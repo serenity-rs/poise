@@ -16,6 +16,8 @@ pub use track_edits::*;
 
 pub mod utils;
 
+pub use poise_macros::*;
+
 mod serenity {
     pub use serenity::{
         builder::*,
@@ -24,6 +26,13 @@ mod serenity {
         utils::*,
         Error,
     };
+}
+
+// needed for proc macro
+#[doc(hidden)]
+pub trait _GetGenerics {
+    type U;
+    type E;
 }
 
 /// Passed to command invocations.
@@ -47,6 +56,10 @@ impl<U, E> Clone for Context<'_, U, E> {
     }
 }
 impl<U, E> Copy for Context<'_, U, E> {}
+impl<U_, E_> _GetGenerics for Context<'_, U_, E_> {
+    type U = U_;
+    type E = E_;
+}
 
 pub struct CommandOptions<U, E> {
     /// Short description of the command. Displayed inline in help menus and similar.
@@ -63,8 +76,9 @@ pub struct CommandOptions<U, E> {
     pub on_error: Option<fn(E, CommandErrorContext<'_, U, E>)>,
     /// Alternative triggers for the command
     pub aliases: &'static [&'static str],
-    /// Fall back to the framework-specified value on None.
-    pub track_edits: Option<bool>,
+    /// Whether to enable edit tracking for commands by default. Note that this won't do anything
+    /// if `Framework::edit_tracker` isn't set.
+    pub track_edits: bool,
     /// Fall back to the framework-specified value on None.
     pub broadcast_typing: Option<bool>,
 }
@@ -77,7 +91,7 @@ impl<U, E> Default for CommandOptions<U, E> {
             check: None,
             on_error: None,
             aliases: &[],
-            track_edits: None,
+            track_edits: false,
             broadcast_typing: None,
         }
     }
@@ -107,11 +121,6 @@ pub struct FrameworkOptions<U, E> {
     /// If Some, the framework will react to message edits by editing the corresponding bot response
     /// with the new result.
     pub edit_tracker: Option<parking_lot::RwLock<EditTracker>>,
-    /// Whether to enable edit tracking for commands by default. Note that this won't do anything
-    /// if `Self::edit_tracker` isn't set.
-    ///
-    /// Individual commands may override this setting.
-    pub track_edits_by_default: bool,
     /// Whether to broadcast a typing indicator while executing this commmand's action.
     pub broadcast_typing: bool,
 }
@@ -125,7 +134,6 @@ impl<U, E> Default for FrameworkOptions<U, E> {
             command_check: |_| Ok(true),
             listener: |_, _, _, _| Ok(()),
             edit_tracker: None,
-            track_edits_by_default: false,
             broadcast_typing: false,
         }
     }
@@ -257,12 +265,7 @@ where
         }
         let command = first_matching_command.ok_or(None)?;
 
-        if triggered_by_edit
-            && !command
-                .options
-                .track_edits
-                .unwrap_or(self.options.track_edits_by_default)
-        {
+        if triggered_by_edit && !command.options.track_edits {
             return Err(None);
         }
 
