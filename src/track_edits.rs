@@ -60,7 +60,6 @@ impl EditTracker {
         let max_duration = self.max_duration;
         self.cache.retain(|(user_msg, _)| {
             let last_update = user_msg.edited_timestamp.unwrap_or(user_msg.timestamp);
-            let last_update = chrono::DateTime::<chrono::Utc>::from(last_update);
             if let Ok(age) = (chrono::Utc::now() - last_update).to_std() {
                 age < max_duration
             } else {
@@ -94,7 +93,7 @@ impl CreateReply {
     }
 }
 
-pub fn send_reply<U, E>(
+pub async fn send_reply<U, E>(
     ctx: crate::Context<'_, U, E>,
     builder: impl FnOnce(&mut CreateReply) -> &mut CreateReply,
 ) -> Result<(), serenity::Error> {
@@ -116,32 +115,38 @@ pub fn send_reply<U, E>(
         .and_then(|t| t.find_bot_response(ctx.msg.id))
     {
         Some(existing_response) => {
-            existing_response.edit(ctx.discord, |m| {
-                if let Some(content) = reply.content {
-                    m.content(content);
-                }
-                if let Some(embed) = reply.embed {
-                    m.embed(|e| {
-                        *e = embed;
-                        e
-                    });
-                }
-                m
-            })?;
+            existing_response
+                .edit(ctx.discord, |m| {
+                    if let Some(content) = reply.content {
+                        m.content(content);
+                    }
+                    if let Some(embed) = reply.embed {
+                        m.embed(|e| {
+                            *e = embed;
+                            e
+                        });
+                    }
+                    m
+                })
+                .await?;
         }
         None => {
-            let new_response = ctx.msg.channel_id.send_message(ctx.discord, |m| {
-                if let Some(content) = reply.content {
-                    m.content(content);
-                }
-                if let Some(embed) = reply.embed {
-                    m.embed(|e| {
-                        *e = embed;
-                        e
-                    });
-                }
-                m
-            })?;
+            let new_response = ctx
+                .msg
+                .channel_id
+                .send_message(ctx.discord, |m| {
+                    if let Some(content) = reply.content {
+                        m.content(content);
+                    }
+                    if let Some(embed) = reply.embed {
+                        m.embed(|e| {
+                            *e = embed;
+                            e
+                        });
+                    }
+                    m
+                })
+                .await?;
             if let Some(track_edits) = &mut track_edits {
                 track_edits.register_response(ctx.msg.clone(), new_response);
             }
@@ -150,6 +155,9 @@ pub fn send_reply<U, E>(
     Ok(())
 }
 
-pub fn say_reply<U, E>(ctx: crate::Context<'_, U, E>, text: String) -> Result<(), serenity::Error> {
-    send_reply(ctx, |m| m.content(text))
+pub async fn say_reply<U, E>(
+    ctx: crate::Context<'_, U, E>,
+    text: String,
+) -> Result<(), serenity::Error> {
+    send_reply(ctx, |m| m.content(text)).await
 }

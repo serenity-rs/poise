@@ -2,8 +2,7 @@
 #![allow(clippy::type_complexity)]
 
 mod event;
-pub use event::Event;
-use event::EventWrapper;
+pub use event::{Event, EventWrapper};
 
 mod argument;
 pub use argument::*;
@@ -27,6 +26,14 @@ mod serenity {
         Error,
     };
 }
+
+use std::future::Future;
+use std::pin::Pin;
+
+/// Shorthand for a wrapped async future with a lifetime, used by many parts of this framework
+pub type BoxFutureBorrowed<'a, T> = Pin<Box<dyn Future<Output = T> + Send + 'a>>;
+/// Shorthand for a owned wrapped async future, used by many parts of this framework
+pub type BoxFuture<T> = BoxFutureBorrowed<'static, T>;
 
 // needed for proc macro
 #[doc(hidden)]
@@ -69,11 +76,9 @@ pub struct CommandOptions<U, E> {
     // TODO: fix the inconsistency that this is String and everywhere else it's &'static str
     pub explanation: Option<String>,
     /// If this function returns false, this command will not be executed.
-    pub check: Option<fn(Context<'_, U, E>) -> Result<bool, E>>,
+    pub check: Option<fn(Context<'_, U, E>) -> BoxFuture<Result<bool, E>>>,
     /// Fall back to the framework-specified value on None.
-    // TODO: use a more specialized error type than UserError, which doesn't include things like
-    // UserError::Listener
-    pub on_error: Option<fn(E, CommandErrorContext<'_, U, E>)>,
+    pub on_error: Option<fn(E, CommandErrorContext<'_, U, E>) -> BoxFuture<()>>,
     /// Alternative triggers for the command
     pub aliases: &'static [&'static str],
     /// Whether to enable edit tracking for commands by default. Note that this won't do anything
@@ -99,7 +104,7 @@ impl<U, E> Default for CommandOptions<U, E> {
 
 pub struct Command<U, E> {
     pub name: &'static str,
-    pub action: fn(Context<'_, U, E>, args: &str) -> Result<(), E>,
+    pub action: fn(Context<'_, U, E>, args: &str) -> BoxFuture<Result<(), E>>,
     pub options: CommandOptions<U, E>,
 }
 
@@ -109,15 +114,16 @@ pub struct FrameworkOptions<U, E> {
     /// List of additional bot prefixes
     pub additional_prefixes: &'static [&'static str],
     /// Provide a callback to be invoked when any user code yields an error.
-    pub on_error: fn(E, ErrorContext<'_, U, E>),
+    pub on_error: fn(E, ErrorContext<'_, U, E>) -> BoxFuture<()>,
     /// Provide a callback to be invoked before every command. The command will only be executed
     /// if the callback returns true.
     ///
     /// Individual commands may override this callback.
-    pub command_check: fn(Context<'_, U, E>) -> Result<bool, E>,
+    pub command_check: fn(Context<'_, U, E>) -> BoxFuture<Result<bool, E>>,
     /// Called on every Discord event. Can be used to react to non-command events, like messages
     /// deletions or guild updates.
-    pub listener: fn(&serenity::Context, &Event, &Framework<U, E>, &U) -> Result<(), E>,
+    pub listener:
+        fn(&serenity::Context, &Event<'_>, &Framework<U, E>, &U) -> BoxFuture<Result<(), E>>,
     /// If Some, the framework will react to message edits by editing the corresponding bot response
     /// with the new result.
     pub edit_tracker: Option<parking_lot::RwLock<EditTracker>>,
@@ -130,9 +136,13 @@ impl<U, E> Default for FrameworkOptions<U, E> {
         Self {
             commands: Vec::new(),
             additional_prefixes: &[],
-            on_error: |_, _| println!("Discord bot framework encountered an error in user code"),
-            command_check: |_| Ok(true),
-            listener: |_, _, _, _| Ok(()),
+            on_error: |_, _| {
+                Box::pin(async {
+                    println!("Discord bot framework encountered an error in user code");
+                })
+            },
+            command_check: |_| Box::pin(async { Ok(true) }),
+            listener: |_, _, _, _| Box::pin(async { Ok(()) }),
             edit_tracker: None,
             broadcast_typing: false,
         }
@@ -153,7 +163,7 @@ pub struct Framework<U, E> {
 impl<U, E> Framework<U, E>
 where
     U: Send + Sync + 'static,
-    E: 'static,
+    E: 'static + Send,
 {
     /// Setup a new blank Framework with a prefix and a callback to provide user data.
     ///
@@ -177,24 +187,34 @@ where
         }
     }
 
-    pub fn start(self, token: &str) -> Result<(), serenity::Error> {
+    pub async fn start(self, token: &str) -> Result<(), serenity::Error> {
         let self_1 = std::sync::Arc::new(self);
         let self_2 = std::sync::Arc::clone(&self_1);
 
-        let edit_track_cache_purge_thread = std::thread::spawn(move || {
+        let edit_track_cache_purge_task = tokio::spawn(async move {
             loop {
                 if let Some(edit_tracker) = &self_1.options.edit_tracker {
                     edit_tracker.write().purge();
                 }
                 // not sure if the purging interval should be configurable
-                std::thread::sleep(std::time::Duration::from_secs(60));
+                tokio::time::sleep(std::time::Duration::from_secs(60)).await;
             }
         });
 
-        let event_handler = EventWrapper(move |ctx, event| self_2.event(ctx, event));
-        serenity::Client::new(token, event_handler)?.start()?;
+        let event_handler = EventWrapper(move |ctx, event| {
+            let self_2 = std::sync::Arc::clone(&self_2);
+            Box::pin(async move {
+                self_2.event(ctx, event).await;
+            }) as _
+        });
+        serenity::Client::builder(token)
+            .event_handler(event_handler)
+            .await?
+            .start()
+            .await?;
 
-        edit_track_cache_purge_thread.join().unwrap();
+        edit_track_cache_purge_task.abort();
+
         Ok(())
     }
 
@@ -217,7 +237,7 @@ where
     /// - Ok(()) if a command was successfully dispatched
     /// - Err(None) if the message does not match any known command
     /// - Err(Some(error: UserError)) if any user code yielded an error
-    fn dispatch_message<'a>(
+    async fn dispatch_message<'a>(
         &'a self,
         ctx: Context<'a, U, E>,
         triggered_by_edit: bool,
@@ -245,7 +265,7 @@ where
             if command.name != command_name {
                 continue;
             }
-            match (command.options.check.unwrap_or(self.options.command_check))(ctx) {
+            match (command.options.check.unwrap_or(self.options.command_check))(ctx).await {
                 Ok(true) => {}
                 Ok(false) => continue,
                 Err(e) => {
@@ -278,7 +298,7 @@ where
         }
 
         // Execute command
-        (command.action)(ctx, args).map_err(|e| {
+        (command.action)(ctx, args).await.map_err(|e| {
             Some((
                 e,
                 ErrorContext::Command(CommandErrorContext {
@@ -290,7 +310,7 @@ where
         })
     }
 
-    fn event(&self, ctx: serenity::Context, event: Event) {
+    async fn event(&self, ctx: serenity::Context, event: Event<'_>) {
         match &event {
             Event::Ready { data_about_bot } => match self.user_data_setup.lock().unwrap().take() {
                 Some(user_data_setup) => {
@@ -305,16 +325,16 @@ where
                     framework: self,
                     data: self.get_user_data(),
                 };
-                if let Err(Some((err, err_ctx))) = self.dispatch_message(ctx, false) {
+                if let Err(Some((err, err_ctx))) = self.dispatch_message(ctx, false).await {
                     match err_ctx.clone() {
                         ErrorContext::Command(command_err_ctx) => {
                             if let Some(on_error) = command_err_ctx.command.options.on_error {
-                                (on_error)(err, command_err_ctx);
+                                (on_error)(err, command_err_ctx).await;
                             } else {
-                                (self.options.on_error)(err, err_ctx)
+                                (self.options.on_error)(err, err_ctx).await;
                             }
                         }
-                        err_ctx => (self.options.on_error)(err, err_ctx),
+                        err_ctx => (self.options.on_error)(err, err_ctx).await,
                     }
                 }
             }
@@ -328,7 +348,7 @@ where
                         framework: self,
                         data: self.get_user_data(),
                     };
-                    if let Err(Some((err, err_ctx))) = self.dispatch_message(ctx, true) {
+                    if let Err(Some((err, err_ctx))) = self.dispatch_message(ctx, true).await {
                         (self.options.on_error)(err, err_ctx);
                     }
                 }
@@ -338,7 +358,7 @@ where
 
         // Do this after the framework's Ready handling, so that self.get_user_data() doesnt
         // potentially block infinitely
-        if let Err(e) = (self.options.listener)(&ctx, &event, self, self.get_user_data()) {
+        if let Err(e) = (self.options.listener)(&ctx, &event, self, self.get_user_data()).await {
             (self.options.on_error)(e, ErrorContext::Listener(&event));
         }
     }

@@ -1,6 +1,6 @@
 /// Contains the location of the error with location-specific context
 pub enum ErrorContext<'a, U, E> {
-    Listener(&'a crate::Event),
+    Listener(&'a crate::Event<'a>),
     Command(CommandErrorContext<'a, U, E>),
 }
 
