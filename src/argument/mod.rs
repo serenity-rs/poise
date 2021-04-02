@@ -100,7 +100,7 @@ macro_rules! _parse {
 
     // Consume Option<T> lazy-first
     ( $args:ident => [ $($preamble:tt)* ]
-        (lazy Option<$type:ty>)
+        (#[lazy] Option<$type:ty>)
         $( $rest:tt )*
     ) => {
         let token: Option<$type> = None;
@@ -117,8 +117,7 @@ macro_rules! _parse {
         $( $rest:tt )*
     ) => {
         let mut tokens = Vec::new();
-        let mut token_rest_args = Vec::new();
-        token_rest_args.push($args.clone());
+        let mut token_rest_args = vec![$args.clone()];
 
         let mut running_args = $args.clone();
         while let Ok((popped_args, token)) = running_args.pop::<$type>() {
@@ -134,8 +133,31 @@ macro_rules! _parse {
         }
     };
 
+    // Consume #[rest] &str as the last argument
+    ( $args:ident => [ $($preamble:tt)* ]
+        (#[rest] &str)
+    ) => {
+        let token = $args.0;
+        let $args = $crate::Arguments("");
+        $crate::_parse!($args => [ $($preamble)* token ] );
+    };
+
+    // Consume #[rest] Wrapper<T> as the last argument
+    ( $args:ident => [ $error:ident $($preamble:tt)* ]
+        (#[rest] $(poise::)* Wrapper<$type:ty>)
+    ) => {
+        match $args.0.trim_start().parse::<$type>() {
+            Ok(token) => {
+                let $args = $crate::Arguments("");
+                let token = $crate::Wrapper(token);
+                $crate::_parse!($args => [ $error $($preamble)* token ]);
+            },
+            Err(e) => $error = Box::new(e),
+        }
+    };
+
     // Consume T
-    ( $args:ident => [ $error:ident $( $preamble:ident )* ]
+    ( $args:ident => [ $error:ident $($preamble:tt)* ]
         ($type:ty)
         $( $rest:tt )*
     ) => {
@@ -146,6 +168,10 @@ macro_rules! _parse {
             Err(e) => $error = Box::new(e),
         }
     };
+
+    // ( $($t:tt)* ) => {
+    //     compile_error!( stringify!($($t)*) );
+    // }
 }
 
 #[macro_export]
@@ -161,7 +187,7 @@ macro_rules! parse_args {
             $crate::_parse!(
                 args => [error]
                 $(
-                    ($($attr)? $($type)*)
+                    ($( #[$attr] )? $($type)*)
                 )*
             );
             Err($crate::ArgumentParseError(error))
@@ -205,6 +231,14 @@ mod test {
         assert_eq!(
             parse_args!("hi" => #[lazy] (Option<String>), (Option<String>)).unwrap(),
             (None, Some("hi".into())),
+        );
+        assert_eq!(
+            parse_args!("a b c" => (String), #[rest] (Wrapper<String>)).unwrap(),
+            ("a".into(), Wrapper("b c".into())),
+        );
+        assert_eq!(
+            parse_args!("a b c" => (String), #[rest] (&str)).unwrap(),
+            ("a".into(), "b c"),
         );
     }
 }
