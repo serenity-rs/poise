@@ -32,6 +32,14 @@ struct Args {
     track_edits: bool,
     #[darling(default)]
     broadcast_typing: Option<bool>,
+    #[darling(default)]
+    explanation_fn: Option<syn::Path>,
+    #[darling(default)]
+    check: Option<syn::Path>,
+    #[darling(default)]
+    on_error: Option<syn::Path>,
+    #[darling(default)]
+    rename: Option<String>,
 }
 
 fn extract_help_from_docstrings(attrs: &[syn::Attribute]) -> (Option<String>, Option<String>) {
@@ -121,12 +129,28 @@ fn command_inner(
 
     let (description, explanation) = extract_help_from_docstrings(&function.attrs);
     let description = wrap_option(description);
-    let explanation = wrap_option(explanation);
+    let explanation = match &args.explanation_fn {
+        Some(explanation_fn) => quote::quote! { Some(#explanation_fn) },
+        None => match explanation {
+            Some(extracted_explanation) => quote::quote! { Some(|| #extracted_explanation.into()) },
+            None => quote::quote! { None },
+        },
+    };
+
+    let check = match &args.check {
+        Some(check) => quote::quote! { Some(|a, b| Box::pin(#check(a, b))) },
+        None => quote::quote! { None },
+    };
+    let on_error = match &args.on_error {
+        Some(on_error) => quote::quote! { Some(|a, b| Box::pin(#on_error(a, b))) },
+        None => quote::quote! { None },
+    };
 
     // Needed because we're not allowed to have lifetimes in the hacky use case below
     let ctx_type_with_static = syn::fold::fold_type(&mut AllLifetimesToStatic, ctx_type.clone());
 
-    let function_name = function.sig.ident.clone();
+    let function_name = &function.sig.ident;
+    let command_name = args.rename.unwrap_or_else(|| function_name.to_string());
     let function_visibility = function.vis;
     let function_body = function.block;
     let track_edits = args.track_edits;
@@ -137,7 +161,7 @@ fn command_inner(
             <#ctx_type_with_static as poise::_GetGenerics>::U,
             <#ctx_type_with_static as poise::_GetGenerics>::E,
         > {
-            fn inner(ctx: #ctx_type, args: &str) -> #return_type {
+            async fn inner(ctx: #ctx_type, args: &str) -> #return_type {
                 let ( #( #arg_name ),* ) = ::poise::parse_args!(args => #(
                     #( #arg_attrs )* (#arg_type)
                 ),* )?;
@@ -146,17 +170,16 @@ fn command_inner(
             }
 
             ::poise::Command {
-                name: stringify!(#function_name),
-                action: inner,
+                name: #command_name,
+                action: |ctx, args| Box::pin(inner(ctx, args)),
                 options: ::poise::CommandOptions {
                     track_edits: #track_edits,
                     broadcast_typing: #broadcast_typing,
                     aliases: &[ #( #aliases ),* ],
                     description: #description,
                     explanation: #explanation,
-
-                    check: None,
-                    on_error: None,
+                    check: #check,
+                    on_error: #on_error,
                 }
             }
         }

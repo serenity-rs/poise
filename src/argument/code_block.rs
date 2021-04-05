@@ -120,6 +120,12 @@ fn test_pop_code_block() {
         );
     }
 
-    assert_eq!(CodeBlock::pop_from(&Arguments("``")), Err(CodeBlockError::Malformed));
-    assert_eq!(CodeBlock::pop_from(&Arguments("``````")), Err(CodeBlockError::Malformed));
+    assert_eq!(
+        CodeBlock::pop_from(&Arguments("``")),
+        Err(CodeBlockError::Malformed)
+    );
+    assert_eq!(
+        CodeBlock::pop_from(&Arguments("``````")),
+        Err(CodeBlockError::Malformed)
+    );
 }

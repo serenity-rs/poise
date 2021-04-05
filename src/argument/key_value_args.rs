@@ -24,7 +24,8 @@ impl KeyValueArgs {
         let mut escaping = false;
 
         let mut chars = args.0.trim_start().chars();
-        while let Some(c) = chars.next() {
+        loop {
+            let c = chars.next()?;
             if escaping {
                 key.push(c);
                 escaping = false;
@@ -61,6 +62,8 @@ impl<'a> ParseConsuming<'a> for KeyValueArgs {
             pairs.insert(key, value);
         }
 
+        dbg!(&pairs);
+
         Ok((args, Self { pairs }))
     }
 }
@@ -68,24 +71,34 @@ impl<'a> ParseConsuming<'a> for KeyValueArgs {
 #[cfg(test)]
 #[test]
 fn test_key_value_args() {
-	for (string, pairs) in &[
-		(
-			r#"key1=value1 key2=value2"#,
-			&[("key1", "value1"), ("key2", "value2")],
-		),
-		(
-			r#""key 1"=value\ 1 key\ 2="value 2""#,
-			&[("key 1", "value 1"), ("key 2", "value 2")],
-		),
-	] {
-		assert_eq!(
-			KeyValueArgs::pop_from(&Arguments(string)).unwrap().1,
-			KeyValueArgs {
-				pairs: pairs
-					.iter()
-					.map(|&(k, v)| (k.to_owned(), v.to_owned()))
-					.collect(),
-			}
-		);
-	}
+    for &(string, pairs, remaining_args) in &[
+        (
+            r#"key1=value1 key2=value2"#,
+            &[("key1", "value1"), ("key2", "value2")][..],
+            "",
+        ),
+        (
+            r#""key 1"=value\ 1 key\ 2="value 2""#,
+            &[("key 1", "value 1"), ("key 2", "value 2")],
+            "",
+        ),
+        (
+            r#"key1"=value1 key2=value2"#,
+            &[],
+            r#"key1"=value1 key2=value2"#,
+        ),
+        (r#"dummyval"#, &[], "dummyval"),
+        (r#"dummyval="#, &[("dummyval", "")], ""),
+    ] {
+        let (args, kv_args) = KeyValueArgs::pop_from(&Arguments(string)).unwrap();
+
+        assert_eq!(
+            kv_args.pairs,
+            pairs
+                .iter()
+                .map(|&(k, v)| (k.to_owned(), v.to_owned()))
+                .collect(),
+        );
+        assert_eq!(args.0, remaining_args);
+    }
 }

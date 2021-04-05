@@ -30,10 +30,10 @@ mod serenity {
 use std::future::Future;
 use std::pin::Pin;
 
-/// Shorthand for a wrapped async future with a lifetime, used by many parts of this framework
-pub type BoxFutureBorrowed<'a, T> = Pin<Box<dyn Future<Output = T> + Send + 'a>>;
-/// Shorthand for a owned wrapped async future, used by many parts of this framework
-pub type BoxFuture<T> = BoxFutureBorrowed<'static, T>;
+/// Shorthand for a wrapped async future with a lifetime, used by many parts of this framework.
+///
+/// An owned future has the `'static` lifetime.
+pub type BoxFuture<'a, T> = Pin<Box<dyn Future<Output = T> + Send + 'a>>;
 
 // needed for proc macro
 #[doc(hidden)]
@@ -74,11 +74,11 @@ pub struct CommandOptions<U, E> {
     /// Multiline description with detailed usage instructions. Displayed in the command specific
     /// help: `~help command_name`
     // TODO: fix the inconsistency that this is String and everywhere else it's &'static str
-    pub explanation: Option<String>,
+    pub explanation: Option<fn() -> String>,
     /// If this function returns false, this command will not be executed.
-    pub check: Option<fn(Context<'_, U, E>) -> BoxFuture<Result<bool, E>>>,
+    pub check: Option<fn(Context<'_, U, E>) -> BoxFuture<'_, Result<bool, E>>>,
     /// Fall back to the framework-specified value on None.
-    pub on_error: Option<fn(E, CommandErrorContext<'_, U, E>) -> BoxFuture<()>>,
+    pub on_error: Option<fn(E, CommandErrorContext<'_, U, E>) -> BoxFuture<'_, ()>>,
     /// Alternative triggers for the command
     pub aliases: &'static [&'static str],
     /// Whether to enable edit tracking for commands by default. Note that this won't do anything
@@ -104,7 +104,7 @@ impl<U, E> Default for CommandOptions<U, E> {
 
 pub struct Command<U, E> {
     pub name: &'static str,
-    pub action: fn(Context<'_, U, E>, args: &str) -> BoxFuture<Result<(), E>>,
+    pub action: for<'a> fn(Context<'a, U, E>, args: &'a str) -> BoxFuture<'a, Result<(), E>>,
     pub options: CommandOptions<U, E>,
 }
 
@@ -114,16 +114,21 @@ pub struct FrameworkOptions<U, E> {
     /// List of additional bot prefixes
     pub additional_prefixes: &'static [&'static str],
     /// Provide a callback to be invoked when any user code yields an error.
-    pub on_error: fn(E, ErrorContext<'_, U, E>) -> BoxFuture<()>,
+    // pub on_error: fn(E, ErrorContext<'_, U, E>) -> BoxFuture<()>,
+    pub on_error: fn(E, ErrorContext<'_, U, E>) -> BoxFuture<'_, ()>,
     /// Provide a callback to be invoked before every command. The command will only be executed
     /// if the callback returns true.
     ///
     /// Individual commands may override this callback.
-    pub command_check: fn(Context<'_, U, E>) -> BoxFuture<Result<bool, E>>,
+    pub command_check: fn(Context<'_, U, E>) -> BoxFuture<'_, Result<bool, E>>,
     /// Called on every Discord event. Can be used to react to non-command events, like messages
     /// deletions or guild updates.
-    pub listener:
-        fn(&serenity::Context, &Event<'_>, &Framework<U, E>, &U) -> BoxFuture<Result<(), E>>,
+    pub listener: for<'a> fn(
+        &'a serenity::Context,
+        &'a Event<'a>,
+        &'a Framework<U, E>,
+        &'a U,
+    ) -> BoxFuture<'a, Result<(), E>>,
     /// If Some, the framework will react to message edits by editing the corresponding bot response
     /// with the new result.
     pub edit_tracker: Option<parking_lot::RwLock<EditTracker>>,
@@ -294,7 +299,7 @@ where
             .broadcast_typing
             .unwrap_or(self.options.broadcast_typing)
         {
-            let _ = ctx.msg.channel_id.broadcast_typing(ctx.discord);
+            let _: Result<_, _> = ctx.msg.channel_id.broadcast_typing(ctx.discord).await;
         }
 
         // Execute command
@@ -314,7 +319,8 @@ where
         match &event {
             Event::Ready { data_about_bot } => match self.user_data_setup.lock().unwrap().take() {
                 Some(user_data_setup) => {
-                    let _ = self.user_data.set(user_data_setup(&ctx, &data_about_bot));
+                    let _: Result<_, _> =
+                        self.user_data.set(user_data_setup(&ctx, &data_about_bot));
                 }
                 None => println!("Warning: skipping duplicate Discord bot ready event"),
             },
@@ -350,6 +356,24 @@ where
                     };
                     if let Err(Some((err, err_ctx))) = self.dispatch_message(ctx, true).await {
                         (self.options.on_error)(err, err_ctx);
+                    }
+                }
+            }
+            Event::MessageDelete {
+                deleted_message_id, ..
+            } => {
+                if let Some(edit_tracker) = &self.options.edit_tracker {
+                    let bot_response = edit_tracker
+                        .write()
+                        .find_bot_response(*deleted_message_id)
+                        .cloned();
+                    if let Some(bot_response) = bot_response {
+                        if let Err(e) = bot_response.delete(&ctx).await {
+                            println!(
+                            "Warning: couldn't delete bot response when user deleted message: {}",
+                            e
+                        );
+                        }
                     }
                 }
             }

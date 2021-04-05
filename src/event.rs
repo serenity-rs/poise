@@ -1,4 +1,4 @@
-use crate::BoxFutureBorrowed;
+use crate::BoxFuture;
 use serde_json::Value;
 use serenity::{client::bridge::gateway::event::*, model::prelude::*};
 use std::collections::HashMap;
@@ -6,7 +6,7 @@ use std::collections::HashMap;
 pub struct EventWrapper<F>(pub F)
 where
     // gotta have this generic bound in the struct as well, or type inference will break down the line
-    F: Send + Sync + for<'a> Fn(serenity::prelude::Context, Event<'a>) -> BoxFutureBorrowed<'a, ()>;
+    F: Send + Sync + for<'a> Fn(serenity::prelude::Context, Event<'a>) -> BoxFuture<'a, ()>;
 
 macro_rules! event {
 	($lt1:lifetime $(
@@ -15,7 +15,7 @@ macro_rules! event {
         #[serenity::async_trait]
 		impl<F> serenity::prelude::EventHandler for EventWrapper<F>
 		where
-			F: Send + Sync + for<'a> Fn(serenity::prelude::Context, Event<'a>) -> BoxFutureBorrowed<'a, ()>
+			F: Send + Sync + for<'a> Fn(serenity::prelude::Context, Event<'a>) -> BoxFuture<'a, ()>
 		{
 			$(
 				async fn $fn_name<'s $(, $lt2)? >(&'s self, ctx: serenity::prelude::Context, $( $arg_name: $arg_type, )* ) {

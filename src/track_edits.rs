@@ -13,15 +13,6 @@ impl EditTracker {
         })
     }
 
-    /// Returns a reference to the bot response that was just registered
-    pub fn register_response(
-        &mut self,
-        user_msg: serenity::Message,
-        bot_response: serenity::Message,
-    ) {
-        self.cache.push((user_msg, bot_response));
-    }
-
     /// Returns a copy of a newly up-to-date cached message, or a brand new generated message when
     /// not in cache
     pub fn process_message_update(
@@ -45,6 +36,18 @@ impl EditTracker {
         }
     }
 
+    pub fn purge(&mut self) {
+        let max_duration = self.max_duration;
+        self.cache.retain(|(user_msg, _)| {
+            let last_update = user_msg.edited_timestamp.unwrap_or(user_msg.timestamp);
+            if let Ok(age) = (chrono::Utc::now() - last_update).to_std() {
+                age < max_duration
+            } else {
+                false
+            }
+        });
+    }
+
     pub fn find_bot_response(
         &mut self,
         user_msg_id: serenity::MessageId,
@@ -56,16 +59,9 @@ impl EditTracker {
         Some(bot_response)
     }
 
-    pub fn purge(&mut self) {
-        let max_duration = self.max_duration;
-        self.cache.retain(|(user_msg, _)| {
-            let last_update = user_msg.edited_timestamp.unwrap_or(user_msg.timestamp);
-            if let Ok(age) = (chrono::Utc::now() - last_update).to_std() {
-                age < max_duration
-            } else {
-                false
-            }
-        });
+    /// Returns a reference to the bot response that was just registered
+    fn register_response(&mut self, user_msg: serenity::Message, bot_response: serenity::Message) {
+        self.cache.push((user_msg, bot_response));
     }
 }
 
@@ -103,53 +99,61 @@ pub async fn send_reply<U, E>(
     };
     builder(&mut reply);
 
-    let mut track_edits = ctx
-        .framework
-        .options
-        .edit_tracker
-        .as_ref()
-        .map(|t| t.write());
+    let lock_edit_tracker = || {
+        ctx.framework
+            .options
+            .edit_tracker
+            .as_ref()
+            .map(|t| t.write())
+    };
 
-    match track_edits
+    let existing_response = lock_edit_tracker()
         .as_mut()
         .and_then(|t| t.find_bot_response(ctx.msg.id))
-    {
-        Some(existing_response) => {
-            existing_response
-                .edit(ctx.discord, |m| {
-                    if let Some(content) = reply.content {
-                        m.content(content);
-                    }
-                    if let Some(embed) = reply.embed {
-                        m.embed(|e| {
-                            *e = embed;
-                            e
-                        });
-                    }
-                    m
-                })
-                .await?;
+        .cloned();
+
+    if let Some(mut response) = existing_response {
+        response
+            .edit(ctx.discord, |m| {
+                if let Some(content) = reply.content {
+                    m.content(content);
+                }
+                if let Some(embed) = reply.embed {
+                    m.embed(|e| {
+                        *e = embed;
+                        e
+                    });
+                }
+                m
+            })
+            .await?;
+
+        // If the entry still exists after the await, update it to the new contents
+        if let Some(response_entry) = lock_edit_tracker()
+            .as_mut()
+            .and_then(|t| t.find_bot_response(ctx.msg.id))
+        {
+            *response_entry = response;
         }
-        None => {
-            let new_response = ctx
-                .msg
-                .channel_id
-                .send_message(ctx.discord, |m| {
-                    if let Some(content) = reply.content {
-                        m.content(content);
-                    }
-                    if let Some(embed) = reply.embed {
-                        m.embed(|e| {
-                            *e = embed;
-                            e
-                        });
-                    }
-                    m
-                })
-                .await?;
-            if let Some(track_edits) = &mut track_edits {
-                track_edits.register_response(ctx.msg.clone(), new_response);
-            }
+    } else {
+        let new_response = ctx
+            .msg
+            .channel_id
+            .send_message(ctx.discord, |m| {
+                if let Some(content) = reply.content {
+                    m.content(content);
+                }
+                if let Some(embed) = reply.embed {
+                    m.embed(|e| {
+                        *e = embed;
+                        e
+                    });
+                }
+                m
+            })
+            .await?;
+        if let Some(track_edits) = &mut lock_edit_tracker() {
+            track_edits.register_response(ctx.msg.clone(), new_response);
         }
     }
     Ok(())
