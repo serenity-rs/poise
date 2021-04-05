@@ -98,6 +98,10 @@ fn command_inner(
     args: Args,
     function: syn::ItemFn,
 ) -> Result<TokenStream, (proc_macro2::Span, &'static str)> {
+    if function.sig.asyncness.is_none() {
+        return Err((function.sig.span(), "command function must be async"));
+    }
+
     let ctx_type = match function.sig.inputs.first() {
         Some(syn::FnArg::Typed(syn::PatType { ty, .. })) => &**ty,
         _ => return Err((function.sig.span(), "expected a Context parameter")),
