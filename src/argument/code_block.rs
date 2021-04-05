@@ -34,7 +34,7 @@ impl std::fmt::Display for CodeBlock {
     }
 }
 
-impl<'a> ParseConsuming<'a> for CodeBlock {
+impl<'a> ParseConsumingSync<'a> for CodeBlock {
     type Err = CodeBlockError;
 
     /// Parse a single-line or multi-line code block. The output of `Self::code` should mirror what
@@ -52,7 +52,7 @@ impl<'a> ParseConsuming<'a> for CodeBlock {
     ///     CodeBlock { code: "println!(\"Hello world!\");".into(), language: Some("rust".into()) },
     /// );
     /// ```
-    fn pop_from(args: &Arguments<'a>) -> Result<(Arguments<'a>, Self), Self::Err> {
+    fn sync_pop_from(args: &Arguments<'a>) -> Result<(Arguments<'a>, Self), Self::Err> {
         let rest;
         let code_block = if let Some(code_block) = args.0.strip_prefix("```") {
             let code_block_end = code_block.find("```").ok_or(CodeBlockError::Malformed)?;
@@ -112,7 +112,7 @@ fn test_pop_code_block() {
         ("```rust\n\n\n\n\nhi\n\n\n\n```", "hi", Some("rust")),
     ] {
         assert_eq!(
-            CodeBlock::pop_from(&Arguments(string)).unwrap().1,
+            CodeBlock::sync_pop_from(&Arguments(string)).unwrap().1,
             CodeBlock {
                 code: code.into(),
                 language: language.map(|x| x.into())
@@ -121,11 +121,11 @@ fn test_pop_code_block() {
     }
 
     assert_eq!(
-        CodeBlock::pop_from(&Arguments("``")),
+        CodeBlock::sync_pop_from(&Arguments("``")),
         Err(CodeBlockError::Malformed)
     );
     assert_eq!(
-        CodeBlock::pop_from(&Arguments("``````")),
+        CodeBlock::sync_pop_from(&Arguments("``````")),
         Err(CodeBlockError::Malformed)
     );
 }

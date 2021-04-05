@@ -10,7 +10,7 @@ impl std::fmt::Display for EmptyArgs {
 
 impl std::error::Error for EmptyArgs {}
 
-impl<'a> ParseConsuming<'a> for String {
+impl<'a> ParseConsumingSync<'a> for String {
     type Err = EmptyArgs;
 
     /// Pop a whitespace-separated word from the front of the arguments. Supports quotes and quote
@@ -29,7 +29,7 @@ impl<'a> ParseConsuming<'a> for String {
     ///     r#"arg " with " quotes " inside"#
     /// );
     /// ```
-    fn pop_from(args: &Arguments<'a>) -> Result<(Arguments<'a>, Self), Self::Err> {
+    fn sync_pop_from(args: &Arguments<'a>) -> Result<(Arguments<'a>, Self), Self::Err> {
         // TODO: consider changing the behavior to parse quotes literally if they're in the middle
         // of the string:
         // - `"hello world"` => `hello world`
@@ -71,22 +71,22 @@ impl<'a> ParseConsuming<'a> for String {
 #[cfg(test)]
 #[test]
 fn test_pop_string() {
-	// Test that trailing whitespace is not consumed
-	assert_eq!(
-		String::pop_from(&Arguments("AA BB")).unwrap().0,
-		Arguments(" BB")
-	);
+    // Test that trailing whitespace is not consumed
+    assert_eq!(
+        String::sync_pop_from(&Arguments("AA BB")).unwrap().0,
+        Arguments(" BB")
+    );
 
-	for &(string, arg) in &[
-		(r#"AA BB"#, r#"AA"#),
-		(r#""AA BB""#, r#"AA BB"#),
-		(r#""AA BB"#, r#"AA BB"#),
-		(r#""AA "BB"#, r#"AA BB"#),
-		(r#"""""A""A" "B"""B"#, r#"AA BB"#),
-		(r#"\"AA BB\""#, r#""AA"#),
-		(r#"\"AA\ BB\""#, r#""AA BB""#),
-		(r#""\"AA BB\"""#, r#""AA BB""#),
-	] {
-		assert_eq!(String::pop_from(&Arguments(string)).unwrap().1, arg);
-	}
+    for &(string, arg) in &[
+        (r#"AA BB"#, r#"AA"#),
+        (r#""AA BB""#, r#"AA BB"#),
+        (r#""AA BB"#, r#"AA BB"#),
+        (r#""AA "BB"#, r#"AA BB"#),
+        (r#"""""A""A" "B"""B"#, r#"AA BB"#),
+        (r#"\"AA BB\""#, r#""AA"#),
+        (r#"\"AA\ BB\""#, r#""AA BB""#),
+        (r#""\"AA BB\"""#, r#""AA BB""#),
+    ] {
+        assert_eq!(String::sync_pop_from(&Arguments(string)).unwrap().1, arg);
+    }
 }

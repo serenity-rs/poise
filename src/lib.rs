@@ -20,6 +20,7 @@ pub use poise_macros::*;
 mod serenity {
     pub use serenity::{
         builder::*,
+        client::bridge::gateway::*,
         model::{event::*, prelude::*},
         prelude::*,
         utils::*,
@@ -213,6 +214,11 @@ where
             }) as _
         });
         serenity::Client::builder(token)
+            .intents(
+                serenity::GatewayIntents::non_privileged()
+                    | serenity::GatewayIntents::GUILD_MEMBERS
+                    | serenity::GatewayIntents::GUILD_PRESENCES,
+            )
             .event_handler(event_handler)
             .await?
             .start()
@@ -370,9 +376,9 @@ where
                     if let Some(bot_response) = bot_response {
                         if let Err(e) = bot_response.delete(&ctx).await {
                             println!(
-                            "Warning: couldn't delete bot response when user deleted message: {}",
-                            e
-                        );
+                                "Warning: couldn't delete bot response when user deleted message: {}",
+                                e
+                            );
                         }
                     }
                 }

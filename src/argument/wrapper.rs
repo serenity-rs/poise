@@ -1,21 +1,26 @@
 use super::*;
 
-macro_rules! impl_for_from_str {
+macro_rules! impl_parse_consuming {
     ($($t:ty)*) => { $(
+        #[async_trait::async_trait]
         impl<'a> ParseConsuming<'a> for $t {
-            type Err = <$t as std::str::FromStr>::Err;
+            type Err = <$t as serenity::Parse>::Err;
 
-            fn pop_from(args: &Arguments<'a>) -> Result<(Arguments<'a>, Self), Self::Err> {
-                let (args, value) = Wrapper::pop_from(args)?;
+            async fn pop_from(
+                ctx: &serenity::Context,
+                msg: &serenity::Message,
+                args: &Arguments<'a>
+            ) -> Result<(Arguments<'a>, Self), Self::Err> {
+                let (args, value) = Wrapper::pop_from(ctx, msg, args).await?;
                 Ok((args, value.0))
             }
         }
     )* }
 }
 
-// Implement ParseConsuming for at least all std FromStr implementors, so the user doesn't have to
-// use the clunky wrapper for simple types
-impl_for_from_str!(
+// Direct ParseConsuming implementation for all known types to avoid the Wrapper indirection for
+// at least some types
+impl_parse_consuming!(
     bool char f32 f64 i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize
     std::net::IpAddr std::net::Ipv4Addr std::net::Ipv6Addr
     std::net::SocketAddr std::net::SocketAddrV4 std::net::SocketAddrV6
@@ -24,18 +29,23 @@ impl_for_from_str!(
     std::num::NonZeroU8 std::num::NonZeroU16 std::num::NonZeroU32
     std::num::NonZeroU64 std::num::NonZeroU128 std::num::NonZeroUsize
     std::path::PathBuf
+    serenity::Message serenity::Member
 );
 
-// TODO: wrap serenity::utils::Parse instead of FromStr
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Wrapper<T>(pub T);
 
-impl<'a, T: std::str::FromStr> ParseConsuming<'a> for Wrapper<T> {
+#[async_trait::async_trait]
+impl<'a, T: serenity::Parse> ParseConsuming<'a> for Wrapper<T> {
     type Err = T::Err;
 
-    fn pop_from(args: &Arguments<'a>) -> Result<(Arguments<'a>, Self), Self::Err> {
-        let (args, string) = String::pop_from(args).unwrap_or((args.clone(), String::new()));
-        let token = string.parse()?;
+    async fn pop_from(
+        ctx: &serenity::Context,
+        msg: &serenity::Message,
+        args: &Arguments<'a>,
+    ) -> Result<(Arguments<'a>, Self), Self::Err> {
+        let (args, string) = String::sync_pop_from(args).unwrap_or((args.clone(), String::new()));
+        let token = T::parse(ctx, msg, &string).await?;
         Ok((args, Self(token)))
     }
 }

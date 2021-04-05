@@ -47,13 +47,8 @@ fn extract_help_from_docstrings(attrs: &[syn::Attribute]) -> (Option<String>, Op
     for attr in attrs {
         if attr.path == quote::format_ident!("doc").into() {
             for token in attr.tokens.clone() {
-                if let proc_macro2::TokenTree::Literal(literal) = token {
-                    // Someone pls tell me how to extract a literal value properly
-                    doc_lines += literal
-                        .to_string()
-                        .trim_start_matches('"')
-                        .trim_end_matches('"')
-                        .trim();
+                if let Ok(literal) = syn::parse2::<syn::LitStr>(token.into()) {
+                    doc_lines += literal.value().trim();
                     doc_lines += "\n";
                 }
             }
@@ -162,9 +157,9 @@ fn command_inner(
             <#ctx_type_with_static as poise::_GetGenerics>::E,
         > {
             async fn inner(ctx: #ctx_type, args: &str) -> #return_type {
-                let ( #( #arg_name ),* ) = ::poise::parse_args!(args => #(
+                let ( #( #arg_name ),* ) = ::poise::parse_args!(ctx.discord, ctx.msg, args => #(
                     #( #arg_attrs )* (#arg_type)
-                ),* )?;
+                ),* ).await?;
 
                 #function_body
             }

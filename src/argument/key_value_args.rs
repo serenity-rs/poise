@@ -44,16 +44,16 @@ impl KeyValueArgs {
 
         let args = Arguments(chars.as_str());
         // `args` used to contain "key=value ...", now it contains "value ...", so pop the value off
-        let (args, value) = String::pop_from(&args).unwrap_or((args, String::new()));
+        let (args, value) = String::sync_pop_from(&args).unwrap_or((args, String::new()));
 
         Some((args, (key, value)))
     }
 }
 
-impl<'a> ParseConsuming<'a> for KeyValueArgs {
+impl<'a> ParseConsumingSync<'a> for KeyValueArgs {
     type Err = std::convert::Infallible;
 
-    fn pop_from(args: &Arguments<'a>) -> Result<(Arguments<'a>, Self), Self::Err> {
+    fn sync_pop_from(args: &Arguments<'a>) -> Result<(Arguments<'a>, Self), Self::Err> {
         let mut pairs = std::collections::HashMap::new();
 
         let mut args = args.clone();
@@ -61,8 +61,6 @@ impl<'a> ParseConsuming<'a> for KeyValueArgs {
             args = new_args;
             pairs.insert(key, value);
         }
-
-        dbg!(&pairs);
 
         Ok((args, Self { pairs }))
     }
@@ -90,7 +88,7 @@ fn test_key_value_args() {
         (r#"dummyval"#, &[], "dummyval"),
         (r#"dummyval="#, &[("dummyval", "")], ""),
     ] {
-        let (args, kv_args) = KeyValueArgs::pop_from(&Arguments(string)).unwrap();
+        let (args, kv_args) = KeyValueArgs::sync_pop_from(&Arguments(string)).unwrap();
 
         assert_eq!(
             kv_args.pairs,
