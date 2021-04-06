@@ -135,6 +135,8 @@ pub struct FrameworkOptions<U, E> {
     pub edit_tracker: Option<parking_lot::RwLock<EditTracker>>,
     /// Whether to broadcast a typing indicator while executing this commmand's action.
     pub broadcast_typing: bool,
+    /// Whether commands in messages emitted by the bot itself should be executed as well.
+    pub execute_self_messages: bool,
 }
 
 impl<U, E> Default for FrameworkOptions<U, E> {
@@ -151,6 +153,7 @@ impl<U, E> Default for FrameworkOptions<U, E> {
             listener: |_, _, _, _| Box::pin(async { Ok(()) }),
             edit_tracker: None,
             broadcast_typing: false,
+            execute_self_messages: false,
         }
     }
 }
@@ -161,6 +164,7 @@ pub struct Framework<U, E> {
     user_data_setup: std::sync::Mutex<
         Option<Box<dyn Send + Sync + FnOnce(&serenity::Context, &serenity::Ready) -> U>>,
     >,
+    bot_id: std::sync::Mutex<Option<serenity::UserId>>,
     // TODO: wrap in RwLock to allow changing framework options while running? Could also replace
     // the edit tracking cache interior mutability
     options: FrameworkOptions<U, E>,
@@ -189,6 +193,7 @@ where
             prefix,
             user_data: once_cell::sync::OnceCell::new(),
             user_data_setup: std::sync::Mutex::new(Some(Box::new(user_data_setup))),
+            bot_id: std::sync::Mutex::new(None),
             options,
         }
     }
@@ -245,7 +250,7 @@ where
     }
 
     /// Returns
-    /// - Ok(()) if a command was successfully dispatched
+    /// - Ok(()) if a command was successfully dispatched and run
     /// - Err(None) if the message does not match any known command
     /// - Err(Some(error: UserError)) if any user code yielded an error
     async fn dispatch_message<'a>(
@@ -263,6 +268,14 @@ where
                 .find_map(|prefix| ctx.msg.content.strip_prefix(prefix))
                 .ok_or(None)?,
         };
+
+        // If we know our own ID, and the message author ID is our own, and we aren't supposed to
+        // execute our own messages, THEN stop execution.
+        if !self.options.execute_self_messages
+            && *self.bot_id.lock().unwrap() == Some(ctx.msg.author.id)
+        {
+            return Err(None);
+        }
 
         // Extract command name and arguments string
         let (command_name, args) = {
@@ -325,6 +338,7 @@ where
         match &event {
             Event::Ready { data_about_bot } => match self.user_data_setup.lock().unwrap().take() {
                 Some(user_data_setup) => {
+                    *self.bot_id.lock().unwrap() = Some(data_about_bot.user.id);
                     let _: Result<_, _> =
                         self.user_data.set(user_data_setup(&ctx, &data_about_bot));
                 }
