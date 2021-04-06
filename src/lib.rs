@@ -279,8 +279,8 @@ where
 
         // Extract command name and arguments string
         let (command_name, args) = {
-            let mut iter = msg.splitn(2, ' ');
-            (iter.next().unwrap(), iter.next().unwrap_or(""))
+            let mut iter = msg.splitn(2, char::is_whitespace);
+            (iter.next().unwrap(), iter.next().unwrap_or("").trim_start())
         };
 
         // Find the first matching command
