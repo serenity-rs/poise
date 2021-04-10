@@ -42,17 +42,17 @@ impl<'a> ParseConsumingSync<'a> for CodeBlock {
     /// official Discord client's syntax highlighting, if existent.
     ///
     /// ```rust
-    /// # use poise::{CodeBlock, Arguments, ParseConsuming as _};
+    /// # use poise::{CodeBlock, ArgString, ParseConsuming as _};
     /// assert_eq!(
-    ///     Arguments("`hello world`").pop::<CodeBlock>().unwrap().1,
+    ///     ArgString("`hello world`").pop::<CodeBlock>().unwrap().1,
     ///     CodeBlock { code: "hello world".into(), language: None },
     /// );
     /// assert_eq!(
-    ///     Arguments("```rust\nprintln!(\"Hello world!\");\n```").pop::<CodeBlock>().unwrap().1,
+    ///     ArgString("```rust\nprintln!(\"Hello world!\");\n```").pop::<CodeBlock>().unwrap().1,
     ///     CodeBlock { code: "println!(\"Hello world!\");".into(), language: Some("rust".into()) },
     /// );
     /// ```
-    fn sync_pop_from(args: &Arguments<'a>) -> Result<(Arguments<'a>, Self), Self::Err> {
+    fn sync_pop_from(args: &ArgString<'a>) -> Result<(ArgString<'a>, Self), Self::Err> {
         let rest;
         let code_block = if let Some(code_block) = args.0.strip_prefix("```") {
             let code_block_end = code_block.find("```").ok_or(CodeBlockError::Malformed)?;
@@ -94,7 +94,7 @@ impl<'a> ParseConsumingSync<'a> for CodeBlock {
         if code_block.code.is_empty() {
             Err(CodeBlockError::Malformed)
         } else {
-            Ok((Arguments(rest), code_block))
+            Ok((ArgString(rest), code_block))
         }
     }
 }
@@ -112,7 +112,7 @@ fn test_pop_code_block() {
         ("```rust\n\n\n\n\nhi\n\n\n\n```", "hi", Some("rust")),
     ] {
         assert_eq!(
-            CodeBlock::sync_pop_from(&Arguments(string)).unwrap().1,
+            CodeBlock::sync_pop_from(&ArgString(string)).unwrap().1,
             CodeBlock {
                 code: code.into(),
                 language: language.map(|x| x.into())
@@ -121,11 +121,11 @@ fn test_pop_code_block() {
     }
 
     assert_eq!(
-        CodeBlock::sync_pop_from(&Arguments("``")),
+        CodeBlock::sync_pop_from(&ArgString("``")),
         Err(CodeBlockError::Malformed)
     );
     assert_eq!(
-        CodeBlock::sync_pop_from(&Arguments("``````")),
+        CodeBlock::sync_pop_from(&ArgString("``````")),
         Err(CodeBlockError::Malformed)
     );
 }

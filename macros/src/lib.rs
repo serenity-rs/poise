@@ -137,7 +137,7 @@ fn command_inner(
     };
 
     let check = match &args.check {
-        Some(check) => quote::quote! { Some(|a, b| Box::pin(#check(a, b))) },
+        Some(check) => quote::quote! { Some(|a| Box::pin(#check(a))) },
         None => quote::quote! { None },
     };
     let on_error = match &args.on_error {
@@ -161,7 +161,7 @@ fn command_inner(
             <#ctx_type_with_static as poise::_GetGenerics>::E,
         > {
             async fn inner(ctx: #ctx_type, args: &str) -> #return_type {
-                let ( #( #arg_name ),* ) = ::poise::parse_args!(ctx.discord, ctx.msg, args => #(
+                let ( #( #arg_name ),* ) = ::poise::parse_prefix_args!(ctx.discord, ctx.msg, args => #(
                     #( #arg_attrs )* (#arg_type)
                 ),* ).await?;
 
@@ -185,8 +185,34 @@ fn command_inner(
     }))
 }
 
+/// Searches for command and slash_command attributes, parses those, and also returns the rest
+/// attributes
+fn parse_attributes(attributes: &[syn::Attribute]) {
+    panic!("{:?}", attributes);
+}
+
 #[proc_macro_attribute]
 pub fn command(args: TokenStream, function: TokenStream) -> TokenStream {
+    let function = syn::parse_macro_input!(function as syn::ItemFn);
+    parse_attributes(&function.attrs);
+
+    let args = syn::parse_macro_input!(args as Vec<syn::NestedMeta>);
+    let args = match <Args as darling::FromMeta>::from_list(&args) {
+        Ok(x) => x,
+        Err(e) => return TokenStream::from(e.write_errors()),
+    };
+
+    match command_inner(args, function) {
+        // Ok(x) => panic!("{}", x),
+        Ok(x) => x,
+        Err((span, msg)) => syn::Error::new(span, msg).into_compile_error().into(),
+    }
+}
+
+#[proc_macro_attribute]
+pub fn slash_command(args: TokenStream, function: TokenStream) -> TokenStream {
+    panic!("{}", args);
+
     let args = syn::parse_macro_input!(args as syn::AttributeArgs);
     let args = match <Args as darling::FromMeta>::from_list(&args) {
         Ok(x) => x,

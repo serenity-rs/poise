@@ -10,20 +10,20 @@ pub use string::*;
 mod wrapper;
 pub use wrapper::*;
 
-use crate::serenity;
+use crate::serenity_prelude as serenity;
 
 // deliberately not copy with the intention to prevent accidental copies and confusion
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
-pub struct Arguments<'a>(pub &'a str);
+#[derive(Clone, PartialEq, Eq, Debug)]
+pub struct ArgString<'a>(pub &'a str);
 
-impl<'a> Arguments<'a> {
+impl<'a> ArgString<'a> {
     /// Parse a single argument and return the remaining arguments.
     ///
     /// Uses `crate::ParseConsuming` internally.
     ///
     /// ```rust
-    /// # use poise::{Arguments, Wrapper};
-    /// let args = Arguments("hello 123");
+    /// # use poise::{ArgString, Wrapper};
+    /// let args = ArgString("hello 123");
     ///
     /// let (args, hello) = args.pop::<String>().expect("a");
     /// assert_eq!(hello, "hello");
@@ -36,9 +36,17 @@ impl<'a> Arguments<'a> {
         &self,
         ctx: &serenity::Context,
         msg: &serenity::Message,
-    ) -> Result<(Arguments<'a>, T), <T as ParseConsuming<'a>>::Err> {
+    ) -> Result<(ArgString<'a>, T), <T as ParseConsuming<'a>>::Err> {
         let (args, obj) = T::pop_from(ctx, msg, self).await?;
-        Ok((Arguments(args.0.trim_start()), obj))
+        Ok((ArgString(args.0.trim_start()), obj))
+    }
+
+    /// Like [`Self::pop`] but synchronous.
+    pub fn sync_pop<T: ParseConsumingSync<'a>>(
+        &self,
+    ) -> Result<(ArgString<'a>, T), <T as ParseConsuming<'a>>::Err> {
+        let (args, obj) = T::sync_pop_from(self)?;
+        Ok((ArgString(args.0.trim_start()), obj))
     }
 }
 
@@ -49,7 +57,7 @@ pub trait ParseConsumingSync<'a>: Sized {
     /// This error type should implement [`std::error::Error`] most of the time
     type Err;
 
-    fn sync_pop_from(args: &Arguments<'a>) -> Result<(Arguments<'a>, Self), Self::Err>;
+    fn sync_pop_from(args: &ArgString<'a>) -> Result<(ArgString<'a>, Self), Self::Err>;
 }
 
 /// Parse a value out of a string by popping off the front of the string. Discord message context
@@ -66,8 +74,8 @@ pub trait ParseConsuming<'a>: Sized {
     async fn pop_from(
         ctx: &serenity::Context,
         msg: &serenity::Message,
-        args: &Arguments<'a>,
-    ) -> Result<(Arguments<'a>, Self), Self::Err>;
+        args: &ArgString<'a>,
+    ) -> Result<(ArgString<'a>, Self), Self::Err>;
 }
 
 #[async_trait::async_trait]
@@ -80,8 +88,8 @@ where
     async fn pop_from(
         _: &serenity::Context,
         _: &serenity::Message,
-        args: &Arguments<'a>,
-    ) -> Result<(Arguments<'a>, Self), Self::Err> {
+        args: &ArgString<'a>,
+    ) -> Result<(ArgString<'a>, Self), Self::Err> {
         <Self as ParseConsumingSync>::sync_pop_from(args)
     }
 }
@@ -97,7 +105,7 @@ impl std::fmt::Display for TooManyArguments {
 
 impl std::error::Error for TooManyArguments {}
 
-/// The error type returned from [parse_args!]. It contains a `Box<dyn Error>`
+/// The error type returned from [parse_prefix_args!]. It contains a `Box<dyn Error>`
 #[derive(Debug)]
 pub struct ArgumentParseError(pub Box<dyn std::error::Error + Send + Sync>);
 
@@ -115,7 +123,7 @@ impl std::error::Error for ArgumentParseError {
 
 #[doc(hidden)]
 #[macro_export]
-macro_rules! _parse {
+macro_rules! _parse_prefix {
     // All arguments have been consumed
     ( $ctx:ident $msg:ident $args:ident => [ $error:ident $( $name:ident )* ] ) => {
         if $args.0.is_empty() {
@@ -130,10 +138,10 @@ macro_rules! _parse {
     ) => {
         if let Ok(($args, token)) = $args.pop($ctx, $msg).await {
             let token: Option<$type> = Some(token);
-            $crate::_parse!($ctx $msg $args => [ $($preamble)* token ] $($rest)* );
+            $crate::_parse_prefix!($ctx $msg $args => [ $($preamble)* token ] $($rest)* );
         }
         let token: Option<$type> = None;
-        $crate::_parse!($ctx $msg $args => [ $($preamble)* token ] $($rest)* );
+        $crate::_parse_prefix!($ctx $msg $args => [ $($preamble)* token ] $($rest)* );
     };
 
     // Consume Option<T> lazy-first
@@ -142,10 +150,10 @@ macro_rules! _parse {
         $( $rest:tt )*
     ) => {
         let token: Option<$type> = None;
-        $crate::_parse!($ctx $msg $args => [ $($preamble)* token ] $($rest)* );
+        $crate::_parse_prefix!($ctx $msg $args => [ $($preamble)* token ] $($rest)* );
         if let Ok(($args, token)) = $args.pop($ctx, $msg).await {
             let token: Option<$type> = Some(token);
-            $crate::_parse!($ctx $msg $args => [ $($preamble)* token ] $($rest)* );
+            $crate::_parse_prefix!($ctx $msg $args => [ $($preamble)* token ] $($rest)* );
         }
     };
 
@@ -166,29 +174,22 @@ macro_rules! _parse {
 
         // This will run at least once
         while let Some(token_rest_args) = token_rest_args.pop() {
-            $crate::_parse!($ctx $msg token_rest_args => [ $($preamble)* tokens ] $($rest)* );
+            $crate::_parse_prefix!($ctx $msg token_rest_args => [ $($preamble)* tokens ] $($rest)* );
             tokens.pop();
         }
     };
 
-    // Consume #[rest] &str as the last argument
-    ( $ctx:ident $msg:ident $args:ident => [ $($preamble:tt)* ]
-        (#[rest] &str)
-    ) => {
-        let token = $args.0;
-        let $args = $crate::Arguments("");
-        $crate::_parse!($ctx $msg $args => [ $($preamble)* token ] );
-    };
+    // deliberately no `#[rest] &str` here because &str isn't supported anywhere else and this
+    // inconsistency and also the further implementation work makes it not worth it.
 
-    // Consume #[rest] Wrapper<T> as the last argument
+    // Consume #[rest] T as the last argument
     ( $ctx:ident $msg:ident $args:ident => [ $error:ident $($preamble:tt)* ]
-        (#[rest] $(poise::)* Wrapper<$type:ty>)
+        (#[rest] $(poise::)* $type:ty)
     ) => {
-        match $args.0.trim_start().parse::<$type>() {
+        match <$type as ::serenity::utils::Parse>::parse($ctx, $msg.guild_id, $msg.channel_id, $args.0.trim_start()).await {
             Ok(token) => {
-                let $args = $crate::Arguments("");
-                let token = $crate::Wrapper(token);
-                $crate::_parse!($ctx $msg $args => [ $error $($preamble)* token ]);
+                let $args = $crate::ArgString("");
+                $crate::_parse_prefix!($ctx $msg $args => [ $error $($preamble)* token ]);
             },
             Err(e) => $error = Box::new(e),
         }
@@ -201,7 +202,7 @@ macro_rules! _parse {
     ) => {
         match $args.pop::<$type>($ctx, $msg).await {
             Ok(($args, token)) => {
-                $crate::_parse!($ctx $msg $args => [ $error $($preamble)* token ] $($rest)* );
+                $crate::_parse_prefix!($ctx $msg $args => [ $error $($preamble)* token ] $($rest)* );
             },
             Err(e) => $error = Box::new(e),
         }
@@ -213,7 +214,7 @@ macro_rules! _parse {
 }
 
 #[macro_export]
-macro_rules! parse_args {
+macro_rules! parse_prefix_args {
     ($ctx:expr, $msg:expr, $args:expr => $(
         $( #[$attr:ident] )?
         ( $($type:tt)* )
@@ -221,12 +222,12 @@ macro_rules! parse_args {
         (|| async {
             let ctx = $ctx;
             let msg = $msg;
-            let args = $crate::Arguments($args);
+            let args = $crate::ArgString($args);
 
             #[allow(unused_mut)] // can happen when few args are requested
             let mut error = Box::new($crate::TooManyArguments) as Box<dyn std::error::Error + Send + Sync>;
 
-            $crate::_parse!(
+            $crate::_parse_prefix!(
                 ctx msg args => [error]
                 $(
                     ($( #[$attr] )? $($type)*)
@@ -256,31 +257,31 @@ mod test {
         let msg = serenity::CustomMessage::new().build();
 
         assert_eq!(
-            parse_args!(&ctx, &msg, "hello" => (Option<String>), (String))
+            parse_prefix_args!(&ctx, &msg, "hello" => (Option<String>), (String))
                 .await
                 .unwrap(),
             (None, "hello".into()),
         );
         assert_eq!(
-            parse_args!(&ctx, &msg, "a b c" => (Vec<String>), (String))
+            parse_prefix_args!(&ctx, &msg, "a b c" => (Vec<String>), (String))
                 .await
                 .unwrap(),
             (vec!["a".into(), "b".into()], "c".into()),
         );
         assert_eq!(
-            parse_args!(&ctx, &msg, "a b c" => (Vec<String>), (Vec<String>))
+            parse_prefix_args!(&ctx, &msg, "a b c" => (Vec<String>), (Vec<String>))
                 .await
                 .unwrap(),
             (vec!["a".into(), "b".into(), "c".into()], vec![]),
         );
         assert_eq!(
-            parse_args!(&ctx, &msg, "a b 8 c" => (Vec<String>), (Wrapper<u32>), (Vec<String>))
+            parse_prefix_args!(&ctx, &msg, "a b 8 c" => (Vec<String>), (Wrapper<u32>), (Vec<String>))
                 .await
                 .unwrap(),
             (vec!["a".into(), "b".into()], Wrapper(8), vec!["c".into()]),
         );
         assert_eq!(
-            parse_args!(&ctx, &msg, "yoo `that's cool` !" => (String), (CodeBlock), (String))
+            parse_prefix_args!(&ctx, &msg, "yoo `that's cool` !" => (String), (CodeBlock), (String))
                 .await
                 .unwrap(),
             (
@@ -293,22 +294,22 @@ mod test {
             ),
         );
         assert_eq!(
-            parse_args!(&ctx, &msg, "hi" => #[lazy] (Option<String>), (Option<String>))
+            parse_prefix_args!(&ctx, &msg, "hi" => #[lazy] (Option<String>), (Option<String>))
                 .await
                 .unwrap(),
             (None, Some("hi".into())),
         );
         assert_eq!(
-            parse_args!(&ctx, &msg, "a b c" => (String), #[rest] (Wrapper<String>))
+            parse_prefix_args!(&ctx, &msg, "a b c" => (String), #[rest] (Wrapper<String>))
                 .await
                 .unwrap(),
             ("a".into(), Wrapper("b c".into())),
         );
         assert_eq!(
-            parse_args!(&ctx, &msg, "a b c" => (String), #[rest] (&str))
+            parse_prefix_args!(&ctx, &msg, "a b c" => (String), #[rest] (String))
                 .await
                 .unwrap(),
-            ("a".into(), "b c"),
+            ("a".into(), "b c".into()),
         );
     }
 }

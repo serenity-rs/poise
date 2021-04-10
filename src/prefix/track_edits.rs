@@ -1,4 +1,49 @@
-use crate::serenity;
+//! Tools for implementing automatic edit tracking, i.e. the bot automatically updating its response
+//! when the user edits their command invocation message.
+
+use crate::serenity_prelude as serenity;
+
+fn update_message(message: &mut serenity::Message, update: serenity::MessageUpdateEvent) {
+    message.channel_id = update.channel_id;
+    message.guild_id = update.guild_id;
+
+    if let Some(kind) = update.kind {
+        message.kind = kind;
+    }
+    if let Some(content) = update.content {
+        message.content = content;
+    }
+    if let Some(tts) = update.tts {
+        message.tts = tts;
+    }
+    if let Some(pinned) = update.pinned {
+        message.pinned = pinned;
+    }
+    if let Some(timestamp) = update.timestamp {
+        message.timestamp = timestamp;
+    }
+    if let Some(edited_timestamp) = update.edited_timestamp {
+        message.edited_timestamp = Some(edited_timestamp);
+    }
+    if let Some(author) = update.author {
+        message.author = author;
+    }
+    if let Some(mention_everyone) = update.mention_everyone {
+        message.mention_everyone = mention_everyone;
+    }
+    if let Some(mentions) = update.mentions {
+        message.mentions = mentions;
+    }
+    if let Some(mention_roles) = update.mention_roles {
+        message.mention_roles = mention_roles;
+    }
+    if let Some(attachments) = update.attachments {
+        message.attachments = attachments;
+    }
+    // if let Some(embeds) = update.embeds {
+    //     message.embeds = embeds;
+    // }
+}
 
 pub struct EditTracker {
     max_duration: std::time::Duration,
@@ -25,12 +70,12 @@ impl EditTracker {
             .find(|(user_msg, _)| user_msg.id == user_msg_update.id)
         {
             Some((user_msg, _)) => {
-                crate::utils::update_message(user_msg, user_msg_update.clone());
+                update_message(user_msg, user_msg_update.clone());
                 user_msg.clone()
             }
             None => {
                 let mut user_msg = serenity::CustomMessage::new().build();
-                crate::utils::update_message(&mut user_msg, user_msg_update.clone());
+                update_message(&mut user_msg, user_msg_update.clone());
                 user_msg
             }
         }
@@ -65,43 +110,17 @@ impl EditTracker {
     }
 }
 
-pub struct CreateReply {
-    content: Option<String>,
-    embed: Option<serenity::CreateEmbed>,
-}
-
-impl CreateReply {
-    /// Set the content of the message.
-    pub fn content(&mut self, content: String) -> &mut Self {
-        self.content = Some(content);
-        self
-    }
-
-    /// Set an embed for the message.
-    pub fn embed<F>(&mut self, f: F) -> &mut Self
-    where
-        F: FnOnce(&mut serenity::CreateEmbed) -> &mut serenity::CreateEmbed,
-    {
-        let mut embed = serenity::CreateEmbed::default();
-        f(&mut embed);
-        self.embed = Some(embed);
-        self
-    }
-}
-
-pub async fn send_reply<U, E>(
-    ctx: crate::Context<'_, U, E>,
-    builder: impl FnOnce(&mut CreateReply) -> &mut CreateReply,
+pub async fn send_prefix_reply<U, E>(
+    ctx: crate::prefix::PrefixContext<'_, U, E>,
+    builder: impl FnOnce(&mut crate::CreateReply) -> &mut crate::CreateReply,
 ) -> Result<(), serenity::Error> {
-    let mut reply = CreateReply {
-        content: None,
-        embed: None,
-    };
+    let mut reply = crate::CreateReply::default();
     builder(&mut reply);
 
     let lock_edit_tracker = || {
         ctx.framework
-            .options
+            .options()
+            .prefix_options
             .edit_tracker
             .as_ref()
             .map(|t| t.write())
@@ -159,9 +178,9 @@ pub async fn send_reply<U, E>(
     Ok(())
 }
 
-pub async fn say_reply<U, E>(
-    ctx: crate::Context<'_, U, E>,
+pub async fn say_prefix_reply<U, E>(
+    ctx: crate::prefix::PrefixContext<'_, U, E>,
     text: String,
 ) -> Result<(), serenity::Error> {
-    send_reply(ctx, |m| m.content(text)).await
+    send_prefix_reply(ctx, |m| m.content(text)).await
 }

@@ -19,17 +19,17 @@ impl<'a> ParseConsumingSync<'a> for String {
     /// Leading whitespace will be trimmed; trailing whitespace is not consumed.
     ///
     /// ```rust
-    /// # use poise::{Arguments, ParseConsuming as _};
+    /// # use poise::{ArgString, ParseConsuming as _};
     /// assert_eq!(
-    ///     String::pop_from(&Arguments(r#""first arg" secondarg"#)).unwrap().1,
+    ///     String::pop_from(&ArgString(r#""first arg" secondarg"#)).unwrap().1,
     ///     r#"first arg"#
     /// );
     /// assert_eq!(
-    ///     String::pop_from(&Arguments(r#""arg \" with \" quotes \" inside""#)).unwrap().1,
+    ///     String::pop_from(&ArgString(r#""arg \" with \" quotes \" inside""#)).unwrap().1,
     ///     r#"arg " with " quotes " inside"#
     /// );
     /// ```
-    fn sync_pop_from(args: &Arguments<'a>) -> Result<(Arguments<'a>, Self), Self::Err> {
+    fn sync_pop_from(args: &ArgString<'a>) -> Result<(ArgString<'a>, Self), Self::Err> {
         // TODO: consider changing the behavior to parse quotes literally if they're in the middle
         // of the string:
         // - `"hello world"` => `hello world`
@@ -64,7 +64,7 @@ impl<'a> ParseConsumingSync<'a> for String {
             chars.next();
         }
 
-        Ok((Arguments(chars.as_str()), output))
+        Ok((ArgString(chars.as_str()), output))
     }
 }
 
@@ -73,8 +73,8 @@ impl<'a> ParseConsumingSync<'a> for String {
 fn test_pop_string() {
     // Test that trailing whitespace is not consumed
     assert_eq!(
-        String::sync_pop_from(&Arguments("AA BB")).unwrap().0,
-        Arguments(" BB")
+        String::sync_pop_from(&ArgString("AA BB")).unwrap().0,
+        ArgString(" BB")
     );
 
     for &(string, arg) in &[
@@ -87,6 +87,6 @@ fn test_pop_string() {
         (r#"\"AA\ BB\""#, r#""AA BB""#),
         (r#""\"AA BB\"""#, r#""AA BB""#),
     ] {
-        assert_eq!(String::sync_pop_from(&Arguments(string)).unwrap().1, arg);
+        assert_eq!(String::sync_pop_from(&ArgString(string)).unwrap().1, arg);
     }
 }

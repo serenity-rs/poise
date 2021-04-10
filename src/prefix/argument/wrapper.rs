@@ -9,8 +9,8 @@ macro_rules! impl_parse_consuming {
             async fn pop_from(
                 ctx: &serenity::Context,
                 msg: &serenity::Message,
-                args: &Arguments<'a>
-            ) -> Result<(Arguments<'a>, Self), Self::Err> {
+                args: &ArgString<'a>
+            ) -> Result<(ArgString<'a>, Self), Self::Err> {
                 let (args, value) = Wrapper::pop_from(ctx, msg, args).await?;
                 Ok((args, value.0))
             }
@@ -32,7 +32,7 @@ impl_parse_consuming!(
     serenity::Message serenity::Member
 );
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Hash, Ord, PartialOrd)]
 pub struct Wrapper<T>(pub T);
 
 #[async_trait::async_trait]
@@ -42,10 +42,24 @@ impl<'a, T: serenity::Parse> ParseConsuming<'a> for Wrapper<T> {
     async fn pop_from(
         ctx: &serenity::Context,
         msg: &serenity::Message,
-        args: &Arguments<'a>,
-    ) -> Result<(Arguments<'a>, Self), Self::Err> {
+        args: &ArgString<'a>,
+    ) -> Result<(ArgString<'a>, Self), Self::Err> {
         let (args, string) = String::sync_pop_from(args).unwrap_or((args.clone(), String::new()));
-        let token = T::parse(ctx, msg, &string).await?;
+        let token = T::parse(ctx, msg.guild_id, msg.channel_id, &string).await?;
         Ok((args, Self(token)))
+    }
+}
+
+#[async_trait::async_trait]
+impl<T: serenity::Parse> serenity::Parse for Wrapper<T> {
+    type Err = T::Err;
+
+    async fn parse(
+        ctx: &serenity::Context,
+        guild_id: Option<serenity::GuildId>,
+        channel_id: serenity::ChannelId,
+        s: &str,
+    ) -> Result<Self, Self::Err> {
+        T::parse(ctx, guild_id, channel_id, s).await.map(Self)
     }
 }

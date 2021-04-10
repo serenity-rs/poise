@@ -1,3 +1,5 @@
+//! Provides a utility EventHandler that generates [`Event`] enum instances for incoming events.
+
 use crate::BoxFuture;
 use serde_json::Value;
 use serenity::{client::bridge::gateway::event::*, model::prelude::*};
@@ -31,6 +33,16 @@ macro_rules! event {
 				$variant_name { $( $arg_name: $arg_type ),* },
 			)*
 		}
+
+        impl Event<'_> {
+            pub fn name(&self) -> &'static str {
+                match self {
+                    $(
+                        Self::$variant_name { .. } => stringify!($variant_name),
+                    )*
+                }
+            }
+        }
 	};
 }
 
@@ -80,4 +92,5 @@ event! {
     voice_server_update => VoiceServerUpdate { update: VoiceServerUpdateEvent },
     voice_state_update => VoiceStateUpdate { guild_id: Option<GuildId>, old: Option<VoiceState>, new: VoiceState },
     webhook_update => WebhookUpdate { guild_id: GuildId, belongs_to_channel_id: ChannelId },
+    interaction_create => InteractionCreate { interaction: Interaction },
 }
