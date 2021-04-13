@@ -23,24 +23,18 @@ impl<U, E> Clone for PrefixContext<'_, U, E> {
     }
 }
 impl<U, E> Copy for PrefixContext<'_, U, E> {}
-// needed for proc macro
-#[doc(hidden)]
-pub trait _GetGenerics {
-    type U;
-    type E;
-}
-impl<U_, E_> _GetGenerics for PrefixContext<'_, U_, E_> {
-    type U = U_;
-    type E = E_;
+impl<U, E> crate::_GetGenerics for PrefixContext<'_, U, E> {
+    type U = U;
+    type E = E;
 }
 
 pub struct PrefixCommandOptions<U, E> {
     /// Short description of the command. Displayed inline in help menus and similar.
-    pub description: Option<&'static str>,
+    pub inline_help: Option<&'static str>,
     /// Multiline description with detailed usage instructions. Displayed in the command specific
     /// help: `~help command_name`
     // TODO: fix the inconsistency that this is String and everywhere else it's &'static str
-    pub explanation: Option<fn() -> String>,
+    pub multiline_help: Option<fn() -> String>,
     /// Alternative triggers for the command
     pub aliases: &'static [&'static str],
     /// Fall back to the framework-specified value on None.
@@ -57,8 +51,8 @@ pub struct PrefixCommandOptions<U, E> {
 impl<U, E> Default for PrefixCommandOptions<U, E> {
     fn default() -> Self {
         Self {
-            description: None,
-            explanation: None,
+            inline_help: None,
+            multiline_help: None,
             check: None,
             on_error: None,
             aliases: &[],

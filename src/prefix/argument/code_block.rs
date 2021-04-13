@@ -44,11 +44,11 @@ impl<'a> ParseConsumingSync<'a> for CodeBlock {
     /// ```rust
     /// # use poise::{CodeBlock, ArgString, ParseConsuming as _};
     /// assert_eq!(
-    ///     ArgString("`hello world`").pop::<CodeBlock>().unwrap().1,
+    ///     ArgString("`hello world`").sync_pop::<CodeBlock>().unwrap().1,
     ///     CodeBlock { code: "hello world".into(), language: None },
     /// );
     /// assert_eq!(
-    ///     ArgString("```rust\nprintln!(\"Hello world!\");\n```").pop::<CodeBlock>().unwrap().1,
+    ///     ArgString("```rust\nprintln!(\"Hello world!\");\n```").sync_pop::<CodeBlock>().unwrap().1,
     ///     CodeBlock { code: "println!(\"Hello world!\");".into(), language: Some("rust".into()) },
     /// );
     /// ```

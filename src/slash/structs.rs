@@ -19,6 +19,10 @@ impl<U, E> Clone for SlashContext<'_, U, E> {
     }
 }
 impl<U, E> Copy for SlashContext<'_, U, E> {}
+impl<U, E> crate::_GetGenerics for SlashContext<'_, U, E> {
+    type U = U;
+    type E = E;
+}
 
 pub struct SlashCommandErrorContext<'a, U, E> {
     pub while_checking: bool,
@@ -41,10 +45,6 @@ pub struct SlashCommandOptions<U, E> {
     pub on_error: Option<fn(E, SlashCommandErrorContext<'_, U, E>) -> BoxFuture<'_, ()>>,
     /// If this function returns false, this command will not be executed.
     pub check: Option<fn(SlashContext<'_, U, E>) -> BoxFuture<'_, Result<bool, E>>>,
-    // commented out because we're using the command name for dispatching right nwo
-    // /// If this command is registered on Discord, this is its ID. If not present, this slash
-    // /// command cannot be dispatched by the framework
-    // pub id: Option<serenity::CommandId>,
 }
 
 impl<U, E> Default for SlashCommandOptions<U, E> {
@@ -64,7 +64,7 @@ pub struct SlashCommand<U, E> {
         SlashContext<'a, U, E>,
         &'a [serenity::ApplicationCommandInteractionDataOption],
     ) -> BoxFuture<'a, Result<(), E>>,
-    pub arguments:
+    pub parameters:
         Vec<fn(&mut serenity::CreateInteractionOption) -> &mut serenity::CreateInteractionOption>,
     pub options: SlashCommandOptions<U, E>,
 }
@@ -74,26 +74,17 @@ impl<U, E> SlashCommand<U, E> {
         &self,
         http: &serenity::Http,
         guild_id: serenity::GuildId,
-        application_id: serenity::ApplicationId,
     ) -> Result<serenity::ApplicationCommand, serenity::Error> {
-        serenity::Interaction::create_guild_application_command(
-            http,
-            guild_id,
-            application_id.0,
-            |c| self.create(c),
-        )
-        .await
+        guild_id
+            .create_application_command(http, |c| self.create(c))
+            .await
     }
 
     pub async fn create_global(
         &self,
         http: &serenity::Http,
-        application_id: serenity::ApplicationId,
     ) -> Result<serenity::ApplicationCommand, serenity::Error> {
-        serenity::Interaction::create_global_application_command(http, application_id.0, |c| {
-            self.create(c)
-        })
-        .await
+        serenity::Interaction::create_global_application_command(http, |c| self.create(c)).await
     }
 
     pub fn create<'a>(
@@ -102,7 +93,7 @@ impl<U, E> SlashCommand<U, E> {
     ) -> &'a mut serenity::CreateInteraction {
         interaction.name(self.name);
         interaction.description(self.description);
-        for create_option in &self.arguments {
+        for create_option in &self.parameters {
             let mut option = serenity::CreateInteractionOption::default();
             create_option(&mut option);
             interaction.add_interaction_option(option);

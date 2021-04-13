@@ -22,15 +22,14 @@ impl<'a> ArgString<'a> {
     /// Uses `crate::ParseConsuming` internally.
     ///
     /// ```rust
-    /// # use poise::{ArgString, Wrapper};
-    /// let args = ArgString("hello 123");
+    /// # use poise::{ArgString, CodeBlock};
+    /// let args = ArgString("hello `foo bar`");
     ///
-    /// let (args, hello) = args.pop::<String>().expect("a");
+    /// let (args, hello) = args.sync_pop::<String>().unwrap();
     /// assert_eq!(hello, "hello");
     ///
-    /// dbg!(&args);
-    /// let (args, number) = args.pop::<Wrapper<u32>>().expect("b");
-    /// assert_eq!(number.0, 123);
+    /// let (args, block) = args.sync_pop::<CodeBlock>().unwrap();
+    /// assert_eq!(block.code, "foo bar");
     /// ```
     pub async fn pop<T: ParseConsuming<'a>>(
         &self,
@@ -50,7 +49,7 @@ impl<'a> ArgString<'a> {
     }
 }
 
-/// Superset of [`DiscordParseConsuming`] without Discord context available and no async support.
+/// Superset of [`ParseConsuming`] without Discord context available and no async support.
 ///
 /// Similar in spirit to [`std::str::FromStr`].
 pub trait ParseConsumingSync<'a>: Sized {
@@ -133,7 +132,7 @@ macro_rules! _parse_prefix {
 
     // Consume Option<T> greedy-first
     ( $ctx:ident $msg:ident $args:ident => [ $($preamble:tt)* ]
-        (Option<$type:ty>)
+        (Option<$type:ty $(,)?>)
         $( $rest:tt )*
     ) => {
         if let Ok(($args, token)) = $args.pop($ctx, $msg).await {
@@ -146,7 +145,7 @@ macro_rules! _parse_prefix {
 
     // Consume Option<T> lazy-first
     ( $ctx:ident $msg:ident $args:ident => [ $($preamble:tt)* ]
-        (#[lazy] Option<$type:ty>)
+        (#[lazy] Option<$type:ty $(,)?>)
         $( $rest:tt )*
     ) => {
         let token: Option<$type> = None;
@@ -159,7 +158,7 @@ macro_rules! _parse_prefix {
 
     // Consume Vec<T> greedy-first
     ( $ctx:ident $msg:ident $args:ident => [ $($preamble:tt)* ]
-        (Vec<$type:ty>)
+        (Vec<$type:ty $(,)?>)
         $( $rest:tt )*
     ) => {
         let mut tokens = Vec::new();
@@ -186,7 +185,7 @@ macro_rules! _parse_prefix {
     ( $ctx:ident $msg:ident $args:ident => [ $error:ident $($preamble:tt)* ]
         (#[rest] $(poise::)* $type:ty)
     ) => {
-        match <$type as ::serenity::utils::Parse>::parse($ctx, $msg.guild_id, $msg.channel_id, $args.0.trim_start()).await {
+        match <$type as ::serenity::utils::Parse>::parse($ctx, $msg, $args.0.trim_start()).await {
             Ok(token) => {
                 let $args = $crate::ArgString("");
                 $crate::_parse_prefix!($ctx $msg $args => [ $error $($preamble)* token ]);
@@ -210,7 +209,7 @@ macro_rules! _parse_prefix {
 
     // ( $($t:tt)* ) => {
     //     compile_error!( stringify!($($t)*) );
-    // }
+    // };
 }
 
 #[macro_export]
@@ -219,7 +218,7 @@ macro_rules! parse_prefix_args {
         $( #[$attr:ident] )?
         ( $($type:tt)* )
     ),* $(,)? ) => {
-        (|| async {
+        async {
             let ctx = $ctx;
             let msg = $msg;
             let args = $crate::ArgString($args);
@@ -234,7 +233,7 @@ macro_rules! parse_prefix_args {
                 )*
             );
             Err($crate::ArgumentParseError(error))
-        })()
+        }
     };
 }
 

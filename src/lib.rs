@@ -22,10 +22,11 @@ pub use reply::*;
 pub use poise_macros::*;
 pub use serenity;
 
-/// This module re-exports a bunch of items from all over serenity. It is useful to not have to
+/// This module re-exports a bunch of items from all over serenity. Useful if you can't
 /// remember the full paths of serenity items.
 ///
-/// One way to use this prelude module in your project is ```rust
+/// One way to use this prelude module in your project is
+/// ```rust
 /// use poise::serenity_prelude as serenity;
 /// ```
 pub mod serenity_prelude {

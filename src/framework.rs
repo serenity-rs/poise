@@ -106,7 +106,7 @@ impl<U, E> Framework<U, E> {
         &'a self,
         ctx: prefix::PrefixContext<'a, U, E>,
         triggered_by_edit: bool,
-    ) -> Result<(), Option<(E, ErrorContext<'a, U, E>)>> {
+    ) -> Result<(), Option<(E, PrefixCommandErrorContext<'a, U, E>)>> {
         // Check prefix
         let msg = match ctx.msg.content.strip_prefix(self.prefix) {
             Some(msg) => msg,
@@ -150,11 +150,11 @@ impl<U, E> Framework<U, E> {
                 Err(e) => {
                     return Err(Some((
                         e,
-                        ErrorContext::PrefixCommand(prefix::PrefixCommandErrorContext {
+                        prefix::PrefixCommandErrorContext {
                             command,
                             ctx,
                             while_checking: true,
-                        }),
+                        },
                     )));
                 }
             }
@@ -180,11 +180,11 @@ impl<U, E> Framework<U, E> {
         (command.action)(ctx, args).await.map_err(|e| {
             Some((
                 e,
-                ErrorContext::PrefixCommand(prefix::PrefixCommandErrorContext {
+                prefix::PrefixCommandErrorContext {
                     ctx,
                     command,
                     while_checking: false,
-                }),
+                },
             ))
         })
     }
@@ -225,7 +225,11 @@ impl<U, E> Framework<U, E> {
             if let Some(on_error) = command.options.on_error {
                 on_error(e, error_ctx).await;
             } else {
-                (self.options.on_error)(e, ErrorContext::SlashCommand(error_ctx)).await;
+                (self.options.on_error)(
+                    e,
+                    ErrorContext::Command(CommandErrorContext::Slash(error_ctx)),
+                )
+                .await;
             }
         }
     }
@@ -254,22 +258,16 @@ impl<U, E> Framework<U, E> {
                     data: self.get_user_data().await,
                 };
                 if let Err(Some((err, err_ctx))) = self.dispatch_message(ctx, false).await {
-                    match err_ctx.clone() {
-                        ErrorContext::PrefixCommand(command_err_ctx) => {
-                            if let Some(on_error) = command_err_ctx.command.options.on_error {
-                                (on_error)(err, command_err_ctx).await;
-                            } else {
-                                (self.options.on_error)(err, err_ctx).await;
-                            }
-                        }
-                        ErrorContext::SlashCommand(command_err_ctx) => {
-                            if let Some(on_error) = command_err_ctx.command.options.on_error {
-                                (on_error)(err, command_err_ctx).await;
-                            } else {
-                                (self.options.on_error)(err, err_ctx).await;
-                            }
-                        }
-                        err_ctx => (self.options.on_error)(err, err_ctx).await,
+                    if let Some(on_error) = err_ctx.command.options.on_error {
+                        (on_error)(err, err_ctx).await;
+                    } else {
+                        (self.options.on_error)(
+                            err,
+                            crate::ErrorContext::Command(crate::CommandErrorContext::Prefix(
+                                err_ctx,
+                            )),
+                        )
+                        .await;
                     }
                 }
             }
@@ -284,7 +282,12 @@ impl<U, E> Framework<U, E> {
                         data: self.get_user_data().await,
                     };
                     if let Err(Some((err, err_ctx))) = self.dispatch_message(ctx, true).await {
-                        (self.options.on_error)(err, err_ctx);
+                        (self.options.on_error)(
+                            err,
+                            crate::ErrorContext::Command(crate::CommandErrorContext::Prefix(
+                                err_ctx,
+                            )),
+                        );
                     }
                 }
             }

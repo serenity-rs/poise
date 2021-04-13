@@ -2,7 +2,7 @@
 
 use crate::{serenity_prelude as serenity, BoxFuture};
 
-/// Wrapper around either [`slash::Context`] or [`prefix::Context`]
+/// Wrapper around either [`SlashContext`] or [`PrefixContext`]
 pub enum Context<'a, U, E> {
     Slash(crate::SlashContext<'a, U, E>),
     Prefix(crate::PrefixContext<'a, U, E>),
@@ -17,11 +17,129 @@ impl<U, E> Clone for Context<'_, U, E> {
 }
 impl<U, E> Copy for Context<'_, U, E> {}
 
+// needed for proc macro
+#[doc(hidden)]
+pub trait _GetGenerics {
+    type U;
+    type E;
+}
+impl<U, E> _GetGenerics for Context<'_, U, E> {
+    type U = U;
+    type E = E;
+}
+
 impl<U, E> Context<'_, U, E> {
+    pub fn discord(&self) -> &serenity::Context {
+        match self {
+            Self::Slash(ctx) => ctx.discord,
+            Self::Prefix(ctx) => ctx.discord,
+        }
+    }
+
+    pub fn framework(&self) -> &crate::Framework<U, E> {
+        match self {
+            Self::Slash(ctx) => ctx.framework,
+            Self::Prefix(ctx) => ctx.framework,
+        }
+    }
+
+    pub fn data(&self) -> &U {
+        match self {
+            Self::Slash(ctx) => ctx.data,
+            Self::Prefix(ctx) => ctx.data,
+        }
+    }
+
+    pub fn channel_id(&self) -> serenity::ChannelId {
+        match self {
+            Self::Slash(ctx) => match ctx.interaction.channel_id {
+                Some(x) => x,
+                None => panic!("Slash command was sent outside specific channel"),
+            },
+            Self::Prefix(ctx) => ctx.msg.channel_id,
+        }
+    }
+
+    pub fn created_at(&self) -> chrono::DateTime<chrono::Utc> {
+        match self {
+            Self::Slash(ctx) => ctx.interaction.id.created_at(),
+            Self::Prefix(ctx) => ctx.msg.timestamp,
+        }
+    }
+
     pub fn author(&self) -> &serenity::User {
         match self {
-            Self::Slash(ctx) => &ctx.interaction.member.user,
+            Self::Slash(ctx) => {
+                if let Some(member) = &ctx.interaction.member {
+                    &member.user
+                } else if let Some(user) = &ctx.interaction.user {
+                    user
+                } else {
+                    panic!("Neither a Member nor a User was sent with interaction");
+                }
+            }
             Self::Prefix(ctx) => &ctx.msg.author,
+        }
+    }
+}
+
+pub enum CommandRef<'a, U, E> {
+    Prefix(&'a crate::PrefixCommand<U, E>),
+    Slash(&'a crate::SlashCommand<U, E>),
+}
+
+impl<U, E> Clone for CommandRef<'_, U, E> {
+    fn clone(&self) -> Self {
+        match *self {
+            Self::Prefix(x) => Self::Prefix(x),
+            Self::Slash(x) => Self::Slash(x),
+        }
+    }
+}
+
+impl<U, E> Copy for CommandRef<'_, U, E> {}
+
+impl<U, E> CommandRef<'_, U, E> {
+    pub fn name(self) -> &'static str {
+        match self {
+            Self::Prefix(x) => x.name,
+            Self::Slash(x) => x.name,
+        }
+    }
+}
+
+pub enum CommandErrorContext<'a, U, E> {
+    Prefix(crate::PrefixCommandErrorContext<'a, U, E>),
+    Slash(crate::SlashCommandErrorContext<'a, U, E>),
+}
+
+impl<U, E> Clone for CommandErrorContext<'_, U, E> {
+    fn clone(&self) -> Self {
+        match self {
+            Self::Prefix(x) => Self::Prefix(x.clone()),
+            Self::Slash(x) => Self::Slash(x.clone()),
+        }
+    }
+}
+
+impl<'a, U, E> CommandErrorContext<'a, U, E> {
+    pub fn command(&self) -> CommandRef<'_, U, E> {
+        match self {
+            Self::Prefix(x) => CommandRef::Prefix(x.command),
+            Self::Slash(x) => CommandRef::Slash(x.command),
+        }
+    }
+
+    pub fn while_checking(&self) -> bool {
+        match self {
+            Self::Prefix(x) => x.while_checking,
+            Self::Slash(x) => x.while_checking,
+        }
+    }
+    pub fn ctx(&self) -> Context<'a, U, E> {
+        match self {
+            Self::Prefix(x) => Context::Prefix(x.ctx),
+            Self::Slash(x) => Context::Slash(x.ctx),
         }
     }
 }
@@ -30,8 +148,7 @@ impl<U, E> Context<'_, U, E> {
 pub enum ErrorContext<'a, U, E> {
     Setup,
     Listener(&'a crate::Event<'a>),
-    PrefixCommand(crate::PrefixCommandErrorContext<'a, U, E>),
-    SlashCommand(crate::SlashCommandErrorContext<'a, U, E>),
+    Command(CommandErrorContext<'a, U, E>),
 }
 
 impl<U, E> Clone for ErrorContext<'_, U, E> {
@@ -39,8 +156,7 @@ impl<U, E> Clone for ErrorContext<'_, U, E> {
         match self {
             Self::Setup => Self::Setup,
             Self::Listener(x) => Self::Listener(x),
-            Self::PrefixCommand(x) => Self::PrefixCommand(x.clone()),
-            Self::SlashCommand(x) => Self::SlashCommand(x.clone()),
+            Self::Command(x) => Self::Command(x.clone()),
         }
     }
 }
@@ -75,13 +191,15 @@ impl<U: Send + Sync, E: std::fmt::Display + Send> Default for FrameworkOptions<U
                             event.name(),
                             error
                         ),
-                        ErrorContext::PrefixCommand(ctx) => {
+                        ErrorContext::Command(CommandErrorContext::Prefix(ctx)) => {
                             println!(
                                 "Error in prefix command \"{}\" from message \"{}\": {}",
-                                &ctx.command.name, &ctx.ctx.msg.content, error
+                                &ctx.command.name,
+                                &ctx.ctx.msg.content,
+                                error
                             );
                         }
-                        ErrorContext::SlashCommand(ctx) => {
+                        ErrorContext::Command(CommandErrorContext::Slash(ctx)) => {
                             println!("Error in slash command \"{}\": {}", ctx.command.name, error);
                         }
                     }

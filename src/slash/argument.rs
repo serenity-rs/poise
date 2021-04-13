@@ -33,7 +33,7 @@ impl std::error::Error for SlashArgError {
 #[doc(hidden)]
 #[macro_export]
 macro_rules! _parse_slash {
-    ($ctx:ident, $guild_id:ident, $channel_id:ident, $args:ident => $name:ident: Option<$type:ty>) => {
+    ($ctx:ident, $guild_id:ident, $channel_id:ident, $args:ident => $name:ident: Option<$type:ty $(,)*>) => {
         if let Some(arg) = $args.iter().find(|arg| arg.name == stringify!($name)) {
             let value = arg
                 .value
@@ -60,13 +60,13 @@ macro_rules! parse_slash_args {
     ($ctx:expr, $guild_id:expr, $channel_id:expr, $args:expr => $(
         ( $name:ident: $($type:tt)* )
     ),* $(,)? ) => {
-        (|| async /* not move! */ {
+        async /* not move! */ {
             let (ctx, guild_id, channel_id, args) = ($ctx, $guild_id, $channel_id, $args);
 
             Ok::<_, $crate::SlashArgError>(( $(
                 $crate::_parse_slash!( ctx, guild_id, channel_id, args => $name: $($type)* )
             ),* ))
-        })()
+        }
     };
 }
 

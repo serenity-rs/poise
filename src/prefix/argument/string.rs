@@ -19,13 +19,13 @@ impl<'a> ParseConsumingSync<'a> for String {
     /// Leading whitespace will be trimmed; trailing whitespace is not consumed.
     ///
     /// ```rust
-    /// # use poise::{ArgString, ParseConsuming as _};
+    /// # use poise::{ArgString, ParseConsumingSync as _};
     /// assert_eq!(
-    ///     String::pop_from(&ArgString(r#""first arg" secondarg"#)).unwrap().1,
+    ///     String::sync_pop_from(&ArgString(r#""first arg" secondarg"#)).unwrap().1,
     ///     r#"first arg"#
     /// );
     /// assert_eq!(
-    ///     String::pop_from(&ArgString(r#""arg \" with \" quotes \" inside""#)).unwrap().1,
+    ///     String::sync_pop_from(&ArgString(r#""arg \" with \" quotes \" inside""#)).unwrap().1,
     ///     r#"arg " with " quotes " inside"#
     /// );
     /// ```
