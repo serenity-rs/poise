@@ -72,7 +72,7 @@ struct ParamAttrArgs {
     description: Option<String>,
 }
 
-/// Part of the Invocation struct
+/// Part of the Invocation struct. Represents a single parameter of a Discord command.
 struct CommandParameter {
     name: syn::Ident,
     type_: syn::Type,
@@ -129,6 +129,26 @@ fn extract_help_from_doc_comments(attrs: &[syn::Attribute]) -> (Option<String>, 
     (inline_help, multiline_help)
 }
 
+// ngl this is ugly
+// transforms a type of form `Option<T>` into `T`
+fn unwrap_option_type(t: &syn::Type) -> Option<&syn::Type> {
+    if let syn::Type::Path(path) = t {
+        if path.path.segments.len() == 1 {
+            let path = &path.path.segments[0];
+            if path.ident == "Option" {
+                if let syn::PathArguments::AngleBracketed(generics) = &path.arguments {
+                    if generics.args.len() == 1 {
+                        if let syn::GenericArgument::Type(t) = &generics.args[0] {
+                            return Some(t);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    None
+}
+
 fn generate_command_spec(inv: &Invocation) -> proc_macro2::TokenStream {
     let description = wrap_option(inv.description);
     let explanation = match &inv.rest.explanation_fn {
@@ -145,8 +165,22 @@ fn generate_command_spec(inv: &Invocation) -> proc_macro2::TokenStream {
         None => quote::quote! { None },
     };
     let on_error = match &inv.rest.on_error {
-        Some(on_error) => quote::quote! { Some(|a, b| Box::pin(#on_error(a, b))) },
+        Some(on_error) => {
+            if inv.rest.slash_command {
+                quote::quote! {
+                    Some(|err, ctx| Box::pin(#on_error(err, ::poise::CommandErrorContext::Prefix(ctx))))
+                }
+            } else {
+                quote::quote! { Some(|err, ctx| Box::pin(#on_error(err, ctx))) }
+            }
+        }
         None => quote::quote! { None },
+    };
+
+    let maybe_wrapped_ctx = if inv.rest.slash_command {
+        quote::quote! { ::poise::Context::Prefix(ctx) }
+    } else {
+        quote::quote! { ctx }
     };
 
     let command_name = &inv.command_name;
@@ -163,14 +197,14 @@ fn generate_command_spec(inv: &Invocation) -> proc_macro2::TokenStream {
                     ctx.discord, ctx.msg, args =>
                     #( (#param_types) ),*
                 ).await?;
-                inner(::poise::Context::Prefix(ctx), #( #param_names ),* ).await
+                inner(#maybe_wrapped_ctx, #( #param_names ),* ).await
             }),
             options: ::poise::PrefixCommandOptions {
                 track_edits: #track_edits,
                 broadcast_typing: #broadcast_typing,
                 aliases: &[ #( #aliases ),* ],
-                description: #description,
-                explanation: #explanation,
+                inline_help: #description,
+                multiline_help: #explanation,
                 check: #check,
                 on_error: #on_error,
             }
@@ -193,9 +227,14 @@ fn generate_slash_command_spec(inv: &Invocation) -> Result<proc_macro2::TokenStr
             "slash command parameters must have a description",
         ))?;
 
+        let (required, type_) = match unwrap_option_type(&param.type_) {
+            Some(t) => (false, t),
+            None => (true, &param.type_),
+        };
+
         parameter_builders.push(quote::quote! {
-            |o| o
-                .kind(serenity::ApplicationCommandOptionType::String)
+            |o| (&&std::marker::PhantomData::<#type_>).create(o)
+                .required(#required)
                 .name(stringify!(#param_name))
                 .description(#param_description)
         });
@@ -207,7 +246,9 @@ fn generate_slash_command_spec(inv: &Invocation) -> Result<proc_macro2::TokenStr
         None => quote::quote! { None },
     };
     let on_error = match &inv.rest.on_error {
-        Some(on_error) => quote::quote! { Some(|a, b| Box::pin(#on_error(a, b))) },
+        Some(on_error) => quote::quote! {
+            Some(|err, ctx| Box::pin(#on_error(err, ::poise::CommandErrorContext::Slash(ctx))))
+        },
         None => quote::quote! { None },
     };
 
@@ -224,9 +265,10 @@ fn generate_slash_command_spec(inv: &Invocation) -> Result<proc_macro2::TokenStr
                 ).await?;
                 inner(::poise::Context::Slash(ctx), #( #param_names ),*).await
             }),
-            parameters: vec![
-                #( #parameter_builders ),*
-            ],
+            parameters: {
+                use ::poise::SlashArgument;
+                vec![ #( #parameter_builders ),* ]
+            },
             options: ::poise::SlashCommandOptions {
                 check: #check,
                 on_error: #on_error,

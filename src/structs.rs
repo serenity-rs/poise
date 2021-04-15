@@ -60,6 +60,13 @@ impl<U, E> Context<'_, U, E> {
         }
     }
 
+    pub fn guild_id(&self) -> Option<serenity::GuildId> {
+        match self {
+            Self::Slash(ctx) => ctx.interaction.guild_id,
+            Self::Prefix(ctx) => ctx.msg.guild_id,
+        }
+    }
+
     pub fn created_at(&self) -> chrono::DateTime<chrono::Utc> {
         match self {
             Self::Slash(ctx) => ctx.interaction.id.created_at(),
@@ -179,6 +186,24 @@ pub struct FrameworkOptions<U, E> {
     pub prefix_options: crate::PrefixFrameworkOptions<U, E>,
 }
 
+impl<U, E> FrameworkOptions<U, E> {
+    pub fn command(
+        &mut self,
+        spec: fn() -> (
+            crate::PrefixCommand<U, E>,
+            Option<crate::SlashCommand<U, E>>,
+        ),
+    ) {
+        let (prefix_command, slash_command) = spec();
+
+        self.prefix_options.commands.push(prefix_command);
+
+        if let Some(slash_command) = slash_command {
+            self.slash_options.commands.push(slash_command);
+        }
+    }
+}
+
 impl<U: Send + Sync, E: std::fmt::Display + Send> Default for FrameworkOptions<U, E> {
     fn default() -> Self {
         Self {
@@ -194,9 +219,7 @@ impl<U: Send + Sync, E: std::fmt::Display + Send> Default for FrameworkOptions<U
                         ErrorContext::Command(CommandErrorContext::Prefix(ctx)) => {
                             println!(
                                 "Error in prefix command \"{}\" from message \"{}\": {}",
-                                &ctx.command.name,
-                                &ctx.ctx.msg.content,
-                                error
+                                &ctx.command.name, &ctx.ctx.msg.content, error
                             );
                         }
                         ErrorContext::Command(CommandErrorContext::Slash(ctx)) => {

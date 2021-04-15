@@ -87,6 +87,27 @@ impl<U, E> Framework<U, E> {
         &self.options
     }
 
+    pub async fn register_slash_commands_in_guild(
+        &self,
+        http: &serenity::Http,
+        guild_id: serenity::GuildId,
+    ) -> Result<(), serenity::Error> {
+        for slash_cmd in &self.options.slash_options.commands {
+            slash_cmd.create_in_guild(http, guild_id).await?;
+        }
+        Ok(())
+    }
+
+    pub async fn register_slash_commands_global(
+        &self,
+        http: &serenity::Http,
+    ) -> Result<(), serenity::Error> {
+        for slash_cmd in &self.options.slash_options.commands {
+            slash_cmd.create_global(http).await?;
+        }
+        Ok(())
+    }
+
     async fn get_user_data(&self) -> &U {
         // We shouldn't get a Message event before a Ready event. But if we do, wait until
         // the Ready event does come and the resulting data has arrived.
@@ -205,13 +226,6 @@ impl<U, E> Framework<U, E> {
             Some(x) => x,
             None => {
                 println!("Warning: received unknown interaction \"{}\"", name);
-                // REMEMBER
-                crate::say_slash_reply(ctx, format!("```rust\n{:#?}\n```", options))
-                    .await
-                    .unwrap();
-                for arg in options {
-                    println!("{}: {:?}", arg.name, arg.value);
-                }
                 return;
             }
         };

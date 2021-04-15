@@ -45,7 +45,7 @@ impl<'a, T: serenity::Parse> ParseConsuming<'a> for Wrapper<T> {
         args: &ArgString<'a>,
     ) -> Result<(ArgString<'a>, Self), Self::Err> {
         let (args, string) = String::sync_pop_from(args).unwrap_or((args.clone(), String::new()));
-        let token = T::parse(ctx, msg, &string).await?;
+        let token = T::parse(ctx, msg.guild_id, Some(msg.channel_id), &string).await?;
         Ok((args, Self(token)))
     }
 }
@@ -56,9 +56,10 @@ impl<T: serenity::Parse> serenity::Parse for Wrapper<T> {
 
     async fn parse(
         ctx: &serenity::Context,
-        msg: &serenity::Message,
+        guild_id: Option<serenity::GuildId>,
+        channel_id: Option<serenity::ChannelId>,
         s: &str,
     ) -> Result<Self, Self::Err> {
-        T::parse(ctx, msg, s).await.map(Self)
+        T::parse(ctx, guild_id, channel_id, s).await.map(Self)
     }
 }

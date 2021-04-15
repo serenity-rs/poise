@@ -185,7 +185,9 @@ macro_rules! _parse_prefix {
     ( $ctx:ident $msg:ident $args:ident => [ $error:ident $($preamble:tt)* ]
         (#[rest] $(poise::)* $type:ty)
     ) => {
-        match <$type as ::serenity::utils::Parse>::parse($ctx, $msg, $args.0.trim_start()).await {
+        match <$type as ::serenity::utils::Parse>::parse(
+            $ctx, $msg.guild_id, Some($msg.channel_id), $args.0.trim_start()
+        ).await {
             Ok(token) => {
                 let $args = $crate::ArgString("");
                 $crate::_parse_prefix!($ctx $msg $args => [ $error $($preamble)* token ]);

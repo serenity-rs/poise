@@ -64,8 +64,11 @@ pub struct SlashCommand<U, E> {
         SlashContext<'a, U, E>,
         &'a [serenity::ApplicationCommandInteractionDataOption],
     ) -> BoxFuture<'a, Result<(), E>>,
-    pub parameters:
-        Vec<fn(&mut serenity::CreateInteractionOption) -> &mut serenity::CreateInteractionOption>,
+    pub parameters: Vec<
+        fn(
+            &mut serenity::CreateApplicationCommandOption,
+        ) -> &mut serenity::CreateApplicationCommandOption,
+    >,
     pub options: SlashCommandOptions<U, E>,
 }
 
@@ -89,14 +92,14 @@ impl<U, E> SlashCommand<U, E> {
 
     pub fn create<'a>(
         &self,
-        interaction: &'a mut serenity::CreateInteraction,
-    ) -> &'a mut serenity::CreateInteraction {
+        interaction: &'a mut serenity::CreateApplicationCommand,
+    ) -> &'a mut serenity::CreateApplicationCommand {
         interaction.name(self.name);
         interaction.description(self.description);
         for create_option in &self.parameters {
-            let mut option = serenity::CreateInteractionOption::default();
+            let mut option = serenity::CreateApplicationCommandOption::default();
             create_option(&mut option);
-            interaction.add_interaction_option(option);
+            interaction.add_option(option);
         }
         interaction
     }
