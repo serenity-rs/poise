@@ -14,12 +14,7 @@ pub struct PrefixContext<'a, U, E> {
 // manual Copy+Clone implementations because Rust is getting confused about the type parameter
 impl<U, E> Clone for PrefixContext<'_, U, E> {
     fn clone(&self) -> Self {
-        Self {
-            discord: self.discord,
-            msg: self.msg,
-            framework: self.framework,
-            data: self.data,
-        }
+        *self
     }
 }
 impl<U, E> Copy for PrefixContext<'_, U, E> {}

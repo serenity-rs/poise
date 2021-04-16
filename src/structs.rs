@@ -9,10 +9,7 @@ pub enum Context<'a, U, E> {
 }
 impl<U, E> Clone for Context<'_, U, E> {
     fn clone(&self) -> Self {
-        match *self {
-            Self::Slash(x) => Self::Slash(x),
-            Self::Prefix(x) => Self::Prefix(x),
-        }
+        *self
     }
 }
 impl<U, E> Copy for Context<'_, U, E> {}
