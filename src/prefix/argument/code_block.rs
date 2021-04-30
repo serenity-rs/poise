@@ -94,6 +94,8 @@ impl<'a> ParseConsumingSync<'a> for CodeBlock {
         if code_block.code.is_empty() {
             Err(CodeBlockError::Malformed)
         } else {
+            // discord likes to insert hair spaces at the end of code blocks sometimes for no reason
+            let rest = rest.trim_end_matches('\u{200a}');
             Ok((ArgString(rest), code_block))
         }
     }

@@ -15,23 +15,41 @@ pub async fn send_slash_reply<U, E>(
     let mut reply = crate::CreateReply::default();
     builder(&mut reply);
 
-    ctx.interaction
-        .create_interaction_response(ctx.discord, |r| {
-            r.kind(serenity::InteractionResponseType::ChannelMessageWithSource)
-                .interaction_response_data(|r| {
+    let has_sent_initial_response = *ctx.has_sent_initial_response.lock().unwrap();
+
+    if has_sent_initial_response {
+        ctx.interaction
+            .edit_original_interaction_response(
+                ctx.discord,
+                ctx.framework.application_id().0,
+                |f| {
                     if let Some(content) = reply.content {
-                        r.content(content);
+                        f.content(content);
                     }
                     if let Some(embed) = reply.embed {
-                        r.embed(|e| {
-                            *e = embed;
-                            e
-                        });
+                        f.add_embed(embed);
                     }
-                    r
-                })
-        })
-        .await?;
+                    f
+                },
+            )
+            .await?;
+    } else {
+        ctx.interaction
+            .create_interaction_response(ctx.discord, |r| {
+                r.kind(serenity::InteractionResponseType::ChannelMessageWithSource)
+                    .interaction_response_data(|r| {
+                        if let Some(content) = reply.content {
+                            r.content(content);
+                        }
+                        if let Some(embed) = reply.embed {
+                            r.set_embed(embed);
+                        }
+                        r
+                    })
+            })
+            .await?;
+        *ctx.has_sent_initial_response.lock().unwrap() = true;
+    }
 
     Ok(())
 }

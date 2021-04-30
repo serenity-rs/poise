@@ -180,16 +180,22 @@ macro_rules! _parse_slash {
     ($ctx:ident, $guild_id:ident, $channel_id:ident, $args:ident => $name:ident: Option<$type:ty $(,)*>) => {
         if let Some(arg) = $args.iter().find(|arg| arg.name == stringify!($name)) {
             let arg = arg.value
-                .as_ref()
-                .ok_or($crate::SlashArgError::CommandStructureMismatch("expected argument value"))?;
+            .as_ref()
+            .ok_or($crate::SlashArgError::CommandStructureMismatch("expected argument value"))?;
             Some(
+                #[allow(clippy::eval_order_dependence)] // idk what it's going on about
                 (&&std::marker::PhantomData::<$type>)
-                    .extract($ctx, $guild_id, $channel_id, arg)
-                    .await?
+                .extract($ctx, $guild_id, $channel_id, arg)
+                .await?
             )
         } else {
             None
         }
+    };
+
+    ($ctx:ident, $guild_id:ident, $channel_id:ident, $args:ident => $name:ident: FLAG) => {
+        $crate::_parse_slash!($ctx, $guild_id, $channel_id, $args => $name: Option<bool>)
+            .unwrap_or(false)
     };
 
     ($ctx:ident, $guild_id:ident, $channel_id:ident, $args:ident => $name:ident: $($type:tt)*) => {
@@ -209,8 +215,8 @@ macro_rules! parse_slash_args {
             let (ctx, guild_id, channel_id, args) = ($ctx, $guild_id, $channel_id, $args);
 
             Ok::<_, $crate::SlashArgError>(( $(
-                $crate::_parse_slash!( ctx, guild_id, channel_id, args => $name: $($type)* )
-            ),* ))
+                $crate::_parse_slash!( ctx, guild_id, channel_id, args => $name: $($type)* ),
+            )* ))
         }
     };
 }

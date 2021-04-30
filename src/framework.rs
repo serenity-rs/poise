@@ -23,6 +23,7 @@ pub struct Framework<U, E> {
     // TODO: wrap in RwLock to allow changing framework options while running? Could also replace
     // the edit tracking cache interior mutability
     options: FrameworkOptions<U, E>,
+    application_id: serenity::ApplicationId,
 }
 
 impl<U, E> Framework<U, E> {
@@ -32,7 +33,12 @@ impl<U, E> Framework<U, E> {
     /// ID or connected guilds can be made available to the user data setup function. The user data
     /// setup is not allowed to return Result because there would be no reasonable
     /// course of action on error.
-    pub fn new<F>(prefix: &'static str, user_data_setup: F, options: FrameworkOptions<U, E>) -> Self
+    pub fn new<F>(
+        prefix: &'static str,
+        application_id: serenity::ApplicationId,
+        user_data_setup: F,
+        options: FrameworkOptions<U, E>,
+    ) -> Self
     where
         F: Send
             + Sync
@@ -49,6 +55,7 @@ impl<U, E> Framework<U, E> {
             user_data_setup: std::sync::Mutex::new(Some(Box::new(user_data_setup))),
             bot_id: std::sync::Mutex::new(None),
             options,
+            application_id,
         }
     }
 
@@ -57,6 +64,8 @@ impl<U, E> Framework<U, E> {
         U: Send + Sync + 'static,
         E: 'static + Send,
     {
+        let application_id = self.application_id;
+
         let self_1 = std::sync::Arc::new(self);
         let self_2 = std::sync::Arc::clone(&self_1);
 
@@ -76,7 +85,12 @@ impl<U, E> Framework<U, E> {
                 self_2.event(ctx, event).await;
             }) as _
         });
-        builder.event_handler(event_handler).await?.start().await?;
+        builder
+            .application_id(application_id.0)
+            .event_handler(event_handler)
+            .await?
+            .start()
+            .await?;
 
         edit_track_cache_purge_task.abort();
 
@@ -87,26 +101,33 @@ impl<U, E> Framework<U, E> {
         &self.options
     }
 
-    pub async fn register_slash_commands_in_guild(
-        &self,
-        http: &serenity::Http,
-        guild_id: serenity::GuildId,
-    ) -> Result<(), serenity::Error> {
-        for slash_cmd in &self.options.slash_options.commands {
-            slash_cmd.create_in_guild(http, guild_id).await?;
-        }
-        Ok(())
+    pub fn application_id(&self) -> serenity::ApplicationId {
+        self.application_id
     }
 
-    pub async fn register_slash_commands_global(
-        &self,
-        http: &serenity::Http,
-    ) -> Result<(), serenity::Error> {
-        for slash_cmd in &self.options.slash_options.commands {
-            slash_cmd.create_global(http).await?;
-        }
-        Ok(())
-    }
+    // Commented out because it feels to specialized, and users will want to insert extra
+    // bookkeeping anyways (e.g. number of slash commands, slash command names added, etc)
+
+    // pub async fn register_slash_commands_in_guild(
+    //     &self,
+    //     http: &serenity::Http,
+    //     guild_id: serenity::GuildId,
+    // ) -> Result<(), serenity::Error> {
+    //     for slash_cmd in &self.options.slash_options.commands {
+    //         slash_cmd.create_in_guild(http, guild_id).await?;
+    //     }
+    //     Ok(())
+    // }
+
+    // pub async fn register_slash_commands_global(
+    //     &self,
+    //     http: &serenity::Http,
+    // ) -> Result<(), serenity::Error> {
+    //     for slash_cmd in &self.options.slash_options.commands {
+    //         slash_cmd.create_global(http).await?;
+    //     }
+    //     Ok(())
+    // }
 
     async fn get_user_data(&self) -> &U {
         // We shouldn't get a Message event before a Ready event. But if we do, wait until
@@ -189,13 +210,25 @@ impl<U, E> Framework<U, E> {
             return Err(None);
         }
 
-        if command
+        // Typing is broadcasted as long as this object is alive
+        let _typing_broadcaster = if command
             .options
             .broadcast_typing
             .unwrap_or(self.options.prefix_options.broadcast_typing)
         {
-            let _: Result<_, _> = ctx.msg.channel_id.broadcast_typing(ctx.discord).await;
-        }
+            match ctx.msg.channel_id.start_typing(&ctx.discord.http) {
+                Ok(x) => Some(x),
+                Err(e) => {
+                    println!(
+                        "Warning: couldn't start typing broadcast before command: {}",
+                        e
+                    );
+                    None
+                }
+            }
+        } else {
+            None
+        };
 
         // Execute command
         (command.action)(ctx, args).await.map_err(|e| {
@@ -229,6 +262,16 @@ impl<U, E> Framework<U, E> {
                 return;
             }
         };
+
+        if command
+            .options
+            .defer_response
+            .unwrap_or(self.options.slash_options.defer_response)
+        {
+            if let Err(e) = ctx.defer_response().await {
+                println!("Failed to send interaction acknowledgement: {}", e);
+            }
+        }
 
         if let Err(e) = (command.action)(ctx, options).await {
             let error_ctx = SlashCommandErrorContext {
@@ -325,11 +368,13 @@ impl<U, E> Framework<U, E> {
             }
             Event::InteractionCreate { interaction } => {
                 if let Some(data) = &interaction.data {
+                    let has_sent_initial_response = std::sync::Mutex::new(false);
                     let slash_ctx = SlashContext {
                         data: self.get_user_data().await,
                         discord: &ctx,
                         framework: self,
                         interaction,
+                        has_sent_initial_response: &has_sent_initial_response,
                     };
                     self.dispatch_interaction(slash_ctx, &data.name, &data.options)
                         .await;

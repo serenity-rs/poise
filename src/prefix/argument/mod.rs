@@ -126,7 +126,7 @@ macro_rules! _parse_prefix {
     // All arguments have been consumed
     ( $ctx:ident $msg:ident $args:ident => [ $error:ident $( $name:ident )* ] ) => {
         if $args.0.is_empty() {
-            return Ok(( $( $name ),* ));
+            return Ok(( $( $name, )* ));
         }
     };
 
@@ -183,9 +183,10 @@ macro_rules! _parse_prefix {
 
     // Consume #[rest] T as the last argument
     ( $ctx:ident $msg:ident $args:ident => [ $error:ident $($preamble:tt)* ]
+        // question to my former self: why the $(poise::)* ?
         (#[rest] $(poise::)* $type:ty)
     ) => {
-        match <$type as ::serenity::utils::Parse>::parse(
+        match <$type as $crate::serenity_prelude::Parse>::parse(
             $ctx, $msg.guild_id, Some($msg.channel_id), $args.0.trim_start()
         ).await {
             Ok(token) => {
@@ -194,6 +195,19 @@ macro_rules! _parse_prefix {
             },
             Err(e) => $error = Box::new(e),
         }
+    };
+
+    // Consume #[flag] FLAGNAME as the last argument
+    ( $ctx:ident $msg:ident $args:ident => [ $error:ident $($preamble:tt)* ]
+        (#[flag] $name:literal)
+        $( $rest:tt )*
+    ) => {
+        if let Ok(($args, token)) = $args.pop::<String>($ctx, $msg).await {
+            if token.eq_ignore_ascii_case($name) {
+                $crate::_parse_prefix!($ctx $msg $args => [ $error $($preamble)* true ] $($rest)* );
+            }
+        }
+        $crate::_parse_prefix!($ctx $msg $args => [ $error $($preamble)* false ] $($rest)* );
     };
 
     // Consume T
@@ -311,6 +325,18 @@ mod test {
                 .await
                 .unwrap(),
             ("a".into(), "b c".into()),
+        );
+        assert_eq!(
+            parse_prefix_args!(&ctx, &msg, "hello" => #[flag] ("hello"), #[rest] (String))
+                .await
+                .unwrap(),
+            (true, "".into())
+        );
+        assert_eq!(
+            parse_prefix_args!(&ctx, &msg, "helloo" => #[flag] ("hello"), #[rest] (String))
+                .await
+                .unwrap(),
+            (false, "helloo".into())
         );
     }
 }

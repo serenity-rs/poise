@@ -57,6 +57,7 @@ struct CommandAttrArgs {
     aliases: Aliases,
     track_edits: bool,
     broadcast_typing: Option<bool>,
+    defer_response: Option<bool>,
     explanation_fn: Option<syn::Path>,
     check: Option<syn::Path>,
     on_error: Option<syn::Path>,
@@ -70,13 +71,16 @@ struct CommandAttrArgs {
 #[darling(default)]
 struct ParamAttrArgs {
     description: Option<String>,
+    lazy: bool,
+    flag: bool,
+    rest: bool,
 }
 
 /// Part of the Invocation struct. Represents a single parameter of a Discord command.
 struct CommandParameter {
     name: syn::Ident,
     type_: syn::Type,
-    description: Option<String>,
+    more: ParamAttrArgs,
     span: proc_macro2::Span,
 }
 
@@ -89,7 +93,7 @@ struct Invocation<'a> {
     description: Option<&'a str>,
     explanation: Option<&'a str>,
     function: &'a syn::ItemFn,
-    rest: &'a CommandAttrArgs,
+    more: &'a CommandAttrArgs,
 }
 
 fn extract_help_from_doc_comments(attrs: &[syn::Attribute]) -> (Option<String>, Option<String>) {
@@ -131,7 +135,7 @@ fn extract_help_from_doc_comments(attrs: &[syn::Attribute]) -> (Option<String>, 
 
 // ngl this is ugly
 // transforms a type of form `Option<T>` into `T`
-fn unwrap_option_type(t: &syn::Type) -> Option<&syn::Type> {
+fn extract_option_type(t: &syn::Type) -> Option<&syn::Type> {
     if let syn::Type::Path(path) = t {
         if path.path.segments.len() == 1 {
             let path = &path.path.segments[0];
@@ -149,9 +153,9 @@ fn unwrap_option_type(t: &syn::Type) -> Option<&syn::Type> {
     None
 }
 
-fn generate_command_spec(inv: &Invocation) -> proc_macro2::TokenStream {
+fn generate_prefix_command_spec(inv: &Invocation) -> Result<proc_macro2::TokenStream, Error> {
     let description = wrap_option(inv.description);
-    let explanation = match &inv.rest.explanation_fn {
+    let explanation = match &inv.more.explanation_fn {
         Some(explanation_fn) => quote::quote! { Some(#explanation_fn) },
         None => match &inv.explanation {
             Some(extracted_explanation) => quote::quote! { Some(|| #extracted_explanation.into()) },
@@ -160,13 +164,13 @@ fn generate_command_spec(inv: &Invocation) -> proc_macro2::TokenStream {
     };
 
     // Box::pin the check and on_error callbacks in order to store them in a struct
-    let check = match &inv.rest.check {
+    let check = match &inv.more.check {
         Some(check) => quote::quote! { Some(|a| Box::pin(#check(a))) },
         None => quote::quote! { None },
     };
-    let on_error = match &inv.rest.on_error {
+    let on_error = match &inv.more.on_error {
         Some(on_error) => {
-            if inv.rest.slash_command {
+            if inv.more.slash_command {
                 quote::quote! {
                     Some(|err, ctx| Box::pin(#on_error(err, ::poise::CommandErrorContext::Prefix(ctx))))
                 }
@@ -177,75 +181,135 @@ fn generate_command_spec(inv: &Invocation) -> proc_macro2::TokenStream {
         None => quote::quote! { None },
     };
 
-    let maybe_wrapped_ctx = if inv.rest.slash_command {
+    let maybe_wrapped_ctx = if inv.more.slash_command {
         quote::quote! { ::poise::Context::Prefix(ctx) }
     } else {
         quote::quote! { ctx }
     };
 
+    let wildcard_arg = if inv.more.discard_spare_arguments {
+        Some(quote::quote! { #[rest] (String), })
+    } else {
+        None
+    };
+
+    let param_specs =
+        inv.parameters
+            .iter()
+            .map(|p| {
+                enum Modifier {
+                    None,
+                    Lazy,
+                    Flag,
+                    Rest,
+                }
+
+                let modifier =
+                    match (p.more.lazy, p.more.rest, p.more.flag) {
+                        (false, false, false) => Modifier::None,
+                        (true, false, false) => Modifier::Lazy,
+                        (false, true, false) => Modifier::Rest,
+                        (false, false, true) => Modifier::Flag,
+                        _ => return Err((
+                            p.span,
+                            "modifiers like #[lazy] or #[rest] currently cannot be used together",
+                        )
+                            .into()),
+                    };
+
+                let type_ = &p.type_;
+                Ok(match modifier {
+                    Modifier::Flag => {
+                        if p.type_ != syn::parse_quote! { bool } {
+                            return Err((p.type_.span(), "Must use bool for flags").into());
+                        }
+                        let literal = proc_macro2::Literal::string(&p.name.to_string());
+                        quote::quote! { #[flag] (#literal) }
+                    }
+                    Modifier::Lazy => quote::quote! { #[lazy] (#type_) },
+                    Modifier::Rest => quote::quote! { #[rest] (#type_) },
+                    Modifier::None => quote::quote! { (#type_) },
+                })
+            })
+            .collect::<Result<Vec<_>, Error>>()?;
+
     let command_name = &inv.command_name;
-    let track_edits = inv.rest.track_edits;
-    let broadcast_typing = wrap_option(inv.rest.broadcast_typing);
-    let aliases = &inv.rest.aliases.0;
+    let track_edits = inv.more.track_edits;
+    let broadcast_typing = wrap_option(inv.more.broadcast_typing);
+    let aliases = &inv.more.aliases.0;
     let param_names = inv.parameters.iter().map(|p| &p.name).collect::<Vec<_>>();
-    let param_types = inv.parameters.iter().map(|p| &p.type_).collect::<Vec<_>>();
-    quote::quote! {
+    Ok(quote::quote! {
         ::poise::PrefixCommand {
             name: #command_name,
             action: |ctx, args| Box::pin(async move {
-                let ( #( #param_names ),* ) = ::poise::parse_prefix_args!(
+                let ( #( #param_names, )* .. ) = ::poise::parse_prefix_args!(
                     ctx.discord, ctx.msg, args =>
-                    #( (#param_types) ),*
+                    #( #param_specs, )*
+                    #wildcard_arg
                 ).await?;
-                inner(#maybe_wrapped_ctx, #( #param_names ),* ).await
+                inner(#maybe_wrapped_ctx, #( #param_names, )* ).await
             }),
             options: ::poise::PrefixCommandOptions {
                 track_edits: #track_edits,
                 broadcast_typing: #broadcast_typing,
-                aliases: &[ #( #aliases ),* ],
+                aliases: &[ #( #aliases, )* ],
                 inline_help: #description,
                 multiline_help: #explanation,
                 check: #check,
                 on_error: #on_error,
             }
         }
-    }
+    })
 }
 
 fn generate_slash_command_spec(inv: &Invocation) -> Result<proc_macro2::TokenStream, Error> {
     let command_name = &inv.command_name;
     let description = inv.description.as_ref().ok_or((
         inv.function.sig.span(),
-        "slash commands must have a description",
+        "slash commands must have a description (doc comment)",
     ))?;
 
     let mut parameter_builders = Vec::new();
     for param in inv.parameters {
-        let param_name = &param.name;
-        let param_description = param.description.as_ref().ok_or((
+        let description = param.more.description.as_ref().ok_or((
             param.span,
             "slash command parameters must have a description",
         ))?;
 
-        let (required, type_) = match unwrap_option_type(&param.type_) {
+        let (mut required, type_) = match extract_option_type(&param.type_) {
             Some(t) => (false, t),
             None => (true, &param.type_),
         };
 
-        parameter_builders.push(quote::quote! {
-            |o| (&&std::marker::PhantomData::<#type_>).create(o)
-                .required(#required)
-                .name(stringify!(#param_name))
-                .description(#param_description)
-        });
+        // Don't require user to input a value for flags - use false as default value (see below)
+        if param.more.flag {
+            required = false;
+        }
+
+        let param_name = &param.name;
+        parameter_builders.push((
+            quote::quote! {
+                |o| (&&std::marker::PhantomData::<#type_>).create(o)
+                    .required(#required)
+                    .name(stringify!(#param_name))
+                    .description(#description)
+            },
+            required,
+        ));
     }
+    // Sort the parameters so that optional parameters come last - Discord requires this order
+    parameter_builders.sort_by_key(|(_, required)| !required);
+    let parameter_builders = parameter_builders
+        .into_iter()
+        .map(|(builder, _)| builder)
+        .collect::<Vec<_>>();
 
     // Box::pin the check and on_error callbacks in order to store them in a struct
-    let check = match &inv.rest.check {
+    let check = match &inv.more.check {
         Some(check) => quote::quote! { Some(|a| Box::pin(#check(a))) },
         None => quote::quote! { None },
     };
-    let on_error = match &inv.rest.on_error {
+    let on_error = match &inv.more.on_error {
         Some(on_error) => quote::quote! {
             Some(|err, ctx| Box::pin(#on_error(err, ::poise::CommandErrorContext::Slash(ctx))))
         },
@@ -253,23 +317,37 @@ fn generate_slash_command_spec(inv: &Invocation) -> Result<proc_macro2::TokenStr
     };
 
     let param_names = inv.parameters.iter().map(|p| &p.name).collect::<Vec<_>>();
-    let param_types = inv.parameters.iter().map(|p| &p.type_).collect::<Vec<_>>();
+    let param_types = inv
+        .parameters
+        .iter()
+        .map(|p| match p.more.flag {
+            true => syn::parse_quote! { FLAG },
+            false => p.type_.clone(),
+        })
+        .collect::<Vec<_>>();
+    let defer_response = wrap_option(inv.more.defer_response);
     Ok(quote::quote! {
         ::poise::SlashCommand {
             name: #command_name,
             description: #description,
             action: |ctx, args| Box::pin(async move {
-                let ( #( #param_names ),* ) = ::poise::parse_slash_args!(
+                // idk why this can't be put in the macro itself (where the lint is triggered) and
+                // why clippy doesn't turn off this lint inside macros in the first place
+                #[allow(clippy::needless_question_mark)]
+
+                let ( #( #param_names, )* ) = ::poise::parse_slash_args!(
                     ctx.discord, ctx.interaction.guild_id, ctx.interaction.channel_id, args =>
-                    #( (#param_names: #param_types) ),*
+                    #( (#param_names: #param_types), )*
                 ).await?;
-                inner(::poise::Context::Slash(ctx), #( #param_names ),*).await
+
+                inner(::poise::Context::Slash(ctx), #( #param_names, )*).await
             }),
             parameters: {
                 use ::poise::SlashArgument;
-                vec![ #( #parameter_builders ),* ]
+                vec![ #( #parameter_builders, )* ]
             },
             options: ::poise::SlashCommandOptions {
+                defer_response: #defer_response,
                 check: #check,
                 on_error: #on_error,
             }
@@ -307,7 +385,7 @@ fn command_inner(args: CommandAttrArgs, mut function: syn::ItemFn) -> Result<Tok
         parameters.push(CommandParameter {
             name: name.clone(),
             type_: (*pattern.ty).clone(),
-            description: attrs.description,
+            more: attrs,
             span: command_param.span(),
         });
     }
@@ -335,13 +413,12 @@ fn command_inner(args: CommandAttrArgs, mut function: syn::ItemFn) -> Result<Tok
         parameters: &parameters,
         description: description.as_deref(),
         explanation: explanation.as_deref(),
-        rest: &args,
+        more: &args,
         function: &function,
     };
-    let command_spec = generate_command_spec(&invocation);
+    let command_spec = generate_prefix_command_spec(&invocation)?;
     let slash_command_spec = wrap_option(if args.slash_command {
-        let spec = generate_slash_command_spec(&invocation)?;
-        Some(spec)
+        Some(generate_slash_command_spec(&invocation)?)
     } else {
         None
     });
