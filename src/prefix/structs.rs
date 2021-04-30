@@ -40,7 +40,7 @@ pub struct PrefixCommandOptions<U, E> {
     /// if `Framework::edit_tracker` isn't set.
     pub track_edits: bool,
     /// Fall back to the framework-specified value on None.
-    pub broadcast_typing: Option<bool>,
+    pub broadcast_typing: Option<BroadcastTypingBehavior>,
 }
 
 impl<U, E> Default for PrefixCommandOptions<U, E> {
@@ -93,7 +93,7 @@ pub struct PrefixFrameworkOptions<U, E> {
     /// with the new result.
     pub edit_tracker: Option<parking_lot::RwLock<super::EditTracker>>,
     /// Whether to broadcast a typing indicator while executing this commmand's action.
-    pub broadcast_typing: bool,
+    pub broadcast_typing: BroadcastTypingBehavior,
     /// Whether commands in messages emitted by the bot itself should be executed as well.
     pub execute_self_messages: bool,
 }
@@ -105,8 +105,17 @@ impl<U, E> Default for PrefixFrameworkOptions<U, E> {
             additional_prefixes: &[],
             command_check: |_| Box::pin(async { Ok(true) }),
             edit_tracker: None,
-            broadcast_typing: false,
+            broadcast_typing: BroadcastTypingBehavior::None,
             execute_self_messages: false,
         }
     }
+}
+
+pub enum BroadcastTypingBehavior {
+    /// Don't broadcast typing
+    None,
+    /// Broadcast typing after the command has been running for a certain time
+    ///
+    /// Set duration to zero for immediate typing broadcast
+    WithDelay(std::time::Duration),
 }

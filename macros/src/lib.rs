@@ -50,13 +50,20 @@ impl darling::FromMeta for Aliases {
     }
 }
 
+// #[derive(Debug, darling::FromMeta)]
+// struct BroadcastTypingArgs {
+//     #[darling(default)]
+//     after: f32,
+// }
+
 /// Representation of the command attribute arguments (`#[command(...)]`)
 #[derive(Default, Debug, darling::FromMeta)]
 #[darling(default)]
 struct CommandAttrArgs {
     aliases: Aliases,
     track_edits: bool,
-    broadcast_typing: Option<bool>,
+    // broadcast_typing: Option<BroadcastTypingArgs>,
+    broadcast_typing: Option<()>,
     defer_response: Option<bool>,
     explanation_fn: Option<syn::Path>,
     check: Option<syn::Path>,
@@ -233,9 +240,19 @@ fn generate_prefix_command_spec(inv: &Invocation) -> Result<proc_macro2::TokenSt
             })
             .collect::<Result<Vec<_>, Error>>()?;
 
+    // Currently you can either fallback to framework setting or opt-in with zero delay. Rest of the
+    // cases are not covered because I don't know how the syntax should look like
+    let broadcast_typing = match inv.more.broadcast_typing {
+        Some(()) => quote::quote! {
+            Some(::poise::BroadcastTypingBehavior::WithDelay(std::time::Duration::from_secs(0)))
+        },
+        None => quote::quote! {
+            None
+        },
+    };
+
     let command_name = &inv.command_name;
     let track_edits = inv.more.track_edits;
-    let broadcast_typing = wrap_option(inv.more.broadcast_typing);
     let aliases = &inv.more.aliases.0;
     let param_names = inv.parameters.iter().map(|p| &p.name).collect::<Vec<_>>();
     Ok(quote::quote! {

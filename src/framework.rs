@@ -3,6 +3,40 @@
 use crate::serenity_prelude as serenity;
 use crate::*;
 
+// Adapted from serenity::Typing
+#[derive(Debug)]
+struct DelayedTyping(tokio::sync::oneshot::Sender<()>);
+impl DelayedTyping {
+    pub fn start(
+        http: &std::sync::Arc<serenity::Http>,
+        channel_id: serenity::ChannelId,
+        delay: std::time::Duration,
+    ) -> Self {
+        let (sx, mut rx) = tokio::sync::oneshot::channel();
+
+        let http = std::sync::Arc::clone(http);
+        tokio::spawn(async move {
+            tokio::time::sleep(delay).await;
+            loop {
+                match rx.try_recv() {
+                    Ok(_) | Err(tokio::sync::oneshot::error::TryRecvError::Closed) => break,
+                    _ => (),
+                }
+
+                channel_id.broadcast_typing(&http).await?;
+
+                // It is unclear for how long typing persists after this method is called.
+                // It is generally assumed to be 7 or 10 seconds, so we use 7 to be safe.
+                tokio::time::sleep(std::time::Duration::from_secs(7)).await;
+            }
+
+            Ok::<_, serenity::Error>(())
+        });
+
+        Self(sx)
+    }
+}
+
 pub struct Framework<U, E> {
     prefix: &'static str,
     user_data: once_cell::sync::OnceCell<U>,
@@ -211,23 +245,18 @@ impl<U, E> Framework<U, E> {
         }
 
         // Typing is broadcasted as long as this object is alive
-        let _typing_broadcaster = if command
+        let _typing_broadcaster = match command
             .options
             .broadcast_typing
-            .unwrap_or(self.options.prefix_options.broadcast_typing)
+            .as_ref()
+            .unwrap_or(&self.options.prefix_options.broadcast_typing)
         {
-            match ctx.msg.channel_id.start_typing(&ctx.discord.http) {
-                Ok(x) => Some(x),
-                Err(e) => {
-                    println!(
-                        "Warning: couldn't start typing broadcast before command: {}",
-                        e
-                    );
-                    None
-                }
-            }
-        } else {
-            None
+            BroadcastTypingBehavior::None => None,
+            BroadcastTypingBehavior::WithDelay(delay) => Some(DelayedTyping::start(
+                &ctx.discord.http,
+                ctx.msg.channel_id,
+                *delay,
+            )),
         };
 
         // Execute command
