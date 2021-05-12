@@ -212,7 +212,7 @@ impl<U, E> Framework<U, E> {
         // Find the first matching command
         let mut first_matching_command = None;
         for command in &self.options.prefix_options.commands {
-            if command.name != command_name {
+            if command.name != command_name && !command.options.aliases.contains(&command_name) {
                 continue;
             }
             match (command
