@@ -156,6 +156,28 @@ macro_rules! _parse_prefix {
         }
     };
 
+    // Consume Option<T> until the end of the input
+    ( $ctx:ident $msg:ident $args:ident => [ $error:ident $($preamble:tt)* ]
+        (#[rest] Option<$type:ty $(,)?>)
+        $( $rest:tt )*
+    ) => {
+        if $args.0.trim_start().is_empty() {
+            let token: Option<$type> = None;
+            $crate::_parse_prefix!($ctx $msg $args => [ $error $($preamble)* token ]);
+        } else {
+            match <$type as $crate::serenity_prelude::Parse>::parse(
+                $ctx, $msg.guild_id, Some($msg.channel_id), $args.0.trim_start()
+            ).await {
+                Ok(token) => {
+                    let $args = $crate::ArgString("");
+                    let token = Some(token);
+                    $crate::_parse_prefix!($ctx $msg $args => [ $error $($preamble)* token ]);
+                },
+                Err(e) => $error = Box::new(e),
+            }
+        }
+    };
+
     // Consume Vec<T> greedy-first
     ( $ctx:ident $msg:ident $args:ident => [ $($preamble:tt)* ]
         (Vec<$type:ty $(,)?>)
