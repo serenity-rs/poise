@@ -97,7 +97,8 @@ impl<U, E> SlashCommand<U, E> {
         &self,
         http: &serenity::Http,
     ) -> Result<serenity::ApplicationCommand, serenity::Error> {
-        serenity::Interaction::create_global_application_command(http, |c| self.create(c)).await
+        serenity::ApplicationCommand::create_global_application_command(http, |c| self.create(c))
+            .await
     }
 
     pub fn create<'a>(
