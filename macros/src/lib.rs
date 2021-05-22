@@ -116,28 +116,18 @@ fn extract_help_from_doc_comments(attrs: &[syn::Attribute]) -> (Option<String>, 
         }
     }
 
-    let mut paragraphs = doc_lines.split("\n\n");
+    // Apply newline escapes
+    let doc_lines = doc_lines.trim().replace("\\\n", "");
 
-    let inline_help = paragraphs
-        .next()
-        .filter(|p| !p.is_empty())
-        .map(|s| s.replace("\n", " "));
-
-    let mut multiline_help = String::new();
-    for paragraph in paragraphs {
-        for line in paragraph.split('\n') {
-            multiline_help += line;
-            multiline_help += " ";
-        }
-        multiline_help += "\n\n";
+    if doc_lines.is_empty() {
+        return (None, None);
     }
-    let multiline_help = if multiline_help.is_empty() {
-        None
-    } else {
-        Some(multiline_help)
-    };
 
-    (inline_help, multiline_help)
+    let mut paragraphs = doc_lines.splitn(2, "\n\n");
+    let inline_help = paragraphs.next().unwrap().replace("\n", " ");
+    let multiline_help = paragraphs.next().map(|x| x.to_owned());
+
+    (Some(inline_help), multiline_help)
 }
 
 // ngl this is ugly
