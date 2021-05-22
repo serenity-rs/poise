@@ -19,19 +19,15 @@ pub async fn send_slash_reply<U, E>(
 
     if has_sent_initial_response {
         ctx.interaction
-            .edit_original_interaction_response(
-                ctx.discord,
-                ctx.framework.application_id().0,
-                |f| {
-                    if let Some(content) = reply.content {
-                        f.content(content);
-                    }
-                    if let Some(embed) = reply.embed {
-                        f.add_embed(embed);
-                    }
-                    f
-                },
-            )
+            .edit_original_interaction_response(ctx.discord, |f| {
+                if let Some(content) = reply.content {
+                    f.content(content);
+                }
+                if let Some(embed) = reply.embed {
+                    f.add_embed(embed);
+                }
+                f
+            })
             .await?;
     } else {
         ctx.interaction

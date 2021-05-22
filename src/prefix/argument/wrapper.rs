@@ -4,7 +4,7 @@ macro_rules! impl_parse_consuming {
     ($($t:ty)*) => { $(
         #[async_trait::async_trait]
         impl<'a> ParseConsuming<'a> for $t {
-            type Err = <$t as serenity::Parse>::Err;
+            type Err = <$t as serenity::ArgumentConvert>::Err;
 
             async fn pop_from(
                 ctx: &serenity::Context,
@@ -36,7 +36,7 @@ impl_parse_consuming!(
 pub struct Wrapper<T>(pub T);
 
 #[async_trait::async_trait]
-impl<'a, T: serenity::Parse> ParseConsuming<'a> for Wrapper<T> {
+impl<'a, T: serenity::ArgumentConvert> ParseConsuming<'a> for Wrapper<T> {
     type Err = T::Err;
 
     async fn pop_from(
@@ -45,21 +45,21 @@ impl<'a, T: serenity::Parse> ParseConsuming<'a> for Wrapper<T> {
         args: &ArgString<'a>,
     ) -> Result<(ArgString<'a>, Self), Self::Err> {
         let (args, string) = String::sync_pop_from(args).unwrap_or((args.clone(), String::new()));
-        let token = T::parse(ctx, msg.guild_id, Some(msg.channel_id), &string).await?;
+        let token = T::convert(ctx, msg.guild_id, Some(msg.channel_id), &string).await?;
         Ok((args, Self(token)))
     }
 }
 
 #[async_trait::async_trait]
-impl<T: serenity::Parse> serenity::Parse for Wrapper<T> {
+impl<T: serenity::ArgumentConvert> serenity::ArgumentConvert for Wrapper<T> {
     type Err = T::Err;
 
-    async fn parse(
+    async fn convert(
         ctx: &serenity::Context,
         guild_id: Option<serenity::GuildId>,
         channel_id: Option<serenity::ChannelId>,
         s: &str,
     ) -> Result<Self, Self::Err> {
-        T::parse(ctx, guild_id, channel_id, s).await.map(Self)
+        T::convert(ctx, guild_id, channel_id, s).await.map(Self)
     }
 }

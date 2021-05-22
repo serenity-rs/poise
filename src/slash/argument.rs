@@ -67,7 +67,7 @@ pub trait SlashArgument<T> {
 #[async_trait::async_trait]
 impl<T> SlashArgument<T> for PhantomData<T>
 where
-    T: serenity::Parse + Send + Sync,
+    T: serenity::ArgumentConvert + Send + Sync,
     T::Err: std::error::Error + Send + Sync + 'static,
 {
     async fn extract(
@@ -80,7 +80,7 @@ where
         let string = value
             .as_str()
             .ok_or(SlashArgError::CommandStructureMismatch("expected string"))?;
-        T::parse(ctx, guild, channel, string)
+        T::convert(ctx, guild, channel, string)
             .await
             .map_err(|e| SlashArgError::Parse(e.into()))
     }
@@ -153,7 +153,7 @@ macro_rules! impl_slash_argument {
                 channel: Option<serenity::ChannelId>,
                 value: &serde_json::Value,
             ) -> Result<$type, SlashArgError> {
-                // We can parse IDs by falling back to the generic serenity::Parse impl
+                // We can parse IDs by falling back to the generic serenity::ArgumentConvert impl
                 PhantomData::<$type>
                     .extract(ctx, guild, channel, value)
                     .await

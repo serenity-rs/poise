@@ -165,7 +165,7 @@ macro_rules! _parse_prefix {
             let token: Option<$type> = None;
             $crate::_parse_prefix!($ctx $msg $args => [ $error $($preamble)* token ]);
         } else {
-            match <$type as $crate::serenity_prelude::Parse>::parse(
+            match <$type as $crate::serenity_prelude::ArgumentConvert>::convert(
                 $ctx, $msg.guild_id, Some($msg.channel_id), $args.0.trim_start()
             ).await {
                 Ok(token) => {
@@ -208,7 +208,7 @@ macro_rules! _parse_prefix {
         // question to my former self: why the $(poise::)* ?
         (#[rest] $(poise::)* $type:ty)
     ) => {
-        match <$type as $crate::serenity_prelude::Parse>::parse(
+        match <$type as $crate::serenity_prelude::ArgumentConvert>::convert(
             $ctx, $msg.guild_id, Some($msg.channel_id), $args.0.trim_start()
         ).await {
             Ok(token) => {
