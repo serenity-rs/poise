@@ -41,6 +41,8 @@ pub struct PrefixCommandOptions<U, E> {
     pub track_edits: bool,
     /// Fall back to the framework-specified value on None.
     pub broadcast_typing: Option<BroadcastTypingBehavior>,
+    /// Whether to hide this command in help menus.
+    pub hide_in_help: bool,
 }
 
 impl<U, E> Default for PrefixCommandOptions<U, E> {
@@ -53,6 +55,7 @@ impl<U, E> Default for PrefixCommandOptions<U, E> {
             aliases: &[],
             track_edits: false,
             broadcast_typing: None,
+            hide_in_help: false,
         }
     }
 }

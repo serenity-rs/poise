@@ -69,8 +69,9 @@ struct CommandAttrArgs {
     check: Option<syn::Path>,
     on_error: Option<syn::Path>,
     rename: Option<String>,
-    discard_spare_arguments: bool, // TODO: integrate
+    discard_spare_arguments: bool,
     slash_command: bool,
+    hide_in_help: bool,
 }
 
 /// Representation of the function parameter attribute arguments
@@ -244,6 +245,7 @@ fn generate_prefix_command_spec(inv: &Invocation) -> Result<proc_macro2::TokenSt
     let command_name = &inv.command_name;
     let track_edits = inv.more.track_edits;
     let aliases = &inv.more.aliases.0;
+    let hide_in_help = &inv.more.hide_in_help;
     let param_names = inv.parameters.iter().map(|p| &p.name).collect::<Vec<_>>();
     Ok(quote::quote! {
         ::poise::PrefixCommand {
@@ -264,6 +266,7 @@ fn generate_prefix_command_spec(inv: &Invocation) -> Result<proc_macro2::TokenSt
                 multiline_help: #explanation,
                 check: #check,
                 on_error: #on_error,
+                hide_in_help: #hide_in_help,
             }
         }
     })
