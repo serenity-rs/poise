@@ -222,7 +222,7 @@ impl<U, E> Framework<U, E> {
                 msg,
                 framework: self,
                 data: self.get_user_data().await,
-                command,
+                command: Some(command),
             };
 
             match (command
@@ -272,7 +272,7 @@ impl<U, E> Framework<U, E> {
             msg,
             framework: self,
             data: self.get_user_data().await,
-            command,
+            command: Some(command),
         };
 
         // Execute command

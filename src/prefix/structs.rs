@@ -9,7 +9,9 @@ pub struct PrefixContext<'a, U, E> {
     pub discord: &'a serenity::Context,
     pub msg: &'a serenity::Message,
     pub framework: &'a Framework<U, E>,
-    pub command: &'a PrefixCommand<U, E>,
+    // Option, because otherwise you can't use this struct in a context where there is no command
+    // Example: Etternabot's message listener
+    pub command: Option<&'a PrefixCommand<U, E>>,
     pub data: &'a U,
 }
 // manual Copy+Clone implementations because Rust is getting confused about the type parameter

@@ -118,13 +118,18 @@ pub async fn send_prefix_reply<U, E>(
     builder(&mut reply);
 
     let lock_edit_tracker = || {
+        if let Some(command) = ctx.command {
+            if !command.options.track_edits {
+                return None;
+            }
+        }
+
         ctx.framework
             .options()
             .prefix_options
             .edit_tracker
             .as_ref()
             .map(|t| t.write())
-            .filter(|_| ctx.command.options.track_edits)
     };
 
     let existing_response = lock_edit_tracker()
