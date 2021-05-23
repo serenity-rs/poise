@@ -138,21 +138,18 @@ pub async fn send_prefix_reply<U, E>(
         .cloned();
 
     if let Some(mut response) = existing_response {
-        let mut f = serenity::EditMessage::default();
-        if let Some(content) = reply.content {
-            f.content(content);
-        }
-        if let Some(embed) = reply.embed {
-            f.embed(|e| {
-                *e = embed;
-                e
-            });
-        }
-
         response
-            .edit(ctx.discord, |builder| {
-                *builder = f;
-                builder
+            .edit(ctx.discord, |f| {
+                if let Some(content) = reply.content {
+                    f.content(content);
+                }
+                if let Some(embed) = reply.embed {
+                    f.embed(|e| {
+                        *e = embed;
+                        e
+                    });
+                }
+                f
             })
             .await?;
 
