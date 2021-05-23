@@ -15,7 +15,9 @@ pub async fn send_slash_reply<U, E>(
     let mut reply = crate::CreateReply::default();
     builder(&mut reply);
 
-    let has_sent_initial_response = *ctx.has_sent_initial_response.lock().unwrap();
+    let has_sent_initial_response = ctx
+        .has_sent_initial_response
+        .load(std::sync::atomic::Ordering::SeqCst);
 
     if has_sent_initial_response {
         ctx.interaction
@@ -44,7 +46,8 @@ pub async fn send_slash_reply<U, E>(
                     })
             })
             .await?;
-        *ctx.has_sent_initial_response.lock().unwrap() = true;
+        ctx.has_sent_initial_response
+            .store(true, std::sync::atomic::Ordering::SeqCst);
     }
 
     Ok(())

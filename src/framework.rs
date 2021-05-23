@@ -399,7 +399,7 @@ impl<U, E> Framework<U, E> {
             }
             Event::InteractionCreate { interaction } => {
                 if let Some(data) = &interaction.data {
-                    let has_sent_initial_response = std::sync::Mutex::new(false);
+                    let has_sent_initial_response = std::sync::atomic::AtomicBool::new(false);
                     let slash_ctx = SlashContext {
                         data: self.get_user_data().await,
                         discord: &ctx,

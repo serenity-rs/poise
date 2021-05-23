@@ -5,7 +5,7 @@ use crate::{serenity_prelude as serenity, BoxFuture, Framework};
 pub struct SlashContext<'a, U, E> {
     pub discord: &'a serenity::Context,
     pub interaction: &'a serenity::Interaction,
-    pub has_sent_initial_response: &'a std::sync::Mutex<bool>,
+    pub has_sent_initial_response: &'a std::sync::atomic::AtomicBool,
     pub framework: &'a Framework<U, E>,
     pub data: &'a U,
 }
@@ -27,7 +27,8 @@ impl<U, E> SlashContext<'_, U, E> {
                 f.kind(serenity::InteractionResponseType::DeferredChannelMessageWithSource)
             })
             .await?;
-        *self.has_sent_initial_response.lock().unwrap() = true;
+        self.has_sent_initial_response
+            .store(true, std::sync::atomic::Ordering::SeqCst);
         Ok(())
     }
 }
