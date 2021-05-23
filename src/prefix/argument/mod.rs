@@ -131,32 +131,38 @@ macro_rules! _parse_prefix {
     };
 
     // Consume Option<T> greedy-first
-    ( $ctx:ident $msg:ident $args:ident => [ $($preamble:tt)* ]
+    ( $ctx:ident $msg:ident $args:ident => [ $error:ident $($preamble:tt)* ]
         (Option<$type:ty $(,)?>)
         $( $rest:tt )*
     ) => {
-        if let Ok(($args, token)) = $args.pop($ctx, $msg).await {
-            let token: Option<$type> = Some(token);
-            $crate::_parse_prefix!($ctx $msg $args => [ $($preamble)* token ] $($rest)* );
+        match $args.pop($ctx, $msg).await {
+            Ok(($args, token)) => {
+                let token: Option<$type> = Some(token);
+                $crate::_parse_prefix!($ctx $msg $args => [ $error $($preamble)* token ] $($rest)* );
+            },
+            Err(e) => $error = Box::new(e),
         }
         let token: Option<$type> = None;
-        $crate::_parse_prefix!($ctx $msg $args => [ $($preamble)* token ] $($rest)* );
+        $crate::_parse_prefix!($ctx $msg $args => [ $error $($preamble)* token ] $($rest)* );
     };
 
     // Consume Option<T> lazy-first
-    ( $ctx:ident $msg:ident $args:ident => [ $($preamble:tt)* ]
+    ( $ctx:ident $msg:ident $args:ident => [ $error:ident $($preamble:tt)* ]
         (#[lazy] Option<$type:ty $(,)?>)
         $( $rest:tt )*
     ) => {
         let token: Option<$type> = None;
-        $crate::_parse_prefix!($ctx $msg $args => [ $($preamble)* token ] $($rest)* );
-        if let Ok(($args, token)) = $args.pop($ctx, $msg).await {
-            let token: Option<$type> = Some(token);
-            $crate::_parse_prefix!($ctx $msg $args => [ $($preamble)* token ] $($rest)* );
+        $crate::_parse_prefix!($ctx $msg $args => [ $error $($preamble)* token ] $($rest)* );
+        match $args.pop($ctx, $msg).await {
+            Ok(($args, token)) => {
+                let token: Option<$type> = Some(token);
+                $crate::_parse_prefix!($ctx $msg $args => [ $error $($preamble)* token ] $($rest)* );
+            },
+            Err(e) => $error = Box::new(e),
         }
     };
 
-    // Consume Option<T> until the end of the input
+    // Consume #[rest] Option<T> until the end of the input
     ( $ctx:ident $msg:ident $args:ident => [ $error:ident $($preamble:tt)* ]
         (#[rest] Option<$type:ty $(,)?>)
         $( $rest:tt )*
@@ -179,7 +185,7 @@ macro_rules! _parse_prefix {
     };
 
     // Consume Vec<T> greedy-first
-    ( $ctx:ident $msg:ident $args:ident => [ $($preamble:tt)* ]
+    ( $ctx:ident $msg:ident $args:ident => [ $error:ident $($preamble:tt)* ]
         (Vec<$type:ty $(,)?>)
         $( $rest:tt )*
     ) => {
@@ -187,15 +193,24 @@ macro_rules! _parse_prefix {
         let mut token_rest_args = vec![$args.clone()];
 
         let mut running_args = $args.clone();
-        while let Ok((popped_args, token)) = running_args.pop::<$type>($ctx, $msg).await {
-            tokens.push(token);
-            token_rest_args.push(popped_args.clone());
-            running_args = popped_args;
+        loop {
+            match running_args.pop::<$type>($ctx, $msg).await {
+                Ok((popped_args, token)) => {
+                    tokens.push(token);
+                    token_rest_args.push(popped_args.clone());
+                    running_args = popped_args;
+                },
+                Err(e) => {
+                    $error = Box::new(e);
+                    break;
+                }
+
+            }
         }
 
         // This will run at least once
         while let Some(token_rest_args) = token_rest_args.pop() {
-            $crate::_parse_prefix!($ctx $msg token_rest_args => [ $($preamble)* tokens ] $($rest)* );
+            $crate::_parse_prefix!($ctx $msg token_rest_args => [ $error $($preamble)* tokens ] $($rest)* );
             tokens.pop();
         }
     };
@@ -261,7 +276,7 @@ macro_rules! parse_prefix_args {
             let msg = $msg;
             let args = $crate::ArgString($args);
 
-            #[allow(unused_mut)] // can happen when few args are requested
+            #[allow(unused)] // can happen when few args are requested
             let mut error = Box::new($crate::TooManyArguments) as Box<dyn std::error::Error + Send + Sync>;
 
             $crate::_parse_prefix!(
