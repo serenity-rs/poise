@@ -180,32 +180,33 @@ impl<U, E> Framework<U, E> {
     /// - Err(Some(error: UserError)) if any user code yielded an error
     async fn dispatch_message<'a>(
         &'a self,
-        ctx: prefix::PrefixContext<'a, U, E>,
+        ctx: &'a serenity::Context,
+        msg: &'a serenity::Message,
         triggered_by_edit: bool,
     ) -> Result<(), Option<(E, PrefixCommandErrorContext<'a, U, E>)>> {
         // Check prefix
-        let msg = match ctx.msg.content.strip_prefix(self.prefix) {
+        let msg_content = match msg.content.strip_prefix(self.prefix) {
             Some(msg) => msg,
             None => self
                 .options
                 .prefix_options
                 .additional_prefixes
                 .iter()
-                .find_map(|prefix| ctx.msg.content.strip_prefix(prefix))
+                .find_map(|prefix| msg.content.strip_prefix(prefix))
                 .ok_or(None)?,
         };
 
         // If we know our own ID, and the message author ID is our own, and we aren't supposed to
         // execute our own messages, THEN stop execution.
         if !self.options.prefix_options.execute_self_messages
-            && *self.bot_id.lock().unwrap() == Some(ctx.msg.author.id)
+            && *self.bot_id.lock().unwrap() == Some(msg.author.id)
         {
             return Err(None);
         }
 
         // Extract command name and arguments string
         let (command_name, args) = {
-            let mut iter = msg.splitn(2, char::is_whitespace);
+            let mut iter = msg_content.splitn(2, char::is_whitespace);
             (iter.next().unwrap(), iter.next().unwrap_or("").trim_start())
         };
 
@@ -215,6 +216,15 @@ impl<U, E> Framework<U, E> {
             if command.name != command_name && !command.options.aliases.contains(&command_name) {
                 continue;
             }
+
+            let ctx = prefix::PrefixContext {
+                discord: &ctx,
+                msg,
+                framework: self,
+                data: self.get_user_data().await,
+                command,
+            };
+
             match (command
                 .options
                 .check
@@ -252,11 +262,17 @@ impl<U, E> Framework<U, E> {
             .unwrap_or(&self.options.prefix_options.broadcast_typing)
         {
             BroadcastTypingBehavior::None => None,
-            BroadcastTypingBehavior::WithDelay(delay) => Some(DelayedTyping::start(
-                &ctx.discord.http,
-                ctx.msg.channel_id,
-                *delay,
-            )),
+            BroadcastTypingBehavior::WithDelay(delay) => {
+                Some(DelayedTyping::start(&ctx.http, msg.channel_id, *delay))
+            }
+        };
+
+        let ctx = prefix::PrefixContext {
+            discord: &ctx,
+            msg,
+            framework: self,
+            data: self.get_user_data().await,
+            command,
         };
 
         // Execute command
@@ -337,21 +353,15 @@ impl<U, E> Framework<U, E> {
                 }
             }
             Event::Message { new_message } => {
-                let ctx = prefix::PrefixContext {
-                    discord: &ctx,
-                    msg: &new_message,
-                    framework: self,
-                    data: self.get_user_data().await,
-                };
-                if let Err(Some((err, err_ctx))) = self.dispatch_message(ctx, false).await {
-                    if let Some(on_error) = err_ctx.command.options.on_error {
-                        (on_error)(err, err_ctx).await;
+                if let Err(Some((err, ctx))) =
+                    self.dispatch_message(&ctx, &new_message, false).await
+                {
+                    if let Some(on_error) = ctx.command.options.on_error {
+                        (on_error)(err, ctx).await;
                     } else {
                         (self.options.on_error)(
                             err,
-                            crate::ErrorContext::Command(crate::CommandErrorContext::Prefix(
-                                err_ctx,
-                            )),
+                            crate::ErrorContext::Command(crate::CommandErrorContext::Prefix(ctx)),
                         )
                         .await;
                     }
@@ -361,18 +371,10 @@ impl<U, E> Framework<U, E> {
                 if let Some(edit_tracker) = &self.options.prefix_options.edit_tracker {
                     let msg = edit_tracker.write().process_message_update(event);
 
-                    let ctx = prefix::PrefixContext {
-                        discord: &ctx,
-                        msg: &msg,
-                        framework: self,
-                        data: self.get_user_data().await,
-                    };
-                    if let Err(Some((err, err_ctx))) = self.dispatch_message(ctx, true).await {
+                    if let Err(Some((err, ctx))) = self.dispatch_message(&ctx, &msg, true).await {
                         (self.options.on_error)(
                             err,
-                            crate::ErrorContext::Command(crate::CommandErrorContext::Prefix(
-                                err_ctx,
-                            )),
+                            crate::ErrorContext::Command(crate::CommandErrorContext::Prefix(ctx)),
                         );
                     }
                 }

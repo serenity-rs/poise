@@ -124,6 +124,7 @@ pub async fn send_prefix_reply<U, E>(
             .edit_tracker
             .as_ref()
             .map(|t| t.write())
+            .filter(|_| ctx.command.options.track_edits)
     };
 
     let existing_response = lock_edit_tracker()
