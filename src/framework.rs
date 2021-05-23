@@ -375,7 +375,8 @@ impl<U, E> Framework<U, E> {
                         (self.options.on_error)(
                             err,
                             crate::ErrorContext::Command(crate::CommandErrorContext::Prefix(ctx)),
-                        );
+                        )
+                        .await;
                     }
                 }
             }
