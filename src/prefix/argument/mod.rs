@@ -234,7 +234,7 @@ macro_rules! _parse_prefix {
         }
     };
 
-    // Consume #[flag] FLAGNAME as the last argument
+    // Consume #[flag] FLAGNAME
     ( $ctx:ident $msg:ident $args:ident => [ $error:ident $($preamble:tt)* ]
         (#[flag] $name:literal)
         $( $rest:tt )*
@@ -244,6 +244,7 @@ macro_rules! _parse_prefix {
                 $crate::_parse_prefix!($ctx $msg $args => [ $error $($preamble)* true ] $($rest)* );
             }
         }
+        $error = concat!("Must use either `", $name, "` or nothing as a modifier").into();
         $crate::_parse_prefix!($ctx $msg $args => [ $error $($preamble)* false ] $($rest)* );
     };
 
@@ -276,7 +277,6 @@ macro_rules! parse_prefix_args {
             let msg = $msg;
             let args = $crate::ArgString($args);
 
-            #[allow(unused)] // can happen when few args are requested
             let mut error = Box::new($crate::TooManyArguments) as Box<dyn std::error::Error + Send + Sync>;
 
             $crate::_parse_prefix!(
