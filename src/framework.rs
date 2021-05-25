@@ -275,6 +275,8 @@ impl<U, E> Framework<U, E> {
             command: Some(command),
         };
 
+        (self.options.pre_command)(Context::Prefix(ctx)).await;
+
         // Execute command
         (command.action)(ctx, args).await.map_err(|e| {
             Some((
@@ -317,6 +319,8 @@ impl<U, E> Framework<U, E> {
                 println!("Failed to send interaction acknowledgement: {}", e);
             }
         }
+
+        (self.options.pre_command)(Context::Slash(ctx)).await;
 
         if let Err(e) = (command.action)(ctx, options).await {
             let error_ctx = SlashCommandErrorContext {

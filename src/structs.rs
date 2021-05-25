@@ -167,8 +167,9 @@ impl<U, E> Clone for ErrorContext<'_, U, E> {
 
 pub struct FrameworkOptions<U, E> {
     /// Provide a callback to be invoked when any user code yields an error.
-    // pub on_error: fn(E, ErrorContext<'_, U, E>) -> BoxFuture<()>,
     pub on_error: fn(E, ErrorContext<'_, U, E>) -> BoxFuture<'_, ()>,
+    /// Called before every command
+    pub pre_command: fn(Context<'_, U, E>) -> BoxFuture<'_, ()>,
     /// Called on every Discord event. Can be used to react to non-command events, like messages
     /// deletions or guild updates.
     pub listener: for<'a> fn(
@@ -226,6 +227,7 @@ impl<U: Send + Sync, E: std::fmt::Display + Send> Default for FrameworkOptions<U
                 })
             },
             listener: |_, _, _, _| Box::pin(async { Ok(()) }),
+            pre_command: |_| Box::pin(async {}),
             slash_options: Default::default(),
             prefix_options: Default::default(),
         }
