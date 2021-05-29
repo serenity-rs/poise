@@ -72,6 +72,7 @@ struct CommandAttrArgs {
     discard_spare_arguments: bool,
     slash_command: bool,
     hide_in_help: bool,
+    category: Option<String>,
 }
 
 /// Representation of the function parameter attribute arguments
@@ -247,6 +248,7 @@ fn generate_prefix_command_spec(inv: &Invocation) -> Result<proc_macro2::TokenSt
     let aliases = &inv.more.aliases.0;
     let hide_in_help = &inv.more.hide_in_help;
     let param_names = inv.parameters.iter().map(|p| &p.name).collect::<Vec<_>>();
+    let category = wrap_option(inv.more.category.as_ref());
     Ok(quote::quote! {
         ::poise::PrefixCommand {
             name: #command_name,
@@ -267,6 +269,7 @@ fn generate_prefix_command_spec(inv: &Invocation) -> Result<proc_macro2::TokenSt
                 check: #check,
                 on_error: #on_error,
                 hide_in_help: #hide_in_help,
+                category: #category,
             }
         }
     })
@@ -462,7 +465,7 @@ pub fn command(args: TokenStream, function: TokenStream) -> TokenStream {
     let args = syn::parse_macro_input!(args as Vec<syn::NestedMeta>);
     let args = match <CommandAttrArgs as darling::FromMeta>::from_list(&args) {
         Ok(x) => x,
-        Err(e) => return TokenStream::from(e.write_errors()),
+        Err(e) => return e.write_errors().into(),
     };
 
     let function = syn::parse_macro_input!(function as syn::ItemFn);

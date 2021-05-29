@@ -46,6 +46,9 @@ pub struct PrefixCommandOptions<U, E> {
     pub broadcast_typing: Option<BroadcastTypingBehavior>,
     /// Whether to hide this command in help menus.
     pub hide_in_help: bool,
+    /// Identifier for the category that this command will be displayed in for help commands.
+    // TODO: should this be part of the framework's internal command bookkeeping?
+    pub category: Option<&'static str>,
 }
 
 impl<U, E> Default for PrefixCommandOptions<U, E> {
@@ -59,6 +62,7 @@ impl<U, E> Default for PrefixCommandOptions<U, E> {
             track_edits: false,
             broadcast_typing: None,
             hide_in_help: false,
+            category: None,
         }
     }
 }

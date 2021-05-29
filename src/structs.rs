@@ -200,6 +200,24 @@ impl<U, E> FrameworkOptions<U, E> {
             self.slash_options.commands.push(slash_command);
         }
     }
+
+    pub fn command_with_category(
+        &mut self,
+        spec: fn() -> (
+            crate::PrefixCommand<U, E>,
+            Option<crate::SlashCommand<U, E>>,
+        ),
+        category: &'static str,
+    ) {
+        let (mut prefix_command, slash_command) = spec();
+
+        prefix_command.options.category = Some(category);
+        self.prefix_options.commands.push(prefix_command);
+
+        if let Some(slash_command) = slash_command {
+            self.slash_options.commands.push(slash_command);
+        }
+    }
 }
 
 impl<U: Send + Sync, E: std::fmt::Display + Send> Default for FrameworkOptions<U, E> {
