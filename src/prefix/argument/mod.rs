@@ -1,3 +1,5 @@
+#![allow(unused)] // false positive from inside macro expansions
+
 mod code_block;
 pub use code_block::*;
 
