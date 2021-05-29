@@ -19,6 +19,8 @@ pub use framework::*;
 mod reply;
 pub use reply::*;
 
+pub mod defaults;
+
 pub use poise_macros::*;
 pub use serenity;
 

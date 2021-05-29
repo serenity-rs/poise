@@ -139,6 +139,10 @@ impl<U, E> Framework<U, E> {
         self.application_id
     }
 
+    pub fn prefix(&self) -> &str {
+        self.prefix
+    }
+
     // Commented out because it feels to specialized, and users will want to insert extra
     // bookkeeping anyways (e.g. number of slash commands, slash command names added, etc)
 
