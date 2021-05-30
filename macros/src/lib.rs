@@ -164,7 +164,13 @@ fn generate_prefix_command_spec(inv: &Invocation) -> Result<proc_macro2::TokenSt
 
     // Box::pin the check and on_error callbacks in order to store them in a struct
     let check = match &inv.more.check {
-        Some(check) => quote::quote! { Some(|a| Box::pin(#check(a))) },
+        Some(check) => {
+            if inv.more.slash_command {
+                quote::quote! { Some(|ctx| Box::pin(#check(::poise::Context::Prefix(ctx)))) }
+            } else {
+                quote::quote! { Some(|ctx| Box::pin(#check(ctx))) }
+            }
+        }
         None => quote::quote! { None },
     };
     let on_error = match &inv.more.on_error {
@@ -319,7 +325,7 @@ fn generate_slash_command_spec(inv: &Invocation) -> Result<proc_macro2::TokenStr
 
     // Box::pin the check and on_error callbacks in order to store them in a struct
     let check = match &inv.more.check {
-        Some(check) => quote::quote! { Some(|a| Box::pin(#check(a))) },
+        Some(check) => quote::quote! { Some(|ctx| Box::pin(#check(::poise::Context::Slash(ctx)))) },
         None => quote::quote! { None },
     };
     let on_error = match &inv.more.on_error {
