@@ -112,10 +112,15 @@ impl EditTracker {
 
 pub async fn send_prefix_reply<U, E>(
     ctx: crate::prefix::PrefixContext<'_, U, E>,
-    builder: impl FnOnce(&mut crate::CreateReply) -> &mut crate::CreateReply,
+    builder: impl for<'a, 'b> FnOnce(&'a mut crate::CreateReply<'b>) -> &'a mut crate::CreateReply<'b>,
 ) -> Result<(), serenity::Error> {
     let mut reply = crate::CreateReply::default();
     builder(&mut reply);
+    let crate::CreateReply {
+        content,
+        embed,
+        attachments,
+    } = reply;
 
     let lock_edit_tracker = || {
         if let Some(command) = ctx.command {
@@ -140,15 +145,22 @@ pub async fn send_prefix_reply<U, E>(
     if let Some(mut response) = existing_response {
         response
             .edit(ctx.discord, |f| {
-                if let Some(content) = reply.content {
+                if let Some(content) = content {
                     f.content(content);
                 }
-                if let Some(embed) = reply.embed {
+
+                if let Some(embed) = embed {
                     f.embed(|e| {
                         *e = embed;
                         e
                     });
                 }
+
+                f.0.insert("attachments", serde_json::json! { [] }); // reset attachments
+                for attachment in attachments {
+                    f.attachment(attachment);
+                }
+
                 f
             })
             .await?;
@@ -165,14 +177,17 @@ pub async fn send_prefix_reply<U, E>(
             .msg
             .channel_id
             .send_message(ctx.discord, |m| {
-                if let Some(content) = reply.content {
+                if let Some(content) = content {
                     m.content(content);
                 }
-                if let Some(embed) = reply.embed {
+                if let Some(embed) = embed {
                     m.embed(|e| {
                         *e = embed;
                         e
                     });
+                }
+                for attachment in attachments {
+                    m.add_file(attachment);
                 }
                 m
             })

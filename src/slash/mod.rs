@@ -10,10 +10,15 @@ use crate::serenity_prelude as serenity;
 
 pub async fn send_slash_reply<U, E>(
     ctx: SlashContext<'_, U, E>,
-    builder: impl FnOnce(&mut crate::CreateReply) -> &mut crate::CreateReply,
+    builder: impl for<'a, 'b> FnOnce(&'a mut crate::CreateReply<'b>) -> &'a mut crate::CreateReply<'b>,
 ) -> Result<(), serenity::Error> {
     let mut reply = crate::CreateReply::default();
     builder(&mut reply);
+    let crate::CreateReply {
+        content,
+        embed,
+        attachments: _,
+    } = reply;
 
     let has_sent_initial_response = ctx
         .has_sent_initial_response
@@ -22,10 +27,10 @@ pub async fn send_slash_reply<U, E>(
     if has_sent_initial_response {
         ctx.interaction
             .edit_original_interaction_response(ctx.discord, |f| {
-                if let Some(content) = reply.content {
+                if let Some(content) = content {
                     f.content(content);
                 }
-                if let Some(embed) = reply.embed {
+                if let Some(embed) = embed {
                     f.add_embed(embed);
                 }
                 f
@@ -36,10 +41,10 @@ pub async fn send_slash_reply<U, E>(
             .create_interaction_response(ctx.discord, |r| {
                 r.kind(serenity::InteractionResponseType::ChannelMessageWithSource)
                     .interaction_response_data(|r| {
-                        if let Some(content) = reply.content {
+                        if let Some(content) = content {
                             r.content(content);
                         }
-                        if let Some(embed) = reply.embed {
+                        if let Some(embed) = embed {
                             r.set_embed(embed);
                         }
                         r
