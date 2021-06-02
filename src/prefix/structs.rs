@@ -106,6 +106,8 @@ pub struct PrefixFrameworkOptions<U, E> {
     pub broadcast_typing: BroadcastTypingBehavior,
     /// Whether commands in messages emitted by the bot itself should be executed as well.
     pub execute_self_messages: bool,
+    /// Whether command names should be compared case-insensitively.
+    pub case_insensitive_commands: bool,
 }
 
 impl<U, E> Default for PrefixFrameworkOptions<U, E> {
@@ -117,6 +119,7 @@ impl<U, E> Default for PrefixFrameworkOptions<U, E> {
             edit_tracker: None,
             broadcast_typing: BroadcastTypingBehavior::None,
             execute_self_messages: false,
+            case_insensitive_commands: true,
         }
     }
 }

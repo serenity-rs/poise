@@ -217,7 +217,21 @@ impl<U, E> Framework<U, E> {
         // Find the first matching command
         let mut first_matching_command = None;
         for command in &self.options.prefix_options.commands {
-            if command.name != command_name && !command.options.aliases.contains(&command_name) {
+            let considered_equal = |a: &str, b: &str| {
+                if self.options.prefix_options.case_insensitive_commands {
+                    a.eq_ignore_ascii_case(b)
+                } else {
+                    a == b
+                }
+            };
+
+            let primary_name_matches = considered_equal(command.name, command_name);
+            let alias_matches = command
+                .options
+                .aliases
+                .iter()
+                .any(|alias| considered_equal(alias, command_name));
+            if !primary_name_matches && !alias_matches {
                 continue;
             }
 
