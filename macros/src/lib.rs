@@ -111,7 +111,10 @@ fn extract_help_from_doc_comments(attrs: &[syn::Attribute]) -> (Option<String>, 
         if attr.path == quote::format_ident!("doc").into() {
             for token in attr.tokens.clone() {
                 if let Ok(literal) = syn::parse2::<syn::LitStr>(token.into()) {
-                    doc_lines += literal.value().trim();
+                    let literal = literal.value();
+                    let literal = literal.strip_prefix(' ').unwrap_or(&literal);
+
+                    doc_lines += literal;
                     doc_lines += "\n";
                 }
             }
