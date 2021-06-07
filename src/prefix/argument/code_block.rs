@@ -54,7 +54,7 @@ impl<'a> ParseConsumingSync<'a> for CodeBlock {
     /// ```
     fn sync_pop_from(args: &ArgString<'a>) -> Result<(ArgString<'a>, Self), Self::Err> {
         let rest;
-        let code_block = if let Some(code_block) = args.0.strip_prefix("```") {
+        let mut code_block = if let Some(code_block) = args.0.strip_prefix("```") {
             let code_block_end = code_block.find("```").ok_or(CodeBlockError::Malformed)?;
             rest = &code_block[(code_block_end + 3)..];
             let mut code_block = &code_block[..code_block_end];
@@ -95,7 +95,8 @@ impl<'a> ParseConsumingSync<'a> for CodeBlock {
             Err(CodeBlockError::Malformed)
         } else {
             // discord likes to insert hair spaces at the end of code blocks sometimes for no reason
-            let rest = rest.trim_end_matches('\u{200a}');
+            code_block.code = code_block.code.trim_end_matches('\u{200a}').to_owned();
+
             Ok((ArgString(rest), code_block))
         }
     }
