@@ -4,6 +4,7 @@
 use crate::serenity_prelude as serenity;
 
 fn update_message(message: &mut serenity::Message, update: serenity::MessageUpdateEvent) {
+    message.id = update.id;
     message.channel_id = update.channel_id;
     message.guild_id = update.guild_id;
 
