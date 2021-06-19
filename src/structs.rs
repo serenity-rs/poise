@@ -71,18 +71,19 @@ impl<U, E> Context<'_, U, E> {
         }
     }
 
-    pub fn author(&self) -> &serenity::User {
+    pub fn author(&self) -> Option<&serenity::User> {
         match self {
             Self::Slash(ctx) => {
                 if let Some(member) = &ctx.interaction.member {
-                    &member.user
+                    Some(&member.user)
                 } else if let Some(user) = &ctx.interaction.user {
-                    user
+                    Some(user)
                 } else {
-                    panic!("Neither a Member nor a User was sent with interaction");
+                    // Neither a Member nor a User was sent with interaction
+                    None
                 }
             }
-            Self::Prefix(ctx) => &ctx.msg.author,
+            Self::Prefix(ctx) => Some(&ctx.msg.author),
         }
     }
 }
