@@ -171,6 +171,8 @@ pub struct FrameworkOptions<U, E> {
     pub on_error: fn(E, ErrorContext<'_, U, E>) -> BoxFuture<'_, ()>,
     /// Called before every command
     pub pre_command: fn(Context<'_, U, E>) -> BoxFuture<'_, ()>,
+    /// Default set of allowed mentions to use for all responses
+    pub allowed_mentions: Option<serenity::CreateAllowedMentions>,
     /// Called on every Discord event. Can be used to react to non-command events, like messages
     /// deletions or guild updates.
     pub listener: for<'a> fn(
@@ -247,6 +249,12 @@ impl<U: Send + Sync, E: std::fmt::Display + Send> Default for FrameworkOptions<U
             },
             listener: |_, _, _, _| Box::pin(async { Ok(()) }),
             pre_command: |_| Box::pin(async {}),
+            allowed_mentions: Some({
+                let mut f = serenity::CreateAllowedMentions::default();
+                // Only support direct user pings by default
+                f.empty_parse().parse(serenity::ParseValue::Users);
+                f
+            }),
             slash_options: Default::default(),
             prefix_options: Default::default(),
         }

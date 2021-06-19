@@ -187,6 +187,13 @@ pub async fn send_prefix_reply<U, E>(
                         e
                     });
                 }
+                if let Some(allowed_mentions) = &ctx.framework.options().allowed_mentions {
+                    m.allowed_mentions(|m| {
+                        *m = allowed_mentions.clone();
+                        m
+                    });
+                }
+
                 for attachment in attachments {
                     m.add_file(attachment);
                 }

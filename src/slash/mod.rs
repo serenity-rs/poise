@@ -47,6 +47,12 @@ pub async fn send_slash_reply<U, E>(
                         if let Some(embed) = embed {
                             r.set_embed(embed);
                         }
+                        if let Some(allowed_mentions) = &ctx.framework.options().allowed_mentions {
+                            r.allowed_mentions(|m| {
+                                *m = allowed_mentions.clone();
+                                m
+                            });
+                        }
                         r
                     })
             })
