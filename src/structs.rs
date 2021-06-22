@@ -71,6 +71,20 @@ impl<U, E> Context<'_, U, E> {
         }
     }
 
+    /// Like `Self::author`, but it returns an error on missing author instead of None.
+    ///
+    /// Useful if your bot cannot reasonably handle a missing author and doesn't care to provide
+    /// personalized error messages for _potential_ interactions that Discord _might_ add in the
+    /// future.
+    pub fn try_author(&self) -> Result<&serenity::User, &'static str> {
+        self.author()
+            .ok_or("failed to retrieve author from unknown interaction")
+    }
+
+    /// Get the author of the command message or slash command.
+    ///
+    /// None may be returned in the future if Discord adds a new way of invoking interactions that
+    /// has no associated author.
     pub fn author(&self) -> Option<&serenity::User> {
         match self {
             Self::Slash(ctx) => {
