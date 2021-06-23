@@ -18,6 +18,7 @@ pub async fn send_slash_reply<U, E>(
         content,
         embed,
         attachments: _,
+        ephemeral,
     } = reply;
 
     let has_sent_initial_response = ctx
@@ -52,6 +53,11 @@ pub async fn send_slash_reply<U, E>(
                                 *m = allowed_mentions.clone();
                                 m
                             });
+                        }
+                        if ephemeral {
+                            r.flags(
+                                serenity::InteractionApplicationCommandCallbackDataFlags::EPHEMERAL,
+                            );
                         }
                         r
                     })

@@ -38,10 +38,17 @@ pub async fn on_error<D>(e: BoxErrorSendSync, ctx: crate::ErrorContext<'_, D, Bo
     }
 }
 
+#[derive(Copy, Clone, PartialEq, Eq, Debug, Hash)]
+pub enum HelpResponseMode {
+    Default,
+    Ephemeral,
+}
+
 pub async fn help<D, E>(
     ctx: crate::Context<'_, D, E>,
     command: Option<&str>,
     extra_text_at_bottom: &str,
+    response_mode: HelpResponseMode,
 ) -> Result<(), serenity::Error> {
     let reply = if let Some(command) = command {
         if let Some(command) = ctx
@@ -111,7 +118,12 @@ pub async fn help<D, E>(
         menu
     };
 
-    crate::say_reply(ctx, reply).await?;
+    let ephemeral = match response_mode {
+        HelpResponseMode::Default => false,
+        HelpResponseMode::Ephemeral => true,
+    };
+
+    crate::send_reply(ctx, |f| f.content(reply).ephemeral(ephemeral)).await?;
 
     Ok(())
 }

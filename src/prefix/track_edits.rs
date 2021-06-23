@@ -121,6 +121,7 @@ pub async fn send_prefix_reply<U, E>(
         content,
         embed,
         attachments,
+        ephemeral: _,
     } = reply;
 
     let lock_edit_tracker = || {

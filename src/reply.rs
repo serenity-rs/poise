@@ -5,6 +5,7 @@ pub struct CreateReply<'a> {
     pub content: Option<String>,
     pub embed: Option<serenity::CreateEmbed>,
     pub attachments: Vec<serenity::AttachmentType<'a>>,
+    pub ephemeral: bool,
 }
 
 impl<'a> CreateReply<'a> {
@@ -30,6 +31,14 @@ impl<'a> CreateReply<'a> {
     /// This will not have an effect in slash commands.
     pub fn attachment(&mut self, attachment: serenity::AttachmentType<'a>) -> &mut Self {
         self.attachments.push(attachment);
+        self
+    }
+
+    /// Toggles whether the message is an ephemeral response (only invoking user can see it).
+    ///
+    /// Only in slash commands!
+    pub fn ephemeral(&mut self, ephemeral: bool) -> &mut Self {
+        self.ephemeral = ephemeral;
         self
     }
 }
