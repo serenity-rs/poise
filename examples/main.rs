@@ -78,6 +78,7 @@ async fn help(
         ctx,
         command.as_deref(),
         "This is an example bot made to showcase features of my custom Discord bot framework",
+        poise::defaults::HelpResponseMode::Ephemeral,
     )
     .await?;
     Ok(())
