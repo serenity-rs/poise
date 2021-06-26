@@ -155,8 +155,6 @@ pub async fn send_prefix_reply<U, E>(
                     None => f.set_embeds(Vec::new()),
                 };
 
-                dbg!(&f.0);
-
                 f.0.insert("attachments", serde_json::json! { [] }); // reset attachments
                 for attachment in attachments {
                     f.attachment(attachment);
