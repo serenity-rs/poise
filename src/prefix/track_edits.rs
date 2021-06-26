@@ -147,16 +147,15 @@ pub async fn send_prefix_reply<U, E>(
     if let Some(mut response) = existing_response {
         response
             .edit(ctx.discord, |f| {
-                if let Some(content) = content {
-                    f.content(content);
-                }
+                // Empty string resets content (happens when user replaces text with embed)
+                f.content(content.as_deref().unwrap_or(""));
 
-                if let Some(embed) = embed {
-                    f.embed(|e| {
-                        *e = embed;
-                        e
-                    });
-                }
+                match embed {
+                    Some(embed) => f.set_embed(embed),
+                    None => f.set_embeds(Vec::new()),
+                };
+
+                dbg!(&f.0);
 
                 f.0.insert("attachments", serde_json::json! { [] }); // reset attachments
                 for attachment in attachments {
@@ -183,10 +182,7 @@ pub async fn send_prefix_reply<U, E>(
                     m.content(content);
                 }
                 if let Some(embed) = embed {
-                    m.embed(|e| {
-                        *e = embed;
-                        e
-                    });
+                    m.set_embed(embed);
                 }
                 if let Some(allowed_mentions) = &ctx.framework.options().allowed_mentions {
                     m.allowed_mentions(|m| {
