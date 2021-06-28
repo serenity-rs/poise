@@ -53,6 +53,8 @@ pub struct Framework<U, E> {
             >,
         >,
     >,
+    // The bot ID is embedded in the token so we shouldn't have to do all of this mutex mess
+    // But it's kinda messy to get access to the token in the framework
     bot_id: std::sync::Mutex<Option<serenity::UserId>>,
     // TODO: wrap in RwLock to allow changing framework options while running? Could also replace
     // the edit tracking cache interior mutability
@@ -178,6 +180,38 @@ impl<U, E> Framework<U, E> {
         }
     }
 
+    // Returns message with (only) bot prefix removed, if it matches
+    fn check_prefix<'a>(&self, msg: &'a serenity::Message) -> Option<&'a str> {
+        if let Some(content) = msg.content.strip_prefix(self.prefix) {
+            return Some(content);
+        }
+
+        if let Some(content) = self
+            .options
+            .prefix_options
+            .additional_prefixes
+            .iter()
+            .find_map(|prefix| msg.content.strip_prefix(prefix))
+        {
+            return Some(content);
+        }
+
+        if self.options.prefix_options.mention_as_prefix {
+            if let Some(content) = self.bot_id.lock().unwrap().and_then(|bot_id| {
+                // Mentions are either <@USER_ID> or <@!USER_ID>
+                msg.content
+                    .strip_prefix("<@")?
+                    .trim_start_matches('!')
+                    .strip_prefix(&bot_id.0.to_string())?
+                    .strip_prefix('>')
+            }) {
+                return Some(content);
+            }
+        }
+
+        None
+    }
+
     /// Returns
     /// - Ok(()) if a command was successfully dispatched and run
     /// - Err(None) if the message does not match any known command
@@ -188,17 +222,8 @@ impl<U, E> Framework<U, E> {
         msg: &'a serenity::Message,
         triggered_by_edit: bool,
     ) -> Result<(), Option<(E, PrefixCommandErrorContext<'a, U, E>)>> {
-        // Check prefix
-        let msg_content = match msg.content.strip_prefix(self.prefix) {
-            Some(msg) => msg,
-            None => self
-                .options
-                .prefix_options
-                .additional_prefixes
-                .iter()
-                .find_map(|prefix| msg.content.strip_prefix(prefix))
-                .ok_or(None)?,
-        };
+        // Strip prefix and whitespace between prefix and command
+        let msg_content = self.check_prefix(msg).ok_or(None)?.trim_start();
 
         // If we know our own ID, and the message author ID is our own, and we aren't supposed to
         // execute our own messages, THEN stop execution.
@@ -361,9 +386,10 @@ impl<U, E> Framework<U, E> {
     async fn event(&self, ctx: serenity::Context, event: Event<'_>) {
         match &event {
             Event::Ready { data_about_bot } => {
+                *self.bot_id.lock().unwrap() = Some(data_about_bot.user.id);
+
                 let user_data_setup = self.user_data_setup.lock().unwrap().take();
                 if let Some(user_data_setup) = user_data_setup {
-                    *self.bot_id.lock().unwrap() = Some(data_about_bot.user.id);
                     match user_data_setup(&ctx, &data_about_bot, self).await {
                         Ok(user_data) => {
                             let _: Result<_, _> = self.user_data.set(user_data);
