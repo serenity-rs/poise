@@ -21,7 +21,7 @@ pub struct ArgString<'a>(pub &'a str);
 impl<'a> ArgString<'a> {
     /// Parse a single argument and return the remaining arguments.
     ///
-    /// Uses `crate::ParseConsuming` internally.
+    /// Uses `crate::PopArgumentAsync` internally.
     ///
     /// ```rust
     /// # use poise::{ArgString, CodeBlock};
@@ -33,32 +33,32 @@ impl<'a> ArgString<'a> {
     /// let (args, block) = args.sync_pop::<CodeBlock>().unwrap();
     /// assert_eq!(block.code, "foo bar");
     /// ```
-    pub async fn pop<T: ParseConsuming<'a>>(
+    pub async fn pop<T: PopArgumentAsync<'a>>(
         &self,
         ctx: &serenity::Context,
         msg: &serenity::Message,
-    ) -> Result<(ArgString<'a>, T), <T as ParseConsuming<'a>>::Err> {
-        let (args, obj) = T::pop_from(ctx, msg, self).await?;
+    ) -> Result<(ArgString<'a>, T), <T as PopArgumentAsync<'a>>::Err> {
+        let (args, obj) = T::async_pop_from(ctx, msg, self).await?;
         Ok((ArgString(args.0.trim_start()), obj))
     }
 
     /// Like [`Self::pop`] but synchronous.
-    pub fn sync_pop<T: ParseConsumingSync<'a>>(
+    pub fn sync_pop<T: PopArgument<'a>>(
         &self,
-    ) -> Result<(ArgString<'a>, T), <T as ParseConsuming<'a>>::Err> {
-        let (args, obj) = T::sync_pop_from(self)?;
+    ) -> Result<(ArgString<'a>, T), <T as PopArgumentAsync<'a>>::Err> {
+        let (args, obj) = T::pop_from(self)?;
         Ok((ArgString(args.0.trim_start()), obj))
     }
 }
 
-/// Superset of [`ParseConsuming`] without Discord context available and no async support.
+/// Superset of [`PopArgumentAsync`] without Discord context available and no async support.
 ///
 /// Similar in spirit to [`std::str::FromStr`].
-pub trait ParseConsumingSync<'a>: Sized {
+pub trait PopArgument<'a>: Sized {
     /// This error type should implement [`std::error::Error`] most of the time
     type Err;
 
-    fn sync_pop_from(args: &ArgString<'a>) -> Result<(ArgString<'a>, Self), Self::Err>;
+    fn pop_from(args: &ArgString<'a>) -> Result<(ArgString<'a>, Self), Self::Err>;
 }
 
 /// Parse a value out of a string by popping off the front of the string. Discord message context
@@ -68,11 +68,11 @@ pub trait ParseConsumingSync<'a>: Sized {
 /// does. This is for consistency's
 /// sake and also because it keeps open the possibility of parsing whitespace.
 #[async_trait::async_trait]
-pub trait ParseConsuming<'a>: Sized {
+pub trait PopArgumentAsync<'a>: Sized {
     /// This error type should implement [`std::error::Error`] most of the time
     type Err;
 
-    async fn pop_from(
+    async fn async_pop_from(
         ctx: &serenity::Context,
         msg: &serenity::Message,
         args: &ArgString<'a>,
@@ -80,18 +80,18 @@ pub trait ParseConsuming<'a>: Sized {
 }
 
 #[async_trait::async_trait]
-impl<'a, T> ParseConsuming<'a> for T
+impl<'a, T> PopArgumentAsync<'a> for T
 where
-    T: ParseConsumingSync<'a>,
+    T: PopArgument<'a>,
 {
-    type Err = <Self as ParseConsumingSync<'a>>::Err;
+    type Err = <Self as PopArgument<'a>>::Err;
 
-    async fn pop_from(
+    async fn async_pop_from(
         _: &serenity::Context,
         _: &serenity::Message,
         args: &ArgString<'a>,
     ) -> Result<(ArgString<'a>, Self), Self::Err> {
-        <Self as ParseConsumingSync>::sync_pop_from(args)
+        <Self as PopArgument>::pop_from(args)
     }
 }
 

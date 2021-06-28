@@ -10,7 +10,7 @@ impl std::fmt::Display for EmptyArgs {
 
 impl std::error::Error for EmptyArgs {}
 
-impl<'a> ParseConsumingSync<'a> for String {
+impl<'a> PopArgument<'a> for String {
     type Err = EmptyArgs;
 
     /// Pop a whitespace-separated word from the front of the arguments. Supports quotes and quote
@@ -19,7 +19,7 @@ impl<'a> ParseConsumingSync<'a> for String {
     /// Leading whitespace will be trimmed; trailing whitespace is not consumed.
     ///
     /// ```rust
-    /// # use poise::{ArgString, ParseConsumingSync as _};
+    /// # use poise::{ArgString, PopArgument as _};
     /// assert_eq!(
     ///     String::sync_pop_from(&ArgString(r#""first arg" secondarg"#)).unwrap().1,
     ///     r#"first arg"#
@@ -29,7 +29,7 @@ impl<'a> ParseConsumingSync<'a> for String {
     ///     r#"arg " with " quotes " inside"#
     /// );
     /// ```
-    fn sync_pop_from(args: &ArgString<'a>) -> Result<(ArgString<'a>, Self), Self::Err> {
+    fn pop_from(args: &ArgString<'a>) -> Result<(ArgString<'a>, Self), Self::Err> {
         // TODO: consider changing the behavior to parse quotes literally if they're in the middle
         // of the string:
         // - `"hello world"` => `hello world`
@@ -73,7 +73,7 @@ impl<'a> ParseConsumingSync<'a> for String {
 fn test_pop_string() {
     // Test that trailing whitespace is not consumed
     assert_eq!(
-        String::sync_pop_from(&ArgString("AA BB")).unwrap().0,
+        String::pop_from(&ArgString("AA BB")).unwrap().0,
         ArgString(" BB")
     );
 
@@ -87,6 +87,6 @@ fn test_pop_string() {
         (r#"\"AA\ BB\""#, r#""AA BB""#),
         (r#""\"AA BB\"""#, r#""AA BB""#),
     ] {
-        assert_eq!(String::sync_pop_from(&ArgString(string)).unwrap().1, arg);
+        assert_eq!(String::pop_from(&ArgString(string)).unwrap().1, arg);
     }
 }

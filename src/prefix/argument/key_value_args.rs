@@ -13,7 +13,7 @@ impl KeyValueArgs {
     fn pop_single_key_value_pair<'a>(
         args: &ArgString<'a>,
     ) -> Option<(ArgString<'a>, (String, String))> {
-        // TODO: share quote parsing machinery with ParseConsuming impl for String
+        // TODO: share quote parsing machinery with PopArgumentAsync impl for String
 
         if args.0.is_empty() {
             return None;
@@ -44,16 +44,16 @@ impl KeyValueArgs {
 
         let args = ArgString(chars.as_str());
         // `args` used to contain "key=value ...", now it contains "value ...", so pop the value off
-        let (args, value) = String::sync_pop_from(&args).unwrap_or((args, String::new()));
+        let (args, value) = String::pop_from(&args).unwrap_or((args, String::new()));
 
         Some((args, (key, value)))
     }
 }
 
-impl<'a> ParseConsumingSync<'a> for KeyValueArgs {
+impl<'a> PopArgument<'a> for KeyValueArgs {
     type Err = std::convert::Infallible;
 
-    fn sync_pop_from(args: &ArgString<'a>) -> Result<(ArgString<'a>, Self), Self::Err> {
+    fn pop_from(args: &ArgString<'a>) -> Result<(ArgString<'a>, Self), Self::Err> {
         let mut pairs = std::collections::HashMap::new();
 
         let mut args = args.clone();
@@ -88,7 +88,7 @@ fn test_key_value_args() {
         (r#"dummyval"#, &[], "dummyval"),
         (r#"dummyval="#, &[("dummyval", "")], ""),
     ] {
-        let (args, kv_args) = KeyValueArgs::sync_pop_from(&ArgString(string)).unwrap();
+        let (args, kv_args) = KeyValueArgs::pop_from(&ArgString(string)).unwrap();
 
         assert_eq!(
             kv_args.pairs,
