@@ -397,7 +397,8 @@ impl<U, E> Framework<U, E> {
                         Err(e) => (self.options.on_error)(e, ErrorContext::Setup).await,
                     }
                 } else {
-                    println!("Warning: skipping duplicate Discord bot ready event");
+                    // discarding duplicate Discord bot ready event
+                    // (happens regularly when bot is online for long period of time)
                 }
             }
             Event::Message { new_message } => {
