@@ -73,6 +73,7 @@ struct CommandAttrArgs {
     slash_command: bool,
     hide_in_help: bool,
     category: Option<String>,
+    ephemeral: bool,
 }
 
 /// Representation of the function parameter attribute arguments
@@ -348,6 +349,7 @@ fn generate_slash_command_spec(inv: &Invocation) -> Result<proc_macro2::TokenStr
         })
         .collect::<Vec<_>>();
     let defer_response = wrap_option(inv.more.defer_response);
+    let ephemeral = inv.more.ephemeral;
     Ok(quote::quote! {
         ::poise::SlashCommand {
             name: #command_name,
@@ -372,6 +374,7 @@ fn generate_slash_command_spec(inv: &Invocation) -> Result<proc_macro2::TokenStr
                 defer_response: #defer_response,
                 check: #check,
                 on_error: #on_error,
+                ephemeral: #ephemeral,
             }
         }
     })

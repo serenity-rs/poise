@@ -12,7 +12,10 @@ pub async fn send_slash_reply<U, E>(
     ctx: SlashContext<'_, U, E>,
     builder: impl for<'a, 'b> FnOnce(&'a mut crate::CreateReply<'b>) -> &'a mut crate::CreateReply<'b>,
 ) -> Result<(), serenity::Error> {
-    let mut reply = crate::CreateReply::default();
+    let mut reply = crate::CreateReply {
+        ephemeral: ctx.command.options.ephemeral,
+        ..Default::default()
+    };
     builder(&mut reply);
     let crate::CreateReply {
         content,

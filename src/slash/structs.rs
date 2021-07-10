@@ -2,11 +2,13 @@
 
 use crate::{serenity_prelude as serenity, BoxFuture, Framework};
 
+#[non_exhaustive]
 pub struct SlashContext<'a, U, E> {
     pub discord: &'a serenity::Context,
     pub interaction: &'a serenity::Interaction,
     pub has_sent_initial_response: &'a std::sync::atomic::AtomicBool,
     pub framework: &'a Framework<U, E>,
+    pub command: &'a SlashCommand<U, E>,
     pub data: &'a U,
 }
 impl<U, E> Clone for SlashContext<'_, U, E> {
@@ -56,6 +58,8 @@ pub struct SlashCommandOptions<U, E> {
     pub check: Option<fn(SlashContext<'_, U, E>) -> BoxFuture<'_, Result<bool, E>>>,
     /// Fall back to the framework-specified value on None.
     pub defer_response: Option<bool>,
+    /// Whether responses to this command should be ephemeral by default.
+    pub ephemeral: bool,
 }
 
 impl<U, E> Default for SlashCommandOptions<U, E> {
@@ -64,6 +68,7 @@ impl<U, E> Default for SlashCommandOptions<U, E> {
             on_error: None,
             check: None,
             defer_response: None,
+            ephemeral: false,
         }
     }
 }

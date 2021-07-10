@@ -335,7 +335,8 @@ impl<U, E> Framework<U, E> {
 
     async fn dispatch_interaction(
         &self,
-        ctx: SlashContext<'_, U, E>,
+        ctx: &serenity::Context,
+        interaction: &serenity::Interaction,
         name: &str,
         options: &[serenity::ApplicationCommandInteractionDataOption],
     ) {
@@ -351,6 +352,16 @@ impl<U, E> Framework<U, E> {
                 println!("Warning: received unknown interaction \"{}\"", name);
                 return;
             }
+        };
+
+        let has_sent_initial_response = std::sync::atomic::AtomicBool::new(false);
+        let ctx = SlashContext {
+            data: self.get_user_data().await,
+            discord: &ctx,
+            framework: self,
+            interaction,
+            command: &command,
+            has_sent_initial_response: &has_sent_initial_response,
         };
 
         if command
@@ -449,15 +460,7 @@ impl<U, E> Framework<U, E> {
             }
             Event::InteractionCreate { interaction } => {
                 if let Some(data) = &interaction.data {
-                    let has_sent_initial_response = std::sync::atomic::AtomicBool::new(false);
-                    let slash_ctx = SlashContext {
-                        data: self.get_user_data().await,
-                        discord: &ctx,
-                        framework: self,
-                        interaction,
-                        has_sent_initial_response: &has_sent_initial_response,
-                    };
-                    self.dispatch_interaction(slash_ctx, &data.name, &data.options)
+                    self.dispatch_interaction(&ctx, &interaction, &data.name, &data.options)
                         .await;
                 } else {
                     println!("Warning: interaction has no data");
