@@ -35,14 +35,14 @@ pub struct PrefixCommandOptions<U, E> {
     pub multiline_help: Option<fn() -> String>,
     /// Alternative triggers for the command
     pub aliases: &'static [&'static str],
-    /// Fall back to the framework-specified value on None.
+    /// Falls back to the framework-specified value on None. See there for documentation.
     pub on_error: Option<fn(E, PrefixCommandErrorContext<'_, U, E>) -> BoxFuture<'_, ()>>,
     /// If this function returns false, this command will not be executed.
     pub check: Option<fn(PrefixContext<'_, U, E>) -> BoxFuture<'_, Result<bool, E>>>,
     /// Whether to enable edit tracking for commands by default. Note that this won't do anything
     /// if `Framework::edit_tracker` isn't set.
     pub track_edits: bool,
-    /// Fall back to the framework-specified value on None.
+    /// Falls back to the framework-specified value on None. See there for documentation.
     pub broadcast_typing: Option<BroadcastTypingBehavior>,
     /// Whether to hide this command in help menus.
     pub hide_in_help: bool,

@@ -52,11 +52,11 @@ impl<U, E> Clone for SlashCommandErrorContext<'_, U, E> {
 }
 
 pub struct SlashCommandOptions<U, E> {
-    /// Fall back to the framework-specified value on None.
+    /// Falls back to the framework-specified value on None. See there for documentation.
     pub on_error: Option<fn(E, SlashCommandErrorContext<'_, U, E>) -> BoxFuture<'_, ()>>,
     /// If this function returns false, this command will not be executed.
     pub check: Option<fn(SlashContext<'_, U, E>) -> BoxFuture<'_, Result<bool, E>>>,
-    /// Fall back to the framework-specified value on None.
+    /// Falls back to the framework-specified value on None. See there for documentation.
     pub defer_response: Option<bool>,
     /// Whether responses to this command should be ephemeral by default.
     pub ephemeral: bool,
