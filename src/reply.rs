@@ -16,6 +16,8 @@ impl<'a> CreateReply<'a> {
     }
 
     /// Set an embed for the message.
+    ///
+    /// Any previously set embed will be overwritten.
     pub fn embed(
         &mut self,
         f: impl FnOnce(&mut serenity::CreateEmbed) -> &mut serenity::CreateEmbed,
@@ -28,7 +30,7 @@ impl<'a> CreateReply<'a> {
 
     /// Add an attachment.
     ///
-    /// This will not have an effect in slash commands.
+    /// This will not have an effect in a slash command's initial response!
     pub fn attachment(&mut self, attachment: serenity::AttachmentType<'a>) -> &mut Self {
         self.attachments.push(attachment);
         self
@@ -36,7 +38,7 @@ impl<'a> CreateReply<'a> {
 
     /// Toggles whether the message is an ephemeral response (only invoking user can see it).
     ///
-    /// Only in slash commands!
+    /// This only has an effect in slash commands!
     pub fn ephemeral(&mut self, ephemeral: bool) -> &mut Self {
         self.ephemeral = ephemeral;
         self
