@@ -8,6 +8,10 @@ pub use argument::*;
 
 use crate::serenity_prelude as serenity;
 
+/// Send a response to an interaction (slash command invocation).
+///
+/// If a response to this interaction has already been sent, a
+/// [followup](serenity::model::interactions::Interaction::create_followup_message) is sent.
 pub async fn send_slash_reply<U, E>(
     ctx: SlashContext<'_, U, E>,
     builder: impl for<'a, 'b> FnOnce(&'a mut crate::CreateReply<'b>) -> &'a mut crate::CreateReply<'b>,
@@ -73,6 +77,7 @@ pub async fn send_slash_reply<U, E>(
     Ok(())
 }
 
+/// Shorthand of [`send_slash_reply`] with simple text content.
 pub async fn say_slash_reply<U, E>(
     ctx: SlashContext<'_, U, E>,
     text: String,
