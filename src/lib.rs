@@ -33,6 +33,7 @@ pub use serenity;
 /// ```
 pub mod serenity_prelude {
     pub use serenity::{
+        async_trait,
         builder::*,
         client::bridge::gateway::*,
         client::*,
