@@ -26,6 +26,7 @@ impl<U, E> crate::_GetGenerics for PrefixContext<'_, U, E> {
     type E = E;
 }
 
+/// Optional settings for a [`PrefixCommand`].
 pub struct PrefixCommandOptions<U, E> {
     /// Short description of the command. Displayed inline in help menus and similar.
     pub inline_help: Option<&'static str>,
@@ -46,9 +47,6 @@ pub struct PrefixCommandOptions<U, E> {
     pub broadcast_typing: Option<BroadcastTypingBehavior>,
     /// Whether to hide this command in help menus.
     pub hide_in_help: bool,
-    /// Identifier for the category that this command will be displayed in for help commands.
-    // TODO: should this be part of the framework's internal command bookkeeping?
-    pub category: Option<&'static str>,
 }
 
 impl<U, E> Default for PrefixCommandOptions<U, E> {
@@ -62,20 +60,38 @@ impl<U, E> Default for PrefixCommandOptions<U, E> {
             track_edits: false,
             broadcast_typing: None,
             hide_in_help: false,
-            category: None,
         }
     }
 }
 
+/// Definition of a single command, excluding metadata which doesn't affect the command itself such
+/// as category.
 pub struct PrefixCommand<U, E> {
+    /// Main name of the command. Aliases can be set in [`PrefixCommandOptions::aliases`].
     pub name: &'static str,
+    /// Callback to execute when this command is invoked.
     pub action: for<'a> fn(PrefixContext<'a, U, E>, args: &'a str) -> BoxFuture<'a, Result<(), E>>,
+    /// Optional data to change this command's behavior.
     pub options: PrefixCommandOptions<U, E>,
 }
 
+/// Includes a command, plus metadata like associated sub-commands or category.
+pub struct PrefixCommandMeta<U, E> {
+    /// Core command data
+    pub command: PrefixCommand<U, E>,
+    /// Identifier for the category that this command will be displayed in for help commands.
+    pub category: Option<&'static str>,
+    // /// Possible sub-commands
+    // pub sub_commands: Vec<PrefixCommandMeta<U, E>>,
+}
+
+/// Context passed alongside the error value to error handlers
 pub struct PrefixCommandErrorContext<'a, U, E> {
+    /// Whether the error occured in a [`check`](PrefixCommandOptions::check) callback
     pub while_checking: bool,
+    /// Which command was being processed when the error occured
     pub command: &'a PrefixCommand<U, E>,
+    /// Further context
     pub ctx: PrefixContext<'a, U, E>,
 }
 
@@ -91,7 +107,7 @@ impl<U, E> Clone for PrefixCommandErrorContext<'_, U, E> {
 
 pub struct PrefixFrameworkOptions<U, E> {
     /// List of bot commands.
-    pub commands: Vec<PrefixCommand<U, E>>,
+    pub commands: Vec<PrefixCommandMeta<U, E>>,
     /// List of additional bot prefixes
     pub additional_prefixes: &'static [&'static str],
     /// Callback invoked on every message to strip the prefix off an incoming message.

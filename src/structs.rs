@@ -202,34 +202,55 @@ pub struct FrameworkOptions<U, E> {
 }
 
 impl<U, E> FrameworkOptions<U, E> {
+    /// Add a command definition, which can include a prefix implementation and a slash
+    /// implementation, to the framework.
+    ///
+    /// To assign the command to a category, use [`Self::command_with_category`] instead.
+    ///
+    /// ```rust
+    /// let mut options = FrameworkOptions::default();
+    /// options.command(misc::ping());
+    /// ```
     pub fn command(
         &mut self,
-        spec: fn() -> (
+        definition: (
             crate::PrefixCommand<U, E>,
             Option<crate::SlashCommand<U, E>>,
         ),
     ) {
-        let (prefix_command, slash_command) = spec();
+        let (prefix_command, slash_command) = definition;
 
-        self.prefix_options.commands.push(prefix_command);
+        self.prefix_options.commands.push(crate::PrefixCommandMeta {
+            command: prefix_command,
+            category: None,
+        });
 
         if let Some(slash_command) = slash_command {
             self.slash_options.commands.push(slash_command);
         }
     }
 
+    /// Add a command definition, which can include a prefix implementation and a slash
+    /// implementation, to the framework, including an assigned category.
+    ///
+    /// ```rust
+    /// let mut options = FrameworkOptions::default();
+    /// options.command_with_category(misc::ping(), "Miscellaneous");
+    /// ```
     pub fn command_with_category(
         &mut self,
-        spec: fn() -> (
+        definition: (
             crate::PrefixCommand<U, E>,
             Option<crate::SlashCommand<U, E>>,
         ),
         category: &'static str,
     ) {
-        let (mut prefix_command, slash_command) = spec();
+        let (prefix_command, slash_command) = definition;
 
-        prefix_command.options.category = Some(category);
-        self.prefix_options.commands.push(prefix_command);
+        self.prefix_options.commands.push(crate::PrefixCommandMeta {
+            command: prefix_command,
+            category: Some(category),
+        });
 
         if let Some(slash_command) = slash_command {
             self.slash_options.commands.push(slash_command);

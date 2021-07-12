@@ -72,7 +72,6 @@ struct CommandAttrArgs {
     discard_spare_arguments: bool,
     slash_command: bool,
     hide_in_help: bool,
-    category: Option<String>,
     ephemeral: bool,
 }
 
@@ -258,7 +257,6 @@ fn generate_prefix_command_spec(inv: &Invocation) -> Result<proc_macro2::TokenSt
     let aliases = &inv.more.aliases.0;
     let hide_in_help = &inv.more.hide_in_help;
     let param_names = inv.parameters.iter().map(|p| &p.name).collect::<Vec<_>>();
-    let category = wrap_option(inv.more.category.as_ref());
     Ok(quote::quote! {
         ::poise::PrefixCommand {
             name: #command_name,
@@ -279,7 +277,6 @@ fn generate_prefix_command_spec(inv: &Invocation) -> Result<proc_macro2::TokenSt
                 check: #check,
                 on_error: #on_error,
                 hide_in_help: #hide_in_help,
-                category: #category,
             }
         }
     })

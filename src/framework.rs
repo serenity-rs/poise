@@ -251,13 +251,13 @@ impl<U, E> Framework<U, E> {
 
         // Find the first matching command
         let mut first_matching_command = None;
-        for command in &self.options.prefix_options.commands {
-            let considered_equal = |a: &str, b: &str| {
-                if self.options.prefix_options.case_insensitive_commands {
-                    a.eq_ignore_ascii_case(b)
-                } else {
-                    a == b
-                }
+        for command_meta in &self.options.prefix_options.commands {
+            let command = &command_meta.command;
+
+            let considered_equal = if self.options.prefix_options.case_insensitive_commands {
+                |a: &str, b: &str| a.eq_ignore_ascii_case(b)
+            } else {
+                |a: &str, b: &str| a == b
             };
 
             let primary_name_matches = considered_equal(command.name, command_name);

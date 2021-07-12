@@ -57,6 +57,7 @@ pub async fn help<D, E>(
             .prefix_options
             .commands
             .iter()
+            .map(|cmd_meta| &cmd_meta.command)
             .find(|cmd| cmd.name == command)
         {
             match command.options.multiline_help {
@@ -77,14 +78,14 @@ pub async fn help<D, E>(
         };
 
         let mut categories: Vec<(Option<&str>, Vec<&PrefixCommand<_, _>>)> = Vec::new();
-        for cmd in &ctx.framework().options().prefix_options.commands {
+        for cmd_meta in &ctx.framework().options().prefix_options.commands {
             if let Some((_, commands)) = categories
                 .iter_mut()
-                .find(|(key, _)| *key == cmd.options.category)
+                .find(|(key, _)| *key == cmd_meta.category)
             {
-                commands.push(cmd);
+                commands.push(&cmd_meta.command);
             } else {
-                categories.push((cmd.options.category, vec![cmd]));
+                categories.push((cmd_meta.category, vec![&cmd_meta.command]));
             }
         }
 
