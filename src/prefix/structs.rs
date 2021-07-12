@@ -81,8 +81,8 @@ pub struct PrefixCommandMeta<U, E> {
     pub command: PrefixCommand<U, E>,
     /// Identifier for the category that this command will be displayed in for help commands.
     pub category: Option<&'static str>,
-    // /// Possible sub-commands
-    // pub sub_commands: Vec<PrefixCommandMeta<U, E>>,
+    /// Possible subcommands
+    pub subcommands: Vec<PrefixCommandMeta<U, E>>,
 }
 
 /// Context passed alongside the error value to error handlers

@@ -181,7 +181,7 @@ impl<U, E> Framework<U, E> {
     }
 
     // Returns message with (only) bot prefix removed, if it matches
-    async fn check_prefix<'a>(
+    async fn strip_prefix<'a>(
         &'a self,
         ctx: &'a serenity::Context,
         msg: &'a serenity::Message,
@@ -222,43 +222,56 @@ impl<U, E> Framework<U, E> {
         None
     }
 
-    /// Returns
-    /// - Ok(()) if a command was successfully dispatched and run
-    /// - Err(None) if the message does not match any known command
-    /// - Err(Some(error: UserError)) if any user code yielded an error
-    async fn dispatch_message<'a>(
+    /// Find a command within nested PrefixCommandMeta's by the user message string. Also returns
+    /// the arguments, i.e. the remaining string.
+    ///
+    /// May throw an error if a command check fails
+    fn find_command<'a>(
         &'a self,
         ctx: &'a serenity::Context,
         msg: &'a serenity::Message,
-        triggered_by_edit: bool,
-    ) -> Result<(), Option<(E, PrefixCommandErrorContext<'a, U, E>)>> {
-        // Strip prefix and whitespace between prefix and command
-        let msg_content = self.check_prefix(ctx, msg).await.ok_or(None)?.trim_start();
+        commands: &'a [crate::PrefixCommandMeta<U, E>],
+        remaining_message: &'a str,
+    ) -> crate::BoxFuture<
+        'a,
+        Result<
+            Option<(&'a crate::PrefixCommandMeta<U, E>, &'a str)>,
+            (E, PrefixCommandErrorContext<'a, U, E>),
+        >,
+    >
+    where
+        U: Send + Sync,
+    {
+        Box::pin(self._find_command(ctx, msg, commands, remaining_message))
+    }
 
-        // If we know our own ID, and the message author ID is our own, and we aren't supposed to
-        // execute our own messages, THEN stop execution.
-        if !self.options.prefix_options.execute_self_messages
-            && *self.bot_id.lock().unwrap() == Some(msg.author.id)
-        {
-            return Err(None);
-        }
+    async fn _find_command<'a>(
+        &'a self,
+        ctx: &'a serenity::Context,
+        msg: &'a serenity::Message,
+        commands: &'a [crate::PrefixCommandMeta<U, E>],
+        remaining_message: &'a str,
+    ) -> Result<
+        Option<(&'a crate::PrefixCommandMeta<U, E>, &'a str)>,
+        (E, PrefixCommandErrorContext<'a, U, E>),
+    >
+    where
+        U: Send + Sync,
+    {
+        let considered_equal = if self.options.prefix_options.case_insensitive_commands {
+            |a: &str, b: &str| a.eq_ignore_ascii_case(b)
+        } else {
+            |a: &str, b: &str| a == b
+        };
 
-        // Extract command name and arguments string
-        let (command_name, args) = {
-            let mut iter = msg_content.splitn(2, char::is_whitespace);
+        let (command_name, remaining_message) = {
+            let mut iter = remaining_message.splitn(2, char::is_whitespace);
             (iter.next().unwrap(), iter.next().unwrap_or("").trim_start())
         };
 
-        // Find the first matching command
         let mut first_matching_command = None;
-        for command_meta in &self.options.prefix_options.commands {
+        for command_meta in commands {
             let command = &command_meta.command;
-
-            let considered_equal = if self.options.prefix_options.case_insensitive_commands {
-                |a: &str, b: &str| a.eq_ignore_ascii_case(b)
-            } else {
-                |a: &str, b: &str| a == b
-            };
 
             let primary_name_matches = considered_equal(command.name, command_name);
             let alias_matches = command
@@ -270,38 +283,80 @@ impl<U, E> Framework<U, E> {
                 continue;
             }
 
-            let ctx = prefix::PrefixContext {
-                discord: &ctx,
+            let prefix_ctx = prefix::PrefixContext {
+                discord: ctx,
                 msg,
                 framework: self,
                 data: self.get_user_data().await,
-                command: Some(command),
+                command: Some(&command_meta.command),
             };
 
             match (command
                 .options
                 .check
-                .unwrap_or(self.options.prefix_options.command_check))(ctx)
+                .unwrap_or(self.options.prefix_options.command_check))(prefix_ctx)
             .await
             {
                 Ok(true) => {}
                 Ok(false) => continue,
                 Err(e) => {
-                    return Err(Some((
+                    return Err((
                         e,
                         prefix::PrefixCommandErrorContext {
                             command,
-                            ctx,
+                            ctx: prefix_ctx,
                             while_checking: true,
                         },
-                    )));
+                    ));
                 }
             }
 
-            first_matching_command = Some(command);
+            first_matching_command = Some(
+                if let Some((subcommand_meta, remaining_message)) = self
+                    .find_command(ctx, msg, &command_meta.subcommands, remaining_message)
+                    .await?
+                {
+                    (subcommand_meta, remaining_message)
+                } else {
+                    (command_meta, remaining_message)
+                },
+            );
             break;
         }
-        let command = first_matching_command.ok_or(None)?;
+
+        Ok(first_matching_command)
+    }
+
+    /// Returns
+    /// - Ok(()) if a command was successfully dispatched and run
+    /// - Err(None) if the message does not match any known command
+    /// - Err(Some(error: UserError)) if any user code yielded an error
+    async fn dispatch_message<'a>(
+        &'a self,
+        ctx: &'a serenity::Context,
+        msg: &'a serenity::Message,
+        triggered_by_edit: bool,
+    ) -> Result<(), Option<(E, PrefixCommandErrorContext<'a, U, E>)>>
+    where
+        U: Send + Sync,
+    {
+        // Strip prefix and whitespace between prefix and command
+        let msg_content = self.strip_prefix(ctx, msg).await.ok_or(None)?.trim_start();
+
+        // If we know our own ID, and the message author ID is our own, and we aren't supposed to
+        // execute our own messages, THEN stop execution.
+        if !self.options.prefix_options.execute_self_messages
+            && *self.bot_id.lock().unwrap() == Some(msg.author.id)
+        {
+            return Err(None);
+        }
+
+        let (command_meta, args) = &self
+            .find_command(ctx, msg, &self.options.prefix_options.commands, msg_content)
+            .await
+            .map_err(Some)?
+            .ok_or(None)?;
+        let command = &command_meta.command;
 
         if triggered_by_edit && !command.options.track_edits {
             return Err(None);
@@ -404,7 +459,10 @@ impl<U, E> Framework<U, E> {
         }
     }
 
-    async fn event(&self, ctx: serenity::Context, event: Event<'_>) {
+    async fn event(&self, ctx: serenity::Context, event: Event<'_>)
+    where
+        U: Send + Sync,
+    {
         match &event {
             Event::Ready { data_about_bot } => {
                 *self.bot_id.lock().unwrap() = Some(data_about_bot.user.id);

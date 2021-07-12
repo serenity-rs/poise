@@ -180,6 +180,47 @@ impl<U, E> Clone for ErrorContext<'_, U, E> {
     }
 }
 
+pub struct CommandBuilder<U, E> {
+    prefix_command: crate::PrefixCommandMeta<U, E>,
+    slash_command: Option<crate::SlashCommand<U, E>>,
+}
+
+impl<U, E> CommandBuilder<U, E> {
+    pub fn category(&mut self, category: &'static str) -> &mut Self {
+        self.prefix_command.category = Some(category);
+        self
+    }
+
+    pub fn subcommand(
+        &mut self,
+        definition: (
+            crate::PrefixCommand<U, E>,
+            Option<crate::SlashCommand<U, E>>,
+        ),
+        meta_builder: impl FnOnce(&mut Self) -> &mut Self,
+    ) -> &mut Self {
+        // STUB: do slash support
+
+        let (prefix_command, slash_command) = definition;
+
+        let prefix_command = crate::PrefixCommandMeta {
+            command: prefix_command,
+            category: None,
+            subcommands: Vec::new(),
+        };
+
+        let mut builder = CommandBuilder {
+            prefix_command,
+            slash_command,
+        };
+        meta_builder(&mut builder);
+
+        self.prefix_command.subcommands.push(builder.prefix_command);
+
+        self
+    }
+}
+
 pub struct FrameworkOptions<U, E> {
     /// Provide a callback to be invoked when any user code yields an error.
     pub on_error: fn(E, ErrorContext<'_, U, E>) -> BoxFuture<'_, ()>,
@@ -205,11 +246,12 @@ impl<U, E> FrameworkOptions<U, E> {
     /// Add a command definition, which can include a prefix implementation and a slash
     /// implementation, to the framework.
     ///
-    /// To assign the command to a category, use [`Self::command_with_category`] instead.
+    /// To define subcommands or other meta information, pass a closure that calls the command
+    /// builder
     ///
     /// ```rust
     /// let mut options = FrameworkOptions::default();
-    /// options.command(misc::ping());
+    /// options.command(misc::ping(), |f| f.category("Miscellaneous"));
     /// ```
     pub fn command(
         &mut self,
@@ -217,42 +259,25 @@ impl<U, E> FrameworkOptions<U, E> {
             crate::PrefixCommand<U, E>,
             Option<crate::SlashCommand<U, E>>,
         ),
+        meta_builder: impl FnOnce(&mut CommandBuilder<U, E>) -> &mut CommandBuilder<U, E>,
     ) {
         let (prefix_command, slash_command) = definition;
 
-        self.prefix_options.commands.push(crate::PrefixCommandMeta {
+        let prefix_command = crate::PrefixCommandMeta {
             command: prefix_command,
             category: None,
-        });
+            subcommands: Vec::new(),
+        };
 
-        if let Some(slash_command) = slash_command {
-            self.slash_options.commands.push(slash_command);
-        }
-    }
+        let mut builder = CommandBuilder {
+            prefix_command,
+            slash_command,
+        };
+        meta_builder(&mut builder);
 
-    /// Add a command definition, which can include a prefix implementation and a slash
-    /// implementation, to the framework, including an assigned category.
-    ///
-    /// ```rust
-    /// let mut options = FrameworkOptions::default();
-    /// options.command_with_category(misc::ping(), "Miscellaneous");
-    /// ```
-    pub fn command_with_category(
-        &mut self,
-        definition: (
-            crate::PrefixCommand<U, E>,
-            Option<crate::SlashCommand<U, E>>,
-        ),
-        category: &'static str,
-    ) {
-        let (prefix_command, slash_command) = definition;
+        self.prefix_options.commands.push(builder.prefix_command);
 
-        self.prefix_options.commands.push(crate::PrefixCommandMeta {
-            command: prefix_command,
-            category: Some(category),
-        });
-
-        if let Some(slash_command) = slash_command {
+        if let Some(slash_command) = builder.slash_command {
             self.slash_options.commands.push(slash_command);
         }
     }
