@@ -181,7 +181,11 @@ impl<U, E> Framework<U, E> {
     }
 
     // Returns message with (only) bot prefix removed, if it matches
-    fn check_prefix<'a>(&self, msg: &'a serenity::Message) -> Option<&'a str> {
+    async fn check_prefix<'a>(
+        &'a self,
+        ctx: &'a serenity::Context,
+        msg: &'a serenity::Message,
+    ) -> Option<&'a str> {
         if let Some(content) = msg.content.strip_prefix(self.prefix) {
             return Some(content);
         }
@@ -209,6 +213,12 @@ impl<U, E> Framework<U, E> {
             }
         }
 
+        if let Some(dynamic_prefix) = self.options.prefix_options.dynamic_prefix {
+            if let Some(content) = dynamic_prefix(ctx, msg, self.get_user_data().await).await {
+                return Some(content);
+            }
+        }
+
         None
     }
 
@@ -223,7 +233,7 @@ impl<U, E> Framework<U, E> {
         triggered_by_edit: bool,
     ) -> Result<(), Option<(E, PrefixCommandErrorContext<'a, U, E>)>> {
         // Strip prefix and whitespace between prefix and command
-        let msg_content = self.check_prefix(msg).ok_or(None)?.trim_start();
+        let msg_content = self.check_prefix(ctx, msg).await.ok_or(None)?.trim_start();
 
         // If we know our own ID, and the message author ID is our own, and we aren't supposed to
         // execute our own messages, THEN stop execution.

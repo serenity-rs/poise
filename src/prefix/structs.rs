@@ -94,6 +94,20 @@ pub struct PrefixFrameworkOptions<U, E> {
     pub commands: Vec<PrefixCommand<U, E>>,
     /// List of additional bot prefixes
     pub additional_prefixes: &'static [&'static str],
+    /// Callback invoked on every message to strip the prefix off an incoming message.
+    ///
+    /// Override this field for dynamic prefixes which change depending on guild or user.
+    ///
+    /// As return value, use the message content with the prefix stripped: ```rust
+    /// msg.content.strip_prefix(my_cool_prefix)
+    /// ```
+    pub dynamic_prefix: Option<
+        for<'a> fn(
+            &'a serenity::Context,
+            &'a serenity::Message,
+            &'a U,
+        ) -> BoxFuture<'a, Option<&'a str>>,
+    >,
     /// Treat a bot mention (a ping) like a prefix
     pub mention_as_prefix: bool,
     /// Provide a callback to be invoked before every command. The command will only be executed
@@ -117,6 +131,7 @@ impl<U, E> Default for PrefixFrameworkOptions<U, E> {
         Self {
             commands: Vec::new(),
             additional_prefixes: &[],
+            dynamic_prefix: None,
             mention_as_prefix: true,
             command_check: |_| Box::pin(async { Ok(true) }),
             edit_tracker: None,
