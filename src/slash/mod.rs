@@ -20,7 +20,7 @@ pub async fn send_slash_reply<U, E>(
     let crate::CreateReply {
         content,
         embed,
-        attachments: _,
+        attachments,
         ephemeral,
     } = reply;
 
@@ -30,13 +30,17 @@ pub async fn send_slash_reply<U, E>(
 
     if has_sent_initial_response {
         ctx.interaction
-            .edit_original_interaction_response(ctx.discord, |f| {
+            .create_followup_message(ctx.discord, |f| {
                 if let Some(content) = content {
                     f.content(content);
                 }
                 if let Some(embed) = embed {
-                    f.add_embed(embed);
+                    f.embed(|f| {
+                        *f = embed;
+                        f
+                    });
                 }
+                f.add_files(attachments);
                 f
             })
             .await?;
