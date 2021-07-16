@@ -29,7 +29,8 @@ impl_parse_consuming!(
     std::num::NonZeroU8 std::num::NonZeroU16 std::num::NonZeroU32
     std::num::NonZeroU64 std::num::NonZeroU128 std::num::NonZeroUsize
     std::path::PathBuf
-    serenity::Message serenity::Member
+    serenity::Channel serenity::GuildChannel serenity::ChannelCategory serenity::Emoji
+    serenity::Member serenity::Message serenity::Role serenity::User
 );
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Hash, Ord, PartialOrd)]
