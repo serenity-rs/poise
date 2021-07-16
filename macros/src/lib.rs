@@ -136,12 +136,12 @@ fn extract_help_from_doc_comments(attrs: &[syn::Attribute]) -> (Option<String>, 
 }
 
 // ngl this is ugly
-// transforms a type of form `Option<T>` into `T`
-fn extract_option_type(t: &syn::Type) -> Option<&syn::Type> {
+// transforms a type of form `OuterType<T>` into `T`
+fn extract_type_parameter<'a>(outer_type: &str, t: &'a syn::Type) -> Option<&'a syn::Type> {
     if let syn::Type::Path(path) = t {
         if path.path.segments.len() == 1 {
             let path = &path.path.segments[0];
-            if path.ident == "Option" {
+            if path.ident == outer_type {
                 if let syn::PathArguments::AngleBracketed(generics) = &path.arguments {
                     if generics.args.len() == 1 {
                         if let syn::GenericArgument::Type(t) = &generics.args[0] {
@@ -153,6 +153,14 @@ fn extract_option_type(t: &syn::Type) -> Option<&syn::Type> {
         }
     }
     None
+}
+
+fn extract_option_type(t: &syn::Type) -> Option<&syn::Type> {
+    extract_type_parameter("Option", t)
+}
+
+fn extract_vec_type(t: &syn::Type) -> Option<&syn::Type> {
+    extract_type_parameter("Vec", t)
 }
 
 fn generate_prefix_command_spec(inv: &Invocation) -> Result<proc_macro2::TokenStream, Error> {
@@ -296,10 +304,11 @@ fn generate_slash_command_spec(inv: &Invocation) -> Result<proc_macro2::TokenStr
             "slash command parameters must have a description",
         ))?;
 
-        let (mut required, type_) = match extract_option_type(&param.type_) {
-            Some(t) => (false, t),
-            None => (true, &param.type_),
-        };
+        let (mut required, type_) =
+            match extract_option_type(&param.type_).or_else(|| extract_vec_type(&param.type_)) {
+                Some(t) => (false, t),
+                None => (true, &param.type_),
+            };
 
         // Don't require user to input a value for flags - use false as default value (see below)
         if param.more.flag {
@@ -309,7 +318,7 @@ fn generate_slash_command_spec(inv: &Invocation) -> Result<proc_macro2::TokenStr
         let param_name = &param.name;
         parameter_builders.push((
             quote::quote! {
-                |o| (&&std::marker::PhantomData::<#type_>).create(o)
+                |o| (&&&&&std::marker::PhantomData::<#type_>).create(o)
                     .required(#required)
                     .name(stringify!(#param_name))
                     .description(#description)
@@ -364,7 +373,7 @@ fn generate_slash_command_spec(inv: &Invocation) -> Result<proc_macro2::TokenStr
                 inner(::poise::Context::Slash(ctx), #( #param_names, )*).await
             }),
             parameters: {
-                use ::poise::SlashArgument;
+                use ::poise::SlashArgumentHack;
                 vec![ #( #parameter_builders, )* ]
             },
             options: ::poise::SlashCommandOptions {
