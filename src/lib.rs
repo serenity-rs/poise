@@ -38,7 +38,11 @@ pub mod serenity_prelude {
         client::bridge::gateway::*,
         client::*,
         http::*,
-        model::{event::*, interactions::*, prelude::*},
+        model::{
+            event::*,
+            interactions::{application_command::*, *},
+            prelude::*,
+        },
         prelude::*,
         utils::*,
         Error,

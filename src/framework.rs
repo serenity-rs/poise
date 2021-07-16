@@ -401,7 +401,7 @@ impl<U, E> Framework<U, E> {
     async fn dispatch_interaction(
         &self,
         ctx: &serenity::Context,
-        interaction: &serenity::Interaction,
+        interaction: &serenity::ApplicationCommandInteraction,
         name: &str,
         options: &[serenity::ApplicationCommandInteractionDataOption],
     ) {
@@ -526,13 +526,16 @@ impl<U, E> Framework<U, E> {
                     }
                 }
             }
-            Event::InteractionCreate { interaction } => {
-                if let Some(data) = &interaction.data {
-                    self.dispatch_interaction(&ctx, &interaction, &data.name, &data.options)
-                        .await;
-                } else {
-                    println!("Warning: interaction has no data");
-                }
+            Event::InteractionCreate {
+                interaction: serenity::Interaction::ApplicationCommand(interaction),
+            } => {
+                self.dispatch_interaction(
+                    &ctx,
+                    &interaction,
+                    &interaction.data.name,
+                    &interaction.data.options,
+                )
+                .await;
             }
             _ => {}
         }

@@ -220,7 +220,7 @@ macro_rules! _parse_slash {
             .ok_or($crate::SlashArgError::CommandStructureMismatch("expected argument value"))?;
             Some(
                 (&&&&&std::marker::PhantomData::<$type>)
-                .extract($ctx, $guild_id, $channel_id, arg)
+                .extract($ctx, $guild_id, Some($channel_id), arg)
                 .await?
             )
         } else {

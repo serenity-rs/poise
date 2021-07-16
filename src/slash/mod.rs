@@ -39,10 +39,7 @@ pub async fn send_slash_reply<U, E>(
                     f.content(content);
                 }
                 if let Some(embed) = embed {
-                    f.embed(|f| {
-                        *f = embed;
-                        f
-                    });
+                    f.add_embed(embed);
                 }
                 f.add_files(attachments);
                 f
@@ -57,7 +54,7 @@ pub async fn send_slash_reply<U, E>(
                             r.content(content);
                         }
                         if let Some(embed) = embed {
-                            r.set_embed(embed);
+                            r.add_embed(embed);
                         }
                         if let Some(allowed_mentions) = &ctx.framework.options().allowed_mentions {
                             r.allowed_mentions(|m| {

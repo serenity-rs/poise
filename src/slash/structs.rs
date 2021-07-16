@@ -5,7 +5,7 @@ use crate::{serenity_prelude as serenity, BoxFuture, Framework};
 #[non_exhaustive]
 pub struct SlashContext<'a, U, E> {
     pub discord: &'a serenity::Context,
-    pub interaction: &'a serenity::Interaction,
+    pub interaction: &'a serenity::ApplicationCommandInteraction,
     pub has_sent_initial_response: &'a std::sync::atomic::AtomicBool,
     pub framework: &'a Framework<U, E>,
     pub command: &'a SlashCommand<U, E>,
