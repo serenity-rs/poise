@@ -140,6 +140,15 @@ pub struct PrefixFrameworkOptions<U, E> {
     pub execute_self_messages: bool,
     /// Whether command names should be compared case-insensitively.
     pub case_insensitive_commands: bool,
+    /* // STUB: implement
+    /// Whether to invoke help command when someone sends a message with just a bot mention
+    pub help_when_mentioned: bool,
+    /// The bot's general help command. Currently used for [`Self::help_when_mentioned`].
+    pub help_commmand: Option<PrefixCommand<U, E>>,
+    // /// The bot's help command for individial commands. Currently used when a command group without
+    // /// any specific subcommand is invoked. This command is expected to take the command name as a
+    // /// single parameter
+    // pub command_specific_help_commmand: Option<PrefixCommand<U, E>>, */
 }
 
 impl<U, E> Default for PrefixFrameworkOptions<U, E> {
@@ -154,6 +163,9 @@ impl<U, E> Default for PrefixFrameworkOptions<U, E> {
             broadcast_typing: BroadcastTypingBehavior::None,
             execute_self_messages: false,
             case_insensitive_commands: true,
+            // help_when_mentioned: true,
+            // help_commmand: None,
+            // command_specific_help_commmand: None,
         }
     }
 }
@@ -161,6 +173,7 @@ impl<U, E> Default for PrefixFrameworkOptions<U, E> {
 pub enum BroadcastTypingBehavior {
     /// Don't broadcast typing
     None,
+    // TODO: make Immediate variant maybe?
     /// Broadcast typing after the command has been running for a certain time
     ///
     /// Set duration to zero for immediate typing broadcast

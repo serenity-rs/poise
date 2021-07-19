@@ -38,7 +38,7 @@ impl DelayedTyping {
 }
 
 pub struct Framework<U, E> {
-    prefix: &'static str,
+    prefix: String,
     user_data: once_cell::sync::OnceCell<U>,
     user_data_setup: std::sync::Mutex<
         Option<
@@ -70,7 +70,7 @@ impl<U, E> Framework<U, E> {
     /// setup is not allowed to return Result because there would be no reasonable
     /// course of action on error.
     pub fn new<F>(
-        prefix: &'static str,
+        prefix: String,
         application_id: serenity::ApplicationId,
         user_data_setup: F,
         options: FrameworkOptions<U, E>,
@@ -142,7 +142,7 @@ impl<U, E> Framework<U, E> {
     }
 
     pub fn prefix(&self) -> &str {
-        self.prefix
+        &self.prefix
     }
 
     // Commented out because it feels to specialized, and users will want to insert extra
@@ -186,7 +186,7 @@ impl<U, E> Framework<U, E> {
         ctx: &'a serenity::Context,
         msg: &'a serenity::Message,
     ) -> Option<&'a str> {
-        if let Some(content) = msg.content.strip_prefix(self.prefix) {
+        if let Some(content) = msg.content.strip_prefix(&self.prefix) {
             return Some(content);
         }
 
