@@ -31,6 +31,7 @@ impl_parse_consuming!(
     std::path::PathBuf
     serenity::Channel serenity::GuildChannel serenity::ChannelCategory serenity::Emoji
     serenity::Member serenity::Message serenity::Role serenity::User
+    serenity::ChannelId serenity::UserId serenity::RoleId
 );
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Hash, Ord, PartialOrd)]

@@ -204,10 +204,9 @@ macro_rules! impl_slash_argument {
     };
 }
 impl_slash_argument!(serenity::Member, User);
-// TODO: uncomment when the corresponding Parse impls in serenity are there
-// impl_slash_argument!(serenity::User, User);
-// impl_slash_argument!(serenity::Channel, Channel);
-// impl_slash_argument!(serenity::Role, Role);
+impl_slash_argument!(serenity::User, User);
+impl_slash_argument!(serenity::Channel, Channel);
+impl_slash_argument!(serenity::Role, Role);
 
 #[doc(hidden)]
 #[macro_export]
