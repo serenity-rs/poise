@@ -1,14 +1,13 @@
 use super::*;
 
 #[derive(Clone, PartialEq, Eq, Debug, Default)]
-pub struct KeyValueArgs {
-    pairs: std::collections::HashMap<String, String>,
-}
+pub struct KeyValueArgs(pub std::collections::HashMap<String, String>);
 
 impl KeyValueArgs {
     pub fn get(&self, key: &str) -> Option<&str> {
-        self.pairs.get(key).map(|x| x.as_str())
+        self.0.get(key).map(|x| x.as_str())
     }
+
 
     fn pop_single_key_value_pair<'a>(
         args: &ArgString<'a>,
@@ -62,7 +61,7 @@ impl<'a> PopArgument<'a> for KeyValueArgs {
             pairs.insert(key, value);
         }
 
-        Ok((args, Self { pairs }))
+        Ok((args, Self(pairs)))
     }
 }
 
