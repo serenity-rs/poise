@@ -225,6 +225,14 @@ impl<U, E> FrameworkOptions<U, E> {
     /// builder
     ///
     /// ```rust
+    /// # mod misc {
+    /// #     type Error = Box<dyn std::error::Error + Send + Sync>;
+    /// #     #[poise::command]
+    /// #     pub async fn ping(ctx: poise::PrefixContext<'_, (), Error>) -> Result<(), Error> {
+    /// #         Ok(())
+    /// #     }
+    /// # }
+    /// # use poise::FrameworkOptions;
     /// let mut options = FrameworkOptions::default();
     /// options.command(misc::ping(), |f| f.category("Miscellaneous"));
     /// ```

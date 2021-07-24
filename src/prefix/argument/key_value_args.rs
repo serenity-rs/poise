@@ -90,7 +90,7 @@ fn test_key_value_args() {
         let (args, kv_args) = KeyValueArgs::pop_from(&ArgString(string)).unwrap();
 
         assert_eq!(
-            kv_args.pairs,
+            kv_args.0,
             pairs
                 .iter()
                 .map(|&(k, v)| (k.to_owned(), v.to_owned()))

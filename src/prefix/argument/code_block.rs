@@ -77,7 +77,7 @@ impl<'a> PopArgument<'a> for CodeBlock {
                 code: code_block.to_owned(),
                 language: language.map(|x| x.to_owned()),
             }
-        } else if let Some(code_line) = args.0.strip_prefix("`") {
+        } else if let Some(code_line) = args.0.strip_prefix('`') {
             let code_line_end = code_line.find('`').ok_or(CodeBlockError::Malformed)?;
             rest = &code_line[(code_line_end + 1)..];
             let code_line = &code_line[..code_line_end];

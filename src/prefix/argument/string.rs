@@ -21,11 +21,11 @@ impl<'a> PopArgument<'a> for String {
     /// ```rust
     /// # use poise::{ArgString, PopArgument as _};
     /// assert_eq!(
-    ///     String::sync_pop_from(&ArgString(r#""first arg" secondarg"#)).unwrap().1,
+    ///     String::pop_from(&ArgString(r#""first arg" secondarg"#)).unwrap().1,
     ///     r#"first arg"#
     /// );
     /// assert_eq!(
-    ///     String::sync_pop_from(&ArgString(r#""arg \" with \" quotes \" inside""#)).unwrap().1,
+    ///     String::pop_from(&ArgString(r#""arg \" with \" quotes \" inside""#)).unwrap().1,
     ///     r#"arg " with " quotes " inside"#
     /// );
     /// ```

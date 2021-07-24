@@ -131,13 +131,13 @@ async fn main() -> Result<(), Error> {
         ..Default::default()
     };
 
-    options.command(vote);
-    options.command(getvotes);
-    options.command(help);
-    options.command(register);
+    options.command(vote(), |f| f);
+    options.command(getvotes(), |f| f);
+    options.command(help(), |f| f);
+    options.command(register(), |f| f);
 
     let framework = poise::Framework::new(
-        "~", // prefix
+        "~".to_owned(), // prefix
         serenity::ApplicationId(var("APPLICATION_ID")?.parse()?),
         move |_ctx, _ready, _framework| {
             Box::pin(async move {

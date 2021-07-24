@@ -376,7 +376,7 @@ impl<U, E> Framework<U, E> {
         };
 
         let ctx = prefix::PrefixContext {
-            discord: &ctx,
+            discord: ctx,
             msg,
             framework: self,
             data: self.get_user_data().await,
@@ -422,10 +422,10 @@ impl<U, E> Framework<U, E> {
         let has_sent_initial_response = std::sync::atomic::AtomicBool::new(false);
         let ctx = SlashContext {
             data: self.get_user_data().await,
-            discord: &ctx,
+            discord: ctx,
             framework: self,
             interaction,
-            command: &command,
+            command,
             has_sent_initial_response: &has_sent_initial_response,
         };
 
@@ -469,7 +469,7 @@ impl<U, E> Framework<U, E> {
 
                 let user_data_setup = self.user_data_setup.lock().unwrap().take();
                 if let Some(user_data_setup) = user_data_setup {
-                    match user_data_setup(&ctx, &data_about_bot, self).await {
+                    match user_data_setup(&ctx, data_about_bot, self).await {
                         Ok(user_data) => {
                             let _: Result<_, _> = self.user_data.set(user_data);
                         }
@@ -482,7 +482,7 @@ impl<U, E> Framework<U, E> {
             }
             Event::Message { new_message } => {
                 if let Err(Some((err, ctx))) =
-                    self.dispatch_message(&ctx, &new_message, false).await
+                    self.dispatch_message(&ctx, new_message, false).await
                 {
                     if let Some(on_error) = ctx.command.options.on_error {
                         (on_error)(err, ctx).await;
@@ -531,7 +531,7 @@ impl<U, E> Framework<U, E> {
             } => {
                 self.dispatch_interaction(
                     &ctx,
-                    &interaction,
+                    interaction,
                     &interaction.data.name,
                     &interaction.data.options,
                 )
