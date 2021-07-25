@@ -18,8 +18,8 @@ macro_rules! impl_parse_consuming {
     )* }
 }
 
-// Direct PopArgumentAsync implementation for all known types to avoid the Wrapper indirection for
-// at least some types
+// Direct PopArgumentAsync implementation for all known ArgumentConvert/FromStr types to avoid the
+// Wrapper indirection for at least some types
 impl_parse_consuming!(
     bool char f32 f64 i8 i16 i32 i64 i128 isize u8 u16 u32 u64 u128 usize
     std::net::IpAddr std::net::Ipv4Addr std::net::Ipv6Addr
@@ -32,6 +32,7 @@ impl_parse_consuming!(
     serenity::Channel serenity::GuildChannel serenity::ChannelCategory serenity::Emoji
     serenity::Member serenity::Message serenity::Role serenity::User
     serenity::ChannelId serenity::UserId serenity::RoleId
+    serenity::EmojiIdentifier serenity::ReactionType
 );
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Hash, Ord, PartialOrd)]
