@@ -60,6 +60,8 @@ pub struct SlashCommandOptions<U, E> {
     pub defer_response: Option<bool>,
     /// Whether responses to this command should be ephemeral by default.
     pub ephemeral: bool,
+    /// Permissions which a user needs to have so that the slash command runs.
+    pub required_permissions: serenity::Permissions,
 }
 
 impl<U, E> Default for SlashCommandOptions<U, E> {
@@ -69,6 +71,7 @@ impl<U, E> Default for SlashCommandOptions<U, E> {
             check: None,
             defer_response: None,
             ephemeral: false,
+            required_permissions: serenity::Permissions::empty(),
         }
     }
 }
@@ -141,14 +144,30 @@ pub struct SlashFrameworkOptions<U, E> {
     ///
     /// In some way this is the equivalent of `crate::PrefixFrameworkOptions::broadcast_typing`.
     pub defer_response: bool,
+    /// Invoked when a user tries to execute a slash command but doesn't have the required
+    /// permissions for it.
+    ///
+    /// This handler should be used to reply with some form of error message. If this handler does
+    /// nothing, the user will be shown "Interaction failed" by their Discord client.
+    pub missing_permissions_handler: fn(SlashContext<'_, U, E>) -> BoxFuture<'_, ()>,
 }
 
-impl<U, E> Default for SlashFrameworkOptions<U, E> {
+impl<U: Send + Sync, E> Default for SlashFrameworkOptions<U, E> {
     fn default() -> Self {
         Self {
             commands: Vec::new(),
             command_check: |_| Box::pin(async { Ok(true) }),
             defer_response: false,
+            missing_permissions_handler: |ctx| {
+                Box::pin(async move {
+                    let response = format!(
+                        "You don't have the required permissions for `/{}`",
+                        ctx.command.name
+                    );
+                    let _: Result<_, _> =
+                        crate::send_slash_reply(ctx, |f| f.content(response).ephemeral(true)).await;
+                })
+            },
         }
     }
 }

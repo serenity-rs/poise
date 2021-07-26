@@ -73,6 +73,7 @@ struct CommandAttrArgs {
     slash_command: bool,
     hide_in_help: bool,
     ephemeral: bool,
+    required_permissions: Option<syn::Ident>,
 }
 
 /// Representation of the function parameter attribute arguments
@@ -102,6 +103,7 @@ struct Invocation<'a> {
     description: Option<&'a str>,
     explanation: Option<&'a str>,
     function: &'a syn::ItemFn,
+    required_permissions: &'a syn::Expr,
     more: &'a CommandAttrArgs,
 }
 
@@ -265,6 +267,7 @@ fn generate_prefix_command_spec(inv: &Invocation) -> Result<proc_macro2::TokenSt
     let aliases = &inv.more.aliases.0;
     let hide_in_help = &inv.more.hide_in_help;
     let param_names = inv.parameters.iter().map(|p| &p.name).collect::<Vec<_>>();
+    let required_permissions = inv.required_permissions;
     Ok(quote::quote! {
         ::poise::PrefixCommand {
             name: #command_name,
@@ -285,6 +288,7 @@ fn generate_prefix_command_spec(inv: &Invocation) -> Result<proc_macro2::TokenSt
                 check: #check,
                 on_error: #on_error,
                 hide_in_help: #hide_in_help,
+                required_permissions: #required_permissions,
             }
         }
     })
@@ -356,6 +360,7 @@ fn generate_slash_command_spec(inv: &Invocation) -> Result<proc_macro2::TokenStr
         .collect::<Vec<_>>();
     let defer_response = wrap_option(inv.more.defer_response);
     let ephemeral = inv.more.ephemeral;
+    let required_permissions = inv.required_permissions;
     Ok(quote::quote! {
         ::poise::SlashCommand {
             name: #command_name,
@@ -381,6 +386,7 @@ fn generate_slash_command_spec(inv: &Invocation) -> Result<proc_macro2::TokenStr
                 check: #check,
                 on_error: #on_error,
                 ephemeral: #ephemeral,
+                required_permissions: #required_permissions,
             }
         }
     })
@@ -434,6 +440,11 @@ fn command_inner(args: CommandAttrArgs, mut function: syn::ItemFn) -> Result<Tok
     // Extract the command descriptionss from the function doc comments
     let (description, explanation) = extract_help_from_doc_comments(&function.attrs);
 
+    let required_permissions = match &args.required_permissions {
+        Some(perms) => syn::parse_quote! { poise::serenity_prelude::Permissions::#perms },
+        None => syn::parse_quote! { poise::serenity_prelude::Permissions::empty() },
+    };
+
     let invocation = Invocation {
         command_name: args
             .rename
@@ -446,6 +457,7 @@ fn command_inner(args: CommandAttrArgs, mut function: syn::ItemFn) -> Result<Tok
         explanation: explanation.as_deref(),
         more: &args,
         function: &function,
+        required_permissions: &required_permissions,
     };
     let command_spec = generate_prefix_command_spec(&invocation)?;
     let slash_command_spec = wrap_option(if args.slash_command {

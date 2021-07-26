@@ -37,6 +37,56 @@ impl DelayedTyping {
     }
 }
 
+async fn check_user_permissions<'a, U, E>(
+    ctx: crate::Context<'a, U, E>,
+    required_permissions: serenity::Permissions,
+) -> bool {
+    if required_permissions.is_empty() {
+        return true;
+    }
+
+    let guild_id = match ctx.guild_id() {
+        Some(x) => x,
+        None => return true, // no permission checks in DMs
+    };
+
+    let guild = match ctx.discord().cache.guild(guild_id).await {
+        Some(x) => x,
+        None => return false, // Guild not in cache
+    };
+
+    let channel = match guild.channels.get(&ctx.channel_id()) {
+        Some(serenity::Channel::Guild(channel)) => channel,
+        Some(_other_channel) => {
+            println!(
+                "Warning: guild message was supposedly sent in a non-guild channel. \
+            Denying invocation"
+            );
+            return false;
+        }
+        None => return false,
+    };
+
+    // If member not in cache (probably because presences intent is not enabled), retrieve via HTTP
+    let member = match guild.members.get(&ctx.author().id) {
+        Some(x) => x.clone(),
+        None => match ctx
+            .discord()
+            .http
+            .get_member(guild_id.0, ctx.author().id.0)
+            .await
+        {
+            Ok(member) => member,
+            Err(_) => return false,
+        },
+    };
+
+    match guild.user_permissions_in(channel, &member) {
+        Ok(perms) => perms.contains(required_permissions),
+        Err(_) => false,
+    }
+}
+
 pub struct Framework<U, E> {
     prefix: String,
     user_data: once_cell::sync::OnceCell<U>,
@@ -291,24 +341,33 @@ impl<U, E> Framework<U, E> {
                 command: Some(&command_meta.command),
             };
 
-            match (command
-                .options
-                .check
-                .unwrap_or(self.options.prefix_options.command_check))(prefix_ctx)
+            // Make sure that user has required permissions
+            if !check_user_permissions(
+                crate::Context::Prefix(prefix_ctx),
+                command.options.required_permissions,
+            )
             .await
             {
-                Ok(true) => {}
-                Ok(false) => continue,
-                Err(e) => {
-                    return Err((
-                        e,
-                        prefix::PrefixCommandErrorContext {
-                            command,
-                            ctx: prefix_ctx,
-                            while_checking: true,
-                        },
-                    ));
-                }
+                continue;
+            }
+
+            // Only continue if command check returns true
+            let command_check = command
+                .options
+                .check
+                .unwrap_or(self.options.prefix_options.command_check);
+            let check_passes = command_check(prefix_ctx).await.map_err(|e| {
+                (
+                    e,
+                    prefix::PrefixCommandErrorContext {
+                        command,
+                        ctx: prefix_ctx,
+                        while_checking: true,
+                    },
+                )
+            })?;
+            if !check_passes {
+                continue;
             }
 
             first_matching_command = Some(
@@ -329,7 +388,7 @@ impl<U, E> Framework<U, E> {
 
     /// Returns
     /// - Ok(()) if a command was successfully dispatched and run
-    /// - Err(None) if the message does not match any known command
+    /// - Err(None) if no command was run but no error happened
     /// - Err(Some(error: UserError)) if any user code yielded an error
     async fn dispatch_message<'a>(
         &'a self,
@@ -398,13 +457,15 @@ impl<U, E> Framework<U, E> {
         })
     }
 
-    async fn dispatch_interaction(
-        &self,
-        ctx: &serenity::Context,
-        interaction: &serenity::ApplicationCommandInteraction,
-        name: &str,
-        options: &[serenity::ApplicationCommandInteractionDataOption],
-    ) {
+    async fn dispatch_interaction<'a>(
+        &'a self,
+        ctx: &'a serenity::Context,
+        interaction: &'a serenity::ApplicationCommandInteraction,
+        name: &'a str,
+        options: &'a [serenity::ApplicationCommandInteractionDataOption],
+        // Need to pass this in from outside because of lifetime issues
+        has_sent_initial_response: &'a std::sync::atomic::AtomicBool,
+    ) -> Result<(), (E, SlashCommandErrorContext<'a, U, E>)> {
         let command = match self
             .options
             .slash_options
@@ -415,19 +476,48 @@ impl<U, E> Framework<U, E> {
             Some(x) => x,
             None => {
                 println!("Warning: received unknown interaction \"{}\"", name);
-                return;
+                return Ok(());
             }
         };
 
-        let has_sent_initial_response = std::sync::atomic::AtomicBool::new(false);
         let ctx = SlashContext {
             data: self.get_user_data().await,
             discord: ctx,
             framework: self,
             interaction,
             command,
-            has_sent_initial_response: &has_sent_initial_response,
+            has_sent_initial_response,
         };
+
+        // Make sure that user has required permissions
+        if !check_user_permissions(
+            crate::Context::Slash(ctx),
+            command.options.required_permissions,
+        )
+        .await
+        {
+            (self.options.slash_options.missing_permissions_handler)(ctx).await;
+            return Ok(());
+        }
+
+        // Only continue if command check returns true
+        let command_check = command
+            .options
+            .check
+            .unwrap_or(self.options.slash_options.command_check);
+        let check_passes = command_check(ctx).await.map_err(|e| {
+            (
+                e,
+                slash::SlashCommandErrorContext {
+                    command,
+                    ctx,
+                    while_checking: true,
+                },
+            )
+        })?;
+        if !check_passes {
+            return Ok(());
+        }
 
         if command
             .options
@@ -441,22 +531,16 @@ impl<U, E> Framework<U, E> {
 
         (self.options.pre_command)(Context::Slash(ctx)).await;
 
-        if let Err(e) = (command.action)(ctx, options).await {
-            let error_ctx = SlashCommandErrorContext {
-                command,
-                ctx,
-                while_checking: false,
-            };
-            if let Some(on_error) = command.options.on_error {
-                on_error(e, error_ctx).await;
-            } else {
-                (self.options.on_error)(
-                    e,
-                    ErrorContext::Command(CommandErrorContext::Slash(error_ctx)),
-                )
-                .await;
-            }
-        }
+        (command.action)(ctx, options).await.map_err(|e| {
+            (
+                e,
+                SlashCommandErrorContext {
+                    command,
+                    ctx,
+                    while_checking: false,
+                },
+            )
+        })
     }
 
     async fn event(&self, ctx: serenity::Context, event: Event<'_>)
@@ -481,8 +565,7 @@ impl<U, E> Framework<U, E> {
                 }
             }
             Event::Message { new_message } => {
-                if let Err(Some((err, ctx))) =
-                    self.dispatch_message(&ctx, new_message, false).await
+                if let Err(Some((err, ctx))) = self.dispatch_message(&ctx, new_message, false).await
                 {
                     if let Some(on_error) = ctx.command.options.on_error {
                         (on_error)(err, ctx).await;
@@ -529,13 +612,26 @@ impl<U, E> Framework<U, E> {
             Event::InteractionCreate {
                 interaction: serenity::Interaction::ApplicationCommand(interaction),
             } => {
-                self.dispatch_interaction(
-                    &ctx,
-                    interaction,
-                    &interaction.data.name,
-                    &interaction.data.options,
-                )
-                .await;
+                if let Err((e, error_ctx)) = self
+                    .dispatch_interaction(
+                        &ctx,
+                        interaction,
+                        &interaction.data.name,
+                        &interaction.data.options,
+                        &std::sync::atomic::AtomicBool::new(false),
+                    )
+                    .await
+                {
+                    if let Some(on_error) = error_ctx.command.options.on_error {
+                        on_error(e, error_ctx).await;
+                    } else {
+                        (self.options.on_error)(
+                            e,
+                            ErrorContext::Command(CommandErrorContext::Slash(error_ctx)),
+                        )
+                        .await;
+                    }
+                }
             }
             _ => {}
         }
