@@ -135,24 +135,46 @@ impl<T: TryFrom<i64> + Send + Sync> SlashArgumentHack<T> for &PhantomData<T> {
 }
 
 #[async_trait::async_trait]
-impl SlashArgumentHack<bool> for &&PhantomData<bool> {
+impl SlashArgumentHack<f32> for &&PhantomData<f32> {
     async fn extract(
         self,
         _: &serenity::Context,
         _: Option<serenity::GuildId>,
         _: Option<serenity::ChannelId>,
         value: &serde_json::Value,
-    ) -> Result<bool, SlashArgError> {
-        value
-            .as_bool()
-            .ok_or(SlashArgError::CommandStructureMismatch("expected bool"))
+    ) -> Result<f32, SlashArgError> {
+        Ok(value
+            .as_f64()
+            .ok_or(SlashArgError::CommandStructureMismatch("expected float"))? as f32)
     }
 
     fn create(
         self,
         builder: &mut serenity::CreateApplicationCommandOption,
     ) -> &mut serenity::CreateApplicationCommandOption {
-        builder.kind(serenity::ApplicationCommandOptionType::Boolean)
+        builder.kind(serenity::ApplicationCommandOptionType::Number)
+    }
+}
+
+#[async_trait::async_trait]
+impl SlashArgumentHack<f64> for &&PhantomData<f64> {
+    async fn extract(
+        self,
+        _: &serenity::Context,
+        _: Option<serenity::GuildId>,
+        _: Option<serenity::ChannelId>,
+        value: &serde_json::Value,
+    ) -> Result<f64, SlashArgError> {
+        value
+            .as_f64()
+            .ok_or(SlashArgError::CommandStructureMismatch("expected float"))
+    }
+
+    fn create(
+        self,
+        builder: &mut serenity::CreateApplicationCommandOption,
+    ) -> &mut serenity::CreateApplicationCommandOption {
+        builder.kind(serenity::ApplicationCommandOptionType::Number)
     }
 }
 
