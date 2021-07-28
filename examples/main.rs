@@ -68,6 +68,18 @@ async fn getvotes(
     Ok(())
 }
 
+/// Add two numbers
+#[poise::command(slash_command, track_edits)]
+async fn add(
+    ctx: Context<'_>,
+    #[description = "First operand"] a: f64,
+    #[description = "Second operand"] b: f32,
+) -> Result<(), Error> {
+    poise::say_reply(ctx, format!("Result: {}", a + b as f64)).await?;
+
+    Ok(())
+}
+
 /// Show this help menu
 #[poise::command(track_edits, slash_command)]
 async fn help(
@@ -135,6 +147,7 @@ async fn main() -> Result<(), Error> {
     options.command(getvotes(), |f| f);
     options.command(help(), |f| f);
     options.command(register(), |f| f);
+    options.command(add(), |f| f);
 
     let framework = poise::Framework::new(
         "~".to_owned(), // prefix
