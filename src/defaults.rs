@@ -1,4 +1,4 @@
-use crate::PrefixCommand;
+use crate::serenity_prelude as serenity;
 
 /// This file provides a bunch of utility functions like help menus or error handlers to use as a
 /// starting point for the framework.
@@ -77,7 +77,7 @@ pub async fn help<D, E>(
             slash_commands.iter().any(|c| c.name == command_name)
         };
 
-        let mut categories: Vec<(Option<&str>, Vec<&PrefixCommand<_, _>>)> = Vec::new();
+        let mut categories: Vec<(Option<&str>, Vec<&crate::PrefixCommand<_, _>>)> = Vec::new();
         for cmd_meta in &ctx.framework().options().prefix_options.commands {
             if let Some((_, commands)) = categories
                 .iter_mut()
@@ -125,6 +125,56 @@ pub async fn help<D, E>(
     };
 
     crate::send_reply(ctx, |f| f.content(reply).ephemeral(ephemeral)).await?;
+
+    Ok(())
+}
+
+/// Generic function to register slash commands. Only allows server owners to invoke.
+///
+/// If you want, you can copy paste this help message:
+///
+/// ```ignore
+/// Register slash commands in this guild or globally
+///
+/// Run with no arguments to register in guild, run with argument "global" to register globally.
+/// ```
+pub async fn register_slash_commands<U, E>(
+    ctx: crate::PrefixContext<'_, U, E>,
+    global: bool,
+) -> Result<(), serenity::Error> {
+    let guild = match ctx.msg.guild(ctx.discord).await {
+        Some(x) => x,
+        None => {
+            crate::say_prefix_reply(ctx, "Must be called in guild".into()).await?;
+            return Ok(());
+        }
+    };
+
+    if ctx.msg.author.id != guild.owner_id {
+        crate::say_prefix_reply(ctx, "Can only be used by server owner".into()).await?;
+        return Ok(());
+    }
+
+    let mut commands_builder = serenity::CreateApplicationCommands::default();
+    let commands = &ctx.framework.options().slash_options.commands;
+    for cmd in commands {
+        commands_builder.create_application_command(|f| cmd.create(f));
+    }
+
+    crate::say_prefix_reply(ctx, format!("Registering {} commands...", commands.len())).await?;
+    let json_value = serde_json::Value::Array(commands_builder.0);
+    if global {
+        ctx.discord
+            .http
+            .create_global_application_commands(&json_value)
+            .await?;
+    } else {
+        ctx.discord
+            .http
+            .create_guild_application_commands(guild.id.0, &json_value)
+            .await?;
+    }
+    crate::say_prefix_reply(ctx, "Done!".to_owned()).await?;
 
     Ok(())
 }
