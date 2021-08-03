@@ -221,6 +221,8 @@ pub struct FrameworkOptions<U, E> {
     pub slash_options: crate::SlashFrameworkOptions<U, E>,
     /// Prefix command specific options.
     pub prefix_options: crate::PrefixFrameworkOptions<U, E>,
+    /// User IDs which are allowed to use owners_only commands
+    pub owners: std::collections::HashSet<serenity::UserId>,
 }
 
 impl<U, E> FrameworkOptions<U, E> {
@@ -306,6 +308,7 @@ impl<U: Send + Sync, E: std::fmt::Display + Send> Default for FrameworkOptions<U
             }),
             slash_options: Default::default(),
             prefix_options: Default::default(),
+            owners: Default::default(),
         }
     }
 }

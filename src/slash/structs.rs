@@ -62,6 +62,9 @@ pub struct SlashCommandOptions<U, E> {
     pub ephemeral: bool,
     /// Permissions which a user needs to have so that the slash command runs.
     pub required_permissions: serenity::Permissions,
+    /// If true, only users from the [owners list](crate::FrameworkOptions::owners) may use this
+    /// command.
+    pub owners_only: bool,
 }
 
 impl<U, E> Default for SlashCommandOptions<U, E> {
@@ -72,6 +75,7 @@ impl<U, E> Default for SlashCommandOptions<U, E> {
             defer_response: None,
             ephemeral: false,
             required_permissions: serenity::Permissions::empty(),
+            owners_only: false,
         }
     }
 }

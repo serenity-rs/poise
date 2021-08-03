@@ -41,7 +41,7 @@ pub struct PrefixCommandOptions<U, E> {
     /// If this function returns false, this command will not be executed.
     pub check: Option<fn(PrefixContext<'_, U, E>) -> BoxFuture<'_, Result<bool, E>>>,
     /// Whether to enable edit tracking for commands by default.
-    /// 
+    ///
     /// Note: this won't do anything if `Framework::edit_tracker` isn't set.
     pub track_edits: bool,
     /// Falls back to the framework-specified value on None. See there for documentation.
@@ -49,9 +49,12 @@ pub struct PrefixCommandOptions<U, E> {
     /// Whether to hide this command in help menus.
     pub hide_in_help: bool,
     /// Permissions which users must have to invoke this command.
-    /// 
+    ///
     /// Set to [`serenity::Permissions::empty()`] by default
     pub required_permissions: serenity::Permissions,
+    /// If true, only users from the [owners list](crate::FrameworkOptions::owners) may use this
+    /// command.
+    pub owners_only: bool,
 }
 
 impl<U, E> Default for PrefixCommandOptions<U, E> {
@@ -66,6 +69,7 @@ impl<U, E> Default for PrefixCommandOptions<U, E> {
             broadcast_typing: None,
             hide_in_help: false,
             required_permissions: serenity::Permissions::empty(),
+            owners_only: false,
         }
     }
 }

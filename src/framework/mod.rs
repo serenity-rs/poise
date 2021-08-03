@@ -7,8 +7,8 @@ mod slash;
 use crate::serenity_prelude as serenity;
 use crate::*;
 
-async fn check_user_permissions<'a, U, E>(
-    ctx: crate::Context<'a, U, E>,
+async fn check_permissions<U, E>(
+    ctx: crate::Context<'_, U, E>,
     required_permissions: serenity::Permissions,
 ) -> bool {
     if required_permissions.is_empty() {
@@ -29,8 +29,7 @@ async fn check_user_permissions<'a, U, E>(
         Some(serenity::Channel::Guild(channel)) => channel,
         Some(_other_channel) => {
             println!(
-                "Warning: guild message was supposedly sent in a non-guild channel. \
-            Denying invocation"
+                "Warning: guild message was supposedly sent in a non-guild channel. Denying invocation"
             );
             return false;
         }
@@ -55,6 +54,22 @@ async fn check_user_permissions<'a, U, E>(
         Ok(perms) => perms.contains(required_permissions),
         Err(_) => false,
     }
+}
+
+async fn check_required_permissions_and_owners_only<U, E>(
+    ctx: crate::Context<'_, U, E>,
+    required_permissions: serenity::Permissions,
+    owners_only: bool,
+) -> bool {
+    if owners_only && !ctx.framework().options().owners.contains(&ctx.author().id) {
+        return false;
+    }
+
+    if !check_permissions(ctx, required_permissions).await {
+        return false;
+    }
+
+    true
 }
 
 pub struct Framework<U, E> {
@@ -184,7 +199,7 @@ impl<U, E> Framework<U, E> {
             Event::Ready { data_about_bot } => {
                 *self.bot_id.lock().unwrap() = Some(data_about_bot.user.id);
 
-                let user_data_setup = self.user_data_setup.lock().unwrap().take();
+                let user_data_setup = Option::take(&mut *self.user_data_setup.lock().unwrap());
                 if let Some(user_data_setup) = user_data_setup {
                     match user_data_setup(&ctx, data_about_bot, self).await {
                         Ok(user_data) => {

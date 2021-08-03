@@ -146,9 +146,10 @@ where
         };
 
         // Make sure that user has required permissions
-        if !super::check_user_permissions(
+        if !super::check_required_permissions_and_owners_only(
             crate::Context::Prefix(prefix_ctx),
             command.options.required_permissions,
+            command.options.owners_only,
         )
         .await
         {

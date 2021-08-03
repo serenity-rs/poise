@@ -74,6 +74,7 @@ struct CommandAttrArgs {
     hide_in_help: bool,
     ephemeral: bool,
     required_permissions: Option<syn::Ident>,
+    owners_only: bool,
 }
 
 /// Representation of the function parameter attribute arguments
@@ -268,6 +269,7 @@ fn generate_prefix_command_spec(inv: &Invocation) -> Result<proc_macro2::TokenSt
     let hide_in_help = &inv.more.hide_in_help;
     let param_names = inv.parameters.iter().map(|p| &p.name).collect::<Vec<_>>();
     let required_permissions = inv.required_permissions;
+    let owners_only = inv.more.owners_only;
     Ok(quote::quote! {
         ::poise::PrefixCommand {
             name: #command_name,
@@ -289,6 +291,7 @@ fn generate_prefix_command_spec(inv: &Invocation) -> Result<proc_macro2::TokenSt
                 on_error: #on_error,
                 hide_in_help: #hide_in_help,
                 required_permissions: #required_permissions,
+                owners_only: #owners_only,
             }
         }
     })
@@ -361,6 +364,7 @@ fn generate_slash_command_spec(inv: &Invocation) -> Result<proc_macro2::TokenStr
     let defer_response = wrap_option(inv.more.defer_response);
     let ephemeral = inv.more.ephemeral;
     let required_permissions = inv.required_permissions;
+    let owners_only = inv.more.owners_only;
     Ok(quote::quote! {
         ::poise::SlashCommand {
             name: #command_name,
@@ -387,6 +391,7 @@ fn generate_slash_command_spec(inv: &Invocation) -> Result<proc_macro2::TokenStr
                 on_error: #on_error,
                 ephemeral: #ephemeral,
                 required_permissions: #required_permissions,
+                owners_only: #owners_only,
             }
         }
     })
