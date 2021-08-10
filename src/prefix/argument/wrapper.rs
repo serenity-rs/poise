@@ -4,13 +4,15 @@ macro_rules! impl_parse_consuming {
     ($($t:ty)*) => { $(
         #[async_trait::async_trait]
         impl<'a> PopArgumentAsync<'a> for $t {
-            type Err = <$t as serenity::ArgumentConvert>::Err;
+            type Err = WrapperArgumentParseError<<$t as serenity::ArgumentConvert>::Err>;
 
             async fn async_pop_from(
                 ctx: &serenity::Context,
                 msg: &serenity::Message,
                 args: &ArgString<'a>
             ) -> Result<(ArgString<'a>, Self), Self::Err> {
+                dbg!(&args.0);
+
                 let (args, value) = Wrapper::async_pop_from(ctx, msg, args).await?;
                 Ok((args, value.0))
             }
@@ -38,17 +40,44 @@ impl_parse_consuming!(
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Hash, Ord, PartialOrd)]
 pub struct Wrapper<T>(pub T);
 
+#[derive(Debug)]
+pub enum WrapperArgumentParseError<E> {
+    EmptyArgs(crate::EmptyArgs),
+    ParseError(E),
+}
+
+impl<E: std::fmt::Display> std::fmt::Display for WrapperArgumentParseError<E> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            WrapperArgumentParseError::EmptyArgs(e) => e.fmt(f),
+            WrapperArgumentParseError::ParseError(e) => e.fmt(f),
+        }
+    }
+}
+
+impl<E: std::error::Error + 'static> std::error::Error for WrapperArgumentParseError<E> {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            WrapperArgumentParseError::EmptyArgs(e) => Some(e),
+            WrapperArgumentParseError::ParseError(e) => Some(e),
+        }
+    }
+}
+
 #[async_trait::async_trait]
 impl<'a, T: serenity::ArgumentConvert> PopArgumentAsync<'a> for Wrapper<T> {
-    type Err = T::Err;
+    type Err = WrapperArgumentParseError<T::Err>;
 
     async fn async_pop_from(
         ctx: &serenity::Context,
         msg: &serenity::Message,
         args: &ArgString<'a>,
     ) -> Result<(ArgString<'a>, Self), Self::Err> {
-        let (args, string) = String::pop_from(args).unwrap_or((args.clone(), String::new()));
-        let token = T::convert(ctx, msg.guild_id, Some(msg.channel_id), &string).await?;
+        let (args, string) =
+            String::pop_from(args).map_err(WrapperArgumentParseError::EmptyArgs)?;
+        let token = T::convert(ctx, msg.guild_id, Some(msg.channel_id), &string)
+            .await
+            .map_err(WrapperArgumentParseError::ParseError)?;
         Ok((args, Self(token)))
     }
 }
