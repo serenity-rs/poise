@@ -11,8 +11,6 @@ macro_rules! impl_parse_consuming {
                 msg: &serenity::Message,
                 args: &ArgString<'a>
             ) -> Result<(ArgString<'a>, Self), Self::Err> {
-                dbg!(&args.0);
-
                 let (args, value) = Wrapper::async_pop_from(ctx, msg, args).await?;
                 Ok((args, value.0))
             }
