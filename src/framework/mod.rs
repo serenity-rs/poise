@@ -20,7 +20,7 @@ async fn check_permissions<U, E>(
         None => return true, // no permission checks in DMs
     };
 
-    let guild = match ctx.discord().cache.guild(guild_id).await {
+    let guild = match ctx.discord().cache.guild(guild_id) {
         Some(x) => x,
         None => return false, // Guild not in cache
     };

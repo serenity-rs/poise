@@ -63,8 +63,8 @@ impl<U, E> Context<'_, U, E> {
 
     // Doesn't fit in with the rest of the functions here but it's convenient
     /// Warnings: clones the entire Guild instance out of the cache
-    pub async fn guild(&self) -> Option<serenity::Guild> {
-        self.guild_id()?.to_guild_cached(self.discord()).await
+    pub fn guild(&self) -> Option<serenity::Guild> {
+        self.guild_id()?.to_guild_cached(self.discord())
     }
 
     pub fn created_at(&self) -> chrono::DateTime<chrono::Utc> {

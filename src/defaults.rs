@@ -142,7 +142,7 @@ pub async fn register_slash_commands<U, E>(
     ctx: crate::PrefixContext<'_, U, E>,
     global: bool,
 ) -> Result<(), serenity::Error> {
-    let guild = match ctx.msg.guild(ctx.discord).await {
+    let guild = match ctx.msg.guild(ctx.discord) {
         Some(x) => x,
         None => {
             crate::say_prefix_reply(ctx, "Must be called in guild".into()).await?;
