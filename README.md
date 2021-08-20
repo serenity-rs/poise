@@ -6,6 +6,8 @@ Poise is an opinionated Discord bot framework with a few distinctive features:
 
 I created this framework mainly for personal use ([rustbot](https://github.com/kangalioo/rustbot) and [etternabot](https://github.com/kangalioo/etternabot)). Features are added on demand, since features can be designed better with a concrete use case at hand.
 
+**Warning: API details are subject to change**
+
 # Example
 This is what a sample command definition looks like:
 ```rust
