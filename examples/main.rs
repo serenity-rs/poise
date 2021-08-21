@@ -80,6 +80,78 @@ async fn add(
     Ok(())
 }
 
+#[derive(Debug)]
+enum MyStringChoice {
+    ChoiceA,
+    ChoiceB,
+}
+
+#[serenity::async_trait]
+impl poise::SlashArgument for MyStringChoice {
+    fn create(
+        builder: &mut serenity::CreateApplicationCommandOption,
+    ) -> &mut serenity::CreateApplicationCommandOption {
+        builder
+            .kind(serenity::ApplicationCommandOptionType::String)
+            .add_string_choice("The first choice", "a")
+            .add_string_choice("The second choice", "b")
+    }
+
+    async fn extract(
+        ctx: &serenity::Context,
+        guild: Option<serenity::GuildId>,
+        channel: Option<serenity::ChannelId>,
+        value: &serde_json::Value,
+    ) -> Result<Self, poise::SlashArgError> {
+        let choice_key = value
+            .as_str()
+            .ok_or(poise::SlashArgError::CommandStructureMismatch(
+                "expected string",
+            ))?;
+
+        match choice_key {
+            "a" => Ok(Self::ChoiceA),
+            "b" => Ok(Self::ChoiceB),
+            _ => Err(poise::SlashArgError::CommandStructureMismatch(
+                "unexpected choice key",
+            )),
+        }
+    }
+}
+
+#[derive(Debug)]
+struct InvalidMyStringChoice;
+impl std::fmt::Display for InvalidMyStringChoice {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("You entered a non-existent choice")
+    }
+}
+impl std::error::Error for InvalidMyStringChoice {}
+
+impl std::str::FromStr for MyStringChoice {
+    type Err = InvalidMyStringChoice;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "a" => Ok(Self::ChoiceA),
+            "b" => Ok(Self::ChoiceB),
+            _ => Err(InvalidMyStringChoice),
+        }
+    }
+}
+
+/// Dummy command to test slash command choice parameters
+#[poise::command(slash_command)]
+async fn choice(
+    ctx: Context<'_>,
+    #[description = "The choice you want to choose"] choice: poise::Wrapper<MyStringChoice>,
+) -> Result<(), Error> {
+    let choice = choice.0;
+
+    poise::say_reply(ctx, format!("You entered {:?}", choice)).await?;
+    Ok(())
+}
+
 /// Show this help menu
 #[poise::command(track_edits, slash_command)]
 async fn help(
@@ -148,6 +220,7 @@ async fn main() -> Result<(), Error> {
     options.command(help(), |f| f);
     options.command(register(), |f| f);
     options.command(add(), |f| f);
+    options.command(choice(), |f| f);
 
     let framework = poise::Framework::new(
         "~".to_owned(), // prefix
