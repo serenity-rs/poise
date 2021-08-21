@@ -93,3 +93,22 @@ impl<T: serenity::ArgumentConvert> serenity::ArgumentConvert for Wrapper<T> {
         T::convert(ctx, guild_id, channel_id, s).await.map(Self)
     }
 }
+
+// TODO: this really shouldn't be here but it works for now (until Wrapper is hopefully gone)
+#[async_trait::async_trait]
+impl<T: crate::SlashArgument> crate::SlashArgument for Wrapper<T> {
+    fn create(
+        builder: &mut serenity::CreateApplicationCommandOption,
+    ) -> &mut serenity::CreateApplicationCommandOption {
+        T::create(builder)
+    }
+
+    async fn extract(
+        ctx: &serenity::Context,
+        guild: Option<serenity::GuildId>,
+        channel: Option<serenity::ChannelId>,
+        value: &serde_json::Value,
+    ) -> Result<Self, crate::SlashArgError> {
+        T::extract(ctx, guild, channel, value).await.map(Self)
+    }
+}
