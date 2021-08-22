@@ -21,7 +21,9 @@ pub use reply::*;
 
 pub mod defaults;
 
+pub use async_trait::async_trait;
 pub use poise_macros::*;
+pub use serde_json;
 pub use serenity;
 
 /// This module re-exports a bunch of items from all over serenity. Useful if you can't

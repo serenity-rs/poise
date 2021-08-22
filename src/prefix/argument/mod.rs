@@ -122,6 +122,19 @@ impl std::error::Error for ArgumentParseError {
     }
 }
 
+/// Emitted when the user enters a string that is not recognized by a SlashChoiceParameter-derived
+/// enum
+#[derive(Debug)]
+pub struct InvalidChoice;
+
+impl std::fmt::Display for InvalidChoice {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("You entered a non-existent choice")
+    }
+}
+
+impl std::error::Error for InvalidChoice {}
+
 #[doc(hidden)]
 #[macro_export]
 macro_rules! _parse_prefix {

@@ -1,4 +1,7 @@
 #![allow(unused)] // temporary
+
+mod slash_choice_parameter;
+
 use proc_macro::TokenStream;
 use syn::spanned::Spanned as _;
 
@@ -17,25 +20,7 @@ impl syn::fold::Fold for AllLifetimesToStatic {
     }
 }
 
-enum Error {
-    Syn(syn::Error),
-    Darling(darling::Error),
-}
-impl From<syn::Error> for Error {
-    fn from(x: syn::Error) -> Self {
-        Self::Syn(x)
-    }
-}
-impl From<darling::Error> for Error {
-    fn from(x: darling::Error) -> Self {
-        Self::Darling(x)
-    }
-}
-impl From<(proc_macro2::Span, &'static str)> for Error {
-    fn from(x: (proc_macro2::Span, &'static str)) -> Self {
-        Self::Syn(syn::Error::new(x.0, x.1))
-    }
-}
+type Error = darling::Error;
 
 #[derive(Debug, Default)]
 struct Aliases(Vec<String>);
@@ -229,18 +214,20 @@ fn generate_prefix_command_spec(inv: &Invocation) -> Result<proc_macro2::TokenSt
                         (true, false, false) => Modifier::Lazy,
                         (false, true, false) => Modifier::Rest,
                         (false, false, true) => Modifier::Flag,
-                        _ => return Err((
+                        _ => return Err(syn::Error::new(
                             p.span,
                             "modifiers like #[lazy] or #[rest] currently cannot be used together",
                         )
-                            .into()),
+                        .into()),
                     };
 
                 let type_ = &p.type_;
                 Ok(match modifier {
                     Modifier::Flag => {
                         if p.type_ != syn::parse_quote! { bool } {
-                            return Err((p.type_.span(), "Must use bool for flags").into());
+                            return Err(
+                                syn::Error::new(p.type_.span(), "Must use bool for flags").into()
+                            );
                         }
                         let literal = proc_macro2::Literal::string(&p.name.to_string());
                         quote::quote! { #[flag] (#literal) }
@@ -299,17 +286,21 @@ fn generate_prefix_command_spec(inv: &Invocation) -> Result<proc_macro2::TokenSt
 
 fn generate_slash_command_spec(inv: &Invocation) -> Result<proc_macro2::TokenStream, Error> {
     let command_name = &inv.command_name;
-    let description = inv.description.as_ref().ok_or((
-        inv.function.sig.span(),
-        "slash commands must have a description (doc comment)",
-    ))?;
+    let description = inv.description.as_ref().ok_or_else(|| {
+        syn::Error::new(
+            inv.function.sig.span(),
+            "slash commands must have a description (doc comment)",
+        )
+    })?;
 
     let mut parameter_builders = Vec::new();
     for param in inv.parameters {
-        let description = param.more.description.as_ref().ok_or((
-            param.span,
-            "slash command parameters must have a description",
-        ))?;
+        let description = param.more.description.as_ref().ok_or_else(|| {
+            syn::Error::new(
+                param.span,
+                "slash command parameters must have a description",
+            )
+        })?;
 
         let (mut required, type_) =
             match extract_option_type(&param.type_).or_else(|| extract_vec_type(&param.type_)) {
@@ -400,7 +391,7 @@ fn generate_slash_command_spec(inv: &Invocation) -> Result<proc_macro2::TokenStr
 fn command_inner(args: CommandAttrArgs, mut function: syn::ItemFn) -> Result<TokenStream, Error> {
     // Verify that the function is marked async. Not strictly needed, but avoids confusion
     if function.sig.asyncness.is_none() {
-        return Err((function.sig.span(), "command function must be async").into());
+        return Err(syn::Error::new(function.sig.span(), "command function must be async").into());
     }
 
     // Collect argument names/types/attributes to insert into generated function
@@ -409,12 +400,14 @@ fn command_inner(args: CommandAttrArgs, mut function: syn::ItemFn) -> Result<Tok
         let pattern = match command_param {
             syn::FnArg::Typed(x) => &mut *x,
             syn::FnArg::Receiver(r) => {
-                return Err((r.span(), "self argument is invalid here").into());
+                return Err(syn::Error::new(r.span(), "self argument is invalid here").into());
             }
         };
         let name = match &*pattern.pat {
             syn::Pat::Ident(pat_ident) => &pat_ident.ident,
-            x => return Err((x.span(), "must use an identifier pattern here").into()),
+            x => {
+                return Err(syn::Error::new(x.span(), "must use an identifier pattern here").into())
+            }
         };
 
         let attrs = pattern
@@ -434,7 +427,9 @@ fn command_inner(args: CommandAttrArgs, mut function: syn::ItemFn) -> Result<Tok
 
     let ctx_type = match function.sig.inputs.first() {
         Some(syn::FnArg::Typed(syn::PatType { ty, .. })) => &**ty,
-        _ => return Err((function.sig.span(), "expected a Context parameter").into()),
+        _ => {
+            return Err(syn::Error::new(function.sig.span(), "expected a Context parameter").into())
+        }
     };
     let unit_type = syn::parse_quote! { () };
     let return_type = match &function.sig.output {
@@ -506,9 +501,17 @@ pub fn command(args: TokenStream, function: TokenStream) -> TokenStream {
     let function = syn::parse_macro_input!(function as syn::ItemFn);
 
     match command_inner(args, function) {
-        // Ok(x) => panic!("{}", x),
         Ok(x) => x,
-        Err(Error::Syn(e)) => e.into_compile_error().into(),
-        Err(Error::Darling(e)) => e.write_errors().into(),
+        Err(e) => e.write_errors().into(),
+    }
+}
+
+#[proc_macro_derive(SlashChoiceParameter, attributes(name))]
+pub fn slash_choice_parameter(input: TokenStream) -> TokenStream {
+    let enum_ = syn::parse_macro_input!(input as syn::DeriveInput);
+
+    match slash_choice_parameter::slash_choice_parameter(enum_) {
+        Ok(x) => x,
+        Err(e) => e.write_errors().into(),
     }
 }
