@@ -96,24 +96,6 @@ pub struct SlashCommand<U, E> {
 }
 
 impl<U, E> SlashCommand<U, E> {
-    pub async fn create_in_guild(
-        &self,
-        http: &serenity::Http,
-        guild_id: serenity::GuildId,
-    ) -> Result<serenity::ApplicationCommand, serenity::Error> {
-        guild_id
-            .create_application_command(http, |c| self.create(c))
-            .await
-    }
-
-    pub async fn create_global(
-        &self,
-        http: &serenity::Http,
-    ) -> Result<serenity::ApplicationCommand, serenity::Error> {
-        serenity::ApplicationCommand::create_global_application_command(http, |c| self.create(c))
-            .await
-    }
-
     pub fn create<'a>(
         &self,
         interaction: &'a mut serenity::CreateApplicationCommand,
