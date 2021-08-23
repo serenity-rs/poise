@@ -115,11 +115,20 @@ impl<U, E> Clone for PrefixCommandErrorContext<'_, U, E> {
     }
 }
 
+pub enum Prefix {
+    /// A case-sensitive string literal prefix (passed to [`str::strip_prefix`])
+    Literal(&'static str),
+    /// Regular expression which matches the prefix
+    Regex(regex::Regex),
+}
+
 pub struct PrefixFrameworkOptions<U, E> {
     /// List of bot commands.
     pub commands: Vec<PrefixCommandMeta<U, E>>,
     /// List of additional bot prefixes
-    pub additional_prefixes: &'static [&'static str],
+    // TODO: maybe it would be nicer to have separate fields for literal and regex prefixes
+    // That way, you don't need to wrap every single literal prefix in a long path which looks ugly
+    pub additional_prefixes: Vec<Prefix>,
     /// Callback invoked on every message to strip the prefix off an incoming message.
     ///
     /// Override this field for dynamic prefixes which change depending on guild or user.
@@ -165,7 +174,7 @@ impl<U, E> Default for PrefixFrameworkOptions<U, E> {
     fn default() -> Self {
         Self {
             commands: Vec::new(),
-            additional_prefixes: &[],
+            additional_prefixes: Vec::new(),
             dynamic_prefix: None,
             mention_as_prefix: true,
             command_check: |_| Box::pin(async { Ok(true) }),

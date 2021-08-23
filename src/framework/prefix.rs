@@ -49,7 +49,17 @@ async fn strip_prefix<'a, U, E>(
         .prefix_options
         .additional_prefixes
         .iter()
-        .find_map(|prefix| msg.content.strip_prefix(prefix))
+        .find_map(|prefix| match prefix {
+            crate::Prefix::Literal(prefix) => msg.content.strip_prefix(prefix),
+            crate::Prefix::Regex(prefix) => {
+                let regex_match = prefix.find(&msg.content)?;
+                if regex_match.start() == 0 {
+                    Some(&msg.content[regex_match.end()..])
+                } else {
+                    None
+                }
+            }
+        })
     {
         return Some(content);
     }
