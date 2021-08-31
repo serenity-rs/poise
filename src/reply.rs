@@ -6,6 +6,7 @@ pub struct CreateReply<'a> {
     pub embed: Option<serenity::CreateEmbed>,
     pub attachments: Vec<serenity::AttachmentType<'a>>,
     pub ephemeral: bool,
+    pub components: Option<serenity::CreateComponents>,
 }
 
 impl<'a> CreateReply<'a> {
@@ -25,6 +26,19 @@ impl<'a> CreateReply<'a> {
         let mut embed = serenity::CreateEmbed::default();
         f(&mut embed);
         self.embed = Some(embed);
+        self
+    }
+
+    /// Set an embed for the message.
+    ///
+    /// Any previously set embed will be overwritten.
+    pub fn components(
+        &mut self,
+        f: impl FnOnce(&mut serenity::CreateComponents) -> &mut serenity::CreateComponents,
+    ) -> &mut Self {
+        let mut components = serenity::CreateComponents::default();
+        f(&mut components);
+        self.components = Some(components);
         self
     }
 

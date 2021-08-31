@@ -121,6 +121,7 @@ pub async fn send_prefix_reply<U, E>(
         content,
         embed,
         attachments,
+        components,
         ephemeral: _,
     } = reply;
 
@@ -160,6 +161,14 @@ pub async fn send_prefix_reply<U, E>(
                     f.attachment(attachment);
                 }
 
+                // When components is None, this will still be run to reset the message components
+                f.components(|f| {
+                    if let Some(components) = components {
+                        *f = components;
+                    }
+                    f
+                });
+
                 f
             })
             .await?;
@@ -186,6 +195,12 @@ pub async fn send_prefix_reply<U, E>(
                     m.allowed_mentions(|m| {
                         *m = allowed_mentions.clone();
                         m
+                    });
+                }
+                if let Some(components) = components {
+                    m.components(|c| {
+                        c.0 = components.0;
+                        c
                     });
                 }
 

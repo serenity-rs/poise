@@ -81,6 +81,28 @@ impl<U, E> Context<'_, U, E> {
             Self::Prefix(ctx) => &ctx.msg.author,
         }
     }
+
+    /// Return a ID that uniquely identifies this command invocation.
+    pub fn id(&self) -> u64 {
+        match self {
+            Self::Slash(ctx) => ctx.interaction.id.0,
+            Self::Prefix(ctx) => {
+                let mut id = ctx.msg.id.0;
+                if let Some(edited_timestamp) = ctx.msg.edited_timestamp {
+                    // We replace the 42 datetime bits with msg.timestamp_edited so that the ID is
+                    // unique even after edits
+
+                    // Set existing datetime bits to zero
+                    id &= !0 >> 42;
+
+                    // Calculate Discord's datetime representation (millis since Discord epoch) and
+                    // insert those bits into the ID
+                    id |= ((edited_timestamp.timestamp_millis() - 1420070400000) as u64) << 22;
+                }
+                id
+            }
+        }
+    }
 }
 
 pub enum CommandRef<'a, U, E> {
