@@ -121,6 +121,7 @@ pub async fn send_prefix_reply<U, E>(
         content,
         embed,
         attachments,
+        components,
         ephemeral: _,
     } = reply;
 
@@ -186,6 +187,12 @@ pub async fn send_prefix_reply<U, E>(
                     m.allowed_mentions(|m| {
                         *m = allowed_mentions.clone();
                         m
+                    });
+                }
+                if let Some(components) = components {
+                    m.components(|c| {
+                        c.0 = components.0;
+                        c
                     });
                 }
 

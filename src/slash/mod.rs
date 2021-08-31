@@ -25,6 +25,7 @@ pub async fn send_slash_reply<U, E>(
         content,
         embed,
         attachments,
+        components,
         ephemeral,
     } = reply;
 
@@ -60,6 +61,12 @@ pub async fn send_slash_reply<U, E>(
                             r.allowed_mentions(|m| {
                                 *m = allowed_mentions.clone();
                                 m
+                            });
+                        }
+                        if let Some(components) = components {
+                            r.components(|c| {
+                                c.0 = components.0;
+                                c
                             });
                         }
                         if ephemeral {
