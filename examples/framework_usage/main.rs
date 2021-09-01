@@ -1,103 +1,17 @@
+mod commands;
+
 use poise::serenity_prelude as serenity;
 use std::{collections::HashMap, env::var, sync::Mutex, time::Duration};
 
+// Types used by all command functions
 type Error = Box<dyn std::error::Error + Send + Sync>;
 type Context<'a> = poise::Context<'a, Data, Error>;
 type PrefixContext<'a> = poise::PrefixContext<'a, Data, Error>;
 
+// Custom user data passed to all command functions
 struct Data {
     votes: Mutex<HashMap<String, u32>>,
     owner_id: serenity::UserId,
-}
-
-/// Vote for something
-///
-/// Enter `~vote pumpkin` to vote for pumpkins
-#[poise::command(slash_command)]
-async fn vote(
-    ctx: Context<'_>,
-    #[description = "What to vote for"] choice: String,
-) -> Result<(), Error> {
-    let num_votes = {
-        let mut hash_map = ctx.data().votes.lock().unwrap();
-        let num_votes = hash_map.entry(choice.clone()).or_default();
-        *num_votes += 1;
-        *num_votes
-    };
-
-    let response = format!(
-        "Successfully voted for {0}. {0} now has {1} votes!",
-        choice, num_votes
-    );
-    poise::say_reply(ctx, response).await?;
-    Ok(())
-}
-
-/// Retrieve number of votes
-///
-/// Retrieve the number of votes either in general, or for a specific choice:
-/// ```
-/// ~getvotes
-/// ~getvotes pumpkin
-/// ```
-#[poise::command(slash_command, track_edits, aliases("votes"))]
-async fn getvotes(
-    ctx: Context<'_>,
-    #[description = "Choice to retrieve votes for"] choice: Option<String>,
-) -> Result<(), Error> {
-    if let Some(choice) = choice {
-        let num_votes = *ctx.data().votes.lock().unwrap().get(&choice).unwrap_or(&0);
-        let response = match num_votes {
-            0 => format!("Nobody has voted for {} yet", choice),
-            _ => format!("{} people have voted for {}", num_votes, choice),
-        };
-        poise::say_reply(ctx, response).await?;
-    } else {
-        let mut response = String::new();
-        for (choice, num_votes) in ctx.data().votes.lock().unwrap().iter() {
-            response += &format!("{}: {} votes\n", choice, num_votes);
-        }
-
-        if response.is_empty() {
-            response += "Nobody has voted for anything yet :(";
-        }
-
-        poise::say_reply(ctx, response).await?;
-    };
-
-    Ok(())
-}
-
-/// Add two numbers
-#[poise::command(slash_command, track_edits)]
-async fn add(
-    ctx: Context<'_>,
-    #[description = "First operand"] a: f64,
-    #[description = "Second operand"] b: f32,
-) -> Result<(), Error> {
-    poise::say_reply(ctx, format!("Result: {}", a + b as f64)).await?;
-
-    Ok(())
-}
-
-#[derive(Debug, poise::SlashChoiceParameter)]
-enum MyStringChoice {
-    #[name = "The first choice"]
-    ChoiceA,
-    #[name = "The second choice"]
-    ChoiceB,
-}
-
-/// Dummy command to test slash command choice parameters
-#[poise::command(slash_command)]
-async fn choice(
-    ctx: Context<'_>,
-    #[description = "The choice you want to choose"] choice: poise::Wrapper<MyStringChoice>,
-) -> Result<(), Error> {
-    let choice = choice.0;
-
-    poise::say_reply(ctx, format!("You entered {:?}", choice)).await?;
-    Ok(())
 }
 
 /// Show this help menu
@@ -151,12 +65,13 @@ async fn main() -> Result<(), Error> {
         ..Default::default()
     };
 
-    options.command(vote(), |f| f);
-    options.command(getvotes(), |f| f);
     options.command(help(), |f| f);
     options.command(register(), |f| f);
-    options.command(add(), |f| f);
-    options.command(choice(), |f| f);
+    options.command(commands::vote(), |f| f);
+    options.command(commands::getvotes(), |f| f);
+    options.command(commands::add(), |f| f);
+    options.command(commands::choice(), |f| f);
+    options.command(commands::boop(), |f| f);
 
     let framework = poise::Framework::new(
         "~".to_owned(), // prefix

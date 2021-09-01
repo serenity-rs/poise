@@ -34,11 +34,12 @@ pub use serenity;
 /// use poise::serenity_prelude as serenity;
 /// ```
 pub mod serenity_prelude {
+    #[cfg(feature = "collector")]
+    pub use serenity::collector::*;
     pub use serenity::{
         async_trait,
         builder::*,
-        client::bridge::gateway::*,
-        client::*,
+        client::{bridge::gateway::*, *},
         http::*,
         model::{
             event::*,
