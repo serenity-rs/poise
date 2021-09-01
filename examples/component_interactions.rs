@@ -14,7 +14,6 @@ type Context<'a> = poise::Context<'a, Data, Error>;
 type PrefixContext<'a> = poise::PrefixContext<'a, Data, Error>;
 
 struct Data {
-    //votes: Mutex<HashMap<String, u32>>,
     owner_id: UserId,
 }
 
@@ -122,12 +121,11 @@ async fn main() -> Result<(), Error> {
 
     let framework = poise::Framework::new(
         ",".to_owned(), // prefix
-        ApplicationId(881987798398283806),
+        ApplicationId(var("APPLICATION_ID")?.parse()?),
         move |_ctx, _ready, _framework| {
             Box::pin(async move {
                 Ok(Data {
-                    //votes: Mutex::new(HashMap::new()),
-                    owner_id: UserId(182891574139682816),
+                    owner_id: UserId(var("OWNER_ID")?.parse()?),
                 })
             })
         },
