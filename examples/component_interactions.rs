@@ -136,7 +136,7 @@ async fn main() -> Result<(), Error> {
 
     framework
         .start(serenity::client::ClientBuilder::new(&env::var(
-            "SLASH_RASH",
+            "DISCORD_TOKEN",
         )?))
         .await?;
 
