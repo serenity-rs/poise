@@ -9,7 +9,7 @@ type Context<'a> = poise::Context<'a, Data, Error>;
 type PrefixContext<'a> = poise::PrefixContext<'a, Data, Error>;
 
 // Custom user data passed to all command functions
-struct Data {
+pub struct Data {
     votes: Mutex<HashMap<String, u32>>,
     owner_id: serenity::UserId,
 }

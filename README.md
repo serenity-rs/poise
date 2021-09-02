@@ -25,6 +25,9 @@ pub async fn age(
 }
 ```
 
+For a large example, see the examples/framework_usage folder. Run that example with
+`cargo run --example=framework_usage --features collector`
+
 # About the weird name
 I'm bad at names. Google lists "poise" as a synonym to "serenity" which is the Discord library
 underlying this framework, so that's what I chose.

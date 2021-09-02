@@ -1,5 +1,4 @@
 use crate::{Context, Error};
-use poise::serenity_prelude as serenity;
 
 /// Vote for something
 ///
@@ -72,7 +71,7 @@ pub async fn add(
 }
 
 #[derive(Debug, poise::SlashChoiceParameter)]
-enum MyStringChoice {
+pub enum MyStringChoice {
     #[name = "The first choice"]
     ChoiceA,
     #[name = "The second choice"]
