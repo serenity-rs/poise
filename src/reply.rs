@@ -59,19 +59,48 @@ impl<'a> CreateReply<'a> {
     }
 }
 
+/// Returned from [`send_reply`] to retrieve the sent message object.
+///
+/// For prefix commands, you can retrieve the sent message directly. For slash commands, Discord
+/// requires a network request.
+pub enum ReplyHandle<'a> {
+    Prefix(serenity::Message),
+    Slash {
+        http: &'a serenity::Http,
+        interaction: &'a serenity::ApplicationCommandInteraction,
+    },
+}
+
+impl ReplyHandle<'_> {
+    pub async fn message(self) -> Result<serenity::Message, serenity::Error> {
+        match self {
+            Self::Prefix(msg) => Ok(msg),
+            Self::Slash { http, interaction } => interaction.get_interaction_response(http).await,
+        }
+    }
+}
+
 pub async fn send_reply<U, E>(
     ctx: crate::Context<'_, U, E>,
     builder: impl for<'a, 'b> FnOnce(&'a mut CreateReply<'b>) -> &'a mut CreateReply<'b>,
-) -> Result<(), serenity::Error> {
-    match ctx {
-        crate::Context::Prefix(ctx) => crate::send_prefix_reply(ctx, builder).await,
-        crate::Context::Slash(ctx) => crate::send_slash_reply(ctx, builder).await,
-    }
+) -> Result<ReplyHandle<'_>, serenity::Error> {
+    Ok(match ctx {
+        crate::Context::Prefix(ctx) => {
+            ReplyHandle::Prefix(crate::send_prefix_reply(ctx, builder).await?)
+        }
+        crate::Context::Slash(ctx) => {
+            crate::send_slash_reply(ctx, builder).await?;
+            ReplyHandle::Slash {
+                interaction: &ctx.interaction,
+                http: &ctx.discord.http,
+            }
+        }
+    })
 }
 
 pub async fn say_reply<U, E>(
     ctx: crate::Context<'_, U, E>,
     text: String,
-) -> Result<(), serenity::Error> {
+) -> Result<ReplyHandle<'_>, serenity::Error> {
     send_reply(ctx, |m| m.content(text)).await
 }

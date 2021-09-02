@@ -114,7 +114,7 @@ impl EditTracker {
 pub async fn send_prefix_reply<U, E>(
     ctx: crate::prefix::PrefixContext<'_, U, E>,
     builder: impl for<'a, 'b> FnOnce(&'a mut crate::CreateReply<'b>) -> &'a mut crate::CreateReply<'b>,
-) -> Result<(), serenity::Error> {
+) -> Result<serenity::Message, serenity::Error> {
     let mut reply = crate::CreateReply::default();
     builder(&mut reply);
     let crate::CreateReply {
@@ -145,7 +145,7 @@ pub async fn send_prefix_reply<U, E>(
         .and_then(|t| t.find_bot_response(ctx.msg.id))
         .cloned();
 
-    if let Some(mut response) = existing_response {
+    Ok(if let Some(mut response) = existing_response {
         response
             .edit(ctx.discord, |f| {
                 // Empty string resets content (happens when user replaces text with embed)
@@ -178,8 +178,10 @@ pub async fn send_prefix_reply<U, E>(
             .as_mut()
             .and_then(|t| t.find_bot_response(ctx.msg.id))
         {
-            *response_entry = response;
+            *response_entry = response.clone();
         }
+
+        response
     } else {
         let new_response = ctx
             .msg
@@ -211,15 +213,16 @@ pub async fn send_prefix_reply<U, E>(
             })
             .await?;
         if let Some(track_edits) = &mut lock_edit_tracker() {
-            track_edits.register_response(ctx.msg.clone(), new_response);
+            track_edits.register_response(ctx.msg.clone(), new_response.clone());
         }
-    }
-    Ok(())
+
+        new_response
+    })
 }
 
 pub async fn say_prefix_reply<U, E>(
     ctx: crate::prefix::PrefixContext<'_, U, E>,
     text: String,
-) -> Result<(), serenity::Error> {
+) -> Result<serenity::Message, serenity::Error> {
     send_prefix_reply(ctx, |m| m.content(text)).await
 }
