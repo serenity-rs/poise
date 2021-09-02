@@ -93,54 +93,41 @@ pub async fn choice(
 /// Boop the bot!
 #[poise::command(slash_command, track_edits)]
 pub async fn boop(ctx: Context<'_>) -> Result<(), Error> {
-    let mut boop_count = 1;
-    let uuid_boop = match ctx {
-        Context::Slash(ctx) => ctx.interaction.id.to_string(),
-        Context::Prefix(ctx) => ctx.msg.id.to_string(),
-    };
+    let uuid_boop = ctx.id();
 
     poise::send_reply(ctx, |m| {
-        m.content("I want some boops!".into());
-        m.components(|c| {
+        m.content("I want some boops!".into()).components(|c| {
             c.create_action_row(|ar| {
                 ar.create_button(|b| {
-                    b.style(serenity::ButtonStyle::Primary);
-                    b.label("Boop me!");
-                    b.custom_id(&uuid_boop);
-                    b
+                    b.style(serenity::ButtonStyle::Primary)
+                        .label("Boop me!")
+                        .custom_id(uuid_boop)
                 })
             })
-        });
-        m
+        })
     })
     .await?;
 
-    loop {
-        let uuid_boop = uuid_boop.clone();
-        let mci = serenity::CollectComponentInteraction::new(ctx.discord())
-            .author_id(ctx.author().id)
-            .channel_id(ctx.channel_id())
-            .timeout(std::time::Duration::from_secs(120))
-            .filter(move |mci| mci.data.custom_id == uuid_boop)
-            .await;
+    let mut boop_count = 0;
+    while let Some(mci) = serenity::CollectComponentInteraction::new(ctx.discord())
+        .author_id(ctx.author().id)
+        .channel_id(ctx.channel_id())
+        .timeout(std::time::Duration::from_secs(120))
+        .filter(move |mci| mci.data.custom_id == uuid_boop.to_string())
+        .await
+    {
+        boop_count += 1;
 
-        if let Some(mci) = mci {
-            let mut msg = mci.message.clone().regular().unwrap();
-            msg.edit(ctx.discord(), |m| {
-                m.content(format!("Boop count: {}", boop_count))
-            })
-            .await?;
+        let mut msg = mci.message.clone().regular().unwrap();
+        msg.edit(ctx.discord(), |m| {
+            m.content(format!("Boop count: {}", boop_count))
+        })
+        .await?;
 
-            boop_count += 1;
-
-            mci.create_interaction_response(ctx.discord(), |ir| {
-                ir.kind(serenity::InteractionResponseType::DeferredUpdateMessage)
-            })
-            .await?;
-        } else {
-            println!("Collector returned None, returning.");
-            break;
-        }
+        mci.create_interaction_response(ctx.discord(), |ir| {
+            ir.kind(serenity::InteractionResponseType::DeferredUpdateMessage)
+        })
+        .await?;
     }
 
     Ok(())
