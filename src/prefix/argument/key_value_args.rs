@@ -8,7 +8,6 @@ impl KeyValueArgs {
         self.0.get(key).map(|x| x.as_str())
     }
 
-
     fn pop_single_key_value_pair<'a>(
         args: &ArgString<'a>,
     ) -> Option<(ArgString<'a>, (String, String))> {

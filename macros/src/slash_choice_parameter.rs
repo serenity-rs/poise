@@ -65,7 +65,7 @@ pub fn slash_choice_parameter(input: syn::DeriveInput) -> Result<TokenStream, da
                     .ok_or(poise::SlashArgError::CommandStructureMismatch(
                         "expected u64",
                     ))?;
-                
+
                 match choice_key {
                     #( #indices1 => Ok(Self::#variant_idents), )*
                     _ => Err(poise::SlashArgError::CommandStructureMismatch("out of bounds choice key")),
@@ -83,7 +83,7 @@ pub fn slash_choice_parameter(input: syn::DeriveInput) -> Result<TokenStream, da
 
         impl std::str::FromStr for #enum_ident {
             type Err = poise::InvalidChoice;
-        
+
             fn from_str(s: &str) -> Result<Self, Self::Err> {
                 #(
                     if s.eq_ignore_ascii_case(#display_strings) {

@@ -91,7 +91,7 @@ pub async fn send_reply<U, E>(
         crate::Context::Slash(ctx) => {
             crate::send_slash_reply(ctx, builder).await?;
             ReplyHandle::Slash {
-                interaction: &ctx.interaction,
+                interaction: ctx.interaction,
                 http: &ctx.discord.http,
             }
         }
