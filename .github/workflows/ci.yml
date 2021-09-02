@@ -1,0 +1,71 @@
+on: [push, pull_request]
+
+name: Continuous integration
+
+jobs:
+  test:
+    name: Test Suite
+    runs-on: ${{ matrix.os || 'ubuntu-latest' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        name:
+          - MSRV
+          - stable
+          - beta
+          - nightly
+          - macOS
+          - Windows
+          - no features
+
+        include:
+          - name: MSRV
+            toolchain: 1.41.0
+          - name: beta
+            toolchain: beta
+          - name: nightly
+            toolchain: nightly
+          - name: macOS
+            os: macOS-latest
+          - name: Windows
+            os: windows-latest
+          - name: no features
+            feature_flags: --no-default-features
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ matrix.toolchain || 'stable' }}
+          override: true
+      - run: cargo test ${{ matrix.feature_flags || '--all-features' }}
+
+  fmt:
+    name: Rustfmt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+      - run: rustup component add rustfmt
+      - uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: --all -- --check
+
+  clippy:
+    name: Clippy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+      - run: rustup component add clippy
+      - run: cargo clippy --all-features -- -D warnings
