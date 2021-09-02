@@ -161,6 +161,14 @@ pub async fn send_prefix_reply<U, E>(
                     f.attachment(attachment);
                 }
 
+                // When components is None, this will still be run to reset the message components
+                f.components(|f| {
+                    if let Some(components) = components {
+                        *f = components;
+                    }
+                    f
+                });
+
                 f
             })
             .await?;
