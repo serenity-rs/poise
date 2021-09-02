@@ -12,7 +12,7 @@ pub struct CreateReply<'a> {
 impl<'a> CreateReply<'a> {
     /// Set the content of the message.
     pub fn content(&mut self, content: String) -> &mut Self {
-        self.content = Some(content.to_string());
+        self.content = Some(content);
         self
     }
 
