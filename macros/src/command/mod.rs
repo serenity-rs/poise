@@ -1,5 +1,5 @@
-mod slash;
 mod prefix;
+mod slash;
 
 use proc_macro::TokenStream;
 use syn::spanned::Spanned as _;
@@ -70,6 +70,10 @@ impl darling::FromMeta for Aliases {
 #[derive(Default, Debug, darling::FromMeta)]
 #[darling(default)]
 pub struct CommandAttrArgs {
+    prefix_command: bool,
+    slash_command: bool,
+    context_menu_command: Option<String>,
+
     aliases: Aliases,
     track_edits: bool,
     // broadcast_typing: Option<BroadcastTypingArgs>,
@@ -80,8 +84,6 @@ pub struct CommandAttrArgs {
     on_error: Option<syn::Path>,
     rename: Option<String>,
     discard_spare_arguments: bool,
-    slash_command: bool,
-    context_menu_command: Option<String>,
     hide_in_help: bool,
     ephemeral: bool,
     required_permissions: Option<syn::Ident>,
@@ -214,7 +216,12 @@ pub fn command(
         function: &function,
         required_permissions: &required_permissions,
     };
-    let command_spec = prefix::generate_prefix_command_spec(&invocation)?;
+
+    let prefix_command_spec = wrap_option(if args.prefix_command {
+        Some(prefix::generate_prefix_command_spec(&invocation)?)
+    } else {
+        None
+    });
     let slash_command_spec = wrap_option(if args.slash_command {
         Some(slash::generate_slash_command_spec(&invocation)?)
     } else {
@@ -241,9 +248,8 @@ pub fn command(
         > {
             #function
 
-            use ::poise::serenity_prelude as serenity;
             ::poise::CommandDefinition {
-                prefix: #command_spec,
+                prefix: #prefix_command_spec,
                 slash: #slash_command_spec,
                 context_menu: #context_menu_command_spec,
             }

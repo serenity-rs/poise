@@ -16,7 +16,7 @@ pub struct Data {
 }
 
 /// Show this help menu
-#[poise::command(track_edits, slash_command)]
+#[poise::command(prefix_command, track_edits, slash_command)]
 async fn help(
     ctx: Context<'_>,
     #[description = "Specific command to show help about"] command: Option<String>,
@@ -38,7 +38,7 @@ async fn is_owner(ctx: crate::PrefixContext<'_>) -> Result<bool, Error> {
 /// Register slash commands in this guild or globally
 ///
 /// Run with no arguments to register in guild, run with argument "global" to register globally.
-#[poise::command(check = "is_owner", hide_in_help)]
+#[poise::command(prefix_command, check = "is_owner", hide_in_help)]
 async fn register(ctx: PrefixContext<'_>, #[flag] global: bool) -> Result<(), Error> {
     poise::defaults::register_slash_commands(ctx.into(), global).await?;
 

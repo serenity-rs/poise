@@ -195,14 +195,16 @@ impl<U, E> Clone for ErrorContext<'_, U, E> {
 }
 
 pub struct CommandBuilder<U, E> {
-    prefix_command: crate::PrefixCommandMeta<U, E>,
+    prefix_command: Option<crate::PrefixCommandMeta<U, E>>,
     slash_command: Option<crate::SlashCommand<U, E>>,
     context_menu_command: Option<crate::ContextMenuCommand<U, E>>,
 }
 
 impl<U, E> CommandBuilder<U, E> {
     pub fn category(&mut self, category: &'static str) -> &mut Self {
-        self.prefix_command.category = Some(category);
+        if let Some(prefix_command) = &mut self.prefix_command {
+            prefix_command.category = Some(category);
+        }
         self
     }
 
@@ -219,11 +221,11 @@ impl<U, E> CommandBuilder<U, E> {
             context_menu: context_menu_command,
         } = definition;
 
-        let prefix_command = crate::PrefixCommandMeta {
+        let prefix_command = prefix_command.map(|prefix_command| crate::PrefixCommandMeta {
             command: prefix_command,
             category: None,
             subcommands: Vec::new(),
-        };
+        });
 
         let mut builder = CommandBuilder {
             prefix_command,
@@ -232,7 +234,10 @@ impl<U, E> CommandBuilder<U, E> {
         };
         meta_builder(&mut builder);
 
-        self.prefix_command.subcommands.push(builder.prefix_command);
+        if let (Some(parent), Some(subcommand)) = (&mut self.prefix_command, builder.prefix_command)
+        {
+            parent.subcommands.push(subcommand);
+        }
 
         self
     }
@@ -291,11 +296,11 @@ impl<U, E> FrameworkOptions<U, E> {
             context_menu: context_menu_command,
         } = definition;
 
-        let prefix_command = crate::PrefixCommandMeta {
+        let prefix_command = prefix_command.map(|prefix_command| crate::PrefixCommandMeta {
             command: prefix_command,
             category: None,
             subcommands: Vec::new(),
-        };
+        });
 
         let mut builder = CommandBuilder {
             prefix_command,
@@ -304,8 +309,9 @@ impl<U, E> FrameworkOptions<U, E> {
         };
         meta_builder(&mut builder);
 
-        self.prefix_options.commands.push(builder.prefix_command);
-
+        if let Some(prefix_command) = builder.prefix_command {
+            self.prefix_options.commands.push(prefix_command);
+        }
         if let Some(slash_command) = builder.slash_command {
             self.application_options
                 .commands
@@ -374,7 +380,7 @@ pub enum Arguments<'a> {
 /// Type returned from `#[poise::command]` annotated functions, which contains all of the generated
 /// prefix and application commands
 pub struct CommandDefinition<U, E> {
-    pub prefix: crate::PrefixCommand<U, E>,
+    pub prefix: Option<crate::PrefixCommand<U, E>>,
     pub slash: Option<crate::SlashCommand<U, E>>,
     pub context_menu: Option<crate::ContextMenuCommand<U, E>>,
 }

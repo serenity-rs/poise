@@ -1,9 +1,10 @@
 use crate::{Context, Error};
+use poise::serenity_prelude as serenity;
 
 /// Vote for something
 ///
 /// Enter `~vote pumpkin` to vote for pumpkins
-#[poise::command(slash_command)]
+#[poise::command(prefix_command, slash_command)]
 pub async fn vote(
     ctx: Context<'_>,
     #[description = "What to vote for"] choice: String,
@@ -30,7 +31,7 @@ pub async fn vote(
 /// ~getvotes
 /// ~getvotes pumpkin
 /// ```
-#[poise::command(slash_command, track_edits, aliases("votes"))]
+#[poise::command(prefix_command, track_edits, aliases("votes"), slash_command)]
 pub async fn getvotes(
     ctx: Context<'_>,
     #[description = "Choice to retrieve votes for"] choice: Option<String>,
@@ -59,7 +60,7 @@ pub async fn getvotes(
 }
 
 /// Add two numbers
-#[poise::command(slash_command, track_edits)]
+#[poise::command(prefix_command, track_edits, slash_command)]
 pub async fn add(
     ctx: Context<'_>,
     #[description = "First operand"] a: f64,
@@ -79,7 +80,7 @@ pub enum MyStringChoice {
 }
 
 /// Dummy command to test slash command choice parameters
-#[poise::command(slash_command)]
+#[poise::command(prefix_command, slash_command)]
 pub async fn choice(
     ctx: Context<'_>,
     #[description = "The choice you want to choose"] choice: poise::Wrapper<MyStringChoice>,
@@ -91,7 +92,7 @@ pub async fn choice(
 }
 
 /// Boop the bot!
-#[poise::command(slash_command, track_edits)]
+#[poise::command(prefix_command, track_edits, slash_command)]
 pub async fn boop(ctx: Context<'_>) -> Result<(), Error> {
     let uuid_boop = ctx.id();
 
