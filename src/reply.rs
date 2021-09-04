@@ -11,8 +11,8 @@ pub struct CreateReply<'a> {
 
 impl<'a> CreateReply<'a> {
     /// Set the content of the message.
-    pub fn content(&mut self, content: String) -> &mut Self {
-        self.content = Some(content);
+    pub fn content(&mut self, content: impl Into<String>) -> &mut Self {
+        self.content = Some(content.into());
         self
     }
 
@@ -100,7 +100,7 @@ pub async fn send_reply<U, E>(
 
 pub async fn say_reply<U, E>(
     ctx: crate::Context<'_, U, E>,
-    text: String,
+    text: impl Into<String>,
 ) -> Result<ReplyHandle<'_>, serenity::Error> {
-    send_reply(ctx, |m| m.content(text)).await
+    send_reply(ctx, |m| m.content(text.into())).await
 }

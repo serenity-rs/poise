@@ -88,7 +88,7 @@ pub async fn send_slash_reply<U, E>(
 /// Shorthand of [`send_slash_reply`] with simple text content.
 pub async fn say_slash_reply<U, E>(
     ctx: SlashContext<'_, U, E>,
-    text: String,
+    text: impl Into<String>,
 ) -> Result<(), serenity::Error> {
-    send_slash_reply(ctx, |m| m.content(text)).await
+    send_slash_reply(ctx, |m| m.content(text.into())).await
 }

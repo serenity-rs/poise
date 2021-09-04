@@ -96,7 +96,7 @@ pub async fn boop(ctx: Context<'_>) -> Result<(), Error> {
     let uuid_boop = ctx.id();
 
     poise::send_reply(ctx, |m| {
-        m.content("I want some boops!".into()).components(|c| {
+        m.content("I want some boops!").components(|c| {
             c.create_action_row(|ar| {
                 ar.create_button(|b| {
                     b.style(serenity::ButtonStyle::Primary)

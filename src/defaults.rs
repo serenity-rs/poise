@@ -145,13 +145,13 @@ pub async fn register_slash_commands<U, E>(
     let guild = match ctx.msg.guild(ctx.discord) {
         Some(x) => x,
         None => {
-            crate::say_prefix_reply(ctx, "Must be called in guild".into()).await?;
+            crate::say_prefix_reply(ctx, "Must be called in guild").await?;
             return Ok(());
         }
     };
 
     if ctx.msg.author.id != guild.owner_id {
-        crate::say_prefix_reply(ctx, "Can only be used by server owner".into()).await?;
+        crate::say_prefix_reply(ctx, "Can only be used by server owner").await?;
         return Ok(());
     }
 
