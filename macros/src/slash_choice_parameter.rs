@@ -1,11 +1,7 @@
+//! Implements the #[derive(SlashChoiceParameter)] derive macro
+
 use proc_macro::TokenStream;
 use syn::spanned::Spanned as _;
-
-struct Choice {
-    variant_ident: syn::Ident,
-    display_string: String,
-    id: u64,
-}
 
 /// Representation of the function parameter attribute arguments
 #[derive(Debug, darling::FromMeta)]
@@ -28,7 +24,7 @@ pub fn slash_choice_parameter(input: syn::DeriveInput) -> Result<TokenStream, da
     let mut variant_idents = Vec::new();
     let mut display_strings = Vec::new();
 
-    for (i, variant) in enum_.variants.into_iter().enumerate() {
+    for (_i, variant) in enum_.variants.into_iter().enumerate() {
         if !matches!(&variant.fields, syn::Fields::Unit) {
             return Err(syn::Error::new(
                 variant.fields.span(),
