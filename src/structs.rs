@@ -155,6 +155,20 @@ impl<U, E> Clone for CommandErrorContext<'_, U, E> {
     }
 }
 
+impl<'a, U, E> From<crate::PrefixCommandErrorContext<'a, U, E>> for CommandErrorContext<'a, U, E> {
+    fn from(x: crate::PrefixCommandErrorContext<'a, U, E>) -> Self {
+        Self::Prefix(x)
+    }
+}
+
+impl<'a, U, E> From<crate::ApplicationCommandErrorContext<'a, U, E>>
+    for CommandErrorContext<'a, U, E>
+{
+    fn from(x: crate::ApplicationCommandErrorContext<'a, U, E>) -> Self {
+        Self::Application(x)
+    }
+}
+
 impl<'a, U, E> CommandErrorContext<'a, U, E> {
     pub fn command(&self) -> CommandRef<'_, U, E> {
         match self {
