@@ -122,10 +122,11 @@ impl<U, E> Clone for CommandRef<'_, U, E> {
 impl<U, E> Copy for CommandRef<'_, U, E> {}
 
 impl<U, E> CommandRef<'_, U, E> {
+    /// Yield name of this command, or, if context menu command, the context menu entry label
     pub fn name(self) -> &'static str {
         match self {
             Self::Prefix(x) => x.name,
-            Self::Slash(x) => x.name,
+            Self::Slash(x) => x.chat_input_or_context_menu_name(),
         }
     }
 }
@@ -186,6 +187,7 @@ impl<U, E> Clone for ErrorContext<'_, U, E> {
 pub struct CommandBuilder<U, E> {
     prefix_command: crate::PrefixCommandMeta<U, E>,
     slash_command: Option<crate::SlashCommand<U, E>>,
+    context_menu_command: Option<crate::SlashCommand<U, E>>,
 }
 
 impl<U, E> CommandBuilder<U, E> {
@@ -201,15 +203,22 @@ impl<U, E> CommandBuilder<U, E> {
     ) -> &mut Self {
         // STUB: do slash support
 
+        let crate::CommandDefinition {
+            prefix: prefix_command,
+            slash: slash_command,
+            context_menu: context_menu_command,
+        } = definition;
+
         let prefix_command = crate::PrefixCommandMeta {
-            command: definition.prefix,
+            command: prefix_command,
             category: None,
             subcommands: Vec::new(),
         };
 
         let mut builder = CommandBuilder {
             prefix_command,
-            slash_command: definition.slash,
+            slash_command,
+            context_menu_command,
         };
         meta_builder(&mut builder);
 
@@ -266,15 +275,22 @@ impl<U, E> FrameworkOptions<U, E> {
         definition: crate::CommandDefinition<U, E>,
         meta_builder: impl FnOnce(&mut CommandBuilder<U, E>) -> &mut CommandBuilder<U, E>,
     ) {
+        let crate::CommandDefinition {
+            prefix: prefix_command,
+            slash: slash_command,
+            context_menu: context_menu_command,
+        } = definition;
+
         let prefix_command = crate::PrefixCommandMeta {
-            command: definition.prefix,
+            command: prefix_command,
             category: None,
             subcommands: Vec::new(),
         };
 
         let mut builder = CommandBuilder {
             prefix_command,
-            slash_command: definition.slash,
+            slash_command,
+            context_menu_command,
         };
         meta_builder(&mut builder);
 
@@ -282,6 +298,9 @@ impl<U, E> FrameworkOptions<U, E> {
 
         if let Some(slash_command) = builder.slash_command {
             self.slash_options.commands.push(slash_command);
+        }
+        if let Some(context_menu_command) = builder.context_menu_command {
+            self.slash_options.commands.push(context_menu_command);
         }
     }
 }
@@ -305,7 +324,16 @@ impl<U: Send + Sync, E: std::fmt::Display + Send> Default for FrameworkOptions<U
                             );
                         }
                         ErrorContext::Command(CommandErrorContext::Slash(ctx)) => {
-                            println!("Error in slash command \"{}\": {}", ctx.command.name, error);
+                            match &ctx.command.kind {
+                                crate::SlashCommandKind::ChatInput { name, .. } => {
+                                    println!("Error in slash command \"{}\": {}", name, error)
+                                }
+                                crate::SlashCommandKind::User { name, .. }
+                                | crate::SlashCommandKind::Message { name, .. } => println!(
+                                    "Error in context menu command \"{}\": {}",
+                                    name, error
+                                ),
+                            }
                         }
                     }
                 })
@@ -335,4 +363,5 @@ pub enum Arguments<'a> {
 pub struct CommandDefinition<U, E> {
     pub prefix: crate::PrefixCommand<U, E>,
     pub slash: Option<crate::SlashCommand<U, E>>,
+    pub context_menu: Option<crate::SlashCommand<U, E>>,
 }

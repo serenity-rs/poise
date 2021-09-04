@@ -81,6 +81,7 @@ pub struct CommandAttrArgs {
     rename: Option<String>,
     discard_spare_arguments: bool,
     slash_command: bool,
+    // context_menu_command: Option<String>,
     hide_in_help: bool,
     ephemeral: bool,
     required_permissions: Option<syn::Ident>,
@@ -236,6 +237,7 @@ pub fn command(
             ::poise::CommandDefinition {
                 prefix: #command_spec,
                 slash: #slash_command_spec,
+                context_menu: None, // STUB
             }
         }
     }))

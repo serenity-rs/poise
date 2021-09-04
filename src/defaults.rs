@@ -74,7 +74,10 @@ pub async fn help<D, E>(
     } else {
         let is_also_a_slash_command = |command_name| {
             let slash_commands = &ctx.framework().options().slash_options.commands;
-            slash_commands.iter().any(|c| c.name == command_name)
+            slash_commands.iter().any(|c| match c.kind {
+                crate::SlashCommandKind::ChatInput { name, .. } => name == command_name,
+                _ => false,
+            })
         };
 
         let mut categories: Vec<(Option<&str>, Vec<&crate::PrefixCommand<_, _>>)> = Vec::new();

@@ -82,6 +82,11 @@ impl<U, E> Default for SlashCommandOptions<U, E> {
 
 pub enum SlashCommandKind<U, E> {
     ChatInput {
+        // The name field is duplicated across variants because it has a different semantic meaning:
+        // in ChatInput, it's an identifier without spaces, in context menu variants it's a full
+        // string with special characters etc.
+        // Separating the fields makes it harder to accidentally use the name in a wrong context
+        name: &'static str,
         description: &'static str,
         parameters: Vec<
             fn(
@@ -94,44 +99,58 @@ pub enum SlashCommandKind<U, E> {
         ) -> BoxFuture<'a, Result<(), E>>,
     },
     User {
+        name: &'static str,
         action: fn(SlashContext<'_, U, E>, serenity::User) -> BoxFuture<'_, Result<(), E>>,
     },
     Message {
+        name: &'static str,
         action: fn(SlashContext<'_, U, E>, serenity::Message) -> BoxFuture<'_, Result<(), E>>,
     },
 }
 
 pub struct SlashCommand<U, E> {
-    pub name: &'static str,
     pub options: SlashCommandOptions<U, E>,
     pub kind: SlashCommandKind<U, E>,
 }
 
 impl<U, E> SlashCommand<U, E> {
+    /// If chat input command, yield the command name. If context menu command, yield the context
+    /// menu entry text.
+    pub fn chat_input_or_context_menu_name(&self) -> &'static str {
+        match &self.kind {
+            SlashCommandKind::ChatInput { name, .. } => name,
+            SlashCommandKind::User { name, .. } => name,
+            SlashCommandKind::Message { name, .. } => name,
+        }
+    }
+
     pub fn create<'a>(
         &self,
         interaction: &'a mut serenity::CreateApplicationCommand,
     ) -> &'a mut serenity::CreateApplicationCommand {
-        interaction.name(self.name);
-
         match &self.kind {
             SlashCommandKind::ChatInput {
+                name,
                 description,
                 parameters,
                 action: _,
             } => {
-                interaction.description(description);
+                interaction.name(name).description(description);
                 for create_option in parameters {
                     let mut option = serenity::CreateApplicationCommandOption::default();
                     create_option(&mut option);
                     interaction.add_option(option);
                 }
             }
-            SlashCommandKind::User { action: _ } => {
-                interaction.kind(serenity::ApplicationCommandType::User);
+            SlashCommandKind::User { name, action: _ } => {
+                interaction
+                    .name(name)
+                    .kind(serenity::ApplicationCommandType::User);
             }
-            SlashCommandKind::Message { action: _ } => {
-                interaction.kind(serenity::ApplicationCommandType::Message);
+            SlashCommandKind::Message { name, action: _ } => {
+                interaction
+                    .name(name)
+                    .kind(serenity::ApplicationCommandType::Message);
             }
         }
 
@@ -176,7 +195,7 @@ impl<U: Send + Sync, E> Default for SlashFrameworkOptions<U, E> {
                 Box::pin(async move {
                     let response = format!(
                         "You don't have the required permissions for `/{}`",
-                        ctx.command.name
+                        ctx.command.chat_input_or_context_menu_name()
                     );
                     let _: Result<_, _> =
                         crate::send_slash_reply(ctx, |f| f.content(response).ephemeral(true)).await;

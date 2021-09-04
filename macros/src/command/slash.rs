@@ -78,8 +78,8 @@ pub fn generate_slash_command_spec(
     let owners_only = inv.more.owners_only;
     Ok(quote::quote! {
         ::poise::SlashCommand {
-            name: #command_name,
             kind: ::poise::SlashCommandKind::ChatInput {
+                name: #command_name,
                 description: #description,
                 parameters: {
                     use ::poise::SlashArgumentHack;

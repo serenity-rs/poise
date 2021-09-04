@@ -5,20 +5,18 @@ fn find_matching_slash_command<'a, U, E>(
     interaction: &serenity::ApplicationCommandInteractionData,
 ) -> Option<&'a crate::SlashCommand<U, E>> {
     let commands = &framework.options.slash_options.commands;
-    commands.iter().find(|cmd| {
-        let is_kind_match = match &cmd.kind {
-            crate::SlashCommandKind::ChatInput { .. } => {
-                interaction.kind == serenity::ApplicationCommandType::ChatInput
-            }
-            crate::SlashCommandKind::User { .. } => {
-                interaction.kind == serenity::ApplicationCommandType::User
-            }
-            crate::SlashCommandKind::Message { .. } => {
-                interaction.kind == serenity::ApplicationCommandType::Message
-            }
-        };
-
-        cmd.name == interaction.name && is_kind_match
+    commands.iter().find(|cmd| match &cmd.kind {
+        crate::SlashCommandKind::ChatInput { name, .. } => {
+            name == &interaction.name
+                && interaction.kind == serenity::ApplicationCommandType::ChatInput
+        }
+        crate::SlashCommandKind::User { name, .. } => {
+            name == &interaction.name && interaction.kind == serenity::ApplicationCommandType::User
+        }
+        crate::SlashCommandKind::Message { name, .. } => {
+            name == &interaction.name
+                && interaction.kind == serenity::ApplicationCommandType::Message
+        }
     })
 }
 
@@ -96,14 +94,14 @@ pub async fn dispatch_interaction<'a, U, E>(
         crate::SlashCommandKind::ChatInput { action, .. } => {
             (action)(ctx, &interaction.data.options).await
         }
-        crate::SlashCommandKind::User { action } => match &interaction.data.target {
+        crate::SlashCommandKind::User { action, .. } => match &interaction.data.target {
             Some(serenity::ResolvedTarget::User(user, _)) => (action)(ctx, user.clone()).await,
             _ => {
                 println!("Warning: no user object sent in user context menu interaction");
                 return Ok(());
             }
         },
-        crate::SlashCommandKind::Message { action } => match &interaction.data.target {
+        crate::SlashCommandKind::Message { action, .. } => match &interaction.data.target {
             Some(serenity::ResolvedTarget::Message(msg)) => (action)(ctx, msg.clone()).await,
             _ => {
                 println!("Warning: no message object sent in message context menu interaction");
