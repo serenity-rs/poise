@@ -118,7 +118,7 @@ pub async fn boop(ctx: Context<'_>) -> Result<(), Error> {
     {
         boop_count += 1;
 
-        let mut msg = mci.message.clone().regular().unwrap();
+        let mut msg = mci.message.clone();
         msg.edit(ctx.discord(), |m| {
             m.content(format!("Boop count: {}", boop_count))
         })

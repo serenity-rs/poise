@@ -1,24 +1,41 @@
 use crate::serenity_prelude as serenity;
 
+fn find_matching_slash_command<'a, U, E>(
+    framework: &'a crate::Framework<U, E>,
+    interaction: &serenity::ApplicationCommandInteractionData,
+) -> Option<&'a crate::SlashCommand<U, E>> {
+    let commands = &framework.options.slash_options.commands;
+    commands.iter().find(|cmd| {
+        let is_kind_match = match &cmd.kind {
+            crate::SlashCommandKind::ChatInput { .. } => {
+                interaction.kind == serenity::ApplicationCommandType::ChatInput
+            }
+            crate::SlashCommandKind::User { .. } => {
+                interaction.kind == serenity::ApplicationCommandType::User
+            }
+            crate::SlashCommandKind::Message { .. } => {
+                interaction.kind == serenity::ApplicationCommandType::Message
+            }
+        };
+
+        cmd.name == interaction.name && is_kind_match
+    })
+}
+
 pub async fn dispatch_interaction<'a, U, E>(
     this: &'a super::Framework<U, E>,
     ctx: &'a serenity::Context,
     interaction: &'a serenity::ApplicationCommandInteraction,
-    name: &'a str,
-    options: &'a [serenity::ApplicationCommandInteractionDataOption],
     // Need to pass this in from outside because of lifetime issues
     has_sent_initial_response: &'a std::sync::atomic::AtomicBool,
 ) -> Result<(), (E, crate::SlashCommandErrorContext<'a, U, E>)> {
-    let command = match this
-        .options
-        .slash_options
-        .commands
-        .iter()
-        .find(|cmd| cmd.name == name)
-    {
-        Some(x) => x,
+    let command = match find_matching_slash_command(this, &interaction.data) {
+        Some(value) => value,
         None => {
-            println!("Warning: received unknown interaction \"{}\"", name);
+            println!(
+                "Warning: received unknown interaction \"{}\"",
+                interaction.data.name
+            );
             return Ok(());
         }
     };
@@ -75,7 +92,27 @@ pub async fn dispatch_interaction<'a, U, E>(
 
     (this.options.pre_command)(crate::Context::Slash(ctx)).await;
 
-    (command.action)(ctx, options).await.map_err(|e| {
+    let action_result = match command.kind {
+        crate::SlashCommandKind::ChatInput { action, .. } => {
+            (action)(ctx, &interaction.data.options).await
+        }
+        crate::SlashCommandKind::User { action } => match &interaction.data.target {
+            Some(serenity::ResolvedTarget::User(user, _)) => (action)(ctx, user.clone()).await,
+            _ => {
+                println!("Warning: no user object sent in user context menu interaction");
+                return Ok(());
+            }
+        },
+        crate::SlashCommandKind::Message { action } => match &interaction.data.target {
+            Some(serenity::ResolvedTarget::Message(msg)) => (action)(ctx, msg.clone()).await,
+            _ => {
+                println!("Warning: no message object sent in message context menu interaction");
+                return Ok(());
+            }
+        },
+    };
+
+    action_result.map_err(|e| {
         (
             e,
             crate::SlashCommandErrorContext {

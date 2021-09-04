@@ -1,4 +1,5 @@
 mod commands;
+mod context_menu;
 
 use poise::serenity_prelude as serenity;
 use std::{collections::HashMap, env::var, sync::Mutex, time::Duration};
@@ -72,6 +73,7 @@ async fn main() -> Result<(), Error> {
     options.command(commands::add(), |f| f);
     options.command(commands::choice(), |f| f);
     options.command(commands::boop(), |f| f);
+    options.command(context_menu::user_info(), |f| f);
 
     let framework = poise::Framework::new(
         "~".to_owned(), // prefix

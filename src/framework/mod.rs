@@ -267,8 +267,6 @@ impl<U, E> Framework<U, E> {
                     self,
                     &ctx,
                     interaction,
-                    &interaction.data.name,
-                    &interaction.data.options,
                     &std::sync::atomic::AtomicBool::new(false),
                 )
                 .await

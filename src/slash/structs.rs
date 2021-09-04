@@ -80,19 +80,31 @@ impl<U, E> Default for SlashCommandOptions<U, E> {
     }
 }
 
+pub enum SlashCommandKind<U, E> {
+    ChatInput {
+        description: &'static str,
+        parameters: Vec<
+            fn(
+                &mut serenity::CreateApplicationCommandOption,
+            ) -> &mut serenity::CreateApplicationCommandOption,
+        >,
+        action: for<'a> fn(
+            SlashContext<'a, U, E>,
+            &'a [serenity::ApplicationCommandInteractionDataOption],
+        ) -> BoxFuture<'a, Result<(), E>>,
+    },
+    User {
+        action: fn(SlashContext<'_, U, E>, serenity::User) -> BoxFuture<'_, Result<(), E>>,
+    },
+    Message {
+        action: fn(SlashContext<'_, U, E>, serenity::Message) -> BoxFuture<'_, Result<(), E>>,
+    },
+}
+
 pub struct SlashCommand<U, E> {
     pub name: &'static str,
-    pub description: &'static str,
-    pub action: for<'a> fn(
-        SlashContext<'a, U, E>,
-        &'a [serenity::ApplicationCommandInteractionDataOption],
-    ) -> BoxFuture<'a, Result<(), E>>,
-    pub parameters: Vec<
-        fn(
-            &mut serenity::CreateApplicationCommandOption,
-        ) -> &mut serenity::CreateApplicationCommandOption,
-    >,
     pub options: SlashCommandOptions<U, E>,
+    pub kind: SlashCommandKind<U, E>,
 }
 
 impl<U, E> SlashCommand<U, E> {
@@ -101,12 +113,28 @@ impl<U, E> SlashCommand<U, E> {
         interaction: &'a mut serenity::CreateApplicationCommand,
     ) -> &'a mut serenity::CreateApplicationCommand {
         interaction.name(self.name);
-        interaction.description(self.description);
-        for create_option in &self.parameters {
-            let mut option = serenity::CreateApplicationCommandOption::default();
-            create_option(&mut option);
-            interaction.add_option(option);
+
+        match &self.kind {
+            SlashCommandKind::ChatInput {
+                description,
+                parameters,
+                action: _,
+            } => {
+                interaction.description(description);
+                for create_option in parameters {
+                    let mut option = serenity::CreateApplicationCommandOption::default();
+                    create_option(&mut option);
+                    interaction.add_option(option);
+                }
+            }
+            SlashCommandKind::User { action: _ } => {
+                interaction.kind(serenity::ApplicationCommandType::User);
+            }
+            SlashCommandKind::Message { action: _ } => {
+                interaction.kind(serenity::ApplicationCommandType::Message);
+            }
         }
+
         interaction
     }
 }

@@ -359,22 +359,24 @@ fn generate_slash_command_spec(inv: &Invocation) -> Result<proc_macro2::TokenStr
     Ok(quote::quote! {
         ::poise::SlashCommand {
             name: #command_name,
-            description: #description,
-            action: |ctx, args| Box::pin(async move {
-                // idk why this can't be put in the macro itself (where the lint is triggered) and
-                // why clippy doesn't turn off this lint inside macros in the first place
-                #[allow(clippy::needless_question_mark)]
+            kind: ::poise::SlashCommandKind::ChatInput {
+                description: #description,
+                parameters: {
+                    use ::poise::SlashArgumentHack;
+                    vec![ #( #parameter_builders, )* ]
+                },
+                action: |ctx, args| Box::pin(async move {
+                    // idk why this can't be put in the macro itself (where the lint is triggered) and
+                    // why clippy doesn't turn off this lint inside macros in the first place
+                    #[allow(clippy::needless_question_mark)]
 
-                let ( #( #param_names, )* ) = ::poise::parse_slash_args!(
-                    ctx.discord, ctx.interaction.guild_id, ctx.interaction.channel_id, args =>
-                    #( (#param_names: #param_types), )*
-                ).await?;
+                    let ( #( #param_names, )* ) = ::poise::parse_slash_args!(
+                        ctx.discord, ctx.interaction.guild_id, ctx.interaction.channel_id, args =>
+                        #( (#param_names: #param_types), )*
+                    ).await?;
 
-                inner(::poise::Context::Slash(ctx), #( #param_names, )*).await
-            }),
-            parameters: {
-                use ::poise::SlashArgumentHack;
-                vec![ #( #parameter_builders, )* ]
+                    inner(::poise::Context::Slash(ctx), #( #param_names, )*).await
+                }),
             },
             options: ::poise::SlashCommandOptions {
                 defer_response: #defer_response,
