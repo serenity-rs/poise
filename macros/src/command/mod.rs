@@ -226,20 +226,17 @@ pub fn command(
     let function_name = std::mem::replace(&mut function.sig.ident, syn::parse_quote! { inner });
     let function_visibility = &function.vis;
     Ok(TokenStream::from(quote::quote! {
-        #function_visibility fn #function_name() -> (
-            ::poise::PrefixCommand<
-                <#ctx_type_with_static as poise::_GetGenerics>::U,
-                <#ctx_type_with_static as poise::_GetGenerics>::E,
-            >,
-            Option<::poise::SlashCommand<
-                <#ctx_type_with_static as poise::_GetGenerics>::U,
-                <#ctx_type_with_static as poise::_GetGenerics>::E,
-            >>,
-        ) {
+        #function_visibility fn #function_name() -> ::poise::CommandDefinition<
+            <#ctx_type_with_static as poise::_GetGenerics>::U,
+            <#ctx_type_with_static as poise::_GetGenerics>::E,
+        > {
             #function
 
             use ::poise::serenity_prelude as serenity;
-            (#command_spec, #slash_command_spec)
+            ::poise::CommandDefinition {
+                prefix: #command_spec,
+                slash: #slash_command_spec,
+            }
         }
     }))
 }

@@ -196,25 +196,20 @@ impl<U, E> CommandBuilder<U, E> {
 
     pub fn subcommand(
         &mut self,
-        definition: (
-            crate::PrefixCommand<U, E>,
-            Option<crate::SlashCommand<U, E>>,
-        ),
+        definition: crate::CommandDefinition<U, E>,
         meta_builder: impl FnOnce(&mut Self) -> &mut Self,
     ) -> &mut Self {
         // STUB: do slash support
 
-        let (prefix_command, slash_command) = definition;
-
         let prefix_command = crate::PrefixCommandMeta {
-            command: prefix_command,
+            command: definition.prefix,
             category: None,
             subcommands: Vec::new(),
         };
 
         let mut builder = CommandBuilder {
             prefix_command,
-            slash_command,
+            slash_command: definition.slash,
         };
         meta_builder(&mut builder);
 
@@ -268,23 +263,18 @@ impl<U, E> FrameworkOptions<U, E> {
     /// ```
     pub fn command(
         &mut self,
-        definition: (
-            crate::PrefixCommand<U, E>,
-            Option<crate::SlashCommand<U, E>>,
-        ),
+        definition: crate::CommandDefinition<U, E>,
         meta_builder: impl FnOnce(&mut CommandBuilder<U, E>) -> &mut CommandBuilder<U, E>,
     ) {
-        let (prefix_command, slash_command) = definition;
-
         let prefix_command = crate::PrefixCommandMeta {
-            command: prefix_command,
+            command: definition.prefix,
             category: None,
             subcommands: Vec::new(),
         };
 
         let mut builder = CommandBuilder {
             prefix_command,
-            slash_command,
+            slash_command: definition.slash,
         };
         meta_builder(&mut builder);
 
@@ -338,4 +328,11 @@ impl<U: Send + Sync, E: std::fmt::Display + Send> Default for FrameworkOptions<U
 pub enum Arguments<'a> {
     Prefix(&'a str),
     Slash(&'a [serenity::ApplicationCommandInteractionDataOption]),
+}
+
+/// Type returned from `#[poise::command]` annotated functions, which contains all of the generated
+/// prefix and slash commands
+pub struct CommandDefinition<U, E> {
+    pub prefix: crate::PrefixCommand<U, E>,
+    pub slash: Option<crate::SlashCommand<U, E>>,
 }
