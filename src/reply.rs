@@ -88,8 +88,8 @@ pub async fn send_reply<U, E>(
         crate::Context::Prefix(ctx) => {
             ReplyHandle::Prefix(crate::send_prefix_reply(ctx, builder).await?)
         }
-        crate::Context::Slash(ctx) => {
-            crate::send_slash_reply(ctx, builder).await?;
+        crate::Context::Application(ctx) => {
+            crate::send_application_reply(ctx, builder).await?;
             ReplyHandle::Slash {
                 interaction: ctx.interaction,
                 http: &ctx.discord.http,

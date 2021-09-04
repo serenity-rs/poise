@@ -1,5 +1,5 @@
-mod prefix;
 mod slash;
+mod prefix;
 
 use proc_macro::TokenStream;
 use syn::spanned::Spanned as _;
@@ -81,7 +81,7 @@ pub struct CommandAttrArgs {
     rename: Option<String>,
     discard_spare_arguments: bool,
     slash_command: bool,
-    // context_menu_command: Option<String>,
+    context_menu_command: Option<String>,
     hide_in_help: bool,
     ephemeral: bool,
     required_permissions: Option<syn::Ident>,
@@ -220,6 +220,14 @@ pub fn command(
     } else {
         None
     });
+    let context_menu_command_spec = wrap_option(if let Some(name) = &args.context_menu_command {
+        Some(slash::generate_context_menu_command_spec(
+            &invocation,
+            name,
+        )?)
+    } else {
+        None
+    });
 
     // Needed because we're not allowed to have lifetimes in the hacky use case below
     let ctx_type_with_static = syn::fold::fold_type(&mut AllLifetimesToStatic, ctx_type.clone());
@@ -237,7 +245,7 @@ pub fn command(
             ::poise::CommandDefinition {
                 prefix: #command_spec,
                 slash: #slash_command_spec,
-                context_menu: None, // STUB
+                context_menu: #context_menu_command_spec,
             }
         }
     }))

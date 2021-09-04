@@ -219,10 +219,3 @@ pub async fn send_prefix_reply<U, E>(
         new_response
     })
 }
-
-pub async fn say_prefix_reply<U, E>(
-    ctx: crate::prefix::PrefixContext<'_, U, E>,
-    text: impl Into<String>,
-) -> Result<serenity::Message, serenity::Error> {
-    send_prefix_reply(ctx, |m| m.content(text.into())).await
-}

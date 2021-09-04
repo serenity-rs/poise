@@ -2,6 +2,37 @@ use syn::spanned::Spanned as _;
 
 use super::{extract_option_type, extract_vec_type, wrap_option, Invocation};
 
+fn generate_options(inv: &Invocation) -> proc_macro2::TokenStream {
+    // Box::pin the check and on_error callbacks in order to store them in a struct
+    let check = match &inv.more.check {
+        Some(check) => {
+            quote::quote! { Some(|ctx| Box::pin(#check(ctx.into()))) }
+        }
+        None => quote::quote! { None },
+    };
+    let on_error = match &inv.more.on_error {
+        Some(on_error) => quote::quote! {
+            Some(|err, ctx| Box::pin(#on_error(err, ::poise::CommandErrorContext::Application(ctx))))
+        },
+        None => quote::quote! { None },
+    };
+
+    let defer_response = wrap_option(inv.more.defer_response);
+    let ephemeral = inv.more.ephemeral;
+    let required_permissions = inv.required_permissions;
+    let owners_only = inv.more.owners_only;
+    quote::quote! {
+        ::poise::ApplicationCommandOptions {
+            defer_response: #defer_response,
+            check: #check,
+            on_error: #on_error,
+            ephemeral: #ephemeral,
+            required_permissions: #required_permissions,
+            owners_only: #owners_only,
+        }
+    }
+}
+
 pub fn generate_slash_command_spec(
     inv: &Invocation,
 ) -> Result<proc_macro2::TokenStream, darling::Error> {
@@ -51,18 +82,6 @@ pub fn generate_slash_command_spec(
         .map(|(builder, _)| builder)
         .collect::<Vec<_>>();
 
-    // Box::pin the check and on_error callbacks in order to store them in a struct
-    let check = match &inv.more.check {
-        Some(check) => quote::quote! { Some(|ctx| Box::pin(#check(::poise::Context::Slash(ctx)))) },
-        None => quote::quote! { None },
-    };
-    let on_error = match &inv.more.on_error {
-        Some(on_error) => quote::quote! {
-            Some(|err, ctx| Box::pin(#on_error(err, ::poise::CommandErrorContext::Slash(ctx))))
-        },
-        None => quote::quote! { None },
-    };
-
     let param_names = inv.parameters.iter().map(|p| &p.name).collect::<Vec<_>>();
     let param_types = inv
         .parameters
@@ -72,40 +91,54 @@ pub fn generate_slash_command_spec(
             false => p.type_.clone(),
         })
         .collect::<Vec<_>>();
-    let defer_response = wrap_option(inv.more.defer_response);
-    let ephemeral = inv.more.ephemeral;
-    let required_permissions = inv.required_permissions;
-    let owners_only = inv.more.owners_only;
+    let options = generate_options(inv);
     Ok(quote::quote! {
         ::poise::SlashCommand {
-            kind: ::poise::SlashCommandKind::ChatInput {
-                name: #command_name,
-                description: #description,
-                parameters: {
-                    use ::poise::SlashArgumentHack;
-                    vec![ #( #parameter_builders, )* ]
-                },
-                action: |ctx, args| Box::pin(async move {
-                    // idk why this can't be put in the macro itself (where the lint is triggered) and
-                    // why clippy doesn't turn off this lint inside macros in the first place
-                    #[allow(clippy::needless_question_mark)]
-
-                    let ( #( #param_names, )* ) = ::poise::parse_slash_args!(
-                        ctx.discord, ctx.interaction.guild_id, ctx.interaction.channel_id, args =>
-                        #( (#param_names: #param_types), )*
-                    ).await?;
-
-                    inner(::poise::Context::Slash(ctx), #( #param_names, )*).await
-                }),
+            name: #command_name,
+            description: #description,
+            parameters: {
+                use ::poise::SlashArgumentHack;
+                vec![ #( #parameter_builders, )* ]
             },
-            options: ::poise::SlashCommandOptions {
-                defer_response: #defer_response,
-                check: #check,
-                on_error: #on_error,
-                ephemeral: #ephemeral,
-                required_permissions: #required_permissions,
-                owners_only: #owners_only,
-            }
+            action: |ctx, args| Box::pin(async move {
+                // idk why this can't be put in the macro itself (where the lint is triggered) and
+                // why clippy doesn't turn off this lint inside macros in the first place
+                #[allow(clippy::needless_question_mark)]
+
+                let ( #( #param_names, )* ) = ::poise::parse_slash_args!(
+                    ctx.discord, ctx.interaction.guild_id, ctx.interaction.channel_id, args =>
+                    #( (#param_names: #param_types), )*
+                ).await?;
+
+                inner(ctx.into(), #( #param_names, )*).await
+            }),
+            options: #options,
+        }
+    })
+}
+
+pub fn generate_context_menu_command_spec(
+    inv: &Invocation,
+    name: &str,
+) -> Result<proc_macro2::TokenStream, darling::Error> {
+    if inv.parameters.len() != 1 {
+        return Err(syn::Error::new(
+            inv.function.sig.inputs.span(),
+            "Context menu commands require exactly one parameter",
+        )
+        .into());
+    }
+
+    let param_type = &inv.parameters[0].type_;
+
+    let options = generate_options(inv);
+    Ok(quote::quote! {
+        ::poise::ContextMenuCommand {
+            name: #name,
+            action: <#param_type as ::poise::ContextMenuParameter<_, _>>::to_action(|ctx, value| {
+                Box::pin(async move { inner(ctx.into(), value).await })
+            }),
+            options: #options,
         }
     })
 }

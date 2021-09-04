@@ -4,7 +4,7 @@ use crate::{serenity_prelude as serenity, BoxFuture};
 
 /// Wrapper around either [`SlashContext`] or [`PrefixContext`]
 pub enum Context<'a, U, E> {
-    Slash(crate::SlashContext<'a, U, E>),
+    Application(crate::ApplicationContext<'a, U, E>),
     Prefix(crate::PrefixContext<'a, U, E>),
 }
 impl<U, E> Clone for Context<'_, U, E> {
@@ -13,6 +13,16 @@ impl<U, E> Clone for Context<'_, U, E> {
     }
 }
 impl<U, E> Copy for Context<'_, U, E> {}
+impl<'a, U, E> From<crate::ApplicationContext<'a, U, E>> for Context<'a, U, E> {
+    fn from(x: crate::ApplicationContext<'a, U, E>) -> Self {
+        Self::Application(x)
+    }
+}
+impl<'a, U, E> From<crate::PrefixContext<'a, U, E>> for Context<'a, U, E> {
+    fn from(x: crate::PrefixContext<'a, U, E>) -> Self {
+        Self::Prefix(x)
+    }
+}
 
 // needed for proc macro
 #[doc(hidden)]
@@ -28,35 +38,35 @@ impl<U, E> _GetGenerics for Context<'_, U, E> {
 impl<U, E> Context<'_, U, E> {
     pub fn discord(&self) -> &serenity::Context {
         match self {
-            Self::Slash(ctx) => ctx.discord,
+            Self::Application(ctx) => ctx.discord,
             Self::Prefix(ctx) => ctx.discord,
         }
     }
 
     pub fn framework(&self) -> &crate::Framework<U, E> {
         match self {
-            Self::Slash(ctx) => ctx.framework,
+            Self::Application(ctx) => ctx.framework,
             Self::Prefix(ctx) => ctx.framework,
         }
     }
 
     pub fn data(&self) -> &U {
         match self {
-            Self::Slash(ctx) => ctx.data,
+            Self::Application(ctx) => ctx.data,
             Self::Prefix(ctx) => ctx.data,
         }
     }
 
     pub fn channel_id(&self) -> serenity::ChannelId {
         match self {
-            Self::Slash(ctx) => ctx.interaction.channel_id,
+            Self::Application(ctx) => ctx.interaction.channel_id,
             Self::Prefix(ctx) => ctx.msg.channel_id,
         }
     }
 
     pub fn guild_id(&self) -> Option<serenity::GuildId> {
         match self {
-            Self::Slash(ctx) => ctx.interaction.guild_id,
+            Self::Application(ctx) => ctx.interaction.guild_id,
             Self::Prefix(ctx) => ctx.msg.guild_id,
         }
     }
@@ -69,15 +79,15 @@ impl<U, E> Context<'_, U, E> {
 
     pub fn created_at(&self) -> chrono::DateTime<chrono::Utc> {
         match self {
-            Self::Slash(ctx) => ctx.interaction.id.created_at(),
+            Self::Application(ctx) => ctx.interaction.id.created_at(),
             Self::Prefix(ctx) => ctx.msg.timestamp,
         }
     }
 
-    /// Get the author of the command message or slash command.
+    /// Get the author of the command message or application command.
     pub fn author(&self) -> &serenity::User {
         match self {
-            Self::Slash(ctx) => &ctx.interaction.user,
+            Self::Application(ctx) => &ctx.interaction.user,
             Self::Prefix(ctx) => &ctx.msg.author,
         }
     }
@@ -85,7 +95,7 @@ impl<U, E> Context<'_, U, E> {
     /// Return a ID that uniquely identifies this command invocation.
     pub fn id(&self) -> u64 {
         match self {
-            Self::Slash(ctx) => ctx.interaction.id.0,
+            Self::Application(ctx) => ctx.interaction.id.0,
             Self::Prefix(ctx) => {
                 let mut id = ctx.msg.id.0;
                 if let Some(edited_timestamp) = ctx.msg.edited_timestamp {
@@ -107,14 +117,14 @@ impl<U, E> Context<'_, U, E> {
 
 pub enum CommandRef<'a, U, E> {
     Prefix(&'a crate::PrefixCommand<U, E>),
-    Slash(&'a crate::SlashCommand<U, E>),
+    Application(&'a crate::ApplicationCommand<U, E>),
 }
 
 impl<U, E> Clone for CommandRef<'_, U, E> {
     fn clone(&self) -> Self {
         match *self {
             Self::Prefix(x) => Self::Prefix(x),
-            Self::Slash(x) => Self::Slash(x),
+            Self::Application(x) => Self::Application(x),
         }
     }
 }
@@ -126,21 +136,21 @@ impl<U, E> CommandRef<'_, U, E> {
     pub fn name(self) -> &'static str {
         match self {
             Self::Prefix(x) => x.name,
-            Self::Slash(x) => x.chat_input_or_context_menu_name(),
+            Self::Application(x) => x.slash_or_context_menu_name(),
         }
     }
 }
 
 pub enum CommandErrorContext<'a, U, E> {
     Prefix(crate::PrefixCommandErrorContext<'a, U, E>),
-    Slash(crate::SlashCommandErrorContext<'a, U, E>),
+    Application(crate::ApplicationCommandErrorContext<'a, U, E>),
 }
 
 impl<U, E> Clone for CommandErrorContext<'_, U, E> {
     fn clone(&self) -> Self {
         match self {
             Self::Prefix(x) => Self::Prefix(x.clone()),
-            Self::Slash(x) => Self::Slash(x.clone()),
+            Self::Application(x) => Self::Application(x.clone()),
         }
     }
 }
@@ -149,20 +159,20 @@ impl<'a, U, E> CommandErrorContext<'a, U, E> {
     pub fn command(&self) -> CommandRef<'_, U, E> {
         match self {
             Self::Prefix(x) => CommandRef::Prefix(x.command),
-            Self::Slash(x) => CommandRef::Slash(x.command),
+            Self::Application(x) => CommandRef::Application(x.command),
         }
     }
 
     pub fn while_checking(&self) -> bool {
         match self {
             Self::Prefix(x) => x.while_checking,
-            Self::Slash(x) => x.while_checking,
+            Self::Application(x) => x.while_checking,
         }
     }
     pub fn ctx(&self) -> Context<'a, U, E> {
         match self {
             Self::Prefix(x) => Context::Prefix(x.ctx),
-            Self::Slash(x) => Context::Slash(x.ctx),
+            Self::Application(x) => Context::Application(x.ctx),
         }
     }
 }
@@ -187,7 +197,7 @@ impl<U, E> Clone for ErrorContext<'_, U, E> {
 pub struct CommandBuilder<U, E> {
     prefix_command: crate::PrefixCommandMeta<U, E>,
     slash_command: Option<crate::SlashCommand<U, E>>,
-    context_menu_command: Option<crate::SlashCommand<U, E>>,
+    context_menu_command: Option<crate::ContextMenuCommand<U, E>>,
 }
 
 impl<U, E> CommandBuilder<U, E> {
@@ -243,8 +253,8 @@ pub struct FrameworkOptions<U, E> {
         &'a crate::Framework<U, E>,
         &'a U,
     ) -> BoxFuture<'a, Result<(), E>>,
-    /// Slash command specific options.
-    pub slash_options: crate::SlashFrameworkOptions<U, E>,
+    /// Application command specific options.
+    pub application_options: crate::ApplicationFrameworkOptions<U, E>,
     /// Prefix command specific options.
     pub prefix_options: crate::PrefixFrameworkOptions<U, E>,
     /// User IDs which are allowed to use owners_only commands
@@ -252,8 +262,8 @@ pub struct FrameworkOptions<U, E> {
 }
 
 impl<U, E> FrameworkOptions<U, E> {
-    /// Add a command definition, which can include a prefix implementation and a slash
-    /// implementation, to the framework.
+    /// Add a command definition, which can include a prefix implementation, slash implementation,
+    /// and context menu implementation, to the framework.
     ///
     /// To define subcommands or other meta information, pass a closure that calls the command
     /// builder
@@ -297,10 +307,14 @@ impl<U, E> FrameworkOptions<U, E> {
         self.prefix_options.commands.push(builder.prefix_command);
 
         if let Some(slash_command) = builder.slash_command {
-            self.slash_options.commands.push(slash_command);
+            self.application_options
+                .commands
+                .push(crate::ApplicationCommand::Slash(slash_command));
         }
         if let Some(context_menu_command) = builder.context_menu_command {
-            self.slash_options.commands.push(context_menu_command);
+            self.application_options
+                .commands
+                .push(crate::ApplicationCommand::ContextMenu(context_menu_command));
         }
     }
 }
@@ -323,15 +337,14 @@ impl<U: Send + Sync, E: std::fmt::Display + Send> Default for FrameworkOptions<U
                                 &ctx.command.name, &ctx.ctx.msg.content, error
                             );
                         }
-                        ErrorContext::Command(CommandErrorContext::Slash(ctx)) => {
-                            match &ctx.command.kind {
-                                crate::SlashCommandKind::ChatInput { name, .. } => {
-                                    println!("Error in slash command \"{}\": {}", name, error)
+                        ErrorContext::Command(CommandErrorContext::Application(ctx)) => {
+                            match &ctx.command {
+                                crate::ApplicationCommand::Slash(cmd) => {
+                                    println!("Error in slash command \"{}\": {}", cmd.name, error)
                                 }
-                                crate::SlashCommandKind::User { name, .. }
-                                | crate::SlashCommandKind::Message { name, .. } => println!(
+                                crate::ApplicationCommand::ContextMenu(cmd) => println!(
                                     "Error in context menu command \"{}\": {}",
-                                    name, error
+                                    cmd.name, error
                                 ),
                             }
                         }
@@ -346,7 +359,7 @@ impl<U: Send + Sync, E: std::fmt::Display + Send> Default for FrameworkOptions<U
                 f.empty_parse().parse(serenity::ParseValue::Users);
                 f
             }),
-            slash_options: Default::default(),
+            application_options: Default::default(),
             prefix_options: Default::default(),
             owners: Default::default(),
         }
@@ -359,9 +372,9 @@ pub enum Arguments<'a> {
 }
 
 /// Type returned from `#[poise::command]` annotated functions, which contains all of the generated
-/// prefix and slash commands
+/// prefix and application commands
 pub struct CommandDefinition<U, E> {
     pub prefix: crate::PrefixCommand<U, E>,
     pub slash: Option<crate::SlashCommand<U, E>>,
-    pub context_menu: Option<crate::SlashCommand<U, E>>,
+    pub context_menu: Option<crate::ContextMenuCommand<U, E>>,
 }

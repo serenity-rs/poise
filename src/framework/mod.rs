@@ -271,12 +271,12 @@ impl<U, E> Framework<U, E> {
                 )
                 .await
                 {
-                    if let Some(on_error) = error_ctx.command.options.on_error {
+                    if let Some(on_error) = error_ctx.command.options().on_error {
                         on_error(e, error_ctx).await;
                     } else {
                         (self.options.on_error)(
                             e,
-                            ErrorContext::Command(CommandErrorContext::Slash(error_ctx)),
+                            ErrorContext::Command(CommandErrorContext::Application(error_ctx)),
                         )
                         .await;
                     }

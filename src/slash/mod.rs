@@ -1,4 +1,4 @@
-//! Stores everything specific to slash commands.
+//! Stores everything specific to application commands.
 
 mod structs;
 pub use structs::*;
@@ -8,16 +8,16 @@ pub use argument::*;
 
 use crate::serenity_prelude as serenity;
 
-/// Send a response to an interaction (slash command invocation).
+/// Send a response to an interaction (slash command or context menu command invocation).
 ///
 /// If a response to this interaction has already been sent, a
 /// [followup](serenity::model::interactions::Interaction::create_followup_message) is sent.
-pub async fn send_slash_reply<U, E>(
-    ctx: SlashContext<'_, U, E>,
+pub async fn send_application_reply<U, E>(
+    ctx: ApplicationContext<'_, U, E>,
     builder: impl for<'a, 'b> FnOnce(&'a mut crate::CreateReply<'b>) -> &'a mut crate::CreateReply<'b>,
 ) -> Result<(), serenity::Error> {
     let mut reply = crate::CreateReply {
-        ephemeral: ctx.command.options.ephemeral,
+        ephemeral: ctx.command.options().ephemeral,
         ..Default::default()
     };
     builder(&mut reply);
@@ -83,12 +83,4 @@ pub async fn send_slash_reply<U, E>(
     }
 
     Ok(())
-}
-
-/// Shorthand of [`send_slash_reply`] with simple text content.
-pub async fn say_slash_reply<U, E>(
-    ctx: SlashContext<'_, U, E>,
-    text: impl Into<String>,
-) -> Result<(), serenity::Error> {
-    send_slash_reply(ctx, |m| m.content(text.into())).await
 }

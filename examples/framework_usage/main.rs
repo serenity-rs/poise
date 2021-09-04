@@ -40,7 +40,7 @@ async fn is_owner(ctx: crate::PrefixContext<'_>) -> Result<bool, Error> {
 /// Run with no arguments to register in guild, run with argument "global" to register globally.
 #[poise::command(check = "is_owner", hide_in_help)]
 async fn register(ctx: PrefixContext<'_>, #[flag] global: bool) -> Result<(), Error> {
-    poise::defaults::register_slash_commands(ctx, global).await?;
+    poise::defaults::register_slash_commands(ctx.into(), global).await?;
 
     Ok(())
 }
@@ -74,6 +74,7 @@ async fn main() -> Result<(), Error> {
     options.command(commands::choice(), |f| f);
     options.command(commands::boop(), |f| f);
     options.command(context_menu::user_info(), |f| f);
+    options.command(context_menu::echo(), |f| f);
 
     let framework = poise::Framework::new(
         "~".to_owned(), // prefix

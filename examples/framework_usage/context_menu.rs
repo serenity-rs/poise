@@ -1,7 +1,12 @@
-use crate::{Context, Data, Error};
+use crate::{Context, Error};
 use poise::serenity_prelude as serenity;
 
-pub async fn user_info_inner(ctx: Context<'_>, user: &serenity::User) -> Result<(), Error> {
+/// Query information about a Discord profile
+#[poise::command(context_menu_command = "User information", slash_command)]
+pub async fn user_info(
+    ctx: Context<'_>,
+    #[description = "Discord profile to query information about"] user: serenity::User,
+) -> Result<(), Error> {
     let response = format!(
         "**Name**: {}\n**Created**: {}",
         user.name,
@@ -12,52 +17,12 @@ pub async fn user_info_inner(ctx: Context<'_>, user: &serenity::User) -> Result<
     Ok(())
 }
 
-pub fn user_info() -> poise::CommandDefinition<Data, Error> {
-    poise::CommandDefinition {
-        prefix: poise::PrefixCommand {
-            name: "userinfo",
-            action: |ctx, args| {
-                Box::pin(async move {
-                    let (member,) =
-                        poise::parse_prefix_args!(ctx.discord, ctx.msg, args => (serenity::Member))
-                            .await?;
-                    user_info_inner(Context::Prefix(ctx), &member.user).await
-                })
-            },
-            options: poise::PrefixCommandOptions::default(),
-        },
-        slash: Some(poise::SlashCommand {
-            kind: poise::SlashCommandKind::ChatInput {
-                name: "userinfo",
-                description: "Query information about a Discord profile",
-                action: |ctx, args| {
-                    Box::pin(async move {
-                        // ($ctx:ident, $guild_id:ident, $channel_id:ident, $args:ident => $name:ident: $($type:tt)*) => {
-                        let (member,) = poise::parse_slash_args!(
-                            &ctx.discord, ctx.interaction.guild_id, ctx.interaction.channel_id, args
-                            => (user: serenity::Member)
-                        )
-                        .await?;
-                        user_info_inner(Context::Slash(ctx), &member.user).await
-                    })
-                },
-                parameters: vec![|f| {
-                    f.kind(serenity::ApplicationCommandOptionType::User)
-                        .name("user")
-                        .description("Discord profile to query information about")
-                        .required(true)
-                }],
-            },
-            options: poise::SlashCommandOptions::default(),
-        }),
-        context_menu: Some(poise::SlashCommand {
-            kind: poise::SlashCommandKind::User {
-                name: "User information",
-                action: |ctx, user| {
-                    Box::pin(async move { user_info_inner(Context::Slash(ctx), &user).await })
-                },
-            },
-            options: poise::SlashCommandOptions::default(),
-        }),
-    }
+/// Echo content of a message
+#[poise::command(context_menu_command = "Echo", slash_command)]
+pub async fn echo(
+    ctx: Context<'_>,
+    #[description = "Message to echo (enter a link or ID)"] msg: serenity::Message,
+) -> Result<(), Error> {
+    poise::say_reply(ctx, &msg.content).await?;
+    Ok(())
 }

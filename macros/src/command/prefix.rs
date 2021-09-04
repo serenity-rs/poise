@@ -17,31 +17,15 @@ pub fn generate_prefix_command_spec(
     // Box::pin the check and on_error callbacks in order to store them in a struct
     let check = match &inv.more.check {
         Some(check) => {
-            if inv.more.slash_command {
-                quote::quote! { Some(|ctx| Box::pin(#check(::poise::Context::Prefix(ctx)))) }
-            } else {
-                quote::quote! { Some(|ctx| Box::pin(#check(ctx))) }
-            }
+            quote::quote! { Some(|ctx| Box::pin(#check(ctx.into()))) }
         }
         None => quote::quote! { None },
     };
     let on_error = match &inv.more.on_error {
         Some(on_error) => {
-            if inv.more.slash_command {
-                quote::quote! {
-                    Some(|err, ctx| Box::pin(#on_error(err, ::poise::CommandErrorContext::Prefix(ctx))))
-                }
-            } else {
-                quote::quote! { Some(|err, ctx| Box::pin(#on_error(err, ctx))) }
-            }
+            quote::quote! { Some(|err, ctx| Box::pin(#on_error(err, ctx.into()))) }
         }
         None => quote::quote! { None },
-    };
-
-    let maybe_wrapped_ctx = if inv.more.slash_command {
-        quote::quote! { ::poise::Context::Prefix(ctx) }
-    } else {
-        quote::quote! { ctx }
     };
 
     let wildcard_arg = if inv.more.discard_spare_arguments {
@@ -119,7 +103,7 @@ pub fn generate_prefix_command_spec(
                     #( #param_specs, )*
                     #wildcard_arg
                 ).await?;
-                inner(#maybe_wrapped_ctx, #( #param_names, )* ).await
+                inner(ctx.into(), #( #param_names, )* ).await
             }),
             options: ::poise::PrefixCommandOptions {
                 track_edits: #track_edits,
