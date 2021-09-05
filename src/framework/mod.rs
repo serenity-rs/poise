@@ -72,6 +72,7 @@ async fn check_required_permissions_and_owners_only<U, E>(
     true
 }
 
+/// The main framework struct which stores all data and handles message and interaction dispatch.
 pub struct Framework<U, E> {
     prefix: String,
     user_data: once_cell::sync::OnceCell<U>,
@@ -130,6 +131,10 @@ impl<U, E> Framework<U, E> {
         }
     }
 
+    /// Start the framework.
+    ///
+    /// Takes a `serenity::ClientBuilder`, in which you need to supply the bot token, as well as
+    /// any gateway intents.
     pub async fn start(self, builder: serenity::ClientBuilder<'_>) -> Result<(), serenity::Error>
     where
         U: Send + Sync + 'static,
@@ -168,14 +173,17 @@ impl<U, E> Framework<U, E> {
         Ok(())
     }
 
+    /// Return the stored framework options, including commands.
     pub fn options(&self) -> &FrameworkOptions<U, E> {
         &self.options
     }
 
+    /// Returns the application ID given to the framework on its creation.
     pub fn application_id(&self) -> serenity::ApplicationId {
         self.application_id
     }
 
+    /// Returns the main prefix for prefix commands
     pub fn prefix(&self) -> &str {
         &self.prefix
     }

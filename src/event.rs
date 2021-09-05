@@ -5,6 +5,10 @@ use serde_json::Value;
 use serenity::{client::bridge::gateway::event::*, model::prelude::*};
 use std::collections::HashMap;
 
+/// A [`serenity::prelude::EventHandler`] implementation that wraps every received event into the [`Event`]
+/// enum and propagates it to a callback.
+///
+/// Packaging every event into a singular type can make it easier to pass around and process.
 pub struct EventWrapper<F>(pub F)
 where
     // gotta have this generic bound in the struct as well, or type inference will break down the line
@@ -26,7 +30,11 @@ macro_rules! event {
 			)*
 		}
 
+        /// This enum stores every possible event that a [`serenity::prelude::EventHandler`] can receive.
+        ///
+        /// Passed to the stored callback by [`EventWrapper`].
 		#[allow(clippy::large_enum_variant)]
+        #[allow(missing_docs)]
 		#[derive(Debug, Clone)]
 		pub enum Event<$lt1> {
 			$(
@@ -35,6 +43,7 @@ macro_rules! event {
 		}
 
         impl Event<'_> {
+            /// Return the name of the event type
             pub fn name(&self) -> &'static str {
                 match self {
                     $(

@@ -46,12 +46,19 @@ fn update_message(message: &mut serenity::Message, update: serenity::MessageUpda
     // }
 }
 
+/// Stores messages and the associated bot responses in order to implement poise's edit tracking
+/// feature.
 pub struct EditTracker {
     max_duration: std::time::Duration,
     cache: Vec<(serenity::Message, serenity::Message)>,
 }
 
 impl EditTracker {
+    /// Create an edit tracker which tracks messages for the specified duration.
+    ///
+    /// Note: [`EditTracker`] will only purge messages outside the duration when [`Self::purge`]
+    /// is called. If you supply the created [`EditTracker`] to [`crate::Framework`], the framework
+    /// will take care of that by calling [`Self::purge`] periodically.
     pub fn for_timespan(duration: std::time::Duration) -> parking_lot::RwLock<Self> {
         parking_lot::RwLock::new(Self {
             max_duration: duration,
@@ -82,6 +89,7 @@ impl EditTracker {
         }
     }
 
+    /// Forget all of the messages that are older than the specified duration.
     pub fn purge(&mut self) {
         let max_duration = self.max_duration;
         self.cache.retain(|(user_msg, _)| {
@@ -94,6 +102,7 @@ impl EditTracker {
         });
     }
 
+    /// Given a message by a user, find the corresponding bot response, if one exists and is cached.
     pub fn find_bot_response(
         &mut self,
         user_msg_id: serenity::MessageId,
@@ -105,12 +114,14 @@ impl EditTracker {
         Some(bot_response)
     }
 
-    /// Returns a reference to the bot response that was just registered
+    /// Notify the [`EditTracker`] that the given user message should be associated with the given
+    /// bot response.
     fn register_response(&mut self, user_msg: serenity::Message, bot_response: serenity::Message) {
         self.cache.push((user_msg, bot_response));
     }
 }
 
+/// Prefix-specific reply function. For more details, see [`crate::send_reply`].
 pub async fn send_prefix_reply<U, E>(
     ctx: crate::prefix::PrefixContext<'_, U, E>,
     builder: impl for<'a, 'b> FnOnce(&'a mut crate::CreateReply<'b>) -> &'a mut crate::CreateReply<'b>,

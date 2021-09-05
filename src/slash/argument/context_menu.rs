@@ -3,6 +3,8 @@ use crate::BoxFuture;
 
 /// Implemented for all types that can be used in a context menu command
 pub trait ContextMenuParameter<U, E> {
+    /// Convert an action function pointer that takes Self as an argument into the appropriate
+    /// [`crate::ContextMenuCommandAction`] variant.
     fn to_action(
         action: fn(crate::ApplicationContext<'_, U, E>, Self) -> BoxFuture<'_, Result<(), E>>,
     ) -> crate::ContextMenuCommandAction<U, E>;

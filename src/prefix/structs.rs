@@ -2,16 +2,24 @@
 
 use crate::{serenity_prelude as serenity, BoxFuture, Framework};
 
-/// Passed to command invocations.
+/// Prefix-specific context passed to command invocations.
 ///
 /// Contains the trigger message, the Discord connection management stuff, and the user data.
 pub struct PrefixContext<'a, U, E> {
+    /// Serenity's context, like HTTP or cache
     pub discord: &'a serenity::Context,
+    /// The invoking user message
     pub msg: &'a serenity::Message,
+    /// Read-only reference to the framework
+    ///
+    /// Useful if you need the list of commands, for example for a custom help command
     pub framework: &'a Framework<U, E>,
-    // Option, because otherwise you can't use this struct in a context where there is no command
-    // Example: Etternabot's message listener
+    /// The command object which is the current command
+    ///
+    /// Optional to allow using [`PrefixContext`] in places where there is no command. For example
+    /// Etternabot's message listener
     pub command: Option<&'a PrefixCommand<U, E>>,
+    /// Your custom user data
     pub data: &'a U,
 }
 // manual Copy+Clone implementations because Rust is getting confused about the type parameter
@@ -115,6 +123,7 @@ impl<U, E> Clone for PrefixCommandErrorContext<'_, U, E> {
     }
 }
 
+/// Possible ways to define a command prefix
 pub enum Prefix {
     /// A case-sensitive string literal prefix (passed to [`str::strip_prefix`])
     Literal(&'static str),
@@ -122,6 +131,7 @@ pub enum Prefix {
     Regex(regex::Regex),
 }
 
+/// Prefix-specific framework configuration
 pub struct PrefixFrameworkOptions<U, E> {
     /// List of bot commands.
     pub commands: Vec<PrefixCommandMeta<U, E>>,
@@ -133,7 +143,8 @@ pub struct PrefixFrameworkOptions<U, E> {
     ///
     /// Override this field for dynamic prefixes which change depending on guild or user.
     ///
-    /// As return value, use the message content with the prefix stripped: ```rust
+    /// As return value, use the message content with the prefix stripped:
+    /// ```rust,ignore
     /// msg.content.strip_prefix(my_cool_prefix)
     /// ```
     pub dynamic_prefix: Option<
@@ -189,6 +200,7 @@ impl<U, E> Default for PrefixFrameworkOptions<U, E> {
     }
 }
 
+/// Defines whether and in what way commands send a typing notification
 pub enum BroadcastTypingBehavior {
     /// Don't broadcast typing
     None,

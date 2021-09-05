@@ -11,7 +11,7 @@ use crate::serenity_prelude as serenity;
 /// Send a response to an interaction (slash command or context menu command invocation).
 ///
 /// If a response to this interaction has already been sent, a
-/// [followup](serenity::model::interactions::Interaction::create_followup_message) is sent.
+/// [followup](serenity::ApplicationCommandInteraction::create_followup_message) is sent.
 pub async fn send_application_reply<U, E>(
     ctx: ApplicationContext<'_, U, E>,
     builder: impl for<'a, 'b> FnOnce(&'a mut crate::CreateReply<'b>) -> &'a mut crate::CreateReply<'b>,

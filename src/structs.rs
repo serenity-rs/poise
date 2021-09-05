@@ -2,9 +2,11 @@
 
 use crate::{serenity_prelude as serenity, BoxFuture};
 
-/// Wrapper around either [`SlashContext`] or [`PrefixContext`]
+/// Wrapper around either [`crate::ApplicationContext`] or [`crate::PrefixContext`]
 pub enum Context<'a, U, E> {
+    /// Application command context
     Application(crate::ApplicationContext<'a, U, E>),
+    /// Prefix command context
     Prefix(crate::PrefixContext<'a, U, E>),
 }
 impl<U, E> Clone for Context<'_, U, E> {
@@ -36,6 +38,7 @@ impl<U, E> _GetGenerics for Context<'_, U, E> {
 }
 
 impl<U, E> Context<'_, U, E> {
+    /// Return the stored [`serenity::Context`] within the underlying context type.
     pub fn discord(&self) -> &serenity::Context {
         match self {
             Self::Application(ctx) => ctx.discord,
@@ -43,6 +46,7 @@ impl<U, E> Context<'_, U, E> {
         }
     }
 
+    /// Return a read-only reference to [`crate::Framework`].
     pub fn framework(&self) -> &crate::Framework<U, E> {
         match self {
             Self::Application(ctx) => ctx.framework,
@@ -50,6 +54,7 @@ impl<U, E> Context<'_, U, E> {
         }
     }
 
+    /// Return a reference to your custom user data
     pub fn data(&self) -> &U {
         match self {
             Self::Application(ctx) => ctx.data,
@@ -57,6 +62,7 @@ impl<U, E> Context<'_, U, E> {
         }
     }
 
+    /// Return the channel ID of this context
     pub fn channel_id(&self) -> serenity::ChannelId {
         match self {
             Self::Application(ctx) => ctx.interaction.channel_id,
@@ -64,6 +70,7 @@ impl<U, E> Context<'_, U, E> {
         }
     }
 
+    /// Returns the guild ID of this context, if we are inside a guild
     pub fn guild_id(&self) -> Option<serenity::GuildId> {
         match self {
             Self::Application(ctx) => ctx.interaction.guild_id,
@@ -72,11 +79,14 @@ impl<U, E> Context<'_, U, E> {
     }
 
     // Doesn't fit in with the rest of the functions here but it's convenient
-    /// Warnings: clones the entire Guild instance out of the cache
+    /// Return the guild of this context, if we are inside a guild.
+    ///
+    /// Warning: clones the entire Guild instance out of the cache
     pub fn guild(&self) -> Option<serenity::Guild> {
         self.guild_id()?.to_guild_cached(self.discord())
     }
 
+    /// Return the datetime of the invoking message or interaction
     pub fn created_at(&self) -> chrono::DateTime<chrono::Utc> {
         match self {
             Self::Application(ctx) => ctx.interaction.id.created_at(),
@@ -115,8 +125,11 @@ impl<U, E> Context<'_, U, E> {
     }
 }
 
+/// A reference to either a prefix or application command.
 pub enum CommandRef<'a, U, E> {
+    /// Prefix command
     Prefix(&'a crate::PrefixCommand<U, E>),
+    /// Application command
     Application(&'a crate::ApplicationCommand<U, E>),
 }
 
@@ -141,8 +154,13 @@ impl<U, E> CommandRef<'_, U, E> {
     }
 }
 
+/// Context of an error in user code
+///
+/// Contains slightly different data depending on where the error was raised
 pub enum CommandErrorContext<'a, U, E> {
+    /// Prefix command specific error context
     Prefix(crate::PrefixCommandErrorContext<'a, U, E>),
+    /// Application command specific error context
     Application(crate::ApplicationCommandErrorContext<'a, U, E>),
 }
 
@@ -170,6 +188,7 @@ impl<'a, U, E> From<crate::ApplicationCommandErrorContext<'a, U, E>>
 }
 
 impl<'a, U, E> CommandErrorContext<'a, U, E> {
+    /// Returns a reference to the command during whose execution the error occured.
     pub fn command(&self) -> CommandRef<'_, U, E> {
         match self {
             Self::Prefix(x) => CommandRef::Prefix(x.command),
@@ -177,12 +196,15 @@ impl<'a, U, E> CommandErrorContext<'a, U, E> {
         }
     }
 
+    /// Whether the error occured in a pre-command check or during execution
     pub fn while_checking(&self) -> bool {
         match self {
             Self::Prefix(x) => x.while_checking,
             Self::Application(x) => x.while_checking,
         }
     }
+
+    /// Further command context
     pub fn ctx(&self) -> Context<'a, U, E> {
         match self {
             Self::Prefix(x) => Context::Prefix(x.ctx),
@@ -193,8 +215,11 @@ impl<'a, U, E> CommandErrorContext<'a, U, E> {
 
 /// Contains the location of the error with location-specific context
 pub enum ErrorContext<'a, U, E> {
+    /// Error in user data setup
     Setup,
+    /// Error in generic event listener
     Listener(&'a crate::Event<'a>),
+    /// Error in bot command
     Command(CommandErrorContext<'a, U, E>),
 }
 
@@ -208,6 +233,7 @@ impl<U, E> Clone for ErrorContext<'_, U, E> {
     }
 }
 
+/// Builder struct to add a command to the framework
 pub struct CommandBuilder<U, E> {
     prefix_command: Option<crate::PrefixCommandMeta<U, E>>,
     slash_command: Option<crate::SlashCommand<U, E>>,
@@ -215,6 +241,7 @@ pub struct CommandBuilder<U, E> {
 }
 
 impl<U, E> CommandBuilder<U, E> {
+    /// Assign a category to this command, which can be used by help commands to group commands
     pub fn category(&mut self, category: &'static str) -> &mut Self {
         if let Some(prefix_command) = &mut self.prefix_command {
             prefix_command.category = Some(category);
@@ -222,6 +249,7 @@ impl<U, E> CommandBuilder<U, E> {
         self
     }
 
+    /// Insert a subcommand
     pub fn subcommand(
         &mut self,
         definition: crate::CommandDefinition<U, E>,
@@ -257,6 +285,7 @@ impl<U, E> CommandBuilder<U, E> {
     }
 }
 
+/// Framework configuration
 pub struct FrameworkOptions<U, E> {
     /// Provide a callback to be invoked when any user code yields an error.
     pub on_error: fn(E, ErrorContext<'_, U, E>) -> BoxFuture<'_, ()>,
@@ -386,15 +415,13 @@ impl<U: Send + Sync, E: std::fmt::Display + Send> Default for FrameworkOptions<U
     }
 }
 
-pub enum Arguments<'a> {
-    Prefix(&'a str),
-    Slash(&'a [serenity::ApplicationCommandInteractionDataOption]),
-}
-
 /// Type returned from `#[poise::command]` annotated functions, which contains all of the generated
 /// prefix and application commands
 pub struct CommandDefinition<U, E> {
+    /// Generated prefix command, if it was enabled
     pub prefix: Option<crate::PrefixCommand<U, E>>,
+    /// Generated slash command, if it was enabled
     pub slash: Option<crate::SlashCommand<U, E>>,
+    /// Generated context menu command, if it was enabled
     pub context_menu: Option<crate::ContextMenuCommand<U, E>>,
 }

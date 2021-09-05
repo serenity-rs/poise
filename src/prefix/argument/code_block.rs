@@ -1,8 +1,11 @@
 use super::*;
 
+/// Error that can be returned from parsing a [`CodeBlock`] ([`CodeBlock::pop_from`])
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum CodeBlockError {
+    /// No starting backtick or triple backtick was found
     Missing,
+    /// A code block was found, but it was not properly formed
     Malformed,
 }
 
@@ -17,9 +20,26 @@ impl std::fmt::Display for CodeBlockError {
 
 impl std::error::Error for CodeBlockError {}
 
+/// A command parameter type for Discord code blocks
+///
+/// ```text
+/// `code here`
+/// ```
+///
+/// or
+///
+/// ```text
+/// ``​`language
+/// code here
+/// ``​`
+/// ```
+///
+/// Can be used as a command parameter. For more information, see [`Self::pop_from`].
 #[derive(Debug, PartialEq, Eq, Clone, Hash)]
 pub struct CodeBlock {
+    /// The text inside the code block
     pub code: String,
+    /// In multiline code blocks, the language code, if present
     pub language: Option<String>,
 }
 

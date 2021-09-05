@@ -1,4 +1,6 @@
+#![doc = include_str!("../README.md")]
 #![warn(rust_2018_idioms)]
+#![warn(missing_docs)]
 #![allow(clippy::type_complexity)]
 
 mod prefix;
@@ -19,8 +21,10 @@ pub use framework::*;
 mod reply;
 pub use reply::*;
 
+/// Building blocks for common commands like help commands or application command registration
 pub mod defaults;
 
+#[doc(no_inline)]
 pub use async_trait::async_trait;
 pub use poise_macros::*;
 pub use serde_json;
@@ -35,7 +39,9 @@ pub use serenity;
 /// ```
 pub mod serenity_prelude {
     #[cfg(feature = "collector")]
+    #[doc(no_inline)]
     pub use serenity::collector::*;
+    #[doc(no_inline)]
     pub use serenity::{
         async_trait,
         builder::*,

@@ -2,13 +2,24 @@
 
 use crate::{serenity_prelude as serenity, BoxFuture, Framework};
 
+/// Application command specific context passed to command invocations.
 #[non_exhaustive]
 pub struct ApplicationContext<'a, U, E> {
+    /// Serenity's context, like HTTP or cache
     pub discord: &'a serenity::Context,
+    /// The interaction which triggered this command execution.
     pub interaction: &'a serenity::ApplicationCommandInteraction,
+    /// Keeps track of whether an initial response has been sent.
+    ///
+    /// Discord requires different HTTP endpoints for initial and additional responses.
     pub has_sent_initial_response: &'a std::sync::atomic::AtomicBool,
+    /// Read-only reference to the framework
+    ///
+    /// Useful if you need the list of commands, for example for a custom help command
     pub framework: &'a Framework<U, E>,
+    /// The command object which is the current command
     pub command: &'a ApplicationCommand<U, E>,
+    /// Your custom user data
     pub data: &'a U,
 }
 impl<U, E> Clone for ApplicationContext<'_, U, E> {
@@ -23,6 +34,11 @@ impl<U, E> crate::_GetGenerics for ApplicationContext<'_, U, E> {
 }
 
 impl<U, E> ApplicationContext<'_, U, E> {
+    /// Defer the response, giving the bot multiple minutes to respond without the user seeing an
+    /// "interaction failed error".
+    ///
+    /// Also sets the [`ApplicationContext::has_sent_initial_response`] flag so the subsequent
+    /// response will be sent in the correct manner.
     pub async fn defer_response(&self) -> Result<(), serenity::Error> {
         self.interaction
             .create_interaction_response(self.discord, |f| {
@@ -35,9 +51,14 @@ impl<U, E> ApplicationContext<'_, U, E> {
     }
 }
 
+/// Application command specific context to an error in user code
 pub struct ApplicationCommandErrorContext<'a, U, E> {
+    /// Whether this error occured while running a pre-command check (`true`) or if it happened
+    /// in normal command execution (`false`)
     pub while_checking: bool,
+    /// Which command was being executed or checked when the error occured
     pub command: &'a ApplicationCommand<U, E>,
+    /// Further context
     pub ctx: ApplicationContext<'a, U, E>,
 }
 
@@ -51,6 +72,7 @@ impl<U, E> Clone for ApplicationCommandErrorContext<'_, U, E> {
     }
 }
 
+/// Application command specific configuration of a framework command
 pub struct ApplicationCommandOptions<U, E> {
     /// Falls back to the framework-specified value on None. See there for documentation.
     pub on_error: Option<fn(E, ApplicationCommandErrorContext<'_, U, E>) -> BoxFuture<'_, ()>>,
@@ -80,34 +102,50 @@ impl<U, E> Default for ApplicationCommandOptions<U, E> {
     }
 }
 
+/// Fully defines a slash command in the framework
 pub struct SlashCommand<U, E> {
+    /// Name of the slash command, displayed in the Discord UI
     pub name: &'static str,
+    /// Short description of what the command does, displayed in the Discord UI
     pub description: &'static str,
+    /// Vector of builder functions for the parameters
     pub parameters: Vec<
         fn(
             &mut serenity::CreateApplicationCommandOption,
         ) -> &mut serenity::CreateApplicationCommandOption,
     >,
+    /// Action which is invoked when the user calls this command
     pub action: for<'a> fn(
         ApplicationContext<'a, U, E>,
         &'a [serenity::ApplicationCommandInteractionDataOption],
     ) -> BoxFuture<'a, Result<(), E>>,
+    /// Further configuration
     pub options: ApplicationCommandOptions<U, E>,
 }
 
+/// Possible actions that a context menu entry can have
 pub enum ContextMenuCommandAction<U, E> {
+    /// Context menu entry on a user
     User(fn(ApplicationContext<'_, U, E>, serenity::User) -> BoxFuture<'_, Result<(), E>>),
+    /// Context menu entry on a message
     Message(fn(ApplicationContext<'_, U, E>, serenity::Message) -> BoxFuture<'_, Result<(), E>>),
 }
 
+/// Fully defines a context menu command in the framework
 pub struct ContextMenuCommand<U, E> {
+    /// Name of the context menu entry, displayed in the Discord UI
     pub name: &'static str,
+    /// Further configuration
     pub options: ApplicationCommandOptions<U, E>,
+    /// The target and action of the context menu entry
     pub action: ContextMenuCommandAction<U, E>,
 }
 
+/// Defines any application command
 pub enum ApplicationCommand<U, E> {
+    /// Slash command
     Slash(SlashCommand<U, E>),
+    /// Context menu command
     ContextMenu(ContextMenuCommand<U, E>),
 }
 
@@ -121,6 +159,7 @@ impl<U, E> ApplicationCommand<U, E> {
         }
     }
 
+    /// Return application command specific configuration
     pub fn options(&self) -> &ApplicationCommandOptions<U, E> {
         match self {
             Self::Slash(cmd) => &cmd.options,
@@ -128,6 +167,7 @@ impl<U, E> ApplicationCommand<U, E> {
         }
     }
 
+    /// Instruct this application command to register itself in the given builder
     pub fn create<'a>(
         &self,
         interaction: &'a mut serenity::CreateApplicationCommand,
@@ -155,6 +195,7 @@ impl<U, E> ApplicationCommand<U, E> {
     }
 }
 
+/// Application command specific configuration for the framework
 pub struct ApplicationFrameworkOptions<U, E> {
     /// List of bot commands.
     pub commands: Vec<ApplicationCommand<U, E>>,

@@ -9,7 +9,7 @@ I created this framework mainly for personal use ([rustbot](https://github.com/k
 **Warning: API details are subject to change**
 
 # Quickstart
-```rust
+```rust,no_run
 use poise::serenity_prelude as serenity;
 
 type Data = ();
@@ -38,11 +38,11 @@ async fn main() -> Result<(), Error> {
 
     poise::Framework::new(
         "~".into(), // prefix
-        serenity::ApplicationId(/* your bot application ID */),
+        serenity::ApplicationId(std::env::var("APPLICATION_ID")?.parse()?),
         move |_ctx, _ready, _framework| Box::pin(async move { Ok(()) }),
         options,
     )
-    .start(serenity::ClientBuilder::new(/* discord bot token */))
+    .start(serenity::ClientBuilder::new(std::env::var("DISCORD_BOT_TOKEN")?))
     .await?;
 
     Ok(())
@@ -60,7 +60,7 @@ You can run the framework_usage example with
 ## Create commands
 Every command is represented by a function:
 
-```rust
+```rust,ignore
 /// Description of the command here
 /// 
 /// Here you can explain how the command \
@@ -84,10 +84,12 @@ There are several things to note here:
 
     Escape newlines with `\`
 - `#[poise::command]` accepts a number of arguments to configure the command:
-    - `aliases`: Command name aliases
-    - `track_edits`: Enable edit tracking
-    - `slash_command`: Make slash command
-    - `broadcast_typing`: Trigger a typing indicator while command runs
+    - `prefix_command`: Generate a prefix command
+    - `slash_command`: Generate a slash command
+    - `context_menu_command`: Generate a context menu command
+    - `aliases`: Command name aliases (only applies to prefix commands)
+    - `track_edits`: Enable edit tracking (only applies to prefix commands)
+    - `broadcast_typing`: Trigger a typing indicator while command runs (only applies to prefix commands I think)
     - `defer_response`: Immediately acknowledge incoming slash command invocation which shows a loading state to the user and gives the bot several minutes to respond
     - `explanation_fn`: Path to a string-returning function which is used for the detailed explanations instead of documentation comments
         - Useful if you have many commands with very similar help messages: you can abstract the common parts into a function
@@ -98,7 +100,7 @@ There are several things to note here:
     - `discard_spare_arguments`: Don't throw an error if the user supplies too many arguments
     - `hide_in_help`: Hide this command in help menus
     - `ephemeral`: Make bot responses ephemeral if possible
-        - Only `poise::send_reply` and related functions respect this preference
+        - Only poise's function, like `poise::send_reply`, respect this preference
     - `required_permissions`: Permissions which the command caller needs to have
     - `owners_only`: Restricts command callers to the list of owners specified in framework options
 - `Context` is the first parameter of all command functions. It's an enum over either PrefixContext or SlashContext, which contain a variety of context data each. Context provides some utility methods to access data present in both PrefixContext and SlashContext, like `author()` or `created_at()`
@@ -111,13 +113,13 @@ There are several things to note here:
 
 ### Big example to showcase many command features
 
-```rust
+```rust,ignore
 /// A test command for poise
 #[poise::command(
     slash_command,
     track_edits,
     hide_in_help,
-    required_permissions = "serenity::Permissions::SEND_MESSAGES"
+    required_permissions = "serenity::Permissions::SEND_MESSAGES",
     aliases("bigounce", "abomination"),
     explanation_fn = "my_huge_ass_command_help",
     check = "check",
@@ -158,7 +160,7 @@ To create and start a framework instance, first create a `FrameworkOptions` stru
 literal and define settings for your bot (hint: use `..Default::default()` to fill uninitialized
 settings with their default value):
 
-```rust
+```rust,ignore
 let mut options = poise::FrameworkOptions {
     on_error: Some(|err, ctx| Box::pin(my_error_function(err, ctx))),
     prefix_options: poise::PrefixFrameworkOptions {
@@ -172,7 +174,7 @@ let mut options = poise::FrameworkOptions {
 
 This is also where commands are registered in the framework:
 
-```rust
+```rust,ignore
 options.command(command1(), |f| f);
 options.command(command2(), |f| f);
 options.command(command3(), |f| f.category("My cool category"));
@@ -189,7 +191,7 @@ Commands with the same category are grouped together in the help menu.
 After configuring framework settings and registering commands, pass the framework options into
 `Framework::new` to create the framework instance:
 
-```rust
+```rust,ignore
 let framework = poise::Framework::new(
     "~".into(), // your prefix
     serenity::ApplicationId(/* your bot application ID */),
@@ -207,7 +209,7 @@ framework.start(serenity::ClientBuilder::new(/* discord bot token */)).await?;
 ## Type aliases
 As seen in the examples, it's useful to define type aliases for `Context` and `PrefixContext` with
 your bot's error type and user data type filled in:
-```rust
+```rust,ignore
 type Context<'a> = poise::Context<'a, UserData, ErrorType>;
 type PrefixContext<'a> = poise::PrefixContext<'a, UserData, ErrorType>;
 ```
@@ -217,7 +219,7 @@ When you're too lazy to import serenity items from their full path which can be 
 times, you can use `poise::serenity_prelude`: a module which reexports almost all items from
 serenity.
 
-```rust
+```rust,ignore
 use poise::serenity_prelude as serenity;
 
 // Short paths!
@@ -228,7 +230,7 @@ serenity::Member, serenity::UserId, serenity::ReactionType, serenity::GatewayInt
 
 - volatile state with breaking API changes to come
 - only partial command group support
-- many miscellaneous features missing, for example command 
+- many miscellaneous features missing, for example command cooldowns
 
 # About the weird name
 I'm bad at names. Google lists "poise" as a synonym to "serenity" which is the Discord library

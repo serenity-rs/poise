@@ -1,5 +1,6 @@
 use super::*;
 
+/// Error type when trying to parse a string parameter but the input is empty
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Default)]
 pub struct EmptyArgs;
 impl std::fmt::Display for EmptyArgs {

@@ -35,12 +35,12 @@ async fn is_owner(ctx: crate::PrefixContext<'_>) -> Result<bool, Error> {
     Ok(ctx.msg.author.id == ctx.data.owner_id)
 }
 
-/// Register slash commands in this guild or globally
+/// Register application commands in this guild or globally
 ///
 /// Run with no arguments to register in guild, run with argument "global" to register globally.
 #[poise::command(prefix_command, check = "is_owner", hide_in_help)]
 async fn register(ctx: PrefixContext<'_>, #[flag] global: bool) -> Result<(), Error> {
-    poise::defaults::register_slash_commands(ctx.into(), global).await?;
+    poise::defaults::register_application_commands(ctx.into(), global).await?;
 
     Ok(())
 }

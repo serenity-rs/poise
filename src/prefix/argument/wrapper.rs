@@ -35,12 +35,20 @@ impl_parse_consuming!(
     serenity::EmojiIdentifier serenity::ReactionType
 );
 
+/// Command parameter type wrapper to support arbitrary [`serenity::ArgumentConvert`]/[`std::str::FromStr`]
+/// instances.
+///
+/// This workaround is currently needed due to overlap rules disallowing overlapping blanket
+/// implementations.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Hash, Ord, PartialOrd)]
 pub struct Wrapper<T>(pub T);
 
+/// Error returned from parsing [`Wrapper`].
 #[derive(Debug)]
 pub enum WrapperArgumentParseError<E> {
+    /// If the input was empty and [`Wrapper`] was unable to pass any string to the underlying type
     EmptyArgs(crate::EmptyArgs),
+    /// The underlying type threw a parse error
     ParseError(E),
 }
 

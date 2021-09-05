@@ -1,9 +1,28 @@
 use super::*;
 
+/// A command parameter type for key-value args
+///
+/// For example `key1=value1 key2="value2 with spaces"`.
+///
+/// ```rust
+/// use poise::PopArgument;
+///
+/// let string = r#"key1=value key2="value with spaces" "key with spaces"="value with \"quotes\"""#;
+/// let key_value_args = poise::KeyValueArgs::pop_from(&poise::ArgString(string)).unwrap().1;
+/// assert_eq!(
+///     key_value_args.0,
+///     std::iter::FromIterator::from_iter([
+///         ("key1".to_owned(), "value".to_owned()),
+///         ("key2".to_owned(), "value with spaces".to_owned()),
+///         ("key with spaces".to_owned(), r#"value with "quotes""#.to_owned()),
+///     ]),
+/// );
+/// ```
 #[derive(Clone, PartialEq, Eq, Debug, Default)]
 pub struct KeyValueArgs(pub std::collections::HashMap<String, String>);
 
 impl KeyValueArgs {
+    /// Retrieve a single value by its key
     pub fn get(&self, key: &str) -> Option<&str> {
         self.0.get(key).map(|x| x.as_str())
     }
