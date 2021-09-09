@@ -18,7 +18,7 @@ pub struct ApplicationContext<'a, U, E> {
     /// Useful if you need the list of commands, for example for a custom help command
     pub framework: &'a Framework<U, E>,
     /// The command object which is the current command
-    pub command: &'a ApplicationCommand<U, E>,
+    pub command: ApplicationCommand<'a, U, E>,
     /// Your custom user data
     pub data: &'a U,
 }
@@ -57,7 +57,7 @@ pub struct ApplicationCommandErrorContext<'a, U, E> {
     /// in normal command execution (`false`)
     pub while_checking: bool,
     /// Which command was being executed or checked when the error occured
-    pub command: &'a ApplicationCommand<U, E>,
+    pub command: ApplicationCommand<'a, U, E>,
     /// Further context
     pub ctx: ApplicationContext<'a, U, E>,
 }
@@ -102,7 +102,7 @@ impl<U, E> Default for ApplicationCommandOptions<U, E> {
     }
 }
 
-/// Fully defines a slash command in the framework
+/// Fully defines a single slash command in the framework
 pub struct SlashCommand<U, E> {
     /// Name of the slash command, displayed in the Discord UI
     pub name: &'static str,
@@ -123,6 +123,85 @@ pub struct SlashCommand<U, E> {
     pub options: ApplicationCommandOptions<U, E>,
 }
 
+/// A single slash command or slash command group
+pub enum SlashCommandMeta<U, E> {
+    /// Single slash command
+    Command(SlashCommand<U, E>),
+    /// Command group with a list of subcommands
+    CommandGroup {
+        /// Name of the command group, i.e. the identifier preceding subcommands
+        name: &'static str,
+        /// Description of the command group (currently not visible in Discord UI)
+        description: &'static str,
+        /// List of command group subcommands
+        subcommands: Vec<SlashCommandMeta<U, E>>,
+    },
+}
+
+impl<U, E> SlashCommandMeta<U, E> {
+    fn create_as_subcommand<'a>(
+        &self,
+        builder: &'a mut serenity::CreateApplicationCommandOption,
+    ) -> &'a mut serenity::CreateApplicationCommandOption {
+        match self {
+            Self::CommandGroup {
+                name,
+                description,
+                subcommands,
+            } => {
+                builder.kind(serenity::ApplicationCommandOptionType::SubCommandGroup);
+                builder.name(name).description(description);
+
+                for sub_subcommand in subcommands {
+                    builder.create_sub_option(|f| sub_subcommand.create_as_subcommand(f));
+                }
+            }
+            Self::Command(command) => {
+                builder.kind(serenity::ApplicationCommandOptionType::SubCommand);
+                builder.name(command.name).description(command.description);
+
+                for create_option in &command.parameters {
+                    let mut option = serenity::CreateApplicationCommandOption::default();
+                    create_option(&mut option);
+                    builder.add_sub_option(option);
+                }
+            }
+        }
+        builder
+    }
+
+    fn create<'a>(
+        &self,
+        interaction: &'a mut serenity::CreateApplicationCommand,
+    ) -> &'a mut serenity::CreateApplicationCommand {
+        match self {
+            Self::CommandGroup {
+                name,
+                description,
+                subcommands,
+            } => {
+                interaction.name(name).description(description);
+
+                for subcommand in subcommands {
+                    interaction.create_option(|f| subcommand.create_as_subcommand(f));
+                }
+            }
+            Self::Command(command) => {
+                interaction
+                    .name(command.name)
+                    .description(command.description);
+
+                for create_option in &command.parameters {
+                    let mut option = serenity::CreateApplicationCommandOption::default();
+                    create_option(&mut option);
+                    interaction.add_option(option);
+                }
+            }
+        }
+        interaction
+    }
+}
+
 /// Possible actions that a context menu entry can have
 pub enum ContextMenuCommandAction<U, E> {
     /// Context menu entry on a user
@@ -141,18 +220,49 @@ pub struct ContextMenuCommand<U, E> {
     pub action: ContextMenuCommandAction<U, E>,
 }
 
-/// Defines any application command
-pub enum ApplicationCommand<U, E> {
+/// Defines any application command, including subcommands if supported by the application command
+/// type
+pub enum ApplicationCommandTree<U, E> {
     /// Slash command
-    Slash(SlashCommand<U, E>),
+    Slash(SlashCommandMeta<U, E>),
     /// Context menu command
     ContextMenu(ContextMenuCommand<U, E>),
 }
 
-impl<U, E> ApplicationCommand<U, E> {
+impl<U, E> ApplicationCommandTree<U, E> {
+    /// Instruct this application command to register itself in the given builder
+    pub fn create<'b>(
+        &self,
+        interaction: &'b mut serenity::CreateApplicationCommand,
+    ) -> &'b mut serenity::CreateApplicationCommand {
+        match self {
+            Self::Slash(cmd) => cmd.create(interaction),
+            Self::ContextMenu(cmd) => interaction.name(cmd.name).kind(match &cmd.action {
+                ContextMenuCommandAction::User(_) => serenity::ApplicationCommandType::User,
+                ContextMenuCommandAction::Message(_) => serenity::ApplicationCommandType::Message,
+            }),
+        }
+    }
+}
+
+/// A view into a leaf of an application command tree. **Not an owned type!**
+pub enum ApplicationCommand<'a, U, E> {
+    /// Slash command
+    Slash(&'a SlashCommand<U, E>),
+    /// Context menu command
+    ContextMenu(&'a ContextMenuCommand<U, E>),
+}
+impl<U, E> Copy for ApplicationCommand<'_, U, E> {}
+impl<U, E> Clone for ApplicationCommand<'_, U, E> {
+    fn clone(&self) -> Self {
+        *self
+    }
+}
+
+impl<'a, U, E> ApplicationCommand<'a, U, E> {
     /// If slash command, yield the command name. If context menu command, yield the context
     /// menu entry text.
-    pub fn slash_or_context_menu_name(&self) -> &'static str {
+    pub fn slash_or_context_menu_name(self) -> &'static str {
         match self {
             Self::Slash(cmd) => cmd.name,
             Self::ContextMenu(cmd) => cmd.name,
@@ -160,45 +270,18 @@ impl<U, E> ApplicationCommand<U, E> {
     }
 
     /// Return application command specific configuration
-    pub fn options(&self) -> &ApplicationCommandOptions<U, E> {
+    pub fn options(self) -> &'a ApplicationCommandOptions<U, E> {
         match self {
             Self::Slash(cmd) => &cmd.options,
             Self::ContextMenu(cmd) => &cmd.options,
         }
-    }
-
-    /// Instruct this application command to register itself in the given builder
-    pub fn create<'a>(
-        &self,
-        interaction: &'a mut serenity::CreateApplicationCommand,
-    ) -> &'a mut serenity::CreateApplicationCommand {
-        match self {
-            Self::Slash(cmd) => {
-                interaction.name(cmd.name).description(cmd.description);
-                for create_option in &cmd.parameters {
-                    let mut option = serenity::CreateApplicationCommandOption::default();
-                    create_option(&mut option);
-                    interaction.add_option(option);
-                }
-            }
-            Self::ContextMenu(cmd) => {
-                interaction.name(cmd.name).kind(match &cmd.action {
-                    ContextMenuCommandAction::User(_) => serenity::ApplicationCommandType::User,
-                    ContextMenuCommandAction::Message(_) => {
-                        serenity::ApplicationCommandType::Message
-                    }
-                });
-            }
-        }
-
-        interaction
     }
 }
 
 /// Application command specific configuration for the framework
 pub struct ApplicationFrameworkOptions<U, E> {
     /// List of bot commands.
-    pub commands: Vec<ApplicationCommand<U, E>>,
+    pub commands: Vec<ApplicationCommandTree<U, E>>,
     /// Provide a callback to be invoked before every command. The command will only be executed
     /// if the callback returns true.
     ///

@@ -133,7 +133,10 @@ pub async fn help<D, E>(
         let is_also_a_slash_command = |command_name| {
             let application_commands = &ctx.framework().options().application_options.commands;
             application_commands.iter().any(|c| match c {
-                crate::ApplicationCommand::Slash(cmd) => cmd.name == command_name,
+                crate::ApplicationCommandTree::Slash(cmd) => match cmd {
+                    crate::SlashCommandMeta::Command(cmd) => cmd.name == command_name,
+                    crate::SlashCommandMeta::CommandGroup { .. } => false, // STUB
+                },
                 _ => false,
             })
         };

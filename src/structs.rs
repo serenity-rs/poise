@@ -130,7 +130,7 @@ pub enum CommandRef<'a, U, E> {
     /// Prefix command
     Prefix(&'a crate::PrefixCommand<U, E>),
     /// Application command
-    Application(&'a crate::ApplicationCommand<U, E>),
+    Application(crate::ApplicationCommand<'a, U, E>),
 }
 
 impl<U, E> Clone for CommandRef<'_, U, E> {
@@ -236,7 +236,7 @@ impl<U, E> Clone for ErrorContext<'_, U, E> {
 /// Builder struct to add a command to the framework
 pub struct CommandBuilder<U, E> {
     prefix_command: Option<crate::PrefixCommandMeta<U, E>>,
-    slash_command: Option<crate::SlashCommand<U, E>>,
+    slash_command: Option<crate::SlashCommandMeta<U, E>>,
     context_menu_command: Option<crate::ContextMenuCommand<U, E>>,
 }
 
@@ -268,6 +268,9 @@ impl<U, E> CommandBuilder<U, E> {
             category: None,
             subcommands: Vec::new(),
         });
+
+        let slash_command =
+            slash_command.map(|slash_command| crate::SlashCommandMeta::Command(slash_command));
 
         let mut builder = CommandBuilder {
             prefix_command,
@@ -335,6 +338,8 @@ impl<U, E> FrameworkOptions<U, E> {
         definition: crate::CommandDefinition<U, E>,
         meta_builder: impl FnOnce(&mut CommandBuilder<U, E>) -> &mut CommandBuilder<U, E>,
     ) {
+        // TODO: remove duplication with CommandBuilder::subcommand
+
         let crate::CommandDefinition {
             prefix: prefix_command,
             slash: slash_command,
@@ -346,6 +351,9 @@ impl<U, E> FrameworkOptions<U, E> {
             category: None,
             subcommands: Vec::new(),
         });
+
+        let slash_command =
+            slash_command.map(|slash_command| crate::SlashCommandMeta::Command(slash_command));
 
         let mut builder = CommandBuilder {
             prefix_command,
@@ -360,12 +368,14 @@ impl<U, E> FrameworkOptions<U, E> {
         if let Some(slash_command) = builder.slash_command {
             self.application_options
                 .commands
-                .push(crate::ApplicationCommand::Slash(slash_command));
+                .push(crate::ApplicationCommandTree::Slash(slash_command));
         }
         if let Some(context_menu_command) = builder.context_menu_command {
             self.application_options
                 .commands
-                .push(crate::ApplicationCommand::ContextMenu(context_menu_command));
+                .push(crate::ApplicationCommandTree::ContextMenu(
+                    context_menu_command,
+                ));
         }
     }
 }
