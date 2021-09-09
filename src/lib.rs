@@ -58,7 +58,7 @@ pub mod serenity_prelude {
         },
         prelude::*,
         utils::*,
-        Error,
+        *,
     };
 }
 
