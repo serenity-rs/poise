@@ -174,7 +174,7 @@ pub async fn dispatch_interaction<'a, U, E>(
     (this.options.pre_command)(crate::Context::Application(ctx)).await;
 
     let action_result = match command {
-        crate::ApplicationCommand::Slash(cmd) => (cmd.action)(ctx, &leaf_interaction_options).await,
+        crate::ApplicationCommand::Slash(cmd) => (cmd.action)(ctx, leaf_interaction_options).await,
         crate::ApplicationCommand::ContextMenu(cmd) => match cmd.action {
             crate::ContextMenuCommandAction::User(action) => match &interaction.data.target {
                 Some(serenity::ResolvedTarget::User(user, _)) => (action)(ctx, user.clone()).await,
