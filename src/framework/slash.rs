@@ -7,7 +7,7 @@ fn find_matching_slash_command<'a, U, E>(
     let commands = &framework.options.application_options.commands;
     commands.iter().find(|cmd| match cmd {
         crate::ApplicationCommand::Slash(cmd) => {
-            cmd.name == &interaction.name
+            cmd.name == interaction.name
                 && interaction.kind == serenity::ApplicationCommandType::ChatInput
         }
         crate::ApplicationCommand::ContextMenu(cmd) => {
@@ -17,7 +17,7 @@ fn find_matching_slash_command<'a, U, E>(
                     serenity::ApplicationCommandType::Message
                 }
             };
-            cmd.name == &interaction.name && interaction.kind == application_command_type
+            cmd.name == interaction.name && interaction.kind == application_command_type
         }
     })
 }

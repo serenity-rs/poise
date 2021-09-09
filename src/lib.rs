@@ -1,4 +1,8 @@
-#![doc = include_str!("../README.md")]
+#![cfg_attr(docsrs, cfg_attr(all(), doc = include_str!("../README.md")))]
+#![cfg_attr(
+    not(docsrs),
+    doc = "For an overview and usage information of the library, see the repository's README.md file"
+)]
 #![warn(rust_2018_idioms)]
 #![warn(missing_docs)]
 #![allow(clippy::type_complexity)]
