@@ -276,9 +276,11 @@ impl<U, E> CommandBuilder<U, E> {
         };
         meta_builder(&mut builder);
 
-        if let (Some(parent), Some(subcommand)) = (&mut self.prefix_command, builder.prefix_command)
-        {
-            parent.subcommands.push(subcommand);
+        // Nested if's to compile on Rust 1.48
+        if let Some(parent) = &mut self.prefix_command {
+            if let Some(subcommand) = builder.prefix_command {
+                parent.subcommands.push(subcommand);
+            }
         }
 
         self
