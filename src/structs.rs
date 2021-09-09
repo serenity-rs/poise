@@ -269,8 +269,7 @@ impl<U, E> CommandBuilder<U, E> {
             subcommands: Vec::new(),
         });
 
-        let slash_command =
-            slash_command.map(|slash_command| crate::SlashCommandMeta::Command(slash_command));
+        let slash_command = slash_command.map(crate::SlashCommandMeta::Command);
 
         let mut builder = CommandBuilder {
             prefix_command,
@@ -352,8 +351,7 @@ impl<U, E> FrameworkOptions<U, E> {
             subcommands: Vec::new(),
         });
 
-        let slash_command =
-            slash_command.map(|slash_command| crate::SlashCommandMeta::Command(slash_command));
+        let slash_command = slash_command.map(crate::SlashCommandMeta::Command);
 
         let mut builder = CommandBuilder {
             prefix_command,

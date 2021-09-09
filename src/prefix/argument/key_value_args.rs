@@ -9,14 +9,13 @@ use super::*;
 ///
 /// let string = r#"key1=value key2="value with spaces" "key with spaces"="value with \"quotes\"""#;
 /// let key_value_args = poise::KeyValueArgs::pop_from(&poise::ArgString(string)).unwrap().1;
-/// assert_eq!(
-///     key_value_args.0,
-///     std::iter::FromIterator::from_iter([
-///         ("key1".to_owned(), "value".to_owned()),
-///         ("key2".to_owned(), "value with spaces".to_owned()),
-///         ("key with spaces".to_owned(), r#"value with "quotes""#.to_owned()),
-///     ]),
-/// );
+///
+/// let mut expected_result = std::collections::HashMap::new();
+/// expected_result.insert("key1".into(), "value".into());
+/// expected_result.insert("key2".into(), "value with spaces".into());
+/// expected_result.insert("key with spaces".into(), r#"value with "quotes""#.into());
+///
+/// assert_eq!(key_value_args.0, expected_result);
 /// ```
 #[derive(Clone, PartialEq, Eq, Debug, Default)]
 pub struct KeyValueArgs(pub std::collections::HashMap<String, String>);
