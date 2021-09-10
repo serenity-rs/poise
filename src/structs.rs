@@ -285,6 +285,23 @@ impl<U, E> CommandBuilder<U, E> {
             }
         }
 
+        if let Some(parent) = &mut self.slash_command {
+            if let Some(subcommand) = builder.slash_command {
+                match parent {
+                    crate::SlashCommandMeta::CommandGroup { subcommands, .. } => {
+                        subcommands.push(subcommand);
+                    }
+                    crate::SlashCommandMeta::Command(cmd) => {
+                        *parent = crate::SlashCommandMeta::CommandGroup {
+                            name: cmd.name,
+                            description: cmd.description,
+                            subcommands: vec![subcommand],
+                        };
+                    }
+                }
+            }
+        }
+
         self
     }
 }
