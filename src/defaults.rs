@@ -135,7 +135,7 @@ pub async fn help<D, E>(
             application_commands.iter().any(|c| match c {
                 crate::ApplicationCommandTree::Slash(cmd) => match cmd {
                     crate::SlashCommandMeta::Command(cmd) => cmd.name == command_name,
-                    crate::SlashCommandMeta::CommandGroup { .. } => false, // STUB
+                    crate::SlashCommandMeta::CommandGroup { name, .. } => name == &command_name,
                 },
                 _ => false,
             })
