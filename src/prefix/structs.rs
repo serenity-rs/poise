@@ -170,7 +170,7 @@ pub struct PrefixFrameworkOptions<U, E> {
     pub execute_self_messages: bool,
     /// Whether command names should be compared case-insensitively.
     pub case_insensitive_commands: bool,
-    /* // STUB: implement
+    /* // TODO: implement
     /// Whether to invoke help command when someone sends a message with just a bot mention
     pub help_when_mentioned: bool,
     /// The bot's general help command. Currently used for [`Self::help_when_mentioned`].

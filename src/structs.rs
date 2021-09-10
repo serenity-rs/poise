@@ -255,8 +255,6 @@ impl<U, E> CommandBuilder<U, E> {
         definition: crate::CommandDefinition<U, E>,
         meta_builder: impl FnOnce(&mut Self) -> &mut Self,
     ) -> &mut Self {
-        // STUB: do slash support
-
         let crate::CommandDefinition {
             prefix: prefix_command,
             slash: slash_command,
