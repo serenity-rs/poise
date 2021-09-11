@@ -1,0 +1,37 @@
+name: Publish docs
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  docs:
+    name: Publish docs
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v2
+
+      - name: Install toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          profile: minimal
+          override: true
+
+      - name: Build docs
+        env:
+          RUSTDOCFLAGS: --cfg docsrs -D rustdoc::broken_intra_doc_links
+        run: |
+          cargo doc --no-deps --all-features
+
+      - name: Deploy docs
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ./target/doc
+          allow_empty_commit: false
+          keep_files: true
