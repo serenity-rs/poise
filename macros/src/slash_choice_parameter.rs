@@ -6,7 +6,8 @@ use syn::spanned::Spanned as _;
 /// Representation of the function parameter attribute arguments
 #[derive(Debug, darling::FromMeta)]
 struct VariantAttribute {
-    name: String,
+    #[darling(multiple)]
+    name: Vec<String>,
 }
 
 pub fn slash_choice_parameter(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
@@ -21,10 +22,11 @@ pub fn slash_choice_parameter(input: syn::DeriveInput) -> Result<TokenStream, da
         }
     };
 
-    let mut variant_idents = Vec::new();
-    let mut display_strings = Vec::new();
+    let mut variant_idents: Vec<proc_macro2::Ident> = Vec::new();
+    let mut display_strings: Vec<String> = Vec::new();
+    let mut more_display_strings = Vec::new();
 
-    for (_i, variant) in enum_.variants.into_iter().enumerate() {
+    for variant in enum_.variants {
         if !matches!(&variant.fields, syn::Fields::Unit) {
             return Err(syn::Error::new(
                 variant.fields.span(),
@@ -38,10 +40,15 @@ pub fn slash_choice_parameter(input: syn::DeriveInput) -> Result<TokenStream, da
             .into_iter()
             .map(|attr| attr.parse_meta().map(syn::NestedMeta::Meta))
             .collect::<Result<Vec<_>, _>>()?;
-        let display_string = <VariantAttribute as darling::FromMeta>::from_list(&attrs)?.name;
+        let mut names = <VariantAttribute as darling::FromMeta>::from_list(&attrs)?.name;
+
+        if names.is_empty() {
+            return Err(syn::Error::new(variant.ident.span(), "Missing `name` attribute").into());
+        }
 
         variant_idents.push(variant.ident);
-        display_strings.push(display_string);
+        display_strings.push(names.remove(0));
+        more_display_strings.push(names);
     }
 
     let enum_ident = &input.ident;
@@ -82,7 +89,9 @@ pub fn slash_choice_parameter(input: syn::DeriveInput) -> Result<TokenStream, da
 
             fn from_str(s: &str) -> Result<Self, Self::Err> {
                 #(
-                    if s.eq_ignore_ascii_case(#display_strings) {
+                    if s.eq_ignore_ascii_case(#display_strings)
+                        #( || s.eq_ignore_ascii_case(#more_display_strings) )*
+                    {
                         Ok(Self::#variant_idents)
                     } else
                 )* {
