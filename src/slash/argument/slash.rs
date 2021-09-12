@@ -244,7 +244,6 @@ impl_slash_argument!(serenity::Role, Role);
 macro_rules! _parse_slash {
     // Extract Option<T>
     ($ctx:ident, $guild_id:ident, $channel_id:ident, $args:ident => $name:ident: Option<$type:ty $(,)*>) => {
-        #[allow(clippy::eval_order_dependence)]
         if let Some(arg) = $args.iter().find(|arg| arg.name == stringify!($name)) {
             let arg = arg.value
             .as_ref()
