@@ -1,7 +1,9 @@
-use crate::serenity_prelude as serenity;
+//! Building blocks for common commands like help commands or application command registration
+//!
+//! This file provides sample commands and utility functions like help menus or error handlers to
+//! use as a starting point for the framework.
 
-/// This file provides a bunch of utility functions like help menus or error handlers to use as a
-/// starting point for the framework.
+use crate::serenity_prelude as serenity;
 
 type BoxErrorSendSync = Box<dyn std::error::Error + Send + Sync>;
 
@@ -239,6 +241,74 @@ pub async fn register_application_commands<U, E>(
             .await?;
     }
     crate::say_reply(ctx, "Done!").await?;
+
+    Ok(())
+}
+
+/// Lists servers of which the bot is a member of, including their member counts, sorted
+/// descendingly by member count.
+///
+/// Non-[public](https://support.discord.com/hc/en-us/articles/360030843331-Enabling-Server-Discovery)
+/// guilds are hidden to preserve privacy. When the command is invoked by the bot
+/// owner as an application command, the response will be made ephemeral and private guilds are
+/// unhidden.
+///
+/// Example:
+/// > I am currently in three servers!
+/// > - **A public server** (7123 members)
+/// > - [3 private servers with 456 members total]
+pub async fn servers<U, E>(ctx: crate::Context<'_, U, E>) -> Result<(), serenity::Error> {
+    let mut show_private_guilds = false;
+    if let crate::Context::Application(_) = ctx {
+        if let Ok(app) = ctx.discord().http.get_current_application_info().await {
+            if app.owner.id == ctx.author().id {
+                show_private_guilds = true;
+            }
+        }
+    }
+
+    struct Guild {
+        name: String,
+        num_members: u64,
+        is_public: bool,
+    }
+
+    let guild_ids = ctx.discord().cache.guilds();
+    let mut guilds = guild_ids
+        .into_iter()
+        .filter_map(|guild_id| {
+            ctx.discord().cache.guild_field(guild_id, |guild| Guild {
+                name: guild.name.clone(),
+                num_members: guild.member_count,
+                is_public: guild.features.iter().any(|x| x == "DISCOVERABLE"),
+            })
+        })
+        .collect::<Vec<_>>();
+    guilds.sort_by_key(|guild| u64::MAX - guild.num_members); // descending sort
+
+    let mut num_private_guilds = 0;
+    let mut num_private_guild_members = 0;
+    let mut response = format!("I am currently in {} servers!\n", guilds.len());
+    for guild in guilds {
+        if guild.is_public || show_private_guilds {
+            response += &format!("- **{}** ({} members)\n", guild.name, guild.num_members);
+        } else {
+            num_private_guilds += 1;
+            num_private_guild_members += guild.num_members;
+        }
+    }
+    if num_private_guilds > 0 {
+        response += &format!(
+            "- [{} private servers with {} members total]\n",
+            num_private_guilds, num_private_guild_members
+        );
+    }
+
+    if show_private_guilds {
+        response += "\n_Showing private guilds because you are the bot owner_\n";
+    }
+
+    crate::send_reply(ctx, |f| f.content(response).ephemeral(show_private_guilds)).await?;
 
     Ok(())
 }

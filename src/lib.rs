@@ -25,8 +25,7 @@ pub use framework::*;
 mod reply;
 pub use reply::*;
 
-/// Building blocks for common commands like help commands or application command registration
-pub mod defaults;
+pub mod samples;
 
 #[doc(no_inline)]
 pub use async_trait::async_trait;
