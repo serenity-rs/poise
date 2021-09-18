@@ -158,6 +158,13 @@ pub fn command(
         return Err(syn::Error::new(function.sig.span(), "command function must be async").into());
     }
 
+    // Verify that at least one command type was enabled
+    if !args.prefix_command && !args.slash_command && args.context_menu_command.is_none() {
+        let err_msg = "you must enable at least one of `prefix_command`, `slash_command` or \
+            `context_menu_command`";
+        return Err(syn::Error::new(proc_macro2::Span::call_site(), err_msg).into());
+    }
+
     // Collect argument names/types/attributes to insert into generated function
     let mut parameters = Vec::new();
     for command_param in function.sig.inputs.iter_mut().skip(1) {
