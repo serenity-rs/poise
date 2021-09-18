@@ -21,11 +21,11 @@ async fn help(
     ctx: Context<'_>,
     #[description = "Specific command to show help about"] command: Option<String>,
 ) -> Result<(), Error> {
-    poise::defaults::help(
+    poise::samples::help(
         ctx,
         command.as_deref(),
         "This is an example bot made to showcase features of my custom Discord bot framework",
-        poise::defaults::HelpResponseMode::Ephemeral,
+        poise::samples::HelpResponseMode::Ephemeral,
     )
     .await?;
     Ok(())
@@ -40,7 +40,7 @@ async fn is_owner(ctx: crate::PrefixContext<'_>) -> Result<bool, Error> {
 /// Run with no arguments to register in guild, run with argument "global" to register globally.
 #[poise::command(prefix_command, check = "is_owner", hide_in_help)]
 async fn register(ctx: PrefixContext<'_>, #[flag] global: bool) -> Result<(), Error> {
-    poise::defaults::register_application_commands(ctx.into(), global).await?;
+    poise::samples::register_application_commands(ctx.into(), global).await?;
 
     Ok(())
 }

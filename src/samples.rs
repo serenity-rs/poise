@@ -64,11 +64,11 @@ pub enum HelpResponseMode {
 /// ) -> Result<(), Error> {
 ///     let bottom_text = "Type ?help command for more info on a command.
 /// You can edit your message to the bot and the bot will edit its response.";
-///     poise::defaults::help(
+///     poise::samples::help(
 ///         ctx,
 ///         command.as_deref(),
 ///         bottom_text,
-///         poise::defaults::HelpResponseMode::Ephemeral,
+///         poise::samples::HelpResponseMode::Ephemeral,
 ///     )
 ///     .await?;
 ///     Ok(())
