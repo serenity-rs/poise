@@ -78,19 +78,29 @@ async fn main() -> Result<(), Error> {
 
     let framework = poise::Framework::new(
         "~".to_owned(), // prefix
-        serenity::ApplicationId(var("APPLICATION_ID")?.parse()?),
+        serenity::ApplicationId(
+            var("APPLICATION_ID")
+                .expect("Missing `APPLICATION_ID` env var, see README for more information.")
+                .parse()?,
+        ),
         move |_ctx, _ready, _framework| {
             Box::pin(async move {
                 Ok(Data {
                     votes: Mutex::new(HashMap::new()),
-                    owner_id: serenity::UserId(var("OWNER_ID")?.parse()?),
+                    owner_id: serenity::UserId(
+                        var("OWNER_ID")
+                            .expect("Missing `OWNER_ID` env var, see README for more information.")
+                            .parse()?,
+                    ),
                 })
             })
         },
         options,
     );
     framework
-        .start(serenity::ClientBuilder::new(&var("TOKEN")?))
+        .start(serenity::ClientBuilder::new(&var("TOKEN").expect(
+            "Missing `TOKEN` env var, see README for more information.",
+        )))
         .await?;
 
     Ok(())
