@@ -106,7 +106,7 @@ impl<U, E> Framework<U, E> {
     /// setup is not allowed to return Result because there would be no reasonable
     /// course of action on error.
     pub fn new<F>(
-        prefix: String,
+        prefix: impl Into<String>,
         application_id: serenity::ApplicationId,
         user_data_setup: F,
         options: FrameworkOptions<U, E>,
@@ -122,7 +122,7 @@ impl<U, E> Framework<U, E> {
             ) -> BoxFuture<'a, Result<U, E>>,
     {
         Self {
-            prefix,
+            prefix: prefix.into(),
             user_data: once_cell::sync::OnceCell::new(),
             user_data_setup: std::sync::Mutex::new(Some(Box::new(user_data_setup))),
             bot_id: std::sync::Mutex::new(None),
