@@ -338,8 +338,8 @@ impl<U, E> FrameworkOptions<U, E> {
     /// ```rust
     /// # mod misc {
     /// #     type Error = Box<dyn std::error::Error + Send + Sync>;
-    /// #     #[poise::command]
-    /// #     pub async fn ping(ctx: poise::PrefixContext<'_, (), Error>) -> Result<(), Error> {
+    /// #     #[poise::command(prefix_command)]
+    /// #     pub async fn ping(ctx: poise::Context<'_, (), Error>) -> Result<(), Error> {
     /// #         Ok(())
     /// #     }
     /// # }
