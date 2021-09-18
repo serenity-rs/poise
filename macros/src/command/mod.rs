@@ -69,7 +69,7 @@ impl darling::FromMeta for Aliases {
 /// Representation of the command attribute arguments (`#[command(...)]`)
 #[derive(Default, Debug, darling::FromMeta)]
 #[darling(default)]
-pub struct CommandAttrArgs {
+pub struct CommandOptions {
     prefix_command: bool,
     slash_command: bool,
     context_menu_command: Option<String>,
@@ -93,7 +93,7 @@ pub struct CommandAttrArgs {
 /// Representation of the function parameter attribute arguments
 #[derive(Default, Debug, darling::FromMeta)]
 #[darling(default)]
-struct ParamAttrArgs {
+struct ParamOptions {
     description: Option<String>,
     lazy: bool,
     flag: bool,
@@ -104,7 +104,7 @@ struct ParamAttrArgs {
 struct CommandParameter {
     name: syn::Ident,
     type_: syn::Type,
-    more: ParamAttrArgs,
+    more: ParamOptions,
     span: proc_macro2::Span,
 }
 
@@ -116,7 +116,7 @@ pub struct Invocation<'a> {
     explanation: Option<&'a str>,
     function: &'a syn::ItemFn,
     required_permissions: &'a syn::Expr,
-    more: &'a CommandAttrArgs,
+    more: &'a CommandOptions,
 }
 
 fn extract_help_from_doc_comments(attrs: &[syn::Attribute]) -> (Option<String>, Option<String>) {
@@ -150,7 +150,7 @@ fn extract_help_from_doc_comments(attrs: &[syn::Attribute]) -> (Option<String>, 
 }
 
 pub fn command(
-    args: CommandAttrArgs,
+    args: CommandOptions,
     mut function: syn::ItemFn,
 ) -> Result<TokenStream, darling::Error> {
     // Verify that the function is marked async. Not strictly needed, but avoids confusion
@@ -186,7 +186,7 @@ pub fn command(
             .drain(..)
             .map(|attr| attr.parse_meta().map(syn::NestedMeta::Meta))
             .collect::<Result<Vec<_>, _>>()?;
-        let attrs = <ParamAttrArgs as darling::FromMeta>::from_list(&attrs)?;
+        let attrs = <ParamOptions as darling::FromMeta>::from_list(&attrs)?;
 
         parameters.push(CommandParameter {
             name: name.clone(),

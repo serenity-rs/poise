@@ -6,7 +6,7 @@ use proc_macro::TokenStream;
 #[proc_macro_attribute]
 pub fn command(args: TokenStream, function: TokenStream) -> TokenStream {
     let args = syn::parse_macro_input!(args as Vec<syn::NestedMeta>);
-    let args = match <command::CommandAttrArgs as darling::FromMeta>::from_list(&args) {
+    let args = match <command::CommandOptions as darling::FromMeta>::from_list(&args) {
         Ok(x) => x,
         Err(e) => return e.write_errors().into(),
     };
