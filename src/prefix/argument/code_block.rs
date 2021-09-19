@@ -62,13 +62,13 @@ impl<'a> PopArgument<'a> for CodeBlock {
     /// official Discord client's syntax highlighting, if existent.
     ///
     /// ```rust
-    /// # use poise::{CodeBlock, ArgString, PopArgumentAsync as _};
+    /// # use poise::{CodeBlock, ArgString, PopArgument as _};
     /// assert_eq!(
-    ///     ArgString("`hello world`").sync_pop::<CodeBlock>().unwrap().1,
+    ///     CodeBlock::pop_from(&ArgString("`hello world`")).unwrap().1,
     ///     CodeBlock { code: "hello world".into(), language: None },
     /// );
     /// assert_eq!(
-    ///     ArgString("```rust\nprintln!(\"Hello world!\");\n```").sync_pop::<CodeBlock>().unwrap().1,
+    ///     CodeBlock::pop_from(&ArgString("```rust\nprintln!(\"Hello world!\");\n```")).unwrap().1,
     ///     CodeBlock { code: "println!(\"Hello world!\");".into(), language: Some("rust".into()) },
     /// );
     /// ```

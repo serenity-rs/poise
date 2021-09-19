@@ -199,7 +199,7 @@ macro_rules! parse_prefix_args {
     ),* $(,)? ) => {
         async {
             use std::marker::PhantomData;
-            use ::poise::PrefixArgumentHack as _;
+            use $crate::PrefixArgumentHack as _;
 
             let ctx = $ctx;
             let msg = $msg;
@@ -224,6 +224,8 @@ mod test {
 
     #[tokio::test]
     async fn test_parse_args() {
+        use crate::serenity_prelude as serenity;
+
         // Create dummy discord context; it will not be accessed in this test
         let ctx = serenity::Context {
             data: std::sync::Arc::new(serenity::RwLock::new(serenity::TypeMap::new())),
@@ -255,18 +257,18 @@ mod test {
             (vec!["a".into(), "b".into(), "c".into()], vec![]),
         );
         assert_eq!(
-            parse_prefix_args!(&ctx, &msg, "a b 8 c" => (Vec<String>), (Wrapper<u32>), (Vec<String>))
+            parse_prefix_args!(&ctx, &msg, "a b 8 c" => (Vec<String>), (u32), (Vec<String>))
                 .await
                 .unwrap(),
-            (vec!["a".into(), "b".into()], Wrapper(8), vec!["c".into()]),
+            (vec!["a".into(), "b".into()], 8, vec!["c".into()]),
         );
         assert_eq!(
-            parse_prefix_args!(&ctx, &msg, "yoo `that's cool` !" => (String), (CodeBlock), (String))
+            parse_prefix_args!(&ctx, &msg, "yoo `that's cool` !" => (String), (crate::CodeBlock), (String))
                 .await
                 .unwrap(),
             (
                 "yoo".into(),
-                CodeBlock {
+                crate::CodeBlock {
                     code: "that's cool".into(),
                     language: None
                 },
@@ -280,10 +282,10 @@ mod test {
             (None, Some("hi".into())),
         );
         assert_eq!(
-            parse_prefix_args!(&ctx, &msg, "a b c" => (String), #[rest] (Wrapper<String>))
+            parse_prefix_args!(&ctx, &msg, "a b c" => (String), #[rest] (String))
                 .await
                 .unwrap(),
-            ("a".into(), Wrapper("b c".into())),
+            ("a".into(), "b c".into()),
         );
         assert_eq!(
             parse_prefix_args!(&ctx, &msg, "a b c" => (String), #[rest] (String))

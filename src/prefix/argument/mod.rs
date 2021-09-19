@@ -162,7 +162,7 @@ impl<'a, T: serenity::ArgumentConvert + Send> PrefixArgumentHack<'a, T>
         ctx: &serenity::Context,
         msg: &serenity::Message,
     ) -> Result<(ArgString<'a>, T), Self::Err> {
-        let (args, string) = String::pop_from(&args).map_err(MaybeEmptyError::EmptyArgs)?;
+        let (args, string) = String::pop_from(args).map_err(MaybeEmptyError::EmptyArgs)?;
         let object = T::convert(ctx, msg.guild_id, Some(msg.channel_id), &string)
             .await
             .map_err(MaybeEmptyError::ParseError)?;
@@ -183,7 +183,7 @@ impl<'a, T: crate::PopArgument<'a> + Sync> PrefixArgumentHack<'a, T>
         _: &serenity::Context,
         _: &serenity::Message,
     ) -> Result<(ArgString<'a>, T), Self::Err> {
-        let (args, object) = T::pop_from(&args)?;
+        let (args, object) = T::pop_from(args)?;
 
         Ok((ArgString(args.0.trim_start()), object))
     }
