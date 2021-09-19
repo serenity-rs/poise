@@ -13,7 +13,7 @@ macro_rules! _parse_prefix {
         (Option<$type:ty $(,)?>)
         $( $rest:tt )*
     ) => {
-        match $args.pop($ctx, $msg).await {
+        match (&PhantomData::<$type>).pop(&$args, $ctx, $msg).await {
             Ok(($args, token)) => {
                 let token: Option<$type> = Some(token);
                 $crate::_parse_prefix!($ctx $msg $args => [ $error $($preamble)* token ] $($rest)* );
@@ -31,7 +31,7 @@ macro_rules! _parse_prefix {
     ) => {
         let token: Option<$type> = None;
         $crate::_parse_prefix!($ctx $msg $args => [ $error $($preamble)* token ] $($rest)* );
-        match $args.pop($ctx, $msg).await {
+        match (&PhantomData::<$type>).pop(&$args, $ctx, $msg).await {
             Ok(($args, token)) => {
                 let token: Option<$type> = Some(token);
                 $crate::_parse_prefix!($ctx $msg $args => [ $error $($preamble)* token ] $($rest)* );
@@ -72,7 +72,7 @@ macro_rules! _parse_prefix {
 
         let mut running_args = $args.clone();
         loop {
-            match running_args.pop::<$type>($ctx, $msg).await {
+            match (&PhantomData::<$type>).pop(&running_args, $ctx, $msg).await {
                 Ok((popped_args, token)) => {
                     tokens.push(token);
                     token_rest_args.push(popped_args.clone());
@@ -117,7 +117,7 @@ macro_rules! _parse_prefix {
         (#[flag] $name:literal)
         $( $rest:tt )*
     ) => {
-        if let Ok(($args, token)) = $args.pop::<String>($ctx, $msg).await {
+        if let Ok(($args, token)) = (&PhantomData::<String>).pop(&$args, $ctx, $msg).await {
             if token.eq_ignore_ascii_case($name) {
                 $crate::_parse_prefix!($ctx $msg $args => [ $error $($preamble)* true ] $($rest)* );
             }
@@ -131,7 +131,7 @@ macro_rules! _parse_prefix {
         ($type:ty)
         $( $rest:tt )*
     ) => {
-        match $args.pop::<$type>($ctx, $msg).await {
+        match (&PhantomData::<$type>).pop(&$args, $ctx, $msg).await {
             Ok(($args, token)) => {
                 $crate::_parse_prefix!($ctx $msg $args => [ $error $($preamble)* token ] $($rest)* );
             },
@@ -198,6 +198,9 @@ macro_rules! parse_prefix_args {
         ( $($type:tt)* )
     ),* $(,)? ) => {
         async {
+            use std::marker::PhantomData;
+            use ::poise::PrefixArgumentHack as _;
+
             let ctx = $ctx;
             let msg = $msg;
             let args = $crate::ArgString($args);

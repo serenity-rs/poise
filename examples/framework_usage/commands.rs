@@ -83,10 +83,8 @@ pub enum MyStringChoice {
 #[poise::command(prefix_command, slash_command)]
 pub async fn choice(
     ctx: Context<'_>,
-    #[description = "The choice you want to choose"] choice: poise::Wrapper<MyStringChoice>,
+    #[description = "The choice you want to choose"] choice: MyStringChoice,
 ) -> Result<(), Error> {
-    let choice = choice.0;
-
     poise::say_reply(ctx, format!("You entered {:?}", choice)).await?;
     Ok(())
 }

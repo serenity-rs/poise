@@ -9,9 +9,6 @@ pub use key_value_args::*;
 mod string;
 pub use string::*;
 
-mod wrapper;
-pub use wrapper::*;
-
 mod parse;
 pub use parse::*;
 
@@ -22,39 +19,6 @@ use crate::serenity_prelude as serenity;
 /// Deliberately not `Copy` with the intention to prevent accidental copies and confusion
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct ArgString<'a>(pub &'a str);
-
-impl<'a> ArgString<'a> {
-    /// Parse a single argument and return the remaining arguments.
-    ///
-    /// Uses `crate::PopArgumentAsync` internally.
-    ///
-    /// ```rust
-    /// # use poise::{ArgString, CodeBlock};
-    /// let args = ArgString("hello `foo bar`");
-    ///
-    /// let (args, hello) = args.sync_pop::<String>().unwrap();
-    /// assert_eq!(hello, "hello");
-    ///
-    /// let (args, block) = args.sync_pop::<CodeBlock>().unwrap();
-    /// assert_eq!(block.code, "foo bar");
-    /// ```
-    pub async fn pop<T: PopArgumentAsync<'a>>(
-        &self,
-        ctx: &serenity::Context,
-        msg: &serenity::Message,
-    ) -> Result<(ArgString<'a>, T), <T as PopArgumentAsync<'a>>::Err> {
-        let (args, obj) = T::async_pop_from(ctx, msg, self).await?;
-        Ok((ArgString(args.0.trim_start()), obj))
-    }
-
-    /// Like [`Self::pop`] but synchronous.
-    pub fn sync_pop<T: PopArgument<'a>>(
-        &self,
-    ) -> Result<(ArgString<'a>, T), <T as PopArgumentAsync<'a>>::Err> {
-        let (args, obj) = T::pop_from(self)?;
-        Ok((ArgString(args.0.trim_start()), obj))
-    }
-}
 
 /// Superset of [`PopArgumentAsync`] without Discord context available and no async support.
 ///
@@ -144,3 +108,83 @@ impl std::fmt::Display for InvalidChoice {
 }
 
 impl std::error::Error for InvalidChoice {}
+
+#[doc(hidden)]
+#[async_trait::async_trait]
+pub trait PrefixArgumentHack<'a, T> {
+    type Err;
+
+    async fn pop(
+        self,
+        args: &ArgString<'a>,
+        ctx: &serenity::Context,
+        msg: &serenity::Message,
+    ) -> Result<(ArgString<'a>, T), Self::Err>;
+}
+
+/// When attempting to parse a string, it can fail either because it's empty, or because it's
+/// invalid in some way. This error type covers both cases
+#[derive(Debug)]
+pub enum MaybeEmptyError<E> {
+    /// If the input was empty and [`Wrapper`] was unable to pass any string to the underlying type
+    EmptyArgs(crate::EmptyArgs),
+    /// The underlying type threw a parse error
+    ParseError(E),
+}
+
+impl<E: std::fmt::Display> std::fmt::Display for MaybeEmptyError<E> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            MaybeEmptyError::EmptyArgs(e) => e.fmt(f),
+            MaybeEmptyError::ParseError(e) => e.fmt(f),
+        }
+    }
+}
+
+impl<E: std::error::Error + 'static> std::error::Error for MaybeEmptyError<E> {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            MaybeEmptyError::EmptyArgs(e) => Some(e),
+            MaybeEmptyError::ParseError(e) => Some(e),
+        }
+    }
+}
+
+#[async_trait::async_trait]
+impl<'a, T: serenity::ArgumentConvert + Send> PrefixArgumentHack<'a, T>
+    for std::marker::PhantomData<T>
+{
+    type Err = MaybeEmptyError<T::Err>;
+
+    async fn pop(
+        self,
+        args: &ArgString<'a>,
+        ctx: &serenity::Context,
+        msg: &serenity::Message,
+    ) -> Result<(ArgString<'a>, T), Self::Err> {
+        let (args, string) = String::pop_from(&args).map_err(MaybeEmptyError::EmptyArgs)?;
+        let object = T::convert(ctx, msg.guild_id, Some(msg.channel_id), &string)
+            .await
+            .map_err(MaybeEmptyError::ParseError)?;
+
+        Ok((ArgString(args.0.trim_start()), object))
+    }
+}
+
+#[async_trait::async_trait]
+impl<'a, T: crate::PopArgument<'a> + Sync> PrefixArgumentHack<'a, T>
+    for &std::marker::PhantomData<T>
+{
+    type Err = <T as crate::PopArgument<'a>>::Err;
+
+    async fn pop(
+        self,
+        args: &ArgString<'a>,
+        _: &serenity::Context,
+        _: &serenity::Message,
+    ) -> Result<(ArgString<'a>, T), Self::Err> {
+        let (args, object) = T::pop_from(&args)?;
+
+        Ok((ArgString(args.0.trim_start()), object))
+    }
+}
