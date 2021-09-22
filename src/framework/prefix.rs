@@ -65,14 +65,14 @@ async fn strip_prefix<'a, U, E>(
     }
 
     if this.options.prefix_options.mention_as_prefix {
-        if let Some(content) = this.bot_id.lock().unwrap().and_then(|bot_id| {
-            // Mentions are either <@USER_ID> or <@!USER_ID>
-            msg.content
-                .strip_prefix("<@")?
-                .trim_start_matches('!')
-                .strip_prefix(&bot_id.0.to_string())?
-                .strip_prefix('>')
-        }) {
+        // Mentions are either <@USER_ID> or <@!USER_ID>
+        if let Some(content) = msg
+            .content
+            .strip_prefix("<@")?
+            .trim_start_matches('!')
+            .strip_prefix(&this.bot_id.0.to_string())?
+            .strip_prefix('>')
+        {
             return Some(content);
         }
     }
@@ -218,9 +218,7 @@ where
 
     // If we know our own ID, and the message author ID is our own, and we aren't supposed to
     // execute our own messages, THEN stop execution.
-    if !this.options.prefix_options.execute_self_messages
-        && *this.bot_id.lock().unwrap() == Some(msg.author.id)
-    {
+    if !this.options.prefix_options.execute_self_messages && this.bot_id == msg.author.id {
         return Err(None);
     }
 

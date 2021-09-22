@@ -39,20 +39,17 @@ pub async fn age(
 }
 
 #[tokio::main]
-async fn main() -> Result<(), Error> {
-    let mut options = poise::FrameworkOptions::default();
-    options.command(age(), |f| f);
-
-    poise::Framework::new(
-        "~".into(), // prefix
-        serenity::ApplicationId(std::env::var("APPLICATION_ID")?.parse()?),
-        move |_ctx, _ready, _framework| Box::pin(async move { Ok(()) }),
-        options,
-    )
-    .start(serenity::ClientBuilder::new(std::env::var("DISCORD_BOT_TOKEN")?))
-    .await?;
-
-    Ok(())
+async fn main() {
+    poise::Framework::build()
+        .prefix("~")
+        .token(std::env::var("DISCORD_BOT_TOKEN").unwrap())
+        .user_data_setup(move |_ctx, _ready, _framework| Box::pin(async move { Ok(()) }),
+        .options(poise::FrameworkOptions {
+            // configure framework here
+            ..Default::default()
+        })
+        .command(age(), |f| f)
+        .run().await.unwrap();
 }
 ```
 
@@ -164,62 +161,57 @@ async fn error_handler(error: Error, _ctx: poise::ErrorContext) {
 
 ## Create and configure framework
 
-To create and start a framework instance, first create a `FrameworkOptions` struct using a struct
-literal and define settings for your bot (hint: use `..Default::default()` to fill uninitialized
+Use `Framework::build()` to create a framework builder and supply basic data to the framework:
+
+```rust,ignore
+poise::Framework::build()
+    .prefix("~")
+    .token("...")
+    .user_data_setup(|_, _, _| Box::pin(async move {
+        // construct user data here (invoked when bot connects to Discord)
+        Ok(())
+    }))
+```
+
+A lot of configuration is done via the `FrameworkOptions` struct, which you can define with a struct
+literal (hint: use `..Default::default()` to fill uninitialized
 settings with their default value):
 
 ```rust,ignore
-let mut options = poise::FrameworkOptions {
+.options(poise::FrameworkOptions {
     on_error: Some(|err, ctx| Box::pin(my_error_function(err, ctx))),
     prefix_options: poise::PrefixFrameworkOptions {
+        edit_tracker: Some(poise::EditTracker::for_timespan(Duration::from_secs(3600)))
         case_insensitive_commands: true,
-        edit_tracker: Some(poise::EditTracker::for_timespan(Duration::from_secs(3600))),
         ..Default::default()
     },
     ..Default::default()
-};
+})
 ```
 
-This is also where commands are registered in the framework:
+Finally, add commands and start the framework. You can add subcommands or assign a category to
+a command. Commands with the same category are grouped together in the help menu.
 
 ```rust,ignore
-options.command(command1(), |f| f);
-options.command(command2(), |f| f);
-options.command(command3(), |f| f.category("My cool category"));
-options.command(command4(), |f| f.category("My cool category"));
-options.command(command5(), |f| f
+.command(command1(), |f| f)
+.command(command2(), |f| f)
+.command(command3(), |f| f.category("My cool category"))
+.command(command4(), |f| f.category("My cool category"))
+.command(command5(), |f| f
     .category("This category has one command with subcommands")
     .subcommand(command5_1(), |f| f)
     .subcommand(command5_2(), |f| f)
-);
-```
-
-Commands with the same category are grouped together in the help menu.
-
-After configuring framework settings and registering commands, pass the framework options into
-`Framework::new` to create the framework instance:
-
-```rust,ignore
-let framework = poise::Framework::new(
-    "~".into(), // your prefix
-    serenity::ApplicationId(/* your bot application ID */),
-    move |ctx, data_about_bot, framework| Box::pin(async move {
-        // Construct user data here (invoked when bot connects to Discord)
-        Ok(())
-    }),
-    options,
-);
-framework.start(serenity::ClientBuilder::new(/* discord bot token */)).await?;
+)
+.run().await?
 ```
 
 # Tips and tricks
 
 ## Type aliases
-As seen in the examples, it's useful to define type aliases for `Context` and `PrefixContext` with
+As seen in the examples, it's useful to define type aliases for `Context` with
 your bot's error type and user data type filled in:
 ```rust,ignore
 type Context<'a> = poise::Context<'a, UserData, ErrorType>;
-type PrefixContext<'a> = poise::PrefixContext<'a, UserData, ErrorType>;
 ```
 
 ## Serenity prelude

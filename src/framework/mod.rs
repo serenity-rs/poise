@@ -4,6 +4,9 @@
 mod prefix;
 mod slash;
 
+mod builder;
+pub use builder::*;
+
 use crate::serenity_prelude as serenity;
 use crate::*;
 
@@ -89,9 +92,7 @@ pub struct Framework<U, E> {
             >,
         >,
     >,
-    // The bot ID is embedded in the token so we shouldn't have to do all of this mutex mess
-    // But it's kinda messy to get access to the token in the framework
-    bot_id: std::sync::Mutex<Option<serenity::UserId>>,
+    bot_id: serenity::UserId,
     // TODO: wrap in RwLock to allow changing framework options while running? Could also replace
     // the edit tracking cache interior mutability
     options: FrameworkOptions<U, E>,
@@ -99,15 +100,30 @@ pub struct Framework<U, E> {
 }
 
 impl<U, E> Framework<U, E> {
-    /// Setup a new blank Framework with a prefix and a callback to provide user data.
+    /// Create a framework builder to configure, create and run a framework.
     ///
-    /// The user data callback is invoked as soon as the bot is logged. That way, bot data like user
-    /// ID or connected guilds can be made available to the user data setup function. The user data
-    /// setup is not allowed to return Result because there would be no reasonable
+    /// For more information, see [`FrameworkBuilder`]
+    pub fn build() -> FrameworkBuilder<U, E> {
+        FrameworkBuilder::default()
+    }
+
+    /// Setup a new [`Framework`]
+    ///
+    /// Takes several arguments:
+    /// - the prefix used for parsing commands from messages
+    /// - the Discord application ID (required for slash commands)
+    /// - a callback to create user data
+    /// - framework configuration via [`FrameworkOptions`]
+    ///
+    /// The user data callback is invoked as soon as the bot is logged in. That way, bot data like
+    /// user ID or connected guilds can be made available to the user data setup function. The user
+    /// data setup is not allowed to return Result because there would be no reasonable
     /// course of action on error.
+    #[deprecated = "use Framework::build() instead"]
     pub fn new<F>(
         prefix: impl Into<String>,
         application_id: serenity::ApplicationId,
+        bot_id: serenity::UserId,
         user_data_setup: F,
         options: FrameworkOptions<U, E>,
     ) -> Self
@@ -125,7 +141,7 @@ impl<U, E> Framework<U, E> {
             prefix: prefix.into(),
             user_data: once_cell::sync::OnceCell::new(),
             user_data_setup: std::sync::Mutex::new(Some(Box::new(user_data_setup))),
-            bot_id: std::sync::Mutex::new(None),
+            bot_id,
             options,
             application_id,
         }
@@ -205,8 +221,6 @@ impl<U, E> Framework<U, E> {
     {
         match &event {
             Event::Ready { data_about_bot } => {
-                *self.bot_id.lock().unwrap() = Some(data_about_bot.user.id);
-
                 let user_data_setup = Option::take(&mut *self.user_data_setup.lock().unwrap());
                 if let Some(user_data_setup) = user_data_setup {
                     match user_data_setup(&ctx, data_about_bot, self).await {

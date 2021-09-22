@@ -4,5 +4,6 @@ To be able to run examples you must enable `serenity`'s `collector` feature. Thu
 
 You must also set the following environment variables:
 - `TOKEN`: your application's token
-- `APPLICATION_ID`: the discord ID of your bot
-- `OWNER_ID`: your discord ID
+
+Application ID and owner ID don't have to be set, since they are requested from Discord on startup
+by poise.
