@@ -15,32 +15,32 @@ where
     F: Send + Sync + for<'a> Fn(serenity::prelude::Context, Event<'a>) -> BoxFuture<'a, ()>;
 
 macro_rules! event {
-	($lt1:lifetime $(
-		$fn_name:ident $(<$lt2:lifetime>)? => $variant_name:ident { $( $arg_name:ident: $arg_type:ty ),* },
-	)*) => {
+    ($lt1:lifetime $(
+        $fn_name:ident $(<$lt2:lifetime>)? => $variant_name:ident { $( $arg_name:ident: $arg_type:ty ),* },
+    )*) => {
         #[serenity::async_trait]
-		impl<F> serenity::prelude::EventHandler for EventWrapper<F>
-		where
-			F: Send + Sync + for<'a> Fn(serenity::prelude::Context, Event<'a>) -> BoxFuture<'a, ()>
-		{
-			$(
-				async fn $fn_name<'s $(, $lt2)? >(&'s self, ctx: serenity::prelude::Context, $( $arg_name: $arg_type, )* ) {
-					(self.0)(ctx, Event::$variant_name { $( $arg_name, )* }).await
-				}
-			)*
-		}
+        impl<F> serenity::prelude::EventHandler for EventWrapper<F>
+        where
+            F: Send + Sync + for<'a> Fn(serenity::prelude::Context, Event<'a>) -> BoxFuture<'a, ()>
+        {
+            $(
+                async fn $fn_name<'s $(, $lt2)? >(&'s self, ctx: serenity::prelude::Context, $( $arg_name: $arg_type, )* ) {
+                    (self.0)(ctx, Event::$variant_name { $( $arg_name, )* }).await
+                }
+            )*
+        }
 
         /// This enum stores every possible event that a [`serenity::prelude::EventHandler`] can receive.
         ///
         /// Passed to the stored callback by [`EventWrapper`].
-		#[allow(clippy::large_enum_variant)]
+        #[allow(clippy::large_enum_variant)]
         #[allow(missing_docs)]
-		#[derive(Debug, Clone)]
-		pub enum Event<$lt1> {
-			$(
-				$variant_name { $( $arg_name: $arg_type ),* },
-			)*
-		}
+        #[derive(Debug, Clone)]
+        pub enum Event<$lt1> {
+            $(
+                $variant_name { $( $arg_name: $arg_type ),* },
+            )*
+        }
 
         impl Event<'_> {
             /// Return the name of the event type
@@ -52,7 +52,7 @@ macro_rules! event {
                 }
             }
         }
-	};
+    };
 }
 
 // generated from https://docs.rs/serenity/0.8.9/src/serenity/client/event_handler.rs.html#12-314
