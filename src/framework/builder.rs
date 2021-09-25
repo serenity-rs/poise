@@ -78,10 +78,11 @@ impl<U, E> FrameworkBuilder<U, E> {
         self
     }
 
-    /// Configure in-detail serenity client settings by supplying a custom client builder
+    /// Configure serenity client settings, like gateway intents, by supplying a custom
+    /// client builder
     ///
-    /// Note: the builder's token and gateway intents will be overridden by the
-    /// [`FrameworkBuilder`]. Please use [`FrameworkBuilder`]'s respective methods instead.
+    /// Note: the builder's token will be overridden by the
+    /// [`FrameworkBuilder`]; use [`FrameworkBuilder::token`] to supply a token.
     pub fn client_settings(
         mut self,
         f: impl FnOnce(serenity::ClientBuilder<'_>) -> serenity::ClientBuilder<'_> + 'static,
@@ -93,12 +94,6 @@ impl<U, E> FrameworkBuilder<U, E> {
     /// The bot token
     pub fn token(mut self, token: impl Into<String>) -> Self {
         self.token = Some(token.into());
-        self
-    }
-
-    /// Configure gateway intents, which control the types of Discord events your bot will receive
-    pub fn intents(mut self, intents: serenity::GatewayIntents) -> Self {
-        self.intents = Some(intents);
         self
     }
 
