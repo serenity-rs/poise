@@ -8,6 +8,79 @@ pub use argument::*;
 
 use crate::serenity_prelude as serenity;
 
+fn send_as_initial_response(
+    data: crate::CreateReply<'_>,
+    allowed_mentions: Option<&serenity::CreateAllowedMentions>,
+    f: &mut serenity::CreateInteractionResponseData,
+) {
+    let crate::CreateReply {
+        content,
+        embed,
+        attachments: _, // discord doesn't support attachments in initial response :(
+        components,
+        ephemeral,
+    } = data;
+
+    if let Some(content) = content {
+        f.content(content);
+    }
+    if let Some(embed) = embed {
+        f.add_embed(embed);
+    }
+    if let Some(allowed_mentions) = allowed_mentions {
+        f.allowed_mentions(|f| {
+            *f = allowed_mentions.clone();
+            f
+        });
+    }
+    if let Some(components) = components {
+        f.components(|f| {
+            f.0 = components.0;
+            f
+        });
+    }
+    if ephemeral {
+        f.flags(serenity::InteractionApplicationCommandCallbackDataFlags::EPHEMERAL);
+    }
+}
+
+fn send_as_followup_response<'a>(
+    data: crate::CreateReply<'a>,
+    allowed_mentions: Option<&serenity::CreateAllowedMentions>,
+    f: &mut serenity::CreateInteractionResponseFollowup<'a>,
+) {
+    let crate::CreateReply {
+        content,
+        embed,
+        attachments,
+        components,
+        ephemeral,
+    } = data;
+
+    if let Some(content) = content {
+        f.content(content);
+    }
+    if let Some(embed) = embed {
+        f.add_embed(embed);
+    }
+    if let Some(components) = components {
+        f.components(|c| {
+            c.0 = components.0;
+            c
+        });
+    }
+    if let Some(allowed_mentions) = allowed_mentions {
+        f.allowed_mentions(|f| {
+            *f = allowed_mentions.clone();
+            f
+        });
+    }
+    if ephemeral {
+        f.flags(serenity::InteractionApplicationCommandCallbackDataFlags::EPHEMERAL);
+    }
+    f.add_files(attachments);
+}
+
 /// Send a response to an interaction (slash command or context menu command invocation).
 ///
 /// If a response to this interaction has already been sent, a
@@ -16,42 +89,21 @@ pub async fn send_application_reply<U, E>(
     ctx: ApplicationContext<'_, U, E>,
     builder: impl for<'a, 'b> FnOnce(&'a mut crate::CreateReply<'b>) -> &'a mut crate::CreateReply<'b>,
 ) -> Result<(), serenity::Error> {
-    let mut reply = crate::CreateReply {
+    let mut data = crate::CreateReply {
         ephemeral: ctx.command.options().ephemeral,
         ..Default::default()
     };
-    builder(&mut reply);
-    let crate::CreateReply {
-        content,
-        embed,
-        attachments,
-        components,
-        ephemeral,
-    } = reply;
+    builder(&mut data);
 
     let has_sent_initial_response = ctx
         .has_sent_initial_response
         .load(std::sync::atomic::Ordering::SeqCst);
 
+    let allowed_mentions = ctx.framework.options().allowed_mentions.as_ref();
     if has_sent_initial_response {
         ctx.interaction
             .create_followup_message(ctx.discord, |f| {
-                if let Some(content) = content {
-                    f.content(content);
-                }
-                if let Some(embed) = embed {
-                    f.add_embed(embed);
-                }
-                if let Some(components) = components {
-                    f.components(|c| {
-                        c.0 = components.0;
-                        c
-                    });
-                }
-                if ephemeral {
-                    f.flags(serenity::InteractionApplicationCommandCallbackDataFlags::EPHEMERAL);
-                }
-                f.add_files(attachments);
+                send_as_followup_response(data, allowed_mentions, f);
                 f
             })
             .await?;
@@ -59,31 +111,9 @@ pub async fn send_application_reply<U, E>(
         ctx.interaction
             .create_interaction_response(ctx.discord, |r| {
                 r.kind(serenity::InteractionResponseType::ChannelMessageWithSource)
-                    .interaction_response_data(|r| {
-                        if let Some(content) = content {
-                            r.content(content);
-                        }
-                        if let Some(embed) = embed {
-                            r.add_embed(embed);
-                        }
-                        if let Some(allowed_mentions) = &ctx.framework.options().allowed_mentions {
-                            r.allowed_mentions(|m| {
-                                *m = allowed_mentions.clone();
-                                m
-                            });
-                        }
-                        if let Some(components) = components {
-                            r.components(|c| {
-                                c.0 = components.0;
-                                c
-                            });
-                        }
-                        if ephemeral {
-                            r.flags(
-                                serenity::InteractionApplicationCommandCallbackDataFlags::EPHEMERAL,
-                            );
-                        }
-                        r
+                    .interaction_response_data(|f| {
+                        send_as_initial_response(data, allowed_mentions, f);
+                        f
                     })
             })
             .await?;
