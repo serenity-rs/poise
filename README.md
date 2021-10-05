@@ -143,10 +143,9 @@ async fn my_huge_ass_command(
 }
 
 fn my_huge_ass_command_help() -> String {
-    String::from("
+    String::from("\
 Example usage:
-~my_huge_ass_command 127.0.0.1 @kangalioo `i = i + 1` my_flag rest of the message
-    ".trim())
+~my_huge_ass_command 127.0.0.1 @kangalioo `i = i + 1` my_flag rest of the message")
 }
 
 async fn check(ctx: Context<'_>) -> Result<bool, Error> {
