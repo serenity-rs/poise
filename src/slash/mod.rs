@@ -42,6 +42,15 @@ pub async fn send_application_reply<U, E>(
                 if let Some(embed) = embed {
                     f.add_embed(embed);
                 }
+                if let Some(components) = components {
+                    f.components(|c| {
+                        c.0 = components.0;
+                        c
+                    });
+                }
+                if ephemeral {
+                    f.flags(serenity::InteractionApplicationCommandCallbackDataFlags::EPHEMERAL);
+                }
                 f.add_files(attachments);
                 f
             })
