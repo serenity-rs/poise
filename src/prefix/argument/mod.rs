@@ -126,7 +126,7 @@ pub trait PrefixArgumentHack<'a, T> {
 /// invalid in some way. This error type covers both cases
 #[derive(Debug)]
 pub enum MaybeEmptyError<E> {
-    /// If the input was empty and [`Wrapper`] was unable to pass any string to the underlying type
+    /// If the input was empty and no string could be passed to the underlying type parser
     EmptyArgs(crate::EmptyArgs),
     /// The underlying type threw a parse error
     ParseError(E),
