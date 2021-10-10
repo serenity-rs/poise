@@ -25,6 +25,22 @@ impl<'a, U, E> From<crate::PrefixContext<'a, U, E>> for Context<'a, U, E> {
         Self::Prefix(x)
     }
 }
+impl<U, E> Context<'_, U, E> {
+    /// Shorthand of [`crate::say_reply`]
+    pub async fn say(self, text: impl Into<String>) -> Result<(), serenity::Error> {
+        crate::say_reply(self, text).await
+    }
+
+    /// Shorthand of [`crate::send_reply`]
+    pub async fn send(
+        self,
+        builder: impl for<'a, 'b> FnOnce(
+            &'a mut crate::CreateReply<'b>,
+        ) -> &'a mut crate::CreateReply<'b>,
+    ) -> Result<(), serenity::Error> {
+        crate::send_reply(self, builder).await
+    }
+}
 
 // needed for proc macro
 #[doc(hidden)]

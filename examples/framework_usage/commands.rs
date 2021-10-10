@@ -20,7 +20,7 @@ pub async fn vote(
         "Successfully voted for {0}. {0} now has {1} votes!",
         choice, num_votes
     );
-    poise::say_reply(ctx, response).await?;
+    ctx.say(response).await?;
     Ok(())
 }
 
@@ -42,7 +42,7 @@ pub async fn getvotes(
             0 => format!("Nobody has voted for {} yet", choice),
             _ => format!("{} people have voted for {}", num_votes, choice),
         };
-        poise::say_reply(ctx, response).await?;
+        ctx.say(response).await?;
     } else {
         let mut response = String::new();
         for (choice, num_votes) in ctx.data().votes.lock().unwrap().iter() {
@@ -53,7 +53,7 @@ pub async fn getvotes(
             response += "Nobody has voted for anything yet :(";
         }
 
-        poise::say_reply(ctx, response).await?;
+        ctx.say(response).await?;
     };
 
     Ok(())
@@ -66,7 +66,7 @@ pub async fn add(
     #[description = "First operand"] a: f64,
     #[description = "Second operand"] b: f32,
 ) -> Result<(), Error> {
-    poise::say_reply(ctx, format!("Result: {}", a + b as f64)).await?;
+    ctx.say(format!("Result: {}", a + b as f64)).await?;
 
     Ok(())
 }
@@ -85,7 +85,7 @@ pub async fn choice(
     ctx: Context<'_>,
     #[description = "The choice you want to choose"] choice: MyStringChoice,
 ) -> Result<(), Error> {
-    poise::say_reply(ctx, format!("You entered {:?}", choice)).await?;
+    ctx.say(format!("You entered {:?}", choice)).await?;
     Ok(())
 }
 
@@ -94,7 +94,7 @@ pub async fn choice(
 pub async fn boop(ctx: Context<'_>) -> Result<(), Error> {
     let uuid_boop = ctx.id();
 
-    poise::send_reply(ctx, |m| {
+    ctx.send(|m| {
         m.content("I want some boops!").components(|c| {
             c.create_action_row(|ar| {
                 ar.create_button(|b| {

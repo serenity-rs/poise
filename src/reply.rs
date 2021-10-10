@@ -111,7 +111,7 @@ impl ReplyHandle<'_> {
 /// ```rust,no_run
 /// # #[tokio::main] async fn main() -> Result<(), Box<dyn std::error::Error>> {
 /// # let ctx: poise::Context<'_, (), ()> = todo!();
-/// poise::send_reply(ctx, |f| f
+/// ctx.send(|f| f
 ///     .content("Works for slash and prefix commands")
 ///     .embed(|f| f
 ///         .title("Much versatile, very wow")
