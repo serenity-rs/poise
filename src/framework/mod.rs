@@ -10,7 +10,6 @@ pub use builder::*;
 use crate::serenity_prelude as serenity;
 use crate::*;
 
-/// Manually dispatch a message with the prefix framework.
 pub use prefix::dispatch_message;
 
 async fn check_permissions<U, E>(
