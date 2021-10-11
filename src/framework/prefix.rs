@@ -200,7 +200,9 @@ where
     Ok(first_matching_command)
 }
 
-/// Returns
+/// Manually dispatches a message with the prefix framework.
+///
+/// Returns:
 /// - Ok(()) if a command was successfully dispatched and run
 /// - Err(None) if no command was run but no error happened
 /// - Err(Some(error: UserError)) if any user code yielded an error
