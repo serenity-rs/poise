@@ -40,42 +40,38 @@ async fn strip_prefix<'a, U, E>(
     ctx: &'a serenity::Context,
     msg: &'a serenity::Message,
 ) -> Option<&'a str> {
-    let mut check_static_prefixes = true;
-
     if let Some(dynamic_prefix) = this.options.prefix_options.dynamic_prefix {
         if let Some(prefix) = dynamic_prefix(ctx, msg, this.get_user_data().await).await {
-            check_static_prefixes = false;
-
             if let Some(content) = msg.content.strip_prefix(&prefix) {
                 return Some(content);
             }
         }
     }
 
-    if check_static_prefixes {
-        if let Some(content) = msg.content.strip_prefix(&this.prefix) {
+    if let Some(prefix) = &this.options.prefix_options.prefix {
+        if let Some(content) = msg.content.strip_prefix(prefix) {
             return Some(content);
         }
+    }
 
-        if let Some(content) = this
-            .options
-            .prefix_options
-            .additional_prefixes
-            .iter()
-            .find_map(|prefix| match prefix {
-                crate::Prefix::Literal(prefix) => msg.content.strip_prefix(prefix),
-                crate::Prefix::Regex(prefix) => {
-                    let regex_match = prefix.find(&msg.content)?;
-                    if regex_match.start() == 0 {
-                        Some(&msg.content[regex_match.end()..])
-                    } else {
-                        None
-                    }
+    if let Some(content) = this
+        .options
+        .prefix_options
+        .additional_prefixes
+        .iter()
+        .find_map(|prefix| match prefix {
+            crate::Prefix::Literal(prefix) => msg.content.strip_prefix(prefix),
+            crate::Prefix::Regex(prefix) => {
+                let regex_match = prefix.find(&msg.content)?;
+                if regex_match.start() == 0 {
+                    Some(&msg.content[regex_match.end()..])
+                } else {
+                    None
                 }
-            })
-        {
-            return Some(content);
-        }
+            }
+        })
+    {
+        return Some(content);
     }
 
     if let Some(dynamic_prefix) = this.options.prefix_options.stripped_dynamic_prefix {
@@ -214,7 +210,9 @@ where
     Ok(first_matching_command)
 }
 
-/// Returns
+/// Manually dispatches a message with the prefix framework.
+///
+/// Returns:
 /// - Ok(()) if a command was successfully dispatched and run
 /// - Err(None) if no command was run but no error happened
 /// - Err(Some(error: UserError)) if any user code yielded an error

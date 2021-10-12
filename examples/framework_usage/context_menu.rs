@@ -13,7 +13,7 @@ pub async fn user_info(
         user.created_at()
     );
 
-    poise::say_reply(ctx, response).await?;
+    ctx.say(response).await?;
     Ok(())
 }
 
@@ -23,6 +23,6 @@ pub async fn echo(
     ctx: Context<'_>,
     #[description = "Message to echo (enter a link or ID)"] msg: serenity::Message,
 ) -> Result<(), Error> {
-    poise::say_reply(ctx, &msg.content).await?;
+    ctx.say(&msg.content).await?;
     Ok(())
 }

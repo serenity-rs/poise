@@ -30,10 +30,7 @@ pub async fn age(
     #[description = "Selected user"] user: Option<serenity::User>,
 ) -> Result<(), Error> {
     let user = user.as_ref().unwrap_or(ctx.author());
-    poise::say_reply(
-        ctx,
-        format!("{}'s account was created at {}", user.name, user.created_at()),
-    ).await?;
+    ctx.say(format!("{}'s account was created at {}", user.name, user.created_at())).await?;
     
     Ok(())
 }

@@ -166,8 +166,10 @@ pub async fn help<D, E>(
 
                 let prefix = if is_also_a_slash_command(command.name) {
                     "/"
+                } else if let Some(prefix) = &ctx.framework().options().prefix_options.prefix {
+                    prefix
                 } else {
-                    ctx.framework().prefix()
+                    ""
                 };
 
                 menu += &format!(

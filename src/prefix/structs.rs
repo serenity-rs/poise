@@ -133,6 +133,9 @@ pub enum Prefix {
 
 /// Prefix-specific framework configuration
 pub struct PrefixFrameworkOptions<U, E> {
+    /// The main bot prefix. Can be set to None if the bot supports only
+    /// [dynamic prefixes](Self::dynamic_prefix).
+    pub prefix: Option<String>,
     /// List of bot commands.
     pub commands: Vec<PrefixCommandMeta<U, E>>,
     /// List of additional bot prefixes
@@ -198,6 +201,7 @@ pub struct PrefixFrameworkOptions<U, E> {
 impl<U, E> Default for PrefixFrameworkOptions<U, E> {
     fn default() -> Self {
         Self {
+            prefix: None,
             commands: Vec::new(),
             additional_prefixes: Vec::new(),
             dynamic_prefix: None,

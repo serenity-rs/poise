@@ -10,6 +10,8 @@ pub use builder::*;
 use crate::serenity_prelude as serenity;
 use crate::*;
 
+pub use prefix::dispatch_message;
+
 async fn check_permissions<U, E>(
     ctx: crate::Context<'_, U, E>,
     required_permissions: serenity::Permissions,
@@ -77,7 +79,6 @@ async fn check_required_permissions_and_owners_only<U, E>(
 
 /// The main framework struct which stores all data and handles message and interaction dispatch.
 pub struct Framework<U, E> {
-    prefix: String,
     user_data: once_cell::sync::OnceCell<U>,
     user_data_setup: std::sync::Mutex<
         Option<
@@ -121,7 +122,6 @@ impl<U, E> Framework<U, E> {
     /// course of action on error.
     #[deprecated = "use Framework::build() instead"]
     pub fn new<F>(
-        prefix: impl Into<String>,
         application_id: serenity::ApplicationId,
         bot_id: serenity::UserId,
         user_data_setup: F,
@@ -138,7 +138,6 @@ impl<U, E> Framework<U, E> {
             ) -> BoxFuture<'a, Result<U, E>>,
     {
         Self {
-            prefix: prefix.into(),
             user_data: once_cell::sync::OnceCell::new(),
             user_data_setup: std::sync::Mutex::new(Some(Box::new(user_data_setup))),
             bot_id,
@@ -197,11 +196,6 @@ impl<U, E> Framework<U, E> {
     /// Returns the application ID given to the framework on its creation.
     pub fn application_id(&self) -> serenity::ApplicationId {
         self.application_id
-    }
-
-    /// Returns the main prefix for prefix commands
-    pub fn prefix(&self) -> &str {
-        &self.prefix
     }
 
     async fn get_user_data(&self) -> &U {
