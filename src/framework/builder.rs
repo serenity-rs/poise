@@ -141,6 +141,7 @@ impl<U, E> FrameworkBuilder<U, E> {
                 .bot_user_id,
             options,
             application_id: serenity::ApplicationId(application_info.id.0),
+            shard_manager: arc_swap::ArcSwapOption::from(None),
         };
 
         // Create serenity client
