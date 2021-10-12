@@ -51,7 +51,6 @@ async fn on_error(error: Error, ctx: poise::ErrorContext<'_, Data, Error>) {
 #[tokio::main]
 async fn main() {
     poise::Framework::build()
-        .prefix("~")
         .token(var("TOKEN").expect("Missing `TOKEN` env var, see README for more information."))
         .user_data_setup(move |_ctx, _ready, _framework| {
             Box::pin(async move {
@@ -62,6 +61,7 @@ async fn main() {
         })
         .options(poise::FrameworkOptions {
             prefix_options: poise::PrefixFrameworkOptions {
+                prefix: Some("~".into()),
                 edit_tracker: Some(poise::EditTracker::for_timespan(Duration::from_secs(3600))),
                 ..Default::default()
             },

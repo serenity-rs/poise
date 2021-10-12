@@ -40,8 +40,10 @@ async fn strip_prefix<'a, U, E>(
     ctx: &'a serenity::Context,
     msg: &'a serenity::Message,
 ) -> Option<&'a str> {
-    if let Some(content) = msg.content.strip_prefix(&this.prefix) {
-        return Some(content);
+    if let Some(prefix) = &this.options.prefix_options.prefix {
+        if let Some(content) = msg.content.strip_prefix(prefix) {
+            return Some(content);
+        }
     }
 
     if let Some(content) = this
