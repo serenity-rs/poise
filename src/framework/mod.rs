@@ -8,12 +8,9 @@ mod builder;
 
 pub use builder::*;
 
+use crate::serenity::client::{bridge::gateway::ShardManager, Client};
 use crate::serenity_prelude as serenity;
 use crate::*;
-use crate::serenity::client::{
-    Client,
-    bridge::gateway::ShardManager,
-};
 
 pub use prefix::dispatch_message;
 
@@ -190,11 +187,11 @@ impl<U, E> Framework<U, E> {
             .event_handler(event_handler)
             .await?;
 
-        self_3.shard_manager.store(Some(client.shard_manager.clone()));
+        self_3
+            .shard_manager
+            .store(Some(client.shard_manager.clone()));
 
-        client
-            .start()
-            .await?;
+        client.start().await?;
 
         edit_track_cache_purge_task.abort();
 
