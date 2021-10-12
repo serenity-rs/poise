@@ -10,6 +10,8 @@ pub use builder::*;
 use crate::serenity_prelude as serenity;
 use crate::*;
 
+pub use prefix::dispatch_message;
+
 async fn check_permissions<U, E>(
     ctx: crate::Context<'_, U, E>,
     required_permissions: serenity::Permissions,
