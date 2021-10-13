@@ -68,22 +68,34 @@ impl EditTracker {
 
     /// Returns a copy of a newly up-to-date cached message, or a brand new generated message when
     /// not in cache
+    ///
+    /// Returns None if the command shouldn't be re-run, e.g. if the message content stayed the
+    /// same
     pub fn process_message_update(
         &mut self,
         user_msg_update: &serenity::MessageUpdateEvent,
     ) -> Option<serenity::Message> {
-        match self.cache.iter_mut().find(|(user_msg, _)| {
-            if let Some(ref edit_content) = user_msg_update.content {
-                user_msg.id == user_msg_update.id && &user_msg.content != edit_content
-            } else {
-                false
-            }
-        }) {
+        match self
+            .cache
+            .iter_mut()
+            .find(|(user_msg, _)| user_msg.id == user_msg_update.id)
+        {
             Some((user_msg, _)) => {
+                // If message content didn't change, don't re-run command
+                match &user_msg_update.content {
+                    Some(content) if content == user_msg.content => return None,
+                    None => return None,
+                    _ => {}
+                }
+
                 update_message(user_msg, user_msg_update.clone());
                 Some(user_msg.clone())
             }
-            None => None,
+            None => {
+                let mut user_msg = serenity::CustomMessage::new().build();
+                update_message(&mut user_msg, user_msg_update.clone());
+                user_msg
+            }
         }
     }
 
