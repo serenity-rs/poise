@@ -75,11 +75,13 @@ impl EditTracker {
         &mut self,
         user_msg_update: &serenity::MessageUpdateEvent,
     ) -> Option<serenity::Message> {
-        match self
-            .cache
-            .iter_mut()
-            .find(|(user_msg, _)| user_msg.id == user_msg_update.id)
-        {
+        match self.cache.iter_mut().find(|(user_msg, _)| {
+            if let Some(ref edit_content) = user_msg_update.content {
+                user_msg.id == user_msg_update.id && &user_msg.content != edit_content
+            } else {
+                false
+            }
+        }) {
             Some((user_msg, _)) => {
                 // If message content didn't change, don't re-run command
                 match &user_msg_update.content {
