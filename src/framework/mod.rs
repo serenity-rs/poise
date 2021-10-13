@@ -5,8 +5,10 @@ mod prefix;
 mod slash;
 
 mod builder;
+
 pub use builder::*;
 
+use crate::serenity::client::{bridge::gateway::ShardManager, Client};
 use crate::serenity_prelude as serenity;
 use crate::*;
 
@@ -98,6 +100,7 @@ pub struct Framework<U, E> {
     // the edit tracking cache interior mutability
     options: FrameworkOptions<U, E>,
     application_id: serenity::ApplicationId,
+    shard_manager: arc_swap::ArcSwapOption<tokio::sync::Mutex<ShardManager>>,
 }
 
 impl<U, E> Framework<U, E> {
@@ -143,6 +146,7 @@ impl<U, E> Framework<U, E> {
             bot_id,
             options,
             application_id,
+            shard_manager: arc_swap::ArcSwapOption::from(None),
         }
     }
 
@@ -158,7 +162,8 @@ impl<U, E> Framework<U, E> {
         let application_id = self.application_id;
 
         let self_1 = std::sync::Arc::new(self);
-        let self_2 = std::sync::Arc::clone(&self_1);
+        let self_2 = self_1.clone();
+        let self_3 = self_1.clone();
 
         let edit_track_cache_purge_task = tokio::spawn(async move {
             loop {
@@ -176,12 +181,17 @@ impl<U, E> Framework<U, E> {
                 self_2.event(ctx, event).await;
             }) as _
         });
-        builder
+
+        let mut client: Client = builder
             .application_id(application_id.0)
             .event_handler(event_handler)
-            .await?
-            .start()
             .await?;
+
+        self_3
+            .shard_manager
+            .store(Some(client.shard_manager.clone()));
+
+        client.start().await?;
 
         edit_track_cache_purge_task.abort();
 
@@ -196,6 +206,11 @@ impl<U, E> Framework<U, E> {
     /// Returns the application ID given to the framework on its creation.
     pub fn application_id(&self) -> serenity::ApplicationId {
         self.application_id
+    }
+
+    /// Returns the serenity's client shard manager.
+    pub fn shard_manager(&self) -> std::sync::Arc<tokio::sync::Mutex<ShardManager>> {
+        self.shard_manager.load().as_ref().unwrap().clone()
     }
 
     async fn get_user_data(&self) -> &U {
