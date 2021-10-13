@@ -82,13 +82,14 @@ async fn strip_prefix<'a, U, E>(
 
     if this.options.prefix_options.mention_as_prefix {
         // Mentions are either <@USER_ID> or <@!USER_ID>
-        if let Some(content) = msg
-            .content
-            .strip_prefix("<@")?
-            .trim_start_matches('!')
-            .strip_prefix(&this.bot_id.0.to_string())?
-            .strip_prefix('>')
-        {
+        let stripped_mention_prefix = || {
+            msg.content
+                .strip_prefix("<@")?
+                .trim_start_matches('!')
+                .strip_prefix(&this.bot_id.0.to_string())?
+                .strip_prefix('>')
+        };
+        if let Some(content) = stripped_mention_prefix() {
             return Some(content);
         }
     }
