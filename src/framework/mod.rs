@@ -262,14 +262,18 @@ impl<U, E> Framework<U, E> {
                 if let Some(edit_tracker) = &self.options.prefix_options.edit_tracker {
                     let msg = edit_tracker.write().process_message_update(event);
 
-                    if let Err(Some((err, ctx))) =
-                        prefix::dispatch_message(self, &ctx, &msg, true).await
-                    {
-                        (self.options.on_error)(
-                            err,
-                            crate::ErrorContext::Command(crate::CommandErrorContext::Prefix(ctx)),
-                        )
-                        .await;
+                    if let Some(msg) = msg {
+                        if let Err(Some((err, ctx))) =
+                            prefix::dispatch_message(self, &ctx, &msg, true).await
+                        {
+                            (self.options.on_error)(
+                                err,
+                                crate::ErrorContext::Command(crate::CommandErrorContext::Prefix(
+                                    ctx,
+                                )),
+                            )
+                            .await;
+                        }
                     }
                 }
             }
