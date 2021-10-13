@@ -83,7 +83,7 @@ impl EditTracker {
             Some((user_msg, _)) => {
                 // If message content didn't change, don't re-run command
                 match &user_msg_update.content {
-                    Some(content) if content == user_msg.content => return None,
+                    Some(content) if content == &user_msg.content => return None,
                     None => return None,
                     _ => {}
                 }
@@ -94,7 +94,7 @@ impl EditTracker {
             None => {
                 let mut user_msg = serenity::CustomMessage::new().build();
                 update_message(&mut user_msg, user_msg_update.clone());
-                user_msg
+                Some(user_msg)
             }
         }
     }
