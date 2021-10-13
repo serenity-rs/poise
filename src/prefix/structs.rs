@@ -181,6 +181,10 @@ pub struct PrefixFrameworkOptions<U, E> {
     /// If Some, the framework will react to message edits by editing the corresponding bot response
     /// with the new result.
     pub edit_tracker: Option<parking_lot::RwLock<super::EditTracker>>,
+    /// Wether or not to ignore message edits on messages outside the cache.
+    /// This can happen if the message edit happens while the command is being invoked, or the
+    /// original message wasn't a command.
+    pub ignore_edit_tracker_cache: bool,
     /// Whether to broadcast a typing indicator while executing this commmand's action.
     pub broadcast_typing: BroadcastTypingBehavior,
     /// Whether commands in messages emitted by the bot itself should be executed as well.
@@ -209,6 +213,7 @@ impl<U, E> Default for PrefixFrameworkOptions<U, E> {
             mention_as_prefix: true,
             command_check: |_| Box::pin(async { Ok(true) }),
             edit_tracker: None,
+            ignore_edit_tracker_cache: false,
             broadcast_typing: BroadcastTypingBehavior::None,
             execute_self_messages: false,
             case_insensitive_commands: true,
