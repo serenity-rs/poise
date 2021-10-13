@@ -40,6 +40,14 @@ async fn strip_prefix<'a, U, E>(
     ctx: &'a serenity::Context,
     msg: &'a serenity::Message,
 ) -> Option<&'a str> {
+    if let Some(dynamic_prefix) = this.options.prefix_options.dynamic_prefix {
+        if let Some(prefix) = dynamic_prefix(ctx, msg, this.get_user_data().await).await {
+            if let Some(content) = msg.content.strip_prefix(&prefix) {
+                return Some(content);
+            }
+        }
+    }
+
     if let Some(prefix) = &this.options.prefix_options.prefix {
         if let Some(content) = msg.content.strip_prefix(prefix) {
             return Some(content);
@@ -66,6 +74,12 @@ async fn strip_prefix<'a, U, E>(
         return Some(content);
     }
 
+    if let Some(dynamic_prefix) = this.options.prefix_options.stripped_dynamic_prefix {
+        if let Some(content) = dynamic_prefix(ctx, msg, this.get_user_data().await).await {
+            return Some(content);
+        }
+    }
+
     if this.options.prefix_options.mention_as_prefix {
         // Mentions are either <@USER_ID> or <@!USER_ID>
         if let Some(content) = msg
@@ -75,12 +89,6 @@ async fn strip_prefix<'a, U, E>(
             .strip_prefix(&this.bot_id.0.to_string())?
             .strip_prefix('>')
         {
-            return Some(content);
-        }
-    }
-
-    if let Some(dynamic_prefix) = this.options.prefix_options.dynamic_prefix {
-        if let Some(content) = dynamic_prefix(ctx, msg, this.get_user_data().await).await {
             return Some(content);
         }
     }
