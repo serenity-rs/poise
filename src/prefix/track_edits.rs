@@ -71,21 +71,19 @@ impl EditTracker {
     pub fn process_message_update(
         &mut self,
         user_msg_update: &serenity::MessageUpdateEvent,
-    ) -> serenity::Message {
-        match self
-            .cache
-            .iter_mut()
-            .find(|(user_msg, _)| user_msg.id == user_msg_update.id)
-        {
+    ) -> Option<serenity::Message> {
+        match self.cache.iter_mut().find(|(user_msg, _)| {
+            if let Some(ref edit_content) = user_msg_update.content {
+                user_msg.id == user_msg_update.id && &user_msg.content != edit_content
+            } else {
+                false
+            }
+        }) {
             Some((user_msg, _)) => {
                 update_message(user_msg, user_msg_update.clone());
-                user_msg.clone()
+                Some(user_msg.clone())
             }
-            None => {
-                let mut user_msg = serenity::CustomMessage::new().build();
-                update_message(&mut user_msg, user_msg_update.clone());
-                user_msg
-            }
+            None => None,
         }
     }
 
