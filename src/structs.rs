@@ -26,6 +26,41 @@ impl<'a, U, E> From<crate::PrefixContext<'a, U, E>> for Context<'a, U, E> {
     }
 }
 impl<'a, U, E> Context<'a, U, E> {
+    /// Delegates to [`ApplicationContext::defer_response`].
+    ///
+    /// This will make the response public; to make it ephemeral, use [`Self::defer_ephemeral()`].
+    pub async fn defer(self) -> Result<(), serenity::Error> {
+        if let Self::Application(ctx) = self {
+            ctx.defer_response(false).await?;
+        }
+        Ok(())
+    }
+
+    /// Delegates to [`ApplicationContext::defer_response`].
+    ///
+    /// This will make the response ephemeral; to make it public, use [`Self::defer()`].
+    pub async fn defer_ephemeral(self) -> Result<(), serenity::Error> {
+        if let Self::Application(ctx) = self {
+            ctx.defer_response(true).await?;
+        }
+        Ok(())
+    }
+
+    /// If this is an application command, it delegates to [`ApplicationContext::defer_response`].
+    ///
+    /// If this is a prefix command, a typing broadcast is started until the return value is
+    /// dropped.
+    #[must_use = "The typing broadcast will only persist if you store it"]
+    pub async fn defer_or_broadcast(self) -> Result<Option<serenity::Typing>, serenity::Error> {
+        Ok(match self {
+            Self::Application(ctx) => {
+                ctx.defer_response(false).await?;
+                None
+            }
+            Self::Prefix(ctx) => Some(ctx.msg.channel_id.start_typing(&ctx.discord.http)?),
+        })
+    }
+
     /// Shorthand of [`crate::say_reply`]
     pub async fn say(
         self,

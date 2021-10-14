@@ -1,6 +1,6 @@
 use syn::spanned::Spanned as _;
 
-use super::{extract_option_type, extract_vec_type, wrap_option, Invocation};
+use super::{extract_option_type, extract_vec_type, Invocation};
 
 fn generate_options(inv: &Invocation) -> proc_macro2::TokenStream {
     // Box::pin the check and on_error callbacks in order to store them in a struct
@@ -17,13 +17,11 @@ fn generate_options(inv: &Invocation) -> proc_macro2::TokenStream {
         None => quote::quote! { None },
     };
 
-    let defer_response = wrap_option(inv.more.defer_response);
     let ephemeral = inv.more.ephemeral;
     let required_permissions = inv.required_permissions;
     let owners_only = inv.more.owners_only;
     quote::quote! {
         ::poise::ApplicationCommandOptions {
-            defer_response: #defer_response,
             check: #check,
             on_error: #on_error,
             ephemeral: #ephemeral,

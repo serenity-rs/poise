@@ -39,10 +39,16 @@ impl<U, E> ApplicationContext<'_, U, E> {
     ///
     /// Also sets the [`ApplicationContext::has_sent_initial_response`] flag so the subsequent
     /// response will be sent in the correct manner.
-    pub async fn defer_response(&self) -> Result<(), serenity::Error> {
+    pub async fn defer_response(&self, ephemeral: bool) -> Result<(), serenity::Error> {
+        let mut flags = serenity::InteractionApplicationCommandCallbackDataFlags::empty();
+        if ephemeral {
+            flags |= serenity::InteractionApplicationCommandCallbackDataFlags::EPHEMERAL;
+        }
+
         self.interaction
             .create_interaction_response(self.discord, |f| {
                 f.kind(serenity::InteractionResponseType::DeferredChannelMessageWithSource)
+                    .interaction_response_data(|f| f.flags(flags))
             })
             .await?;
         self.has_sent_initial_response
@@ -78,8 +84,6 @@ pub struct ApplicationCommandOptions<U, E> {
     pub on_error: Option<fn(E, ApplicationCommandErrorContext<'_, U, E>) -> BoxFuture<'_, ()>>,
     /// If this function returns false, this command will not be executed.
     pub check: Option<fn(ApplicationContext<'_, U, E>) -> BoxFuture<'_, Result<bool, E>>>,
-    /// Falls back to the framework-specified value on None. See there for documentation.
-    pub defer_response: Option<bool>,
     /// Whether responses to this command should be ephemeral by default.
     pub ephemeral: bool,
     /// Permissions which a user needs to have so that the application command runs.
@@ -94,7 +98,6 @@ impl<U, E> Default for ApplicationCommandOptions<U, E> {
         Self {
             on_error: None,
             check: None,
-            defer_response: None,
             ephemeral: false,
             required_permissions: serenity::Permissions::empty(),
             owners_only: false,
@@ -287,17 +290,6 @@ pub struct ApplicationFrameworkOptions<U, E> {
     ///
     /// Individual commands may override this callback.
     pub command_check: fn(ApplicationContext<'_, U, E>) -> BoxFuture<'_, Result<bool, E>>,
-    /// Whether to send an interaction acknoweldgement.
-    ///
-    /// Individual commands may override this value.
-    ///
-    /// If true, send back a quick interaction acknowledgement when receiving an interaction, which
-    /// gives your code 15 minutes to respond. When this field is set to false, no acknowledgement
-    /// is sent and you need to respond within 3 seconds or the interaction is considered failed by
-    /// Discord.
-    ///
-    /// In some way this is the equivalent of `crate::PrefixFrameworkOptions::broadcast_typing`.
-    pub defer_response: bool,
     /// Invoked when a user tries to execute an application command but doesn't have the required
     /// permissions for it.
     ///
@@ -311,7 +303,6 @@ impl<U: Send + Sync, E> Default for ApplicationFrameworkOptions<U, E> {
         Self {
             commands: Vec::new(),
             command_check: |_| Box::pin(async { Ok(true) }),
-            defer_response: false,
             missing_permissions_handler: |ctx| {
                 Box::pin(async move {
                     let response = format!(

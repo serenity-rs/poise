@@ -161,16 +161,6 @@ pub async fn dispatch_interaction<'a, U, E>(
         return Ok(());
     }
 
-    if command
-        .options()
-        .defer_response
-        .unwrap_or(this.options.application_options.defer_response)
-    {
-        if let Err(e) = ctx.defer_response().await {
-            println!("Failed to send interaction acknowledgement: {}", e);
-        }
-    }
-
     (this.options.pre_command)(crate::Context::Application(ctx)).await;
 
     let action_result = match command {
