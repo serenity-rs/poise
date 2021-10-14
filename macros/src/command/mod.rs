@@ -60,12 +60,6 @@ impl darling::FromMeta for Aliases {
     }
 }
 
-// #[derive(Debug, darling::FromMeta)]
-// struct BroadcastTypingArgs {
-//     #[darling(default)]
-//     after: f32,
-// }
-
 /// Representation of the command attribute arguments (`#[command(...)]`)
 #[derive(Default, Debug, darling::FromMeta)]
 #[darling(default)]
@@ -76,9 +70,6 @@ pub struct CommandOptions {
 
     aliases: Aliases,
     track_edits: bool,
-    // broadcast_typing: Option<BroadcastTypingArgs>,
-    broadcast_typing: Option<()>,
-    defer_response: Option<bool>,
     explanation_fn: Option<syn::Path>,
     check: Option<syn::Path>,
     on_error: Option<syn::Path>,

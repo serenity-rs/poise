@@ -76,17 +76,6 @@ pub fn generate_prefix_command_spec(
             })
             .collect::<Result<Vec<_>, darling::Error>>()?;
 
-    // Currently you can either fallback to framework setting or opt-in with zero delay. Rest of the
-    // cases are not covered because I don't know how the syntax should look like
-    let broadcast_typing = match inv.more.broadcast_typing {
-        Some(()) => quote::quote! {
-            Some(::poise::BroadcastTypingBehavior::WithDelay(std::time::Duration::from_secs(0)))
-        },
-        None => quote::quote! {
-            None
-        },
-    };
-
     let command_name = &inv.command_name;
     let track_edits = inv.more.track_edits;
     let aliases = &inv.more.aliases.0;
@@ -107,7 +96,6 @@ pub fn generate_prefix_command_spec(
             }),
             options: ::poise::PrefixCommandOptions {
                 track_edits: #track_edits,
-                broadcast_typing: #broadcast_typing,
                 aliases: &[ #( #aliases, )* ],
                 inline_help: #description,
                 multiline_help: #explanation,

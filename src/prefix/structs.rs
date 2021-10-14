@@ -52,8 +52,6 @@ pub struct PrefixCommandOptions<U, E> {
     ///
     /// Note: this won't do anything if `Framework::edit_tracker` isn't set.
     pub track_edits: bool,
-    /// Falls back to the framework-specified value on None. See there for documentation.
-    pub broadcast_typing: Option<BroadcastTypingBehavior>,
     /// Whether to hide this command in help menus.
     pub hide_in_help: bool,
     /// Permissions which users must have to invoke this command.
@@ -74,7 +72,6 @@ impl<U, E> Default for PrefixCommandOptions<U, E> {
             on_error: None,
             aliases: &[],
             track_edits: false,
-            broadcast_typing: None,
             hide_in_help: false,
             required_permissions: serenity::Permissions::empty(),
             owners_only: false,
@@ -185,8 +182,7 @@ pub struct PrefixFrameworkOptions<U, E> {
     /// This can happen if the message edit happens while the command is being invoked, or the
     /// original message wasn't a command.
     pub ignore_edit_tracker_cache: bool,
-    /// Whether to broadcast a typing indicator while executing this commmand's action.
-    pub broadcast_typing: BroadcastTypingBehavior,
+
     /// Whether commands in messages emitted by the bot itself should be executed as well.
     pub execute_self_messages: bool,
     /// Whether command names should be compared case-insensitively.
@@ -214,7 +210,6 @@ impl<U, E> Default for PrefixFrameworkOptions<U, E> {
             command_check: |_| Box::pin(async { Ok(true) }),
             edit_tracker: None,
             ignore_edit_tracker_cache: false,
-            broadcast_typing: BroadcastTypingBehavior::None,
             execute_self_messages: false,
             case_insensitive_commands: true,
             // help_when_mentioned: true,
@@ -222,15 +217,4 @@ impl<U, E> Default for PrefixFrameworkOptions<U, E> {
             // command_specific_help_commmand: None,
         }
     }
-}
-
-/// Defines whether and in what way commands send a typing notification
-pub enum BroadcastTypingBehavior {
-    /// Don't broadcast typing
-    None,
-    // TODO: make Immediate variant maybe?
-    /// Broadcast typing after the command has been running for a certain time
-    ///
-    /// Set duration to zero for immediate typing broadcast
-    WithDelay(std::time::Duration),
 }
