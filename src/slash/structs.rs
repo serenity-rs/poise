@@ -285,11 +285,6 @@ impl<'a, U, E> ApplicationCommand<'a, U, E> {
 pub struct ApplicationFrameworkOptions<U, E> {
     /// List of bot commands.
     pub commands: Vec<ApplicationCommandTree<U, E>>,
-    /// Provide a callback to be invoked before every command. The command will only be executed
-    /// if the callback returns true.
-    ///
-    /// Individual commands may override this callback.
-    pub command_check: fn(ApplicationContext<'_, U, E>) -> BoxFuture<'_, Result<bool, E>>,
     /// Invoked when a user tries to execute an application command but doesn't have the required
     /// permissions for it.
     ///
@@ -302,7 +297,6 @@ impl<U: Send + Sync, E> Default for ApplicationFrameworkOptions<U, E> {
     fn default() -> Self {
         Self {
             commands: Vec::new(),
-            command_check: |_| Box::pin(async { Ok(true) }),
             missing_permissions_handler: |ctx| {
                 Box::pin(async move {
                     let response = format!(
