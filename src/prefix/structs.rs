@@ -170,11 +170,6 @@ pub struct PrefixFrameworkOptions<U, E> {
     >,
     /// Treat a bot mention (a ping) like a prefix
     pub mention_as_prefix: bool,
-    /// Provide a callback to be invoked before every command. The command will only be executed
-    /// if the callback returns true.
-    ///
-    /// Individual commands may override this callback.
-    pub command_check: fn(PrefixContext<'_, U, E>) -> BoxFuture<'_, Result<bool, E>>,
     /// If Some, the framework will react to message edits by editing the corresponding bot response
     /// with the new result.
     pub edit_tracker: Option<parking_lot::RwLock<super::EditTracker>>,
@@ -202,7 +197,6 @@ impl<U, E> Default for PrefixFrameworkOptions<U, E> {
             dynamic_prefix: None,
             stripped_dynamic_prefix: None,
             mention_as_prefix: true,
-            command_check: |_| Box::pin(async { Ok(true) }),
             edit_tracker: None,
             execute_self_messages: false,
             case_insensitive_commands: true,

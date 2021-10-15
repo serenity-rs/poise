@@ -143,12 +143,22 @@ where
             continue;
         }
 
-        // Only continue if command check returns true
-        let command_check = command
-            .options
-            .check
-            .unwrap_or(this.options.prefix_options.command_check);
-        let check_passes = command_check(prefix_ctx).await.map_err(|e| {
+        // Only continue if command checks returns true
+        let checks_passing = (|| async {
+            let global_check_passes = match &this.options.command_check {
+                Some(check) => check(crate::Context::Prefix(prefix_ctx)).await?,
+                None => true,
+            };
+
+            let command_specific_check_passes = match &command.options.check {
+                Some(check) => check(prefix_ctx).await?,
+                None => true,
+            };
+
+            Ok(global_check_passes && command_specific_check_passes)
+        })()
+        .await
+        .map_err(|e| {
             (
                 e,
                 crate::PrefixCommandErrorContext {
@@ -158,7 +168,7 @@ where
                 },
             )
         })?;
-        if !check_passes {
+        if !checks_passing {
             continue;
         }
 
