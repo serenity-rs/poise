@@ -74,6 +74,7 @@ impl EditTracker {
     pub fn process_message_update(
         &mut self,
         user_msg_update: &serenity::MessageUpdateEvent,
+        ignore_edit_tracker_cache: bool,
     ) -> Option<serenity::Message> {
         match self
             .cache
@@ -92,9 +93,13 @@ impl EditTracker {
                 Some(user_msg.clone())
             }
             None => {
-                let mut user_msg = serenity::CustomMessage::new().build();
-                update_message(&mut user_msg, user_msg_update.clone());
-                Some(user_msg)
+                if !ignore_edit_tracker_cache {
+                    let mut user_msg = serenity::CustomMessage::new().build();
+                    update_message(&mut user_msg, user_msg_update.clone());
+                    Some(user_msg)
+                } else {
+                    None
+                }
             }
         }
     }
