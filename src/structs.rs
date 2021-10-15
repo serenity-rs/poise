@@ -26,7 +26,7 @@ impl<'a, U, E> From<crate::PrefixContext<'a, U, E>> for Context<'a, U, E> {
     }
 }
 impl<'a, U, E> Context<'a, U, E> {
-    /// Delegates to [`ApplicationContext::defer_response`].
+    /// Delegates to [`crate::ApplicationContext::defer_response`].
     ///
     /// This will make the response public; to make it ephemeral, use [`Self::defer_ephemeral()`].
     pub async fn defer(self) -> Result<(), serenity::Error> {
@@ -36,7 +36,7 @@ impl<'a, U, E> Context<'a, U, E> {
         Ok(())
     }
 
-    /// Delegates to [`ApplicationContext::defer_response`].
+    /// Delegates to [`crate::ApplicationContext::defer_response`].
     ///
     /// This will make the response ephemeral; to make it public, use [`Self::defer()`].
     pub async fn defer_ephemeral(self) -> Result<(), serenity::Error> {
@@ -46,7 +46,7 @@ impl<'a, U, E> Context<'a, U, E> {
         Ok(())
     }
 
-    /// If this is an application command, it delegates to [`ApplicationContext::defer_response`].
+    /// If this is an application command, it delegates to [`crate::ApplicationContext::defer_response`].
     ///
     /// If this is a prefix command, a typing broadcast is started until the return value is
     /// dropped.
