@@ -260,7 +260,10 @@ impl<U, E> Framework<U, E> {
             }
             Event::MessageUpdate { event, .. } => {
                 if let Some(edit_tracker) = &self.options.prefix_options.edit_tracker {
-                    let msg = edit_tracker.write().process_message_update(event);
+                    let msg = edit_tracker.write().process_message_update(
+                        event,
+                        self.options().prefix_options.ignore_edit_tracker_cache,
+                    );
 
                     if let Some(msg) = msg {
                         if let Err(Some((err, ctx))) =
