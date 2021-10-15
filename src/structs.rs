@@ -474,7 +474,10 @@ impl<U, E> FrameworkOptions<U, E> {
         };
 
         self.id_count += 1;
-        let command_id = CommandId { id: self.id_count, name };
+        let command_id = CommandId {
+            id: self.id_count,
+            name,
+        };
 
         if let Some(mut prefix_command) = builder.prefix_command {
             self.prefix_options.commands.push({
