@@ -300,6 +300,7 @@ pub struct CommandBuilder<U, E> {
     prefix_command: Option<crate::PrefixCommandMeta<U, E>>,
     slash_command: Option<crate::SlashCommandMeta<U, E>>,
     context_menu_command: Option<crate::ContextMenuCommand<U, E>>,
+    name: Option<String>,
 }
 
 impl<U, E> CommandBuilder<U, E> {
@@ -308,6 +309,12 @@ impl<U, E> CommandBuilder<U, E> {
         if let Some(prefix_command) = &mut self.prefix_command {
             prefix_command.category = Some(category);
         }
+        self
+    }
+
+    /// Assign a name to this command, which will be used as the [`crate::CommandId`] name.
+    pub fn name(&mut self, name: String) -> &mut Self {
+        self.name = Some(name);
         self
     }
 
@@ -335,6 +342,7 @@ impl<U, E> CommandBuilder<U, E> {
             prefix_command,
             slash_command,
             context_menu_command,
+            name: self.name.clone(),
         };
         meta_builder(&mut builder);
 
@@ -393,6 +401,8 @@ pub struct FrameworkOptions<U, E> {
     pub prefix_options: crate::PrefixFrameworkOptions<U, E>,
     /// User IDs which are allowed to use owners_only commands
     pub owners: std::collections::HashSet<serenity::UserId>,
+    /// Internal field to count the number of assigned Command IDs
+    pub id_count: usize,
 }
 
 impl<U, E> FrameworkOptions<U, E> {
@@ -418,7 +428,7 @@ impl<U, E> FrameworkOptions<U, E> {
         &mut self,
         definition: crate::CommandDefinition<U, E>,
         meta_builder: impl FnOnce(&mut CommandBuilder<U, E>) -> &mut CommandBuilder<U, E>,
-    ) {
+    ) -> CommandId {
         // TODO: remove duplication with CommandBuilder::subcommand
 
         let crate::CommandDefinition {
@@ -439,8 +449,21 @@ impl<U, E> FrameworkOptions<U, E> {
             prefix_command,
             slash_command,
             context_menu_command,
+            name: None,
         };
         meta_builder(&mut builder);
+
+        let name = if let Some(name) = builder.name {
+            name
+        } else if let Some(ref prefix_command) = builder.prefix_command {
+            prefix_command.command.name.to_string()
+        } else if let Some(ref slash_command) = builder.slash_command {
+            slash_command.name().to_string()
+        } else if let Some(ref context_menu_command) = builder.context_menu_command {
+            context_menu_command.name.to_string()
+        } else {
+            panic!("No registered name");
+        };
 
         if let Some(prefix_command) = builder.prefix_command {
             self.prefix_options.commands.push(prefix_command);
@@ -457,6 +480,10 @@ impl<U, E> FrameworkOptions<U, E> {
                     context_menu_command,
                 ));
         }
+
+        self.id_count += 1;
+
+        CommandId { id: self.id_count, name }
     }
 }
 
@@ -504,6 +531,7 @@ impl<U: Send + Sync, E: std::fmt::Display + Send> Default for FrameworkOptions<U
             application_options: Default::default(),
             prefix_options: Default::default(),
             owners: Default::default(),
+            id_count: 0,
         }
     }
 }
@@ -517,4 +545,15 @@ pub struct CommandDefinition<U, E> {
     pub slash: Option<crate::SlashCommand<U, E>>,
     /// Generated context menu command, if it was enabled
     pub context_menu: Option<crate::ContextMenuCommand<U, E>>,
+}
+
+/// Command Identification, because context menus and normal commands could have different names.
+#[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Ord, Hash)]
+pub struct CommandId {
+    /// A unique ID of the command.
+    pub id: usize,
+    /// A unique name for the command, configurable when registered, otherwise it will use the
+    /// Prefix name if present, otherwise the Application Command if present and at last, the
+    /// ContextNenu name.
+    pub name: String,
 }

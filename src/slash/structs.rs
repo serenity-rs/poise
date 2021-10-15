@@ -203,6 +203,14 @@ impl<U, E> SlashCommandMeta<U, E> {
         }
         interaction
     }
+
+    /// Returns the Command or Group name.
+    pub fn name(&self) -> &'static str {
+        match self {
+            Self::CommandGroup { name, .. } => name,
+            Self::Command(command) => command.name,
+        }
+    }
 }
 
 /// Possible actions that a context menu entry can have
