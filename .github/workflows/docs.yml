@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - develop
 
 jobs:
   docs:
@@ -25,13 +26,17 @@ jobs:
         env:
           RUSTDOCFLAGS: --cfg docsrs -D rustdoc::broken_intra_doc_links
         run: |
+          DIR=${GITHUB_REF/refs\/+(heads|tags)\//}
           cargo doc --no-deps --all-features
+          mkdir -p ./doocs/$DIR
+          mv ./target/doc/* ./docs/$DIR/
+
 
       - name: Deploy docs
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
-          publish_dir: ./target/doc
+          publish_dir: ./docs
           allow_empty_commit: false
           keep_files: true
