@@ -375,7 +375,7 @@ pub struct FrameworkOptions<U, E> {
     /// Provide a callback to be invoked before every command. The command will only be executed
     /// if the callback returns true.
     ///
-    /// Individual commands may override this callback.
+    /// If individual commands add their own check, both callbacks are run and must return true.
     pub command_check: Option<fn(Context<'_, U, E>) -> BoxFuture<'_, Result<bool, E>>>,
     /// Default set of allowed mentions to use for all responses
     pub allowed_mentions: Option<serenity::CreateAllowedMentions>,

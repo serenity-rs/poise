@@ -26,9 +26,13 @@ jobs:
         env:
           RUSTDOCFLAGS: --cfg docsrs -D rustdoc::broken_intra_doc_links
         run: |
-          DIR=${GITHUB_REF/refs\/+(heads|tags)\//}
           cargo doc --no-deps --all-features
-          mkdir -p ./doocs/$DIR
+
+      - name: Move files
+        shell: bash
+        run: |
+          DIR=${GITHUB_REF#refs/heads/}
+          mkdir -p ./docs/$DIR
           mv ./target/doc/* ./docs/$DIR/
 
 
