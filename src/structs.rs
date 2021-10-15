@@ -177,6 +177,14 @@ impl<U, E> Context<'_, U, E> {
             }
         }
     }
+
+    /// Returns a reference to the command.
+    pub fn command(&self) -> Option<crate::CommandRef<'_, U, E>> {
+        Some(match self {
+            Self::Prefix(x) => crate::CommandRef::Prefix(x.command?),
+            Self::Application(x) => crate::CommandRef::Application(x.command),
+        })
+    }
 }
 
 /// A reference to either a prefix or application command.
