@@ -178,19 +178,12 @@ impl<U, E> Context<'_, U, E> {
         }
     }
 
-    /// Retunrs the name of the command.
-    ///
-    /// Can return None if the prefix context command field is None.
-    pub fn command_name(&self) -> Option<&'static str> {
-        match self {
-            Self::Prefix(ctx) => Some(ctx.command?.name),
-            Self::Application(ctx) => {
-                match ctx.command {
-                    crate::ApplicationCommand::Slash(cmd) => Some(cmd.name),
-                    crate::ApplicationCommand::ContextMenu(cmd) => Some(cmd.name),
-                }
-            }
-        }
+    /// Returns a reference to the command.
+    pub fn command(&self) -> Option<crate::CommandRef<'_, U, E>> {
+        Some(match self {
+            Self::Prefix(x) => crate::CommandRef::Prefix(x.command?),
+            Self::Application(x) => crate::CommandRef::Application(x.command),
+        })
     }
 }
 
