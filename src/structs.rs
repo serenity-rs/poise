@@ -214,6 +214,14 @@ impl<U, E> CommandRef<'_, U, E> {
             Self::Application(x) => x.slash_or_context_menu_name(),
         }
     }
+
+    /// Yield the ID of the command.
+    pub fn id(self) -> CommandId {
+        match self {
+            Self::Prefix(x) => x.id.clone(),
+            Self::Application(x) => x.id(),
+        }
+    }
 }
 
 /// Context of an error in user code
@@ -465,25 +473,36 @@ impl<U, E> FrameworkOptions<U, E> {
             panic!("No registered name");
         };
 
-        if let Some(prefix_command) = builder.prefix_command {
-            self.prefix_options.commands.push(prefix_command);
-        }
-        if let Some(slash_command) = builder.slash_command {
-            self.application_options
-                .commands
-                .push(crate::ApplicationCommandTree::Slash(slash_command));
-        }
-        if let Some(context_menu_command) = builder.context_menu_command {
-            self.application_options
-                .commands
-                .push(crate::ApplicationCommandTree::ContextMenu(
-                    context_menu_command,
-                ));
-        }
-
         self.id_count += 1;
+        let command_id = CommandId { id: self.id_count, name };
 
-        CommandId { id: self.id_count, name }
+        if let Some(mut prefix_command) = builder.prefix_command {
+            self.prefix_options.commands.push({
+                prefix_command.command.id = command_id.clone();
+
+                prefix_command
+            });
+        }
+        if let Some(mut slash_command) = builder.slash_command {
+            self.application_options
+                .commands
+                .push(crate::ApplicationCommandTree::Slash({
+                    if let crate::SlashCommandMeta::Command(ref mut cmd) = slash_command {
+                        cmd.id = command_id.clone();
+                    }
+                    slash_command
+                }));
+        }
+        if let Some(mut context_menu_command) = builder.context_menu_command {
+            self.application_options
+                .commands
+                .push(crate::ApplicationCommandTree::ContextMenu({
+                    context_menu_command.id = command_id.clone();
+                    context_menu_command
+                }));
+        }
+
+        command_id
     }
 }
 
@@ -548,7 +567,7 @@ pub struct CommandDefinition<U, E> {
 }
 
 /// Command Identification, because context menus and normal commands could have different names.
-#[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Ord, Hash, Default)]
 pub struct CommandId {
     /// A unique ID of the command.
     pub id: usize,

@@ -124,6 +124,8 @@ pub struct SlashCommand<U, E> {
     ) -> BoxFuture<'a, Result<(), E>>,
     /// Further configuration
     pub options: ApplicationCommandOptions<U, E>,
+    /// The command ID
+    pub id: crate::CommandId,
 }
 
 /// A single slash command or slash command group
@@ -229,6 +231,8 @@ pub struct ContextMenuCommand<U, E> {
     pub options: ApplicationCommandOptions<U, E>,
     /// The target and action of the context menu entry
     pub action: ContextMenuCommandAction<U, E>,
+    /// The command ID
+    pub id: crate::CommandId,
 }
 
 /// Defines any application command, including subcommands if supported by the application command
@@ -277,6 +281,14 @@ impl<'a, U, E> ApplicationCommand<'a, U, E> {
         match self {
             Self::Slash(cmd) => cmd.name,
             Self::ContextMenu(cmd) => cmd.name,
+        }
+    }
+
+    /// Yield the command ID.
+    pub fn id(self) -> crate::CommandId {
+        match self {
+            Self::Slash(cmd) => cmd.id.clone(),
+            Self::ContextMenu(cmd) => cmd.id.clone(),
         }
     }
 

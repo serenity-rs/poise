@@ -88,6 +88,8 @@ pub struct PrefixCommand<U, E> {
     pub action: for<'a> fn(PrefixContext<'a, U, E>, args: &'a str) -> BoxFuture<'a, Result<(), E>>,
     /// Optional data to change this command's behavior.
     pub options: PrefixCommandOptions<U, E>,
+    /// The command ID
+    pub id: crate::CommandId,
 }
 
 /// Includes a command, plus metadata like associated sub-commands or category.

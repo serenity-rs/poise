@@ -111,6 +111,7 @@ pub fn generate_slash_command_spec(
                 inner(ctx.into(), #( #param_names, )*).await
             }),
             options: #options,
+            id: Default::default(),
         }
     })
 }
@@ -137,6 +138,7 @@ pub fn generate_context_menu_command_spec(
                 Box::pin(async move { inner(ctx.into(), value).await })
             }),
             options: #options,
+            id: Default::default(),
         }
     })
 }

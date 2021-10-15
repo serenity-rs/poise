@@ -104,7 +104,8 @@ pub fn generate_prefix_command_spec(
                 hide_in_help: #hide_in_help,
                 required_permissions: #required_permissions,
                 owners_only: #owners_only,
-            }
+            },
+            id: Default::default(),
         }
     })
 }
