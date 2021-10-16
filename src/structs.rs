@@ -391,7 +391,7 @@ impl<U, E> CommandBuilder<U, E> {
                     crate::SlashCommandMeta::CommandGroup { subcommands, .. } => {
                         subcommands.push({
                             if let crate::SlashCommandMeta::Command(ref mut cmd) = subcommand {
-                                cmd.id = command_id.clone();
+                                cmd.id = command_id;
                             }
 
                             subcommand
@@ -403,7 +403,7 @@ impl<U, E> CommandBuilder<U, E> {
                             description: cmd.description,
                             subcommands: {
                                 if let crate::SlashCommandMeta::Command(ref mut cmd) = subcommand {
-                                    cmd.id = command_id.clone();
+                                    cmd.id = command_id;
                                 }
 
                                 vec![subcommand]
@@ -445,7 +445,7 @@ pub struct FrameworkOptions<U, E> {
     pub prefix_options: crate::PrefixFrameworkOptions<U, E>,
     /// User IDs which are allowed to use owners_only commands
     pub owners: std::collections::HashSet<serenity::UserId>,
-    /// The IDs of the registered commands. This has individual commands, and will not have 
+    /// The IDs of the registered commands. This has individual commands, and will not have
     /// individual variants if they can be executed multiple ways.
     pub command_ids: Vec<CommandId>,
 }
@@ -536,15 +536,15 @@ impl<U, E> FrameworkOptions<U, E> {
                         cmd.id = command_id.clone();
                     }
 
-                    match &slash_command {
-                        crate::SlashCommandMeta::CommandGroup { ref subcommands, .. } => {
-                            for cmd in subcommands {
-                                if let crate::SlashCommandMeta::Command(cmd) = cmd {
-                                    self.command_ids.push(cmd.id.clone());
-                                }
+                    if let crate::SlashCommandMeta::CommandGroup {
+                        ref subcommands, ..
+                    } = &slash_command
+                    {
+                        for cmd in subcommands {
+                            if let crate::SlashCommandMeta::Command(cmd) = cmd {
+                                self.command_ids.push(cmd.id.clone());
                             }
                         }
-                        _ => ()
                     }
 
                     slash_command
