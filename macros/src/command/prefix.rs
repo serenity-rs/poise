@@ -78,6 +78,7 @@ pub fn generate_prefix_command_spec(
 
     let command_name = &inv.command_name;
     let track_edits = inv.more.track_edits;
+    let broadcast_typing = inv.more.broadcast_typing;
     let aliases = &inv.more.aliases.0;
     let hide_in_help = &inv.more.hide_in_help;
     let param_names = inv.parameters.iter().map(|p| &p.name).collect::<Vec<_>>();
@@ -96,6 +97,7 @@ pub fn generate_prefix_command_spec(
             }),
             options: ::poise::PrefixCommandOptions {
                 track_edits: #track_edits,
+                broadcast_typing: #broadcast_typing,
                 aliases: &[ #( #aliases, )* ],
                 inline_help: #description,
                 multiline_help: #explanation,

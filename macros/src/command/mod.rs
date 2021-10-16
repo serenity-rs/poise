@@ -70,6 +70,7 @@ pub struct CommandOptions {
 
     aliases: Aliases,
     track_edits: bool,
+    broadcast_typing: bool,
     explanation_fn: Option<syn::Path>,
     check: Option<syn::Path>,
     on_error: Option<syn::Path>,

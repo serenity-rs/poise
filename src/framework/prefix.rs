@@ -227,6 +227,13 @@ where
         return Err(None);
     }
 
+    // Typing is broadcasted as long as this object is alive
+    let _typing_broadcaster = if command.options.broadcast_typing {
+        msg.channel_id.start_typing(&ctx.http).ok()
+    } else {
+        None
+    };
+
     let ctx = crate::PrefixContext {
         discord: ctx,
         msg,

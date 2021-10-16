@@ -52,6 +52,8 @@ pub struct PrefixCommandOptions<U, E> {
     ///
     /// Note: this won't do anything if `Framework::edit_tracker` isn't set.
     pub track_edits: bool,
+    /// Whether to broadcast a typing indicator while executing this commmand.
+    pub broadcast_typing: bool,
     /// Whether to hide this command in help menus.
     pub hide_in_help: bool,
     /// Permissions which users must have to invoke this command.
@@ -72,6 +74,7 @@ impl<U, E> Default for PrefixCommandOptions<U, E> {
             on_error: None,
             aliases: &[],
             track_edits: false,
+            broadcast_typing: false,
             hide_in_help: false,
             required_permissions: serenity::Permissions::empty(),
             owners_only: false,
