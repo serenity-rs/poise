@@ -2,6 +2,9 @@
 
 use crate::{serenity_prelude as serenity, BoxFuture};
 
+/// A Unique ID of a command.
+type UniqueId = uid::Id<usize>;
+
 /// Wrapper around either [`crate::ApplicationContext`] or [`crate::PrefixContext`]
 pub enum Context<'a, U, E> {
     /// Application command context
@@ -350,28 +353,61 @@ impl<U, E> CommandBuilder<U, E> {
             prefix_command,
             slash_command,
             context_menu_command,
-            name: self.name.clone(),
+            name: None,
         };
         meta_builder(&mut builder);
 
+        let name = if let Some(name) = builder.name {
+            name
+        } else if let Some(ref prefix_command) = builder.prefix_command {
+            prefix_command.command.name.to_string()
+        } else if let Some(ref slash_command) = builder.slash_command {
+            slash_command.name().to_string()
+        } else if let Some(ref context_menu_command) = builder.context_menu_command {
+            context_menu_command.name.to_string()
+        } else {
+            panic!("No registered name");
+        };
+
+        let command_id = CommandId {
+            id: UniqueId::new(),
+            name,
+        };
+
         // Nested if's to compile on Rust 1.48
         if let Some(parent) = &mut self.prefix_command {
-            if let Some(subcommand) = builder.prefix_command {
-                parent.subcommands.push(subcommand);
+            if let Some(mut subcommand) = builder.prefix_command {
+                parent.subcommands.push({
+                    subcommand.command.id = command_id.clone();
+
+                    subcommand
+                });
             }
         }
 
         if let Some(parent) = &mut self.slash_command {
-            if let Some(subcommand) = builder.slash_command {
+            if let Some(mut subcommand) = builder.slash_command {
                 match parent {
                     crate::SlashCommandMeta::CommandGroup { subcommands, .. } => {
-                        subcommands.push(subcommand);
+                        subcommands.push({
+                            if let crate::SlashCommandMeta::Command(ref mut cmd) = subcommand {
+                                cmd.id = command_id.clone();
+                            }
+
+                            subcommand
+                        });
                     }
                     crate::SlashCommandMeta::Command(cmd) => {
                         *parent = crate::SlashCommandMeta::CommandGroup {
                             name: cmd.name,
                             description: cmd.description,
-                            subcommands: vec![subcommand],
+                            subcommands: {
+                                if let crate::SlashCommandMeta::Command(ref mut cmd) = subcommand {
+                                    cmd.id = command_id.clone();
+                                }
+
+                                vec![subcommand]
+                            },
                         };
                     }
                 }
@@ -409,9 +445,9 @@ pub struct FrameworkOptions<U, E> {
     pub prefix_options: crate::PrefixFrameworkOptions<U, E>,
     /// User IDs which are allowed to use owners_only commands
     pub owners: std::collections::HashSet<serenity::UserId>,
-    /// The number of registered commands. This counts individual commands, and will not count
+    /// The IDs of the registered commands. This has individual commands, and will not have 
     /// individual variants if they can be executed multiple ways.
-    pub id_count: usize,
+    pub command_ids: Vec<CommandId>,
 }
 
 impl<U, E> FrameworkOptions<U, E> {
@@ -474,15 +510,20 @@ impl<U, E> FrameworkOptions<U, E> {
             panic!("No registered name");
         };
 
-        self.id_count += 1;
         let command_id = CommandId {
-            id: self.id_count,
+            id: UniqueId::new(),
             name,
         };
+
+        self.command_ids.push(command_id.clone());
 
         if let Some(mut prefix_command) = builder.prefix_command {
             self.prefix_options.commands.push({
                 prefix_command.command.id = command_id.clone();
+
+                for cmd in &prefix_command.subcommands {
+                    self.command_ids.push(cmd.command.id.clone());
+                }
 
                 prefix_command
             });
@@ -494,6 +535,18 @@ impl<U, E> FrameworkOptions<U, E> {
                     if let crate::SlashCommandMeta::Command(ref mut cmd) = slash_command {
                         cmd.id = command_id.clone();
                     }
+
+                    match &slash_command {
+                        crate::SlashCommandMeta::CommandGroup { ref subcommands, .. } => {
+                            for cmd in subcommands {
+                                if let crate::SlashCommandMeta::Command(cmd) = cmd {
+                                    self.command_ids.push(cmd.id.clone());
+                                }
+                            }
+                        }
+                        _ => ()
+                    }
+
                     slash_command
                 }));
         }
@@ -554,7 +607,7 @@ impl<U: Send + Sync, E: std::fmt::Display + Send> Default for FrameworkOptions<U
             application_options: Default::default(),
             prefix_options: Default::default(),
             owners: Default::default(),
-            id_count: 0,
+            command_ids: Default::default(),
         }
     }
 }
@@ -573,8 +626,9 @@ pub struct CommandDefinition<U, E> {
 /// Command Identification, because context menus and normal commands could have different names.
 #[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Ord, Hash, Default)]
 pub struct CommandId {
-    /// A unique ID of the command.
-    pub id: usize,
+    /// A unique ID of the command. Unless commands are added or removed, this value will be
+    /// constant across restarts.
+    pub id: UniqueId,
     /// A unique name for the command, configurable when registered, otherwise it will use the
     /// Prefix name if present, otherwise the Application Command if present and at last, the
     /// ContextNenu name.
