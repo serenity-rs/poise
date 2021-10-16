@@ -216,9 +216,9 @@ impl<U, E> CommandRef<'_, U, E> {
     }
 
     /// Yield the ID of the command.
-    pub fn id(self) -> CommandId {
+    pub fn id(&self) -> &CommandId {
         match self {
-            Self::Prefix(x) => x.id.clone(),
+            Self::Prefix(x) => &x.id,
             Self::Application(x) => x.id(),
         }
     }

@@ -285,10 +285,10 @@ impl<'a, U, E> ApplicationCommand<'a, U, E> {
     }
 
     /// Yield the command ID.
-    pub fn id(self) -> crate::CommandId {
+    pub fn id(&self) -> &crate::CommandId {
         match self {
-            Self::Slash(cmd) => cmd.id.clone(),
-            Self::ContextMenu(cmd) => cmd.id.clone(),
+            Self::Slash(cmd) => &cmd.id,
+            Self::ContextMenu(cmd) => &cmd.id,
         }
     }
 
