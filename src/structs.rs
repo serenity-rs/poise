@@ -311,7 +311,7 @@ pub struct CommandBuilder<U, E> {
     prefix_command: Option<crate::PrefixCommandMeta<U, E>>,
     slash_command: Option<crate::SlashCommandMeta<U, E>>,
     context_menu_command: Option<crate::ContextMenuCommand<U, E>>,
-    name: Option<String>,
+    identifying_name: Option<String>,
 }
 
 impl<U, E> CommandBuilder<U, E> {
@@ -323,9 +323,9 @@ impl<U, E> CommandBuilder<U, E> {
         self
     }
 
-    /// Assign a name to this command, which will be used as the [`crate::CommandId`] name.
-    pub fn name(&mut self, name: String) -> &mut Self {
-        self.name = Some(name);
+    /// Assign a name to this command, which will be used as the [`crate::CommandId`] identifying_name.
+    pub fn identifying_name(&mut self, name: String) -> &mut Self {
+        self.identifying_name = Some(name);
         self
     }
 
@@ -353,11 +353,11 @@ impl<U, E> CommandBuilder<U, E> {
             prefix_command,
             slash_command,
             context_menu_command,
-            name: None,
+            identifying_name: None,
         };
         meta_builder(&mut builder);
 
-        let name = if let Some(name) = builder.name {
+        let identifying_name = if let Some(name) = builder.identifying_name {
             name
         } else if let Some(ref prefix_command) = builder.prefix_command {
             prefix_command.command.name.to_string()
@@ -371,7 +371,7 @@ impl<U, E> CommandBuilder<U, E> {
 
         let command_id = CommandId {
             id: UniqueId::new(),
-            name,
+            identifying_name,
         };
 
         // Nested if's to compile on Rust 1.48
@@ -459,7 +459,7 @@ pub struct FrameworkOptions<U, E> {
     /// // Will only have one ID, and the name will be "new_name", but the command invoke will
     /// // still be "name"
     /// #[command(slash_command, context_menu_command = "New Name", rename="name")]
-    /// options.command(command_function(), |f| f.name("new_name".to_string()));
+    /// options.command(command_function(), |f| f.identifying_name("new_name".to_string()));
     ///
     /// // Will only have one ID, and the name will be "Name"
     /// #[command(context_menu_command = "Name")]
@@ -469,7 +469,7 @@ pub struct FrameworkOptions<U, E> {
     /// #[command(prefix_command, slash_command, rename="name")]
     /// options.command(command_function(), |f| {
     ///     f.subcommand(command_function(), |f| {
-    ///         f.name("name".to_string())
+    ///         f.identifying_name("name".to_string())
     ///     })
     /// });
     /// ```
@@ -520,11 +520,11 @@ impl<U, E> FrameworkOptions<U, E> {
             prefix_command,
             slash_command,
             context_menu_command,
-            name: None,
+            identifying_name: None,
         };
         meta_builder(&mut builder);
 
-        let name = if let Some(name) = builder.name {
+        let identifying_name = if let Some(name) = builder.identifying_name {
             name
         } else if let Some(ref prefix_command) = builder.prefix_command {
             prefix_command.command.name.to_string()
@@ -538,7 +538,7 @@ impl<U, E> FrameworkOptions<U, E> {
 
         let command_id = CommandId {
             id: UniqueId::new(),
-            name,
+            identifying_name,
         };
 
         self.command_ids.push(command_id.clone());
@@ -658,5 +658,5 @@ pub struct CommandId {
     /// A unique name for the command, configurable when registered, otherwise it will use the
     /// Prefix name if present, otherwise the Application Command if present and at last, the
     /// ContextNenu name.
-    pub name: String,
+    pub identifying_name: String,
 }
