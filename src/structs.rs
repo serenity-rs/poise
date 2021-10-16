@@ -409,7 +409,8 @@ pub struct FrameworkOptions<U, E> {
     pub prefix_options: crate::PrefixFrameworkOptions<U, E>,
     /// User IDs which are allowed to use owners_only commands
     pub owners: std::collections::HashSet<serenity::UserId>,
-    /// Internal field to count the number of assigned Command IDs
+    /// The number of registered commands. This counts individual commands, and will not count
+    /// individual variants if they can be executed multiple ways.
     pub id_count: usize,
 }
 
