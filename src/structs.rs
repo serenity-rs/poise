@@ -447,6 +447,32 @@ pub struct FrameworkOptions<U, E> {
     pub owners: std::collections::HashSet<serenity::UserId>,
     /// The IDs of the registered commands. This has individual commands, and will not have
     /// individual variants if they can be executed multiple ways.
+    ///
+    /// Example:
+    /// ```rust, ignore
+    /// // Will only have one ID
+    /// #[command(prefix_command, slash_command)]
+    ///
+    /// // Will only have one ID, and the name will be "name"
+    /// #[command(slash_command, context_menu_command = "New Name", rename="name")]
+    ///
+    /// // Will only have one ID, and the name will be "new_name", but the command invoke will
+    /// // still be "name"
+    /// #[command(slash_command, context_menu_command = "New Name", rename="name")]
+    /// options.command(command_function(), |f| f.name("new_name".to_string()));
+    ///
+    /// // Will only have one ID, and the name will be "Name"
+    /// #[command(context_menu_command = "Name")]
+    ///
+    /// // Will only have two IDs, the name of `/name` will be `name`, and the name of
+    /// // `/name name` will be `name2`, both with different IDs.
+    /// #[command(prefix_command, slash_command, rename="name")]
+    /// options.command(command_function(), |f| {
+    ///     f.subcommand(command_function(), |f| {
+    ///         f.name("name".to_string())
+    ///     })
+    /// });
+    /// ```
     pub command_ids: Vec<CommandId>,
 }
 
