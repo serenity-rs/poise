@@ -25,7 +25,12 @@ pub use framework::*;
 mod reply;
 pub use reply::*;
 
-pub mod samples;
+pub mod builtins;
+/// See [`builtins`]
+#[deprecated = "`samples` module was renamed to `builtins`"]
+pub mod samples {
+    pub use crate::builtins::*;
+}
 
 #[doc(no_inline)]
 pub use async_trait::async_trait;
