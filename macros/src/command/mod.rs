@@ -80,6 +80,7 @@ pub struct CommandOptions {
     ephemeral: bool,
     required_permissions: Option<syn::Ident>,
     owners_only: bool,
+    identifying_name: Option<String>,
 }
 
 /// Representation of the function parameter attribute arguments
@@ -235,6 +236,11 @@ pub fn command(
         None
     });
 
+    let identifying_name = args
+        .identifying_name
+        .as_ref()
+        .unwrap_or(&invocation.command_name);
+
     // Needed because we're not allowed to have lifetimes in the hacky use case below
     let ctx_type_with_static = syn::fold::fold_type(&mut AllLifetimesToStatic, ctx_type.clone());
 
@@ -246,6 +252,10 @@ pub fn command(
             <#ctx_type_with_static as poise::_GetGenerics>::E,
         > {
             #function
+
+            let command_id = std::sync::Arc::new(::poise::CommandId {
+                identifying_name: String::from(#identifying_name),
+            });
 
             ::poise::CommandDefinition {
                 prefix: #prefix_command_spec,

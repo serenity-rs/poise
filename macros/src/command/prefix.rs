@@ -95,6 +95,7 @@ pub fn generate_prefix_command_spec(
                 ).await?;
                 inner(ctx.into(), #( #param_names, )* ).await
             }),
+            id: std::sync::Arc::clone(&command_id),
             options: ::poise::PrefixCommandOptions {
                 track_edits: #track_edits,
                 broadcast_typing: #broadcast_typing,

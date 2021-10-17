@@ -518,3 +518,17 @@ pub struct CommandDefinition<U, E> {
     /// Generated context menu command, if it was enabled
     pub context_menu: Option<crate::ContextMenuCommand<U, E>>,
 }
+
+/// This struct holds all data shared across different command types of the same implementation.
+///
+/// For example with a `#[command(prefix_command, slash_command)]`, the generated
+/// [`crate::PrefixCommand`] and [`crate::SlashCommand`] will both contain an `Arc<CommandId>`
+/// pointing to the same [`CommandId`] instance.
+pub struct CommandId {
+    /// A string to identify this particular command within a list of commands.
+    ///
+    /// Can be configured via the [`crate::command`] macro (though it's probably not needed for most
+    /// bots). If not explicitly configured, it falls back to prefix command name, slash command
+    /// name, or context menu command name (in that order).
+    pub identifying_name: String,
+}

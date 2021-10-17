@@ -122,6 +122,8 @@ pub struct SlashCommand<U, E> {
         ApplicationContext<'a, U, E>,
         &'a [serenity::ApplicationCommandInteractionDataOption],
     ) -> BoxFuture<'a, Result<(), E>>,
+    /// The command ID, shared across all command types that belong to the same implementation
+    pub id: std::sync::Arc<crate::CommandId>,
     /// Further configuration
     pub options: ApplicationCommandOptions<U, E>,
 }
@@ -219,6 +221,8 @@ pub struct ContextMenuCommand<U, E> {
     pub name: &'static str,
     /// Further configuration
     pub options: ApplicationCommandOptions<U, E>,
+    /// The command ID, shared across all command types that belong to the same implementation
+    pub id: std::sync::Arc<crate::CommandId>,
     /// The target and action of the context menu entry
     pub action: ContextMenuCommandAction<U, E>,
 }
@@ -277,6 +281,15 @@ impl<'a, U, E> ApplicationCommand<'a, U, E> {
         match self {
             Self::Slash(cmd) => &cmd.options,
             Self::ContextMenu(cmd) => &cmd.options,
+        }
+    }
+
+    /// Return the command ID, shared across all command types that belong to the same
+    /// implementation
+    pub fn id(self) -> &'a std::sync::Arc<crate::CommandId> {
+        match self {
+            Self::Slash(cmd) => &cmd.id,
+            Self::ContextMenu(cmd) => &cmd.id,
         }
     }
 }

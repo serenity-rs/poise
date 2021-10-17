@@ -89,6 +89,8 @@ pub struct PrefixCommand<U, E> {
     pub name: &'static str,
     /// Callback to execute when this command is invoked.
     pub action: for<'a> fn(PrefixContext<'a, U, E>, args: &'a str) -> BoxFuture<'a, Result<(), E>>,
+    /// The command ID, shared across all command types that belong to the same implementation
+    pub id: std::sync::Arc<crate::CommandId>,
     /// Optional data to change this command's behavior.
     pub options: PrefixCommandOptions<U, E>,
 }
