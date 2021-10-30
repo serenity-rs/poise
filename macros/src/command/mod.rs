@@ -87,6 +87,7 @@ pub struct CommandOptions {
 #[darling(default)]
 struct ParamOptions {
     description: Option<String>,
+    autocomplete: Option<syn::Path>,
     lazy: bool,
     flag: bool,
     rest: bool,

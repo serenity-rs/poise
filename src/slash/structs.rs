@@ -62,8 +62,6 @@ pub struct ApplicationCommandErrorContext<'a, U, E> {
     /// Whether this error occured while running a pre-command check (`true`) or if it happened
     /// in normal command execution (`false`)
     pub while_checking: bool,
-    /// Which command was being executed or checked when the error occured
-    pub command: ApplicationCommand<'a, U, E>,
     /// Further context
     pub ctx: ApplicationContext<'a, U, E>,
 }
@@ -72,7 +70,6 @@ impl<U, E> Clone for ApplicationCommandErrorContext<'_, U, E> {
     fn clone(&self) -> Self {
         Self {
             while_checking: self.while_checking,
-            command: self.command,
             ctx: self.ctx,
         }
     }
@@ -105,18 +102,31 @@ impl<U, E> Default for ApplicationCommandOptions<U, E> {
     }
 }
 
+/// A single parameter of a slash command
+pub struct SlashCommandParameter<U, E> {
+    /// Builder function for this parameters
+    pub builder: fn(
+        &mut serenity::CreateApplicationCommandOption,
+    ) -> &mut serenity::CreateApplicationCommandOption,
+    /// Optionally, a callback on autocomplete interactions. If the focused option in the
+    /// autocomplete interaction matches this parameter, an autocomplete response should be sent
+    pub autocomplete_callback: Option<
+        for<'a> fn(
+            crate::ApplicationContext<'a, U, E>,
+            &'a serenity::ApplicationCommandInteraction,
+            &'a [serenity::ApplicationCommandInteractionDataOption],
+        ) -> BoxFuture<'a, Result<(), E>>,
+    >,
+}
+
 /// Fully defines a single slash command in the framework
 pub struct SlashCommand<U, E> {
     /// Name of the slash command, displayed in the Discord UI
     pub name: &'static str,
     /// Short description of what the command does, displayed in the Discord UI
     pub description: &'static str,
-    /// Vector of builder functions for the parameters
-    pub parameters: Vec<
-        fn(
-            &mut serenity::CreateApplicationCommandOption,
-        ) -> &mut serenity::CreateApplicationCommandOption,
-    >,
+    /// List of parameters for this slash command
+    pub parameters: Vec<SlashCommandParameter<U, E>>,
     /// Action which is invoked when the user calls this command
     pub action: for<'a> fn(
         ApplicationContext<'a, U, E>,
@@ -163,9 +173,9 @@ impl<U, E> SlashCommandMeta<U, E> {
                 builder.kind(serenity::ApplicationCommandOptionType::SubCommand);
                 builder.name(command.name).description(command.description);
 
-                for create_option in &command.parameters {
+                for param in &command.parameters {
                     let mut option = serenity::CreateApplicationCommandOption::default();
-                    create_option(&mut option);
+                    (param.builder)(&mut option);
                     builder.add_sub_option(option);
                 }
             }
@@ -194,9 +204,9 @@ impl<U, E> SlashCommandMeta<U, E> {
                     .name(command.name)
                     .description(command.description);
 
-                for create_option in &command.parameters {
+                for param in &command.parameters {
                     let mut option = serenity::CreateApplicationCommandOption::default();
-                    create_option(&mut option);
+                    (param.builder)(&mut option);
                     interaction.add_option(option);
                 }
             }

@@ -254,7 +254,7 @@ impl<'a, U, E> CommandErrorContext<'a, U, E> {
     pub fn command(&self) -> CommandRef<'_, U, E> {
         match self {
             Self::Prefix(x) => CommandRef::Prefix(x.command),
-            Self::Application(x) => CommandRef::Application(x.command),
+            Self::Application(x) => CommandRef::Application(x.ctx.command),
         }
     }
 
@@ -283,6 +283,8 @@ pub enum ErrorContext<'a, U, E> {
     Listener(&'a crate::Event<'a>),
     /// Error in bot command
     Command(CommandErrorContext<'a, U, E>),
+    /// Error in autocomplete callback
+    Autocomplete(crate::ApplicationCommandErrorContext<'a, U, E>),
 }
 
 impl<U, E> Clone for ErrorContext<'_, U, E> {
@@ -291,6 +293,7 @@ impl<U, E> Clone for ErrorContext<'_, U, E> {
             Self::Setup => Self::Setup,
             Self::Listener(x) => Self::Listener(x),
             Self::Command(x) => Self::Command(x.clone()),
+            Self::Autocomplete(x) => Self::Autocomplete(x.clone()),
         }
     }
 }
@@ -472,14 +475,14 @@ impl<U: Send + Sync, E: std::fmt::Display + Send> Default for FrameworkOptions<U
                             event.name(),
                             error
                         ),
-                        ErrorContext::Command(CommandErrorContext::Prefix(ctx)) => {
+                        ErrorContext::Command(CommandErrorContext::Prefix(err_ctx)) => {
                             println!(
                                 "Error in prefix command \"{}\" from message \"{}\": {}",
-                                &ctx.command.name, &ctx.ctx.msg.content, error
+                                &err_ctx.command.name, &err_ctx.ctx.msg.content, error
                             );
                         }
-                        ErrorContext::Command(CommandErrorContext::Application(ctx)) => {
-                            match &ctx.command {
+                        ErrorContext::Command(CommandErrorContext::Application(err_ctx)) => {
+                            match &err_ctx.ctx.command {
                                 crate::ApplicationCommand::Slash(cmd) => {
                                     println!("Error in slash command \"{}\": {}", cmd.name, error)
                                 }
@@ -489,6 +492,15 @@ impl<U: Send + Sync, E: std::fmt::Display + Send> Default for FrameworkOptions<U
                                 ),
                             }
                         }
+                        ErrorContext::Autocomplete(err_ctx) => match &err_ctx.ctx.command {
+                            crate::ApplicationCommand::Slash(cmd) => {
+                                println!("Error in slash command \"{}\": {}", cmd.name, error)
+                            }
+                            crate::ApplicationCommand::ContextMenu(cmd) => println!(
+                                "Error in context menu command \"{}\": {}",
+                                cmd.name, error
+                            ),
+                        },
                     }
                 })
             },

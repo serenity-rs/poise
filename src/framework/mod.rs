@@ -301,7 +301,7 @@ impl<U, E> Framework<U, E> {
             Event::InteractionCreate {
                 interaction: serenity::Interaction::ApplicationCommand(interaction),
             } => {
-                if let Err((e, error_ctx)) = slash::dispatch_interaction(
+                if let Err(Some((e, error_ctx))) = slash::dispatch_interaction(
                     self,
                     &ctx,
                     interaction,
@@ -309,7 +309,7 @@ impl<U, E> Framework<U, E> {
                 )
                 .await
                 {
-                    if let Some(on_error) = error_ctx.command.options().on_error {
+                    if let Some(on_error) = error_ctx.ctx.command.options().on_error {
                         on_error(e, error_ctx).await;
                     } else {
                         (self.options.on_error)(
@@ -317,6 +317,24 @@ impl<U, E> Framework<U, E> {
                             ErrorContext::Command(CommandErrorContext::Application(error_ctx)),
                         )
                         .await;
+                    }
+                }
+            }
+            Event::InteractionCreate {
+                interaction: serenity::Interaction::AutoComplete(interaction),
+            } => {
+                if let Err(Some((e, error_ctx))) = slash::dispatch_autocomplete(
+                    self,
+                    &ctx,
+                    interaction,
+                    &std::sync::atomic::AtomicBool::new(false),
+                )
+                .await
+                {
+                    if let Some(on_error) = error_ctx.ctx.command.options().on_error {
+                        on_error(e, error_ctx).await;
+                    } else {
+                        (self.options.on_error)(e, ErrorContext::Autocomplete(error_ctx)).await;
                     }
                 }
             }

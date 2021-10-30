@@ -102,29 +102,31 @@ fn find_matching_application_command<'a, 'b, U, E>(
     })
 }
 
-pub async fn dispatch_interaction<'a, U, E>(
-    this: &'a super::Framework<U, E>,
+pub async fn extract_command_and_run_checks<'a, U, E>(
+    framework: &'a super::Framework<U, E>,
     ctx: &'a serenity::Context,
     interaction: &'a serenity::ApplicationCommandInteraction,
-    // Need to pass this in from outside because of lifetime issues
     has_sent_initial_response: &'a std::sync::atomic::AtomicBool,
-) -> Result<(), (E, crate::ApplicationCommandErrorContext<'a, U, E>)> {
+) -> Result<
+    (
+        crate::ApplicationContext<'a, U, E>,
+        &'a [serenity::ApplicationCommandInteractionDataOption],
+    ),
+    Option<(E, crate::ApplicationCommandErrorContext<'a, U, E>)>,
+> {
     let (command, leaf_interaction_options) =
-        match find_matching_application_command(this, &interaction.data) {
-            Some(value) => value,
-            None => {
-                println!(
-                    "Warning: received unknown interaction \"{}\"",
-                    interaction.data.name
-                );
-                return Ok(());
-            }
-        };
+        find_matching_application_command(framework, &interaction.data).ok_or_else(|| {
+            println!(
+                "Warning: received unknown interaction \"{}\"",
+                interaction.data.name
+            );
+            None
+        })?;
 
     let ctx = crate::ApplicationContext {
-        data: this.get_user_data().await,
+        data: framework.get_user_data().await,
         discord: ctx,
-        framework: this,
+        framework,
         interaction,
         command,
         has_sent_initial_response,
@@ -138,13 +140,17 @@ pub async fn dispatch_interaction<'a, U, E>(
     )
     .await
     {
-        (this.options.application_options.missing_permissions_handler)(ctx).await;
-        return Ok(());
+        (framework
+            .options
+            .application_options
+            .missing_permissions_handler)(ctx)
+        .await;
+        return Err(None);
     }
 
     // Only continue if command checks returns true
     let checks_passing = (|| async {
-        let global_check_passes = match &this.options.command_check {
+        let global_check_passes = match &framework.options.command_check {
             Some(check) => check(crate::Context::Application(ctx)).await?,
             None => true,
         };
@@ -161,20 +167,33 @@ pub async fn dispatch_interaction<'a, U, E>(
         (
             e,
             crate::ApplicationCommandErrorContext {
-                command,
                 ctx,
                 while_checking: true,
             },
         )
     })?;
     if !checks_passing {
-        return Ok(());
+        return Err(None);
     }
 
-    (this.options.pre_command)(crate::Context::Application(ctx)).await;
+    Ok((ctx, leaf_interaction_options))
+}
 
-    let action_result = match command {
-        crate::ApplicationCommand::Slash(cmd) => (cmd.action)(ctx, leaf_interaction_options).await,
+pub async fn dispatch_interaction<'a, U, E>(
+    framework: &'a super::Framework<U, E>,
+    ctx: &'a serenity::Context,
+    interaction: &'a serenity::ApplicationCommandInteraction,
+    // Need to pass this in from outside because of lifetime issues
+    has_sent_initial_response: &'a std::sync::atomic::AtomicBool,
+) -> Result<(), Option<(E, crate::ApplicationCommandErrorContext<'a, U, E>)>> {
+    let (ctx, options) =
+        extract_command_and_run_checks(framework, ctx, interaction, has_sent_initial_response)
+            .await?;
+
+    (framework.options.pre_command)(crate::Context::Application(ctx)).await;
+
+    let action_result = match ctx.command {
+        crate::ApplicationCommand::Slash(cmd) => (cmd.action)(ctx, options).await,
         crate::ApplicationCommand::ContextMenu(cmd) => match cmd.action {
             crate::ContextMenuCommandAction::User(action) => match &interaction.data.target {
                 Some(serenity::ResolvedTarget::User(user, _)) => (action)(ctx, user.clone()).await,
@@ -194,13 +213,51 @@ pub async fn dispatch_interaction<'a, U, E>(
     };
 
     action_result.map_err(|e| {
-        (
+        Some((
             e,
             crate::ApplicationCommandErrorContext {
-                command,
                 ctx,
                 while_checking: false,
             },
-        )
+        ))
     })
+}
+
+pub async fn dispatch_autocomplete<'a, U, E>(
+    framework: &'a super::Framework<U, E>,
+    ctx: &'a serenity::Context,
+    interaction: &'a serenity::ApplicationCommandInteraction,
+    // Need to pass this in from outside because of lifetime issues
+    has_sent_initial_response: &'a std::sync::atomic::AtomicBool,
+) -> Result<(), Option<(E, crate::ApplicationCommandErrorContext<'a, U, E>)>> {
+    let (ctx, options) =
+        extract_command_and_run_checks(framework, ctx, interaction, has_sent_initial_response)
+            .await?;
+
+    let command = match ctx.command {
+        crate::ApplicationCommand::Slash(x) => x,
+        crate::ApplicationCommand::ContextMenu(_) => return Err(None),
+    };
+
+    for param in &command.parameters {
+        let autocomplete_callback = match param.autocomplete_callback {
+            Some(x) => x,
+            None => continue,
+        };
+
+        if let Err(e) = autocomplete_callback(ctx, interaction, options).await {
+            let error_ctx = crate::ApplicationCommandErrorContext {
+                ctx,
+                while_checking: false,
+            };
+
+            if let Some(on_error) = error_ctx.ctx.command.options().on_error {
+                on_error(e, error_ctx).await;
+            } else {
+                (framework.options.on_error)(e, crate::ErrorContext::Autocomplete(error_ctx)).await;
+            }
+        }
+    }
+
+    Ok(())
 }

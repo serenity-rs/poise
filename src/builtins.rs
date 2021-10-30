@@ -36,6 +36,14 @@ pub async fn on_error<D>(e: BoxErrorSendSync, ctx: crate::ErrorContext<'_, D, Bo
         crate::ErrorContext::Listener(event) => {
             println!("Error in listener while processing {:?}: {}", event, e)
         }
+        crate::ErrorContext::Autocomplete(err_ctx) => {
+            let ctx = err_ctx.ctx;
+            println!(
+                "Error in autocomplete callback for command {:?}: {}",
+                ctx.command.slash_or_context_menu_name(),
+                e
+            )
+        }
         crate::ErrorContext::Setup => println!("Setup failed: {}", e),
     }
 }
