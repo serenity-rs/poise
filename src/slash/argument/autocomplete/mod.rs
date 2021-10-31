@@ -14,3 +14,12 @@ pub struct AutocompleteChoice<T> {
     /// Value of the choice, sent to the bot
     pub value: T,
 }
+
+impl<T: ToString> From<T> for AutocompleteChoice<T> {
+    fn from(value: T) -> Self {
+        Self {
+            name: value.to_string(),
+            value,
+        }
+    }
+}

@@ -85,8 +85,12 @@ pub fn generate_slash_command_spec(
                         .ok_or(::poise::SlashArgError::CommandStructureMismatch("expected argument value"))?;
                     let partial_input = (&&&&&std::marker::PhantomData::<#type_>).extract_partial(json_value)?;
 
-                    let choices_json = ::poise::into_stream!(#autocomplete_fn(partial_input).await)
+                    let choices_stream = ::poise::into_stream!(
+                        #autocomplete_fn(ctx.into(), partial_input).await
+                    );
+                    let choices_json = choices_stream
                         .take(25)
+                        .map(|value| poise::AutocompleteChoice::from(value))
                         .map(|choice| serde_json::json!({
                             "name": choice.name,
                             "value": (&&&&&std::marker::PhantomData::<#type_>).into_json(choice.value),

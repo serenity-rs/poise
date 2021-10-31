@@ -1,20 +1,27 @@
 use crate::{Context, Error};
 use poise::futures::{self, Stream, StreamExt};
 
-/// You can return a Stream...
-async fn autocomplete_name(
-    partial: String,
-) -> impl Stream<Item = poise::AutocompleteChoice<String>> {
-    futures::stream::iter(["Amanda", "Bob", "Christian", "Danny", "Ester", "Falk"])
-        .filter(move |&name| futures::future::ready(name.starts_with(&partial)))
-        .map(|name| poise::AutocompleteChoice {
-            name: name.to_string(),
-            value: name.to_string(),
-        })
+// Poise supports autocomplete on slash command parameters. You need to provide an autocomplete
+// function, which will be called on demand when the user is typing a command.
+//
+// The first parameter of that function is ApplicationContext or Context, and the second parameter
+// is the partial input which the user has typed so far.
+//
+// As the return value of autocomplete functions, you can return a Stream, an Iterator, or an
+// IntoIterator (which includes e.g. Vec<T> and [T; N]).
+//
+// As the type of the returned items, you can use either the type directly, or wrap it in
+// AutocompleteChoice. By wrapping in AutocompleteChoice, you can set a custom name for each choice
+// which will be displayed in the Discord UI.
+
+async fn autocomplete_name(_ctx: Context<'_>, partial: String) -> impl Stream<Item = String> {
+    futures::stream::iter(&["Amanda", "Bob", "Christian", "Danny", "Ester", "Falk"])
+        .filter(move |name| futures::future::ready(name.starts_with(&partial)))
+        .map(|name| name.to_string())
 }
 
-/// ...or an Iterator/IntoIterator
 async fn autocomplete_number(
+    _ctx: Context<'_>,
     _partial: u32,
 ) -> impl Iterator<Item = poise::AutocompleteChoice<u32>> {
     // Dummy choices
@@ -22,7 +29,7 @@ async fn autocomplete_number(
         .iter()
         .map(|&n| poise::AutocompleteChoice {
             name: format!(
-                "{} (why do autocomplete choices have a separate label???)",
+                "{} (why did discord even give autocomplete choices separate labels)",
                 n
             ),
             value: n,
