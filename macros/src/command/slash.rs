@@ -70,6 +70,8 @@ pub fn generate_slash_command_spec(
                     interaction: &poise::serenity_prelude::ApplicationCommandInteraction,
                     options: &[poise::serenity_prelude::ApplicationCommandInteractionDataOption],
                 | Box::pin(async move {
+                    use ::poise::futures::{Stream, StreamExt};
+
                     let choice = match options
                         .iter()
                         .find(|option| option.focused && option.name == stringify!(#param_name))
@@ -83,13 +85,15 @@ pub fn generate_slash_command_spec(
                         .ok_or(::poise::SlashArgError::CommandStructureMismatch("expected argument value"))?;
                     let partial_input = (&&&&&std::marker::PhantomData::<#type_>).extract_partial(json_value)?;
 
-                    let choices_json = #autocomplete_fn(partial_input)
+                    let choices_json = ::poise::into_stream!(#autocomplete_fn(partial_input).await)
                         .take(25)
                         .map(|choice| serde_json::json!({
                             "name": choice.name,
                             "value": (&&&&&std::marker::PhantomData::<#type_>).into_json(choice.value),
                         }))
-                        .collect();
+                        .collect()
+                        .await;
+                    let choices_json = poise::serde_json::Value::Array(choices_json);
 
                     interaction
                         .create_interaction_response(&ctx.discord.http, |b| {

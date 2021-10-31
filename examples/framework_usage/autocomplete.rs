@@ -1,16 +1,22 @@
 use crate::{Context, Error};
+use poise::futures::{self, Stream, StreamExt};
 
-fn autocomplete_name(partial: String) -> impl Iterator<Item = poise::AutocompleteChoice<String>> {
-    ["Amanda", "Bob", "Christian", "Danny", "Ester", "Falk"]
-        .iter()
-        .filter(move |name| name.starts_with(&partial))
+/// You can return a Stream...
+async fn autocomplete_name(
+    partial: String,
+) -> impl Stream<Item = poise::AutocompleteChoice<String>> {
+    futures::stream::iter(["Amanda", "Bob", "Christian", "Danny", "Ester", "Falk"])
+        .filter(move |&name| futures::future::ready(name.starts_with(&partial)))
         .map(|name| poise::AutocompleteChoice {
             name: name.to_string(),
             value: name.to_string(),
         })
 }
 
-fn autocomplete_number(_partial: u32) -> impl Iterator<Item = poise::AutocompleteChoice<u32>> {
+/// ...or an Iterator/IntoIterator
+async fn autocomplete_number(
+    _partial: u32,
+) -> impl Iterator<Item = poise::AutocompleteChoice<u32>> {
     // Dummy choices
     [1_u32, 2, 3, 4, 5]
         .iter()

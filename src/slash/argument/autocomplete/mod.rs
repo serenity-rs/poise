@@ -1,8 +1,8 @@
 mod autocompletable;
 pub use autocompletable::*;
 
-mod return_value;
-pub use return_value::*;
+mod into_stream_hack;
+pub use into_stream_hack::*;
 
 /// A single autocomplete choice, displayed in Discord UI
 ///
