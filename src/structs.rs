@@ -91,9 +91,9 @@ impl<U, E> _GetGenerics for Context<'_, U, E> {
     type E = E;
 }
 
-impl<U, E> Context<'_, U, E> {
+impl<'a, U, E> Context<'a, U, E> {
     /// Return the stored [`serenity::Context`] within the underlying context type.
-    pub fn discord(&self) -> &serenity::Context {
+    pub fn discord(&self) -> &'a serenity::Context {
         match self {
             Self::Application(ctx) => ctx.discord,
             Self::Prefix(ctx) => ctx.discord,
@@ -101,7 +101,7 @@ impl<U, E> Context<'_, U, E> {
     }
 
     /// Return a read-only reference to [`crate::Framework`].
-    pub fn framework(&self) -> &crate::Framework<U, E> {
+    pub fn framework(&self) -> &'a crate::Framework<U, E> {
         match self {
             Self::Application(ctx) => ctx.framework,
             Self::Prefix(ctx) => ctx.framework,
@@ -109,7 +109,7 @@ impl<U, E> Context<'_, U, E> {
     }
 
     /// Return a reference to your custom user data
-    pub fn data(&self) -> &U {
+    pub fn data(&self) -> &'a U {
         match self {
             Self::Application(ctx) => ctx.data,
             Self::Prefix(ctx) => ctx.data,
@@ -149,7 +149,7 @@ impl<U, E> Context<'_, U, E> {
     }
 
     /// Get the author of the command message or application command.
-    pub fn author(&self) -> &serenity::User {
+    pub fn author(&self) -> &'a serenity::User {
         match self {
             Self::Application(ctx) => ctx.interaction.user(),
             Self::Prefix(ctx) => &ctx.msg.author,
@@ -179,7 +179,7 @@ impl<U, E> Context<'_, U, E> {
     }
 
     /// Returns a reference to the command.
-    pub fn command(&self) -> Option<crate::CommandRef<'_, U, E>> {
+    pub fn command(&self) -> Option<crate::CommandRef<'a, U, E>> {
         Some(match self {
             Self::Prefix(x) => crate::CommandRef::Prefix(x.command?),
             Self::Application(x) => crate::CommandRef::Application(x.command),
