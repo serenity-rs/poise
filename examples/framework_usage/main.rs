@@ -17,13 +17,15 @@ pub struct Data {
 #[poise::command(prefix_command, track_edits, slash_command)]
 async fn help(
     ctx: Context<'_>,
-    #[description = "Specific command to show help about"] command: Option<String>,
+    #[description = "Specific command to show help about"]
+    #[autocomplete = "poise::builtins::autocomplete_command"]
+    command: Option<String>,
 ) -> Result<(), Error> {
-    poise::samples::help(
+    poise::builtins::help(
         ctx,
         command.as_deref(),
         "This is an example bot made to showcase features of my custom Discord bot framework",
-        poise::samples::HelpResponseMode::Ephemeral,
+        poise::builtins::HelpResponseMode::Ephemeral,
     )
     .await?;
     Ok(())
@@ -34,7 +36,7 @@ async fn help(
 /// Run with no arguments to register in guild, run with argument "global" to register globally.
 #[poise::command(prefix_command, hide_in_help)]
 async fn register(ctx: Context<'_>, #[flag] global: bool) -> Result<(), Error> {
-    poise::samples::register_application_commands(ctx, global).await?;
+    poise::builtins::register_application_commands(ctx, global).await?;
 
     Ok(())
 }

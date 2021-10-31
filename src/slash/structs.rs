@@ -218,6 +218,22 @@ pub enum SlashCommandMeta<U, E> {
 }
 
 impl<U, E> SlashCommandMeta<U, E> {
+    /// Returns the name of this command or command group
+    pub fn name(&self) -> &'static str {
+        match self {
+            Self::Command(cmd) => cmd.name,
+            Self::CommandGroup { name, .. } => name,
+        }
+    }
+
+    /// Returns the description of this command or command group
+    pub fn description(&self) -> &'static str {
+        match self {
+            Self::Command(cmd) => cmd.description,
+            Self::CommandGroup { description, .. } => description,
+        }
+    }
+
     fn create_as_subcommand<'a>(
         &self,
         builder: &'a mut serenity::CreateApplicationCommandOption,
