@@ -58,7 +58,7 @@ pub mod serenity_prelude {
         http::*,
         model::{
             event::*,
-            interactions::{application_command::*, message_component::*, *},
+            interactions::{application_command::*, autocomplete::*, message_component::*, *},
             prelude::*,
         },
         prelude::*,

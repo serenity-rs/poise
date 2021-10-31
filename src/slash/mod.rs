@@ -85,10 +85,17 @@ fn send_as_followup_response<'a>(
 ///
 /// If a response to this interaction has already been sent, a
 /// [followup](serenity::ApplicationCommandInteraction::create_followup_message) is sent.
+///
+/// No-op if autocomplete context
 pub async fn send_application_reply<U, E>(
     ctx: ApplicationContext<'_, U, E>,
     builder: impl for<'a, 'b> FnOnce(&'a mut crate::CreateReply<'b>) -> &'a mut crate::CreateReply<'b>,
 ) -> Result<(), serenity::Error> {
+    let interaction = match ctx.interaction {
+        crate::ApplicationCommandOrAutocompleteInteraction::ApplicationCommand(x) => x,
+        crate::ApplicationCommandOrAutocompleteInteraction::Autocomplete(_) => return Ok(()),
+    };
+
     let mut data = crate::CreateReply {
         ephemeral: ctx.command.options().ephemeral,
         ..Default::default()
@@ -101,14 +108,14 @@ pub async fn send_application_reply<U, E>(
 
     let allowed_mentions = ctx.framework.options().allowed_mentions.as_ref();
     if has_sent_initial_response {
-        ctx.interaction
+        interaction
             .create_followup_message(ctx.discord, |f| {
                 send_as_followup_response(data, allowed_mentions, f);
                 f
             })
             .await?;
     } else {
-        ctx.interaction
+        interaction
             .create_interaction_response(ctx.discord, |r| {
                 r.kind(serenity::InteractionResponseType::ChannelMessageWithSource)
                     .interaction_response_data(|f| {

@@ -2,13 +2,72 @@
 
 use crate::{serenity_prelude as serenity, BoxFuture, Framework};
 
+/// Abstracts over a refernce to an application command interaction or autocomplete interaction
+#[derive(Copy, Clone)]
+pub enum ApplicationCommandOrAutocompleteInteraction<'a> {
+    /// An application command interaction
+    ApplicationCommand(&'a serenity::ApplicationCommandInteraction),
+    /// An autocomplete interaction
+    Autocomplete(&'a serenity::AutocompleteInteraction),
+}
+
+impl<'a> ApplicationCommandOrAutocompleteInteraction<'a> {
+    /// Returns the data field of the underlying interaction
+    pub fn data(self) -> &'a serenity::ApplicationCommandInteractionData {
+        match self {
+            Self::ApplicationCommand(x) => &x.data,
+            Self::Autocomplete(x) => &x.data,
+        }
+    }
+
+    /// Returns the ID of the underlying interaction
+    pub fn id(self) -> serenity::InteractionId {
+        match self {
+            Self::ApplicationCommand(x) => x.id,
+            Self::Autocomplete(x) => x.id,
+        }
+    }
+
+    /// Returns the guild ID of the underlying interaction
+    pub fn guild_id(self) -> Option<serenity::GuildId> {
+        match self {
+            Self::ApplicationCommand(x) => x.guild_id,
+            Self::Autocomplete(x) => x.guild_id,
+        }
+    }
+
+    /// Returns the channel ID of the underlying interaction
+    pub fn channel_id(self) -> serenity::ChannelId {
+        match self {
+            Self::ApplicationCommand(x) => x.channel_id,
+            Self::Autocomplete(x) => x.channel_id,
+        }
+    }
+
+    /// Returns the member field of the underlying interaction
+    pub fn member(self) -> Option<&'a serenity::Member> {
+        match self {
+            Self::ApplicationCommand(x) => x.member.as_ref(),
+            Self::Autocomplete(x) => x.member.as_ref(),
+        }
+    }
+
+    /// Returns the user field of the underlying interaction
+    pub fn user(self) -> &'a serenity::User {
+        match self {
+            Self::ApplicationCommand(x) => &x.user,
+            Self::Autocomplete(x) => &x.user,
+        }
+    }
+}
+
 /// Application command specific context passed to command invocations.
 #[non_exhaustive]
 pub struct ApplicationContext<'a, U, E> {
     /// Serenity's context, like HTTP or cache
     pub discord: &'a serenity::Context,
     /// The interaction which triggered this command execution.
-    pub interaction: &'a serenity::ApplicationCommandInteraction,
+    pub interaction: ApplicationCommandOrAutocompleteInteraction<'a>,
     /// Keeps track of whether an initial response has been sent.
     ///
     /// Discord requires different HTTP endpoints for initial and additional responses.
@@ -39,13 +98,20 @@ impl<U, E> ApplicationContext<'_, U, E> {
     ///
     /// Also sets the [`ApplicationContext::has_sent_initial_response`] flag so the subsequent
     /// response will be sent in the correct manner.
+    ///
+    /// No-op if this is an autocomplete context
     pub async fn defer_response(&self, ephemeral: bool) -> Result<(), serenity::Error> {
+        let interaction = match self.interaction {
+            ApplicationCommandOrAutocompleteInteraction::ApplicationCommand(x) => x,
+            ApplicationCommandOrAutocompleteInteraction::Autocomplete(_) => return Ok(()),
+        };
+
         let mut flags = serenity::InteractionApplicationCommandCallbackDataFlags::empty();
         if ephemeral {
             flags |= serenity::InteractionApplicationCommandCallbackDataFlags::EPHEMERAL;
         }
 
-        self.interaction
+        interaction
             .create_interaction_response(self.discord, |f| {
                 f.kind(serenity::InteractionResponseType::DeferredChannelMessageWithSource)
                     .interaction_response_data(|f| f.flags(flags))
@@ -113,7 +179,7 @@ pub struct SlashCommandParameter<U, E> {
     pub autocomplete_callback: Option<
         for<'a> fn(
             crate::ApplicationContext<'a, U, E>,
-            &'a serenity::ApplicationCommandInteraction,
+            &'a serenity::AutocompleteInteraction,
             &'a [serenity::ApplicationCommandInteractionDataOption],
         ) -> BoxFuture<'a, Result<(), E>>,
     >,

@@ -67,7 +67,7 @@ pub fn generate_slash_command_spec(
             Some(autocomplete_fn) => {
                 quote::quote! { Some(|
                     ctx: poise::ApplicationContext<'_, _, _>,
-                    interaction: &poise::serenity_prelude::ApplicationCommandInteraction,
+                    interaction: &poise::serenity_prelude::AutocompleteInteraction,
                     options: &[poise::serenity_prelude::ApplicationCommandInteractionDataOption],
                 | Box::pin(async move {
                     use ::poise::futures::{Stream, StreamExt};
@@ -96,10 +96,10 @@ pub fn generate_slash_command_spec(
                     let choices_json = poise::serde_json::Value::Array(choices_json);
 
                     interaction
-                        .create_interaction_response(&ctx.discord.http, |b| {
-                            b.kind(::poise::serenity_prelude::InteractionResponseType::AutoComplete)
-                                .interaction_response_data(|b| b.set_choices(choices_json))
-                        })
+                        .create_autocomplete_response(
+                            &ctx.discord.http,
+                            |b| b.set_choices(choices_json),
+                        )
                         .await
                         .unwrap();
 
@@ -155,7 +155,7 @@ pub fn generate_slash_command_spec(
                 #[allow(clippy::needless_question_mark)]
 
                 let ( #( #param_names, )* ) = ::poise::parse_slash_args!(
-                    ctx.discord, ctx.interaction.guild_id, ctx.interaction.channel_id, args =>
+                    ctx.discord, ctx.interaction.guild_id(), ctx.interaction.channel_id(), args =>
                     #( (#param_names: #param_types), )*
                 ).await?;
 

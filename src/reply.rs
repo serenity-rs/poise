@@ -124,16 +124,24 @@ impl ReplyHandle<'_> {
 pub async fn send_reply<U, E>(
     ctx: crate::Context<'_, U, E>,
     builder: impl for<'a, 'b> FnOnce(&'a mut CreateReply<'b>) -> &'a mut CreateReply<'b>,
-) -> Result<ReplyHandle<'_>, serenity::Error> {
+) -> Result<Option<ReplyHandle<'_>>, serenity::Error> {
     Ok(match ctx {
-        crate::Context::Prefix(ctx) => {
-            ReplyHandle::Prefix(crate::send_prefix_reply(ctx, builder).await?)
-        }
+        crate::Context::Prefix(ctx) => Some(ReplyHandle::Prefix(
+            crate::send_prefix_reply(ctx, builder).await?,
+        )),
         crate::Context::Application(ctx) => {
             crate::send_application_reply(ctx, builder).await?;
-            ReplyHandle::Application {
-                interaction: ctx.interaction,
-                http: &ctx.discord.http,
+
+            if let crate::ApplicationCommandOrAutocompleteInteraction::ApplicationCommand(
+                interaction,
+            ) = &ctx.interaction
+            {
+                Some(ReplyHandle::Application {
+                    interaction,
+                    http: &ctx.discord.http,
+                })
+            } else {
+                None
             }
         }
     })
@@ -143,6 +151,6 @@ pub async fn send_reply<U, E>(
 pub async fn say_reply<U, E>(
     ctx: crate::Context<'_, U, E>,
     text: impl Into<String>,
-) -> Result<ReplyHandle<'_>, serenity::Error> {
+) -> Result<Option<ReplyHandle<'_>>, serenity::Error> {
     send_reply(ctx, |m| m.content(text.into())).await
 }

@@ -65,7 +65,7 @@ impl<'a, U, E> Context<'a, U, E> {
     pub async fn say(
         self,
         text: impl Into<String>,
-    ) -> Result<crate::ReplyHandle<'a>, serenity::Error> {
+    ) -> Result<Option<crate::ReplyHandle<'a>>, serenity::Error> {
         crate::say_reply(self, text).await
     }
 
@@ -75,7 +75,7 @@ impl<'a, U, E> Context<'a, U, E> {
         builder: impl for<'b, 'c> FnOnce(
             &'b mut crate::CreateReply<'c>,
         ) -> &'b mut crate::CreateReply<'c>,
-    ) -> Result<crate::ReplyHandle<'a>, serenity::Error> {
+    ) -> Result<Option<crate::ReplyHandle<'a>>, serenity::Error> {
         crate::send_reply(self, builder).await
     }
 }
@@ -119,7 +119,7 @@ impl<U, E> Context<'_, U, E> {
     /// Return the channel ID of this context
     pub fn channel_id(&self) -> serenity::ChannelId {
         match self {
-            Self::Application(ctx) => ctx.interaction.channel_id,
+            Self::Application(ctx) => ctx.interaction.channel_id(),
             Self::Prefix(ctx) => ctx.msg.channel_id,
         }
     }
@@ -127,7 +127,7 @@ impl<U, E> Context<'_, U, E> {
     /// Returns the guild ID of this context, if we are inside a guild
     pub fn guild_id(&self) -> Option<serenity::GuildId> {
         match self {
-            Self::Application(ctx) => ctx.interaction.guild_id,
+            Self::Application(ctx) => ctx.interaction.guild_id(),
             Self::Prefix(ctx) => ctx.msg.guild_id,
         }
     }
@@ -143,7 +143,7 @@ impl<U, E> Context<'_, U, E> {
     /// Return the datetime of the invoking message or interaction
     pub fn created_at(&self) -> chrono::DateTime<chrono::Utc> {
         match self {
-            Self::Application(ctx) => ctx.interaction.id.created_at(),
+            Self::Application(ctx) => ctx.interaction.id().created_at(),
             Self::Prefix(ctx) => ctx.msg.timestamp,
         }
     }
@@ -151,7 +151,7 @@ impl<U, E> Context<'_, U, E> {
     /// Get the author of the command message or application command.
     pub fn author(&self) -> &serenity::User {
         match self {
-            Self::Application(ctx) => &ctx.interaction.user,
+            Self::Application(ctx) => ctx.interaction.user(),
             Self::Prefix(ctx) => &ctx.msg.author,
         }
     }
@@ -159,7 +159,7 @@ impl<U, E> Context<'_, U, E> {
     /// Return a ID that uniquely identifies this command invocation.
     pub fn id(&self) -> u64 {
         match self {
-            Self::Application(ctx) => ctx.interaction.id.0,
+            Self::Application(ctx) => ctx.interaction.id().0,
             Self::Prefix(ctx) => {
                 let mut id = ctx.msg.id.0;
                 if let Some(edited_timestamp) = ctx.msg.edited_timestamp {

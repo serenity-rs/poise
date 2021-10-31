@@ -105,7 +105,7 @@ fn find_matching_application_command<'a, 'b, U, E>(
 pub async fn extract_command_and_run_checks<'a, U, E>(
     framework: &'a super::Framework<U, E>,
     ctx: &'a serenity::Context,
-    interaction: &'a serenity::ApplicationCommandInteraction,
+    interaction: crate::ApplicationCommandOrAutocompleteInteraction<'a>,
     has_sent_initial_response: &'a std::sync::atomic::AtomicBool,
 ) -> Result<
     (
@@ -115,10 +115,10 @@ pub async fn extract_command_and_run_checks<'a, U, E>(
     Option<(E, crate::ApplicationCommandErrorContext<'a, U, E>)>,
 > {
     let (command, leaf_interaction_options) =
-        find_matching_application_command(framework, &interaction.data).ok_or_else(|| {
+        find_matching_application_command(framework, interaction.data()).ok_or_else(|| {
             println!(
                 "Warning: received unknown interaction \"{}\"",
-                interaction.data.name
+                interaction.data().name
             );
             None
         })?;
@@ -186,9 +186,13 @@ pub async fn dispatch_interaction<'a, U, E>(
     // Need to pass this in from outside because of lifetime issues
     has_sent_initial_response: &'a std::sync::atomic::AtomicBool,
 ) -> Result<(), Option<(E, crate::ApplicationCommandErrorContext<'a, U, E>)>> {
-    let (ctx, options) =
-        extract_command_and_run_checks(framework, ctx, interaction, has_sent_initial_response)
-            .await?;
+    let (ctx, options) = extract_command_and_run_checks(
+        framework,
+        ctx,
+        crate::ApplicationCommandOrAutocompleteInteraction::ApplicationCommand(interaction),
+        has_sent_initial_response,
+    )
+    .await?;
 
     (framework.options.pre_command)(crate::Context::Application(ctx)).await;
 
@@ -226,13 +230,17 @@ pub async fn dispatch_interaction<'a, U, E>(
 pub async fn dispatch_autocomplete<'a, U, E>(
     framework: &'a super::Framework<U, E>,
     ctx: &'a serenity::Context,
-    interaction: &'a serenity::ApplicationCommandInteraction,
+    interaction: &'a serenity::AutocompleteInteraction,
     // Need to pass this in from outside because of lifetime issues
     has_sent_initial_response: &'a std::sync::atomic::AtomicBool,
 ) -> Result<(), Option<(E, crate::ApplicationCommandErrorContext<'a, U, E>)>> {
-    let (ctx, options) =
-        extract_command_and_run_checks(framework, ctx, interaction, has_sent_initial_response)
-            .await?;
+    let (ctx, options) = extract_command_and_run_checks(
+        framework,
+        ctx,
+        crate::ApplicationCommandOrAutocompleteInteraction::Autocomplete(interaction),
+        has_sent_initial_response,
+    )
+    .await?;
 
     let command = match ctx.command {
         crate::ApplicationCommand::Slash(x) => x,

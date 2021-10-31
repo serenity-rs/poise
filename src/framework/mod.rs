@@ -321,7 +321,7 @@ impl<U, E> Framework<U, E> {
                 }
             }
             Event::InteractionCreate {
-                interaction: serenity::Interaction::AutoComplete(interaction),
+                interaction: serenity::Interaction::Autocomplete(interaction),
             } => {
                 if let Err(Some((e, error_ctx))) = slash::dispatch_autocomplete(
                     self,
