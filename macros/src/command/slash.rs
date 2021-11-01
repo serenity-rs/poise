@@ -99,13 +99,15 @@ pub fn generate_slash_command_spec(
                         .await;
                     let choices_json = poise::serde_json::Value::Array(choices_json);
 
-                    interaction
+                    if let Err(e) = interaction
                         .create_autocomplete_response(
                             &ctx.discord.http,
                             |b| b.set_choices(choices_json),
                         )
                         .await
-                        .unwrap();
+                    {
+                        println!("Warning: couldn't send autocomplete response: {}", e);
+                    }
 
                     Ok(())
                 })) }
