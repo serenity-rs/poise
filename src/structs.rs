@@ -375,6 +375,8 @@ pub struct FrameworkOptions<U, E> {
     pub on_error: fn(E, ErrorContext<'_, U, E>) -> BoxFuture<'_, ()>,
     /// Called before every command
     pub pre_command: fn(Context<'_, U, E>) -> BoxFuture<'_, ()>,
+    /// Called after every command
+    pub post_command: fn(Context<'_, U, E>) -> BoxFuture<'_, ()>,
     /// Provide a callback to be invoked before every command. The command will only be executed
     /// if the callback returns true.
     ///
@@ -506,6 +508,7 @@ impl<U: Send + Sync, E: std::fmt::Display + Send> Default for FrameworkOptions<U
             },
             listener: |_, _, _, _| Box::pin(async { Ok(()) }),
             pre_command: |_| Box::pin(async {}),
+            post_command: |_| Box::pin(async {}),
             command_check: None,
             allowed_mentions: Some({
                 let mut f = serenity::CreateAllowedMentions::default();

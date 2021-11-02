@@ -245,7 +245,7 @@ where
     (this.options.pre_command)(crate::Context::Prefix(ctx)).await;
 
     // Execute command
-    (command.action)(ctx, args).await.map_err(|e| {
+    let res = (command.action)(ctx, args).await.map_err(|e| {
         Some((
             e,
             crate::PrefixCommandErrorContext {
@@ -254,5 +254,9 @@ where
                 while_checking: false,
             },
         ))
-    })
+    });
+
+    (this.options.post_command)(crate::Context::Prefix(ctx)).await;
+
+    res
 }
