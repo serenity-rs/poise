@@ -38,11 +38,14 @@ pub async fn age(
 #[tokio::main]
 async fn main() {
     poise::Framework::build()
-        .prefix("~")
         .token(std::env::var("DISCORD_BOT_TOKEN").unwrap())
         .user_data_setup(move |_ctx, _ready, _framework| Box::pin(async move { Ok(()) }))
         .options(poise::FrameworkOptions {
             // configure framework here
+            prefix_options: PrefixFrameworkOptions {
+                prefix: Some("~".into()),
+                ..Default::default()
+            },
             ..Default::default()
         })
         .command(age(), |f| f)

@@ -5,7 +5,6 @@ use crate::BoxFuture;
 ///
 /// If one of the following required values is missing, the builder will panic on start:
 /// - [`Self::token`]
-/// - [`Self::prefix`]
 /// - [`Self::user_data_setup`]
 /// - [`Self::options`]
 ///
