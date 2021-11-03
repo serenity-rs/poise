@@ -105,10 +105,12 @@ impl<U, E> FrameworkBuilder<U, E> {
         self
     }
 
-    /// Start the framework with the specified configuration.
+    /// Build the framework with the specified configuration.
     ///
     /// For more information, see [`FrameworkBuilder`]
-    pub async fn run(self) -> Result<(), serenity::Error>
+    pub async fn build(
+        self,
+    ) -> Result<(crate::Framework<U, E>, serenity::ClientBuilder<'static>), serenity::Error>
     where
         U: Send + Sync + 'static,
         E: 'static + Send,
@@ -154,7 +156,21 @@ impl<U, E> FrameworkBuilder<U, E> {
             client = client_settings(client);
         }
 
-        // Run the framework
-        framework.start(client).await
+        Ok((framework, client))
+    }
+
+    /// Start the framework with the specified configuration.
+    ///
+    /// [`FrameworkBuilder::run`] is just a shorthand that calls [`FrameworkBuilder::build`] and
+    /// starts the returned framework
+    pub async fn run(self) -> Result<(), serenity::Error>
+    where
+        U: Send + Sync + 'static,
+        E: 'static + Send,
+    {
+        let (framework, client) = self.build().await?;
+        framework.start(client).await?;
+
+        Ok(())
     }
 }
