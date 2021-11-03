@@ -53,6 +53,30 @@ async fn on_error(error: Error, ctx: poise::ErrorContext<'_, Data, Error>) {
 
 #[tokio::main]
 async fn main() {
+    let options = poise::FrameworkOptions {
+        prefix_options: poise::PrefixFrameworkOptions {
+            prefix: Some("~".into()),
+            edit_tracker: Some(poise::EditTracker::for_timespan(Duration::from_secs(3600))),
+            additional_prefixes: vec![
+                poise::Prefix::Literal("hey bot"),
+                poise::Prefix::Literal("hey bot,"),
+            ],
+            ..Default::default()
+        },
+        on_error: |error, ctx| Box::pin(on_error(error, ctx)),
+        pre_command: |ctx| {
+            Box::pin(async move {
+                println!("Executing command {}...", ctx.command().unwrap().name());
+            })
+        },
+        post_command: |ctx| {
+            Box::pin(async move {
+                println!("Executed command {}!", ctx.command().unwrap().name());
+            })
+        },
+        ..Default::default()
+    };
+
     poise::Framework::build()
         .token(var("TOKEN").expect("Missing `TOKEN` env var, see README for more information."))
         .user_data_setup(move |_ctx, _ready, _framework| {
@@ -62,15 +86,7 @@ async fn main() {
                 })
             })
         })
-        .options(poise::FrameworkOptions {
-            prefix_options: poise::PrefixFrameworkOptions {
-                prefix: Some("~".into()),
-                edit_tracker: Some(poise::EditTracker::for_timespan(Duration::from_secs(3600))),
-                ..Default::default()
-            },
-            on_error: |error, ctx| Box::pin(on_error(error, ctx)),
-            ..Default::default()
-        })
+        .options(options)
         .command(help(), |f| f)
         .command(register(), |f| f)
         .command(commands::vote(), |f| f)
