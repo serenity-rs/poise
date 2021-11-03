@@ -216,6 +216,8 @@ pub async fn dispatch_interaction<'a, U, E>(
         },
     };
 
+    (framework.options.post_command)(crate::Context::Application(ctx)).await;
+
     action_result.map_err(|e| {
         Some((
             e,
