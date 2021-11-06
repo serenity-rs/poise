@@ -82,6 +82,17 @@ async fn check_required_permissions_and_owners_only<U, E>(
 /// The main framework struct which stores all data and handles message and interaction dispatch.
 pub struct Framework<U, E> {
     user_data: once_cell::sync::OnceCell<U>,
+    bot_id: serenity::UserId,
+    // TODO: wrap in RwLock to allow changing framework options while running? Could also replace
+    // the edit tracking cache interior mutability
+    options: FrameworkOptions<U, E>,
+    application_id: serenity::ApplicationId,
+
+    // Will be initialized to Some on construction, and then taken out on startup
+    client: std::sync::Mutex<Option<serenity::Client>>,
+    // Initialized to Some during construction; so shouldn't be None at any observable point
+    shard_manager: std::sync::Mutex<Option<std::sync::Arc<tokio::sync::Mutex<ShardManager>>>>,
+    // Filled with Some on construction. Taken out and executed on first Ready gateway event
     user_data_setup: std::sync::Mutex<
         Option<
             Box<
@@ -95,12 +106,6 @@ pub struct Framework<U, E> {
             >,
         >,
     >,
-    bot_id: serenity::UserId,
-    // TODO: wrap in RwLock to allow changing framework options while running? Could also replace
-    // the edit tracking cache interior mutability
-    options: FrameworkOptions<U, E>,
-    application_id: serenity::ApplicationId,
-    shard_manager: arc_swap::ArcSwapOption<tokio::sync::Mutex<ShardManager>>,
 }
 
 impl<U, E> Framework<U, E> {
@@ -111,25 +116,20 @@ impl<U, E> Framework<U, E> {
         FrameworkBuilder::default()
     }
 
-    /// Setup a new [`Framework`]
+    /// Setup a new [`Framework`]. For more ergonomic setup, please see [`FrameworkBuilder`]
     ///
-    /// Takes several arguments:
-    /// - the prefix used for parsing commands from messages
-    /// - the Discord application ID (required for slash commands)
-    /// - a callback to create user data
-    /// - framework configuration via [`FrameworkOptions`]
+    /// This function is async and returns Result because it already initializes the Discord client.
     ///
     /// The user data callback is invoked as soon as the bot is logged in. That way, bot data like
     /// user ID or connected guilds can be made available to the user data setup function. The user
     /// data setup is not allowed to return Result because there would be no reasonable
     /// course of action on error.
-    #[deprecated = "use Framework::build() instead"]
-    pub fn new<F>(
+    pub async fn new<F>(
         application_id: serenity::ApplicationId,
-        bot_id: serenity::UserId,
+        client_builder: serenity::ClientBuilder<'_>,
         user_data_setup: F,
         options: FrameworkOptions<U, E>,
-    ) -> Self
+    ) -> Result<std::sync::Arc<Self>, serenity::Error>
     where
         F: Send
             + Sync
@@ -139,41 +139,24 @@ impl<U, E> Framework<U, E> {
                 &'a serenity::Ready,
                 &'a Self,
             ) -> BoxFuture<'a, Result<U, E>>,
+        U: Send + Sync + 'static,
+        E: Send + 'static,
     {
-        Self {
+        let self_1 = std::sync::Arc::new(Self {
             user_data: once_cell::sync::OnceCell::new(),
             user_data_setup: std::sync::Mutex::new(Some(Box::new(user_data_setup))),
-            bot_id,
+            bot_id: serenity::parse_token(client_builder.get_token().trim_start_matches("Bot "))
+                .expect("Invalid bot token")
+                .bot_user_id,
+            // To break up the circular dependency (framework setup -> client setup -> event handler
+            // -> framework), we initialize this with None and then immediately fill in once the
+            // client is created
+            client: std::sync::Mutex::new(None),
             options,
             application_id,
-            shard_manager: arc_swap::ArcSwapOption::from(None),
-        }
-    }
-
-    /// Start the framework.
-    ///
-    /// Takes a `serenity::ClientBuilder`, in which you need to supply the bot token, as well as
-    /// any gateway intents.
-    pub async fn start(self, builder: serenity::ClientBuilder<'_>) -> Result<(), serenity::Error>
-    where
-        U: Send + Sync + 'static,
-        E: 'static + Send,
-    {
-        let application_id = self.application_id;
-
-        let self_1 = std::sync::Arc::new(self);
-        let self_2 = self_1.clone();
-        let self_3 = self_1.clone();
-
-        let edit_track_cache_purge_task = tokio::spawn(async move {
-            loop {
-                if let Some(edit_tracker) = &self_1.options.prefix_options.edit_tracker {
-                    edit_tracker.write().purge();
-                }
-                // not sure if the purging interval should be configurable
-                tokio::time::sleep(std::time::Duration::from_secs(60)).await;
-            }
+            shard_manager: std::sync::Mutex::new(None),
         });
+        let self_2 = self_1.clone();
 
         let event_handler = EventWrapper(move |ctx, event| {
             let self_2 = std::sync::Arc::clone(&self_2);
@@ -182,15 +165,44 @@ impl<U, E> Framework<U, E> {
             }) as _
         });
 
-        let mut client: Client = builder
+        let client: Client = client_builder
             .application_id(application_id.0)
             .event_handler(event_handler)
             .await?;
 
-        self_3
-            .shard_manager
-            .store(Some(client.shard_manager.clone()));
+        *self_1.shard_manager.lock().unwrap() = Some(client.shard_manager.clone());
+        *self_1.client.lock().unwrap() = Some(client);
 
+        Ok(self_1)
+    }
+
+    /// Start the framework.
+    ///
+    /// Takes a `serenity::ClientBuilder`, in which you need to supply the bot token, as well as
+    /// any gateway intents.
+    pub async fn start(self: std::sync::Arc<Self>) -> Result<(), serenity::Error>
+    where
+        U: Send + Sync + 'static,
+        E: Send + 'static,
+    {
+        let mut client = self
+            .client
+            .lock()
+            .unwrap()
+            .take()
+            .expect("Prepared client is missing");
+
+        let edit_track_cache_purge_task = tokio::spawn(async move {
+            loop {
+                if let Some(edit_tracker) = &self.options.prefix_options.edit_tracker {
+                    edit_tracker.write().purge();
+                }
+                // not sure if the purging interval should be configurable
+                tokio::time::sleep(std::time::Duration::from_secs(60)).await;
+            }
+        });
+
+        // This will run for as long as the bot is active
         client.start().await?;
 
         edit_track_cache_purge_task.abort();
@@ -210,7 +222,11 @@ impl<U, E> Framework<U, E> {
 
     /// Returns the serenity's client shard manager.
     pub fn shard_manager(&self) -> std::sync::Arc<tokio::sync::Mutex<ShardManager>> {
-        self.shard_manager.load().as_ref().unwrap().clone()
+        self.shard_manager
+            .lock()
+            .unwrap()
+            .clone()
+            .expect("fatal: shard manager not stored in framework initialization")
     }
 
     async fn get_user_data(&self) -> &U {

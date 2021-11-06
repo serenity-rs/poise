@@ -108,12 +108,10 @@ impl<U, E> FrameworkBuilder<U, E> {
     /// Build the framework with the specified configuration.
     ///
     /// For more information, see [`FrameworkBuilder`]
-    pub async fn build(
-        self,
-    ) -> Result<(crate::Framework<U, E>, serenity::ClientBuilder<'static>), serenity::Error>
+    pub async fn build(self) -> Result<std::sync::Arc<crate::Framework<U, E>>, serenity::Error>
     where
         U: Send + Sync + 'static,
-        E: 'static + Send,
+        E: Send + 'static,
     {
         // Aggregate required values or panic if not provided
         let token = self.token.expect("No token was provided to the framework");
@@ -133,30 +131,25 @@ impl<U, E> FrameworkBuilder<U, E> {
         }
         options.owners.insert(application_info.owner.id);
 
-        // Create framework with specified settings
-        let framework = crate::Framework {
-            user_data: once_cell::sync::OnceCell::new(),
-            user_data_setup: std::sync::Mutex::new(Some(user_data_setup)),
-            bot_id: serenity::parse_token(&token)
-                .expect("Invalid bot token")
-                .bot_user_id,
-            options,
-            application_id: serenity::ApplicationId(application_info.id.0),
-            shard_manager: arc_swap::ArcSwapOption::from(None),
-        };
-
         // Create serenity client
-        let mut client = serenity::ClientBuilder::new(token)
+        let mut client_builder = serenity::ClientBuilder::new(token)
             .application_id(application_info.id.0)
             .intents(
                 self.intents
                     .unwrap_or_else(serenity::GatewayIntents::non_privileged),
             );
         if let Some(client_settings) = self.client_settings {
-            client = client_settings(client);
+            client_builder = client_settings(client_builder);
         }
 
-        Ok((framework, client))
+        // Create framework with specified settings
+        crate::Framework::new(
+            serenity::ApplicationId(application_info.id.0),
+            client_builder,
+            user_data_setup,
+            options,
+        )
+        .await
     }
 
     /// Start the framework with the specified configuration.
@@ -166,11 +159,8 @@ impl<U, E> FrameworkBuilder<U, E> {
     pub async fn run(self) -> Result<(), serenity::Error>
     where
         U: Send + Sync + 'static,
-        E: 'static + Send,
+        E: Send + 'static,
     {
-        let (framework, client) = self.build().await?;
-        framework.start(client).await?;
-
-        Ok(())
+        self.build().await?.start().await
     }
 }
