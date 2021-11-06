@@ -59,8 +59,8 @@ impl EditTracker {
     /// Note: [`EditTracker`] will only purge messages outside the duration when [`Self::purge`]
     /// is called. If you supply the created [`EditTracker`] to [`crate::Framework`], the framework
     /// will take care of that by calling [`Self::purge`] periodically.
-    pub fn for_timespan(duration: std::time::Duration) -> parking_lot::RwLock<Self> {
-        parking_lot::RwLock::new(Self {
+    pub fn for_timespan(duration: std::time::Duration) -> std::sync::RwLock<Self> {
+        std::sync::RwLock::new(Self {
             max_duration: duration,
             cache: Vec::new(),
         })
@@ -163,7 +163,7 @@ pub async fn send_prefix_reply<U, E>(
             .prefix_options
             .edit_tracker
             .as_ref()
-            .map(|t| t.write())
+            .map(|t| t.write().unwrap())
     };
 
     let existing_response = lock_edit_tracker()

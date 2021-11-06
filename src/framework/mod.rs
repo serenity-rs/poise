@@ -195,7 +195,7 @@ impl<U, E> Framework<U, E> {
         let edit_track_cache_purge_task = tokio::spawn(async move {
             loop {
                 if let Some(edit_tracker) = &self.options.prefix_options.edit_tracker {
-                    edit_tracker.write().purge();
+                    edit_tracker.write().unwrap().purge();
                 }
                 // not sure if the purging interval should be configurable
                 tokio::time::sleep(std::time::Duration::from_secs(60)).await;
@@ -276,7 +276,7 @@ impl<U, E> Framework<U, E> {
             }
             Event::MessageUpdate { event, .. } => {
                 if let Some(edit_tracker) = &self.options.prefix_options.edit_tracker {
-                    let msg = edit_tracker.write().process_message_update(
+                    let msg = edit_tracker.write().unwrap().process_message_update(
                         event,
                         self.options().prefix_options.ignore_edit_tracker_cache,
                     );
@@ -302,6 +302,7 @@ impl<U, E> Framework<U, E> {
                 if let Some(edit_tracker) = &self.options.prefix_options.edit_tracker {
                     let bot_response = edit_tracker
                         .write()
+                        .unwrap()
                         .find_bot_response(*deleted_message_id)
                         .cloned();
                     if let Some(bot_response) = bot_response {

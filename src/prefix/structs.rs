@@ -175,7 +175,7 @@ pub struct PrefixFrameworkOptions<U, E> {
     pub mention_as_prefix: bool,
     /// If Some, the framework will react to message edits by editing the corresponding bot response
     /// with the new result.
-    pub edit_tracker: Option<parking_lot::RwLock<super::EditTracker>>,
+    pub edit_tracker: Option<std::sync::RwLock<super::EditTracker>>,
     /// Wether or not to ignore message edits on messages outside the cache.
     /// This can happen if the message edit happens while the command is being invoked, or the
     /// original message wasn't a command.
