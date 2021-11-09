@@ -70,6 +70,7 @@ pub struct CommandOptions {
 
     aliases: Aliases,
     track_edits: bool,
+    broadcast_typing: bool,
     explanation_fn: Option<syn::Path>,
     check: Option<syn::Path>,
     on_error: Option<syn::Path>,
@@ -86,6 +87,7 @@ pub struct CommandOptions {
 #[darling(default)]
 struct ParamOptions {
     description: Option<String>,
+    autocomplete: Option<syn::Path>,
     lazy: bool,
     flag: bool,
     rest: bool,

@@ -36,8 +36,35 @@ pub async fn on_error<D>(e: BoxErrorSendSync, ctx: crate::ErrorContext<'_, D, Bo
         crate::ErrorContext::Listener(event) => {
             println!("Error in listener while processing {:?}: {}", event, e)
         }
+        crate::ErrorContext::Autocomplete(err_ctx) => {
+            let ctx = err_ctx.ctx;
+            println!(
+                "Error in autocomplete callback for command {:?}: {}",
+                ctx.command.slash_or_context_menu_name(),
+                e
+            )
+        }
         crate::ErrorContext::Setup => println!("Setup failed: {}", e),
     }
+}
+
+/// An autocomplete function that can be used for the command parameter in your help function.
+///
+/// See examples/framework_usage for an example
+pub async fn autocomplete_command<U, E>(
+    ctx: crate::Context<'_, U, E>,
+    partial: String,
+) -> impl Iterator<Item = String> + '_ {
+    // We only consider prefix commands here because, bad as it is, that's what other builtins
+    // do to. For example the help command only shows commands that have a prefix version.
+    // Once a better command structure design is adopted, this issue should be solved
+    ctx.framework()
+        .options()
+        .prefix_options
+        .commands
+        .iter()
+        .filter(move |cmd| cmd.command.name.starts_with(&partial))
+        .map(|cmd| cmd.command.name.to_string())
 }
 
 /// Whether to send the help message as ephemeral (if possible), or as a normal message

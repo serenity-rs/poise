@@ -227,6 +227,13 @@ where
         return Err(None);
     }
 
+    // Typing is broadcasted as long as this object is alive
+    let _typing_broadcaster = if command.options.broadcast_typing {
+        msg.channel_id.start_typing(&ctx.http).ok()
+    } else {
+        None
+    };
+
     let ctx = crate::PrefixContext {
         discord: ctx,
         msg,
@@ -238,7 +245,7 @@ where
     (this.options.pre_command)(crate::Context::Prefix(ctx)).await;
 
     // Execute command
-    (command.action)(ctx, args).await.map_err(|e| {
+    let res = (command.action)(ctx, args).await.map_err(|e| {
         Some((
             e,
             crate::PrefixCommandErrorContext {
@@ -247,5 +254,9 @@ where
                 while_checking: false,
             },
         ))
-    })
+    });
+
+    (this.options.post_command)(crate::Context::Prefix(ctx)).await;
+
+    res
 }

@@ -25,10 +25,16 @@ pub use framework::*;
 mod reply;
 pub use reply::*;
 
-pub mod samples;
+pub mod builtins;
+/// See [`builtins`]
+#[deprecated = "`samples` module was renamed to `builtins`"]
+pub mod samples {
+    pub use crate::builtins::*;
+}
 
 #[doc(no_inline)]
 pub use async_trait::async_trait;
+pub use futures;
 pub use poise_macros::*;
 pub use serde_json;
 pub use serenity;
@@ -52,7 +58,7 @@ pub mod serenity_prelude {
         http::*,
         model::{
             event::*,
-            interactions::{application_command::*, message_component::*, *},
+            interactions::{application_command::*, autocomplete::*, message_component::*, *},
             prelude::*,
         },
         prelude::*,

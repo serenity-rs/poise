@@ -68,7 +68,7 @@ impl<'a, U, E> Context<'a, U, E> {
     pub async fn say(
         self,
         text: impl Into<String>,
-    ) -> Result<crate::ReplyHandle<'a>, serenity::Error> {
+    ) -> Result<Option<crate::ReplyHandle<'a>>, serenity::Error> {
         crate::say_reply(self, text).await
     }
 
@@ -78,7 +78,7 @@ impl<'a, U, E> Context<'a, U, E> {
         builder: impl for<'b, 'c> FnOnce(
             &'b mut crate::CreateReply<'c>,
         ) -> &'b mut crate::CreateReply<'c>,
-    ) -> Result<crate::ReplyHandle<'a>, serenity::Error> {
+    ) -> Result<Option<crate::ReplyHandle<'a>>, serenity::Error> {
         crate::send_reply(self, builder).await
     }
 }
@@ -94,9 +94,9 @@ impl<U, E> _GetGenerics for Context<'_, U, E> {
     type E = E;
 }
 
-impl<U, E> Context<'_, U, E> {
+impl<'a, U, E> Context<'a, U, E> {
     /// Return the stored [`serenity::Context`] within the underlying context type.
-    pub fn discord(&self) -> &serenity::Context {
+    pub fn discord(&self) -> &'a serenity::Context {
         match self {
             Self::Application(ctx) => ctx.discord,
             Self::Prefix(ctx) => ctx.discord,
@@ -104,7 +104,7 @@ impl<U, E> Context<'_, U, E> {
     }
 
     /// Return a read-only reference to [`crate::Framework`].
-    pub fn framework(&self) -> &crate::Framework<U, E> {
+    pub fn framework(&self) -> &'a crate::Framework<U, E> {
         match self {
             Self::Application(ctx) => ctx.framework,
             Self::Prefix(ctx) => ctx.framework,
@@ -112,7 +112,7 @@ impl<U, E> Context<'_, U, E> {
     }
 
     /// Return a reference to your custom user data
-    pub fn data(&self) -> &U {
+    pub fn data(&self) -> &'a U {
         match self {
             Self::Application(ctx) => ctx.data,
             Self::Prefix(ctx) => ctx.data,
@@ -122,7 +122,7 @@ impl<U, E> Context<'_, U, E> {
     /// Return the channel ID of this context
     pub fn channel_id(&self) -> serenity::ChannelId {
         match self {
-            Self::Application(ctx) => ctx.interaction.channel_id,
+            Self::Application(ctx) => ctx.interaction.channel_id(),
             Self::Prefix(ctx) => ctx.msg.channel_id,
         }
     }
@@ -130,7 +130,7 @@ impl<U, E> Context<'_, U, E> {
     /// Returns the guild ID of this context, if we are inside a guild
     pub fn guild_id(&self) -> Option<serenity::GuildId> {
         match self {
-            Self::Application(ctx) => ctx.interaction.guild_id,
+            Self::Application(ctx) => ctx.interaction.guild_id(),
             Self::Prefix(ctx) => ctx.msg.guild_id,
         }
     }
@@ -146,15 +146,15 @@ impl<U, E> Context<'_, U, E> {
     /// Return the datetime of the invoking message or interaction
     pub fn created_at(&self) -> chrono::DateTime<chrono::Utc> {
         match self {
-            Self::Application(ctx) => ctx.interaction.id.created_at(),
+            Self::Application(ctx) => ctx.interaction.id().created_at(),
             Self::Prefix(ctx) => ctx.msg.timestamp,
         }
     }
 
     /// Get the author of the command message or application command.
-    pub fn author(&self) -> &serenity::User {
+    pub fn author(&self) -> &'a serenity::User {
         match self {
-            Self::Application(ctx) => &ctx.interaction.user,
+            Self::Application(ctx) => ctx.interaction.user(),
             Self::Prefix(ctx) => &ctx.msg.author,
         }
     }
@@ -162,7 +162,7 @@ impl<U, E> Context<'_, U, E> {
     /// Return a ID that uniquely identifies this command invocation.
     pub fn id(&self) -> u64 {
         match self {
-            Self::Application(ctx) => ctx.interaction.id.0,
+            Self::Application(ctx) => ctx.interaction.id().0,
             Self::Prefix(ctx) => {
                 let mut id = ctx.msg.id.0;
                 if let Some(edited_timestamp) = ctx.msg.edited_timestamp {
@@ -182,7 +182,7 @@ impl<U, E> Context<'_, U, E> {
     }
 
     /// Returns a reference to the command.
-    pub fn command(&self) -> Option<crate::CommandRef<'_, U, E>> {
+    pub fn command(&self) -> Option<crate::CommandRef<'a, U, E>> {
         Some(match self {
             Self::Prefix(x) => crate::CommandRef::Prefix(x.command?),
             Self::Application(x) => crate::CommandRef::Application(x.command),
@@ -265,7 +265,7 @@ impl<'a, U, E> CommandErrorContext<'a, U, E> {
     pub fn command(&self) -> CommandRef<'_, U, E> {
         match self {
             Self::Prefix(x) => CommandRef::Prefix(x.command),
-            Self::Application(x) => CommandRef::Application(x.command),
+            Self::Application(x) => CommandRef::Application(x.ctx.command),
         }
     }
 
@@ -294,6 +294,8 @@ pub enum ErrorContext<'a, U, E> {
     Listener(&'a crate::Event<'a>),
     /// Error in bot command
     Command(CommandErrorContext<'a, U, E>),
+    /// Error in autocomplete callback
+    Autocomplete(crate::ApplicationCommandErrorContext<'a, U, E>),
 }
 
 impl<U, E> Clone for ErrorContext<'_, U, E> {
@@ -302,6 +304,7 @@ impl<U, E> Clone for ErrorContext<'_, U, E> {
             Self::Setup => Self::Setup,
             Self::Listener(x) => Self::Listener(x),
             Self::Command(x) => Self::Command(x.clone()),
+            Self::Autocomplete(x) => Self::Autocomplete(x.clone()),
         }
     }
 }
@@ -424,6 +427,8 @@ pub struct FrameworkOptions<U, E> {
     pub on_error: fn(E, ErrorContext<'_, U, E>) -> BoxFuture<'_, ()>,
     /// Called before every command
     pub pre_command: fn(Context<'_, U, E>) -> BoxFuture<'_, ()>,
+    /// Called after every command
+    pub post_command: fn(Context<'_, U, E>) -> BoxFuture<'_, ()>,
     /// Provide a callback to be invoked before every command. The command will only be executed
     /// if the callback returns true.
     ///
@@ -601,14 +606,14 @@ impl<U: Send + Sync, E: std::fmt::Display + Send> Default for FrameworkOptions<U
                             event.name(),
                             error
                         ),
-                        ErrorContext::Command(CommandErrorContext::Prefix(ctx)) => {
+                        ErrorContext::Command(CommandErrorContext::Prefix(err_ctx)) => {
                             println!(
                                 "Error in prefix command \"{}\" from message \"{}\": {}",
-                                &ctx.command.name, &ctx.ctx.msg.content, error
+                                &err_ctx.command.name, &err_ctx.ctx.msg.content, error
                             );
                         }
-                        ErrorContext::Command(CommandErrorContext::Application(ctx)) => {
-                            match &ctx.command {
+                        ErrorContext::Command(CommandErrorContext::Application(err_ctx)) => {
+                            match &err_ctx.ctx.command {
                                 crate::ApplicationCommand::Slash(cmd) => {
                                     println!("Error in slash command \"{}\": {}", cmd.name, error)
                                 }
@@ -618,11 +623,21 @@ impl<U: Send + Sync, E: std::fmt::Display + Send> Default for FrameworkOptions<U
                                 ),
                             }
                         }
+                        ErrorContext::Autocomplete(err_ctx) => match &err_ctx.ctx.command {
+                            crate::ApplicationCommand::Slash(cmd) => {
+                                println!("Error in slash command \"{}\": {}", cmd.name, error)
+                            }
+                            crate::ApplicationCommand::ContextMenu(cmd) => println!(
+                                "Error in context menu command \"{}\": {}",
+                                cmd.name, error
+                            ),
+                        },
                     }
                 })
             },
             listener: |_, _, _, _| Box::pin(async { Ok(()) }),
             pre_command: |_| Box::pin(async {}),
+            post_command: |_| Box::pin(async {}),
             command_check: None,
             allowed_mentions: Some({
                 let mut f = serenity::CreateAllowedMentions::default();
