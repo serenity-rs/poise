@@ -82,11 +82,12 @@ impl EditTracker {
             .find(|(user_msg, _)| user_msg.id == user_msg_update.id)
         {
             Some((user_msg, _)) => {
-                // If message content didn't change, don't re-run command
-                match &user_msg_update.content {
-                    Some(content) if content == &user_msg.content => return None,
-                    None => return None,
-                    _ => {}
+                // If message content wasn't touched, don't re-run command
+                // Note: this may be Some, but still identical to previous content. We want to
+                // re-run the command in that case too; because that means the user explicitly
+                // edited their message
+                if user_msg_update.content.is_none() {
+                    return None;
                 }
 
                 update_message(user_msg, user_msg_update.clone());
