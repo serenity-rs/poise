@@ -70,11 +70,9 @@ impl<'a, U, E> Context<'a, U, E> {
     }
 
     /// Shorthand of [`crate::send_reply`]
-    pub async fn send(
+    pub async fn send<'b>(
         self,
-        builder: impl for<'b, 'c> FnOnce(
-            &'b mut crate::CreateReply<'c>,
-        ) -> &'b mut crate::CreateReply<'c>,
+        builder: impl for<'c> FnOnce(&'c mut crate::CreateReply<'b>) -> &'c mut crate::CreateReply<'b>,
     ) -> Result<Option<crate::ReplyHandle<'a>>, serenity::Error> {
         crate::send_reply(self, builder).await
     }

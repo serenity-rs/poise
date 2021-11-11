@@ -121,9 +121,9 @@ impl ReplyHandle<'_> {
 /// ).await?;
 /// # Ok(()) }
 /// ```
-pub async fn send_reply<U, E>(
+pub async fn send_reply<'a, U, E>(
     ctx: crate::Context<'_, U, E>,
-    builder: impl for<'a, 'b> FnOnce(&'a mut CreateReply<'b>) -> &'a mut CreateReply<'b>,
+    builder: impl for<'b> FnOnce(&'b mut CreateReply<'a>) -> &'b mut CreateReply<'a>,
 ) -> Result<Option<ReplyHandle<'_>>, serenity::Error> {
     Ok(match ctx {
         crate::Context::Prefix(ctx) => Some(ReplyHandle::Prefix(
