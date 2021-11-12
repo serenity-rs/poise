@@ -86,6 +86,7 @@ impl EditTracker {
                 // Note: this may be Some, but still identical to previous content. We want to
                 // re-run the command in that case too; because that means the user explicitly
                 // edited their message
+                #[allow(clippy::question_mark)]
                 if user_msg_update.content.is_none() {
                     return None;
                 }
