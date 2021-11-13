@@ -2,13 +2,72 @@
 
 use crate::{serenity_prelude as serenity, BoxFuture, Framework};
 
+/// Abstracts over a refernce to an application command interaction or autocomplete interaction
+#[derive(Copy, Clone)]
+pub enum ApplicationCommandOrAutocompleteInteraction<'a> {
+    /// An application command interaction
+    ApplicationCommand(&'a serenity::ApplicationCommandInteraction),
+    /// An autocomplete interaction
+    Autocomplete(&'a serenity::AutocompleteInteraction),
+}
+
+impl<'a> ApplicationCommandOrAutocompleteInteraction<'a> {
+    /// Returns the data field of the underlying interaction
+    pub fn data(self) -> &'a serenity::ApplicationCommandInteractionData {
+        match self {
+            Self::ApplicationCommand(x) => &x.data,
+            Self::Autocomplete(x) => &x.data,
+        }
+    }
+
+    /// Returns the ID of the underlying interaction
+    pub fn id(self) -> serenity::InteractionId {
+        match self {
+            Self::ApplicationCommand(x) => x.id,
+            Self::Autocomplete(x) => x.id,
+        }
+    }
+
+    /// Returns the guild ID of the underlying interaction
+    pub fn guild_id(self) -> Option<serenity::GuildId> {
+        match self {
+            Self::ApplicationCommand(x) => x.guild_id,
+            Self::Autocomplete(x) => x.guild_id,
+        }
+    }
+
+    /// Returns the channel ID of the underlying interaction
+    pub fn channel_id(self) -> serenity::ChannelId {
+        match self {
+            Self::ApplicationCommand(x) => x.channel_id,
+            Self::Autocomplete(x) => x.channel_id,
+        }
+    }
+
+    /// Returns the member field of the underlying interaction
+    pub fn member(self) -> Option<&'a serenity::Member> {
+        match self {
+            Self::ApplicationCommand(x) => x.member.as_ref(),
+            Self::Autocomplete(x) => x.member.as_ref(),
+        }
+    }
+
+    /// Returns the user field of the underlying interaction
+    pub fn user(self) -> &'a serenity::User {
+        match self {
+            Self::ApplicationCommand(x) => &x.user,
+            Self::Autocomplete(x) => &x.user,
+        }
+    }
+}
+
 /// Application command specific context passed to command invocations.
 #[non_exhaustive]
 pub struct ApplicationContext<'a, U, E> {
     /// Serenity's context, like HTTP or cache
     pub discord: &'a serenity::Context,
     /// The interaction which triggered this command execution.
-    pub interaction: &'a serenity::ApplicationCommandInteraction,
+    pub interaction: ApplicationCommandOrAutocompleteInteraction<'a>,
     /// Keeps track of whether an initial response has been sent.
     ///
     /// Discord requires different HTTP endpoints for initial and additional responses.
@@ -39,13 +98,20 @@ impl<U, E> ApplicationContext<'_, U, E> {
     ///
     /// Also sets the [`ApplicationContext::has_sent_initial_response`] flag so the subsequent
     /// response will be sent in the correct manner.
+    ///
+    /// No-op if this is an autocomplete context
     pub async fn defer_response(&self, ephemeral: bool) -> Result<(), serenity::Error> {
+        let interaction = match self.interaction {
+            ApplicationCommandOrAutocompleteInteraction::ApplicationCommand(x) => x,
+            ApplicationCommandOrAutocompleteInteraction::Autocomplete(_) => return Ok(()),
+        };
+
         let mut flags = serenity::InteractionApplicationCommandCallbackDataFlags::empty();
         if ephemeral {
             flags |= serenity::InteractionApplicationCommandCallbackDataFlags::EPHEMERAL;
         }
 
-        self.interaction
+        interaction
             .create_interaction_response(self.discord, |f| {
                 f.kind(serenity::InteractionResponseType::DeferredChannelMessageWithSource)
                     .interaction_response_data(|f| f.flags(flags))
@@ -62,8 +128,6 @@ pub struct ApplicationCommandErrorContext<'a, U, E> {
     /// Whether this error occured while running a pre-command check (`true`) or if it happened
     /// in normal command execution (`false`)
     pub while_checking: bool,
-    /// Which command was being executed or checked when the error occured
-    pub command: ApplicationCommand<'a, U, E>,
     /// Further context
     pub ctx: ApplicationContext<'a, U, E>,
 }
@@ -72,7 +136,6 @@ impl<U, E> Clone for ApplicationCommandErrorContext<'_, U, E> {
     fn clone(&self) -> Self {
         Self {
             while_checking: self.while_checking,
-            command: self.command,
             ctx: self.ctx,
         }
     }
@@ -105,18 +168,31 @@ impl<U, E> Default for ApplicationCommandOptions<U, E> {
     }
 }
 
+/// A single parameter of a slash command
+pub struct SlashCommandParameter<U, E> {
+    /// Builder function for this parameters
+    pub builder: fn(
+        &mut serenity::CreateApplicationCommandOption,
+    ) -> &mut serenity::CreateApplicationCommandOption,
+    /// Optionally, a callback on autocomplete interactions. If the focused option in the
+    /// autocomplete interaction matches this parameter, an autocomplete response should be sent
+    pub autocomplete_callback: Option<
+        for<'a> fn(
+            crate::ApplicationContext<'a, U, E>,
+            &'a serenity::AutocompleteInteraction,
+            &'a [serenity::ApplicationCommandInteractionDataOption],
+        ) -> BoxFuture<'a, Result<(), E>>,
+    >,
+}
+
 /// Fully defines a single slash command in the framework
 pub struct SlashCommand<U, E> {
     /// Name of the slash command, displayed in the Discord UI
     pub name: &'static str,
     /// Short description of what the command does, displayed in the Discord UI
     pub description: &'static str,
-    /// Vector of builder functions for the parameters
-    pub parameters: Vec<
-        fn(
-            &mut serenity::CreateApplicationCommandOption,
-        ) -> &mut serenity::CreateApplicationCommandOption,
-    >,
+    /// List of parameters for this slash command
+    pub parameters: Vec<SlashCommandParameter<U, E>>,
     /// Action which is invoked when the user calls this command
     pub action: for<'a> fn(
         ApplicationContext<'a, U, E>,
@@ -144,6 +220,22 @@ pub enum SlashCommandMeta<U, E> {
 }
 
 impl<U, E> SlashCommandMeta<U, E> {
+    /// Returns the name of this command or command group
+    pub fn name(&self) -> &'static str {
+        match self {
+            Self::Command(cmd) => cmd.name,
+            Self::CommandGroup { name, .. } => name,
+        }
+    }
+
+    /// Returns the description of this command or command group
+    pub fn description(&self) -> &'static str {
+        match self {
+            Self::Command(cmd) => cmd.description,
+            Self::CommandGroup { description, .. } => description,
+        }
+    }
+
     fn create_as_subcommand<'a>(
         &self,
         builder: &'a mut serenity::CreateApplicationCommandOption,
@@ -165,9 +257,9 @@ impl<U, E> SlashCommandMeta<U, E> {
                 builder.kind(serenity::ApplicationCommandOptionType::SubCommand);
                 builder.name(command.name).description(command.description);
 
-                for create_option in &command.parameters {
+                for param in &command.parameters {
                     let mut option = serenity::CreateApplicationCommandOption::default();
-                    create_option(&mut option);
+                    (param.builder)(&mut option);
                     builder.add_sub_option(option);
                 }
             }
@@ -196,9 +288,9 @@ impl<U, E> SlashCommandMeta<U, E> {
                     .name(command.name)
                     .description(command.description);
 
-                for create_option in &command.parameters {
+                for param in &command.parameters {
                     let mut option = serenity::CreateApplicationCommandOption::default();
-                    create_option(&mut option);
+                    (param.builder)(&mut option);
                     interaction.add_option(option);
                 }
             }

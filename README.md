@@ -1,5 +1,5 @@
-[![Build](https://img.shields.io/badge/build-passing-brightgreen)](https://kangalioo.github.io/poise/poise/)
-[![Docs](https://img.shields.io/badge/docs-online-informational)](https://kangalioo.github.io/poise/poise/)
+[![Build](https://img.shields.io/badge/build-passing-brightgreen)](https://kangalioo.github.io/poise/)
+[![Docs](https://img.shields.io/badge/docs-online-informational)](https://kangalioo.github.io/poise/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Rust: 1.51+](https://img.shields.io/badge/rust-1.51+-93450a)](https://blog.rust-lang.org/2020/11/19/Rust-1.51.html)
 
@@ -38,11 +38,14 @@ pub async fn age(
 #[tokio::main]
 async fn main() {
     poise::Framework::build()
-        .prefix("~")
         .token(std::env::var("DISCORD_BOT_TOKEN").unwrap())
-        .user_data_setup(move |_ctx, _ready, _framework| Box::pin(async move { Ok(()) })),
+        .user_data_setup(move |_ctx, _ready, _framework| Box::pin(async move { Ok(()) }))
         .options(poise::FrameworkOptions {
             // configure framework here
+            prefix_options: PrefixFrameworkOptions {
+                prefix: Some("~".into()),
+                ..Default::default()
+            },
             ..Default::default()
         })
         .command(age(), |f| f)

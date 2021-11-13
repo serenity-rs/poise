@@ -42,7 +42,7 @@ pub fn generate_slash_command_spec(
         )
     })?;
 
-    let mut parameter_builders = Vec::new();
+    let mut parameter_structs = Vec::new();
     for param in inv.parameters {
         let description = param.more.description.as_ref().ok_or_else(|| {
             syn::Error::new(
@@ -63,19 +63,76 @@ pub fn generate_slash_command_spec(
         }
 
         let param_name = &param.name;
-        parameter_builders.push((
+        let autocomplete_callback = match &param.more.autocomplete {
+            Some(autocomplete_fn) => {
+                quote::quote! { Some(|
+                    ctx: poise::ApplicationContext<'_, _, _>,
+                    interaction: &poise::serenity_prelude::AutocompleteInteraction,
+                    options: &[poise::serenity_prelude::ApplicationCommandInteractionDataOption],
+                | Box::pin(async move {
+                    use ::poise::futures::{Stream, StreamExt};
+
+                    let choice = match options
+                        .iter()
+                        .find(|option| option.focused && option.name == stringify!(#param_name))
+                    {
+                        Some(x) => x,
+                        None => return Ok(()),
+                    };
+
+                    let json_value = choice.value
+                        .as_ref()
+                        .ok_or(::poise::SlashArgError::CommandStructureMismatch("expected argument value"))?;
+                    let partial_input = (&&&&&std::marker::PhantomData::<#type_>).extract_partial(json_value)?;
+
+                    let choices_stream = ::poise::into_stream!(
+                        #autocomplete_fn(ctx.into(), partial_input).await
+                    );
+                    let choices_json = choices_stream
+                        .take(25)
+                        .map(|value| poise::AutocompleteChoice::from(value))
+                        .map(|choice| serde_json::json!({
+                            "name": choice.name,
+                            "value": (&&&&&std::marker::PhantomData::<#type_>).into_json(choice.value),
+                        }))
+                        .collect()
+                        .await;
+                    let choices_json = poise::serde_json::Value::Array(choices_json);
+
+                    if let Err(e) = interaction
+                        .create_autocomplete_response(
+                            &ctx.discord.http,
+                            |b| b.set_choices(choices_json),
+                        )
+                        .await
+                    {
+                        println!("Warning: couldn't send autocomplete response: {}", e);
+                    }
+
+                    Ok(())
+                })) }
+            }
+            None => quote::quote! { None },
+        };
+
+        let is_autocomplete = param.more.autocomplete.is_some();
+        parameter_structs.push((
             quote::quote! {
-                |o| (&&&&&std::marker::PhantomData::<#type_>).create(o)
-                    .required(#required)
-                    .name(stringify!(#param_name))
-                    .description(#description)
+                ::poise::SlashCommandParameter {
+                    builder: |o| (&&&&&std::marker::PhantomData::<#type_>).create(o)
+                        .required(#required)
+                        .name(stringify!(#param_name))
+                        .description(#description)
+                        .set_autocomplete(#is_autocomplete),
+                    autocomplete_callback: #autocomplete_callback,
+                }
             },
             required,
         ));
     }
     // Sort the parameters so that optional parameters come last - Discord requires this order
-    parameter_builders.sort_by_key(|(_, required)| !required);
-    let parameter_builders = parameter_builders
+    parameter_structs.sort_by_key(|(_, required)| !required);
+    let parameter_structs = parameter_structs
         .into_iter()
         .map(|(builder, _)| builder)
         .collect::<Vec<_>>();
@@ -95,8 +152,8 @@ pub fn generate_slash_command_spec(
             name: #command_name,
             description: #description,
             parameters: {
-                use ::poise::SlashArgumentHack;
-                vec![ #( #parameter_builders, )* ]
+                use ::poise::{SlashArgumentHack, AutocompletableHack};
+                vec![ #( #parameter_structs, )* ]
             },
             action: |ctx, args| Box::pin(async move {
                 // idk why this can't be put in the macro itself (where the lint is triggered) and
@@ -104,7 +161,7 @@ pub fn generate_slash_command_spec(
                 #[allow(clippy::needless_question_mark)]
 
                 let ( #( #param_names, )* ) = ::poise::parse_slash_args!(
-                    ctx.discord, ctx.interaction.guild_id, ctx.interaction.channel_id, args =>
+                    ctx.discord, ctx.interaction.guild_id(), ctx.interaction.channel_id(), args =>
                     #( (#param_names: #param_types), )*
                 ).await?;
 

@@ -1,3 +1,4 @@
+mod autocomplete;
 mod commands;
 mod context_menu;
 
@@ -16,13 +17,15 @@ pub struct Data {
 #[poise::command(prefix_command, track_edits, slash_command)]
 async fn help(
     ctx: Context<'_>,
-    #[description = "Specific command to show help about"] command: Option<String>,
+    #[description = "Specific command to show help about"]
+    #[autocomplete = "poise::builtins::autocomplete_command"]
+    command: Option<String>,
 ) -> Result<(), Error> {
-    poise::samples::help(
+    poise::builtins::help(
         ctx,
         command.as_deref(),
         "This is an example bot made to showcase features of my custom Discord bot framework",
-        poise::samples::HelpResponseMode::Ephemeral,
+        poise::builtins::HelpResponseMode::Ephemeral,
     )
     .await?;
     Ok(())
@@ -33,7 +36,7 @@ async fn help(
 /// Run with no arguments to register in guild, run with argument "global" to register globally.
 #[poise::command(prefix_command, hide_in_help)]
 async fn register(ctx: Context<'_>, #[flag] global: bool) -> Result<(), Error> {
-    poise::samples::register_application_commands(ctx, global).await?;
+    poise::builtins::register_application_commands(ctx, global).await?;
 
     Ok(())
 }
@@ -50,6 +53,30 @@ async fn on_error(error: Error, ctx: poise::ErrorContext<'_, Data, Error>) {
 
 #[tokio::main]
 async fn main() {
+    let options = poise::FrameworkOptions {
+        prefix_options: poise::PrefixFrameworkOptions {
+            prefix: Some("~".into()),
+            edit_tracker: Some(poise::EditTracker::for_timespan(Duration::from_secs(3600))),
+            additional_prefixes: vec![
+                poise::Prefix::Literal("hey bot"),
+                poise::Prefix::Literal("hey bot,"),
+            ],
+            ..Default::default()
+        },
+        on_error: |error, ctx| Box::pin(on_error(error, ctx)),
+        pre_command: |ctx| {
+            Box::pin(async move {
+                println!("Executing command {}...", ctx.command().unwrap().name());
+            })
+        },
+        post_command: |ctx| {
+            Box::pin(async move {
+                println!("Executed command {}!", ctx.command().unwrap().name());
+            })
+        },
+        ..Default::default()
+    };
+
     poise::Framework::build()
         .token(var("TOKEN").expect("Missing `TOKEN` env var, see README for more information."))
         .user_data_setup(move |_ctx, _ready, _framework| {
@@ -59,15 +86,7 @@ async fn main() {
                 })
             })
         })
-        .options(poise::FrameworkOptions {
-            prefix_options: poise::PrefixFrameworkOptions {
-                prefix: Some("~".into()),
-                edit_tracker: Some(poise::EditTracker::for_timespan(Duration::from_secs(3600))),
-                ..Default::default()
-            },
-            on_error: |error, ctx| Box::pin(on_error(error, ctx)),
-            ..Default::default()
-        })
+        .options(options)
         .command(help(), |f| f)
         .command(register(), |f| f)
         .command(commands::vote(), |f| f)
@@ -77,6 +96,7 @@ async fn main() {
         .command(commands::boop(), |f| f)
         .command(context_menu::user_info(), |f| f)
         .command(context_menu::echo(), |f| f)
+        .command(autocomplete::greet(), |f| f)
         .run()
         .await
         .unwrap();

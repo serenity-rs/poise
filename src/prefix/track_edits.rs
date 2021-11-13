@@ -59,8 +59,8 @@ impl EditTracker {
     /// Note: [`EditTracker`] will only purge messages outside the duration when [`Self::purge`]
     /// is called. If you supply the created [`EditTracker`] to [`crate::Framework`], the framework
     /// will take care of that by calling [`Self::purge`] periodically.
-    pub fn for_timespan(duration: std::time::Duration) -> parking_lot::RwLock<Self> {
-        parking_lot::RwLock::new(Self {
+    pub fn for_timespan(duration: std::time::Duration) -> std::sync::RwLock<Self> {
+        std::sync::RwLock::new(Self {
             max_duration: duration,
             cache: Vec::new(),
         })
@@ -82,11 +82,13 @@ impl EditTracker {
             .find(|(user_msg, _)| user_msg.id == user_msg_update.id)
         {
             Some((user_msg, _)) => {
-                // If message content didn't change, don't re-run command
-                match &user_msg_update.content {
-                    Some(content) if content == &user_msg.content => return None,
-                    None => return None,
-                    _ => {}
+                // If message content wasn't touched, don't re-run command
+                // Note: this may be Some, but still identical to previous content. We want to
+                // re-run the command in that case too; because that means the user explicitly
+                // edited their message
+                #[allow(clippy::question_mark)]
+                if user_msg_update.content.is_none() {
+                    return None;
                 }
 
                 update_message(user_msg, user_msg_update.clone());
@@ -137,9 +139,9 @@ impl EditTracker {
 }
 
 /// Prefix-specific reply function. For more details, see [`crate::send_reply`].
-pub async fn send_prefix_reply<U, E>(
+pub async fn send_prefix_reply<'a, U, E>(
     ctx: crate::prefix::PrefixContext<'_, U, E>,
-    builder: impl for<'a, 'b> FnOnce(&'a mut crate::CreateReply<'b>) -> &'a mut crate::CreateReply<'b>,
+    builder: impl for<'b> FnOnce(&'b mut crate::CreateReply<'a>) -> &'b mut crate::CreateReply<'a>,
 ) -> Result<serenity::Message, serenity::Error> {
     let mut reply = crate::CreateReply::default();
     builder(&mut reply);
@@ -163,7 +165,7 @@ pub async fn send_prefix_reply<U, E>(
             .prefix_options
             .edit_tracker
             .as_ref()
-            .map(|t| t.write())
+            .map(|t| t.write().unwrap())
     };
 
     let existing_response = lock_edit_tracker()

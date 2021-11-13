@@ -29,15 +29,42 @@ pub async fn on_error<D>(e: BoxErrorSendSync, ctx: crate::ErrorContext<'_, D, Bo
             } else {
                 e.to_string()
             };
-            if let Err(e) = crate::say_reply(ctx.ctx(), user_error_msg).await {
+            if let Err(e) = ctx.ctx().say(user_error_msg).await {
                 println!("Error while user command error: {}", e);
             }
         }
         crate::ErrorContext::Listener(event) => {
             println!("Error in listener while processing {:?}: {}", event, e)
         }
+        crate::ErrorContext::Autocomplete(err_ctx) => {
+            let ctx = err_ctx.ctx;
+            println!(
+                "Error in autocomplete callback for command {:?}: {}",
+                ctx.command.slash_or_context_menu_name(),
+                e
+            )
+        }
         crate::ErrorContext::Setup => println!("Setup failed: {}", e),
     }
+}
+
+/// An autocomplete function that can be used for the command parameter in your help function.
+///
+/// See examples/framework_usage for an example
+pub async fn autocomplete_command<U, E>(
+    ctx: crate::Context<'_, U, E>,
+    partial: String,
+) -> impl Iterator<Item = String> + '_ {
+    // We only consider prefix commands here because, bad as it is, that's what other builtins
+    // do to. For example the help command only shows commands that have a prefix version.
+    // Once a better command structure design is adopted, this issue should be solved
+    ctx.framework()
+        .options()
+        .prefix_options
+        .commands
+        .iter()
+        .filter(move |cmd| cmd.command.name.starts_with(&partial))
+        .map(|cmd| cmd.command.name.to_string())
 }
 
 /// Whether to send the help message as ephemeral (if possible), or as a normal message
@@ -192,12 +219,13 @@ pub async fn help<D, E>(
         HelpResponseMode::Ephemeral => true,
     };
 
-    crate::send_reply(ctx, |f| f.content(reply).ephemeral(ephemeral)).await?;
+    ctx.send(|f| f.content(reply).ephemeral(ephemeral)).await?;
 
     Ok(())
 }
 
-/// Generic function to register application commands. Only allows server owners to invoke.
+/// Generic function to register application commands, either globally or in a guild. Only bot
+/// owners can register globally, only guild owners can register in guild.
 ///
 /// If you want, you can copy paste this help message:
 ///
@@ -210,39 +238,51 @@ pub async fn register_application_commands<U, E>(
     ctx: crate::Context<'_, U, E>,
     global: bool,
 ) -> Result<(), serenity::Error> {
-    let guild = match ctx.guild() {
-        Some(x) => x,
-        None => {
-            crate::say_reply(ctx, "Must be called in guild").await?;
-            return Ok(());
-        }
-    };
-
-    if ctx.author().id != guild.owner_id {
-        crate::say_reply(ctx, "Can only be used by server owner").await?;
-        return Ok(());
-    }
-
     let mut commands_builder = serenity::CreateApplicationCommands::default();
     let commands = &ctx.framework().options().application_options.commands;
     for cmd in commands {
         commands_builder.create_application_command(|f| cmd.create(f));
     }
+    let commands_builder = serde_json::Value::Array(commands_builder.0);
 
-    crate::say_reply(ctx, format!("Registering {} commands...", commands.len())).await?;
-    let json_value = serde_json::Value::Array(commands_builder.0);
     if global {
+        let is_bot_owner = ctx.framework().options().owners.contains(&ctx.author().id);
+
+        if !is_bot_owner {
+            ctx.say("Can only be used by bot owner").await?;
+            return Ok(());
+        }
+
+        ctx.say(format!("Registering {} commands...", commands.len()))
+            .await?;
         ctx.discord()
             .http
-            .create_global_application_commands(&json_value)
+            .create_global_application_commands(&commands_builder)
             .await?;
     } else {
+        let guild = match ctx.guild() {
+            Some(x) => x,
+            None => {
+                ctx.say("Must be called in guild").await?;
+                return Ok(());
+            }
+        };
+        let is_guild_owner = ctx.author().id == guild.owner_id;
+
+        if !is_guild_owner {
+            ctx.say("Can only be used by server owner").await?;
+            return Ok(());
+        }
+
+        ctx.say(format!("Registering {} commands...", commands.len()))
+            .await?;
         ctx.discord()
             .http
-            .create_guild_application_commands(guild.id.0, &json_value)
+            .create_guild_application_commands(guild.id.0, &commands_builder)
             .await?;
     }
-    crate::say_reply(ctx, "Done!").await?;
+
+    ctx.say("Done!").await?;
 
     Ok(())
 }
@@ -310,7 +350,8 @@ pub async fn servers<U, E>(ctx: crate::Context<'_, U, E>) -> Result<(), serenity
         response += "\n_Showing private guilds because you are the bot owner_\n";
     }
 
-    crate::send_reply(ctx, |f| f.content(response).ephemeral(show_private_guilds)).await?;
+    ctx.send(|f| f.content(response).ephemeral(show_private_guilds))
+        .await?;
 
     Ok(())
 }
