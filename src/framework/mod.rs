@@ -126,7 +126,7 @@ impl<U, E> Framework<U, E> {
     /// course of action on error.
     pub async fn new<F>(
         application_id: serenity::ApplicationId,
-        client_builder: serenity::ClientBuilder<'_>,
+        client_builder: serenity::ClientBuilder,
         user_data_setup: F,
         options: FrameworkOptions<U, E>,
     ) -> Result<std::sync::Arc<Self>, serenity::Error>

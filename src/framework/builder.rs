@@ -23,8 +23,7 @@ pub struct FrameworkBuilder<U, E> {
         >,
     >,
     options: Option<crate::FrameworkOptions<U, E>>,
-    client_settings:
-        Option<Box<dyn FnOnce(serenity::ClientBuilder<'_>) -> serenity::ClientBuilder<'_>>>,
+    client_settings: Option<Box<dyn FnOnce(serenity::ClientBuilder) -> serenity::ClientBuilder>>,
     token: Option<String>,
     intents: Option<serenity::GatewayIntents>,
     commands: Vec<(
@@ -82,7 +81,7 @@ impl<U, E> FrameworkBuilder<U, E> {
     /// [`FrameworkBuilder`]; use [`FrameworkBuilder::token`] to supply a token.
     pub fn client_settings(
         mut self,
-        f: impl FnOnce(serenity::ClientBuilder<'_>) -> serenity::ClientBuilder<'_> + 'static,
+        f: impl FnOnce(serenity::ClientBuilder) -> serenity::ClientBuilder + 'static,
     ) -> Self {
         self.client_settings = Some(Box::new(f));
         self
