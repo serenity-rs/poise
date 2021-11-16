@@ -137,8 +137,13 @@ pub async fn help<D, E>(
     extra_text_at_bottom: &str,
     response_mode: HelpResponseMode,
 ) -> Result<(), serenity::Error> {
-    let reply = if let Some(command) = command {
-        if let Some(command) = ctx
+    let ephemeral = match response_mode {
+        HelpResponseMode::Default => false,
+        HelpResponseMode::Ephemeral => true,
+    };
+
+    if let Some(command) = command {
+        let reply = if let Some(command) = ctx
             .framework()
             .options()
             .prefix_options
@@ -157,69 +162,72 @@ pub async fn help<D, E>(
             }
         } else {
             format!("No such command `{}`", command)
-        }
-    } else {
-        let is_also_a_slash_command = |command_name| {
-            let application_commands = &ctx.framework().options().application_options.commands;
-            application_commands.iter().any(|c| match c {
-                crate::ApplicationCommandTree::Slash(cmd) => match cmd {
-                    crate::SlashCommandMeta::Command(cmd) => cmd.name == command_name,
-                    crate::SlashCommandMeta::CommandGroup { name, .. } => name == &command_name,
-                },
-                _ => false,
-            })
         };
 
-        let mut categories: Vec<(Option<&str>, Vec<&crate::PrefixCommand<_, _>>)> = Vec::new();
-        for cmd_meta in &ctx.framework().options().prefix_options.commands {
-            if let Some((_, commands)) = categories
-                .iter_mut()
-                .find(|(key, _)| *key == cmd_meta.category)
-            {
-                commands.push(&cmd_meta.command);
+        ctx.send(|f| f.content(reply).ephemeral(ephemeral)).await?;
+        return Ok(());
+    }
+
+    struct Command<'a, U, E> {
+        info: std::sync::Arc<crate::CommandId>,
+        is_slash: bool,
+    }
+
+    let mut commands = Vec::new();
+
+    let is_also_a_slash_command = |command_name| {
+        let application_commands = &ctx.framework().options().application_options.commands;
+        application_commands.iter().any(|c| match c {
+            crate::ApplicationCommandTree::Slash(cmd) => match cmd {
+                crate::SlashCommandMeta::Command(cmd) => cmd.name == command_name,
+                crate::SlashCommandMeta::CommandGroup { name, .. } => name == &command_name,
+            },
+            _ => false,
+        })
+    };
+
+    let mut categories: Vec<(Option<&str>, Vec<&crate::PrefixCommand<_, _>>)> = Vec::new();
+    for cmd_meta in &ctx.framework().options().prefix_options.commands {
+        if let Some((_, commands)) = categories
+            .iter_mut()
+            .find(|(key, _)| *key == cmd_meta.category)
+        {
+            commands.push(&cmd_meta.command);
+        } else {
+            categories.push((cmd_meta.category, vec![&cmd_meta.command]));
+        }
+    }
+
+    let mut menu = String::from("```\n");
+    for (category_name, commands) in categories {
+        menu += category_name.unwrap_or("Commands");
+        menu += ":\n";
+        for command in commands {
+            if command.options.hide_in_help {
+                continue;
+            }
+
+            let prefix = if is_also_a_slash_command(command.name) {
+                "/"
+            } else if let Some(prefix) = &ctx.framework().options().prefix_options.prefix {
+                prefix
             } else {
-                categories.push((cmd_meta.category, vec![&cmd_meta.command]));
-            }
+                ""
+            };
+
+            menu += &format!(
+                "  {}{:<12}{}\n",
+                prefix,
+                command.name,
+                command.options.inline_help.unwrap_or("")
+            );
         }
+    }
+    menu += "\n";
+    menu += extra_text_at_bottom;
+    menu += "\n```";
 
-        let mut menu = String::from("```\n");
-        for (category_name, commands) in categories {
-            menu += category_name.unwrap_or("Commands");
-            menu += ":\n";
-            for command in commands {
-                if command.options.hide_in_help {
-                    continue;
-                }
-
-                let prefix = if is_also_a_slash_command(command.name) {
-                    "/"
-                } else if let Some(prefix) = &ctx.framework().options().prefix_options.prefix {
-                    prefix
-                } else {
-                    ""
-                };
-
-                menu += &format!(
-                    "  {}{:<12}{}\n",
-                    prefix,
-                    command.name,
-                    command.options.inline_help.unwrap_or("")
-                );
-            }
-        }
-        menu += "\n";
-        menu += extra_text_at_bottom;
-        menu += "\n```";
-
-        menu
-    };
-
-    let ephemeral = match response_mode {
-        HelpResponseMode::Default => false,
-        HelpResponseMode::Ephemeral => true,
-    };
-
-    ctx.send(|f| f.content(reply).ephemeral(ephemeral)).await?;
+    ctx.send(|f| f.content(menu).ephemeral(ephemeral)).await?;
 
     Ok(())
 }
