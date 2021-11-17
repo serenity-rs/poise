@@ -104,6 +104,34 @@ impl<U, E> FrameworkBuilder<U, E> {
         self
     }
 
+    /// Add multiple new commands to the framework. Shorthand for calling [`Self::command`] multiple
+    /// times with the builder left to defaults, i.e. no command category or subcommands
+    ///
+    /// ```rust
+    /// # type Error = Box<dyn std::error::Error + Send + Sync>;
+    /// # #[poise::command(prefix_command)]
+    /// # async fn command1(ctx: poise::Context<'_, (), Error>) -> Result<(), Error> { Ok(()) }
+    /// # #[poise::command(prefix_command)]
+    /// # async fn command2(ctx: poise::Context<'_, (), Error>) -> Result<(), Error> { Ok(()) }
+    ///
+    /// poise::Framework::build()
+    ///     // framework setup...
+    ///     .commands([command1, command2])
+    ///     // framework startup...
+    /// # ;
+    /// ```
+    pub fn commands(
+        mut self,
+        commands: impl IntoIterator<Item = fn() -> crate::CommandDefinition<U, E>> + 'static,
+    ) -> Self {
+        // Can't use Vec::extend() due to ??? compile errors
+        for command in commands {
+            let definition = (command)();
+            self.commands.push((definition, Box::new(|f| f)));
+        }
+        self
+    }
+
     /// Build the framework with the specified configuration.
     ///
     /// For more information, see [`FrameworkBuilder`]
