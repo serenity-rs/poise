@@ -363,7 +363,7 @@ impl<U, E> Framework<U, E> {
         if let Err(e) =
             (self.options.listener)(&ctx, &event, self, self.get_user_data().await).await
         {
-            (self.options.on_error)(e, ErrorContext::Listener(&event));
+            (self.options.on_error)(e, ErrorContext::Listener(&event)).await;
         }
     }
 }
