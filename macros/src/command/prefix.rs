@@ -1,11 +1,10 @@
 use syn::spanned::Spanned as _;
 
-use super::{wrap_option, Invocation};
+use super::Invocation;
 
 pub fn generate_prefix_command_spec(
     inv: &Invocation,
 ) -> Result<proc_macro2::TokenStream, darling::Error> {
-    let description = wrap_option(inv.description);
     let explanation = match &inv.more.explanation_fn {
         Some(explanation_fn) => quote::quote! { Some(#explanation_fn) },
         None => match &inv.explanation {
@@ -80,7 +79,6 @@ pub fn generate_prefix_command_spec(
     let track_edits = inv.more.track_edits;
     let broadcast_typing = inv.more.broadcast_typing;
     let aliases = &inv.more.aliases.0;
-    let hide_in_help = &inv.more.hide_in_help;
     let param_names = inv.parameters.iter().map(|p| &p.name).collect::<Vec<_>>();
     let required_permissions = inv.required_permissions;
     let owners_only = inv.more.owners_only;
@@ -100,11 +98,9 @@ pub fn generate_prefix_command_spec(
                 track_edits: #track_edits,
                 broadcast_typing: #broadcast_typing,
                 aliases: &[ #( #aliases, )* ],
-                inline_help: #description,
                 multiline_help: #explanation,
                 check: #check,
                 on_error: #on_error,
-                hide_in_help: #hide_in_help,
                 required_permissions: #required_permissions,
                 owners_only: #owners_only,
             }

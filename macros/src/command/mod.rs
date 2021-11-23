@@ -81,6 +81,7 @@ pub struct CommandOptions {
     required_permissions: Option<syn::Ident>,
     owners_only: bool,
     identifying_name: Option<String>,
+    category: Option<String>,
 }
 
 /// Representation of the function parameter attribute arguments
@@ -141,6 +142,24 @@ fn extract_help_from_doc_comments(attrs: &[syn::Attribute]) -> (Option<String>, 
     let multiline_help = paragraphs.next().map(|x| x.to_owned());
 
     (Some(inline_help), multiline_help)
+}
+
+fn make_command_id(inv: &Invocation) -> proc_macro2::TokenStream {
+    let identifying_name = &inv.more.identifying_name;
+    let identifying_name = identifying_name.as_ref().unwrap_or(&inv.command_name);
+
+    let description = wrap_option(inv.description);
+    let hide_in_help = &inv.more.hide_in_help;
+    let category = wrap_option(inv.more.category.as_ref());
+
+    quote::quote! {
+        ::poise::CommandId {
+            identifying_name: String::from(#identifying_name),
+            category: #category,
+            inline_help: #description,
+            hide_in_help: #hide_in_help,
+        }
+    }
 }
 
 pub fn command(
@@ -236,11 +255,7 @@ pub fn command(
     } else {
         None
     });
-
-    let identifying_name = args
-        .identifying_name
-        .as_ref()
-        .unwrap_or(&invocation.command_name);
+    let command_id = make_command_id(&invocation);
 
     // Needed because we're not allowed to have lifetimes in the hacky use case below
     let ctx_type_with_static = syn::fold::fold_type(&mut AllLifetimesToStatic, ctx_type.clone());
@@ -254,9 +269,7 @@ pub fn command(
         > {
             #function
 
-            let command_id = std::sync::Arc::new(::poise::CommandId {
-                identifying_name: String::from(#identifying_name),
-            });
+            let command_id = std::sync::Arc::new(#command_id);
 
             ::poise::CommandDefinition {
                 prefix: #prefix_command_spec,

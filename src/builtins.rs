@@ -131,8 +131,8 @@ pub enum HelpResponseMode {
 /// Type ?help command for more info on a command.
 /// You can edit your message to the bot and the bot will edit its response.
 /// ```
-pub async fn help<D, E>(
-    ctx: crate::Context<'_, D, E>,
+pub async fn help<U, E>(
+    ctx: crate::Context<'_, U, E>,
     command: Option<&str>,
     extra_text_at_bottom: &str,
     response_mode: HelpResponseMode,
@@ -155,7 +155,7 @@ pub async fn help<D, E>(
             match command.options.multiline_help {
                 Some(f) => f(),
                 None => command
-                    .options
+                    .id
                     .inline_help
                     .unwrap_or("No help available")
                     .to_owned(),
@@ -168,33 +168,16 @@ pub async fn help<D, E>(
         return Ok(());
     }
 
-    struct Command<'a, U, E> {
-        info: std::sync::Arc<crate::CommandId>,
-        is_slash: bool,
-    }
-
-    let mut commands = Vec::new();
-
-    let is_also_a_slash_command = |command_name| {
-        let application_commands = &ctx.framework().options().application_options.commands;
-        application_commands.iter().any(|c| match c {
-            crate::ApplicationCommandTree::Slash(cmd) => match cmd {
-                crate::SlashCommandMeta::Command(cmd) => cmd.name == command_name,
-                crate::SlashCommandMeta::CommandGroup { name, .. } => name == &command_name,
-            },
-            _ => false,
-        })
-    };
-
-    let mut categories: Vec<(Option<&str>, Vec<&crate::PrefixCommand<_, _>>)> = Vec::new();
-    for cmd_meta in &ctx.framework().options().prefix_options.commands {
+    let mut categories: Vec<(Option<&str>, Vec<crate::CommandDefinitionRef<'_, U, E>>)> =
+        Vec::new();
+    for cmd in ctx.framework().commands() {
         if let Some((_, commands)) = categories
             .iter_mut()
-            .find(|(key, _)| *key == cmd_meta.category)
+            .find(|(key, _)| *key == cmd.id.category)
         {
-            commands.push(&cmd_meta.command);
+            commands.push(cmd);
         } else {
-            categories.push((cmd_meta.category, vec![&cmd_meta.command]));
+            categories.push((cmd.id.category, vec![cmd]));
         }
     }
 
@@ -203,23 +186,27 @@ pub async fn help<D, E>(
         menu += category_name.unwrap_or("Commands");
         menu += ":\n";
         for command in commands {
-            if command.options.hide_in_help {
+            if command.id.hide_in_help {
                 continue;
             }
 
-            let prefix = if is_also_a_slash_command(command.name) {
-                "/"
-            } else if let Some(prefix) = &ctx.framework().options().prefix_options.prefix {
-                prefix
+            let (prefix, command_name) = if let Some(slash_command) = &command.slash {
+                ("/", slash_command.name)
+            } else if let Some(prefix_command) = &command.prefix {
+                let prefix = &ctx.framework().options().prefix_options.prefix;
+                let prefix = prefix.as_deref().unwrap_or("");
+                (prefix, prefix_command.name)
             } else {
-                ""
+                // This is not a prefix or slash command, i.e. probably a context menu only command
+                // which we don't show in the help menu
+                continue;
             };
 
             menu += &format!(
                 "  {}{:<12}{}\n",
                 prefix,
-                command.name,
-                command.options.inline_help.unwrap_or("")
+                command_name,
+                command.id.inline_help.unwrap_or("")
             );
         }
     }

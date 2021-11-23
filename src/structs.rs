@@ -306,9 +306,10 @@ pub struct CommandBuilder<U, E> {
 impl<U, E> CommandBuilder<U, E> {
     /// Assign a category to this command, which can be used by help commands to group commands
     pub fn category(&mut self, category: &'static str) -> &mut Self {
-        if let Some(prefix_command) = &mut self.prefix_command {
-            prefix_command.category = Some(category);
-        }
+        // REMEMBER
+        // if let Some(prefix_command) = &mut self.prefix_command {
+        //     prefix_command.command.id.category = Some(category);
+        // }
         self
     }
 
@@ -326,7 +327,6 @@ impl<U, E> CommandBuilder<U, E> {
 
         let prefix_command = prefix_command.map(|prefix_command| crate::PrefixCommandMeta {
             command: prefix_command,
-            category: None,
             subcommands: Vec::new(),
         });
 
@@ -432,7 +432,6 @@ impl<U, E> FrameworkOptions<U, E> {
 
         let prefix_command = prefix_command.map(|prefix_command| crate::PrefixCommandMeta {
             command: prefix_command,
-            category: None,
             subcommands: Vec::new(),
         });
 
@@ -532,6 +531,13 @@ pub struct CommandDefinition<U, E> {
     pub context_menu: Option<crate::ContextMenuCommand<U, E>>,
 }
 
+pub struct CommandDefinitionRef<'a, U, E> {
+    pub prefix: Option<&'a crate::PrefixCommand<U, E>>,
+    pub slash: Option<&'a crate::SlashCommand<U, E>>,
+    pub context_menu: Option<&'a crate::ContextMenuCommand<U, E>>,
+    pub id: std::sync::Arc<CommandId>,
+}
+
 /// This struct holds all data shared across different command types of the same implementation.
 ///
 /// For example with a `#[command(prefix_command, slash_command)]`, the generated
@@ -544,4 +550,10 @@ pub struct CommandId {
     /// bots). If not explicitly configured, it falls back to prefix command name, slash command
     /// name, or context menu command name (in that order).
     pub identifying_name: String,
+    /// Identifier for the category that this command will be displayed in for help commands.
+    pub category: Option<&'static str>,
+    /// Whether to hide this command in help menus.
+    pub hide_in_help: bool,
+    /// Short description of the command. Displayed inline in help menus and similar.
+    pub inline_help: Option<&'static str>,
 }

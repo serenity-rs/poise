@@ -229,6 +229,55 @@ impl<U, E> Framework<U, E> {
             .expect("fatal: shard manager not stored in framework initialization")
     }
 
+    pub fn commands(&self) -> impl Iterator<Item = crate::CommandDefinitionRef<'_, U, E>> {
+        type CommandMap<'s, U, E> =
+            std::collections::HashMap<*const (), crate::CommandDefinitionRef<'s, U, E>>;
+
+        fn get_command<'a, 's, U, E>(
+            map: &'a mut CommandMap<'s, U, E>,
+            id: &std::sync::Arc<crate::CommandId>,
+        ) -> &'a mut crate::CommandDefinitionRef<'s, U, E> {
+            map.entry(std::sync::Arc::as_ptr(id) as _)
+                .or_insert_with(|| crate::CommandDefinitionRef {
+                    prefix: None,
+                    slash: None,
+                    context_menu: None,
+                    id: id.clone(),
+                })
+        }
+
+        fn store_slash_commands<'a, U, E>(
+            map: &mut CommandMap<'a, U, E>,
+            command: &'a crate::SlashCommandMeta<U, E>,
+        ) {
+            match command {
+                SlashCommandMeta::Command(command) => {
+                    get_command(map, &command.id).slash = Some(command)
+                }
+                SlashCommandMeta::CommandGroup { subcommands, .. } => {
+                    for subcommand in subcommands {
+                        store_slash_commands(map, subcommand);
+                    }
+                }
+            }
+        }
+
+        let mut map = CommandMap::new();
+        for command in &self.options().application_options.commands {
+            match command {
+                ApplicationCommandTree::Slash(command) => store_slash_commands(&mut map, command),
+                ApplicationCommandTree::ContextMenu(command) => {
+                    get_command(&mut map, &command.id).context_menu = Some(command)
+                }
+            }
+        }
+        for command in &self.options().prefix_options.commands {
+            get_command(&mut map, &command.command.id).prefix = Some(&command.command);
+        }
+
+        map.into_iter().map(|(_k, v)| v)
+    }
+
     async fn get_user_data(&self) -> &U {
         // We shouldn't get a Message event before a Ready event. But if we do, wait until
         // the Ready event does come and the resulting data has arrived.
