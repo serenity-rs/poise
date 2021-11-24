@@ -547,10 +547,15 @@ pub struct CommandDefinition<U, E> {
     pub context_menu: Option<crate::ContextMenuCommand<U, E>>,
 }
 
+/// A view into a command definition with its different implementations
 pub struct CommandDefinitionRef<'a, U, E> {
+    /// Prefix implementation of the command
     pub prefix: Option<&'a crate::PrefixCommand<U, E>>,
+    /// Slash implementation of the command
     pub slash: Option<&'a crate::SlashCommand<U, E>>,
+    /// Context menu implementation of the command
     pub context_menu: Option<&'a crate::ContextMenuCommand<U, E>>,
+    /// Implementation type agnostic data that is always present
     pub id: std::sync::Arc<CommandId>,
 }
 
@@ -576,10 +581,16 @@ pub struct CommandId {
     pub cooldowns: std::sync::Mutex<crate::Cooldowns>,
 }
 
+/// Used for command errors to store the specific operation in a command's execution where an
+/// error occured
 #[derive(Copy, Clone)]
 pub enum CommandErrorLocation {
+    /// Error occured in the main command code
     Body,
+    /// Error occured in one of the pre-command checks
     Check,
+    /// Error occured in a parameter autocomplete callback
     Autocomplete,
+    /// Error occured in the callback which was invoked because a cooldown limit was hit
     CooldownCallback,
 }

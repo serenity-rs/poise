@@ -3,15 +3,25 @@ use crate::serenity_prelude as serenity;
 use std::collections::HashMap;
 use std::time::{Duration, Instant};
 
+/// Configuration struct for [`Cooldowns`]
 #[derive(Default)]
 pub struct CooldownConfig {
+    /// This cooldown operates on a global basis
     pub global: Option<Duration>,
+    /// This cooldown operates on a per-user basis
     pub user: Option<Duration>,
+    /// This cooldown operates on a per-guild basis
     pub guild: Option<Duration>,
+    /// This cooldown operates on a per-channel basis
     pub channel: Option<Duration>,
+    /// This cooldown operates on a per-member basis
     pub member: Option<Duration>,
 }
 
+/// Handles cooldowns for a single command
+///
+/// You probably don't need to use this directly. `#[poise::command]` automatically generates a
+/// cooldown handler.
 pub struct Cooldowns {
     cooldown: CooldownConfig,
 
@@ -23,6 +33,7 @@ pub struct Cooldowns {
 }
 
 impl Cooldowns {
+    /// Create a new cooldown handler with the given cooldown durations
     pub fn new(config: CooldownConfig) -> Self {
         Self {
             cooldown: config,
@@ -35,6 +46,8 @@ impl Cooldowns {
         }
     }
 
+    /// Queries the cooldown buckets and checks if all cooldowns have expired and command
+    /// execution may proceed. If not, Some is returned with the remaining cooldown
     pub fn get_wait_time<U, E>(&self, ctx: crate::Context<'_, U, E>) -> Option<Duration> {
         let mut cooldown_data = vec![
             (self.cooldown.global, self.global_invocation),
@@ -71,6 +84,7 @@ impl Cooldowns {
             .max()
     }
 
+    /// Indicates that a command has been executed and all associated cooldowns should start running
     pub fn start_cooldown<U, E>(&mut self, ctx: crate::Context<'_, U, E>) {
         let now = Instant::now();
 

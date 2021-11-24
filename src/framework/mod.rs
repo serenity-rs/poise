@@ -229,6 +229,8 @@ impl<U, E> Framework<U, E> {
             .expect("fatal: shard manager not stored in framework initialization")
     }
 
+    /// Yields an iterator over all unique commands in this framework. Different command types are
+    /// grouped together if they belong to the same command definition.
     pub fn commands(&self) -> impl Iterator<Item = crate::CommandDefinitionRef<'_, U, E>> {
         type CommandMap<'s, U, E> =
             std::collections::HashMap<*const (), crate::CommandDefinitionRef<'s, U, E>>;
