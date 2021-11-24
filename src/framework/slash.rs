@@ -176,7 +176,9 @@ pub async fn extract_command_and_run_checks<'a, U, E>(
         return Err(None);
     }
 
-    if let Some(cooldown_left) = command.id().cooldowns.get_wait_time(ctx.into()) {
+    let cooldowns = &command.id().cooldowns;
+    let cooldown_left = cooldowns.lock().unwrap().get_wait_time(ctx.into());
+    if let Some(cooldown_left) = cooldown_left {
         if let Some(callback) = ctx.framework.options().cooldown_hit {
             callback(ctx.into(), cooldown_left).await.map_err(|e| {
                 Some((
@@ -190,7 +192,7 @@ pub async fn extract_command_and_run_checks<'a, U, E>(
         }
         return Err(None);
     }
-    command.id().cooldowns.trigger(ctx.into());
+    cooldowns.lock().unwrap().start_cooldown(ctx.into());
 
     Ok((ctx, leaf_interaction_options))
 }

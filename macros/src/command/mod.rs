@@ -86,7 +86,9 @@ pub struct CommandOptions {
     // In seconds
     global_cooldown: Option<u64>,
     user_cooldown: Option<u64>,
+    guild_cooldown: Option<u64>,
     channel_cooldown: Option<u64>,
+    member_cooldown: Option<u64>,
 }
 
 /// Representation of the function parameter attribute arguments
@@ -156,9 +158,12 @@ fn make_command_id(inv: &Invocation) -> proc_macro2::TokenStream {
     let description = wrap_option(inv.description);
     let hide_in_help = &inv.more.hide_in_help;
     let category = wrap_option(inv.more.category.as_ref());
+
     let global_cooldown = wrap_option(inv.more.global_cooldown);
     let user_cooldown = wrap_option(inv.more.user_cooldown);
+    let guild_cooldown = wrap_option(inv.more.guild_cooldown);
     let channel_cooldown = wrap_option(inv.more.channel_cooldown);
+    let member_cooldown = wrap_option(inv.more.member_cooldown);
 
     quote::quote! {
         ::poise::CommandId {
@@ -166,11 +171,13 @@ fn make_command_id(inv: &Invocation) -> proc_macro2::TokenStream {
             category: #category,
             inline_help: #description,
             hide_in_help: #hide_in_help,
-            cooldowns: ::poise::Cooldowns::new(
-                #global_cooldown.map(std::time::Duration::from_secs),
-                #user_cooldown.map(std::time::Duration::from_secs),
-                #channel_cooldown.map(std::time::Duration::from_secs),
-            )
+            cooldowns: std::sync::Mutex::new(::poise::Cooldowns::new(::poise::CooldownConfig {
+                global: #global_cooldown.map(std::time::Duration::from_secs),
+                user: #user_cooldown.map(std::time::Duration::from_secs),
+                guild: #guild_cooldown.map(std::time::Duration::from_secs),
+                channel: #channel_cooldown.map(std::time::Duration::from_secs),
+                member: #member_cooldown.map(std::time::Duration::from_secs),
+            }))
         }
     }
 }

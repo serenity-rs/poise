@@ -573,7 +573,7 @@ pub struct CommandId {
     /// Short description of the command. Displayed inline in help menus and similar.
     pub inline_help: Option<&'static str>,
     /// Handles command cooldowns. Mainly for framework internal use
-    pub cooldowns: crate::Cooldowns,
+    pub cooldowns: std::sync::Mutex<crate::Cooldowns>,
 }
 
 #[derive(Copy, Clone)]

@@ -64,8 +64,11 @@ pub async fn getvotes(
     prefix_command,
     track_edits,
     slash_command,
-    global_cooldown = 3,
-    channel_cooldown = 10
+    global_cooldown = 1,
+    user_cooldown = 5,
+    guild_cooldown = 2,
+    channel_cooldown = 2,
+    member_cooldown = 3
 )]
 pub async fn add(
     ctx: Context<'_>,

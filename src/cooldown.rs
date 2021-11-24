@@ -1,57 +1,65 @@
 use crate::serenity_prelude as serenity;
 // I usually don't do imports, but these are very convenient
 use std::collections::HashMap;
-use std::sync::Mutex;
 use std::time::{Duration, Instant};
 
+#[derive(Default)]
+pub struct CooldownConfig {
+    pub global: Option<Duration>,
+    pub user: Option<Duration>,
+    pub guild: Option<Duration>,
+    pub channel: Option<Duration>,
+    pub member: Option<Duration>,
+}
+
 pub struct Cooldowns {
-    global_cooldown: Option<Duration>,
-    global_invocation: Mutex<Option<Instant>>,
-    user_cooldown: Option<Duration>,
-    user_invocations: Mutex<HashMap<serenity::UserId, Instant>>,
-    channel_cooldown: Option<Duration>,
-    channel_invocations: Mutex<HashMap<serenity::ChannelId, Instant>>,
+    cooldown: CooldownConfig,
+
+    global_invocation: Option<Instant>,
+    user_invocations: HashMap<serenity::UserId, Instant>,
+    guild_invocations: HashMap<serenity::GuildId, Instant>,
+    channel_invocations: HashMap<serenity::ChannelId, Instant>,
+    member_invocations: HashMap<(serenity::UserId, serenity::GuildId), Instant>,
 }
 
 impl Cooldowns {
-    pub fn new(
-        global_cooldown: Option<Duration>,
-        user_cooldown: Option<Duration>,
-        channel_cooldown: Option<Duration>,
-    ) -> Self {
+    pub fn new(config: CooldownConfig) -> Self {
         Self {
-            global_cooldown,
-            global_invocation: Mutex::new(None),
-            user_cooldown,
-            user_invocations: Mutex::new(HashMap::new()),
-            channel_cooldown,
-            channel_invocations: Mutex::new(HashMap::new()),
+            cooldown: config,
+
+            global_invocation: None,
+            user_invocations: HashMap::new(),
+            guild_invocations: HashMap::new(),
+            channel_invocations: HashMap::new(),
+            member_invocations: HashMap::new(),
         }
     }
 
     pub fn get_wait_time<U, E>(&self, ctx: crate::Context<'_, U, E>) -> Option<Duration> {
-        let cooldown_data = &[
+        let mut cooldown_data = vec![
+            (self.cooldown.global, self.global_invocation),
             (
-                self.global_cooldown,
-                *self.global_invocation.lock().unwrap(),
+                self.cooldown.user,
+                self.user_invocations.get(&ctx.author().id).copied(),
             ),
             (
-                self.user_cooldown,
-                self.user_invocations
-                    .lock()
-                    .unwrap()
-                    .get(&ctx.author().id)
-                    .copied(),
-            ),
-            (
-                self.channel_cooldown,
-                self.channel_invocations
-                    .lock()
-                    .unwrap()
-                    .get(&ctx.channel_id())
-                    .copied(),
+                self.cooldown.channel,
+                self.channel_invocations.get(&ctx.channel_id()).copied(),
             ),
         ];
+
+        if let Some(guild_id) = ctx.guild_id() {
+            cooldown_data.push((
+                self.cooldown.guild,
+                self.guild_invocations.get(&guild_id).copied(),
+            ));
+            cooldown_data.push((
+                self.cooldown.member,
+                self.member_invocations
+                    .get(&(ctx.author().id, guild_id))
+                    .copied(),
+            ));
+        }
 
         cooldown_data
             .iter()
@@ -63,17 +71,17 @@ impl Cooldowns {
             .max()
     }
 
-    pub fn trigger<U, E>(&self, ctx: crate::Context<'_, U, E>) {
+    pub fn start_cooldown<U, E>(&mut self, ctx: crate::Context<'_, U, E>) {
         let now = Instant::now();
 
-        *self.global_invocation.lock().unwrap() = Some(now);
-        self.user_invocations
-            .lock()
-            .unwrap()
-            .insert(ctx.author().id, now);
-        self.channel_invocations
-            .lock()
-            .unwrap()
-            .insert(ctx.channel_id(), now);
+        self.global_invocation = Some(now);
+        self.user_invocations.insert(ctx.author().id, now);
+        self.channel_invocations.insert(ctx.channel_id(), now);
+
+        if let Some(guild_id) = ctx.guild_id() {
+            self.guild_invocations.insert(guild_id, now);
+            self.member_invocations
+                .insert((ctx.author().id, guild_id), now);
+        }
     }
 }
