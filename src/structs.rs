@@ -304,13 +304,10 @@ pub struct CommandBuilder<U, E> {
 }
 
 impl<U, E> CommandBuilder<U, E> {
-    /// Assign a category to this command, which can be used by help commands to group commands
-    pub fn category(&mut self, category: &'static str) -> &mut Self {
-        // REMEMBER
-        // if let Some(prefix_command) = &mut self.prefix_command {
-        //     prefix_command.command.id.category = Some(category);
-        // }
-        self
+    /// **Deprecated**
+    #[deprecated = "Please use `category = \"...\"` on the command attribute instead"]
+    pub fn category(&mut self, _category: &'static str) -> &mut Self {
+        panic!("Please use `category = \"...\"` on the command attribute instead")
     }
 
     /// Insert a subcommand

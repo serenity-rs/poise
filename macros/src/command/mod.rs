@@ -48,9 +48,9 @@ impl syn::fold::Fold for AllLifetimesToStatic {
 }
 
 #[derive(Debug, Default)]
-struct Aliases(Vec<String>);
+struct StringList(Vec<String>);
 
-impl darling::FromMeta for Aliases {
+impl darling::FromMeta for StringList {
     fn from_list(items: &[::syn::NestedMeta]) -> darling::Result<Self> {
         items
             .iter()
@@ -68,7 +68,7 @@ pub struct CommandOptions {
     slash_command: bool,
     context_menu_command: Option<String>,
 
-    aliases: Aliases,
+    aliases: StringList,
     track_edits: bool,
     broadcast_typing: bool,
     explanation_fn: Option<syn::Path>,
@@ -82,6 +82,7 @@ pub struct CommandOptions {
     owners_only: bool,
     identifying_name: Option<String>,
     category: Option<String>,
+    subcommands: StringList,
 
     // In seconds
     global_cooldown: Option<u64>,
