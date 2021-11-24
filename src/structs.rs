@@ -257,10 +257,10 @@ impl<'a, U, E> CommandErrorContext<'a, U, E> {
     }
 
     /// Whether the error occured in a pre-command check or during execution
-    pub fn while_checking(&self) -> bool {
+    pub fn location(&self) -> crate::CommandErrorLocation {
         match self {
-            Self::Prefix(x) => x.while_checking,
-            Self::Application(x) => x.while_checking,
+            Self::Prefix(x) => x.location,
+            Self::Application(x) => x.location,
         }
     }
 
@@ -380,6 +380,9 @@ pub struct FrameworkOptions<U, E> {
     ///
     /// If individual commands add their own check, both callbacks are run and must return true.
     pub command_check: Option<fn(Context<'_, U, E>) -> BoxFuture<'_, Result<bool, E>>>,
+    /// Called when a command is invoked before its cooldown has expired
+    pub cooldown_hit:
+        Option<fn(Context<'_, U, E>, std::time::Duration) -> BoxFuture<'_, Result<(), E>>>,
     /// Default set of allowed mentions to use for all responses
     pub allowed_mentions: Option<serenity::CreateAllowedMentions>,
     /// Called on every Discord event. Can be used to react to non-command events, like messages
@@ -462,51 +465,64 @@ impl<U, E> FrameworkOptions<U, E> {
     }
 }
 
+async fn default_error_handler<U, E>(error: E, ctx: ErrorContext<'_, U, E>)
+where
+    U: Send + Sync,
+    E: std::fmt::Display + Send,
+{
+    match ctx {
+        ErrorContext::Setup => println!("Error in user data setup: {}", error),
+        ErrorContext::Listener(event) => println!(
+            "User event listener encountered an error on {} event: {}",
+            event.name(),
+            error
+        ),
+        ErrorContext::Command(CommandErrorContext::Prefix(err_ctx)) => {
+            println!(
+                "Error in prefix command \"{}\" from message \"{}\": {}",
+                &err_ctx.command.name, &err_ctx.ctx.msg.content, error
+            );
+        }
+        ErrorContext::Command(CommandErrorContext::Application(err_ctx)) => {
+            match &err_ctx.ctx.command {
+                crate::ApplicationCommand::Slash(cmd) => {
+                    println!("Error in slash command \"{}\": {}", cmd.name, error)
+                }
+                crate::ApplicationCommand::ContextMenu(cmd) => {
+                    println!("Error in context menu command \"{}\": {}", cmd.name, error)
+                }
+            }
+        }
+        ErrorContext::Autocomplete(err_ctx) => match &err_ctx.ctx.command {
+            crate::ApplicationCommand::Slash(cmd) => {
+                println!("Error in slash command \"{}\": {}", cmd.name, error)
+            }
+            crate::ApplicationCommand::ContextMenu(cmd) => {
+                println!("Error in context menu command \"{}\": {}", cmd.name, error)
+            }
+        },
+    }
+}
+
 impl<U: Send + Sync, E: std::fmt::Display + Send> Default for FrameworkOptions<U, E> {
     fn default() -> Self {
         Self {
-            on_error: |error, ctx| {
-                Box::pin(async move {
-                    match ctx {
-                        ErrorContext::Setup => println!("Error in user data setup: {}", error),
-                        ErrorContext::Listener(event) => println!(
-                            "User event listener encountered an error on {} event: {}",
-                            event.name(),
-                            error
-                        ),
-                        ErrorContext::Command(CommandErrorContext::Prefix(err_ctx)) => {
-                            println!(
-                                "Error in prefix command \"{}\" from message \"{}\": {}",
-                                &err_ctx.command.name, &err_ctx.ctx.msg.content, error
-                            );
-                        }
-                        ErrorContext::Command(CommandErrorContext::Application(err_ctx)) => {
-                            match &err_ctx.ctx.command {
-                                crate::ApplicationCommand::Slash(cmd) => {
-                                    println!("Error in slash command \"{}\": {}", cmd.name, error)
-                                }
-                                crate::ApplicationCommand::ContextMenu(cmd) => println!(
-                                    "Error in context menu command \"{}\": {}",
-                                    cmd.name, error
-                                ),
-                            }
-                        }
-                        ErrorContext::Autocomplete(err_ctx) => match &err_ctx.ctx.command {
-                            crate::ApplicationCommand::Slash(cmd) => {
-                                println!("Error in slash command \"{}\": {}", cmd.name, error)
-                            }
-                            crate::ApplicationCommand::ContextMenu(cmd) => println!(
-                                "Error in context menu command \"{}\": {}",
-                                cmd.name, error
-                            ),
-                        },
-                    }
-                })
-            },
+            on_error: |error, ctx| Box::pin(default_error_handler(error, ctx)),
             listener: |_, _, _, _| Box::pin(async { Ok(()) }),
             pre_command: |_| Box::pin(async {}),
             post_command: |_| Box::pin(async {}),
             command_check: None,
+            cooldown_hit: Some(|ctx, cooldown_left| {
+                Box::pin(async move {
+                    let msg = format!(
+                        "You're too fast. Please wait {} seconds before retrying",
+                        cooldown_left.as_secs()
+                    );
+                    let _: Result<_, _> = ctx.send(|b| b.content(msg).ephemeral(true)).await;
+
+                    Ok(())
+                })
+            }),
             allowed_mentions: Some({
                 let mut f = serenity::CreateAllowedMentions::default();
                 // Only support direct user pings by default
@@ -556,4 +572,14 @@ pub struct CommandId {
     pub hide_in_help: bool,
     /// Short description of the command. Displayed inline in help menus and similar.
     pub inline_help: Option<&'static str>,
+    /// Handles command cooldowns. Mainly for framework internal use
+    pub cooldowns: crate::Cooldowns,
+}
+
+#[derive(Copy, Clone)]
+pub enum CommandErrorLocation {
+    Body,
+    Check,
+    Autocomplete,
+    CooldownCallback,
 }

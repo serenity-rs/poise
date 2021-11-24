@@ -82,6 +82,11 @@ pub struct CommandOptions {
     owners_only: bool,
     identifying_name: Option<String>,
     category: Option<String>,
+
+    // In seconds
+    global_cooldown: Option<u64>,
+    user_cooldown: Option<u64>,
+    channel_cooldown: Option<u64>,
 }
 
 /// Representation of the function parameter attribute arguments
@@ -151,6 +156,9 @@ fn make_command_id(inv: &Invocation) -> proc_macro2::TokenStream {
     let description = wrap_option(inv.description);
     let hide_in_help = &inv.more.hide_in_help;
     let category = wrap_option(inv.more.category.as_ref());
+    let global_cooldown = wrap_option(inv.more.global_cooldown);
+    let user_cooldown = wrap_option(inv.more.user_cooldown);
+    let channel_cooldown = wrap_option(inv.more.channel_cooldown);
 
     quote::quote! {
         ::poise::CommandId {
@@ -158,6 +166,11 @@ fn make_command_id(inv: &Invocation) -> proc_macro2::TokenStream {
             category: #category,
             inline_help: #description,
             hide_in_help: #hide_in_help,
+            cooldowns: ::poise::Cooldowns::new(
+                #global_cooldown.map(std::time::Duration::from_secs),
+                #user_cooldown.map(std::time::Duration::from_secs),
+                #channel_cooldown.map(std::time::Duration::from_secs),
+            )
         }
     }
 }

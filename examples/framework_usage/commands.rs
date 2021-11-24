@@ -60,7 +60,13 @@ pub async fn getvotes(
 }
 
 /// Add two numbers
-#[poise::command(prefix_command, track_edits, slash_command)]
+#[poise::command(
+    prefix_command,
+    track_edits,
+    slash_command,
+    global_cooldown = 3,
+    channel_cooldown = 10
+)]
 pub async fn add(
     ctx: Context<'_>,
     #[description = "First operand"] a: f64,

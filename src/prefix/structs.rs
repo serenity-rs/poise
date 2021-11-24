@@ -99,8 +99,8 @@ pub struct PrefixCommandMeta<U, E> {
 
 /// Context passed alongside the error value to error handlers
 pub struct PrefixCommandErrorContext<'a, U, E> {
-    /// Whether the error occured in a [`check`](PrefixCommandOptions::check) callback
-    pub while_checking: bool,
+    /// What part of the command triggered the error
+    pub location: crate::CommandErrorLocation,
     /// Which command was being processed when the error occured
     pub command: &'a PrefixCommand<U, E>,
     /// Further context
@@ -110,7 +110,7 @@ pub struct PrefixCommandErrorContext<'a, U, E> {
 impl<U, E> Clone for PrefixCommandErrorContext<'_, U, E> {
     fn clone(&self) -> Self {
         Self {
-            while_checking: self.while_checking,
+            location: self.location,
             command: self.command,
             ctx: self.ctx,
         }

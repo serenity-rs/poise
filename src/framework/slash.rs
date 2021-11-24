@@ -168,13 +168,29 @@ pub async fn extract_command_and_run_checks<'a, U, E>(
             e,
             crate::ApplicationCommandErrorContext {
                 ctx,
-                while_checking: true,
+                location: crate::CommandErrorLocation::Check,
             },
         )
     })?;
     if !checks_passing {
         return Err(None);
     }
+
+    if let Some(cooldown_left) = command.id().cooldowns.get_wait_time(ctx.into()) {
+        if let Some(callback) = ctx.framework.options().cooldown_hit {
+            callback(ctx.into(), cooldown_left).await.map_err(|e| {
+                Some((
+                    e,
+                    crate::ApplicationCommandErrorContext {
+                        ctx,
+                        location: crate::CommandErrorLocation::CooldownCallback,
+                    },
+                ))
+            })?;
+        }
+        return Err(None);
+    }
+    command.id().cooldowns.trigger(ctx.into());
 
     Ok((ctx, leaf_interaction_options))
 }
@@ -223,7 +239,7 @@ pub async fn dispatch_interaction<'a, U, E>(
             e,
             crate::ApplicationCommandErrorContext {
                 ctx,
-                while_checking: false,
+                location: crate::CommandErrorLocation::Body,
             },
         ))
     })
@@ -258,7 +274,7 @@ pub async fn dispatch_autocomplete<'a, U, E>(
         if let Err(e) = autocomplete_callback(ctx, interaction, options).await {
             let error_ctx = crate::ApplicationCommandErrorContext {
                 ctx,
-                while_checking: false,
+                location: crate::CommandErrorLocation::Autocomplete,
             };
 
             if let Some(on_error) = error_ctx.ctx.command.options().on_error {

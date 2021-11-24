@@ -25,6 +25,9 @@ pub use framework::*;
 mod reply;
 pub use reply::*;
 
+mod cooldown;
+pub use cooldown::*;
+
 pub mod builtins;
 /// See [`builtins`]
 #[deprecated = "`samples` module was renamed to `builtins`"]
