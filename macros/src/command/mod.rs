@@ -48,9 +48,9 @@ impl syn::fold::Fold for AllLifetimesToStatic {
 }
 
 #[derive(Debug, Default)]
-struct Aliases(Vec<String>);
+struct StringList(Vec<String>);
 
-impl darling::FromMeta for Aliases {
+impl darling::FromMeta for StringList {
     fn from_list(items: &[::syn::NestedMeta]) -> darling::Result<Self> {
         items
             .iter()
@@ -68,7 +68,7 @@ pub struct CommandOptions {
     slash_command: bool,
     context_menu_command: Option<String>,
 
-    aliases: Aliases,
+    aliases: StringList,
     track_edits: bool,
     broadcast_typing: bool,
     explanation_fn: Option<syn::Path>,
@@ -80,6 +80,16 @@ pub struct CommandOptions {
     ephemeral: bool,
     required_permissions: Option<syn::Ident>,
     owners_only: bool,
+    identifying_name: Option<String>,
+    category: Option<String>,
+    subcommands: StringList,
+
+    // In seconds
+    global_cooldown: Option<u64>,
+    user_cooldown: Option<u64>,
+    guild_cooldown: Option<u64>,
+    channel_cooldown: Option<u64>,
+    member_cooldown: Option<u64>,
 }
 
 /// Representation of the function parameter attribute arguments
@@ -140,6 +150,37 @@ fn extract_help_from_doc_comments(attrs: &[syn::Attribute]) -> (Option<String>, 
     let multiline_help = paragraphs.next().map(|x| x.to_owned());
 
     (Some(inline_help), multiline_help)
+}
+
+fn make_command_id(inv: &Invocation) -> proc_macro2::TokenStream {
+    let identifying_name = &inv.more.identifying_name;
+    let identifying_name = identifying_name.as_ref().unwrap_or(&inv.command_name);
+
+    let description = wrap_option(inv.description);
+    let hide_in_help = &inv.more.hide_in_help;
+    let category = wrap_option(inv.more.category.as_ref());
+
+    let global_cooldown = wrap_option(inv.more.global_cooldown);
+    let user_cooldown = wrap_option(inv.more.user_cooldown);
+    let guild_cooldown = wrap_option(inv.more.guild_cooldown);
+    let channel_cooldown = wrap_option(inv.more.channel_cooldown);
+    let member_cooldown = wrap_option(inv.more.member_cooldown);
+
+    quote::quote! {
+        ::poise::CommandId {
+            identifying_name: String::from(#identifying_name),
+            category: #category,
+            inline_help: #description,
+            hide_in_help: #hide_in_help,
+            cooldowns: std::sync::Mutex::new(::poise::Cooldowns::new(::poise::CooldownConfig {
+                global: #global_cooldown.map(std::time::Duration::from_secs),
+                user: #user_cooldown.map(std::time::Duration::from_secs),
+                guild: #guild_cooldown.map(std::time::Duration::from_secs),
+                channel: #channel_cooldown.map(std::time::Duration::from_secs),
+                member: #member_cooldown.map(std::time::Duration::from_secs),
+            }))
+        }
+    }
 }
 
 pub fn command(
@@ -235,6 +276,7 @@ pub fn command(
     } else {
         None
     });
+    let command_id = make_command_id(&invocation);
 
     // Needed because we're not allowed to have lifetimes in the hacky use case below
     let ctx_type_with_static = syn::fold::fold_type(&mut AllLifetimesToStatic, ctx_type.clone());
@@ -247,6 +289,8 @@ pub fn command(
             <#ctx_type_with_static as poise::_GetGenerics>::E,
         > {
             #function
+
+            let command_id = std::sync::Arc::new(#command_id);
 
             ::poise::CommandDefinition {
                 prefix: #prefix_command_spec,

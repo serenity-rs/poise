@@ -167,6 +167,7 @@ pub fn generate_slash_command_spec(
 
                 inner(ctx.into(), #( #param_names, )*).await
             }),
+            id: std::sync::Arc::clone(&command_id),
             options: #options,
         }
     })
@@ -193,6 +194,7 @@ pub fn generate_context_menu_command_spec(
             action: <#param_type as ::poise::ContextMenuParameter<_, _>>::to_action(|ctx, value| {
                 Box::pin(async move { inner(ctx.into(), value).await })
             }),
+            id: std::sync::Arc::clone(&command_id),
             options: #options,
         }
     })

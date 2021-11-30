@@ -36,8 +36,6 @@ impl<U, E> crate::_GetGenerics for PrefixContext<'_, U, E> {
 
 /// Optional settings for a [`PrefixCommand`].
 pub struct PrefixCommandOptions<U, E> {
-    /// Short description of the command. Displayed inline in help menus and similar.
-    pub inline_help: Option<&'static str>,
     /// Multiline description with detailed usage instructions. Displayed in the command specific
     /// help: `~help command_name`
     // TODO: fix the inconsistency that this is String and everywhere else it's &'static str
@@ -54,8 +52,6 @@ pub struct PrefixCommandOptions<U, E> {
     pub track_edits: bool,
     /// Whether to broadcast a typing indicator while executing this commmand.
     pub broadcast_typing: bool,
-    /// Whether to hide this command in help menus.
-    pub hide_in_help: bool,
     /// Permissions which users must have to invoke this command.
     ///
     /// Set to [`serenity::Permissions::empty()`] by default
@@ -68,14 +64,12 @@ pub struct PrefixCommandOptions<U, E> {
 impl<U, E> Default for PrefixCommandOptions<U, E> {
     fn default() -> Self {
         Self {
-            inline_help: None,
             multiline_help: None,
             check: None,
             on_error: None,
             aliases: &[],
             track_edits: false,
             broadcast_typing: false,
-            hide_in_help: false,
             required_permissions: serenity::Permissions::empty(),
             owners_only: false,
         }
@@ -89,6 +83,8 @@ pub struct PrefixCommand<U, E> {
     pub name: &'static str,
     /// Callback to execute when this command is invoked.
     pub action: for<'a> fn(PrefixContext<'a, U, E>, args: &'a str) -> BoxFuture<'a, Result<(), E>>,
+    /// The command ID, shared across all command types that belong to the same implementation
+    pub id: std::sync::Arc<crate::CommandId>,
     /// Optional data to change this command's behavior.
     pub options: PrefixCommandOptions<U, E>,
 }
@@ -97,16 +93,14 @@ pub struct PrefixCommand<U, E> {
 pub struct PrefixCommandMeta<U, E> {
     /// Core command data
     pub command: PrefixCommand<U, E>,
-    /// Identifier for the category that this command will be displayed in for help commands.
-    pub category: Option<&'static str>,
     /// Possible subcommands
     pub subcommands: Vec<PrefixCommandMeta<U, E>>,
 }
 
 /// Context passed alongside the error value to error handlers
 pub struct PrefixCommandErrorContext<'a, U, E> {
-    /// Whether the error occured in a [`check`](PrefixCommandOptions::check) callback
-    pub while_checking: bool,
+    /// What part of the command triggered the error
+    pub location: crate::CommandErrorLocation,
     /// Which command was being processed when the error occured
     pub command: &'a PrefixCommand<U, E>,
     /// Further context
@@ -116,7 +110,7 @@ pub struct PrefixCommandErrorContext<'a, U, E> {
 impl<U, E> Clone for PrefixCommandErrorContext<'_, U, E> {
     fn clone(&self) -> Self {
         Self {
-            while_checking: self.while_checking,
+            location: self.location,
             command: self.command,
             ctx: self.ctx,
         }

@@ -164,7 +164,7 @@ where
                 crate::PrefixCommandErrorContext {
                     command,
                     ctx: prefix_ctx,
-                    while_checking: true,
+                    location: crate::CommandErrorLocation::Check,
                 },
             )
         })?;
@@ -227,19 +227,38 @@ where
         return Err(None);
     }
 
-    // Typing is broadcasted as long as this object is alive
-    let _typing_broadcaster = if command.options.broadcast_typing {
-        msg.channel_id.start_typing(&ctx.http).ok()
-    } else {
-        None
-    };
-
     let ctx = crate::PrefixContext {
         discord: ctx,
         msg,
         framework: this,
         data: this.get_user_data().await,
         command: Some(command),
+    };
+
+    let cooldowns = &command.id.cooldowns;
+    let cooldown_left = cooldowns.lock().unwrap().get_wait_time(ctx.into());
+    if let Some(cooldown_left) = cooldown_left {
+        if let Some(callback) = ctx.framework.options().cooldown_hit {
+            callback(ctx.into(), cooldown_left).await.map_err(|e| {
+                Some((
+                    e,
+                    crate::PrefixCommandErrorContext {
+                        ctx,
+                        command,
+                        location: crate::CommandErrorLocation::CooldownCallback,
+                    },
+                ))
+            })?;
+        }
+        return Err(None);
+    }
+    cooldowns.lock().unwrap().start_cooldown(ctx.into());
+
+    // Typing is broadcasted as long as this object is alive
+    let _typing_broadcaster = if command.options.broadcast_typing {
+        msg.channel_id.start_typing(&ctx.discord.http).ok()
+    } else {
+        None
     };
 
     (this.options.pre_command)(crate::Context::Prefix(ctx)).await;
@@ -251,7 +270,7 @@ where
             crate::PrefixCommandErrorContext {
                 ctx,
                 command,
-                while_checking: false,
+                location: crate::CommandErrorLocation::Check,
             },
         ))
     });

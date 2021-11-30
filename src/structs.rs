@@ -26,7 +26,13 @@ impl<'a, U, E> From<crate::PrefixContext<'a, U, E>> for Context<'a, U, E> {
     }
 }
 impl<'a, U, E> Context<'a, U, E> {
-    /// Delegates to [`crate::ApplicationContext::defer_response`].
+    /// Defer the response, giving the bot multiple minutes to respond without the user seeing an
+    /// "interaction failed error".
+    ///
+    /// Also sets the [`ApplicationContext::has_sent_initial_response`] flag so the subsequent
+    /// response will be sent in the correct manner.
+    ///
+    /// No-op if this is an autocomplete context
     ///
     /// This will make the response public; to make it ephemeral, use [`Self::defer_ephemeral()`].
     pub async fn defer(self) -> Result<(), serenity::Error> {
@@ -36,7 +42,7 @@ impl<'a, U, E> Context<'a, U, E> {
         Ok(())
     }
 
-    /// Delegates to [`crate::ApplicationContext::defer_response`].
+    /// See [`Self::defer()`]
     ///
     /// This will make the response ephemeral; to make it public, use [`Self::defer()`].
     pub async fn defer_ephemeral(self) -> Result<(), serenity::Error> {
@@ -46,7 +52,7 @@ impl<'a, U, E> Context<'a, U, E> {
         Ok(())
     }
 
-    /// If this is an application command, it delegates to [`crate::ApplicationContext::defer_response`].
+    /// If this is an application command, [`Self::defer()`] is called
     ///
     /// If this is a prefix command, a typing broadcast is started until the return value is
     /// dropped.
@@ -257,10 +263,10 @@ impl<'a, U, E> CommandErrorContext<'a, U, E> {
     }
 
     /// Whether the error occured in a pre-command check or during execution
-    pub fn while_checking(&self) -> bool {
+    pub fn location(&self) -> crate::CommandErrorLocation {
         match self {
-            Self::Prefix(x) => x.while_checking,
-            Self::Application(x) => x.while_checking,
+            Self::Prefix(x) => x.location,
+            Self::Application(x) => x.location,
         }
     }
 
@@ -304,12 +310,10 @@ pub struct CommandBuilder<U, E> {
 }
 
 impl<U, E> CommandBuilder<U, E> {
-    /// Assign a category to this command, which can be used by help commands to group commands
-    pub fn category(&mut self, category: &'static str) -> &mut Self {
-        if let Some(prefix_command) = &mut self.prefix_command {
-            prefix_command.category = Some(category);
-        }
-        self
+    /// **Deprecated**
+    #[deprecated = "Please use `category = \"...\"` on the command attribute instead"]
+    pub fn category(&mut self, _category: &'static str) -> &mut Self {
+        panic!("Please use `category = \"...\"` on the command attribute instead")
     }
 
     /// Insert a subcommand
@@ -319,14 +323,34 @@ impl<U, E> CommandBuilder<U, E> {
         meta_builder: impl FnOnce(&mut Self) -> &mut Self,
     ) -> &mut Self {
         let crate::CommandDefinition {
-            prefix: prefix_command,
-            slash: slash_command,
-            context_menu: context_menu_command,
+            prefix: mut prefix_command,
+            slash: mut slash_command,
+            context_menu: mut context_menu_command,
         } = definition;
+
+        // Make sure every implementation points to the same CommandId (they may have different
+        // IDs if each implemented comes from a different function, like rustbot's rustify)
+        let id = if let Some(prefix_command) = &prefix_command {
+            prefix_command.id.clone()
+        } else if let Some(slash_command) = &slash_command {
+            slash_command.id.clone()
+        } else if let Some(context_menu_command) = &context_menu_command {
+            context_menu_command.id.clone()
+        } else {
+            panic!("Empty command definition (no implementations)");
+        };
+        if let Some(prefix_command) = &mut prefix_command {
+            prefix_command.id = id.clone();
+        }
+        if let Some(slash_command) = &mut slash_command {
+            slash_command.id = id.clone();
+        }
+        if let Some(context_menu_command) = &mut context_menu_command {
+            context_menu_command.id = id.clone();
+        }
 
         let prefix_command = prefix_command.map(|prefix_command| crate::PrefixCommandMeta {
             command: prefix_command,
-            category: None,
             subcommands: Vec::new(),
         });
 
@@ -357,6 +381,7 @@ impl<U, E> CommandBuilder<U, E> {
                             name: cmd.name,
                             description: cmd.description,
                             subcommands: vec![subcommand],
+                            id,
                         };
                     }
                 }
@@ -380,6 +405,9 @@ pub struct FrameworkOptions<U, E> {
     ///
     /// If individual commands add their own check, both callbacks are run and must return true.
     pub command_check: Option<fn(Context<'_, U, E>) -> BoxFuture<'_, Result<bool, E>>>,
+    /// Called when a command is invoked before its cooldown has expired
+    pub cooldown_hit:
+        Option<fn(Context<'_, U, E>, std::time::Duration) -> BoxFuture<'_, Result<(), E>>>,
     /// Default set of allowed mentions to use for all responses
     pub allowed_mentions: Option<serenity::CreateAllowedMentions>,
     /// Called on every Discord event. Can be used to react to non-command events, like messages
@@ -415,7 +443,7 @@ impl<U, E> FrameworkOptions<U, E> {
     /// # }
     /// # use poise::FrameworkOptions;
     /// let mut options = FrameworkOptions::default();
-    /// options.command(misc::ping(), |f| f.category("Miscellaneous"));
+    /// options.command(misc::ping(), |f| f);
     /// ```
     pub fn command(
         &mut self,
@@ -424,20 +452,42 @@ impl<U, E> FrameworkOptions<U, E> {
     ) {
         // TODO: remove duplication with CommandBuilder::subcommand
 
+        // Unpack command implementations
         let crate::CommandDefinition {
-            prefix: prefix_command,
-            slash: slash_command,
-            context_menu: context_menu_command,
+            prefix: mut prefix_command,
+            slash: mut slash_command,
+            context_menu: mut context_menu_command,
         } = definition;
 
+        // Make sure every implementation points to the same CommandId (they may have different
+        // IDs if each implemented comes from a different function, like rustbot's rustify)
+        let id = if let Some(prefix_command) = &prefix_command {
+            prefix_command.id.clone()
+        } else if let Some(slash_command) = &slash_command {
+            slash_command.id.clone()
+        } else if let Some(context_menu_command) = &context_menu_command {
+            context_menu_command.id.clone()
+        } else {
+            panic!("Empty command definition (no implementations)");
+        };
+        if let Some(prefix_command) = &mut prefix_command {
+            prefix_command.id = id.clone();
+        }
+        if let Some(slash_command) = &mut slash_command {
+            slash_command.id = id.clone();
+        }
+        if let Some(context_menu_command) = &mut context_menu_command {
+            context_menu_command.id = id;
+        }
+
+        // Wrap the commands in their meta structs
         let prefix_command = prefix_command.map(|prefix_command| crate::PrefixCommandMeta {
             command: prefix_command,
-            category: None,
             subcommands: Vec::new(),
         });
-
         let slash_command = slash_command.map(crate::SlashCommandMeta::Command);
 
+        // Run the command builder on the meta structs to fill in metadata
         let mut builder = CommandBuilder {
             prefix_command,
             slash_command,
@@ -445,6 +495,7 @@ impl<U, E> FrameworkOptions<U, E> {
         };
         meta_builder(&mut builder);
 
+        // Insert command implementations
         if let Some(prefix_command) = builder.prefix_command {
             self.prefix_options.commands.push(prefix_command);
         }
@@ -463,51 +514,64 @@ impl<U, E> FrameworkOptions<U, E> {
     }
 }
 
+async fn default_error_handler<U, E>(error: E, ctx: ErrorContext<'_, U, E>)
+where
+    U: Send + Sync,
+    E: std::fmt::Display + Send,
+{
+    match ctx {
+        ErrorContext::Setup => println!("Error in user data setup: {}", error),
+        ErrorContext::Listener(event) => println!(
+            "User event listener encountered an error on {} event: {}",
+            event.name(),
+            error
+        ),
+        ErrorContext::Command(CommandErrorContext::Prefix(err_ctx)) => {
+            println!(
+                "Error in prefix command \"{}\" from message \"{}\": {}",
+                &err_ctx.command.name, &err_ctx.ctx.msg.content, error
+            );
+        }
+        ErrorContext::Command(CommandErrorContext::Application(err_ctx)) => {
+            match &err_ctx.ctx.command {
+                crate::ApplicationCommand::Slash(cmd) => {
+                    println!("Error in slash command \"{}\": {}", cmd.name, error)
+                }
+                crate::ApplicationCommand::ContextMenu(cmd) => {
+                    println!("Error in context menu command \"{}\": {}", cmd.name, error)
+                }
+            }
+        }
+        ErrorContext::Autocomplete(err_ctx) => match &err_ctx.ctx.command {
+            crate::ApplicationCommand::Slash(cmd) => {
+                println!("Error in slash command \"{}\": {}", cmd.name, error)
+            }
+            crate::ApplicationCommand::ContextMenu(cmd) => {
+                println!("Error in context menu command \"{}\": {}", cmd.name, error)
+            }
+        },
+    }
+}
+
 impl<U: Send + Sync, E: std::fmt::Display + Send> Default for FrameworkOptions<U, E> {
     fn default() -> Self {
         Self {
-            on_error: |error, ctx| {
-                Box::pin(async move {
-                    match ctx {
-                        ErrorContext::Setup => println!("Error in user data setup: {}", error),
-                        ErrorContext::Listener(event) => println!(
-                            "User event listener encountered an error on {} event: {}",
-                            event.name(),
-                            error
-                        ),
-                        ErrorContext::Command(CommandErrorContext::Prefix(err_ctx)) => {
-                            println!(
-                                "Error in prefix command \"{}\" from message \"{}\": {}",
-                                &err_ctx.command.name, &err_ctx.ctx.msg.content, error
-                            );
-                        }
-                        ErrorContext::Command(CommandErrorContext::Application(err_ctx)) => {
-                            match &err_ctx.ctx.command {
-                                crate::ApplicationCommand::Slash(cmd) => {
-                                    println!("Error in slash command \"{}\": {}", cmd.name, error)
-                                }
-                                crate::ApplicationCommand::ContextMenu(cmd) => println!(
-                                    "Error in context menu command \"{}\": {}",
-                                    cmd.name, error
-                                ),
-                            }
-                        }
-                        ErrorContext::Autocomplete(err_ctx) => match &err_ctx.ctx.command {
-                            crate::ApplicationCommand::Slash(cmd) => {
-                                println!("Error in slash command \"{}\": {}", cmd.name, error)
-                            }
-                            crate::ApplicationCommand::ContextMenu(cmd) => println!(
-                                "Error in context menu command \"{}\": {}",
-                                cmd.name, error
-                            ),
-                        },
-                    }
-                })
-            },
+            on_error: |error, ctx| Box::pin(default_error_handler(error, ctx)),
             listener: |_, _, _, _| Box::pin(async { Ok(()) }),
             pre_command: |_| Box::pin(async {}),
             post_command: |_| Box::pin(async {}),
             command_check: None,
+            cooldown_hit: Some(|ctx, cooldown_left| {
+                Box::pin(async move {
+                    let msg = format!(
+                        "You're too fast. Please wait {} seconds before retrying",
+                        cooldown_left.as_secs()
+                    );
+                    let _: Result<_, _> = ctx.send(|b| b.content(msg).ephemeral(true)).await;
+
+                    Ok(())
+                })
+            }),
             allowed_mentions: Some({
                 let mut f = serenity::CreateAllowedMentions::default();
                 // Only support direct user pings by default
@@ -530,4 +594,52 @@ pub struct CommandDefinition<U, E> {
     pub slash: Option<crate::SlashCommand<U, E>>,
     /// Generated context menu command, if it was enabled
     pub context_menu: Option<crate::ContextMenuCommand<U, E>>,
+}
+
+/// A view into a command definition with its different implementations
+pub struct CommandDefinitionRef<'a, U, E> {
+    /// Prefix implementation of the command
+    pub prefix: Option<&'a crate::PrefixCommandMeta<U, E>>,
+    /// Slash implementation of the command
+    pub slash: Option<&'a crate::SlashCommandMeta<U, E>>,
+    /// Context menu implementation of the command
+    pub context_menu: Option<&'a crate::ContextMenuCommand<U, E>>,
+    /// Implementation type agnostic data that is always present
+    pub id: std::sync::Arc<CommandId>,
+}
+
+/// This struct holds all data shared across different command types of the same implementation.
+///
+/// For example with a `#[command(prefix_command, slash_command)]`, the generated
+/// [`crate::PrefixCommand`] and [`crate::SlashCommand`] will both contain an `Arc<CommandId>`
+/// pointing to the same [`CommandId`] instance.
+pub struct CommandId {
+    /// A string to identify this particular command within a list of commands.
+    ///
+    /// Can be configured via the [`crate::command`] macro (though it's probably not needed for most
+    /// bots). If not explicitly configured, it falls back to prefix command name, slash command
+    /// name, or context menu command name (in that order).
+    pub identifying_name: String,
+    /// Identifier for the category that this command will be displayed in for help commands.
+    pub category: Option<&'static str>,
+    /// Whether to hide this command in help menus.
+    pub hide_in_help: bool,
+    /// Short description of the command. Displayed inline in help menus and similar.
+    pub inline_help: Option<&'static str>,
+    /// Handles command cooldowns. Mainly for framework internal use
+    pub cooldowns: std::sync::Mutex<crate::Cooldowns>,
+}
+
+/// Used for command errors to store the specific operation in a command's execution where an
+/// error occured
+#[derive(Copy, Clone)]
+pub enum CommandErrorLocation {
+    /// Error occured in the main command code
+    Body,
+    /// Error occured in one of the pre-command checks
+    Check,
+    /// Error occured in a parameter autocomplete callback
+    Autocomplete,
+    /// Error occured in the callback which was invoked because a cooldown limit was hit
+    CooldownCallback,
 }

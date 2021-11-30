@@ -41,6 +41,7 @@ fn find_matching_application_command<'a, 'b, U, E>(
                 subcommands,
                 name: _,
                 description: _,
+                id: _,
             } => {
                 let interaction = match interaction.options.iter().find(|option| {
                     option.kind == serenity::ApplicationCommandOptionType::SubCommand
@@ -66,6 +67,7 @@ fn find_matching_application_command<'a, 'b, U, E>(
                         subcommands,
                         name: _,
                         description: _,
+                        id: _,
                     } => {
                         let interaction = match interaction.options.iter().find(|option| {
                             option.kind == serenity::ApplicationCommandOptionType::SubCommand
@@ -168,13 +170,31 @@ pub async fn extract_command_and_run_checks<'a, U, E>(
             e,
             crate::ApplicationCommandErrorContext {
                 ctx,
-                while_checking: true,
+                location: crate::CommandErrorLocation::Check,
             },
         )
     })?;
     if !checks_passing {
         return Err(None);
     }
+
+    let cooldowns = &command.id().cooldowns;
+    let cooldown_left = cooldowns.lock().unwrap().get_wait_time(ctx.into());
+    if let Some(cooldown_left) = cooldown_left {
+        if let Some(callback) = ctx.framework.options().cooldown_hit {
+            callback(ctx.into(), cooldown_left).await.map_err(|e| {
+                Some((
+                    e,
+                    crate::ApplicationCommandErrorContext {
+                        ctx,
+                        location: crate::CommandErrorLocation::CooldownCallback,
+                    },
+                ))
+            })?;
+        }
+        return Err(None);
+    }
+    cooldowns.lock().unwrap().start_cooldown(ctx.into());
 
     Ok((ctx, leaf_interaction_options))
 }
@@ -223,7 +243,7 @@ pub async fn dispatch_interaction<'a, U, E>(
             e,
             crate::ApplicationCommandErrorContext {
                 ctx,
-                while_checking: false,
+                location: crate::CommandErrorLocation::Body,
             },
         ))
     })
@@ -258,7 +278,7 @@ pub async fn dispatch_autocomplete<'a, U, E>(
         if let Err(e) = autocomplete_callback(ctx, interaction, options).await {
             let error_ctx = crate::ApplicationCommandErrorContext {
                 ctx,
-                while_checking: false,
+                location: crate::CommandErrorLocation::Autocomplete,
             };
 
             if let Some(on_error) = error_ctx.ctx.command.options().on_error {

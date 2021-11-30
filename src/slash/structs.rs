@@ -93,13 +93,7 @@ impl<U, E> crate::_GetGenerics for ApplicationContext<'_, U, E> {
 }
 
 impl<U, E> ApplicationContext<'_, U, E> {
-    /// Defer the response, giving the bot multiple minutes to respond without the user seeing an
-    /// "interaction failed error".
-    ///
-    /// Also sets the [`ApplicationContext::has_sent_initial_response`] flag so the subsequent
-    /// response will be sent in the correct manner.
-    ///
-    /// No-op if this is an autocomplete context
+    /// See [`Context::defer()`]
     pub async fn defer_response(&self, ephemeral: bool) -> Result<(), serenity::Error> {
         let interaction = match self.interaction {
             ApplicationCommandOrAutocompleteInteraction::ApplicationCommand(x) => x,
@@ -125,9 +119,8 @@ impl<U, E> ApplicationContext<'_, U, E> {
 
 /// Application command specific context to an error in user code
 pub struct ApplicationCommandErrorContext<'a, U, E> {
-    /// Whether this error occured while running a pre-command check (`true`) or if it happened
-    /// in normal command execution (`false`)
-    pub while_checking: bool,
+    /// In which part of the command execution the error occured
+    pub location: crate::CommandErrorLocation,
     /// Further context
     pub ctx: ApplicationContext<'a, U, E>,
 }
@@ -135,7 +128,7 @@ pub struct ApplicationCommandErrorContext<'a, U, E> {
 impl<U, E> Clone for ApplicationCommandErrorContext<'_, U, E> {
     fn clone(&self) -> Self {
         Self {
-            while_checking: self.while_checking,
+            location: self.location,
             ctx: self.ctx,
         }
     }
@@ -198,6 +191,8 @@ pub struct SlashCommand<U, E> {
         ApplicationContext<'a, U, E>,
         &'a [serenity::ApplicationCommandInteractionDataOption],
     ) -> BoxFuture<'a, Result<(), E>>,
+    /// The command ID, shared across all command types that belong to the same implementation
+    pub id: std::sync::Arc<crate::CommandId>,
     /// Further configuration
     pub options: ApplicationCommandOptions<U, E>,
 }
@@ -214,6 +209,8 @@ pub enum SlashCommandMeta<U, E> {
         description: &'static str,
         /// List of command group subcommands
         subcommands: Vec<SlashCommandMeta<U, E>>,
+        /// Contains command-type agnostic data
+        id: std::sync::Arc<crate::CommandId>,
     },
 }
 
@@ -234,6 +231,14 @@ impl<U, E> SlashCommandMeta<U, E> {
         }
     }
 
+    /// Returns the [`crate::CommandId`] for this command or command group
+    pub fn id(&self) -> &std::sync::Arc<crate::CommandId> {
+        match self {
+            SlashCommandMeta::Command(cmd) => &cmd.id,
+            SlashCommandMeta::CommandGroup { id, .. } => id,
+        }
+    }
+
     fn create_as_subcommand<'a>(
         &self,
         builder: &'a mut serenity::CreateApplicationCommandOption,
@@ -243,6 +248,7 @@ impl<U, E> SlashCommandMeta<U, E> {
                 name,
                 description,
                 subcommands,
+                id: _,
             } => {
                 builder.kind(serenity::ApplicationCommandOptionType::SubCommandGroup);
                 builder.name(name).description(description);
@@ -274,6 +280,7 @@ impl<U, E> SlashCommandMeta<U, E> {
                 name,
                 description,
                 subcommands,
+                id: _,
             } => {
                 interaction.name(name).description(description);
 
@@ -311,6 +318,8 @@ pub struct ContextMenuCommand<U, E> {
     pub name: &'static str,
     /// Further configuration
     pub options: ApplicationCommandOptions<U, E>,
+    /// The command ID, shared across all command types that belong to the same implementation
+    pub id: std::sync::Arc<crate::CommandId>,
     /// The target and action of the context menu entry
     pub action: ContextMenuCommandAction<U, E>,
 }
@@ -369,6 +378,15 @@ impl<'a, U, E> ApplicationCommand<'a, U, E> {
         match self {
             Self::Slash(cmd) => &cmd.options,
             Self::ContextMenu(cmd) => &cmd.options,
+        }
+    }
+
+    /// Return the command ID, shared across all command types that belong to the same
+    /// implementation
+    pub fn id(self) -> &'a std::sync::Arc<crate::CommandId> {
+        match self {
+            Self::Slash(cmd) => &cmd.id,
+            Self::ContextMenu(cmd) => &cmd.id,
         }
     }
 }

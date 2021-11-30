@@ -283,26 +283,24 @@ async fn main() {
         // command signature, for example by changing its name, adding or removing parameters, or
         // changing a parameter type, you should call this function.
         .command(register(), |f| f)
-        // If a category is associated with the command, it's specified in the builder
-        .command(about(), |f| f.category("General"))
-        .command(am_i_admin(), |f| f.category("General"))
-        .command(say(), |f| f.category("General"))
-        .command(commands(), |f| f.category("General"))
-        .command(ping(), |f| f.category("General"))
-        .command(latency(), |f| f.category("General"))
-        .command(some_long_command(), |f| f.category("General"))
+        .command(about(), |f| f)
+        .command(am_i_admin(), |f| f)
+        .command(say(), |f| f)
+        .command(commands(), |f| f)
+        .command(ping(), |f| f)
+        .command(latency(), |f| f)
+        .command(some_long_command(), |f| f)
         .command(upper_command(), |f| {
-            f.category("General")
-                // A command can have sub-commands, just like in command lines tools.
-                // Imagine `cargo help` and `cargo help run`.
-                // Subcommands are also specified here, inside the builder
-                .subcommand(sub(), |f| f)
+            // A command can have sub-commands, just like in command lines tools.
+            // Imagine `cargo help` and `cargo help run`.
+            // Subcommands are also specified here, inside the builder
+            f.subcommand(sub(), |f| f)
         })
-        .command(bird(), |f| f.category("Emoji"))
-        .command(cat(), |f| f.category("Emoji"))
-        .command(dog(), |f| f.category("Emoji"))
-        .command(multiply(), |f| f.category("Math"))
-        .command(slow_mode(), |f| f.category("Owner"))
+        .command(bird(), |f| f)
+        .command(cat(), |f| f)
+        .command(dog(), |f| f)
+        .command(multiply(), |f| f)
+        .command(slow_mode(), |f| f)
         .run()
         .await
         .expect("Client error");
@@ -337,7 +335,7 @@ async fn main() {
 
 // Commands can be created via the attribute `#[poise::command()]` macro.
 // Options are passed as arguments to the macro.
-#[poise::command(prefix_command, slash_command)]
+#[poise::command(prefix_command, slash_command, category = "General")]
 // INFO: not supported
 /*
 // Make this command use the "complicated" bucket.
@@ -362,7 +360,7 @@ async fn commands(ctx: Context<'_>) -> Result<(), Error> {
 // In this example channel mentions are excluded via the `ContentSafeOptions`.
 // The track_edits argument ensures that when the user edits their command invocation,
 // the bot updates the response message accordingly.
-#[poise::command(prefix_command, slash_command, track_edits)]
+#[poise::command(prefix_command, slash_command, track_edits, category = "General")]
 async fn say(
     ctx: Context<'_>,
     #[description = "Text to repeat"]
@@ -409,7 +407,7 @@ async fn owner_check(ctx: Context<'_>) -> Result<bool, Error> {
 }
 
 /// This is a command with a deliberately long name
-#[poise::command(prefix_command, slash_command)]
+#[poise::command(prefix_command, slash_command, category = "General")]
 async fn some_long_command(
     ctx: Context<'_>,
     #[description = "Arguments to this command"]
@@ -459,6 +457,7 @@ async fn about_role(
     slash_command,
     // Lets us also call `~math *` instead of just `~math multiply`.
     aliases("*"),
+    category = "Math",
 )]
 async fn multiply(
     ctx: Context<'_>,
@@ -473,7 +472,7 @@ async fn multiply(
 }
 
 /// Shows information about this bot
-#[poise::command(prefix_command, slash_command)]
+#[poise::command(prefix_command, slash_command, category = "General")]
 async fn about(ctx: Context<'_>) -> Result<(), Error> {
     ctx.say("This is a small test-bot! : )").await?;
 
@@ -481,7 +480,7 @@ async fn about(ctx: Context<'_>) -> Result<(), Error> {
 }
 
 /// Shows current latency of this bot
-#[poise::command(prefix_command, slash_command)]
+#[poise::command(prefix_command, slash_command, category = "General")]
 async fn latency(ctx: Context<'_>) -> Result<(), Error> {
     // The shard manager is an interface for mutating, stopping, restarting, and
     // retrieving information about shards.
@@ -503,7 +502,12 @@ async fn latency(ctx: Context<'_>) -> Result<(), Error> {
     Ok(())
 }
 
-#[poise::command(prefix_command, slash_command, check = "owner_check")]
+#[poise::command(
+    prefix_command,
+    slash_command,
+    check = "owner_check",
+    category = "General"
+)]
 // INFO: not implemented
 /*
 // Limit command usage to guilds.
@@ -524,6 +528,7 @@ async fn ping(ctx: Context<'_>) -> Result<(), Error> {
     aliases("kitty", "neko"),
     // Allow only administrators to call this:
     required_permissions = "ADMINISTRATOR",
+    category = "Emoji"
 )]
 // INFO: not implemented
 /*
@@ -543,7 +548,7 @@ async fn cat(ctx: Context<'_>) -> Result<(), Error> {
 }
 
 /// Sends an emoji with a dog.
-#[poise::command(prefix_command, slash_command)]
+#[poise::command(prefix_command, slash_command, category = "Emoji")]
 // INFO: not implemented
 /*
 #[bucket = "emoji"]
@@ -555,7 +560,7 @@ async fn dog(ctx: Context<'_>) -> Result<(), Error> {
 }
 
 /// Sends an emoji with a bird.
-#[poise::command(prefix_command, slash_command)]
+#[poise::command(prefix_command, slash_command, category = "Emoji")]
 async fn bird(
     ctx: Context<'_>,
     #[description = "Name of the bird you're searching for"] bird_name: Option<String>,
@@ -573,7 +578,7 @@ async fn bird(
 // We could also use `required_permissions = "ADMINISTRATOR"`
 // but that would not let us reply when it fails.
 /// Tells you whether you are an admin on the server
-#[poise::command(prefix_command, slash_command)]
+#[poise::command(prefix_command, slash_command, category = "General")]
 async fn am_i_admin(ctx: Context<'_>) -> Result<(), Error> {
     if let Some(guild_id) = ctx.guild_id() {
         for role in guild_id.member(ctx.discord(), ctx.author().id).await?.roles {
@@ -593,7 +598,12 @@ async fn am_i_admin(ctx: Context<'_>) -> Result<(), Error> {
 }
 
 /// Enable slowmode for a channel. Pass no argument to disable slowmode
-#[poise::command(prefix_command, slash_command, check = "owner_check")]
+#[poise::command(
+    prefix_command,
+    slash_command,
+    check = "owner_check",
+    category = "Owner"
+)]
 async fn slow_mode(
     ctx: Context<'_>,
     #[description = "How long users have to wait inbetween sending messages"]
@@ -634,7 +644,7 @@ async fn slow_mode(
 }
 
 /// Dummy command to test subcommands
-#[poise::command(prefix_command, slash_command, rename = "upper")]
+#[poise::command(prefix_command, slash_command, rename = "upper", category = "General")]
 async fn upper_command(ctx: Context<'_>) -> Result<(), Error> {
     ctx.say("This is the main function!").await?;
 

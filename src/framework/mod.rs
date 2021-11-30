@@ -229,6 +229,46 @@ impl<U, E> Framework<U, E> {
             .expect("fatal: shard manager not stored in framework initialization")
     }
 
+    /// Yields an iterator over all unique commands in this framework. Different command
+    /// types are grouped together if they belong to the same command definition.
+    ///
+    /// Only top-level commands are included, i.e. no subcommands
+    pub fn commands(&self) -> impl Iterator<Item = crate::CommandDefinitionRef<'_, U, E>> {
+        type CommandMap<'s, U, E> =
+            crate::util::OrderedMap<*const (), crate::CommandDefinitionRef<'s, U, E>>;
+
+        fn get_command<'a, 's, U, E>(
+            map: &'a mut CommandMap<'s, U, E>,
+            id: &std::sync::Arc<crate::CommandId>,
+        ) -> &'a mut crate::CommandDefinitionRef<'s, U, E> {
+            map.get_or_insert_with(std::sync::Arc::as_ptr(id) as _, || {
+                crate::CommandDefinitionRef {
+                    prefix: None,
+                    slash: None,
+                    context_menu: None,
+                    id: id.clone(),
+                }
+            })
+        }
+
+        let mut map = CommandMap::new();
+        for command in &self.options().prefix_options.commands {
+            get_command(&mut map, &command.command.id).prefix = Some(command);
+        }
+        for command in &self.options().application_options.commands {
+            match command {
+                ApplicationCommandTree::Slash(command) => {
+                    get_command(&mut map, command.id()).slash = Some(command)
+                }
+                ApplicationCommandTree::ContextMenu(command) => {
+                    get_command(&mut map, &command.id).context_menu = Some(command)
+                }
+            }
+        }
+
+        map.into_iter().map(|(_k, v)| v)
+    }
+
     async fn get_user_data(&self) -> &U {
         // We shouldn't get a Message event before a Ready event. But if we do, wait until
         // the Ready event does come and the resulting data has arrived.
