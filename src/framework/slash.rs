@@ -41,6 +41,7 @@ fn find_matching_application_command<'a, 'b, U, E>(
                 subcommands,
                 name: _,
                 description: _,
+                id: _,
             } => {
                 let interaction = match interaction.options.iter().find(|option| {
                     option.kind == serenity::ApplicationCommandOptionType::SubCommand
@@ -66,6 +67,7 @@ fn find_matching_application_command<'a, 'b, U, E>(
                         subcommands,
                         name: _,
                         description: _,
+                        id: _,
                     } => {
                         let interaction = match interaction.options.iter().find(|option| {
                             option.kind == serenity::ApplicationCommandOptionType::SubCommand

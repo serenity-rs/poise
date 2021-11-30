@@ -26,7 +26,13 @@ impl<'a, U, E> From<crate::PrefixContext<'a, U, E>> for Context<'a, U, E> {
     }
 }
 impl<'a, U, E> Context<'a, U, E> {
-    /// Delegates to [`crate::ApplicationContext::defer_response`].
+    /// Defer the response, giving the bot multiple minutes to respond without the user seeing an
+    /// "interaction failed error".
+    ///
+    /// Also sets the [`ApplicationContext::has_sent_initial_response`] flag so the subsequent
+    /// response will be sent in the correct manner.
+    ///
+    /// No-op if this is an autocomplete context
     ///
     /// This will make the response public; to make it ephemeral, use [`Self::defer_ephemeral()`].
     pub async fn defer(self) -> Result<(), serenity::Error> {
@@ -36,7 +42,7 @@ impl<'a, U, E> Context<'a, U, E> {
         Ok(())
     }
 
-    /// Delegates to [`crate::ApplicationContext::defer_response`].
+    /// See [`Self::defer()`]
     ///
     /// This will make the response ephemeral; to make it public, use [`Self::defer()`].
     pub async fn defer_ephemeral(self) -> Result<(), serenity::Error> {
@@ -46,7 +52,7 @@ impl<'a, U, E> Context<'a, U, E> {
         Ok(())
     }
 
-    /// If this is an application command, it delegates to [`crate::ApplicationContext::defer_response`].
+    /// If this is an application command, [`Self::defer()`] is called
     ///
     /// If this is a prefix command, a typing broadcast is started until the return value is
     /// dropped.
@@ -317,10 +323,31 @@ impl<U, E> CommandBuilder<U, E> {
         meta_builder: impl FnOnce(&mut Self) -> &mut Self,
     ) -> &mut Self {
         let crate::CommandDefinition {
-            prefix: prefix_command,
-            slash: slash_command,
-            context_menu: context_menu_command,
+            prefix: mut prefix_command,
+            slash: mut slash_command,
+            context_menu: mut context_menu_command,
         } = definition;
+
+        // Make sure every implementation points to the same CommandId (they may have different
+        // IDs if each implemented comes from a different function, like rustbot's rustify)
+        let id = if let Some(prefix_command) = &prefix_command {
+            prefix_command.id.clone()
+        } else if let Some(slash_command) = &slash_command {
+            slash_command.id.clone()
+        } else if let Some(context_menu_command) = &context_menu_command {
+            context_menu_command.id.clone()
+        } else {
+            panic!("Empty command definition (no implementations)");
+        };
+        if let Some(prefix_command) = &mut prefix_command {
+            prefix_command.id = id.clone();
+        }
+        if let Some(slash_command) = &mut slash_command {
+            slash_command.id = id.clone();
+        }
+        if let Some(context_menu_command) = &mut context_menu_command {
+            context_menu_command.id = id.clone();
+        }
 
         let prefix_command = prefix_command.map(|prefix_command| crate::PrefixCommandMeta {
             command: prefix_command,
@@ -354,6 +381,7 @@ impl<U, E> CommandBuilder<U, E> {
                             name: cmd.name,
                             description: cmd.description,
                             subcommands: vec![subcommand],
+                            id,
                         };
                     }
                 }
@@ -424,19 +452,42 @@ impl<U, E> FrameworkOptions<U, E> {
     ) {
         // TODO: remove duplication with CommandBuilder::subcommand
 
+        // Unpack command implementations
         let crate::CommandDefinition {
-            prefix: prefix_command,
-            slash: slash_command,
-            context_menu: context_menu_command,
+            prefix: mut prefix_command,
+            slash: mut slash_command,
+            context_menu: mut context_menu_command,
         } = definition;
 
+        // Make sure every implementation points to the same CommandId (they may have different
+        // IDs if each implemented comes from a different function, like rustbot's rustify)
+        let id = if let Some(prefix_command) = &prefix_command {
+            prefix_command.id.clone()
+        } else if let Some(slash_command) = &slash_command {
+            slash_command.id.clone()
+        } else if let Some(context_menu_command) = &context_menu_command {
+            context_menu_command.id.clone()
+        } else {
+            panic!("Empty command definition (no implementations)");
+        };
+        if let Some(prefix_command) = &mut prefix_command {
+            prefix_command.id = id.clone();
+        }
+        if let Some(slash_command) = &mut slash_command {
+            slash_command.id = id.clone();
+        }
+        if let Some(context_menu_command) = &mut context_menu_command {
+            context_menu_command.id = id.clone();
+        }
+
+        // Wrap the commands in their meta structs
         let prefix_command = prefix_command.map(|prefix_command| crate::PrefixCommandMeta {
             command: prefix_command,
             subcommands: Vec::new(),
         });
-
         let slash_command = slash_command.map(crate::SlashCommandMeta::Command);
 
+        // Run the command builder on the meta structs to fill in metadata
         let mut builder = CommandBuilder {
             prefix_command,
             slash_command,
@@ -444,6 +495,7 @@ impl<U, E> FrameworkOptions<U, E> {
         };
         meta_builder(&mut builder);
 
+        // Insert command implementations
         if let Some(prefix_command) = builder.prefix_command {
             self.prefix_options.commands.push(prefix_command);
         }
@@ -547,9 +599,9 @@ pub struct CommandDefinition<U, E> {
 /// A view into a command definition with its different implementations
 pub struct CommandDefinitionRef<'a, U, E> {
     /// Prefix implementation of the command
-    pub prefix: Option<&'a crate::PrefixCommand<U, E>>,
+    pub prefix: Option<&'a crate::PrefixCommandMeta<U, E>>,
     /// Slash implementation of the command
-    pub slash: Option<&'a crate::SlashCommand<U, E>>,
+    pub slash: Option<&'a crate::SlashCommandMeta<U, E>>,
     /// Context menu implementation of the command
     pub context_menu: Option<&'a crate::ContextMenuCommand<U, E>>,
     /// Implementation type agnostic data that is always present

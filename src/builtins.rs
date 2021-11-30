@@ -168,17 +168,12 @@ pub async fn help<U, E>(
         return Ok(());
     }
 
-    let mut categories: Vec<(Option<&str>, Vec<crate::CommandDefinitionRef<'_, U, E>>)> =
-        Vec::new();
+    let mut categories =
+        crate::util::OrderedMap::<Option<&str>, Vec<crate::CommandDefinitionRef<'_, U, E>>>::new();
     for cmd in ctx.framework().commands() {
-        if let Some((_, commands)) = categories
-            .iter_mut()
-            .find(|(key, _)| *key == cmd.id.category)
-        {
-            commands.push(cmd);
-        } else {
-            categories.push((cmd.id.category, vec![cmd]));
-        }
+        categories
+            .get_or_insert_with(cmd.id.category, || Vec::new())
+            .push(cmd);
     }
 
     let mut menu = String::from("```\n");
@@ -191,11 +186,11 @@ pub async fn help<U, E>(
             }
 
             let (prefix, command_name) = if let Some(slash_command) = &command.slash {
-                ("/", slash_command.name)
+                ("/", slash_command.name())
             } else if let Some(prefix_command) = &command.prefix {
                 let prefix = &ctx.framework().options().prefix_options.prefix;
                 let prefix = prefix.as_deref().unwrap_or("");
-                (prefix, prefix_command.name)
+                (prefix, prefix_command.command.name)
             } else {
                 // This is not a prefix or slash command, i.e. probably a context menu only command
                 // which we don't show in the help menu

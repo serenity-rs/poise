@@ -1,6 +1,6 @@
 use crate::serenity_prelude as serenity;
-// I usually don't do imports, but these are very convenient
-use std::collections::HashMap;
+// I usually don't really do imports, but these are very convenient
+use crate::util::OrderedMap;
 use std::time::{Duration, Instant};
 
 /// Configuration struct for [`Cooldowns`]
@@ -26,10 +26,10 @@ pub struct Cooldowns {
     cooldown: CooldownConfig,
 
     global_invocation: Option<Instant>,
-    user_invocations: HashMap<serenity::UserId, Instant>,
-    guild_invocations: HashMap<serenity::GuildId, Instant>,
-    channel_invocations: HashMap<serenity::ChannelId, Instant>,
-    member_invocations: HashMap<(serenity::UserId, serenity::GuildId), Instant>,
+    user_invocations: OrderedMap<serenity::UserId, Instant>,
+    guild_invocations: OrderedMap<serenity::GuildId, Instant>,
+    channel_invocations: OrderedMap<serenity::ChannelId, Instant>,
+    member_invocations: OrderedMap<(serenity::UserId, serenity::GuildId), Instant>,
 }
 
 impl Cooldowns {
@@ -39,10 +39,10 @@ impl Cooldowns {
             cooldown: config,
 
             global_invocation: None,
-            user_invocations: HashMap::new(),
-            guild_invocations: HashMap::new(),
-            channel_invocations: HashMap::new(),
-            member_invocations: HashMap::new(),
+            user_invocations: OrderedMap::new(),
+            guild_invocations: OrderedMap::new(),
+            channel_invocations: OrderedMap::new(),
+            member_invocations: OrderedMap::new(),
         }
     }
 
