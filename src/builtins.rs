@@ -172,7 +172,7 @@ pub async fn help<U, E>(
         crate::util::OrderedMap::<Option<&str>, Vec<crate::CommandDefinitionRef<'_, U, E>>>::new();
     for cmd in ctx.framework().commands() {
         categories
-            .get_or_insert_with(cmd.id.category, || Vec::new())
+            .get_or_insert_with(cmd.id.category, Vec::new)
             .push(cmd);
     }
 

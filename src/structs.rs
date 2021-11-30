@@ -443,7 +443,7 @@ impl<U, E> FrameworkOptions<U, E> {
     /// # }
     /// # use poise::FrameworkOptions;
     /// let mut options = FrameworkOptions::default();
-    /// options.command(misc::ping(), |f| f.category("Miscellaneous"));
+    /// options.command(misc::ping(), |f| f);
     /// ```
     pub fn command(
         &mut self,
@@ -477,7 +477,7 @@ impl<U, E> FrameworkOptions<U, E> {
             slash_command.id = id.clone();
         }
         if let Some(context_menu_command) = &mut context_menu_command {
-            context_menu_command.id = id.clone();
+            context_menu_command.id = id;
         }
 
         // Wrap the commands in their meta structs

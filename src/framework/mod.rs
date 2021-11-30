@@ -253,12 +253,12 @@ impl<U, E> Framework<U, E> {
 
         let mut map = CommandMap::new();
         for command in &self.options().prefix_options.commands {
-            get_command(&mut map, &command.command.id).prefix = Some(&command);
+            get_command(&mut map, &command.command.id).prefix = Some(command);
         }
         for command in &self.options().application_options.commands {
             match command {
                 ApplicationCommandTree::Slash(command) => {
-                    get_command(&mut map, &command.id()).slash = Some(command)
+                    get_command(&mut map, command.id()).slash = Some(command)
                 }
                 ApplicationCommandTree::ContextMenu(command) => {
                     get_command(&mut map, &command.id).context_menu = Some(command)

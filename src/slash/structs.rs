@@ -231,6 +231,7 @@ impl<U, E> SlashCommandMeta<U, E> {
         }
     }
 
+    /// Returns the [`crate::CommandId`] for this command or command group
     pub fn id(&self) -> &std::sync::Arc<crate::CommandId> {
         match self {
             SlashCommandMeta::Command(cmd) => &cmd.id,
