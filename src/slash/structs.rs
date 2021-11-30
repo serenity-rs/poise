@@ -93,7 +93,7 @@ impl<U, E> crate::_GetGenerics for ApplicationContext<'_, U, E> {
 }
 
 impl<U, E> ApplicationContext<'_, U, E> {
-    /// See [`Context::defer()`]
+    /// See [`crate::Context::defer()`]
     pub async fn defer_response(&self, ephemeral: bool) -> Result<(), serenity::Error> {
         let interaction = match self.interaction {
             ApplicationCommandOrAutocompleteInteraction::ApplicationCommand(x) => x,

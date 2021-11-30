@@ -29,8 +29,8 @@ impl<'a, U, E> Context<'a, U, E> {
     /// Defer the response, giving the bot multiple minutes to respond without the user seeing an
     /// "interaction failed error".
     ///
-    /// Also sets the [`ApplicationContext::has_sent_initial_response`] flag so the subsequent
-    /// response will be sent in the correct manner.
+    /// Also sets the [`crate::ApplicationContext::has_sent_initial_response`] flag so subsequent
+    /// responses will be sent in the correct manner.
     ///
     /// No-op if this is an autocomplete context
     ///
@@ -56,7 +56,7 @@ impl<'a, U, E> Context<'a, U, E> {
     ///
     /// If this is a prefix command, a typing broadcast is started until the return value is
     /// dropped.
-    #[must_use = "The typing broadcast will only persist if you store it"]
+    // #[must_use = "The typing broadcast will only persist if you store it"] // currently doesn't work
     pub async fn defer_or_broadcast(self) -> Result<Option<serenity::Typing>, serenity::Error> {
         Ok(match self {
             Self::Application(ctx) => {
