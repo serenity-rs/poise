@@ -336,25 +336,6 @@ impl<U, E> Framework<U, E> {
                     }
                 }
             }
-            Event::MessageDelete {
-                deleted_message_id, ..
-            } => {
-                if let Some(edit_tracker) = &self.options.prefix_options.edit_tracker {
-                    let bot_response = edit_tracker
-                        .write()
-                        .unwrap()
-                        .find_bot_response(*deleted_message_id)
-                        .cloned();
-                    if let Some(bot_response) = bot_response {
-                        if let Err(e) = bot_response.delete(&ctx).await {
-                            println!(
-                                "Warning: couldn't delete bot response when user deleted message: {}",
-                                e
-                            );
-                        }
-                    }
-                }
-            }
             Event::InteractionCreate {
                 interaction: serenity::Interaction::ApplicationCommand(interaction),
             } => {
