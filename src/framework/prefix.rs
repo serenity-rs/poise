@@ -198,6 +198,7 @@ pub async fn dispatch_message<'a, U, E>(
     ctx: &'a serenity::Context,
     msg: &'a serenity::Message,
     triggered_by_edit: bool,
+    previously_tracked: bool,
 ) -> Result<(), Option<(E, crate::PrefixCommandErrorContext<'a, U, E>)>>
 where
     U: Send + Sync,
@@ -223,7 +224,9 @@ where
     .ok_or(None)?;
     let command = &command_meta.command;
 
-    if triggered_by_edit && !command.options.track_edits {
+    if (triggered_by_edit && !command.options.track_edits)
+        && !(!previously_tracked && this.options.prefix_options.execute_untracked_edits)
+    {
         return Err(None);
     }
 

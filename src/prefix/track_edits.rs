@@ -67,15 +67,14 @@ impl EditTracker {
     }
 
     /// Returns a copy of a newly up-to-date cached message, or a brand new generated message when
-    /// not in cache
+    /// not in cache. Also returns a bool with `true` if this message was previously tracked
     ///
-    /// Returns None if the command shouldn't be re-run, e.g. if the message content stayed the
-    /// same
+    /// Returns None if the command shouldn't be re-run, e.g. if the message content wasn't edited
     pub fn process_message_update(
         &mut self,
         user_msg_update: &serenity::MessageUpdateEvent,
         ignore_edit_tracker_cache: bool,
-    ) -> Option<serenity::Message> {
+    ) -> Option<(serenity::Message, bool)> {
         match self
             .cache
             .iter_mut()
@@ -92,13 +91,13 @@ impl EditTracker {
                 }
 
                 update_message(user_msg, user_msg_update.clone());
-                Some(user_msg.clone())
+                Some((user_msg.clone(), true))
             }
             None => {
                 if !ignore_edit_tracker_cache {
                     let mut user_msg = serenity::CustomMessage::new().build();
                     update_message(&mut user_msg, user_msg_update.clone());
-                    Some(user_msg)
+                    Some((user_msg, false))
                 } else {
                     None
                 }
@@ -155,7 +154,13 @@ pub async fn send_prefix_reply<'a, U, E>(
 
     let lock_edit_tracker = || {
         if let Some(command) = ctx.command {
-            if !command.options.track_edits {
+            // If we definitely don't need to track this command invocation, stop
+            let execute_untracked_edits = ctx
+                .framework
+                .options()
+                .prefix_options
+                .execute_untracked_edits;
+            if !(command.options.track_edits || execute_untracked_edits) {
                 return None;
             }
         }

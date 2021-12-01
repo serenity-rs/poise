@@ -48,7 +48,7 @@ pub struct PrefixCommandOptions<U, E> {
     pub check: Option<fn(PrefixContext<'_, U, E>) -> BoxFuture<'_, Result<bool, E>>>,
     /// Whether to enable edit tracking for commands by default.
     ///
-    /// Note: this won't do anything if `Framework::edit_tracker` isn't set.
+    /// Note: only has an effect if `Framework::edit_tracker` is set.
     pub track_edits: bool,
     /// Whether to broadcast a typing indicator while executing this commmand.
     pub broadcast_typing: bool,
@@ -170,6 +170,15 @@ pub struct PrefixFrameworkOptions<U, E> {
     /// If Some, the framework will react to message edits by editing the corresponding bot response
     /// with the new result.
     pub edit_tracker: Option<std::sync::RwLock<super::EditTracker>>,
+    /// If the user makes a typo in their message and a subsequent edit creates a valid invocation,
+    /// the bot will execute the command if this attribute is set. [`Self::edit_tracker`] does not
+    /// need to be set for this.
+    ///
+    /// That does not mean that any subsequent edits will also trigger execution. For that,
+    /// see [`PrefixCommandOptions::track_edits`].
+    ///
+    /// Note: only has an effect if [`Self::edit_tracker`] is set.
+    pub execute_untracked_edits: bool,
     /// Wether or not to ignore message edits on messages outside the cache.
     /// This can happen if the message edit happens while the command is being invoked, or the
     /// original message wasn't a command.
@@ -200,6 +209,7 @@ impl<U, E> Default for PrefixFrameworkOptions<U, E> {
             stripped_dynamic_prefix: None,
             mention_as_prefix: true,
             edit_tracker: None,
+            execute_untracked_edits: true,
             ignore_edit_tracker_cache: false,
             execute_self_messages: false,
             case_insensitive_commands: true,

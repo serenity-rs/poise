@@ -301,7 +301,7 @@ impl<U, E> Framework<U, E> {
             }
             Event::Message { new_message } => {
                 if let Err(Some((err, ctx))) =
-                    prefix::dispatch_message(self, &ctx, new_message, false).await
+                    prefix::dispatch_message(self, &ctx, new_message, false, false).await
                 {
                     if let Some(on_error) = ctx.command.options.on_error {
                         (on_error)(err, ctx).await;
@@ -321,9 +321,10 @@ impl<U, E> Framework<U, E> {
                         self.options().prefix_options.ignore_edit_tracker_cache,
                     );
 
-                    if let Some(msg) = msg {
+                    if let Some((msg, previously_tracked)) = msg {
                         if let Err(Some((err, ctx))) =
-                            prefix::dispatch_message(self, &ctx, &msg, true).await
+                            prefix::dispatch_message(self, &ctx, &msg, true, previously_tracked)
+                                .await
                         {
                             (self.options.on_error)(
                                 err,
