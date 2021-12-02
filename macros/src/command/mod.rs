@@ -79,6 +79,7 @@ pub struct CommandOptions {
     hide_in_help: bool,
     ephemeral: bool,
     required_permissions: Option<syn::Ident>,
+    required_bot_permissions: Option<syn::Ident>,
     owners_only: bool,
     identifying_name: Option<String>,
     category: Option<String>,
@@ -119,6 +120,7 @@ pub struct Invocation<'a> {
     explanation: Option<&'a str>,
     function: &'a syn::ItemFn,
     required_permissions: &'a syn::Expr,
+    required_bot_permissions: &'a syn::Expr,
     more: &'a CommandOptions,
 }
 
@@ -166,6 +168,10 @@ fn make_command_id(inv: &Invocation) -> proc_macro2::TokenStream {
     let channel_cooldown = wrap_option(inv.more.channel_cooldown);
     let member_cooldown = wrap_option(inv.more.member_cooldown);
 
+    let required_permissions = inv.required_permissions;
+    let required_bot_permissions = inv.required_bot_permissions;
+    let owners_only = inv.more.owners_only;
+
     quote::quote! {
         ::poise::CommandId {
             identifying_name: String::from(#identifying_name),
@@ -178,7 +184,10 @@ fn make_command_id(inv: &Invocation) -> proc_macro2::TokenStream {
                 guild: #guild_cooldown.map(std::time::Duration::from_secs),
                 channel: #channel_cooldown.map(std::time::Duration::from_secs),
                 member: #member_cooldown.map(std::time::Duration::from_secs),
-            }))
+            })),
+            required_permissions: #required_permissions,
+            required_bot_permissions: #required_bot_permissions,
+            owners_only: #owners_only,
         }
     }
 }
@@ -244,6 +253,10 @@ pub fn command(
         Some(perms) => syn::parse_quote! { poise::serenity_prelude::Permissions::#perms },
         None => syn::parse_quote! { poise::serenity_prelude::Permissions::empty() },
     };
+    let required_bot_permissions = match &args.required_bot_permissions {
+        Some(perms) => syn::parse_quote! { poise::serenity_prelude::Permissions::#perms },
+        None => syn::parse_quote! { poise::serenity_prelude::Permissions::empty() },
+    };
 
     let invocation = Invocation {
         command_name: args
@@ -256,6 +269,7 @@ pub fn command(
         more: &args,
         function: &function,
         required_permissions: &required_permissions,
+        required_bot_permissions: &required_bot_permissions,
     };
 
     let prefix_command_spec = wrap_option(if args.prefix_command {

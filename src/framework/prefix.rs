@@ -135,8 +135,8 @@ where
         // Make sure that user has required permissions
         if !super::check_required_permissions_and_owners_only(
             crate::Context::Prefix(prefix_ctx),
-            command.options.required_permissions,
-            command.options.owners_only,
+            command.id.required_permissions,
+            command.id.owners_only,
         )
         .await
         {
@@ -224,9 +224,10 @@ where
     .ok_or(None)?;
     let command = &command_meta.command;
 
-    if (triggered_by_edit && !command.options.track_edits)
-        && !(!previously_tracked && this.options.prefix_options.execute_untracked_edits)
-    {
+    // Check if we should disregard this invocation if it was triggered by an edit
+    let should_execute_if_triggered_by_edit = command.options.track_edits
+        || (!previously_tracked && this.options.prefix_options.execute_untracked_edits);
+    if triggered_by_edit && !should_execute_if_triggered_by_edit {
         return Err(None);
     }
 
@@ -256,6 +257,27 @@ where
         return Err(None);
     }
     cooldowns.lock().unwrap().start_cooldown(ctx.into());
+
+    let missing_bot_permissions =
+        super::check_missing_bot_permissions(ctx.into(), command.id.required_bot_permissions).await;
+    if !missing_bot_permissions.is_empty() {
+        (ctx.framework.options().missing_bot_permissions_handler)(
+            ctx.into(),
+            missing_bot_permissions,
+        )
+        .await
+        .map_err(|e| {
+            Some((
+                e,
+                crate::PrefixCommandErrorContext {
+                    ctx,
+                    command,
+                    location: crate::CommandErrorLocation::MissingBotPermissionsCallback,
+                },
+            ))
+        })?;
+        return Err(None);
+    }
 
     // Typing is broadcasted as long as this object is alive
     let _typing_broadcaster = if command.options.broadcast_typing {

@@ -408,6 +408,11 @@ pub struct FrameworkOptions<U, E> {
     /// Called when a command is invoked before its cooldown has expired
     pub cooldown_hit:
         Option<fn(Context<'_, U, E>, std::time::Duration) -> BoxFuture<'_, Result<(), E>>>,
+    /// Called if the bot is lacking any of the permissions specified in
+    /// [`crate::CommandId::required_bot_permissions`]. The list of missing permissions is given as
+    /// an argument.
+    pub missing_bot_permissions_handler:
+        fn(Context<'_, U, E>, serenity::Permissions) -> BoxFuture<'_, Result<(), E>>,
     /// Default set of allowed mentions to use for all responses
     pub allowed_mentions: Option<serenity::CreateAllowedMentions>,
     /// Called on every Discord event. Can be used to react to non-command events, like messages
@@ -572,6 +577,17 @@ impl<U: Send + Sync, E: std::fmt::Display + Send> Default for FrameworkOptions<U
                     Ok(())
                 })
             }),
+            missing_bot_permissions_handler: |ctx, missing_permissions| {
+                Box::pin(async move {
+                    let msg = format!(
+                        "Command cannot be executed because the bot is lacking permissions: {}",
+                        missing_permissions,
+                    );
+                    let _: Result<_, _> = ctx.send(|b| b.content(msg).ephemeral(true)).await;
+
+                    Ok(())
+                })
+            },
             allowed_mentions: Some({
                 let mut f = serenity::CreateAllowedMentions::default();
                 // Only support direct user pings by default
@@ -628,6 +644,19 @@ pub struct CommandId {
     pub inline_help: Option<&'static str>,
     /// Handles command cooldowns. Mainly for framework internal use
     pub cooldowns: std::sync::Mutex<crate::Cooldowns>,
+    /// Permissions which users must have to invoke this command.
+    ///
+    /// Set to [`serenity::Permissions::empty()`] by default
+    pub required_permissions: serenity::Permissions,
+    /// Permissions without which command execution will fail. You can set this to fail early and
+    /// give a descriptive error message in case the
+    /// bot hasn't been assigned the minimum permissions by the guild admin.
+    ///
+    /// Set to [`serenity::Permissions::empty()`] by default
+    pub required_bot_permissions: serenity::Permissions,
+    /// If true, only users from the [owners list](crate::FrameworkOptions::owners) may use this
+    /// command.
+    pub owners_only: bool,
 }
 
 /// Used for command errors to store the specific operation in a command's execution where an
@@ -640,6 +669,8 @@ pub enum CommandErrorLocation {
     Check,
     /// Error occured in a parameter autocomplete callback
     Autocomplete,
-    /// Error occured in the callback which was invoked because a cooldown limit was hit
+    /// Error occured in [`crate::FrameworkOptions::cooldown_hit`]
     CooldownCallback,
+    /// Error occured in [`crate::FrameworkOptions::missing_bot_permissions_handler`]
+    MissingBotPermissionsCallback,
 }

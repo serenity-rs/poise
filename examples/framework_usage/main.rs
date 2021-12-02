@@ -94,6 +94,7 @@ async fn main() {
         .command(commands::add(), |f| f)
         .command(commands::choice(), |f| f)
         .command(commands::boop(), |f| f)
+        .command(commands::delete(), |f| f)
         .command(context_menu::user_info(), |f| f)
         .command(context_menu::echo(), |f| f)
         .command(autocomplete::greet(), |f| f)

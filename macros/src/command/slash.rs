@@ -18,15 +18,11 @@ fn generate_options(inv: &Invocation) -> proc_macro2::TokenStream {
     };
 
     let ephemeral = inv.more.ephemeral;
-    let required_permissions = inv.required_permissions;
-    let owners_only = inv.more.owners_only;
     quote::quote! {
         ::poise::ApplicationCommandOptions {
             check: #check,
             on_error: #on_error,
             ephemeral: #ephemeral,
-            required_permissions: #required_permissions,
-            owners_only: #owners_only,
         }
     }
 }

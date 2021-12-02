@@ -80,8 +80,6 @@ pub fn generate_prefix_command_spec(
     let broadcast_typing = inv.more.broadcast_typing;
     let aliases = &inv.more.aliases.0;
     let param_names = inv.parameters.iter().map(|p| &p.name).collect::<Vec<_>>();
-    let required_permissions = inv.required_permissions;
-    let owners_only = inv.more.owners_only;
     Ok(quote::quote! {
         ::poise::PrefixCommand {
             name: #command_name,
@@ -101,8 +99,6 @@ pub fn generate_prefix_command_spec(
                 multiline_help: #explanation,
                 check: #check,
                 on_error: #on_error,
-                required_permissions: #required_permissions,
-                owners_only: #owners_only,
             }
         }
     })

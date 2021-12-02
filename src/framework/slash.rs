@@ -137,8 +137,8 @@ pub async fn extract_command_and_run_checks<'a, U, E>(
     // Make sure that user has required permissions
     if !super::check_required_permissions_and_owners_only(
         crate::Context::Application(ctx),
-        command.options().required_permissions,
-        command.options().owners_only,
+        command.id().required_permissions,
+        command.id().owners_only,
     )
     .await
     {
@@ -195,6 +195,27 @@ pub async fn extract_command_and_run_checks<'a, U, E>(
         return Err(None);
     }
     cooldowns.lock().unwrap().start_cooldown(ctx.into());
+
+    let missing_bot_permissions =
+        super::check_missing_bot_permissions(ctx.into(), command.id().required_bot_permissions)
+            .await;
+    if !missing_bot_permissions.is_empty() {
+        (ctx.framework.options().missing_bot_permissions_handler)(
+            ctx.into(),
+            missing_bot_permissions,
+        )
+        .await
+        .map_err(|e| {
+            Some((
+                e,
+                crate::ApplicationCommandErrorContext {
+                    ctx,
+                    location: crate::CommandErrorLocation::MissingBotPermissionsCallback,
+                },
+            ))
+        })?;
+        return Err(None);
+    }
 
     Ok((ctx, leaf_interaction_options))
 }

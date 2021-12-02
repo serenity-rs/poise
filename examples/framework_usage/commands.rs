@@ -140,3 +140,17 @@ pub async fn boop(ctx: Context<'_>) -> Result<(), Error> {
 
     Ok(())
 }
+
+/// Deletes the given message
+#[poise::command(
+    prefix_command,
+    slash_command,
+    required_bot_permissions = "MANAGE_MESSAGES"
+)]
+pub async fn delete(
+    ctx: Context<'_>,
+    #[description = "Message to be deleted"] msg: serenity::Message,
+) -> Result<(), Error> {
+    msg.delete(ctx.discord()).await?;
+    Ok(())
+}

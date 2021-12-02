@@ -142,11 +142,6 @@ pub struct ApplicationCommandOptions<U, E> {
     pub check: Option<fn(ApplicationContext<'_, U, E>) -> BoxFuture<'_, Result<bool, E>>>,
     /// Whether responses to this command should be ephemeral by default.
     pub ephemeral: bool,
-    /// Permissions which a user needs to have so that the application command runs.
-    pub required_permissions: serenity::Permissions,
-    /// If true, only users from the [owners list](crate::FrameworkOptions::owners) may use this
-    /// command.
-    pub owners_only: bool,
 }
 
 impl<U, E> Default for ApplicationCommandOptions<U, E> {
@@ -155,8 +150,6 @@ impl<U, E> Default for ApplicationCommandOptions<U, E> {
             on_error: None,
             check: None,
             ephemeral: false,
-            required_permissions: serenity::Permissions::empty(),
-            owners_only: false,
         }
     }
 }

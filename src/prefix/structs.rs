@@ -52,13 +52,6 @@ pub struct PrefixCommandOptions<U, E> {
     pub track_edits: bool,
     /// Whether to broadcast a typing indicator while executing this commmand.
     pub broadcast_typing: bool,
-    /// Permissions which users must have to invoke this command.
-    ///
-    /// Set to [`serenity::Permissions::empty()`] by default
-    pub required_permissions: serenity::Permissions,
-    /// If true, only users from the [owners list](crate::FrameworkOptions::owners) may use this
-    /// command.
-    pub owners_only: bool,
 }
 
 impl<U, E> Default for PrefixCommandOptions<U, E> {
@@ -70,8 +63,6 @@ impl<U, E> Default for PrefixCommandOptions<U, E> {
             aliases: &[],
             track_edits: false,
             broadcast_typing: false,
-            required_permissions: serenity::Permissions::empty(),
-            owners_only: false,
         }
     }
 }
