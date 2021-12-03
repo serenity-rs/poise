@@ -124,7 +124,7 @@ where
             continue;
         }
 
-        let prefix_ctx = crate::PrefixContext {
+        let ctx = crate::PrefixContext {
             discord: ctx,
             msg,
             framework: this,
@@ -134,7 +134,7 @@ where
 
         // Make sure that user has required permissions
         if !super::check_required_permissions_and_owners_only(
-            crate::Context::Prefix(prefix_ctx),
+            crate::Context::Prefix(ctx),
             command.id.required_permissions,
             command.id.owners_only,
         )
@@ -143,15 +143,38 @@ where
             continue;
         }
 
+        // Before running any checks, make sure the bot has the permissions it needs
+        let missing_bot_permissions =
+            super::check_missing_bot_permissions(ctx.into(), command.id.required_bot_permissions)
+                .await;
+        if !missing_bot_permissions.is_empty() {
+            (ctx.framework.options().missing_bot_permissions_handler)(
+                ctx.into(),
+                missing_bot_permissions,
+            )
+            .await
+            .map_err(|e| {
+                (
+                    e,
+                    crate::PrefixCommandErrorContext {
+                        ctx,
+                        command,
+                        location: crate::CommandErrorLocation::MissingBotPermissionsCallback,
+                    },
+                )
+            })?;
+            continue;
+        }
+
         // Only continue if command checks returns true
         let checks_passing = (|| async {
             let global_check_passes = match &this.options.command_check {
-                Some(check) => check(crate::Context::Prefix(prefix_ctx)).await?,
+                Some(check) => check(crate::Context::Prefix(ctx)).await?,
                 None => true,
             };
 
             let command_specific_check_passes = match &command.options.check {
-                Some(check) => check(prefix_ctx).await?,
+                Some(check) => check(ctx).await?,
                 None => true,
             };
 
@@ -163,7 +186,7 @@ where
                 e,
                 crate::PrefixCommandErrorContext {
                     command,
-                    ctx: prefix_ctx,
+                    ctx,
                     location: crate::CommandErrorLocation::Check,
                 },
             )
@@ -173,12 +196,17 @@ where
         }
 
         first_matching_command = Some(
-            if let Some((subcommand_meta, remaining_message)) =
-                find_command(this, ctx, msg, &command_meta.subcommands, remaining_message).await?
+            match find_command(
+                this,
+                ctx.discord,
+                msg,
+                &command_meta.subcommands,
+                remaining_message,
+            )
+            .await?
             {
-                (subcommand_meta, remaining_message)
-            } else {
-                (command_meta, remaining_message)
+                Some((subcommand_meta, remaining_message)) => (subcommand_meta, remaining_message),
+                None => (command_meta, remaining_message),
             },
         );
         break;
@@ -257,27 +285,6 @@ where
         return Err(None);
     }
     cooldowns.lock().unwrap().start_cooldown(ctx.into());
-
-    let missing_bot_permissions =
-        super::check_missing_bot_permissions(ctx.into(), command.id.required_bot_permissions).await;
-    if !missing_bot_permissions.is_empty() {
-        (ctx.framework.options().missing_bot_permissions_handler)(
-            ctx.into(),
-            missing_bot_permissions,
-        )
-        .await
-        .map_err(|e| {
-            Some((
-                e,
-                crate::PrefixCommandErrorContext {
-                    ctx,
-                    command,
-                    location: crate::CommandErrorLocation::MissingBotPermissionsCallback,
-                },
-            ))
-        })?;
-        return Err(None);
-    }
 
     // Typing is broadcasted as long as this object is alive
     let _typing_broadcaster = if command.options.broadcast_typing {
