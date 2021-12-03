@@ -145,7 +145,7 @@ pub async fn boop(ctx: Context<'_>) -> Result<(), Error> {
 #[poise::command(
     prefix_command,
     slash_command,
-    required_bot_permissions = "MANAGE_MESSAGES"
+    required_bot_permissions = "MANAGE_MESSAGES | ADMINISTRATOR"
 )]
 pub async fn delete(
     ctx: Context<'_>,

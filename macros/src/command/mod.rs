@@ -78,8 +78,8 @@ pub struct CommandOptions {
     discard_spare_arguments: bool,
     hide_in_help: bool,
     ephemeral: bool,
-    required_permissions: Option<syn::Ident>,
-    required_bot_permissions: Option<syn::Ident>,
+    required_permissions: Option<syn::punctuated::Punctuated<syn::Ident, syn::Token![|]>>,
+    required_bot_permissions: Option<syn::punctuated::Punctuated<syn::Ident, syn::Token![|]>>,
     owners_only: bool,
     identifying_name: Option<String>,
     category: Option<String>,
@@ -249,14 +249,19 @@ pub fn command(
     // Extract the command descriptionss from the function doc comments
     let (description, explanation) = extract_help_from_doc_comments(&function.attrs);
 
-    let required_permissions = match &args.required_permissions {
-        Some(perms) => syn::parse_quote! { poise::serenity_prelude::Permissions::#perms },
-        None => syn::parse_quote! { poise::serenity_prelude::Permissions::empty() },
-    };
-    let required_bot_permissions = match &args.required_bot_permissions {
-        Some(perms) => syn::parse_quote! { poise::serenity_prelude::Permissions::#perms },
-        None => syn::parse_quote! { poise::serenity_prelude::Permissions::empty() },
-    };
+    fn permissions_to_tokens(
+        perms: &Option<syn::punctuated::Punctuated<syn::Ident, syn::Token![|]>>,
+    ) -> Result<syn::Expr, darling::Error> {
+        Ok(match perms {
+            Some(perms) => {
+                let perms = perms.iter();
+                syn::parse_quote! { #(poise::serenity_prelude::Permissions::#perms)|* }
+            }
+            None => syn::parse_quote! { poise::serenity_prelude::Permissions::empty() },
+        })
+    }
+    let required_permissions = permissions_to_tokens(&args.required_permissions)?;
+    let required_bot_permissions = permissions_to_tokens(&args.required_bot_permissions)?;
 
     let invocation = Invocation {
         command_name: args
