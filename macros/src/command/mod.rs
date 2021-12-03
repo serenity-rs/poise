@@ -251,17 +251,17 @@ pub fn command(
 
     fn permissions_to_tokens(
         perms: &Option<syn::punctuated::Punctuated<syn::Ident, syn::Token![|]>>,
-    ) -> Result<syn::Expr, darling::Error> {
-        Ok(match perms {
+    ) -> syn::Expr {
+        match perms {
             Some(perms) => {
                 let perms = perms.iter();
                 syn::parse_quote! { #(poise::serenity_prelude::Permissions::#perms)|* }
             }
             None => syn::parse_quote! { poise::serenity_prelude::Permissions::empty() },
-        })
+        }
     }
-    let required_permissions = permissions_to_tokens(&args.required_permissions)?;
-    let required_bot_permissions = permissions_to_tokens(&args.required_bot_permissions)?;
+    let required_permissions = permissions_to_tokens(&args.required_permissions);
+    let required_bot_permissions = permissions_to_tokens(&args.required_bot_permissions);
 
     let invocation = Invocation {
         command_name: args
