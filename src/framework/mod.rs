@@ -12,7 +12,6 @@ pub use dispatch::dispatch_message;
 /// The main framework struct which stores all data and handles message and interaction dispatch.
 pub struct Framework<U, E> {
     user_data: once_cell::sync::OnceCell<U>,
-    bot_id: serenity::UserId,
     // TODO: wrap in RwLock to allow changing framework options while running? Could also replace
     // the edit tracking cache interior mutability
     options: crate::FrameworkOptions<U, E>,
@@ -76,9 +75,6 @@ impl<U, E> Framework<U, E> {
         let self_1 = std::sync::Arc::new(Self {
             user_data: once_cell::sync::OnceCell::new(),
             user_data_setup: std::sync::Mutex::new(Some(Box::new(user_data_setup))),
-            bot_id: serenity::parse_token(client_builder.get_token().trim_start_matches("Bot "))
-                .expect("Invalid bot token")
-                .bot_user_id,
             // To break up the circular dependency (framework setup -> client setup -> event handler
             // -> framework), we initialize this with None and then immediately fill in once the
             // client is created

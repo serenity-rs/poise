@@ -2,25 +2,25 @@ use crate::serenity_prelude as serenity;
 
 // Returns tuple of stripped prefix and rest of the message, if any prefix matches
 async fn strip_prefix<'a, U, E>(
-    this: &'a crate::Framework<U, E>,
+    framework: &'a crate::Framework<U, E>,
     ctx: &'a serenity::Context,
     msg: &'a serenity::Message,
 ) -> Option<(&'a str, &'a str)> {
-    if let Some(dynamic_prefix) = this.options.prefix_options.dynamic_prefix {
-        if let Some(prefix) = dynamic_prefix(ctx, msg, this.get_user_data().await).await {
+    if let Some(dynamic_prefix) = framework.options.prefix_options.dynamic_prefix {
+        if let Some(prefix) = dynamic_prefix(ctx, msg, framework.get_user_data().await).await {
             if msg.content.starts_with(&prefix) {
                 return Some(msg.content.split_at(prefix.len()));
             }
         }
     }
 
-    if let Some(prefix) = &this.options.prefix_options.prefix {
+    if let Some(prefix) = &framework.options.prefix_options.prefix {
         if let Some(content) = msg.content.strip_prefix(prefix) {
             return Some((prefix, content));
         }
     }
 
-    if let Some((prefix, content)) = this
+    if let Some((prefix, content)) = framework
         .options
         .prefix_options
         .additional_prefixes
@@ -40,20 +40,21 @@ async fn strip_prefix<'a, U, E>(
         return Some((prefix, content));
     }
 
-    if let Some(dynamic_prefix) = this.options.prefix_options.stripped_dynamic_prefix {
-        if let Some((prefix, content)) = dynamic_prefix(ctx, msg, this.get_user_data().await).await
+    if let Some(dynamic_prefix) = framework.options.prefix_options.stripped_dynamic_prefix {
+        if let Some((prefix, content)) =
+            dynamic_prefix(ctx, msg, framework.get_user_data().await).await
         {
             return Some((prefix, content));
         }
     }
 
-    if this.options.prefix_options.mention_as_prefix {
+    if framework.options.prefix_options.mention_as_prefix {
         // Mentions are either <@USER_ID> or <@!USER_ID>
         if let Some(stripped_content) = (|| {
             msg.content
                 .strip_prefix("<@")?
                 .trim_start_matches('!')
-                .strip_prefix(&this.bot_id.0.to_string())?
+                .strip_prefix(&ctx.cache.current_user_id().0.to_string())?
                 .strip_prefix('>')
         })() {
             let mention_prefix = &msg.content[..(msg.content.len() - stripped_content.len())];
@@ -69,7 +70,7 @@ async fn strip_prefix<'a, U, E>(
 ///
 /// May throw an error if a command check fails
 fn find_command<'a, U, E>(
-    this: &'a crate::Framework<U, E>,
+    framework: &'a crate::Framework<U, E>,
     ctx: &'a serenity::Context,
     msg: &'a serenity::Message,
     prefix: &'a str,
@@ -86,7 +87,7 @@ where
     U: Send + Sync,
 {
     Box::pin(_find_command(
-        this,
+        framework,
         ctx,
         msg,
         prefix,
@@ -96,7 +97,7 @@ where
 }
 
 async fn _find_command<'a, U, E>(
-    this: &'a crate::Framework<U, E>,
+    framework: &'a crate::Framework<U, E>,
     ctx: &'a serenity::Context,
     msg: &'a serenity::Message,
     prefix: &'a str,
@@ -109,7 +110,7 @@ async fn _find_command<'a, U, E>(
 where
     U: Send + Sync,
 {
-    let considered_equal = if this.options.prefix_options.case_insensitive_commands {
+    let considered_equal = if framework.options.prefix_options.case_insensitive_commands {
         |a: &str, b: &str| a.eq_ignore_ascii_case(b)
     } else {
         |a: &str, b: &str| a == b
@@ -138,8 +139,8 @@ where
             discord: ctx,
             msg,
             prefix,
-            framework: this,
-            data: this.get_user_data().await,
+            framework,
+            data: framework.get_user_data().await,
             command: Some(&command_meta.command),
         };
 
@@ -179,7 +180,7 @@ where
 
         // Only continue if command checks returns true
         let checks_passing = (|| async {
-            let global_check_passes = match &this.options.command_check {
+            let global_check_passes = match &framework.options.command_check {
                 Some(check) => check(crate::Context::Prefix(ctx)).await?,
                 None => true,
             };
@@ -208,7 +209,7 @@ where
 
         first_matching_command = Some(
             match find_command(
-                this,
+                framework,
                 ctx.discord,
                 msg,
                 prefix,
@@ -234,7 +235,7 @@ where
 /// - Err(None) if no command was run but no error happened
 /// - Err(Some(error: UserError)) if any user code yielded an error
 pub async fn dispatch_message<'a, U, E>(
-    this: &'a crate::Framework<U, E>,
+    framework: &'a crate::Framework<U, E>,
     ctx: &'a serenity::Context,
     msg: &'a serenity::Message,
     triggered_by_edit: bool,
@@ -244,21 +245,22 @@ where
     U: Send + Sync,
 {
     // Strip prefix and whitespace between prefix and command
-    let (prefix, msg_content) = strip_prefix(this, ctx, msg).await.ok_or(None)?;
+    let (prefix, msg_content) = strip_prefix(framework, ctx, msg).await.ok_or(None)?;
     let msg_content = msg_content.trim_start();
 
-    // If we know our own ID, and the message author ID is our own, and we aren't supposed to
-    // execute our own messages, THEN stop execution.
-    if !this.options.prefix_options.execute_self_messages && this.bot_id == msg.author.id {
+    // Check if we're allowed to execute our own messages
+    let bot_id = ctx.cache.current_user_id();
+    let execute_self_messages = framework.options.prefix_options.execute_self_messages;
+    if bot_id == msg.author.id && !execute_self_messages {
         return Err(None);
     }
 
     let (command_meta, args) = find_command(
-        this,
+        framework,
         ctx,
         msg,
         prefix,
-        &this.options.prefix_options.commands,
+        &framework.options.prefix_options.commands,
         msg_content,
     )
     .await
@@ -268,7 +270,7 @@ where
 
     // Check if we should disregard this invocation if it was triggered by an edit
     let should_execute_if_triggered_by_edit = command.options.track_edits
-        || (!previously_tracked && this.options.prefix_options.execute_untracked_edits);
+        || (!previously_tracked && framework.options.prefix_options.execute_untracked_edits);
     if triggered_by_edit && !should_execute_if_triggered_by_edit {
         return Err(None);
     }
@@ -277,8 +279,8 @@ where
         discord: ctx,
         msg,
         prefix,
-        framework: this,
-        data: this.get_user_data().await,
+        framework,
+        data: framework.get_user_data().await,
         command: Some(command),
     };
 
@@ -308,7 +310,7 @@ where
         None
     };
 
-    (this.options.pre_command)(crate::Context::Prefix(ctx)).await;
+    (framework.options.pre_command)(crate::Context::Prefix(ctx)).await;
 
     // Execute command
     let res = (command.action)(ctx, args).await.map_err(|e| {
@@ -322,7 +324,7 @@ where
         ))
     });
 
-    (this.options.post_command)(crate::Context::Prefix(ctx)).await;
+    (framework.options.post_command)(crate::Context::Prefix(ctx)).await;
 
     res
 }
