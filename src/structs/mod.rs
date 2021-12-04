@@ -38,12 +38,20 @@ impl<U, E> Clone for CommandRef<'_, U, E> {
 
 impl<U, E> Copy for CommandRef<'_, U, E> {}
 
-impl<U, E> CommandRef<'_, U, E> {
-    /// Yield name of this command, or, if context menu command, the context menu entry label
+impl<'a, U, E> CommandRef<'a, U, E> {
+    /// Yield `name` of this command, or, if context menu command, the context menu entry label
     pub fn name(self) -> &'static str {
         match self {
             Self::Prefix(x) => x.name,
             Self::Application(x) => x.slash_or_context_menu_name(),
+        }
+    }
+
+    /// Yield `id` of this command.
+    pub fn id(self) -> &'a std::sync::Arc<CommandId> {
+        match self {
+            Self::Prefix(x) => &x.id,
+            Self::Application(x) => x.id(),
         }
     }
 }
