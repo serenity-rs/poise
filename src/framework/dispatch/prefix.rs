@@ -2,7 +2,7 @@ use crate::serenity_prelude as serenity;
 
 // Returns tuple of stripped prefix and rest of the message, if any prefix matches
 async fn strip_prefix<'a, U, E>(
-    this: &'a super::Framework<U, E>,
+    this: &'a crate::Framework<U, E>,
     ctx: &'a serenity::Context,
     msg: &'a serenity::Message,
 ) -> Option<(&'a str, &'a str)> {
@@ -69,7 +69,7 @@ async fn strip_prefix<'a, U, E>(
 ///
 /// May throw an error if a command check fails
 fn find_command<'a, U, E>(
-    this: &'a super::Framework<U, E>,
+    this: &'a crate::Framework<U, E>,
     ctx: &'a serenity::Context,
     msg: &'a serenity::Message,
     prefix: &'a str,
@@ -96,7 +96,7 @@ where
 }
 
 async fn _find_command<'a, U, E>(
-    this: &'a super::Framework<U, E>,
+    this: &'a crate::Framework<U, E>,
     ctx: &'a serenity::Context,
     msg: &'a serenity::Message,
     prefix: &'a str,
@@ -234,7 +234,7 @@ where
 /// - Err(None) if no command was run but no error happened
 /// - Err(Some(error: UserError)) if any user code yielded an error
 pub async fn dispatch_message<'a, U, E>(
-    this: &'a super::Framework<U, E>,
+    this: &'a crate::Framework<U, E>,
     ctx: &'a serenity::Context,
     msg: &'a serenity::Message,
     triggered_by_edit: bool,

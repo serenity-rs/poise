@@ -1,109 +1,13 @@
 //! The central Framework struct that ties everything together.
 
-// Prefix and slash specific implementation details
-mod prefix;
-mod slash;
+mod dispatch;
 
 mod builder;
-
 pub use builder::*;
 
-use crate::serenity::client::{bridge::gateway::ShardManager, Client};
-use crate::serenity_prelude as serenity;
-use crate::*;
+use crate::{serenity_prelude as serenity, BoxFuture};
 
-pub use prefix::dispatch_message;
-
-/// Retrieves user permissions in the given channel. If unknown, returns None. If in DMs, returns
-/// `Permissions::all()`.
-async fn user_permissions(
-    ctx: &serenity::Context,
-    guild_id: Option<serenity::GuildId>,
-    channel_id: serenity::ChannelId,
-    user_id: serenity::UserId,
-) -> Option<serenity::Permissions> {
-    let guild_id = match guild_id {
-        Some(x) => x,
-        None => return Some(serenity::Permissions::all()), // no permission checks in DMs
-    };
-
-    let guild = match ctx.cache.guild(guild_id) {
-        Some(x) => x,
-        None => return None, // Guild not in cache
-    };
-
-    let channel = match guild.channels.get(&channel_id) {
-        Some(serenity::Channel::Guild(channel)) => channel,
-        Some(_other_channel) => {
-            println!(
-                "Warning: guild message was supposedly sent in a non-guild channel. Denying invocation"
-            );
-            return None;
-        }
-        None => return None,
-    };
-
-    // If member not in cache (probably because presences intent is not enabled), retrieve via HTTP
-    let member = match guild.members.get(&user_id) {
-        Some(x) => x.clone(),
-        None => match ctx.http.get_member(guild_id.0, user_id.0).await {
-            Ok(member) => member,
-            Err(_) => return None,
-        },
-    };
-
-    guild.user_permissions_in(channel, &member).ok()
-}
-
-async fn check_required_permissions_and_owners_only<U, E>(
-    ctx: crate::Context<'_, U, E>,
-    required_permissions: serenity::Permissions,
-    owners_only: bool,
-) -> bool {
-    if owners_only && !ctx.framework().options().owners.contains(&ctx.author().id) {
-        return false;
-    }
-
-    if !required_permissions.is_empty() {
-        let user_permissions = user_permissions(
-            ctx.discord(),
-            ctx.guild_id(),
-            ctx.channel_id(),
-            ctx.discord().cache.current_user_id(),
-        )
-        .await;
-        match user_permissions {
-            Some(perms) => {
-                if !perms.contains(required_permissions) {
-                    return false;
-                }
-            }
-            // better safe than sorry: when perms are unknown, restrict access
-            None => return false,
-        }
-    }
-
-    true
-}
-
-async fn check_missing_bot_permissions<U, E>(
-    ctx: crate::Context<'_, U, E>,
-    required_bot_permissions: serenity::Permissions,
-) -> serenity::Permissions {
-    let user_permissions = user_permissions(
-        ctx.discord(),
-        ctx.guild_id(),
-        ctx.channel_id(),
-        ctx.discord().cache.current_user_id(),
-    )
-    .await;
-    match user_permissions {
-        Some(perms) => required_bot_permissions - perms,
-        // When in doubt, just let it run. Not getting fancy missing permissions errors is better
-        // than the command not executing at all
-        None => serenity::Permissions::empty(),
-    }
-}
+pub use dispatch::dispatch_message;
 
 /// The main framework struct which stores all data and handles message and interaction dispatch.
 pub struct Framework<U, E> {
@@ -111,13 +15,14 @@ pub struct Framework<U, E> {
     bot_id: serenity::UserId,
     // TODO: wrap in RwLock to allow changing framework options while running? Could also replace
     // the edit tracking cache interior mutability
-    options: FrameworkOptions<U, E>,
+    options: crate::FrameworkOptions<U, E>,
     application_id: serenity::ApplicationId,
 
     // Will be initialized to Some on construction, and then taken out on startup
     client: std::sync::Mutex<Option<serenity::Client>>,
     // Initialized to Some during construction; so shouldn't be None at any observable point
-    shard_manager: std::sync::Mutex<Option<std::sync::Arc<tokio::sync::Mutex<ShardManager>>>>,
+    shard_manager:
+        std::sync::Mutex<Option<std::sync::Arc<tokio::sync::Mutex<serenity::ShardManager>>>>,
     // Filled with Some on construction. Taken out and executed on first Ready gateway event
     user_data_setup: std::sync::Mutex<
         Option<
@@ -154,7 +59,7 @@ impl<U, E> Framework<U, E> {
         application_id: serenity::ApplicationId,
         client_builder: serenity::ClientBuilder,
         user_data_setup: F,
-        options: FrameworkOptions<U, E>,
+        options: crate::FrameworkOptions<U, E>,
     ) -> Result<std::sync::Arc<Self>, serenity::Error>
     where
         F: Send
@@ -184,14 +89,12 @@ impl<U, E> Framework<U, E> {
         });
         let self_2 = self_1.clone();
 
-        let event_handler = EventWrapper(move |ctx, event| {
-            let self_2 = std::sync::Arc::clone(&self_2);
-            Box::pin(async move {
-                self_2.event(ctx, event).await;
-            }) as _
+        let event_handler = crate::EventWrapper(move |ctx, event| {
+            let self_2 = self_2.clone();
+            Box::pin(async move { dispatch::dispatch_event(&*self_2, ctx, event).await }) as _
         });
 
-        let client: Client = client_builder
+        let client: serenity::Client = client_builder
             .application_id(application_id.0)
             .event_handler(event_handler)
             .await?;
@@ -237,7 +140,7 @@ impl<U, E> Framework<U, E> {
     }
 
     /// Return the stored framework options, including commands.
-    pub fn options(&self) -> &FrameworkOptions<U, E> {
+    pub fn options(&self) -> &crate::FrameworkOptions<U, E> {
         &self.options
     }
 
@@ -247,7 +150,7 @@ impl<U, E> Framework<U, E> {
     }
 
     /// Returns the serenity's client shard manager.
-    pub fn shard_manager(&self) -> std::sync::Arc<tokio::sync::Mutex<ShardManager>> {
+    pub fn shard_manager(&self) -> std::sync::Arc<tokio::sync::Mutex<serenity::ShardManager>> {
         self.shard_manager
             .lock()
             .unwrap()
@@ -283,10 +186,10 @@ impl<U, E> Framework<U, E> {
         }
         for command in &self.options().application_options.commands {
             match command {
-                ApplicationCommandTree::Slash(command) => {
+                crate::ApplicationCommandTree::Slash(command) => {
                     get_command(&mut map, command.id()).slash = Some(command)
                 }
-                ApplicationCommandTree::ContextMenu(command) => {
+                crate::ApplicationCommandTree::ContextMenu(command) => {
                     get_command(&mut map, &command.id).context_menu = Some(command)
                 }
             }
@@ -303,115 +206,6 @@ impl<U, E> Framework<U, E> {
                 Some(x) => break x,
                 None => tokio::time::sleep(std::time::Duration::from_millis(100)).await,
             }
-        }
-    }
-
-    async fn event(&self, ctx: serenity::Context, event: Event<'_>)
-    where
-        U: Send + Sync,
-    {
-        match &event {
-            Event::Ready { data_about_bot } => {
-                let user_data_setup = Option::take(&mut *self.user_data_setup.lock().unwrap());
-                if let Some(user_data_setup) = user_data_setup {
-                    match user_data_setup(&ctx, data_about_bot, self).await {
-                        Ok(user_data) => {
-                            let _: Result<_, _> = self.user_data.set(user_data);
-                        }
-                        Err(e) => (self.options.on_error)(e, ErrorContext::Setup).await,
-                    }
-                } else {
-                    // discarding duplicate Discord bot ready event
-                    // (happens regularly when bot is online for long period of time)
-                }
-            }
-            Event::Message { new_message } => {
-                if let Err(Some((err, ctx))) =
-                    prefix::dispatch_message(self, &ctx, new_message, false, false).await
-                {
-                    if let Some(on_error) = ctx.command.options.on_error {
-                        (on_error)(err, ctx).await;
-                    } else {
-                        (self.options.on_error)(
-                            err,
-                            crate::ErrorContext::Command(crate::CommandErrorContext::Prefix(ctx)),
-                        )
-                        .await;
-                    }
-                }
-            }
-            Event::MessageUpdate { event, .. } => {
-                if let Some(edit_tracker) = &self.options.prefix_options.edit_tracker {
-                    let msg = edit_tracker.write().unwrap().process_message_update(
-                        event,
-                        self.options().prefix_options.ignore_edit_tracker_cache,
-                    );
-
-                    if let Some((msg, previously_tracked)) = msg {
-                        if let Err(Some((err, ctx))) =
-                            prefix::dispatch_message(self, &ctx, &msg, true, previously_tracked)
-                                .await
-                        {
-                            (self.options.on_error)(
-                                err,
-                                crate::ErrorContext::Command(crate::CommandErrorContext::Prefix(
-                                    ctx,
-                                )),
-                            )
-                            .await;
-                        }
-                    }
-                }
-            }
-            Event::InteractionCreate {
-                interaction: serenity::Interaction::ApplicationCommand(interaction),
-            } => {
-                if let Err(Some((e, error_ctx))) = slash::dispatch_interaction(
-                    self,
-                    &ctx,
-                    interaction,
-                    &std::sync::atomic::AtomicBool::new(false),
-                )
-                .await
-                {
-                    if let Some(on_error) = error_ctx.ctx.command.options().on_error {
-                        on_error(e, error_ctx).await;
-                    } else {
-                        (self.options.on_error)(
-                            e,
-                            ErrorContext::Command(CommandErrorContext::Application(error_ctx)),
-                        )
-                        .await;
-                    }
-                }
-            }
-            Event::InteractionCreate {
-                interaction: serenity::Interaction::Autocomplete(interaction),
-            } => {
-                if let Err(Some((e, error_ctx))) = slash::dispatch_autocomplete(
-                    self,
-                    &ctx,
-                    interaction,
-                    &std::sync::atomic::AtomicBool::new(false),
-                )
-                .await
-                {
-                    if let Some(on_error) = error_ctx.ctx.command.options().on_error {
-                        on_error(e, error_ctx).await;
-                    } else {
-                        (self.options.on_error)(e, ErrorContext::Autocomplete(error_ctx)).await;
-                    }
-                }
-            }
-            _ => {}
-        }
-
-        // Do this after the framework's Ready handling, so that self.get_user_data() doesnt
-        // potentially block infinitely
-        if let Err(e) =
-            (self.options.listener)(&ctx, &event, self, self.get_user_data().await).await
-        {
-            (self.options.on_error)(e, ErrorContext::Listener(&event)).await;
         }
     }
 }
