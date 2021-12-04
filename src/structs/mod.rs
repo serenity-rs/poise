@@ -140,6 +140,7 @@ impl<U, E> Clone for ErrorContext<'_, U, E> {
 
 /// Type returned from `#[poise::command]` annotated functions, which contains all of the generated
 /// prefix and application commands
+#[derive(Default, Clone)]
 pub struct CommandDefinition<U, E> {
     /// Generated prefix command, if it was enabled
     pub prefix: Option<crate::PrefixCommand<U, E>>,
@@ -150,6 +151,7 @@ pub struct CommandDefinition<U, E> {
 }
 
 /// A view into a command definition with its different implementations
+#[derive(Default)]
 pub struct CommandDefinitionRef<'a, U, E> {
     /// Prefix implementation of the command
     pub prefix: Option<&'a crate::PrefixCommandMeta<U, E>>,
@@ -166,6 +168,7 @@ pub struct CommandDefinitionRef<'a, U, E> {
 /// For example with a `#[command(prefix_command, slash_command)]`, the generated
 /// [`crate::PrefixCommand`] and [`crate::SlashCommand`] will both contain an `Arc<CommandId>`
 /// pointing to the same [`CommandId`] instance.
+#[derive(Debug, Default)]
 pub struct CommandId {
     /// A string to identify this particular command within a list of commands.
     ///
@@ -198,7 +201,7 @@ pub struct CommandId {
 
 /// Used for command errors to store the specific operation in a command's execution where an
 /// error occured
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug, Hash, PartialEq, Eq)]
 pub enum CommandErrorLocation {
     /// Error occured in the main command code
     Body,

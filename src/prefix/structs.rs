@@ -37,6 +37,7 @@ impl<U, E> crate::_GetGenerics for PrefixContext<'_, U, E> {
 }
 
 /// Optional settings for a [`PrefixCommand`].
+#[derive(Clone)]
 pub struct PrefixCommandOptions<U, E> {
     /// Multiline description with detailed usage instructions. Displayed in the command specific
     /// help: `~help command_name`
@@ -71,6 +72,7 @@ impl<U, E> Default for PrefixCommandOptions<U, E> {
 
 /// Definition of a single command, excluding metadata which doesn't affect the command itself such
 /// as category.
+#[derive(Clone)]
 pub struct PrefixCommand<U, E> {
     /// Main name of the command. Aliases can be set in [`PrefixCommandOptions::aliases`].
     pub name: &'static str,
@@ -83,6 +85,7 @@ pub struct PrefixCommand<U, E> {
 }
 
 /// Includes a command, plus metadata like associated sub-commands or category.
+#[derive(Clone)]
 pub struct PrefixCommandMeta<U, E> {
     /// Core command data
     pub command: PrefixCommand<U, E>,
@@ -111,6 +114,7 @@ impl<U, E> Clone for PrefixCommandErrorContext<'_, U, E> {
 }
 
 /// Possible ways to define a command prefix
+#[derive(Clone, Debug)]
 pub enum Prefix {
     /// A case-sensitive string literal prefix (passed to [`str::strip_prefix`])
     Literal(&'static str),

@@ -3,7 +3,7 @@
 use crate::{serenity_prelude as serenity, BoxFuture, Framework};
 
 /// Abstracts over a refernce to an application command interaction or autocomplete interaction
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub enum ApplicationCommandOrAutocompleteInteraction<'a> {
     /// An application command interaction
     ApplicationCommand(&'a serenity::ApplicationCommandInteraction),
@@ -135,6 +135,7 @@ impl<U, E> Clone for ApplicationCommandErrorContext<'_, U, E> {
 }
 
 /// Application command specific configuration of a framework command
+#[derive(Clone)]
 pub struct ApplicationCommandOptions<U, E> {
     /// Falls back to the framework-specified value on None. See there for documentation.
     pub on_error: Option<fn(E, ApplicationCommandErrorContext<'_, U, E>) -> BoxFuture<'_, ()>>,
@@ -155,6 +156,7 @@ impl<U, E> Default for ApplicationCommandOptions<U, E> {
 }
 
 /// A single parameter of a slash command
+#[derive(Clone)]
 pub struct SlashCommandParameter<U, E> {
     /// Builder function for this parameters
     pub builder: fn(
@@ -172,6 +174,7 @@ pub struct SlashCommandParameter<U, E> {
 }
 
 /// Fully defines a single slash command in the framework
+#[derive(Clone)]
 pub struct SlashCommand<U, E> {
     /// Name of the slash command, displayed in the Discord UI
     pub name: &'static str,
@@ -191,6 +194,7 @@ pub struct SlashCommand<U, E> {
 }
 
 /// A single slash command or slash command group
+#[derive(Clone)]
 pub enum SlashCommandMeta<U, E> {
     /// Single slash command
     Command(SlashCommand<U, E>),
@@ -298,6 +302,7 @@ impl<U, E> SlashCommandMeta<U, E> {
 }
 
 /// Possible actions that a context menu entry can have
+#[derive(Clone)]
 pub enum ContextMenuCommandAction<U, E> {
     /// Context menu entry on a user
     User(fn(ApplicationContext<'_, U, E>, serenity::User) -> BoxFuture<'_, Result<(), E>>),
@@ -306,6 +311,7 @@ pub enum ContextMenuCommandAction<U, E> {
 }
 
 /// Fully defines a context menu command in the framework
+#[derive(Clone)]
 pub struct ContextMenuCommand<U, E> {
     /// Name of the context menu entry, displayed in the Discord UI
     pub name: &'static str,
@@ -319,6 +325,7 @@ pub struct ContextMenuCommand<U, E> {
 
 /// Defines any application command, including subcommands if supported by the application command
 /// type
+#[derive(Clone)]
 pub enum ApplicationCommandTree<U, E> {
     /// Slash command
     Slash(SlashCommandMeta<U, E>),
@@ -385,6 +392,7 @@ impl<'a, U, E> ApplicationCommand<'a, U, E> {
 }
 
 /// Application command specific configuration for the framework
+#[derive(Clone)]
 pub struct ApplicationFrameworkOptions<U, E> {
     /// List of bot commands.
     pub commands: Vec<ApplicationCommandTree<U, E>>,

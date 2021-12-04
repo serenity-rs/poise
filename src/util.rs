@@ -1,7 +1,13 @@
 // I don't want a dependency on indexmap (it unconditionally depends on rayon???), so this will have
 // to do instead
-#[derive(Default)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct OrderedMap<K, V>(pub Vec<(K, V)>);
+
+impl<K, V> Default for OrderedMap<K, V> {
+    fn default() -> Self {
+        Self(Default::default())
+    }
+}
 
 impl<K: Eq, V> OrderedMap<K, V> {
     pub fn new() -> Self {

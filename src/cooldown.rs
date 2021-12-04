@@ -4,7 +4,7 @@ use crate::util::OrderedMap;
 use std::time::{Duration, Instant};
 
 /// Configuration struct for [`Cooldowns`]
-#[derive(Default)]
+#[derive(Default, Clone, PartialEq, Eq, Debug, Hash)]
 pub struct CooldownConfig {
     /// This cooldown operates on a global basis
     pub global: Option<Duration>,
@@ -22,6 +22,7 @@ pub struct CooldownConfig {
 ///
 /// You probably don't need to use this directly. `#[poise::command]` automatically generates a
 /// cooldown handler.
+#[derive(Default, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Cooldowns {
     cooldown: CooldownConfig,
 
