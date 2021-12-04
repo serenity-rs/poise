@@ -16,7 +16,7 @@ async fn strip_prefix<'a, U, E>(
 
     if let Some(prefix) = &this.options.prefix_options.prefix {
         if let Some(content) = msg.content.strip_prefix(prefix) {
-            return Some((&prefix, content));
+            return Some((prefix, content));
         }
     }
 
