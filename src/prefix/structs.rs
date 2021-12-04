@@ -10,6 +10,8 @@ pub struct PrefixContext<'a, U, E> {
     pub discord: &'a serenity::Context,
     /// The invoking user message
     pub msg: &'a serenity::Message,
+    /// Prefix used by the user to invoke this command
+    pub prefix: &'a str,
     /// Read-only reference to the framework
     ///
     /// Useful if you need the list of commands, for example for a custom help command
@@ -145,16 +147,18 @@ pub struct PrefixFrameworkOptions<U, E> {
     ///
     /// Override this field for dynamic prefixes which change depending on guild or user.
     ///
-    /// As return value, use the message content with the prefix stripped:
+    /// Return value is a tuple of the prefix and the rest of the message:
     /// ```rust,ignore
-    /// msg.content.strip_prefix(my_cool_prefix)
+    /// if msg.content.starts_with(my_cool_prefix) {
+    ///     return Some(msg.content.split_at(my_cool_prefix.len()));
+    /// }
     /// ```
     pub stripped_dynamic_prefix: Option<
         for<'a> fn(
             &'a serenity::Context,
             &'a serenity::Message,
             &'a U,
-        ) -> BoxFuture<'a, Option<&'a str>>,
+        ) -> BoxFuture<'a, Option<(&'a str, &'a str)>>,
     >,
     /// Treat a bot mention (a ping) like a prefix
     pub mention_as_prefix: bool,

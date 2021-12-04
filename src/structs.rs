@@ -189,6 +189,15 @@ impl<'a, U, E> Context<'a, U, E> {
             Self::Application(x) => crate::CommandRef::Application(x.command),
         })
     }
+
+    /// Returns the prefix this command was invoked with, or a slash (`/`), if this is an
+    /// application command.
+    pub fn prefix(&self) -> &'a str {
+        match self {
+            Context::Prefix(ctx) => ctx.prefix,
+            Context::Application(_) => "/",
+        }
+    }
 }
 
 /// A reference to either a prefix or application command.

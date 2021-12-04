@@ -1,62 +1,63 @@
 use crate::serenity_prelude as serenity;
 
-// Returns message with (only) bot prefix removed, if it matches
+// Returns tuple of stripped prefix and rest of the message, if any prefix matches
 async fn strip_prefix<'a, U, E>(
     this: &'a super::Framework<U, E>,
     ctx: &'a serenity::Context,
     msg: &'a serenity::Message,
-) -> Option<&'a str> {
+) -> Option<(&'a str, &'a str)> {
     if let Some(dynamic_prefix) = this.options.prefix_options.dynamic_prefix {
         if let Some(prefix) = dynamic_prefix(ctx, msg, this.get_user_data().await).await {
-            if let Some(content) = msg.content.strip_prefix(&prefix) {
-                return Some(content);
+            if msg.content.starts_with(&prefix) {
+                return Some(msg.content.split_at(prefix.len()));
             }
         }
     }
 
     if let Some(prefix) = &this.options.prefix_options.prefix {
         if let Some(content) = msg.content.strip_prefix(prefix) {
-            return Some(content);
+            return Some((&prefix, content));
         }
     }
 
-    if let Some(content) = this
+    if let Some((prefix, content)) = this
         .options
         .prefix_options
         .additional_prefixes
         .iter()
         .find_map(|prefix| match prefix {
-            crate::Prefix::Literal(prefix) => msg.content.strip_prefix(prefix),
+            &crate::Prefix::Literal(prefix) => Some((prefix, msg.content.strip_prefix(prefix)?)),
             crate::Prefix::Regex(prefix) => {
                 let regex_match = prefix.find(&msg.content)?;
                 if regex_match.start() == 0 {
-                    Some(&msg.content[regex_match.end()..])
+                    Some(msg.content.split_at(regex_match.end()))
                 } else {
                     None
                 }
             }
         })
     {
-        return Some(content);
+        return Some((prefix, content));
     }
 
     if let Some(dynamic_prefix) = this.options.prefix_options.stripped_dynamic_prefix {
-        if let Some(content) = dynamic_prefix(ctx, msg, this.get_user_data().await).await {
-            return Some(content);
+        if let Some((prefix, content)) = dynamic_prefix(ctx, msg, this.get_user_data().await).await
+        {
+            return Some((prefix, content));
         }
     }
 
     if this.options.prefix_options.mention_as_prefix {
         // Mentions are either <@USER_ID> or <@!USER_ID>
-        let stripped_mention_prefix = || {
+        if let Some(stripped_content) = (|| {
             msg.content
                 .strip_prefix("<@")?
                 .trim_start_matches('!')
                 .strip_prefix(&this.bot_id.0.to_string())?
                 .strip_prefix('>')
-        };
-        if let Some(content) = stripped_mention_prefix() {
-            return Some(content);
+        })() {
+            let mention_prefix = &msg.content[..(msg.content.len() - stripped_content.len())];
+            return Some((mention_prefix, stripped_content));
         }
     }
 
@@ -71,6 +72,7 @@ fn find_command<'a, U, E>(
     this: &'a super::Framework<U, E>,
     ctx: &'a serenity::Context,
     msg: &'a serenity::Message,
+    prefix: &'a str,
     commands: &'a [crate::PrefixCommandMeta<U, E>],
     remaining_message: &'a str,
 ) -> crate::BoxFuture<
@@ -83,13 +85,21 @@ fn find_command<'a, U, E>(
 where
     U: Send + Sync,
 {
-    Box::pin(_find_command(this, ctx, msg, commands, remaining_message))
+    Box::pin(_find_command(
+        this,
+        ctx,
+        msg,
+        prefix,
+        commands,
+        remaining_message,
+    ))
 }
 
 async fn _find_command<'a, U, E>(
     this: &'a super::Framework<U, E>,
     ctx: &'a serenity::Context,
     msg: &'a serenity::Message,
+    prefix: &'a str,
     commands: &'a [crate::PrefixCommandMeta<U, E>],
     remaining_message: &'a str,
 ) -> Result<
@@ -127,6 +137,7 @@ where
         let ctx = crate::PrefixContext {
             discord: ctx,
             msg,
+            prefix,
             framework: this,
             data: this.get_user_data().await,
             command: Some(&command_meta.command),
@@ -200,6 +211,7 @@ where
                 this,
                 ctx.discord,
                 msg,
+                prefix,
                 &command_meta.subcommands,
                 remaining_message,
             )
@@ -232,7 +244,8 @@ where
     U: Send + Sync,
 {
     // Strip prefix and whitespace between prefix and command
-    let msg_content = strip_prefix(this, ctx, msg).await.ok_or(None)?.trim_start();
+    let (prefix, msg_content) = strip_prefix(this, ctx, msg).await.ok_or(None)?;
+    let msg_content = msg_content.trim_start();
 
     // If we know our own ID, and the message author ID is our own, and we aren't supposed to
     // execute our own messages, THEN stop execution.
@@ -244,6 +257,7 @@ where
         this,
         ctx,
         msg,
+        prefix,
         &this.options.prefix_options.commands,
         msg_content,
     )
@@ -262,6 +276,7 @@ where
     let ctx = crate::PrefixContext {
         discord: ctx,
         msg,
+        prefix,
         framework: this,
         data: this.get_user_data().await,
         command: Some(command),
