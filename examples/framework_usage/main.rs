@@ -24,8 +24,12 @@ async fn help(
     poise::builtins::help(
         ctx,
         command.as_deref(),
-        "This is an example bot made to showcase features of my custom Discord bot framework",
-        poise::builtins::HelpResponseMode::Ephemeral,
+        poise::builtins::HelpConfiguration {
+            extra_text_at_bottom: "\
+This is an example bot made to showcase features of my custom Discord bot framework",
+            show_context_menu_commands: true,
+            ..Default::default()
+        },
     )
     .await?;
     Ok(())
