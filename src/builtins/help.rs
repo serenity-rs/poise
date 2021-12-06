@@ -23,19 +23,33 @@ impl Default for HelpConfiguration<'_> {
 
 async fn help_single_command<U, E>(
     ctx: crate::Context<'_, U, E>,
-    command: &str,
+    command_name: &str,
     config: HelpConfiguration<'_>,
 ) -> Result<(), serenity::Error> {
-    let reply = if let Some(command) = ctx
-        .framework()
-        .options()
-        .prefix_options
-        .commands
-        .iter()
-        .map(|cmd_meta| &cmd_meta.command)
-        .find(|cmd| cmd.name == command)
-    {
-        match command.options.multiline_help {
+    let command = ctx.framework().commands().find(|cmd| {
+        if let Some(slash) = &cmd.slash {
+            if slash.name().eq_ignore_ascii_case(command_name) {
+                return true;
+            }
+        }
+
+        if let Some(prefix) = &cmd.prefix {
+            if prefix.command.name.eq_ignore_ascii_case(command_name) {
+                return true;
+            }
+        }
+
+        if let Some(context_menu) = &cmd.context_menu {
+            if context_menu.name.eq_ignore_ascii_case(command_name) {
+                return true;
+            }
+        }
+
+        false
+    });
+
+    let reply = if let Some(command) = command {
+        match command.id.multiline_help {
             Some(f) => f(),
             None => command
                 .id
@@ -44,7 +58,7 @@ async fn help_single_command<U, E>(
                 .to_owned(),
         }
     } else {
-        format!("No such command `{}`", command)
+        format!("No such command `{}`", command_name)
     };
 
     ctx.send(|f| f.content(reply).ephemeral(config.ephemeral))

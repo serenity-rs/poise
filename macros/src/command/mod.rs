@@ -172,11 +172,20 @@ fn make_command_id(inv: &Invocation) -> proc_macro2::TokenStream {
     let required_bot_permissions = inv.required_bot_permissions;
     let owners_only = inv.more.owners_only;
 
+    let explanation = match &inv.more.explanation_fn {
+        Some(explanation_fn) => quote::quote! { Some(#explanation_fn) },
+        None => match &inv.explanation {
+            Some(extracted_explanation) => quote::quote! { Some(|| #extracted_explanation.into()) },
+            None => quote::quote! { None },
+        },
+    };
+
     quote::quote! {
         ::poise::CommandId {
             identifying_name: String::from(#identifying_name),
             category: #category,
             inline_help: #description,
+            multiline_help: #explanation,
             hide_in_help: #hide_in_help,
             cooldowns: std::sync::Mutex::new(::poise::Cooldowns::new(::poise::CooldownConfig {
                 global: #global_cooldown.map(std::time::Duration::from_secs),

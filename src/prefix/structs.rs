@@ -39,10 +39,6 @@ impl<U, E> crate::_GetGenerics for PrefixContext<'_, U, E> {
 /// Optional settings for a [`PrefixCommand`].
 #[derive(Clone)]
 pub struct PrefixCommandOptions<U, E> {
-    /// Multiline description with detailed usage instructions. Displayed in the command specific
-    /// help: `~help command_name`
-    // TODO: fix the inconsistency that this is String and everywhere else it's &'static str
-    pub multiline_help: Option<fn() -> String>,
     /// Alternative triggers for the command
     pub aliases: &'static [&'static str],
     /// Falls back to the framework-specified value on None. See there for documentation.
@@ -60,7 +56,6 @@ pub struct PrefixCommandOptions<U, E> {
 impl<U, E> Default for PrefixCommandOptions<U, E> {
     fn default() -> Self {
         Self {
-            multiline_help: None,
             check: None,
             on_error: None,
             aliases: &[],

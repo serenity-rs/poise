@@ -5,14 +5,6 @@ use super::Invocation;
 pub fn generate_prefix_command_spec(
     inv: &Invocation,
 ) -> Result<proc_macro2::TokenStream, darling::Error> {
-    let explanation = match &inv.more.explanation_fn {
-        Some(explanation_fn) => quote::quote! { Some(#explanation_fn) },
-        None => match &inv.explanation {
-            Some(extracted_explanation) => quote::quote! { Some(|| #extracted_explanation.into()) },
-            None => quote::quote! { None },
-        },
-    };
-
     // Box::pin the check and on_error callbacks in order to store them in a struct
     let check = match &inv.more.check {
         Some(check) => {
@@ -96,7 +88,6 @@ pub fn generate_prefix_command_spec(
                 track_edits: #track_edits,
                 broadcast_typing: #broadcast_typing,
                 aliases: &[ #( #aliases, )* ],
-                multiline_help: #explanation,
                 check: #check,
                 on_error: #on_error,
             }

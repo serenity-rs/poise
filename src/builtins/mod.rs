@@ -22,10 +22,8 @@ pub async fn on_error<D>(e: BoxErrorSendSync, ctx: crate::ErrorContext<'_, D, Bo
                 // command explanation if available
 
                 let mut usage = "Please check the help menu for usage information".into();
-                if let crate::CommandErrorContext::Prefix(ctx) = &ctx {
-                    if let Some(multiline_help) = &ctx.command.options.multiline_help {
-                        usage = multiline_help();
-                    }
+                if let Some(multiline_help) = &ctx.command().id().multiline_help {
+                    usage = multiline_help();
                 }
                 format!("**{}**\n{}", e, usage)
             } else {

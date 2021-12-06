@@ -182,6 +182,10 @@ pub struct CommandId {
     pub hide_in_help: bool,
     /// Short description of the command. Displayed inline in help menus and similar.
     pub inline_help: Option<&'static str>,
+    /// Multiline description with detailed usage instructions. Displayed in the command specific
+    /// help: `~help command_name`
+    // TODO: fix the inconsistency that this is String and everywhere else it's &'static str
+    pub multiline_help: Option<fn() -> String>,
     /// Handles command cooldowns. Mainly for framework internal use
     pub cooldowns: std::sync::Mutex<crate::Cooldowns>,
     /// Permissions which users must have to invoke this command.
