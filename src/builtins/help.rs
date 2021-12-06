@@ -93,6 +93,21 @@ async fn help_all_commands<U, E>(
             );
         }
     }
+
+    if config.show_context_menu_commands {
+        menu += "\nContext menu commands:\n";
+
+        for command in &ctx.framework().options().application_options.commands {
+            if let crate::ApplicationCommandTree::ContextMenu(command) = command {
+                let kind = match &command.action {
+                    crate::ContextMenuCommandAction::User(_) => "user",
+                    crate::ContextMenuCommandAction::Message(_) => "message",
+                };
+                menu += &format!("  {} (on {})\n", command.name, kind);
+            }
+        }
+    }
+
     menu += "\n";
     menu += config.extra_text_at_bottom;
     menu += "\n```";
