@@ -74,21 +74,37 @@ async fn help_all_commands<U, E>(
             }
 
             let (prefix, command_name) = if let Some(slash_command) = &command.slash {
-                ("/", slash_command.name())
+                (String::from("/"), slash_command.name())
             } else if let Some(prefix_command) = &command.prefix {
-                let prefix = &ctx.framework().options().prefix_options.prefix;
-                let prefix = prefix.as_deref().unwrap_or("");
+                let options = &ctx.framework().options().prefix_options;
+
+                let prefix = match &options.prefix {
+                    Some(fixed_prefix) => fixed_prefix.clone(),
+                    None => match options.dynamic_prefix {
+                        Some(dynamic_prefix_callback) => {
+                            match dynamic_prefix_callback(crate::PartialContext::from(ctx)).await {
+                                Some(dynamic_prefix) => dynamic_prefix,
+                                None => String::from(""),
+                            }
+                        }
+                        None => String::from(""),
+                    },
+                };
+
                 (prefix, prefix_command.command.name)
             } else {
                 // This is not a prefix or slash command, i.e. probably a context menu only command
-                // which we don't show in the help menu
+                // which we will only show later
                 continue;
             };
 
+            let total_command_name_length = prefix.chars().count() + command_name.chars().count();
+            let padding = 12_usize.saturating_sub(total_command_name_length) + 1;
             menu += &format!(
-                "  {}{:<12}{}\n",
+                "  {}{}{}{}\n",
                 prefix,
                 command_name,
+                " ".repeat(padding),
                 command.id.inline_help.unwrap_or("")
             );
         }

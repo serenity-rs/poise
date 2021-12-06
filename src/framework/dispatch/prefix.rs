@@ -7,7 +7,15 @@ async fn strip_prefix<'a, U, E>(
     msg: &'a serenity::Message,
 ) -> Option<(&'a str, &'a str)> {
     if let Some(dynamic_prefix) = framework.options.prefix_options.dynamic_prefix {
-        if let Some(prefix) = dynamic_prefix(ctx, msg, framework.get_user_data().await).await {
+        let partial_ctx = crate::PartialContext {
+            guild_id: msg.guild_id,
+            channel_id: msg.channel_id,
+            author: &msg.author,
+            discord: ctx,
+            framework,
+            data: framework.get_user_data().await,
+        };
+        if let Some(prefix) = dynamic_prefix(partial_ctx).await {
             if msg.content.starts_with(&prefix) {
                 return Some(msg.content.split_at(prefix.len()));
             }

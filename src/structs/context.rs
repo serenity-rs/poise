@@ -186,3 +186,31 @@ impl<'a, U, E> Context<'a, U, E> {
         }
     }
 }
+
+pub struct PartialContext<'a, U, E> {
+    /// ID of the guild, if not invoked in DMs
+    pub guild_id: Option<serenity::GuildId>,
+    /// ID of the invocation channel
+    pub channel_id: serenity::ChannelId,
+    /// ID of the invocation author
+    pub author: &'a serenity::User,
+    /// Serenity's context, like HTTP or cache
+    pub discord: &'a serenity::Context,
+    /// Useful if you need the list of commands, for example for a custom help command
+    pub framework: &'a crate::Framework<U, E>,
+    /// Your custom user data
+    pub data: &'a U,
+}
+
+impl<'a, U, E> From<Context<'a, U, E>> for PartialContext<'a, U, E> {
+    fn from(ctx: Context<'a, U, E>) -> Self {
+        Self {
+            guild_id: ctx.guild_id(),
+            channel_id: ctx.channel_id(),
+            author: ctx.author(),
+            discord: ctx.discord(),
+            framework: ctx.framework(),
+            data: ctx.data(),
+        }
+    }
+}

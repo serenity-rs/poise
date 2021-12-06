@@ -133,20 +133,15 @@ pub struct PrefixFrameworkOptions<U, E> {
     // TODO: maybe it would be nicer to have separate fields for literal and regex prefixes
     // That way, you don't need to wrap every single literal prefix in a long path which looks ugly
     pub additional_prefixes: Vec<Prefix>,
-    /// Callback invoked on evevry message to return a prefix.
+    /// Callback invoked on every message to return a prefix.
     ///
     /// If Some is returned, the static prefix, along with the additional prefixes will be ignored,
     /// and the returned prefix will be used for checking, but if None is returned, the static
     /// prefix and additional prefixes will be checked instead.
     ///
     /// Override this field for a simple dynamic prefixe which changes depending on the guild or user.
-    pub dynamic_prefix: Option<
-        for<'a> fn(
-            &'a serenity::Context,
-            &'a serenity::Message,
-            &'a U,
-        ) -> BoxFuture<'a, Option<String>>,
-    >,
+    pub dynamic_prefix:
+        Option<fn(crate::PartialContext<'_, U, E>) -> BoxFuture<'_, Option<String>>>,
     /// Callback invoked on every message to strip the prefix off an incoming message.
     ///
     /// Override this field for dynamic prefixes which change depending on guild or user.
