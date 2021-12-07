@@ -160,7 +160,7 @@ async fn help_all_commands<U, E>(
 ///     ctx: Context<'_>,
 ///     #[description = "Specific command to show help about"] command: Option<String>,
 /// ) -> Result<(), Error> {
-///     let config = poise::builtins::HelpConfig {
+///     let config = poise::builtins::HelpConfiguration {
 ///         extra_text_at_bottom: "\
 /// Type ?help command for more info on a command.
 /// You can edit your message to the bot and the bot will edit its response.",

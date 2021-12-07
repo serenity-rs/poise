@@ -187,6 +187,7 @@ impl<'a, U, E> Context<'a, U, E> {
     }
 }
 
+/// Trimmed down, more general version of [`Context`]
 pub struct PartialContext<'a, U, E> {
     /// ID of the guild, if not invoked in DMs
     pub guild_id: Option<serenity::GuildId>,

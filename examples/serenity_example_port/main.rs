@@ -107,18 +107,15 @@ async fn help(
     ctx: Context<'_>,
     #[description = "Command to display specific information about"] command: Option<String>,
 ) -> Result<(), Error> {
-    let extra_text_at_bottom = "\
+    let config = poise::builtins::HelpConfiguration {
+        extra_text_at_bottom: "\
 Hello! こんにちは！Hola! Bonjour! 您好! 안녕하세요~
 
-If you want more information about a specific command, just pass the command as argument.";
+If you want more information about a specific command, just pass the command as argument.",
+        ..Default::default()
+    };
 
-    poise::samples::help(
-        ctx,
-        command.as_deref(),
-        extra_text_at_bottom,
-        poise::samples::HelpResponseMode::Default,
-    )
-    .await?;
+    poise::builtins::help(ctx, command.as_deref(), config).await?;
 
     Ok(())
 }
@@ -128,7 +125,7 @@ If you want more information about a specific command, just pass the command as 
 /// Run with no arguments to register in guild, run with argument "global" to register globally.
 #[poise::command(prefix_command, hide_in_help)]
 async fn register(ctx: Context<'_>, #[flag] global: bool) -> Result<(), Error> {
-    poise::samples::register_application_commands(ctx, global).await?;
+    poise::builtins::register_application_commands(ctx, global).await?;
 
     Ok(())
 }
