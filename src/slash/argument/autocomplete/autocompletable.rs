@@ -1,4 +1,4 @@
-#[cfg(feature = "simdjson")]
+#[allow(unused_imports)] // required if serenity simdjson feature is enabled
 use crate::serenity::json::prelude::*;
 use crate::{serenity_prelude as serenity, SlashArgError};
 use std::convert::{TryFrom, TryInto};
@@ -56,9 +56,8 @@ where
 }
 
 // Handles all integers, signed and unsigned.
-#[cfg(not(feature = "simdjson"))]
 #[async_trait::async_trait]
-impl<T: TryFrom<i64> + Into<serde_json::Number> + Send + Sync> AutocompletableHack<T>
+impl<T: TryFrom<i64> + Into<serenity::json::Value> + Send + Sync> AutocompletableHack<T>
     for &PhantomData<T>
 {
     type Partial = T;
@@ -72,26 +71,7 @@ impl<T: TryFrom<i64> + Into<serde_json::Number> + Send + Sync> AutocompletableHa
     }
 
     fn into_json(self, value: T) -> serenity::json::Value {
-        serenity::json::Value::from(value.into())
-    }
-}
-#[cfg(feature = "simdjson")]
-#[async_trait::async_trait]
-impl<T: TryFrom<i64> + ValueAccess + Into<serde_json::Number> + Send + Sync> AutocompletableHack<T>
-    for &PhantomData<T>
-{
-    type Partial = T;
-
-    fn extract_partial(self, value: &serenity::json::Value) -> Result<T, SlashArgError> {
-        value
-            .as_i64()
-            .ok_or(SlashArgError::CommandStructureMismatch("expected integer"))?
-            .try_into()
-            .map_err(|_| SlashArgError::IntegerOutOfBounds)
-    }
-
-    fn into_json(self, value: T) -> serenity::json::Value {
-        serenity::json::Value::from(value.as_i64())
+        value.into()
     }
 }
 

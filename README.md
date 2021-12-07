@@ -62,7 +62,6 @@ You can run the framework_usage example with
 ## Crate features
 
 - collector: enables serenity's `collector` feature
-- simdjson: enables serenity's `simdjson` feature and adapts poise to support it.
 
 # How to use
 

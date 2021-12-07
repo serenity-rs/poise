@@ -3,7 +3,7 @@
 use std::convert::{TryFrom, TryInto};
 use std::marker::PhantomData;
 
-#[cfg(feature = "simdjson")]
+#[allow(unused_imports)] // required if serenity simdjson feature is enabled
 use crate::serenity::json::prelude::*;
 use crate::serenity_prelude as serenity;
 
