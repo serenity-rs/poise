@@ -63,6 +63,7 @@ pub fn slash_choice_parameter(input: syn::DeriveInput) -> Result<TokenStream, da
                 _: Option<poise::serenity_prelude::ChannelId>,
                 value: &poise::serenity::json::Value,
             ) -> Result<Self, poise::SlashArgError> {
+                use poise::serenity_prelude::json::prelude::*;
                 let choice_key = value
                     .as_u64()
                     .ok_or(poise::SlashArgError::CommandStructureMismatch(
