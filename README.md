@@ -59,6 +59,11 @@ commands. See [`examples/framework_usage`] for examples on that as well as other
 You can run the framework_usage example with
 `cargo run --example=framework_usage --features collector`
 
+## Crate features
+
+- collector: enables serenity's `collector` feature
+- simdjson: enables serenity's `simdjson` feature and adapts poise to support it.
+
 # How to use
 
 ## Create commands

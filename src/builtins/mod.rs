@@ -86,7 +86,7 @@ pub async fn register_application_commands<U, E>(
     for cmd in commands {
         commands_builder.create_application_command(|f| cmd.create(f));
     }
-    let commands_builder = serde_json::Value::Array(commands_builder.0);
+    let commands_builder = serenity::json::Value::Array(commands_builder.0);
 
     if global {
         let is_bot_owner = ctx.framework().options().owners.contains(&ctx.author().id);

@@ -61,7 +61,7 @@ pub fn slash_choice_parameter(input: syn::DeriveInput) -> Result<TokenStream, da
                 _: &poise::serenity_prelude::Context,
                 _: Option<poise::serenity_prelude::GuildId>,
                 _: Option<poise::serenity_prelude::ChannelId>,
-                value: &poise::serde_json::Value,
+                value: &poise::serenity::json::Value,
             ) -> Result<Self, poise::SlashArgError> {
                 let choice_key = value
                     .as_u64()

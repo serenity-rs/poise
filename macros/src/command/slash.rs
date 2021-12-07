@@ -87,13 +87,13 @@ pub fn generate_slash_command_spec(
                     let choices_json = choices_stream
                         .take(25)
                         .map(|value| poise::AutocompleteChoice::from(value))
-                        .map(|choice| serde_json::json!({
+                        .map(|choice| serenity::json::json!({
                             "name": choice.name,
                             "value": (&&&&&std::marker::PhantomData::<#type_>).into_json(choice.value),
                         }))
                         .collect()
                         .await;
-                    let choices_json = poise::serde_json::Value::Array(choices_json);
+                    let choices_json = poise::serenity::json::Value::Array(choices_json);
 
                     if let Err(e) = interaction
                         .create_autocomplete_response(
