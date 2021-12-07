@@ -3,6 +3,8 @@
 use std::convert::{TryFrom, TryInto};
 use std::marker::PhantomData;
 
+#[allow(unused_imports)] // required if serenity simdjson feature is enabled
+use crate::serenity::json::prelude::*;
 use crate::serenity_prelude as serenity;
 
 /// Possible errors when parsing slash command arguments
@@ -48,12 +50,12 @@ impl std::error::Error for SlashArgError {
 #[async_trait::async_trait]
 pub trait SlashArgument: Sized {
     /// Extract a Rust value of type T from the slash command argument, given via a
-    /// [`serde_json::Value`].
+    /// [`serenity::json::Value`].
     async fn extract(
         ctx: &serenity::Context,
         guild: Option<serenity::GuildId>,
         channel: Option<serenity::ChannelId>,
-        value: &serde_json::Value,
+        value: &serenity::json::Value,
     ) -> Result<Self, SlashArgError>;
 
     /// Create a slash command parameter equivalent to type T.
@@ -77,7 +79,7 @@ pub trait SlashArgumentHack<T> {
         ctx: &serenity::Context,
         guild: Option<serenity::GuildId>,
         channel: Option<serenity::ChannelId>,
-        value: &serde_json::Value,
+        value: &serenity::json::Value,
     ) -> Result<T, SlashArgError>;
 
     fn create(
@@ -98,7 +100,7 @@ where
         ctx: &serenity::Context,
         guild: Option<serenity::GuildId>,
         channel: Option<serenity::ChannelId>,
-        value: &serde_json::Value,
+        value: &serenity::json::Value,
     ) -> Result<T, SlashArgError> {
         let string = value
             .as_str()
@@ -124,7 +126,7 @@ impl<T: TryFrom<i64> + Send + Sync> SlashArgumentHack<T> for &PhantomData<T> {
         _: &serenity::Context,
         _: Option<serenity::GuildId>,
         _: Option<serenity::ChannelId>,
-        value: &serde_json::Value,
+        value: &serenity::json::Value,
     ) -> Result<T, SlashArgError> {
         value
             .as_i64()
@@ -149,7 +151,7 @@ impl SlashArgumentHack<f32> for &&PhantomData<f32> {
         _: &serenity::Context,
         _: Option<serenity::GuildId>,
         _: Option<serenity::ChannelId>,
-        value: &serde_json::Value,
+        value: &serenity::json::Value,
     ) -> Result<f32, SlashArgError> {
         Ok(value
             .as_f64()
@@ -171,7 +173,7 @@ impl SlashArgumentHack<f64> for &&PhantomData<f64> {
         _: &serenity::Context,
         _: Option<serenity::GuildId>,
         _: Option<serenity::ChannelId>,
-        value: &serde_json::Value,
+        value: &serenity::json::Value,
     ) -> Result<f64, SlashArgError> {
         value
             .as_f64()
@@ -193,7 +195,7 @@ impl<T: SlashArgument + Sync> SlashArgumentHack<T> for &&PhantomData<T> {
         ctx: &serenity::Context,
         guild: Option<serenity::GuildId>,
         channel: Option<serenity::ChannelId>,
-        value: &serde_json::Value,
+        value: &serenity::json::Value,
     ) -> Result<T, SlashArgError> {
         <T as SlashArgument>::extract(ctx, guild, channel, value).await
     }
@@ -216,7 +218,7 @@ macro_rules! impl_slash_argument {
                 ctx: &serenity::Context,
                 guild: Option<serenity::GuildId>,
                 channel: Option<serenity::ChannelId>,
-                value: &serde_json::Value,
+                value: &serenity::json::Value,
             ) -> Result<$type, SlashArgError> {
                 // We can parse IDs by falling back to the generic serenity::ArgumentConvert impl
                 PhantomData::<$type>

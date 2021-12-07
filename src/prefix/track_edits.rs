@@ -189,7 +189,7 @@ pub async fn send_prefix_reply<'a, U, E>(
                     None => f.set_embeds(Vec::new()),
                 };
 
-                f.0.insert("attachments", serde_json::json! { [] }); // reset attachments
+                f.0.insert("attachments", serenity::json::json! { [] }); // reset attachments
                 for attachment in attachments {
                     f.attachment(attachment);
                 }

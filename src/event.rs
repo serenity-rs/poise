@@ -1,7 +1,7 @@
 //! Provides a utility EventHandler that generates [`Event`] enum instances for incoming events.
 
 use crate::BoxFuture;
-use serde_json::Value;
+use serenity::json::Value;
 use serenity::{client::bridge::gateway::event::*, model::prelude::*};
 use std::collections::HashMap;
 
