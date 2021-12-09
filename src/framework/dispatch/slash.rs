@@ -228,7 +228,7 @@ pub async fn dispatch_autocomplete<'a, U, E>(
                 location: crate::CommandErrorLocation::Autocomplete,
             };
 
-            if let Some(on_error) = error_ctx.ctx.command.id.on_error {
+            if let Some(on_error) = error_ctx.ctx.command.id().on_error {
                 on_error(e, crate::CommandErrorContext::Application(error_ctx)).await;
             } else {
                 (framework.options.on_error)(e, crate::ErrorContext::Autocomplete(error_ctx)).await;

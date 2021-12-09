@@ -124,7 +124,6 @@ where
 
         let primary_name_matches = considered_equal(command.name, command_name);
         let alias_matches = command
-            .options
             .aliases
             .iter()
             .any(|alias| considered_equal(alias, command_name));
@@ -203,7 +202,7 @@ where
     let command = &command_meta.command;
 
     // Check if we should disregard this invocation if it was triggered by an edit
-    let should_execute_if_triggered_by_edit = command.options.track_edits
+    let should_execute_if_triggered_by_edit = command.track_edits
         || (!previously_tracked && framework.options.prefix_options.execute_untracked_edits);
     if triggered_by_edit && !should_execute_if_triggered_by_edit {
         return Err(None);
@@ -235,7 +234,7 @@ where
     }
 
     // Typing is broadcasted as long as this object is alive
-    let _typing_broadcaster = if command.options.broadcast_typing {
+    let _typing_broadcaster = if command.broadcast_typing {
         msg.channel_id.start_typing(&ctx.discord.http).ok()
     } else {
         None

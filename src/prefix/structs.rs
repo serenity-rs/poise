@@ -36,29 +36,6 @@ impl<U, E> crate::_GetGenerics for PrefixContext<'_, U, E> {
     type E = E;
 }
 
-/// Optional settings for a [`PrefixCommand`].
-#[derive(Clone)]
-pub struct PrefixCommandOptions {
-    /// Alternative triggers for the command
-    pub aliases: &'static [&'static str],
-    /// Whether to enable edit tracking for commands by default.
-    ///
-    /// Note: only has an effect if `Framework::edit_tracker` is set.
-    pub track_edits: bool,
-    /// Whether to broadcast a typing indicator while executing this commmand.
-    pub broadcast_typing: bool,
-}
-
-impl Default for PrefixCommandOptions {
-    fn default() -> Self {
-        Self {
-            aliases: &[],
-            track_edits: false,
-            broadcast_typing: false,
-        }
-    }
-}
-
 /// Definition of a single command, excluding metadata which doesn't affect the command itself such
 /// as category.
 #[derive(Clone)]
@@ -69,8 +46,14 @@ pub struct PrefixCommand<U, E> {
     pub action: for<'a> fn(PrefixContext<'a, U, E>, args: &'a str) -> BoxFuture<'a, Result<(), E>>,
     /// The command ID, shared across all command types that belong to the same implementation
     pub id: std::sync::Arc<crate::CommandId<U, E>>,
-    /// Optional data to change this command's behavior.
-    pub options: PrefixCommandOptions,
+    /// Alternative triggers for the command
+    pub aliases: &'static [&'static str],
+    /// Whether to enable edit tracking for commands by default.
+    ///
+    /// Note: only has an effect if `Framework::edit_tracker` is set.
+    pub track_edits: bool,
+    /// Whether to broadcast a typing indicator while executing this commmand.
+    pub broadcast_typing: bool,
 }
 
 /// Includes a command, plus metadata like associated sub-commands or category.

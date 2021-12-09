@@ -160,7 +160,7 @@ pub async fn send_prefix_reply<'a, U, E>(
                 .options()
                 .prefix_options
                 .execute_untracked_edits;
-            if !(command.options.track_edits || execute_untracked_edits) {
+            if !(command.track_edits || execute_untracked_edits) {
                 return None;
             }
         }
