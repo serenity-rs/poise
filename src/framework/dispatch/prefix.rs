@@ -217,19 +217,20 @@ where
         command: Some(command),
     };
 
-    if !super::common::check_permissions_and_cooldown(ctx.into(), &command.id)
-        .await
-        .map_err(|(e, location)| {
-            Some((
-                e,
-                crate::PrefixCommandErrorContext {
-                    ctx,
-                    command,
-                    location,
-                },
-            ))
-        })?
-    {
+    let perms_and_cooldown_ok =
+        super::common::check_permissions_and_cooldown(ctx.into(), &command.id)
+            .await
+            .map_err(|(e, location)| {
+                Some((
+                    e,
+                    crate::PrefixCommandErrorContext {
+                        ctx,
+                        command,
+                        location,
+                    },
+                ))
+            })?;
+    if !perms_and_cooldown_ok {
         return Err(None);
     }
 

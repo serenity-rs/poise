@@ -138,16 +138,16 @@ pub async fn check_permissions_and_cooldown<U, E>(
     }
 
     let cooldowns = &cmd.cooldowns;
-    let cooldown_left = cooldowns.lock().unwrap().get_wait_time(ctx.into());
+    let cooldown_left = cooldowns.lock().unwrap().get_wait_time(ctx);
     if let Some(cooldown_left) = cooldown_left {
         if let Some(callback) = ctx.framework().options().cooldown_hit {
-            callback(ctx.into(), cooldown_left)
+            callback(ctx, cooldown_left)
                 .await
                 .map_err(|e| (e, crate::CommandErrorLocation::CooldownCallback))?;
         }
         return Ok(false);
     }
-    cooldowns.lock().unwrap().start_cooldown(ctx.into());
+    cooldowns.lock().unwrap().start_cooldown(ctx);
 
     Ok(true)
 }

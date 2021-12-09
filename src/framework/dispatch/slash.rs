@@ -134,12 +134,13 @@ pub async fn extract_command_and_run_checks<'a, U, E>(
         has_sent_initial_response,
     };
 
-    if !super::common::check_permissions_and_cooldown(ctx.into(), command.id())
-        .await
-        .map_err(|(e, location)| {
-            Some((e, crate::ApplicationCommandErrorContext { ctx, location }))
-        })?
-    {
+    let perms_and_cooldown_ok =
+        super::common::check_permissions_and_cooldown(ctx.into(), command.id())
+            .await
+            .map_err(|(e, location)| {
+                Some((e, crate::ApplicationCommandErrorContext { ctx, location }))
+            })?;
+    if !perms_and_cooldown_ok {
         return Err(None);
     }
 

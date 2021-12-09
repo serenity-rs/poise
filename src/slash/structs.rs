@@ -141,6 +141,7 @@ pub struct ApplicationCommandOptions {
     pub ephemeral: bool,
 }
 
+#[allow(clippy::derivable_impls)] // the default values have important meaning
 impl Default for ApplicationCommandOptions {
     fn default() -> Self {
         Self { ephemeral: false }

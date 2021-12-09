@@ -40,7 +40,7 @@ impl<U, E> crate::_GetGenerics for PrefixContext<'_, U, E> {
 /// as category.
 #[derive(Clone)]
 pub struct PrefixCommand<U, E> {
-    /// Main name of the command. Aliases can be set in [`PrefixCommandOptions::aliases`].
+    /// Main name of the command. Aliases can be set in [`Self::aliases`].
     pub name: &'static str,
     /// Callback to execute when this command is invoked.
     pub action: for<'a> fn(PrefixContext<'a, U, E>, args: &'a str) -> BoxFuture<'a, Result<(), E>>,
@@ -141,7 +141,7 @@ pub struct PrefixFrameworkOptions<U, E> {
     /// need to be set for this.
     ///
     /// That does not mean that any subsequent edits will also trigger execution. For that,
-    /// see [`PrefixCommandOptions::track_edits`].
+    /// see [`PrefixCommand::track_edits`].
     ///
     /// Note: only has an effect if [`Self::edit_tracker`] is set.
     pub execute_untracked_edits: bool,
