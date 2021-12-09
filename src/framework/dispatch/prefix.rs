@@ -75,8 +75,6 @@ async fn strip_prefix<'a, U, E>(
 
 /// Find a command within nested PrefixCommandMeta's by the user message string. Also returns
 /// the arguments, i.e. the remaining string.
-///
-/// May throw an error if a command check fails
 fn find_command<'a, U, E>(
     framework: &'a crate::Framework<U, E>,
     ctx: &'a serenity::Context,
@@ -84,13 +82,7 @@ fn find_command<'a, U, E>(
     prefix: &'a str,
     commands: &'a [crate::PrefixCommandMeta<U, E>],
     remaining_message: &'a str,
-) -> crate::BoxFuture<
-    'a,
-    Result<
-        Option<(&'a crate::PrefixCommandMeta<U, E>, &'a str)>,
-        (E, crate::PrefixCommandErrorContext<'a, U, E>),
-    >,
->
+) -> crate::BoxFuture<'a, Option<(&'a crate::PrefixCommandMeta<U, E>, &'a str)>>
 where
     U: Send + Sync,
 {
@@ -111,10 +103,7 @@ async fn _find_command<'a, U, E>(
     prefix: &'a str,
     commands: &'a [crate::PrefixCommandMeta<U, E>],
     remaining_message: &'a str,
-) -> Result<
-    Option<(&'a crate::PrefixCommandMeta<U, E>, &'a str)>,
-    (E, crate::PrefixCommandErrorContext<'a, U, E>),
->
+) -> Option<(&'a crate::PrefixCommandMeta<U, E>, &'a str)>
 where
     U: Send + Sync,
 {
@@ -152,69 +141,6 @@ where
             command: Some(&command_meta.command),
         };
 
-        // Make sure that user has required permissions
-        if !super::check_required_permissions_and_owners_only(
-            crate::Context::Prefix(ctx),
-            command.id.required_permissions,
-            command.id.owners_only,
-        )
-        .await
-        {
-            continue;
-        }
-
-        // Before running any checks, make sure the bot has the permissions it needs
-        let missing_bot_permissions =
-            super::check_missing_bot_permissions(ctx.into(), command.id.required_bot_permissions)
-                .await;
-        if !missing_bot_permissions.is_empty() {
-            (ctx.framework.options().missing_bot_permissions_handler)(
-                ctx.into(),
-                missing_bot_permissions,
-            )
-            .await
-            .map_err(|e| {
-                (
-                    e,
-                    crate::PrefixCommandErrorContext {
-                        ctx,
-                        command,
-                        location: crate::CommandErrorLocation::MissingBotPermissionsCallback,
-                    },
-                )
-            })?;
-            continue;
-        }
-
-        // Only continue if command checks returns true
-        let checks_passing = (|| async {
-            let global_check_passes = match &framework.options.command_check {
-                Some(check) => check(crate::Context::Prefix(ctx)).await?,
-                None => true,
-            };
-
-            let command_specific_check_passes = match &command.options.check {
-                Some(check) => check(ctx).await?,
-                None => true,
-            };
-
-            Ok(global_check_passes && command_specific_check_passes)
-        })()
-        .await
-        .map_err(|e| {
-            (
-                e,
-                crate::PrefixCommandErrorContext {
-                    command,
-                    ctx,
-                    location: crate::CommandErrorLocation::Check,
-                },
-            )
-        })?;
-        if !checks_passing {
-            continue;
-        }
-
         first_matching_command = Some(
             match find_command(
                 framework,
@@ -224,7 +150,7 @@ where
                 &command_meta.subcommands,
                 remaining_message,
             )
-            .await?
+            .await
             {
                 Some((subcommand_meta, remaining_message)) => (subcommand_meta, remaining_message),
                 None => (command_meta, remaining_message),
@@ -233,14 +159,15 @@ where
         break;
     }
 
-    Ok(first_matching_command)
+    first_matching_command
 }
 
 /// Manually dispatches a message with the prefix framework.
 ///
 /// Returns:
 /// - Ok(()) if a command was successfully dispatched and run
-/// - Err(None) if no command was run but no error happened
+/// - Err(None) if no command was dispatched, for example if the message didn't contain a command or
+///   the cooldown limits were reached
 /// - Err(Some(error: UserError)) if any user code yielded an error
 pub async fn dispatch_message<'a, U, E>(
     framework: &'a crate::Framework<U, E>,
@@ -272,7 +199,6 @@ where
         msg_content,
     )
     .await
-    .map_err(Some)?
     .ok_or(None)?;
     let command = &command_meta.command;
 
@@ -292,24 +218,21 @@ where
         command: Some(command),
     };
 
-    let cooldowns = &command.id.cooldowns;
-    let cooldown_left = cooldowns.lock().unwrap().get_wait_time(ctx.into());
-    if let Some(cooldown_left) = cooldown_left {
-        if let Some(callback) = ctx.framework.options().cooldown_hit {
-            callback(ctx.into(), cooldown_left).await.map_err(|e| {
-                Some((
-                    e,
-                    crate::PrefixCommandErrorContext {
-                        ctx,
-                        command,
-                        location: crate::CommandErrorLocation::CooldownCallback,
-                    },
-                ))
-            })?;
-        }
+    if !super::common::check_permissions_and_cooldown(ctx.into(), &command.id)
+        .await
+        .map_err(|(e, location)| {
+            Some((
+                e,
+                crate::PrefixCommandErrorContext {
+                    ctx,
+                    command,
+                    location,
+                },
+            ))
+        })?
+    {
         return Err(None);
     }
-    cooldowns.lock().unwrap().start_cooldown(ctx.into());
 
     // Typing is broadcasted as long as this object is alive
     let _typing_broadcaster = if command.options.broadcast_typing {

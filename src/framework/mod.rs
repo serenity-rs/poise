@@ -164,7 +164,7 @@ impl<U, E> Framework<U, E> {
 
         fn get_command<'a, 's, U, E>(
             map: &'a mut CommandMap<'s, U, E>,
-            id: &std::sync::Arc<crate::CommandId>,
+            id: &std::sync::Arc<crate::CommandId<U, E>>,
         ) -> &'a mut crate::CommandDefinitionRef<'s, U, E> {
             map.get_or_insert_with(std::sync::Arc::as_ptr(id) as _, || {
                 crate::CommandDefinitionRef {

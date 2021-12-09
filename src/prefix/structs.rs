@@ -38,13 +38,9 @@ impl<U, E> crate::_GetGenerics for PrefixContext<'_, U, E> {
 
 /// Optional settings for a [`PrefixCommand`].
 #[derive(Clone)]
-pub struct PrefixCommandOptions<U, E> {
+pub struct PrefixCommandOptions {
     /// Alternative triggers for the command
     pub aliases: &'static [&'static str],
-    /// Falls back to the framework-specified value on None. See there for documentation.
-    pub on_error: Option<fn(E, PrefixCommandErrorContext<'_, U, E>) -> BoxFuture<'_, ()>>,
-    /// If this function returns false, this command will not be executed.
-    pub check: Option<fn(PrefixContext<'_, U, E>) -> BoxFuture<'_, Result<bool, E>>>,
     /// Whether to enable edit tracking for commands by default.
     ///
     /// Note: only has an effect if `Framework::edit_tracker` is set.
@@ -53,11 +49,9 @@ pub struct PrefixCommandOptions<U, E> {
     pub broadcast_typing: bool,
 }
 
-impl<U, E> Default for PrefixCommandOptions<U, E> {
+impl Default for PrefixCommandOptions {
     fn default() -> Self {
         Self {
-            check: None,
-            on_error: None,
             aliases: &[],
             track_edits: false,
             broadcast_typing: false,
@@ -74,9 +68,9 @@ pub struct PrefixCommand<U, E> {
     /// Callback to execute when this command is invoked.
     pub action: for<'a> fn(PrefixContext<'a, U, E>, args: &'a str) -> BoxFuture<'a, Result<(), E>>,
     /// The command ID, shared across all command types that belong to the same implementation
-    pub id: std::sync::Arc<crate::CommandId>,
+    pub id: std::sync::Arc<crate::CommandId<U, E>>,
     /// Optional data to change this command's behavior.
-    pub options: PrefixCommandOptions<U, E>,
+    pub options: PrefixCommandOptions,
 }
 
 /// Includes a command, plus metadata like associated sub-commands or category.

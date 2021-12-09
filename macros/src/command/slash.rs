@@ -3,25 +3,9 @@ use syn::spanned::Spanned as _;
 use super::{extract_option_type, extract_vec_type, Invocation};
 
 fn generate_options(inv: &Invocation) -> proc_macro2::TokenStream {
-    // Box::pin the check and on_error callbacks in order to store them in a struct
-    let check = match &inv.more.check {
-        Some(check) => {
-            quote::quote! { Some(|ctx| Box::pin(#check(ctx.into()))) }
-        }
-        None => quote::quote! { None },
-    };
-    let on_error = match &inv.more.on_error {
-        Some(on_error) => quote::quote! {
-            Some(|err, ctx| Box::pin(#on_error(err, ::poise::CommandErrorContext::Application(ctx))))
-        },
-        None => quote::quote! { None },
-    };
-
     let ephemeral = inv.more.ephemeral;
     quote::quote! {
         ::poise::ApplicationCommandOptions {
-            check: #check,
-            on_error: #on_error,
             ephemeral: #ephemeral,
         }
     }

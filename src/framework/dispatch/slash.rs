@@ -134,89 +134,14 @@ pub async fn extract_command_and_run_checks<'a, U, E>(
         has_sent_initial_response,
     };
 
-    // Make sure that user has required permissions
-    if !super::check_required_permissions_and_owners_only(
-        crate::Context::Application(ctx),
-        command.id().required_permissions,
-        command.id().owners_only,
-    )
-    .await
-    {
-        (framework
-            .options
-            .application_options
-            .missing_permissions_handler)(ctx)
-        .await;
-        return Err(None);
-    }
-
-    // Make sure the bot has the permissions it needs
-    let missing_bot_permissions =
-        super::check_missing_bot_permissions(ctx.into(), command.id().required_bot_permissions)
-            .await;
-    if !missing_bot_permissions.is_empty() {
-        (ctx.framework.options().missing_bot_permissions_handler)(
-            ctx.into(),
-            missing_bot_permissions,
-        )
+    if !super::common::check_permissions_and_cooldown(ctx.into(), command.id())
         .await
-        .map_err(|e| {
-            Some((
-                e,
-                crate::ApplicationCommandErrorContext {
-                    ctx,
-                    location: crate::CommandErrorLocation::MissingBotPermissionsCallback,
-                },
-            ))
-        })?;
+        .map_err(|(e, location)| {
+            Some((e, crate::ApplicationCommandErrorContext { ctx, location }))
+        })?
+    {
         return Err(None);
     }
-
-    // Only continue if command checks returns true
-    let checks_passing = (|| async {
-        let global_check_passes = match &framework.options.command_check {
-            Some(check) => check(crate::Context::Application(ctx)).await?,
-            None => true,
-        };
-
-        let command_specific_check_passes = match &command.options().check {
-            Some(check) => check(ctx).await?,
-            None => true,
-        };
-
-        Ok(global_check_passes && command_specific_check_passes)
-    })()
-    .await
-    .map_err(|e| {
-        (
-            e,
-            crate::ApplicationCommandErrorContext {
-                ctx,
-                location: crate::CommandErrorLocation::Check,
-            },
-        )
-    })?;
-    if !checks_passing {
-        return Err(None);
-    }
-
-    let cooldowns = &command.id().cooldowns;
-    let cooldown_left = cooldowns.lock().unwrap().get_wait_time(ctx.into());
-    if let Some(cooldown_left) = cooldown_left {
-        if let Some(callback) = ctx.framework.options().cooldown_hit {
-            callback(ctx.into(), cooldown_left).await.map_err(|e| {
-                Some((
-                    e,
-                    crate::ApplicationCommandErrorContext {
-                        ctx,
-                        location: crate::CommandErrorLocation::CooldownCallback,
-                    },
-                ))
-            })?;
-        }
-        return Err(None);
-    }
-    cooldowns.lock().unwrap().start_cooldown(ctx.into());
 
     Ok((ctx, leaf_interaction_options))
 }
@@ -303,8 +228,8 @@ pub async fn dispatch_autocomplete<'a, U, E>(
                 location: crate::CommandErrorLocation::Autocomplete,
             };
 
-            if let Some(on_error) = error_ctx.ctx.command.options().on_error {
-                on_error(e, error_ctx).await;
+            if let Some(on_error) = error_ctx.ctx.command.id.on_error {
+                on_error(e, crate::CommandErrorContext::Application(error_ctx)).await;
             } else {
                 (framework.options.on_error)(e, crate::ErrorContext::Autocomplete(error_ctx)).await;
             }

@@ -136,22 +136,14 @@ impl<U, E> Clone for ApplicationCommandErrorContext<'_, U, E> {
 
 /// Application command specific configuration of a framework command
 #[derive(Clone)]
-pub struct ApplicationCommandOptions<U, E> {
-    /// Falls back to the framework-specified value on None. See there for documentation.
-    pub on_error: Option<fn(E, ApplicationCommandErrorContext<'_, U, E>) -> BoxFuture<'_, ()>>,
-    /// If this function returns false, this command will not be executed.
-    pub check: Option<fn(ApplicationContext<'_, U, E>) -> BoxFuture<'_, Result<bool, E>>>,
+pub struct ApplicationCommandOptions {
     /// Whether responses to this command should be ephemeral by default.
     pub ephemeral: bool,
 }
 
-impl<U, E> Default for ApplicationCommandOptions<U, E> {
+impl Default for ApplicationCommandOptions {
     fn default() -> Self {
-        Self {
-            on_error: None,
-            check: None,
-            ephemeral: false,
-        }
+        Self { ephemeral: false }
     }
 }
 
@@ -188,9 +180,9 @@ pub struct SlashCommand<U, E> {
         &'a [serenity::ApplicationCommandInteractionDataOption],
     ) -> BoxFuture<'a, Result<(), E>>,
     /// The command ID, shared across all command types that belong to the same implementation
-    pub id: std::sync::Arc<crate::CommandId>,
+    pub id: std::sync::Arc<crate::CommandId<U, E>>,
     /// Further configuration
-    pub options: ApplicationCommandOptions<U, E>,
+    pub options: ApplicationCommandOptions,
 }
 
 /// A single slash command or slash command group
@@ -207,7 +199,7 @@ pub enum SlashCommandMeta<U, E> {
         /// List of command group subcommands
         subcommands: Vec<SlashCommandMeta<U, E>>,
         /// Contains command-type agnostic data
-        id: std::sync::Arc<crate::CommandId>,
+        id: std::sync::Arc<crate::CommandId<U, E>>,
     },
 }
 
@@ -229,7 +221,7 @@ impl<U, E> SlashCommandMeta<U, E> {
     }
 
     /// Returns the [`crate::CommandId`] for this command or command group
-    pub fn id(&self) -> &std::sync::Arc<crate::CommandId> {
+    pub fn id(&self) -> &std::sync::Arc<crate::CommandId<U, E>> {
         match self {
             SlashCommandMeta::Command(cmd) => &cmd.id,
             SlashCommandMeta::CommandGroup { id, .. } => id,
@@ -316,9 +308,9 @@ pub struct ContextMenuCommand<U, E> {
     /// Name of the context menu entry, displayed in the Discord UI
     pub name: &'static str,
     /// Further configuration
-    pub options: ApplicationCommandOptions<U, E>,
+    pub options: ApplicationCommandOptions,
     /// The command ID, shared across all command types that belong to the same implementation
-    pub id: std::sync::Arc<crate::CommandId>,
+    pub id: std::sync::Arc<crate::CommandId<U, E>>,
     /// The target and action of the context menu entry
     pub action: ContextMenuCommandAction<U, E>,
 }
@@ -374,7 +366,7 @@ impl<'a, U, E> ApplicationCommand<'a, U, E> {
     }
 
     /// Return application command specific configuration
-    pub fn options(self) -> &'a ApplicationCommandOptions<U, E> {
+    pub fn options(self) -> &'a ApplicationCommandOptions {
         match self {
             Self::Slash(cmd) => &cmd.options,
             Self::ContextMenu(cmd) => &cmd.options,
@@ -383,7 +375,7 @@ impl<'a, U, E> ApplicationCommand<'a, U, E> {
 
     /// Return the command ID, shared across all command types that belong to the same
     /// implementation
-    pub fn id(self) -> &'a std::sync::Arc<crate::CommandId> {
+    pub fn id(self) -> &'a std::sync::Arc<crate::CommandId<U, E>> {
         match self {
             Self::Slash(cmd) => &cmd.id,
             Self::ContextMenu(cmd) => &cmd.id,

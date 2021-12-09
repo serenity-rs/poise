@@ -1,101 +1,11 @@
 // Prefix and slash specific implementation details
+mod common;
 mod prefix;
 mod slash;
 
 pub use prefix::dispatch_message;
 
 use crate::serenity_prelude as serenity;
-
-/// Retrieves user permissions in the given channel. If unknown, returns None. If in DMs, returns
-/// `Permissions::all()`.
-async fn user_permissions(
-    ctx: &serenity::Context,
-    guild_id: Option<serenity::GuildId>,
-    channel_id: serenity::ChannelId,
-    user_id: serenity::UserId,
-) -> Option<serenity::Permissions> {
-    let guild_id = match guild_id {
-        Some(x) => x,
-        None => return Some(serenity::Permissions::all()), // no permission checks in DMs
-    };
-
-    let guild = match ctx.cache.guild(guild_id) {
-        Some(x) => x,
-        None => return None, // Guild not in cache
-    };
-
-    let channel = match guild.channels.get(&channel_id) {
-        Some(serenity::Channel::Guild(channel)) => channel,
-        Some(_other_channel) => {
-            println!(
-                "Warning: guild message was supposedly sent in a non-guild channel. Denying invocation"
-            );
-            return None;
-        }
-        None => return None,
-    };
-
-    // If member not in cache (probably because presences intent is not enabled), retrieve via HTTP
-    let member = match guild.members.get(&user_id) {
-        Some(x) => x.clone(),
-        None => match ctx.http.get_member(guild_id.0, user_id.0).await {
-            Ok(member) => member,
-            Err(_) => return None,
-        },
-    };
-
-    guild.user_permissions_in(channel, &member).ok()
-}
-
-async fn check_required_permissions_and_owners_only<U, E>(
-    ctx: crate::Context<'_, U, E>,
-    required_permissions: serenity::Permissions,
-    owners_only: bool,
-) -> bool {
-    if owners_only && !ctx.framework().options().owners.contains(&ctx.author().id) {
-        return false;
-    }
-
-    if !required_permissions.is_empty() {
-        let user_permissions = user_permissions(
-            ctx.discord(),
-            ctx.guild_id(),
-            ctx.channel_id(),
-            ctx.discord().cache.current_user_id(),
-        )
-        .await;
-        match user_permissions {
-            Some(perms) => {
-                if !perms.contains(required_permissions) {
-                    return false;
-                }
-            }
-            // better safe than sorry: when perms are unknown, restrict access
-            None => return false,
-        }
-    }
-
-    true
-}
-
-async fn check_missing_bot_permissions<U, E>(
-    ctx: crate::Context<'_, U, E>,
-    required_bot_permissions: serenity::Permissions,
-) -> serenity::Permissions {
-    let user_permissions = user_permissions(
-        ctx.discord(),
-        ctx.guild_id(),
-        ctx.channel_id(),
-        ctx.discord().cache.current_user_id(),
-    )
-    .await;
-    match user_permissions {
-        Some(perms) => required_bot_permissions - perms,
-        // When in doubt, just let it run. Not getting fancy missing permissions errors is better
-        // than the command not executing at all
-        None => serenity::Permissions::empty(),
-    }
-}
 
 pub async fn dispatch_event<U, E>(
     framework: &crate::Framework<U, E>,
@@ -123,8 +33,8 @@ pub async fn dispatch_event<U, E>(
             if let Err(Some((err, ctx))) =
                 prefix::dispatch_message(framework, &ctx, new_message, false, false).await
             {
-                if let Some(on_error) = ctx.command.options.on_error {
-                    (on_error)(err, ctx).await;
+                if let Some(on_error) = ctx.command.id.on_error {
+                    (on_error)(err, crate::CommandErrorContext::Prefix(ctx)).await;
                 } else {
                     (framework.options.on_error)(
                         err,
@@ -146,11 +56,13 @@ pub async fn dispatch_event<U, E>(
                         prefix::dispatch_message(framework, &ctx, &msg, true, previously_tracked)
                             .await
                     {
-                        (framework.options.on_error)(
-                            err,
-                            crate::ErrorContext::Command(crate::CommandErrorContext::Prefix(ctx)),
-                        )
-                        .await;
+                        let ctx = crate::CommandErrorContext::Prefix(ctx);
+                        if let Some(on_error) = ctx.command().id().on_error {
+                            on_error(err, ctx).await;
+                        } else {
+                            (framework.options.on_error)(err, crate::ErrorContext::Command(ctx))
+                                .await;
+                        }
                     }
                 }
             }
@@ -166,8 +78,8 @@ pub async fn dispatch_event<U, E>(
             )
             .await
             {
-                if let Some(on_error) = error_ctx.ctx.command.options().on_error {
-                    on_error(e, error_ctx).await;
+                if let Some(on_error) = error_ctx.ctx.command.id().on_error {
+                    on_error(e, crate::CommandErrorContext::Application(error_ctx)).await;
                 } else {
                     (framework.options.on_error)(
                         e,
@@ -190,8 +102,8 @@ pub async fn dispatch_event<U, E>(
             )
             .await
             {
-                if let Some(on_error) = error_ctx.ctx.command.options().on_error {
-                    on_error(e, error_ctx).await;
+                if let Some(on_error) = error_ctx.ctx.command.id().on_error {
+                    on_error(e, crate::CommandErrorContext::Application(error_ctx)).await;
                 } else {
                     (framework.options.on_error)(e, crate::ErrorContext::Autocomplete(error_ctx))
                         .await;

@@ -5,20 +5,6 @@ use super::Invocation;
 pub fn generate_prefix_command_spec(
     inv: &Invocation,
 ) -> Result<proc_macro2::TokenStream, darling::Error> {
-    // Box::pin the check and on_error callbacks in order to store them in a struct
-    let check = match &inv.more.check {
-        Some(check) => {
-            quote::quote! { Some(|ctx| Box::pin(#check(ctx.into()))) }
-        }
-        None => quote::quote! { None },
-    };
-    let on_error = match &inv.more.on_error {
-        Some(on_error) => {
-            quote::quote! { Some(|err, ctx| Box::pin(#on_error(err, ctx.into()))) }
-        }
-        None => quote::quote! { None },
-    };
-
     let wildcard_arg = if inv.more.discard_spare_arguments {
         Some(quote::quote! { #[rest] (String), })
     } else {
@@ -88,8 +74,6 @@ pub fn generate_prefix_command_spec(
                 track_edits: #track_edits,
                 broadcast_typing: #broadcast_typing,
                 aliases: &[ #( #aliases, )* ],
-                check: #check,
-                on_error: #on_error,
             }
         }
     })

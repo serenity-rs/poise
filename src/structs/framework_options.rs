@@ -56,7 +56,7 @@ pub struct CommandBuilder<U, E> {
     prefix_command: Option<crate::PrefixCommandMeta<U, E>>,
     slash_command: Option<crate::SlashCommandMeta<U, E>>,
     context_menu_command: Option<crate::ContextMenuCommand<U, E>>,
-    id: std::sync::Arc<crate::CommandId>,
+    id: std::sync::Arc<crate::CommandId<U, E>>,
 }
 
 impl<U, E> CommandBuilder<U, E> {
@@ -109,7 +109,7 @@ pub struct FrameworkOptions<U, E> {
     pub on_error: fn(E, crate::ErrorContext<'_, U, E>) -> BoxFuture<'_, ()>,
     /// Called before every command
     pub pre_command: fn(crate::Context<'_, U, E>) -> BoxFuture<'_, ()>,
-    /// Called after every command
+    /// Called after every command, no matter if it succeeded or failed
     pub post_command: fn(crate::Context<'_, U, E>) -> BoxFuture<'_, ()>,
     /// Provide a callback to be invoked before every command. The command will only be executed
     /// if the callback returns true.

@@ -6,7 +6,7 @@ pub use context::*;
 mod framework_options;
 pub use framework_options::*;
 
-use crate::serenity_prelude as serenity;
+use crate::{serenity_prelude as serenity, BoxFuture};
 
 // needed for proc macro
 #[doc(hidden)]
@@ -48,7 +48,7 @@ impl<'a, U, E> CommandRef<'a, U, E> {
     }
 
     /// Yield `id` of this command.
-    pub fn id(self) -> &'a std::sync::Arc<CommandId> {
+    pub fn id(self) -> &'a std::sync::Arc<CommandId<U, E>> {
         match self {
             Self::Prefix(x) => &x.id,
             Self::Application(x) => x.id(),
@@ -124,6 +124,7 @@ pub enum ErrorContext<'a, U, E> {
     /// Error in bot command
     Command(CommandErrorContext<'a, U, E>),
     /// Error in autocomplete callback
+    // TODO: remove and just use Self::Command instead?
     Autocomplete(crate::ApplicationCommandErrorContext<'a, U, E>),
 }
 
@@ -160,16 +161,16 @@ pub struct CommandDefinitionRef<'a, U, E> {
     /// Context menu implementation of the command
     pub context_menu: Option<&'a crate::ContextMenuCommand<U, E>>,
     /// Implementation type agnostic data that is always present
-    pub id: std::sync::Arc<CommandId>,
+    pub id: std::sync::Arc<CommandId<U, E>>,
 }
 
 /// This struct holds all data shared across different command types of the same implementation.
 ///
 /// For example with a `#[command(prefix_command, slash_command)]`, the generated
-/// [`crate::PrefixCommand`] and [`crate::SlashCommand`] will both contain an `Arc<CommandId>`
+/// [`crate::PrefixCommand`] and [`crate::SlashCommand`] will both contain an `Arc<CommandId<U, E>>`
 /// pointing to the same [`CommandId`] instance.
-#[derive(Debug, Default)]
-pub struct CommandId {
+#[derive(Default)]
+pub struct CommandId<U, E> {
     /// A string to identify this particular command within a list of commands.
     ///
     /// Can be configured via the [`crate::command`] macro (though it's probably not needed for most
@@ -201,6 +202,42 @@ pub struct CommandId {
     /// If true, only users from the [owners list](crate::FrameworkOptions::owners) may use this
     /// command.
     pub owners_only: bool,
+    /// Command-specific override for [`crate::FrameworkOptions::on_error`]
+    pub on_error: Option<fn(E, CommandErrorContext<'_, U, E>) -> BoxFuture<'_, ()>>,
+    /// If this function returns false, this command will not be executed.
+    pub check: Option<fn(Context<'_, U, E>) -> BoxFuture<'_, Result<bool, E>>>,
+}
+
+impl<U, E> std::fmt::Debug for CommandId<U, E> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let Self {
+            identifying_name,
+            category,
+            hide_in_help,
+            inline_help,
+            multiline_help,
+            cooldowns,
+            required_permissions,
+            required_bot_permissions,
+            owners_only,
+            on_error,
+            check,
+        } = self;
+
+        f.debug_struct("CommandId")
+            .field("identifying_name", identifying_name)
+            .field("category", category)
+            .field("hide_in_help", hide_in_help)
+            .field("inline_help", inline_help)
+            .field("multiline_help", multiline_help)
+            .field("cooldowns", cooldowns)
+            .field("required_permissions", required_permissions)
+            .field("required_bot_permissions", required_bot_permissions)
+            .field("owners_only", owners_only)
+            .field("on_error", &on_error.map(|_| "<function pointer>"))
+            .field("check", &check.map(|_| "<function pointer>"))
+            .finish()
+    }
 }
 
 /// Used for command errors to store the specific operation in a command's execution where an
