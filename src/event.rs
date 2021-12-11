@@ -2,7 +2,12 @@
 
 use crate::BoxFuture;
 use serenity::json::Value;
-use serenity::{client::bridge::gateway::event::*, model::prelude::*};
+use serenity::{
+    client::bridge::gateway::event::*,
+    // Can't use model::prelude::* because of
+    // https://github.com/rust-analyzer/rust-analyzer/issues/10991
+    model::{channel::*, gateway::*, guild::*, id::*, interactions::*, user::*, voice::*},
+};
 use std::collections::HashMap;
 
 /// A [`serenity::prelude::EventHandler`] implementation that wraps every received event into the [`Event`]
@@ -55,7 +60,7 @@ macro_rules! event {
     };
 }
 
-// generated from https://docs.rs/serenity/0.8.9/src/serenity/client/event_handler.rs.html#12-314
+// generated from serenity/client/event_handler.rs
 // with help from vscode multiline editing and some manual cleanup
 event! {
     'a
