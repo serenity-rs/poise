@@ -2,7 +2,7 @@
 
 use crate::{serenity_prelude as serenity, BoxFuture};
 
-/// A [`serenity::prelude::EventHandler`] implementation that wraps every received event into the [`Event`]
+/// A [`serenity::EventHandler`] implementation that wraps every received event into the [`Event`]
 /// enum and propagates it to a callback.
 ///
 /// Packaging every event into a singular type can make it easier to pass around and process.
@@ -27,7 +27,7 @@ macro_rules! event {
             )*
         }
 
-        /// This enum stores every possible event that a [`serenity::prelude::EventHandler`] can receive.
+        /// This enum stores every possible event that a [`serenity::EventHandler`] can receive.
         ///
         /// Passed to the stored callback by [`EventWrapper`].
         #[allow(clippy::large_enum_variant)]
