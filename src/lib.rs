@@ -58,7 +58,10 @@ pub mod serenity_prelude {
     pub use serenity::{
         async_trait,
         builder::*,
-        client::{bridge::gateway::*, *},
+        client::{
+            bridge::gateway::{event::*, *},
+            *,
+        },
         http::*,
         model::{
             event::*,
