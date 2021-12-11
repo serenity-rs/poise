@@ -26,7 +26,7 @@ fn find_matching_application_command<'a, 'b, U, E>(
             }
         }
         // TODO: improve this monstrosity
-        crate::ApplicationCommandTree::Slash(cmd) => match cmd {
+        crate::ApplicationCommandTree::Slash(cmd_meta) => match cmd_meta {
             crate::SlashCommandMeta::Command(cmd) => {
                 if cmd.name == interaction.name
                     && interaction.kind == serenity::ApplicationCommandType::ChatInput
@@ -43,6 +43,9 @@ fn find_matching_application_command<'a, 'b, U, E>(
                 description: _,
                 id: _,
             } => {
+                if cmd_meta.name() != interaction.name {
+                    return None;
+                }
                 let interaction = match interaction.options.iter().find(|option| {
                     option.kind == serenity::ApplicationCommandOptionType::SubCommand
                         || option.kind == serenity::ApplicationCommandOptionType::SubCommandGroup
