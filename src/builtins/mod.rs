@@ -88,9 +88,8 @@ pub async fn register_application_commands<U, E>(
     }
     let commands_builder = serenity::json::Value::Array(commands_builder.0);
 
+    let is_bot_owner = ctx.framework().options().owners.contains(&ctx.author().id);
     if global {
-        let is_bot_owner = ctx.framework().options().owners.contains(&ctx.author().id);
-
         if !is_bot_owner {
             ctx.say("Can only be used by bot owner").await?;
             return Ok(());
@@ -112,7 +111,7 @@ pub async fn register_application_commands<U, E>(
         };
         let is_guild_owner = ctx.author().id == guild.owner_id;
 
-        if !is_guild_owner {
+        if !is_guild_owner && !is_bot_owner {
             ctx.say("Can only be used by server owner").await?;
             return Ok(());
         }
