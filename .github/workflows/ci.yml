@@ -22,7 +22,7 @@ jobs:
           - name: MSRV
             toolchain: 1.51.0
             # don't do doctests because they rely on new features for brevity
-            command: cargo test --all-features --lib --tests --examples
+            command: cargo test --features collector --lib --tests
           - name: beta
             toolchain: beta
           - name: nightly
@@ -31,13 +31,17 @@ jobs:
             os: macOS-latest
             # don't test simd-json feature because GHA macOS runners break trying to compile
             # simd_json for a recent CPU
-            rustflags: " "
+            rustflags: " " # non-empty string as to not override it later
             command: cargo test --features collector
           - name: Windows
             os: windows-latest
           - name: no features
-            # don't test example because it needs features
-            command: cargo test --no-default-features --lib --tests
+            # don't examples because they need collector feature
+            command: cargo test --no-default-features --features serenity_rustls --lib --tests
+          - name: all features
+            command: cargo test --features collector,__internal_simdjson --lib --tests --examples
+          - name: native TLS
+            command: cargo test --no-default-features --features collector,serenity_native_tls --lib --tests --examples
 
     steps:
       - uses: actions/checkout@v2
@@ -46,7 +50,7 @@ jobs:
           profile: minimal
           toolchain: ${{ matrix.toolchain || 'stable' }}
           override: true
-      - run: ${{ matrix.command || 'cargo test --all-features' }}
+      - run: ${{ matrix.command || 'cargo test --features collector' }}
         env:
           RUSTFLAGS: ${{ matrix.rustflags || '-C target-cpu=haswell' }}
 
