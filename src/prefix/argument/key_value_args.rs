@@ -53,6 +53,11 @@ impl KeyValueArgs {
                 escaping = true;
             } else if !inside_string && c == '=' {
                 break;
+            } else if !inside_string && c.is_ascii_punctuation() {
+                // If not enclosed in quotes, keys mustn't contain special characters.
+                // Otherwise this command invocation: "?eval `0..=5`" is parsed as key-value args
+                // with key "`0.." and value "5`". (This was a long-standing issue in rustbot)
+                return None;
             } else {
                 key.push(c);
             }
