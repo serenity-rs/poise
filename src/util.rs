@@ -1,5 +1,4 @@
-// I don't want a dependency on indexmap (it unconditionally depends on rayon???), so this will have
-// to do instead
+// Depending on indexmap seems overkill, so this will do instead
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct OrderedMap<K, V>(pub Vec<(K, V)>);
 
