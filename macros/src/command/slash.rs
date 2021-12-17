@@ -71,7 +71,7 @@ pub fn generate_slash_command_spec(
                     let choices_json = choices_stream
                         .take(25)
                         .map(|value| poise::AutocompleteChoice::from(value))
-                        .map(|choice| serenity::json::json!({
+                        .map(|choice| poise::serenity::json::json!({
                             "name": choice.name,
                             "value": (&&&&&std::marker::PhantomData::<#type_>).into_json(choice.value),
                         }))
