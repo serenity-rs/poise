@@ -141,7 +141,7 @@ impl<U, E> Clone for ErrorContext<'_, U, E> {
 
 /// Type returned from `#[poise::command]` annotated functions, which contains all of the generated
 /// prefix and application commands
-#[derive(Default, Clone)]
+#[derive(Default, Clone, Debug)]
 pub struct CommandDefinition<U, E> {
     /// Generated prefix command, if it was enabled
     pub prefix: Option<crate::PrefixCommand<U, E>>,
@@ -152,7 +152,7 @@ pub struct CommandDefinition<U, E> {
 }
 
 /// A view into a command definition with its different implementations
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct CommandDefinitionRef<'a, U, E> {
     /// Prefix implementation of the command
     pub prefix: Option<&'a crate::PrefixCommandMeta<U, E>>,
@@ -234,8 +234,8 @@ impl<U, E> std::fmt::Debug for CommandId<U, E> {
             .field("required_permissions", required_permissions)
             .field("required_bot_permissions", required_bot_permissions)
             .field("owners_only", owners_only)
-            .field("on_error", &on_error.map(|_| "<function pointer>"))
-            .field("check", &check.map(|_| "<function pointer>"))
+            .field("on_error", &on_error.map(|f| f as *const ()))
+            .field("check", &check.map(|f| f as *const ()))
             .finish()
     }
 }

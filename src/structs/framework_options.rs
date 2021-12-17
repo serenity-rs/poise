@@ -194,6 +194,46 @@ impl<U, E> FrameworkOptions<U, E> {
     }
 }
 
+impl<U: std::fmt::Debug, E: std::fmt::Debug> std::fmt::Debug for FrameworkOptions<U, E> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let Self {
+            on_error,
+            pre_command,
+            post_command,
+            command_check,
+            cooldown_hit,
+            missing_bot_permissions_handler,
+            missing_permissions_handler,
+            allowed_mentions,
+            listener,
+            application_options,
+            prefix_options,
+            owners,
+        } = self;
+
+        f.debug_struct("FrameworkOptions")
+            .field("on_error", &(*on_error as *const ()))
+            .field("pre_command", &(*pre_command as *const ()))
+            .field("post_command", &(*post_command as *const ()))
+            .field("command_check", &command_check.map(|f| f as *const ()))
+            .field("cooldown_hit", &cooldown_hit.map(|f| f as *const ()))
+            .field(
+                "missing_bot_permissions_handler",
+                &(*missing_bot_permissions_handler as *const ()),
+            )
+            .field(
+                "missing_permissions_handler",
+                &(*missing_permissions_handler as *const ()),
+            )
+            .field("allowed_mentions", allowed_mentions)
+            .field("listener", &(*listener as *const ()))
+            .field("application_options", application_options)
+            .field("prefix_options", prefix_options)
+            .field("owners", owners)
+            .finish()
+    }
+}
+
 async fn default_error_handler<U, E>(error: E, ctx: crate::ErrorContext<'_, U, E>)
 where
     U: Send + Sync,

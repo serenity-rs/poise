@@ -135,7 +135,7 @@ impl<U, E> Clone for ApplicationCommandErrorContext<'_, U, E> {
 }
 
 /// Application command specific configuration of a framework command
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ApplicationCommandOptions {
     /// Whether responses to this command should be ephemeral by default.
     pub ephemeral: bool,
@@ -166,6 +166,23 @@ pub struct SlashCommandParameter<U, E> {
     >,
 }
 
+impl<U, E> std::fmt::Debug for SlashCommandParameter<U, E> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let Self {
+            builder,
+            autocomplete_callback,
+        } = self;
+
+        f.debug_struct("SlashCommandParameter")
+            .field("builder", &(*builder as *const ()))
+            .field(
+                "autocomplete_callback",
+                &autocomplete_callback.map(|f| f as *const ()),
+            )
+            .finish()
+    }
+}
+
 /// Fully defines a single slash command in the framework
 #[derive(Clone)]
 pub struct SlashCommand<U, E> {
@@ -186,8 +203,30 @@ pub struct SlashCommand<U, E> {
     pub options: ApplicationCommandOptions,
 }
 
+impl<U, E> std::fmt::Debug for SlashCommand<U, E> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let Self {
+            name,
+            description,
+            parameters,
+            action,
+            id,
+            options,
+        } = self;
+
+        f.debug_struct("SlashCommand")
+            .field("name", name)
+            .field("description", description)
+            .field("parameters", parameters)
+            .field("action", &(*action as *const ()))
+            .field("id", id)
+            .field("options", options)
+            .finish()
+    }
+}
+
 /// A single slash command or slash command group
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum SlashCommandMeta<U, E> {
     /// Single slash command
     Command(SlashCommand<U, E>),
@@ -303,8 +342,17 @@ pub enum ContextMenuCommandAction<U, E> {
     Message(fn(ApplicationContext<'_, U, E>, serenity::Message) -> BoxFuture<'_, Result<(), E>>),
 }
 
+impl<U, E> std::fmt::Debug for ContextMenuCommandAction<U, E> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match *self {
+            Self::User(x) => f.debug_tuple("User").field(&(x as *const ())).finish(),
+            Self::Message(x) => f.debug_tuple("Message").field(&(x as *const ())).finish(),
+        }
+    }
+}
+
 /// Fully defines a context menu command in the framework
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ContextMenuCommand<U, E> {
     /// Name of the context menu entry, displayed in the Discord UI
     pub name: &'static str,
@@ -318,7 +366,7 @@ pub struct ContextMenuCommand<U, E> {
 
 /// Defines any application command, including subcommands if supported by the application command
 /// type
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum ApplicationCommandTree<U, E> {
     /// Slash command
     Slash(SlashCommandMeta<U, E>),
@@ -385,13 +433,13 @@ impl<'a, U, E> ApplicationCommand<'a, U, E> {
 }
 
 /// Application command specific configuration for the framework
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ApplicationFrameworkOptions<U, E> {
     /// List of bot commands.
     pub commands: Vec<ApplicationCommandTree<U, E>>,
 }
 
-impl<U: Send + Sync, E> Default for ApplicationFrameworkOptions<U, E> {
+impl<U, E> Default for ApplicationFrameworkOptions<U, E> {
     fn default() -> Self {
         Self {
             commands: Vec::new(),

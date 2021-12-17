@@ -56,8 +56,29 @@ pub struct PrefixCommand<U, E> {
     pub broadcast_typing: bool,
 }
 
+impl<U, E> std::fmt::Debug for PrefixCommand<U, E> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let Self {
+            name,
+            action,
+            id,
+            aliases,
+            track_edits,
+            broadcast_typing,
+        } = self;
+        f.debug_struct("PrefixCommand")
+            .field("name", name)
+            .field("action", &(*action as *const ()))
+            .field("id", id)
+            .field("aliases", aliases)
+            .field("track_edits", track_edits)
+            .field("broadcast_typing", broadcast_typing)
+            .finish()
+    }
+}
+
 /// Includes a command, plus metadata like associated sub-commands or category.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PrefixCommandMeta<U, E> {
     /// Core command data
     pub command: PrefixCommand<U, E>,
@@ -163,6 +184,41 @@ pub struct PrefixFrameworkOptions<U, E> {
     // /// any specific subcommand is invoked. This command is expected to take the command name as a
     // /// single parameter
     // pub command_specific_help_commmand: Option<PrefixCommand<U, E>>, */
+}
+
+impl<U: std::fmt::Debug, E: std::fmt::Debug> std::fmt::Debug for PrefixFrameworkOptions<U, E> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let Self {
+            prefix,
+            commands,
+            additional_prefixes,
+            dynamic_prefix,
+            stripped_dynamic_prefix,
+            mention_as_prefix,
+            edit_tracker,
+            execute_untracked_edits,
+            ignore_edit_tracker_cache,
+            execute_self_messages,
+            case_insensitive_commands,
+        } = self;
+
+        f.debug_struct("PrefixFrameworkOptions")
+            .field("prefix", prefix)
+            .field("commands", commands)
+            .field("additional_prefixes", additional_prefixes)
+            .field("dynamic_prefix", &dynamic_prefix.map(|f| f as *const ()))
+            .field(
+                "stripped_dynamic_prefix",
+                &stripped_dynamic_prefix.map(|f| f as *const ()),
+            )
+            .field("mention_as_prefix", mention_as_prefix)
+            .field("edit_tracker", edit_tracker)
+            .field("execute_untracked_edits", execute_untracked_edits)
+            .field("ignore_edit_tracker_cache", ignore_edit_tracker_cache)
+            .field("execute_self_messages", execute_self_messages)
+            .field("case_insensitive_commands", case_insensitive_commands)
+            .finish()
+    }
 }
 
 impl<U, E> Default for PrefixFrameworkOptions<U, E> {

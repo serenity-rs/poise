@@ -48,6 +48,7 @@ fn update_message(message: &mut serenity::Message, update: serenity::MessageUpda
 
 /// Stores messages and the associated bot responses in order to implement poise's edit tracking
 /// feature.
+#[derive(Debug)]
 pub struct EditTracker {
     max_duration: std::time::Duration,
     cache: Vec<(serenity::Message, serenity::Message)>,
