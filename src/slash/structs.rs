@@ -389,29 +389,12 @@ impl<'a, U, E> ApplicationCommand<'a, U, E> {
 pub struct ApplicationFrameworkOptions<U, E> {
     /// List of bot commands.
     pub commands: Vec<ApplicationCommandTree<U, E>>,
-    /// Invoked when a user tries to execute an application command but doesn't have the required
-    /// permissions for it.
-    ///
-    /// This handler should be used to reply with some form of error message. If this handler does
-    /// nothing, the user will be shown "Interaction failed" by their Discord client.
-    pub missing_permissions_handler: fn(ApplicationContext<'_, U, E>) -> BoxFuture<'_, ()>,
 }
 
 impl<U: Send + Sync, E> Default for ApplicationFrameworkOptions<U, E> {
     fn default() -> Self {
         Self {
             commands: Vec::new(),
-            missing_permissions_handler: |ctx| {
-                Box::pin(async move {
-                    let response = format!(
-                        "You don't have the required permissions for `/{}`",
-                        ctx.command.slash_or_context_menu_name()
-                    );
-                    let _: Result<_, _> =
-                        crate::send_application_reply(ctx, |f| f.content(response).ephemeral(true))
-                            .await;
-                })
-            },
         }
     }
 }

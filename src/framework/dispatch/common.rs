@@ -99,6 +99,9 @@ pub async fn check_permissions_and_cooldown<U, E>(
     if !check_required_permissions_and_owners_only(ctx, cmd.required_permissions, cmd.owners_only)
         .await
     {
+        (ctx.framework().options().missing_permissions_handler)(ctx)
+            .await
+            .map_err(|e| (e, crate::CommandErrorLocation::MissingPermissionsCallback))?;
         return Ok(false);
     }
 

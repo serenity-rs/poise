@@ -254,4 +254,6 @@ pub enum CommandErrorLocation {
     CooldownCallback,
     /// Error occured in [`crate::FrameworkOptions::missing_bot_permissions_handler`]
     MissingBotPermissionsCallback,
+    /// Error occured in [`crate::FrameworkOptions::missing_permissions_handler`]
+    MissingPermissionsCallback,
 }

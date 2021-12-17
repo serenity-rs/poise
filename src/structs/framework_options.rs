@@ -124,6 +124,13 @@ pub struct FrameworkOptions<U, E> {
     /// an argument.
     pub missing_bot_permissions_handler:
         fn(crate::Context<'_, U, E>, serenity::Permissions) -> BoxFuture<'_, Result<(), E>>,
+    /// Invoked when a user tries to execute an command but doesn't have the required
+    /// permissions for it.
+    ///
+    /// This handler should be used to reply with some form of error message. On
+    /// application commands, if this handler does
+    /// nothing, the user will be shown "Interaction failed" by their Discord client.
+    pub missing_permissions_handler: fn(crate::Context<'_, U, E>) -> BoxFuture<'_, Result<(), E>>,
     /// Default set of allowed mentions to use for all responses
     pub allowed_mentions: Option<serenity::CreateAllowedMentions>,
     /// Called on every Discord event. Can be used to react to non-command events, like messages
@@ -252,6 +259,18 @@ impl<U: Send + Sync, E: std::fmt::Display + Send> Default for FrameworkOptions<U
                         missing_permissions,
                     );
                     let _: Result<_, _> = ctx.send(|b| b.content(msg).ephemeral(true)).await;
+
+                    Ok(())
+                })
+            },
+            missing_permissions_handler: |ctx| {
+                Box::pin(async move {
+                    let response = format!(
+                        "You don't have the required permissions for `{}{}`",
+                        ctx.prefix(),
+                        ctx.command().map_or("<unknown>", |cmd| cmd.name()),
+                    );
+                    let _: Result<_, _> = ctx.send(|b| b.content(response).ephemeral(true)).await;
 
                     Ok(())
                 })
