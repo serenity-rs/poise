@@ -190,4 +190,13 @@ impl<U, E> FrameworkBuilder<U, E> {
     {
         self.build().await?.start().await
     }
+
+    /// Autosharded version of [`Self::run`]
+    pub async fn run_autosharded(self) -> Result<(), serenity::Error>
+    where
+        U: Send + Sync + 'static,
+        E: Send + 'static,
+    {
+        self.build().await?.start_autosharded().await
+    }
 }

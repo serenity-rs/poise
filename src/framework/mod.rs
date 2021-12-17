@@ -101,16 +101,15 @@ impl<U, E> Framework<U, E> {
         Ok(self_1)
     }
 
-    /// Start the framework.
-    ///
-    /// Takes a `serenity::ClientBuilder`, in which you need to supply the bot token, as well as
-    /// any gateway intents.
-    pub async fn start(self: std::sync::Arc<Self>) -> Result<(), serenity::Error>
+    async fn start_with<F: std::future::Future<Output = serenity::Result<()>>>(
+        self: std::sync::Arc<Self>,
+        start: fn(serenity::Client) -> F,
+    ) -> Result<(), serenity::Error>
     where
         U: Send + Sync + 'static,
         E: Send + 'static,
     {
-        let mut client = self
+        let client = self
             .client
             .lock()
             .unwrap()
@@ -128,11 +127,31 @@ impl<U, E> Framework<U, E> {
         });
 
         // This will run for as long as the bot is active
-        client.start().await?;
+        start(client).await?;
 
         edit_track_cache_purge_task.abort();
 
         Ok(())
+    }
+
+    /// Starts the framework.
+    pub async fn start(self: std::sync::Arc<Self>) -> Result<(), serenity::Error>
+    where
+        U: Send + Sync + 'static,
+        E: Send + 'static,
+    {
+        self.start_with(|mut c| async move { c.start().await })
+            .await
+    }
+
+    /// Starts the framework. Calls [`serenity::Client::start_autosharded`] internally
+    pub async fn start_autosharded(self: std::sync::Arc<Self>) -> Result<(), serenity::Error>
+    where
+        U: Send + Sync + 'static,
+        E: Send + 'static,
+    {
+        self.start_with(|mut c| async move { c.start_autosharded().await })
+            .await
     }
 
     /// Return the stored framework options, including commands.
