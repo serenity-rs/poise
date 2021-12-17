@@ -340,6 +340,7 @@ pub fn command(
                 prefix: #prefix_command_spec,
                 slash: #slash_command_spec,
                 context_menu: #context_menu_command_spec,
+                id: command_id,
             }
         }
     }))

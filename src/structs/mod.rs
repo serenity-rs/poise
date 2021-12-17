@@ -149,6 +149,8 @@ pub struct CommandDefinition<U, E> {
     pub slash: Option<crate::SlashCommand<U, E>>,
     /// Generated context menu command, if it was enabled
     pub context_menu: Option<crate::ContextMenuCommand<U, E>>,
+    /// Implementation type agnostic data that is always present
+    pub id: std::sync::Arc<CommandId<U, E>>,
 }
 
 /// A view into a command definition with its different implementations

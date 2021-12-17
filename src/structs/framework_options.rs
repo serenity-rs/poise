@@ -9,19 +9,11 @@ fn prepare_command_definition<U, E>(
         prefix: mut prefix_command,
         slash: mut slash_command,
         context_menu: mut context_menu_command,
+        id,
     } = definition;
 
     // Make sure every implementation points to the same CommandId (they may have different
     // IDs if each implemented comes from a different function, like rustbot's rustify)
-    let id = if let Some(prefix_command) = &prefix_command {
-        prefix_command.id.clone()
-    } else if let Some(slash_command) = &slash_command {
-        slash_command.id.clone()
-    } else if let Some(context_menu_command) = &context_menu_command {
-        context_menu_command.id.clone()
-    } else {
-        panic!("Empty command definition (no implementations)");
-    };
     if let Some(prefix_command) = &mut prefix_command {
         prefix_command.id = id.clone();
     }
@@ -92,7 +84,7 @@ impl<U, E> CommandBuilder<U, E> {
                             name: cmd.name,
                             description: cmd.description,
                             subcommands: vec![subcommand],
-                            id: builder.id,
+                            id: self.id.clone(),
                         };
                     }
                 }
