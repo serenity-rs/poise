@@ -106,7 +106,32 @@ pub fn command(args: TokenStream, function: TokenStream) -> TokenStream {
         Err(e) => e.write_errors().into(),
     }
 }
+/**
+Use this derive macro on an enum to easily generate a _choice parameter_ type. A _choice parameter_
+is mainly useful in slash commands. It allows you to constrain input to a fixed set of choices.
 
+# Example
+
+```rust
+#[derive(Debug, poise::SlashChoiceParameter)]
+pub enum MyStringChoice {
+    #[name = "The first choice"]
+    ChoiceA,
+    #[name = "The second choice"]
+    ChoiceB,
+}
+
+/// Dummy command to test slash command choice parameters
+#[poise::command(prefix_command, slash_command)]
+pub async fn choice(
+    ctx: Context<'_>,
+    #[description = "The choice you want to choose"] choice: MyStringChoice,
+) -> Result<(), Error> {
+    ctx.say(format!("You entered {:?}", choice)).await?;
+    Ok(())
+}
+```
+*/
 #[proc_macro_derive(SlashChoiceParameter, attributes(name))]
 pub fn slash_choice_parameter(input: TokenStream) -> TokenStream {
     let enum_ = syn::parse_macro_input!(input as syn::DeriveInput);
