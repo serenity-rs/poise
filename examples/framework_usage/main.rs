@@ -1,6 +1,7 @@
 mod autocomplete;
 mod commands;
 mod context_menu;
+mod subcommands;
 
 use std::{collections::HashMap, env::var, sync::Mutex, time::Duration};
 
@@ -102,6 +103,10 @@ async fn main() {
         .command(context_menu::user_info(), |f| f)
         .command(context_menu::echo(), |f| f)
         .command(autocomplete::greet(), |f| f)
+        .command(subcommands::parent(), |f| {
+            f.subcommand(subcommands::child1(), |b| b)
+                .subcommand(subcommands::child2(), |b| b)
+        })
         .run()
         .await
         .unwrap();
