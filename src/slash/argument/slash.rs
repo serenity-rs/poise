@@ -142,7 +142,7 @@ impl<T: TryFrom<i64> + Send + Sync> SlashArgumentHack<T> for &PhantomData<T> {
             .ok_or(SlashArgError::CommandStructureMismatch("expected integer"))?
             .try_into()
             .ok()
-            .ok_or(SlashArgError::Parse(IntegerOutOfBounds.into()))
+            .ok_or_else(|| SlashArgError::Parse(IntegerOutOfBounds.into()))
     }
 
     fn create(
