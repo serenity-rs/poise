@@ -16,10 +16,11 @@ use crate::serenity_prelude as serenity;
 /// Can return an error if sending the Discord error message failed. You can decide for yourself
 /// how to handle this, for example:
 /// ```rust,no_run
-/// # let error = todo!();
+/// # async { let error: poise::FrameworkError<'_, (), &str> = todo!();
 /// if let Err(e) = poise::builtins::on_error(error).await {
 ///     println!("Fatal error while sending error message: {}", e);
 /// }
+/// # };
 /// ```
 pub async fn on_error<U: std::fmt::Debug, E: std::fmt::Display + std::fmt::Debug>(
     error: crate::FrameworkError<'_, U, E>,

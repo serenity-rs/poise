@@ -93,7 +93,7 @@ See [`#[poise::command]`](command) for detailed information.
 
 ```rust
 use poise::serenity_prelude as serenity;
-struct Data {}
+type Data = ();
 type Error = Box<dyn std::error::Error + Send + Sync>;
 type Context<'a> = poise::Context<'a, Data, Error>;
 
@@ -132,7 +132,7 @@ async fn check(ctx: Context<'_>) -> Result<bool, Error> {
 }
 
 async fn error_handler(error: poise::FrameworkError<'_, Data, Error>) {
-    println!("Oh noes, we got an error: {}", error);
+    println!("Oh noes, we got an error: {:?}", error);
 }
 ```
 
@@ -141,7 +141,7 @@ async fn error_handler(error: poise::FrameworkError<'_, Data, Error>) {
 ```rust
 # type Error = Box<dyn std::error::Error + Send + Sync>;
 # type Context<'a> = poise::Context<'a, (), Error>;
-# async fn my_error_function(_: poise::FrameworkContext<'_, (), Error>) {}
+# async fn my_error_function(_: poise::FrameworkError<'_, (), Error>) {}
 # #[poise::command(prefix_command)] async fn command1(ctx: Context<'_>) -> Result<(), Error> { Ok(()) }
 # #[poise::command(prefix_command)] async fn command2(ctx: Context<'_>) -> Result<(), Error> { Ok(()) }
 # #[poise::command(prefix_command)] async fn command3(ctx: Context<'_>) -> Result<(), Error> { Ok(()) }
@@ -161,7 +161,7 @@ poise::Framework::build()
     // a struct literal (hint: use `..Default::default()` to fill uninitialized
     // settings with their default value):
     .options(poise::FrameworkOptions {
-        on_error: |err, ctx| Box::pin(my_error_function(err, ctx)),
+        on_error: |err| Box::pin(my_error_function(err)),
         prefix_options: poise::PrefixFrameworkOptions {
             prefix: Some("~".into()),
             edit_tracker: Some(poise::EditTracker::for_timespan(std::time::Duration::from_secs(3600))),

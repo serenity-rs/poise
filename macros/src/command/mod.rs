@@ -189,7 +189,7 @@ fn make_command_id(inv: &Invocation) -> proc_macro2::TokenStream {
     };
     let on_error = match &inv.more.on_error {
         Some(on_error) => {
-            quote::quote! { Some(|err, ctx| Box::pin(#on_error(err, ctx))) }
+            quote::quote! { Some(|err| Box::pin(#on_error(err))) }
         }
         None => quote::quote! { None },
     };
