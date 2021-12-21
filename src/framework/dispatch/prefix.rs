@@ -1,5 +1,19 @@
 use crate::serenity_prelude as serenity;
 
+/// Small utility function to create the scuffed ad-hoc error type we use in this module
+fn make_error<'a, U, E>(
+    error: E,
+    ctx: crate::PrefixContext<'a, U, E>,
+    location: crate::CommandErrorLocation,
+) -> (crate::FrameworkError<'a, U, E>, &'a crate::CommandId<U, E>) {
+    let error = crate::FrameworkError::Command {
+        error,
+        ctx: crate::Context::Prefix(ctx),
+        location,
+    };
+    (error, &*ctx.command.id)
+}
+
 // Returns tuple of stripped prefix and rest of the message, if any prefix matches
 async fn strip_prefix<'a, U, E>(
     framework: &'a crate::Framework<U, E>,
@@ -137,7 +151,7 @@ where
             prefix,
             framework,
             data: framework.get_user_data().await,
-            command: Some(&command_meta.command),
+            command: &command_meta.command,
         };
 
         first_matching_command = Some(
@@ -174,7 +188,7 @@ pub async fn dispatch_message<'a, U, E>(
     msg: &'a serenity::Message,
     triggered_by_edit: bool,
     previously_tracked: bool,
-) -> Result<(), Option<(E, crate::PrefixCommandErrorContext<'a, U, E>)>>
+) -> Result<(), Option<(crate::FrameworkError<'a, U, E>, &'a crate::CommandId<U, E>)>>
 where
     U: Send + Sync,
 {
@@ -214,25 +228,12 @@ where
         prefix,
         framework,
         data: framework.get_user_data().await,
-        command: Some(command),
+        command,
     };
 
-    let perms_and_cooldown_ok =
-        super::common::check_permissions_and_cooldown(ctx.into(), &command.id)
-            .await
-            .map_err(|(e, location)| {
-                Some((
-                    e,
-                    crate::PrefixCommandErrorContext {
-                        ctx,
-                        command,
-                        location,
-                    },
-                ))
-            })?;
-    if !perms_and_cooldown_ok {
-        return Err(None);
-    }
+    super::common::check_permissions_and_cooldown(ctx.into(), &command.id)
+        .await
+        .map_err(|e| Some((e, &*command.id)))?;
 
     // Typing is broadcasted as long as this object is alive
     let _typing_broadcaster = if command.broadcast_typing {
@@ -244,16 +245,9 @@ where
     (framework.options.pre_command)(crate::Context::Prefix(ctx)).await;
 
     // Execute command
-    let res = (command.action)(ctx, args).await.map_err(|e| {
-        Some((
-            e,
-            crate::PrefixCommandErrorContext {
-                ctx,
-                command,
-                location: crate::CommandErrorLocation::Check,
-            },
-        ))
-    });
+    let res = (command.action)(ctx, args)
+        .await
+        .map_err(|e| Some(make_error(e, ctx, crate::CommandErrorLocation::Check)));
 
     (framework.options.post_command)(crate::Context::Prefix(ctx)).await;
 

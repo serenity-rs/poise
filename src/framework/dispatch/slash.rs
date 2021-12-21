@@ -1,5 +1,19 @@
 use crate::serenity_prelude as serenity;
 
+/// Small utility function to create the scuffed ad-hoc error type we use in this module
+fn make_error<'a, U, E>(
+    error: E,
+    ctx: crate::ApplicationContext<'a, U, E>,
+    location: crate::CommandErrorLocation,
+) -> (crate::FrameworkError<'a, U, E>, &'a crate::CommandId<U, E>) {
+    let error = crate::FrameworkError::Command {
+        error,
+        ctx: crate::Context::Application(ctx),
+        location,
+    };
+    (error, ctx.command.id())
+}
+
 fn find_matching_application_command<'a, 'b, U, E>(
     framework: &'a crate::Framework<U, E>,
     interaction: &'b serenity::ApplicationCommandInteractionData,
@@ -117,7 +131,7 @@ pub async fn extract_command_and_run_checks<'a, U, E>(
         crate::ApplicationContext<'a, U, E>,
         &'a [serenity::ApplicationCommandInteractionDataOption],
     ),
-    Option<(E, crate::ApplicationCommandErrorContext<'a, U, E>)>,
+    Option<(crate::FrameworkError<'a, U, E>, &'a crate::CommandId<U, E>)>,
 > {
     let (command, leaf_interaction_options) =
         find_matching_application_command(framework, interaction.data()).ok_or_else(|| {
@@ -137,15 +151,9 @@ pub async fn extract_command_and_run_checks<'a, U, E>(
         has_sent_initial_response,
     };
 
-    let perms_and_cooldown_ok =
-        super::common::check_permissions_and_cooldown(ctx.into(), command.id())
-            .await
-            .map_err(|(e, location)| {
-                Some((e, crate::ApplicationCommandErrorContext { ctx, location }))
-            })?;
-    if !perms_and_cooldown_ok {
-        return Err(None);
-    }
+    super::common::check_permissions_and_cooldown(ctx.into(), command.id())
+        .await
+        .map_err(|e| Some((e, &**command.id())))?;
 
     Ok((ctx, leaf_interaction_options))
 }
@@ -156,7 +164,7 @@ pub async fn dispatch_interaction<'a, U, E>(
     interaction: &'a serenity::ApplicationCommandInteraction,
     // Need to pass this in from outside because of lifetime issues
     has_sent_initial_response: &'a std::sync::atomic::AtomicBool,
-) -> Result<(), Option<(E, crate::ApplicationCommandErrorContext<'a, U, E>)>> {
+) -> Result<(), Option<(crate::FrameworkError<'a, U, E>, &'a crate::CommandId<U, E>)>> {
     let (ctx, options) = extract_command_and_run_checks(
         framework,
         ctx,
@@ -189,15 +197,7 @@ pub async fn dispatch_interaction<'a, U, E>(
 
     (framework.options.post_command)(crate::Context::Application(ctx)).await;
 
-    action_result.map_err(|e| {
-        Some((
-            e,
-            crate::ApplicationCommandErrorContext {
-                ctx,
-                location: crate::CommandErrorLocation::Body,
-            },
-        ))
-    })
+    action_result.map_err(|e| Some(make_error(e, ctx, crate::CommandErrorLocation::Body)))
 }
 
 pub async fn dispatch_autocomplete<'a, U, E>(
@@ -206,7 +206,7 @@ pub async fn dispatch_autocomplete<'a, U, E>(
     interaction: &'a serenity::AutocompleteInteraction,
     // Need to pass this in from outside because of lifetime issues
     has_sent_initial_response: &'a std::sync::atomic::AtomicBool,
-) -> Result<(), Option<(E, crate::ApplicationCommandErrorContext<'a, U, E>)>> {
+) -> Result<(), Option<(crate::FrameworkError<'a, U, E>, &'a crate::CommandId<U, E>)>> {
     let (ctx, options) = extract_command_and_run_checks(
         framework,
         ctx,
@@ -226,17 +226,16 @@ pub async fn dispatch_autocomplete<'a, U, E>(
             None => continue,
         };
 
-        if let Err(e) = autocomplete_callback(ctx, interaction, options).await {
-            let error_ctx = crate::ApplicationCommandErrorContext {
-                ctx,
-                location: crate::CommandErrorLocation::Autocomplete,
-            };
-
-            if let Some(on_error) = error_ctx.ctx.command.id().on_error {
-                on_error(e, crate::CommandErrorContext::Application(error_ctx)).await;
-            } else {
-                (framework.options.on_error)(e, crate::ErrorContext::Autocomplete(error_ctx)).await;
-            }
+        if let Err(error) = autocomplete_callback(ctx, interaction, options).await {
+            let command = &ctx.command;
+            command.id().on_error.unwrap_or(framework.options.on_error)(
+                crate::FrameworkError::Command {
+                    ctx: crate::Context::Application(ctx),
+                    error,
+                    location: crate::CommandErrorLocation::Autocomplete,
+                },
+            )
+            .await;
         }
     }
 

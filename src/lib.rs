@@ -131,7 +131,7 @@ async fn check(ctx: Context<'_>) -> Result<bool, Error> {
     Ok(!ctx.author().name.starts_with('X'))
 }
 
-async fn error_handler(error: Error, _ctx: poise::CommandErrorContext<'_, Data, Error>) {
+async fn error_handler(error: poise::FrameworkError<'_, Data, Error>) {
     println!("Oh noes, we got an error: {}", error);
 }
 ```
@@ -141,7 +141,7 @@ async fn error_handler(error: Error, _ctx: poise::CommandErrorContext<'_, Data, 
 ```rust
 # type Error = Box<dyn std::error::Error + Send + Sync>;
 # type Context<'a> = poise::Context<'a, (), Error>;
-# async fn my_error_function(_: Error, _: poise::ErrorContext<'_, (), Error>) {}
+# async fn my_error_function(_: poise::FrameworkContext<'_, (), Error>) {}
 # #[poise::command(prefix_command)] async fn command1(ctx: Context<'_>) -> Result<(), Error> { Ok(()) }
 # #[poise::command(prefix_command)] async fn command2(ctx: Context<'_>) -> Result<(), Error> { Ok(()) }
 # #[poise::command(prefix_command)] async fn command3(ctx: Context<'_>) -> Result<(), Error> { Ok(()) }

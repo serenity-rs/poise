@@ -17,10 +17,7 @@ pub struct PrefixContext<'a, U, E> {
     /// Useful if you need the list of commands, for example for a custom help command
     pub framework: &'a Framework<U, E>,
     /// The command object which is the current command
-    ///
-    /// Optional to allow using [`PrefixContext`] in places where there is no command. For example
-    /// Etternabot's message listener
-    pub command: Option<&'a PrefixCommand<U, E>>,
+    pub command: &'a PrefixCommand<U, E>,
     /// Your custom user data
     pub data: &'a U,
 }
@@ -84,26 +81,6 @@ pub struct PrefixCommandMeta<U, E> {
     pub command: PrefixCommand<U, E>,
     /// Possible subcommands
     pub subcommands: Vec<PrefixCommandMeta<U, E>>,
-}
-
-/// Context passed alongside the error value to error handlers
-pub struct PrefixCommandErrorContext<'a, U, E> {
-    /// What part of the command triggered the error
-    pub location: crate::CommandErrorLocation,
-    /// Which command was being processed when the error occured
-    pub command: &'a PrefixCommand<U, E>,
-    /// Further context
-    pub ctx: PrefixContext<'a, U, E>,
-}
-
-impl<U, E> Clone for PrefixCommandErrorContext<'_, U, E> {
-    fn clone(&self) -> Self {
-        Self {
-            location: self.location,
-            command: self.command,
-            ctx: self.ctx,
-        }
-    }
 }
 
 /// Possible ways to define a command prefix

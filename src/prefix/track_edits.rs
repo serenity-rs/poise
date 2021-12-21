@@ -154,16 +154,14 @@ pub async fn send_prefix_reply<'a, U, E>(
     } = reply;
 
     let lock_edit_tracker = || {
-        if let Some(command) = ctx.command {
-            // If we definitely don't need to track this command invocation, stop
-            let execute_untracked_edits = ctx
-                .framework
-                .options()
-                .prefix_options
-                .execute_untracked_edits;
-            if !(command.track_edits || execute_untracked_edits) {
-                return None;
-            }
+        // If we definitely don't need to track this command invocation, stop
+        let execute_untracked_edits = ctx
+            .framework
+            .options()
+            .prefix_options
+            .execute_untracked_edits;
+        if !(ctx.command.track_edits || execute_untracked_edits) {
+            return None;
         }
 
         ctx.framework

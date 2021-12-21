@@ -56,89 +56,6 @@ impl<'a, U, E> CommandRef<'a, U, E> {
     }
 }
 
-/// Context of an error in user code
-///
-/// Contains slightly different data depending on where the error was raised
-pub enum CommandErrorContext<'a, U, E> {
-    /// Prefix command specific error context
-    Prefix(crate::PrefixCommandErrorContext<'a, U, E>),
-    /// Application command specific error context
-    Application(crate::ApplicationCommandErrorContext<'a, U, E>),
-}
-
-impl<U, E> Clone for CommandErrorContext<'_, U, E> {
-    fn clone(&self) -> Self {
-        match self {
-            Self::Prefix(x) => Self::Prefix(x.clone()),
-            Self::Application(x) => Self::Application(x.clone()),
-        }
-    }
-}
-
-impl<'a, U, E> From<crate::PrefixCommandErrorContext<'a, U, E>> for CommandErrorContext<'a, U, E> {
-    fn from(x: crate::PrefixCommandErrorContext<'a, U, E>) -> Self {
-        Self::Prefix(x)
-    }
-}
-
-impl<'a, U, E> From<crate::ApplicationCommandErrorContext<'a, U, E>>
-    for CommandErrorContext<'a, U, E>
-{
-    fn from(x: crate::ApplicationCommandErrorContext<'a, U, E>) -> Self {
-        Self::Application(x)
-    }
-}
-
-impl<'a, U, E> CommandErrorContext<'a, U, E> {
-    /// Returns a reference to the command during whose execution the error occured.
-    pub fn command(&self) -> CommandRef<'_, U, E> {
-        match self {
-            Self::Prefix(x) => CommandRef::Prefix(x.command),
-            Self::Application(x) => CommandRef::Application(x.ctx.command),
-        }
-    }
-
-    /// Whether the error occured in a pre-command check or during execution
-    pub fn location(&self) -> crate::CommandErrorLocation {
-        match self {
-            Self::Prefix(x) => x.location,
-            Self::Application(x) => x.location,
-        }
-    }
-
-    /// Further command context
-    pub fn ctx(&self) -> Context<'a, U, E> {
-        match self {
-            Self::Prefix(x) => Context::Prefix(x.ctx),
-            Self::Application(x) => Context::Application(x.ctx),
-        }
-    }
-}
-
-/// Contains the location of the error with location-specific context
-pub enum ErrorContext<'a, U, E> {
-    /// Error in user data setup
-    Setup,
-    /// Error in generic event listener
-    Listener(&'a crate::Event<'a>),
-    /// Error in bot command
-    Command(CommandErrorContext<'a, U, E>),
-    /// Error in autocomplete callback
-    // TODO: remove and just use Self::Command instead?
-    Autocomplete(crate::ApplicationCommandErrorContext<'a, U, E>),
-}
-
-impl<U, E> Clone for ErrorContext<'_, U, E> {
-    fn clone(&self) -> Self {
-        match self {
-            Self::Setup => Self::Setup,
-            Self::Listener(x) => Self::Listener(x),
-            Self::Command(x) => Self::Command(x.clone()),
-            Self::Autocomplete(x) => Self::Autocomplete(x.clone()),
-        }
-    }
-}
-
 /// Type returned from `#[poise::command]` annotated functions, which contains all of the generated
 /// prefix and application commands
 #[derive(Default, Clone, Debug)]
@@ -205,7 +122,7 @@ pub struct CommandId<U, E> {
     /// command.
     pub owners_only: bool,
     /// Command-specific override for [`crate::FrameworkOptions::on_error`]
-    pub on_error: Option<fn(E, CommandErrorContext<'_, U, E>) -> BoxFuture<'_, ()>>,
+    pub on_error: Option<fn(FrameworkError<'_, U, E>) -> BoxFuture<'_, ()>>,
     /// If this function returns false, this command will not be executed.
     pub check: Option<fn(Context<'_, U, E>) -> BoxFuture<'_, Result<bool, E>>>,
 }
@@ -252,10 +169,53 @@ pub enum CommandErrorLocation {
     Check,
     /// Error occured in a parameter autocomplete callback
     Autocomplete,
-    /// Error occured in [`crate::FrameworkOptions::cooldown_hit`]
-    CooldownCallback,
-    /// Error occured in [`crate::FrameworkOptions::missing_bot_permissions_handler`]
-    MissingBotPermissionsCallback,
-    /// Error occured in [`crate::FrameworkOptions::missing_permissions_handler`]
-    MissingPermissionsCallback,
+}
+
+#[derive(Debug)]
+pub enum FrameworkError<'a, U, E> {
+    /// User code threw an error in user data setup
+    Setup { error: E },
+    /// User code threw an error in generic event listener
+    Listener {
+        error: E,
+        event: &'a crate::Event<'a>,
+    },
+    /// User code threw an error in bot command
+    Command {
+        error: E,
+        /// In which part of the command execution the error occured
+        location: crate::CommandErrorLocation,
+        /// General context
+        ctx: Context<'a, U, E>,
+    },
+    /// Command was invoked before its cooldown expired
+    CooldownHit {
+        remaining_cooldown: std::time::Duration,
+        /// General context
+        ctx: Context<'a, U, E>,
+    },
+    /// Command was invoked but the bot is lacking the permissions specified in
+    /// `crate::CommandId::required_bot_permissions`
+    MissingBotPermissions {
+        missing_permissions: serenity::Permissions,
+        /// General context
+        ctx: Context<'a, U, E>,
+    },
+    /// Command was invoked but the user is lacking the permissions specified in
+    /// `crate::CommandId::required_bot_permissions`
+    MissingUserPermissions {
+        /// List of permissions that the user is lacking. May be None if retrieving the user's
+        /// permissions failed
+        missing_permissions: Option<serenity::Permissions>,
+        /// General context
+        ctx: Context<'a, U, E>,
+    },
+    NotAnOwner {
+        /// General context
+        ctx: Context<'a, U, E>,
+    },
+    CommandCheckFailed {
+        /// General context
+        ctx: Context<'a, U, E>,
+    },
 }

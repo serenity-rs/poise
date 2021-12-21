@@ -12,6 +12,7 @@ use poise::serenity_prelude as serenity;
 use std::fmt::Write as _;
 
 /// A shared instance of this struct is available across all events and framework commands
+#[derive(Debug)]
 struct Data {
     command_counter: std::sync::Mutex<std::collections::HashMap<String, u64>>,
 }
@@ -131,11 +132,9 @@ async fn register(ctx: Context<'_>, #[flag] global: bool) -> Result<(), Error> {
 }
 
 async fn pre_command(ctx: Context<'_>) {
-    let command_name = ctx.command().map_or("<unknown>", |cmd| cmd.name());
-
     println!(
         "Got command '{}' by user '{}'",
-        command_name,
+        ctx.command().name(),
         ctx.author().name
     );
 
@@ -143,12 +142,14 @@ async fn pre_command(ctx: Context<'_>) {
     // the command's name does not exist in the counter, add a default
     // value of 0.
     let mut command_counter = ctx.data().command_counter.lock().unwrap();
-    let entry = command_counter.entry(command_name.to_string()).or_insert(0);
+    let entry = command_counter
+        .entry(ctx.command().name().to_string())
+        .or_insert(0);
     *entry += 1;
 }
 
 async fn post_command(ctx: Context<'_>) {
-    println!("Processed command '{}'", ctx.command().unwrap().name());
+    println!("Processed command '{}'", ctx.command().name());
 }
 
 // TODO: unify the command checks in poise::FrameworkOptions and then implement a command check here
@@ -157,23 +158,31 @@ async fn post_command(ctx: Context<'_>) {
 // true // if `check` returns false, command processing doesn't happen.
 // ```
 
-async fn on_error(error: Error, ctx: poise::ErrorContext<'_, Data, Error>) {
-    match ctx {
-        poise::ErrorContext::Command(ctx) => {
+async fn on_error(error: poise::FrameworkError<'_, Data, Error>) {
+    match error {
+        poise::FrameworkError::Command {
+            error,
+            ctx,
+            location: _,
+        } => {
             println!(
                 "Command '{}' returned error {:?}",
                 ctx.command().name(),
                 error
             );
         }
-        poise::ErrorContext::Listener(event) => {
+        poise::FrameworkError::Listener { error, event } => {
             println!(
                 "Listener returned error during {} event: {:?}",
                 event.name(),
                 error
             );
         }
-        _ => {}
+        error => {
+            if let Err(e) = poise::builtins::on_error(error).await {
+                println!("Error while handling error: {}", e)
+            }
+        }
     }
 }
 
@@ -235,7 +244,7 @@ async fn main() {
         listener: |ctx, event, framework, user_data| {
             Box::pin(event_listener(ctx, event, framework, user_data))
         },
-        on_error: |error, ctx| Box::pin(on_error(error, ctx)),
+        on_error: |error| Box::pin(on_error(error)),
         // Set a function to be called prior to each command execution. This
         // provides all context of the command that would also be passed to the actual command code
         pre_command: |ctx| Box::pin(pre_command(ctx)),

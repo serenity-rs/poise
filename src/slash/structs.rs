@@ -117,23 +117,6 @@ impl<U, E> ApplicationContext<'_, U, E> {
     }
 }
 
-/// Application command specific context to an error in user code
-pub struct ApplicationCommandErrorContext<'a, U, E> {
-    /// In which part of the command execution the error occured
-    pub location: crate::CommandErrorLocation,
-    /// Further context
-    pub ctx: ApplicationContext<'a, U, E>,
-}
-
-impl<U, E> Clone for ApplicationCommandErrorContext<'_, U, E> {
-    fn clone(&self) -> Self {
-        Self {
-            location: self.location,
-            ctx: self.ctx,
-        }
-    }
-}
-
 /// Application command specific configuration of a framework command
 #[derive(Clone, Debug)]
 pub struct ApplicationCommandOptions {

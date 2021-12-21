@@ -98,7 +98,7 @@ impl<U, E> CommandBuilder<U, E> {
 /// Framework configuration
 pub struct FrameworkOptions<U, E> {
     /// Provide a callback to be invoked when any user code yields an error.
-    pub on_error: fn(E, crate::ErrorContext<'_, U, E>) -> BoxFuture<'_, ()>,
+    pub on_error: fn(crate::FrameworkError<'_, U, E>) -> BoxFuture<'_, ()>,
     /// Called before every command
     pub pre_command: fn(crate::Context<'_, U, E>) -> BoxFuture<'_, ()>,
     /// Called after every command, no matter if it succeeded or failed
@@ -108,21 +108,6 @@ pub struct FrameworkOptions<U, E> {
     ///
     /// If individual commands add their own check, both callbacks are run and must return true.
     pub command_check: Option<fn(crate::Context<'_, U, E>) -> BoxFuture<'_, Result<bool, E>>>,
-    /// Called when a command is invoked before its cooldown has expired
-    pub cooldown_hit:
-        Option<fn(crate::Context<'_, U, E>, std::time::Duration) -> BoxFuture<'_, Result<(), E>>>,
-    /// Called if the bot is lacking any of the permissions specified in
-    /// [`crate::CommandId::required_bot_permissions`]. The list of missing permissions is given as
-    /// an argument.
-    pub missing_bot_permissions_handler:
-        fn(crate::Context<'_, U, E>, serenity::Permissions) -> BoxFuture<'_, Result<(), E>>,
-    /// Invoked when a user tries to execute an command but doesn't have the required
-    /// permissions for it.
-    ///
-    /// This handler should be used to reply with some form of error message. On
-    /// application commands, if this handler does
-    /// nothing, the user will be shown "Interaction failed" by their Discord client.
-    pub missing_permissions_handler: fn(crate::Context<'_, U, E>) -> BoxFuture<'_, Result<(), E>>,
     /// Default set of allowed mentions to use for all responses
     pub allowed_mentions: Option<serenity::CreateAllowedMentions>,
     /// Called on every Discord event. Can be used to react to non-command events, like messages
@@ -193,9 +178,6 @@ impl<U: std::fmt::Debug, E: std::fmt::Debug> std::fmt::Debug for FrameworkOption
             pre_command,
             post_command,
             command_check,
-            cooldown_hit,
-            missing_bot_permissions_handler,
-            missing_permissions_handler,
             allowed_mentions,
             listener,
             application_options,
@@ -208,15 +190,6 @@ impl<U: std::fmt::Debug, E: std::fmt::Debug> std::fmt::Debug for FrameworkOption
             .field("pre_command", &(*pre_command as *const ()))
             .field("post_command", &(*post_command as *const ()))
             .field("command_check", &command_check.map(|f| f as *const ()))
-            .field("cooldown_hit", &cooldown_hit.map(|f| f as *const ()))
-            .field(
-                "missing_bot_permissions_handler",
-                &(*missing_bot_permissions_handler as *const ()),
-            )
-            .field(
-                "missing_permissions_handler",
-                &(*missing_permissions_handler as *const ()),
-            )
             .field("allowed_mentions", allowed_mentions)
             .field("listener", &(*listener as *const ()))
             .field("application_options", application_options)
@@ -226,87 +199,24 @@ impl<U: std::fmt::Debug, E: std::fmt::Debug> std::fmt::Debug for FrameworkOption
     }
 }
 
-async fn default_error_handler<U, E>(error: E, ctx: crate::ErrorContext<'_, U, E>)
+impl<U, E> Default for FrameworkOptions<U, E>
 where
-    U: Send + Sync,
-    E: std::fmt::Display + Send,
+    U: Send + Sync + std::fmt::Debug,
+    E: std::fmt::Display + std::fmt::Debug + Send,
 {
-    match ctx {
-        crate::ErrorContext::Setup => println!("Error in user data setup: {}", error),
-        crate::ErrorContext::Listener(event) => println!(
-            "User event listener encountered an error on {} event: {}",
-            event.name(),
-            error
-        ),
-        crate::ErrorContext::Command(crate::CommandErrorContext::Prefix(err_ctx)) => {
-            println!(
-                "Error in prefix command \"{}\" from message \"{}\": {}",
-                &err_ctx.command.name, &err_ctx.ctx.msg.content, error
-            );
-        }
-        crate::ErrorContext::Command(crate::CommandErrorContext::Application(err_ctx)) => {
-            match &err_ctx.ctx.command {
-                crate::ApplicationCommand::Slash(cmd) => {
-                    println!("Error in slash command \"{}\": {}", cmd.name, error)
-                }
-                crate::ApplicationCommand::ContextMenu(cmd) => {
-                    println!("Error in context menu command \"{}\": {}", cmd.name, error)
-                }
-            }
-        }
-        crate::ErrorContext::Autocomplete(err_ctx) => match &err_ctx.ctx.command {
-            crate::ApplicationCommand::Slash(cmd) => {
-                println!("Error in slash command \"{}\": {}", cmd.name, error)
-            }
-            crate::ApplicationCommand::ContextMenu(cmd) => {
-                println!("Error in context menu command \"{}\": {}", cmd.name, error)
-            }
-        },
-    }
-}
-
-impl<U: Send + Sync, E: std::fmt::Display + Send> Default for FrameworkOptions<U, E> {
     fn default() -> Self {
         Self {
-            on_error: |error, ctx| Box::pin(default_error_handler(error, ctx)),
+            on_error: |error| {
+                Box::pin(async move {
+                    if let Err(e) = crate::builtins::on_error(error).await {
+                        println!("Error while handling error: {}", e);
+                    }
+                })
+            },
             listener: |_, _, _, _| Box::pin(async { Ok(()) }),
             pre_command: |_| Box::pin(async {}),
             post_command: |_| Box::pin(async {}),
             command_check: None,
-            cooldown_hit: Some(|ctx, cooldown_left| {
-                Box::pin(async move {
-                    let msg = format!(
-                        "You're too fast. Please wait {} seconds before retrying",
-                        cooldown_left.as_secs()
-                    );
-                    let _: Result<_, _> = ctx.send(|b| b.content(msg).ephemeral(true)).await;
-
-                    Ok(())
-                })
-            }),
-            missing_bot_permissions_handler: |ctx, missing_permissions| {
-                Box::pin(async move {
-                    let msg = format!(
-                        "Command cannot be executed because the bot is lacking permissions: {}",
-                        missing_permissions,
-                    );
-                    let _: Result<_, _> = ctx.send(|b| b.content(msg).ephemeral(true)).await;
-
-                    Ok(())
-                })
-            },
-            missing_permissions_handler: |ctx| {
-                Box::pin(async move {
-                    let response = format!(
-                        "You don't have the required permissions for `{}{}`",
-                        ctx.prefix(),
-                        ctx.command().map_or("<unknown>", |cmd| cmd.name()),
-                    );
-                    let _: Result<_, _> = ctx.send(|b| b.content(response).ephemeral(true)).await;
-
-                    Ok(())
-                })
-            },
             allowed_mentions: Some({
                 let mut f = serenity::CreateAllowedMentions::default();
                 // Only support direct user pings by default

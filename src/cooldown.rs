@@ -49,7 +49,7 @@ impl Cooldowns {
 
     /// Queries the cooldown buckets and checks if all cooldowns have expired and command
     /// execution may proceed. If not, Some is returned with the remaining cooldown
-    pub fn get_wait_time<U, E>(&self, ctx: crate::Context<'_, U, E>) -> Option<Duration> {
+    pub fn remaining_cooldown<U, E>(&self, ctx: crate::Context<'_, U, E>) -> Option<Duration> {
         let mut cooldown_data = vec![
             (self.cooldown.global, self.global_invocation),
             (

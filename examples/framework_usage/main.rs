@@ -10,6 +10,7 @@ type Error = Box<dyn std::error::Error + Send + Sync>;
 type Context<'a> = poise::Context<'a, Data, Error>;
 
 // Custom user data passed to all command functions
+#[derive(Debug)]
 pub struct Data {
     votes: Mutex<HashMap<String, u32>>,
 }
@@ -46,13 +47,29 @@ async fn register(ctx: Context<'_>, #[flag] global: bool) -> Result<(), Error> {
     Ok(())
 }
 
-async fn on_error(error: Error, ctx: poise::ErrorContext<'_, Data, Error>) {
-    match ctx {
-        poise::ErrorContext::Setup => panic!("Failed to start bot: {:?}", error),
-        poise::ErrorContext::Command(ctx) => {
-            println!("Error in command `{}`: {:?}", ctx.command().name(), error)
+async fn on_error(error: poise::FrameworkError<'_, Data, Error>) {
+    // This is our custom error handler
+    // They are many errors that can occur, so we only handle the ones we want to customize
+    // and forward the rest to the default handler
+    match error {
+        poise::FrameworkError::Setup { error } => panic!("Failed to start bot: {:?}", error),
+        poise::FrameworkError::Command {
+            error,
+            ctx,
+            location,
+        } => {
+            println!(
+                "Error in command `{}` in {:?}: {:?}",
+                ctx.command().name(),
+                error,
+                location
+            );
         }
-        _ => println!("Other error: {:?}", error),
+        error => {
+            if let Err(e) = poise::builtins::on_error(error).await {
+                println!("Error while handling error: {}", e)
+            }
+        }
     }
 }
 
@@ -68,15 +85,15 @@ async fn main() {
             ],
             ..Default::default()
         },
-        on_error: |error, ctx| Box::pin(on_error(error, ctx)),
+        on_error: |error| Box::pin(on_error(error)),
         pre_command: |ctx| {
             Box::pin(async move {
-                println!("Executing command {}...", ctx.command().unwrap().name());
+                println!("Executing command {}...", ctx.command().name());
             })
         },
         post_command: |ctx| {
             Box::pin(async move {
-                println!("Executed command {}!", ctx.command().unwrap().name());
+                println!("Executed command {}!", ctx.command().name());
             })
         },
         ..Default::default()

@@ -13,6 +13,11 @@ impl<U, E> Clone for Context<'_, U, E> {
     }
 }
 impl<U, E> Copy for Context<'_, U, E> {}
+impl<U, E> std::fmt::Debug for Context<'_, U, E> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("STUB") // STUB // TODO
+    }
+}
 impl<'a, U, E> From<crate::ApplicationContext<'a, U, E>> for Context<'a, U, E> {
     fn from(x: crate::ApplicationContext<'a, U, E>) -> Self {
         Self::Application(x)
@@ -170,11 +175,11 @@ impl<'a, U, E> Context<'a, U, E> {
     }
 
     /// Returns a reference to the command.
-    pub fn command(&self) -> Option<crate::CommandRef<'a, U, E>> {
-        Some(match self {
-            Self::Prefix(x) => crate::CommandRef::Prefix(x.command?),
+    pub fn command(&self) -> crate::CommandRef<'a, U, E> {
+        match self {
+            Self::Prefix(x) => crate::CommandRef::Prefix(x.command),
             Self::Application(x) => crate::CommandRef::Application(x.command),
-        })
+        }
     }
 
     /// Returns the prefix this command was invoked with, or a slash (`/`), if this is an

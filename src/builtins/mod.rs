@@ -13,11 +13,32 @@ type BoxErrorSendSync = Box<dyn std::error::Error + Send + Sync>;
 /// If the user invoked the command wrong
 /// (i.e. an [`crate::ArgumentParseError`]), the command help is displayed and the user is directed
 /// to the help menu.
-pub async fn on_error<D>(e: BoxErrorSendSync, ctx: crate::ErrorContext<'_, D, BoxErrorSendSync>) {
-    println!("Encountered an error: {:?}", e);
-    match ctx {
-        crate::ErrorContext::Command(ctx) => {
-            let user_error_msg = if let Some(crate::ArgumentParseError(e)) = e.downcast_ref() {
+///
+/// Can return an error if sending the Discord error message failed. You can decide for yourself
+/// how to handle this, for example: ```rust,no_run
+/// # let error = todo!();
+/// if let Err(e) = poise::builtins::on_error(error).await {
+///     println!("Fatal error while sending error message: {}", e);
+/// }
+/// ```
+pub async fn on_error<U: std::fmt::Debug, E: std::fmt::Display + std::fmt::Debug>(
+    error: crate::FrameworkError<'_, U, E>,
+) -> Result<(), serenity::Error> {
+    println!("Encountered an error: {:?}", error);
+    match error {
+        crate::FrameworkError::Setup { error } => println!("Error in user data setup: {}", error),
+        crate::FrameworkError::Listener { error, event } => println!(
+            "User event listener encountered an error on {} event: {}",
+            event.name(),
+            error
+        ),
+        crate::FrameworkError::Command {
+            ctx,
+            error,
+            location: _,
+        } => {
+            // TODO: throw argument parse errors some different way
+            let user_error_msg = /*if let Some(crate::ArgumentParseError(e)) = error.downcast_ref() {
                 // If we caught an argument parse error, give a helpful error message with the
                 // command explanation if available
 
@@ -26,26 +47,65 @@ pub async fn on_error<D>(e: BoxErrorSendSync, ctx: crate::ErrorContext<'_, D, Bo
                     usage = multiline_help();
                 }
                 format!("**{}**\n{}", e, usage)
-            } else {
-                e.to_string()
-            };
-            if let Err(e) = ctx.ctx().say(user_error_msg).await {
-                println!("Error while user command error: {}", e);
-            }
+            } else {*/
+                error.to_string()
+            /*}*/;
+            ctx.say(user_error_msg).await?;
         }
-        crate::ErrorContext::Listener(event) => {
-            println!("Error in listener while processing {:?}: {}", event, e)
-        }
-        crate::ErrorContext::Autocomplete(err_ctx) => {
-            let ctx = err_ctx.ctx;
+        crate::FrameworkError::CommandCheckFailed { ctx } => {
             println!(
-                "Error in autocomplete callback for command {:?}: {}",
-                ctx.command.slash_or_context_menu_name(),
-                e
-            )
+                "A command check failed in command {} for user {}",
+                ctx.command().name(),
+                ctx.author().name
+            );
         }
-        crate::ErrorContext::Setup => println!("Setup failed: {}", e),
+        crate::FrameworkError::CooldownHit {
+            remaining_cooldown,
+            ctx,
+        } => {
+            let msg = format!(
+                "You're too fast. Please wait {} seconds before retrying",
+                remaining_cooldown.as_secs()
+            );
+            ctx.send(|b| b.content(msg).ephemeral(true)).await?;
+        }
+        crate::FrameworkError::MissingBotPermissions {
+            missing_permissions,
+            ctx,
+        } => {
+            let msg = format!(
+                "Command cannot be executed because the bot is lacking permissions: {}",
+                missing_permissions,
+            );
+            ctx.send(|b| b.content(msg).ephemeral(true)).await?;
+        }
+        crate::FrameworkError::MissingUserPermissions {
+            missing_permissions,
+            ctx,
+        } => {
+            let response = if let Some(missing_permissions) = missing_permissions {
+                format!(
+                    "You're lacking permissions for `{}{}`: {}",
+                    ctx.prefix(),
+                    ctx.command().name(),
+                    missing_permissions,
+                )
+            } else {
+                format!(
+                    "You may be lacking permissions for `{}{}`. Not executing for safety",
+                    ctx.prefix(),
+                    ctx.command().name(),
+                )
+            };
+            ctx.send(|b| b.content(response).ephemeral(true)).await?;
+        }
+        crate::FrameworkError::NotAnOwner { ctx } => {
+            let response = "Only bot owners can call this command";
+            ctx.send(|b| b.content(response).ephemeral(true)).await?;
+        }
     }
+
+    Ok(())
 }
 
 /// An autocomplete function that can be used for the command parameter in your help function.
