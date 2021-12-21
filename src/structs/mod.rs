@@ -198,6 +198,24 @@ pub enum FrameworkError<'a, U, E> {
         /// General context
         ctx: Context<'a, U, E>,
     },
+    /// A command argument failed to parse from the Discord message or interaction content
+    ArgumentParse {
+        /// Error which was thrown by the parameter type's parsing routine
+        error: Box<dyn std::error::Error + Send + Sync>,
+        /// General context
+        ctx: Context<'a, U, E>,
+    },
+    /// Expected a certain argument type at a certain position in the unstructured list of
+    /// arguments, but found something else.
+    ///
+    /// Most often the result of the bot not having registered the command in Discord, so Discord
+    /// stores an outdated version of the command and its parameters.
+    CommandStructureMismatch {
+        /// Developer-readable description of the type mismatch
+        error: &'static str,
+        /// General context
+        ctx: crate::ApplicationContext<'a, U, E>,
+    },
     /// Command was invoked before its cooldown expired
     CooldownHit {
         /// Time until the command may be invoked for the next time in the given context

@@ -1,19 +1,5 @@
 use crate::serenity_prelude as serenity;
 
-/// Small utility function to create the scuffed ad-hoc error type we use in this module
-fn make_error<U, E>(
-    error: E,
-    ctx: crate::PrefixContext<'_, U, E>,
-    location: crate::CommandErrorLocation,
-) -> (crate::FrameworkError<'_, U, E>, &crate::CommandId<U, E>) {
-    let error = crate::FrameworkError::Command {
-        error,
-        ctx: crate::Context::Prefix(ctx),
-        location,
-    };
-    (error, &*ctx.command.id)
-}
-
 // Returns tuple of stripped prefix and rest of the message, if any prefix matches
 async fn strip_prefix<'a, U, E>(
     framework: &'a crate::Framework<U, E>,
@@ -247,7 +233,7 @@ where
     // Execute command
     let res = (command.action)(ctx, args)
         .await
-        .map_err(|e| Some(make_error(e, ctx, crate::CommandErrorLocation::Check)));
+        .map_err(|e| Some((e, &*command.id)));
 
     (framework.options.post_command)(crate::Context::Prefix(ctx)).await;
 

@@ -1,19 +1,5 @@
 use crate::serenity_prelude as serenity;
 
-/// Small utility function to create the scuffed ad-hoc error type we use in this module
-fn make_error<U, E>(
-    error: E,
-    ctx: crate::ApplicationContext<'_, U, E>,
-    location: crate::CommandErrorLocation,
-) -> (crate::FrameworkError<'_, U, E>, &crate::CommandId<U, E>) {
-    let error = crate::FrameworkError::Command {
-        error,
-        ctx: crate::Context::Application(ctx),
-        location,
-    };
-    (error, ctx.command.id())
-}
-
 fn find_matching_application_command<'a, 'b, U, E>(
     framework: &'a crate::Framework<U, E>,
     interaction: &'b serenity::ApplicationCommandInteractionData,
@@ -197,7 +183,7 @@ pub async fn dispatch_interaction<'a, U, E>(
 
     (framework.options.post_command)(crate::Context::Application(ctx)).await;
 
-    action_result.map_err(|e| Some(make_error(e, ctx, crate::CommandErrorLocation::Body)))
+    action_result.map_err(|e| Some((e, &**ctx.command.id())))
 }
 
 pub async fn dispatch_autocomplete<'a, U, E>(

@@ -143,9 +143,22 @@ pub fn generate_slash_command_spec(
                 let ( #( #param_names, )* ) = ::poise::parse_slash_args!(
                     ctx.discord, ctx.interaction.guild_id(), ctx.interaction.channel_id(), args =>
                     #( (#param_names: #param_types), )*
-                ).await?;
+                ).await.map_err(|error| match error {
+                    poise::SlashArgError::CommandStructureMismatch(error) => {
+                        poise::FrameworkError::CommandStructureMismatch { ctx, error }
+                    },
+                    poise::SlashArgError::Parse(error) => {
+                        poise::FrameworkError::ArgumentParse { ctx: ctx.into(), error }
+                    },
+                })?;
 
-                inner(ctx.into(), #( #param_names, )*).await
+                inner(ctx.into(), #( #param_names, )*)
+                    .await
+                    .map_err(|error| poise::FrameworkError::Command {
+                        error,
+                        location: poise::CommandErrorLocation::Body,
+                        ctx: ctx.into(),
+                    })
             }),
             id: std::sync::Arc::clone(&command_id),
             options: #options,
@@ -171,8 +184,17 @@ pub fn generate_context_menu_command_spec(
     Ok(quote::quote! {
         ::poise::ContextMenuCommand {
             name: #name,
-            action: <#param_type as ::poise::ContextMenuParameter<_, _>>::to_action(|ctx, value| {
-                Box::pin(async move { inner(ctx.into(), value).await })
+            action: <#param_type as ::
+            poise::ContextMenuParameter<_, _>>::to_action(|ctx, value| {
+                Box::pin(async move {
+                    inner(ctx.into(), value)
+                        .await
+                        .map_err(|error| poise::FrameworkError::Command {
+                            error,
+                            location: poise::CommandErrorLocation::Body,
+                            ctx: ctx.into(),
+                        })
+                })
             }),
             id: std::sync::Arc::clone(&command_id),
             options: #options,

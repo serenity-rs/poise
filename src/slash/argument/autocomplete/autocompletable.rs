@@ -67,7 +67,7 @@ impl<T: TryFrom<i64> + Into<serenity::json::Value> + Send + Sync> Autocompletabl
             .as_i64()
             .ok_or(SlashArgError::CommandStructureMismatch("expected integer"))?
             .try_into()
-            .map_err(|_| SlashArgError::IntegerOutOfBounds)
+            .map_err(|_| SlashArgError::Parse(crate::IntegerOutOfBounds.into()))
     }
 
     fn into_json(self, value: T) -> serenity::json::Value {

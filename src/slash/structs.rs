@@ -200,7 +200,7 @@ pub struct SlashCommand<U, E> {
     pub action: for<'a> fn(
         ApplicationContext<'a, U, E>,
         &'a [serenity::ApplicationCommandInteractionDataOption],
-    ) -> BoxFuture<'a, Result<(), E>>,
+    ) -> BoxFuture<'a, Result<(), crate::FrameworkError<'a, U, E>>>,
     /// The command ID, shared across all command types that belong to the same implementation
     pub id: std::sync::Arc<crate::CommandId<U, E>>,
     /// Further configuration
@@ -341,9 +341,19 @@ impl<U, E> SlashCommandMeta<U, E> {
 #[derive(Clone)]
 pub enum ContextMenuCommandAction<U, E> {
     /// Context menu entry on a user
-    User(fn(ApplicationContext<'_, U, E>, serenity::User) -> BoxFuture<'_, Result<(), E>>),
+    User(
+        fn(
+            ApplicationContext<'_, U, E>,
+            serenity::User,
+        ) -> BoxFuture<'_, Result<(), crate::FrameworkError<'_, U, E>>>,
+    ),
     /// Context menu entry on a message
-    Message(fn(ApplicationContext<'_, U, E>, serenity::Message) -> BoxFuture<'_, Result<(), E>>),
+    Message(
+        fn(
+            ApplicationContext<'_, U, E>,
+            serenity::Message,
+        ) -> BoxFuture<'_, Result<(), crate::FrameworkError<'_, U, E>>>,
+    ),
 }
 
 impl<U, E> std::fmt::Debug for ContextMenuCommandAction<U, E> {

@@ -62,7 +62,10 @@ pub struct PrefixCommand<U, E> {
     /// Main name of the command. Aliases can be set in [`Self::aliases`].
     pub name: &'static str,
     /// Callback to execute when this command is invoked.
-    pub action: for<'a> fn(PrefixContext<'a, U, E>, args: &'a str) -> BoxFuture<'a, Result<(), E>>,
+    pub action: for<'a> fn(
+        PrefixContext<'a, U, E>,
+        args: &'a str,
+    ) -> BoxFuture<'a, Result<(), crate::FrameworkError<'a, U, E>>>,
     /// The command ID, shared across all command types that belong to the same implementation
     pub id: std::sync::Arc<crate::CommandId<U, E>>,
     /// Alternative triggers for the command

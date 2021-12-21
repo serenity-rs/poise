@@ -3,7 +3,7 @@
 use std::convert::{TryFrom, TryInto};
 use std::marker::PhantomData;
 
-#[allow(unused_imports)] // required if serenity simdjson feature is enabled
+#[allow(unused_imports)] // import is required if serenity simdjson feature is enabled
 use crate::serenity::json::prelude::*;
 use crate::serenity_prelude as serenity;
 
@@ -18,8 +18,6 @@ pub enum SlashArgError {
     CommandStructureMismatch(&'static str),
     /// A string parameter was found, but it could not be parsed into the target type.
     Parse(Box<dyn std::error::Error + Send + Sync>),
-    /// An integer parameter was found, but it did not fit into the target integer type.
-    IntegerOutOfBounds,
 }
 impl std::fmt::Display for SlashArgError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -32,7 +30,6 @@ impl std::fmt::Display for SlashArgError {
                 )
             }
             Self::Parse(e) => write!(f, "Failed to parse argument: {}", e),
-            Self::IntegerOutOfBounds => write!(f, "Integer out of bounds for target type"),
         }
     }
 }
@@ -41,7 +38,6 @@ impl std::error::Error for SlashArgError {
         match self {
             Self::Parse(e) => Some(&**e),
             Self::CommandStructureMismatch(_) => None,
-            Self::IntegerOutOfBounds => None,
         }
     }
 }
@@ -118,7 +114,20 @@ where
     }
 }
 
-// Handles all integers, signed and unsigned, via TryFrom<i64>.
+/// Error type thrown if an integer slash command argument is too large
+///
+/// For example: a user sends `300` but you used
+#[derive(Debug)]
+pub struct IntegerOutOfBounds;
+impl std::fmt::Display for IntegerOutOfBounds {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("integer out of bounds for target type")
+    }
+}
+impl std::error::Error for IntegerOutOfBounds {}
+
+// Handles all integers, signed and unsigned. The TryFrom<i64> impl is not actually used, it's just
+// to filter for integer types.
 #[async_trait::async_trait]
 impl<T: TryFrom<i64> + Send + Sync> SlashArgumentHack<T> for &PhantomData<T> {
     async fn extract(
@@ -133,7 +142,7 @@ impl<T: TryFrom<i64> + Send + Sync> SlashArgumentHack<T> for &PhantomData<T> {
             .ok_or(SlashArgError::CommandStructureMismatch("expected integer"))?
             .try_into()
             .ok()
-            .ok_or(SlashArgError::IntegerOutOfBounds)
+            .ok_or(SlashArgError::Parse(IntegerOutOfBounds.into()))
     }
 
     fn create(

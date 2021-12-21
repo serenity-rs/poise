@@ -14,7 +14,8 @@ use crate::serenity_prelude as serenity;
 /// to the help menu.
 ///
 /// Can return an error if sending the Discord error message failed. You can decide for yourself
-/// how to handle this, for example: ```rust,no_run
+/// how to handle this, for example:
+/// ```rust,no_run
 /// # let error = todo!();
 /// if let Err(e) = poise::builtins::on_error(error).await {
 ///     println!("Fatal error while sending error message: {}", e);
@@ -36,20 +37,24 @@ pub async fn on_error<U: std::fmt::Debug, E: std::fmt::Display + std::fmt::Debug
             error,
             location: _,
         } => {
-            // TODO: throw argument parse errors some different way
-            let user_error_msg = /*if let Some(crate::ArgumentParseError(e)) = error.downcast_ref() {
-                // If we caught an argument parse error, give a helpful error message with the
-                // command explanation if available
-
-                let mut usage = "Please check the help menu for usage information".into();
-                if let Some(multiline_help) = &ctx.command().id().multiline_help {
-                    usage = multiline_help();
-                }
-                format!("**{}**\n{}", e, usage)
-            } else {*/
-                error.to_string()
-            /*}*/;
-            ctx.say(user_error_msg).await?;
+            let error = error.to_string();
+            ctx.say(error).await?;
+        }
+        crate::FrameworkError::ArgumentParse { ctx, error } => {
+            // If we caught an argument parse error, give a helpful error message with the
+            // command explanation if available
+            let usage = match ctx.command().id().multiline_help {
+                Some(multiline_help) => multiline_help(),
+                None => "Please check the help menu for usage information".into(),
+            };
+            ctx.say(format!("**{}**\n{}", error, usage)).await?;
+        }
+        crate::FrameworkError::CommandStructureMismatch { ctx, error } => {
+            println!(
+                "Error: failed to deserialize interaction arguments for `/{}`: {}",
+                ctx.command.slash_or_context_menu_name(),
+                error,
+            );
         }
         crate::FrameworkError::CommandCheckFailed { ctx } => {
             println!(
