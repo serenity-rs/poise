@@ -39,7 +39,7 @@ impl<'a, U: std::fmt::Debug, E> std::fmt::Debug for PrefixContext<'a, U, E> {
             discord: _,
             msg,
             prefix,
-            framework,
+            framework: _,
             command,
             data,
         } = self;

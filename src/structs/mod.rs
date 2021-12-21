@@ -171,17 +171,27 @@ pub enum CommandErrorLocation {
     Autocomplete,
 }
 
+/// Any error that can occur while the bot runs. Either thrown by user code (those variants will
+/// have an `error` field with your error type `E` in it), or originating from within the framework.
+///
+/// These errors are handled with the [`crate::FrameworkOptions::on_error`] callback
 #[derive(Debug)]
 pub enum FrameworkError<'a, U, E> {
     /// User code threw an error in user data setup
-    Setup { error: E },
+    Setup {
+        /// Error which was thrown in the setup code
+        error: E,
+    },
     /// User code threw an error in generic event listener
     Listener {
+        /// Error which was thrown in the listener code
         error: E,
+        /// Which event was being processed when the error occurred
         event: &'a crate::Event<'a>,
     },
     /// User code threw an error in bot command
     Command {
+        /// Error which was thrown in the command code
         error: E,
         /// In which part of the command execution the error occured
         location: crate::CommandErrorLocation,
@@ -190,6 +200,7 @@ pub enum FrameworkError<'a, U, E> {
     },
     /// Command was invoked before its cooldown expired
     CooldownHit {
+        /// Time until the command may be invoked for the next time in the given context
         remaining_cooldown: std::time::Duration,
         /// General context
         ctx: Context<'a, U, E>,
@@ -197,6 +208,7 @@ pub enum FrameworkError<'a, U, E> {
     /// Command was invoked but the bot is lacking the permissions specified in
     /// `crate::CommandId::required_bot_permissions`
     MissingBotPermissions {
+        /// Which permissions in particular the bot is lacking for this command
         missing_permissions: serenity::Permissions,
         /// General context
         ctx: Context<'a, U, E>,
@@ -210,10 +222,12 @@ pub enum FrameworkError<'a, U, E> {
         /// General context
         ctx: Context<'a, U, E>,
     },
+    /// A non-owner tried to invoke an owners-only command
     NotAnOwner {
         /// General context
         ctx: Context<'a, U, E>,
     },
+    /// Provided pre-command check didn't succeed, so command execution aborted
     CommandCheckFailed {
         /// General context
         ctx: Context<'a, U, E>,

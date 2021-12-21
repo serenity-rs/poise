@@ -1,11 +1,11 @@
 use crate::serenity_prelude as serenity;
 
 /// Small utility function to create the scuffed ad-hoc error type we use in this module
-fn make_error<'a, U, E>(
+fn make_error<U, E>(
     error: E,
-    ctx: crate::PrefixContext<'a, U, E>,
+    ctx: crate::PrefixContext<'_, U, E>,
     location: crate::CommandErrorLocation,
-) -> (crate::FrameworkError<'a, U, E>, &'a crate::CommandId<U, E>) {
+) -> (crate::FrameworkError<'_, U, E>, &crate::CommandId<U, E>) {
     let error = crate::FrameworkError::Command {
         error,
         ctx: crate::Context::Prefix(ctx),

@@ -94,10 +94,10 @@ impl<U, E> crate::_GetGenerics for ApplicationContext<'_, U, E> {
 impl<U: std::fmt::Debug, E: std::fmt::Debug> std::fmt::Debug for ApplicationContext<'_, U, E> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let Self {
-            discord,
+            discord: _,
             interaction,
             has_sent_initial_response,
-            framework,
+            framework: _,
             command,
             data,
         } = self;

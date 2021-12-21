@@ -52,12 +52,10 @@ async fn missing_permissions<U, E>(
     }
 
     let permissions = user_permissions(ctx.discord(), ctx.guild_id(), ctx.channel_id(), user).await;
-    match permissions {
-        Some(perms) => Some(required_permissions - perms),
-        None => None,
-    }
+    Some(required_permissions - permissions?)
 }
 
+#[allow(clippy::needless_lifetimes)] // false positive (clippy issue 7271)
 pub async fn check_permissions_and_cooldown<'a, U, E>(
     ctx: crate::Context<'a, U, E>,
     cmd: &crate::CommandId<U, E>,

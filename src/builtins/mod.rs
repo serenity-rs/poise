@@ -7,7 +7,6 @@ mod help;
 pub use help::*;
 
 use crate::serenity_prelude as serenity;
-type BoxErrorSendSync = Box<dyn std::error::Error + Send + Sync>;
 
 /// An error handler that prints the error into the console and also into the Discord chat.
 /// If the user invoked the command wrong
