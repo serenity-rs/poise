@@ -1,6 +1,7 @@
 use crate::serenity_prelude as serenity;
 
 /// Wrapper around either [`crate::ApplicationContext`] or [`crate::PrefixContext`]
+#[derive(Debug)]
 pub enum Context<'a, U, E> {
     /// Application command context
     Application(crate::ApplicationContext<'a, U, E>),
@@ -13,11 +14,6 @@ impl<U, E> Clone for Context<'_, U, E> {
     }
 }
 impl<U, E> Copy for Context<'_, U, E> {}
-impl<U, E> std::fmt::Debug for Context<'_, U, E> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str("STUB") // STUB // TODO
-    }
-}
 impl<'a, U, E> From<crate::ApplicationContext<'a, U, E>> for Context<'a, U, E> {
     fn from(x: crate::ApplicationContext<'a, U, E>) -> Self {
         Self::Application(x)

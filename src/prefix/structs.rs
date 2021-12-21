@@ -33,6 +33,28 @@ impl<U, E> crate::_GetGenerics for PrefixContext<'_, U, E> {
     type E = E;
 }
 
+impl<'a, U: std::fmt::Debug, E> std::fmt::Debug for PrefixContext<'a, U, E> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let Self {
+            discord: _,
+            msg,
+            prefix,
+            framework,
+            command,
+            data,
+        } = self;
+
+        f.debug_struct("PrefixContext")
+            .field("discord", &"<serenity::Context>")
+            .field("msg", msg)
+            .field("prefix", prefix)
+            .field("framework", &"<poise::Framework>")
+            .field("command", command)
+            .field("data", data)
+            .finish()
+    }
+}
+
 /// Definition of a single command, excluding metadata which doesn't affect the command itself such
 /// as category.
 #[derive(Clone)]

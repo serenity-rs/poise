@@ -62,7 +62,6 @@ impl<'a> ApplicationCommandOrAutocompleteInteraction<'a> {
 }
 
 /// Application command specific context passed to command invocations.
-#[non_exhaustive]
 pub struct ApplicationContext<'a, U, E> {
     /// Serenity's context, like HTTP or cache
     pub discord: &'a serenity::Context,
@@ -90,6 +89,28 @@ impl<U, E> Copy for ApplicationContext<'_, U, E> {}
 impl<U, E> crate::_GetGenerics for ApplicationContext<'_, U, E> {
     type U = U;
     type E = E;
+}
+
+impl<U: std::fmt::Debug, E: std::fmt::Debug> std::fmt::Debug for ApplicationContext<'_, U, E> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let Self {
+            discord,
+            interaction,
+            has_sent_initial_response,
+            framework,
+            command,
+            data,
+        } = self;
+
+        f.debug_struct("ApplicationContext")
+            .field("discord", &"<serenity Context>")
+            .field("interaction", interaction)
+            .field("has_sent_initial_response", has_sent_initial_response)
+            .field("framework", &"<poise Framework>")
+            .field("command", command)
+            .field("data", data)
+            .finish()
+    }
 }
 
 impl<U, E> ApplicationContext<'_, U, E> {
@@ -374,6 +395,7 @@ impl<U, E> ApplicationCommandTree<U, E> {
 }
 
 /// A view into a leaf of an application command tree. **Not an owned type!**
+#[derive(Debug)]
 pub enum ApplicationCommand<'a, U, E> {
     /// Slash command
     Slash(&'a SlashCommand<U, E>),
