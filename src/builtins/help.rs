@@ -26,21 +26,12 @@ async fn help_single_command<U, E>(
     command_name: &str,
     config: HelpConfiguration<'_>,
 ) -> Result<(), serenity::Error> {
-    let command = ctx.framework().commands().find(|cmd| {
-        if let Some(slash) = &cmd.slash {
-            if slash.name().eq_ignore_ascii_case(command_name) {
-                return true;
-            }
+    let command = ctx.framework().options().commands.iter().find(|command| {
+        if command.name.eq_ignore_ascii_case(command_name) {
+            return true;
         }
-
-        if let Some(prefix) = &cmd.prefix {
-            if prefix.command.name.eq_ignore_ascii_case(command_name) {
-                return true;
-            }
-        }
-
-        if let Some(context_menu) = &cmd.context_menu {
-            if context_menu.name.eq_ignore_ascii_case(command_name) {
+        if let Some(context_menu_name) = command.context_menu_name {
+            if context_menu_name.eq_ignore_ascii_case(command_name) {
                 return true;
             }
         }
@@ -49,10 +40,9 @@ async fn help_single_command<U, E>(
     });
 
     let reply = if let Some(command) = command {
-        match command.id.multiline_help {
+        match command.multiline_help {
             Some(f) => f(),
             None => command
-                .id
                 .inline_help
                 .unwrap_or("No help available")
                 .to_owned(),
@@ -70,11 +60,10 @@ async fn help_all_commands<U, E>(
     ctx: crate::Context<'_, U, E>,
     config: HelpConfiguration<'_>,
 ) -> Result<(), serenity::Error> {
-    let mut categories =
-        crate::util::OrderedMap::<Option<&str>, Vec<crate::CommandDefinitionRef<'_, U, E>>>::new();
-    for cmd in ctx.framework().commands() {
+    let mut categories = crate::util::OrderedMap::<Option<&str>, Vec<&crate::Command<U, E>>>::new();
+    for cmd in &ctx.framework().options().commands {
         categories
-            .get_or_insert_with(cmd.id.category, Vec::new)
+            .get_or_insert_with(cmd.category, Vec::new)
             .push(cmd);
     }
 
@@ -83,16 +72,16 @@ async fn help_all_commands<U, E>(
         menu += category_name.unwrap_or("Commands");
         menu += ":\n";
         for command in commands {
-            if command.id.hide_in_help {
+            if command.hide_in_help {
                 continue;
             }
 
-            let (prefix, command_name) = if let Some(slash_command) = &command.slash {
-                (String::from("/"), slash_command.name())
-            } else if let Some(prefix_command) = &command.prefix {
+            let prefix = if command.slash_action.is_some() {
+                String::from("/")
+            } else if command.prefix_action.is_some() {
                 let options = &ctx.framework().options().prefix_options;
 
-                let prefix = match &options.prefix {
+                match &options.prefix {
                     Some(fixed_prefix) => fixed_prefix.clone(),
                     None => match options.dynamic_prefix {
                         Some(dynamic_prefix_callback) => {
@@ -103,23 +92,21 @@ async fn help_all_commands<U, E>(
                         }
                         None => String::from(""),
                     },
-                };
-
-                (prefix, prefix_command.command.name)
+                }
             } else {
                 // This is not a prefix or slash command, i.e. probably a context menu only command
                 // which we will only show later
                 continue;
             };
 
-            let total_command_name_length = prefix.chars().count() + command_name.chars().count();
+            let total_command_name_length = prefix.chars().count() + command.name.chars().count();
             let padding = 12_usize.saturating_sub(total_command_name_length) + 1;
             menu += &format!(
                 "  {}{}{}{}\n",
                 prefix,
-                command_name,
+                command.name,
                 " ".repeat(padding),
-                command.id.inline_help.unwrap_or("")
+                command.inline_help.unwrap_or("")
             );
         }
     }
@@ -127,14 +114,14 @@ async fn help_all_commands<U, E>(
     if config.show_context_menu_commands {
         menu += "\nContext menu commands:\n";
 
-        for command in &ctx.framework().options().application_options.commands {
-            if let crate::ApplicationCommandTree::ContextMenu(command) = command {
-                let kind = match &command.action {
-                    crate::ContextMenuCommandAction::User(_) => "user",
-                    crate::ContextMenuCommandAction::Message(_) => "message",
-                };
-                menu += &format!("  {} (on {})\n", command.name, kind);
-            }
+        for command in &ctx.framework().options().commands {
+            let kind = match command.context_menu_action {
+                Some(crate::ContextMenuCommandAction::User(_)) => "user",
+                Some(crate::ContextMenuCommandAction::Message(_)) => "message",
+                None => continue,
+            };
+            let name = command.context_menu_name.unwrap_or(command.name);
+            menu += &format!("  {} (on {})\n", name, kind);
         }
     }
 

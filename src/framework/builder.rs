@@ -26,10 +26,7 @@ pub struct FrameworkBuilder<U, E> {
     client_settings: Option<Box<dyn FnOnce(serenity::ClientBuilder) -> serenity::ClientBuilder>>,
     token: Option<String>,
     intents: Option<serenity::GatewayIntents>,
-    commands: Vec<(
-        crate::CommandDefinition<U, E>,
-        Box<dyn FnOnce(&mut crate::CommandBuilder<U, E>) -> &mut crate::CommandBuilder<U, E>>,
-    )>,
+    commands: Vec<crate::Command<U, E>>,
 }
 
 impl<U, E> Default for FrameworkBuilder<U, E> {
@@ -96,11 +93,11 @@ impl<U, E> FrameworkBuilder<U, E> {
     /// Add a new command to the framework
     pub fn command(
         mut self,
-        definition: crate::CommandDefinition<U, E>,
-        meta_builder: impl FnOnce(&mut crate::CommandBuilder<U, E>) -> &mut crate::CommandBuilder<U, E>
-            + 'static,
+        mut command: crate::Command<U, E>,
+        meta_builder: impl FnOnce(&mut crate::Command<U, E>) -> &mut crate::Command<U, E> + 'static,
     ) -> Self {
-        self.commands.push((definition, Box::new(meta_builder)));
+        meta_builder(&mut command);
+        self.commands.push(command);
         self
     }
 
@@ -122,13 +119,14 @@ impl<U, E> FrameworkBuilder<U, E> {
     /// ```
     pub fn commands(
         mut self,
-        commands: impl IntoIterator<Item = fn() -> crate::CommandDefinition<U, E>> + 'static,
+        commands: impl IntoIterator<Item = fn() -> crate::Command<U, E>> + 'static,
     ) -> Self {
-        // Can't use Vec::extend() due to ??? compile errors
-        for command in commands {
-            let definition = (command)();
-            self.commands.push((definition, Box::new(|f| f)));
-        }
+        self.commands.extend(commands.into_iter().map(|c| c()));
+        // // Can't use Vec::extend() due to ??? compile errors
+        // for command in commands {
+        //     let definition = (command)();
+        //     self.commands.push((definition, Box::new(|f| f)));
+        // }
         self
     }
 
@@ -153,9 +151,7 @@ impl<U, E> FrameworkBuilder<U, E> {
             .await?;
 
         // Build framework options by concatenating user-set options with commands and owner
-        for (command, meta_builder) in self.commands {
-            options.command(command, meta_builder);
-        }
+        options.commands.extend(self.commands);
         options.owners.insert(application_info.owner.id);
 
         // Create serenity client

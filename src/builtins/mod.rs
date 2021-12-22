@@ -44,7 +44,7 @@ pub async fn on_error<U: std::fmt::Debug, E: std::fmt::Display + std::fmt::Debug
         crate::FrameworkError::ArgumentParse { ctx, error } => {
             // If we caught an argument parse error, give a helpful error message with the
             // command explanation if available
-            let usage = match ctx.command().id().multiline_help {
+            let usage = match ctx.command().multiline_help {
                 Some(multiline_help) => multiline_help(),
                 None => "Please check the help menu for usage information".into(),
             };
@@ -53,14 +53,13 @@ pub async fn on_error<U: std::fmt::Debug, E: std::fmt::Display + std::fmt::Debug
         crate::FrameworkError::CommandStructureMismatch { ctx, error } => {
             println!(
                 "Error: failed to deserialize interaction arguments for `/{}`: {}",
-                ctx.command.slash_or_context_menu_name(),
-                error,
+                ctx.command.name, error,
             );
         }
         crate::FrameworkError::CommandCheckFailed { ctx } => {
             println!(
                 "A command check failed in command {} for user {}",
-                ctx.command().name(),
+                ctx.command().name,
                 ctx.author().name
             );
         }
@@ -92,14 +91,14 @@ pub async fn on_error<U: std::fmt::Debug, E: std::fmt::Display + std::fmt::Debug
                 format!(
                     "You're lacking permissions for `{}{}`: {}",
                     ctx.prefix(),
-                    ctx.command().name(),
+                    ctx.command().name,
                     missing_permissions,
                 )
             } else {
                 format!(
                     "You may be lacking permissions for `{}{}`. Not executing for safety",
                     ctx.prefix(),
-                    ctx.command().name(),
+                    ctx.command().name,
                 )
             };
             ctx.send(|b| b.content(response).ephemeral(true)).await?;
@@ -120,16 +119,12 @@ pub async fn autocomplete_command<U, E>(
     ctx: crate::Context<'_, U, E>,
     partial: String,
 ) -> impl Iterator<Item = String> + '_ {
-    // We only consider prefix commands here because, bad as it is, that's what other builtins
-    // do to. For example the help command only shows commands that have a prefix version.
-    // Once a better command structure design is adopted, this issue should be solved
     ctx.framework()
         .options()
-        .prefix_options
         .commands
         .iter()
-        .filter(move |cmd| cmd.command.name.starts_with(&partial))
-        .map(|cmd| cmd.command.name.to_string())
+        .filter(move |cmd| cmd.name.starts_with(&partial))
+        .map(|cmd| cmd.name.to_string())
 }
 
 /// Generic function to register application commands, either globally or in a guild. Only bot
@@ -147,9 +142,14 @@ pub async fn register_application_commands<U, E>(
     global: bool,
 ) -> Result<(), serenity::Error> {
     let mut commands_builder = serenity::CreateApplicationCommands::default();
-    let commands = &ctx.framework().options().application_options.commands;
-    for cmd in commands {
-        commands_builder.create_application_command(|f| cmd.create(f));
+    let commands = &ctx.framework().options().commands;
+    for command in commands {
+        if let Some(slash_command) = command.create_as_slash_command() {
+            commands_builder.add_application_command(slash_command);
+        }
+        if let Some(context_menu_command) = command.create_as_context_menu_command() {
+            commands_builder.add_application_command(context_menu_command);
+        }
     }
     let commands_builder = serenity::json::Value::Array(commands_builder.0);
 

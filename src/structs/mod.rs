@@ -19,77 +19,35 @@ impl<U, E> _GetGenerics for Context<'_, U, E> {
     type E = E;
 }
 
-/// A reference to either a prefix or application command.
-pub enum CommandRef<'a, U, E> {
-    /// Prefix command
-    Prefix(&'a crate::PrefixCommand<U, E>),
-    /// Application command
-    Application(crate::ApplicationCommand<'a, U, E>),
-}
-
-impl<U, E> Clone for CommandRef<'_, U, E> {
-    fn clone(&self) -> Self {
-        match *self {
-            Self::Prefix(x) => Self::Prefix(x),
-            Self::Application(x) => Self::Application(x),
-        }
-    }
-}
-
-impl<U, E> Copy for CommandRef<'_, U, E> {}
-
-impl<'a, U, E> CommandRef<'a, U, E> {
-    /// Yield `name` of this command, or, if context menu command, the context menu entry label
-    pub fn name(self) -> &'static str {
-        match self {
-            Self::Prefix(x) => x.name,
-            Self::Application(x) => x.slash_or_context_menu_name(),
-        }
-    }
-
-    /// Yield `id` of this command.
-    pub fn id(self) -> &'a std::sync::Arc<CommandId<U, E>> {
-        match self {
-            Self::Prefix(x) => &x.id,
-            Self::Application(x) => x.id(),
-        }
-    }
-}
-
 /// Type returned from `#[poise::command]` annotated functions, which contains all of the generated
 /// prefix and application commands
-#[derive(Default, Clone, Debug)]
-pub struct CommandDefinition<U, E> {
-    /// Generated prefix command, if it was enabled
-    pub prefix: Option<crate::PrefixCommand<U, E>>,
-    /// Generated slash command, if it was enabled
-    pub slash: Option<crate::SlashCommand<U, E>>,
-    /// Generated context menu command, if it was enabled
-    pub context_menu: Option<crate::ContextMenuCommand<U, E>>,
-    /// Implementation type agnostic data that is always present
-    pub id: std::sync::Arc<CommandId<U, E>>,
-}
+#[derive(Default /* gah i hate how #[derive(Debug)] falls apart at the slightest touch */)]
+pub struct Command<U, E> {
+    // =============
+    /// Callback to execute when this command is invoked in a prefix context
+    pub prefix_action: Option<
+        for<'a> fn(
+            crate::PrefixContext<'a, U, E>,
+            args: &'a str,
+        ) -> BoxFuture<'a, Result<(), crate::FrameworkError<'a, U, E>>>,
+    >,
+    /// Callback to execute when this command is invoked in a slash context
+    pub slash_action: Option<
+        for<'a> fn(
+            crate::ApplicationContext<'a, U, E>,
+            &'a [serenity::ApplicationCommandInteractionDataOption],
+        ) -> BoxFuture<'a, Result<(), crate::FrameworkError<'a, U, E>>>,
+    >,
+    /// Callback to execute when this command is invoked in a context menu context
+    ///
+    /// The enum variant shows which Discord item this context menu command works on
+    pub context_menu_action: Option<crate::ContextMenuCommandAction<U, E>>,
 
-/// A view into a command definition with its different implementations
-#[derive(Default, Debug)]
-pub struct CommandDefinitionRef<'a, U, E> {
-    /// Prefix implementation of the command
-    pub prefix: Option<&'a crate::PrefixCommandMeta<U, E>>,
-    /// Slash implementation of the command
-    pub slash: Option<&'a crate::SlashCommandMeta<U, E>>,
-    /// Context menu implementation of the command
-    pub context_menu: Option<&'a crate::ContextMenuCommand<U, E>>,
-    /// Implementation type agnostic data that is always present
-    pub id: std::sync::Arc<CommandId<U, E>>,
-}
-
-/// This struct holds all data shared across different command types of the same implementation.
-///
-/// For example with a `#[command(prefix_command, slash_command)]`, the generated
-/// [`crate::PrefixCommand`] and [`crate::SlashCommand`] will both contain an `Arc<CommandId<U, E>>`
-/// pointing to the same [`CommandId`] instance.
-#[derive(Default)]
-pub struct CommandId<U, E> {
+    // ============= Command type agnostic data
+    /// Subcommands of this command, if any
+    pub subcommands: Vec<Command<U, E>>,
+    /// Main name of the command. Aliases (prefix-only) can be set in [`Self::aliases`].
+    pub name: &'static str,
     /// A string to identify this particular command within a list of commands.
     ///
     /// Can be configured via the [`crate::command`] macro (though it's probably not needed for most
@@ -125,37 +83,117 @@ pub struct CommandId<U, E> {
     pub on_error: Option<fn(FrameworkError<'_, U, E>) -> BoxFuture<'_, ()>>,
     /// If this function returns false, this command will not be executed.
     pub check: Option<fn(Context<'_, U, E>) -> BoxFuture<'_, Result<bool, E>>>,
+
+    // ============= Prefix-specific data
+    /// Alternative triggers for the command (prefix-only)
+    pub aliases: &'static [&'static str],
+    /// Whether to enable edit tracking for commands by default (prefix-only)
+    ///
+    /// Note: only has an effect if `crate::PrefixFrameworkOptions::edit_tracker` is set.
+    pub track_edits: bool,
+    /// Whether to broadcast a typing indicator while executing this commmand (prefix-only)
+    pub broadcast_typing: bool,
+
+    // ============= Application-specific data
+    /// Context menu specific name for this command, displayed in Discord's context menu
+    pub context_menu_name: Option<&'static str>,
+    /// List of parameters for this slash command (slash-only)
+    pub parameters: Vec<crate::SlashCommandParameter<U, E>>,
+    /// Whether responses to this command should be ephemeral by default (application-only)
+    pub ephemeral: bool,
 }
 
-impl<U, E> std::fmt::Debug for CommandId<U, E> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let Self {
-            identifying_name,
-            category,
-            hide_in_help,
-            inline_help,
-            multiline_help,
-            cooldowns,
-            required_permissions,
-            required_bot_permissions,
-            owners_only,
-            on_error,
-            check,
-        } = self;
+impl<U, E> Command<U, E> {
+    fn create_as_subcommand(&self) -> Option<serenity::CreateApplicationCommandOption> {
+        self.slash_action?;
 
-        f.debug_struct("CommandId")
-            .field("identifying_name", identifying_name)
-            .field("category", category)
-            .field("hide_in_help", hide_in_help)
-            .field("inline_help", inline_help)
-            .field("multiline_help", multiline_help)
-            .field("cooldowns", cooldowns)
-            .field("required_permissions", required_permissions)
-            .field("required_bot_permissions", required_bot_permissions)
-            .field("owners_only", owners_only)
-            .field("on_error", &on_error.map(|f| f as *const ()))
-            .field("check", &check.map(|f| f as *const ()))
-            .finish()
+        let mut builder = serenity::CreateApplicationCommandOption::default();
+        builder
+            .name(self.name)
+            .description(self.inline_help.unwrap_or("A slash command"));
+
+        if self.subcommands.is_empty() {
+            builder.kind(serenity::ApplicationCommandOptionType::SubCommand);
+
+            for param in &self.parameters {
+                let mut option = serenity::CreateApplicationCommandOption::default();
+                (param.builder)(&mut option);
+                builder.add_sub_option(option);
+            }
+        } else {
+            builder.kind(serenity::ApplicationCommandOptionType::SubCommandGroup);
+
+            for subcommand in &self.subcommands {
+                if let Some(subcommand) = subcommand.create_as_subcommand() {
+                    builder.add_sub_option(subcommand);
+                }
+            }
+        }
+
+        Some(builder)
+    }
+
+    /// Generates a slash command builder from this [`Command`] instance. This can be used
+    /// to register this command on Discord's servers
+    pub fn create_as_slash_command(&self) -> Option<serenity::CreateApplicationCommand> {
+        self.slash_action?;
+
+        let mut builder = serenity::CreateApplicationCommand::default();
+        builder
+            .name(self.name)
+            .description(self.inline_help.unwrap_or("A slash command"));
+
+        if self.subcommands.is_empty() {
+            for param in &self.parameters {
+                let mut option = serenity::CreateApplicationCommandOption::default();
+                (param.builder)(&mut option);
+                builder.add_option(option);
+            }
+        } else {
+            for subcommand in &self.subcommands {
+                if let Some(subcommand) = subcommand.create_as_subcommand() {
+                    builder.add_option(subcommand);
+                }
+            }
+        }
+
+        Some(builder)
+    }
+
+    /// Generates a context menu command builder from this [`Command`] instance. This can be used
+    /// to register this command on Discord's servers
+    pub fn create_as_context_menu_command(&self) -> Option<serenity::CreateApplicationCommand> {
+        let context_menu_action = self.context_menu_action?;
+
+        let mut builder = serenity::CreateApplicationCommand::default();
+        builder
+            .name(self.context_menu_name.unwrap_or(self.name))
+            .kind(match context_menu_action {
+                crate::ContextMenuCommandAction::User(_) => serenity::ApplicationCommandType::User,
+                crate::ContextMenuCommandAction::Message(_) => {
+                    serenity::ApplicationCommandType::Message
+                }
+            });
+
+        Some(builder)
+    }
+
+    /// **Deprecated**
+    #[deprecated = "Please use `category = \"...\"` on the command attribute instead"]
+    pub fn category(&mut self, category: &'static str) -> &mut Self {
+        self.category = Some(category);
+        self
+    }
+
+    /// Insert a subcommand
+    pub fn subcommand(
+        &mut self,
+        mut subcommand: crate::Command<U, E>,
+        meta_builder: impl FnOnce(&mut Self) -> &mut Self,
+    ) -> &mut Self {
+        meta_builder(&mut subcommand);
+        self.subcommands.push(subcommand);
+        self
     }
 }
 
@@ -224,7 +262,7 @@ pub enum FrameworkError<'a, U, E> {
         ctx: Context<'a, U, E>,
     },
     /// Command was invoked but the bot is lacking the permissions specified in
-    /// `crate::CommandId::required_bot_permissions`
+    /// [`crate::Command::required_bot_permissions`]
     MissingBotPermissions {
         /// Which permissions in particular the bot is lacking for this command
         missing_permissions: serenity::Permissions,
@@ -232,7 +270,7 @@ pub enum FrameworkError<'a, U, E> {
         ctx: Context<'a, U, E>,
     },
     /// Command was invoked but the user is lacking the permissions specified in
-    /// `crate::CommandId::required_bot_permissions`
+    /// [`crate::Command::required_bot_permissions`]
     MissingUserPermissions {
         /// List of permissions that the user is lacking. May be None if retrieving the user's
         /// permissions failed

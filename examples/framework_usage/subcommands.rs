@@ -6,7 +6,7 @@ use crate::{Context, Error};
 
 /// A command with two subcommands: `child1` and `child2`
 ///
-/// This command can only be called as a prefix command with `~parent`. Discord doesn't permit
+/// This command can only be called as a prefix command with `~parent`. Discord doesn't permit \
 /// invoking the root command of a slash command.
 #[poise::command(prefix_command, slash_command)]
 pub async fn parent(ctx: Context<'_>) -> Result<(), Error> {

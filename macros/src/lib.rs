@@ -50,7 +50,7 @@ are multiple attributes you can use on parameters:
 
 # Internals
 
-Internally, this attribute macro generates a function with a single [`poise::CommandDefinition`]
+Internally, this attribute macro generates a function with a single [`poise::Command`]
 return type, which contains all data about this command. For example, it transforms a function of
 this form:
 ```rust
@@ -62,12 +62,12 @@ async fn my_command(ctx: Context<'_>) -> Result<(), Error> {
 ```
 into something like
 ```rust
-fn my_command() -> poise::CommandDefinition<Data, Error> {
+fn my_command() -> poise::Command<Data, Error> {
     async fn inner(ctx: Context<'_>) -> Result<(), Error> {
         // code
     }
 
-    poise::CommandDefinition {
+    poise::Command {
         prefix: Some(poise::PrefixCommand {
             name: "my_command",
             action: |ctx, args| Box::pin(async move {
@@ -94,7 +94,7 @@ exact desugaring
 #[proc_macro_attribute]
 pub fn command(args: TokenStream, function: TokenStream) -> TokenStream {
     let args = syn::parse_macro_input!(args as Vec<syn::NestedMeta>);
-    let args = match <command::CommandOptions as darling::FromMeta>::from_list(&args) {
+    let args = match <command::CommandArgs as darling::FromMeta>::from_list(&args) {
         Ok(x) => x,
         Err(e) => return e.write_errors().into(),
     };

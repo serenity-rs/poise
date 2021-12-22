@@ -97,7 +97,7 @@ pub async fn send_application_reply<'a, U, E>(
     };
 
     let mut data = crate::CreateReply {
-        ephemeral: ctx.command.options().ephemeral,
+        ephemeral: ctx.command.ephemeral,
         ..Default::default()
     };
     builder(&mut data);

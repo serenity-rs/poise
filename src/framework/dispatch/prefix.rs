@@ -73,37 +73,24 @@ async fn strip_prefix<'a, U, E>(
     None
 }
 
-/// Find a command within nested PrefixCommandMeta's by the user message string. Also returns
+/// Find a command within nested Command's by the user message string. Also returns
 /// the arguments, i.e. the remaining string.
 fn find_command<'a, U, E>(
     framework: &'a crate::Framework<U, E>,
+    user_data: &'a U,
     ctx: &'a serenity::Context,
     msg: &'a serenity::Message,
     prefix: &'a str,
-    commands: &'a [crate::PrefixCommandMeta<U, E>],
+    commands: &'a [crate::Command<U, E>],
     remaining_message: &'a str,
-) -> crate::BoxFuture<'a, Option<(&'a crate::PrefixCommandMeta<U, E>, &'a str)>>
-where
-    U: Send + Sync,
-{
-    Box::pin(_find_command(
-        framework,
-        ctx,
-        msg,
-        prefix,
-        commands,
-        remaining_message,
-    ))
-}
-
-async fn _find_command<'a, U, E>(
-    framework: &'a crate::Framework<U, E>,
-    ctx: &'a serenity::Context,
-    msg: &'a serenity::Message,
-    prefix: &'a str,
-    commands: &'a [crate::PrefixCommandMeta<U, E>],
-    remaining_message: &'a str,
-) -> Option<(&'a crate::PrefixCommandMeta<U, E>, &'a str)>
+) -> Option<(
+    &'a crate::Command<U, E>,
+    for<'b> fn(
+        crate::PrefixContext<'b, U, E>,
+        args: &'b str,
+    ) -> crate::BoxFuture<'b, Result<(), crate::FrameworkError<'b, U, E>>>,
+    &'a str,
+)>
 where
     U: Send + Sync,
 {
@@ -118,10 +105,7 @@ where
         (iter.next().unwrap(), iter.next().unwrap_or("").trim_start())
     };
 
-    let mut first_matching_command = None;
-    for command_meta in commands {
-        let command = &command_meta.command;
-
+    for command in commands {
         let primary_name_matches = considered_equal(command.name, command_name);
         let alias_matches = command
             .aliases
@@ -136,29 +120,30 @@ where
             msg,
             prefix,
             framework,
-            data: framework.get_user_data().await,
-            command: &command_meta.command,
+            data: user_data,
+            command,
         };
 
-        first_matching_command = Some(
+        return Some(
             match find_command(
                 framework,
+                user_data,
                 ctx.discord,
                 msg,
                 prefix,
-                &command_meta.subcommands,
+                &command.subcommands,
                 remaining_message,
-            )
-            .await
-            {
-                Some((subcommand_meta, remaining_message)) => (subcommand_meta, remaining_message),
-                None => (command_meta, remaining_message),
+            ) {
+                Some(subcommand_result) => subcommand_result,
+                None => match command.prefix_action {
+                    Some(action) => (command, action, remaining_message),
+                    None => continue,
+                },
             },
         );
-        break;
     }
 
-    first_matching_command
+    None
 }
 
 /// Manually dispatches a message with the prefix framework.
@@ -174,7 +159,7 @@ pub async fn dispatch_message<'a, U, E>(
     msg: &'a serenity::Message,
     triggered_by_edit: bool,
     previously_tracked: bool,
-) -> Result<(), Option<(crate::FrameworkError<'a, U, E>, &'a crate::CommandId<U, E>)>>
+) -> Result<(), Option<(crate::FrameworkError<'a, U, E>, &'a crate::Command<U, E>)>>
 where
     U: Send + Sync,
 {
@@ -189,17 +174,16 @@ where
         return Err(None);
     }
 
-    let (command_meta, args) = find_command(
+    let (command, action, args) = find_command(
         framework,
+        framework.get_user_data().await,
         ctx,
         msg,
         prefix,
-        &framework.options.prefix_options.commands,
+        &framework.options.commands,
         msg_content,
     )
-    .await
     .ok_or(None)?;
-    let command = &command_meta.command;
 
     // Check if we should disregard this invocation if it was triggered by an edit
     let should_execute_if_triggered_by_edit = command.track_edits
@@ -217,9 +201,9 @@ where
         command,
     };
 
-    super::common::check_permissions_and_cooldown(ctx.into(), &command.id)
+    super::common::check_permissions_and_cooldown(ctx.into(), command)
         .await
-        .map_err(|e| Some((e, &*command.id)))?;
+        .map_err(|e| Some((e, command)))?;
 
     // Typing is broadcasted as long as this object is alive
     let _typing_broadcaster = if command.broadcast_typing {
@@ -231,9 +215,7 @@ where
     (framework.options.pre_command)(crate::Context::Prefix(ctx)).await;
 
     // Execute command
-    let res = (command.action)(ctx, args)
-        .await
-        .map_err(|e| Some((e, &*command.id)));
+    let res = (action)(ctx, args).await.map_err(|e| Some((e, command)));
 
     (framework.options.post_command)(crate::Context::Prefix(ctx)).await;
 

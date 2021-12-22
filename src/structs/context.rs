@@ -171,10 +171,10 @@ impl<'a, U, E> Context<'a, U, E> {
     }
 
     /// Returns a reference to the command.
-    pub fn command(&self) -> crate::CommandRef<'a, U, E> {
+    pub fn command(&self) -> &'a crate::Command<U, E> {
         match self {
-            Self::Prefix(x) => crate::CommandRef::Prefix(x.command),
-            Self::Application(x) => crate::CommandRef::Application(x.command),
+            Self::Prefix(x) => x.command,
+            Self::Application(x) => x.command,
         }
     }
 

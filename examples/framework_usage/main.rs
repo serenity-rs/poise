@@ -60,7 +60,7 @@ async fn on_error(error: poise::FrameworkError<'_, Data, Error>) {
         } => {
             println!(
                 "Error in command `{}` in {:?}: {:?}",
-                ctx.command().name(),
+                ctx.command().name,
                 error,
                 location
             );
@@ -88,12 +88,12 @@ async fn main() {
         on_error: |error| Box::pin(on_error(error)),
         pre_command: |ctx| {
             Box::pin(async move {
-                println!("Executing command {}...", ctx.command().name());
+                println!("Executing command {}...", ctx.command().name);
             })
         },
         post_command: |ctx| {
             Box::pin(async move {
-                println!("Executed command {}!", ctx.command().name());
+                println!("Executed command {}!", ctx.command().name);
             })
         },
         ..Default::default()
@@ -123,6 +123,8 @@ async fn main() {
         .command(subcommands::parent(), |f| {
             f.subcommand(subcommands::child1(), |b| b)
                 .subcommand(subcommands::child2(), |b| b)
+                // Let's make sure poise isn't confused by the duplicate names!
+                .subcommand(subcommands::parent(), |b| b)
         })
         .run()
         .await

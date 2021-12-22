@@ -1,6 +1,6 @@
 //! Holds prefix-command definition structs.
 
-use crate::{serenity_prelude as serenity, BoxFuture, Framework};
+use crate::{serenity_prelude as serenity, BoxFuture};
 
 /// Prefix-specific context passed to command invocations.
 ///
@@ -15,9 +15,9 @@ pub struct PrefixContext<'a, U, E> {
     /// Read-only reference to the framework
     ///
     /// Useful if you need the list of commands, for example for a custom help command
-    pub framework: &'a Framework<U, E>,
+    pub framework: &'a crate::Framework<U, E>,
     /// The command object which is the current command
-    pub command: &'a PrefixCommand<U, E>,
+    pub command: &'a crate::Command<U, E>,
     /// Your custom user data
     pub data: &'a U,
 }
@@ -33,79 +33,26 @@ impl<U, E> crate::_GetGenerics for PrefixContext<'_, U, E> {
     type E = E;
 }
 
-impl<'a, U: std::fmt::Debug, E> std::fmt::Debug for PrefixContext<'a, U, E> {
+impl<'a, U: std::fmt::Debug, E: std::fmt::Debug> std::fmt::Debug for PrefixContext<'a, U, E> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let Self {
             discord: _,
             msg,
             prefix,
             framework: _,
-            command,
+            command: _,
             data,
         } = self;
 
         f.debug_struct("PrefixContext")
-            .field("discord", &"<serenity::Context>")
+            .field("discord", &"<serenity Context>")
             .field("msg", msg)
             .field("prefix", prefix)
-            .field("framework", &"<poise::Framework>")
-            .field("command", command)
+            .field("framework", &"<poise Framework>")
+            .field("command", &"<poise Command>")
             .field("data", data)
             .finish()
     }
-}
-
-/// Definition of a single command, excluding metadata which doesn't affect the command itself such
-/// as category.
-#[derive(Clone)]
-pub struct PrefixCommand<U, E> {
-    /// Main name of the command. Aliases can be set in [`Self::aliases`].
-    pub name: &'static str,
-    /// Callback to execute when this command is invoked.
-    pub action: for<'a> fn(
-        PrefixContext<'a, U, E>,
-        args: &'a str,
-    ) -> BoxFuture<'a, Result<(), crate::FrameworkError<'a, U, E>>>,
-    /// The command ID, shared across all command types that belong to the same implementation
-    pub id: std::sync::Arc<crate::CommandId<U, E>>,
-    /// Alternative triggers for the command
-    pub aliases: &'static [&'static str],
-    /// Whether to enable edit tracking for commands by default.
-    ///
-    /// Note: only has an effect if `Framework::edit_tracker` is set.
-    pub track_edits: bool,
-    /// Whether to broadcast a typing indicator while executing this commmand.
-    pub broadcast_typing: bool,
-}
-
-impl<U, E> std::fmt::Debug for PrefixCommand<U, E> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let Self {
-            name,
-            action,
-            id,
-            aliases,
-            track_edits,
-            broadcast_typing,
-        } = self;
-        f.debug_struct("PrefixCommand")
-            .field("name", name)
-            .field("action", &(*action as *const ()))
-            .field("id", id)
-            .field("aliases", aliases)
-            .field("track_edits", track_edits)
-            .field("broadcast_typing", broadcast_typing)
-            .finish()
-    }
-}
-
-/// Includes a command, plus metadata like associated sub-commands or category.
-#[derive(Clone, Debug)]
-pub struct PrefixCommandMeta<U, E> {
-    /// Core command data
-    pub command: PrefixCommand<U, E>,
-    /// Possible subcommands
-    pub subcommands: Vec<PrefixCommandMeta<U, E>>,
 }
 
 /// Possible ways to define a command prefix
@@ -122,8 +69,6 @@ pub struct PrefixFrameworkOptions<U, E> {
     /// The main bot prefix. Can be set to None if the bot supports only
     /// [dynamic prefixes](Self::dynamic_prefix).
     pub prefix: Option<String>,
-    /// List of bot commands.
-    pub commands: Vec<PrefixCommandMeta<U, E>>,
     /// List of additional bot prefixes
     // TODO: maybe it would be nicer to have separate fields for literal and regex prefixes
     // That way, you don't need to wrap every single literal prefix in a long path which looks ugly
@@ -164,7 +109,7 @@ pub struct PrefixFrameworkOptions<U, E> {
     /// need to be set for this.
     ///
     /// That does not mean that any subsequent edits will also trigger execution. For that,
-    /// see [`PrefixCommand::track_edits`].
+    /// see [`crate::Command::track_edits`].
     ///
     /// Note: only has an effect if [`Self::edit_tracker`] is set.
     pub execute_untracked_edits: bool,
@@ -181,18 +126,17 @@ pub struct PrefixFrameworkOptions<U, E> {
     /// Whether to invoke help command when someone sends a message with just a bot mention
     pub help_when_mentioned: bool,
     /// The bot's general help command. Currently used for [`Self::help_when_mentioned`].
-    pub help_commmand: Option<PrefixCommand<U, E>>,
+    pub help_commmand: Option<Command<U, E>>,
     // /// The bot's help command for individial commands. Currently used when a command group without
     // /// any specific subcommand is invoked. This command is expected to take the command name as a
     // /// single parameter
-    // pub command_specific_help_commmand: Option<PrefixCommand<U, E>>, */
+    // pub command_specific_help_commmand: Option<Command<U, E>>, */
 }
 
 impl<U: std::fmt::Debug, E: std::fmt::Debug> std::fmt::Debug for PrefixFrameworkOptions<U, E> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let Self {
             prefix,
-            commands,
             additional_prefixes,
             dynamic_prefix,
             stripped_dynamic_prefix,
@@ -206,7 +150,6 @@ impl<U: std::fmt::Debug, E: std::fmt::Debug> std::fmt::Debug for PrefixFramework
 
         f.debug_struct("PrefixFrameworkOptions")
             .field("prefix", prefix)
-            .field("commands", commands)
             .field("additional_prefixes", additional_prefixes)
             .field("dynamic_prefix", &dynamic_prefix.map(|f| f as *const ()))
             .field(
@@ -227,7 +170,6 @@ impl<U, E> Default for PrefixFrameworkOptions<U, E> {
     fn default() -> Self {
         Self {
             prefix: None,
-            commands: Vec::new(),
             additional_prefixes: Vec::new(),
             dynamic_prefix: None,
             stripped_dynamic_prefix: None,

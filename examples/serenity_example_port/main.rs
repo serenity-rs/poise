@@ -281,7 +281,7 @@ async fn main() {
             })
         })
         // The `#[poise::command(prefix_command, slash_command)]` macro transforms the function into
-        // `fn() -> poise::CommandDefinition`.
+        // `fn() -> poise::Command`.
         // Therefore, you need to call the command function without any arguments to get the
         // command definition instance to pass to the framework
         .command(help(), |f| f)
