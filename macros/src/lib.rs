@@ -68,22 +68,16 @@ fn my_command() -> poise::Command<Data, Error> {
     }
 
     poise::Command {
-        prefix: Some(poise::PrefixCommand {
-            name: "my_command",
-            action: |ctx, args| Box::pin(async move {
-                inner(ctx.into()).await
-            }),
-            // ...
-        }),
-        slash: Some(ooise::SlashCommand {
-            name: "my_command",
-            description: "This is a command",
-            action: |ctx, args| Box::pin(async move {
-                inner(ctx.into()).await
-            })
-            // ...
-        }),
-        context_menu: None,
+        name: "my_command",
+        inline_help: "This is a command",
+        prefix_action: Some(|ctx, args| Box::pin(async move {
+            inner(ctx.into()).await
+        })),
+        slash_action: Some(|ctx, args| Box::pin(async move {
+            inner(ctx.into()).await
+        })),
+        context_menu_action: None,
+        // ...
     }
 }
 ```
