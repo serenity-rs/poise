@@ -53,17 +53,8 @@ async fn on_error(error: poise::FrameworkError<'_, Data, Error>) {
     // and forward the rest to the default handler
     match error {
         poise::FrameworkError::Setup { error } => panic!("Failed to start bot: {:?}", error),
-        poise::FrameworkError::Command {
-            error,
-            ctx,
-            location,
-        } => {
-            println!(
-                "Error in command `{}` in {:?}: {:?}",
-                ctx.command().name,
-                error,
-                location
-            );
+        poise::FrameworkError::Command { error, ctx } => {
+            println!("Error in command `{}`: {:?}", ctx.command().name, error,);
         }
         error => {
             if let Err(e) = poise::builtins::on_error(error).await {
@@ -76,6 +67,28 @@ async fn on_error(error: poise::FrameworkError<'_, Data, Error>) {
 #[tokio::main]
 async fn main() {
     let options = poise::FrameworkOptions {
+        commands: vec![
+            help(),
+            register(),
+            commands::vote(),
+            commands::getvotes(),
+            commands::add(),
+            commands::choice(),
+            commands::boop(),
+            commands::delete(),
+            context_menu::user_info(),
+            context_menu::echo(),
+            autocomplete::greet(),
+            poise::Command {
+                subcommands: vec![
+                    subcommands::child1(),
+                    subcommands::child2(),
+                    // Let's make sure poise isn't confused by the duplicate names!
+                    subcommands::parent(),
+                ],
+                ..subcommands::parent()
+            },
+        ],
         prefix_options: poise::PrefixFrameworkOptions {
             prefix: Some("~".into()),
             edit_tracker: Some(poise::EditTracker::for_timespan(Duration::from_secs(3600))),
@@ -109,23 +122,6 @@ async fn main() {
             })
         })
         .options(options)
-        .command(help(), |f| f)
-        .command(register(), |f| f)
-        .command(commands::vote(), |f| f)
-        .command(commands::getvotes(), |f| f)
-        .command(commands::add(), |f| f)
-        .command(commands::choice(), |f| f)
-        .command(commands::boop(), |f| f)
-        .command(commands::delete(), |f| f)
-        .command(context_menu::user_info(), |f| f)
-        .command(context_menu::echo(), |f| f)
-        .command(autocomplete::greet(), |f| f)
-        .command(subcommands::parent(), |f| {
-            f.subcommand(subcommands::child1(), |b| b)
-                .subcommand(subcommands::child2(), |b| b)
-                // Let's make sure poise isn't confused by the duplicate names!
-                .subcommand(subcommands::parent(), |b| b)
-        })
         .run()
         .await
         .unwrap();

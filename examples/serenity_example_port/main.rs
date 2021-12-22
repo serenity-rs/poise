@@ -134,7 +134,7 @@ async fn register(ctx: Context<'_>, #[flag] global: bool) -> Result<(), Error> {
 async fn pre_command(ctx: Context<'_>) {
     println!(
         "Got command '{}' by user '{}'",
-        ctx.command().name(),
+        ctx.command().name,
         ctx.author().name
     );
 
@@ -143,13 +143,13 @@ async fn pre_command(ctx: Context<'_>) {
     // value of 0.
     let mut command_counter = ctx.data().command_counter.lock().unwrap();
     let entry = command_counter
-        .entry(ctx.command().name().to_string())
+        .entry(ctx.command().name.to_string())
         .or_insert(0);
     *entry += 1;
 }
 
 async fn post_command(ctx: Context<'_>) {
-    println!("Processed command '{}'", ctx.command().name());
+    println!("Processed command '{}'", ctx.command().name);
 }
 
 // TODO: unify the command checks in poise::FrameworkOptions and then implement a command check here
@@ -160,14 +160,10 @@ async fn post_command(ctx: Context<'_>) {
 
 async fn on_error(error: poise::FrameworkError<'_, Data, Error>) {
     match error {
-        poise::FrameworkError::Command {
-            error,
-            ctx,
-            location: _,
-        } => {
+        poise::FrameworkError::Command { error, ctx } => {
             println!(
                 "Command '{}' returned error {:?}",
-                ctx.command().name(),
+                ctx.command().name,
                 error
             );
         }
@@ -241,6 +237,35 @@ fn _dispatch_error_no_macro<'fut>(
 #[tokio::main]
 async fn main() {
     let options = poise::FrameworkOptions {
+        commands: vec![
+            // The `#[poise::command(prefix_command, slash_command)]` macro transforms the function into
+            // `fn() -> poise::Command`.
+            // Therefore, you need to call the command function without any arguments to get the
+            // command definition instance to pass to the framework
+            help(),
+            // This function registers slash commands on Discord. When you change something about a
+            // command signature, for example by changing its name, adding or removing parameters, or
+            // changing a parameter type, you should call this function.
+            register(),
+            about(),
+            am_i_admin(),
+            say(),
+            commands(),
+            ping(),
+            latency(),
+            some_long_command(),
+            poise::Command {
+                // A command can have sub-commands, just like in command lines tools.
+                // Imagine `cargo help` and `cargo help run`.
+                subcommands: vec![sub()],
+                ..upper_command()
+            },
+            bird(),
+            cat(),
+            dog(),
+            multiply(),
+            slow_mode(),
+        ],
         listener: |ctx, event, framework, user_data| {
             Box::pin(event_listener(ctx, event, framework, user_data))
         },
@@ -280,33 +305,6 @@ async fn main() {
                 })
             })
         })
-        // The `#[poise::command(prefix_command, slash_command)]` macro transforms the function into
-        // `fn() -> poise::Command`.
-        // Therefore, you need to call the command function without any arguments to get the
-        // command definition instance to pass to the framework
-        .command(help(), |f| f)
-        // This function registers slash commands on Discord. When you change something about a
-        // command signature, for example by changing its name, adding or removing parameters, or
-        // changing a parameter type, you should call this function.
-        .command(register(), |f| f)
-        .command(about(), |f| f)
-        .command(am_i_admin(), |f| f)
-        .command(say(), |f| f)
-        .command(commands(), |f| f)
-        .command(ping(), |f| f)
-        .command(latency(), |f| f)
-        .command(some_long_command(), |f| f)
-        .command(upper_command(), |f| {
-            // A command can have sub-commands, just like in command lines tools.
-            // Imagine `cargo help` and `cargo help run`.
-            // Subcommands are also specified here, inside the builder
-            f.subcommand(sub(), |f| f)
-        })
-        .command(bird(), |f| f)
-        .command(cat(), |f| f)
-        .command(dog(), |f| f)
-        .command(multiply(), |f| f)
-        .command(slow_mode(), |f| f)
         .run()
         .await
         .expect("Client error");
