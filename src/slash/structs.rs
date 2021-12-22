@@ -171,11 +171,20 @@ impl<U, E> std::fmt::Debug for ContextMenuCommandAction<U, E> {
     }
 }
 
-/// A single parameter of a slash command
+/// A single parameter of a [`crate::Command`]
 #[derive(Clone)]
-pub struct SlashCommandParameter<U, E> {
-    /// Builder function for this parameters
-    pub builder: fn(
+pub struct CommandParameter<U, E> {
+    /// Name of this command parameter
+    pub name: &'static str,
+    /// Description of the command. Required for slash commands
+    pub description: Option<&'static str>,
+    /// `true` is this parameter is required, `false` if it's optional or variadic
+    pub required: bool,
+    /// Closure that sets this parameter's type in the given builder
+    ///
+    /// For example an integer [`CommandParameter`] will store
+    /// `|b| b.kind(serenity::ApplicationCommandOptionType::Integer)` as the [`Self::type_setter`]
+    pub type_setter: fn(
         &mut serenity::CreateApplicationCommandOption,
     ) -> &mut serenity::CreateApplicationCommandOption,
     /// Optionally, a callback on autocomplete interactions. If the focused option in the
@@ -183,21 +192,46 @@ pub struct SlashCommandParameter<U, E> {
     pub autocomplete_callback: Option<
         for<'a> fn(
             crate::ApplicationContext<'a, U, E>,
-            &'a serenity::AutocompleteInteraction,
-            &'a [serenity::ApplicationCommandInteractionDataOption],
-        ) -> BoxFuture<'a, Result<(), E>>,
+            &'a serenity::json::Value,
+        ) -> BoxFuture<
+            'a,
+            Result<serenity::CreateAutocompleteResponse, crate::SlashArgError>,
+        >,
     >,
 }
 
-impl<U, E> std::fmt::Debug for SlashCommandParameter<U, E> {
+impl<U, E> CommandParameter<U, E> {
+    /// Generates a slash command parameter builder from this [`CommandParameter`] instance. This
+    /// can be used to register the command on Discord's servers
+    pub fn create_as_slash_command_option(
+        &self,
+    ) -> Option<serenity::CreateApplicationCommandOption> {
+        let mut builder = serenity::CreateApplicationCommandOption::default();
+        builder
+            .required(self.required)
+            .name(self.name)
+            .description(self.description?)
+            .set_autocomplete(self.autocomplete_callback.is_some());
+        (self.type_setter)(&mut builder);
+        Some(builder)
+    }
+}
+
+impl<U, E> std::fmt::Debug for CommandParameter<U, E> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let Self {
-            builder,
+            name,
+            description,
+            required,
+            type_setter,
             autocomplete_callback,
         } = self;
 
-        f.debug_struct("SlashCommandParameter")
-            .field("builder", &(*builder as *const ()))
+        f.debug_struct("CommandParameter")
+            .field("name", name)
+            .field("description", description)
+            .field("required", required)
+            .field("type_setter", &(*type_setter as *const ()))
             .field(
                 "autocomplete_callback",
                 &autocomplete_callback.map(|f| f as *const ()),

@@ -1,4 +1,4 @@
-use super::Invocation;
+use super::{wrap_option, Invocation};
 use syn::spanned::Spanned as _;
 
 // ngl this is ugly
@@ -21,17 +21,16 @@ fn extract_type_parameter<'a>(outer_type: &str, t: &'a syn::Type) -> Option<&'a 
     None
 }
 
-pub fn generate_slash_parameters(
-    inv: &Invocation,
-) -> Result<Vec<proc_macro2::TokenStream>, syn::Error> {
+pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStream>, syn::Error> {
     let mut parameter_structs = Vec::new();
     for param in &inv.parameters {
-        let description = param.more.description.as_ref().ok_or_else(|| {
-            syn::Error::new(
+        if inv.args.slash_command && param.args.description.is_none() {
+            return Err(syn::Error::new(
                 param.span,
                 "slash command parameters must have a description",
-            )
-        })?;
+            ));
+        }
+        let description = wrap_option(param.args.description.as_ref());
 
         let (mut required, type_) = match extract_type_parameter("Option", &param.type_)
             .or_else(|| extract_type_parameter("Vec", &param.type_))
@@ -41,32 +40,21 @@ pub fn generate_slash_parameters(
         };
 
         // Don't require user to input a value for flags - use false as default value (see below)
-        if param.more.flag {
+        if param.args.flag {
             required = false;
         }
 
         let param_name = &param.name;
-        let autocomplete_callback = match &param.more.autocomplete {
+        let autocomplete_callback = match &param.args.autocomplete {
             Some(autocomplete_fn) => {
                 quote::quote! { Some(|
                     ctx: poise::ApplicationContext<'_, _, _>,
-                    interaction: &poise::serenity_prelude::AutocompleteInteraction,
-                    options: &[poise::serenity_prelude::ApplicationCommandInteractionDataOption],
+                    json_value: &poise::serenity::json::Value,
                 | Box::pin(async move {
                     use ::poise::futures::{Stream, StreamExt};
 
-                    let choice = match options
-                        .iter()
-                        .find(|option| option.focused && option.name == stringify!(#param_name))
-                    {
-                        Some(x) => x,
-                        None => return Ok(()),
-                    };
-
-                    let json_value = choice.value
-                        .as_ref()
-                        .ok_or(::poise::SlashArgError::CommandStructureMismatch("expected argument value"))?;
-                    let partial_input = (&&&&&std::marker::PhantomData::<#type_>).extract_partial(json_value)?;
+                    let partial_input = (&&&&&std::marker::PhantomData::<#type_>)
+                        .extract_partial(json_value)?;
 
                     let choices_stream = ::poise::into_stream!(
                         #autocomplete_fn(ctx.into(), partial_input).await
@@ -80,33 +68,22 @@ pub fn generate_slash_parameters(
                         }))
                         .collect()
                         .await;
-                    let choices_json = poise::serenity::json::Value::Array(choices_json);
 
-                    if let Err(e) = interaction
-                        .create_autocomplete_response(
-                            &ctx.discord.http,
-                            |b| b.set_choices(choices_json),
-                        )
-                        .await
-                    {
-                        println!("Warning: couldn't send autocomplete response: {}", e);
-                    }
-
-                    Ok(())
+                    let mut response = poise::serenity::builder::CreateAutocompleteResponse::default();
+                    response.set_choices(poise::serenity::json::Value::Array(choices_json));
+                    Ok(response)
                 })) }
             }
             None => quote::quote! { None },
         };
 
-        let is_autocomplete = param.more.autocomplete.is_some();
         parameter_structs.push((
             quote::quote! {
-                ::poise::SlashCommandParameter {
-                    builder: |o| (&&&&&std::marker::PhantomData::<#type_>).create(o)
-                        .required(#required)
-                        .name(stringify!(#param_name))
-                        .description(#description)
-                        .set_autocomplete(#is_autocomplete),
+                ::poise::CommandParameter {
+                    name: stringify!(#param_name),
+                    description: #description,
+                    required: #required,
+                    type_setter: |o| (&&&&&std::marker::PhantomData::<#type_>).create(o),
                     autocomplete_callback: #autocomplete_callback,
                 }
             },
@@ -126,7 +103,7 @@ pub fn generate_slash_action(inv: &Invocation) -> proc_macro2::TokenStream {
     let param_types = inv
         .parameters
         .iter()
-        .map(|p| match p.more.flag {
+        .map(|p| match p.args.flag {
             true => syn::parse_quote! { FLAG },
             false => p.type_.clone(),
         })
@@ -142,8 +119,8 @@ pub fn generate_slash_action(inv: &Invocation) -> proc_macro2::TokenStream {
                 ctx.discord, ctx.interaction.guild_id(), ctx.interaction.channel_id(), args =>
                 #( (#param_names: #param_types), )*
             ).await.map_err(|error| match error {
-                poise::SlashArgError::CommandStructureMismatch(error) => {
-                    poise::FrameworkError::CommandStructureMismatch { ctx, error }
+                poise::SlashArgError::CommandStructureMismatch(description) => {
+                    poise::FrameworkError::CommandStructureMismatch { ctx, description }
                 },
                 poise::SlashArgError::Parse(error) => {
                     poise::FrameworkError::ArgumentParse { ctx: ctx.into(), error }

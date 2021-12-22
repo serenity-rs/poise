@@ -83,6 +83,10 @@ pub struct Command<U, E> {
     pub on_error: Option<fn(FrameworkError<'_, U, E>) -> BoxFuture<'_, ()>>,
     /// If this function returns false, this command will not be executed.
     pub check: Option<fn(Context<'_, U, E>) -> BoxFuture<'_, Result<bool, E>>>,
+    /// List of parameters for this command
+    ///
+    /// Used for registering and parsing slash commands. Can also be used in help commands
+    pub parameters: Vec<crate::CommandParameter<U, E>>,
 
     // ============= Prefix-specific data
     /// Alternative triggers for the command (prefix-only)
@@ -97,8 +101,6 @@ pub struct Command<U, E> {
     // ============= Application-specific data
     /// Context menu specific name for this command, displayed in Discord's context menu
     pub context_menu_name: Option<&'static str>,
-    /// List of parameters for this slash command (slash-only)
-    pub parameters: Vec<crate::SlashCommandParameter<U, E>>,
     /// Whether responses to this command should be ephemeral by default (application-only)
     pub ephemeral: bool,
 }
@@ -116,9 +118,9 @@ impl<U, E> Command<U, E> {
             builder.kind(serenity::ApplicationCommandOptionType::SubCommand);
 
             for param in &self.parameters {
-                let mut option = serenity::CreateApplicationCommandOption::default();
-                (param.builder)(&mut option);
-                builder.add_sub_option(option);
+                // Using `?` because if this command has slash-incompatible parameters, we cannot
+                // just ignore them but have to abort the creation process entirely
+                builder.add_sub_option(param.create_as_slash_command_option()?);
             }
         } else {
             builder.kind(serenity::ApplicationCommandOptionType::SubCommandGroup);
@@ -145,9 +147,9 @@ impl<U, E> Command<U, E> {
 
         if self.subcommands.is_empty() {
             for param in &self.parameters {
-                let mut option = serenity::CreateApplicationCommandOption::default();
-                (param.builder)(&mut option);
-                builder.add_option(option);
+                // Using `?` because if this command has slash-incompatible parameters, we cannot
+                // just ignore them but have to abort the creation process entirely
+                builder.add_option(param.create_as_slash_command_option()?);
             }
         } else {
             for subcommand in &self.subcommands {
@@ -222,13 +224,6 @@ pub enum FrameworkError<'a, U, E> {
         /// General context
         ctx: Context<'a, U, E>,
     },
-    /// Error occured during parameter autocomplete callback
-    Autocomplete {
-        /// Error which was thrown in the autocomplete code
-        error: E,
-        /// General context
-        ctx: crate::ApplicationContext<'a, U, E>,
-    },
     /// A command argument failed to parse from the Discord message or interaction content
     ArgumentParse {
         /// Error which was thrown by the parameter type's parsing routine
@@ -243,7 +238,7 @@ pub enum FrameworkError<'a, U, E> {
     /// stores an outdated version of the command and its parameters.
     CommandStructureMismatch {
         /// Developer-readable description of the type mismatch
-        error: &'static str,
+        description: &'static str,
         /// General context
         ctx: crate::ApplicationContext<'a, U, E>,
     },

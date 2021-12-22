@@ -80,7 +80,7 @@ struct ParamArgs {
 struct CommandParameter {
     name: syn::Ident,
     type_: syn::Type,
-    more: ParamArgs,
+    args: ParamArgs,
     span: proc_macro2::Span,
 }
 
@@ -168,7 +168,7 @@ pub fn command(
         parameters.push(CommandParameter {
             name: name.clone(),
             type_: (*pattern.ty).clone(),
-            more: attrs,
+            args: attrs,
             span: command_param.span(),
         });
     }
@@ -276,10 +276,7 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
     let broadcast_typing = inv.args.broadcast_typing;
     let aliases = &inv.args.aliases.0;
 
-    let slash_parameters = match inv.args.slash_command {
-        true => slash::generate_slash_parameters(&inv)?,
-        false => Vec::new(),
-    };
+    let parameters = slash::generate_parameters(&inv)?;
     let ephemeral = inv.args.ephemeral;
 
     let function_name = std::mem::replace(&mut inv.function.sig.ident, syn::parse_quote! { inner });
@@ -318,13 +315,13 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
                 owners_only: #owners_only,
                 check: #check,
                 on_error: #on_error,
+                parameters: vec![ #( #parameters ),* ],
 
                 aliases: &[ #( #aliases, )* ],
                 track_edits: #track_edits,
                 broadcast_typing: #broadcast_typing,
 
                 context_menu_name: #context_menu_name,
-                parameters: vec![ #( #slash_parameters ),* ],
                 ephemeral: #ephemeral,
             }
         }

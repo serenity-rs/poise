@@ -8,7 +8,7 @@ fn quote_parameter(p: &super::CommandParameter) -> Result<proc_macro2::TokenStre
         Flag,
         Rest,
     }
-    let modifier = match (p.more.lazy, p.more.rest, p.more.flag) {
+    let modifier = match (p.args.lazy, p.args.rest, p.args.flag) {
         (false, false, false) => Modifier::None,
         (true, false, false) => Modifier::Lazy,
         (false, true, false) => Modifier::Rest,

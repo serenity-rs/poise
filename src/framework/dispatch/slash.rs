@@ -91,7 +91,7 @@ pub async fn dispatch_interaction<'a, U, E>(
     let command_structure_mismatch_error = Some((
         crate::FrameworkError::CommandStructureMismatch {
             ctx,
-            error: "received interaction type but command contained no \
+            description: "received interaction type but command contained no \
                 matching action or interaction contained no matching context menu object",
         },
         ctx.command,
@@ -145,17 +145,37 @@ pub async fn dispatch_autocomplete<'a, U, E>(
     )
     .await?;
 
-    for param in &ctx.command.parameters {
-        let autocomplete_callback = match param.autocomplete_callback {
-            Some(x) => x,
-            None => continue,
+    // Find which parameter is focused by the user
+    let focused_option = options.iter().find(|o| o.focused).ok_or(None)?;
+
+    // Find the matching parameter from our Command object
+    let parameters = &ctx.command.parameters;
+    let focused_parameter = parameters
+        .iter()
+        .find(|p| p.name == focused_option.name)
+        .ok_or(None)?;
+
+    // If this parameter supports autocomplete...
+    if let Some(autocomplete_callback) = focused_parameter.autocomplete_callback {
+        // Generate an autocomplete response
+        let focused_option_json = focused_option.value.as_ref().ok_or(None)?;
+        let autocomplete_response = match autocomplete_callback(ctx, focused_option_json).await {
+            Ok(x) => x,
+            Err(e) => {
+                println!("Warning: couldn't generate autocomplete response: {}", e);
+                return Err(None);
+            }
         };
 
-        if let Err(error) = autocomplete_callback(ctx, interaction, options).await {
-            ctx.command.on_error.unwrap_or(framework.options.on_error)(
-                crate::FrameworkError::Autocomplete { ctx, error },
-            )
-            .await;
+        // Send the generates autocomplete response
+        if let Err(e) = interaction
+            .create_autocomplete_response(&ctx.discord.http, |b| {
+                *b = autocomplete_response;
+                b
+            })
+            .await
+        {
+            println!("Warning: couldn't send autocomplete response: {}", e);
         }
     }
 

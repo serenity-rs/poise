@@ -46,10 +46,10 @@ pub async fn on_error<U: std::fmt::Debug, E: std::fmt::Display + std::fmt::Debug
             };
             ctx.say(format!("**{}**\n{}", error, usage)).await?;
         }
-        crate::FrameworkError::CommandStructureMismatch { ctx, error } => {
+        crate::FrameworkError::CommandStructureMismatch { ctx, description } => {
             println!(
                 "Error: failed to deserialize interaction arguments for `/{}`: {}",
-                ctx.command.name, error,
+                ctx.command.name, description,
             );
         }
         crate::FrameworkError::CommandCheckFailed { ctx, error } => {
@@ -58,12 +58,6 @@ pub async fn on_error<U: std::fmt::Debug, E: std::fmt::Display + std::fmt::Debug
                 ctx.command().name,
                 ctx.author().name,
                 error,
-            );
-        }
-        crate::FrameworkError::Autocomplete { ctx, error } => {
-            println!(
-                "Autocomplete callback failed in command `/{}`: {}",
-                ctx.command.name, error,
             );
         }
         crate::FrameworkError::CooldownHit {
