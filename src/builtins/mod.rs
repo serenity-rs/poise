@@ -63,8 +63,7 @@ pub async fn on_error<U: std::fmt::Debug, E: std::fmt::Display + std::fmt::Debug
         crate::FrameworkError::Autocomplete { ctx, error } => {
             println!(
                 "Autocomplete callback failed in command `/{}`: {}",
-                ctx.command.name,
-                error,
+                ctx.command.name, error,
             );
         }
         crate::FrameworkError::CooldownHit {
