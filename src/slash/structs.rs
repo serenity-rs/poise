@@ -187,8 +187,9 @@ pub struct CommandParameter<U, E> {
     pub type_setter: fn(
         &mut serenity::CreateApplicationCommandOption,
     ) -> &mut serenity::CreateApplicationCommandOption,
-    /// Optionally, a callback on autocomplete interactions. If the focused option in the
-    /// autocomplete interaction matches this parameter, an autocomplete response should be sent
+    /// Optionally, a callback that is invoked on autocomplete interactions. This closure should
+    /// extract the partial argument from the given JSON value and generate the autocomplete
+    /// response which contains the list of autocomplete suggestions.
     pub autocomplete_callback: Option<
         for<'a> fn(
             crate::ApplicationContext<'a, U, E>,
