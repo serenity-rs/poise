@@ -33,6 +33,7 @@ pub struct FrameworkOptions<U, E> {
 
 impl<U, E> FrameworkOptions<U, E> {
     /// Add a new command to the framework
+    #[deprecated = "supply commands in FrameworkOptions directly with `commands: vec![...]`"]
     pub fn command(
         &mut self,
         mut command: crate::Command<U, E>,

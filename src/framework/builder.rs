@@ -91,6 +91,7 @@ impl<U, E> FrameworkBuilder<U, E> {
     }
 
     /// Add a new command to the framework
+    #[deprecated = "supply commands in FrameworkOptions directly with `commands: vec![...]`"]
     pub fn command(
         mut self,
         mut command: crate::Command<U, E>,
@@ -117,6 +118,7 @@ impl<U, E> FrameworkBuilder<U, E> {
     ///     // framework startup...
     /// # ;
     /// ```
+    #[deprecated = "supply commands in FrameworkOptions directly with `commands: vec![...]`"]
     pub fn commands(
         mut self,
         commands: impl IntoIterator<Item = fn() -> crate::Command<U, E>> + 'static,
