@@ -33,11 +33,7 @@ pub async fn on_error<U: std::fmt::Debug, E: std::fmt::Display + std::fmt::Debug
             event.name(),
             error
         ),
-        crate::FrameworkError::Command {
-            ctx,
-            error,
-            location: _,
-        } => {
+        crate::FrameworkError::Command { ctx, error } => {
             let error = error.to_string();
             ctx.say(error).await?;
         }
@@ -56,11 +52,19 @@ pub async fn on_error<U: std::fmt::Debug, E: std::fmt::Display + std::fmt::Debug
                 ctx.command.name, error,
             );
         }
-        crate::FrameworkError::CommandCheckFailed { ctx } => {
+        crate::FrameworkError::CommandCheckFailed { ctx, error } => {
             println!(
-                "A command check failed in command {} for user {}",
+                "A command check failed in command {} for user {}: {:?}",
                 ctx.command().name,
-                ctx.author().name
+                ctx.author().name,
+                error,
+            );
+        }
+        crate::FrameworkError::Autocomplete { ctx, error } => {
+            println!(
+                "Autocomplete callback failed in command `/{}`: {}",
+                ctx.command.name,
+                error,
             );
         }
         crate::FrameworkError::CooldownHit {

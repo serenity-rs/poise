@@ -197,18 +197,6 @@ impl<U, E> Command<U, E> {
     }
 }
 
-/// Used for command errors to store the specific operation in a command's execution where an
-/// error occured
-#[derive(Copy, Clone, Debug, Hash, PartialEq, Eq)]
-pub enum CommandErrorLocation {
-    /// Error occured in the main command code
-    Body,
-    /// Error occured in one of the pre-command checks
-    Check,
-    /// Error occured in a parameter autocomplete callback
-    Autocomplete,
-}
-
 /// Any error that can occur while the bot runs. Either thrown by user code (those variants will
 /// have an `error` field with your error type `E` in it), or originating from within the framework.
 ///
@@ -227,14 +215,19 @@ pub enum FrameworkError<'a, U, E> {
         /// Which event was being processed when the error occurred
         event: &'a crate::Event<'a>,
     },
-    /// User code threw an error in bot command
+    /// Error occured during command execution
     Command {
         /// Error which was thrown in the command code
         error: E,
-        /// In which part of the command execution the error occured
-        location: crate::CommandErrorLocation,
         /// General context
         ctx: Context<'a, U, E>,
+    },
+    /// Error occured during parameter autocomplete callback
+    Autocomplete {
+        /// Error which was thrown in the autocomplete code
+        error: E,
+        /// General context
+        ctx: crate::ApplicationContext<'a, U, E>,
     },
     /// A command argument failed to parse from the Discord message or interaction content
     ArgumentParse {
@@ -283,8 +276,11 @@ pub enum FrameworkError<'a, U, E> {
         /// General context
         ctx: Context<'a, U, E>,
     },
-    /// Provided pre-command check didn't succeed, so command execution aborted
+    /// Provided pre-command check either errored, or returned false, so command execution aborted
     CommandCheckFailed {
+        /// If execution wasn't aborted because of an error but because it successfully returned
+        /// false, this field is None
+        error: Option<E>,
         /// General context
         ctx: Context<'a, U, E>,
     },

@@ -63,7 +63,6 @@ pub fn generate_prefix_action(inv: &Invocation) -> Result<proc_macro2::TokenStre
                 .await
                 .map_err(|error| poise::FrameworkError::Command {
                     error,
-                    location: poise::CommandErrorLocation::Body,
                     ctx: ctx.into(),
                 })
         })

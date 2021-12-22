@@ -153,11 +153,7 @@ pub async fn dispatch_autocomplete<'a, U, E>(
 
         if let Err(error) = autocomplete_callback(ctx, interaction, options).await {
             ctx.command.on_error.unwrap_or(framework.options.on_error)(
-                crate::FrameworkError::Command {
-                    ctx: crate::Context::Application(ctx),
-                    error,
-                    location: crate::CommandErrorLocation::Autocomplete,
-                },
+                crate::FrameworkError::Autocomplete { ctx, error },
             )
             .await;
         }

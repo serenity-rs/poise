@@ -154,7 +154,6 @@ pub fn generate_slash_action(inv: &Invocation) -> proc_macro2::TokenStream {
                 .await
                 .map_err(|error| poise::FrameworkError::Command {
                     error,
-                    location: poise::CommandErrorLocation::Body,
                     ctx: ctx.into(),
                 })
         })
@@ -181,7 +180,6 @@ pub fn generate_context_menu_action(
                     .await
                     .map_err(|error| poise::FrameworkError::Command {
                         error,
-                        location: poise::CommandErrorLocation::Body,
                         ctx: ctx.into(),
                     })
             })

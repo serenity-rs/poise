@@ -101,12 +101,13 @@ pub async fn check_permissions_and_cooldown<'a, U, E>(
     if let Some(check) = cmd.check.or(ctx.framework().options().command_check) {
         match check(ctx).await {
             Ok(true) => {}
-            Ok(false) => return Err(crate::FrameworkError::CommandCheckFailed { ctx }),
+            Ok(false) => {
+                return Err(crate::FrameworkError::CommandCheckFailed { ctx, error: None })
+            }
             Err(error) => {
-                return Err(crate::FrameworkError::Command {
-                    error,
+                return Err(crate::FrameworkError::CommandCheckFailed {
+                    error: Some(error),
                     ctx,
-                    location: crate::CommandErrorLocation::Check,
                 })
             }
         }
