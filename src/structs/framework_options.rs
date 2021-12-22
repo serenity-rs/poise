@@ -31,6 +31,18 @@ pub struct FrameworkOptions<U, E> {
     pub owners: std::collections::HashSet<serenity::UserId>,
 }
 
+impl<U, E> FrameworkOptions<U, E> {
+    /// Add a new command to the framework
+    pub fn command(
+        &mut self,
+        mut command: crate::Command<U, E>,
+        meta_builder: impl FnOnce(&mut crate::Command<U, E>) -> &mut crate::Command<U, E> + 'static,
+    ) {
+        meta_builder(&mut command);
+        self.commands.push(command);
+    }
+}
+
 impl<U: std::fmt::Debug, E: std::fmt::Debug> std::fmt::Debug for FrameworkOptions<U, E> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let Self {
