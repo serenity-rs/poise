@@ -22,10 +22,9 @@ use crate::serenity_prelude as serenity;
 /// }
 /// # };
 /// ```
-pub async fn on_error<U: std::fmt::Debug, E: std::fmt::Display + std::fmt::Debug>(
+pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
     error: crate::FrameworkError<'_, U, E>,
 ) -> Result<(), serenity::Error> {
-    println!("Encountered an error: {:?}", error);
     match error {
         crate::FrameworkError::Setup { error } => println!("Error in user data setup: {}", error),
         crate::FrameworkError::Listener { error, event } => println!(

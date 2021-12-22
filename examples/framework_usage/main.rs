@@ -10,7 +10,6 @@ type Error = Box<dyn std::error::Error + Send + Sync>;
 type Context<'a> = poise::Context<'a, Data, Error>;
 
 // Custom user data passed to all command functions
-#[derive(Debug)]
 pub struct Data {
     votes: Mutex<HashMap<String, u32>>,
 }

@@ -12,7 +12,6 @@ use poise::serenity_prelude as serenity;
 use std::fmt::Write as _;
 
 /// A shared instance of this struct is available across all events and framework commands
-#[derive(Debug)]
 struct Data {
     command_counter: std::sync::Mutex<std::collections::HashMap<String, u64>>,
 }

@@ -74,7 +74,7 @@ impl<U: std::fmt::Debug, E: std::fmt::Debug> std::fmt::Debug for FrameworkOption
 
 impl<U, E> Default for FrameworkOptions<U, E>
 where
-    U: Send + Sync + std::fmt::Debug,
+    U: Send + Sync,
     E: std::fmt::Display + std::fmt::Debug + Send,
 {
     fn default() -> Self {
