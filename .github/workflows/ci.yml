@@ -22,26 +22,30 @@ jobs:
           - name: MSRV
             toolchain: 1.51.0
             # don't do doctests because they rely on new features for brevity
-            command: cargo test --features collector --lib --tests
+            command: cargo test --all-features --lib --tests
+
           - name: beta
             toolchain: beta
+
           - name: nightly
             toolchain: nightly
+
           - name: macOS
             os: macOS-latest
-            # don't test simd-json feature because GHA macOS runners break trying to compile
-            # simd_json for a recent CPU
-            rustflags: " " # non-empty string as to not override it later
-            command: cargo test --features collector
+
           - name: Windows
             os: windows-latest
+
           - name: no features
-            # don't examples because they need collector feature
-            command: cargo test --no-default-features --features serenity_rustls --lib --tests
-          - name: all features
-            command: cargo test --features collector,__internal_simdjson --lib --tests --examples
+            # don't test examples because they need collector feature
+            command: cargo test --no-default-features --lib --tests
+          
+          - name: all features + simdjson
+            command: cargo test --all-features --features serenity/simdjson --lib --tests --examples
+            rustflags: -C target-cpu=haswell # needed for simdjson
+
           - name: native TLS
-            command: cargo test --no-default-features --features collector,serenity_native_tls --lib --tests --examples
+            command: cargo test --all-features --features serenity/native_tls_backend --lib --tests --examples
 
     steps:
       - uses: actions/checkout@v2
@@ -50,9 +54,9 @@ jobs:
           profile: minimal
           toolchain: ${{ matrix.toolchain || 'stable' }}
           override: true
-      - run: ${{ matrix.command || 'cargo test --features collector' }}
+      - run: ${{ matrix.command || 'cargo test --all-features' }}
         env:
-          RUSTFLAGS: ${{ matrix.rustflags || '-C target-cpu=haswell' }}
+          RUSTFLAGS: ${{ matrix.rustflags }}
 
   fmt:
     name: Rustfmt
