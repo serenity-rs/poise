@@ -3,6 +3,11 @@
 use crate::{serenity_prelude as serenity, BoxFuture, Framework};
 
 /// Abstracts over a refernce to an application command interaction or autocomplete interaction
+///
+/// Used in [`crate::ApplicationContext`]. We need to support autocomplete interactions in
+/// [`crate::ApplicationContext`] because command checks are invoked for autocomplete interactions
+/// too: we don't want poise accidentally leaking sensitive information through autocomplete
+/// suggestions
 #[derive(Copy, Clone, Debug)]
 pub enum ApplicationCommandOrAutocompleteInteraction<'a> {
     /// An application command interaction

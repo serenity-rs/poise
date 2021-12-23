@@ -9,8 +9,8 @@ pub use key_value_args::*;
 mod string;
 pub use string::*;
 
-mod parse;
-pub use parse::*;
+mod macros;
+pub use macros::*;
 
 use crate::serenity_prelude as serenity;
 

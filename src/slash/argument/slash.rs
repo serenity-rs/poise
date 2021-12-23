@@ -116,7 +116,7 @@ where
 
 /// Error type thrown if an integer slash command argument is too large
 ///
-/// For example: a user sends `300` but you used
+/// For example: a user inputs `300` as an argument of type [`u8`]
 #[derive(Debug)]
 pub struct IntegerOutOfBounds;
 impl std::fmt::Display for IntegerOutOfBounds {
