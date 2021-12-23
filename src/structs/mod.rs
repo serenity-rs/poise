@@ -21,7 +21,7 @@ impl<U, E> _GetGenerics for Context<'_, U, E> {
 
 /// Type returned from `#[poise::command]` annotated functions, which contains all of the generated
 /// prefix and application commands
-#[derive(Default /* gah i hate how #[derive(Debug)] falls apart at the slightest touch */)]
+#[derive(Default)]
 pub struct Command<U, E> {
     // =============
     /// Callback to execute when this command is invoked in a prefix context
@@ -105,6 +105,67 @@ pub struct Command<U, E> {
     pub ephemeral: bool,
 }
 
+impl<U, E> PartialEq for Command<U, E> {
+    fn eq(&self, other: &Self) -> bool {
+        std::ptr::eq(self, other)
+    }
+}
+impl<U, E> Eq for Command<U, E> {}
+
+impl<U, E> std::fmt::Debug for Command<U, E> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let Self {
+            prefix_action,
+            slash_action,
+            context_menu_action,
+            subcommands,
+            name,
+            identifying_name,
+            category,
+            hide_in_help,
+            inline_help,
+            multiline_help,
+            cooldowns,
+            required_permissions,
+            required_bot_permissions,
+            owners_only,
+            on_error,
+            check,
+            parameters,
+            aliases,
+            track_edits,
+            broadcast_typing,
+            context_menu_name,
+            ephemeral,
+        } = self;
+
+        f.debug_struct("Command")
+            .field("prefix_action", &prefix_action.map(|f| f as *const ()))
+            .field("slash_action", &slash_action.map(|f| f as *const ()))
+            .field("context_menu_action", context_menu_action)
+            .field("subcommands", subcommands)
+            .field("name", name)
+            .field("identifying_name", identifying_name)
+            .field("category", category)
+            .field("hide_in_help", hide_in_help)
+            .field("inline_help", inline_help)
+            .field("multiline_help", multiline_help)
+            .field("cooldowns", cooldowns)
+            .field("required_permissions", required_permissions)
+            .field("required_bot_permissions", required_bot_permissions)
+            .field("owners_only", owners_only)
+            .field("on_error", &on_error.map(|f| f as *const ()))
+            .field("check", &check.map(|f| f as *const ()))
+            .field("parameters", parameters)
+            .field("aliases", aliases)
+            .field("track_edits", track_edits)
+            .field("broadcast_typing", broadcast_typing)
+            .field("context_menu_name", context_menu_name)
+            .field("ephemeral", ephemeral)
+            .finish()
+    }
+}
+
 impl<U, E> Command<U, E> {
     fn create_as_subcommand(&self) -> Option<serenity::CreateApplicationCommandOption> {
         self.slash_action?;
@@ -181,7 +242,7 @@ impl<U, E> Command<U, E> {
     }
 
     /// **Deprecated**
-    #[deprecated = "Please use `category = \"...\"` on the command attribute instead"]
+    #[deprecated = "Please use `crate::Command { category: \"...\", ..command() }` instead"]
     pub fn category(&mut self, category: &'static str) -> &mut Self {
         self.category = Some(category);
         self

@@ -7,7 +7,7 @@ pub use builder::*;
 
 use crate::{serenity_prelude as serenity, BoxFuture};
 
-pub use dispatch::dispatch_message;
+pub use dispatch::{dispatch_message, find_command};
 
 /// The main framework struct which stores all data and handles message and interaction dispatch.
 pub struct Framework<U, E> {

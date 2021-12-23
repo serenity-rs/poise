@@ -73,28 +73,42 @@ async fn strip_prefix<'a, U, E>(
     None
 }
 
-/// Find a command within nested Command's by the user message string. Also returns
-/// the arguments, i.e. the remaining string.
-fn find_command<'a, U, E>(
-    framework: &'a crate::Framework<U, E>,
-    user_data: &'a U,
-    ctx: &'a serenity::Context,
-    msg: &'a serenity::Message,
-    prefix: &'a str,
+/// Find a command or subcommand within `&[Command]`, given a command invocation without a prefix.
+/// Also returns  the arguments, i.e. the remaining string.
+///
+/// ```rust
+/// #[poise::command(prefix_command)] async fn command1(ctx: poise::Context<'_, (), ()>) -> Result<(), ()> { Ok(()) }
+/// #[poise::command(prefix_command)] async fn command2(ctx: poise::Context<'_, (), ()>) -> Result<(), ()> { Ok(()) }
+/// #[poise::command(prefix_command)] async fn command3(ctx: poise::Context<'_, (), ()>) -> Result<(), ()> { Ok(()) }
+/// let commands = vec![
+///     command1(),    
+///     poise::Command {
+///         subcommands: vec![command3()],
+///         ..command2()
+///     },
+/// ];
+///
+/// assert_eq!(
+///     poise::find_command(&commands, "command1 my arguments", false),
+///     Some((&commands[0], "my arguments")),
+/// );
+/// assert_eq!(
+///     poise::find_command(&commands, "command2 command3 my arguments", false),
+///     Some((&commands[1].subcommands[0], "my arguments")),
+/// );
+/// assert_eq!(
+///     poise::find_command(&commands, "CoMmAnD2 cOmMaNd99 my arguments", true),
+///     Some((&commands[1], "cOmMaNd99 my arguments")),
+/// );
+pub fn find_command<'a, U, E>(
     commands: &'a [crate::Command<U, E>],
     remaining_message: &'a str,
-) -> Option<(
-    &'a crate::Command<U, E>,
-    for<'b> fn(
-        crate::PrefixContext<'b, U, E>,
-        args: &'b str,
-    ) -> crate::BoxFuture<'b, Result<(), crate::FrameworkError<'b, U, E>>>,
-    &'a str,
-)>
+    case_insensitive: bool,
+) -> Option<(&'a crate::Command<U, E>, &'a str)>
 where
     U: Send + Sync,
 {
-    let considered_equal = if framework.options.prefix_options.case_insensitive_commands {
+    let string_equal = if case_insensitive {
         |a: &str, b: &str| a.eq_ignore_ascii_case(b)
     } else {
         |a: &str, b: &str| a == b
@@ -106,40 +120,18 @@ where
     };
 
     for command in commands {
-        let primary_name_matches = considered_equal(command.name, command_name);
+        let primary_name_matches = string_equal(command.name, command_name);
         let alias_matches = command
             .aliases
             .iter()
-            .any(|alias| considered_equal(alias, command_name));
+            .any(|alias| string_equal(alias, command_name));
         if !primary_name_matches && !alias_matches {
             continue;
         }
 
-        let ctx = crate::PrefixContext {
-            discord: ctx,
-            msg,
-            prefix,
-            framework,
-            data: user_data,
-            command,
-        };
-
         return Some(
-            match find_command(
-                framework,
-                user_data,
-                ctx.discord,
-                msg,
-                prefix,
-                &command.subcommands,
-                remaining_message,
-            ) {
-                Some(subcommand_result) => subcommand_result,
-                None => match command.prefix_action {
-                    Some(action) => (command, action, remaining_message),
-                    None => continue,
-                },
-            },
+            find_command(&command.subcommands, remaining_message, case_insensitive)
+                .unwrap_or((command, remaining_message)),
         );
     }
 
@@ -174,16 +166,13 @@ where
         return Err(None);
     }
 
-    let (command, action, args) = find_command(
-        framework,
-        framework.get_user_data().await,
-        ctx,
-        msg,
-        prefix,
+    let (command, args) = find_command(
         &framework.options.commands,
         msg_content,
+        framework.options.prefix_options.case_insensitive_commands,
     )
     .ok_or(None)?;
+    let action = command.prefix_action.ok_or(None)?;
 
     // Check if we should disregard this invocation if it was triggered by an edit
     let should_execute_if_triggered_by_edit = command.track_edits

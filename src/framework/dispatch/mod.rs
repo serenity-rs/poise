@@ -3,7 +3,7 @@ mod common;
 mod prefix;
 mod slash;
 
-pub use prefix::dispatch_message;
+pub use prefix::{dispatch_message, find_command};
 
 use crate::serenity_prelude as serenity;
 
