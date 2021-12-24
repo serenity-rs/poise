@@ -122,8 +122,12 @@ pub fn generate_slash_action(inv: &Invocation) -> proc_macro2::TokenStream {
                 poise::SlashArgError::CommandStructureMismatch(description) => {
                     poise::FrameworkError::CommandStructureMismatch { ctx, description }
                 },
-                poise::SlashArgError::Parse(error) => {
-                    poise::FrameworkError::ArgumentParse { ctx: ctx.into(), error }
+                poise::SlashArgError::Parse { error, input } => {
+                    poise::FrameworkError::ArgumentParse {
+                        ctx: ctx.into(),
+                        error,
+                        input: Some(input),
+                    }
                 },
             })?;
 

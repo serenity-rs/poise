@@ -9,9 +9,8 @@ pub use help::*;
 use crate::serenity_prelude as serenity;
 
 /// An error handler that prints the error into the console and also into the Discord chat.
-/// If the user invoked the command wrong
-/// (i.e. an [`crate::ArgumentParseError`]), the command help is displayed and the user is directed
-/// to the help menu.
+/// If the user invoked the command wrong ([`crate::FrameworkError::ArgumentParse`]), the command
+/// help is displayed and the user is directed to the help menu.
 ///
 /// Can return an error if sending the Discord error message failed. You can decide for yourself
 /// how to handle this, for example:
@@ -36,14 +35,22 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
             let error = error.to_string();
             ctx.say(error).await?;
         }
-        crate::FrameworkError::ArgumentParse { ctx, error } => {
+        crate::FrameworkError::ArgumentParse { ctx, input, error } => {
             // If we caught an argument parse error, give a helpful error message with the
             // command explanation if available
             let usage = match ctx.command().multiline_help {
                 Some(multiline_help) => multiline_help(),
                 None => "Please check the help menu for usage information".into(),
             };
-            ctx.say(format!("**{}**\n{}", error, usage)).await?;
+            let response = if let Some(input) = input {
+                format!(
+                    "**Cannot parse `{}` as argument: {}**\n{}",
+                    input, error, usage
+                )
+            } else {
+                format!("**{}**\n{}", error, usage)
+            };
+            ctx.say(response).await?;
         }
         crate::FrameworkError::CommandStructureMismatch { ctx, description } => {
             println!(

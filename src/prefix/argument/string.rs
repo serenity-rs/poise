@@ -1,18 +1,7 @@
 use super::*;
 
-/// Error type when trying to parse a string parameter but the input is empty
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Default)]
-pub struct EmptyArgs;
-impl std::fmt::Display for EmptyArgs {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str("Not enough arguments were given")
-    }
-}
-
-impl std::error::Error for EmptyArgs {}
-
 impl<'a> PopArgument<'a> for String {
-    type Err = EmptyArgs;
+    type Err = std::convert::Infallible;
 
     /// Pop a whitespace-separated word from the front of the arguments. Supports quotes and quote
     /// escaping.
@@ -20,32 +9,32 @@ impl<'a> PopArgument<'a> for String {
     /// Leading whitespace will be trimmed; trailing whitespace is not consumed.
     ///
     /// ```rust
-    /// # use poise::{ArgString, PopArgument as _};
+    /// # use poise::PopArgument as _;
     /// assert_eq!(
-    ///     String::pop_from(&ArgString(r#""first arg" secondarg"#)).unwrap().1,
+    ///     String::pop_from(r#""first arg" secondarg"#).unwrap().1,
     ///     r#"first arg"#
     /// );
     /// assert_eq!(
-    ///     String::pop_from(&ArgString(r#""arg \" with \" quotes \" inside""#)).unwrap().1,
+    ///     String::pop_from(r#""arg \" with \" quotes \" inside""#).unwrap().1,
     ///     r#"arg " with " quotes " inside"#
     /// );
     /// ```
-    fn pop_from(args: &ArgString<'a>) -> Result<(ArgString<'a>, Self), Self::Err> {
+    fn pop_from(args: &'a str) -> Result<(&'a str, Self), Option<Self::Err>> {
         // TODO: consider changing the behavior to parse quotes literally if they're in the middle
         // of the string:
         // - `"hello world"` => `hello world`
         // - `"hello "world"` => `"hello "world`
         // - `"hello" world"` => `hello`
 
-        if args.0.is_empty() {
-            return Err(EmptyArgs);
+        if args.is_empty() {
+            return Err(None);
         }
 
         let mut output = String::new();
         let mut inside_string = false;
         let mut escaping = false;
 
-        let mut chars = args.0.chars();
+        let mut chars = args.chars();
         // .clone().next() is poor man's .peek(), but we can't do peekable because then we can't
         // call as_str on the Chars iterator
         while let Some(c) = chars.clone().next() {
@@ -65,7 +54,7 @@ impl<'a> PopArgument<'a> for String {
             chars.next();
         }
 
-        Ok((ArgString(chars.as_str()), output))
+        Ok((chars.as_str(), output))
     }
 }
 
@@ -73,10 +62,7 @@ impl<'a> PopArgument<'a> for String {
 #[test]
 fn test_pop_string() {
     // Test that trailing whitespace is not consumed
-    assert_eq!(
-        String::pop_from(&ArgString("AA BB")).unwrap().0,
-        ArgString(" BB")
-    );
+    assert_eq!(String::pop_from("AA BB").unwrap().0, " BB");
 
     for &(string, arg) in &[
         (r#"AA BB"#, r#"AA"#),
@@ -88,6 +74,6 @@ fn test_pop_string() {
         (r#"\"AA\ BB\""#, r#""AA BB""#),
         (r#""\"AA BB\"""#, r#""AA BB""#),
     ] {
-        assert_eq!(String::pop_from(&ArgString(string)).unwrap().1, arg);
+        assert_eq!(String::pop_from(string).unwrap().1, arg);
     }
 }

@@ -3,7 +3,7 @@
 macro_rules! _parse_prefix {
     // All arguments have been consumed
     ( $ctx:ident $msg:ident $args:ident => [ $error:ident $( $name:ident )* ] ) => {
-        if $args.0.is_empty() {
+        if $args.is_empty() {
             return Ok(( $( $name, )* ));
         }
     };
@@ -18,7 +18,7 @@ macro_rules! _parse_prefix {
                 let token: Option<$type> = Some(token);
                 $crate::_parse_prefix!($ctx $msg $args => [ $error $($preamble)* token ] $($rest)* );
             },
-            Err(e) => $error = Box::new(e),
+            Err(e) => $error = e,
         }
         let token: Option<$type> = None;
         $crate::_parse_prefix!($ctx $msg $args => [ $error $($preamble)* token ] $($rest)* );
@@ -36,7 +36,7 @@ macro_rules! _parse_prefix {
                 let token: Option<$type> = Some(token);
                 $crate::_parse_prefix!($ctx $msg $args => [ $error $($preamble)* token ] $($rest)* );
             },
-            Err(e) => $error = Box::new(e),
+            Err(e) => $error = e,
         }
     };
 
@@ -45,19 +45,20 @@ macro_rules! _parse_prefix {
         (#[rest] Option<$type:ty $(,)?>)
         $( $rest:tt )*
     ) => {
-        if $args.0.trim_start().is_empty() {
+        if $args.trim_start().is_empty() {
             let token: Option<$type> = None;
             $crate::_parse_prefix!($ctx $msg $args => [ $error $($preamble)* token ]);
         } else {
+            let input = $args.trim_start();
             match <$type as $crate::serenity_prelude::ArgumentConvert>::convert(
-                $ctx, $msg.guild_id, Some($msg.channel_id), $args.0.trim_start()
+                $ctx, $msg.guild_id, Some($msg.channel_id), input
             ).await {
                 Ok(token) => {
-                    let $args = $crate::ArgString("");
+                    let $args = "";
                     let token = Some(token);
                     $crate::_parse_prefix!($ctx $msg $args => [ $error $($preamble)* token ]);
                 },
-                Err(e) => $error = Box::new(e),
+                Err(e) => $error = (e.into(), Some(input.to_string())),
             }
         }
     };
@@ -79,7 +80,7 @@ macro_rules! _parse_prefix {
                     running_args = popped_args;
                 },
                 Err(e) => {
-                    $error = Box::new(e);
+                    $error = e;
                     break;
                 }
 
@@ -101,14 +102,15 @@ macro_rules! _parse_prefix {
         // question to my former self: why the $(poise::)* ?
         (#[rest] $(poise::)* $type:ty)
     ) => {
+        let input = $args.trim_start();
         match <$type as $crate::serenity_prelude::ArgumentConvert>::convert(
-            $ctx, $msg.guild_id, Some($msg.channel_id), $args.0.trim_start()
+            $ctx, $msg.guild_id, Some($msg.channel_id), input
         ).await {
             Ok(token) => {
-                let $args = $crate::ArgString("");
+                let $args = "";
                 $crate::_parse_prefix!($ctx $msg $args => [ $error $($preamble)* token ]);
             },
-            Err(e) => $error = Box::new(e),
+            Err(e) => $error = (e.into(), Some(input.to_string())),
         }
     };
 
@@ -122,7 +124,7 @@ macro_rules! _parse_prefix {
                 $crate::_parse_prefix!($ctx $msg $args => [ $error $($preamble)* true ] $($rest)* );
             }
         }
-        $error = concat!("Must use either `", $name, "` or nothing as a modifier").into();
+        $error = (concat!("Must use either `", $name, "` or nothing as a modifier").into(), None);
         $crate::_parse_prefix!($ctx $msg $args => [ $error $($preamble)* false ] $($rest)* );
     };
 
@@ -135,7 +137,7 @@ macro_rules! _parse_prefix {
             Ok(($args, token)) => {
                 $crate::_parse_prefix!($ctx $msg $args => [ $error $($preamble)* token ] $($rest)* );
             },
-            Err(e) => $error = Box::new(e),
+            Err(e) => $error = e,
         }
     };
 
@@ -168,7 +170,7 @@ assert_eq!(
     poise::parse_prefix_args!(
         &ctx, &msg,
         "one two three four" => (String), (Option<u32>), #[rest] (String)
-    ).await?,
+    ).await.unwrap(),
     (
         String::from("one"),
         None,
@@ -180,7 +182,7 @@ assert_eq!(
     poise::parse_prefix_args!(
         &ctx, &msg,
         "1 2 3 4" => (String), (Option<u32>), #[rest] (String)
-    ).await?,
+    ).await.unwrap(),
     (
         String::from("1"),
         Some(2),
@@ -203,9 +205,10 @@ macro_rules! parse_prefix_args {
 
             let ctx = $ctx;
             let msg = $msg;
-            let args = $crate::ArgString($args);
+            let args = $args;
 
-            let mut error = Box::new($crate::TooManyArguments) as Box<dyn std::error::Error + Send + Sync>;
+            let mut error: (Box<dyn std::error::Error + Send + Sync>, Option<String>)
+                = (Box::new($crate::TooManyArguments) as _, None);
 
             $crate::_parse_prefix!(
                 ctx msg args => [error]
@@ -213,7 +216,7 @@ macro_rules! parse_prefix_args {
                     ($( #[$attr] )? $($type)*)
                 )*
             );
-            Err($crate::ArgumentParseError(error))
+            Err(error)
         }
     };
 }

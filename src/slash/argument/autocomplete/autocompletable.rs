@@ -63,11 +63,13 @@ impl<T: TryFrom<i64> + Into<serenity::json::Value> + Send + Sync> Autocompletabl
     type Partial = T;
 
     fn extract_partial(self, value: &serenity::json::Value) -> Result<T, SlashArgError> {
-        value
+        let number = value
             .as_i64()
-            .ok_or(SlashArgError::CommandStructureMismatch("expected integer"))?
-            .try_into()
-            .map_err(|_| SlashArgError::Parse(crate::IntegerOutOfBounds.into()))
+            .ok_or(SlashArgError::CommandStructureMismatch("expected integer"))?;
+        number.try_into().map_err(|_| SlashArgError::Parse {
+            error: crate::IntegerOutOfBounds.into(),
+            input: number.to_string(),
+        })
     }
 
     fn into_json(self, value: T) -> serenity::json::Value {

@@ -54,9 +54,10 @@ pub fn generate_prefix_action(inv: &Invocation) -> Result<proc_macro2::TokenStre
                 ctx.discord, ctx.msg, args =>
                 #( #param_specs, )*
                 #wildcard_arg
-            ).await.map_err(|error| poise::FrameworkError::ArgumentParse {
+            ).await.map_err(|(error, input)| poise::FrameworkError::ArgumentParse {
+                error,
+                input,
                 ctx: ctx.into(),
-                error: error.0
             })?;
 
             inner(ctx.into(), #( #param_names, )* )

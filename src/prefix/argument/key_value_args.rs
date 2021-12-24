@@ -8,7 +8,7 @@ use super::*;
 /// use poise::PopArgument;
 ///
 /// let string = r#"key1=value key2="value with spaces" "key with spaces"="value with \"quotes\"""#;
-/// let key_value_args = poise::KeyValueArgs::pop_from(&poise::ArgString(string)).unwrap().1;
+/// let key_value_args = poise::KeyValueArgs::pop_from(string).unwrap().1;
 ///
 /// let mut expected_result = std::collections::HashMap::new();
 /// expected_result.insert("key1".into(), "value".into());
@@ -26,12 +26,10 @@ impl KeyValueArgs {
         self.0.get(key).map(|x| x.as_str())
     }
 
-    fn pop_single_key_value_pair<'a>(
-        args: &ArgString<'a>,
-    ) -> Option<(ArgString<'a>, (String, String))> {
+    fn pop_single_key_value_pair(args: &str) -> Option<(&str, (String, String))> {
         // TODO: share quote parsing machinery with PopArgumentAsync impl for String
 
-        if args.0.is_empty() {
+        if args.is_empty() {
             return None;
         }
 
@@ -39,7 +37,7 @@ impl KeyValueArgs {
         let mut inside_string = false;
         let mut escaping = false;
 
-        let mut chars = args.0.trim_start().chars();
+        let mut chars = args.trim_start().chars();
         loop {
             let c = chars.next()?;
             if escaping {
@@ -63,9 +61,9 @@ impl KeyValueArgs {
             }
         }
 
-        let args = ArgString(chars.as_str());
+        let args = chars.as_str();
         // `args` used to contain "key=value ...", now it contains "value ...", so pop the value off
-        let (args, value) = String::pop_from(&args).unwrap_or((args, String::new()));
+        let (args, value) = String::pop_from(args).unwrap_or((args, String::new()));
 
         Some((args, (key, value)))
     }
@@ -74,12 +72,11 @@ impl KeyValueArgs {
 impl<'a> PopArgument<'a> for KeyValueArgs {
     type Err = std::convert::Infallible;
 
-    fn pop_from(args: &ArgString<'a>) -> Result<(ArgString<'a>, Self), Self::Err> {
+    fn pop_from(mut args: &'a str) -> Result<(&'a str, Self), Option<Self::Err>> {
         let mut pairs = std::collections::HashMap::new();
 
-        let mut args = args.clone();
-        while let Some((new_args, (key, value))) = Self::pop_single_key_value_pair(&args) {
-            args = new_args;
+        while let Some((remaining_args, (key, value))) = Self::pop_single_key_value_pair(args) {
+            args = remaining_args;
             pairs.insert(key, value);
         }
 
@@ -109,7 +106,7 @@ fn test_key_value_args() {
         (r#"dummyval"#, &[], "dummyval"),
         (r#"dummyval="#, &[("dummyval", "")], ""),
     ] {
-        let (args, kv_args) = KeyValueArgs::pop_from(&ArgString(string)).unwrap();
+        let (args, kv_args) = KeyValueArgs::pop_from(string).unwrap();
 
         assert_eq!(
             kv_args.0,
@@ -118,6 +115,6 @@ fn test_key_value_args() {
                 .map(|&(k, v)| (k.to_owned(), v.to_owned()))
                 .collect(),
         );
-        assert_eq!(args.0, remaining_args);
+        assert_eq!(args, remaining_args);
     }
 }

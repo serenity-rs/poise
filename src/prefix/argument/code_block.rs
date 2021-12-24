@@ -1,24 +1,14 @@
 use super::*;
 
-/// Error that can be returned from parsing a [`CodeBlock`] ([`CodeBlock::pop_from`])
+/// Error thrown when parsing a malformed [`CodeBlock`] ([`CodeBlock::pop_from`])
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub enum CodeBlockError {
-    /// No starting backtick or triple backtick was found
-    Missing,
-    /// A code block was found, but it was not properly formed
-    Malformed,
-}
-
-impl std::fmt::Display for CodeBlockError {
+pub struct MalformedCodeBlock;
+impl std::fmt::Display for MalformedCodeBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::Missing => f.write_str("Missing code block"),
-            Self::Malformed => f.write_str("Malformed code block"),
-        }
+        f.write_str("malformed code block")
     }
 }
-
-impl std::error::Error for CodeBlockError {}
+impl std::error::Error for MalformedCodeBlock {}
 
 /// A command parameter type for Discord code blocks
 ///
@@ -55,27 +45,27 @@ impl std::fmt::Display for CodeBlock {
 }
 
 impl<'a> PopArgument<'a> for CodeBlock {
-    type Err = CodeBlockError;
+    type Err = MalformedCodeBlock;
 
     /// Parse a single-line or multi-line code block. The output of `Self::code` should mirror what
     /// the official Discord client renders, and the output of `Self::language` should mirror the
     /// official Discord client's syntax highlighting, if existent.
     ///
     /// ```rust
-    /// # use poise::{CodeBlock, ArgString, PopArgument as _};
+    /// # use poise::{CodeBlock, PopArgument as _};
     /// assert_eq!(
-    ///     CodeBlock::pop_from(&ArgString("`hello world`")).unwrap().1,
+    ///     CodeBlock::pop_from("`hello world`").unwrap().1,
     ///     CodeBlock { code: "hello world".into(), language: None },
     /// );
     /// assert_eq!(
-    ///     CodeBlock::pop_from(&ArgString("```rust\nprintln!(\"Hello world!\");\n```")).unwrap().1,
+    ///     CodeBlock::pop_from("```rust\nprintln!(\"Hello world!\");\n```").unwrap().1,
     ///     CodeBlock { code: "println!(\"Hello world!\");".into(), language: Some("rust".into()) },
     /// );
     /// ```
-    fn pop_from(args: &ArgString<'a>) -> Result<(ArgString<'a>, Self), Self::Err> {
+    fn pop_from(args: &'a str) -> Result<(&'a str, Self), Option<Self::Err>> {
         let rest;
-        let mut code_block = if let Some(code_block) = args.0.strip_prefix("```") {
-            let code_block_end = code_block.find("```").ok_or(CodeBlockError::Malformed)?;
+        let mut code_block = if let Some(code_block) = args.strip_prefix("```") {
+            let code_block_end = code_block.find("```").ok_or(Some(MalformedCodeBlock))?;
             rest = &code_block[(code_block_end + 3)..];
             let mut code_block = &code_block[..code_block_end];
 
@@ -97,8 +87,8 @@ impl<'a> PopArgument<'a> for CodeBlock {
                 code: code_block.to_owned(),
                 language: language.map(|x| x.to_owned()),
             }
-        } else if let Some(code_line) = args.0.strip_prefix('`') {
-            let code_line_end = code_line.find('`').ok_or(CodeBlockError::Malformed)?;
+        } else if let Some(code_line) = args.strip_prefix('`') {
+            let code_line_end = code_line.find('`').ok_or(Some(MalformedCodeBlock))?;
             rest = &code_line[(code_line_end + 1)..];
             let code_line = &code_line[..code_line_end];
 
@@ -107,17 +97,17 @@ impl<'a> PopArgument<'a> for CodeBlock {
                 language: None,
             }
         } else {
-            return Err(CodeBlockError::Missing);
+            return Err(None);
         };
 
         // Empty codeblocks like `` are not rendered as codeblocks by Discord
         if code_block.code.is_empty() {
-            Err(CodeBlockError::Malformed)
+            Err(Some(MalformedCodeBlock))
         } else {
             // discord likes to insert hair spaces at the end of code blocks sometimes for no reason
             code_block.code = code_block.code.trim_end_matches('\u{200a}').to_owned();
 
-            Ok((ArgString(rest), code_block))
+            Ok((rest, code_block))
         }
     }
 }
@@ -135,7 +125,7 @@ fn test_pop_code_block() {
         ("```rust\n\n\n\n\nhi\n\n\n\n```", "hi", Some("rust")),
     ] {
         assert_eq!(
-            CodeBlock::pop_from(&ArgString(string)).unwrap().1,
+            CodeBlock::pop_from(string).unwrap().1,
             CodeBlock {
                 code: code.into(),
                 language: language.map(|x| x.into())
@@ -143,12 +133,7 @@ fn test_pop_code_block() {
         );
     }
 
-    assert_eq!(
-        CodeBlock::pop_from(&ArgString("``")),
-        Err(CodeBlockError::Malformed)
-    );
-    assert_eq!(
-        CodeBlock::pop_from(&ArgString("``````")),
-        Err(CodeBlockError::Malformed)
-    );
+    assert_eq!(CodeBlock::pop_from(""), Err(None));
+    assert_eq!(CodeBlock::pop_from("``"), Err(Some(MalformedCodeBlock)));
+    assert_eq!(CodeBlock::pop_from("``````"), Err(Some(MalformedCodeBlock)));
 }

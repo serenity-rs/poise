@@ -17,7 +17,12 @@ pub enum SlashArgError {
     /// stores an outdated version of the command and its parameters.
     CommandStructureMismatch(&'static str),
     /// A string parameter was found, but it could not be parsed into the target type.
-    Parse(Box<dyn std::error::Error + Send + Sync>),
+    Parse {
+        /// Error that occured while parsing the string into the target type
+        error: Box<dyn std::error::Error + Send + Sync>,
+        /// Original input string
+        input: String,
+    },
 }
 impl std::fmt::Display for SlashArgError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -29,18 +34,25 @@ impl std::fmt::Display for SlashArgError {
                     detail
                 )
             }
-            Self::Parse(e) => write!(f, "Failed to parse argument: {}", e),
+            Self::Parse { error, input } => {
+                write!(f, "Failed to parse `{}` as argument: {}", input, error)
+            }
         }
     }
 }
 impl std::error::Error for SlashArgError {
     fn cause(&self) -> Option<&dyn std::error::Error> {
         match self {
-            Self::Parse(e) => Some(&**e),
+            Self::Parse { error, input: _ } => Some(&**error),
             Self::CommandStructureMismatch(_) => None,
         }
     }
 }
+
+macro_rules! specialized {
+    ($($t:tt)*) => {};
+}
+specialized! {}
 
 /// Implement this trait on types that you want to use as a slash command parameter.
 #[async_trait::async_trait]
@@ -103,7 +115,10 @@ where
             .ok_or(SlashArgError::CommandStructureMismatch("expected string"))?;
         T::convert(ctx, guild, channel, string)
             .await
-            .map_err(|e| SlashArgError::Parse(e.into()))
+            .map_err(|e| SlashArgError::Parse {
+                error: e.into(),
+                input: string.into(),
+            })
     }
 
     fn create(
@@ -114,7 +129,7 @@ where
     }
 }
 
-/// Error type thrown if an integer slash command argument is too large
+/// Error thrown if an integer slash command argument is too large
 ///
 /// For example: a user inputs `300` as an argument of type [`u8`]
 #[derive(Debug)]
@@ -137,12 +152,13 @@ impl<T: TryFrom<i64> + Send + Sync> SlashArgumentHack<T> for &PhantomData<T> {
         _: Option<serenity::ChannelId>,
         value: &serenity::json::Value,
     ) -> Result<T, SlashArgError> {
-        value
+        let number = value
             .as_i64()
-            .ok_or(SlashArgError::CommandStructureMismatch("expected integer"))?
-            .try_into()
-            .ok()
-            .ok_or_else(|| SlashArgError::Parse(IntegerOutOfBounds.into()))
+            .ok_or(SlashArgError::CommandStructureMismatch("expected integer"))?;
+        number.try_into().map_err(|_| SlashArgError::Parse {
+            error: IntegerOutOfBounds.into(),
+            input: number.to_string(),
+        })
     }
 
     fn create(

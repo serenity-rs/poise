@@ -289,6 +289,8 @@ pub enum FrameworkError<'a, U, E> {
     ArgumentParse {
         /// Error which was thrown by the parameter type's parsing routine
         error: Box<dyn std::error::Error + Send + Sync>,
+        /// If applicable, the input on which parsing failed
+        input: Option<String>,
         /// General context
         ctx: Context<'a, U, E>,
     },
