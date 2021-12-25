@@ -20,8 +20,7 @@ pub struct Framework<U, E> {
     // Will be initialized to Some on construction, and then taken out on startup
     client: std::sync::Mutex<Option<serenity::Client>>,
     // Initialized to Some during construction; so shouldn't be None at any observable point
-    shard_manager:
-        std::sync::Mutex<Option<std::sync::Arc<tokio::sync::Mutex<serenity::ShardManager>>>>,
+    shard_manager: std::sync::Arc<tokio::sync::Mutex<serenity::ShardManager>>,
     // Filled with Some on construction. Taken out and executed on first Ready gateway event
     user_data_setup: std::sync::Mutex<
         Option<
@@ -72,22 +71,16 @@ impl<U, E> Framework<U, E> {
         U: Send + Sync + 'static,
         E: Send + 'static,
     {
-        let self_1 = std::sync::Arc::new(Self {
-            user_data: once_cell::sync::OnceCell::new(),
-            user_data_setup: std::sync::Mutex::new(Some(Box::new(user_data_setup))),
-            // To break up the circular dependency (framework setup -> client setup -> event handler
-            // -> framework), we initialize this with None and then immediately fill in once the
-            // client is created
-            client: std::sync::Mutex::new(None),
-            options,
-            application_id,
-            shard_manager: std::sync::Mutex::new(None),
-        });
-        let self_2 = self_1.clone();
+        use std::sync::{Arc, Mutex};
 
+        let framework_cell = Arc::new(once_cell::sync::OnceCell::<Arc<Self>>::new());
+        let framework_cell_2 = framework_cell.clone();
         let event_handler = crate::EventWrapper(move |ctx, event| {
-            let self_2 = self_2.clone();
-            Box::pin(async move { dispatch::dispatch_event(&*self_2, ctx, event).await }) as _
+            // unwrap_used: we will only receive events once the client has been started, by which
+            // point framework_cell has been initialized
+            #[clippy::unwrap_used]
+            let framework = framework_cell_2.get().unwrap().clone();
+            Box::pin(async move { dispatch::dispatch_event(&*framework, ctx, event).await }) as _
         });
 
         let client: serenity::Client = client_builder
@@ -95,10 +88,16 @@ impl<U, E> Framework<U, E> {
             .event_handler(event_handler)
             .await?;
 
-        *self_1.shard_manager.lock().unwrap() = Some(client.shard_manager.clone());
-        *self_1.client.lock().unwrap() = Some(client);
-
-        Ok(self_1)
+        let framework = Arc::new(Self {
+            user_data: once_cell::sync::OnceCell::new(),
+            user_data_setup: Mutex::new(Some(Box::new(user_data_setup))),
+            options,
+            application_id,
+            shard_manager: client.shard_manager.clone(),
+            client: Mutex::new(Some(client)),
+        });
+        let _: Result<_, _> = framework_cell.set(framework.clone());
+        Ok(framework)
     }
 
     async fn start_with<F: std::future::Future<Output = serenity::Result<()>>>(
@@ -166,11 +165,7 @@ impl<U, E> Framework<U, E> {
 
     /// Returns the serenity's client shard manager.
     pub fn shard_manager(&self) -> std::sync::Arc<tokio::sync::Mutex<serenity::ShardManager>> {
-        self.shard_manager
-            .lock()
-            .unwrap()
-            .clone()
-            .expect("fatal: shard manager not stored in framework initialization")
+        self.shard_manager.clone()
     }
 
     async fn get_user_data(&self) -> &U {
