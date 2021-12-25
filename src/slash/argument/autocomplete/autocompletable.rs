@@ -8,6 +8,8 @@ use std::marker::PhantomData;
 ///
 /// Includes almost all types that can be used as a slash command parameter in general,
 /// except some built-in model types (User, Member, Role...)
+// Note to self: this CANNOT be integrated into SlashArgumentHack because some types (User, Channel,
+// etc.) cannot be used for autocomplete!
 pub trait Autocompletable {
     /// Type of the partial input. This should be `Self` except in cases where a partial input
     /// cannot be parsed into `Self` (e.g. an IP address)
