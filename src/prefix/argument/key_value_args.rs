@@ -2,21 +2,7 @@ use super::*;
 
 /// A command parameter type for key-value args
 ///
-/// For example `key1=value1 key2="value2 with spaces"`.
-///
-/// ```rust
-/// use poise::PopArgument;
-///
-/// let string = r#"key1=value key2="value with spaces" "key with spaces"="value with \"quotes\"""#;
-/// let key_value_args = poise::KeyValueArgs::pop_from(string).unwrap().1;
-///
-/// let mut expected_result = std::collections::HashMap::new();
-/// expected_result.insert("key1".into(), "value".into());
-/// expected_result.insert("key2".into(), "value with spaces".into());
-/// expected_result.insert("key with spaces".into(), r#"value with "quotes""#.into());
-///
-/// assert_eq!(key_value_args.0, expected_result);
-/// ```
+/// For example `key1=value1 key2="value2 with spaces"`
 #[derive(Clone, PartialEq, Eq, Debug, Default)]
 pub struct KeyValueArgs(pub std::collections::HashMap<String, String>);
 
@@ -63,16 +49,12 @@ impl KeyValueArgs {
 
         let args = chars.as_str();
         // `args` used to contain "key=value ...", now it contains "value ...", so pop the value off
-        let (args, value) = String::pop_from(args).unwrap_or((args, String::new()));
+        let (args, value) = super::pop_string(args).unwrap_or((args, String::new()));
 
         Some((args, (key, value)))
     }
-}
 
-impl<'a> PopArgument<'a> for KeyValueArgs {
-    type Err = std::convert::Infallible;
-
-    fn pop_from(mut args: &'a str) -> Result<(&'a str, Self), Option<Self::Err>> {
+    fn pop_from(mut args: &str) -> (&str, Self) {
         let mut pairs = std::collections::HashMap::new();
 
         while let Some((remaining_args, (key, value))) = Self::pop_single_key_value_pair(args) {
@@ -80,7 +62,18 @@ impl<'a> PopArgument<'a> for KeyValueArgs {
             pairs.insert(key, value);
         }
 
-        Ok((args, Self(pairs)))
+        (args, Self(pairs))
+    }
+}
+
+#[async_trait::async_trait]
+impl<'a> PopArgument<'a> for KeyValueArgs {
+    async fn pop_from(
+        args: &'a str,
+        _: &serenity::Context,
+        _: &serenity::Message,
+    ) -> Result<(&'a str, Self), (Box<dyn std::error::Error + Send + Sync>, Option<String>)> {
+        Ok(Self::pop_from(args))
     }
 }
 
@@ -106,7 +99,7 @@ fn test_key_value_args() {
         (r#"dummyval"#, &[], "dummyval"),
         (r#"dummyval="#, &[("dummyval", "")], ""),
     ] {
-        let (args, kv_args) = KeyValueArgs::pop_from(string).unwrap();
+        let (args, kv_args) = KeyValueArgs::pop_from(string);
 
         assert_eq!(
             kv_args.0,
