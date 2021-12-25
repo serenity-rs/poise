@@ -77,13 +77,18 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
             None => quote::quote! { None },
         };
 
+        let type_setter = match inv.args.slash_command {
+            true => quote::quote! { Some(|o| (&&&&&std::marker::PhantomData::<#type_>).create(o)) },
+            false => quote::quote! { None },
+        };
+
         parameter_structs.push((
             quote::quote! {
                 ::poise::CommandParameter {
                     name: stringify!(#param_name),
                     description: #description,
                     required: #required,
-                    type_setter: |o| (&&&&&std::marker::PhantomData::<#type_>).create(o),
+                    type_setter: #type_setter,
                     autocomplete_callback: #autocomplete_callback,
                 }
             },
