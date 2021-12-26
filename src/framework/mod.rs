@@ -172,9 +172,9 @@ impl<U, E> Framework<U, E> {
         self.shard_manager.clone()
     }
 
-    async fn get_user_data(&self) -> &U {
-        // We shouldn't get a Message event before a Ready event. But if we do, wait until
-        // the Ready event does come and the resulting data has arrived.
+    /// Retrieves user data, or blocks until it has been initialized (once the Ready event has been
+    /// received).
+    pub async fn user_data(&self) -> &U {
         loop {
             match self.user_data.get() {
                 Some(x) => break x,

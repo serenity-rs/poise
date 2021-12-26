@@ -54,7 +54,7 @@ pub async fn extract_command_and_run_checks<'a, U, E>(
     })?;
 
     let ctx = crate::ApplicationContext {
-        data: framework.get_user_data().await,
+        data: framework.user_data().await,
         discord: ctx,
         framework,
         interaction,

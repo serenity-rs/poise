@@ -13,7 +13,7 @@ async fn strip_prefix<'a, U, E>(
             author: &msg.author,
             discord: ctx,
             framework,
-            data: framework.get_user_data().await,
+            data: framework.user_data().await,
         };
         if let Some(prefix) = dynamic_prefix(partial_ctx).await {
             if msg.content.starts_with(&prefix) {
@@ -49,8 +49,7 @@ async fn strip_prefix<'a, U, E>(
     }
 
     if let Some(dynamic_prefix) = framework.options.prefix_options.stripped_dynamic_prefix {
-        if let Some((prefix, content)) =
-            dynamic_prefix(ctx, msg, framework.get_user_data().await).await
+        if let Some((prefix, content)) = dynamic_prefix(ctx, msg, framework.user_data().await).await
         {
             return Some((prefix, content));
         }
@@ -186,7 +185,7 @@ where
         msg,
         prefix,
         framework,
-        data: framework.get_user_data().await,
+        data: framework.user_data().await,
         command,
     };
 

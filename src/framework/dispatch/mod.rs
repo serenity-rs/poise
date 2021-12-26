@@ -91,7 +91,7 @@ pub async fn dispatch_event<U, E>(
     // Do this after the framework's Ready handling, so that get_user_data() doesnt
     // potentially block infinitely
     if let Err(error) =
-        (framework.options.listener)(&ctx, &event, framework, framework.get_user_data().await).await
+        (framework.options.listener)(&ctx, &event, framework, framework.user_data().await).await
     {
         let error = crate::FrameworkError::Listener { error, event };
         (framework.options.on_error)(error).await;
