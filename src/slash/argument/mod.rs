@@ -1,3 +1,5 @@
+//! Application command argument handling code
+
 mod slash;
 pub use slash::*;
 

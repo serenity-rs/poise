@@ -1,5 +1,8 @@
+//! Dispatches interactions onto framework commands
+
 use crate::serenity_prelude as serenity;
 
+/// Check if the interaction with the given name and arguments matches any framework command
 fn find_matching_command<'a, 'b, U, E>(
     interaction_name: &str,
     interaction_options: &'b [serenity::ApplicationCommandInteractionDataOption],
@@ -28,6 +31,8 @@ fn find_matching_command<'a, 'b, U, E>(
     })
 }
 
+/// Given an interaction, finds the matching framework command and checks if the user is allowed
+/// access
 pub async fn extract_command_and_run_checks<'a, U, E>(
     framework: &'a crate::Framework<U, E>,
     ctx: &'a serenity::Context,
@@ -69,6 +74,7 @@ pub async fn extract_command_and_run_checks<'a, U, E>(
     Ok((ctx, leaf_interaction_options))
 }
 
+/// Dispatches this interaction onto framework commands, i.e. runs the associated command
 pub async fn dispatch_interaction<'a, U, E>(
     framework: &'a crate::Framework<U, E>,
     ctx: &'a serenity::Context,
@@ -130,6 +136,8 @@ pub async fn dispatch_interaction<'a, U, E>(
     action_result.map_err(|e| Some((e, ctx.command)))
 }
 
+/// Dispatches this interaction onto framework commands, i.e. runs the associated autocomplete
+/// callback
 pub async fn dispatch_autocomplete<'a, U, E>(
     framework: &'a crate::Framework<U, E>,
     ctx: &'a serenity::Context,

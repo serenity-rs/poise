@@ -3,6 +3,7 @@
 
 use crate::serenity_prelude as serenity;
 
+/// Updates the given message according to the update event
 fn update_message(message: &mut serenity::Message, update: serenity::MessageUpdateEvent) {
     message.id = update.id;
     message.channel_id = update.channel_id;
@@ -50,7 +51,9 @@ fn update_message(message: &mut serenity::Message, update: serenity::MessageUpda
 /// feature.
 #[derive(Debug)]
 pub struct EditTracker {
+    /// Duration after which cached messages can be purged
     max_duration: std::time::Duration,
+    /// Cache, which associates user messages to the corresponding bot response message
     cache: Vec<(serenity::Message, serenity::Message)>,
 }
 

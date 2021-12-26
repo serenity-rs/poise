@@ -1,3 +1,5 @@
+//! Contains the built-in help command and surrounding infrastructure
+
 use crate::serenity_prelude as serenity;
 
 /// Optional configuration for how the help message from [`help()`] looks
@@ -21,6 +23,7 @@ impl Default for HelpConfiguration<'_> {
     }
 }
 
+/// Code for printing help of a specific command (e.g. `~help my_command`)
 async fn help_single_command<U, E>(
     ctx: crate::Context<'_, U, E>,
     command_name: &str,
@@ -56,6 +59,7 @@ async fn help_single_command<U, E>(
     Ok(())
 }
 
+/// Code for printing an overview of all commands (e.g. `~help`)
 async fn help_all_commands<U, E>(
     ctx: crate::Context<'_, U, E>,
     config: HelpConfiguration<'_>,

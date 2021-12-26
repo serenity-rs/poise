@@ -49,11 +49,6 @@ impl std::error::Error for SlashArgError {
     }
 }
 
-macro_rules! specialized {
-    ($($t:tt)*) => {};
-}
-specialized! {}
-
 /// Implement this trait on types that you want to use as a slash command parameter.
 #[async_trait::async_trait]
 pub trait SlashArgument: Sized {
@@ -233,7 +228,7 @@ impl<T: SlashArgument + Sync> SlashArgumentHack<T> for &&PhantomData<T> {
     }
 }
 
-// Implement slash argument for a model type that is represented in interactions via an ID
+/// Implements SlashArgumentHack for a model type that is represented in interactions via an ID
 macro_rules! impl_slash_argument {
     ($type:ty, $slash_param_type:ident) => {
         #[async_trait::async_trait]

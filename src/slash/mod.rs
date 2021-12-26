@@ -8,6 +8,8 @@ pub use argument::*;
 
 use crate::serenity_prelude as serenity;
 
+/// Sends the message, specified via [`crate::CreateReply`], to the interaction initial response
+/// endpoint
 fn send_as_initial_response(
     data: crate::CreateReply<'_>,
     allowed_mentions: Option<&serenity::CreateAllowedMentions>,
@@ -44,6 +46,8 @@ fn send_as_initial_response(
     }
 }
 
+/// Sends the message, specified via [`crate::CreateReply`], to the interaction followup response
+/// endpoint
 fn send_as_followup_response<'a>(
     data: crate::CreateReply<'a>,
     allowed_mentions: Option<&serenity::CreateAllowedMentions>,

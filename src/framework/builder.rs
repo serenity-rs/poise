@@ -1,3 +1,5 @@
+//! A builder struct that allows easy and readable creation of a [`crate::Framework`]
+
 use crate::serenity_prelude as serenity;
 use crate::BoxFuture;
 
@@ -11,6 +13,7 @@ use crate::BoxFuture;
 /// Before starting, the builder will make an HTTP request to retrieve the bot's application ID and
 /// owner.
 pub struct FrameworkBuilder<U, E> {
+    /// Callback for user data setup
     user_data_setup: Option<
         Box<
             dyn Send
@@ -22,10 +25,15 @@ pub struct FrameworkBuilder<U, E> {
                 ) -> BoxFuture<'a, Result<U, E>>,
         >,
     >,
+    /// Framework options
     options: Option<crate::FrameworkOptions<U, E>>,
+    /// Client settings that will be applied to the ClientBuilder before initializing the framework
     client_settings: Option<Box<dyn FnOnce(serenity::ClientBuilder) -> serenity::ClientBuilder>>,
+    /// Discord bot token
     token: Option<String>,
+    /// Requested gateway intents for the bot
     intents: Option<serenity::GatewayIntents>,
+    /// List of framework commands
     commands: Vec<crate::Command<U, E>>,
 }
 
@@ -168,13 +176,7 @@ impl<U, E> FrameworkBuilder<U, E> {
         }
 
         // Create framework with specified settings
-        crate::Framework::new(
-            serenity::ApplicationId(application_info.id.0),
-            client_builder,
-            user_data_setup,
-            options,
-        )
-        .await
+        crate::Framework::new(client_builder, user_data_setup, options).await
     }
 
     /// Start the framework with the specified configuration.

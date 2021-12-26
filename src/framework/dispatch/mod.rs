@@ -1,4 +1,5 @@
-// Prefix and slash specific implementation details
+//! Contains all code to dispatch incoming events onto framework commands
+
 mod common;
 mod prefix;
 mod slash;
@@ -7,6 +8,7 @@ pub use prefix::{dispatch_message, find_command};
 
 use crate::serenity_prelude as serenity;
 
+/// Central event handling function of this library
 pub async fn dispatch_event<U, E>(
     framework: &crate::Framework<U, E>,
     ctx: serenity::Context,
@@ -91,7 +93,7 @@ pub async fn dispatch_event<U, E>(
     // Do this after the framework's Ready handling, so that get_user_data() doesnt
     // potentially block infinitely
     if let Err(error) =
-        (framework.options.listener)(&ctx, &event, framework, framework.user_data().await).await
+        (framework.options.listener)(&ctx, event, framework, framework.user_data().await).await
     {
         let error = crate::FrameworkError::Listener { error, event };
         (framework.options.on_error)(error).await;

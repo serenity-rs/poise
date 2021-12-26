@@ -1,3 +1,8 @@
+//! Infrastructure for replying, i.e. sending a message in a command context
+//!
+//! This file dispatches to command-type specific reply code, which is in the prefix and slash
+//! modules
+
 use crate::serenity_prelude as serenity;
 
 /// Message builder that abstracts over prefix and application command responses

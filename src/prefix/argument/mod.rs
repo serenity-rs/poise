@@ -1,3 +1,5 @@
+//! Everything related to parsing command arguments from a text message
+
 #![allow(unused)] // false positive from inside macro expansions
 
 mod code_block;

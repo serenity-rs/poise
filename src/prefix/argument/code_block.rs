@@ -1,14 +1,16 @@
+//! Parsing code for [`CodeBlock`], a prefix-specific command parameter type
+
 use super::*;
 
 /// Error thrown when parsing a malformed [`CodeBlock`] ([`CodeBlock::pop_from`])
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct MalformedCodeBlock;
-impl std::fmt::Display for MalformedCodeBlock {
+pub struct CodeBlockError;
+impl std::fmt::Display for CodeBlockError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str("malformed code block")
+        f.write_str("couldn't find a valid code block")
     }
 }
-impl std::error::Error for MalformedCodeBlock {}
+impl std::error::Error for CodeBlockError {}
 
 /// A command parameter type for Discord code blocks
 ///
@@ -44,12 +46,13 @@ impl std::fmt::Display for CodeBlock {
     }
 }
 
-fn pop_from(args: &str) -> Result<(&str, CodeBlock), Option<MalformedCodeBlock>> {
+/// Reads a [`CodeBlock`] from the front of the string and returns the remaining string.
+fn pop_from(args: &str) -> Result<(&str, CodeBlock), CodeBlockError> {
     let args = args.trim_start();
 
     let rest;
     let mut code_block = if let Some(code_block) = args.strip_prefix("```") {
-        let code_block_end = code_block.find("```").ok_or(Some(MalformedCodeBlock))?;
+        let code_block_end = code_block.find("```").ok_or(CodeBlockError)?;
         rest = &code_block[(code_block_end + 3)..];
         let mut code_block = &code_block[..code_block_end];
 
@@ -72,7 +75,7 @@ fn pop_from(args: &str) -> Result<(&str, CodeBlock), Option<MalformedCodeBlock>>
             language: language.map(|x| x.to_owned()),
         }
     } else if let Some(code_line) = args.strip_prefix('`') {
-        let code_line_end = code_line.find('`').ok_or(Some(MalformedCodeBlock))?;
+        let code_line_end = code_line.find('`').ok_or(CodeBlockError)?;
         rest = &code_line[(code_line_end + 1)..];
         let code_line = &code_line[..code_line_end];
 
@@ -81,12 +84,12 @@ fn pop_from(args: &str) -> Result<(&str, CodeBlock), Option<MalformedCodeBlock>>
             language: None,
         }
     } else {
-        return Err(None);
+        return Err(CodeBlockError);
     };
 
     // Empty codeblocks like `` are not rendered as codeblocks by Discord
     if code_block.code.is_empty() {
-        Err(Some(MalformedCodeBlock))
+        Err(CodeBlockError)
     } else {
         // discord likes to insert hair spaces at the end of code blocks sometimes for no reason
         code_block.code = code_block.code.trim_end_matches('\u{200a}').to_owned();
@@ -105,7 +108,7 @@ impl<'a> PopArgument<'a> for CodeBlock {
         _: &serenity::Context,
         _: &serenity::Message,
     ) -> Result<(&'a str, Self), (Box<dyn std::error::Error + Send + Sync>, Option<String>)> {
-        pop_from(args).map_err(|e| (e.map_or(crate::TooFewArguments.into(), |e| e.into()), None))
+        pop_from(args).map_err(|e| (e.into(), None))
     }
 }
 

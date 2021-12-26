@@ -219,9 +219,13 @@ pub async fn servers<U, E>(ctx: crate::Context<'_, U, E>) -> Result<(), serenity
         }
     }
 
+    /// Stores details of a guild for the purposes of listing it in the bot guild list
     struct Guild {
+        /// Name of the guild
         name: String,
+        /// Number of members in the guild
         num_members: u64,
+        /// Whether the guild is public
         is_public: bool,
     }
 

@@ -1,6 +1,10 @@
+//! Dispatches incoming messages and message edits onto framework commands
+
 use crate::serenity_prelude as serenity;
 
-// Returns tuple of stripped prefix and rest of the message, if any prefix matches
+/// Checks if this message is a bot invocation by attempting to strip the prefix
+///
+/// Returns tuple of stripped prefix and rest of the message, if any prefix matches
 async fn strip_prefix<'a, U, E>(
     framework: &'a crate::Framework<U, E>,
     ctx: &'a serenity::Context,

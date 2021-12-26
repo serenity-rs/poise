@@ -1,3 +1,6 @@
+//! Small hacky macro to convert any value into a Stream, where the value can be an IntoIterator
+//! or a Stream. Used for the return value of autocomplete callbacks
+
 #[doc(hidden)]
 pub struct IntoStreamWrap<'a, T>(pub &'a T);
 

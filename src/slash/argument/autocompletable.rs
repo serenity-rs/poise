@@ -1,3 +1,7 @@
+//! A trait and an instance of the auto-deref specialization trick for the purposes of
+//! converting between Discord's autocomplete data and Rust types, in order to run the parameter
+//! autocomplete callbacks
+
 #[allow(unused_imports)] // required if serenity simdjson feature is enabled
 use crate::serenity::json::prelude::*;
 use crate::{serenity_prelude as serenity, SlashArgError};

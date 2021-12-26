@@ -1,3 +1,6 @@
+//! A macro that generates backtracking-capable argument parsing code, given a list of parameter
+//! types and attributes
+
 #[doc(hidden)]
 #[macro_export]
 macro_rules! _parse_prefix {

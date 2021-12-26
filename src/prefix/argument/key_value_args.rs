@@ -1,3 +1,5 @@
+//! Parsing code for [`KeyValueArgs`], a prefix-specific command parameter type
+
 use super::*;
 
 /// A command parameter type for key-value args
@@ -12,6 +14,7 @@ impl KeyValueArgs {
         self.0.get(key).map(|x| x.as_str())
     }
 
+    /// Reads a single key value pair ("key=value") from the front of the arguments
     fn pop_single_key_value_pair(args: &str) -> Option<(&str, (String, String))> {
         // TODO: share quote parsing machinery with PopArgumentAsync impl for String
 
@@ -54,6 +57,8 @@ impl KeyValueArgs {
         Some((args, (key, value)))
     }
 
+    /// Reads as many key-value args as possible from the front of the string and produces a
+    /// [`KeyValueArgs`] out of those
     fn pop_from(mut args: &str) -> (&str, Self) {
         let mut pairs = std::collections::HashMap::new();
 

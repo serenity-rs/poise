@@ -167,6 +167,8 @@ impl<U, E> std::fmt::Debug for Command<U, E> {
 }
 
 impl<U, E> Command<U, E> {
+    /// Serializes this Command into an application command option, which is the form which Discord
+    /// requires subcommands to be in
     fn create_as_subcommand(&self) -> Option<serenity::CreateApplicationCommandOption> {
         self.slash_action?;
 

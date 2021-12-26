@@ -11,17 +11,16 @@ pub use dispatch::{dispatch_message, find_command};
 
 /// The main framework struct which stores all data and handles message and interaction dispatch.
 pub struct Framework<U, E> {
+    /// Stores user data. Is initialized on first Ready event
     user_data: once_cell::sync::OnceCell<U>,
-    // TODO: wrap in RwLock to allow changing framework options while running? Could also replace
-    // the edit tracking cache interior mutability
+    /// Stores the framework options
     options: crate::FrameworkOptions<U, E>,
-    application_id: serenity::ApplicationId,
 
-    // Will be initialized to Some on construction, and then taken out on startup
+    /// Will be initialized to Some on construction, and then taken out on startup
     client: std::sync::Mutex<Option<serenity::Client>>,
-    // Initialized to Some during construction; so shouldn't be None at any observable point
+    /// Initialized to Some during construction; so shouldn't be None at any observable point
     shard_manager: std::sync::Arc<tokio::sync::Mutex<serenity::ShardManager>>,
-    // Filled with Some on construction. Taken out and executed on first Ready gateway event
+    /// Filled with Some on construction. Taken out and executed on first Ready gateway event
     user_data_setup: std::sync::Mutex<
         Option<
             Box<
@@ -54,7 +53,6 @@ impl<U, E> Framework<U, E> {
     /// data setup is not allowed to return Result because there would be no reasonable
     /// course of action on error.
     pub async fn new<F>(
-        application_id: serenity::ApplicationId,
         client_builder: serenity::ClientBuilder,
         user_data_setup: F,
         options: crate::FrameworkOptions<U, E>,
@@ -73,13 +71,14 @@ impl<U, E> Framework<U, E> {
     {
         use std::sync::{Arc, Mutex};
 
+        /// Ad-hoc event handler struct that forwards events to dispatch_event()
         struct EventHandler<U, E>(Arc<once_cell::sync::OnceCell<Arc<Framework<U, E>>>>);
         #[serenity::async_trait]
         impl<U: Send + Sync, E: Send> serenity::RawEventHandler for EventHandler<U, E> {
             async fn raw_event(&self, ctx: serenity::Context, event: serenity::Event) {
                 // unwrap_used: we will only receive events once the client has been started, by which
                 // point framework_cell has been initialized
-                #[clippy::unwrap_used]
+                #[allow(clippy::unwrap_used)]
                 let framework = self.0.get().unwrap().clone();
                 dispatch::dispatch_event(&*framework, ctx, &event).await;
             }
@@ -87,16 +86,12 @@ impl<U, E> Framework<U, E> {
         let framework_cell = Arc::new(once_cell::sync::OnceCell::new());
         let event_handler = EventHandler(framework_cell.clone());
 
-        let client: serenity::Client = client_builder
-            .application_id(application_id.0)
-            .raw_event_handler(event_handler)
-            .await?;
+        let client: serenity::Client = client_builder.raw_event_handler(event_handler).await?;
 
         let framework = Arc::new(Self {
             user_data: once_cell::sync::OnceCell::new(),
             user_data_setup: Mutex::new(Some(Box::new(user_data_setup))),
             options,
-            application_id,
             shard_manager: client.shard_manager.clone(),
             client: Mutex::new(Some(client)),
         });
@@ -104,6 +99,7 @@ impl<U, E> Framework<U, E> {
         Ok(framework)
     }
 
+    /// Small utility function for starting the framework that is agnostic over client sharding
     async fn start_with<F: std::future::Future<Output = serenity::Result<()>>>(
         self: std::sync::Arc<Self>,
         start: fn(serenity::Client) -> F,
@@ -160,11 +156,6 @@ impl<U, E> Framework<U, E> {
     /// Return the stored framework options, including commands.
     pub fn options(&self) -> &crate::FrameworkOptions<U, E> {
         &self.options
-    }
-
-    /// Returns the application ID given to the framework on its creation.
-    pub fn application_id(&self) -> serenity::ApplicationId {
-        self.application_id
     }
 
     /// Returns the serenity's client shard manager.

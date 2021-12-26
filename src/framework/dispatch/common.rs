@@ -1,3 +1,5 @@
+//! Prefix and slash agnostic utilities for dispatching incoming events onto framework commands
+
 use crate::serenity_prelude as serenity;
 
 /// Retrieves user permissions in the given channel. If unknown, returns None. If in DMs, returns
@@ -41,6 +43,8 @@ async fn user_permissions(
     guild.user_permissions_in(channel, &member).ok()
 }
 
+/// Retrieves the set of permissions that are lacking, relative to the given required permission set
+///
 /// Returns None if permissions couldn't be retrieved
 async fn missing_permissions<U, E>(
     ctx: crate::Context<'_, U, E>,
@@ -55,6 +59,7 @@ async fn missing_permissions<U, E>(
     Some(required_permissions - permissions?)
 }
 
+/// Checks if the invoker is allowed to execute this command at this point in time
 #[allow(clippy::needless_lifetimes)] // false positive (clippy issue 7271)
 pub async fn check_permissions_and_cooldown<'a, U, E>(
     ctx: crate::Context<'a, U, E>,

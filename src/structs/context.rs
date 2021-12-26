@@ -1,3 +1,5 @@
+//! Just contains Context and PartialContext structs
+
 use crate::serenity_prelude as serenity;
 
 /// Wrapper around either [`crate::ApplicationContext`] or [`crate::PrefixContext`]
