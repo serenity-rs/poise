@@ -278,7 +278,7 @@ pub enum FrameworkError<'a, U, E> {
         /// Error which was thrown in the listener code
         error: E,
         /// Which event was being processed when the error occurred
-        event: &'a serenity::Event,
+        event: &'a crate::Event<'a>,
     },
     /// Error occured during command execution
     Command {

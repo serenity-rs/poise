@@ -71,22 +71,20 @@ impl<U, E> Framework<U, E> {
     {
         use std::sync::{Arc, Mutex};
 
-        /// Ad-hoc event handler struct that forwards events to dispatch_event()
-        struct EventHandler<U, E>(Arc<once_cell::sync::OnceCell<Arc<Framework<U, E>>>>);
-        #[serenity::async_trait]
-        impl<U: Send + Sync, E: Send> serenity::RawEventHandler for EventHandler<U, E> {
-            async fn raw_event(&self, ctx: serenity::Context, event: serenity::Event) {
-                // unwrap_used: we will only receive events once the client has been started, by which
-                // point framework_cell has been initialized
-                #[allow(clippy::unwrap_used)]
-                let framework = self.0.get().unwrap().clone();
-                dispatch::dispatch_event(&*framework, ctx, &event).await;
-            }
-        }
-        let framework_cell = Arc::new(once_cell::sync::OnceCell::new());
-        let event_handler = EventHandler(framework_cell.clone());
+        let framework_cell = Arc::new(once_cell::sync::OnceCell::<Arc<Self>>::new());
+        let framework_cell_2 = framework_cell.clone();
+        let event_handler = crate::EventWrapper(move |ctx, event| {
+            // unwrap_used: we will only receive events once the client has been started, by which
+            // point framework_cell has been initialized
+            #[clippy::unwrap_used]
+            let framework = framework_cell_2.get().unwrap().clone();
+            Box::pin(async move { dispatch::dispatch_event(&*framework, ctx, event).await }) as _
+        });
 
-        let client: serenity::Client = client_builder.raw_event_handler(event_handler).await?;
+        let client: serenity::Client = client_builder
+            .application_id(application_id.0)
+            .event_handler(event_handler)
+            .await?;
 
         let framework = Arc::new(Self {
             user_data: once_cell::sync::OnceCell::new(),
