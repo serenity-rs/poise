@@ -289,8 +289,6 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
         > {
             #function
 
-            use poise::{SlashArgumentHack as _, AutocompletableHack as _};
-
             ::poise::Command {
                 prefix_action: #prefix_action,
                 slash_action: #slash_action,

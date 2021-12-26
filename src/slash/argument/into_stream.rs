@@ -26,7 +26,7 @@ impl<T: futures::Stream> IntoStream<T> for &&IntoStreamWrap<'_, T> {
     }
 }
 
-// Takes an expression that is either an IntoIterator or a Stream, and converts it to a Stream
+/// Takes an expression that is either an IntoIterator or a Stream, and converts it to a Stream
 #[doc(hidden)]
 #[macro_export]
 macro_rules! into_stream {

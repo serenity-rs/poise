@@ -1,5 +1,6 @@
-//! Parse received slash command arguments into Rust types.
+//! Traits for slash command parameters and a macro to wrap the auto-deref specialization hack
 
+use super::SlashArgError;
 use std::convert::{TryFrom, TryInto};
 use std::marker::PhantomData;
 
@@ -7,53 +8,13 @@ use std::marker::PhantomData;
 use crate::serenity::json::prelude::*;
 use crate::serenity_prelude as serenity;
 
-/// Possible errors when parsing slash command arguments
-#[derive(Debug)]
-pub enum SlashArgError {
-    /// Expected a certain argument type at a certain position in the unstructured list of
-    /// arguments, but found something else.
-    ///
-    /// Most often the result of the bot not having registered the command in Discord, so Discord
-    /// stores an outdated version of the command and its parameters.
-    CommandStructureMismatch(&'static str),
-    /// A string parameter was found, but it could not be parsed into the target type.
-    Parse {
-        /// Error that occured while parsing the string into the target type
-        error: Box<dyn std::error::Error + Send + Sync>,
-        /// Original input string
-        input: String,
-    },
-}
-impl std::fmt::Display for SlashArgError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::CommandStructureMismatch(detail) => {
-                write!(
-                    f,
-                    "Bot author did not register their commands correctly ({})",
-                    detail
-                )
-            }
-            Self::Parse { error, input } => {
-                write!(f, "Failed to parse `{}` as argument: {}", input, error)
-            }
-        }
-    }
-}
-impl std::error::Error for SlashArgError {
-    fn cause(&self) -> Option<&dyn std::error::Error> {
-        match self {
-            Self::Parse { error, input: _ } => Some(&**error),
-            Self::CommandStructureMismatch(_) => None,
-        }
-    }
-}
-
 /// Implement this trait on types that you want to use as a slash command parameter.
 #[async_trait::async_trait]
 pub trait SlashArgument: Sized {
     /// Extract a Rust value of type T from the slash command argument, given via a
     /// [`serenity::json::Value`].
+    ///
+    /// Don't call this method directly! Use [`crate::extract_slash_argument!`]
     async fn extract(
         ctx: &serenity::Context,
         guild: Option<serenity::GuildId>,
@@ -65,6 +26,8 @@ pub trait SlashArgument: Sized {
     ///
     /// Only fields about the argument type are filled in. The caller is still responsible for
     /// filling in `name()`, `description()`, and possibly `required()` or other fields.
+    ///
+    /// Don't call this method directly! Use [`crate::create_slash_argument!`]
     fn create(
         builder: &mut serenity::CreateApplicationCommandOption,
     ) -> &mut serenity::CreateApplicationCommandOption;
@@ -89,6 +52,27 @@ pub trait SlashArgumentHack<T> {
         self,
         builder: &mut serenity::CreateApplicationCommandOption,
     ) -> &mut serenity::CreateApplicationCommandOption;
+}
+
+/// Full version of [`crate::SlashArgument::extract`].
+///
+/// Uses specialization to get full coverage of types. Pass the type as the first argument
+#[macro_export]
+macro_rules! extract_slash_argument {
+    ($target:ty, $ctx:expr, $guild:expr, $channel:expr, $value:expr) => {{
+        use $crate::SlashArgumentHack as _;
+        (&&&&&std::marker::PhantomData::<$target>).extract($ctx, $guild, $channel, $value)
+    }};
+}
+/// Full version of [`crate::SlashArgument::create`].
+///
+/// Uses specialization to get full coverage of types. Pass the type as the first argument
+#[macro_export]
+macro_rules! create_slash_argument {
+    ($target:ty, $builder:expr) => {{
+        use $crate::SlashArgumentHack as _;
+        (&&&&&std::marker::PhantomData::<$target>).create($builder)
+    }};
 }
 
 /// Handles arbitrary types that can be parsed from string.
@@ -260,84 +244,3 @@ impl_slash_argument!(serenity::User, User);
 impl_slash_argument!(serenity::Channel, Channel);
 impl_slash_argument!(serenity::GuildChannel, Channel);
 impl_slash_argument!(serenity::Role, Role);
-
-#[doc(hidden)]
-#[macro_export]
-macro_rules! _parse_slash {
-    // Extract Option<T>
-    ($ctx:ident, $guild_id:ident, $channel_id:ident, $args:ident => $name:ident: Option<$type:ty $(,)*>) => {
-        if let Some(arg) = $args.iter().find(|arg| arg.name == stringify!($name)) {
-            let arg = arg.value
-            .as_ref()
-            .ok_or($crate::SlashArgError::CommandStructureMismatch("expected argument value"))?;
-            Some(
-                (&&&&&std::marker::PhantomData::<$type>)
-                .extract($ctx, $guild_id, Some($channel_id), arg)
-                .await?
-            )
-        } else {
-            None
-        }
-    };
-
-    // Extract Vec<T> (delegating to Option<T> because slash commands don't support variadic
-    // arguments right now)
-    ($ctx:ident, $guild_id:ident, $channel_id:ident, $args:ident => $name:ident: Vec<$type:ty $(,)*>) => {
-        match $crate::_parse_slash!($ctx, $guild_id, $channel_id, $args => $name: Option<$type>) {
-            Some(value) => vec![value],
-            None => vec![],
-        }
-    };
-
-    // Extract #[flag]
-    ($ctx:ident, $guild_id:ident, $channel_id:ident, $args:ident => $name:ident: FLAG) => {
-        $crate::_parse_slash!($ctx, $guild_id, $channel_id, $args => $name: Option<bool>)
-            .unwrap_or(false)
-    };
-
-    // Extract T
-    ($ctx:ident, $guild_id:ident, $channel_id:ident, $args:ident => $name:ident: $($type:tt)*) => {
-        $crate::_parse_slash!($ctx, $guild_id, $channel_id, $args => $name: Option<$($type)*>)
-            .ok_or($crate::SlashArgError::CommandStructureMismatch("a required argument is missing"))?
-    };
-}
-
-/**
-Macro for extracting and parsing slash command arguments out of an array of
-[`serenity::ApplicationCommandInteractionDataOption`].
-
-An invocation of this macro is generated by `crate::command`, so you usually don't need this macro
-directly.
-
-```rust,no_run
-# #[tokio::main] async fn main() -> Result<(), Box<dyn std::error::Error>> {
-# use poise::serenity_prelude as serenity;
-let ctx: serenity::Context = todo!();
-let guild_id: Option<serenity::GuildId> = todo!();
-let channel_id: serenity::ChannelId = todo!();
-let args: &[serenity::ApplicationCommandInteractionDataOption] = todo!();
-
-let (arg1, arg2) = poise::parse_slash_args!(
-    &ctx, guild_id, channel_id,
-    args => (arg1: String), (arg2: Option<u32>)
-).await?;
-
-# Ok(()) }
-```
-*/
-#[macro_export]
-macro_rules! parse_slash_args {
-    ($ctx:expr, $guild_id:expr, $channel_id:expr, $args:expr => $(
-        ( $name:ident: $($type:tt)* )
-    ),* $(,)? ) => {
-        async /* not move! */ {
-            use $crate::SlashArgumentHack;
-
-            let (ctx, guild_id, channel_id, args) = ($ctx, $guild_id, $channel_id, $args);
-
-            Ok::<_, $crate::SlashArgError>(( $(
-                $crate::_parse_slash!( ctx, guild_id, channel_id, args => $name: $($type)* ),
-            )* ))
-        }
-    };
-}

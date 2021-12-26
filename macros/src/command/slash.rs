@@ -53,8 +53,7 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
                 | Box::pin(async move {
                     use ::poise::futures::{Stream, StreamExt};
 
-                    let partial_input = (&&&&&std::marker::PhantomData::<#type_>)
-                        .extract_partial(json_value)?;
+                    let partial_input = poise::extract_autocomplete_argument!(#type_, json_value)?;
 
                     let choices_stream = ::poise::into_stream!(
                         #autocomplete_fn(ctx.into(), partial_input).await
@@ -64,7 +63,7 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
                         .map(|value| poise::AutocompleteChoice::from(value))
                         .map(|choice| poise::serenity::json::json!({
                             "name": choice.name,
-                            "value": (&&&&&std::marker::PhantomData::<#type_>).into_json(choice.value),
+                            "value": poise::autocomplete_argument_into_json!(#type_, choice.value),
                         }))
                         .collect()
                         .await;
@@ -78,7 +77,7 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
         };
 
         let type_setter = match inv.args.slash_command {
-            true => quote::quote! { Some(|o| (&&&&&std::marker::PhantomData::<#type_>).create(o)) },
+            true => quote::quote! { Some(|o| poise::create_slash_argument!(#type_, o)) },
             false => quote::quote! { None },
         };
 

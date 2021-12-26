@@ -42,11 +42,15 @@ pub trait Autocompletable {
     /// Try extracting the partial input from the JSON value
     ///
     /// Equivalent to [`crate::SlashArgument::extract`]
+    ///
+    /// Don't call this method directly! Use [`crate::extract_autocomplete_argument!`]
     fn extract_partial(value: &serenity::json::Value) -> Result<Self::Partial, SlashArgError>;
 
     /// Serialize an autocompletion choice as a JSON value.
     ///
     /// This is the counterpart to [`Self::extract_partial`]
+    ///
+    /// Don't call this method directly! Use [`crate::autocomplete_argument_into_json!`]
     fn into_json(self) -> serenity::json::Value;
 }
 
@@ -58,6 +62,27 @@ pub trait AutocompletableHack<T> {
         -> Result<Self::Partial, SlashArgError>;
 
     fn into_json(self, value: T) -> serenity::json::Value;
+}
+
+/// Full version of [`crate::Autocompletable::extract_partial`].
+///
+/// Uses specialization to get full coverage of types. Pass the type as the first argument
+#[macro_export]
+macro_rules! extract_autocomplete_argument {
+    ($target:ty, $value:expr) => {
+        use $crate::AutocompletableHack as _;
+        (&&&&&std::marker::PhantomData::<$target>).extract_partial($value)
+    };
+}
+/// Full version of [`crate::Autocompletable::into_json`].
+///
+/// Uses specialization to get full coverage of types. Pass the type as the first argument
+#[macro_export]
+macro_rules! autocomplete_argument_into_json {
+    ($target:ty, $value:expr) => {
+        use $crate::AutocompletableHack as _;
+        (&&&&&std::marker::PhantomData::<$target>).into_json($value)
+    };
 }
 
 /// Handles arbitrary types that can be parsed from string.
