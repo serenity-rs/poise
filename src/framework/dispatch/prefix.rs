@@ -77,7 +77,8 @@ async fn strip_prefix<'a, U, E>(
 }
 
 /// Find a command or subcommand within `&[Command]`, given a command invocation without a prefix.
-/// Also returns  the arguments, i.e. the remaining string.
+/// Returns the verbatim command name string as well as the command arguments (i.e. the remaining
+/// string).
 ///
 /// ```rust
 /// #[poise::command(prefix_command)] async fn command1(ctx: poise::Context<'_, (), ()>) -> Result<(), ()> { Ok(()) }
@@ -93,21 +94,21 @@ async fn strip_prefix<'a, U, E>(
 ///
 /// assert_eq!(
 ///     poise::find_command(&commands, "command1 my arguments", false),
-///     Some((&commands[0], "my arguments")),
+///     Some((&commands[0], "command1", "my arguments")),
 /// );
 /// assert_eq!(
 ///     poise::find_command(&commands, "command2 command3 my arguments", false),
-///     Some((&commands[1].subcommands[0], "my arguments")),
+///     Some((&commands[1].subcommands[0], "command3", "my arguments")),
 /// );
 /// assert_eq!(
 ///     poise::find_command(&commands, "CoMmAnD2 cOmMaNd99 my arguments", true),
-///     Some((&commands[1], "cOmMaNd99 my arguments")),
+///     Some((&commands[1], "CoMmAnD2", "cOmMaNd99 my arguments")),
 /// );
 pub fn find_command<'a, U, E>(
     commands: &'a [crate::Command<U, E>],
     remaining_message: &'a str,
     case_insensitive: bool,
-) -> Option<(&'a crate::Command<U, E>, &'a str)>
+) -> Option<(&'a crate::Command<U, E>, &'a str, &'a str)>
 where
     U: Send + Sync,
 {
@@ -133,8 +134,11 @@ where
         }
 
         return Some(
-            find_command(&command.subcommands, remaining_message, case_insensitive)
-                .unwrap_or((command, remaining_message)),
+            find_command(&command.subcommands, remaining_message, case_insensitive).unwrap_or((
+                command,
+                command_name,
+                remaining_message,
+            )),
         );
     }
 
@@ -169,7 +173,7 @@ where
         return Err(None);
     }
 
-    let (command, args) = find_command(
+    let (command, invoked_command_name, args) = find_command(
         &framework.options.commands,
         msg_content,
         framework.options.prefix_options.case_insensitive_commands,
@@ -188,6 +192,7 @@ where
         discord: ctx,
         msg,
         prefix,
+        invoked_command_name,
         framework,
         data: framework.user_data().await,
         command,

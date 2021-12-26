@@ -83,9 +83,7 @@ impl<'a, U, E> Context<'a, U, E> {
     ) -> Result<Option<crate::ReplyHandle<'a>>, serenity::Error> {
         crate::send_reply(self, builder).await
     }
-}
 
-impl<'a, U, E> Context<'a, U, E> {
     /// Return the stored [`serenity::Context`] within the underlying context type.
     pub fn discord(&self) -> &'a serenity::Context {
         match self {
@@ -186,6 +184,19 @@ impl<'a, U, E> Context<'a, U, E> {
         match self {
             Context::Prefix(ctx) => ctx.prefix,
             Context::Application(_) => "/",
+        }
+    }
+
+    /// Returns the command name that this command was invoked with
+    ///
+    /// Mainly useful in prefix context, for example to check whether a command alias was used.
+    ///
+    /// In slash contexts, the given command name will always be returned verbatim, since there are
+    /// no slash command aliases and the user has no control over spelling
+    pub fn invoked_command_name(&self) -> &'a str {
+        match self {
+            Self::Prefix(ctx) => ctx.invoked_command_name,
+            Self::Application(ctx) => &ctx.interaction.data().name,
         }
     }
 }

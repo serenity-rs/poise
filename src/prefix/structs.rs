@@ -10,6 +10,8 @@ pub struct PrefixContext<'a, U, E> {
     pub discord: &'a serenity::Context,
     /// The invoking user message
     pub msg: &'a serenity::Message,
+    /// Command name used by the user to invoke this command
+    pub invoked_command_name: &'a str,
     /// Prefix used by the user to invoke this command
     pub prefix: &'a str,
     /// Read-only reference to the framework
@@ -38,6 +40,7 @@ impl<'a, U: std::fmt::Debug, E: std::fmt::Debug> std::fmt::Debug for PrefixConte
         let Self {
             discord: _,
             msg,
+            invoked_command_name,
             prefix,
             framework: _,
             command: _,
@@ -47,6 +50,7 @@ impl<'a, U: std::fmt::Debug, E: std::fmt::Debug> std::fmt::Debug for PrefixConte
         f.debug_struct("PrefixContext")
             .field("discord", &"<serenity Context>")
             .field("msg", msg)
+            .field("invoked_command_name", invoked_command_name)
             .field("prefix", prefix)
             .field("framework", &"<poise Framework>")
             .field("command", &"<poise Command>")

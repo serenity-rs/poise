@@ -12,11 +12,11 @@ use crate::serenity_prelude as serenity;
 pub async fn dispatch_event<U, E>(
     framework: &crate::Framework<U, E>,
     ctx: serenity::Context,
-    event: crate::Event<'_>,
+    event: &crate::Event<'_>,
 ) where
     U: Send + Sync,
 {
-    match &event {
+    match event {
         crate::Event::Ready { data_about_bot } => {
             let user_data_setup = Option::take(&mut *framework.user_data_setup.lock().unwrap());
             if let Some(user_data_setup) = user_data_setup {
@@ -93,10 +93,7 @@ pub async fn dispatch_event<U, E>(
     if let Err(error) =
         (framework.options.listener)(&ctx, event, framework, framework.user_data().await).await
     {
-        let error = crate::FrameworkError::Listener {
-            error,
-            event: &event,
-        };
+        let error = crate::FrameworkError::Listener { error, event };
         (framework.options.on_error)(error).await;
     }
 }

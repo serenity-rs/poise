@@ -78,13 +78,10 @@ impl<U, E> Framework<U, E> {
             // point framework_cell has been initialized
             #[clippy::unwrap_used]
             let framework = framework_cell_2.get().unwrap().clone();
-            Box::pin(async move { dispatch::dispatch_event(&*framework, ctx, event).await }) as _
+            Box::pin(async move { dispatch::dispatch_event(&*framework, ctx, &event).await }) as _
         });
 
-        let client: serenity::Client = client_builder
-            .application_id(application_id.0)
-            .event_handler(event_handler)
-            .await?;
+        let client: serenity::Client = client_builder.event_handler(event_handler).await?;
 
         let framework = Arc::new(Self {
             user_data: once_cell::sync::OnceCell::new(),
