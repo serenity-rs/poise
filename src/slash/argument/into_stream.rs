@@ -4,19 +4,19 @@ pub struct IntoStreamWrap<'a, T>(pub &'a T);
 #[doc(hidden)]
 pub trait IntoStream<T> {
     type Output;
-    fn converter(self, x: T) -> Self::Output;
+    fn into_stream(self, x: T) -> Self::Output;
 }
 
 impl<T: IntoIterator> IntoStream<T> for &IntoStreamWrap<'_, T> {
     type Output = futures::stream::Iter<T::IntoIter>;
-    fn converter(self, iter: T) -> Self::Output {
+    fn into_stream(self, iter: T) -> Self::Output {
         futures::stream::iter(iter)
     }
 }
 
 impl<T: futures::Stream> IntoStream<T> for &&IntoStreamWrap<'_, T> {
     type Output = T;
-    fn converter(self, stream: T) -> Self::Output {
+    fn into_stream(self, stream: T) -> Self::Output {
         stream
     }
 }
@@ -29,7 +29,7 @@ macro_rules! into_stream {
         match $e {
             value => {
                 use $crate::IntoStream as _;
-                (&&$crate::IntoStreamWrap(&value)).converter()(value)
+                (&&$crate::IntoStreamWrap(&value)).into_stream(value)
             }
         }
     };
