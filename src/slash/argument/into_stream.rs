@@ -7,20 +7,22 @@ pub struct IntoStreamWrap<'a, T>(pub &'a T);
 #[doc(hidden)]
 pub trait IntoStream<T> {
     type Output;
-    fn into_stream(self, x: T) -> Self::Output;
+    // Have to return a callback instead of simply taking a parameter because we're moving T in,
+    // but self still points into it (`cannot move out of _ because it is borrowed`)
+    fn converter(self) -> fn(T) -> Self::Output;
 }
 
 impl<T: IntoIterator> IntoStream<T> for &IntoStreamWrap<'_, T> {
     type Output = futures::stream::Iter<T::IntoIter>;
-    fn into_stream(self, iter: T) -> Self::Output {
-        futures::stream::iter(iter)
+    fn converter(self) -> fn(T) -> Self::Output {
+        |iter| futures::stream::iter(iter)
     }
 }
 
 impl<T: futures::Stream> IntoStream<T> for &&IntoStreamWrap<'_, T> {
     type Output = T;
-    fn into_stream(self, stream: T) -> Self::Output {
-        stream
+    fn converter(self) -> fn(T) -> Self::Output {
+        |stream| stream
     }
 }
 
@@ -32,7 +34,7 @@ macro_rules! into_stream {
         match $e {
             value => {
                 use $crate::IntoStream as _;
-                (&&$crate::IntoStreamWrap(&value)).into_stream(value)
+                (&&$crate::IntoStreamWrap(&value)).converter()(value)
             }
         }
     };

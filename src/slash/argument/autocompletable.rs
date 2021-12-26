@@ -1,4 +1,4 @@
-//! A trait and an instance of the auto-deref specialization trick for the purposes of
+//! A struct and trait and an instance of the auto-deref specialization trick for the purposes of
 //! converting between Discord's autocomplete data and Rust types, in order to run the parameter
 //! autocomplete callbacks
 
@@ -7,6 +7,26 @@ use crate::serenity::json::prelude::*;
 use crate::{serenity_prelude as serenity, SlashArgError};
 use std::convert::{TryFrom, TryInto};
 use std::marker::PhantomData;
+
+/// A single autocomplete choice, displayed in Discord UI
+///
+/// This type should be returned by functions set via the `#[autocomplete = ]` attribute on slash
+/// command parameters.
+pub struct AutocompleteChoice<T> {
+    /// Name of the choice, displayed in the Discord UI
+    pub name: String,
+    /// Value of the choice, sent to the bot
+    pub value: T,
+}
+
+impl<T: ToString> From<T> for AutocompleteChoice<T> {
+    fn from(value: T) -> Self {
+        Self {
+            name: value.to_string(),
+            value,
+        }
+    }
+}
 
 /// Types that can be marked autocompletable in a slash command parameter.
 ///

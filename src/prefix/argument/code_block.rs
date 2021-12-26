@@ -133,7 +133,8 @@ fn test_pop_code_block() {
         );
     }
 
-    assert_eq!(pop_from(""), Err(None));
-    assert_eq!(pop_from("``"), Err(Some(MalformedCodeBlock)));
-    assert_eq!(pop_from("``````"), Err(Some(MalformedCodeBlock)));
+    assert_eq!(pop_from(""), Err(CodeBlockError));
+    assert_eq!(pop_from("''"), Err(CodeBlockError));
+    assert_eq!(pop_from("``"), Err(CodeBlockError));
+    assert_eq!(pop_from("``````"), Err(CodeBlockError));
 }
