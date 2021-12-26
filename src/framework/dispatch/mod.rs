@@ -10,15 +10,15 @@ use crate::serenity_prelude as serenity;
 pub async fn dispatch_event<U, E>(
     framework: &crate::Framework<U, E>,
     ctx: serenity::Context,
-    event: crate::Event<'_>,
+    event: &serenity::Event,
 ) where
     U: Send + Sync,
 {
     match &event {
-        crate::Event::Ready { data_about_bot } => {
+        serenity::Event::Ready(serenity::ReadyEvent { ready, .. }) => {
             let user_data_setup = Option::take(&mut *framework.user_data_setup.lock().unwrap());
             if let Some(user_data_setup) = user_data_setup {
-                match user_data_setup(&ctx, data_about_bot, framework).await {
+                match user_data_setup(&ctx, ready, framework).await {
                     Ok(user_data) => {
                         let _: Result<_, _> = framework.user_data.set(user_data);
                     }
@@ -31,14 +31,14 @@ pub async fn dispatch_event<U, E>(
                 // (happens regularly when bot is online for long period of time)
             }
         }
-        crate::Event::Message { new_message } => {
+        serenity::Event::MessageCreate(serenity::MessageCreateEvent { message, .. }) => {
             if let Err(Some((error, command))) =
-                prefix::dispatch_message(framework, &ctx, new_message, false, false).await
+                prefix::dispatch_message(framework, &ctx, message, false, false).await
             {
                 command.on_error.unwrap_or(framework.options.on_error)(error).await;
             }
         }
-        crate::Event::MessageUpdate { event, .. } => {
+        serenity::Event::MessageUpdate(event) => {
             if let Some(edit_tracker) = &framework.options.prefix_options.edit_tracker {
                 let msg = edit_tracker.write().unwrap().process_message_update(
                     event,
@@ -55,9 +55,10 @@ pub async fn dispatch_event<U, E>(
                 }
             }
         }
-        crate::Event::InteractionCreate {
+        serenity::Event::InteractionCreate(serenity::InteractionCreateEvent {
             interaction: serenity::Interaction::ApplicationCommand(interaction),
-        } => {
+            ..
+        }) => {
             if let Err(Some((error, command))) = slash::dispatch_interaction(
                 framework,
                 &ctx,
@@ -69,9 +70,10 @@ pub async fn dispatch_event<U, E>(
                 command.on_error.unwrap_or(framework.options.on_error)(error).await;
             }
         }
-        crate::Event::InteractionCreate {
+        serenity::Event::InteractionCreate(serenity::InteractionCreateEvent {
             interaction: serenity::Interaction::Autocomplete(interaction),
-        } => {
+            ..
+        }) => {
             if let Err(Some((error, command))) = slash::dispatch_autocomplete(
                 framework,
                 &ctx,
@@ -91,10 +93,7 @@ pub async fn dispatch_event<U, E>(
     if let Err(error) =
         (framework.options.listener)(&ctx, &event, framework, framework.get_user_data().await).await
     {
-        let error = crate::FrameworkError::Listener {
-            error,
-            event: &event,
-        };
+        let error = crate::FrameworkError::Listener { error, event };
         (framework.options.on_error)(error).await;
     }
 }

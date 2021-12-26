@@ -27,8 +27,8 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
     match error {
         crate::FrameworkError::Setup { error } => println!("Error in user data setup: {}", error),
         crate::FrameworkError::Listener { error, event } => println!(
-            "User event listener encountered an error on {} event: {}",
-            event.name(),
+            "User event listener encountered an error on {:?} event: {}",
+            event.event_type(),
             error
         ),
         crate::FrameworkError::Command { ctx, error } => {

@@ -21,7 +21,7 @@ pub struct FrameworkOptions<U, E> {
     /// deletions or guild updates.
     pub listener: for<'a> fn(
         &'a serenity::Context,
-        &'a crate::Event<'a>,
+        &'a serenity::Event,
         &'a crate::Framework<U, E>,
         &'a U,
     ) -> BoxFuture<'a, Result<(), E>>,

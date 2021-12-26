@@ -218,9 +218,6 @@ pub use prefix::*;
 mod slash;
 pub use slash::*;
 
-mod event;
-pub use event::{Event, EventWrapper};
-
 mod structs;
 pub use structs::*;
 
