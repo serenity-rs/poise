@@ -2,6 +2,8 @@
 
 #[allow(unused_imports)] // import is required if serenity simdjson feature is enabled
 use crate::serenity::json::prelude::*;
+#[allow(unused_imports)] // required for introdoc-links in doc comments
+use crate::serenity_prelude as serenity;
 
 /// Possible errors when parsing slash command arguments
 #[derive(Debug)]

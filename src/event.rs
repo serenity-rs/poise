@@ -11,6 +11,7 @@ where
     // gotta have this generic bound in the struct as well, or type inference will break down the line
     F: Send + Sync + for<'a> Fn(serenity::Context, Event<'a>) -> BoxFuture<'a, ()>;
 
+/// Small macro to concisely generate the EventWrapper code while handling every possible event
 macro_rules! event {
     ($lt1:lifetime $(
         $fn_name:ident $(<$lt2:lifetime>)? => $variant_name:ident { $( $arg_name:ident: $arg_type:ty ),* },

@@ -76,7 +76,7 @@ impl<U, E> Framework<U, E> {
         let event_handler = crate::EventWrapper(move |ctx, event| {
             // unwrap_used: we will only receive events once the client has been started, by which
             // point framework_cell has been initialized
-            #[clippy::unwrap_used]
+            #[allow(clippy::unwrap_used)]
             let framework = framework_cell_2.get().unwrap().clone();
             Box::pin(async move { dispatch::dispatch_event(&*framework, ctx, &event).await }) as _
         });

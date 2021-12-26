@@ -69,20 +69,20 @@ pub trait AutocompletableHack<T> {
 /// Uses specialization to get full coverage of types. Pass the type as the first argument
 #[macro_export]
 macro_rules! extract_autocomplete_argument {
-    ($target:ty, $value:expr) => {
+    ($target:ty, $value:expr) => {{
         use $crate::AutocompletableHack as _;
         (&&&&&std::marker::PhantomData::<$target>).extract_partial($value)
-    };
+    }};
 }
 /// Full version of [`crate::Autocompletable::into_json`].
 ///
 /// Uses specialization to get full coverage of types. Pass the type as the first argument
 #[macro_export]
 macro_rules! autocomplete_argument_into_json {
-    ($target:ty, $value:expr) => {
+    ($target:ty, $value:expr) => {{
         use $crate::AutocompletableHack as _;
         (&&&&&std::marker::PhantomData::<$target>).into_json($value)
-    };
+    }};
 }
 
 /// Handles arbitrary types that can be parsed from string.
