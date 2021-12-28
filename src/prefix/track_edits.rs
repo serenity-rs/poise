@@ -124,6 +124,18 @@ impl EditTracker {
 
     /// Given a message by a user, find the corresponding bot response, if one exists and is cached.
     pub fn find_bot_response(
+        &self,
+        user_msg_id: serenity::MessageId,
+    ) -> Option<&serenity::Message> {
+        let (_, bot_response) = self
+            .cache
+            .iter()
+            .find(|(user_msg, _)| user_msg.id == user_msg_id)?;
+        Some(bot_response)
+    }
+
+    /// Given a message by a user, find the corresponding bot response, if one exists and is cached.
+    pub fn find_bot_response_mut(
         &mut self,
         user_msg_id: serenity::MessageId,
     ) -> Option<&mut serenity::Message> {
@@ -211,7 +223,7 @@ pub async fn send_prefix_reply<'a, U, E>(
         // If the entry still exists after the await, update it to the new contents
         if let Some(response_entry) = lock_edit_tracker()
             .as_mut()
-            .and_then(|t| t.find_bot_response(ctx.msg.id))
+            .and_then(|t| t.find_bot_response_mut(ctx.msg.id))
         {
             *response_entry = response.clone();
         }
