@@ -1,7 +1,7 @@
 //! Traits for slash command parameters and a macro to wrap the auto-deref specialization hack
 
 use super::SlashArgError;
-use std::convert::{TryFrom, TryInto};
+use std::convert::TryInto as _;
 use std::marker::PhantomData;
 
 #[allow(unused_imports)] // import is required if serenity simdjson feature is enabled
@@ -61,7 +61,7 @@ pub trait SlashArgumentHack<T> {
 macro_rules! extract_slash_argument {
     ($target:ty, $ctx:expr, $guild:expr, $channel:expr, $value:expr) => {{
         use $crate::SlashArgumentHack as _;
-        (&&&&&std::marker::PhantomData::<$target>).extract($ctx, $guild, $channel, $value)
+        (&&std::marker::PhantomData::<$target>).extract($ctx, $guild, $channel, $value)
     }};
 }
 /// Full version of [`crate::SlashArgument::create`].
@@ -71,7 +71,7 @@ macro_rules! extract_slash_argument {
 macro_rules! create_slash_argument {
     ($target:ty, $builder:expr) => {{
         use $crate::SlashArgumentHack as _;
-        (&&&&&std::marker::PhantomData::<$target>).create($builder)
+        (&&std::marker::PhantomData::<$target>).create($builder)
     }};
 }
 
@@ -108,92 +108,67 @@ where
     }
 }
 
-/// Error thrown if an integer slash command argument is too large
-///
-/// For example: a user inputs `300` as an argument of type [`u8`]
-#[derive(Debug)]
-pub struct IntegerOutOfBounds;
-impl std::fmt::Display for IntegerOutOfBounds {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str("integer out of bounds for target type")
-    }
+macro_rules! impl_for_integer {
+    ($($t:ty)*) => { $(
+        #[async_trait::async_trait]
+        impl SlashArgumentHack<$t> for &PhantomData<$t> {
+            async fn extract(
+                self,
+                _: &serenity::Context,
+                _: Option<serenity::GuildId>,
+                _: Option<serenity::ChannelId>,
+                value: &serenity::json::Value,
+            ) -> Result<$t, SlashArgError> {
+                value
+                    .as_i64()
+                    .ok_or(SlashArgError::CommandStructureMismatch("expected integer"))?
+                    .try_into()
+                    .map_err(|_| SlashArgError::CommandStructureMismatch("received out of bounds integer"))
+            }
+
+            fn create(
+                self,
+                builder: &mut serenity::CreateApplicationCommandOption,
+            ) -> &mut serenity::CreateApplicationCommandOption {
+                builder
+                    .min_int_value(<$t>::MIN)
+                    .max_int_value(<$t>::MAX)
+                    .kind(serenity::ApplicationCommandOptionType::Integer)
+            }
+        }
+    )* };
 }
-impl std::error::Error for IntegerOutOfBounds {}
+impl_for_integer!(i8 i16 i32 i64 isize u8 u16 u32 u64 usize);
 
-// Handles all integers, signed and unsigned. The TryFrom<i64> impl is not actually used, it's just
-// to filter for integer types.
-#[async_trait::async_trait]
-impl<T: TryFrom<i64> + Send + Sync> SlashArgumentHack<T> for &PhantomData<T> {
-    async fn extract(
-        self,
-        _: &serenity::Context,
-        _: Option<serenity::GuildId>,
-        _: Option<serenity::ChannelId>,
-        value: &serenity::json::Value,
-    ) -> Result<T, SlashArgError> {
-        let number = value
-            .as_i64()
-            .ok_or(SlashArgError::CommandStructureMismatch("expected integer"))?;
-        number.try_into().map_err(|_| SlashArgError::Parse {
-            error: IntegerOutOfBounds.into(),
-            input: number.to_string(),
-        })
-    }
+macro_rules! impl_for_float {
+    ($($t:ty)*) => { $(
+        #[async_trait::async_trait]
+        impl SlashArgumentHack<$t> for &PhantomData<$t> {
+            async fn extract(
+                self,
+                _: &serenity::Context,
+                _: Option<serenity::GuildId>,
+                _: Option<serenity::ChannelId>,
+                value: &serenity::json::Value,
+            ) -> Result<$t, SlashArgError> {
+                Ok(value
+                    .as_f64()
+                    .ok_or(SlashArgError::CommandStructureMismatch("expected float"))? as $t)
+            }
 
-    fn create(
-        self,
-        builder: &mut serenity::CreateApplicationCommandOption,
-    ) -> &mut serenity::CreateApplicationCommandOption {
-        builder.kind(serenity::ApplicationCommandOptionType::Integer)
-    }
+            fn create(
+                self,
+                builder: &mut serenity::CreateApplicationCommandOption,
+            ) -> &mut serenity::CreateApplicationCommandOption {
+                builder.kind(serenity::ApplicationCommandOptionType::Number)
+            }
+        }
+    )* };
 }
-
-#[async_trait::async_trait]
-impl SlashArgumentHack<f32> for &&PhantomData<f32> {
-    async fn extract(
-        self,
-        _: &serenity::Context,
-        _: Option<serenity::GuildId>,
-        _: Option<serenity::ChannelId>,
-        value: &serenity::json::Value,
-    ) -> Result<f32, SlashArgError> {
-        Ok(value
-            .as_f64()
-            .ok_or(SlashArgError::CommandStructureMismatch("expected float"))? as f32)
-    }
-
-    fn create(
-        self,
-        builder: &mut serenity::CreateApplicationCommandOption,
-    ) -> &mut serenity::CreateApplicationCommandOption {
-        builder.kind(serenity::ApplicationCommandOptionType::Number)
-    }
-}
+impl_for_float!(f32 f64);
 
 #[async_trait::async_trait]
-impl SlashArgumentHack<f64> for &&PhantomData<f64> {
-    async fn extract(
-        self,
-        _: &serenity::Context,
-        _: Option<serenity::GuildId>,
-        _: Option<serenity::ChannelId>,
-        value: &serenity::json::Value,
-    ) -> Result<f64, SlashArgError> {
-        value
-            .as_f64()
-            .ok_or(SlashArgError::CommandStructureMismatch("expected float"))
-    }
-
-    fn create(
-        self,
-        builder: &mut serenity::CreateApplicationCommandOption,
-    ) -> &mut serenity::CreateApplicationCommandOption {
-        builder.kind(serenity::ApplicationCommandOptionType::Number)
-    }
-}
-
-#[async_trait::async_trait]
-impl<T: SlashArgument + Sync> SlashArgumentHack<T> for &&PhantomData<T> {
+impl<T: SlashArgument + Sync> SlashArgumentHack<T> for &PhantomData<T> {
     async fn extract(
         self,
         ctx: &serenity::Context,
@@ -216,7 +191,7 @@ impl<T: SlashArgument + Sync> SlashArgumentHack<T> for &&PhantomData<T> {
 macro_rules! impl_slash_argument {
     ($type:ty, $slash_param_type:ident) => {
         #[async_trait::async_trait]
-        impl SlashArgumentHack<$type> for &&PhantomData<$type> {
+        impl SlashArgumentHack<$type> for &PhantomData<$type> {
             async fn extract(
                 self,
                 ctx: &serenity::Context,
