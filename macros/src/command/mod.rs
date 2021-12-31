@@ -19,16 +19,20 @@ impl syn::fold::Fold for AllLifetimesToStatic {
     }
 }
 
-#[derive(Debug, Default)]
-struct StringList(Vec<String>);
-
-impl darling::FromMeta for StringList {
+#[derive(Debug)]
+struct List<T>(Vec<T>);
+impl<T: darling::FromMeta> darling::FromMeta for List<T> {
     fn from_list(items: &[::syn::NestedMeta]) -> darling::Result<Self> {
         items
             .iter()
-            .map(|item| String::from_nested_meta(item))
-            .collect::<darling::Result<Vec<String>>>()
+            .map(|item| T::from_nested_meta(item))
+            .collect::<darling::Result<Vec<T>>>()
             .map(Self)
+    }
+}
+impl<T> Default for List<T> {
+    fn default() -> Self {
+        Self(Default::default())
     }
 }
 
@@ -40,7 +44,7 @@ pub struct CommandArgs {
     slash_command: bool,
     context_menu_command: Option<String>,
 
-    aliases: StringList,
+    aliases: List<String>,
     track_edits: bool,
     broadcast_typing: bool,
     explanation_fn: Option<syn::Path>,
@@ -55,7 +59,6 @@ pub struct CommandArgs {
     owners_only: bool,
     identifying_name: Option<String>,
     category: Option<String>,
-    subcommands: StringList,
 
     // In seconds
     global_cooldown: Option<u64>,
@@ -71,6 +74,7 @@ pub struct CommandArgs {
 struct ParamArgs {
     description: Option<String>,
     autocomplete: Option<syn::Path>,
+    channel_types: Option<List<syn::Ident>>,
     lazy: bool,
     flag: bool,
     rest: bool,

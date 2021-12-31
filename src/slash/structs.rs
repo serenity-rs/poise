@@ -185,15 +185,15 @@ pub struct CommandParameter<U, E> {
     pub description: Option<&'static str>,
     /// `true` is this parameter is required, `false` if it's optional or variadic
     pub required: bool,
+    /// If this parameter is a channel, users can only enter these channel types in a slash command
+    ///
+    /// Prefix commands are currently unaffected by this
+    pub channel_types: Option<Vec<serenity::ChannelType>>,
     /// Closure that sets this parameter's type in the given builder
     ///
     /// For example an integer [`CommandParameter`] will store
     /// `|b| b.kind(serenity::ApplicationCommandOptionType::Integer)` as the [`Self::type_setter`]
-    pub type_setter: Option<
-        fn(
-            &mut serenity::CreateApplicationCommandOption,
-        ) -> &mut serenity::CreateApplicationCommandOption,
-    >,
+    pub type_setter: Option<fn(&mut serenity::CreateApplicationCommandOption)>,
     /// Optionally, a callback that is invoked on autocomplete interactions. This closure should
     /// extract the partial argument from the given JSON value and generate the autocomplete
     /// response which contains the list of autocomplete suggestions.
@@ -220,6 +220,9 @@ impl<U, E> CommandParameter<U, E> {
             .name(self.name)
             .description(self.description?)
             .set_autocomplete(self.autocomplete_callback.is_some());
+        if let Some(channel_types) = &self.channel_types {
+            builder.channel_types(channel_types);
+        }
         (self.type_setter?)(&mut builder);
         Some(builder)
     }
@@ -231,6 +234,7 @@ impl<U, E> std::fmt::Debug for CommandParameter<U, E> {
             name,
             description,
             required,
+            channel_types,
             type_setter,
             autocomplete_callback,
         } = self;
@@ -239,6 +243,7 @@ impl<U, E> std::fmt::Debug for CommandParameter<U, E> {
             .field("name", name)
             .field("description", description)
             .field("required", required)
+            .field("channel_types", channel_types)
             .field("type_setter", &type_setter.map(|f| f as *const ()))
             .field(
                 "autocomplete_callback",

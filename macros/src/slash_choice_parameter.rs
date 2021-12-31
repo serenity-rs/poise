@@ -76,12 +76,10 @@ pub fn slash_choice_parameter(input: syn::DeriveInput) -> Result<TokenStream, da
                 }
             }
 
-            fn create(
-                builder: &mut poise::serenity_prelude::CreateApplicationCommandOption,
-            ) -> &mut poise::serenity_prelude::CreateApplicationCommandOption {
+            fn create(builder: &mut poise::serenity_prelude::CreateApplicationCommandOption) {
                 builder
                     .kind(poise::serenity_prelude::ApplicationCommandOptionType::Integer)
-                    #( .add_int_choice(#display_strings, #indices2 as i32) )*
+                    #( .add_int_choice(#display_strings, #indices2 as i32) )* ;
             }
         }
 

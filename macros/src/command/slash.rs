@@ -81,12 +81,20 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
             false => quote::quote! { None },
         };
 
+        let channel_types = match &param.args.channel_types {
+            Some(super::List(channel_types)) => quote::quote! { Some(
+                vec![ #( poise::serenity_prelude::ChannelType::#channel_types ),* ]
+            ) },
+            None => quote::quote! { None },
+        };
+
         parameter_structs.push((
             quote::quote! {
                 ::poise::CommandParameter {
                     name: stringify!(#param_name),
                     description: #description,
                     required: #required,
+                    channel_types: #channel_types,
                     type_setter: #type_setter,
                     autocomplete_callback: #autocomplete_callback,
                 }
