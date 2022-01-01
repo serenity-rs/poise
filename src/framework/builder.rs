@@ -31,8 +31,6 @@ pub struct FrameworkBuilder<U, E> {
     client_settings: Option<Box<dyn FnOnce(serenity::ClientBuilder) -> serenity::ClientBuilder>>,
     /// Discord bot token
     token: Option<String>,
-    /// Requested gateway intents for the bot
-    intents: Option<serenity::GatewayIntents>,
     /// List of framework commands
     commands: Vec<crate::Command<U, E>>,
 }
@@ -44,7 +42,6 @@ impl<U, E> Default for FrameworkBuilder<U, E> {
             options: Default::default(),
             client_settings: Default::default(),
             token: Default::default(),
-            intents: Default::default(),
             commands: Default::default(),
         }
     }
@@ -132,11 +129,6 @@ impl<U, E> FrameworkBuilder<U, E> {
         commands: impl IntoIterator<Item = fn() -> crate::Command<U, E>> + 'static,
     ) -> Self {
         self.commands.extend(commands.into_iter().map(|c| c()));
-        // // Can't use Vec::extend() due to ??? compile errors
-        // for command in commands {
-        //     let definition = (command)();
-        //     self.commands.push((definition, Box::new(|f| f)));
-        // }
         self
     }
 
@@ -165,12 +157,8 @@ impl<U, E> FrameworkBuilder<U, E> {
         options.owners.insert(application_info.owner.id);
 
         // Create serenity client
-        let mut client_builder = serenity::ClientBuilder::new(token)
-            .application_id(application_info.id.0)
-            .intents(
-                self.intents
-                    .unwrap_or_else(serenity::GatewayIntents::non_privileged),
-            );
+        let mut client_builder =
+            serenity::ClientBuilder::new(token).application_id(application_info.id.0);
         if let Some(client_settings) = self.client_settings {
             client_builder = client_settings(client_builder);
         }
