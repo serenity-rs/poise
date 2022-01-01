@@ -55,7 +55,7 @@ impl<U, E> Framework<U, E> {
     pub async fn new<F>(
         client_builder: serenity::ClientBuilder,
         user_data_setup: F,
-        options: crate::FrameworkOptions<U, E>,
+        mut options: crate::FrameworkOptions<U, E>,
     ) -> Result<std::sync::Arc<Self>, serenity::Error>
     where
         F: Send
@@ -70,6 +70,18 @@ impl<U, E> Framework<U, E> {
         E: Send + 'static,
     {
         use std::sync::{Arc, Mutex};
+
+        // Fill in [`Command::qualified_name`] with the correct values
+        fn set_qualified_names<U, E>(command: &mut crate::Command<U, E>) {
+            for subcommand in &mut command.subcommands {
+                subcommand.qualified_name =
+                    format!("{} {}", command.qualified_name, subcommand.name);
+                set_qualified_names(subcommand);
+            }
+        }
+        for command in &mut options.commands {
+            set_qualified_names(command);
+        }
 
         let framework_cell = Arc::new(once_cell::sync::OnceCell::<Arc<Self>>::new());
         let framework_cell_2 = framework_cell.clone();

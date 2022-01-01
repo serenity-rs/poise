@@ -300,6 +300,7 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
 
                 subcommands: Vec::new(),
                 name: #command_name,
+                qualified_name: String::from(#command_name), // properly filled in later by Framework
                 identifying_name: String::from(#identifying_name),
                 category: #category,
                 inline_help: #description,

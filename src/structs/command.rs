@@ -31,6 +31,10 @@ pub struct Command<U, E> {
     pub subcommands: Vec<Command<U, E>>,
     /// Main name of the command. Aliases (prefix-only) can be set in [`Self::aliases`].
     pub name: &'static str,
+    /// Full name including parent command names.
+    ///
+    /// Initially set to just [`Self::name`] and properly populated when the framework is started.
+    pub qualified_name: String,
     /// A string to identify this particular command within a list of commands.
     ///
     /// Can be configured via the [`crate::command`] macro (though it's probably not needed for most
@@ -103,6 +107,7 @@ impl<U, E> std::fmt::Debug for Command<U, E> {
             context_menu_action,
             subcommands,
             name,
+            qualified_name,
             identifying_name,
             category,
             hide_in_help,
@@ -128,6 +133,7 @@ impl<U, E> std::fmt::Debug for Command<U, E> {
             .field("context_menu_action", context_menu_action)
             .field("subcommands", subcommands)
             .field("name", name)
+            .field("qualified_name", qualified_name)
             .field("identifying_name", identifying_name)
             .field("category", category)
             .field("hide_in_help", hide_in_help)
