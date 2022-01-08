@@ -17,7 +17,9 @@ for example for command-specific help (i.e. `~help command_name`). Escape newlin
 - `slash_command`: Generate a slash command
 - `context_menu_command`: Generate a context menu command
 - `aliases`: Command name aliases (only applies to prefix commands)
-- `track_edits`: Enable edit tracking (only applies to prefix commands)
+- `invoke_on_edit`: Reruns the command if an existing invocation message is edited (prefix only)
+- `reuse_response`: After the first response, post subsequent responses as edits to the initial message
+- `track_edits`: Shorthand for `invoke_on_edit` and `reuse_response`
 - `broadcast_typing`: Trigger a typing indicator while command runs (only applies to prefix commands I think)
 - `explanation_fn`: Path to a string-returning function which is used for the detailed explanations instead of documentation comments
     - Useful if you have many commands with very similar help messages: you can abstract the common parts into a function

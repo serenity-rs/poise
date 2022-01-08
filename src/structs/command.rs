@@ -53,6 +53,12 @@ pub struct Command<U, E> {
     pub multiline_help: Option<fn() -> String>,
     /// Handles command cooldowns. Mainly for framework internal use
     pub cooldowns: std::sync::Mutex<crate::Cooldowns>,
+    /// After the first response, whether to post subsequent responses as edits to the initial
+    /// message
+    ///
+    /// Note: in prefix commands, this only has an effect if
+    /// `crate::PrefixFrameworkOptions::edit_tracker` is set.
+    pub reuse_response: bool,
     /// Permissions which users must have to invoke this command.
     ///
     /// Set to [`serenity::Permissions::empty()`] by default
@@ -78,10 +84,8 @@ pub struct Command<U, E> {
     // ============= Prefix-specific data
     /// Alternative triggers for the command (prefix-only)
     pub aliases: &'static [&'static str],
-    /// Whether to enable edit tracking for commands by default (prefix-only)
-    ///
-    /// Note: only has an effect if `crate::PrefixFrameworkOptions::edit_tracker` is set.
-    pub track_edits: bool,
+    /// Whether to rerun the command if an existing invocation message is edited (prefix-only)
+    pub invoke_on_edit: bool,
     /// Whether to broadcast a typing indicator while executing this commmand (prefix-only)
     pub broadcast_typing: bool,
 
@@ -121,7 +125,8 @@ impl<U, E> std::fmt::Debug for Command<U, E> {
             check,
             parameters,
             aliases,
-            track_edits,
+            invoke_on_edit,
+            reuse_response,
             broadcast_typing,
             context_menu_name,
             ephemeral,
@@ -147,7 +152,8 @@ impl<U, E> std::fmt::Debug for Command<U, E> {
             .field("check", &check.map(|f| f as *const ()))
             .field("parameters", parameters)
             .field("aliases", aliases)
-            .field("track_edits", track_edits)
+            .field("invoke_on_edit", invoke_on_edit)
+            .field("reuse_response", reuse_response)
             .field("broadcast_typing", broadcast_typing)
             .field("context_menu_name", context_menu_name)
             .field("ephemeral", ephemeral)

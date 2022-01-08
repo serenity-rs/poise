@@ -182,7 +182,7 @@ where
     let action = command.prefix_action.ok_or(None)?;
 
     // Check if we should disregard this invocation if it was triggered by an edit
-    let should_execute_if_triggered_by_edit = command.track_edits
+    let should_execute_if_triggered_by_edit = command.invoke_on_edit
         || (!previously_tracked && framework.options.prefix_options.execute_untracked_edits);
     if triggered_by_edit && !should_execute_if_triggered_by_edit {
         return Err(None);

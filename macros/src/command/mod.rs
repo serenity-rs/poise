@@ -46,6 +46,8 @@ pub struct CommandArgs {
 
     aliases: List<String>,
     track_edits: bool,
+    invoke_on_edit: bool,
+    reuse_response: bool,
     broadcast_typing: bool,
     explanation_fn: Option<syn::Path>,
     check: Option<syn::Path>,
@@ -276,7 +278,8 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
         None => quote::quote! { None },
     };
 
-    let track_edits = inv.args.track_edits;
+    let invoke_on_edit = inv.args.invoke_on_edit || inv.args.track_edits;
+    let reuse_response = inv.args.reuse_response || inv.args.track_edits;
     let broadcast_typing = inv.args.broadcast_typing;
     let aliases = &inv.args.aliases.0;
 
@@ -313,6 +316,7 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
                     channel: #channel_cooldown.map(std::time::Duration::from_secs),
                     member: #member_cooldown.map(std::time::Duration::from_secs),
                 })),
+                reuse_response: #reuse_response,
                 required_permissions: #required_permissions,
                 required_bot_permissions: #required_bot_permissions,
                 owners_only: #owners_only,
@@ -321,7 +325,7 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
                 parameters: vec![ #( #parameters ),* ],
 
                 aliases: &[ #( #aliases, )* ],
-                track_edits: #track_edits,
+                invoke_on_edit: #invoke_on_edit,
                 broadcast_typing: #broadcast_typing,
 
                 context_menu_name: #context_menu_name,

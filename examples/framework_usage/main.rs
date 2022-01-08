@@ -76,6 +76,7 @@ async fn main() {
             commands::boop(),
             commands::delete(),
             commands::voiceinfo(),
+            commands::test_reuse_response(),
             context_menu::user_info(),
             context_menu::echo(),
             autocomplete::greet(),

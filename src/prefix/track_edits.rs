@@ -175,16 +175,14 @@ pub async fn send_prefix_reply<'a, U, E>(
             .options()
             .prefix_options
             .execute_untracked_edits;
-        if !(ctx.command.track_edits || execute_untracked_edits) {
+        if !(ctx.command.reuse_response || execute_untracked_edits) {
             return None;
         }
 
-        ctx.framework
-            .options()
-            .prefix_options
-            .edit_tracker
-            .as_ref()
-            .map(|t| t.write().unwrap())
+        if let Some(edit_tracker) = &ctx.framework.options().prefix_options.edit_tracker {
+            return Some(edit_tracker.write().unwrap());
+        }
+        None
     };
 
     let existing_response = lock_edit_tracker()
