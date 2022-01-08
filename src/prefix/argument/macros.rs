@@ -106,14 +106,18 @@ macro_rules! _parse_prefix {
         (#[rest] $(poise::)* $type:ty)
     ) => {
         let input = $args.trim_start();
-        match <$type as $crate::serenity_prelude::ArgumentConvert>::convert(
-            $ctx, $msg.guild_id, Some($msg.channel_id), input
-        ).await {
-            Ok(token) => {
-                let $args = "";
-                $crate::_parse_prefix!($ctx $msg $args => [ $error $($preamble)* token ]);
-            },
-            Err(e) => $error = (e.into(), Some(input.to_string())),
+        if input.is_empty() {
+            $error = ($crate::TooFewArguments.into(), None);
+        } else {
+            match <$type as $crate::serenity_prelude::ArgumentConvert>::convert(
+                $ctx, $msg.guild_id, Some($msg.channel_id), input
+            ).await {
+                Ok(token) => {
+                    let $args = "";
+                    $crate::_parse_prefix!($ctx $msg $args => [ $error $($preamble)* token ]);
+                },
+                Err(e) => $error = (e.into(), Some(input.to_string())),
+            }
         }
     };
 
@@ -122,13 +126,17 @@ macro_rules! _parse_prefix {
         (#[flag] $name:literal)
         $( $rest:tt )*
     ) => {
-        if let Ok(($args, token)) = String::pop_from(&$args, $ctx, $msg).await {
-            if token.eq_ignore_ascii_case($name) {
+        match String::pop_from(&$args, $ctx, $msg).await {
+            Ok(($args, token)) if token.eq_ignore_ascii_case($name) => {
                 $crate::_parse_prefix!($ctx $msg $args => [ $error $($preamble)* true ] $($rest)* );
+            },
+            // only allow backtracking if the flag didn't match: it's confusing for the user if they
+            // precisely set the flag but it's ignored
+            _ => {
+                $error = (concat!("Must use either `", $name, "` or nothing as a modifier").into(), None);
+                $crate::_parse_prefix!($ctx $msg $args => [ $error $($preamble)* false ] $($rest)* );
             }
         }
-        $error = (concat!("Must use either `", $name, "` or nothing as a modifier").into(), None);
-        $crate::_parse_prefix!($ctx $msg $args => [ $error $($preamble)* false ] $($rest)* );
     };
 
     // Consume T
@@ -298,11 +306,12 @@ mod test {
                 .unwrap(),
             ("a".into(), "b c".into()),
         );
-        assert_eq!(
+        assert!(
             parse_prefix_args!(&ctx, &msg, "hello" => #[flag] ("hello"), #[rest] (String))
                 .await
-                .unwrap(),
-            (true, "".into())
+                .unwrap_err()
+                .0
+                .is::<crate::TooFewArguments>(),
         );
         assert_eq!(
             parse_prefix_args!(&ctx, &msg, "helloo" => #[flag] ("hello"), #[rest] (String))
