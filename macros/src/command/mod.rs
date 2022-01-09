@@ -77,6 +77,8 @@ struct ParamArgs {
     description: Option<String>,
     autocomplete: Option<syn::Path>,
     channel_types: Option<List<syn::Ident>>,
+    min: Option<syn::Lit>,
+    max: Option<syn::Lit>,
     lazy: bool,
     flag: bool,
     rest: bool,

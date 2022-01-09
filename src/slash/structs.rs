@@ -189,10 +189,12 @@ pub struct CommandParameter<U, E> {
     ///
     /// Prefix commands are currently unaffected by this
     pub channel_types: Option<Vec<serenity::ChannelType>>,
-    /// Closure that sets this parameter's type in the given builder
+    /// Closure that sets this parameter's type and min/max value in the given builder
     ///
-    /// For example an integer [`CommandParameter`] will store
-    /// `|b| b.kind(serenity::ApplicationCommandOptionType::Integer)` as the [`Self::type_setter`]
+    /// For example a u32 [`CommandParameter`] would store this as the [`Self::type_setter`]:
+    /// ```rust
+    /// |b| b.kind(serenity::ApplicationCommandOptionType::Integer).min_value(0).max_value(u32::MAX)
+    /// ```
     pub type_setter: Option<fn(&mut serenity::CreateApplicationCommandOption)>,
     /// Optionally, a callback that is invoked on autocomplete interactions. This closure should
     /// extract the partial argument from the given JSON value and generate the autocomplete

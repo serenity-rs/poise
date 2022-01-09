@@ -73,7 +73,10 @@ pub async fn getvotes(
 pub async fn add(
     ctx: Context<'_>,
     #[description = "First operand"] a: f64,
-    #[description = "Second operand"] b: f32,
+    #[description = "Second operand"]
+    #[min = -15]
+    #[max = 28.765]
+    b: f32,
 ) -> Result<(), Error> {
     ctx.say(format!("Result: {}", a + b as f64)).await?;
 

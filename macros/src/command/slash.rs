@@ -76,8 +76,30 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
             None => quote::quote! { None },
         };
 
+        // jank
+        // serenity's min_value max_value API is making this pain but I can't complain because I
+        // contributed it lol
+        let min_value_setter = match &param.args.min {
+            Some(syn::Lit::Int(min)) => quote::quote! { o.min_int_value(#min); },
+            Some(syn::Lit::Float(min)) => quote::quote! { o.min_number_value(#min); },
+            Some(other) => {
+                return Err(syn::Error::new(other.span(), "expected int or float literal").into())
+            }
+            None => quote::quote! {},
+        };
+        let max_value_setter = match &param.args.max {
+            Some(syn::Lit::Int(max)) => quote::quote! { o.max_int_value(#max); },
+            Some(syn::Lit::Float(max)) => quote::quote! { o.max_number_value(#max); },
+            Some(other) => {
+                return Err(syn::Error::new(other.span(), "expected int or float literal").into())
+            }
+            None => quote::quote! {},
+        };
         let type_setter = match inv.args.slash_command {
-            true => quote::quote! { Some(|o| poise::create_slash_argument!(#type_, o)) },
+            true => quote::quote! { Some(|o| {
+                #min_value_setter #max_value_setter
+                poise::create_slash_argument!(#type_, o);
+            }) },
             false => quote::quote! { None },
         };
 
