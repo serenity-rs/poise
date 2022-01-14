@@ -154,6 +154,25 @@ macro_rules! impl_for_float {
 impl_for_float!(f32 f64);
 
 #[async_trait::async_trait]
+impl SlashArgumentHack<bool> for &PhantomData<bool> {
+    async fn extract(
+        self,
+        _: &serenity::Context,
+        _: Option<serenity::GuildId>,
+        _: Option<serenity::ChannelId>,
+        value: &serenity::json::Value,
+    ) -> Result<bool, SlashArgError> {
+        Ok(value
+            .as_bool()
+            .ok_or(SlashArgError::CommandStructureMismatch("expected bool"))?)
+    }
+
+    fn create(self, builder: &mut serenity::CreateApplicationCommandOption) {
+        builder.kind(serenity::ApplicationCommandOptionType::Boolean);
+    }
+}
+
+#[async_trait::async_trait]
 impl<T: SlashArgument + Sync> SlashArgumentHack<T> for &PhantomData<T> {
     async fn extract(
         self,

@@ -223,3 +223,18 @@ pub async fn test_reuse_response(ctx: Context<'_>) -> Result<(), Error> {
 
     Ok(())
 }
+
+#[poise::command(slash_command, prefix_command)]
+pub async fn oracle(
+    ctx: Context<'_>,
+    #[description = "Take a decision"] b: bool,
+) -> Result<(), Error> {
+    if b {
+        ctx.say("You seem to be an optimistic kind of person...")
+            .await?;
+    } else {
+        ctx.say("You seem to be a pessimistic kind of person...")
+            .await?;
+    }
+    Ok(())
+}

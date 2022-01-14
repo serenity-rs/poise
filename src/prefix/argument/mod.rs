@@ -11,6 +11,9 @@ pub use key_value_args::*;
 mod macros;
 pub use macros::*;
 
+mod argument_trait;
+pub use argument_trait::*;
+
 use crate::serenity_prelude as serenity;
 
 /// Pop a whitespace-separated word from the front of the arguments. Supports quotes and quote
@@ -56,47 +59,6 @@ fn pop_string(args: &str) -> Result<(&str, String), crate::TooFewArguments> {
     Ok((chars.as_str(), output))
 }
 
-/// Parse a value out of a string by popping off the front of the string. Discord message context
-/// is available for parsing, and IO may be done as part of the parsing.
-///
-/// Implementors should assume that a string never starts with whitespace, and fail to parse if it
-/// does. This is for consistency's
-/// sake and also because it keeps open the possibility of parsing whitespace.
-///
-/// Similar in spirit to [`std::str::FromStr`].
-#[async_trait::async_trait]
-pub trait PopArgument<'a>: Sized {
-    /// Parse [`Self`] from the front of the given string and return a tuple of the remaining string
-    /// and [`Self`]. If parsing failed, an error is returned and, if applicable, the string on
-    /// which parsing failed.
-    ///
-    /// If parsing fails because the string is empty, use the `TooFewArguments` type as the error.
-    async fn pop_from(
-        args: &'a str,
-        ctx: &serenity::Context,
-        msg: &serenity::Message,
-    ) -> Result<(&'a str, Self), (Box<dyn std::error::Error + Send + Sync>, Option<String>)>;
-}
-
-#[async_trait::async_trait]
-impl<'a, T: serenity::ArgumentConvert + Send> PopArgument<'a> for T
-where
-    T::Err: std::error::Error + Send + Sync + 'static,
-{
-    async fn pop_from(
-        args: &'a str,
-        ctx: &serenity::Context,
-        msg: &serenity::Message,
-    ) -> Result<(&'a str, T), (Box<dyn std::error::Error + Send + Sync>, Option<String>)> {
-        let (args, string) = pop_string(args).map_err(|_| (TooFewArguments.into(), None))?;
-        let object = T::convert(ctx, msg.guild_id, Some(msg.channel_id), &string)
-            .await
-            .map_err(|e| (e.into(), Some(string)))?;
-
-        Ok((args.trim_start(), object))
-    }
-}
-
 /// Error thrown if user passes too many arguments to a command
 #[derive(Debug)]
 pub struct TooManyArguments;
@@ -127,6 +89,16 @@ impl std::fmt::Display for InvalidChoice {
     }
 }
 impl std::error::Error for InvalidChoice {}
+
+/// Error thrown when the user enters a string that is not recognized as a boolean
+#[derive(Debug)]
+pub struct InvalidBool;
+impl std::fmt::Display for InvalidBool {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("Expected a string like `yes` or `no` for the boolean parameter")
+    }
+}
+impl std::error::Error for InvalidBool {}
 
 #[cfg(test)]
 #[test]

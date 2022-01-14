@@ -77,6 +77,7 @@ async fn main() {
             commands::delete(),
             commands::voiceinfo(),
             commands::test_reuse_response(),
+            commands::oracle(),
             context_menu::user_info(),
             context_menu::echo(),
             autocomplete::greet(),
