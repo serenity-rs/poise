@@ -69,6 +69,18 @@ where
 }
 
 #[async_trait::async_trait]
+impl<'a, T: PopArgument<'a> + Send + Sync> PopArgumentHack<'a, T> for &PhantomData<T> {
+    async fn pop_from(
+        self,
+        args: &'a str,
+        ctx: &serenity::Context,
+        msg: &serenity::Message,
+    ) -> Result<(&'a str, T), (Box<dyn std::error::Error + Send + Sync>, Option<String>)> {
+        T::pop_from(args, ctx, msg).await
+    }
+}
+
+#[async_trait::async_trait]
 impl<'a> PopArgumentHack<'a, bool> for &PhantomData<bool> {
     async fn pop_from(
         self,
