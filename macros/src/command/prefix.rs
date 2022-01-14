@@ -44,7 +44,7 @@ pub fn generate_prefix_action(inv: &Invocation) -> Result<proc_macro2::TokenStre
         .map(quote_parameter)
         .collect::<Result<Vec<_>, syn::Error>>()?;
     let wildcard_arg = match inv.args.discard_spare_arguments {
-        true => Some(quote::quote! { #[rest] (String), }),
+        true => Some(quote::quote! { #[rest] (Option<String>), }),
         false => None,
     };
 
