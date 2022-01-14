@@ -130,8 +130,11 @@ pub async fn autocomplete_command<U, E>(
         .map(|cmd| cmd.name.to_string())
 }
 
-/// Generic function to register application commands, either globally or in a guild. Only bot
-/// owners can register globally, only guild owners can register in guild.
+/// Generic function to register application commands, either globally or in a guild.
+///
+/// Some permission checks are built in:
+/// - global command registration is only allowed for bot owners
+/// - guild-specific command registration is allowed for guild owners and bot owners
 ///
 /// If you want, you can copy paste this help message:
 ///
