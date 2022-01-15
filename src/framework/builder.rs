@@ -50,11 +50,13 @@ impl<U, E> Default for FrameworkBuilder<U, E> {
 impl<U, E> FrameworkBuilder<U, E> {
     /// Set a prefix for commands
     #[deprecated = "Please set the prefix via FrameworkOptions::prefix_options::prefix"]
+    #[must_use]
     pub fn prefix(self, _prefix: impl Into<String>) -> Self {
         panic!("Please set the prefix via FrameworkOptions::prefix_options::prefix");
     }
 
     /// Set a callback to be invoked to create the user data instance
+    #[must_use]
     pub fn user_data_setup<F>(mut self, user_data_setup: F) -> Self
     where
         F: Send
@@ -71,6 +73,7 @@ impl<U, E> FrameworkBuilder<U, E> {
     }
 
     /// Configure framework options
+    #[must_use]
     pub fn options(mut self, options: crate::FrameworkOptions<U, E>) -> Self {
         self.options = Some(options);
         self
@@ -81,6 +84,7 @@ impl<U, E> FrameworkBuilder<U, E> {
     ///
     /// Note: the builder's token will be overridden by the
     /// [`FrameworkBuilder`]; use [`FrameworkBuilder::token`] to supply a token.
+    #[must_use]
     pub fn client_settings(
         mut self,
         f: impl FnOnce(serenity::ClientBuilder) -> serenity::ClientBuilder + 'static,
@@ -90,6 +94,7 @@ impl<U, E> FrameworkBuilder<U, E> {
     }
 
     /// The bot token
+    #[must_use]
     pub fn token(mut self, token: impl Into<String>) -> Self {
         self.token = Some(token.into());
         self
@@ -97,6 +102,7 @@ impl<U, E> FrameworkBuilder<U, E> {
 
     /// Add a new command to the framework
     #[deprecated = "supply commands in FrameworkOptions directly with `commands: vec![...]`"]
+    #[must_use]
     pub fn command(
         mut self,
         mut command: crate::Command<U, E>,
@@ -124,6 +130,7 @@ impl<U, E> FrameworkBuilder<U, E> {
     /// # ;
     /// ```
     #[deprecated = "supply commands in FrameworkOptions directly with `commands: vec![...]`"]
+    #[must_use]
     pub fn commands(
         mut self,
         commands: impl IntoIterator<Item = fn() -> crate::Command<U, E>> + 'static,

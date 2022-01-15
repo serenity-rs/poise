@@ -113,7 +113,7 @@ pub struct PrefixFrameworkOptions<U, E> {
     /// need to be set for this.
     ///
     /// That does not mean that any subsequent edits will also trigger execution. For that,
-    /// see [`crate::Command::track_edits`].
+    /// see [`crate::Command::invoke_on_edit`].
     ///
     /// Note: only has an effect if [`Self::edit_tracker`] is set.
     pub execute_untracked_edits: bool,

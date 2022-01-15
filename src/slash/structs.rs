@@ -193,7 +193,10 @@ pub struct CommandParameter<U, E> {
     ///
     /// For example a u32 [`CommandParameter`] would store this as the [`Self::type_setter`]:
     /// ```rust
-    /// |b| b.kind(serenity::ApplicationCommandOptionType::Integer).min_value(0).max_value(u32::MAX)
+    /// # use poise::serenity_prelude as serenity;
+    /// # let _: fn(&mut serenity::CreateApplicationCommandOption) -> &mut serenity::CreateApplicationCommandOption =
+    /// |b| b.kind(serenity::ApplicationCommandOptionType::Integer).min_int_value(0).max_int_value(u32::MAX)
+    /// # ;
     /// ```
     pub type_setter: Option<fn(&mut serenity::CreateApplicationCommandOption)>,
     /// Optionally, a callback that is invoked on autocomplete interactions. This closure should

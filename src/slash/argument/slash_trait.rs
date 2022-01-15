@@ -100,6 +100,7 @@ where
     }
 }
 
+/// Implements slash argument trait for integer types
 macro_rules! impl_for_integer {
     ($($t:ty)*) => { $(
         #[async_trait::async_trait]
@@ -129,6 +130,7 @@ macro_rules! impl_for_integer {
 }
 impl_for_integer!(i8 i16 i32 i64 isize u8 u16 u32 u64 usize);
 
+/// Implements slash argument trait for float types
 macro_rules! impl_for_float {
     ($($t:ty)*) => { $(
         #[async_trait::async_trait]

@@ -1,3 +1,7 @@
+//! Trait implemented for all types usable as prefix command parameters. This file also includes
+//! the auto-deref specialization emulation code to e.g. support more strings for bool parameters
+//! instead of the FromStr ones
+
 use super::{pop_string, InvalidBool, TooFewArguments};
 use crate::serenity_prelude as serenity;
 use std::marker::PhantomData;

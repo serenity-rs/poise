@@ -71,7 +71,7 @@ impl<U, E> Framework<U, E> {
     {
         use std::sync::{Arc, Mutex};
 
-        // Fill in [`Command::qualified_name`] with the correct values
+        /// Fill in [`Command::qualified_name`] with the correct values
         fn set_qualified_names<U, E>(command: &mut crate::Command<U, E>) {
             for subcommand in &mut command.subcommands {
                 subcommand.qualified_name =

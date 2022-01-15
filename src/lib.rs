@@ -1,3 +1,4 @@
+#![cfg_attr(docsrs, feature(doc_cfg))]
 #![warn(rust_2018_idioms)]
 #![warn(missing_docs)]
 #![warn(clippy::missing_docs_in_private_items)]
