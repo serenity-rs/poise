@@ -72,6 +72,7 @@ async fn main() {
             commands::vote(),
             commands::getvotes(),
             commands::add(),
+            commands::addmultiple(),
             commands::choice(),
             commands::boop(),
             commands::delete(),

@@ -121,8 +121,8 @@ macro_rules! impl_for_integer {
 
             fn create(self, builder: &mut serenity::CreateApplicationCommandOption) {
                 builder
-                    .min_int_value(<$t>::MIN)
-                    .max_int_value(<$t>::MAX)
+                    .min_number_value(f64::max(<$t>::MIN as f64, -9007199254740991.))
+                    .max_number_value(f64::min(<$t>::MAX as f64, 9007199254740991.))
                     .kind(serenity::ApplicationCommandOptionType::Integer);
             }
         }
