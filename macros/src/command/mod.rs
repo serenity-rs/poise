@@ -45,9 +45,9 @@ pub struct CommandArgs {
     context_menu_command: Option<String>,
 
     aliases: List<String>,
-    track_edits: bool,
     invoke_on_edit: bool,
     reuse_response: bool,
+    track_edits: bool,
     broadcast_typing: bool,
     explanation_fn: Option<syn::Path>,
     check: Option<syn::Path>,

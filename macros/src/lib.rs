@@ -32,7 +32,15 @@ for example for command-specific help (i.e. `~help command_name`). Escape newlin
 - `ephemeral`: Make bot responses ephemeral if possible
     - Only poise's function, like `poise::send_reply`, respect this preference
 - `required_permissions`: Permissions which the command caller needs to have
+- `required_bot_permissions`: Permissions which the bot is known to need
 - `owners_only`: Restricts command callers to the list of owners specified in framework options
+- `identifying_name`: Optionally, a unique identifier for this command for your personal usage
+- `category`: Category of this command which affects placement in the help command
+- `global_cooldown`: Minimum duration between invocations, globally
+- `user_cooldown`: Minimum duration between invocations, per user
+- `guild_cooldown`: Minimum duration between invocations, per guild
+- `channel_cooldown`: Minimum duration between invocations, per channel
+- `member_cooldown`: Minimum duration between invocations, per guild member
 
 # Function parameters
 
