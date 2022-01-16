@@ -246,7 +246,8 @@ pub mod samples {
 
 #[doc(no_inline)]
 pub use async_trait::async_trait;
-pub use futures;
+pub use futures_core;
+pub use futures_util;
 pub use poise_macros::*;
 pub use serenity;
 

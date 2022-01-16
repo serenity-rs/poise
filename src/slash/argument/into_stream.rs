@@ -13,13 +13,13 @@ pub trait IntoStream<T> {
 }
 
 impl<T: IntoIterator> IntoStream<T> for &IntoStreamWrap<'_, T> {
-    type Output = futures::stream::Iter<T::IntoIter>;
+    type Output = futures_util::stream::Iter<T::IntoIter>;
     fn converter(self) -> fn(T) -> Self::Output {
-        |iter| futures::stream::iter(iter)
+        |iter| futures_util::stream::iter(iter)
     }
 }
 
-impl<T: futures::Stream> IntoStream<T> for &&IntoStreamWrap<'_, T> {
+impl<T: futures_util::Stream> IntoStream<T> for &&IntoStreamWrap<'_, T> {
     type Output = T;
     fn converter(self) -> fn(T) -> Self::Output {
         |stream| stream

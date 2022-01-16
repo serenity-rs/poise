@@ -51,7 +51,7 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
                     ctx: poise::ApplicationContext<'_, _, _>,
                     json_value: &poise::serenity::json::Value,
                 | Box::pin(async move {
-                    use ::poise::futures::{Stream, StreamExt};
+                    use ::poise::futures_util::{Stream, StreamExt};
 
                     let partial_input = poise::extract_autocomplete_argument!(#type_, json_value)?;
 
