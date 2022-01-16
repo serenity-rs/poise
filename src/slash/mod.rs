@@ -17,7 +17,7 @@ fn send_as_initial_response(
 ) {
     let crate::CreateReply {
         content,
-        embed,
+        embeds,
         attachments: _, // serenity doesn't support attachments in initial response yet
         components,
         ephemeral,
@@ -26,9 +26,7 @@ fn send_as_initial_response(
     if let Some(content) = content {
         f.content(content);
     }
-    if let Some(embed) = embed {
-        f.add_embed(embed);
-    }
+    f.embeds(embeds);
     if let Some(allowed_mentions) = allowed_mentions {
         f.allowed_mentions(|f| {
             *f = allowed_mentions.clone();
@@ -55,7 +53,7 @@ fn send_as_followup_response<'a>(
 ) {
     let crate::CreateReply {
         content,
-        embed,
+        embeds,
         attachments,
         components,
         ephemeral,
@@ -64,9 +62,7 @@ fn send_as_followup_response<'a>(
     if let Some(content) = content {
         f.content(content);
     }
-    if let Some(embed) = embed {
-        f.add_embed(embed);
-    }
+    f.embeds(embeds);
     if let Some(components) = components {
         f.components(|c| {
             c.0 = components.0;
@@ -94,7 +90,7 @@ fn send_as_edit<'a>(
 ) {
     let crate::CreateReply {
         content,
-        embed,
+        embeds,
         attachments: _, // no support for attachment edits in serenity yet
         components,
         ephemeral: _, // can't edit ephemerality in retrospect
@@ -103,9 +99,7 @@ fn send_as_edit<'a>(
     if let Some(content) = content {
         f.content(content);
     }
-    if let Some(embed) = embed {
-        f.add_embed(embed);
-    }
+    f.set_embeds(embeds);
     if let Some(components) = components {
         f.components(|c| {
             c.0 = components.0;

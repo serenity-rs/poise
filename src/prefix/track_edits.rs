@@ -162,7 +162,7 @@ pub async fn send_prefix_reply<'a, U, E>(
     builder(&mut reply);
     let crate::CreateReply {
         content,
-        embed,
+        embeds,
         attachments,
         components,
         ephemeral: _,
@@ -196,10 +196,7 @@ pub async fn send_prefix_reply<'a, U, E>(
                 // Empty string resets content (happens when user replaces text with embed)
                 f.content(content.as_deref().unwrap_or(""));
 
-                match embed {
-                    Some(embed) => f.set_embed(embed),
-                    None => f.set_embeds(Vec::new()),
-                };
+                f.set_embeds(embeds);
 
                 f.0.insert("attachments", serenity::json::json! { [] }); // reset attachments
                 for attachment in attachments {
@@ -235,9 +232,7 @@ pub async fn send_prefix_reply<'a, U, E>(
                 if let Some(content) = content {
                     m.content(content);
                 }
-                if let Some(embed) = embed {
-                    m.set_embed(embed);
-                }
+                m.set_embeds(embeds);
                 if let Some(allowed_mentions) = &ctx.framework.options().allowed_mentions {
                     m.allowed_mentions(|m| {
                         *m = allowed_mentions.clone();
