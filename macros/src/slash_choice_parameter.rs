@@ -42,12 +42,14 @@ pub fn slash_choice_parameter(input: syn::DeriveInput) -> Result<TokenStream, da
             .collect::<Result<Vec<_>, _>>()?;
         let mut names = <VariantAttribute as darling::FromMeta>::from_list(&attrs)?.name;
 
-        if names.is_empty() {
-            return Err(syn::Error::new(variant.ident.span(), "Missing `name` attribute").into());
-        }
+        let main_name = if names.is_empty() {
+            variant.ident.to_string()
+        } else {
+            names.remove(0)
+        };
 
         variant_idents.push(variant.ident);
-        display_strings.push(names.remove(0));
+        display_strings.push(main_name);
         more_display_strings.push(names);
     }
 

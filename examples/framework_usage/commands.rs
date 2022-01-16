@@ -105,7 +105,10 @@ pub enum MyStringChoice {
     #[name = "The first choice"]
     ChoiceA,
     #[name = "The second choice"]
+    #[name = "A single choice can have multiple names"]
     ChoiceB,
+    // If no name is given, the variant name is used
+    ChoiceC,
 }
 
 /// Dummy command to test slash command choice parameters
