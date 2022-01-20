@@ -67,7 +67,7 @@ event! {
     guild_ban_addition => GuildBanAddition { guild_id: serenity::GuildId, banned_user: serenity::User },
     guild_ban_removal => GuildBanRemoval { guild_id: serenity::GuildId, unbanned_user: serenity::User },
     guild_create => GuildCreate { guild: serenity::Guild, is_new: bool },
-    guild_delete => GuildDelete { incomplete: serenity::GuildUnavailable, full: Option<serenity::Guild> },
+    guild_delete => GuildDelete { incomplete: serenity::UnavailableGuild, full: Option<serenity::Guild> },
     guild_emojis_update => GuildEmojisUpdate { guild_id: serenity::GuildId, current_state: std::collections::HashMap<serenity::EmojiId, serenity::Emoji> },
     guild_integrations_update => GuildIntegrationsUpdate { guild_id: serenity::GuildId },
     guild_member_addition => GuildMemberAddition { new_member: serenity::Member },
