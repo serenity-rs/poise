@@ -142,7 +142,8 @@ impl<U, E> FrameworkBuilder<U, E> {
         self
     }
 
-    /// Whether to add this bot application's owner to [`FrameworkOptions::owners`] automatically
+    /// Whether to add this bot application's owner and team members to [`FrameworkOptions::owners`]
+    /// automatically
     ///
     /// `true` by default
     pub fn initialize_owners(&mut self, initialize_owners: bool) -> &mut Self {
@@ -170,10 +171,19 @@ impl<U, E> FrameworkBuilder<U, E> {
             .get_current_application_info()
             .await?;
 
-        // Build framework options by concatenating user-set options with commands and owner
+        // Build framework options by concatenating user-set options with commands and owners
         options.commands.extend(self.commands);
         if self.initialize_owners {
             options.owners.insert(application_info.owner.id);
+            if let Some(team) = application_info.team {
+                for member in team.members {
+                    // This `if` currently always evaluates to true but it becomes important once
+                    // Discord implements more team roles than Admin
+                    if member.permissions.iter().any(|p| p == "*") {
+                        options.owners.insert(member.user.id);
+                    }
+                }
+            }
         }
 
         // Create serenity client

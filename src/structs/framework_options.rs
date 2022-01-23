@@ -32,6 +32,7 @@ pub struct FrameworkOptions<U, E> {
     /// User IDs which are allowed to use owners_only commands
     ///
     /// If using [`FrameworkBuilder`], automatically initialized with the bot application owner
+    /// and team members
     pub owners: std::collections::HashSet<serenity::UserId>,
 }
 
