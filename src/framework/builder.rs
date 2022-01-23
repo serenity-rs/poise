@@ -142,8 +142,8 @@ impl<U, E> FrameworkBuilder<U, E> {
         self
     }
 
-    /// Whether to add this bot application's owner and team members to [`FrameworkOptions::owners`]
-    /// automatically
+    /// Whether to add this bot application's owner and team members to
+    /// [`crate::FrameworkOptions::owners`] automatically
     ///
     /// `true` by default
     pub fn initialize_owners(&mut self, initialize_owners: bool) -> &mut Self {
