@@ -30,6 +30,8 @@ pub struct FrameworkOptions<U, E> {
     /// Prefix command specific options.
     pub prefix_options: crate::PrefixFrameworkOptions<U, E>,
     /// User IDs which are allowed to use owners_only commands
+    ///
+    /// If using [`FrameworkBuilder`], automatically initialized with the bot application owner
     pub owners: std::collections::HashSet<serenity::UserId>,
 }
 

@@ -33,7 +33,7 @@ for example for command-specific help (i.e. `~help command_name`). Escape newlin
     - Only poise's function, like `poise::send_reply`, respect this preference
 - `required_permissions`: Permissions which the command caller needs to have
 - `required_bot_permissions`: Permissions which the bot is known to need
-- `owners_only`: Restricts command callers to the list of owners specified in framework options
+- `owners_only`: Restricts command callers to a configurable list of owners (see FrameworkOptions)
 - `identifying_name`: Optionally, a unique identifier for this command for your personal usage
 - `category`: Category of this command which affects placement in the help command
 - `global_cooldown`: Minimum duration between invocations, globally

@@ -33,6 +33,8 @@ pub struct FrameworkBuilder<U, E> {
     token: Option<String>,
     /// List of framework commands
     commands: Vec<crate::Command<U, E>>,
+    /// See [`Self::initialize_owners()`]
+    initialize_owners: bool,
 }
 
 impl<U, E> Default for FrameworkBuilder<U, E> {
@@ -43,6 +45,7 @@ impl<U, E> Default for FrameworkBuilder<U, E> {
             client_settings: Default::default(),
             token: Default::default(),
             commands: Default::default(),
+            initialize_owners: true,
         }
     }
 }
@@ -139,6 +142,14 @@ impl<U, E> FrameworkBuilder<U, E> {
         self
     }
 
+    /// Whether to add this bot application's owner to [`FrameworkOptions::owners`] automatically
+    ///
+    /// `true` by default
+    pub fn initialize_owners(&mut self, initialize_owners: bool) -> &mut Self {
+        self.initialize_owners = initialize_owners;
+        self
+    }
+
     /// Build the framework with the specified configuration.
     ///
     /// For more information, see [`FrameworkBuilder`]
@@ -161,7 +172,9 @@ impl<U, E> FrameworkBuilder<U, E> {
 
         // Build framework options by concatenating user-set options with commands and owner
         options.commands.extend(self.commands);
-        options.owners.insert(application_info.owner.id);
+        if self.initialize_owners {
+            options.owners.insert(application_info.owner.id);
+        }
 
         // Create serenity client
         let mut client_builder =
