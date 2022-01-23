@@ -103,12 +103,12 @@ pub async fn addmultiple(
 #[derive(Debug, poise::SlashChoiceParameter)]
 pub enum MyStringChoice {
     #[name = "The first choice"]
-    ChoiceA,
+    A,
     #[name = "The second choice"]
     #[name = "A single choice can have multiple names"]
-    ChoiceB,
+    B,
     // If no name is given, the variant name is used
-    ChoiceC,
+    C,
 }
 
 /// Dummy command to test slash command choice parameters
@@ -267,5 +267,16 @@ pub async fn code(
 ) -> Result<(), Error> {
     ctx.say(format!("Key value args: {:?}\nCode: {}", args, code))
         .await?;
+    Ok(())
+}
+
+#[poise::command(prefix_command, slash_command)]
+pub async fn say(
+    ctx: Context<'_>,
+    #[rest]
+    #[description = "Text to say"]
+    msg: String,
+) -> Result<(), Error> {
+    ctx.say(msg).await?;
     Ok(())
 }

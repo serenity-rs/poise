@@ -61,7 +61,7 @@ macro_rules! _parse_prefix {
                     let token = Some(token);
                     $crate::_parse_prefix!($ctx $msg $args => [ $error $($preamble)* token ]);
                 },
-                Err(e) => $error = (e.into(), Some(input.to_string())),
+                Err(e) => $error = (e.into(), Some(input.to_owned())),
             }
         }
     };
@@ -116,7 +116,7 @@ macro_rules! _parse_prefix {
                     let $args = "";
                     $crate::_parse_prefix!($ctx $msg $args => [ $error $($preamble)* token ]);
                 },
-                Err(e) => $error = (e.into(), Some(input.to_string())),
+                Err(e) => $error = (e.into(), Some(input.to_owned())),
             }
         }
     };

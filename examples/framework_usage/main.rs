@@ -1,3 +1,5 @@
+#![warn(clippy::str_to_string)]
+
 mod autocomplete;
 mod commands;
 mod context_menu;
@@ -80,6 +82,7 @@ async fn main() {
             commands::test_reuse_response(),
             commands::oracle(),
             commands::code(),
+            commands::say(),
             context_menu::user_info(),
             context_menu::echo(),
             autocomplete::greet(),
