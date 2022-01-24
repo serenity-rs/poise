@@ -114,11 +114,8 @@ impl EditTracker {
         let max_duration = self.max_duration;
         self.cache.retain(|(user_msg, _)| {
             let last_update = user_msg.edited_timestamp.unwrap_or(user_msg.timestamp);
-            if let Ok(age) = (chrono::Utc::now() - last_update).to_std() {
-                age < max_duration
-            } else {
-                false
-            }
+            let age = serenity::Timestamp::now().unix_timestamp() - last_update.unix_timestamp();
+            age < max_duration.as_secs() as i64
         });
     }
 

@@ -133,7 +133,7 @@ impl<'a, U, E> Context<'a, U, E> {
     }
 
     /// Return the datetime of the invoking message or interaction
-    pub fn created_at(&self) -> chrono::DateTime<chrono::Utc> {
+    pub fn created_at(&self) -> serenity::Timestamp {
         match self {
             Self::Application(ctx) => ctx.interaction.id().created_at(),
             Self::Prefix(ctx) => ctx.msg.timestamp,
