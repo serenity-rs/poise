@@ -611,7 +611,6 @@ async fn slow_mode(
     ctx: Context<'_>,
     #[description = "Minimum time between sending messages per user"] rate_limit: Option<u64>,
 ) -> Result<(), Error> {
-    #[allow(deprecated)] // slow_mode_rate has no alternative right now
     let say_content = if let Some(rate_limit) = rate_limit {
         if let Err(why) = ctx
             .channel_id()
@@ -631,7 +630,7 @@ async fn slow_mode(
     {
         format!(
             "Current slow mode rate is `{}` seconds.",
-            channel.slow_mode_rate.unwrap_or(0)
+            channel.rate_limit_per_user.unwrap_or(0)
         )
     } else {
         "Failed to find channel in cache.".to_string()
