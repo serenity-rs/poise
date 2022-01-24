@@ -609,25 +609,21 @@ async fn am_i_admin(ctx: Context<'_>) -> Result<(), Error> {
 )]
 async fn slow_mode(
     ctx: Context<'_>,
-    #[description = "How long users have to wait inbetween sending messages"]
-    slow_mode_rate_seconds: Option<u64>,
+    #[description = "Minimum time between sending messages per user"] rate_limit: Option<u64>,
 ) -> Result<(), Error> {
-    let say_content = if let Some(slow_mode_rate_seconds) = slow_mode_rate_seconds {
+    #[allow(deprecated)] // slow_mode_rate has no alternative right now
+    let say_content = if let Some(rate_limit) = rate_limit {
         if let Err(why) = ctx
             .channel_id()
-            .edit(ctx.discord(), |c| c.slow_mode_rate(slow_mode_rate_seconds))
+            .edit(ctx.discord(), |c| c.rate_limit_per_user(rate_limit))
             .await
         {
             println!("Error setting channel's slow mode rate: {:?}", why);
-
-            format!(
-                "Failed to set slow mode to `{}` seconds.",
-                slow_mode_rate_seconds
-            )
+            format!("Failed to set slow mode to `{}` seconds.", rate_limit)
         } else {
             format!(
                 "Successfully set slow mode rate to `{}` seconds.",
-                slow_mode_rate_seconds
+                rate_limit
             )
         }
     } else if let Some(serenity::Channel::Guild(channel)) =
