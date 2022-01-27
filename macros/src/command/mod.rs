@@ -74,6 +74,7 @@ pub struct CommandArgs {
 #[derive(Default, Debug, darling::FromMeta)]
 #[darling(default)]
 struct ParamArgs {
+    // When changing these, document it in parent file!
     description: Option<String>,
     autocomplete: Option<syn::Path>,
     channel_types: Option<List<syn::Ident>>,

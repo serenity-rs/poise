@@ -52,10 +52,14 @@ All following parameters are inputs to the command. You can use all types that i
 `poise::PopArgumentAsync`, `poise::PopArgument`, `serenity::ArgumentConvert` or `std::str::FromStr`.
 You can also wrap types in `Option` or `Vec` to make them optional or variadic. In addition, there
 are multiple attributes you can use on parameters:
-- `#[description]`: Required for slash commands; a description of the parameter
-- `#[rest]`: Relevant for prefix commands; means that the entire rest of the message is parsed as the parameter even without quotes
-- `#[lazy]`: Relevant for prefix commands; can be used on Option and Vec parameters and is equivalent to regular expressions' laziness
-- `#[flag]`: Relevant for prefix commands; can be used on a bool parameter to set the bool to true if the user typed the parameter name literally
+- `#[description = ""]`: Sets description of the parameter (slash-only)
+- `#[autocomplete = ""]`: Sets the autocomplete callback (slash-only)
+- `#[channel_types("", "")]`: For channel parameters, restricts allowed channel types (slash-only)
+- `#[min = 0]`: Minimum value for this number parameter (slash-only)
+- `#[max = 0]`: Minimum value for this number parameter (slash-only)
+- `#[rest]`: Use the entire rest of the message for this parameter (prefix-only)
+- `#[lazy]`: Can be used on Option and Vec parameters and is equivalent to regular expressions' laziness (prefix-only)
+- `#[flag]`: Can be used on a bool parameter to set the bool to true if the user typed the parameter name literally (prefix-only)
     - For example with `async fn my_command(ctx: Context<'_>, #[flag] my_flag: bool)`, `~my_command` would set my_flag to false, and `~my_command my_flag` would set my_flag to true
 
 # Internals
