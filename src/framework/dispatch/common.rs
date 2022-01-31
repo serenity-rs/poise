@@ -20,15 +20,16 @@ async fn user_permissions(
         None => return None, // Guild not in cache
     };
 
-    let channel = match guild.channels.get(&channel_id) {
-        Some(serenity::Channel::Guild(channel)) => channel,
-        Some(_other_channel) => {
+    // Use to_channel so that it can fallback on HTTP for threads (which aren't in cache usually)
+    let channel = match channel_id.to_channel(ctx).await {
+        Ok(serenity::Channel::Guild(channel)) => channel,
+        Ok(_other_channel) => {
             println!(
                 "Warning: guild message was supposedly sent in a non-guild channel. Denying invocation"
             );
             return None;
         }
-        None => return None,
+        Err(_) => return None,
     };
 
     // If member not in cache (probably because presences intent is not enabled), retrieve via HTTP
@@ -40,7 +41,7 @@ async fn user_permissions(
         },
     };
 
-    guild.user_permissions_in(channel, &member).ok()
+    guild.user_permissions_in(&channel, &member).ok()
 }
 
 /// Retrieves the set of permissions that are lacking, relative to the given required permission set
