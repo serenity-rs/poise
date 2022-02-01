@@ -1,6 +1,7 @@
 #![warn(clippy::str_to_string)]
 
 mod autocomplete;
+mod checks;
 mod commands;
 mod context_menu;
 mod subcommands;
@@ -73,11 +74,9 @@ async fn main() {
             register(),
             commands::vote(),
             commands::getvotes(),
-            commands::add(),
             commands::addmultiple(),
             commands::choice(),
             commands::boop(),
-            commands::delete(),
             commands::voiceinfo(),
             commands::test_reuse_response(),
             commands::oracle(),
@@ -86,6 +85,11 @@ async fn main() {
             context_menu::user_info(),
             context_menu::echo(),
             autocomplete::greet(),
+            checks::shutdown(),
+            checks::modonly(),
+            checks::delete(),
+            checks::ferrisparty(),
+            checks::add(),
             poise::Command {
                 subcommands: vec![
                     subcommands::child1(),
@@ -105,17 +109,29 @@ async fn main() {
             ],
             ..Default::default()
         },
+        /// The global error handler for all error cases that may occur
         on_error: |error| Box::pin(on_error(error)),
+        /// This code is ran before every command
         pre_command: |ctx| {
             Box::pin(async move {
                 println!("Executing command {}...", ctx.command().qualified_name);
             })
         },
+        /// This code is ran after every command, regardless of whether it returned an error
         post_command: |ctx| {
             Box::pin(async move {
                 println!("Executed command {}!", ctx.command().qualified_name);
             })
         },
+        /// Every command invocation must pass this check to continue execution
+        command_check: Some(|ctx| {
+            Box::pin(async move {
+                if ctx.author().id == 123456789 {
+                    return Ok(false);
+                }
+                Ok(true)
+            })
+        }),
         ..Default::default()
     };
 

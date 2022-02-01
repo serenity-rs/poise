@@ -59,30 +59,6 @@ pub async fn getvotes(
     Ok(())
 }
 
-/// Add two numbers
-#[poise::command(
-    prefix_command,
-    track_edits,
-    slash_command,
-    global_cooldown = 1,
-    user_cooldown = 5,
-    guild_cooldown = 2,
-    channel_cooldown = 2,
-    member_cooldown = 3
-)]
-pub async fn add(
-    ctx: Context<'_>,
-    #[description = "First operand"] a: f64,
-    #[description = "Second operand"]
-    #[min = -15]
-    #[max = 28.765]
-    b: f32,
-) -> Result<(), Error> {
-    ctx.say(format!("Result: {}", a + b as f64)).await?;
-
-    Ok(())
-}
-
 /// Adds multiple numbers
 #[poise::command(prefix_command, slash_command)]
 pub async fn addmultiple(
@@ -161,20 +137,6 @@ pub async fn boop(ctx: Context<'_>) -> Result<(), Error> {
         .await?;
     }
 
-    Ok(())
-}
-
-/// Deletes the given message
-#[poise::command(
-    prefix_command,
-    slash_command,
-    required_bot_permissions = "MANAGE_MESSAGES | ADMINISTRATOR"
-)]
-pub async fn delete(
-    ctx: Context<'_>,
-    #[description = "Message to be deleted"] msg: serenity::Message,
-) -> Result<(), Error> {
-    msg.delete(ctx.discord()).await?;
     Ok(())
 }
 
