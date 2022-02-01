@@ -103,8 +103,12 @@ pub async fn check_permissions_and_cooldown<'a, U, E>(
         None => {}
     }
 
-    // Only continue if command checks returns true
-    if let Some(check) = cmd.check.or(ctx.framework().options().command_check) {
+    // Only continue if command checks returns true. First perform global checks, then command
+    // checks (if necessary)
+    for check in [ctx.framework().options().command_check, cmd.check]
+        .iter()
+        .flatten()
+    {
         match check(ctx).await {
             Ok(true) => {}
             Ok(false) => {
