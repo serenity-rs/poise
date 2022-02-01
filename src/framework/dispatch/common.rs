@@ -104,32 +104,19 @@ pub async fn check_permissions_and_cooldown<'a, U, E>(
 
     // Only continue if command checks returns true. First perform global checks, then command
     // checks (if necessary)
-    if let Some(check) = ctx.framework().options().command_check {
-        match check(ctx).await {
-            Ok(true) => {}
-            Ok(false) => {
-                return Err(crate::FrameworkError::CommandCheckFailed { ctx, error: None })
-            }
-            Err(error) => {
-                return Err(crate::FrameworkError::CommandCheckFailed {
-                    error: Some(error),
-                    ctx,
-                })
-            }
-        }
-    }
-
-    if let Some(check) = cmd.check {
-        match check(ctx).await {
-            Ok(true) => {}
-            Ok(false) => {
-                return Err(crate::FrameworkError::CommandCheckFailed { ctx, error: None })
-            }
-            Err(error) => {
-                return Err(crate::FrameworkError::CommandCheckFailed {
-                    error: Some(error),
-                    ctx,
-                })
+    for check in [ctx.framework().options().command_check, cmd.check] {
+        if let Some(check) = check {
+            match check(ctx).await {
+                Ok(true) => {}
+                Ok(false) => {
+                    return Err(crate::FrameworkError::CommandCheckFailed { ctx, error: None })
+                }
+                Err(error) => {
+                    return Err(crate::FrameworkError::CommandCheckFailed {
+                        error: Some(error),
+                        ctx,
+                    })
+                }
             }
         }
     }
