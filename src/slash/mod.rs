@@ -15,7 +15,6 @@ fn send_as_initial_response(
     allowed_mentions: Option<&serenity::CreateAllowedMentions>,
     f: &mut serenity::CreateInteractionResponseData,
 ) {
-
     let crate::CreateReply {
         content,
         embeds,
@@ -26,7 +25,7 @@ fn send_as_initial_response(
         reference_message: _, // can't reply to a message in interactions
     } = {
         if data.allowed_mentions.is_none() {
-            data.allowed_mentions = allowed_mentions.map(|i| i.clone());
+            data.allowed_mentions = allowed_mentions.cloned();
         }
 
         data
@@ -70,7 +69,7 @@ fn send_as_followup_response<'a>(
         reference_message: _,
     } = {
         if data.allowed_mentions.is_none() {
-            data.allowed_mentions = allowed_mentions.map(|i| i.clone());
+            data.allowed_mentions = allowed_mentions.cloned();
         }
 
         data
@@ -115,7 +114,7 @@ fn send_as_edit<'a>(
         reference_message: _,
     } = {
         if data.allowed_mentions.is_none() {
-            data.allowed_mentions = allowed_mentions.map(|i| i.clone());
+            data.allowed_mentions = allowed_mentions.cloned();
         }
 
         data
