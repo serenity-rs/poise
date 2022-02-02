@@ -163,6 +163,8 @@ pub async fn send_prefix_reply<'a, U, E>(
         attachments,
         components,
         ephemeral: _,
+        allowed_mentions,
+        reference_message,
     } = reply;
 
     let lock_edit_tracker = || {
@@ -200,7 +202,7 @@ pub async fn send_prefix_reply<'a, U, E>(
                     f.attachment(attachment);
                 }
 
-                // When components is None, this will still be run to reset the message components
+                // When components is None, this will still be run to reset the components.
                 f.components(|f| {
                     if let Some(components) = components {
                         *f = components;
@@ -230,7 +232,12 @@ pub async fn send_prefix_reply<'a, U, E>(
                     m.content(content);
                 }
                 m.set_embeds(embeds);
-                if let Some(allowed_mentions) = &ctx.framework.options().allowed_mentions {
+                if let Some(allowed_mentions) = allowed_mentions {
+                    m.allowed_mentions(|c| {
+                        c.0 = allowed_mentions.0;
+                        c
+                    });
+                } else if let Some(allowed_mentions) = &ctx.framework.options().allowed_mentions {
                     m.allowed_mentions(|m| {
                         *m = allowed_mentions.clone();
                         m
@@ -241,6 +248,9 @@ pub async fn send_prefix_reply<'a, U, E>(
                         c.0 = components.0;
                         c
                     });
+                }
+                if let Some(reference_message) = reference_message {
+                    m.reference_message(reference_message);
                 }
 
                 for attachment in attachments {

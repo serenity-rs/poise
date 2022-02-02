@@ -11,17 +11,26 @@ use crate::serenity_prelude as serenity;
 /// Sends the message, specified via [`crate::CreateReply`], to the interaction initial response
 /// endpoint
 fn send_as_initial_response(
-    data: crate::CreateReply<'_>,
+    mut data: crate::CreateReply<'_>,
     allowed_mentions: Option<&serenity::CreateAllowedMentions>,
     f: &mut serenity::CreateInteractionResponseData,
 ) {
+
     let crate::CreateReply {
         content,
         embeds,
         attachments: _, // serenity doesn't support attachments in initial response yet
         components,
         ephemeral,
-    } = data;
+        allowed_mentions,
+        reference_message: _, // can't reply to a message in interactions
+    } = {
+        if data.allowed_mentions.is_none() {
+            data.allowed_mentions = allowed_mentions.map(|i| i.clone());
+        }
+
+        data
+    };
 
     if let Some(content) = content {
         f.content(content);
@@ -47,7 +56,7 @@ fn send_as_initial_response(
 /// Sends the message, specified via [`crate::CreateReply`], to the interaction followup response
 /// endpoint
 fn send_as_followup_response<'a>(
-    data: crate::CreateReply<'a>,
+    mut data: crate::CreateReply<'a>,
     allowed_mentions: Option<&serenity::CreateAllowedMentions>,
     f: &mut serenity::CreateInteractionResponseFollowup<'a>,
 ) {
@@ -57,7 +66,15 @@ fn send_as_followup_response<'a>(
         attachments,
         components,
         ephemeral,
-    } = data;
+        allowed_mentions,
+        reference_message: _,
+    } = {
+        if data.allowed_mentions.is_none() {
+            data.allowed_mentions = allowed_mentions.map(|i| i.clone());
+        }
+
+        data
+    };
 
     if let Some(content) = content {
         f.content(content);
@@ -84,7 +101,7 @@ fn send_as_followup_response<'a>(
 /// Sends the message, specified via [`crate::CreateReply`], to the interaction initial response
 /// edit endpoint
 fn send_as_edit<'a>(
-    data: crate::CreateReply<'a>,
+    mut data: crate::CreateReply<'a>,
     allowed_mentions: Option<&serenity::CreateAllowedMentions>,
     f: &mut serenity::EditInteractionResponse,
 ) {
@@ -94,7 +111,15 @@ fn send_as_edit<'a>(
         attachments: _, // no support for attachment edits in serenity yet
         components,
         ephemeral: _, // can't edit ephemerality in retrospect
-    } = data;
+        allowed_mentions,
+        reference_message: _,
+    } = {
+        if data.allowed_mentions.is_none() {
+            data.allowed_mentions = allowed_mentions.map(|i| i.clone());
+        }
+
+        data
+    };
 
     if let Some(content) = content {
         f.content(content);
