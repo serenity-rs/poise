@@ -232,14 +232,11 @@ pub async fn send_prefix_reply<'a, U, E>(
                     m.content(content);
                 }
                 m.set_embeds(embeds);
-                if let Some(allowed_mentions) = allowed_mentions {
-                    m.allowed_mentions(|c| {
-                        c.0 = allowed_mentions.0;
-                        c
-                    });
-                } else if let Some(allowed_mentions) = &ctx.framework.options().allowed_mentions {
+                if let Some(allowed_mentions) =
+                    allowed_mentions.or_else(|| ctx.framework.options().allowed_mentions.clone())
+                {
                     m.allowed_mentions(|m| {
-                        *m = allowed_mentions.clone();
+                        *m = allowed_mentions;
                         m
                     });
                 }

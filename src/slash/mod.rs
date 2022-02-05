@@ -11,8 +11,7 @@ use crate::serenity_prelude as serenity;
 /// Sends the message, specified via [`crate::CreateReply`], to the interaction initial response
 /// endpoint
 fn send_as_initial_response(
-    mut data: crate::CreateReply<'_>,
-    allowed_mentions: Option<&serenity::CreateAllowedMentions>,
+    data: crate::CreateReply<'_>,
     f: &mut serenity::CreateInteractionResponseData,
 ) {
     let crate::CreateReply {
@@ -23,13 +22,7 @@ fn send_as_initial_response(
         ephemeral,
         allowed_mentions,
         reference_message: _, // can't reply to a message in interactions
-    } = {
-        if data.allowed_mentions.is_none() {
-            data.allowed_mentions = allowed_mentions.cloned();
-        }
-
-        data
-    };
+    } = data;
 
     if let Some(content) = content {
         f.content(content);
@@ -55,8 +48,7 @@ fn send_as_initial_response(
 /// Sends the message, specified via [`crate::CreateReply`], to the interaction followup response
 /// endpoint
 fn send_as_followup_response<'a>(
-    mut data: crate::CreateReply<'a>,
-    allowed_mentions: Option<&serenity::CreateAllowedMentions>,
+    data: crate::CreateReply<'a>,
     f: &mut serenity::CreateInteractionResponseFollowup<'a>,
 ) {
     let crate::CreateReply {
@@ -67,13 +59,7 @@ fn send_as_followup_response<'a>(
         ephemeral,
         allowed_mentions,
         reference_message: _,
-    } = {
-        if data.allowed_mentions.is_none() {
-            data.allowed_mentions = allowed_mentions.cloned();
-        }
-
-        data
-    };
+    } = data;
 
     if let Some(content) = content {
         f.content(content);
@@ -99,11 +85,7 @@ fn send_as_followup_response<'a>(
 
 /// Sends the message, specified via [`crate::CreateReply`], to the interaction initial response
 /// edit endpoint
-fn send_as_edit<'a>(
-    mut data: crate::CreateReply<'a>,
-    allowed_mentions: Option<&serenity::CreateAllowedMentions>,
-    f: &mut serenity::EditInteractionResponse,
-) {
+fn send_as_edit(data: crate::CreateReply<'_>, f: &mut serenity::EditInteractionResponse) {
     let crate::CreateReply {
         content,
         embeds,
@@ -112,13 +94,7 @@ fn send_as_edit<'a>(
         ephemeral: _, // can't edit ephemerality in retrospect
         allowed_mentions,
         reference_message: _,
-    } = {
-        if data.allowed_mentions.is_none() {
-            data.allowed_mentions = allowed_mentions.cloned();
-        }
-
-        data
-    };
+    } = data;
 
     if let Some(content) = content {
         f.content(content);
@@ -155,6 +131,7 @@ pub async fn send_application_reply<'a, U, E>(
 
     let mut data = crate::CreateReply {
         ephemeral: ctx.command.ephemeral,
+        allowed_mentions: ctx.framework.options().allowed_mentions.clone(),
         ..Default::default()
     };
     builder(&mut data);
@@ -163,19 +140,18 @@ pub async fn send_application_reply<'a, U, E>(
         .has_sent_initial_response
         .load(std::sync::atomic::Ordering::SeqCst);
 
-    let allowed_mentions = ctx.framework.options().allowed_mentions.as_ref();
     if has_sent_initial_response {
         if ctx.command.reuse_response {
             interaction
                 .edit_original_interaction_response(ctx.discord, |f| {
-                    send_as_edit(data, allowed_mentions, f);
+                    send_as_edit(data, f);
                     f
                 })
                 .await?;
         } else {
             interaction
                 .create_followup_message(ctx.discord, |f| {
-                    send_as_followup_response(data, allowed_mentions, f);
+                    send_as_followup_response(data, f);
                     f
                 })
                 .await?;
@@ -185,7 +161,7 @@ pub async fn send_application_reply<'a, U, E>(
             .create_interaction_response(ctx.discord, |r| {
                 r.kind(serenity::InteractionResponseType::ChannelMessageWithSource)
                     .interaction_response_data(|f| {
-                        send_as_initial_response(data, allowed_mentions, f);
+                        send_as_initial_response(data, f);
                         f
                     })
             })
