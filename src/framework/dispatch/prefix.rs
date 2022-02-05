@@ -211,6 +211,17 @@ where
 
     (framework.options.pre_command)(crate::Context::Prefix(ctx)).await;
 
+    // Store that this command is currently running; so that if the invocation message is being
+    // edited before a response message is registered, we don't accidentally treat it as an
+    // execute_untracked_edits situation and start an infinite loop
+    // Reported by vicky5124 https://discord.com/channels/381880193251409931/381912587505500160/897981367604903966
+    if let Some(edit_tracker) = &framework.options.prefix_options.edit_tracker {
+        edit_tracker
+            .write()
+            .unwrap()
+            .register_invocation(ctx.msg, None);
+    }
+
     // Execute command
     let res = (action)(ctx, args).await.map_err(|e| Some((e, command)));
 

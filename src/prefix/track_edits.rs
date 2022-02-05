@@ -53,8 +53,8 @@ fn update_message(message: &mut serenity::Message, update: serenity::MessageUpda
 pub struct EditTracker {
     /// Duration after which cached messages can be purged
     max_duration: std::time::Duration,
-    /// Cache, which associates user messages to the corresponding bot response message
-    cache: Vec<(serenity::Message, serenity::Message)>,
+    /// Cache, which stores invocation messages, and the corresponding bot response message if any
+    cache: Vec<(serenity::Message, Option<serenity::Message>)>,
 }
 
 impl EditTracker {
@@ -74,7 +74,7 @@ impl EditTracker {
     /// not in cache. Also returns a bool with `true` if this message was previously tracked
     ///
     /// Returns None if the command shouldn't be re-run, e.g. if the message content wasn't edited
-    pub fn process_message_update(
+    pub(crate) fn process_message_update(
         &mut self,
         user_msg_update: &serenity::MessageUpdateEvent,
         ignore_edit_tracker_cache: bool,
@@ -128,11 +128,11 @@ impl EditTracker {
             .cache
             .iter()
             .find(|(user_msg, _)| user_msg.id == user_msg_id)?;
-        Some(bot_response)
+        bot_response.as_ref()
     }
 
     /// Given a message by a user, find the corresponding bot response, if one exists and is cached.
-    pub fn find_bot_response_mut(
+    pub(crate) fn find_bot_response_mut(
         &mut self,
         user_msg_id: serenity::MessageId,
     ) -> Option<&mut serenity::Message> {
@@ -140,13 +140,27 @@ impl EditTracker {
             .cache
             .iter_mut()
             .find(|(user_msg, _)| user_msg.id == user_msg_id)?;
-        Some(bot_response)
+        bot_response.as_mut()
     }
 
+    /// When called with Some:
     /// Notify the [`EditTracker`] that the given user message should be associated with the given
     /// bot response.
-    fn register_response(&mut self, user_msg: serenity::Message, bot_response: serenity::Message) {
-        self.cache.push((user_msg, bot_response));
+    ///
+    /// When called with None:
+    /// Store that this command is currently running; so that if the command is editing its own
+    /// invocation message, we don't accidentally treat it as an execute_untracked_edits situation
+    /// and start an infinite loop
+    pub(crate) fn register_invocation(
+        &mut self,
+        user_msg: &serenity::Message,
+        bot_response: Option<serenity::Message>,
+    ) {
+        if let Some((_, r)) = self.cache.iter_mut().find(|(m, _)| m.id == user_msg.id) {
+            *r = bot_response;
+        } else {
+            self.cache.push((user_msg.clone(), bot_response));
+        }
     }
 }
 
@@ -167,19 +181,13 @@ pub async fn send_prefix_reply<'a, U, E>(
         reference_message,
     } = reply;
 
+    // This must only return None when we _actually_ want to reuse the existing response! There are
+    // no checks later
     let lock_edit_tracker = || {
-        // If we definitely don't need to track this command invocation, stop
-        let execute_untracked_edits = ctx
-            .framework
-            .options()
-            .prefix_options
-            .execute_untracked_edits;
-        if !(ctx.command.reuse_response || execute_untracked_edits) {
-            return None;
-        }
-
-        if let Some(edit_tracker) = &ctx.framework.options().prefix_options.edit_tracker {
-            return Some(edit_tracker.write().unwrap());
+        if ctx.command.reuse_response {
+            if let Some(edit_tracker) = &ctx.framework.options().prefix_options.edit_tracker {
+                return Some(edit_tracker.write().unwrap());
+            }
         }
         None
     };
@@ -257,7 +265,7 @@ pub async fn send_prefix_reply<'a, U, E>(
             })
             .await?;
         if let Some(track_edits) = &mut lock_edit_tracker() {
-            track_edits.register_response(ctx.msg.clone(), new_response.clone());
+            track_edits.register_invocation(ctx.msg, Some(new_response.clone()));
         }
 
         new_response
