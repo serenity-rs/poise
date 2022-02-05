@@ -80,7 +80,7 @@ impl<'a> CreateReply<'a> {
 
     /// Set the allowed mentions for the message.
     ///
-    /// See the [serenity documentation](https://serenity-rs.github.io/serenity/next/serenity/builder/struct.CreateAllowedMentions.html) for more information.
+    /// See [`serenity::CreateAllowedMentions`] for more information.
     pub fn allowed_mentions(
         &mut self,
         f: impl FnOnce(&mut serenity::CreateAllowedMentions) -> &mut serenity::CreateAllowedMentions,
