@@ -18,6 +18,8 @@ pub struct FrameworkOptions<U, E> {
     /// If individual commands add their own check, both callbacks are run and must return true.
     pub command_check: Option<fn(crate::Context<'_, U, E>) -> BoxFuture<'_, Result<bool, E>>>,
     /// Default set of allowed mentions to use for all responses
+    ///
+    /// By default, user pings are allowed and role pings and everyone pings are filtered
     pub allowed_mentions: Option<serenity::CreateAllowedMentions>,
     /// Called on every Discord event. Can be used to react to non-command events, like messages
     /// deletions or guild updates.

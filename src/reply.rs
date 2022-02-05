@@ -8,16 +8,20 @@ use crate::serenity_prelude as serenity;
 /// Message builder that abstracts over prefix and application command responses
 #[derive(Default)]
 pub struct CreateReply<'a> {
-    /// Message content
+    /// Message content.
     pub content: Option<String>,
-    /// Embeds, if present
+    /// Embeds, if present.
     pub embeds: Vec<serenity::CreateEmbed>,
-    /// Message attachments
+    /// Message attachments.
     pub attachments: Vec<serenity::AttachmentType<'a>>,
     /// Whether the message is ephemeral (only has an effect in application commands)
     pub ephemeral: bool,
-    /// Message components, that is, buttons
+    /// Message components, that is, buttons and select menus.
     pub components: Option<serenity::CreateComponents>,
+    /// The allowed mentions for the message.
+    pub allowed_mentions: Option<serenity::CreateAllowedMentions>,
+    /// The reference message this message is a reply to.
+    pub reference_message: Option<serenity::MessageReference>,
 }
 
 impl<'a> CreateReply<'a> {
@@ -40,7 +44,7 @@ impl<'a> CreateReply<'a> {
         self
     }
 
-    /// Set components (buttons) for this message.
+    /// Set components (buttons and select menus) for this message.
     ///
     /// Any previously set components will be overwritten.
     pub fn components(
@@ -71,6 +75,28 @@ impl<'a> CreateReply<'a> {
     /// ephemeral.
     pub fn ephemeral(&mut self, ephemeral: bool) -> &mut Self {
         self.ephemeral = ephemeral;
+        self
+    }
+
+    /// Set the allowed mentions for the message.
+    ///
+    /// See [`serenity::CreateAllowedMentions`] for more information.
+    pub fn allowed_mentions(
+        &mut self,
+        f: impl FnOnce(&mut serenity::CreateAllowedMentions) -> &mut serenity::CreateAllowedMentions,
+    ) -> &mut Self {
+        let mut allowed_mentions = serenity::CreateAllowedMentions::default();
+        f(&mut allowed_mentions);
+        self.allowed_mentions = Some(allowed_mentions);
+        self
+    }
+
+    /// Set the reference message this message is a reply to.
+    pub fn reference_message(
+        &mut self,
+        reference: impl Into<serenity::MessageReference>,
+    ) -> &mut Self {
+        self.reference_message = Some(reference.into());
         self
     }
 }
