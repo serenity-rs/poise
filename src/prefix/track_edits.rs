@@ -171,6 +171,9 @@ pub async fn send_prefix_reply<'a, U, E>(
 ) -> Result<Box<serenity::Message>, serenity::Error> {
     let mut reply = crate::CreateReply::default();
     builder(&mut reply);
+    if let Some(callback) = ctx.framework.options().reply_callback {
+        callback(ctx.into(), &mut reply);
+    }
     let crate::CreateReply {
         content,
         embeds,

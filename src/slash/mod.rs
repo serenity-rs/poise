@@ -135,6 +135,9 @@ pub async fn send_application_reply<'a, U, E>(
         ..Default::default()
     };
     builder(&mut data);
+    if let Some(callback) = ctx.framework.options().reply_callback {
+        callback(ctx.into(), &mut data);
+    }
 
     let has_sent_initial_response = ctx
         .has_sent_initial_response
