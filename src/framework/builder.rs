@@ -28,7 +28,8 @@ pub struct FrameworkBuilder<U, E> {
     /// Framework options
     options: Option<crate::FrameworkOptions<U, E>>,
     /// Client settings that will be applied to the ClientBuilder before initializing the framework
-    client_settings: Option<Box<dyn FnOnce(serenity::ClientBuilder) -> serenity::ClientBuilder>>,
+    client_settings:
+        Option<Box<dyn FnOnce(serenity::ClientBuilder) -> serenity::ClientBuilder + Send + Sync>>,
     /// Discord bot token
     token: Option<String>,
     /// List of framework commands
@@ -90,7 +91,7 @@ impl<U, E> FrameworkBuilder<U, E> {
     #[must_use]
     pub fn client_settings(
         mut self,
-        f: impl FnOnce(serenity::ClientBuilder) -> serenity::ClientBuilder + 'static,
+        f: impl FnOnce(serenity::ClientBuilder) -> serenity::ClientBuilder + Send + Sync + 'static,
     ) -> Self {
         self.client_settings = Some(Box::new(f));
         self
