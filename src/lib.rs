@@ -1,4 +1,5 @@
 #![cfg_attr(docsrs, feature(doc_cfg))]
+#![doc(test(attr(deny(deprecated))))]
 #![warn(rust_2018_idioms)]
 #![warn(missing_docs)]
 #![warn(clippy::missing_docs_in_private_items)]
@@ -47,9 +48,9 @@ async fn main() {
                 prefix: Some("~".into()),
                 ..Default::default()
             },
+            commands: vec![age()],
             ..Default::default()
         })
-        .command(age(), |f| f)
         .run().await.unwrap();
 }
 ```
@@ -176,7 +177,7 @@ poise::Framework::build()
         Ok(())
     }))
 
-    // A lot of configuration is done via the `FrameworkOptions` struct, which you can define with
+    // Most configuration is done via the `FrameworkOptions` struct, which you can define with
     // a struct literal (hint: use `..Default::default()` to fill uninitialized
     // settings with their default value):
     .options(poise::FrameworkOptions {
@@ -187,16 +188,20 @@ poise::Framework::build()
             case_insensitive_commands: true,
             ..Default::default()
         },
+        // This is also where commands go
+        commands: vec![
+            command1(),
+            command2(),
+            // To add subcommands, modify the `subcommands` field of the `Command` struct returned
+            // by the command functions
+            poise::Command {
+                subcommands: vec![command3_1(), command3_2()],
+                ..command3()
+            }
+        ],
         ..Default::default()
     })
 
-    // Finally, add commands and start the framework. You can add subcommands to a command.
-    .command(command1(), |f| f)
-    .command(command2(), |f| f)
-    .command(command3(), |f| f
-        .subcommand(command3_1(), |f| f)
-        .subcommand(command3_2(), |f| f)
-    )
     .run().await?;
 # Ok::<(), Error>(()) };
 ```
