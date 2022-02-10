@@ -12,7 +12,7 @@ Poise is an opinionated Discord bot framework with a few distinctive features:
 
 I created this framework mainly for personal use ([rustbot](<https://github.com/kangalioo/rustbot>)
 and [etternabot](<https://github.com/kangalioo/etternabot>)). Features are added on demand, since
-it's easy to draft a good design when you know exactly what the feature will be used for.
+it's easier to draft a good design when you know exactly which practical needs it should cover.
 
 **Warning: API details are subject to change**
 
@@ -59,6 +59,23 @@ commands. See [`examples/framework_usage`] for examples on that as well as other
 
 You can run the framework_usage example with
 `cargo run --example=framework_usage --features collector`
+
+# Introduction to slash commands
+
+Discord slash commands can be a bit unintuitive at first. If you're unfamiliar, please read this
+
+To activate a slash command, your bot
+needs to _register_ in on Discord. You may want to do this manually, with a `register` command
+(poise provides [`builtins::register_application_commands`] as a starting point for that), or you
+may want to re-register commands automatically on every bot startup. Choose what you prefer
+
+Commands can be registered _globally_ or _per guild_. Global commands are available on every guild
+your bot is invited on, but it takes up to an hour for global registration to roll out. Per guild
+registration only updates a single guild, but it happens instantly, which is useful for testing.
+
+Your bot also needs to be invited with the `applications.commands` scope. For example, in Discord's
+invite link generator (discord.com/developers/applications/XXX/oauth2/url-generator),
+tick the `applications.commands` box.
 
 ## Crate features
 
