@@ -216,10 +216,7 @@ where
     // execute_untracked_edits situation and start an infinite loop
     // Reported by vicky5124 https://discord.com/channels/381880193251409931/381912587505500160/897981367604903966
     if let Some(edit_tracker) = &framework.options.prefix_options.edit_tracker {
-        edit_tracker
-            .write()
-            .unwrap()
-            .register_invocation(ctx.msg, None);
+        edit_tracker.write().unwrap().track_command(ctx.msg);
     }
 
     // Execute command

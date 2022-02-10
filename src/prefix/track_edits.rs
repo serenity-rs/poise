@@ -54,6 +54,7 @@ pub struct EditTracker {
     /// Duration after which cached messages can be purged
     max_duration: std::time::Duration,
     /// Cache, which stores invocation messages, and the corresponding bot response message if any
+    // TODO: change to `OrderedMap<MessageId, (Message, Option<serenity::Message>)>`?
     cache: Vec<(serenity::Message, Option<serenity::Message>)>,
 }
 
@@ -131,35 +132,26 @@ impl EditTracker {
         bot_response.as_ref()
     }
 
-    /// Given a message by a user, find the corresponding bot response, if one exists and is cached.
-    pub(crate) fn find_bot_response_mut(
+    /// Notify the [`EditTracker`] that the given user message should be associated with the given
+    /// bot response. Overwrites any previous associated bot response
+    pub(crate) fn set_bot_response(
         &mut self,
-        user_msg_id: serenity::MessageId,
-    ) -> Option<&mut serenity::Message> {
-        let (_, bot_response) = self
-            .cache
-            .iter_mut()
-            .find(|(user_msg, _)| user_msg.id == user_msg_id)?;
-        bot_response.as_mut()
+        user_msg: &serenity::Message,
+        bot_response: serenity::Message,
+    ) {
+        if let Some((_, r)) = self.cache.iter_mut().find(|(m, _)| m.id == user_msg.id) {
+            *r = Some(bot_response);
+        } else {
+            self.cache.push((user_msg.clone(), Some(bot_response)));
+        }
     }
 
-    /// When called with Some:
-    /// Notify the [`EditTracker`] that the given user message should be associated with the given
-    /// bot response.
-    ///
-    /// When called with None:
     /// Store that this command is currently running; so that if the command is editing its own
     /// invocation message, we don't accidentally treat it as an execute_untracked_edits situation
     /// and start an infinite loop
-    pub(crate) fn register_invocation(
-        &mut self,
-        user_msg: &serenity::Message,
-        bot_response: Option<serenity::Message>,
-    ) {
-        if let Some((_, r)) = self.cache.iter_mut().find(|(m, _)| m.id == user_msg.id) {
-            *r = bot_response;
-        } else {
-            self.cache.push((user_msg.clone(), bot_response));
+    pub(crate) fn track_command(&mut self, user_msg: &serenity::Message) {
+        if !self.cache.iter().any(|(m, _)| m.id == user_msg.id) {
+            self.cache.push((user_msg.clone(), None));
         }
     }
 }
@@ -226,11 +218,8 @@ pub async fn send_prefix_reply<'a, U, E>(
             .await?;
 
         // If the entry still exists after the await, update it to the new contents
-        if let Some(response_entry) = lock_edit_tracker()
-            .as_mut()
-            .and_then(|t| t.find_bot_response_mut(ctx.msg.id))
-        {
-            *response_entry = response.clone();
+        if let Some(mut edit_tracker) = lock_edit_tracker() {
+            edit_tracker.set_bot_response(ctx.msg, response.clone());
         }
 
         response
@@ -268,7 +257,7 @@ pub async fn send_prefix_reply<'a, U, E>(
             })
             .await?;
         if let Some(track_edits) = &mut lock_edit_tracker() {
-            track_edits.register_invocation(ctx.msg, Some(new_response.clone()));
+            track_edits.set_bot_response(ctx.msg, new_response.clone());
         }
 
         new_response
