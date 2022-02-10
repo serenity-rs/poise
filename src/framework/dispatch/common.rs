@@ -123,15 +123,17 @@ pub async fn check_permissions_and_cooldown<'a, U, E>(
         }
     }
 
-    let cooldowns = &cmd.cooldowns;
-    let remaining_cooldown = cooldowns.lock().unwrap().remaining_cooldown(ctx);
-    if let Some(remaining_cooldown) = remaining_cooldown {
-        return Err(crate::FrameworkError::CooldownHit {
-            ctx,
-            remaining_cooldown,
-        });
+    if !ctx.framework().options().manual_cooldowns {
+        let cooldowns = &cmd.cooldowns;
+        let remaining_cooldown = cooldowns.lock().unwrap().remaining_cooldown(ctx);
+        if let Some(remaining_cooldown) = remaining_cooldown {
+            return Err(crate::FrameworkError::CooldownHit {
+                ctx,
+                remaining_cooldown,
+            });
+        }
+        cooldowns.lock().unwrap().start_cooldown(ctx);
     }
-    cooldowns.lock().unwrap().start_cooldown(ctx);
 
     Ok(())
 }

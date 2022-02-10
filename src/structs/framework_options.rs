@@ -25,6 +25,11 @@ pub struct FrameworkOptions<U, E> {
     ///
     /// Allows you to modify every outgoing message in a central place
     pub reply_callback: Option<fn(crate::Context<'_, U, E>, &mut crate::CreateReply<'_>)>,
+    /// If `true`, disables automatic cooldown handling before every command invocation.
+    ///
+    /// Useful for implementing custom cooldown behavior. See [`crate::Command::cooldowns`] and
+    /// the methods on [`crate::Cooldowns`] for how to do that.
+    pub manual_cooldowns: bool,
     /// Called on every Discord event. Can be used to react to non-command events, like messages
     /// deletions or guild updates.
     pub listener: for<'a> fn(
@@ -65,6 +70,7 @@ impl<U: std::fmt::Debug, E: std::fmt::Debug> std::fmt::Debug for FrameworkOption
             command_check,
             allowed_mentions,
             reply_callback,
+            manual_cooldowns,
             listener,
             prefix_options,
             owners,
@@ -77,7 +83,8 @@ impl<U: std::fmt::Debug, E: std::fmt::Debug> std::fmt::Debug for FrameworkOption
             .field("post_command", &(*post_command as *const ()))
             .field("command_check", &command_check.map(|f| f as *const ()))
             .field("allowed_mentions", allowed_mentions)
-            .field("command_check", &reply_callback.map(|f| f as *const ()))
+            .field("reply_callback", &reply_callback.map(|f| f as *const ()))
+            .field("manual_cooldowns", manual_cooldowns)
             .field("listener", &(*listener as *const ()))
             .field("prefix_options", prefix_options)
             .field("owners", owners)
@@ -111,6 +118,7 @@ where
                 f
             }),
             reply_callback: None,
+            manual_cooldowns: false,
             prefix_options: Default::default(),
             owners: Default::default(),
         }
