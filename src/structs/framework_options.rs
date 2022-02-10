@@ -10,7 +10,7 @@ pub struct FrameworkOptions<U, E> {
     pub on_error: fn(crate::FrameworkError<'_, U, E>) -> BoxFuture<'_, ()>,
     /// Called before every command
     pub pre_command: fn(crate::Context<'_, U, E>) -> BoxFuture<'_, ()>,
-    /// Called after every command, no matter if it succeeded or failed
+    /// Called after every command if it was successful (returned Ok)
     pub post_command: fn(crate::Context<'_, U, E>) -> BoxFuture<'_, ()>,
     /// Provide a callback to be invoked before every command. The command will only be executed
     /// if the callback returns true.

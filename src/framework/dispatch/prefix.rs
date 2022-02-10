@@ -223,9 +223,9 @@ where
     }
 
     // Execute command
-    let res = (action)(ctx, args).await.map_err(|e| Some((e, command)));
+    (action)(ctx, args).await.map_err(|e| Some((e, command)))?;
 
     (framework.options.post_command)(crate::Context::Prefix(ctx)).await;
 
-    res
+    Ok(())
 }

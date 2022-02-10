@@ -117,7 +117,7 @@ async fn main() {
                 println!("Executing command {}...", ctx.command().qualified_name);
             })
         },
-        /// This code is ran after every command, regardless of whether it returned an error
+        /// This code is ran after a command if it was successful (returned Ok)
         post_command: |ctx| {
             Box::pin(async move {
                 println!("Executed command {}!", ctx.command().qualified_name);

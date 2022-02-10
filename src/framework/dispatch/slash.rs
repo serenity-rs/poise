@@ -130,10 +130,11 @@ pub async fn dispatch_interaction<'a, U, E>(
         }
         _ => return Err(None),
     };
+    action_result.map_err(|e| Some((e, ctx.command)))?;
 
     (framework.options.post_command)(crate::Context::Application(ctx)).await;
 
-    action_result.map_err(|e| Some((e, ctx.command)))
+    Ok(())
 }
 
 /// Dispatches this interaction onto framework commands, i.e. runs the associated autocomplete
