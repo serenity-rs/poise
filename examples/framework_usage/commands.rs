@@ -242,3 +242,16 @@ pub async fn say(
     ctx.say(msg).await?;
     Ok(())
 }
+
+#[poise::command(prefix_command, slash_command)]
+pub async fn file_details(
+    ctx: Context<'_>,
+    #[description = "File to examine"] file: serenity::Attachment,
+) -> Result<(), Error> {
+    ctx.say(format!(
+        "File name: **{}**. File size: **{}** bytes",
+        file.filename, file.size
+    ))
+    .await?;
+    Ok(())
+}

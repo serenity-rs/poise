@@ -220,3 +220,4 @@ impl_slash_argument!(serenity::User, User);
 impl_slash_argument!(serenity::Channel, Channel);
 impl_slash_argument!(serenity::GuildChannel, Channel);
 impl_slash_argument!(serenity::Role, Role);
+impl_slash_argument!(serenity::Attachment, Attachment);

@@ -103,3 +103,25 @@ impl<'a> PopArgumentHack<'a, bool> for &PhantomData<bool> {
         Ok((args.trim_start(), value))
     }
 }
+
+#[async_trait::async_trait]
+impl<'a> PopArgumentHack<'a, serenity::Attachment> for &PhantomData<serenity::Attachment> {
+    async fn pop_from(
+        self,
+        args: &'a str,
+        ctx: &serenity::Context,
+        msg: &serenity::Message,
+    ) -> Result<
+        (&'a str, serenity::Attachment),
+        (Box<dyn std::error::Error + Send + Sync>, Option<String>),
+    > {
+        // TODO this needs to grab attachments in sequence
+        let attachment = msg
+            .attachments
+            .get(0)
+            .ok_or_else(|| (TooFewArguments.into(), None))?
+            .to_owned();
+
+        Ok((args, attachment))
+    }
+}
