@@ -130,25 +130,15 @@ pub async fn autocomplete_command<U, E>(
         .map(|cmd| cmd.name.to_string())
 }
 
-/// Generic function to register application commands, either globally or in a guild.
+/// Collects all commands into a [`serenity::CreateApplicationCommands`] builder, which can be used
+/// to register the commands on Discord
 ///
-/// Some permission checks are built in:
-/// - global command registration is only allowed for bot owners
-/// - guild-specific command registration is allowed for guild owners and bot owners
-///
-/// If you want, you can copy paste this help message:
-///
-/// ```ignore
-/// Register application commands in this guild or globally
-///
-/// Run with no arguments to register in guild, run with argument "global" to register globally.
-/// ```
-pub async fn register_application_commands<U, E>(
-    ctx: crate::Context<'_, U, E>,
-    global: bool,
-) -> Result<(), serenity::Error> {
+/// See [`register_application_commands`] for an example usage of the returned
+/// [`serenity::CreateApplicationCommands`] builder
+pub fn create_application_commands<U, E>(
+    commands: &[crate::Command<U, E>],
+) -> serenity::CreateApplicationCommands {
     let mut commands_builder = serenity::CreateApplicationCommands::default();
-    let commands = &ctx.framework().options().commands;
     for command in commands {
         if let Some(slash_command) = command.create_as_slash_command() {
             commands_builder.add_application_command(slash_command);
@@ -157,7 +147,29 @@ pub async fn register_application_commands<U, E>(
             commands_builder.add_application_command(context_menu_command);
         }
     }
-    let commands_builder = serenity::json::Value::Array(commands_builder.0);
+    commands_builder
+}
+/// Wraps [`create_application_commands`] and does some sane default permission checks, as well as
+/// actually send the registration HTTP request to Discord
+///
+/// Permission checks:
+/// - global command registration is only allowed for bot owners
+/// - guild-specific command registration is allowed for guild owners and bot owners
+///
+/// This function is supposed to be ready-to-use implementation for a `~register` command of your
+/// bot. So if you want, you can copy paste this help message for the command:
+///
+/// ```text
+/// Registers application commands in this guild or globally
+///
+/// Run with no arguments to register in guild, run with argument "global" to register globally.
+/// ```
+pub async fn register_application_commands<U, E>(
+    ctx: crate::Context<'_, U, E>,
+    global: bool,
+) -> Result<(), serenity::Error> {
+    let commands = &ctx.framework().options().commands;
+    let commands_builder = create_application_commands(commands);
 
     let is_bot_owner = ctx.framework().options().owners.contains(&ctx.author().id);
     if global {
@@ -168,10 +180,11 @@ pub async fn register_application_commands<U, E>(
 
         ctx.say(format!("Registering {} commands...", commands.len()))
             .await?;
-        ctx.discord()
-            .http
-            .create_global_application_commands(&commands_builder)
-            .await?;
+        serenity::ApplicationCommand::set_global_application_commands(ctx.discord(), |b| {
+            *b = commands_builder;
+            b
+        })
+        .await?;
     } else {
         let guild = match ctx.guild() {
             Some(x) => x,
@@ -189,9 +202,11 @@ pub async fn register_application_commands<U, E>(
 
         ctx.say(format!("Registering {} commands...", commands.len()))
             .await?;
-        ctx.discord()
-            .http
-            .create_guild_application_commands(guild.id.0, &commands_builder)
+        guild
+            .set_application_commands(ctx.discord(), |b| {
+                *b = commands_builder;
+                b
+            })
             .await?;
     }
 
