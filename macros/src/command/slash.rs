@@ -140,7 +140,7 @@ pub fn generate_slash_action(inv: &Invocation) -> proc_macro2::TokenStream {
             #[allow(clippy::needless_question_mark)]
 
             let ( #( #param_names, )* ) = ::poise::parse_slash_args!(
-                ctx.discord, ctx.interaction.guild_id(), ctx.interaction.channel_id(), args =>
+                ctx.discord, ctx.interaction, args =>
                 #( (#param_names: #param_types), )*
             ).await.map_err(|error| match error {
                 poise::SlashArgError::CommandStructureMismatch(description) => {

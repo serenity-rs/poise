@@ -82,6 +82,7 @@ async fn main() {
             commands::oracle(),
             commands::code(),
             commands::say(),
+            commands::file_details(),
             context_menu::user_info(),
             context_menu::echo(),
             autocomplete::greet(),

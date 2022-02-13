@@ -247,10 +247,12 @@ pub async fn say(
 pub async fn file_details(
     ctx: Context<'_>,
     #[description = "File to examine"] file: serenity::Attachment,
+    #[description = "Second file to examine"] file_2: Option<serenity::Attachment>,
 ) -> Result<(), Error> {
     ctx.say(format!(
-        "File name: **{}**. File size: **{}** bytes",
-        file.filename, file.size
+        "First file name: **{}**. File size difference: **{}** bytes",
+        file.filename,
+        file.size - file_2.map_or(0, |f| f.size)
     ))
     .await?;
     Ok(())
