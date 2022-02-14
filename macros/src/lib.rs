@@ -56,7 +56,7 @@ are multiple attributes you can use on parameters:
 - `#[autocomplete = ""]`: Sets the autocomplete callback (slash-only)
 - `#[channel_types("", "")]`: For channel parameters, restricts allowed channel types (slash-only)
 - `#[min = 0]`: Minimum value for this number parameter (slash-only)
-- `#[max = 0]`: Minimum value for this number parameter (slash-only)
+- `#[max = 0]`: Maximum value for this number parameter (slash-only)
 - `#[rest]`: Use the entire rest of the message for this parameter (prefix-only)
 - `#[lazy]`: Can be used on Option and Vec parameters and is equivalent to regular expressions' laziness (prefix-only)
 - `#[flag]`: Can be used on a bool parameter to set the bool to true if the user typed the parameter name literally (prefix-only)
