@@ -243,6 +243,7 @@ pub async fn say(
     Ok(())
 }
 
+/// View the difference between two file sizes
 #[poise::command(prefix_command, slash_command)]
 pub async fn file_details(
     ctx: Context<'_>,
@@ -255,5 +256,22 @@ pub async fn file_details(
         file.size - file_2.map_or(0, |f| f.size)
     ))
     .await?;
+    Ok(())
+}
+
+#[poise::command(prefix_command)]
+pub async fn totalsize(
+    ctx: Context<'_>,
+    #[description = "File to rename"] files: Vec<serenity::Attachment>,
+) -> Result<(), Error> {
+    let total = files.iter().fold(0, |acc, f| acc + f.size);
+
+    ctx.say(format!(
+        "Total file size: `{}B`. Average size: `{}B`",
+        total,
+        total / files.len() as u64
+    ))
+    .await?;
+
     Ok(())
 }
