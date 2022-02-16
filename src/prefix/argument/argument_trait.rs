@@ -2,7 +2,7 @@
 //! the auto-deref specialization emulation code to e.g. support more strings for bool parameters
 //! instead of the FromStr ones
 
-use super::{pop_string, InvalidBool, TooFewArguments};
+use super::{pop_string, InvalidBool, MissingAttachment, TooFewArguments};
 use crate::serenity_prelude as serenity;
 use std::marker::PhantomData;
 
@@ -127,7 +127,7 @@ impl<'a> PopArgumentHack<'a, serenity::Attachment> for &PhantomData<serenity::At
         let attachment = msg
             .attachments
             .get(attachment_index)
-            .ok_or_else(|| (TooFewArguments.into(), None))?
+            .ok_or_else(|| (MissingAttachment.into(), None))?
             .to_owned();
 
         Ok((args, attachment_index + 1, attachment))
