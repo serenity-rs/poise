@@ -105,10 +105,14 @@ impl<'a> PopArgument<'a> for CodeBlock {
     /// official Discord client's syntax highlighting, if existent.
     async fn pop_from(
         args: &'a str,
+        attachment_index: usize,
         _: &serenity::Context,
         _: &serenity::Message,
-    ) -> Result<(&'a str, Self), (Box<dyn std::error::Error + Send + Sync>, Option<String>)> {
-        pop_from(args).map_err(|e| (e.into(), None))
+    ) -> Result<(&'a str, usize, Self), (Box<dyn std::error::Error + Send + Sync>, Option<String>)>
+    {
+        let (a, b) = pop_from(args).map_err(|e| (e.into(), None))?;
+
+        Ok((a, attachment_index, b))
     }
 }
 

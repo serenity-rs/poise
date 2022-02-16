@@ -11,9 +11,9 @@ use std::marker::PhantomData;
 /// Uses specialization to get full coverage of types. Pass the type as the first argument
 #[macro_export]
 macro_rules! pop_prefix_argument {
-    ($target:ty, $args:expr, $ctx:expr, $msg:expr) => {{
+    ($target:ty, $args:expr, $attachment_id:expr, $ctx:expr, $msg:expr) => {{
         use $crate::PopArgumentHack as _;
-        (&std::marker::PhantomData::<$target>).pop_from($args, $ctx, $msg)
+        (&std::marker::PhantomData::<$target>).pop_from($args, $attachment_id, $ctx, $msg)
     }};
 }
 
@@ -36,9 +36,10 @@ pub trait PopArgument<'a>: Sized {
     /// Don't call this method directly! Use [`crate::pop_prefix_argument!`]
     async fn pop_from(
         args: &'a str,
+        attachment_index: usize,
         ctx: &serenity::Context,
         msg: &serenity::Message,
-    ) -> Result<(&'a str, Self), (Box<dyn std::error::Error + Send + Sync>, Option<String>)>;
+    ) -> Result<(&'a str, usize, Self), (Box<dyn std::error::Error + Send + Sync>, Option<String>)>;
 }
 
 #[doc(hidden)]
@@ -47,9 +48,10 @@ pub trait PopArgumentHack<'a, T>: Sized {
     async fn pop_from(
         self,
         args: &'a str,
+        attachment_index: usize,
         ctx: &serenity::Context,
         msg: &serenity::Message,
-    ) -> Result<(&'a str, T), (Box<dyn std::error::Error + Send + Sync>, Option<String>)>;
+    ) -> Result<(&'a str, usize, T), (Box<dyn std::error::Error + Send + Sync>, Option<String>)>;
 }
 
 #[async_trait::async_trait]
@@ -60,15 +62,17 @@ where
     async fn pop_from(
         self,
         args: &'a str,
+        attachment_index: usize,
         ctx: &serenity::Context,
         msg: &serenity::Message,
-    ) -> Result<(&'a str, T), (Box<dyn std::error::Error + Send + Sync>, Option<String>)> {
+    ) -> Result<(&'a str, usize, T), (Box<dyn std::error::Error + Send + Sync>, Option<String>)>
+    {
         let (args, string) = pop_string(args).map_err(|_| (TooFewArguments.into(), None))?;
         let object = T::convert(ctx, msg.guild_id, Some(msg.channel_id), &string)
             .await
             .map_err(|e| (e.into(), Some(string)))?;
 
-        Ok((args.trim_start(), object))
+        Ok((args.trim_start(), attachment_index, object))
     }
 }
 
@@ -77,10 +81,12 @@ impl<'a, T: PopArgument<'a> + Send + Sync> PopArgumentHack<'a, T> for &PhantomDa
     async fn pop_from(
         self,
         args: &'a str,
+        attachment_index: usize,
         ctx: &serenity::Context,
         msg: &serenity::Message,
-    ) -> Result<(&'a str, T), (Box<dyn std::error::Error + Send + Sync>, Option<String>)> {
-        T::pop_from(args, ctx, msg).await
+    ) -> Result<(&'a str, usize, T), (Box<dyn std::error::Error + Send + Sync>, Option<String>)>
+    {
+        T::pop_from(args, attachment_index, ctx, msg).await
     }
 }
 
@@ -89,9 +95,11 @@ impl<'a> PopArgumentHack<'a, bool> for &PhantomData<bool> {
     async fn pop_from(
         self,
         args: &'a str,
+        attachment_index: usize,
         ctx: &serenity::Context,
         msg: &serenity::Message,
-    ) -> Result<(&'a str, bool), (Box<dyn std::error::Error + Send + Sync>, Option<String>)> {
+    ) -> Result<(&'a str, usize, bool), (Box<dyn std::error::Error + Send + Sync>, Option<String>)>
+    {
         let (args, string) = pop_string(args).map_err(|_| (TooFewArguments.into(), None))?;
 
         let value = match string.to_ascii_lowercase().trim() {
@@ -100,7 +108,7 @@ impl<'a> PopArgumentHack<'a, bool> for &PhantomData<bool> {
             _ => return Err((InvalidBool.into(), Some(string))),
         };
 
-        Ok((args.trim_start(), value))
+        Ok((args.trim_start(), attachment_index, value))
     }
 }
 
@@ -109,19 +117,19 @@ impl<'a> PopArgumentHack<'a, serenity::Attachment> for &PhantomData<serenity::At
     async fn pop_from(
         self,
         args: &'a str,
+        attachment_index: usize,
         ctx: &serenity::Context,
         msg: &serenity::Message,
     ) -> Result<
-        (&'a str, serenity::Attachment),
+        (&'a str, usize, serenity::Attachment),
         (Box<dyn std::error::Error + Send + Sync>, Option<String>),
     > {
-        // TODO this needs to grab attachments in sequence
         let attachment = msg
             .attachments
-            .get(0)
+            .get(attachment_index)
             .ok_or_else(|| (TooFewArguments.into(), None))?
             .to_owned();
 
-        Ok((args, attachment))
+        Ok((args, attachment_index + 1, attachment))
     }
 }
