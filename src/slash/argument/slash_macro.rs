@@ -51,12 +51,12 @@ impl std::error::Error for SlashArgError {
 #[macro_export]
 macro_rules! _parse_slash {
     // Extract Option<T>
-    ($ctx:ident, $guild_id:ident, $channel_id:ident, $data:ident, $args:ident => $name:ident: Option<$type:ty $(,)*>) => {
+    ($ctx:ident, $interaction:ident, $args:ident => $name:ident: Option<$type:ty $(,)*>) => {
         if let Some(arg) = $args.iter().find(|arg| arg.name == stringify!($name)) {
             let arg = arg.value
             .as_ref()
             .ok_or($crate::SlashArgError::CommandStructureMismatch("expected argument value"))?;
-            Some($crate::extract_slash_argument!($type, $ctx, $guild_id, Some($channel_id), $data, arg)
+            Some($crate::extract_slash_argument!($type, $ctx, $interaction, arg)
                 .await?)
         } else {
             None
@@ -65,22 +65,22 @@ macro_rules! _parse_slash {
 
     // Extract Vec<T> (delegating to Option<T> because slash commands don't support variadic
     // arguments right now)
-    ($ctx:ident, $guild_id:ident, $channel_id:ident, $data:ident, $args:ident => $name:ident: Vec<$type:ty $(,)*>) => {
-        match $crate::_parse_slash!($ctx, $guild_id, $channel_id, $data, $args => $name: Option<$type>) {
+    ($ctx:ident, $interaction:ident, $args:ident => $name:ident: Vec<$type:ty $(,)*>) => {
+        match $crate::_parse_slash!($ctx, $interaction, $args => $name: Option<$type>) {
             Some(value) => vec![value],
             None => vec![],
         }
     };
 
     // Extract #[flag]
-    ($ctx:ident, $guild_id:ident, $channel_id:ident, $data:ident, $args:ident => $name:ident: FLAG) => {
-        $crate::_parse_slash!($ctx, $guild_id, $channel_id, $data, $args => $name: Option<bool>)
+    ($ctx:ident, $interaction:ident, $args:ident => $name:ident: FLAG) => {
+        $crate::_parse_slash!($ctx, $interaction, $args => $name: Option<bool>)
             .unwrap_or(false)
     };
 
     // Extract T
-    ($ctx:ident, $guild_id:ident, $channel_id:ident, $data:ident, $args:ident => $name:ident: $($type:tt)*) => {
-        $crate::_parse_slash!($ctx, $guild_id, $channel_id, $data, $args => $name: Option<$($type)*>)
+    ($ctx:ident, $interaction:ident, $args:ident => $name:ident: $($type:tt)*) => {
+        $crate::_parse_slash!($ctx, $interaction, $args => $name: Option<$($type)*>)
             .ok_or($crate::SlashArgError::CommandStructureMismatch("a required argument is missing"))?
     };
 }
@@ -115,10 +115,11 @@ macro_rules! parse_slash_args {
         async /* not move! */ {
             use $crate::SlashArgumentHack;
 
-            let (ctx, guild_id, channel_id, data, args) = ($ctx, $interaction.guild_id(), $interaction.channel_id(), $interaction.data(), $args);
+            // ctx here is a serenity::Context, so it doesn't already contain interaction!
+            let (ctx, interaction, args) = ($ctx, $interaction, $args);
 
             Ok::<_, $crate::SlashArgError>(( $(
-                $crate::_parse_slash!( ctx, guild_id, channel_id, data, args => $name: $($type)* ),
+                $crate::_parse_slash!( ctx, interaction, args => $name: $($type)* ),
             )* ))
         }
     };

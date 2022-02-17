@@ -61,9 +61,7 @@ pub fn slash_choice_parameter(input: syn::DeriveInput) -> Result<TokenStream, da
         impl poise::SlashArgument for #enum_ident {
             async fn extract(
                 _: &poise::serenity_prelude::Context,
-                _: Option<poise::serenity_prelude::GuildId>,
-                _: Option<poise::serenity_prelude::ChannelId>,
-                _: &poise::serenity_prelude::ApplicationCommandInteractionData,
+                _: poise::ApplicationCommandOrAutocompleteInteraction<'_>,
                 value: &poise::serenity::json::Value,
             ) -> Result<Self, poise::SlashArgError> {
                 use poise::serenity_prelude::json::prelude::*;
