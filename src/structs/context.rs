@@ -200,6 +200,7 @@ impl<'a, U, E> Context<'a, U, E> {
         }
     }
 
+    /// Actual implementation of rerun() that returns FrameworkError for implementation convenience
     async fn rerun_inner(self) -> Result<(), crate::FrameworkError<'a, U, E>> {
         match self {
             Self::Application(ctx) => {

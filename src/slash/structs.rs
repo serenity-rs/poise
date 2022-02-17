@@ -75,7 +75,7 @@ pub struct ApplicationContext<'a, U, E> {
     /// Slash command arguments
     ///
     /// **Not** equivalent to `self.interaction.data().options`. That one refers to just the
-    /// top-level command arguments, whereas [`Self::options`] is the options of the actual
+    /// top-level command arguments, whereas [`Self::args`] is the options of the actual
     /// subcommand, if any.
     pub args: &'a [serenity::ApplicationCommandInteractionDataOption],
     /// Keeps track of whether an initial response has been sent.
