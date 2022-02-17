@@ -113,13 +113,13 @@ async fn main() {
         },
         /// The global error handler for all error cases that may occur
         on_error: |error| Box::pin(on_error(error)),
-        /// This code is ran before every command
+        /// This code is run before every command
         pre_command: |ctx| {
             Box::pin(async move {
                 println!("Executing command {}...", ctx.command().qualified_name);
             })
         },
-        /// This code is ran after a command if it was successful (returned Ok)
+        /// This code is run after a command if it was successful (returned Ok)
         post_command: |ctx| {
             Box::pin(async move {
                 println!("Executed command {}!", ctx.command().qualified_name);
