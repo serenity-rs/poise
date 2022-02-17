@@ -199,6 +199,80 @@ impl<'a, U, E> Context<'a, U, E> {
             Self::Application(ctx) => &ctx.interaction.data().name,
         }
     }
+
+    async fn rerun_inner(self) -> Result<(), crate::FrameworkError<'a, U, E>> {
+        match self {
+            Self::Application(ctx) => {
+                // Skip autocomplete interactions
+                let interaction = match ctx.interaction {
+                    crate::ApplicationCommandOrAutocompleteInteraction::ApplicationCommand(
+                        interaction,
+                    ) => interaction,
+                    crate::ApplicationCommandOrAutocompleteInteraction::Autocomplete(_) => {
+                        return Ok(())
+                    }
+                };
+
+                // Check slash command
+                if interaction.data.kind == serenity::ApplicationCommandType::ChatInput {
+                    return if let Some(action) = ctx.command.slash_action {
+                        action(ctx).await
+                    } else {
+                        Ok(())
+                    };
+                }
+
+                // Check context menu command
+                if let (Some(action), Some(target)) =
+                    (ctx.command.context_menu_action, &interaction.data.target)
+                {
+                    return match action {
+                        crate::ContextMenuCommandAction::User(action) => {
+                            if let serenity::ResolvedTarget::User(user, _) = target {
+                                action(ctx, user.clone()).await
+                            } else {
+                                Ok(())
+                            }
+                        }
+                        crate::ContextMenuCommandAction::Message(action) => {
+                            if let serenity::ResolvedTarget::Message(message) = target {
+                                action(ctx, message.clone()).await
+                            } else {
+                                Ok(())
+                            }
+                        }
+                    };
+                }
+            }
+            Self::Prefix(ctx) => {
+                if let Some(action) = ctx.command.prefix_action {
+                    return action(ctx).await;
+                }
+            }
+        }
+
+        // Fallback if the Command doesn't have the action it needs to execute this context
+        // (This should never happen, because if this context cannot be executed, how could this
+        // method have been called)
+        Ok(())
+    }
+
+    /// Re-runs this entire command invocation
+    ///
+    /// Permission checks are omitted; the command code is directly executed as a function. The
+    /// result is returned by this function
+    pub async fn rerun(self) -> Result<(), E> {
+        match self.rerun_inner().await {
+            Ok(()) => Ok(()),
+            Err(crate::FrameworkError::Command { error, ctx: _ }) => Err(error),
+            // The only code that runs before the actual user code (which would trigger Command
+            // error) is argument parsing. And that's pretty much deterministic. So, because the
+            // current command invocation parsed successfully, we can always expect that a command
+            // rerun will still parse successfully.
+            // Also: can't debug print error because then we need U: Debug + E: Debug bound arghhhhh
+            Err(_other) => panic!("unexpected error before entering command"),
+        }
+    }
 }
 
 /// Trimmed down, more general version of [`Context`]
