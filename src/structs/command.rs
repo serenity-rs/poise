@@ -11,14 +11,12 @@ pub struct Command<U, E> {
     pub prefix_action: Option<
         for<'a> fn(
             crate::PrefixContext<'a, U, E>,
-            args: &'a str,
         ) -> BoxFuture<'a, Result<(), crate::FrameworkError<'a, U, E>>>,
     >,
     /// Callback to execute when this command is invoked in a slash context
     pub slash_action: Option<
         for<'a> fn(
             crate::ApplicationContext<'a, U, E>,
-            &'a [serenity::ApplicationCommandInteractionDataOption],
         ) -> BoxFuture<'a, Result<(), crate::FrameworkError<'a, U, E>>>,
     >,
     /// Callback to execute when this command is invoked in a context menu context

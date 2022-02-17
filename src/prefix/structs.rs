@@ -10,10 +10,12 @@ pub struct PrefixContext<'a, U, E> {
     pub discord: &'a serenity::Context,
     /// The invoking user message
     pub msg: &'a serenity::Message,
-    /// Command name used by the user to invoke this command
-    pub invoked_command_name: &'a str,
     /// Prefix used by the user to invoke this command
     pub prefix: &'a str,
+    /// Command name used by the user to invoke this command
+    pub invoked_command_name: &'a str,
+    /// Entire argument string
+    pub args: &'a str,
     /// Read-only reference to the framework
     ///
     /// Useful if you need the list of commands, for example for a custom help command
@@ -40,8 +42,9 @@ impl<'a, U: std::fmt::Debug, E: std::fmt::Debug> std::fmt::Debug for PrefixConte
         let Self {
             discord: _,
             msg,
-            invoked_command_name,
             prefix,
+            invoked_command_name,
+            args,
             framework: _,
             command: _,
             data,
@@ -50,8 +53,9 @@ impl<'a, U: std::fmt::Debug, E: std::fmt::Debug> std::fmt::Debug for PrefixConte
         f.debug_struct("PrefixContext")
             .field("discord", &"<serenity Context>")
             .field("msg", msg)
-            .field("invoked_command_name", invoked_command_name)
             .field("prefix", prefix)
+            .field("invoked_command_name", invoked_command_name)
+            .field("args", args)
             .field("framework", &"<poise Framework>")
             .field("command", &"<poise Command>")
             .field("data", data)

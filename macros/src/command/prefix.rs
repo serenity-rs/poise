@@ -49,9 +49,9 @@ pub fn generate_prefix_action(inv: &Invocation) -> Result<proc_macro2::TokenStre
     };
 
     Ok(quote::quote! {
-        |ctx, args| Box::pin(async move {
+        |ctx| Box::pin(async move {
             let ( #( #param_names, )* .. ) = ::poise::parse_prefix_args!(
-                ctx.discord, ctx.msg, args, 0 =>
+                ctx.discord, ctx.msg, ctx.args, 0 =>
                 #( #param_specs, )*
                 #wildcard_arg
             ).await.map_err(|(error, input)| poise::FrameworkError::ArgumentParse {

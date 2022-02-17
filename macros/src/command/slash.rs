@@ -134,13 +134,13 @@ pub fn generate_slash_action(inv: &Invocation) -> proc_macro2::TokenStream {
         .collect::<Vec<_>>();
 
     quote::quote! {
-        |ctx, args| Box::pin(async move {
+        |ctx| Box::pin(async move {
             // idk why this can't be put in the macro itself (where the lint is triggered) and
             // why clippy doesn't turn off this lint inside macros in the first place
             #[allow(clippy::needless_question_mark)]
 
             let ( #( #param_names, )* ) = ::poise::parse_slash_args!(
-                ctx.discord, ctx.interaction, args =>
+                ctx.discord, ctx.interaction, ctx.args =>
                 #( (#param_names: #param_types), )*
             ).await.map_err(|error| match error {
                 poise::SlashArgError::CommandStructureMismatch(description) => {

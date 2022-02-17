@@ -72,6 +72,12 @@ pub struct ApplicationContext<'a, U, E> {
     pub discord: &'a serenity::Context,
     /// The interaction which triggered this command execution.
     pub interaction: ApplicationCommandOrAutocompleteInteraction<'a>,
+    /// Slash command arguments
+    ///
+    /// **Not** equivalent to `self.interaction.data().options`. That one refers to just the
+    /// top-level command arguments, whereas [`Self::options`] is the options of the actual
+    /// subcommand, if any.
+    pub args: &'a [serenity::ApplicationCommandInteractionDataOption],
     /// Keeps track of whether an initial response has been sent.
     ///
     /// Discord requires different HTTP endpoints for initial and additional responses.
@@ -101,6 +107,7 @@ impl<U: std::fmt::Debug, E: std::fmt::Debug> std::fmt::Debug for ApplicationCont
         let Self {
             discord: _,
             interaction,
+            args,
             has_sent_initial_response,
             framework: _,
             command: _,
@@ -110,6 +117,7 @@ impl<U: std::fmt::Debug, E: std::fmt::Debug> std::fmt::Debug for ApplicationCont
         f.debug_struct("ApplicationContext")
             .field("discord", &"<serenity Context>")
             .field("interaction", interaction)
+            .field("args", args)
             .field("has_sent_initial_response", has_sent_initial_response)
             .field("framework", &"<poise Framework>")
             .field("command", &"<poise Command>")

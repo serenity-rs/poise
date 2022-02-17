@@ -193,6 +193,7 @@ where
         msg,
         prefix,
         invoked_command_name,
+        args,
         framework,
         data: framework.user_data().await,
         command,
@@ -220,7 +221,7 @@ where
     }
 
     // Execute command
-    (action)(ctx, args).await.map_err(|e| Some((e, command)))?;
+    (action)(ctx).await.map_err(|e| Some((e, command)))?;
 
     (framework.options.post_command)(crate::Context::Prefix(ctx)).await;
 

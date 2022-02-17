@@ -39,10 +39,7 @@ pub async fn extract_command_and_run_checks<'a, U, E>(
     interaction: crate::ApplicationCommandOrAutocompleteInteraction<'a>,
     has_sent_initial_response: &'a std::sync::atomic::AtomicBool,
 ) -> Result<
-    (
-        crate::ApplicationContext<'a, U, E>,
-        &'a [serenity::ApplicationCommandInteractionDataOption],
-    ),
+    crate::ApplicationContext<'a, U, E>,
     Option<(crate::FrameworkError<'a, U, E>, &'a crate::Command<U, E>)>,
 > {
     let search_result = find_matching_command(
@@ -63,6 +60,7 @@ pub async fn extract_command_and_run_checks<'a, U, E>(
         discord: ctx,
         framework,
         interaction,
+        args: leaf_interaction_options,
         command,
         has_sent_initial_response,
     };
@@ -71,7 +69,7 @@ pub async fn extract_command_and_run_checks<'a, U, E>(
         .await
         .map_err(|e| Some((e, command)))?;
 
-    Ok((ctx, leaf_interaction_options))
+    Ok(ctx)
 }
 
 /// Dispatches this interaction onto framework commands, i.e. runs the associated command
@@ -82,7 +80,7 @@ pub async fn dispatch_interaction<'a, U, E>(
     // Need to pass this in from outside because of lifetime issues
     has_sent_initial_response: &'a std::sync::atomic::AtomicBool,
 ) -> Result<(), Option<(crate::FrameworkError<'a, U, E>, &'a crate::Command<U, E>)>> {
-    let (ctx, options) = extract_command_and_run_checks(
+    let ctx = extract_command_and_run_checks(
         framework,
         ctx,
         crate::ApplicationCommandOrAutocompleteInteraction::ApplicationCommand(interaction),
@@ -108,7 +106,7 @@ pub async fn dispatch_interaction<'a, U, E>(
                 .command
                 .slash_action
                 .ok_or(command_structure_mismatch_error)?;
-            action(ctx, options).await
+            action(ctx).await
         }
         serenity::ApplicationCommandType::User => {
             match (ctx.command.context_menu_action, &interaction.data.target) {
@@ -146,7 +144,7 @@ pub async fn dispatch_autocomplete<'a, U, E>(
     // Need to pass this in from outside because of lifetime issues
     has_sent_initial_response: &'a std::sync::atomic::AtomicBool,
 ) -> Result<(), Option<(crate::FrameworkError<'a, U, E>, &'a crate::Command<U, E>)>> {
-    let (ctx, options) = extract_command_and_run_checks(
+    let ctx = extract_command_and_run_checks(
         framework,
         ctx,
         crate::ApplicationCommandOrAutocompleteInteraction::Autocomplete(interaction),
@@ -155,7 +153,7 @@ pub async fn dispatch_autocomplete<'a, U, E>(
     .await?;
 
     // Find which parameter is focused by the user
-    let focused_option = options.iter().find(|o| o.focused).ok_or(None)?;
+    let focused_option = ctx.args.iter().find(|o| o.focused).ok_or(None)?;
 
     // Find the matching parameter from our Command object
     let parameters = &ctx.command.parameters;

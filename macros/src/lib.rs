@@ -84,10 +84,10 @@ fn my_command() -> poise::Command<Data, Error> {
     poise::Command {
         name: "my_command",
         inline_help: "This is a command",
-        prefix_action: Some(|ctx, args| Box::pin(async move {
+        prefix_action: Some(|ctx| Box::pin(async move {
             inner(ctx.into()).await
         })),
-        slash_action: Some(|ctx, args| Box::pin(async move {
+        slash_action: Some(|ctx| Box::pin(async move {
             inner(ctx.into()).await
         })),
         context_menu_action: None,
