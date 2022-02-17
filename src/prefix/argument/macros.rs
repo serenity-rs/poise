@@ -86,7 +86,9 @@ macro_rules! _parse_prefix {
                     attachment = new_attachment;
                 },
                 Err(e) => {
-                    $error = e;
+                    // No `$error = e`, because e.g. parsing into a Vec<Attachment> parameter with
+                    // spare arguments would cause the error from the spare arguments to be the
+                    // Attachment parse error ("missing attachment"), which is confusing
                     break;
                 }
 
