@@ -44,7 +44,10 @@ pub async fn dispatch_event<U, E>(
             if let Some(edit_tracker) = &framework.options.prefix_options.edit_tracker {
                 let msg = edit_tracker.write().unwrap().process_message_update(
                     event,
-                    framework.options().prefix_options.ignore_edit_tracker_cache,
+                    framework
+                        .options()
+                        .prefix_options
+                        .ignore_edits_if_not_yet_responded,
                 );
 
                 if let Some((msg, previously_tracked)) = msg {

@@ -121,10 +121,11 @@ pub struct PrefixFrameworkOptions<U, E> {
     ///
     /// Note: only has an effect if [`Self::edit_tracker`] is set.
     pub execute_untracked_edits: bool,
-    /// Wether or not to ignore message edits on messages outside the cache.
-    /// This can happen if the message edit happens while the command is being invoked, or the
-    /// original message wasn't a command.
-    pub ignore_edit_tracker_cache: bool,
+    /// Whether to ignore message edits on messages that have not yet been responded to.
+    ///
+    /// This is the case if the message edit happens before a command has sent a response, or if the
+    /// command does not send a response at all.
+    pub ignore_edits_if_not_yet_responded: bool,
 
     /// Whether commands in messages emitted by the bot itself should be executed as well.
     pub execute_self_messages: bool,
@@ -151,7 +152,7 @@ impl<U: std::fmt::Debug, E: std::fmt::Debug> std::fmt::Debug for PrefixFramework
             mention_as_prefix,
             edit_tracker,
             execute_untracked_edits,
-            ignore_edit_tracker_cache,
+            ignore_edits_if_not_yet_responded,
             execute_self_messages,
             case_insensitive_commands,
         } = self;
@@ -167,7 +168,10 @@ impl<U: std::fmt::Debug, E: std::fmt::Debug> std::fmt::Debug for PrefixFramework
             .field("mention_as_prefix", mention_as_prefix)
             .field("edit_tracker", edit_tracker)
             .field("execute_untracked_edits", execute_untracked_edits)
-            .field("ignore_edit_tracker_cache", ignore_edit_tracker_cache)
+            .field(
+                "ignore_edits_if_not_yet_responded",
+                ignore_edits_if_not_yet_responded,
+            )
             .field("execute_self_messages", execute_self_messages)
             .field("case_insensitive_commands", case_insensitive_commands)
             .finish()
@@ -184,7 +188,7 @@ impl<U, E> Default for PrefixFrameworkOptions<U, E> {
             mention_as_prefix: true,
             edit_tracker: None,
             execute_untracked_edits: true,
-            ignore_edit_tracker_cache: false,
+            ignore_edits_if_not_yet_responded: false,
             execute_self_messages: false,
             case_insensitive_commands: true,
             // help_when_mentioned: true,

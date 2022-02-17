@@ -78,14 +78,18 @@ impl EditTracker {
     pub(crate) fn process_message_update(
         &mut self,
         user_msg_update: &serenity::MessageUpdateEvent,
-        ignore_edit_tracker_cache: bool,
+        ignore_edits_if_not_yet_responded: bool,
     ) -> Option<(serenity::Message, bool)> {
         match self
             .cache
             .iter_mut()
             .find(|(user_msg, _)| user_msg.id == user_msg_update.id)
         {
-            Some((user_msg, _)) => {
+            Some((user_msg, response)) => {
+                if ignore_edits_if_not_yet_responded && response.is_none() {
+                    return None;
+                }
+
                 // If message content wasn't touched, don't re-run command
                 // Note: this may be Some, but still identical to previous content. We want to
                 // re-run the command in that case too; because that means the user explicitly
@@ -99,13 +103,12 @@ impl EditTracker {
                 Some((user_msg.clone(), true))
             }
             None => {
-                if !ignore_edit_tracker_cache {
-                    let mut user_msg = serenity::CustomMessage::new().build();
-                    update_message(&mut user_msg, user_msg_update.clone());
-                    Some((user_msg, false))
-                } else {
-                    None
+                if ignore_edits_if_not_yet_responded {
+                    return None;
                 }
+                let mut user_msg = serenity::CustomMessage::new().build();
+                update_message(&mut user_msg, user_msg_update.clone());
+                Some((user_msg, false))
             }
         }
     }
