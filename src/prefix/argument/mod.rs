@@ -79,6 +79,16 @@ impl std::fmt::Display for TooFewArguments {
 }
 impl std::error::Error for TooFewArguments {}
 
+/// Error thrown in prefix invocation when there's too few attachments
+#[derive(Debug)]
+pub struct MissingAttachment;
+impl std::fmt::Display for MissingAttachment {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("A required attachment is missing")
+    }
+}
+impl std::error::Error for MissingAttachment {}
+
 /// Error thrown when the user enters a string that is not recognized by a
 /// SlashChoiceParameter-derived enum
 #[derive(Debug)]

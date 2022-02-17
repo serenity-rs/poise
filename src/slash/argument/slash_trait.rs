@@ -19,6 +19,7 @@ pub trait SlashArgument: Sized {
         ctx: &serenity::Context,
         guild: Option<serenity::GuildId>,
         channel: Option<serenity::ChannelId>,
+        data: &serenity::ApplicationCommandInteractionData,
         value: &serenity::json::Value,
     ) -> Result<Self, SlashArgError>;
 
@@ -43,6 +44,7 @@ pub trait SlashArgumentHack<T> {
         ctx: &serenity::Context,
         guild: Option<serenity::GuildId>,
         channel: Option<serenity::ChannelId>,
+        data: &serenity::ApplicationCommandInteractionData,
         value: &serenity::json::Value,
     ) -> Result<T, SlashArgError>;
 
@@ -54,9 +56,9 @@ pub trait SlashArgumentHack<T> {
 /// Uses specialization to get full coverage of types. Pass the type as the first argument
 #[macro_export]
 macro_rules! extract_slash_argument {
-    ($target:ty, $ctx:expr, $guild:expr, $channel:expr, $value:expr) => {{
+    ($target:ty, $ctx:expr, $guild:expr, $channel:expr, $data:expr, $value:expr) => {{
         use $crate::SlashArgumentHack as _;
-        (&&std::marker::PhantomData::<$target>).extract($ctx, $guild, $channel, $value)
+        (&&std::marker::PhantomData::<$target>).extract($ctx, $guild, $channel, $data, $value)
     }};
 }
 /// Full version of [`crate::SlashArgument::create`].
@@ -82,6 +84,7 @@ where
         ctx: &serenity::Context,
         guild: Option<serenity::GuildId>,
         channel: Option<serenity::ChannelId>,
+        _: &serenity::ApplicationCommandInteractionData,
         value: &serenity::json::Value,
     ) -> Result<T, SlashArgError> {
         let string = value
@@ -110,6 +113,7 @@ macro_rules! impl_for_integer {
                 _: &serenity::Context,
                 _: Option<serenity::GuildId>,
                 _: Option<serenity::ChannelId>,
+                _: &serenity::ApplicationCommandInteractionData,
                 value: &serenity::json::Value,
             ) -> Result<$t, SlashArgError> {
                 value
@@ -140,6 +144,7 @@ macro_rules! impl_for_float {
                 _: &serenity::Context,
                 _: Option<serenity::GuildId>,
                 _: Option<serenity::ChannelId>,
+                _: &serenity::ApplicationCommandInteractionData,
                 value: &serenity::json::Value,
             ) -> Result<$t, SlashArgError> {
                 Ok(value
@@ -162,6 +167,7 @@ impl SlashArgumentHack<bool> for &PhantomData<bool> {
         _: &serenity::Context,
         _: Option<serenity::GuildId>,
         _: Option<serenity::ChannelId>,
+        _: &serenity::ApplicationCommandInteractionData,
         value: &serenity::json::Value,
     ) -> Result<bool, SlashArgError> {
         Ok(value
@@ -175,15 +181,52 @@ impl SlashArgumentHack<bool> for &PhantomData<bool> {
 }
 
 #[async_trait::async_trait]
+impl SlashArgumentHack<serenity::Attachment> for &PhantomData<serenity::Attachment> {
+    async fn extract(
+        self,
+        _: &serenity::Context,
+        _: Option<serenity::GuildId>,
+        _: Option<serenity::ChannelId>,
+        data: &serenity::ApplicationCommandInteractionData,
+        value: &Value,
+    ) -> Result<serenity::Attachment, SlashArgError> {
+        let attachment_id = serenity::AttachmentId(
+            value
+                .as_str()
+                .ok_or(SlashArgError::CommandStructureMismatch(
+                    "expected attachment id",
+                ))?
+                .parse()
+                .map_err(|_| {
+                    SlashArgError::CommandStructureMismatch("improper attachment id passed")
+                })?,
+        );
+
+        data.resolved
+            .attachments
+            .get(&attachment_id)
+            .cloned()
+            .ok_or(SlashArgError::CommandStructureMismatch(
+                "attachment id with no attachment",
+            ))
+    }
+
+    fn create(self, builder: &mut serenity::CreateApplicationCommandOption) {
+        builder.kind(serenity::ApplicationCommandOptionType::Attachment);
+    }
+}
+
+#[async_trait::async_trait]
 impl<T: SlashArgument + Sync> SlashArgumentHack<T> for &PhantomData<T> {
     async fn extract(
         self,
         ctx: &serenity::Context,
         guild: Option<serenity::GuildId>,
         channel: Option<serenity::ChannelId>,
+        data: &serenity::ApplicationCommandInteractionData,
         value: &serenity::json::Value,
     ) -> Result<T, SlashArgError> {
-        <T as SlashArgument>::extract(ctx, guild, channel, value).await
+        <T as SlashArgument>::extract(ctx, guild, channel, data, value).await
     }
 
     fn create(self, builder: &mut serenity::CreateApplicationCommandOption) {
@@ -201,11 +244,12 @@ macro_rules! impl_slash_argument {
                 ctx: &serenity::Context,
                 guild: Option<serenity::GuildId>,
                 channel: Option<serenity::ChannelId>,
+                data: &serenity::ApplicationCommandInteractionData,
                 value: &serenity::json::Value,
             ) -> Result<$type, SlashArgError> {
                 // We can parse IDs by falling back to the generic serenity::ArgumentConvert impl
                 PhantomData::<$type>
-                    .extract(ctx, guild, channel, value)
+                    .extract(ctx, guild, channel, data, value)
                     .await
             }
 

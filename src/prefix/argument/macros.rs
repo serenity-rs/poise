@@ -5,52 +5,52 @@
 #[macro_export]
 macro_rules! _parse_prefix {
     // All arguments have been consumed
-    ( $ctx:ident $msg:ident $args:ident => [ $error:ident $( $name:ident )* ] ) => {
+    ( $ctx:ident $msg:ident $args:ident $attachment_index:ident => [ $error:ident $( $name:ident )* ] ) => {
         if $args.is_empty() {
             return Ok(( $( $name, )* ));
         }
     };
 
     // Consume Option<T> greedy-first
-    ( $ctx:ident $msg:ident $args:ident => [ $error:ident $($preamble:tt)* ]
+    ( $ctx:ident $msg:ident $args:ident $attachment_index:ident => [ $error:ident $($preamble:tt)* ]
         (Option<$type:ty $(,)?>)
         $( $rest:tt )*
     ) => {
-        match $crate::pop_prefix_argument!($type, &$args, $ctx, $msg).await {
-            Ok(($args, token)) => {
+        match $crate::pop_prefix_argument!($type, &$args, $attachment_index, $ctx, $msg).await {
+            Ok(($args, $attachment_index, token)) => {
                 let token: Option<$type> = Some(token);
-                $crate::_parse_prefix!($ctx $msg $args => [ $error $($preamble)* token ] $($rest)* );
+                $crate::_parse_prefix!($ctx $msg $args $attachment_index => [ $error $($preamble)* token ] $($rest)* );
             },
             Err(e) => $error = e,
         }
         let token: Option<$type> = None;
-        $crate::_parse_prefix!($ctx $msg $args => [ $error $($preamble)* token ] $($rest)* );
+        $crate::_parse_prefix!($ctx $msg $args $attachment_index => [ $error $($preamble)* token ] $($rest)* );
     };
 
     // Consume Option<T> lazy-first
-    ( $ctx:ident $msg:ident $args:ident => [ $error:ident $($preamble:tt)* ]
+    ( $ctx:ident $msg:ident $args:ident $attachment_index:ident => [ $error:ident $($preamble:tt)* ]
         (#[lazy] Option<$type:ty $(,)?>)
         $( $rest:tt )*
     ) => {
         let token: Option<$type> = None;
-        $crate::_parse_prefix!($ctx $msg $args => [ $error $($preamble)* token ] $($rest)* );
-        match $crate::pop_prefix_argument!($type, &$args, $ctx, $msg).await {
-            Ok(($args, token)) => {
+        $crate::_parse_prefix!($ctx $msg $args $attachment_index => [ $error $($preamble)* token ] $($rest)* );
+        match $crate::pop_prefix_argument!($type, &$args, $attachment_index, $ctx, $msg).await {
+            Ok(($args, $attachment_index, token)) => {
                 let token: Option<$type> = Some(token);
-                $crate::_parse_prefix!($ctx $msg $args => [ $error $($preamble)* token ] $($rest)* );
+                $crate::_parse_prefix!($ctx $msg $args $attachment_index => [ $error $($preamble)* token ] $($rest)* );
             },
             Err(e) => $error = e,
         }
     };
 
     // Consume #[rest] Option<T> until the end of the input
-    ( $ctx:ident $msg:ident $args:ident => [ $error:ident $($preamble:tt)* ]
+    ( $ctx:ident $msg:ident $args:ident $attachment_index:ident => [ $error:ident $($preamble:tt)* ]
         (#[rest] Option<$type:ty $(,)?>)
         $( $rest:tt )*
     ) => {
         if $args.trim_start().is_empty() {
             let token: Option<$type> = None;
-            $crate::_parse_prefix!($ctx $msg $args => [ $error $($preamble)* token ]);
+            $crate::_parse_prefix!($ctx $msg $args $attachment_index => [ $error $($preamble)* token ]);
         } else {
             let input = $args.trim_start();
             match <$type as $crate::serenity_prelude::ArgumentConvert>::convert(
@@ -59,7 +59,7 @@ macro_rules! _parse_prefix {
                 Ok(token) => {
                     let $args = "";
                     let token = Some(token);
-                    $crate::_parse_prefix!($ctx $msg $args => [ $error $($preamble)* token ]);
+                    $crate::_parse_prefix!($ctx $msg $args $attachment_index => [ $error $($preamble)* token ]);
                 },
                 Err(e) => $error = (e.into(), Some(input.to_owned())),
             }
@@ -67,7 +67,7 @@ macro_rules! _parse_prefix {
     };
 
     // Consume Vec<T> greedy-first
-    ( $ctx:ident $msg:ident $args:ident => [ $error:ident $($preamble:tt)* ]
+    ( $ctx:ident $msg:ident $args:ident $attachment_index:ident => [ $error:ident $($preamble:tt)* ]
         (Vec<$type:ty $(,)?>)
         $( $rest:tt )*
     ) => {
@@ -75,15 +75,20 @@ macro_rules! _parse_prefix {
         let mut token_rest_args = vec![$args.clone()];
 
         let mut running_args = $args.clone();
+        let mut attachment = $attachment_index;
+
         loop {
-            match $crate::pop_prefix_argument!($type, &running_args, $ctx, $msg).await {
-                Ok((popped_args, token)) => {
+            match $crate::pop_prefix_argument!($type, &running_args, attachment, $ctx, $msg).await {
+                Ok((popped_args, new_attachment, token)) => {
                     tokens.push(token);
                     token_rest_args.push(popped_args.clone());
                     running_args = popped_args;
+                    attachment = new_attachment;
                 },
                 Err(e) => {
-                    $error = e;
+                    // No `$error = e`, because e.g. parsing into a Vec<Attachment> parameter with
+                    // spare arguments would cause the error from the spare arguments to be the
+                    // Attachment parse error ("missing attachment"), which is confusing
                     break;
                 }
 
@@ -92,7 +97,7 @@ macro_rules! _parse_prefix {
 
         // This will run at least once
         while let Some(token_rest_args) = token_rest_args.pop() {
-            $crate::_parse_prefix!($ctx $msg token_rest_args => [ $error $($preamble)* tokens ] $($rest)* );
+            $crate::_parse_prefix!($ctx $msg token_rest_args attachment => [ $error $($preamble)* tokens ] $($rest)* );
             tokens.pop();
         }
     };
@@ -101,7 +106,7 @@ macro_rules! _parse_prefix {
     // inconsistency and also the further implementation work makes it not worth it.
 
     // Consume #[rest] T as the last argument
-    ( $ctx:ident $msg:ident $args:ident => [ $error:ident $($preamble:tt)* ]
+    ( $ctx:ident $msg:ident $args:ident $attachment_index:ident => [ $error:ident $($preamble:tt)* ]
         // question to my former self: why the $(poise::)* ?
         (#[rest] $(poise::)* $type:ty)
     ) => {
@@ -114,7 +119,7 @@ macro_rules! _parse_prefix {
             ).await {
                 Ok(token) => {
                     let $args = "";
-                    $crate::_parse_prefix!($ctx $msg $args => [ $error $($preamble)* token ]);
+                    $crate::_parse_prefix!($ctx $msg $args $attachment_index => [ $error $($preamble)* token ]);
                 },
                 Err(e) => $error = (e.into(), Some(input.to_owned())),
             }
@@ -122,31 +127,31 @@ macro_rules! _parse_prefix {
     };
 
     // Consume #[flag] FLAGNAME
-    ( $ctx:ident $msg:ident $args:ident => [ $error:ident $($preamble:tt)* ]
+    ( $ctx:ident $msg:ident $args:ident $attachment_index:ident => [ $error:ident $($preamble:tt)* ]
         (#[flag] $name:literal)
         $( $rest:tt )*
     ) => {
-        match $crate::pop_prefix_argument!(String, &$args, $ctx, $msg).await {
-            Ok(($args, token)) if token.eq_ignore_ascii_case($name) => {
-                $crate::_parse_prefix!($ctx $msg $args => [ $error $($preamble)* true ] $($rest)* );
+        match $crate::pop_prefix_argument!(String, &$args, $attachment_index, $ctx, $msg).await {
+            Ok(($args, $attachment_index, token)) if token.eq_ignore_ascii_case($name) => {
+                $crate::_parse_prefix!($ctx $msg $args $attachment_index => [ $error $($preamble)* true ] $($rest)* );
             },
             // only allow backtracking if the flag didn't match: it's confusing for the user if they
             // precisely set the flag but it's ignored
             _ => {
                 $error = (concat!("Must use either `", $name, "` or nothing as a modifier").into(), None);
-                $crate::_parse_prefix!($ctx $msg $args => [ $error $($preamble)* false ] $($rest)* );
+                $crate::_parse_prefix!($ctx $msg $args $attachment_index => [ $error $($preamble)* false ] $($rest)* );
             }
         }
     };
 
     // Consume T
-    ( $ctx:ident $msg:ident $args:ident => [ $error:ident $($preamble:tt)* ]
+    ( $ctx:ident $msg:ident $args:ident $attachment_index:ident => [ $error:ident $($preamble:tt)* ]
         ($type:ty)
         $( $rest:tt )*
     ) => {
-        match $crate::pop_prefix_argument!($type, &$args, $ctx, $msg).await {
-            Ok(($args, token)) => {
-                $crate::_parse_prefix!($ctx $msg $args => [ $error $($preamble)* token ] $($rest)* );
+        match $crate::pop_prefix_argument!($type, &$args, $attachment_index, $ctx, $msg).await {
+            Ok(($args, $attachment_index, token)) => {
+                $crate::_parse_prefix!($ctx $msg $args $attachment_index => [ $error $($preamble)* token ] $($rest)* );
             },
             Err(e) => $error = e,
         }
@@ -180,7 +185,7 @@ to use this macro directly.
 assert_eq!(
     poise::parse_prefix_args!(
         &ctx, &msg,
-        "one two three four" => (String), (Option<u32>), #[rest] (String)
+        "one two three four", 0 => (String), (Option<u32>), #[rest] (String)
     ).await.unwrap(),
     (
         String::from("one"),
@@ -192,7 +197,7 @@ assert_eq!(
 assert_eq!(
     poise::parse_prefix_args!(
         &ctx, &msg,
-        "1 2 3 4" => (String), (Option<u32>), #[rest] (String)
+        "1 2 3 4", 0 => (String), (Option<u32>), #[rest] (String)
     ).await.unwrap(),
     (
         String::from("1"),
@@ -206,7 +211,7 @@ assert_eq!(
 */
 #[macro_export]
 macro_rules! parse_prefix_args {
-    ($ctx:expr, $msg:expr, $args:expr => $(
+    ($ctx:expr, $msg:expr, $args:expr, $attachment_index:expr => $(
         $( #[$attr:ident] )?
         ( $($type:tt)* )
     ),* $(,)? ) => {
@@ -216,12 +221,13 @@ macro_rules! parse_prefix_args {
             let ctx = $ctx;
             let msg = $msg;
             let args = $args;
+            let attachment_index = $attachment_index;
 
             let mut error: (Box<dyn std::error::Error + Send + Sync>, Option<String>)
                 = (Box::new($crate::TooManyArguments) as _, None);
 
             $crate::_parse_prefix!(
-                ctx msg args => [error]
+                ctx msg args attachment_index => [error]
                 $(
                     ($( #[$attr] )? $($type)*)
                 )*
@@ -252,31 +258,31 @@ mod test {
         let msg = serenity::CustomMessage::new().build();
 
         assert_eq!(
-            parse_prefix_args!(&ctx, &msg, "hello" => (Option<String>), (String))
+            parse_prefix_args!(&ctx, &msg, "hello", 0 => (Option<String>), (String))
                 .await
                 .unwrap(),
             (None, "hello".into()),
         );
         assert_eq!(
-            parse_prefix_args!(&ctx, &msg, "a b c" => (Vec<String>), (String))
+            parse_prefix_args!(&ctx, &msg, "a b c", 0 => (Vec<String>), (String))
                 .await
                 .unwrap(),
             (vec!["a".into(), "b".into()], "c".into()),
         );
         assert_eq!(
-            parse_prefix_args!(&ctx, &msg, "a b c" => (Vec<String>), (Vec<String>))
+            parse_prefix_args!(&ctx, &msg, "a b c", 0 => (Vec<String>), (Vec<String>))
                 .await
                 .unwrap(),
             (vec!["a".into(), "b".into(), "c".into()], vec![]),
         );
         assert_eq!(
-            parse_prefix_args!(&ctx, &msg, "a b 8 c" => (Vec<String>), (u32), (Vec<String>))
+            parse_prefix_args!(&ctx, &msg, "a b 8 c", 0 => (Vec<String>), (u32), (Vec<String>))
                 .await
                 .unwrap(),
             (vec!["a".into(), "b".into()], 8, vec!["c".into()]),
         );
         assert_eq!(
-            parse_prefix_args!(&ctx, &msg, "yoo `that's cool` !" => (String), (crate::CodeBlock), (String))
+            parse_prefix_args!(&ctx, &msg, "yoo `that's cool` !", 0 => (String), (crate::CodeBlock), (String))
                 .await
                 .unwrap(),
             (
@@ -289,32 +295,32 @@ mod test {
             ),
         );
         assert_eq!(
-            parse_prefix_args!(&ctx, &msg, "hi" => #[lazy] (Option<String>), (Option<String>))
+            parse_prefix_args!(&ctx, &msg, "hi", 0 => #[lazy] (Option<String>), (Option<String>))
                 .await
                 .unwrap(),
             (None, Some("hi".into())),
         );
         assert_eq!(
-            parse_prefix_args!(&ctx, &msg, "a b c" => (String), #[rest] (String))
+            parse_prefix_args!(&ctx, &msg, "a b c", 0 => (String), #[rest] (String))
                 .await
                 .unwrap(),
             ("a".into(), "b c".into()),
         );
         assert_eq!(
-            parse_prefix_args!(&ctx, &msg, "a b c" => (String), #[rest] (String))
+            parse_prefix_args!(&ctx, &msg, "a b c", 0 => (String), #[rest] (String))
                 .await
                 .unwrap(),
             ("a".into(), "b c".into()),
         );
         assert!(
-            parse_prefix_args!(&ctx, &msg, "hello" => #[flag] ("hello"), #[rest] (String))
+            parse_prefix_args!(&ctx, &msg, "hello", 0 => #[flag] ("hello"), #[rest] (String))
                 .await
                 .unwrap_err()
                 .0
                 .is::<crate::TooFewArguments>(),
         );
         assert_eq!(
-            parse_prefix_args!(&ctx, &msg, "helloo" => #[flag] ("hello"), #[rest] (String))
+            parse_prefix_args!(&ctx, &msg, "helloo", 0 => #[flag] ("hello"), #[rest] (String))
                 .await
                 .unwrap(),
             (false, "helloo".into())
