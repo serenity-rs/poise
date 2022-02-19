@@ -9,8 +9,4 @@ Poise is an opinionated Discord bot framework with a few distinctive features:
 - slash commands: completely define both normal and slash commands with a single function
 - flexible argument parsing: command parameters are defined with normal Rust types and parsed automatically
 
-I created this framework mainly for personal use ([rustbot](<https://github.com/kangalioo/rustbot>)
-and [etternabot](<https://github.com/kangalioo/etternabot>)). Features are added on demand, since
-it's easy to draft a good design when you know exactly what the feature will be used for.
-
 # [See documentation for more info](https://kangalioo.github.io/poise/)
