@@ -142,7 +142,7 @@ impl<U, E> ApplicationContext<'_, U, E> {
         interaction
             .create_interaction_response(self.discord, |f| {
                 f.kind(serenity::InteractionResponseType::DeferredChannelMessageWithSource)
-                    .interaction_response_data(|f| f.flags(flags))
+                    .interaction_response_data(|b| b.flags(flags))
             })
             .await?;
         self.has_sent_initial_response

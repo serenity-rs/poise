@@ -282,7 +282,7 @@ pub async fn servers<U, E>(ctx: crate::Context<'_, U, E>) -> Result<(), serenity
         response += "\n_Showing private guilds because you are the bot owner_\n";
     }
 
-    ctx.send(|f| f.content(response).ephemeral(show_private_guilds))
+    ctx.send(|b| b.content(response).ephemeral(show_private_guilds))
         .await?;
 
     Ok(())

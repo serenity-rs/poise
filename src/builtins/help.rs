@@ -54,7 +54,7 @@ async fn help_single_command<U, E>(
         format!("No such command `{}`", command_name)
     };
 
-    ctx.send(|f| f.content(reply).ephemeral(config.ephemeral))
+    ctx.send(|b| b.content(reply).ephemeral(config.ephemeral))
         .await?;
     Ok(())
 }
@@ -133,7 +133,7 @@ async fn help_all_commands<U, E>(
     menu += config.extra_text_at_bottom;
     menu += "\n```";
 
-    ctx.send(|f| f.content(menu).ephemeral(config.ephemeral))
+    ctx.send(|b| b.content(menu).ephemeral(config.ephemeral))
         .await?;
     Ok(())
 }
