@@ -274,6 +274,24 @@ impl<'a, U, E> Context<'a, U, E> {
             Err(_other) => panic!("unexpected error before entering command"),
         }
     }
+
+    // TODO: implement invocation_string. Needs hierarchy of parent commands available, e.g. as
+    // `parent_commands: Vec<&'a Command>` field. But... do I want to do that?
+    /* pub fn invocation_string(&self) -> String {
+        match self {
+            Context::Application(ctx) => {
+                let mut string = String::from("/");
+                string += ctx.interaction.data().name; // ... ah crap we need to traverse hierarchy of parent commands
+                for arg in ctx.args {
+                    string += " ";
+                    string += arg.name;
+                    string += ":";
+                    strińg +=
+                }
+            },
+            Context::Prefix(ctx) => ctx.msg.content.clone(),
+        }
+    } */
 }
 
 /// Trimmed down, more general version of [`Context`]
