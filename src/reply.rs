@@ -103,14 +103,15 @@ impl<'a> CreateReply<'a> {
 
 /// Returned from [`send_reply`] to retrieve the sent message object.
 ///
-/// For prefix commands, you can retrieve the sent message directly. For slash commands, Discord
-/// requires a network request.
+/// Discord sometimes returns the [`Message`] object directly, but sometimes you have to request
+/// it manually. This enum abstracts over the two cases
 pub enum ReplyHandle<'a> {
-    /// When sending a normal message, Discord returns the message object directly
-    Prefix(Box<serenity::Message>),
-    /// When sending an application command response, you need to request the message object
+    /// When sending a normal message or application command followup response, Discord returns the
+    /// message object directly
+    Known(Box<serenity::Message>),
+    /// When sending an initial application command response, you need to request the message object
     /// seperately
-    Application {
+    Unknown {
         /// Serenity HTTP instance that can be used to request the interaction response message
         /// object
         http: &'a serenity::Http,
@@ -126,10 +127,8 @@ impl ReplyHandle<'_> {
     /// Only needs to do an HTTP request in the application command response case
     pub async fn message(self) -> Result<serenity::Message, serenity::Error> {
         match self {
-            Self::Prefix(msg) => Ok(*msg),
-            Self::Application { http, interaction } => {
-                interaction.get_interaction_response(http).await
-            }
+            Self::Known(msg) => Ok(*msg),
+            Self::Unknown { http, interaction } => interaction.get_interaction_response(http).await,
         }
     }
 }
@@ -157,24 +156,10 @@ pub async fn send_reply<'a, U, E>(
     builder: impl for<'b> FnOnce(&'b mut CreateReply<'a>) -> &'b mut CreateReply<'a>,
 ) -> Result<Option<ReplyHandle<'_>>, serenity::Error> {
     Ok(match ctx {
-        crate::Context::Prefix(ctx) => Some(ReplyHandle::Prefix(
+        crate::Context::Prefix(ctx) => Some(ReplyHandle::Known(
             crate::send_prefix_reply(ctx, builder).await?,
         )),
-        crate::Context::Application(ctx) => {
-            crate::send_application_reply(ctx, builder).await?;
-
-            if let crate::ApplicationCommandOrAutocompleteInteraction::ApplicationCommand(
-                interaction,
-            ) = &ctx.interaction
-            {
-                Some(ReplyHandle::Application {
-                    interaction,
-                    http: &ctx.discord.http,
-                })
-            } else {
-                None
-            }
-        }
+        crate::Context::Application(ctx) => crate::send_application_reply(ctx, builder).await?,
     })
 }
 

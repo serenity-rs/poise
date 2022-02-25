@@ -123,10 +123,10 @@ fn send_as_edit(data: crate::CreateReply<'_>, f: &mut serenity::EditInteractionR
 pub async fn send_application_reply<'a, U, E>(
     ctx: ApplicationContext<'_, U, E>,
     builder: impl for<'b> FnOnce(&'b mut crate::CreateReply<'a>) -> &'b mut crate::CreateReply<'a>,
-) -> Result<(), serenity::Error> {
+) -> Result<Option<crate::ReplyHandle<'_>>, serenity::Error> {
     let interaction = match ctx.interaction {
         crate::ApplicationCommandOrAutocompleteInteraction::ApplicationCommand(x) => x,
-        crate::ApplicationCommandOrAutocompleteInteraction::Autocomplete(_) => return Ok(()),
+        crate::ApplicationCommandOrAutocompleteInteraction::Autocomplete(_) => return Ok(None),
     };
 
     let mut data = crate::CreateReply {
@@ -143,22 +143,22 @@ pub async fn send_application_reply<'a, U, E>(
         .has_sent_initial_response
         .load(std::sync::atomic::Ordering::SeqCst);
 
-    if has_sent_initial_response {
-        if ctx.command.reuse_response {
+    Ok(Some(if has_sent_initial_response {
+        crate::ReplyHandle::Known(Box::new(if ctx.command.reuse_response {
             interaction
                 .edit_original_interaction_response(ctx.discord, |f| {
                     send_as_edit(data, f);
                     f
                 })
-                .await?;
+                .await?
         } else {
             interaction
                 .create_followup_message(ctx.discord, |f| {
                     send_as_followup_response(data, f);
                     f
                 })
-                .await?;
-        }
+                .await?
+        }))
     } else {
         interaction
             .create_interaction_response(ctx.discord, |r| {
@@ -171,7 +171,10 @@ pub async fn send_application_reply<'a, U, E>(
             .await?;
         ctx.has_sent_initial_response
             .store(true, std::sync::atomic::Ordering::SeqCst);
-    }
 
-    Ok(())
+        crate::ReplyHandle::Unknown {
+            http: &ctx.discord.http,
+            interaction,
+        }
+    }))
 }
