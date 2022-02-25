@@ -1,4 +1,4 @@
-//! Implements the #[derive(SlashChoiceParameter)] derive macro
+//! Implements the #[derive(ChoiceParameter)] derive macro
 
 use proc_macro::TokenStream;
 use syn::spanned::Spanned as _;
@@ -10,7 +10,7 @@ struct VariantAttribute {
     name: Vec<String>,
 }
 
-pub fn slash_choice_parameter(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
+pub fn choice_parameter(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
     let enum_ = match input.data {
         syn::Data::Enum(x) => x,
         _ => {
@@ -30,7 +30,7 @@ pub fn slash_choice_parameter(input: syn::DeriveInput) -> Result<TokenStream, da
         if !matches!(&variant.fields, syn::Fields::Unit) {
             return Err(syn::Error::new(
                 variant.fields.span(),
-                "Slash choice parameters cannot have fields",
+                "Choice parameters cannot have fields",
             )
             .into());
         }

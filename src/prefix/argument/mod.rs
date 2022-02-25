@@ -90,7 +90,7 @@ impl std::fmt::Display for MissingAttachment {
 impl std::error::Error for MissingAttachment {}
 
 /// Error thrown when the user enters a string that is not recognized by a
-/// SlashChoiceParameter-derived enum
+/// ChoiceParameter-derived enum
 #[derive(Debug)]
 pub struct InvalidChoice;
 impl std::fmt::Display for InvalidChoice {

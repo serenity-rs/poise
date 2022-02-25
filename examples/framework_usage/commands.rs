@@ -76,7 +76,7 @@ pub async fn addmultiple(
     Ok(())
 }
 
-#[derive(Debug, poise::SlashChoiceParameter)]
+#[derive(Debug, poise::ChoiceParameter)]
 pub enum MyStringChoice {
     #[name = "The first choice"]
     A,

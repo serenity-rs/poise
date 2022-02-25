@@ -1,5 +1,5 @@
+mod choice_parameter;
 mod command;
-mod slash_choice_parameter;
 
 use proc_macro::TokenStream;
 
@@ -121,7 +121,7 @@ is mainly useful in slash commands. It allows you to constrain input to a fixed 
 # Example
 
 ```rust
-#[derive(Debug, poise::SlashChoiceParameter)]
+#[derive(Debug, poise::ChoiceParameter)]
 pub enum MyStringChoice {
     #[name = "The first choice"]
     ChoiceA,
@@ -140,12 +140,19 @@ pub async fn choice(
 }
 ```
 */
-#[proc_macro_derive(SlashChoiceParameter, attributes(name))]
-pub fn slash_choice_parameter(input: TokenStream) -> TokenStream {
+#[proc_macro_derive(ChoiceParameter, attributes(name))]
+pub fn choice_parameter(input: TokenStream) -> TokenStream {
     let enum_ = syn::parse_macro_input!(input as syn::DeriveInput);
 
-    match slash_choice_parameter::slash_choice_parameter(enum_) {
+    match choice_parameter::choice_parameter(enum_) {
         Ok(x) => x,
         Err(e) => e.write_errors().into(),
     }
+}
+
+/// See [`ChoiceParameter`]
+#[deprecated = "renamed to ChoiceParameter"]
+#[proc_macro_derive(SlashChoiceParameter, attributes(name))]
+pub fn slash_choice_parameter(input: TokenStream) -> TokenStream {
+    choice_parameter(input)
 }
