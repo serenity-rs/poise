@@ -103,8 +103,8 @@ impl<'a> CreateReply<'a> {
 
 /// Returned from [`send_reply`] to retrieve the sent message object.
 ///
-/// Discord sometimes returns the [`Message`] object directly, but sometimes you have to request
-/// it manually. This enum abstracts over the two cases
+/// Discord sometimes returns the [`serenity::Message`] object directly, but sometimes you have to
+/// request it manually. This enum abstracts over the two cases
 pub enum ReplyHandle<'a> {
     /// When sending a normal message or application command followup response, Discord returns the
     /// message object directly
