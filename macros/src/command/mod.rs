@@ -241,11 +241,7 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
         None => None,
     });
 
-    let identifying_name = inv
-        .args
-        .identifying_name
-        .as_ref()
-        .unwrap_or(&inv.command_name);
+    let identifying_name = inv.function.sig.ident.to_string();
     let command_name = &inv.command_name;
     let context_menu_name = wrap_option(inv.args.context_menu_command.as_ref());
 

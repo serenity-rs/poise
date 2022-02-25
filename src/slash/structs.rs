@@ -139,14 +139,19 @@ impl<U, E> ApplicationContext<'_, U, E> {
             flags |= serenity::InteractionApplicationCommandCallbackDataFlags::EPHEMERAL;
         }
 
-        interaction
-            .create_interaction_response(self.discord, |f| {
-                f.kind(serenity::InteractionResponseType::DeferredChannelMessageWithSource)
-                    .interaction_response_data(|b| b.flags(flags))
-            })
-            .await?;
-        self.has_sent_initial_response
-            .store(true, std::sync::atomic::Ordering::SeqCst);
+        if !self
+            .has_sent_initial_response
+            .load(std::sync::atomic::Ordering::SeqCst)
+        {
+            interaction
+                .create_interaction_response(self.discord, |f| {
+                    f.kind(serenity::InteractionResponseType::DeferredChannelMessageWithSource)
+                        .interaction_response_data(|b| b.flags(flags))
+                })
+                .await?;
+            self.has_sent_initial_response
+                .store(true, std::sync::atomic::Ordering::SeqCst);
+        }
         Ok(())
     }
 }
