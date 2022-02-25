@@ -21,13 +21,13 @@ it's easier to draft a good design when you know exactly which practical needs i
 ```rust,no_run
 use poise::serenity_prelude as serenity;
 
-type Data = ();
+struct Data {}
 type Error = Box<dyn std::error::Error + Send + Sync>;
 type Context<'a> = poise::Context<'a, Data, Error>;
 
 /// Display your or another user's account creation date
 #[poise::command(prefix_command, slash_command, track_edits)]
-pub async fn age(
+async fn age(
     ctx: Context<'_>,
     #[description = "Selected user"] user: Option<serenity::User>,
 ) -> Result<(), Error> {
@@ -41,7 +41,9 @@ pub async fn age(
 async fn main() {
     poise::Framework::build()
         .token(std::env::var("DISCORD_BOT_TOKEN").unwrap())
-        .user_data_setup(move |_ctx, _ready, _framework| Box::pin(async move { Ok(()) }))
+        .user_data_setup(move |_ctx, _ready, _framework| Box::pin(async move {
+            Ok(Data {})
+        }))
         .options(poise::FrameworkOptions {
             // configure framework here
             prefix_options: poise::PrefixFrameworkOptions {
