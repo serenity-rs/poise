@@ -132,6 +132,20 @@ impl<'a, U, E> Context<'a, U, E> {
         self.guild_id()?.to_guild_cached(self.discord())
     }
 
+    // Doesn't fit in with the rest of the functions here but it's convenient
+    /// Returns the author of the invoking message or interaction, as a [`serenity::Member`]
+    ///
+    /// Returns None if this command was invoked in DMs, or if the member cache lookup or HTTP
+    /// request failed
+    ///
+    /// Warning: clones the entire Member instance out of the cache
+    pub async fn author_member(&self) -> Option<serenity::Member> {
+        self.guild_id()?
+            .member(self.discord(), self.author().id)
+            .await
+            .ok()
+    }
+
     /// Return the datetime of the invoking message or interaction
     pub fn created_at(&self) -> serenity::Timestamp {
         match self {
