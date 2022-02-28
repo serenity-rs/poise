@@ -233,7 +233,7 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
         false => None,
     });
     let slash_action = wrap_option(match inv.args.slash_command {
-        true => Some(slash::generate_slash_action(&inv)),
+        true => Some(slash::generate_slash_action(&inv)?),
         false => None,
     });
     let context_menu_action = wrap_option(match &inv.args.context_menu_command {

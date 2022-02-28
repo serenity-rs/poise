@@ -122,7 +122,19 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
         .collect::<Vec<_>>())
 }
 
-pub fn generate_slash_action(inv: &Invocation) -> proc_macro2::TokenStream {
+pub fn generate_slash_action(inv: &Invocation) -> Result<proc_macro2::TokenStream, syn::Error> {
+    if let Some(desc) = &inv.description {
+        if desc.len() > 100 {
+            return Err(syn::Error::new(
+                inv.function.span(),
+                format!(
+                    "slash command description too long ({} chars, must be max 100)",
+                    desc.len()
+                ),
+            ));
+        }
+    }
+
     let param_names = inv.parameters.iter().map(|p| &p.name).collect::<Vec<_>>();
     let param_types = inv
         .parameters
@@ -133,7 +145,7 @@ pub fn generate_slash_action(inv: &Invocation) -> proc_macro2::TokenStream {
         })
         .collect::<Vec<_>>();
 
-    quote::quote! {
+    Ok(quote::quote! {
         |ctx| Box::pin(async move {
             // idk why this can't be put in the macro itself (where the lint is triggered) and
             // why clippy doesn't turn off this lint inside macros in the first place
@@ -162,7 +174,7 @@ pub fn generate_slash_action(inv: &Invocation) -> proc_macro2::TokenStream {
                     ctx: ctx.into(),
                 })
         })
-    }
+    })
 }
 
 pub fn generate_context_menu_action(
