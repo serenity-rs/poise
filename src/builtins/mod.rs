@@ -138,14 +138,24 @@ pub async fn autocomplete_command<U, E>(
 pub fn create_application_commands<U, E>(
     commands: &[crate::Command<U, E>],
 ) -> serenity::CreateApplicationCommands {
+    fn recursively_add_context_menu_commands<U, E>(
+        builder: &mut serenity::CreateApplicationCommands,
+        command: &crate::Command<U, E>,
+    ) {
+        if let Some(context_menu_command) = command.create_as_context_menu_command() {
+            builder.add_application_command(context_menu_command);
+        }
+        for subcommand in &command.subcommands {
+            recursively_add_context_menu_commands(builder, subcommand);
+        }
+    }
+
     let mut commands_builder = serenity::CreateApplicationCommands::default();
     for command in commands {
         if let Some(slash_command) = command.create_as_slash_command() {
             commands_builder.add_application_command(slash_command);
         }
-        if let Some(context_menu_command) = command.create_as_context_menu_command() {
-            commands_builder.add_application_command(context_menu_command);
-        }
+        recursively_add_context_menu_commands(&mut commands_builder, command);
     }
     commands_builder
 }
