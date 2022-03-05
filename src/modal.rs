@@ -63,7 +63,7 @@ pub fn find_modal_text(
 ///
 /// #[poise::command(slash_command)]
 /// pub async fn modal(ctx: ApplicationContext<'_>) -> Result<(), Error> {
-///     let data = MyModal::execute(ctx.discord, ctx.interaction.unwrap()).await?;
+///     let data = MyModal::execute(ctx).await?;
 ///     println!("Got data: {:?}", data);
 ///
 ///     Ok(())
@@ -85,27 +85,30 @@ pub trait Modal: Sized {
     /// 2. waits for the user to submit via [`serenity::CollectModalInteraction`]
     /// 3. acknowledges the submitted data so that Discord closes the pop-up for the user
     /// 4. parses the submitted data via [`Self::parse()`], wrapping errors in [`serenity::Error::Other`]
-    async fn execute(
-        ctx: &serenity::Context,
-        interaction: &serenity::ApplicationCommandInteraction,
+    async fn execute<U: Send + Sync, E>(
+        ctx: crate::ApplicationContext<'_, U, E>,
     ) -> Result<Self, serenity::Error> {
+        let interaction = ctx.interaction.unwrap();
+
         // Send modal
         interaction
-            .create_interaction_response(ctx, |b| {
+            .create_interaction_response(ctx.discord, |b| {
                 *b = Self::create();
                 b
             })
             .await?;
+        ctx.has_sent_initial_response
+            .store(true, std::sync::atomic::Ordering::SeqCst);
 
         // Wait for user to submit
-        let response = serenity::CollectModalInteraction::new(&ctx.shard)
+        let response = serenity::CollectModalInteraction::new(&ctx.discord.shard)
             .author_id(interaction.user.id)
             .await
             .unwrap();
 
         // Send acknowledgement so that the pop-up is closed
         response
-            .create_interaction_response(ctx, |b| {
+            .create_interaction_response(ctx.discord, |b| {
                 b.kind(serenity::InteractionResponseType::DeferredUpdateMessage)
             })
             .await?;
