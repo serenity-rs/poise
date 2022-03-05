@@ -1,3 +1,5 @@
+//! Modal trait and utility items for implementing it (mainly for the derive macro)
+
 use crate::serenity_prelude as serenity;
 
 /// Meant for use in derived [`Modal::parse`] implementation
