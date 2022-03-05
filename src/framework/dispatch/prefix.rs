@@ -19,9 +19,16 @@ async fn strip_prefix<'a, U, E>(
             framework,
             data: framework.user_data().await,
         };
-        if let Some(prefix) = dynamic_prefix(partial_ctx).await {
-            if msg.content.starts_with(&prefix) {
-                return Some(msg.content.split_at(prefix.len()));
+        match dynamic_prefix(partial_ctx).await {
+            Ok(prefix) => {
+                if let Some(prefix) = prefix {
+                    if msg.content.starts_with(&prefix) {
+                        return Some(msg.content.split_at(prefix.len()));
+                    }
+                }
+            }
+            Err(error) => {
+                (framework.options.on_error)(crate::FrameworkError::DynamicPrefix { error }).await;
             }
         }
     }
@@ -53,9 +60,15 @@ async fn strip_prefix<'a, U, E>(
     }
 
     if let Some(dynamic_prefix) = framework.options.prefix_options.stripped_dynamic_prefix {
-        if let Some((prefix, content)) = dynamic_prefix(ctx, msg, framework.user_data().await).await
-        {
-            return Some((prefix, content));
+        match dynamic_prefix(ctx, msg, framework.user_data().await).await {
+            Ok(result) => {
+                if let Some((prefix, content)) = result {
+                    return Some((prefix, content));
+                }
+            }
+            Err(error) => {
+                (framework.options.on_error)(crate::FrameworkError::DynamicPrefix { error }).await;
+            }
         }
     }
 

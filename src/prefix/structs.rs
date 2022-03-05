@@ -89,7 +89,7 @@ pub struct PrefixFrameworkOptions<U, E> {
     ///
     /// Override this field for a simple dynamic prefixe which changes depending on the guild or user.
     pub dynamic_prefix:
-        Option<fn(crate::PartialContext<'_, U, E>) -> BoxFuture<'_, Option<String>>>,
+        Option<fn(crate::PartialContext<'_, U, E>) -> BoxFuture<'_, Result<Option<String>, E>>>,
     /// Callback invoked on every message to strip the prefix off an incoming message.
     ///
     /// Override this field for dynamic prefixes which change depending on guild or user.
@@ -105,7 +105,7 @@ pub struct PrefixFrameworkOptions<U, E> {
             &'a serenity::Context,
             &'a serenity::Message,
             &'a U,
-        ) -> BoxFuture<'a, Option<(&'a str, &'a str)>>,
+        ) -> BoxFuture<'a, Result<Option<(&'a str, &'a str)>, E>>,
     >,
     /// Treat a bot mention (a ping) like a prefix
     pub mention_as_prefix: bool,

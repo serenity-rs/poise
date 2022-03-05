@@ -110,6 +110,9 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
             let response = "Only bot owners can call this command";
             ctx.send(|b| b.content(response).ephemeral(true)).await?;
         }
+        crate::FrameworkError::DynamicPrefix { error } => {
+            println!("Dynamic prefix failed: {}", error);
+        }
     }
 
     Ok(())

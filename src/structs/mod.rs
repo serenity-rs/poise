@@ -104,4 +104,10 @@ pub enum FrameworkError<'a, U, E> {
         /// General context
         ctx: Context<'a, U, E>,
     },
+    /// [`crate::PrefixFrameworkOptions::dynamic_prefix`] or
+    /// [`crate::PrefixFrameworkOptions::stripped_dynamic_prefix`] returned an error
+    DynamicPrefix {
+        /// Error which was thrown in the dynamic prefix code
+        error: E,
+    },
 }
