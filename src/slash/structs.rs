@@ -64,6 +64,16 @@ impl<'a> ApplicationCommandOrAutocompleteInteraction<'a> {
             Self::Autocomplete(x) => &x.user,
         }
     }
+
+    /// Returns the inner [`serenity::ApplicationCommandInteraction`] and panics otherwise
+    pub fn unwrap(self) -> &'a serenity::ApplicationCommandInteraction {
+        match self {
+            ApplicationCommandOrAutocompleteInteraction::ApplicationCommand(x) => x,
+            ApplicationCommandOrAutocompleteInteraction::Autocomplete(_) => {
+                panic!("expected application command interaction, got autocomplete interaction")
+            }
+        }
+    }
 }
 
 /// Application command specific context passed to command invocations.

@@ -1,25 +1,6 @@
-use super::{wrap_option, Invocation};
+use super::Invocation;
+use crate::util::{extract_type_parameter, wrap_option};
 use syn::spanned::Spanned as _;
-
-// ngl this is ugly
-// transforms a type of form `OuterType<T>` into `T`
-fn extract_type_parameter<'a>(outer_type: &str, t: &'a syn::Type) -> Option<&'a syn::Type> {
-    if let syn::Type::Path(path) = t {
-        if path.path.segments.len() == 1 {
-            let path = &path.path.segments[0];
-            if path.ident == outer_type {
-                if let syn::PathArguments::AngleBracketed(generics) = &path.arguments {
-                    if generics.args.len() == 1 {
-                        if let syn::GenericArgument::Type(t) = &generics.args[0] {
-                            return Some(t);
-                        }
-                    }
-                }
-            }
-        }
-    }
-    None
-}
 
 pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStream>, syn::Error> {
     let mut parameter_structs = Vec::new();
@@ -94,7 +75,7 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
         };
 
         let channel_types = match &param.args.channel_types {
-            Some(super::List(channel_types)) => quote::quote! { Some(
+            Some(crate::util::List(channel_types)) => quote::quote! { Some(
                 vec![ #( poise::serenity_prelude::ChannelType::#channel_types ),* ]
             ) },
             None => quote::quote! { None },

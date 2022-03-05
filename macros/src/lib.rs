@@ -1,5 +1,7 @@
 mod choice_parameter;
 mod command;
+mod modal;
+mod util;
 
 use proc_macro::TokenStream;
 
@@ -152,4 +154,18 @@ pub fn choice_parameter(input: TokenStream) -> TokenStream {
 #[proc_macro_derive(SlashChoiceParameter, attributes(name))]
 pub fn slash_choice_parameter(input: TokenStream) -> TokenStream {
     choice_parameter(input)
+}
+
+/// See `Modal` trait documentation
+#[proc_macro_derive(
+    Modal,
+    attributes(name, placeholder, min_length, max_length, paragraph)
+)]
+pub fn modal(input: TokenStream) -> TokenStream {
+    let struct_ = syn::parse_macro_input!(input as syn::DeriveInput);
+
+    match modal::modal(struct_) {
+        Ok(x) => x,
+        Err(e) => e.write_errors().into(),
+    }
 }

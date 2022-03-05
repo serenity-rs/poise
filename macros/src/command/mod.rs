@@ -1,40 +1,9 @@
 mod prefix;
 mod slash;
 
+use crate::util::wrap_option;
 use proc_macro::TokenStream;
 use syn::spanned::Spanned as _;
-
-// Convert None => None and Some(T) => Some(T)
-fn wrap_option<T: quote::ToTokens>(literal: Option<T>) -> syn::Expr {
-    match literal {
-        Some(literal) => syn::parse_quote! { Some(#literal) },
-        None => syn::parse_quote! { None },
-    }
-}
-
-struct AllLifetimesToStatic;
-impl syn::fold::Fold for AllLifetimesToStatic {
-    fn fold_lifetime(&mut self, _: syn::Lifetime) -> syn::Lifetime {
-        syn::parse_quote! { 'static }
-    }
-}
-
-#[derive(Debug)]
-struct List<T>(Vec<T>);
-impl<T: darling::FromMeta> darling::FromMeta for List<T> {
-    fn from_list(items: &[::syn::NestedMeta]) -> darling::Result<Self> {
-        items
-            .iter()
-            .map(|item| T::from_nested_meta(item))
-            .collect::<darling::Result<Vec<T>>>()
-            .map(Self)
-    }
-}
-impl<T> Default for List<T> {
-    fn default() -> Self {
-        Self(Default::default())
-    }
-}
 
 /// Representation of the command attribute arguments (`#[command(...)]`)
 #[derive(Default, Debug, darling::FromMeta)]
@@ -44,7 +13,7 @@ pub struct CommandArgs {
     slash_command: bool,
     context_menu_command: Option<String>,
 
-    aliases: List<String>,
+    aliases: crate::util::List<String>,
     invoke_on_edit: bool,
     reuse_response: bool,
     track_edits: bool,
@@ -77,7 +46,7 @@ struct ParamArgs {
     // When changing these, document it in parent file!
     description: Option<String>,
     autocomplete: Option<syn::Path>,
-    channel_types: Option<List<syn::Ident>>,
+    channel_types: Option<crate::util::List<syn::Ident>>,
     min: Option<syn::Lit>,
     max: Option<syn::Lit>,
     lazy: bool,
@@ -226,7 +195,8 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
         }
     };
     // Needed because we're not allowed to have lifetimes in the hacky use case below
-    let ctx_type_with_static = syn::fold::fold_type(&mut AllLifetimesToStatic, ctx_type.clone());
+    let ctx_type_with_static =
+        syn::fold::fold_type(&mut crate::util::AllLifetimesToStatic, ctx_type.clone());
 
     let prefix_action = wrap_option(match inv.args.prefix_command {
         true => Some(prefix::generate_prefix_action(&inv)?),

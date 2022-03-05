@@ -259,6 +259,9 @@ pub use reply::*;
 mod cooldown;
 pub use cooldown::*;
 
+mod modal;
+pub use modal::*;
+
 pub(crate) mod util;
 
 pub mod builtins;
@@ -297,7 +300,9 @@ pub mod serenity_prelude {
         http::*,
         model::{
             event::*,
-            interactions::{application_command::*, autocomplete::*, message_component::*, *},
+            interactions::{
+                application_command::*, autocomplete::*, message_component::*, modal::*, *,
+            },
             prelude::*,
         },
         prelude::*,
