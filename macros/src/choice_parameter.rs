@@ -5,6 +5,7 @@ use syn::spanned::Spanned as _;
 
 /// Representation of the function parameter attribute arguments
 #[derive(Debug, darling::FromMeta)]
+#[darling(allow_unknown_fields)]
 struct VariantAttribute {
     #[darling(multiple)]
     name: Vec<String>,
