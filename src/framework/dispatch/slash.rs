@@ -48,8 +48,8 @@ pub async fn extract_command_and_run_checks<'a, U, E>(
         &framework.options.commands,
     );
     let (command, leaf_interaction_options) = search_result.ok_or_else(|| {
-        println!(
-            "Warning: received unknown interaction \"{}\"",
+        log::warn!(
+            "received unknown interaction \"{}\"",
             interaction.data().name
         );
         None
@@ -169,7 +169,7 @@ pub async fn dispatch_autocomplete<'a, U, E>(
         let autocomplete_response = match autocomplete_callback(ctx, focused_option_json).await {
             Ok(x) => x,
             Err(e) => {
-                println!("Warning: couldn't generate autocomplete response: {}", e);
+                log::warn!("couldn't generate autocomplete response: {}", e);
                 return Err(None);
             }
         };
@@ -182,7 +182,7 @@ pub async fn dispatch_autocomplete<'a, U, E>(
             })
             .await
         {
-            println!("Warning: couldn't send autocomplete response: {}", e);
+            log::warn!("couldn't send autocomplete response: {}", e);
         }
     }
 

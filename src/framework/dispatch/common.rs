@@ -24,8 +24,8 @@ async fn user_permissions(
     let channel = match channel_id.to_channel(ctx).await {
         Ok(serenity::Channel::Guild(channel)) => channel,
         Ok(_other_channel) => {
-            println!(
-                "Warning: guild message was supposedly sent in a non-guild channel. Denying invocation"
+            log::warn!(
+                "guild message was supposedly sent in a non-guild channel. Denying invocation"
             );
             return None;
         }
