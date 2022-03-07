@@ -61,7 +61,7 @@ A full functioning bot would contain a help command as well as a register comman
 commands. See [`examples/framework_usage`] for examples on that as well as other features of poise.
 
 You can run the framework_usage example with
-`cargo run --example=framework_usage --features collector`
+`cargo run --example=framework_usage`
 
 # Introduction to slash commands
 
@@ -79,10 +79,6 @@ registration only updates a single guild, but it happens instantly, which is use
 Your bot also needs to be invited with the `applications.commands` scope. For example, in Discord's
 invite link generator (discord.com/developers/applications/XXX/oauth2/url-generator),
 tick the `applications.commands` box.
-
-## Crate features
-
-- collector: enables serenity's `collector` feature
 
 # How to use
 
@@ -286,9 +282,6 @@ pub use serenity;
 /// use poise::serenity_prelude as serenity;
 /// ```
 pub mod serenity_prelude {
-    #[cfg(feature = "collector")]
-    #[doc(no_inline)]
-    pub use serenity::collector::*;
     #[doc(no_inline)]
     pub use serenity::{
         async_trait,
@@ -297,6 +290,7 @@ pub mod serenity_prelude {
             bridge::gateway::{event::*, *},
             *,
         },
+        collector::*,
         http::*,
         model::{
             event::*,
