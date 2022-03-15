@@ -80,7 +80,12 @@ pub trait Modal: Sized {
     /// let users submit when all required fields are filled properly
     fn parse(data: serenity::ModalSubmitInteractionData) -> Result<Self, &'static str>;
 
-    /// Convenience function which:
+    /// Convenience function for showing the modal and waiting for a response
+    ///
+    /// Note: a modal must be the first response to a command. You cannot send any messages before,
+    /// or the modal will fail
+    ///
+    /// This function:
     /// 1. sends the modal via [`Self::create()`]
     /// 2. waits for the user to submit via [`serenity::CollectModalInteraction`]
     /// 3. acknowledges the submitted data so that Discord closes the pop-up for the user
