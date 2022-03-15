@@ -310,6 +310,45 @@ impl ReplyHandle<'_> {
             Self::Unknown { http, interaction } => interaction.get_interaction_response(http).await,
         }
     }
+
+    /// Edits the message that this [`ReplyHandle`] points to
+    // TODO: return the edited Message object?
+    pub async fn edit<'a, U, E>(
+        &self,
+        ctx: crate::Context<'_, U, E>,
+        builder: impl for<'b> FnOnce(&'b mut CreateReply<'a>) -> &'b mut CreateReply<'a>,
+    ) -> Result<(), serenity::Error> {
+        // TODO: deduplicate this block of code
+        let mut reply = crate::CreateReply {
+            ephemeral: ctx.command().ephemeral,
+            allowed_mentions: ctx.framework().options().allowed_mentions.clone(),
+            ..Default::default()
+        };
+        builder(&mut reply);
+        if let Some(callback) = ctx.framework().options().reply_callback {
+            callback(ctx.into(), &mut reply);
+        }
+
+        match self {
+            Self::Known(msg) => {
+                msg.clone()
+                    .edit(ctx.discord(), |b| {
+                        reply.to_prefix_edit(b);
+                        b
+                    })
+                    .await?;
+            }
+            Self::Unknown { http, interaction } => {
+                interaction
+                    .edit_original_interaction_response(http, |b| {
+                        reply.to_slash_initial_response_edit(b);
+                        b
+                    })
+                    .await?;
+            }
+        }
+        Ok(())
+    }
 }
 
 /// Send a message in the given context: normal message if prefix command, interaction response
