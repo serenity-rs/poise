@@ -326,7 +326,7 @@ impl ReplyHandle<'_> {
         };
         builder(&mut reply);
         if let Some(callback) = ctx.framework().options().reply_callback {
-            callback(ctx.into(), &mut reply);
+            callback(ctx, &mut reply);
         }
 
         match self {
