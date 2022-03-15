@@ -164,20 +164,15 @@ pub async fn send_prefix_reply<'a, U, E>(
     ctx: crate::prefix::PrefixContext<'_, U, E>,
     builder: impl for<'b> FnOnce(&'b mut crate::CreateReply<'a>) -> &'b mut crate::CreateReply<'a>,
 ) -> Result<Box<serenity::Message>, serenity::Error> {
-    let mut reply = crate::CreateReply::default();
+    let mut reply = crate::CreateReply {
+        ephemeral: ctx.command.ephemeral,
+        allowed_mentions: ctx.framework.options().allowed_mentions.clone(),
+        ..Default::default()
+    };
     builder(&mut reply);
     if let Some(callback) = ctx.framework.options().reply_callback {
         callback(ctx.into(), &mut reply);
     }
-    let crate::CreateReply {
-        content,
-        embeds,
-        attachments,
-        components,
-        ephemeral: _,
-        allowed_mentions,
-        reference_message,
-    } = reply;
 
     // This must only return None when we _actually_ want to reuse the existing response! There are
     // no checks later
@@ -198,24 +193,7 @@ pub async fn send_prefix_reply<'a, U, E>(
     Ok(Box::new(if let Some(mut response) = existing_response {
         response
             .edit(ctx.discord, |f| {
-                // Empty string resets content (happens when user replaces text with embed)
-                f.content(content.as_deref().unwrap_or(""));
-
-                f.set_embeds(embeds);
-
-                f.0.insert("attachments", serenity::json::json! { [] }); // reset attachments
-                for attachment in attachments {
-                    f.attachment(attachment);
-                }
-
-                // When components is None, this will still be run to reset the components.
-                f.components(|f| {
-                    if let Some(components) = components {
-                        *f = components;
-                    }
-                    f
-                });
-
+                reply.to_prefix_edit(f);
                 f
             })
             .await?;
@@ -231,31 +209,7 @@ pub async fn send_prefix_reply<'a, U, E>(
             .msg
             .channel_id
             .send_message(ctx.discord, |m| {
-                if let Some(content) = content {
-                    m.content(content);
-                }
-                m.set_embeds(embeds);
-                if let Some(allowed_mentions) =
-                    allowed_mentions.or_else(|| ctx.framework.options().allowed_mentions.clone())
-                {
-                    m.allowed_mentions(|m| {
-                        *m = allowed_mentions;
-                        m
-                    });
-                }
-                if let Some(components) = components {
-                    m.components(|c| {
-                        c.0 = components.0;
-                        c
-                    });
-                }
-                if let Some(reference_message) = reference_message {
-                    m.reference_message(reference_message);
-                }
-
-                for attachment in attachments {
-                    m.add_file(attachment);
-                }
+                reply.to_prefix(m);
                 m
             })
             .await?;

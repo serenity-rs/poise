@@ -101,6 +101,185 @@ impl<'a> CreateReply<'a> {
     }
 }
 
+/// Methods to create a message builder from any type from this [`CreateReply`]. Used by poise
+/// internally to actually send a response to Discord
+impl<'a> CreateReply<'a> {
+    /// Serialize this response builder to a [`serenity::CreateInteractionResponseData`]
+    pub fn to_slash_initial_response(self, f: &mut serenity::CreateInteractionResponseData) {
+        let crate::CreateReply {
+            content,
+            embeds,
+            attachments: _, // serenity doesn't support attachments in initial response yet
+            components,
+            ephemeral,
+            allowed_mentions,
+            reference_message: _, // can't reply to a message in interactions
+        } = self;
+
+        if let Some(content) = content {
+            f.content(content);
+        }
+        f.set_embeds(embeds);
+        if let Some(allowed_mentions) = allowed_mentions {
+            f.allowed_mentions(|f| {
+                *f = allowed_mentions.clone();
+                f
+            });
+        }
+        if let Some(components) = components {
+            f.components(|f| {
+                f.0 = components.0;
+                f
+            });
+        }
+        if ephemeral {
+            f.flags(serenity::InteractionApplicationCommandCallbackDataFlags::EPHEMERAL);
+        }
+    }
+
+    /// Serialize this response builder to a [`serenity::CreateInteractionResponseFollowup`]
+    pub fn to_slash_followup_response(
+        self,
+        f: &mut serenity::CreateInteractionResponseFollowup<'a>,
+    ) {
+        let crate::CreateReply {
+            content,
+            embeds,
+            attachments,
+            components,
+            ephemeral,
+            allowed_mentions,
+            reference_message: _,
+        } = self;
+
+        if let Some(content) = content {
+            f.content(content);
+        }
+        f.set_embeds(embeds);
+        if let Some(components) = components {
+            f.components(|c| {
+                c.0 = components.0;
+                c
+            });
+        }
+        if let Some(allowed_mentions) = allowed_mentions {
+            f.allowed_mentions(|f| {
+                *f = allowed_mentions.clone();
+                f
+            });
+        }
+        if ephemeral {
+            f.flags(serenity::InteractionApplicationCommandCallbackDataFlags::EPHEMERAL);
+        }
+        f.add_files(attachments);
+    }
+
+    /// Serialize this response builder to a [`serenity::EditInteractionResponse`]
+    pub fn to_slash_initial_response_edit(self, f: &mut serenity::EditInteractionResponse) {
+        let crate::CreateReply {
+            content,
+            embeds,
+            attachments: _, // no support for attachment edits in serenity yet
+            components,
+            ephemeral: _, // can't edit ephemerality in retrospect
+            allowed_mentions,
+            reference_message: _,
+        } = self;
+
+        if let Some(content) = content {
+            f.content(content);
+        }
+        f.set_embeds(embeds);
+        if let Some(components) = components {
+            f.components(|c| {
+                c.0 = components.0;
+                c
+            });
+        }
+        if let Some(allowed_mentions) = allowed_mentions {
+            f.allowed_mentions(|f| {
+                *f = allowed_mentions.clone();
+                f
+            });
+        }
+    }
+
+    /// Serialize this response builder to a [`serenity::EditMessage`]
+    pub fn to_prefix_edit(self, f: &mut serenity::EditMessage<'a>) {
+        let crate::CreateReply {
+            content,
+            embeds,
+            attachments,
+            components,
+            ephemeral: _, // not supported in prefix
+            allowed_mentions,
+            reference_message: _, // can't edit reference message afterwards
+        } = self;
+
+        // Empty string resets content (happens when user replaces text with embed)
+        f.content(content.as_deref().unwrap_or(""));
+
+        f.set_embeds(embeds);
+
+        f.0.insert("attachments", serenity::json::json! { [] }); // reset attachments
+        for attachment in attachments {
+            f.attachment(attachment);
+        }
+
+        if let Some(allowed_mentions) = allowed_mentions {
+            f.allowed_mentions(|b| {
+                *b = allowed_mentions;
+                b
+            });
+        }
+
+        // When components is None, this will still be run to reset the components.
+        f.components(|f| {
+            if let Some(components) = components {
+                *f = components;
+            }
+            f
+        });
+    }
+
+    /// Serialize this response builder to a [`serenity::CreateMessage`]
+    pub fn to_prefix(self, m: &mut serenity::CreateMessage<'a>) {
+        let crate::CreateReply {
+            content,
+            embeds,
+            attachments,
+            components,
+            ephemeral: _, // not supported in prefix
+            allowed_mentions,
+            reference_message,
+        } = self;
+
+        if let Some(content) = content {
+            m.content(content);
+        }
+        m.set_embeds(embeds);
+        if let Some(allowed_mentions) = allowed_mentions {
+            m.allowed_mentions(|m| {
+                *m = allowed_mentions;
+                m
+            });
+        }
+        if let Some(components) = components {
+            m.components(|c| {
+                c.0 = components.0;
+                c
+            });
+        }
+        if let Some(reference_message) = reference_message {
+            m.reference_message(reference_message);
+        }
+
+        for attachment in attachments {
+            m.add_file(attachment);
+        }
+    }
+}
+
 /// Returned from [`send_reply`] to retrieve the sent message object.
 ///
 /// Discord sometimes returns the [`serenity::Message`] object directly, but sometimes you have to
