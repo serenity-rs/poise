@@ -138,6 +138,8 @@ impl ReplyHandle<'_> {
 ///
 /// If you just want to send a string, use [`say_reply`].
 ///
+/// Note: panics when called in an autocomplete context!
+///
 /// ```rust,no_run
 /// # #[tokio::main] async fn main() -> Result<(), Box<dyn std::error::Error>> {
 /// # let ctx: poise::Context<'_, (), ()> = todo!();
@@ -154,19 +156,23 @@ impl ReplyHandle<'_> {
 pub async fn send_reply<'a, U, E>(
     ctx: crate::Context<'_, U, E>,
     builder: impl for<'b> FnOnce(&'b mut CreateReply<'a>) -> &'b mut CreateReply<'a>,
-) -> Result<Option<ReplyHandle<'_>>, serenity::Error> {
+) -> Result<ReplyHandle<'_>, serenity::Error> {
     Ok(match ctx {
-        crate::Context::Prefix(ctx) => Some(ReplyHandle::Known(
-            crate::send_prefix_reply(ctx, builder).await?,
-        )),
-        crate::Context::Application(ctx) => crate::send_application_reply(ctx, builder).await?,
+        crate::Context::Prefix(ctx) => {
+            ReplyHandle::Known(crate::send_prefix_reply(ctx, builder).await?)
+        }
+        crate::Context::Application(ctx) => crate::send_application_reply(ctx, builder)
+            .await?
+            .expect("cannot send a reply in autocomplete context"),
     })
 }
 
 /// Shorthand of [`send_reply`] for text-only messages
+///
+/// Note: panics when called in an autocomplete context!
 pub async fn say_reply<U, E>(
     ctx: crate::Context<'_, U, E>,
     text: impl Into<String>,
-) -> Result<Option<ReplyHandle<'_>>, serenity::Error> {
+) -> Result<ReplyHandle<'_>, serenity::Error> {
     send_reply(ctx, |m| m.content(text.into())).await
 }
