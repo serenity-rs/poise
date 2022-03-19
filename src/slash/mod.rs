@@ -38,21 +38,14 @@ pub async fn send_application_reply<'a, U, E>(
         .load(std::sync::atomic::Ordering::SeqCst);
 
     Ok(Some(if has_sent_initial_response {
-        crate::ReplyHandle::Known(Box::new(if ctx.command.reuse_response {
-            interaction
-                .edit_original_interaction_response(ctx.discord, |f| {
-                    data.to_slash_initial_response_edit(f);
-                    f
-                })
-                .await?
-        } else {
+        crate::ReplyHandle::Known(Box::new(
             interaction
                 .create_followup_message(ctx.discord, |f| {
                     data.to_slash_followup_response(f);
                     f
                 })
-                .await?
-        }))
+                .await?,
+        ))
     } else {
         interaction
             .create_interaction_response(ctx.discord, |r| {
