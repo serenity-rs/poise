@@ -107,7 +107,9 @@ impl<U, E> Framework<U, E> {
     }
 
     /// Small utility function for starting the framework that is agnostic over client sharding
-    async fn start_with<F: std::future::Future<Output = serenity::Result<()>>>(
+    ///
+    /// Used internally by [`Self::start()`] and [`Self::start_autosharded()`]
+    pub async fn start_with<F: std::future::Future<Output = serenity::Result<()>>>(
         self: std::sync::Arc<Self>,
         start: fn(serenity::Client) -> F,
     ) -> Result<(), serenity::Error>
