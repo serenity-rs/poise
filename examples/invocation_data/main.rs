@@ -1,9 +1,8 @@
 //! On request of a user, a system to store data across all phases of a single command invocation
 //! was added. See the invocation_data and set_invocation_data methods on Context
 //!
-//! The pre_command hook defined in the crate root fills the invocation data with "hello". This
-//! module has a test command to check that this string is available in all phases of command
-//! execution.
+//! This module has a test command which stores a dummy payload to check that this string is
+//! available in all phases of command execution
 
 type Error = &'static str;
 type Context<'a> = poise::Context<'a, (), Error>;

@@ -311,10 +311,11 @@ impl<'a, U, E> Context<'a, U, E> {
         }
     } */
 
+    /// Returns the raw type erased invocation data
     fn invocation_data_raw(&self) -> &std::sync::Mutex<Box<dyn std::any::Any + Send + Sync>> {
         match self {
-            Context::Application(ctx) => &ctx.invocation_data,
-            Context::Prefix(ctx) => &ctx.invocation_data,
+            Context::Application(ctx) => ctx.invocation_data,
+            Context::Prefix(ctx) => ctx.invocation_data,
         }
     }
 
@@ -331,7 +332,7 @@ impl<'a, U, E> Context<'a, U, E> {
     ///
     /// If the stored invocation data has a different type than requested, None is returned
     pub fn invocation_data<T: 'static>(&self) -> Option<impl std::ops::DerefMut<Target = T> + '_> {
-        // Could replace this entire thing with parking_lot's map, but that'd be another dependency
+        /// Could replace this entire thing with parking_lot's map, but that'd be another dependency
         struct DowncastUnwrap<'a, T>(
             std::sync::MutexGuard<'a, Box<dyn std::any::Any + Send + Sync>>,
             std::marker::PhantomData<T>,
