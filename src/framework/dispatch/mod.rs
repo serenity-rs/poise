@@ -34,8 +34,16 @@ pub async fn dispatch_event<U, E>(
             }
         }
         crate::Event::Message { new_message } => {
-            if let Err(Some((error, command))) =
-                prefix::dispatch_message(framework, &ctx, new_message, false, false).await
+            let invocation_data = std::sync::Mutex::new(Box::new(()) as _);
+            if let Err(Some((error, command))) = prefix::dispatch_message(
+                framework,
+                &ctx,
+                new_message,
+                false,
+                false,
+                &invocation_data,
+            )
+            .await
             {
                 command.on_error.unwrap_or(framework.options.on_error)(error).await;
             }
@@ -51,9 +59,16 @@ pub async fn dispatch_event<U, E>(
                 );
 
                 if let Some((msg, previously_tracked)) = msg {
-                    if let Err(Some((error, command))) =
-                        prefix::dispatch_message(framework, &ctx, &msg, true, previously_tracked)
-                            .await
+                    let invocation_data = std::sync::Mutex::new(Box::new(()) as _);
+                    if let Err(Some((error, command))) = prefix::dispatch_message(
+                        framework,
+                        &ctx,
+                        &msg,
+                        true,
+                        previously_tracked,
+                        &invocation_data,
+                    )
+                    .await
                     {
                         command.on_error.unwrap_or(framework.options.on_error)(error).await;
                     }
@@ -63,11 +78,13 @@ pub async fn dispatch_event<U, E>(
         crate::Event::InteractionCreate {
             interaction: serenity::Interaction::ApplicationCommand(interaction),
         } => {
+            let invocation_data = std::sync::Mutex::new(Box::new(()) as _);
             if let Err(Some((error, command))) = slash::dispatch_interaction(
                 framework,
                 &ctx,
                 interaction,
                 &std::sync::atomic::AtomicBool::new(false),
+                &invocation_data,
             )
             .await
             {
@@ -77,11 +94,13 @@ pub async fn dispatch_event<U, E>(
         crate::Event::InteractionCreate {
             interaction: serenity::Interaction::Autocomplete(interaction),
         } => {
+            let invocation_data = std::sync::Mutex::new(Box::new(()) as _);
             if let Err(Some((error, command))) = slash::dispatch_autocomplete(
                 framework,
                 &ctx,
                 interaction,
                 &std::sync::atomic::AtomicBool::new(false),
+                &invocation_data,
             )
             .await
             {

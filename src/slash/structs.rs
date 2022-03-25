@@ -100,6 +100,8 @@ pub struct ApplicationContext<'a, U, E> {
     pub command: &'a crate::Command<U, E>,
     /// Your custom user data
     pub data: &'a U,
+    /// Custom user data carried across a single command invocation
+    pub invocation_data: &'a std::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
 }
 impl<U, E> Clone for ApplicationContext<'_, U, E> {
     fn clone(&self) -> Self {
@@ -122,6 +124,7 @@ impl<U: std::fmt::Debug, E: std::fmt::Debug> std::fmt::Debug for ApplicationCont
             framework: _,
             command: _,
             data,
+            invocation_data: _,
         } = self;
 
         f.debug_struct("ApplicationContext")
@@ -132,6 +135,7 @@ impl<U: std::fmt::Debug, E: std::fmt::Debug> std::fmt::Debug for ApplicationCont
             .field("framework", &"<poise Framework>")
             .field("command", &"<poise Command>")
             .field("data", data)
+            .field("invocation_data", &"<Box<dyn Any>>")
             .finish()
     }
 }

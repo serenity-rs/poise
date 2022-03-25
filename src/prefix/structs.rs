@@ -24,6 +24,8 @@ pub struct PrefixContext<'a, U, E> {
     pub command: &'a crate::Command<U, E>,
     /// Your custom user data
     pub data: &'a U,
+    /// Custom user data carried across a single command invocation
+    pub invocation_data: &'a std::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
 }
 // manual Copy+Clone implementations because Rust is getting confused about the type parameter
 impl<U, E> Clone for PrefixContext<'_, U, E> {
@@ -48,6 +50,7 @@ impl<'a, U: std::fmt::Debug, E: std::fmt::Debug> std::fmt::Debug for PrefixConte
             framework: _,
             command: _,
             data,
+            invocation_data: _,
         } = self;
 
         f.debug_struct("PrefixContext")
@@ -59,6 +62,7 @@ impl<'a, U: std::fmt::Debug, E: std::fmt::Debug> std::fmt::Debug for PrefixConte
             .field("framework", &"<poise Framework>")
             .field("command", &"<poise Command>")
             .field("data", data)
+            .field("invocation_data", &"<Box<dyn Any>>")
             .finish()
     }
 }
