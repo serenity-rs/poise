@@ -275,3 +275,18 @@ pub async fn totalsize(
 
     Ok(())
 }
+
+#[derive(Debug, poise::Modal)]
+struct MyModal {
+    first_input: String,
+    second_input: Option<String>,
+}
+#[poise::command(slash_command)]
+pub async fn modal(
+    ctx: poise::ApplicationContext<'_, crate::Data, crate::Error>,
+) -> Result<(), Error> {
+    let data = <MyModal as poise::Modal>::execute(ctx).await?;
+    println!("Got data: {:?}", data);
+
+    Ok(())
+}

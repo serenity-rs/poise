@@ -84,6 +84,7 @@ async fn main() {
             commands::say(),
             commands::file_details(),
             commands::totalsize(),
+            commands::modal(),
             context_menu::user_info(),
             context_menu::echo(),
             autocomplete::greet(),
