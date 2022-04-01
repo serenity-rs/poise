@@ -115,7 +115,7 @@ pub async fn dispatch_event<U, E>(
     if let Err(error) =
         (framework.options.listener)(&ctx, event, framework, framework.user_data().await).await
     {
-        let error = crate::FrameworkError::Listener { error, event };
+        let error = crate::FrameworkError::Listener { ctx, error, event, framework };
         (framework.options.on_error)(error).await;
     }
 }
