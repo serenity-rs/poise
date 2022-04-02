@@ -166,7 +166,12 @@ async fn on_error(error: poise::FrameworkError<'_, Data, Error>) {
                 error
             );
         }
-        poise::FrameworkError::Listener { error, event, ctx: _, framework: _ } => {
+        poise::FrameworkError::Listener {
+            error,
+            event,
+            ctx: _,
+            framework: _,
+        } => {
             println!(
                 "Listener returned error during {:?} event: {:?}",
                 event.name(),

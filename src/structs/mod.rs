@@ -41,12 +41,12 @@ pub enum FrameworkError<'a, U, E> {
         /// Error which was thrown in the listener code
         error: E,
         /// The serenity Context passed to the event
-        #[derivative(Debug="ignore")]
+        #[derivative(Debug = "ignore")]
         ctx: serenity::Context,
         /// Which event was being processed when the error occurred
         event: &'a crate::Event<'a>,
         /// The Framework passed to the event
-        #[derivative(Debug="ignore")]
+        #[derivative(Debug = "ignore")]
         framework: &'a Framework<U, E>,
     },
     /// Error occured during command execution
