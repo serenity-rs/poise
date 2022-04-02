@@ -72,7 +72,7 @@ pub fn find_modal_text(
 #[async_trait::async_trait]
 pub trait Modal: Sized {
     /// Returns an interaction response builder which creates the modal for this type
-    fn create() -> serenity::CreateInteractionResponse;
+    fn create() -> serenity::CreateInteractionResponse<'static>;
 
     /// Parses a received modal submit interaction into this type
     ///
