@@ -243,7 +243,7 @@ impl<'a, U, E> Context<'a, U, E> {
 
                 // Check context menu command
                 if let (Some(action), Some(target)) =
-                    (ctx.command.context_menu_action, &interaction.data.target)
+                    (ctx.command.context_menu_action, &interaction.data.target())
                 {
                     return match action {
                         crate::ContextMenuCommandAction::User(action) => {
