@@ -312,7 +312,7 @@ impl<'a, U, E> Context<'a, U, E> {
     } */
 
     /// Returns the raw type erased invocation data
-    fn invocation_data_raw(&self) -> &std::sync::Mutex<Box<dyn std::any::Any + Send + Sync>> {
+    fn invocation_data_raw(&self) -> &tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>> {
         match self {
             Context::Application(ctx) => ctx.invocation_data,
             Context::Prefix(ctx) => ctx.invocation_data,
@@ -324,37 +324,20 @@ impl<'a, U, E> Context<'a, U, E> {
     /// This data is carried across the pre_command hook, checks, main command execution, and
     /// post_command. It may be useful to cache data or pass information to later phases of command
     /// execution.
-    pub fn set_invocation_data<T: 'static + Send + Sync>(&self, data: T) {
-        *self.invocation_data_raw().lock().unwrap() = Box::new(data);
+    pub async fn set_invocation_data<T: 'static + Send + Sync>(&self, data: T) {
+        *self.invocation_data_raw().lock().await = Box::new(data);
     }
 
     /// Attempts to get the invocation data with the requested type
     ///
     /// If the stored invocation data has a different type than requested, None is returned
-    pub fn invocation_data<T: 'static>(&self) -> Option<impl std::ops::DerefMut<Target = T> + '_> {
-        /// Could replace this entire thing with parking_lot's map, but that'd be another dependency
-        struct DowncastUnwrap<'a, T>(
-            std::sync::MutexGuard<'a, Box<dyn std::any::Any + Send + Sync>>,
-            std::marker::PhantomData<T>,
-        );
-        impl<T: 'static> std::ops::Deref for DowncastUnwrap<'_, T> {
-            type Target = T;
-            fn deref(&self) -> &Self::Target {
-                self.0.downcast_ref().unwrap()
-            }
-        }
-        impl<T: 'static> std::ops::DerefMut for DowncastUnwrap<'_, T> {
-            fn deref_mut(&mut self) -> &mut Self::Target {
-                self.0.downcast_mut().unwrap()
-            }
-        }
-
-        let guard = self.invocation_data_raw().lock().unwrap();
-        if guard.is::<T>() {
-            Some(DowncastUnwrap(guard, std::marker::PhantomData))
-        } else {
-            None
-        }
+    pub async fn invocation_data<T: 'static>(
+        &self,
+    ) -> Option<impl std::ops::DerefMut<Target = T> + '_> {
+        tokio::sync::MutexGuard::try_map(self.invocation_data_raw().lock().await, |any| {
+            any.downcast_mut()
+        })
+        .ok()
     }
 }
 

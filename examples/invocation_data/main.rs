@@ -10,7 +10,7 @@ type Context<'a> = poise::Context<'a, (), Error>;
 async fn my_check(ctx: Context<'_>) -> Result<bool, Error> {
     println!(
         "In command specific check: {:?}",
-        ctx.invocation_data::<&str>().as_deref()
+        ctx.invocation_data::<&str>().await.as_deref()
     );
 
     Ok(true)
@@ -19,7 +19,7 @@ async fn my_check(ctx: Context<'_>) -> Result<bool, Error> {
 async fn my_autocomplete(ctx: Context<'_>, _: u32) -> impl Iterator<Item = u32> {
     println!(
         "In autocomplete: {:?}",
-        ctx.invocation_data::<&str>().as_deref()
+        ctx.invocation_data::<&str>().await.as_deref()
     );
 
     std::iter::empty()
@@ -33,7 +33,10 @@ pub async fn invocation_data_test(
     #[autocomplete = "my_autocomplete"]
     should_succeed: u32,
 ) -> Result<(), Error> {
-    println!("In command: {:?}", ctx.invocation_data::<&str>().as_deref());
+    println!(
+        "In command: {:?}",
+        ctx.invocation_data::<&str>().await.as_deref()
+    );
 
     if should_succeed > 0 {
         Ok(())
@@ -65,7 +68,7 @@ async fn main() {
                 Box::pin(async move {
                     println!(
                         "In pre_command: {:?}",
-                        ctx.invocation_data::<&str>().as_deref()
+                        ctx.invocation_data::<&str>().await.as_deref()
                     );
                 })
             },
@@ -74,27 +77,21 @@ async fn main() {
                     // Global command check is the first callback that's invoked, so let's set the
                     // data here
                     println!("Writing invocation data!");
-                    ctx.set_invocation_data("hello");
+                    ctx.set_invocation_data("hello").await;
 
                     println!(
                         "In global check: {:?}",
-                        ctx.invocation_data::<&str>().as_deref()
+                        ctx.invocation_data::<&str>().await.as_deref()
                     );
 
                     Ok(true)
                 })
             }),
-            reply_callback: Some(|ctx, _| {
-                println!(
-                    "In reply_callback: {:?}",
-                    ctx.invocation_data::<&str>().as_deref()
-                );
-            }),
             post_command: |ctx| {
                 Box::pin(async move {
                     println!(
                         "In post_command: {:?}",
-                        ctx.invocation_data::<&str>().as_deref()
+                        ctx.invocation_data::<&str>().await.as_deref()
                     );
                 })
             },
@@ -104,7 +101,7 @@ async fn main() {
                         poise::FrameworkError::Command { ctx, .. } => {
                             println!(
                                 "In on_error: {:?}",
-                                ctx.invocation_data::<&str>().as_deref()
+                                ctx.invocation_data::<&str>().await.as_deref()
                             );
                         }
                         err => poise::samples::on_error(err).await.unwrap(),

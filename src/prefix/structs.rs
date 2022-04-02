@@ -25,7 +25,7 @@ pub struct PrefixContext<'a, U, E> {
     /// Your custom user data
     pub data: &'a U,
     /// Custom user data carried across a single command invocation
-    pub invocation_data: &'a std::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
+    pub invocation_data: &'a tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
 }
 // manual Copy+Clone implementations because Rust is getting confused about the type parameter
 impl<U, E> Clone for PrefixContext<'_, U, E> {

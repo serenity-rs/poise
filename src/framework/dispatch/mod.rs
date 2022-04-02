@@ -34,7 +34,7 @@ pub async fn dispatch_event<U, E>(
             }
         }
         crate::Event::Message { new_message } => {
-            let invocation_data = std::sync::Mutex::new(Box::new(()) as _);
+            let invocation_data = tokio::sync::Mutex::new(Box::new(()) as _);
             if let Err(Some((error, command))) = prefix::dispatch_message(
                 framework,
                 &ctx,
@@ -59,7 +59,7 @@ pub async fn dispatch_event<U, E>(
                 );
 
                 if let Some((msg, previously_tracked)) = msg {
-                    let invocation_data = std::sync::Mutex::new(Box::new(()) as _);
+                    let invocation_data = tokio::sync::Mutex::new(Box::new(()) as _);
                     if let Err(Some((error, command))) = prefix::dispatch_message(
                         framework,
                         &ctx,
@@ -78,7 +78,7 @@ pub async fn dispatch_event<U, E>(
         crate::Event::InteractionCreate {
             interaction: serenity::Interaction::ApplicationCommand(interaction),
         } => {
-            let invocation_data = std::sync::Mutex::new(Box::new(()) as _);
+            let invocation_data = tokio::sync::Mutex::new(Box::new(()) as _);
             if let Err(Some((error, command))) = slash::dispatch_interaction(
                 framework,
                 &ctx,
@@ -94,7 +94,7 @@ pub async fn dispatch_event<U, E>(
         crate::Event::InteractionCreate {
             interaction: serenity::Interaction::Autocomplete(interaction),
         } => {
-            let invocation_data = std::sync::Mutex::new(Box::new(()) as _);
+            let invocation_data = tokio::sync::Mutex::new(Box::new(()) as _);
             if let Err(Some((error, command))) = slash::dispatch_autocomplete(
                 framework,
                 &ctx,

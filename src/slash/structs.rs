@@ -101,7 +101,7 @@ pub struct ApplicationContext<'a, U, E> {
     /// Your custom user data
     pub data: &'a U,
     /// Custom user data carried across a single command invocation
-    pub invocation_data: &'a std::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
+    pub invocation_data: &'a tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
 }
 impl<U, E> Clone for ApplicationContext<'_, U, E> {
     fn clone(&self) -> Self {

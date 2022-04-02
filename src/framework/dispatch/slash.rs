@@ -38,7 +38,7 @@ pub async fn extract_command_and_run_checks<'a, U, E>(
     ctx: &'a serenity::Context,
     interaction: crate::ApplicationCommandOrAutocompleteInteraction<'a>,
     has_sent_initial_response: &'a std::sync::atomic::AtomicBool,
-    invocation_data: &'a std::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
+    invocation_data: &'a tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
 ) -> Result<
     crate::ApplicationContext<'a, U, E>,
     Option<(crate::FrameworkError<'a, U, E>, &'a crate::Command<U, E>)>,
@@ -82,7 +82,7 @@ pub async fn dispatch_interaction<'a, U, E>(
     // Need to pass this in from outside because of lifetime issues
     has_sent_initial_response: &'a std::sync::atomic::AtomicBool,
     // Need to pass this in from outside because of lifetime issues
-    invocation_data: &'a std::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
+    invocation_data: &'a tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
 ) -> Result<(), Option<(crate::FrameworkError<'a, U, E>, &'a crate::Command<U, E>)>> {
     let ctx = extract_command_and_run_checks(
         framework,
@@ -149,7 +149,7 @@ pub async fn dispatch_autocomplete<'a, U, E>(
     // Need to pass this in from outside because of lifetime issues
     has_sent_initial_response: &'a std::sync::atomic::AtomicBool,
     // Need to pass this in from outside because of lifetime issues
-    invocation_data: &'a std::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
+    invocation_data: &'a tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
 ) -> Result<(), Option<(crate::FrameworkError<'a, U, E>, &'a crate::Command<U, E>)>> {
     let ctx = extract_command_and_run_checks(
         framework,

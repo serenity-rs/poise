@@ -171,7 +171,7 @@ pub async fn dispatch_message<'a, U, E>(
     msg: &'a serenity::Message,
     triggered_by_edit: bool,
     previously_tracked: bool,
-    invocation_data: &'a std::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
+    invocation_data: &'a tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
 ) -> Result<(), Option<(crate::FrameworkError<'a, U, E>, &'a crate::Command<U, E>)>>
 where
     U: Send + Sync,
