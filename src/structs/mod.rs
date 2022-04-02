@@ -1,7 +1,5 @@
 //! Plain data structs that define the framework configuration.
 
-use derivative::Derivative;
-
 mod context;
 pub use context::*;
 
@@ -11,7 +9,7 @@ pub use framework_options::*;
 mod command;
 pub use command::*;
 
-use crate::{serenity_prelude as serenity, Framework};
+use crate::serenity_prelude as serenity;
 
 // needed for proc macro
 #[doc(hidden)]
@@ -28,7 +26,7 @@ impl<U, E> _GetGenerics for Context<'_, U, E> {
 /// have an `error` field with your error type `E` in it), or originating from within the framework.
 ///
 /// These errors are handled with the [`crate::FrameworkOptions::on_error`] callback
-#[derive(Derivative)]
+#[derive(derivative::Derivative)]
 #[derivative(Debug)]
 pub enum FrameworkError<'a, U, E> {
     /// User code threw an error in user data setup
@@ -47,7 +45,7 @@ pub enum FrameworkError<'a, U, E> {
         event: &'a crate::Event<'a>,
         /// The Framework passed to the event
         #[derivative(Debug = "ignore")]
-        framework: &'a Framework<U, E>,
+        framework: &'a crate::Framework<U, E>,
     },
     /// Error occured during command execution
     Command {
