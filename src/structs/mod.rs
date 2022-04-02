@@ -26,7 +26,8 @@ impl<U, E> _GetGenerics for Context<'_, U, E> {
 /// have an `error` field with your error type `E` in it), or originating from within the framework.
 ///
 /// These errors are handled with the [`crate::FrameworkOptions::on_error`] callback
-#[derive(Debug)]
+#[derive(derivative::Derivative)]
+#[derivative(Debug)]
 pub enum FrameworkError<'a, U, E> {
     /// User code threw an error in user data setup
     Setup {
@@ -37,8 +38,14 @@ pub enum FrameworkError<'a, U, E> {
     Listener {
         /// Error which was thrown in the listener code
         error: E,
+        /// The serenity Context passed to the event
+        #[derivative(Debug = "ignore")]
+        ctx: serenity::Context,
         /// Which event was being processed when the error occurred
         event: &'a crate::Event<'a>,
+        /// The Framework passed to the event
+        #[derivative(Debug = "ignore")]
+        framework: &'a crate::Framework<U, E>,
     },
     /// Error occured during command execution
     Command {
