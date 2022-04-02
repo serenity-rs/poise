@@ -11,16 +11,16 @@ use crate::serenity_prelude as serenity;
 /// Central event handling function of this library
 pub async fn dispatch_event<U, E>(
     framework: &crate::Framework<U, E>,
-    ctx: serenity::Context,
-    event: &crate::Event<'_>,
+    ctx: &serenity::Context,
+    event: &serenity::Event,
 ) where
     U: Send + Sync,
 {
     match event {
-        crate::Event::Ready { data_about_bot } => {
+        serenity::Event::Ready(serenity::ReadyEvent { ready, .. }) => {
             let user_data_setup = Option::take(&mut *framework.user_data_setup.lock().unwrap());
             if let Some(user_data_setup) = user_data_setup {
-                match user_data_setup(&ctx, data_about_bot, framework).await {
+                match user_data_setup(ctx, ready, framework).await {
                     Ok(user_data) => {
                         let _: Result<_, _> = framework.user_data.set(user_data);
                     }
@@ -33,22 +33,16 @@ pub async fn dispatch_event<U, E>(
                 // (happens regularly when bot is online for long period of time)
             }
         }
-        crate::Event::Message { new_message } => {
+        serenity::Event::MessageCreate(serenity::MessageCreateEvent { message, .. }) => {
             let invocation_data = tokio::sync::Mutex::new(Box::new(()) as _);
-            if let Err(Some((error, command))) = prefix::dispatch_message(
-                framework,
-                &ctx,
-                new_message,
-                false,
-                false,
-                &invocation_data,
-            )
-            .await
+            if let Err(Some((error, command))) =
+                prefix::dispatch_message(framework, ctx, message, false, false, &invocation_data)
+                    .await
             {
                 command.on_error.unwrap_or(framework.options.on_error)(error).await;
             }
         }
-        crate::Event::MessageUpdate { event, .. } => {
+        serenity::Event::MessageUpdate(event) => {
             if let Some(edit_tracker) = &framework.options.prefix_options.edit_tracker {
                 let msg = edit_tracker.write().unwrap().process_message_update(
                     event,
@@ -62,7 +56,7 @@ pub async fn dispatch_event<U, E>(
                     let invocation_data = tokio::sync::Mutex::new(Box::new(()) as _);
                     if let Err(Some((error, command))) = prefix::dispatch_message(
                         framework,
-                        &ctx,
+                        ctx,
                         &msg,
                         true,
                         previously_tracked,
@@ -75,13 +69,14 @@ pub async fn dispatch_event<U, E>(
                 }
             }
         }
-        crate::Event::InteractionCreate {
+        serenity::Event::InteractionCreate(serenity::InteractionCreateEvent {
             interaction: serenity::Interaction::ApplicationCommand(interaction),
-        } => {
+            ..
+        }) => {
             let invocation_data = tokio::sync::Mutex::new(Box::new(()) as _);
             if let Err(Some((error, command))) = slash::dispatch_interaction(
                 framework,
-                &ctx,
+                ctx,
                 interaction,
                 &std::sync::atomic::AtomicBool::new(false),
                 &invocation_data,
@@ -91,13 +86,14 @@ pub async fn dispatch_event<U, E>(
                 command.on_error.unwrap_or(framework.options.on_error)(error).await;
             }
         }
-        crate::Event::InteractionCreate {
+        serenity::Event::InteractionCreate(serenity::InteractionCreateEvent {
             interaction: serenity::Interaction::Autocomplete(interaction),
-        } => {
+            ..
+        }) => {
             let invocation_data = tokio::sync::Mutex::new(Box::new(()) as _);
             if let Err(Some((error, command))) = slash::dispatch_autocomplete(
                 framework,
-                &ctx,
+                ctx,
                 interaction,
                 &std::sync::atomic::AtomicBool::new(false),
                 &invocation_data,
@@ -113,7 +109,7 @@ pub async fn dispatch_event<U, E>(
     // Do this after the framework's Ready handling, so that get_user_data() doesnt
     // potentially block infinitely
     if let Err(error) =
-        (framework.options.listener)(&ctx, event, framework, framework.user_data().await).await
+        (framework.options.listener)(ctx, event, framework, framework.user_data().await).await
     {
         let error = crate::FrameworkError::Listener {
             ctx,

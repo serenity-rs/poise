@@ -40,9 +40,9 @@ pub enum FrameworkError<'a, U, E> {
         error: E,
         /// The serenity Context passed to the event
         #[derivative(Debug = "ignore")]
-        ctx: serenity::Context,
+        ctx: &'a serenity::Context,
         /// Which event was being processed when the error occurred
-        event: &'a crate::Event<'a>,
+        event: &'a serenity::Event,
         /// The Framework passed to the event
         #[derivative(Debug = "ignore")]
         framework: &'a crate::Framework<U, E>,

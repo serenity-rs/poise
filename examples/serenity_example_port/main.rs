@@ -23,13 +23,13 @@ type Context<'a> = poise::Context<'a, Data, Error>;
 
 async fn event_listener(
     _ctx: &serenity::Context,
-    event: &poise::Event<'_>,
+    event: &serenity::Event,
     _framework: &poise::Framework<Data, Error>,
     _user_data: &Data,
 ) -> Result<(), Error> {
     match event {
-        poise::Event::Ready { data_about_bot } => {
-            println!("{} is connected!", data_about_bot.user.name)
+        serenity::Event::Ready(serenity::ReadyEvent { ready, .. }) => {
+            println!("{} is connected!", ready.user.name)
         }
         _ => {}
     }
@@ -169,7 +169,7 @@ async fn on_error(error: poise::FrameworkError<'_, Data, Error>) {
         poise::FrameworkError::Listener { error, event, .. } => {
             println!(
                 "Listener returned error during {:?} event: {:?}",
-                event.name(),
+                event.event_type().name().unwrap_or("<unknown>"),
                 error
             );
         }
