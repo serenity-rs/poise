@@ -90,17 +90,20 @@ impl<U, E> Framework<U, E> {
             existing_event_handler: Option<Arc<dyn serenity::RawEventHandler>>,
         }
         #[async_trait::async_trait]
-        impl<U: Send + Sync, E: Send> serenity::RawEventHandler for EventHandler<U, E> {
+        impl<U: Send + Sync + 'static, E: Send + 'static> serenity::RawEventHandler for EventHandler<U, E> {
             async fn raw_event(&self, ctx: serenity::Context, event: serenity::Event) {
+                if let Some(handler) = &self.existing_event_handler {
+                    handler.raw_event(ctx.clone(), event.clone()).await;
+                }
+
                 // unwrap_used: we will only receive events once the client has been started, by which
                 // point framework_cell has been initialized
                 #[allow(clippy::unwrap_used)]
                 let framework = self.framework.get().unwrap().clone();
-                dispatch::dispatch_event(&*framework, &ctx, &event).await;
-
-                if let Some(handler) = &self.existing_event_handler {
-                    handler.raw_event(ctx, event).await;
-                }
+                // serenity runs RawEventHandler directly on its event loop which we must not block!
+                tokio::spawn(
+                    async move { dispatch::dispatch_event(&*framework, &ctx, &event).await },
+                );
             }
         }
 
