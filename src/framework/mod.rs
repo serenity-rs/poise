@@ -85,8 +85,12 @@ impl<U, E> Framework<U, E> {
 
         let framework_cell = Arc::new(once_cell::sync::OnceCell::<Arc<Self>>::new());
 
+        /// Small raw event handler that forwards received events to dispatch_event and the previous
+        /// user-registered raw event handler we overwrote, if any
         struct EventHandler<U, E> {
+            /// Reference to the framework
             framework: Arc<once_cell::sync::OnceCell<Arc<Framework<U, E>>>>,
+            /// Reference to the existing user-registered raw event handler we overwrote, if any
             existing_event_handler: Option<Arc<dyn serenity::RawEventHandler>>,
         }
         #[async_trait::async_trait]
