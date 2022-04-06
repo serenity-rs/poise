@@ -385,7 +385,15 @@ async fn say(
             .clean_role(false)
     };
 
-    let content = serenity::content_safe(ctx.discord(), &content, &settings);
+    let content = serenity::content_safe(ctx.discord(), &content, &settings, {
+        // If we are in a prefix command, we pass the Users that were mentioned in the message
+        // to avoid them needing to be fetched from cache
+        if let poise::Context::Prefix(ctx) = ctx {
+            &ctx.msg.mentions
+        } else {
+            &[]
+        }
+    });
 
     ctx.say(content).await?;
 
