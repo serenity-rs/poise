@@ -31,8 +31,6 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
             param.name.to_string()
         };
 
-        println!("{:?}", param_name);
-
         let autocomplete_callback = match &param.args.autocomplete {
             Some(autocomplete_fn) => {
                 quote::quote! { Some(|
