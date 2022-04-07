@@ -25,7 +25,14 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
             required = false;
         }
 
-        let param_name = &param.name;
+        let param_name = if let Some(rename) = param.args.rename.clone() {
+            rename
+        } else {
+            param.name.to_string()
+        };
+
+        println!("{:?}", param_name);
+
         let autocomplete_callback = match &param.args.autocomplete {
             Some(autocomplete_fn) => {
                 quote::quote! { Some(|
@@ -84,7 +91,7 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
         parameter_structs.push((
             quote::quote! {
                 ::poise::CommandParameter {
-                    name: stringify!(#param_name),
+                    name: #param_name,
                     description: #description,
                     required: #required,
                     channel_types: #channel_types,

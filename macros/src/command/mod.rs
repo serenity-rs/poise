@@ -45,6 +45,7 @@ pub struct CommandArgs {
 struct ParamArgs {
     // When changing these, document it in parent file!
     description: Option<String>,
+    rename: Option<String>,
     autocomplete: Option<syn::Path>,
     channel_types: Option<crate::util::List<syn::Ident>>,
     min: Option<syn::Lit>,
