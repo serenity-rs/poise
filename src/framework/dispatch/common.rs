@@ -88,7 +88,7 @@ pub async fn check_permissions_and_cooldown<'a, U, E>(
         {
             true => (),
             false => return Err(crate::FrameworkError::NsfwOnly { ctx }),
-        }
+        };
     }
 
     // Make sure that user has required permissions
