@@ -98,3 +98,31 @@ pub async fn add(
 
     Ok(())
 }
+
+/// Get the guild name (guild-only)
+#[poise::command(prefix_command, slash_command, guild_only)]
+pub async fn get_guild_name(ctx: Context<'_>) -> Result<(), Error> {
+    ctx.say(format!(
+        "The name of this guild is: {}",
+        ctx.guild().unwrap().name
+    ))
+    .await?;
+
+    Ok(())
+}
+
+/// A dm-only command
+#[poise::command(prefix_command, slash_command, dm_only)]
+pub async fn only_in_dms(ctx: Context<'_>) -> Result<(), Error> {
+    ctx.say("This is a dm channel").await?;
+
+    Ok(())
+}
+
+/// Only runs on NSFW channels
+#[poise::command(prefix_command, slash_command, nsfw_only)]
+pub async fn lennyface(ctx: Context<'_>) -> Result<(), Error> {
+    ctx.say("( ͡° ͜ʖ ͡°)").await?;
+
+    Ok(())
+}
