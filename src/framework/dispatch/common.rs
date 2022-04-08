@@ -88,7 +88,7 @@ pub async fn check_permissions_and_cooldown<'a, U, E>(
             }
         };
 
-        if channel.is_nsfw() {
+        if !channel.is_nsfw() {
             return Err(crate::FrameworkError::NsfwOnly { ctx });
         }
     }
