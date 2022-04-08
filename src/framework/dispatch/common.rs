@@ -79,15 +79,16 @@ pub async fn check_permissions_and_cooldown<'a, U, E>(
     }
 
     if cmd.nsfw_only {
-        match ctx.guild() {
-            Some(guild) => match guild.nsfw_level {
-                serenity::NsfwLevel::AgeRestricted | serenity::NsfwLevel::Explicit => {
-                    return Err(crate::FrameworkError::NsfwOnly { ctx })
-                }
-                _ => (),
-            },
-            None => return Err(crate::FrameworkError::NsfwOnly { ctx }),
-        };
+        match ctx
+            .channel_id()
+            .to_channel(ctx.discord())
+            .await
+            .unwrap()
+            .is_nsfw()
+        {
+            true => (),
+            false => return Err(crate::FrameworkError::NsfwOnly { ctx }),
+        }
     }
 
     // Make sure that user has required permissions
