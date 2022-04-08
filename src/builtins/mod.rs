@@ -110,6 +110,18 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
             let response = "Only bot owners can call this command";
             ctx.send(|b| b.content(response).ephemeral(true)).await?;
         }
+        crate::FrameworkError::GuildOnly { ctx } => {
+            let response = "You cannot run this command in DMs.";
+            ctx.send(|b| b.content(response).ephemeral(true)).await?;
+        }
+        crate::FrameworkError::DmOnly { ctx } => {
+            let response = "You cannot run this command outside DMs.";
+            ctx.send(|b| b.content(response).ephemeral(true)).await?;
+        }
+        crate::FrameworkError::NsfwOnly { ctx } => {
+            let response = "You cannot run this command outside NSFW channels.";
+            ctx.send(|b| b.content(response).ephemeral(true)).await?;
+        }
         crate::FrameworkError::DynamicPrefix { error } => {
             println!("Dynamic prefix failed: {}", error);
         }

@@ -70,6 +70,29 @@ pub async fn check_permissions_and_cooldown<'a, U, E>(
         return Err(crate::FrameworkError::NotAnOwner { ctx });
     }
 
+    if cmd.guild_only && ctx.guild_id().is_none() {
+        return Err(crate::FrameworkError::GuildOnly { ctx });
+    }
+
+    if cmd.dm_only && ctx.guild_id().is_some() {
+        return Err(crate::FrameworkError::DmOnly { ctx });
+    }
+
+    if cmd.nsfw_only {
+        let channel = match ctx.channel_id().to_channel(ctx.discord()).await {
+            Ok(channel) => channel,
+            Err(e) => {
+                log::warn!("Error when getting channel: {}", e);
+
+                return Err(crate::FrameworkError::NsfwOnly { ctx });
+            }
+        };
+
+        if !channel.is_nsfw() {
+            return Err(crate::FrameworkError::NsfwOnly { ctx });
+        }
+    }
+
     // Make sure that user has required permissions
     match missing_permissions(ctx, ctx.author().id, cmd.required_permissions).await {
         Some(missing_permissions) if missing_permissions.is_empty() => {}
