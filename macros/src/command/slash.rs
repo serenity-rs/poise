@@ -121,7 +121,16 @@ pub fn generate_slash_action(inv: &Invocation) -> Result<proc_macro2::TokenStrea
         }
     }
 
-    let param_names = inv.parameters.iter().map(|p| &p.name).collect::<Vec<_>>();
+    let param_names_renamed = inv.parameters.iter().map(|p| {
+        if let Some(rename) = p.args.rename.clone() {
+            syn::Ident::new(&rename, p.name.span())
+        } else {
+            p.name.clone()
+        }
+    }).collect::<Vec<_>>();
+
+    let param_names_raw = inv.parameters.iter().map(|p| &p.name).collect::<Vec<_>>();
+
     let param_types = inv
         .parameters
         .iter()
@@ -137,9 +146,9 @@ pub fn generate_slash_action(inv: &Invocation) -> Result<proc_macro2::TokenStrea
             // why clippy doesn't turn off this lint inside macros in the first place
             #[allow(clippy::needless_question_mark)]
 
-            let ( #( #param_names, )* ) = ::poise::parse_slash_args!(
+            let ( #( #param_names_raw, )* ) = ::poise::parse_slash_args!(
                 ctx.discord, ctx.interaction, ctx.args =>
-                #( (#param_names: #param_types), )*
+                #( (#param_names_renamed: #param_types), )*
             ).await.map_err(|error| match error {
                 poise::SlashArgError::CommandStructureMismatch(description) => {
                     poise::FrameworkError::CommandStructureMismatch { ctx, description }
@@ -153,7 +162,7 @@ pub fn generate_slash_action(inv: &Invocation) -> Result<proc_macro2::TokenStrea
                 },
             })?;
 
-            inner(ctx.into(), #( #param_names, )*)
+            inner(ctx.into(), #( #param_names_raw, )*)
                 .await
                 .map_err(|error| poise::FrameworkError::Command {
                     error,

@@ -6,6 +6,7 @@ mod commands;
 mod context_menu;
 mod subcommands;
 
+use poise::serenity_prelude as serenity;
 use std::{collections::HashMap, env::var, sync::Mutex, time::Duration};
 
 // Types used by all command functions
@@ -85,6 +86,7 @@ async fn main() {
             commands::file_details(),
             commands::totalsize(),
             commands::modal(),
+            commands::punish(),
             context_menu::user_info(),
             context_menu::echo(),
             autocomplete::greet(),
@@ -138,6 +140,12 @@ async fn main() {
                 Ok(true)
             })
         }),
+        listener: |_ctx, event, _framework, _data| {
+            Box::pin(async move {
+                println!("Got an event in listener: {:?}", event.event_type());
+                Ok(())
+            })
+        },
         ..Default::default()
     };
 
@@ -151,6 +159,12 @@ async fn main() {
             })
         })
         .options(options)
+        .client_settings(|b| {
+            b.intents(
+                serenity::GatewayIntents::non_privileged()
+                    | serenity::GatewayIntents::MESSAGE_CONTENT,
+            )
+        })
         .run()
         .await
         .unwrap();
