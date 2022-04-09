@@ -255,7 +255,7 @@ impl<'a, U, E> Context<'a, U, E> {
                         }
                         crate::ContextMenuCommandAction::Message(action) => {
                             if let serenity::ResolvedTarget::Message(message) = target {
-                                action(ctx, message.clone()).await
+                                action(ctx, *message.clone()).await
                             } else {
                                 Ok(())
                             }

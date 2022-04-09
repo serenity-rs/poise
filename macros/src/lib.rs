@@ -36,6 +36,9 @@ for example for command-specific help (i.e. `~help command_name`). Escape newlin
 - `required_permissions`: Permissions which the command caller needs to have
 - `required_bot_permissions`: Permissions which the bot is known to need
 - `owners_only`: Restricts command callers to a configurable list of owners (see FrameworkOptions)
+- `guild_only`: Restricts command callers to only run on a guild
+- `dm_only`: Restricts command callers to only run on a DM
+- `nsfw_only`: Restricts command callers to only run on a NSFW channel
 - `identifying_name`: Optionally, a unique identifier for this command for your personal usage
 - `category`: Category of this command which affects placement in the help command
 - `global_cooldown`: Minimum duration between invocations, globally

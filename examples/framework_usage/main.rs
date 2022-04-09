@@ -93,6 +93,9 @@ async fn main() {
             checks::delete(),
             checks::ferrisparty(),
             checks::add(),
+            checks::get_guild_name(),
+            checks::only_in_dms(),
+            checks::lennyface(),
             poise::Command {
                 subcommands: vec![
                     subcommands::child1(),
