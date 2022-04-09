@@ -121,13 +121,17 @@ pub fn generate_slash_action(inv: &Invocation) -> Result<proc_macro2::TokenStrea
         }
     }
 
-    let param_names_renamed = inv.parameters.iter().map(|p| {
-        if let Some(rename) = p.args.rename.clone() {
-            syn::Ident::new(&rename, p.name.span())
-        } else {
-            p.name.clone()
-        }
-    }).collect::<Vec<_>>();
+    let param_names_renamed = inv
+        .parameters
+        .iter()
+        .map(|p| {
+            if let Some(rename) = p.args.rename.clone() {
+                syn::Ident::new(&rename, p.name.span())
+            } else {
+                p.name.clone()
+            }
+        })
+        .collect::<Vec<_>>();
 
     let param_names_raw = inv.parameters.iter().map(|p| &p.name).collect::<Vec<_>>();
 
