@@ -60,6 +60,7 @@ are multiple attributes you can use on parameters:
 - `#[description = ""]`: Sets description of the parameter (slash-only)
 - `#[autocomplete = ""]`: Sets the autocomplete callback (slash-only)
 - `#[channel_types("", "")]`: For channel parameters, restricts allowed channel types (slash-only)
+- `#[rename = ""]`: Changes the user-facing name of the parameter (slash-only)
 - `#[min = 0]`: Minimum value for this number parameter (slash-only)
 - `#[max = 0]`: Maximum value for this number parameter (slash-only)
 - `#[rest]`: Use the entire rest of the message for this parameter (prefix-only)

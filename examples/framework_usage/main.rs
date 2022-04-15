@@ -83,6 +83,7 @@ async fn main() {
             general::file_details(),
             general::totalsize(),
             general::modal(),
+            general::punish(),
             context_menu::user_info(),
             context_menu::echo(),
             autocomplete::greet(),
