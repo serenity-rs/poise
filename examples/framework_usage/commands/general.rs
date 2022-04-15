@@ -277,7 +277,7 @@ pub async fn totalsize(
 }
 
 #[derive(Debug, poise::Modal)]
-#[allow(dead_code)] // These fields are only used in the Debug impl
+#[allow(dead_code)] // fields only used for Debug print
 struct MyModal {
     first_input: String,
     second_input: Option<String>,

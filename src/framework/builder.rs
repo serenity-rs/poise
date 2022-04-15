@@ -11,7 +11,7 @@ use crate::BoxFuture;
 /// - [`Self::options`]
 ///
 /// Before starting, the builder will make an HTTP request to retrieve the bot's application ID and
-/// owner.
+/// owner, if [`Self::initialize_owners`] is set (true by default).
 pub struct FrameworkBuilder<U, E> {
     /// Callback for user data setup
     user_data_setup: Option<
@@ -32,6 +32,8 @@ pub struct FrameworkBuilder<U, E> {
         Option<Box<dyn FnOnce(serenity::ClientBuilder) -> serenity::ClientBuilder + Send + Sync>>,
     /// Discord bot token
     token: Option<String>,
+    /// Discord gateway intents
+    intents: Option<serenity::GatewayIntents>,
     /// List of framework commands
     commands: Vec<crate::Command<U, E>>,
     /// See [`Self::initialize_owners()`]
@@ -45,6 +47,7 @@ impl<U, E> Default for FrameworkBuilder<U, E> {
             options: Default::default(),
             client_settings: Default::default(),
             token: Default::default(),
+            intents: Default::default(),
             commands: Default::default(),
             initialize_owners: true,
         }
@@ -101,6 +104,13 @@ impl<U, E> FrameworkBuilder<U, E> {
     #[must_use]
     pub fn token(mut self, token: impl Into<String>) -> Self {
         self.token = Some(token.into());
+        self
+    }
+
+    /// The gateway intents
+    #[must_use]
+    pub fn intents(mut self, intents: serenity::GatewayIntents) -> Self {
+        self.intents = Some(intents);
         self
     }
 
@@ -163,6 +173,16 @@ impl<U, E> FrameworkBuilder<U, E> {
     {
         // Aggregate required values or panic if not provided
         let token = self.token.expect("No token was provided to the framework");
+        let intents = self.intents.expect(
+            "
+
+No gateway intents were provided to the framework via `FrameworkBuilder::intents()`. If you're \
+unsure, use
+`serenity::GatewayIntents::non_privileged() | serenity::GatewayIntents::MESSAGE_CONTENT`
+and enable MESSAGE_CONTENT in your Discord bot dashboard
+
+",
+        );
         let user_data_setup = self
             .user_data_setup
             .expect("No user data setup function was provided to the framework");
@@ -189,8 +209,9 @@ impl<U, E> FrameworkBuilder<U, E> {
         }
 
         // Create serenity client
-        let mut client_builder =
-            serenity::ClientBuilder::new(token).application_id(application_info.id.0);
+        let mut client_builder = serenity::ClientBuilder::new(token)
+            .application_id(application_info.id.0)
+            .intents(intents);
         if let Some(client_settings) = self.client_settings {
             client_builder = client_settings(client_builder);
         }

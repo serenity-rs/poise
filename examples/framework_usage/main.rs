@@ -1,10 +1,7 @@
 #![warn(clippy::str_to_string)]
 
-mod autocomplete;
-mod checks;
 mod commands;
-mod context_menu;
-mod subcommands;
+use commands::*;
 
 use poise::serenity_prelude as serenity;
 use std::{collections::HashMap, env::var, sync::Mutex, time::Duration};
@@ -73,20 +70,20 @@ async fn main() {
         commands: vec![
             help(),
             register(),
-            commands::vote(),
-            commands::getvotes(),
-            commands::addmultiple(),
-            commands::choice(),
-            commands::boop(),
-            commands::voiceinfo(),
-            commands::test_reuse_response(),
-            commands::oracle(),
-            commands::code(),
-            commands::say(),
-            commands::file_details(),
-            commands::totalsize(),
-            commands::modal(),
-            commands::punish(),
+            general::vote(),
+            general::getvotes(),
+            general::addmultiple(),
+            general::choice(),
+            general::boop(),
+            general::voiceinfo(),
+            general::test_reuse_response(),
+            general::oracle(),
+            general::code(),
+            general::say(),
+            general::file_details(),
+            general::totalsize(),
+            general::modal(),
+            general::punish(),
             context_menu::user_info(),
             context_menu::echo(),
             autocomplete::greet(),
@@ -142,7 +139,7 @@ async fn main() {
         }),
         listener: |_ctx, event, _framework, _data| {
             Box::pin(async move {
-                println!("Got an event in listener: {:?}", event.event_type());
+                println!("Got an event in listener: {:?}", event.name());
                 Ok(())
             })
         },
@@ -159,12 +156,9 @@ async fn main() {
             })
         })
         .options(options)
-        .client_settings(|b| {
-            b.intents(
-                serenity::GatewayIntents::non_privileged()
-                    | serenity::GatewayIntents::MESSAGE_CONTENT,
-            )
-        })
+        .intents(
+            serenity::GatewayIntents::non_privileged() | serenity::GatewayIntents::MESSAGE_CONTENT,
+        )
         .run()
         .await
         .unwrap();

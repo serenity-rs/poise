@@ -298,6 +298,9 @@ pub enum ReplyHandle<'a> {
         /// message object
         interaction: &'a serenity::ApplicationCommandInteraction,
     },
+    /// Reply was attempted to be sent in autocomplete context, resulting in a no-op. Calling
+    /// methods on this variant will panic
+    Autocomplete,
 }
 
 impl ReplyHandle<'_> {
@@ -308,6 +311,9 @@ impl ReplyHandle<'_> {
         match self {
             Self::Known(msg) => Ok(*msg),
             Self::Unknown { http, interaction } => interaction.get_interaction_response(http).await,
+            Self::Autocomplete => {
+                panic!("reply is a no-op in autocomplete context; can't retrieve message")
+            }
         }
     }
 
@@ -346,6 +352,9 @@ impl ReplyHandle<'_> {
                     })
                     .await?;
             }
+            Self::Autocomplete => {
+                panic!("reply is a no-op in autocomplete context; can't edit message")
+            }
         }
         Ok(())
     }
@@ -379,9 +388,7 @@ pub async fn send_reply<'a, U, E>(
         crate::Context::Prefix(ctx) => {
             ReplyHandle::Known(crate::send_prefix_reply(ctx, builder).await?)
         }
-        crate::Context::Application(ctx) => crate::send_application_reply(ctx, builder)
-            .await?
-            .expect("cannot send a reply in autocomplete context"),
+        crate::Context::Application(ctx) => crate::send_application_reply(ctx, builder).await?,
     })
 }
 

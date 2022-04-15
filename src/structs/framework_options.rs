@@ -34,8 +34,9 @@ pub struct FrameworkOptions<U, E> {
     /// deletions or guild updates.
     pub listener: for<'a> fn(
         &'a serenity::Context,
-        &'a serenity::Event,
+        &'a crate::Event<'a>,
         &'a crate::Framework<U, E>,
+        // TODO: redundant with framework
         &'a U,
     ) -> BoxFuture<'a, Result<(), E>>,
     /// Prefix command specific options.

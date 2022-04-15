@@ -83,41 +83,38 @@ impl<U, E> Framework<U, E> {
             set_qualified_names(command);
         }
 
+        // Gateway intents sanity check
+        let is_prefix_configured = options.prefix_options.prefix.is_some()
+            || options.prefix_options.dynamic_prefix.is_some()
+            || options.prefix_options.stripped_dynamic_prefix.is_some();
+        let can_receive_message_content = client_builder
+            .get_intents()
+            .contains(serenity::GatewayIntents::MESSAGE_CONTENT);
+        if is_prefix_configured && !can_receive_message_content {
+            eprintln!(
+                "Warning: MESSAGE_CONTENT intent not set; prefix commands will not be received"
+            );
+        }
+
         let framework_cell = Arc::new(once_cell::sync::OnceCell::<Arc<Self>>::new());
+        let framework_cell_2 = framework_cell.clone();
+        let existing_event_handler = client_builder.get_event_handler();
+        let event_handler = crate::EventWrapper(move |ctx, event| {
+            // unwrap_used: we will only receive events once the client has been started, by which
+            // point framework_cell has been initialized
+            #[allow(clippy::unwrap_used)]
+            let framework = framework_cell_2.get().unwrap().clone();
+            let existing_event_handler = existing_event_handler.clone();
 
-        /// Small raw event handler that forwards received events to dispatch_event and the previous
-        /// user-registered raw event handler we overwrote, if any
-        struct EventHandler<U, E> {
-            /// Reference to the framework
-            framework: Arc<once_cell::sync::OnceCell<Arc<Framework<U, E>>>>,
-            /// Reference to the existing user-registered raw event handler we overwrote, if any
-            existing_event_handler: Option<Arc<dyn serenity::RawEventHandler>>,
-        }
-        #[async_trait::async_trait]
-        impl<U: Send + Sync + 'static, E: Send + 'static> serenity::RawEventHandler for EventHandler<U, E> {
-            async fn raw_event(&self, ctx: serenity::Context, event: serenity::Event) {
-                if let Some(handler) = &self.existing_event_handler {
-                    handler.raw_event(ctx.clone(), event.clone()).await;
+            Box::pin(async move {
+                dispatch::dispatch_event(&*framework, &ctx, &event).await;
+                if let Some(handler) = existing_event_handler {
+                    event.dispatch(ctx, &*handler).await;
                 }
+            }) as _
+        });
 
-                // unwrap_used: we will only receive events once the client has been started, by which
-                // point framework_cell has been initialized
-                #[allow(clippy::unwrap_used)]
-                let framework = self.framework.get().unwrap().clone();
-                // serenity runs RawEventHandler directly on its event loop which we must not block!
-                tokio::spawn(
-                    async move { dispatch::dispatch_event(&*framework, &ctx, &event).await },
-                );
-            }
-        }
-
-        let existing_event_handler = client_builder.get_raw_event_handler();
-        let client: serenity::Client = client_builder
-            .raw_event_handler(EventHandler {
-                framework: framework_cell.clone(),
-                existing_event_handler,
-            })
-            .await?;
+        let client: serenity::Client = client_builder.event_handler(event_handler).await?;
 
         let framework = Arc::new(Self {
             user_data: once_cell::sync::OnceCell::new(),
