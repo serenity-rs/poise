@@ -36,6 +36,7 @@ pub struct FrameworkOptions<U, E> {
         &'a serenity::Context,
         &'a serenity::Event,
         &'a crate::Framework<U, E>,
+        // TODO: redundant with framework
         &'a U,
     ) -> BoxFuture<'a, Result<(), E>>,
     /// Prefix command specific options.

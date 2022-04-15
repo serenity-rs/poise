@@ -354,6 +354,7 @@ pub struct PartialContext<'a, U, E> {
     /// Useful if you need the list of commands, for example for a custom help command
     pub framework: &'a crate::Framework<U, E>,
     /// Your custom user data
+    // TODO: redundant with framework
     pub data: &'a U,
 }
 

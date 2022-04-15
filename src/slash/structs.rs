@@ -99,6 +99,7 @@ pub struct ApplicationContext<'a, U, E> {
     /// The command object which is the current command
     pub command: &'a crate::Command<U, E>,
     /// Your custom user data
+    // TODO: redundant with framework
     pub data: &'a U,
     /// Custom user data carried across a single command invocation
     pub invocation_data: &'a tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
