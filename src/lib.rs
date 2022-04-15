@@ -20,7 +20,8 @@ it's easier to draft a good design when you know exactly which practical needs i
 # Quickstart
 ```rust,no_run
 */
-#![cfg_attr(docsrs, doc = include_str!("../examples/quickstart/main.rs"))]
+// Nested cfg_attr is needed for some reason
+#![cfg_attr(docsrs, cfg_attr(docsrs, doc = include_str!("../examples/quickstart/main.rs")))]
 #![cfg_attr(not(docsrs), doc = "// See ../examples/quickstart/main.rs")]
 /*!
 ```
