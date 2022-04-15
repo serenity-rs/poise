@@ -49,6 +49,17 @@ macro_rules! event {
                     )*
                 }
             }
+
+            /// Runs this event in the given [`serenity::EventHandler`]
+            pub async fn dispatch(self, ctx: serenity::Context, handler: &dyn serenity::EventHandler) {
+                match self {
+                    $(
+                        Self::$variant_name { $( $arg_name ),* } => {
+                            handler.$fn_name( ctx, $( $arg_name ),* ).await;
+                        }
+                    )*
+                }
+            }
         }
     };
 }
