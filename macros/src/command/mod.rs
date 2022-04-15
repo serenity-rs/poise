@@ -111,9 +111,16 @@ pub fn command(
     args: CommandArgs,
     mut function: syn::ItemFn,
 ) -> Result<TokenStream, darling::Error> {
-    // Verify that the function is marked async. Not strictly needed, but avoids confusion
+    // Verify some things about the function. Not strictly needed, but avoids confusion
     if function.sig.asyncness.is_none() {
         return Err(syn::Error::new(function.sig.span(), "command function must be async").into());
+    }
+    if function.sig.output == syn::ReturnType::Default {
+        return Err(syn::Error::new(
+            function.sig.span(),
+            "command function must return Result<(), ...>",
+        )
+        .into());
     }
 
     // Verify that at least one command type was enabled
