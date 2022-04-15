@@ -299,20 +299,21 @@ pub enum PunishType {
     Mute,
 }
 
-// Punishment command for testing the rename macro
+/// Punishment command for testing the rename macro
 #[poise::command(slash_command)]
 pub async fn punish(
     ctx: Context<'_>,
     #[description = "Punishment type"]
     #[rename = "type"]
     punish_type: PunishType,
-    #[description = "User to execute the punishment on."] user: serenity::User,
+    #[description = "User to execute the punishment on"] user: serenity::User,
 ) -> Result<(), Error> {
-    match punish_type {
-        PunishType::Ban => ctx.say(format!("{} has been banned!", user.name)).await?,
-        PunishType::Kick => ctx.say(format!("{} has been kicked!", user.name)).await?,
-        PunishType::Mute => ctx.say(format!("{} has been muted!", user.name)).await?,
+    let text = match punish_type {
+        PunishType::Ban => format!("{} has been banned!", user.name),
+        PunishType::Kick => format!("{} has been kicked!", user.name),
+        PunishType::Mute => format!("{} has been muted!", user.name),
     };
+    ctx.say(text).await?;
 
     Ok(())
 }

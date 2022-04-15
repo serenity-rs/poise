@@ -25,10 +25,9 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
             required = false;
         }
 
-        let param_name = if let Some(rename) = param.args.rename.clone() {
-            rename
-        } else {
-            param.name.to_string()
+        let param_name = match &param.args.rename {
+            Some(rename) => rename.clone(),
+            None => param.name.to_string(),
         };
 
         let autocomplete_callback = match &param.args.autocomplete {
@@ -121,19 +120,15 @@ pub fn generate_slash_action(inv: &Invocation) -> Result<proc_macro2::TokenStrea
         }
     }
 
-    let param_names_renamed = inv
+    let param_identifiers = inv.parameters.iter().map(|p| &p.name).collect::<Vec<_>>();
+    let param_names = inv
         .parameters
         .iter()
-        .map(|p| {
-            if let Some(rename) = p.args.rename.clone() {
-                syn::Ident::new(&rename, p.name.span())
-            } else {
-                p.name.clone()
-            }
+        .map(|p| match &p.args.rename {
+            Some(rename) => syn::Ident::new(rename, p.name.span()),
+            None => p.name.clone(),
         })
         .collect::<Vec<_>>();
-
-    let param_names_raw = inv.parameters.iter().map(|p| &p.name).collect::<Vec<_>>();
 
     let param_types = inv
         .parameters
@@ -150,9 +145,9 @@ pub fn generate_slash_action(inv: &Invocation) -> Result<proc_macro2::TokenStrea
             // why clippy doesn't turn off this lint inside macros in the first place
             #[allow(clippy::needless_question_mark)]
 
-            let ( #( #param_names_raw, )* ) = ::poise::parse_slash_args!(
+            let ( #( #param_identifiers, )* ) = ::poise::parse_slash_args!(
                 ctx.discord, ctx.interaction, ctx.args =>
-                #( (#param_names_renamed: #param_types), )*
+                #( (#param_names: #param_types), )*
             ).await.map_err(|error| match error {
                 poise::SlashArgError::CommandStructureMismatch(description) => {
                     poise::FrameworkError::CommandStructureMismatch { ctx, description }
@@ -166,7 +161,7 @@ pub fn generate_slash_action(inv: &Invocation) -> Result<proc_macro2::TokenStrea
                 },
             })?;
 
-            inner(ctx.into(), #( #param_names_raw, )*)
+            inner(ctx.into(), #( #param_identifiers, )*)
                 .await
                 .map_err(|error| poise::FrameworkError::Command {
                     error,
