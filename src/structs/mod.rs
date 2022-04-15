@@ -103,6 +103,21 @@ pub enum FrameworkError<'a, U, E> {
         /// General context
         ctx: Context<'a, U, E>,
     },
+    /// Command was invoked but the channel was a DM channel
+    GuildOnly {
+        /// General context
+        ctx: Context<'a, U, E>,
+    },
+    /// Command was invoked but the channel was a non-DM channel
+    DmOnly {
+        /// General context
+        ctx: Context<'a, U, E>,
+    },
+    /// Command was invoked but the channel wasn't a NSFW channel
+    NsfwOnly {
+        /// General context
+        ctx: Context<'a, U, E>,
+    },
     /// Provided pre-command check either errored, or returned false, so command execution aborted
     CommandCheckFailed {
         /// If execution wasn't aborted because of an error but because it successfully returned

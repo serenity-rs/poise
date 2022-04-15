@@ -70,6 +70,12 @@ pub struct Command<U, E> {
     /// If true, only users from the [owners list](crate::FrameworkOptions::owners) may use this
     /// command.
     pub owners_only: bool,
+    /// If true, only people in guilds may use this command
+    pub guild_only: bool,
+    /// If true, the command may only run in DMs
+    pub dm_only: bool,
+    /// If true, the command may only run in NSFW channels
+    pub nsfw_only: bool,
     /// Command-specific override for [`crate::FrameworkOptions::on_error`]
     pub on_error: Option<fn(crate::FrameworkError<'_, U, E>) -> BoxFuture<'_, ()>>,
     /// If this function returns false, this command will not be executed.
@@ -119,6 +125,9 @@ impl<U, E> std::fmt::Debug for Command<U, E> {
             required_permissions,
             required_bot_permissions,
             owners_only,
+            guild_only,
+            dm_only,
+            nsfw_only,
             on_error,
             check,
             parameters,
@@ -146,6 +155,9 @@ impl<U, E> std::fmt::Debug for Command<U, E> {
             .field("required_permissions", required_permissions)
             .field("required_bot_permissions", required_bot_permissions)
             .field("owners_only", owners_only)
+            .field("guild_only", guild_only)
+            .field("dm_only", dm_only)
+            .field("nsfw_only", nsfw_only)
             .field("on_error", &on_error.map(|f| f as *const ()))
             .field("check", &check.map(|f| f as *const ()))
             .field("parameters", parameters)

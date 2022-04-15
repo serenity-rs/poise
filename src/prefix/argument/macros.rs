@@ -177,7 +177,7 @@ to use this macro directly.
 #         futures::channel::mpsc::unbounded().0,
 #     ),
 #     shard_id: Default::default(),
-#     http: Default::default(),
+#     http: std::sync::Arc::new(::serenity::http::Http::new("example")),
 #     cache: Default::default(),
 # };
 # let msg = serenity::CustomMessage::new().build();
@@ -252,7 +252,7 @@ mod test {
                 futures::channel::mpsc::unbounded().0,
             ),
             shard_id: Default::default(),
-            http: Default::default(),
+            http: std::sync::Arc::new(::serenity::http::Http::new("example")),
             cache: Default::default(),
         };
         let msg = serenity::CustomMessage::new().build();

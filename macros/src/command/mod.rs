@@ -28,6 +28,9 @@ pub struct CommandArgs {
     required_permissions: Option<syn::punctuated::Punctuated<syn::Ident, syn::Token![|]>>,
     required_bot_permissions: Option<syn::punctuated::Punctuated<syn::Ident, syn::Token![|]>>,
     owners_only: bool,
+    guild_only: bool,
+    dm_only: bool,
+    nsfw_only: bool,
     identifying_name: Option<String>,
     category: Option<String>,
 
@@ -228,6 +231,9 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
     let required_permissions = &inv.required_permissions;
     let required_bot_permissions = &inv.required_bot_permissions;
     let owners_only = inv.args.owners_only;
+    let guild_only = inv.args.guild_only;
+    let dm_only = inv.args.dm_only;
+    let nsfw_only = inv.args.nsfw_only;
 
     let explanation = match &inv.args.explanation_fn {
         Some(explanation_fn) => quote::quote! { Some(#explanation_fn) },
@@ -289,6 +295,9 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
                 required_permissions: #required_permissions,
                 required_bot_permissions: #required_bot_permissions,
                 owners_only: #owners_only,
+                guild_only: #guild_only,
+                dm_only: #dm_only,
+                nsfw_only: #nsfw_only,
                 check: #check,
                 on_error: #on_error,
                 parameters: vec![ #( #parameters ),* ],

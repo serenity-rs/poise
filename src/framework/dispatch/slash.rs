@@ -127,7 +127,7 @@ pub async fn dispatch_interaction<'a, U, E>(
                 (
                     Some(crate::ContextMenuCommandAction::Message(action)),
                     Some(serenity::ResolvedTarget::Message(message)),
-                ) => action(ctx, message.clone()).await,
+                ) => action(ctx, *message.clone()).await,
                 _ => return Err(command_structure_mismatch_error),
             }
         }

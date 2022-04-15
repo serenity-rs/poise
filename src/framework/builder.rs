@@ -169,7 +169,7 @@ impl<U, E> FrameworkBuilder<U, E> {
         let mut options = self.options.expect("No framework options provided");
 
         // Retrieve application info via HTTP
-        let application_info = serenity::Http::new_with_token(&token)
+        let application_info = serenity::Http::new(&token)
             .get_current_application_info()
             .await?;
 
