@@ -141,7 +141,7 @@ async fn main() {
         }),
         listener: |_ctx, event, _framework, _data| {
             Box::pin(async move {
-                println!("Got an event in listener: {:?}", event.event_type());
+                println!("Got an event in listener: {:?}", event.name());
                 Ok(())
             })
         },
