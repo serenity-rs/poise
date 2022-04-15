@@ -158,12 +158,9 @@ async fn main() {
             })
         })
         .options(options)
-        .client_settings(|b| {
-            b.intents(
-                serenity::GatewayIntents::non_privileged()
-                    | serenity::GatewayIntents::MESSAGE_CONTENT,
-            )
-        })
+        .intents(
+            serenity::GatewayIntents::non_privileged() | serenity::GatewayIntents::MESSAGE_CONTENT,
+        )
         .run()
         .await
         .unwrap();
