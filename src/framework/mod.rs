@@ -83,6 +83,19 @@ impl<U, E> Framework<U, E> {
             set_qualified_names(command);
         }
 
+        // Gateway intents sanity check
+        let is_prefix_configured = options.prefix_options.prefix.is_some()
+            || options.prefix_options.dynamic_prefix.is_some()
+            || options.prefix_options.stripped_dynamic_prefix.is_some();
+        let can_receive_message_content = client_builder
+            .get_intents()
+            .contains(serenity::GatewayIntents::MESSAGE_CONTENT);
+        if is_prefix_configured && !can_receive_message_content {
+            eprintln!(
+                "Warning: MESSAGE_CONTENT intent not set; prefix commands will not be received"
+            );
+        }
+
         let framework_cell = Arc::new(once_cell::sync::OnceCell::<Arc<Self>>::new());
         let framework_cell_2 = framework_cell.clone();
         let existing_event_handler = client_builder.get_event_handler();
