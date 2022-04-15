@@ -11,7 +11,12 @@ async fn age(
     #[description = "Selected user"] user: Option<serenity::User>,
 ) -> Result<(), Error> {
     let user = user.as_ref().unwrap_or(ctx.author());
-    ctx.say(format!("{}'s account was created at {}", user.name, user.created_at())).await?;
+    ctx.say(format!(
+        "{}'s account was created at {}",
+        user.name,
+        user.created_at()
+    ))
+    .await?;
 
     Ok(())
 }
@@ -20,10 +25,10 @@ async fn age(
 async fn main() {
     poise::Framework::build()
         .token(std::env::var("DISCORD_BOT_TOKEN").unwrap())
-        .intents(serenity::GatewayIntents::non_privileged() | serenity::GatewayIntents::MESSAGE_CONTENT)
-        .user_data_setup(move |_ctx, _ready, _framework| Box::pin(async move {
-            Ok(Data {})
-        }))
+        .intents(
+            serenity::GatewayIntents::non_privileged() | serenity::GatewayIntents::MESSAGE_CONTENT,
+        )
+        .user_data_setup(move |_ctx, _ready, _framework| Box::pin(async move { Ok(Data {}) }))
         .options(poise::FrameworkOptions {
             // configure framework here
             prefix_options: poise::PrefixFrameworkOptions {
@@ -33,5 +38,7 @@ async fn main() {
             commands: vec![age()],
             ..Default::default()
         })
-        .run().await.unwrap();
+        .run()
+        .await
+        .unwrap();
 }
