@@ -17,10 +17,12 @@ use crate::serenity_prelude as serenity;
 pub async fn send_application_reply<'a, U, E>(
     ctx: ApplicationContext<'_, U, E>,
     builder: impl for<'b> FnOnce(&'b mut crate::CreateReply<'a>) -> &'b mut crate::CreateReply<'a>,
-) -> Result<Option<crate::ReplyHandle<'_>>, serenity::Error> {
+) -> Result<crate::ReplyHandle<'_>, serenity::Error> {
     let interaction = match ctx.interaction {
         crate::ApplicationCommandOrAutocompleteInteraction::ApplicationCommand(x) => x,
-        crate::ApplicationCommandOrAutocompleteInteraction::Autocomplete(_) => return Ok(None),
+        crate::ApplicationCommandOrAutocompleteInteraction::Autocomplete(_) => {
+            return Ok(crate::ReplyHandle::Autocomplete)
+        }
     };
 
     let mut data = crate::CreateReply {
@@ -37,7 +39,7 @@ pub async fn send_application_reply<'a, U, E>(
         .has_sent_initial_response
         .load(std::sync::atomic::Ordering::SeqCst);
 
-    Ok(Some(if has_sent_initial_response {
+    Ok(if has_sent_initial_response {
         crate::ReplyHandle::Known(Box::new(
             interaction
                 .create_followup_message(ctx.discord, |f| {
@@ -63,5 +65,5 @@ pub async fn send_application_reply<'a, U, E>(
             http: &ctx.discord.http,
             interaction,
         }
-    }))
+    })
 }
