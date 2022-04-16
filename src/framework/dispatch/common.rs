@@ -70,8 +70,17 @@ pub async fn check_permissions_and_cooldown<'a, U, E>(
         return Err(crate::FrameworkError::NotAnOwner { ctx });
     }
 
-    if cmd.guild_only && ctx.guild_id().is_none() {
-        return Err(crate::FrameworkError::GuildOnly { ctx });
+    if cmd.guild_only {
+        let should_abort = match ctx.guild_id() {
+            None => true,
+            Some(guild_id) => {
+                ctx.framework().options().require_cache_for_guild_check
+                    && ctx.discord().cache.guild_field(guild_id, |_| ()).is_none()
+            }
+        };
+        if should_abort {
+            return Err(crate::FrameworkError::GuildOnly { ctx });
+        }
     }
 
     if cmd.dm_only && ctx.guild_id().is_some() {

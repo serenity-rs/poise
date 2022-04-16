@@ -30,6 +30,9 @@ pub struct FrameworkOptions<U, E> {
     /// Useful for implementing custom cooldown behavior. See [`crate::Command::cooldowns`] and
     /// the methods on [`crate::Cooldowns`] for how to do that.
     pub manual_cooldowns: bool,
+    /// If `true`, changes behavior of guild_only command check to abort execution if the guild is
+    /// not in cache.
+    pub require_cache_for_guild_check: bool,
     /// Called on every Discord event. Can be used to react to non-command events, like messages
     /// deletions or guild updates.
     pub listener: for<'a> fn(
@@ -72,6 +75,7 @@ impl<U: std::fmt::Debug, E: std::fmt::Debug> std::fmt::Debug for FrameworkOption
             allowed_mentions,
             reply_callback,
             manual_cooldowns,
+            require_cache_for_guild_check,
             listener,
             prefix_options,
             owners,
@@ -86,6 +90,10 @@ impl<U: std::fmt::Debug, E: std::fmt::Debug> std::fmt::Debug for FrameworkOption
             .field("allowed_mentions", allowed_mentions)
             .field("reply_callback", &reply_callback.map(|f| f as *const ()))
             .field("manual_cooldowns", manual_cooldowns)
+            .field(
+                "require_cache_for_guild_check",
+                require_cache_for_guild_check,
+            )
             .field("listener", &(*listener as *const ()))
             .field("prefix_options", prefix_options)
             .field("owners", owners)
@@ -120,6 +128,7 @@ where
             }),
             reply_callback: None,
             manual_cooldowns: false,
+            require_cache_for_guild_check: false,
             prefix_options: Default::default(),
             owners: Default::default(),
         }
