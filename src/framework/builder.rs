@@ -209,9 +209,8 @@ and enable MESSAGE_CONTENT in your Discord bot dashboard
         }
 
         // Create serenity client
-        let mut client_builder = serenity::ClientBuilder::new(token)
-            .application_id(application_info.id.0)
-            .intents(intents);
+        let mut client_builder =
+            serenity::ClientBuilder::new(token, intents).application_id(application_info.id.0);
         if let Some(client_settings) = self.client_settings {
             client_builder = client_settings(client_builder);
         }
