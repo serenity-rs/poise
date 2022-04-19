@@ -9,6 +9,7 @@ use crate::BoxFuture;
 /// - [`Self::token`]
 /// - [`Self::user_data_setup`]
 /// - [`Self::options`]
+/// - [`Self::intents`]
 ///
 /// Before starting, the builder will make an HTTP request to retrieve the bot's application ID and
 /// owner, if [`Self::initialize_owners`] is set (true by default).
@@ -172,6 +173,7 @@ impl<U, E> FrameworkBuilder<U, E> {
         E: Send + 'static,
     {
         // Aggregate required values or panic if not provided
+        // WHEN CHANGING THESE, UPDATE FrameworkBuilder docs!
         let token = self.token.expect("No token was provided to the framework");
         let intents = self.intents.expect(
             "
