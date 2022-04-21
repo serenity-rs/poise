@@ -181,9 +181,13 @@ where
     let msg_content = msg_content.trim_start();
 
     // Check if we're allowed to execute our own messages
-    let bot_id = ctx.cache.current_user_id();
-    let execute_self_messages = framework.options.prefix_options.execute_self_messages;
-    if bot_id == msg.author.id && !execute_self_messages {
+    let from_self = msg.author.id == ctx.cache.current_user_id();
+    if from_self && !framework.options.prefix_options.execute_self_messages {
+        return Err(None);
+    }
+
+    // Check if we're allowed to execute bot messages
+    if msg.author.bot && !framework.options.prefix_options.execute_bot_messages {
         return Err(None);
     }
 
