@@ -86,10 +86,10 @@ pub async fn check_permissions_and_cooldown<'a, U, E>(
             None => return Err(crate::FrameworkError::GuildOnly { ctx }),
             Some(guild_id) => {
                 #[cfg(feature = "cache")]
-                if ctx.framework().options().require_cache_for_guild_check {
-                    if ctx.discord().cache.guild_field(guild_id, |_| ()).is_none() {
-                        return Err(crate::FrameworkError::GuildOnly { ctx });
-                    }
+                if ctx.framework().options().require_cache_for_guild_check
+                    && ctx.discord().cache.guild_field(guild_id, |_| ()).is_none()
+                {
+                    return Err(crate::FrameworkError::GuildOnly { ctx });
                 }
                 #[cfg(not(feature = "cache"))]
                 let _ = guild_id;
