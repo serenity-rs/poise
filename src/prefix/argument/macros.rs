@@ -178,6 +178,7 @@ to use this macro directly.
 #     ),
 #     shard_id: Default::default(),
 #     http: std::sync::Arc::new(::serenity::http::Http::new("example")),
+#     #[cfg(feature = "cache")]
 #     cache: Default::default(),
 # };
 # let msg = serenity::CustomMessage::new().build();
@@ -253,6 +254,7 @@ mod test {
             ),
             shard_id: Default::default(),
             http: std::sync::Arc::new(::serenity::http::Http::new("example")),
+            #[cfg(feature = "cache")]
             cache: Default::default(),
         };
         let msg = serenity::CustomMessage::new().build();
