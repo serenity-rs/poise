@@ -4,6 +4,8 @@
 #![warn(missing_docs)]
 #![warn(clippy::missing_docs_in_private_items)]
 #![allow(clippy::type_complexity)]
+// native #[non_exhaustive] is awful because you can't do struct update syntax with it (??)
+#![allow(clippy::manual_non_exhaustive)]
 
 /*!
 Poise is an opinionated Discord bot framework with a few distinctive features:
