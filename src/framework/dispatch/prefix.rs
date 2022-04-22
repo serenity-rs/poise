@@ -223,6 +223,7 @@ where
         data: framework.user_data().await,
         command,
         invocation_data,
+        __non_exhaustive: (),
     };
 
     super::common::check_permissions_and_cooldown(ctx.into(), command)

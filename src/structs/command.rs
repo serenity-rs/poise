@@ -98,6 +98,10 @@ pub struct Command<U, E> {
     pub context_menu_name: Option<&'static str>,
     /// Whether responses to this command should be ephemeral by default (application-only)
     pub ephemeral: bool,
+
+    // Like #[non_exhaustive], but #[poise::command] still needs to be able to create an instance
+    #[doc(hidden)]
+    pub __non_exhaustive: (),
 }
 
 impl<U, E> PartialEq for Command<U, E> {
@@ -137,6 +141,7 @@ impl<U, E> std::fmt::Debug for Command<U, E> {
             broadcast_typing,
             context_menu_name,
             ephemeral,
+            __non_exhaustive: _,
         } = self;
 
         f.debug_struct("Command")

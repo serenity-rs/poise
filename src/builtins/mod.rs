@@ -125,6 +125,7 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
         crate::FrameworkError::DynamicPrefix { error } => {
             println!("Dynamic prefix failed: {}", error);
         }
+        crate::FrameworkError::__NonExhaustive => panic!(),
     }
 
     Ok(())

@@ -316,6 +316,8 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
 
                 context_menu_name: #context_menu_name,
                 ephemeral: #ephemeral,
+
+                __non_exhaustive: (),
             }
         }
     })

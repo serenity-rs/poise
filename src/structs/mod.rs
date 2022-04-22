@@ -132,4 +132,7 @@ pub enum FrameworkError<'a, U, E> {
         /// Error which was thrown in the dynamic prefix code
         error: E,
     },
+    // #[non_exhaustive] forbids struct update syntax for ?? reason
+    #[doc(hidden)]
+    __NonExhaustive,
 }

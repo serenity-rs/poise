@@ -103,6 +103,9 @@ pub struct ApplicationContext<'a, U, E> {
     pub data: &'a U,
     /// Custom user data carried across a single command invocation
     pub invocation_data: &'a tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
+    // #[non_exhaustive] forbids struct update syntax for ?? reason
+    #[doc(hidden)]
+    pub __non_exhaustive: (),
 }
 impl<U, E> Clone for ApplicationContext<'_, U, E> {
     fn clone(&self) -> Self {
@@ -126,6 +129,7 @@ impl<U: std::fmt::Debug, E: std::fmt::Debug> std::fmt::Debug for ApplicationCont
             command: _,
             data,
             invocation_data: _,
+            __non_exhaustive: _,
         } = self;
 
         f.debug_struct("ApplicationContext")

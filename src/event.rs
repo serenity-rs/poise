@@ -41,6 +41,9 @@ macro_rules! event {
                 $( #[$attr] )?
                 $variant_name { $( $arg_name: $arg_type ),* },
             )*
+            // #[non_exhaustive] forbids struct update syntax for ?? reason
+            #[doc(hidden)]
+            __NonExhaustive,
         }
 
         impl Event<'_> {
@@ -51,6 +54,7 @@ macro_rules! event {
                         $( #[$attr] )?
                         Self::$variant_name { .. } => stringify!($variant_name),
                     )*
+                    Self::__NonExhaustive => panic!(),
                 }
             }
 
@@ -63,6 +67,7 @@ macro_rules! event {
                             handler.$fn_name( ctx, $( $arg_name ),* ).await;
                         }
                     )*
+                    Self::__NonExhaustive => panic!(),
                 }
             }
         }

@@ -27,6 +27,9 @@ pub struct PrefixContext<'a, U, E> {
     pub data: &'a U,
     /// Custom user data carried across a single command invocation
     pub invocation_data: &'a tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
+    // #[non_exhaustive] forbids struct update syntax for ?? reason
+    #[doc(hidden)]
+    pub __non_exhaustive: (),
 }
 // manual Copy+Clone implementations because Rust is getting confused about the type parameter
 impl<U, E> Clone for PrefixContext<'_, U, E> {
@@ -52,6 +55,7 @@ impl<'a, U: std::fmt::Debug, E: std::fmt::Debug> std::fmt::Debug for PrefixConte
             command: _,
             data,
             invocation_data: _,
+            __non_exhaustive: _,
         } = self;
 
         f.debug_struct("PrefixContext")
@@ -147,6 +151,9 @@ pub struct PrefixFrameworkOptions<U, E> {
     // /// any specific subcommand is invoked. This command is expected to take the command name as a
     // /// single parameter
     // pub command_specific_help_commmand: Option<Command<U, E>>, */
+    // #[non_exhaustive] forbids struct update syntax for ?? reason
+    #[doc(hidden)]
+    pub __non_exhaustive: (),
 }
 
 impl<U: std::fmt::Debug, E: std::fmt::Debug> std::fmt::Debug for PrefixFrameworkOptions<U, E> {
@@ -163,6 +170,7 @@ impl<U: std::fmt::Debug, E: std::fmt::Debug> std::fmt::Debug for PrefixFramework
             execute_self_messages,
             ignore_bots,
             case_insensitive_commands,
+            __non_exhaustive: _,
         } = self;
 
         f.debug_struct("PrefixFrameworkOptions")
@@ -204,6 +212,7 @@ impl<U, E> Default for PrefixFrameworkOptions<U, E> {
             // help_when_mentioned: true,
             // help_commmand: None,
             // command_specific_help_commmand: None,
+            __non_exhaustive: (),
         }
     }
 }

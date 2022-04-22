@@ -65,6 +65,7 @@ pub async fn extract_command_and_run_checks<'a, U, E>(
         command,
         has_sent_initial_response,
         invocation_data,
+        __non_exhaustive: (),
     };
 
     super::common::check_permissions_and_cooldown(ctx.into(), command)
