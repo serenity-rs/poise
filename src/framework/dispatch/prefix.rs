@@ -176,6 +176,11 @@ pub async fn dispatch_message<'a, U, E>(
 where
     U: Send + Sync,
 {
+    // Check if we're allowed to invoke from bot messages
+    if msg.author.bot && framework.options.prefix_options.ignore_bots {
+        return Err(None)
+    }
+
     // Strip prefix and whitespace between prefix and command
     let (prefix, msg_content) = strip_prefix(framework, ctx, msg).await.ok_or(None)?;
     let msg_content = msg_content.trim_start();
