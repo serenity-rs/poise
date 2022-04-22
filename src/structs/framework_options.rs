@@ -32,6 +32,8 @@ pub struct FrameworkOptions<U, E> {
     pub manual_cooldowns: bool,
     /// If `true`, changes behavior of guild_only command check to abort execution if the guild is
     /// not in cache.
+    ///
+    /// **If `cache` feature is disabled, this has no effect!**
     pub require_cache_for_guild_check: bool,
     /// Called on every Discord event. Can be used to react to non-command events, like messages
     /// deletions or guild updates.

@@ -215,8 +215,8 @@ pub async fn register_application_commands<U, E>(
         })
         .await?;
     } else {
-        let guild = match ctx.guild() {
-            Some(x) => x,
+        let guild = match ctx.guild_id() {
+            Some(x) => x.to_partial_guild(ctx.discord()).await?,
             None => {
                 ctx.say("Must be called in guild").await?;
                 return Ok(());
@@ -256,6 +256,7 @@ pub async fn register_application_commands<U, E>(
 /// > I am currently in three servers!
 /// > - **A public server** (7123 members)
 /// > - [3 private servers with 456 members total]
+#[cfg(feature = "cache")]
 pub async fn servers<U, E>(ctx: crate::Context<'_, U, E>) -> Result<(), serenity::Error> {
     let mut show_private_guilds = false;
     if let crate::Context::Application(_) = ctx {

@@ -132,6 +132,7 @@ impl<'a, U, E> Context<'a, U, E> {
     /// Return the guild of this context, if we are inside a guild.
     ///
     /// Warning: clones the entire Guild instance out of the cache
+    #[cfg(feature = "cache")]
     pub fn guild(&self) -> Option<serenity::Guild> {
         self.guild_id()?.to_guild_cached(self.discord())
     }

@@ -73,16 +73,20 @@ async fn strip_prefix<'a, U, E>(
     }
 
     if framework.options.prefix_options.mention_as_prefix {
-        // Mentions are either <@USER_ID> or <@!USER_ID>
-        if let Some(stripped_content) = (|| {
-            msg.content
-                .strip_prefix("<@")?
-                .trim_start_matches('!')
-                .strip_prefix(&ctx.cache.current_user_id().0.to_string())?
-                .strip_prefix('>')
-        })() {
-            let mention_prefix = &msg.content[..(msg.content.len() - stripped_content.len())];
-            return Some((mention_prefix, stripped_content));
+        if let Some(bot_id) = framework.bot_id.get() {
+            // Mentions are either <@USER_ID> or <@!USER_ID>
+            if let Some(stripped_content) = (|| {
+                msg.content
+                    .strip_prefix("<@")?
+                    .trim_start_matches('!')
+                    .strip_prefix(&bot_id.0.to_string())?
+                    .strip_prefix('>')
+            })() {
+                let mention_prefix = &msg.content[..(msg.content.len() - stripped_content.len())];
+                return Some((mention_prefix, stripped_content));
+            }
+        } else {
+            log::warn!("bot_id not yet initialized");
         }
     }
 
@@ -181,9 +185,12 @@ where
     let msg_content = msg_content.trim_start();
 
     // Check if we're allowed to execute our own messages
-    let from_self = msg.author.id == ctx.cache.current_user_id();
-    if from_self && !framework.options.prefix_options.execute_self_messages {
-        return Err(None);
+    if let Some(&bot_id) = framework.bot_id.get() {
+        if bot_id == msg.author.id && !framework.options.prefix_options.execute_self_messages {
+            return Err(None);
+        }
+    } else {
+        log::warn!("bot_id not yet initialized");
     }
 
     // Check if we're allowed to execute bot messages
