@@ -178,7 +178,7 @@ where
 {
     // Check if we're allowed to invoke from bot messages
     if msg.author.bot && framework.options.prefix_options.ignore_bots {
-        return Err(None)
+        return Err(None);
     }
 
     // Strip prefix and whitespace between prefix and command
