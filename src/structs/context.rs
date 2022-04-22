@@ -137,6 +137,23 @@ impl<'a, U, E> Context<'a, U, E> {
         self.guild_id()?.to_guild_cached(self.discord())
     }
 
+    // TODO: uncomment when https://github.com/serenity-rs/serenity/pull/1865 can be used
+    /* // Doesn't fit in with the rest of the functions here but it's convenient
+    /// Return the partial guild of this context, if we are inside a guild.
+    ///
+    /// Attempts to find the guild in cache, if cache feature is enabled. Otherwise, falls back to
+    /// an HTTP request
+    ///
+    /// Returns None if in DMs, or if the guild HTTP request fails
+    pub async fn partial_guild(&self) -> Option<serenity::PartialGuild> {
+        #[cfg(feature = "cache")]
+        if let Some(guild) = self.guild_id()?.to_guild_cached(self.discord()) {
+            return Some(guild.into());
+        }
+
+        self.guild_id()?.to_partial_guild(self.discord()).await.ok()
+    } */
+
     // Doesn't fit in with the rest of the functions here but it's convenient
     /// Returns the author of the invoking message or interaction, as a [`serenity::Member`]
     ///
