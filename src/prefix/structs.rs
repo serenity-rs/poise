@@ -132,8 +132,10 @@ pub struct PrefixFrameworkOptions<U, E> {
     /// command does not send a response at all.
     pub ignore_edits_if_not_yet_responded: bool,
 
-    /// Whether commands in messages emitted by the bot itself should be executed as well.
+    /// Whether commands in messages emitted by this bot itself should be executed as well.
     pub execute_self_messages: bool,
+    /// Whether commands in messages emitted by bots in general should be executed as well.
+    pub execute_bot_messages: bool,
     /// Whether command names should be compared case-insensitively.
     pub case_insensitive_commands: bool,
     /// Whether to ignore messages from bots for command invoking. Default `true`
@@ -161,6 +163,7 @@ impl<U: std::fmt::Debug, E: std::fmt::Debug> std::fmt::Debug for PrefixFramework
             execute_untracked_edits,
             ignore_edits_if_not_yet_responded,
             execute_self_messages,
+            execute_bot_messages,
             case_insensitive_commands,
             ignore_bots,
         } = self;
@@ -181,6 +184,7 @@ impl<U: std::fmt::Debug, E: std::fmt::Debug> std::fmt::Debug for PrefixFramework
                 ignore_edits_if_not_yet_responded,
             )
             .field("execute_self_messages", execute_self_messages)
+            .field("execute_bot_messages", execute_bot_messages)
             .field("case_insensitive_commands", case_insensitive_commands)
             .field("ignore_bots", ignore_bots)
             .finish()
@@ -199,6 +203,7 @@ impl<U, E> Default for PrefixFrameworkOptions<U, E> {
             execute_untracked_edits: true,
             ignore_edits_if_not_yet_responded: false,
             execute_self_messages: false,
+            execute_bot_messages: true,
             case_insensitive_commands: true,
             ignore_bots: true,
             // help_when_mentioned: true,

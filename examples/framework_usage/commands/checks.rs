@@ -104,6 +104,8 @@ pub async fn add(
 pub async fn get_guild_name(ctx: Context<'_>) -> Result<(), Error> {
     ctx.say(format!(
         "The name of this guild is: {}",
+        // TODO: uncomment when https://github.com/serenity-rs/serenity/pull/1865 can be used
+        // ctx.partial_guild().await.unwrap().name
         ctx.guild().unwrap().name
     ))
     .await?;

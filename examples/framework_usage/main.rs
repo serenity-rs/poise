@@ -66,6 +66,8 @@ async fn on_error(error: poise::FrameworkError<'_, Data, Error>) {
 
 #[tokio::main]
 async fn main() {
+    env_logger::init();
+
     let options = poise::FrameworkOptions {
         commands: vec![
             help(),

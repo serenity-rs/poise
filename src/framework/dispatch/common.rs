@@ -15,9 +15,15 @@ async fn user_permissions(
         None => return Some(serenity::Permissions::all()), // no permission checks in DMs
     };
 
+    #[cfg(feature = "cache")]
     let guild = match ctx.cache.guild(guild_id) {
         Some(x) => x,
         None => return None, // Guild not in cache
+    };
+    #[cfg(not(feature = "cache"))]
+    let guild = match ctx.http.get_guild(guild_id.0).await {
+        Ok(x) => x,
+        Err(_) => return None,
     };
 
     // Use to_channel so that it can fallback on HTTP for threads (which aren't in cache usually)
@@ -32,9 +38,14 @@ async fn user_permissions(
         Err(_) => return None,
     };
 
+    #[cfg(feature = "cache")]
+    let cached_member = guild.members.get(&user_id).cloned();
+    #[cfg(not(feature = "cache"))]
+    let cached_member = None;
+
     // If member not in cache (probably because presences intent is not enabled), retrieve via HTTP
-    let member = match guild.members.get(&user_id) {
-        Some(x) => x.clone(),
+    let member = match cached_member {
+        Some(x) => x,
         None => match ctx.http.get_member(guild_id.0, user_id.0).await {
             Ok(member) => member,
             Err(_) => return None,
@@ -71,15 +82,18 @@ pub async fn check_permissions_and_cooldown<'a, U, E>(
     }
 
     if cmd.guild_only {
-        let should_abort = match ctx.guild_id() {
-            None => true,
+        match ctx.guild_id() {
+            None => return Err(crate::FrameworkError::GuildOnly { ctx }),
             Some(guild_id) => {
-                ctx.framework().options().require_cache_for_guild_check
-                    && ctx.discord().cache.guild_field(guild_id, |_| ()).is_none()
+                #[cfg(feature = "cache")]
+                if ctx.framework().options().require_cache_for_guild_check {
+                    if ctx.discord().cache.guild_field(guild_id, |_| ()).is_none() {
+                        return Err(crate::FrameworkError::GuildOnly { ctx });
+                    }
+                }
+                #[cfg(not(feature = "cache"))]
+                let _ = guild_id;
             }
-        };
-        if should_abort {
-            return Err(crate::FrameworkError::GuildOnly { ctx });
         }
     }
 
@@ -121,18 +135,21 @@ pub async fn check_permissions_and_cooldown<'a, U, E>(
     }
 
     // Before running any pre-command checks, make sure the bot has the permissions it needs
-    let bot_user_id = ctx.discord().cache.current_user_id();
-    match missing_permissions(ctx, bot_user_id, cmd.required_bot_permissions).await {
-        Some(missing_permissions) if missing_permissions.is_empty() => {}
-        Some(missing_permissions) => {
-            return Err(crate::FrameworkError::MissingBotPermissions {
-                ctx,
-                missing_permissions,
-            })
+    if let Some(&bot_user_id) = ctx.framework().bot_id.get() {
+        match missing_permissions(ctx, bot_user_id, cmd.required_bot_permissions).await {
+            Some(missing_permissions) if missing_permissions.is_empty() => {}
+            Some(missing_permissions) => {
+                return Err(crate::FrameworkError::MissingBotPermissions {
+                    ctx,
+                    missing_permissions,
+                })
+            }
+            // When in doubt, just let it run. Not getting fancy missing permissions errors is better
+            // than the command not executing at all
+            None => {}
         }
-        // When in doubt, just let it run. Not getting fancy missing permissions errors is better
-        // than the command not executing at all
-        None => {}
+    } else {
+        // When in doubt, let it run (see above)
     }
 
     // Only continue if command checks returns true. First perform global checks, then command
