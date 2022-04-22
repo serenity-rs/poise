@@ -1,6 +1,7 @@
-[![Build](https://img.shields.io/badge/build-passing-brightgreen)](https://kangalioo.github.io/poise/)
+[![Build](https://img.shields.io/github/workflow/status/kangalioo/poise/CI)](https://kangalioo.github.io/poise/)
+[![crates.io](https://img.shields.io/crates/v/poise.svg)](https://docs.rs/poise/)
 [![Docs](https://img.shields.io/badge/docs-online-informational)](https://docs.rs/poise/)
-[![Docs (git)](https://img.shields.io/badge/docs-online-informational)](https://kangalioo.github.io/poise/)
+[![Docs (master)](https://img.shields.io/badge/docs%20%28master%29-online-informational)](https://kangalioo.github.io/poise/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Rust: 1.53+](https://img.shields.io/badge/rust-1.53+-93450a)](https://blog.rust-lang.org/2021/06/17/Rust-1.53.0.html)
 
