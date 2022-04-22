@@ -185,10 +185,6 @@ where
         return Err(None);
     }
 
-    // Strip prefix and whitespace between prefix and command
-    let (prefix, msg_content) = strip_prefix(framework, ctx, msg).await.ok_or(None)?;
-    let msg_content = msg_content.trim_start();
-
     // Check if we're allowed to execute our own messages
     if let Some(&bot_id) = framework.bot_id.get() {
         if bot_id == msg.author.id && !framework.options.prefix_options.execute_self_messages {
@@ -198,10 +194,9 @@ where
         log::warn!("bot_id not yet initialized");
     }
 
-    // Check if we're allowed to execute bot messages
-    if msg.author.bot && !framework.options.prefix_options.execute_bot_messages {
-        return Err(None);
-    }
+    // Strip prefix and whitespace between prefix and command
+    let (prefix, msg_content) = strip_prefix(framework, ctx, msg).await.ok_or(None)?;
+    let msg_content = msg_content.trim_start();
 
     let (command, invoked_command_name, args) = find_command(
         &framework.options.commands,
