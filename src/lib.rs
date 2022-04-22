@@ -15,8 +15,6 @@ I initially this framework mainly for personal use ([rustbot](<https://github.co
 and [etternabot](<https://github.com/kangalioo/etternabot>)). Features are added on demand, since
 it's easier to draft a good design when you know exactly which practical needs it should cover.
 
-**Warning: API details are subject to change**
-
 # Quickstart
 ```rust,no_run
 */
