@@ -81,11 +81,11 @@ impl<'a, U, E> Context<'a, U, E> {
     /// Shorthand of [`crate::send_reply`]
     ///
     /// Note: panics when called in an autocomplete context!
-    pub async fn send(
+    pub async fn send<'att>(
         self,
-        builder: impl for<'b, 'c> FnOnce(
-            &'b mut crate::CreateReply<'c>,
-        ) -> &'b mut crate::CreateReply<'c>,
+        builder: impl for<'b> FnOnce(
+            &'b mut crate::CreateReply<'att>,
+        ) -> &'b mut crate::CreateReply<'att>,
     ) -> Result<crate::ReplyHandle<'a>, serenity::Error> {
         crate::send_reply(self, builder).await
     }

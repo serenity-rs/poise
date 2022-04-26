@@ -7,13 +7,13 @@ use crate::serenity_prelude as serenity;
 
 /// Message builder that abstracts over prefix and application command responses
 #[derive(Default)]
-pub struct CreateReply<'a> {
+pub struct CreateReply<'att> {
     /// Message content.
     pub content: Option<String>,
     /// Embeds, if present.
     pub embeds: Vec<serenity::CreateEmbed>,
     /// Message attachments.
-    pub attachments: Vec<serenity::AttachmentType<'a>>,
+    pub attachments: Vec<serenity::AttachmentType<'att>>,
     /// Whether the message is ephemeral (only has an effect in application commands)
     pub ephemeral: bool,
     /// Message components, that is, buttons and select menus.
@@ -24,7 +24,7 @@ pub struct CreateReply<'a> {
     pub reference_message: Option<serenity::MessageReference>,
 }
 
-impl<'a> CreateReply<'a> {
+impl<'att> CreateReply<'att> {
     /// Set the content of the message.
     pub fn content(&mut self, content: impl Into<String>) -> &mut Self {
         self.content = Some(content.into());
@@ -60,7 +60,7 @@ impl<'a> CreateReply<'a> {
     /// Add an attachment.
     ///
     /// This will not have an effect in a slash command's initial response!
-    pub fn attachment(&mut self, attachment: serenity::AttachmentType<'a>) -> &mut Self {
+    pub fn attachment(&mut self, attachment: serenity::AttachmentType<'att>) -> &mut Self {
         self.attachments.push(attachment);
         self
     }
@@ -103,9 +103,9 @@ impl<'a> CreateReply<'a> {
 
 /// Methods to create a message builder from any type from this [`CreateReply`]. Used by poise
 /// internally to actually send a response to Discord
-impl<'a> CreateReply<'a> {
+impl<'att> CreateReply<'att> {
     /// Serialize this response builder to a [`serenity::CreateInteractionResponseData`]
-    pub fn to_slash_initial_response(self, f: &mut serenity::CreateInteractionResponseData<'a>) {
+    pub fn to_slash_initial_response(self, f: &mut serenity::CreateInteractionResponseData<'att>) {
         let crate::CreateReply {
             content,
             embeds,
@@ -141,7 +141,7 @@ impl<'a> CreateReply<'a> {
     /// Serialize this response builder to a [`serenity::CreateInteractionResponseFollowup`]
     pub fn to_slash_followup_response(
         self,
-        f: &mut serenity::CreateInteractionResponseFollowup<'a>,
+        f: &mut serenity::CreateInteractionResponseFollowup<'att>,
     ) {
         let crate::CreateReply {
             content,
@@ -206,7 +206,7 @@ impl<'a> CreateReply<'a> {
     }
 
     /// Serialize this response builder to a [`serenity::EditMessage`]
-    pub fn to_prefix_edit(self, f: &mut serenity::EditMessage<'a>) {
+    pub fn to_prefix_edit(self, f: &mut serenity::EditMessage<'att>) {
         let crate::CreateReply {
             content,
             embeds,
@@ -244,7 +244,7 @@ impl<'a> CreateReply<'a> {
     }
 
     /// Serialize this response builder to a [`serenity::CreateMessage`]
-    pub fn to_prefix(self, m: &mut serenity::CreateMessage<'a>) {
+    pub fn to_prefix(self, m: &mut serenity::CreateMessage<'att>) {
         let crate::CreateReply {
             content,
             embeds,
@@ -320,10 +320,10 @@ impl ReplyHandle<'_> {
 
     /// Edits the message that this [`ReplyHandle`] points to
     // TODO: return the edited Message object?
-    pub async fn edit<'a, U, E>(
+    pub async fn edit<'att, U, E>(
         &self,
         ctx: crate::Context<'_, U, E>,
-        builder: impl for<'b> FnOnce(&'b mut CreateReply<'a>) -> &'b mut CreateReply<'a>,
+        builder: impl for<'a> FnOnce(&'a mut CreateReply<'att>) -> &'a mut CreateReply<'att>,
     ) -> Result<(), serenity::Error> {
         // TODO: deduplicate this block of code
         let mut reply = crate::CreateReply {
@@ -381,9 +381,9 @@ impl ReplyHandle<'_> {
 /// ).await?;
 /// # Ok(()) }
 /// ```
-pub async fn send_reply<U, E>(
+pub async fn send_reply<'att, U, E>(
     ctx: crate::Context<'_, U, E>,
-    builder: impl for<'a, 'b> FnOnce(&'a mut CreateReply<'b>) -> &'a mut CreateReply<'b>,
+    builder: impl for<'a> FnOnce(&'a mut CreateReply<'att>) -> &'a mut CreateReply<'att>,
 ) -> Result<ReplyHandle<'_>, serenity::Error> {
     Ok(match ctx {
         crate::Context::Prefix(ctx) => {
