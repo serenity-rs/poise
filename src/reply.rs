@@ -105,11 +105,11 @@ impl<'a> CreateReply<'a> {
 /// internally to actually send a response to Discord
 impl<'a> CreateReply<'a> {
     /// Serialize this response builder to a [`serenity::CreateInteractionResponseData`]
-    pub fn to_slash_initial_response(self, f: &mut serenity::CreateInteractionResponseData<'_>) {
+    pub fn to_slash_initial_response(self, f: &mut serenity::CreateInteractionResponseData<'a>) {
         let crate::CreateReply {
             content,
             embeds,
-            attachments: _, // serenity doesn't support attachments in initial response yet
+            attachments,
             components,
             ephemeral,
             allowed_mentions,
@@ -135,6 +135,7 @@ impl<'a> CreateReply<'a> {
         if ephemeral {
             f.flags(serenity::InteractionApplicationCommandCallbackDataFlags::EPHEMERAL);
         }
+        f.add_files(attachments);
     }
 
     /// Serialize this response builder to a [`serenity::CreateInteractionResponseFollowup`]
@@ -380,9 +381,9 @@ impl ReplyHandle<'_> {
 /// ).await?;
 /// # Ok(()) }
 /// ```
-pub async fn send_reply<'a, U, E>(
+pub async fn send_reply<U, E>(
     ctx: crate::Context<'_, U, E>,
-    builder: impl for<'b> FnOnce(&'b mut CreateReply<'a>) -> &'b mut CreateReply<'a>,
+    builder: impl for<'a, 'b> FnOnce(&'a mut CreateReply<'b>) -> &'a mut CreateReply<'b>,
 ) -> Result<ReplyHandle<'_>, serenity::Error> {
     Ok(match ctx {
         crate::Context::Prefix(ctx) => {
