@@ -13,10 +13,6 @@ Poise is an opinionated Discord bot framework with a few distinctive features:
 - slash commands: completely define both normal and slash commands with a single function
 - flexible argument parsing: command parameters are defined with normal Rust types and parsed automatically
 
-I initially this framework mainly for personal use ([rustbot](<https://github.com/kangalioo/rustbot>)
-and [etternabot](<https://github.com/kangalioo/etternabot>)). Features are added on demand, since
-it's easier to draft a good design when you know exactly which practical needs it should cover.
-
 # Quickstart
 ```rust,no_run
 */
@@ -26,11 +22,14 @@ it's easier to draft a good design when you know exactly which practical needs i
 /*!
 ```
 
-A full functioning bot would contain a help command as well as a register command to register slash
-commands. See [`examples/framework_usage`] for examples on that as well as other features of poise.
+The quickstart is slash command only. To use prefix commands:
+- add `prefix_command` in [`#[poise::command()]`](command) to make the command prefix-compatible
+- add `| serenity::GatewayIntents::MESSAGE_CONTENT` to the intents to receive full message data
+- add [a prefix](PrefixFrameworkOptions::prefix) in FrameworkOptions
 
-You can run the framework_usage example with
-`cargo run --example=framework_usage`
+A full bot would contain a help command, and a more sophisticated system to register slash commands.
+See examples/framework_usage/ in the git repository for a full-featured example bot, showcasing most
+features of poise: `cargo run --example=framework_usage`
 
 # Introduction to slash commands
 
