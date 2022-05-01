@@ -159,7 +159,7 @@ impl<U, E> FrameworkBuilder<U, E> {
     /// [`crate::FrameworkOptions::owners`] automatically
     ///
     /// `true` by default
-    pub fn initialize_owners(&mut self, initialize_owners: bool) -> &mut Self {
+    pub fn initialize_owners(mut self, initialize_owners: bool) -> Self {
         self.initialize_owners = initialize_owners;
         self
     }
