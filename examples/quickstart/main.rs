@@ -28,9 +28,10 @@ async fn main() {
         .intents(serenity::GatewayIntents::non_privileged())
         .user_data_setup(move |ctx, _ready, framework| {
             Box::pin(async move {
+                let guild_id = serenity::GuildId(todo!("GUILD ID HERE"));
                 let commands_builder =
                     poise::builtins::create_application_commands(&framework.options().commands);
-                serenity::GuildId(XXXX)
+                guild_id
                     .set_application_commands(ctx, |b| {
                         *b = commands_builder;
                         b
