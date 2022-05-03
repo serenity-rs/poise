@@ -179,14 +179,9 @@ pub fn create_application_commands<U, E>(
     }
     commands_builder
 }
-/// Wraps [`create_application_commands`] and does some sane default permission checks, as well as
-/// actually send the registration HTTP request to Discord
+/// Wraps [`create_application_commands`] and adds a bot owner permission check and status messages.
 ///
-/// Permission checks:
-/// - global command registration is only allowed for bot owners
-/// - guild-specific command registration is allowed for guild owners and bot owners
-///
-/// This function is supposed to be ready-to-use implementation for a `~register` command of your
+/// This function is supposed to be a ready-to-use implementation for a `~register` command of your
 /// bot. So if you want, you can copy paste this help message for the command:
 ///
 /// ```text
@@ -202,12 +197,12 @@ pub async fn register_application_commands<U, E>(
     let commands_builder = create_application_commands(commands);
 
     let is_bot_owner = ctx.framework().options().owners.contains(&ctx.author().id);
-    if global {
-        if !is_bot_owner {
-            ctx.say("Can only be used by bot owner").await?;
-            return Ok(());
-        }
+    if !is_bot_owner {
+        ctx.say("Can only be used by bot owner").await?;
+        return Ok(());
+    }
 
+    if global {
         ctx.say(format!("Registering {} commands...", commands.len()))
             .await?;
         serenity::ApplicationCommand::set_global_application_commands(ctx.discord(), |b| {
@@ -216,23 +211,17 @@ pub async fn register_application_commands<U, E>(
         })
         .await?;
     } else {
-        let guild = match ctx.guild_id() {
-            Some(x) => x.to_partial_guild(ctx.discord()).await?,
+        let guild_id = match ctx.guild_id() {
+            Some(x) => x,
             None => {
                 ctx.say("Must be called in guild").await?;
                 return Ok(());
             }
         };
-        let is_guild_owner = ctx.author().id == guild.owner_id;
-
-        if !is_guild_owner && !is_bot_owner {
-            ctx.say("Can only be used by server owner").await?;
-            return Ok(());
-        }
 
         ctx.say(format!("Registering {} commands...", commands.len()))
             .await?;
-        guild
+        guild_id
             .set_application_commands(ctx.discord(), |b| {
                 *b = commands_builder;
                 b
