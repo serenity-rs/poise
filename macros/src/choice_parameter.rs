@@ -64,7 +64,7 @@ pub fn choice_parameter(input: syn::DeriveInput) -> Result<TokenStream, darling:
                 _: &poise::serenity_prelude::Context,
                 _: poise::ApplicationCommandOrAutocompleteInteraction<'_>,
                 value: &poise::serenity::json::Value,
-            ) -> Result<Self, poise::SlashArgError> {
+            ) -> ::std::result::Result<Self, poise::SlashArgError> {
                 use poise::serenity_prelude::json::prelude::*;
                 let choice_key = value
                     .as_u64()
@@ -88,7 +88,7 @@ pub fn choice_parameter(input: syn::DeriveInput) -> Result<TokenStream, darling:
         impl std::str::FromStr for #enum_ident {
             type Err = poise::InvalidChoice;
 
-            fn from_str(s: &str) -> Result<Self, Self::Err> {
+            fn from_str(s: &str) -> ::std::result::Result<Self, Self::Err> {
                 #(
                     if s.eq_ignore_ascii_case(#display_strings)
                         #( || s.eq_ignore_ascii_case(#more_display_strings) )*
