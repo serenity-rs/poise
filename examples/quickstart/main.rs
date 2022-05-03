@@ -6,7 +6,7 @@ type Context<'a> = poise::Context<'a, Data, Error>;
 struct Data {}
 
 /// Displays your or another user's account creation date
-#[poise::command(slash_command)]
+#[poise::command(slash_command, prefix_command)]
 async fn age(
     ctx: Context<'_>,
     #[description = "Selected user"] user: Option<serenity::User>,
@@ -17,30 +17,22 @@ async fn age(
     Ok(())
 }
 
+#[poise::command(prefix_command)]
+async fn register(ctx: Context<'_>, #[flag] global: bool) -> Result<(), Error> {
+    poise::builtins::register_application_commands(ctx, global).await?;
+    Ok(())
+}
+
 #[tokio::main]
 async fn main() {
     let framework = poise::Framework::build()
         .options(poise::FrameworkOptions {
-            commands: vec![age()],
+            commands: vec![age(), register()],
             ..Default::default()
         })
         .token(std::env::var("DISCORD_TOKEN").expect("missing DISCORD_TOKEN"))
         .intents(serenity::GatewayIntents::non_privileged())
-        .user_data_setup(move |ctx, _ready, framework| {
-            Box::pin(async move {
-                let guild_id = serenity::GuildId(todo!("GUILD ID HERE"));
-                let commands_builder =
-                    poise::builtins::create_application_commands(&framework.options().commands);
-                guild_id
-                    .set_application_commands(ctx, |b| {
-                        *b = commands_builder;
-                        b
-                    })
-                    .await?;
-
-                Ok(Data {})
-            })
-        });
+        .user_data_setup(move |_ctx, _ready, _framework| Box::pin(async move { Ok(Data {}) }));
 
     framework.run().await.unwrap();
 }

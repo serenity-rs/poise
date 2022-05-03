@@ -22,12 +22,9 @@ Poise is an opinionated Discord bot framework with a few distinctive features:
 /*!
 ```
 
-The quickstart is slash command only. To use prefix commands:
-- add `prefix_command` in [`#[poise::command()]`](command) to make the command prefix-compatible
-- add `| serenity::GatewayIntents::MESSAGE_CONTENT` to the intents to receive full message data
-- add [a prefix](PrefixFrameworkOptions::prefix) in FrameworkOptions
+To run commands, ping your bot and write the command name and arguments after. Run the register
+command to register slash commands, after which you can use those, too.
 
-A full bot would contain a help command, and a more sophisticated system to register slash commands.
 See examples/framework_usage/ in the git repository for a full-featured example bot, showcasing most
 features of poise: `cargo run --example=framework_usage`
 
