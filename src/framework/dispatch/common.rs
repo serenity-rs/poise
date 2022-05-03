@@ -190,6 +190,8 @@ pub async fn check_permissions_and_cooldown<'a, U, E>(
     Ok(())
 }
 
+/// Should be invoked after running a command. As long as the command didn't fail due to argument
+/// parsing, this function will trigger the cooldown counter
 pub fn trigger_cooldown_maybe<U, E>(
     ctx: crate::Context<'_, U, E>,
     res: &Result<(), crate::FrameworkError<'_, U, E>>,
