@@ -6,7 +6,7 @@
 use crate::serenity_prelude as serenity;
 
 /// Message builder that abstracts over prefix and application command responses
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct CreateReply<'a> {
     /// Message content.
     pub content: Option<String>,
