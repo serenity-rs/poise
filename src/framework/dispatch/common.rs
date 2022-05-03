@@ -139,21 +139,17 @@ pub async fn check_permissions_and_cooldown<'a, U, E>(
     }
 
     // Before running any pre-command checks, make sure the bot has the permissions it needs
-    if let Some(&bot_user_id) = ctx.framework().bot_id.get() {
-        match missing_permissions(ctx, bot_user_id, cmd.required_bot_permissions).await {
-            Some(missing_permissions) if missing_permissions.is_empty() => {}
-            Some(missing_permissions) => {
-                return Err(crate::FrameworkError::MissingBotPermissions {
-                    ctx,
-                    missing_permissions,
-                })
-            }
-            // When in doubt, just let it run. Not getting fancy missing permissions errors is better
-            // than the command not executing at all
-            None => {}
+    match missing_permissions(ctx, ctx.framework().bot_id, cmd.required_bot_permissions).await {
+        Some(missing_permissions) if missing_permissions.is_empty() => {}
+        Some(missing_permissions) => {
+            return Err(crate::FrameworkError::MissingBotPermissions {
+                ctx,
+                missing_permissions,
+            })
         }
-    } else {
-        // When in doubt, let it run (see above)
+        // When in doubt, just let it run. Not getting fancy missing permissions errors is better
+        // than the command not executing at all
+        None => {}
     }
 
     // Only continue if command checks returns true. First perform global checks, then command
