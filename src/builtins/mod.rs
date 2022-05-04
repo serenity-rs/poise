@@ -4,9 +4,10 @@
 //! use as a starting point for the framework.
 
 mod help;
+use ::serenity::model::interactions::message_component::ButtonStyle;
 pub use help::*;
 
-use crate::serenity_prelude as serenity;
+use crate::{serenity_prelude as serenity, Command};
 
 /// An error handler that prints the error into the console and also into the Discord chat.
 /// If the user invoked the command wrong ([`crate::FrameworkError::ArgumentParse`]), the command
@@ -231,6 +232,131 @@ pub async fn register_application_commands<U, E>(
 
     ctx.say("Done!").await?;
 
+    Ok(())
+}
+
+/// Improvments to [`register_application_commands`]
+/// Added removal of Guild and Global commands with the addition of Buttons
+pub async fn register_application_commands_new<U, E>(
+    ctx: crate::Context<'_, U, E>,
+) -> Result<(), serenity::Error> {
+    let commands = &ctx.framework().options().commands;
+    let create_commands = create_application_commands(commands);
+
+    let is_bot_owner = ctx.framework().options().owners.contains(&ctx.author().id);
+    if !is_bot_owner {
+        ctx.say("Can only be used by bot owner").await?;
+        return Ok(());
+    }
+
+    let mut msg = ctx
+        .send(|m| {
+            m.content("Choose what to do with the commands.")
+                .components(|c| {
+                    c.create_action_row(|r| {
+                        r.create_button(|b| {
+                            b.custom_id("poise.register.global")
+                                .label("Global")
+                                .style(ButtonStyle::Success)
+                        })
+                        .create_button(|b| {
+                            b.custom_id("remove.poise.register.global")
+                                .label("Global Remove")
+                                .style(ButtonStyle::Danger)
+                        })
+                        .create_button(|b| {
+                            b.custom_id("poise.register.guild")
+                                .label("Guild")
+                                .style(ButtonStyle::Success)
+                        })
+                        .create_button(|b| {
+                            b.custom_id("remove.poise.register.guild")
+                                .label("Guild Remove")
+                                .style(ButtonStyle::Danger)
+                        })
+                    })
+                })
+        })
+        .await?
+        .message()
+        .await?;
+
+    let button_collector = msg
+        .await_component_interaction(ctx.discord())
+        .collect_limit(1)
+        .await;
+
+    match button_collector {
+        Some(m) => {
+            if m.data.custom_id.contains("global") {
+                if !m.data.custom_id.starts_with("remove") {
+                    serenity::ApplicationCommand::set_global_application_commands(
+                        ctx.discord(),
+                        |b| {
+                            *b = create_commands;
+                            b
+                        },
+                    )
+                    .await?;
+                    msg.edit(ctx.discord(), |e| {
+                        e.set_components(serenity::builder::CreateComponents(Vec::new()))
+                            .content(format!("Registering {} global commands...", commands.len()))
+                    })
+                    .await?
+                } else {
+                    serenity::ApplicationCommand::set_global_application_commands(
+                        ctx.discord(),
+                        |b| b,
+                    )
+                    .await?;
+                    msg.edit(ctx.discord(), |e| {
+                        e.set_components(serenity::builder::CreateComponents(Vec::new()))
+                            .content("Unregistering commands.")
+                    })
+                    .await?;
+                }
+            } else {
+                let guild_id = match ctx.guild_id() {
+                    Some(x) => x,
+                    None => {
+                        ctx.say("Must be called in guild").await?;
+                        return Ok(());
+                    }
+                };
+                if !m.data.custom_id.starts_with("remove") {
+                    guild_id
+                        .set_application_commands(ctx.discord(), |b| {
+                            *b = create_commands;
+                            b
+                        })
+                        .await?;
+                    msg.edit(ctx.discord(), |e| {
+                        e.set_components(serenity::builder::CreateComponents(Vec::new()))
+                            .content(format!("Registering {} guild commands...", commands.len()))
+                    })
+                    .await?
+                } else {
+                    guild_id
+                        .set_application_commands(ctx.discord(), |b| b)
+                        .await?;
+                    msg.edit(ctx.discord(), |e| {
+                        e.set_components(serenity::builder::CreateComponents(Vec::new()))
+                            .content("Unregistering commands.")
+                    })
+                    .await?;
+                }
+            }
+        }
+        None => {
+            msg.edit(ctx.discord(), |e| {
+                e.set_components(serenity::builder::CreateComponents(Vec::new()))
+                    .content("You didn't interact in time.")
+            })
+            .await?;
+        }
+    };
+
+    ctx.say("Done!").await?;
     Ok(())
 }
 
