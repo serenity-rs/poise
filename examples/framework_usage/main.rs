@@ -97,7 +97,6 @@ async fn main() {
             checks::get_guild_name(),
             checks::only_in_dms(),
             checks::lennyface(),
-            checks::permissions_v2(),
             poise::Command {
                 subcommands: vec![
                     subcommands::child1(),

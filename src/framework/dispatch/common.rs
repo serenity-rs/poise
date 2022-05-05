@@ -120,21 +120,23 @@ pub async fn check_permissions_and_cooldown<'a, U, E>(
         }
     }
 
-    // Make sure that user has required permissions
-    match missing_permissions(ctx, ctx.author().id, cmd.required_permissions).await {
-        Some(missing_permissions) if missing_permissions.is_empty() => {}
-        Some(missing_permissions) => {
-            return Err(crate::FrameworkError::MissingUserPermissions {
-                ctx,
-                missing_permissions: Some(missing_permissions),
-            })
-        }
-        // Better safe than sorry: when perms are unknown, restrict access
-        None => {
-            return Err(crate::FrameworkError::MissingUserPermissions {
-                ctx,
-                missing_permissions: None,
-            })
+    // Make sure that user has required permissions (slash commands checked by Discord)
+    if let crate::Context::Prefix(_) = ctx {
+        match missing_permissions(ctx, ctx.author().id, cmd.required_permissions).await {
+            Some(missing_permissions) if missing_permissions.is_empty() => {}
+            Some(missing_permissions) => {
+                return Err(crate::FrameworkError::MissingUserPermissions {
+                    ctx,
+                    missing_permissions: Some(missing_permissions),
+                })
+            }
+            // Better safe than sorry: when perms are unknown, restrict access
+            None => {
+                return Err(crate::FrameworkError::MissingUserPermissions {
+                    ctx,
+                    missing_permissions: None,
+                })
+            }
         }
     }
 
