@@ -18,60 +18,60 @@ pub async fn send_application_reply<'a, U, E>(
     ctx: ApplicationContext<'_, U, E>,
     builder: impl for<'b> FnOnce(&'b mut crate::CreateReply<'a>) -> &'b mut crate::CreateReply<'a>,
 ) -> Result<crate::ReplyHandle<'_>, serenity::Error> {
-    // inner function that isn't generic over the builer to minimize monomorphization-related codegen bloat
-    async fn inner<'a, 'b, U, E>(
-        ctx: ApplicationContext<'b, U, E>,
-        mut data: crate::CreateReply<'a>,
-    ) -> Result<crate::ReplyHandle<'b>, serenity::Error> {
-        let interaction = match ctx.interaction {
-            crate::ApplicationCommandOrAutocompleteInteraction::ApplicationCommand(x) => x,
-            crate::ApplicationCommandOrAutocompleteInteraction::Autocomplete(_) => {
-                return Ok(crate::ReplyHandle::Autocomplete)
-            }
-        };
-
-        if let Some(callback) = ctx.framework.options().reply_callback {
-            callback(ctx.into(), &mut data);
-        }
-
-        let has_sent_initial_response = ctx
-            .has_sent_initial_response
-            .load(std::sync::atomic::Ordering::SeqCst);
-
-        Ok(if has_sent_initial_response {
-            crate::ReplyHandle::Known(Box::new(
-                interaction
-                    .create_followup_message(ctx.discord, |f| {
-                        data.to_slash_followup_response(f);
-                        f
-                    })
-                    .await?,
-            ))
-        } else {
-            interaction
-                .create_interaction_response(ctx.discord, |r| {
-                    r.kind(serenity::InteractionResponseType::ChannelMessageWithSource)
-                        .interaction_response_data(|f| {
-                            data.to_slash_initial_response(f);
-                            f
-                        })
-                })
-                .await?;
-            ctx.has_sent_initial_response
-                .store(true, std::sync::atomic::Ordering::SeqCst);
-
-            crate::ReplyHandle::Unknown {
-                http: &ctx.discord.http,
-                interaction,
-            }
-        })
-    }
-
     let mut data = crate::CreateReply {
         ephemeral: ctx.command.ephemeral,
         allowed_mentions: ctx.framework.options().allowed_mentions.clone(),
         ..Default::default()
     };
     builder(&mut data);
-    inner(ctx, data).await
+    _send_application_reply(ctx, data).await
+}
+
+// private function that isn't generic over the builder to minimize monomorphization-related codegen bloat
+async fn _send_application_reply<'a, 'b, U, E>(
+    ctx: ApplicationContext<'b, U, E>,
+    mut data: crate::CreateReply<'a>,
+) -> Result<crate::ReplyHandle<'b>, serenity::Error> {
+    let interaction = match ctx.interaction {
+        crate::ApplicationCommandOrAutocompleteInteraction::ApplicationCommand(x) => x,
+        crate::ApplicationCommandOrAutocompleteInteraction::Autocomplete(_) => {
+            return Ok(crate::ReplyHandle::Autocomplete)
+        }
+    };
+
+    if let Some(callback) = ctx.framework.options().reply_callback {
+        callback(ctx.into(), &mut data);
+    }
+
+    let has_sent_initial_response = ctx
+        .has_sent_initial_response
+        .load(std::sync::atomic::Ordering::SeqCst);
+
+    Ok(if has_sent_initial_response {
+        crate::ReplyHandle::Known(Box::new(
+            interaction
+                .create_followup_message(ctx.discord, |f| {
+                    data.to_slash_followup_response(f);
+                    f
+                })
+                .await?,
+        ))
+    } else {
+        interaction
+            .create_interaction_response(ctx.discord, |r| {
+                r.kind(serenity::InteractionResponseType::ChannelMessageWithSource)
+                    .interaction_response_data(|f| {
+                        data.to_slash_initial_response(f);
+                        f
+                    })
+            })
+            .await?;
+        ctx.has_sent_initial_response
+            .store(true, std::sync::atomic::Ordering::SeqCst);
+
+        crate::ReplyHandle::Unknown {
+            http: &ctx.discord.http,
+            interaction,
+        }
+    })
 }
