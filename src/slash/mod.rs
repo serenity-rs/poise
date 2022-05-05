@@ -27,7 +27,7 @@ pub async fn send_application_reply<'a, U, E>(
     _send_application_reply(ctx, data).await
 }
 
-// private function that isn't generic over the builder to minimize monomorphization-related codegen bloat
+/// private version of [`send_application_reply`] that isn't generic over the builder to minimize monomorphization-related codegen bloat
 async fn _send_application_reply<'a, 'b, U, E>(
     ctx: ApplicationContext<'b, U, E>,
     mut data: crate::CreateReply<'a>,
