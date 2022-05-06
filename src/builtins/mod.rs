@@ -4,7 +4,6 @@
 //! use as a starting point for the framework.
 
 mod help;
-use ::serenity::model::interactions::message_component::ButtonStyle;
 pub use help::*;
 
 use crate::serenity_prelude as serenity;
@@ -257,22 +256,22 @@ pub async fn register_application_commands_new<U, E>(
                         r.create_button(|b| {
                             b.custom_id("poise.register.global")
                                 .label("Global")
-                                .style(ButtonStyle::Success)
+                                .style(serenity::ButtonStyle::Success)
                         })
                         .create_button(|b| {
                             b.custom_id("remove.poise.register.global")
                                 .label("Global Remove")
-                                .style(ButtonStyle::Danger)
+                                .style(serenity::ButtonStyle::Danger)
                         })
                         .create_button(|b| {
                             b.custom_id("poise.register.guild")
                                 .label("Guild")
-                                .style(ButtonStyle::Success)
+                                .style(serenity::ButtonStyle::Success)
                         })
                         .create_button(|b| {
                             b.custom_id("remove.poise.register.guild")
                                 .label("Guild Remove")
-                                .style(ButtonStyle::Danger)
+                                .style(serenity::ButtonStyle::Danger)
                         })
                     })
                 })
