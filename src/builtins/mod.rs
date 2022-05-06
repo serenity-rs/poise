@@ -254,24 +254,24 @@ pub async fn register_application_commands_new<U, E>(
                 .components(|c| {
                     c.create_action_row(|r| {
                         r.create_button(|b| {
-                            b.custom_id("poise.register.global")
+                            b.custom_id("register.global")
                                 .label("Register globally")
                                 .style(serenity::ButtonStyle::Primary)
                         })
                         .create_button(|b| {
-                            b.custom_id("remove.poise.register.global")
+                            b.custom_id("unregister.global")
                                 .label("Delete globally")
                                 .style(serenity::ButtonStyle::Danger)
                         })
                     })
                     .create_action_row(|r| {
                         r.create_button(|b| {
-                            b.custom_id("poise.register.guild")
+                            b.custom_id("register.guild")
                                 .label("Register in guild")
                                 .style(serenity::ButtonStyle::Primary)
                         })
                         .create_button(|b| {
-                            b.custom_id("remove.poise.register.guild")
+                            b.custom_id("unregister.guild")
                                 .label("Delete in guild")
                                 .style(serenity::ButtonStyle::Danger)
                         })
@@ -295,8 +295,19 @@ pub async fn register_application_commands_new<U, E>(
         }
     };
 
-    if pressed_button_id.contains("global") {
-        if !pressed_button_id.starts_with("remove") {
+    let (register, global) = match &**pressed_button_id {
+        "register.global" => (true, true),
+        "unregister.global" => (false, true),
+        "register.guild" => (true, false),
+        "unregister.guild" => (false, false),
+        other => {
+            log::warn!("unknown register button ID: {:?}", other);
+            return Ok(());
+        }
+    };
+
+    if global {
+        if register {
             ctx.say(format!("Registering {} global commands...", commands.len()))
                 .await?;
             serenity::ApplicationCommand::set_global_application_commands(ctx.discord(), |b| {
@@ -305,7 +316,7 @@ pub async fn register_application_commands_new<U, E>(
             })
             .await?;
         } else {
-            ctx.say("Unregistering commands.").await?;
+            ctx.say("Unregistering global commands...").await?;
             serenity::ApplicationCommand::set_global_application_commands(ctx.discord(), |b| b)
                 .await?;
         }
@@ -317,7 +328,7 @@ pub async fn register_application_commands_new<U, E>(
                 return Ok(());
             }
         };
-        if !pressed_button_id.starts_with("remove") {
+        if register {
             ctx.say(format!("Registering {} guild commands...", commands.len()))
                 .await?;
             guild_id
@@ -327,7 +338,7 @@ pub async fn register_application_commands_new<U, E>(
                 })
                 .await?;
         } else {
-            ctx.say("Unregistering commands.").await?;
+            ctx.say("Unregistering guild commands...").await?;
             guild_id
                 .set_application_commands(ctx.discord(), |b| b)
                 .await?;
