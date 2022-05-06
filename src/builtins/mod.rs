@@ -250,27 +250,29 @@ pub async fn register_application_commands_new<U, E>(
 
     let mut msg = ctx
         .send(|m| {
-            m.content("Choose what to do with the commands.")
+            m.content("Choose what to do with the commands:")
                 .components(|c| {
                     c.create_action_row(|r| {
                         r.create_button(|b| {
                             b.custom_id("poise.register.global")
-                                .label("Global")
-                                .style(serenity::ButtonStyle::Success)
+                                .label("Register globally")
+                                .style(serenity::ButtonStyle::Primary)
                         })
                         .create_button(|b| {
                             b.custom_id("remove.poise.register.global")
-                                .label("Global Remove")
+                                .label("Delete globally")
                                 .style(serenity::ButtonStyle::Danger)
                         })
-                        .create_button(|b| {
+                    })
+                    .create_action_row(|r| {
+                        r.create_button(|b| {
                             b.custom_id("poise.register.guild")
-                                .label("Guild")
-                                .style(serenity::ButtonStyle::Success)
+                                .label("Register in guild")
+                                .style(serenity::ButtonStyle::Primary)
                         })
                         .create_button(|b| {
                             b.custom_id("remove.poise.register.guild")
-                                .label("Guild Remove")
+                                .label("Delete in guild")
                                 .style(serenity::ButtonStyle::Danger)
                         })
                     })
