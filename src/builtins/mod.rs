@@ -286,38 +286,28 @@ pub async fn register_application_commands_new<U, E>(
         .await_component_interaction(ctx.discord())
         .collect_limit(1)
         .await;
+    msg.edit(ctx.discord(), |b| b.components(|b| b)).await?; // remove buttons after button press
     let pressed_button_id = match &interaction {
         Some(m) => &m.data.custom_id,
         None => {
-            msg.edit(ctx.discord(), |e| {
-                e.set_components(serenity::builder::CreateComponents(Vec::new()))
-                    .content("You didn't interact in time.")
-            })
-            .await?;
+            ctx.say("You didn't interact in time").await?;
             return Ok(());
         }
     };
 
     if pressed_button_id.contains("global") {
         if !pressed_button_id.starts_with("remove") {
+            ctx.say(format!("Registering {} global commands...", commands.len()))
+                .await?;
             serenity::ApplicationCommand::set_global_application_commands(ctx.discord(), |b| {
                 *b = create_commands;
                 b
             })
             .await?;
-            msg.edit(ctx.discord(), |e| {
-                e.set_components(serenity::builder::CreateComponents(Vec::new()))
-                    .content(format!("Registering {} global commands...", commands.len()))
-            })
-            .await?
         } else {
+            ctx.say("Unregistering commands.").await?;
             serenity::ApplicationCommand::set_global_application_commands(ctx.discord(), |b| b)
                 .await?;
-            msg.edit(ctx.discord(), |e| {
-                e.set_components(serenity::builder::CreateComponents(Vec::new()))
-                    .content("Unregistering commands.")
-            })
-            .await?;
         }
     } else {
         let guild_id = match ctx.guild_id() {
@@ -328,26 +318,19 @@ pub async fn register_application_commands_new<U, E>(
             }
         };
         if !pressed_button_id.starts_with("remove") {
+            ctx.say(format!("Registering {} guild commands...", commands.len()))
+                .await?;
             guild_id
                 .set_application_commands(ctx.discord(), |b| {
                     *b = create_commands;
                     b
                 })
                 .await?;
-            msg.edit(ctx.discord(), |e| {
-                e.set_components(serenity::builder::CreateComponents(Vec::new()))
-                    .content(format!("Registering {} guild commands...", commands.len()))
-            })
-            .await?
         } else {
+            ctx.say("Unregistering commands.").await?;
             guild_id
                 .set_application_commands(ctx.discord(), |b| b)
                 .await?;
-            msg.edit(ctx.discord(), |e| {
-                e.set_components(serenity::builder::CreateComponents(Vec::new()))
-                    .content("Unregistering commands.")
-            })
-            .await?;
         }
     }
 
