@@ -128,8 +128,6 @@ async fn error_handler(error: poise::FrameworkError<'_, Data, Error>) {
 # #[poise::command(prefix_command)] async fn command1(ctx: Context<'_>) -> Result<(), Error> { Ok(()) }
 # #[poise::command(prefix_command)] async fn command2(ctx: Context<'_>) -> Result<(), Error> { Ok(()) }
 # #[poise::command(prefix_command)] async fn command3(ctx: Context<'_>) -> Result<(), Error> { Ok(()) }
-# #[poise::command(prefix_command)] async fn command3_1(ctx: Context<'_>) -> Result<(), Error> { Ok(()) }
-# #[poise::command(prefix_command)] async fn command3_2(ctx: Context<'_>) -> Result<(), Error> { Ok(()) }
 
 # async {
 // Use `Framework::build()` to create a framework builder and supply basic data to the framework:
@@ -155,10 +153,9 @@ poise::Framework::build()
         commands: vec![
             command1(),
             command2(),
-            // To add subcommands, modify the `subcommands` field of the `Command` struct returned
-            // by the command functions
+            // You can also modify a command by changing the fields of its Command instance
             poise::Command {
-                subcommands: vec![command3_1(), command3_2()],
+                // [override fields here]
                 ..command3()
             }
         ],

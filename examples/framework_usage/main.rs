@@ -95,15 +95,7 @@ async fn main() {
             checks::get_guild_name(),
             checks::only_in_dms(),
             checks::lennyface(),
-            poise::Command {
-                subcommands: vec![
-                    subcommands::child1(),
-                    subcommands::child2(),
-                    // Let's make sure poise isn't confused by the duplicate names!
-                    subcommands::parent(),
-                ],
-                ..subcommands::parent()
-            },
+            subcommands::parent(),
         ],
         prefix_options: poise::PrefixFrameworkOptions {
             prefix: Some("~".into()),

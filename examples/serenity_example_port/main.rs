@@ -251,12 +251,7 @@ async fn main() {
             ping(),
             latency(),
             some_long_command(),
-            poise::Command {
-                // A command can have sub-commands, just like in command lines tools.
-                // Imagine `cargo help` and `cargo help run`.
-                subcommands: vec![sub()],
-                ..upper_command()
-            },
+            upper_command(),
             bird(),
             cat(),
             dog(),
@@ -648,7 +643,15 @@ async fn slow_mode(
 }
 
 /// Dummy command to test subcommands
-#[poise::command(prefix_command, slash_command, rename = "upper", category = "General")]
+#[poise::command(
+    prefix_command,
+    slash_command,
+    rename = "upper",
+    category = "General",
+    // A command can have sub-commands, just like in command lines tools.
+    // Imagine `cargo help` and `cargo help run`.
+    subcommands("sub")
+)]
 async fn upper_command(ctx: Context<'_>) -> Result<(), Error> {
     ctx.say("This is the main function!").await?;
 

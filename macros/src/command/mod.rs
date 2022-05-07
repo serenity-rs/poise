@@ -13,6 +13,8 @@ pub struct CommandArgs {
     slash_command: bool,
     context_menu_command: Option<String>,
 
+    // When changing these, document it in parent file!
+    subcommands: crate::util::List<syn::Path>,
     aliases: crate::util::List<String>,
     invoke_on_edit: bool,
     reuse_response: bool,
@@ -265,6 +267,7 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
     let reuse_response = inv.args.reuse_response || inv.args.track_edits;
     let broadcast_typing = inv.args.broadcast_typing;
     let aliases = &inv.args.aliases.0;
+    let subcommands = &inv.args.subcommands.0;
 
     let parameters = slash::generate_parameters(&inv)?;
     let ephemeral = inv.args.ephemeral;
@@ -284,7 +287,7 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
                 slash_action: #slash_action,
                 context_menu_action: #context_menu_action,
 
-                subcommands: Vec::new(),
+                subcommands: vec![ #( #subcommands() ),* ],
                 name: #command_name,
                 qualified_name: String::from(#command_name), // properly filled in later by Framework
                 identifying_name: String::from(#identifying_name),

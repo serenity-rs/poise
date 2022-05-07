@@ -94,16 +94,13 @@ async fn strip_prefix<'a, U, E>(
 /// string).
 ///
 /// ```rust
-/// #[poise::command(prefix_command)] async fn command1(ctx: poise::Context<'_, (), ()>) -> Result<(), ()> { Ok(()) }
-/// #[poise::command(prefix_command)] async fn command2(ctx: poise::Context<'_, (), ()>) -> Result<(), ()> { Ok(()) }
-/// #[poise::command(prefix_command)] async fn command3(ctx: poise::Context<'_, (), ()>) -> Result<(), ()> { Ok(()) }
-/// let commands = vec![
-///     command1(),    
-///     poise::Command {
-///         subcommands: vec![command3()],
-///         ..command2()
-///     },
-/// ];
+/// #[poise::command(prefix_command)]
+/// async fn command1(ctx: poise::Context<'_, (), ()>) -> Result<(), ()> { Ok(()) }
+/// #[poise::command(prefix_command, subcommands("command3"))]
+/// async fn command2(ctx: poise::Context<'_, (), ()>) -> Result<(), ()> { Ok(()) }
+/// #[poise::command(prefix_command)]
+/// async fn command3(ctx: poise::Context<'_, (), ()>) -> Result<(), ()> { Ok(()) }
+/// let commands = vec![command1(), command2()];
 ///
 /// assert_eq!(
 ///     poise::find_command(&commands, "command1 my arguments", false),
