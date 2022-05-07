@@ -149,8 +149,20 @@ pub async fn autocomplete_command<U, E>(
 /// Collects all commands into a [`serenity::CreateApplicationCommands`] builder, which can be used
 /// to register the commands on Discord
 ///
-/// See [`register_application_commands`] for an example usage of the returned
-/// [`serenity::CreateApplicationCommands`] builder
+/// Also see [`register_application_commands_buttons`] for a ready to use register command
+///
+/// ```rust,no_run
+/// # use poise::serenity_prelude as serenity;
+/// # async fn foo<U, E>(ctx: poise::Context<'_, U, E>) -> Result<(), serenity::Error> {
+/// let commands = &ctx.framework().options().commands;
+/// let create_commands = poise::builtins::create_application_commands(commands);
+///
+/// serenity::ApplicationCommand::set_global_application_commands(ctx.discord(), |b| {
+///     *b = create_commands; // replace the given builder with the one prepared by poise
+///     b
+/// }).await?;
+/// # Ok(()) }
+/// ```
 pub fn create_application_commands<U, E>(
     commands: &[crate::Command<U, E>],
 ) -> serenity::CreateApplicationCommands {
@@ -179,6 +191,9 @@ pub fn create_application_commands<U, E>(
     }
     commands_builder
 }
+/// _Note: you probably want [`register_application_commands_buttons`] instead; it's easier and more
+/// powerful_
+///
 /// Wraps [`create_application_commands`] and adds a bot owner permission check and status messages.
 ///
 /// This function is supposed to be a ready-to-use implementation for a `~register` command of your
@@ -234,9 +249,10 @@ pub async fn register_application_commands<U, E>(
     Ok(())
 }
 
-/// Improvments to [`register_application_commands`]
-/// Added removal of Guild and Global commands with the addition of Buttons
-pub async fn register_application_commands_new<U, E>(
+/// Spawns four buttons to register or delete application commands globally or in the current guild
+///
+/// Upgraded version of [`register_application_commands`]
+pub async fn register_application_commands_buttons<U, E>(
     ctx: crate::Context<'_, U, E>,
 ) -> Result<(), serenity::Error> {
     let commands = &ctx.framework().options().commands;

@@ -18,8 +18,8 @@ async fn age(
 }
 
 #[poise::command(prefix_command)]
-async fn register(ctx: Context<'_>, #[flag] global: bool) -> Result<(), Error> {
-    poise::builtins::register_application_commands(ctx, global).await?;
+async fn register(ctx: Context<'_>) -> Result<(), Error> {
+    poise::builtins::register_application_commands_buttons(ctx).await?;
     Ok(())
 }
 
