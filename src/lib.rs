@@ -34,7 +34,7 @@ Discord slash commands can be a bit unintuitive at first. If you're unfamiliar, 
 
 To activate a slash command, your bot
 needs to _register_ in on Discord. You may want to do this manually, with a `register` command
-(poise provides [`builtins::register_application_commands`] as a starting point for that), or you
+(poise provides [`builtins::register_application_commands_buttons`] as a starting point for that), or you
 may want to re-register commands automatically on every bot startup. Choose what you prefer
 
 Commands can be registered _globally_ or _per guild_. Global commands are available on every guild

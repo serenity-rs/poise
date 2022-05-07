@@ -37,12 +37,10 @@ This is an example bot made to showcase features of my custom Discord bot framew
     Ok(())
 }
 
-/// Register application commands in this guild or globally
-///
-/// Run with no arguments to register in guild, run with argument "global" to register globally.
+/// Registers or unregisters application commands in this guild or globally
 #[poise::command(prefix_command, hide_in_help)]
-async fn register(ctx: Context<'_>, #[flag] global: bool) -> Result<(), Error> {
-    poise::builtins::register_application_commands(ctx, global).await?;
+async fn register(ctx: Context<'_>) -> Result<(), Error> {
+    poise::builtins::register_application_commands_buttons(ctx).await?;
 
     Ok(())
 }
