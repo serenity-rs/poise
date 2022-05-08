@@ -18,6 +18,7 @@ for example for command-specific help (i.e. `~help command_name`). Escape newlin
 - `prefix_command`: Generate a prefix command
 - `slash_command`: Generate a slash command
 - `context_menu_command`: Generate a context menu command
+- `subcommands`: List of subcommands `subcommands("foo", "bar", "baz")`
 - `aliases`: Command name aliases (only applies to prefix commands)
 - `invoke_on_edit`: Reruns the command if an existing invocation message is edited (prefix only)
 - `reuse_response`: After the first response, post subsequent responses as edits to the initial message (prefix only)
