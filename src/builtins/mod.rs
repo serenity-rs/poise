@@ -300,7 +300,7 @@ pub async fn register_application_commands_buttons<U, E>(
 
     let interaction = msg
         .await_component_interaction(ctx.discord())
-        .collect_limit(1)
+        .author_id(ctx.author().id)
         .await;
     msg.edit(ctx.discord(), |b| b.components(|b| b)).await?; // remove buttons after button press
     let pressed_button_id = match &interaction {
