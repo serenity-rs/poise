@@ -18,6 +18,20 @@ pub async fn send_application_reply<'att, U, E>(
     ctx: ApplicationContext<'_, U, E>,
     builder: impl for<'a> FnOnce(&'a mut crate::CreateReply<'att>) -> &'a mut crate::CreateReply<'att>,
 ) -> Result<crate::ReplyHandle<'_>, serenity::Error> {
+    let mut data = crate::CreateReply {
+        ephemeral: ctx.command.ephemeral,
+        allowed_mentions: ctx.framework.options().allowed_mentions.clone(),
+        ..Default::default()
+    };
+    builder(&mut data);
+    _send_application_reply(ctx, data).await
+}
+
+/// private version of [`send_application_reply`] that isn't generic over the builder to minimize monomorphization-related codegen bloat
+async fn _send_application_reply<'a, 'b, U, E>(
+    ctx: ApplicationContext<'b, U, E>,
+    mut data: crate::CreateReply<'a>,
+) -> Result<crate::ReplyHandle<'b>, serenity::Error> {
     let interaction = match ctx.interaction {
         crate::ApplicationCommandOrAutocompleteInteraction::ApplicationCommand(x) => x,
         crate::ApplicationCommandOrAutocompleteInteraction::Autocomplete(_) => {
@@ -25,12 +39,6 @@ pub async fn send_application_reply<'att, U, E>(
         }
     };
 
-    let mut data = crate::CreateReply {
-        ephemeral: ctx.command.ephemeral,
-        allowed_mentions: ctx.framework.options().allowed_mentions.clone(),
-        ..Default::default()
-    };
-    builder(&mut data);
     if let Some(callback) = ctx.framework.options().reply_callback {
         callback(ctx.into(), &mut data);
     }

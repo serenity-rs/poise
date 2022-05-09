@@ -72,6 +72,10 @@ async fn missing_permissions<U, E>(
 }
 
 /// Checks if the invoker is allowed to execute this command at this point in time
+///
+/// Doesn't actually start the cooldown timer! This should be done by the caller later, after
+/// argument parsing.
+/// (A command that didn't even get past argument parsing shouldn't trigger cooldowns)
 #[allow(clippy::needless_lifetimes)] // false positive (clippy issue 7271)
 pub async fn check_permissions_and_cooldown<'a, U, E>(
     ctx: crate::Context<'a, U, E>,
@@ -135,21 +139,17 @@ pub async fn check_permissions_and_cooldown<'a, U, E>(
     }
 
     // Before running any pre-command checks, make sure the bot has the permissions it needs
-    if let Some(&bot_user_id) = ctx.framework().bot_id.get() {
-        match missing_permissions(ctx, bot_user_id, cmd.required_bot_permissions).await {
-            Some(missing_permissions) if missing_permissions.is_empty() => {}
-            Some(missing_permissions) => {
-                return Err(crate::FrameworkError::MissingBotPermissions {
-                    ctx,
-                    missing_permissions,
-                })
-            }
-            // When in doubt, just let it run. Not getting fancy missing permissions errors is better
-            // than the command not executing at all
-            None => {}
+    match missing_permissions(ctx, ctx.framework().bot_id, cmd.required_bot_permissions).await {
+        Some(missing_permissions) if missing_permissions.is_empty() => {}
+        Some(missing_permissions) => {
+            return Err(crate::FrameworkError::MissingBotPermissions {
+                ctx,
+                missing_permissions,
+            })
         }
-    } else {
-        // When in doubt, let it run (see above)
+        // When in doubt, just let it run. Not getting fancy missing permissions errors is better
+        // than the command not executing at all
+        None => {}
     }
 
     // Only continue if command checks returns true. First perform global checks, then command
@@ -181,8 +181,22 @@ pub async fn check_permissions_and_cooldown<'a, U, E>(
                 remaining_cooldown,
             });
         }
-        cooldowns.lock().unwrap().start_cooldown(ctx);
     }
 
     Ok(())
+}
+
+/// Should be invoked after running a command. As long as the command didn't fail due to argument
+/// parsing, this function will trigger the cooldown counter
+pub fn trigger_cooldown_maybe<U, E>(
+    ctx: crate::Context<'_, U, E>,
+    res: &Result<(), crate::FrameworkError<'_, U, E>>,
+) {
+    if !ctx.framework().options.manual_cooldowns {
+        if let Err(crate::FrameworkError::ArgumentParse { .. }) = res {
+            // Argument parse errors shouldn't count towards cooldown
+        } else {
+            ctx.command().cooldowns.lock().unwrap().start_cooldown(ctx);
+        }
+    }
 }

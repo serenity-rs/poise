@@ -6,7 +6,7 @@
 use crate::serenity_prelude as serenity;
 
 /// Message builder that abstracts over prefix and application command responses
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct CreateReply<'att> {
     /// Message content.
     pub content: Option<String>,
@@ -132,9 +132,7 @@ impl<'att> CreateReply<'att> {
                 f
             });
         }
-        if ephemeral {
-            f.flags(serenity::InteractionApplicationCommandCallbackDataFlags::EPHEMERAL);
-        }
+        f.ephemeral(ephemeral);
         f.add_files(attachments);
     }
 
@@ -169,9 +167,7 @@ impl<'att> CreateReply<'att> {
                 f
             });
         }
-        if ephemeral {
-            f.flags(serenity::InteractionApplicationCommandCallbackDataFlags::EPHEMERAL);
-        }
+        f.ephemeral(ephemeral);
         f.add_files(attachments);
     }
 

@@ -1,44 +1,38 @@
 use poise::serenity_prelude as serenity;
 
-struct Data {}
 type Error = Box<dyn std::error::Error + Send + Sync>;
 type Context<'a> = poise::Context<'a, Data, Error>;
+// User data, which is stored and accessible in all command invocations
+struct Data {}
 
-/// Display your or another user's account creation date
-#[poise::command(prefix_command, slash_command, track_edits)]
+/// Displays your or another user's account creation date
+#[poise::command(slash_command, prefix_command)]
 async fn age(
     ctx: Context<'_>,
     #[description = "Selected user"] user: Option<serenity::User>,
 ) -> Result<(), Error> {
-    let user = user.as_ref().unwrap_or(ctx.author());
-    ctx.say(format!(
-        "{}'s account was created at {}",
-        user.name,
-        user.created_at()
-    ))
-    .await?;
+    let u = user.as_ref().unwrap_or(ctx.author());
+    let response = format!("{}'s account was created at {}", u.name, u.created_at());
+    ctx.say(response).await?;
+    Ok(())
+}
 
+#[poise::command(prefix_command)]
+async fn register(ctx: Context<'_>) -> Result<(), Error> {
+    poise::builtins::register_application_commands_buttons(ctx).await?;
     Ok(())
 }
 
 #[tokio::main]
 async fn main() {
-    poise::Framework::build()
-        .token(std::env::var("DISCORD_BOT_TOKEN").unwrap())
-        .intents(
-            serenity::GatewayIntents::non_privileged() | serenity::GatewayIntents::MESSAGE_CONTENT,
-        )
-        .user_data_setup(move |_ctx, _ready, _framework| Box::pin(async move { Ok(Data {}) }))
+    let framework = poise::Framework::build()
         .options(poise::FrameworkOptions {
-            // configure framework here
-            prefix_options: poise::PrefixFrameworkOptions {
-                prefix: Some("~".into()),
-                ..Default::default()
-            },
-            commands: vec![age()],
+            commands: vec![age(), register()],
             ..Default::default()
         })
-        .run()
-        .await
-        .unwrap();
+        .token(std::env::var("DISCORD_TOKEN").expect("missing DISCORD_TOKEN"))
+        .intents(serenity::GatewayIntents::non_privileged())
+        .user_data_setup(move |_ctx, _ready, _framework| Box::pin(async move { Ok(Data {}) }));
+
+    framework.run().await.unwrap();
 }

@@ -73,20 +73,16 @@ async fn strip_prefix<'a, U, E>(
     }
 
     if framework.options.prefix_options.mention_as_prefix {
-        if let Some(bot_id) = framework.bot_id.get() {
-            // Mentions are either <@USER_ID> or <@!USER_ID>
-            if let Some(stripped_content) = (|| {
-                msg.content
-                    .strip_prefix("<@")?
-                    .trim_start_matches('!')
-                    .strip_prefix(&bot_id.0.to_string())?
-                    .strip_prefix('>')
-            })() {
-                let mention_prefix = &msg.content[..(msg.content.len() - stripped_content.len())];
-                return Some((mention_prefix, stripped_content));
-            }
-        } else {
-            log::warn!("bot_id not yet initialized");
+        // Mentions are either <@USER_ID> or <@!USER_ID>
+        if let Some(stripped_content) = (|| {
+            msg.content
+                .strip_prefix("<@")?
+                .trim_start_matches('!')
+                .strip_prefix(&framework.bot_id.0.to_string())?
+                .strip_prefix('>')
+        })() {
+            let mention_prefix = &msg.content[..(msg.content.len() - stripped_content.len())];
+            return Some((mention_prefix, stripped_content));
         }
     }
 
@@ -98,16 +94,13 @@ async fn strip_prefix<'a, U, E>(
 /// string).
 ///
 /// ```rust
-/// #[poise::command(prefix_command)] async fn command1(ctx: poise::Context<'_, (), ()>) -> Result<(), ()> { Ok(()) }
-/// #[poise::command(prefix_command)] async fn command2(ctx: poise::Context<'_, (), ()>) -> Result<(), ()> { Ok(()) }
-/// #[poise::command(prefix_command)] async fn command3(ctx: poise::Context<'_, (), ()>) -> Result<(), ()> { Ok(()) }
-/// let commands = vec![
-///     command1(),    
-///     poise::Command {
-///         subcommands: vec![command3()],
-///         ..command2()
-///     },
-/// ];
+/// #[poise::command(prefix_command)]
+/// async fn command1(ctx: poise::Context<'_, (), ()>) -> Result<(), ()> { Ok(()) }
+/// #[poise::command(prefix_command, subcommands("command3"))]
+/// async fn command2(ctx: poise::Context<'_, (), ()>) -> Result<(), ()> { Ok(()) }
+/// #[poise::command(prefix_command)]
+/// async fn command3(ctx: poise::Context<'_, (), ()>) -> Result<(), ()> { Ok(()) }
+/// let commands = vec![command1(), command2()];
 ///
 /// assert_eq!(
 ///     poise::find_command(&commands, "command1 my arguments", false),
@@ -186,12 +179,9 @@ where
     }
 
     // Check if we're allowed to execute our own messages
-    if let Some(&bot_id) = framework.bot_id.get() {
-        if bot_id == msg.author.id && !framework.options.prefix_options.execute_self_messages {
-            return Err(None);
-        }
-    } else {
-        log::warn!("bot_id not yet initialized");
+    if framework.bot_id == msg.author.id && !framework.options.prefix_options.execute_self_messages
+    {
+        return Err(None);
     }
 
     // Strip prefix and whitespace between prefix and command
@@ -248,7 +238,9 @@ where
     }
 
     // Execute command
-    (action)(ctx).await.map_err(|e| Some((e, command)))?;
+    let action_result = (action)(ctx).await;
+    super::common::trigger_cooldown_maybe(ctx.into(), &action_result);
+    action_result.map_err(|e| Some((e, command)))?;
 
     (framework.options.post_command)(crate::Context::Prefix(ctx)).await;
 

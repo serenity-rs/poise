@@ -13,8 +13,8 @@ pub use dispatch::{dispatch_message, find_command};
 pub struct Framework<U, E> {
     /// Stores user data. Is initialized on first Ready event
     user_data: once_cell::sync::OnceCell<U>,
-    /// Stores bot ID. Is initialized on first Ready event
-    bot_id: once_cell::sync::OnceCell<serenity::UserId>,
+    /// Stores bot ID. Initialized from bot token
+    bot_id: serenity::UserId,
     /// Stores the framework options
     options: crate::FrameworkOptions<U, E>,
 
@@ -116,11 +116,21 @@ impl<U, E> Framework<U, E> {
             }) as _
         });
 
+        #[allow(clippy::unwrap_used)] // "can be unwrapped safely unless after awaiting"
+        let bot_id = serenity::parse_token(
+            client_builder
+                .get_token()
+                .unwrap()
+                // Can be removed after https://github.com/serenity-rs/serenity/pull/1889
+                .trim_start_matches("Bot "),
+        )
+        .ok_or(serenity::Error::Other("cannot parse Discord token"))?
+        .0;
         let client: serenity::Client = client_builder.event_handler(event_handler).await?;
 
         let framework = Arc::new(Self {
             user_data: once_cell::sync::OnceCell::new(),
-            bot_id: once_cell::sync::OnceCell::new(),
+            bot_id,
             user_data_setup: Mutex::new(Some(Box::new(user_data_setup))),
             options,
             shard_manager: client.shard_manager.clone(),

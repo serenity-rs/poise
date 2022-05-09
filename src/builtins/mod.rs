@@ -149,8 +149,20 @@ pub async fn autocomplete_command<U, E>(
 /// Collects all commands into a [`serenity::CreateApplicationCommands`] builder, which can be used
 /// to register the commands on Discord
 ///
-/// See [`register_application_commands`] for an example usage of the returned
-/// [`serenity::CreateApplicationCommands`] builder
+/// Also see [`register_application_commands_buttons`] for a ready to use register command
+///
+/// ```rust,no_run
+/// # use poise::serenity_prelude as serenity;
+/// # async fn foo<U, E>(ctx: poise::Context<'_, U, E>) -> Result<(), serenity::Error> {
+/// let commands = &ctx.framework().options().commands;
+/// let create_commands = poise::builtins::create_application_commands(commands);
+///
+/// serenity::ApplicationCommand::set_global_application_commands(ctx.discord(), |b| {
+///     *b = create_commands; // replace the given builder with the one prepared by poise
+///     b
+/// }).await?;
+/// # Ok(()) }
+/// ```
 pub fn create_application_commands<U, E>(
     commands: &[crate::Command<U, E>],
 ) -> serenity::CreateApplicationCommands {
@@ -179,14 +191,12 @@ pub fn create_application_commands<U, E>(
     }
     commands_builder
 }
-/// Wraps [`create_application_commands`] and does some sane default permission checks, as well as
-/// actually send the registration HTTP request to Discord
+/// _Note: you probably want [`register_application_commands_buttons`] instead; it's easier and more
+/// powerful_
 ///
-/// Permission checks:
-/// - global command registration is only allowed for bot owners
-/// - guild-specific command registration is allowed for guild owners and bot owners
+/// Wraps [`create_application_commands`] and adds a bot owner permission check and status messages.
 ///
-/// This function is supposed to be ready-to-use implementation for a `~register` command of your
+/// This function is supposed to be a ready-to-use implementation for a `~register` command of your
 /// bot. So if you want, you can copy paste this help message for the command:
 ///
 /// ```text
@@ -202,12 +212,12 @@ pub async fn register_application_commands<U, E>(
     let commands_builder = create_application_commands(commands);
 
     let is_bot_owner = ctx.framework().options().owners.contains(&ctx.author().id);
-    if global {
-        if !is_bot_owner {
-            ctx.say("Can only be used by bot owner").await?;
-            return Ok(());
-        }
+    if !is_bot_owner {
+        ctx.say("Can only be used by bot owner").await?;
+        return Ok(());
+    }
 
+    if global {
         ctx.say(format!("Registering {} commands...", commands.len()))
             .await?;
         serenity::ApplicationCommand::set_global_application_commands(ctx.discord(), |b| {
@@ -216,23 +226,17 @@ pub async fn register_application_commands<U, E>(
         })
         .await?;
     } else {
-        let guild = match ctx.guild_id() {
-            Some(x) => x.to_partial_guild(ctx.discord()).await?,
+        let guild_id = match ctx.guild_id() {
+            Some(x) => x,
             None => {
                 ctx.say("Must be called in guild").await?;
                 return Ok(());
             }
         };
-        let is_guild_owner = ctx.author().id == guild.owner_id;
-
-        if !is_guild_owner && !is_bot_owner {
-            ctx.say("Can only be used by server owner").await?;
-            return Ok(());
-        }
 
         ctx.say(format!("Registering {} commands...", commands.len()))
             .await?;
-        guild
+        guild_id
             .set_application_commands(ctx.discord(), |b| {
                 *b = commands_builder;
                 b
@@ -242,6 +246,122 @@ pub async fn register_application_commands<U, E>(
 
     ctx.say("Done!").await?;
 
+    Ok(())
+}
+
+/// Spawns four buttons to register or delete application commands globally or in the current guild
+///
+/// Upgraded version of [`register_application_commands`]
+pub async fn register_application_commands_buttons<U, E>(
+    ctx: crate::Context<'_, U, E>,
+) -> Result<(), serenity::Error> {
+    let commands = &ctx.framework().options().commands;
+    let create_commands = create_application_commands(commands);
+
+    let is_bot_owner = ctx.framework().options().owners.contains(&ctx.author().id);
+    if !is_bot_owner {
+        ctx.say("Can only be used by bot owner").await?;
+        return Ok(());
+    }
+
+    let mut msg = ctx
+        .send(|m| {
+            m.content("Choose what to do with the commands:")
+                .components(|c| {
+                    c.create_action_row(|r| {
+                        r.create_button(|b| {
+                            b.custom_id("register.global")
+                                .label("Register globally")
+                                .style(serenity::ButtonStyle::Primary)
+                        })
+                        .create_button(|b| {
+                            b.custom_id("unregister.global")
+                                .label("Delete globally")
+                                .style(serenity::ButtonStyle::Danger)
+                        })
+                    })
+                    .create_action_row(|r| {
+                        r.create_button(|b| {
+                            b.custom_id("register.guild")
+                                .label("Register in guild")
+                                .style(serenity::ButtonStyle::Primary)
+                        })
+                        .create_button(|b| {
+                            b.custom_id("unregister.guild")
+                                .label("Delete in guild")
+                                .style(serenity::ButtonStyle::Danger)
+                        })
+                    })
+                })
+        })
+        .await?
+        .message()
+        .await?;
+
+    let interaction = msg
+        .await_component_interaction(ctx.discord())
+        .author_id(ctx.author().id)
+        .await;
+    msg.edit(ctx.discord(), |b| b.components(|b| b)).await?; // remove buttons after button press
+    let pressed_button_id = match &interaction {
+        Some(m) => &m.data.custom_id,
+        None => {
+            ctx.say("You didn't interact in time").await?;
+            return Ok(());
+        }
+    };
+
+    let (register, global) = match &**pressed_button_id {
+        "register.global" => (true, true),
+        "unregister.global" => (false, true),
+        "register.guild" => (true, false),
+        "unregister.guild" => (false, false),
+        other => {
+            log::warn!("unknown register button ID: {:?}", other);
+            return Ok(());
+        }
+    };
+
+    if global {
+        if register {
+            ctx.say(format!("Registering {} global commands...", commands.len()))
+                .await?;
+            serenity::ApplicationCommand::set_global_application_commands(ctx.discord(), |b| {
+                *b = create_commands;
+                b
+            })
+            .await?;
+        } else {
+            ctx.say("Unregistering global commands...").await?;
+            serenity::ApplicationCommand::set_global_application_commands(ctx.discord(), |b| b)
+                .await?;
+        }
+    } else {
+        let guild_id = match ctx.guild_id() {
+            Some(x) => x,
+            None => {
+                ctx.say("Must be called in guild").await?;
+                return Ok(());
+            }
+        };
+        if register {
+            ctx.say(format!("Registering {} guild commands...", commands.len()))
+                .await?;
+            guild_id
+                .set_application_commands(ctx.discord(), |b| {
+                    *b = create_commands;
+                    b
+                })
+                .await?;
+        } else {
+            ctx.say("Unregistering guild commands...").await?;
+            guild_id
+                .set_application_commands(ctx.discord(), |b| b)
+                .await?;
+        }
+    }
+
+    ctx.say("Done!").await?;
     Ok(())
 }
 
