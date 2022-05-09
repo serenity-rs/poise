@@ -160,9 +160,9 @@ impl EditTracker {
 }
 
 /// Prefix-specific reply function. For more details, see [`crate::send_reply`].
-pub async fn send_prefix_reply<'a, U, E>(
+pub async fn send_prefix_reply<'att, U, E>(
     ctx: crate::prefix::PrefixContext<'_, U, E>,
-    builder: impl for<'b> FnOnce(&'b mut crate::CreateReply<'a>) -> &'b mut crate::CreateReply<'a>,
+    builder: impl for<'a> FnOnce(&'a mut crate::CreateReply<'att>) -> &'a mut crate::CreateReply<'att>,
 ) -> Result<Box<serenity::Message>, serenity::Error> {
     let mut reply = crate::CreateReply {
         ephemeral: ctx.command.ephemeral,

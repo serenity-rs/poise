@@ -14,9 +14,9 @@ use crate::serenity_prelude as serenity;
 /// [followup](serenity::ApplicationCommandInteraction::create_followup_message) is sent.
 ///
 /// No-op if autocomplete context
-pub async fn send_application_reply<'a, U, E>(
+pub async fn send_application_reply<'att, U, E>(
     ctx: ApplicationContext<'_, U, E>,
-    builder: impl for<'b> FnOnce(&'b mut crate::CreateReply<'a>) -> &'b mut crate::CreateReply<'a>,
+    builder: impl for<'a> FnOnce(&'a mut crate::CreateReply<'att>) -> &'a mut crate::CreateReply<'att>,
 ) -> Result<crate::ReplyHandle<'_>, serenity::Error> {
     let mut data = crate::CreateReply {
         ephemeral: ctx.command.ephemeral,
