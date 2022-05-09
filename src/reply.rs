@@ -132,9 +132,7 @@ impl<'a> CreateReply<'a> {
                 f
             });
         }
-        if ephemeral {
-            f.flags(serenity::InteractionApplicationCommandCallbackDataFlags::EPHEMERAL);
-        }
+        f.ephemeral(ephemeral);
     }
 
     /// Serialize this response builder to a [`serenity::CreateInteractionResponseFollowup`]
@@ -168,9 +166,7 @@ impl<'a> CreateReply<'a> {
                 f
             });
         }
-        if ephemeral {
-            f.flags(serenity::InteractionApplicationCommandCallbackDataFlags::EPHEMERAL);
-        }
+        f.ephemeral(ephemeral);
         f.add_files(attachments);
     }
 
