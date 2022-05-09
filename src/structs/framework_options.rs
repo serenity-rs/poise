@@ -15,7 +15,7 @@ pub struct FrameworkOptions<U, E> {
     /// Provide a callback to wrap all event dispatch logic in your own code.
     ///
     /// Simply forwards the event dispatch call by default:
-    /// ```rust
+    /// ```rust,ignore
     /// |ctx, event, framework, handler, dispatch_fn| {
     ///     Box::pin(async move {
     ///         dispatch_fn(ctx, event, framework, handler).await;
