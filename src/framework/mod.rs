@@ -113,14 +113,15 @@ impl<U, E> Framework<U, E> {
                     ctx,
                     event,
                     &*framework,
-                    Box::new(move |ctx, event, framework| {
+                    existing_event_handler,
+                    |ctx, event, framework, existing_event_handler| {
                         Box::pin(async move {
                             dispatch::dispatch_event(framework, &ctx, &event).await;
                             if let Some(handler) = existing_event_handler {
                                 event.dispatch(ctx, &*handler).await;
                             }
                         })
-                    }),
+                    },
                 )
                 .await;
             }) as _

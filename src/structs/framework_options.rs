@@ -12,20 +12,27 @@ pub struct FrameworkOptions<U, E> {
     pub pre_command: fn(crate::Context<'_, U, E>) -> BoxFuture<'_, ()>,
     /// Called after every command if it was successful (returned Ok)
     pub post_command: fn(crate::Context<'_, U, E>) -> BoxFuture<'_, ()>,
+    /// Provide a callback to wrap all event dispatch logic in your own code.
+    ///
+    /// Simply forwards the event dispatch call by default:
+    /// ```rust
+    /// |ctx, event, framework, handler, dispatch_fn| {
+    ///     Box::pin(async move {
+    ///         dispatch_fn(ctx, event, framework, handler).await;
+    ///     })
+    /// }
+    /// ```
     pub intercept_dispatch: for<'a> fn(
         serenity::Context,
         crate::Event<'a>,
         &'a crate::Framework<U, E>,
-        Box<
-            dyn FnOnce(
-                    serenity::Context,
-                    crate::Event<'a>,
-                    &'a crate::Framework<U, E>,
-                ) -> BoxFuture<'a, ()>
-                + Send
-                + Sync
-                + 'static,
-        >,
+        Option<std::sync::Arc<dyn serenity::EventHandler>>,
+        fn(
+            serenity::Context,
+            crate::Event<'a>,
+            &'a crate::Framework<U, E>,
+            Option<std::sync::Arc<dyn serenity::EventHandler>>,
+        ) -> BoxFuture<'a, ()>,
     ) -> BoxFuture<'a, ()>,
     /// Provide a callback to be invoked before every command. The command will only be executed
     /// if the callback returns true.
@@ -142,9 +149,9 @@ where
             listener: |_, _, _, _| Box::pin(async { Ok(()) }),
             pre_command: |_| Box::pin(async {}),
             post_command: |_| Box::pin(async {}),
-            intercept_dispatch: |ctx, event, framework, dispatch_fn| {
+            intercept_dispatch: |ctx, event, framework, handler, dispatch_fn| {
                 Box::pin(async move {
-                    dispatch_fn(ctx, event, framework).await;
+                    dispatch_fn(ctx, event, framework, handler).await;
                 })
             },
             command_check: None,
