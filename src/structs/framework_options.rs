@@ -12,6 +12,21 @@ pub struct FrameworkOptions<U, E> {
     pub pre_command: fn(crate::Context<'_, U, E>) -> BoxFuture<'_, ()>,
     /// Called after every command if it was successful (returned Ok)
     pub post_command: fn(crate::Context<'_, U, E>) -> BoxFuture<'_, ()>,
+    pub intercept_dispatch: for<'a> fn(
+        serenity::Context,
+        crate::Event<'a>,
+        &'a crate::Framework<U, E>,
+        Box<
+            dyn FnOnce(
+                    serenity::Context,
+                    crate::Event<'a>,
+                    &'a crate::Framework<U, E>,
+                ) -> BoxFuture<'a, ()>
+                + Send
+                + Sync
+                + 'static,
+        >,
+    ) -> BoxFuture<'a, ()>,
     /// Provide a callback to be invoked before every command. The command will only be executed
     /// if the callback returns true.
     ///
@@ -84,6 +99,7 @@ impl<U: std::fmt::Debug, E: std::fmt::Debug> std::fmt::Debug for FrameworkOption
             listener,
             prefix_options,
             owners,
+            intercept_dispatch,
             __non_exhaustive,
         } = self;
 
@@ -92,6 +108,7 @@ impl<U: std::fmt::Debug, E: std::fmt::Debug> std::fmt::Debug for FrameworkOption
             .field("on_error", &(*on_error as *const ()))
             .field("pre_command", &(*pre_command as *const ()))
             .field("post_command", &(*post_command as *const ()))
+            .field("intercept_dispatch", &(*intercept_dispatch as *const ()))
             .field("command_check", &command_check.map(|f| f as *const ()))
             .field("allowed_mentions", allowed_mentions)
             .field("reply_callback", &reply_callback.map(|f| f as *const ()))
@@ -125,6 +142,11 @@ where
             listener: |_, _, _, _| Box::pin(async { Ok(()) }),
             pre_command: |_| Box::pin(async {}),
             post_command: |_| Box::pin(async {}),
+            intercept_dispatch: |ctx, event, framework, dispatch_fn| {
+                Box::pin(async move {
+                    dispatch_fn(ctx, event, framework).await;
+                })
+            },
             command_check: None,
             allowed_mentions: Some({
                 let mut f = serenity::CreateAllowedMentions::default();

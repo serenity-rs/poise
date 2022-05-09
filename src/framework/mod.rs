@@ -109,10 +109,20 @@ impl<U, E> Framework<U, E> {
             let existing_event_handler = existing_event_handler.clone();
 
             Box::pin(async move {
-                dispatch::dispatch_event(&*framework, &ctx, &event).await;
-                if let Some(handler) = existing_event_handler {
-                    event.dispatch(ctx, &*handler).await;
-                }
+                (framework.options.intercept_dispatch)(
+                    ctx,
+                    event,
+                    &*framework,
+                    Box::new(move |ctx, event, framework| {
+                        Box::pin(async move {
+                            dispatch::dispatch_event(framework, &ctx, &event).await;
+                            if let Some(handler) = existing_event_handler {
+                                event.dispatch(ctx, &*handler).await;
+                            }
+                        })
+                    }),
+                )
+                .await;
             }) as _
         });
 
