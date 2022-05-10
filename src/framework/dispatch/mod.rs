@@ -46,6 +46,8 @@ impl<'a, U, E> FrameworkContext<'a, U, E> {
     }
 }
 
+/// If the incoming event is Ready, this method executes the user data setup logic
+/// Otherwise, it forwards the event to [`dispatch_event`]
 pub async fn raw_dispatch_event<U, E>(
     framework: &crate::Framework<U, E>,
     ctx: &serenity::Context,

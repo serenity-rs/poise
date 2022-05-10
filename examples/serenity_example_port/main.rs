@@ -24,7 +24,7 @@ type Context<'a> = poise::Context<'a, Data, Error>;
 async fn event_listener(
     _ctx: &serenity::Context,
     event: &poise::Event<'_>,
-    _framework: &poise::Framework<Data, Error>,
+    _framework: poise::FrameworkContext<'_, Data, Error>,
     _user_data: &Data,
 ) -> Result<(), Error> {
     match event {
