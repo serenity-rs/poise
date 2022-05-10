@@ -1,6 +1,6 @@
 //! Holds application command definition structs.
 
-use crate::{serenity_prelude as serenity, BoxFuture, Framework};
+use crate::{serenity_prelude as serenity, BoxFuture};
 
 /// Abstracts over a refernce to an application command interaction or autocomplete interaction
 ///
@@ -95,7 +95,7 @@ pub struct ApplicationContext<'a, U, E> {
     /// Read-only reference to the framework
     ///
     /// Useful if you need the list of commands, for example for a custom help command
-    pub framework: &'a Framework<U, E>,
+    pub framework: crate::FrameworkContext<'a, U, E>,
     /// The command object which is the current command
     pub command: &'a crate::Command<U, E>,
     /// Your custom user data

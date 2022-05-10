@@ -19,7 +19,7 @@ pub struct PrefixContext<'a, U, E> {
     /// Read-only reference to the framework
     ///
     /// Useful if you need the list of commands, for example for a custom help command
-    pub framework: &'a crate::Framework<U, E>,
+    pub framework: crate::FrameworkContext<'a, U, E>,
     /// The command object which is the current command
     pub command: &'a crate::Command<U, E>,
     /// Your custom user data

@@ -45,7 +45,7 @@ pub enum FrameworkError<'a, U, E> {
         event: &'a crate::Event<'a>,
         /// The Framework passed to the event
         #[derivative(Debug = "ignore")]
-        framework: &'a crate::Framework<U, E>,
+        framework: crate::FrameworkContext<'a, U, E>,
     },
     /// Error occured during command execution
     Command {

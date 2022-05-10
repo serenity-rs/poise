@@ -98,8 +98,8 @@ impl<'a, U, E> Context<'a, U, E> {
         }
     }
 
-    /// Return a read-only reference to [`crate::Framework`].
-    pub fn framework(&self) -> &'a crate::Framework<U, E> {
+    /// Returns a view into data stored by the framework, like configuration
+    pub fn framework(&self) -> crate::FrameworkContext<'a, U, E> {
         match self {
             Self::Application(ctx) => ctx.framework,
             Self::Prefix(ctx) => ctx.framework,
@@ -372,7 +372,7 @@ pub struct PartialContext<'a, U, E> {
     /// Serenity's context, like HTTP or cache
     pub discord: &'a serenity::Context,
     /// Useful if you need the list of commands, for example for a custom help command
-    pub framework: &'a crate::Framework<U, E>,
+    pub framework: crate::FrameworkContext<'a, U, E>,
     /// Your custom user data
     // TODO: redundant with framework
     pub data: &'a U,

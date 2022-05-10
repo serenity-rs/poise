@@ -6,7 +6,7 @@ use crate::serenity_prelude as serenity;
 ///
 /// Returns tuple of stripped prefix and rest of the message, if any prefix matches
 async fn strip_prefix<'a, U, E>(
-    framework: &'a crate::Framework<U, E>,
+    framework: crate::FrameworkContext<'a, U, E>,
     ctx: &'a serenity::Context,
     msg: &'a serenity::Message,
 ) -> Option<(&'a str, &'a str)> {
@@ -163,7 +163,7 @@ where
 ///   the cooldown limits were reached
 /// - Err(Some(error: UserError)) if any user code yielded an error
 pub async fn dispatch_message<'a, U, E>(
-    framework: &'a crate::Framework<U, E>,
+    framework: crate::FrameworkContext<'a, U, E>,
     ctx: &'a serenity::Context,
     msg: &'a serenity::Message,
     triggered_by_edit: bool,
