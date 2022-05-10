@@ -20,8 +20,8 @@ pub struct FrameworkContext<'a, U, E> {
     pub user_data: &'a U,
     /// Serenity shard manager. Can be used for example to shutdown the bot
     pub shard_manager: &'a std::sync::Arc<tokio::sync::Mutex<serenity::ShardManager>>,
-    #[doc(hidden)]
-    pub __non_exhaustive: (),
+    // deliberately not non exhaustive because you need to create FrameworkContext from scratch
+    // to run your own event loop
 }
 impl<U, E> Copy for FrameworkContext<'_, U, E> {}
 impl<U, E> Clone for FrameworkContext<'_, U, E> {
@@ -46,8 +46,7 @@ impl<'a, U, E> FrameworkContext<'a, U, E> {
     }
 }
 
-/// Central event handling function of this library
-pub async fn dispatch_event<U, E>(
+pub async fn raw_dispatch_event<U, E>(
     framework: &crate::Framework<U, E>,
     ctx: &serenity::Context,
     event: &crate::Event<'_>,
@@ -70,14 +69,22 @@ pub async fn dispatch_event<U, E>(
             // (happens regularly when bot is online for long period of time)
         }
     }
+
     let framework = crate::FrameworkContext {
         bot_id: framework.bot_id,
         options: &framework.options,
         user_data: framework.user_data().await,
         shard_manager: &framework.shard_manager,
-        __non_exhaustive: (),
     };
+    dispatch_event(framework, ctx, event).await;
+}
 
+/// Central event handling function of this library
+pub async fn dispatch_event<U: Send + Sync, E>(
+    framework: crate::FrameworkContext<'_, U, E>,
+    ctx: &serenity::Context,
+    event: &crate::Event<'_>,
+) {
     match event {
         crate::Event::Message { new_message } => {
             let invocation_data = tokio::sync::Mutex::new(Box::new(()) as _);
