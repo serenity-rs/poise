@@ -74,6 +74,7 @@ pub struct Invocation {
     description: Option<String>,
     explanation: Option<String>,
     function: syn::ItemFn,
+    default_member_permissions: syn::Expr,
     required_permissions: syn::Expr,
     required_bot_permissions: syn::Expr,
     args: CommandArgs,
@@ -177,6 +178,7 @@ pub fn command(
             None => syn::parse_quote! { poise::serenity_prelude::Permissions::empty() },
         }
     }
+    let default_member_permissions = permissions_to_tokens(&args.default_member_permissions);
     let required_permissions = permissions_to_tokens(&args.required_permissions);
     let required_bot_permissions = permissions_to_tokens(&args.required_bot_permissions);
 
@@ -190,6 +192,7 @@ pub fn command(
         explanation,
         args,
         function,
+        default_member_permissions,
         required_permissions,
         required_bot_permissions,
     };
@@ -237,6 +240,7 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
     let channel_cooldown = wrap_option(inv.args.channel_cooldown);
     let member_cooldown = wrap_option(inv.args.member_cooldown);
 
+    let default_member_permissions = &inv.default_member_permissions;
     let required_permissions = &inv.required_permissions;
     let required_bot_permissions = &inv.required_bot_permissions;
     let owners_only = inv.args.owners_only;
@@ -301,6 +305,7 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
                     member: #member_cooldown.map(std::time::Duration::from_secs),
                 })),
                 reuse_response: #reuse_response,
+                default_member_permissions: #default_member_permissions,
                 required_permissions: #required_permissions,
                 required_bot_permissions: #required_bot_permissions,
                 owners_only: #owners_only,

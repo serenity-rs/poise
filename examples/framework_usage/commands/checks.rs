@@ -132,3 +132,11 @@ pub async fn lennyface(ctx: Context<'_>) -> Result<(), Error> {
 
     Ok(())
 }
+
+/// Utilizes the permissions v2 `default_member_permissions` field
+#[poise::command(slash_command, default_member_permissions = "ADMINISTRATOR")]
+pub async fn permissions_v2(ctx: Context<'_>) -> Result<(), Error> {
+    ctx.say("Whoop! You're authorized!").await?;
+
+    Ok(())
+}
