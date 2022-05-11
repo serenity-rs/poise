@@ -34,7 +34,7 @@ Discord slash commands can be a bit unintuitive at first. If you're unfamiliar, 
 
 To activate a slash command, your bot
 needs to _register_ in on Discord. You may want to do this manually, with a `register` command
-(poise provides [`builtins::register_application_commands`] as a starting point for that), or you
+(poise provides [`builtins::register_application_commands_buttons`] as a starting point for that), or you
 may want to re-register commands automatically on every bot startup. Choose what you prefer
 
 Commands can be registered _globally_ or _per guild_. Global commands are available on every guild
@@ -128,8 +128,6 @@ async fn error_handler(error: poise::FrameworkError<'_, Data, Error>) {
 # #[poise::command(prefix_command)] async fn command1(ctx: Context<'_>) -> Result<(), Error> { Ok(()) }
 # #[poise::command(prefix_command)] async fn command2(ctx: Context<'_>) -> Result<(), Error> { Ok(()) }
 # #[poise::command(prefix_command)] async fn command3(ctx: Context<'_>) -> Result<(), Error> { Ok(()) }
-# #[poise::command(prefix_command)] async fn command3_1(ctx: Context<'_>) -> Result<(), Error> { Ok(()) }
-# #[poise::command(prefix_command)] async fn command3_2(ctx: Context<'_>) -> Result<(), Error> { Ok(()) }
 
 # async {
 // Use `Framework::build()` to create a framework builder and supply basic data to the framework:
@@ -155,10 +153,9 @@ poise::Framework::build()
         commands: vec![
             command1(),
             command2(),
-            // To add subcommands, modify the `subcommands` field of the `Command` struct returned
-            // by the command functions
+            // You can also modify a command by changing the fields of its Command instance
             poise::Command {
-                subcommands: vec![command3_1(), command3_2()],
+                // [override fields here]
                 ..command3()
             }
         ],

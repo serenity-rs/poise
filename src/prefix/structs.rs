@@ -19,7 +19,7 @@ pub struct PrefixContext<'a, U, E> {
     /// Read-only reference to the framework
     ///
     /// Useful if you need the list of commands, for example for a custom help command
-    pub framework: &'a crate::Framework<U, E>,
+    pub framework: crate::FrameworkContext<'a, U, E>,
     /// The command object which is the current command
     pub command: &'a crate::Command<U, E>,
     /// Your custom user data
@@ -102,10 +102,14 @@ pub struct PrefixFrameworkOptions<U, E> {
     /// Override this field for advanced dynamic prefixes which change depending on guild or user.
     ///
     /// Return value is a tuple of the prefix and the rest of the message:
-    /// ```rust,ignore
+    /// ```rust,no_run
+    /// # poise::PrefixFrameworkOptions::<(), ()> { stripped_dynamic_prefix: Some(|_, msg, _| Box::pin(async move {
+    /// let my_cool_prefix = "$";
     /// if msg.content.starts_with(my_cool_prefix) {
-    ///     return Some(msg.content.split_at(my_cool_prefix.len()));
+    ///     return Ok(Some(msg.content.split_at(my_cool_prefix.len())));
     /// }
+    /// Ok(None)
+    /// # })), ..Default::default() };
     /// ```
     pub stripped_dynamic_prefix: Option<
         for<'a> fn(

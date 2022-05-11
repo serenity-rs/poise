@@ -1,13 +1,12 @@
 //! The central Framework struct that ties everything together.
 
 mod dispatch;
+pub use dispatch::{dispatch_event, dispatch_message, find_command, FrameworkContext};
 
 mod builder;
 pub use builder::*;
 
 use crate::{serenity_prelude as serenity, BoxFuture};
-
-pub use dispatch::{dispatch_message, find_command};
 
 /// The main framework struct which stores all data and handles message and interaction dispatch.
 pub struct Framework<U, E> {
@@ -109,7 +108,7 @@ impl<U, E> Framework<U, E> {
             let existing_event_handler = existing_event_handler.clone();
 
             Box::pin(async move {
-                dispatch::dispatch_event(&*framework, &ctx, &event).await;
+                dispatch::raw_dispatch_event(&*framework, &ctx, &event).await;
                 if let Some(handler) = existing_event_handler {
                     event.dispatch(ctx, &*handler).await;
                 }

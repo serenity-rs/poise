@@ -34,7 +34,7 @@ fn find_matching_command<'a, 'b, U, E>(
 /// Given an interaction, finds the matching framework command and checks if the user is allowed
 /// access
 pub async fn extract_command_and_run_checks<'a, U, E>(
-    framework: &'a crate::Framework<U, E>,
+    framework: crate::FrameworkContext<'a, U, E>,
     ctx: &'a serenity::Context,
     interaction: crate::ApplicationCommandOrAutocompleteInteraction<'a>,
     has_sent_initial_response: &'a std::sync::atomic::AtomicBool,
@@ -77,7 +77,7 @@ pub async fn extract_command_and_run_checks<'a, U, E>(
 
 /// Dispatches this interaction onto framework commands, i.e. runs the associated command
 pub async fn dispatch_interaction<'a, U, E>(
-    framework: &'a crate::Framework<U, E>,
+    framework: crate::FrameworkContext<'a, U, E>,
     ctx: &'a serenity::Context,
     interaction: &'a serenity::ApplicationCommandInteraction,
     // Need to pass this in from outside because of lifetime issues
@@ -145,7 +145,7 @@ pub async fn dispatch_interaction<'a, U, E>(
 /// Dispatches this interaction onto framework commands, i.e. runs the associated autocomplete
 /// callback
 pub async fn dispatch_autocomplete<'a, U, E>(
-    framework: &'a crate::Framework<U, E>,
+    framework: crate::FrameworkContext<'a, U, E>,
     ctx: &'a serenity::Context,
     interaction: &'a serenity::AutocompleteInteraction,
     // Need to pass this in from outside because of lifetime issues

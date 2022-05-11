@@ -24,7 +24,7 @@ type Context<'a> = poise::Context<'a, Data, Error>;
 async fn event_listener(
     _ctx: &serenity::Context,
     event: &poise::Event<'_>,
-    _framework: &poise::Framework<Data, Error>,
+    _framework: poise::FrameworkContext<'_, Data, Error>,
     _user_data: &Data,
 ) -> Result<(), Error> {
     match event {
@@ -120,12 +120,10 @@ If you want more information about a specific command, just pass the command as 
     Ok(())
 }
 
-/// Register slash commands in this guild or globally
-///
-/// Run with no arguments to register in guild, run with argument "global" to register globally.
+/// Registers slash commands in this guild or globally
 #[poise::command(prefix_command, hide_in_help)]
-async fn register(ctx: Context<'_>, #[flag] global: bool) -> Result<(), Error> {
-    poise::builtins::register_application_commands(ctx, global).await?;
+async fn register(ctx: Context<'_>) -> Result<(), Error> {
+    poise::builtins::register_application_commands_buttons(ctx).await?;
 
     Ok(())
 }
@@ -253,12 +251,7 @@ async fn main() {
             ping(),
             latency(),
             some_long_command(),
-            poise::Command {
-                // A command can have sub-commands, just like in command lines tools.
-                // Imagine `cargo help` and `cargo help run`.
-                subcommands: vec![sub()],
-                ..upper_command()
-            },
+            upper_command(),
             bird(),
             cat(),
             dog(),
@@ -650,7 +643,15 @@ async fn slow_mode(
 }
 
 /// Dummy command to test subcommands
-#[poise::command(prefix_command, slash_command, rename = "upper", category = "General")]
+#[poise::command(
+    prefix_command,
+    slash_command,
+    rename = "upper",
+    category = "General",
+    // A command can have sub-commands, just like in command lines tools.
+    // Imagine `cargo help` and `cargo help run`.
+    subcommands("sub")
+)]
 async fn upper_command(ctx: Context<'_>) -> Result<(), Error> {
     ctx.say("This is the main function!").await?;
 

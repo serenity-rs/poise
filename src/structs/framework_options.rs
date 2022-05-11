@@ -40,7 +40,7 @@ pub struct FrameworkOptions<U, E> {
     pub listener: for<'a> fn(
         &'a serenity::Context,
         &'a crate::Event<'a>,
-        &'a crate::Framework<U, E>,
+        crate::FrameworkContext<'a, U, E>,
         // TODO: redundant with framework
         &'a U,
     ) -> BoxFuture<'a, Result<(), E>>,

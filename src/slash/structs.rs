@@ -1,6 +1,6 @@
 //! Holds application command definition structs.
 
-use crate::{serenity_prelude as serenity, BoxFuture, Framework};
+use crate::{serenity_prelude as serenity, BoxFuture};
 
 /// Abstracts over a refernce to an application command interaction or autocomplete interaction
 ///
@@ -95,7 +95,7 @@ pub struct ApplicationContext<'a, U, E> {
     /// Read-only reference to the framework
     ///
     /// Useful if you need the list of commands, for example for a custom help command
-    pub framework: &'a Framework<U, E>,
+    pub framework: crate::FrameworkContext<'a, U, E>,
     /// The command object which is the current command
     pub command: &'a crate::Command<U, E>,
     /// Your custom user data
@@ -153,11 +153,6 @@ impl<U, E> ApplicationContext<'_, U, E> {
             ApplicationCommandOrAutocompleteInteraction::Autocomplete(_) => return Ok(()),
         };
 
-        let mut flags = serenity::InteractionApplicationCommandCallbackDataFlags::empty();
-        if ephemeral {
-            flags |= serenity::InteractionApplicationCommandCallbackDataFlags::EPHEMERAL;
-        }
-
         if !self
             .has_sent_initial_response
             .load(std::sync::atomic::Ordering::SeqCst)
@@ -165,7 +160,7 @@ impl<U, E> ApplicationContext<'_, U, E> {
             interaction
                 .create_interaction_response(self.discord, |f| {
                     f.kind(serenity::InteractionResponseType::DeferredChannelMessageWithSource)
-                        .interaction_response_data(|b| b.flags(flags))
+                        .interaction_response_data(|b| b.ephemeral(ephemeral))
                 })
                 .await?;
             self.has_sent_initial_response

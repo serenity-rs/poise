@@ -286,7 +286,9 @@ struct MyModal {
 pub async fn modal(
     ctx: poise::ApplicationContext<'_, crate::Data, crate::Error>,
 ) -> Result<(), Error> {
-    let data = <MyModal as poise::Modal>::execute(ctx).await?;
+    use poise::Modal as _;
+
+    let data = MyModal::execute(ctx).await?;
     println!("Got data: {:?}", data);
 
     Ok(())

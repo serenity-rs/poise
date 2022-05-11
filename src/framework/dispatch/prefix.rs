@@ -6,7 +6,7 @@ use crate::serenity_prelude as serenity;
 ///
 /// Returns tuple of stripped prefix and rest of the message, if any prefix matches
 async fn strip_prefix<'a, U, E>(
-    framework: &'a crate::Framework<U, E>,
+    framework: crate::FrameworkContext<'a, U, E>,
     ctx: &'a serenity::Context,
     msg: &'a serenity::Message,
 ) -> Option<(&'a str, &'a str)> {
@@ -94,16 +94,13 @@ async fn strip_prefix<'a, U, E>(
 /// string).
 ///
 /// ```rust
-/// #[poise::command(prefix_command)] async fn command1(ctx: poise::Context<'_, (), ()>) -> Result<(), ()> { Ok(()) }
-/// #[poise::command(prefix_command)] async fn command2(ctx: poise::Context<'_, (), ()>) -> Result<(), ()> { Ok(()) }
-/// #[poise::command(prefix_command)] async fn command3(ctx: poise::Context<'_, (), ()>) -> Result<(), ()> { Ok(()) }
-/// let commands = vec![
-///     command1(),    
-///     poise::Command {
-///         subcommands: vec![command3()],
-///         ..command2()
-///     },
-/// ];
+/// #[poise::command(prefix_command)]
+/// async fn command1(ctx: poise::Context<'_, (), ()>) -> Result<(), ()> { Ok(()) }
+/// #[poise::command(prefix_command, subcommands("command3"))]
+/// async fn command2(ctx: poise::Context<'_, (), ()>) -> Result<(), ()> { Ok(()) }
+/// #[poise::command(prefix_command)]
+/// async fn command3(ctx: poise::Context<'_, (), ()>) -> Result<(), ()> { Ok(()) }
+/// let commands = vec![command1(), command2()];
 ///
 /// assert_eq!(
 ///     poise::find_command(&commands, "command1 my arguments", false),
@@ -166,7 +163,7 @@ where
 ///   the cooldown limits were reached
 /// - Err(Some(error: UserError)) if any user code yielded an error
 pub async fn dispatch_message<'a, U, E>(
-    framework: &'a crate::Framework<U, E>,
+    framework: crate::FrameworkContext<'a, U, E>,
     ctx: &'a serenity::Context,
     msg: &'a serenity::Message,
     triggered_by_edit: bool,
