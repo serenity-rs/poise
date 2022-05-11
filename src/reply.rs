@@ -44,6 +44,23 @@ impl<'att> CreateReply<'att> {
         self
     }
 
+    /// Adds an embed to the message.
+    ///
+    /// Existing embeds are kept.
+    pub fn add_embed(&mut self, embed: serenity::CreateEmbed) -> &mut Self {
+        self.embeds.push(embed);
+        self
+    }
+
+    /// Sets a single embed for the message.
+    ///
+    /// Calling this will overwrite the embed list.
+    pub fn set_embed(&mut self, embed: serenity::CreateEmbed) -> &mut Self {
+        self.embeds.clear();
+        self.embeds.push(embed);
+        self
+    }
+
     /// Set components (buttons and select menus) for this message.
     ///
     /// Any previously set components will be overwritten.
@@ -53,6 +70,14 @@ impl<'att> CreateReply<'att> {
     ) -> &mut Self {
         let mut components = serenity::CreateComponents::default();
         f(&mut components);
+        self.components = Some(components);
+        self
+    }
+
+    /// Set components (buttons and select menus) for this message.
+    ///
+    /// Any previously set components will be overwritten.
+    pub fn set_components(&mut self, components: serenity::CreateComponents) -> &mut Self {
         self.components = Some(components);
         self
     }
