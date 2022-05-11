@@ -67,7 +67,15 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
         let max_length = field_attrs.max_length.into_iter();
         builders.push(quote::quote! {
             .create_action_row(|b| b
-                .create_input_text(|b| b
+                .create_input_text(|b| {
+                    if let Some(defaults) = &mut defaults {
+                        // Can use `defaults.#field_ident` directly in Edition 2021 due to more
+                        // specific closure capture rules
+                        let default = std::mem::take(&mut defaults.#field_ident);
+                        // Option::from().unwrap_or_default() dance to handle both T and Option<T>
+                        b.value(Option::from(default).unwrap_or_else(String::new));
+                    }
+                    b
                     .label(#label)
                     #( .placeholder(#placeholder) )*
                     .required(#required)
@@ -75,7 +83,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                     .style(#style)
                     #( .min_length(#min_length) )*
                     #( .max_length(#max_length) )*
-                )
+                })
             )
         });
 
@@ -97,7 +105,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
     Ok(quote::quote! { const _: () = {
         use poise::serenity_prelude as serenity;
         impl #impl_generics poise::Modal for #struct_ident #ty_generics #where_clause {
-            fn create() -> serenity::CreateInteractionResponse<'static> {
+            fn create(mut defaults: Option<Self>) -> serenity::CreateInteractionResponse<'static> {
                 let mut b = serenity::CreateInteractionResponse::default();
                 b.kind(serenity::InteractionResponseType::Modal);
                 b.interaction_response_data(|b| {
