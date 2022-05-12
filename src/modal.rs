@@ -65,7 +65,7 @@ async fn execute<U: Send + Sync, E, M: Modal>(
         })
         .await?;
 
-    Ok(M::parse(response.data.clone()).map_err(serenity::Error::Other)?)
+    M::parse(response.data.clone()).map_err(serenity::Error::Other)
 }
 
 /// Derivable trait for modal interactions, Discords version of interactive forms
