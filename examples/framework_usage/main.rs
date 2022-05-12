@@ -95,6 +95,7 @@ async fn main() {
             checks::get_guild_name(),
             checks::only_in_dms(),
             checks::lennyface(),
+            checks::permissions_v2(),
             subcommands::parent(),
         ],
         prefix_options: poise::PrefixFrameworkOptions {

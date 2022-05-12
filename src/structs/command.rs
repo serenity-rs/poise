@@ -57,7 +57,13 @@ pub struct Command<U, E> {
     /// Note: in prefix commands, this only has an effect if
     /// `crate::PrefixFrameworkOptions::edit_tracker` is set.
     pub reuse_response: bool,
-    /// Permissions which users must have to invoke this command.
+    /// Permissions which users must have to invoke this command. Used by Discord to set who can
+    /// invoke this as a slash command. Not used on prefix commands or checked internally.
+    ///
+    /// Set to [`serenity::Permissions::empty()`] by default
+    pub default_member_permissions: serenity::Permissions,
+    /// Permissions which users must have to invoke this command. This is checked internally and
+    /// works for both prefix commands and slash commands.
     ///
     /// Set to [`serenity::Permissions::empty()`] by default
     pub required_permissions: serenity::Permissions,
@@ -126,6 +132,7 @@ impl<U, E> std::fmt::Debug for Command<U, E> {
             inline_help,
             multiline_help,
             cooldowns,
+            default_member_permissions,
             required_permissions,
             required_bot_permissions,
             owners_only,
@@ -157,6 +164,7 @@ impl<U, E> std::fmt::Debug for Command<U, E> {
             .field("inline_help", inline_help)
             .field("multiline_help", multiline_help)
             .field("cooldowns", cooldowns)
+            .field("default_member_permissions", default_member_permissions)
             .field("required_permissions", required_permissions)
             .field("required_bot_permissions", required_bot_permissions)
             .field("owners_only", owners_only)
@@ -216,7 +224,8 @@ impl<U, E> Command<U, E> {
         let mut builder = serenity::CreateApplicationCommand::default();
         builder
             .name(self.name)
-            .description(self.inline_help.unwrap_or("A slash command"));
+            .description(self.inline_help.unwrap_or("A slash command"))
+            .default_member_permissions(self.default_member_permissions);
 
         if self.subcommands.is_empty() {
             for param in &self.parameters {
