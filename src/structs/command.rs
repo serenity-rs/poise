@@ -224,7 +224,8 @@ impl<U, E> Command<U, E> {
         let mut builder = serenity::CreateApplicationCommand::default();
         builder
             .name(self.name)
-            .description(self.inline_help.unwrap_or("A slash command"));
+            .description(self.inline_help.unwrap_or("A slash command"))
+            .default_member_permissions(self.default_member_permissions);
 
         if self.subcommands.is_empty() {
             for param in &self.parameters {
@@ -239,11 +240,6 @@ impl<U, E> Command<U, E> {
                 }
             }
         }
-
-        println!("{:?}", self.default_member_permissions);
-        println!("{}", self.default_member_permissions.is_empty());
-
-        builder.default_member_permissions(self.default_member_permissions);
 
         Some(builder)
     }
