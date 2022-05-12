@@ -208,14 +208,14 @@ pub async fn register_application_commands<U, E>(
     ctx: crate::Context<'_, U, E>,
     global: bool,
 ) -> Result<(), serenity::Error> {
-    let commands = &ctx.framework().options().commands;
-    let commands_builder = create_application_commands(commands);
-
     let is_bot_owner = ctx.framework().options().owners.contains(&ctx.author().id);
     if !is_bot_owner {
         ctx.say("Can only be used by bot owner").await?;
         return Ok(());
     }
+
+    let commands = &ctx.framework().options().commands;
+    let commands_builder = create_application_commands(commands);
 
     if global {
         ctx.say(format!("Registering {} commands...", commands.len()))
