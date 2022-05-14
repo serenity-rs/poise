@@ -42,6 +42,7 @@ for example for command-specific help (i.e. `~help command_name`). Escape newlin
 - `nsfw_only`: Restricts command callers to only run on a NSFW channel
 - `identifying_name`: Optionally, a unique identifier for this command for your personal usage
 - `category`: Category of this command which affects placement in the help command
+- `custom_data`: Arbitrary expression that will be boxed and stored in `Command::custom_data`
 - `global_cooldown`: Minimum duration between invocations, globally
 - `user_cooldown`: Minimum duration between invocations, per user
 - `guild_cooldown`: Minimum duration between invocations, per guild

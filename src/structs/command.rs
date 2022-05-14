@@ -4,7 +4,8 @@ use crate::{serenity_prelude as serenity, BoxFuture};
 
 /// Type returned from `#[poise::command]` annotated functions, which contains all of the generated
 /// prefix and application commands
-#[derive(Default)]
+#[derive(derivative::Derivative)]
+#[derivative(Default)]
 pub struct Command<U, E> {
     // =============
     /// Callback to execute when this command is invoked in a prefix context
@@ -90,6 +91,9 @@ pub struct Command<U, E> {
     ///
     /// Used for registering and parsing slash commands. Can also be used in help commands
     pub parameters: Vec<crate::CommandParameter<U, E>>,
+    /// Arbitrary data, useful for storing custom metadata about your commands
+    #[derivative(Default(value = "Box::new(())"))]
+    pub custom_data: Box<dyn std::any::Any + Send + Sync>,
 
     // ============= Prefix-specific data
     /// Alternative triggers for the command (prefix-only)
@@ -142,6 +146,7 @@ impl<U, E> std::fmt::Debug for Command<U, E> {
             on_error,
             check,
             parameters,
+            custom_data: _,
             aliases,
             invoke_on_edit,
             reuse_response,
@@ -174,6 +179,7 @@ impl<U, E> std::fmt::Debug for Command<U, E> {
             .field("on_error", &on_error.map(|f| f as *const ()))
             .field("check", &check.map(|f| f as *const ()))
             .field("parameters", parameters)
+            .field("custom_data", &"<Box<dyn Any>>")
             .field("aliases", aliases)
             .field("invoke_on_edit", invoke_on_edit)
             .field("reuse_response", reuse_response)

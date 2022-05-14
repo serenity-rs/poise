@@ -36,6 +36,7 @@ pub struct CommandArgs {
     nsfw_only: bool,
     identifying_name: Option<String>,
     category: Option<String>,
+    custom_data: Option<syn::Expr>,
 
     // In seconds
     global_cooldown: Option<u64>,
@@ -276,6 +277,10 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
 
     let parameters = slash::generate_parameters(&inv)?;
     let ephemeral = inv.args.ephemeral;
+    let custom_data = match &inv.args.custom_data {
+        Some(custom_data) => quote::quote! { Box::new(#custom_data) },
+        None => quote::quote! { Box::new(()) },
+    };
 
     let function_name = std::mem::replace(&mut inv.function.sig.ident, syn::parse_quote! { inner });
     let function_visibility = &inv.function.vis;
@@ -318,6 +323,7 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
                 check: #check,
                 on_error: #on_error,
                 parameters: vec![ #( #parameters ),* ],
+                custom_data: #custom_data,
 
                 aliases: &[ #( #aliases, )* ],
                 invoke_on_edit: #invoke_on_edit,
