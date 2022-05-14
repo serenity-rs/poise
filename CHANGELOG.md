@@ -1,3 +1,8 @@
+# 0.2.1
+
+Behavior changes:
+- Bot ID is retrieved from first Ready event again instead of extracted from the token. Extracting the bot ID from the bot token often didn't work and caused breakage for many users. This should now be fixed
+
 # 0.2.0
 
 New features:
