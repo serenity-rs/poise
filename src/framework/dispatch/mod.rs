@@ -56,6 +56,7 @@ pub async fn raw_dispatch_event<U, E>(
     U: Send + Sync,
 {
     if let crate::Event::Ready { data_about_bot } = event {
+        let _: Result<_, _> = framework.bot_id.set(data_about_bot.user.id);
         let user_data_setup = Option::take(&mut *framework.user_data_setup.lock().unwrap());
         if let Some(user_data_setup) = user_data_setup {
             match user_data_setup(ctx, data_about_bot, framework).await {
@@ -72,10 +73,15 @@ pub async fn raw_dispatch_event<U, E>(
         }
     }
 
+    let user_data = framework.user_data().await;
+    let bot_id = *framework
+        .bot_id
+        .get()
+        .expect("bot ID not set even though we awaited Ready");
     let framework = crate::FrameworkContext {
-        bot_id: framework.bot_id,
+        bot_id,
         options: &framework.options,
-        user_data: framework.user_data().await,
+        user_data,
         shard_manager: &framework.shard_manager,
     };
     dispatch_event(framework, ctx, event).await;
