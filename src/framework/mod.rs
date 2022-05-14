@@ -192,8 +192,9 @@ impl<U, E> Framework<U, E> {
     }
 
     /// Returns the serenity's client shard manager.
-    pub fn shard_manager(&self) -> std::sync::Arc<tokio::sync::Mutex<serenity::ShardManager>> {
-        self.shard_manager.clone()
+    // Returns a reference so you can plug it into [`FrameworkContext`]
+    pub fn shard_manager(&self) -> &std::sync::Arc<tokio::sync::Mutex<serenity::ShardManager>> {
+        &self.shard_manager
     }
 
     /// Retrieves user data, or blocks until it has been initialized (once the Ready event has been
