@@ -8,7 +8,7 @@ pub use send_reply::*;
 
 use crate::serenity_prelude as serenity;
 
-/// Returned from [`send_reply`] to retrieve the sent message object.
+/// Returned from [`send_reply()`] to retrieve the sent message object.
 ///
 /// Discord sometimes returns the [`serenity::Message`] object directly, but sometimes you have to
 /// request it manually. This enum abstracts over the two cases
