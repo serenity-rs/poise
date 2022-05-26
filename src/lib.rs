@@ -196,11 +196,11 @@ I'm bad at names. Google lists "poise" as a synonym to "serenity" which is the D
 underlying this framework, so that's what I chose.
 */
 
-mod prefix;
-pub use prefix::*;
+mod prefix_argument;
+pub use prefix_argument::*;
 
-mod slash;
-pub use slash::*;
+mod slash_argument;
+pub use slash_argument::*;
 
 mod event;
 pub use event::{Event, EventWrapper};
@@ -222,6 +222,9 @@ pub use cooldown::*;
 
 mod modal;
 pub use modal::*;
+
+mod track_edits;
+pub use track_edits::*;
 
 pub(crate) mod util;
 

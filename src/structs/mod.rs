@@ -9,6 +9,12 @@ pub use framework_options::*;
 mod command;
 pub use command::*;
 
+mod prefix;
+pub use prefix::*;
+
+mod slash;
+pub use slash::*;
+
 use crate::serenity_prelude as serenity;
 
 // needed for proc macro

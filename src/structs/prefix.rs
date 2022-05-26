@@ -122,7 +122,7 @@ pub struct PrefixFrameworkOptions<U, E> {
     pub mention_as_prefix: bool,
     /// If Some, the framework will react to message edits by editing the corresponding bot response
     /// with the new result.
-    pub edit_tracker: Option<std::sync::RwLock<super::EditTracker>>,
+    pub edit_tracker: Option<std::sync::RwLock<crate::EditTracker>>,
     /// If the user makes a typo in their message and a subsequent edit creates a valid invocation,
     /// the bot will execute the command if this attribute is set. [`Self::edit_tracker`] does not
     /// need to be set for this.
