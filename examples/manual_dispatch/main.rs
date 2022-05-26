@@ -41,14 +41,16 @@ impl serenity::EventHandler for Handler {
 async fn main() -> Result<(), Error> {
     let token = std::env::var("DISCORD_TOKEN").expect("missing DISCORD_TOKEN");
     let intents = serenity::GatewayIntents::non_privileged();
-    let handler = std::sync::Arc::new(Handler {
+    let mut handler = Handler {
         options: poise::FrameworkOptions {
             commands: vec![ping()],
             ..Default::default()
         },
         shard_manager: std::sync::Mutex::new(None),
-    });
+    };
+    poise::set_qualified_names(&mut handler.options.commands); // some setup
 
+    let handler = std::sync::Arc::new(handler);
     let mut client = serenity::Client::builder(token, intents)
         .event_handler_arc(handler.clone())
         .await?;

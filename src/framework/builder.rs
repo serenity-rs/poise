@@ -190,29 +190,16 @@ and enable MESSAGE_CONTENT in your Discord bot dashboard
             .expect("No user data setup function was provided to the framework");
         let mut options = self.options.expect("No framework options provided");
 
-        // Retrieve application info via HTTP
-        let application_info = serenity::Http::new(&token)
-            .get_current_application_info()
-            .await?;
-
         // Build framework options by concatenating user-set options with commands and owners
         options.commands.extend(self.commands);
         if self.initialize_owners {
-            options.owners.insert(application_info.owner.id);
-            if let Some(team) = application_info.team {
-                for member in team.members {
-                    // This `if` currently always evaluates to true but it becomes important once
-                    // Discord implements more team roles than Admin
-                    if member.permissions.iter().any(|p| p == "*") {
-                        options.owners.insert(member.user.id);
-                    }
-                }
+            if let Err(e) = super::insert_owners_from_http(&token, &mut options.owners).await {
+                log::warn!("Failed to insert owners from HTTP: {}", e);
             }
         }
 
         // Create serenity client
-        let mut client_builder =
-            serenity::ClientBuilder::new(token, intents).application_id(application_info.id.0);
+        let mut client_builder = serenity::ClientBuilder::new(token, intents);
         if let Some(client_settings) = self.client_settings {
             client_builder = client_settings(client_builder);
         }

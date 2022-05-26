@@ -6,6 +6,15 @@ pub use builder::*;
 use crate::{serenity_prelude as serenity, BoxFuture};
 
 /// The main framework struct which stores all data and handles message and interaction dispatch.
+///
+/// Technically, this is just an optional abstraction over [`crate::dispatch_event`] with some
+/// additional conveniences built-in:
+/// - fills in correct values for [`crate::Command::qualified_name`]: [`set_qualified_names`]
+/// - spawns a background task to periodically clear edit tracker cache
+/// - sets up user data on the first Ready event
+/// - keeps track of shard manager and bot ID automatically
+///
+/// You can build a bot without [`Framework`]: see the manual_dispatch example in the repository
 pub struct Framework<U, E> {
     /// Stores user data. Is initialized on first Ready event
     user_data: once_cell::sync::OnceCell<U>,
@@ -69,31 +78,8 @@ impl<U, E> Framework<U, E> {
     {
         use std::sync::{Arc, Mutex};
 
-        // TODO: this should happen even with manual dispatching, when not involving Framework
-        /// Fill in [`Command::qualified_name`] with the correct values
-        fn set_qualified_names<U, E>(command: &mut crate::Command<U, E>) {
-            for subcommand in &mut command.subcommands {
-                subcommand.qualified_name =
-                    format!("{} {}", command.qualified_name, subcommand.name);
-                set_qualified_names(subcommand);
-            }
-        }
-        for command in &mut options.commands {
-            set_qualified_names(command);
-        }
-
-        // Gateway intents sanity check
-        let is_prefix_configured = options.prefix_options.prefix.is_some()
-            || options.prefix_options.dynamic_prefix.is_some()
-            || options.prefix_options.stripped_dynamic_prefix.is_some();
-        let can_receive_message_content = client_builder
-            .get_intents()
-            .contains(serenity::GatewayIntents::MESSAGE_CONTENT);
-        if is_prefix_configured && !can_receive_message_content {
-            eprintln!(
-                "Warning: MESSAGE_CONTENT intent not set; prefix commands will not be received"
-            );
-        }
+        set_qualified_names(&mut options.commands);
+        message_content_intent_sanity_check(&options.prefix_options, client_builder.get_intents());
 
         let framework_cell = Arc::new(once_cell::sync::OnceCell::<Arc<Self>>::new());
         let framework_cell_2 = framework_cell.clone();
@@ -145,20 +131,10 @@ impl<U, E> Framework<U, E> {
             .take()
             .expect("Prepared client is missing");
 
-        let edit_track_cache_purge_task = tokio::spawn(async move {
-            loop {
-                if let Some(edit_tracker) = &self.options.prefix_options.edit_tracker {
-                    edit_tracker.write().unwrap().purge();
-                }
-                // not sure if the purging interval should be configurable
-                tokio::time::sleep(std::time::Duration::from_secs(60)).await;
-            }
-        });
-
         // This will run for as long as the bot is active
+        let edit_tracker_purge_task = spawn_edit_tracker_purge_task(self);
         start(client).await?;
-
-        edit_track_cache_purge_task.abort();
+        edit_tracker_purge_task.abort();
 
         Ok(())
     }
@@ -245,4 +221,77 @@ async fn raw_dispatch_event<U, E>(
         shard_manager: &framework.shard_manager,
     };
     crate::dispatch_event(framework, ctx, event).await;
+}
+
+/// Traverses commands recursively and sets [`crate::Command::qualified_name`] to its actual value
+pub fn set_qualified_names<U, E>(commands: &mut [crate::Command<U, E>]) {
+    /// Fills in qualified_name fields by appending command name to the parent command name
+    fn set_subcommand_qualified_names<U, E>(parents: &str, commands: &mut [crate::Command<U, E>]) {
+        for cmd in commands {
+            cmd.qualified_name = format!("{} {}", parents, cmd.name);
+            set_subcommand_qualified_names(&cmd.qualified_name, &mut cmd.subcommands);
+        }
+    }
+    for command in commands {
+        set_subcommand_qualified_names(command.name, &mut command.subcommands);
+    }
+}
+
+/// Prints a warning on stderr if a prefix is configured but MESSAGE_CONTENT is not set
+fn message_content_intent_sanity_check<U, E>(
+    prefix_options: &crate::PrefixFrameworkOptions<U, E>,
+    intents: serenity::GatewayIntents,
+) {
+    let is_prefix_configured = prefix_options.prefix.is_some()
+        || prefix_options.dynamic_prefix.is_some()
+        || prefix_options.stripped_dynamic_prefix.is_some();
+    let can_receive_message_content = intents.contains(serenity::GatewayIntents::MESSAGE_CONTENT);
+    if is_prefix_configured && !can_receive_message_content {
+        eprintln!("Warning: MESSAGE_CONTENT intent not set; prefix commands will not be received");
+    }
+}
+
+/// Runs [`serenity::Http::get_current_application_info`] and inserts owner data into
+/// [`crate::FrameworkOptions::owners`]
+pub async fn insert_owners_from_http(
+    token: &str,
+    owners: &mut std::collections::HashSet<serenity::UserId>,
+) -> Result<(), serenity::Error> {
+    let application_info = serenity::Http::new(token)
+        .get_current_application_info()
+        .await?;
+
+    owners.insert(application_info.owner.id);
+    if let Some(team) = application_info.team {
+        for member in team.members {
+            // This `if` currently always evaluates to true but it becomes important once
+            // Discord implements more team roles than Admin
+            if member.permissions.iter().any(|p| p == "*") {
+                owners.insert(member.user.id);
+            }
+        }
+    }
+
+    Ok(())
+}
+
+/// Spawns a background task that periodically purges outdated entries from the edit tracker cache
+///
+/// Important to avoid the edit tracker gobbling up unlimited memory
+///
+/// NOT PUB because it's not useful to outside users because it requires a full blown Framework
+/// Because e.g. taking a PrefixFrameworkOptions reference won't work because tokio tasks need to be
+/// 'static
+fn spawn_edit_tracker_purge_task<U: 'static + Send + Sync, E: 'static>(
+    framework: std::sync::Arc<Framework<U, E>>,
+) -> tokio::task::JoinHandle<()> {
+    tokio::spawn(async move {
+        loop {
+            if let Some(edit_tracker) = &framework.options.prefix_options.edit_tracker {
+                edit_tracker.write().unwrap().purge();
+            }
+            // not sure if the purging interval should be configurable
+            tokio::time::sleep(std::time::Duration::from_secs(60)).await;
+        }
+    })
 }
