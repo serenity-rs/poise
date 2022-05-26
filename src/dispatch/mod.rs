@@ -46,47 +46,6 @@ impl<'a, U, E> FrameworkContext<'a, U, E> {
     }
 }
 
-/// If the incoming event is Ready, this method executes the user data setup logic
-/// Otherwise, it forwards the event to [`dispatch_event`]
-pub async fn raw_dispatch_event<U, E>(
-    framework: &crate::Framework<U, E>,
-    ctx: &serenity::Context,
-    event: &crate::Event<'_>,
-) where
-    U: Send + Sync,
-{
-    if let crate::Event::Ready { data_about_bot } = event {
-        let _: Result<_, _> = framework.bot_id.set(data_about_bot.user.id);
-        let user_data_setup = Option::take(&mut *framework.user_data_setup.lock().unwrap());
-        if let Some(user_data_setup) = user_data_setup {
-            match user_data_setup(ctx, data_about_bot, framework).await {
-                Ok(user_data) => {
-                    let _: Result<_, _> = framework.user_data.set(user_data);
-                }
-                Err(error) => {
-                    (framework.options.on_error)(crate::FrameworkError::Setup { error }).await
-                }
-            }
-        } else {
-            // ignoring duplicate Discord bot ready event
-            // (happens regularly when bot is online for long period of time)
-        }
-    }
-
-    let user_data = framework.user_data().await;
-    let bot_id = *framework
-        .bot_id
-        .get()
-        .expect("bot ID not set even though we awaited Ready");
-    let framework = crate::FrameworkContext {
-        bot_id,
-        options: &framework.options,
-        user_data,
-        shard_manager: &framework.shard_manager,
-    };
-    dispatch_event(framework, ctx, event).await;
-}
-
 /// Central event handling function of this library
 pub async fn dispatch_event<U: Send + Sync, E>(
     framework: crate::FrameworkContext<'_, U, E>,

@@ -1,8 +1,5 @@
 //! The central Framework struct that ties everything together.
 
-mod dispatch;
-pub use dispatch::{dispatch_event, dispatch_message, find_command, FrameworkContext};
-
 mod builder;
 pub use builder::*;
 
@@ -109,7 +106,7 @@ impl<U, E> Framework<U, E> {
             let existing_event_handler = existing_event_handler.clone();
 
             Box::pin(async move {
-                dispatch::raw_dispatch_event(&*framework, &ctx, &event).await;
+                raw_dispatch_event(&*framework, &ctx, &event).await;
                 if let Some(handler) = existing_event_handler {
                     event.dispatch(ctx, &*handler).await;
                 }
@@ -207,4 +204,45 @@ impl<U, E> Framework<U, E> {
             }
         }
     }
+}
+
+/// If the incoming event is Ready, this method executes the user data setup logic
+/// Otherwise, it forwards the event to [`crate::dispatch_event`]
+async fn raw_dispatch_event<U, E>(
+    framework: &crate::Framework<U, E>,
+    ctx: &serenity::Context,
+    event: &crate::Event<'_>,
+) where
+    U: Send + Sync,
+{
+    if let crate::Event::Ready { data_about_bot } = event {
+        let _: Result<_, _> = framework.bot_id.set(data_about_bot.user.id);
+        let user_data_setup = Option::take(&mut *framework.user_data_setup.lock().unwrap());
+        if let Some(user_data_setup) = user_data_setup {
+            match user_data_setup(ctx, data_about_bot, framework).await {
+                Ok(user_data) => {
+                    let _: Result<_, _> = framework.user_data.set(user_data);
+                }
+                Err(error) => {
+                    (framework.options.on_error)(crate::FrameworkError::Setup { error }).await
+                }
+            }
+        } else {
+            // ignoring duplicate Discord bot ready event
+            // (happens regularly when bot is online for long period of time)
+        }
+    }
+
+    let user_data = framework.user_data().await;
+    let bot_id = *framework
+        .bot_id
+        .get()
+        .expect("bot ID not set even though we awaited Ready");
+    let framework = crate::FrameworkContext {
+        bot_id,
+        options: &framework.options,
+        user_data,
+        shard_manager: &framework.shard_manager,
+    };
+    crate::dispatch_event(framework, ctx, event).await;
 }

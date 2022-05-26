@@ -208,6 +208,9 @@ pub use event::{Event, EventWrapper};
 mod structs;
 pub use structs::*;
 
+mod dispatch;
+pub use dispatch::*;
+
 mod framework;
 pub use framework::*;
 
