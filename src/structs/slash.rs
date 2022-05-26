@@ -77,8 +77,11 @@ impl<'a> ApplicationCommandOrAutocompleteInteraction<'a> {
 }
 
 /// Application command specific context passed to command invocations.
+#[derive(derivative::Derivative)]
+#[derivative(Debug(bound = ""))]
 pub struct ApplicationContext<'a, U, E> {
     /// Serenity's context, like HTTP or cache
+    #[derivative(Debug = "ignore")]
     pub discord: &'a serenity::Context,
     /// The interaction which triggered this command execution.
     pub interaction: ApplicationCommandOrAutocompleteInteraction<'a>,
@@ -95,11 +98,13 @@ pub struct ApplicationContext<'a, U, E> {
     /// Read-only reference to the framework
     ///
     /// Useful if you need the list of commands, for example for a custom help command
+    #[derivative(Debug = "ignore")]
     pub framework: crate::FrameworkContext<'a, U, E>,
     /// The command object which is the current command
     pub command: &'a crate::Command<U, E>,
     /// Your custom user data
     // TODO: redundant with framework
+    #[derivative(Debug = "ignore")]
     pub data: &'a U,
     /// Custom user data carried across a single command invocation
     pub invocation_data: &'a tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
@@ -116,33 +121,6 @@ impl<U, E> Copy for ApplicationContext<'_, U, E> {}
 impl<U, E> crate::_GetGenerics for ApplicationContext<'_, U, E> {
     type U = U;
     type E = E;
-}
-
-impl<U: std::fmt::Debug, E: std::fmt::Debug> std::fmt::Debug for ApplicationContext<'_, U, E> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let Self {
-            discord: _,
-            interaction,
-            args,
-            has_sent_initial_response,
-            framework: _,
-            command: _,
-            data,
-            invocation_data: _,
-            __non_exhaustive: _,
-        } = self;
-
-        f.debug_struct("ApplicationContext")
-            .field("discord", &"<serenity Context>")
-            .field("interaction", interaction)
-            .field("args", args)
-            .field("has_sent_initial_response", has_sent_initial_response)
-            .field("framework", &"<poise Framework>")
-            .field("command", &"<poise Command>")
-            .field("data", data)
-            .field("invocation_data", &"<Box<dyn Any>>")
-            .finish()
-    }
 }
 
 impl<U, E> ApplicationContext<'_, U, E> {
@@ -171,9 +149,12 @@ impl<U, E> ApplicationContext<'_, U, E> {
 }
 
 /// Possible actions that a context menu entry can have
+#[derive(derivative::Derivative)]
+#[derivative(Debug(bound = ""))]
 pub enum ContextMenuCommandAction<U, E> {
     /// Context menu entry on a user
     User(
+        #[derivative(Debug = "ignore")]
         fn(
             ApplicationContext<'_, U, E>,
             serenity::User,
@@ -181,6 +162,7 @@ pub enum ContextMenuCommandAction<U, E> {
     ),
     /// Context menu entry on a message
     Message(
+        #[derivative(Debug = "ignore")]
         fn(
             ApplicationContext<'_, U, E>,
             serenity::Message,
@@ -194,17 +176,9 @@ impl<U, E> Clone for ContextMenuCommandAction<U, E> {
     }
 }
 
-impl<U, E> std::fmt::Debug for ContextMenuCommandAction<U, E> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match *self {
-            Self::User(x) => f.debug_tuple("User").field(&(x as *const ())).finish(),
-            Self::Message(x) => f.debug_tuple("Message").field(&(x as *const ())).finish(),
-        }
-    }
-}
-
 /// A single parameter of a [`crate::Command`]
-#[derive(Clone)]
+#[derive(Clone, derivative::Derivative)]
+#[derivative(Debug(bound = ""))]
 pub struct CommandParameter<U, E> {
     /// Name of this command parameter
     pub name: &'static str,
@@ -225,10 +199,12 @@ pub struct CommandParameter<U, E> {
     /// |b| b.kind(serenity::ApplicationCommandOptionType::Integer).min_int_value(0).max_int_value(u32::MAX)
     /// # ;
     /// ```
+    #[derivative(Debug = "ignore")]
     pub type_setter: Option<fn(&mut serenity::CreateApplicationCommandOption)>,
     /// Optionally, a callback that is invoked on autocomplete interactions. This closure should
     /// extract the partial argument from the given JSON value and generate the autocomplete
     /// response which contains the list of autocomplete suggestions.
+    #[derivative(Debug = "ignore")]
     pub autocomplete_callback: Option<
         for<'a> fn(
             crate::ApplicationContext<'a, U, E>,
@@ -257,30 +233,5 @@ impl<U, E> CommandParameter<U, E> {
         }
         (self.type_setter?)(&mut builder);
         Some(builder)
-    }
-}
-
-impl<U, E> std::fmt::Debug for CommandParameter<U, E> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let Self {
-            name,
-            description,
-            required,
-            channel_types,
-            type_setter,
-            autocomplete_callback,
-        } = self;
-
-        f.debug_struct("CommandParameter")
-            .field("name", name)
-            .field("description", description)
-            .field("required", required)
-            .field("channel_types", channel_types)
-            .field("type_setter", &type_setter.map(|f| f as *const ()))
-            .field(
-                "autocomplete_callback",
-                &autocomplete_callback.map(|f| f as *const ()),
-            )
-            .finish()
     }
 }

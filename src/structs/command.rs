@@ -5,16 +5,18 @@ use crate::{serenity_prelude as serenity, BoxFuture};
 /// Type returned from `#[poise::command]` annotated functions, which contains all of the generated
 /// prefix and application commands
 #[derive(derivative::Derivative)]
-#[derivative(Default)]
+#[derivative(Default, Debug(bound = ""))]
 pub struct Command<U, E> {
     // =============
     /// Callback to execute when this command is invoked in a prefix context
+    #[derivative(Debug = "ignore")]
     pub prefix_action: Option<
         for<'a> fn(
             crate::PrefixContext<'a, U, E>,
         ) -> BoxFuture<'a, Result<(), crate::FrameworkError<'a, U, E>>>,
     >,
     /// Callback to execute when this command is invoked in a slash context
+    #[derivative(Debug = "ignore")]
     pub slash_action: Option<
         for<'a> fn(
             crate::ApplicationContext<'a, U, E>,
@@ -83,8 +85,10 @@ pub struct Command<U, E> {
     /// If true, the command may only run in NSFW channels
     pub nsfw_only: bool,
     /// Command-specific override for [`crate::FrameworkOptions::on_error`]
+    #[derivative(Debug = "ignore")]
     pub on_error: Option<fn(crate::FrameworkError<'_, U, E>) -> BoxFuture<'_, ()>>,
     /// If this function returns false, this command will not be executed.
+    #[derivative(Debug = "ignore")]
     pub check: Option<fn(crate::Context<'_, U, E>) -> BoxFuture<'_, Result<bool, E>>>,
     /// List of parameters for this command
     ///
@@ -119,75 +123,6 @@ impl<U, E> PartialEq for Command<U, E> {
     }
 }
 impl<U, E> Eq for Command<U, E> {}
-
-impl<U, E> std::fmt::Debug for Command<U, E> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let Self {
-            prefix_action,
-            slash_action,
-            context_menu_action,
-            subcommands,
-            name,
-            qualified_name,
-            identifying_name,
-            category,
-            hide_in_help,
-            inline_help,
-            multiline_help,
-            cooldowns,
-            default_member_permissions,
-            required_permissions,
-            required_bot_permissions,
-            owners_only,
-            guild_only,
-            dm_only,
-            nsfw_only,
-            on_error,
-            check,
-            parameters,
-            custom_data: _,
-            aliases,
-            invoke_on_edit,
-            reuse_response,
-            broadcast_typing,
-            context_menu_name,
-            ephemeral,
-            __non_exhaustive: _,
-        } = self;
-
-        f.debug_struct("Command")
-            .field("prefix_action", &prefix_action.map(|f| f as *const ()))
-            .field("slash_action", &slash_action.map(|f| f as *const ()))
-            .field("context_menu_action", context_menu_action)
-            .field("subcommands", subcommands)
-            .field("name", name)
-            .field("qualified_name", qualified_name)
-            .field("identifying_name", identifying_name)
-            .field("category", category)
-            .field("hide_in_help", hide_in_help)
-            .field("inline_help", inline_help)
-            .field("multiline_help", multiline_help)
-            .field("cooldowns", cooldowns)
-            .field("default_member_permissions", default_member_permissions)
-            .field("required_permissions", required_permissions)
-            .field("required_bot_permissions", required_bot_permissions)
-            .field("owners_only", owners_only)
-            .field("guild_only", guild_only)
-            .field("dm_only", dm_only)
-            .field("nsfw_only", nsfw_only)
-            .field("on_error", &on_error.map(|f| f as *const ()))
-            .field("check", &check.map(|f| f as *const ()))
-            .field("parameters", parameters)
-            .field("custom_data", &"<Box<dyn Any>>")
-            .field("aliases", aliases)
-            .field("invoke_on_edit", invoke_on_edit)
-            .field("reuse_response", reuse_response)
-            .field("broadcast_typing", broadcast_typing)
-            .field("context_menu_name", context_menu_name)
-            .field("ephemeral", ephemeral)
-            .finish()
-    }
-}
 
 impl<U, E> Command<U, E> {
     /// Serializes this Command into an application command option, which is the form which Discord

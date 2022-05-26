@@ -3,19 +3,25 @@
 use crate::{serenity_prelude as serenity, BoxFuture};
 
 /// Framework configuration
+#[derive(derivative::Derivative)]
+#[derivative(Debug(bound = ""))]
 pub struct FrameworkOptions<U, E> {
     /// List of commands in the framework
     pub commands: Vec<crate::Command<U, E>>,
     /// Provide a callback to be invoked when any user code yields an error.
+    #[derivative(Debug = "ignore")]
     pub on_error: fn(crate::FrameworkError<'_, U, E>) -> BoxFuture<'_, ()>,
     /// Called before every command
+    #[derivative(Debug = "ignore")]
     pub pre_command: fn(crate::Context<'_, U, E>) -> BoxFuture<'_, ()>,
     /// Called after every command if it was successful (returned Ok)
+    #[derivative(Debug = "ignore")]
     pub post_command: fn(crate::Context<'_, U, E>) -> BoxFuture<'_, ()>,
     /// Provide a callback to be invoked before every command. The command will only be executed
     /// if the callback returns true.
     ///
     /// If individual commands add their own check, both callbacks are run and must return true.
+    #[derivative(Debug = "ignore")]
     pub command_check: Option<fn(crate::Context<'_, U, E>) -> BoxFuture<'_, Result<bool, E>>>,
     /// Default set of allowed mentions to use for all responses
     ///
@@ -24,6 +30,7 @@ pub struct FrameworkOptions<U, E> {
     /// Invoked before every message sent using [`crate::Context::say`] or [`crate::Context::send`]
     ///
     /// Allows you to modify every outgoing message in a central place
+    #[derivative(Debug = "ignore")]
     pub reply_callback: Option<fn(crate::Context<'_, U, E>, &mut crate::CreateReply<'_>)>,
     /// If `true`, disables automatic cooldown handling before every command invocation.
     ///
@@ -37,6 +44,7 @@ pub struct FrameworkOptions<U, E> {
     pub require_cache_for_guild_check: bool,
     /// Called on every Discord event. Can be used to react to non-command events, like messages
     /// deletions or guild updates.
+    #[derivative(Debug = "ignore")]
     pub listener: for<'a> fn(
         &'a serenity::Context,
         &'a crate::Event<'a>,
@@ -66,44 +74,6 @@ impl<U, E> FrameworkOptions<U, E> {
     ) {
         meta_builder(&mut command);
         self.commands.push(command);
-    }
-}
-
-impl<U: std::fmt::Debug, E: std::fmt::Debug> std::fmt::Debug for FrameworkOptions<U, E> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let Self {
-            commands: _,
-            on_error,
-            pre_command,
-            post_command,
-            command_check,
-            allowed_mentions,
-            reply_callback,
-            manual_cooldowns,
-            require_cache_for_guild_check,
-            listener,
-            prefix_options,
-            owners,
-            __non_exhaustive,
-        } = self;
-
-        f.debug_struct("FrameworkOptions")
-            .field("commands", &"< Vec<poise Command> >")
-            .field("on_error", &(*on_error as *const ()))
-            .field("pre_command", &(*pre_command as *const ()))
-            .field("post_command", &(*post_command as *const ()))
-            .field("command_check", &command_check.map(|f| f as *const ()))
-            .field("allowed_mentions", allowed_mentions)
-            .field("reply_callback", &reply_callback.map(|f| f as *const ()))
-            .field("manual_cooldowns", manual_cooldowns)
-            .field(
-                "require_cache_for_guild_check",
-                require_cache_for_guild_check,
-            )
-            .field("listener", &(*listener as *const ()))
-            .field("prefix_options", prefix_options)
-            .field("owners", owners)
-            .finish()
     }
 }
 
