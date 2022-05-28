@@ -1,4 +1,6 @@
 use crate::{Context, Error};
+
+use std::fmt::Write as _;
 use futures::{Stream, StreamExt};
 
 // Poise supports autocomplete on slash command parameters. You need to provide an autocomplete
@@ -49,7 +51,7 @@ pub async fn greet(
 ) -> Result<(), Error> {
     let mut response = format!("Hello {}", name);
     if let Some(number) = number {
-        response += &format!("#{}", number);
+        write!(response, "#{}", number).unwrap();
     }
     response += "!";
 
