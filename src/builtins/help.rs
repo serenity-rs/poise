@@ -114,7 +114,8 @@ async fn help_all_commands<U, E>(
                 command.name,
                 " ".repeat(padding),
                 command.inline_help.unwrap_or("")
-            ).unwrap();
+            )
+            .unwrap();
         }
     }
 
