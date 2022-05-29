@@ -1,8 +1,7 @@
 //! Contains the built-in help command and surrounding infrastructure
 
-use std::fmt::Write as _;
-
 use crate::serenity_prelude as serenity;
+use std::fmt::Write as _;
 
 /// Optional configuration for how the help message from [`help()`] looks
 pub struct HelpConfiguration<'a> {

@@ -1,5 +1,4 @@
 use crate::{Context, Error};
-
 use futures::{Stream, StreamExt};
 use std::fmt::Write as _;
 

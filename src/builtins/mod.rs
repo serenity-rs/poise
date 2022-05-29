@@ -9,9 +9,8 @@ pub use help::*;
 mod register;
 pub use register::*;
 
-use std::fmt::Write as _;
-
 use crate::serenity_prelude as serenity;
+use std::fmt::Write as _;
 
 /// An error handler that prints the error into the console and also into the Discord chat.
 /// If the user invoked the command wrong ([`crate::FrameworkError::ArgumentParse`]), the command
