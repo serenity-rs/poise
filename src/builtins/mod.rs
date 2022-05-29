@@ -201,24 +201,22 @@ pub async fn servers<U, E>(ctx: crate::Context<'_, U, E>) -> Result<(), serenity
     let mut response = format!("I am currently in {} servers!\n", guilds.len());
     for guild in guilds {
         if guild.is_public || show_private_guilds {
-            writeln!(
+            let _ = writeln!(
                 response,
                 "- **{}** ({} members)",
                 guild.name, guild.num_members
-            )
-            .unwrap();
+            );
         } else {
             num_private_guilds += 1;
             num_private_guild_members += guild.num_members;
         }
     }
     if num_private_guilds > 0 {
-        writeln!(
+        let _ = writeln!(
             response,
             "- [{} private servers with {} members total]",
             num_private_guilds, num_private_guild_members
-        )
-        .unwrap();
+        );
     }
 
     if show_private_guilds {

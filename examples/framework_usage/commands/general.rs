@@ -47,7 +47,7 @@ pub async fn getvotes(
     } else {
         let mut response = String::new();
         for (choice, num_votes) in ctx.data().votes.lock().unwrap().iter() {
-            writeln!(response, "{}: {} votes", choice, num_votes).unwrap();
+            let _ = writeln!(response, "{}: {} votes", choice, num_votes);
         }
 
         if response.is_empty() {

@@ -106,15 +106,14 @@ async fn help_all_commands<U, E>(
 
             let total_command_name_length = prefix.chars().count() + command.name.chars().count();
             let padding = 12_usize.saturating_sub(total_command_name_length) + 1;
-            writeln!(
+            let _ = writeln!(
                 menu,
                 "  {}{}{}{}",
                 prefix,
                 command.name,
                 " ".repeat(padding),
                 command.inline_help.unwrap_or("")
-            )
-            .unwrap();
+            );
         }
     }
 
@@ -128,7 +127,7 @@ async fn help_all_commands<U, E>(
                 None => continue,
             };
             let name = command.context_menu_name.unwrap_or(command.name);
-            writeln!(menu, "  {} (on {})", name, kind).unwrap();
+            let _ = writeln!(menu, "  {} (on {})", name, kind);
         }
     }
 

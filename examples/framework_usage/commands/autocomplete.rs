@@ -50,7 +50,7 @@ pub async fn greet(
 ) -> Result<(), Error> {
     let mut response = format!("Hello {}", name);
     if let Some(number) = number {
-        write!(response, "#{}", number).unwrap();
+        let _ = write!(response, "#{}", number);
     }
     response += "!";
 
