@@ -1,5 +1,6 @@
 use crate::{Context, Error};
 use poise::serenity_prelude as serenity;
+use std::fmt::Write as _;
 
 /// Vote for something
 ///
@@ -46,7 +47,7 @@ pub async fn getvotes(
     } else {
         let mut response = String::new();
         for (choice, num_votes) in ctx.data().votes.lock().unwrap().iter() {
-            response += &format!("{}: {} votes\n", choice, num_votes);
+            let _ = writeln!(response, "{}: {} votes", choice, num_votes);
         }
 
         if response.is_empty() {
