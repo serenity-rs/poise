@@ -76,9 +76,10 @@ async fn missing_permissions<U, E>(
 /// Doesn't actually start the cooldown timer! This should be done by the caller later, after
 /// argument parsing.
 /// (A command that didn't even get past argument parsing shouldn't trigger cooldowns)
+#[allow(clippy::needless_lifetimes)] // false positive (clippy issue 7271)
 pub async fn check_permissions_and_cooldown<'a, U, E>(
     ctx: crate::Context<'a, U, E>,
-    cmd: &'a crate::Command<U, E>,
+    cmd: &crate::Command<U, E>,
 ) -> Result<(), crate::FrameworkError<'a, U, E>> {
     if cmd.owners_only && !ctx.framework().options().owners.contains(&ctx.author().id) {
         return Err(crate::FrameworkError::NotAnOwner { ctx });
