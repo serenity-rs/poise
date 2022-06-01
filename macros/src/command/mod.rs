@@ -172,18 +172,19 @@ pub fn command(
 
     fn permissions_to_tokens(
         perms: &Option<syn::punctuated::Punctuated<syn::Ident, syn::Token![|]>>,
+        empty_perms: bool
     ) -> syn::Expr {
-        match perms {
-            Some(perms) => {
-                let perms = perms.iter();
-                syn::parse_quote! { #(poise::serenity_prelude::Permissions::#perms)|* }
-            }
-            None => syn::parse_quote! { poise::serenity_prelude::Permissions::empty() },
+        match perms.as_ref().map(syn::punctuated::Punctuated::iter) {
+            Some(perms) if empty_perms => syn::parse_quote! { #(poise::serenity_prelude::Permissions::#perms)|* },
+            Some(perms) =>  syn::parse_quote! { Some(#(poise::serenity_prelude::Permissions::#perms)|*) },
+            None if empty_perms => syn::parse_quote! { poise::serenity_prelude::Permissions::empty() },
+            None => syn::parse_quote! { None },
         }
     }
-    let default_member_permissions = permissions_to_tokens(&args.default_member_permissions);
-    let required_permissions = permissions_to_tokens(&args.required_permissions);
-    let required_bot_permissions = permissions_to_tokens(&args.required_bot_permissions);
+
+    let default_member_permissions = permissions_to_tokens(&args.default_member_permissions, false);
+    let required_bot_permissions = permissions_to_tokens(&args.required_bot_permissions, true);
+    let required_permissions = permissions_to_tokens(&args.required_permissions, true);
 
     let inv = Invocation {
         command_name: args
