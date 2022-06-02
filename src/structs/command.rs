@@ -164,8 +164,13 @@ impl<U, E> Command<U, E> {
         let mut builder = serenity::CreateApplicationCommand::default();
         builder
             .name(self.name)
-            .description(self.inline_help.unwrap_or("A slash command"))
-            .default_member_permissions(self.default_member_permissions);
+            .description(self.inline_help.unwrap_or("A slash command"));
+
+        // This is_empty check is needed because Discord special cases empty
+        // default_member_permissions to mean "admin-only" (yes it's stupid)
+        if !self.default_member_permissions.is_empty() {
+            builder.default_member_permissions(self.default_member_permissions);
+        }
 
         if self.subcommands.is_empty() {
             for param in &self.parameters {
