@@ -1,5 +1,7 @@
 //! Just contains Context and PartialContext structs
 
+use std::borrow::Cow;
+
 use crate::serenity_prelude as serenity;
 
 /// Wrapper around either [`crate::ApplicationContext`] or [`crate::PrefixContext`]
@@ -158,15 +160,23 @@ impl<'a, U, E> Context<'a, U, E> {
     // Doesn't fit in with the rest of the functions here but it's convenient
     /// Returns the author of the invoking message or interaction, as a [`serenity::Member`]
     ///
+    /// Returns a reference to the inner member object if in an [`ApplicationContext`], otherwise
+    /// clones the member out of the cache, or fetches from the discord API.
+    ///
     /// Returns None if this command was invoked in DMs, or if the member cache lookup or HTTP
     /// request failed
     ///
-    /// Warning: clones the entire Member instance out of the cache
-    pub async fn author_member(&self) -> Option<serenity::Member> {
-        self.guild_id()?
-            .member(self.discord(), self.author().id)
-            .await
-            .ok()
+    /// Warning: can clone the entire Member instance out of the cache
+    pub async fn author_member(&'a self) -> Option<Cow<'a, serenity::Member>> {
+        if let Self::Application(ctx) = self {
+            ctx.interaction.member().map(Cow::Borrowed)
+        } else {
+            self.guild_id()?
+                .member(self.discord(), self.author().id)
+                .await
+                .ok()
+                .map(Cow::Owned)
+        }
     }
 
     /// Return the datetime of the invoking message or interaction
