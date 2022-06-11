@@ -1,3 +1,8 @@
+# 0.2.2
+
+Behavior changes:
+- `default_member_permissions` fixed to not constrain commands to administrators by default
+
 # 0.2.1
 
 Behavior changes:
