@@ -249,7 +249,7 @@ impl<U, E> CommandParameter<U, E> {
         builder
             .required(self.required)
             .name(self.name)
-            .description(self.description?)
+            .description(self.description.unwrap_or("A slash command parameter"))
             .set_autocomplete(self.autocomplete_callback.is_some());
         for (locale, name) in &self.name_localizations {
             builder.name_localized(locale, name);

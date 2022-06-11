@@ -5,12 +5,8 @@ use syn::spanned::Spanned as _;
 pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStream>, syn::Error> {
     let mut parameter_structs = Vec::new();
     for param in &inv.parameters {
-        if inv.args.slash_command && param.args.description.is_none() {
-            return Err(syn::Error::new(
-                param.span,
-                "slash command parameters must have a description",
-            ));
-        }
+        // no #[description] check here even if slash_command set, so users can programatically
+        // supply descriptions later (e.g. via translation framework like fluent)
         let description = wrap_option(param.args.description.as_ref());
 
         let (mut required, type_) = match extract_type_parameter("Option", &param.type_)
