@@ -74,6 +74,14 @@ impl<'a> ApplicationCommandOrAutocompleteInteraction<'a> {
             }
         }
     }
+
+    /// Returns the locale field of the underlying interaction
+    pub fn locale(self) -> &'a str {
+        match self {
+            ApplicationCommandOrAutocompleteInteraction::ApplicationCommand(x) => &x.locale,
+            ApplicationCommandOrAutocompleteInteraction::Autocomplete(x) => &x.locale,
+        }
+    }
 }
 
 /// Application command specific context passed to command invocations.
@@ -176,20 +184,35 @@ impl<U, E> Clone for ContextMenuCommandAction<U, E> {
     }
 }
 
+/// A single drop-down choice in a slash command choice parameter
+#[derive(Debug, Clone)]
+pub struct CommandParameterChoice {
+    /// Label of this choice
+    pub name: &'static str,
+    /// Localized labels with locale string as the key (slash-only)
+    pub localizations: std::collections::HashMap<String, String>,
+}
+
 /// A single parameter of a [`crate::Command`]
 #[derive(Clone, derivative::Derivative)]
 #[derivative(Debug(bound = ""))]
 pub struct CommandParameter<U, E> {
     /// Name of this command parameter
     pub name: &'static str,
+    /// Localized names with locale string as the key (slash-only)
+    pub name_localizations: std::collections::HashMap<String, String>,
     /// Description of the command. Required for slash commands
     pub description: Option<&'static str>,
+    /// Localized descriptions with locale string as the key (slash-only)
+    pub description_localizations: std::collections::HashMap<String, String>,
     /// `true` is this parameter is required, `false` if it's optional or variadic
     pub required: bool,
     /// If this parameter is a channel, users can only enter these channel types in a slash command
     ///
     /// Prefix commands are currently unaffected by this
     pub channel_types: Option<Vec<serenity::ChannelType>>,
+    /// If this parameter is a choice parameter, this is the fixed list of options
+    pub choices: Vec<CommandParameterChoice>,
     /// Closure that sets this parameter's type and min/max value in the given builder
     ///
     /// For example a u32 [`CommandParameter`] would store this as the [`Self::type_setter`]:
@@ -228,8 +251,21 @@ impl<U, E> CommandParameter<U, E> {
             .name(self.name)
             .description(self.description?)
             .set_autocomplete(self.autocomplete_callback.is_some());
+        for (locale, name) in &self.name_localizations {
+            builder.name_localized(locale, name);
+        }
+        for (locale, description) in &self.description_localizations {
+            builder.description_localized(locale, description);
+        }
         if let Some(channel_types) = &self.channel_types {
             builder.channel_types(channel_types);
+        }
+        for (i, choice) in self.choices.iter().enumerate() {
+            builder.add_int_choice_localized(
+                choice.name,
+                i as _,
+                choice.localizations.iter().map(|(a, b)| (a, &**b)),
+            );
         }
         (self.type_setter?)(&mut builder);
         Some(builder)

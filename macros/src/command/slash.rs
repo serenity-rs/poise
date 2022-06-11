@@ -29,6 +29,10 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
             Some(rename) => rename.clone(),
             None => param.name.to_string(),
         };
+        let name_locales = param.args.name_localized.iter().map(|x| &x.0);
+        let name_localized_values = param.args.name_localized.iter().map(|x| &x.1);
+        let description_locales = param.args.description_localized.iter().map(|x| &x.0);
+        let description_localized_values = param.args.description_localized.iter().map(|x| &x.1);
 
         let autocomplete_callback = match &param.args.autocomplete {
             Some(autocomplete_fn) => {
@@ -62,6 +66,7 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
         };
 
         // We can just cast to f64 here because Discord only uses f64 precision anyways
+        // TODO: move this to poise::CommandParameter::{min, max} fields
         let min_value_setter = match &param.args.min {
             Some(x) => quote::quote! { o.min_number_value(#x as f64); },
             None => quote::quote! {},
@@ -77,6 +82,11 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
             }) },
             false => quote::quote! { None },
         };
+        // TODO: theoretically a problem that we don't store choices for non slash commands
+        let choices = match inv.args.slash_command {
+            true => quote::quote! { poise::slash_argument_choices!(#type_) },
+            false => quote::quote! { vec![] },
+        };
 
         let channel_types = match &param.args.channel_types {
             Some(crate::util::List(channel_types)) => quote::quote! { Some(
@@ -89,10 +99,17 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
             quote::quote! {
                 ::poise::CommandParameter {
                     name: #param_name,
+                    name_localizations: vec![
+                        #( (#name_locales.to_string(), #name_localized_values.to_string()) )*
+                    ].into_iter().collect(),
                     description: #description,
+                    description_localizations: vec![
+                        #( (#description_locales.to_string(), #description_localized_values.to_string()) )*
+                    ].into_iter().collect(),
                     required: #required,
                     channel_types: #channel_types,
                     type_setter: #type_setter,
+                    choices: #choices,
                     autocomplete_callback: #autocomplete_callback,
                 }
             },

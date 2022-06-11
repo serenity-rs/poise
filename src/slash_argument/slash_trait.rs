@@ -28,6 +28,11 @@ pub trait SlashArgument: Sized {
     ///
     /// Don't call this method directly! Use [`crate::create_slash_argument!`]
     fn create(builder: &mut serenity::CreateApplicationCommandOption);
+
+    /// If this is a choice parameter, returns the choices
+    ///
+    /// Don't call this method directly! Use [`crate::slash_argument_choices!`]
+    fn choices() -> Vec<crate::CommandParameterChoice>;
 }
 
 /// Implemented for all types that can be used as a function parameter in a slash command.
@@ -36,7 +41,7 @@ pub trait SlashArgument: Sized {
 /// `PhantomData` hack and the auto-deref specialization hack.
 #[doc(hidden)]
 #[async_trait::async_trait]
-pub trait SlashArgumentHack<T> {
+pub trait SlashArgumentHack<T>: Sized {
     async fn extract(
         self,
         ctx: &serenity::Context,
@@ -45,6 +50,10 @@ pub trait SlashArgumentHack<T> {
     ) -> Result<T, SlashArgError>;
 
     fn create(self, builder: &mut serenity::CreateApplicationCommandOption);
+
+    fn choices(self) -> Vec<crate::CommandParameterChoice> {
+        Vec::new()
+    }
 }
 
 /// Full version of [`crate::SlashArgument::extract`].
@@ -65,6 +74,16 @@ macro_rules! create_slash_argument {
     ($target:ty, $builder:expr) => {{
         use $crate::SlashArgumentHack as _;
         (&&std::marker::PhantomData::<$target>).create($builder)
+    }};
+}
+/// Full version of [`crate::SlashArgument::choices`].
+///
+/// Uses specialization to get full coverage of types. Pass the type as the first argument
+#[macro_export]
+macro_rules! slash_argument_choices {
+    ($target:ty) => {{
+        use $crate::SlashArgumentHack as _;
+        (&&std::marker::PhantomData::<$target>).choices()
     }};
 }
 
@@ -222,6 +241,10 @@ impl<T: SlashArgument + Sync> SlashArgumentHack<T> for &PhantomData<T> {
 
     fn create(self, builder: &mut serenity::CreateApplicationCommandOption) {
         <T as SlashArgument>::create(builder);
+    }
+
+    fn choices(self) -> Vec<crate::CommandParameterChoice> {
+        <T as SlashArgument>::choices()
     }
 }
 

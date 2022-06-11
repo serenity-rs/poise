@@ -14,6 +14,8 @@ pub struct CommandArgs {
     context_menu_command: Option<String>,
 
     // When changing these, document it in parent file!
+    // TODO: decide why darling(multiple) feels wrong here but not in e.g. localizations (because
+    //  if it's actually irrational, the inconsistency should be fixed)
     subcommands: crate::util::List<syn::Path>,
     aliases: crate::util::List<String>,
     invoke_on_edit: bool,
@@ -24,6 +26,10 @@ pub struct CommandArgs {
     check: Option<syn::Path>,
     on_error: Option<syn::Path>,
     rename: Option<String>,
+    #[darling(multiple)]
+    name_localized: Vec<crate::util::Tuple2<String>>,
+    #[darling(multiple)]
+    description_localized: Vec<crate::util::Tuple2<String>>,
     discard_spare_arguments: bool,
     hide_in_help: bool,
     ephemeral: bool,
@@ -53,6 +59,10 @@ struct ParamArgs {
     // When changing these, document it in parent file!
     description: Option<String>,
     rename: Option<String>,
+    #[darling(multiple)]
+    name_localized: Vec<crate::util::Tuple2<String>>,
+    #[darling(multiple)]
+    description_localized: Vec<crate::util::Tuple2<String>>,
     autocomplete: Option<syn::Path>,
     channel_types: Option<crate::util::List<syn::Ident>>,
     min: Option<syn::Lit>,
@@ -286,6 +296,10 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
         None => quote::quote! { Box::new(()) },
     };
 
+    let name_localizations = crate::util::vec_tuple_2_to_hash_map(inv.args.name_localized);
+    let description_localizations =
+        crate::util::vec_tuple_2_to_hash_map(inv.args.description_localized);
+
     let function_name = std::mem::replace(&mut inv.function.sig.ident, syn::parse_quote! { inner });
     let function_visibility = &inv.function.vis;
     let function = &inv.function;
@@ -303,10 +317,12 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
 
                 subcommands: vec![ #( #subcommands() ),* ],
                 name: #command_name,
+                name_localizations: #name_localizations,
                 qualified_name: String::from(#command_name), // properly filled in later by Framework
                 identifying_name: String::from(#identifying_name),
                 category: #category,
                 inline_help: #description,
+                description_localizations: #description_localizations,
                 multiline_help: #explanation,
                 hide_in_help: #hide_in_help,
                 cooldowns: std::sync::Mutex::new(::poise::Cooldowns::new(::poise::CooldownConfig {

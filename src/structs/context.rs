@@ -160,7 +160,7 @@ impl<'a, U, E> Context<'a, U, E> {
     // Doesn't fit in with the rest of the functions here but it's convenient
     /// Returns the author of the invoking message or interaction, as a [`serenity::Member`]
     ///
-    /// Returns a reference to the inner member object if in an [`ApplicationContext`], otherwise
+    /// Returns a reference to the inner member object if in an [`crate::ApplicationContext`], otherwise
     /// clones the member out of the cache, or fetches from the discord API.
     ///
     /// Returns None if this command was invoked in DMs, or if the member cache lookup or HTTP
@@ -367,6 +367,14 @@ impl<'a, U, E> Context<'a, U, E> {
             any.downcast_mut()
         })
         .ok()
+    }
+
+    /// If available, returns the locale (selected language) of the invoking user
+    pub fn locale(&self) -> Option<&str> {
+        match self {
+            Context::Application(ctx) => Some(ctx.interaction.locale()),
+            Context::Prefix(_) => None,
+        }
     }
 }
 

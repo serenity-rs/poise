@@ -7,8 +7,11 @@ use syn::spanned::Spanned as _;
 #[derive(Debug, darling::FromMeta)]
 #[darling(allow_unknown_fields)]
 struct VariantAttribute {
+    // Note to self: when adding an attribute here, add it to #[proc_macro_derive]!
     #[darling(multiple)]
     name: Vec<String>,
+    #[darling(multiple)]
+    name_localized: Vec<crate::util::Tuple2<String>>,
 }
 
 pub fn choice_parameter(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
@@ -24,8 +27,10 @@ pub fn choice_parameter(input: syn::DeriveInput) -> Result<TokenStream, darling:
     };
 
     let mut variant_idents: Vec<proc_macro2::Ident> = Vec::new();
-    let mut display_strings: Vec<String> = Vec::new();
-    let mut more_display_strings = Vec::new();
+    let mut names: Vec<String> = Vec::new();
+    let mut alternative_names = Vec::new();
+    let mut locales: Vec<Vec<String>> = Vec::new();
+    let mut localized_names: Vec<Vec<String>> = Vec::new();
 
     for variant in enum_.variants {
         if !matches!(&variant.fields, syn::Fields::Unit) {
@@ -41,22 +46,25 @@ pub fn choice_parameter(input: syn::DeriveInput) -> Result<TokenStream, darling:
             .into_iter()
             .map(|attr| attr.parse_meta().map(syn::NestedMeta::Meta))
             .collect::<Result<Vec<_>, _>>()?;
-        let mut names = <VariantAttribute as darling::FromMeta>::from_list(&attrs)?.name;
+        let mut attrs = <VariantAttribute as darling::FromMeta>::from_list(&attrs)?;
 
-        let main_name = if names.is_empty() {
+        let main_name = if attrs.name.is_empty() {
             variant.ident.to_string()
         } else {
-            names.remove(0)
+            attrs.name.remove(0)
         };
 
         variant_idents.push(variant.ident);
-        display_strings.push(main_name);
-        more_display_strings.push(names);
+        names.push(main_name);
+        alternative_names.push(attrs.name);
+
+        let (a, b) = attrs.name_localized.into_iter().map(|x| (x.0, x.1)).unzip();
+        locales.push(a);
+        localized_names.push(b);
     }
 
     let enum_ident = &input.ident;
-    let indices1 = 0_u64..(variant_idents.len() as _);
-    let indices2 = 0_i32..(variant_idents.len() as _);
+    let indices = 0_u64..(variant_idents.len() as _);
     Ok(quote::quote! {
         #[poise::async_trait]
         impl poise::SlashArgument for #enum_ident {
@@ -73,15 +81,22 @@ pub fn choice_parameter(input: syn::DeriveInput) -> Result<TokenStream, darling:
                     ))?;
 
                 match choice_key {
-                    #( #indices1 => Ok(Self::#variant_idents), )*
+                    #( #indices => Ok(Self::#variant_idents), )*
                     _ => Err(poise::SlashArgError::CommandStructureMismatch("out of bounds choice key")),
                 }
             }
 
             fn create(builder: &mut poise::serenity_prelude::CreateApplicationCommandOption) {
-                builder
-                    .kind(poise::serenity_prelude::ApplicationCommandOptionType::Integer)
-                    #( .add_int_choice(#display_strings, #indices2 as i32) )* ;
+                builder.kind(poise::serenity_prelude::ApplicationCommandOptionType::Integer); 
+            }
+
+            fn choices() -> Vec<poise::CommandParameterChoice> {
+                vec![ #( poise::CommandParameterChoice {
+                    name: #names,
+                    localizations: std::collections::HashMap::from([
+                        #( (#locales.to_string(), #localized_names.to_string()) )*
+                    ]),
+                }, )* ]
             }
         }
 
@@ -90,13 +105,38 @@ pub fn choice_parameter(input: syn::DeriveInput) -> Result<TokenStream, darling:
 
             fn from_str(s: &str) -> ::std::result::Result<Self, Self::Err> {
                 #(
-                    if s.eq_ignore_ascii_case(#display_strings)
-                        #( || s.eq_ignore_ascii_case(#more_display_strings) )*
+                    if s.eq_ignore_ascii_case(#names)
+                        #( || s.eq_ignore_ascii_case(#alternative_names) )*
                     {
                         Ok(Self::#variant_idents)
                     } else
                 )* {
                     Err(poise::InvalidChoice)
+                }
+            }
+        }
+
+        impl std::fmt::Display for #enum_ident {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                f.write_str(self.name())
+            }
+        }
+
+        impl #enum_ident {
+            /// Returns the non-localized name of this choice
+            pub fn name(&self) -> &'static str {
+                match self {
+                    #( Self::#variant_idents => #names, )*
+                }
+            }
+
+            /// Returns the localized name for the given locale, if one is set
+            pub fn localized_name(&self, locale: &str) -> Option<&'static str> {
+                match self {
+                    #( Self::#variant_idents => match locale {
+                        #( #locales => Some(#localized_names), )*
+                        _ => None,
+                    }, )*
                 }
             }
         }

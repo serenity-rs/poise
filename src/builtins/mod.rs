@@ -10,7 +10,6 @@ mod register;
 pub use register::*;
 
 use crate::serenity_prelude as serenity;
-use std::fmt::Write as _;
 
 /// An error handler that prints the error into the console and also into the Discord chat.
 /// If the user invoked the command wrong ([`crate::FrameworkError::ArgumentParse`]), the command
@@ -164,6 +163,8 @@ pub async fn autocomplete_command<U, E>(
 /// > - [3 private servers with 456 members total]
 #[cfg(feature = "cache")]
 pub async fn servers<U, E>(ctx: crate::Context<'_, U, E>) -> Result<(), serenity::Error> {
+    use std::fmt::Write as _;
+
     let mut show_private_guilds = false;
     if let crate::Context::Application(_) = ctx {
         if let Ok(app) = ctx.discord().http.get_current_application_info().await {

@@ -32,6 +32,8 @@ pub struct Command<U, E> {
     pub subcommands: Vec<Command<U, E>>,
     /// Main name of the command. Aliases (prefix-only) can be set in [`Self::aliases`].
     pub name: &'static str,
+    /// Localized names with locale string as the key (slash-only)
+    pub name_localizations: std::collections::HashMap<String, String>,
     /// Full name including parent command names.
     ///
     /// Initially set to just [`Self::name`] and properly populated when the framework is started.
@@ -46,7 +48,10 @@ pub struct Command<U, E> {
     /// Whether to hide this command in help menus.
     pub hide_in_help: bool,
     /// Short description of the command. Displayed inline in help menus and similar.
+    // TODO: rename to description
     pub inline_help: Option<&'static str>,
+    /// Localized descriptions with locale string as the key (slash-only)
+    pub description_localizations: std::collections::HashMap<String, String>,
     /// Multiline description with detailed usage instructions. Displayed in the command specific
     /// help: `~help command_name`
     // TODO: fix the inconsistency that this is String and everywhere else it's &'static str
@@ -134,6 +139,12 @@ impl<U, E> Command<U, E> {
         builder
             .name(self.name)
             .description(self.inline_help.unwrap_or("A slash command"));
+        for (locale, name) in &self.name_localizations {
+            builder.name_localized(locale, name);
+        }
+        for (locale, description) in &self.description_localizations {
+            builder.description_localized(locale, description);
+        }
 
         if self.subcommands.is_empty() {
             builder.kind(serenity::ApplicationCommandOptionType::SubCommand);
@@ -165,6 +176,12 @@ impl<U, E> Command<U, E> {
         builder
             .name(self.name)
             .description(self.inline_help.unwrap_or("A slash command"));
+        for (locale, name) in &self.name_localizations {
+            builder.name_localized(locale, name);
+        }
+        for (locale, description) in &self.description_localizations {
+            builder.description_localized(locale, description);
+        }
 
         // This is_empty check is needed because Discord special cases empty
         // default_member_permissions to mean "admin-only" (yes it's stupid)
@@ -196,6 +213,7 @@ impl<U, E> Command<U, E> {
 
         let mut builder = serenity::CreateApplicationCommand::default();
         builder
+            // TODO: localization?
             .name(self.context_menu_name.unwrap_or(self.name))
             .kind(match context_menu_action {
                 crate::ContextMenuCommandAction::User(_) => serenity::ApplicationCommandType::User,
@@ -208,13 +226,14 @@ impl<U, E> Command<U, E> {
     }
 
     /// **Deprecated**
-    #[deprecated = "Please use `crate::Command { category: \"...\", ..command() }` instead"]
+    #[deprecated = "Please use `poise::Command { category: \"...\", ..command() }` instead"]
     pub fn category(&mut self, category: &'static str) -> &mut Self {
         self.category = Some(category);
         self
     }
 
     /// Insert a subcommand
+    #[deprecated = "Please use `poise::Command { subcommands: vec![...], ..command() }` instead"]
     pub fn subcommand(
         &mut self,
         mut subcommand: crate::Command<U, E>,
