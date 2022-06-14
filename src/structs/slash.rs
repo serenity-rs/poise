@@ -188,7 +188,7 @@ impl<U, E> Clone for ContextMenuCommandAction<U, E> {
 #[derive(Debug, Clone)]
 pub struct CommandParameterChoice {
     /// Label of this choice
-    pub name: &'static str,
+    pub name: String,
     /// Localized labels with locale string as the key (slash-only)
     pub localizations: std::collections::HashMap<String, String>,
 }
@@ -198,11 +198,11 @@ pub struct CommandParameterChoice {
 #[derivative(Debug(bound = ""))]
 pub struct CommandParameter<U, E> {
     /// Name of this command parameter
-    pub name: &'static str,
+    pub name: String,
     /// Localized names with locale string as the key (slash-only)
     pub name_localizations: std::collections::HashMap<String, String>,
     /// Description of the command. Required for slash commands
-    pub description: Option<&'static str>,
+    pub description: Option<String>,
     /// Localized descriptions with locale string as the key (slash-only)
     pub description_localizations: std::collections::HashMap<String, String>,
     /// `true` is this parameter is required, `false` if it's optional or variadic
@@ -248,8 +248,12 @@ impl<U, E> CommandParameter<U, E> {
         let mut builder = serenity::CreateApplicationCommandOption::default();
         builder
             .required(self.required)
-            .name(self.name)
-            .description(self.description.unwrap_or("A slash command parameter"))
+            .name(&self.name)
+            .description(
+                self.description
+                    .as_deref()
+                    .unwrap_or("A slash command parameter"),
+            )
             .set_autocomplete(self.autocomplete_callback.is_some());
         for (locale, name) in &self.name_localizations {
             builder.name_localized(locale, name);
@@ -261,11 +265,7 @@ impl<U, E> CommandParameter<U, E> {
             builder.channel_types(channel_types);
         }
         for (i, choice) in self.choices.iter().enumerate() {
-            builder.add_int_choice_localized(
-                choice.name,
-                i as _,
-                choice.localizations.iter().map(|(a, b)| (a, &**b)),
-            );
+            builder.add_int_choice_localized(&choice.name, i as _, choice.localizations.iter());
         }
         (self.type_setter?)(&mut builder);
         Some(builder)

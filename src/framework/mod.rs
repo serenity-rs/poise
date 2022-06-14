@@ -233,7 +233,7 @@ pub fn set_qualified_names<U, E>(commands: &mut [crate::Command<U, E>]) {
         }
     }
     for command in commands {
-        set_subcommand_qualified_names(command.name, &mut command.subcommands);
+        set_subcommand_qualified_names(&command.name, &mut command.subcommands);
     }
 }
 

@@ -117,10 +117,10 @@ fn extract_help_from_doc_comments(attrs: &[syn::Attribute]) -> (Option<String>, 
     }
 
     let mut paragraphs = doc_lines.splitn(2, "\n\n");
-    let inline_help = paragraphs.next().unwrap().replace("\n", " ");
+    let description = paragraphs.next().unwrap().replace("\n", " ");
     let multiline_help = paragraphs.next().map(|x| x.to_owned());
 
-    (Some(inline_help), multiline_help)
+    (Some(description), multiline_help)
 }
 
 pub fn command(
@@ -247,7 +247,10 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
     let command_name = &inv.command_name;
     let context_menu_name = wrap_option(inv.args.context_menu_command.as_ref());
 
-    let description = wrap_option(inv.description.as_ref());
+    let description = match &inv.description {
+        Some(x) => quote::quote! { Some(#x.to_string()) },
+        None => quote::quote! { None },
+    };
     let hide_in_help = &inv.args.hide_in_help;
     let category = wrap_option(inv.args.category.as_ref());
 
@@ -316,12 +319,12 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
                 context_menu_action: #context_menu_action,
 
                 subcommands: vec![ #( #subcommands() ),* ],
-                name: #command_name,
+                name: #command_name.to_string(),
                 name_localizations: #name_localizations,
                 qualified_name: String::from(#command_name), // properly filled in later by Framework
                 identifying_name: String::from(#identifying_name),
                 category: #category,
-                inline_help: #description,
+                description: #description,
                 description_localizations: #description_localizations,
                 multiline_help: #explanation,
                 hide_in_help: #hide_in_help,

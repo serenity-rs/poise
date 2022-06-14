@@ -1,5 +1,5 @@
 use super::Invocation;
-use crate::util::{extract_type_parameter, wrap_option};
+use crate::util::extract_type_parameter;
 use syn::spanned::Spanned as _;
 
 pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStream>, syn::Error> {
@@ -7,7 +7,10 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
     for param in &inv.parameters {
         // no #[description] check here even if slash_command set, so users can programatically
         // supply descriptions later (e.g. via translation framework like fluent)
-        let description = wrap_option(param.args.description.as_ref());
+        let description = match &param.args.description {
+            Some(x) => quote::quote! { Some(#x.to_string()) },
+            None => quote::quote! { None },
+        };
 
         let (mut required, type_) = match extract_type_parameter("Option", &param.type_)
             .or_else(|| extract_type_parameter("Vec", &param.type_))
@@ -94,7 +97,7 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
         parameter_structs.push((
             quote::quote! {
                 ::poise::CommandParameter {
-                    name: #param_name,
+                    name: #param_name.to_string(),
                     name_localizations: vec![
                         #( (#name_locales.to_string(), #name_localized_values.to_string()) )*
                     ].into_iter().collect(),

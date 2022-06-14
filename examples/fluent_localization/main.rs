@@ -4,13 +4,9 @@ use poise::serenity_prelude as serenity;
 use translation::get;
 
 pub struct Data {
-    translations: std::collections::HashMap<String, FluentBundle>,
+    translations: translation::Translations,
 }
 
-type FluentBundle = fluent::bundle::FluentBundle<
-    fluent::FluentResource,
-    intl_memoizer::concurrent::IntlLangMemoizer,
->;
 type Error = Box<dyn std::error::Error + Send + Sync>;
 type Context<'a> = poise::Context<'a, Data, Error>;
 

@@ -64,10 +64,10 @@ pub async fn send_application_reply<'att, U, E>(
 }
 
 /// private version of [`send_application_reply`] that isn't generic over the builder to minimize monomorphization-related codegen bloat
-async fn _send_application_reply<'a, 'b, U, E>(
-    ctx: crate::ApplicationContext<'b, U, E>,
-    mut data: crate::CreateReply<'a>,
-) -> Result<crate::ReplyHandle<'b>, serenity::Error> {
+async fn _send_application_reply<'a, U, E>(
+    ctx: crate::ApplicationContext<'a, U, E>,
+    mut data: crate::CreateReply<'_>,
+) -> Result<crate::ReplyHandle<'a>, serenity::Error> {
     let interaction = match ctx.interaction {
         crate::ApplicationCommandOrAutocompleteInteraction::ApplicationCommand(x) => x,
         crate::ApplicationCommandOrAutocompleteInteraction::Autocomplete(_) => {

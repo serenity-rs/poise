@@ -31,7 +31,7 @@ pub struct Command<U, E> {
     /// Subcommands of this command, if any
     pub subcommands: Vec<Command<U, E>>,
     /// Main name of the command. Aliases (prefix-only) can be set in [`Self::aliases`].
-    pub name: &'static str,
+    pub name: String,
     /// Localized names with locale string as the key (slash-only)
     pub name_localizations: std::collections::HashMap<String, String>,
     /// Full name including parent command names.
@@ -49,7 +49,7 @@ pub struct Command<U, E> {
     pub hide_in_help: bool,
     /// Short description of the command. Displayed inline in help menus and similar.
     // TODO: rename to description
-    pub inline_help: Option<&'static str>,
+    pub description: Option<String>,
     /// Localized descriptions with locale string as the key (slash-only)
     pub description_localizations: std::collections::HashMap<String, String>,
     /// Multiline description with detailed usage instructions. Displayed in the command specific
@@ -137,8 +137,8 @@ impl<U, E> Command<U, E> {
 
         let mut builder = serenity::CreateApplicationCommandOption::default();
         builder
-            .name(self.name)
-            .description(self.inline_help.unwrap_or("A slash command"));
+            .name(&self.name)
+            .description(self.description.as_deref().unwrap_or("A slash command"));
         for (locale, name) in &self.name_localizations {
             builder.name_localized(locale, name);
         }
@@ -174,8 +174,8 @@ impl<U, E> Command<U, E> {
 
         let mut builder = serenity::CreateApplicationCommand::default();
         builder
-            .name(self.name)
-            .description(self.inline_help.unwrap_or("A slash command"));
+            .name(&self.name)
+            .description(self.description.as_deref().unwrap_or("A slash command"));
         for (locale, name) in &self.name_localizations {
             builder.name_localized(locale, name);
         }
@@ -214,7 +214,7 @@ impl<U, E> Command<U, E> {
         let mut builder = serenity::CreateApplicationCommand::default();
         builder
             // TODO: localization?
-            .name(self.context_menu_name.unwrap_or(self.name))
+            .name(self.context_menu_name.unwrap_or(&self.name))
             .kind(match context_menu_action {
                 crate::ContextMenuCommandAction::User(_) => serenity::ApplicationCommandType::User,
                 crate::ContextMenuCommandAction::Message(_) => {
