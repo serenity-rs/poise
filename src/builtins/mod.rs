@@ -41,8 +41,8 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
         crate::FrameworkError::ArgumentParse { ctx, input, error } => {
             // If we caught an argument parse error, give a helpful error message with the
             // command explanation if available
-            let usage = match ctx.command().multiline_help {
-                Some(multiline_help) => multiline_help(),
+            let usage = match ctx.command().help_text {
+                Some(help_text) => help_text(),
                 None => "Please check the help menu for usage information".into(),
             };
             let response = if let Some(input) = input {

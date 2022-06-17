@@ -88,7 +88,7 @@ type Context<'a> = poise::Context<'a, Data, Error>;
     hide_in_help,
     required_permissions = "SEND_MESSAGES",
     aliases("bigounce", "abomination"),
-    explanation_fn = "my_huge_ass_command_help",
+    help_text_fn = "my_huge_ass_command_help",
     check = "check",
     on_error = "error_handler",
 )]

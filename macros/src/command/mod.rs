@@ -22,7 +22,7 @@ pub struct CommandArgs {
     reuse_response: bool,
     track_edits: bool,
     broadcast_typing: bool,
-    explanation_fn: Option<syn::Path>,
+    help_text_fn: Option<syn::Path>,
     check: Option<syn::Path>,
     on_error: Option<syn::Path>,
     rename: Option<String>,
@@ -85,7 +85,7 @@ pub struct Invocation {
     command_name: String,
     parameters: Vec<CommandParameter>,
     description: Option<String>,
-    explanation: Option<String>,
+    help_text: Option<String>,
     function: syn::ItemFn,
     default_member_permissions: syn::Expr,
     required_permissions: syn::Expr,
@@ -99,28 +99,24 @@ fn extract_help_from_doc_comments(attrs: &[syn::Attribute]) -> (Option<String>, 
         if attr.path == quote::format_ident!("doc").into() {
             for token in attr.tokens.clone() {
                 if let Ok(literal) = syn::parse2::<syn::LitStr>(token.into()) {
-                    let literal = literal.value();
-                    let literal = literal.strip_prefix(' ').unwrap_or(&literal);
-
-                    doc_lines += literal;
+                    doc_lines += literal.value().trim(); // Trim lines like rustdoc does
                     doc_lines += "\n";
                 }
             }
         }
     }
 
-    // Apply newline escapes
+    // Trim trailing newline and apply newline escapes
     let doc_lines = doc_lines.trim().replace("\\\n", "");
 
-    if doc_lines.is_empty() {
-        return (None, None);
-    }
+    let mut paragraphs = doc_lines.splitn(2, "\n\n").filter(|x| !x.is_empty()); // "".split => [""]
 
-    let mut paragraphs = doc_lines.splitn(2, "\n\n");
-    let description = paragraphs.next().unwrap().replace("\n", " ");
-    let multiline_help = paragraphs.next().map(|x| x.to_owned());
+    // Pop first paragraph as description if needed (but no newlines bc description is single line)
+    let description = paragraphs.next().map(|x| x.replace("\n", " "));
+    // Use rest of doc comments as help text
+    let help_text = paragraphs.next().map(|x| x.to_owned());
 
-    (Some(description), multiline_help)
+    (description, help_text)
 }
 
 pub fn command(
@@ -178,7 +174,7 @@ pub fn command(
     }
 
     // Extract the command descriptions from the function doc comments
-    let (description, explanation) = extract_help_from_doc_comments(&function.attrs);
+    let (description, help_text) = extract_help_from_doc_comments(&function.attrs);
 
     fn permissions_to_tokens(
         perms: &Option<syn::punctuated::Punctuated<syn::Ident, syn::Token![|]>>,
@@ -202,7 +198,7 @@ pub fn command(
             .unwrap_or_else(|| function.sig.ident.to_string()),
         parameters,
         description,
-        explanation,
+        help_text,
         args,
         function,
         default_member_permissions,
@@ -268,9 +264,9 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
     let dm_only = inv.args.dm_only;
     let nsfw_only = inv.args.nsfw_only;
 
-    let explanation = match &inv.args.explanation_fn {
-        Some(explanation_fn) => quote::quote! { Some(#explanation_fn) },
-        None => match &inv.explanation {
+    let help_text = match &inv.args.help_text_fn {
+        Some(help_text_fn) => quote::quote! { Some(#help_text_fn) },
+        None => match &inv.help_text {
             Some(extracted_explanation) => quote::quote! { Some(|| #extracted_explanation.into()) },
             None => quote::quote! { None },
         },
@@ -326,7 +322,7 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
                 category: #category,
                 description: #description,
                 description_localizations: #description_localizations,
-                multiline_help: #explanation,
+                help_text: #help_text,
                 hide_in_help: #hide_in_help,
                 cooldowns: std::sync::Mutex::new(::poise::Cooldowns::new(::poise::CooldownConfig {
                     global: #global_cooldown.map(std::time::Duration::from_secs),

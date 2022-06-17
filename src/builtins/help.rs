@@ -44,7 +44,7 @@ async fn help_single_command<U, E>(
     });
 
     let reply = if let Some(command) = command {
-        match command.multiline_help {
+        match command.help_text {
             Some(f) => f(),
             None => command
                 .description

@@ -26,7 +26,7 @@ for example for command-specific help (i.e. `~help command_name`). Escape newlin
 - `reuse_response`: After the first response, post subsequent responses as edits to the initial message (prefix only)
 - `track_edits`: Shorthand for `invoke_on_edit` and `reuse_response` (prefix only)
 - `broadcast_typing`: Trigger a typing indicator while command runs (only applies to prefix commands I think)
-- `explanation_fn`: Path to a string-returning function which is used for the detailed explanations instead of documentation comments
+- `help_text_fn`: Path to a string-returning function which is used for command help text instead of documentation comments
     - Useful if you have many commands with very similar help messages: you can abstract the common parts into a function
 - `check`: Path to a function which is invoked for every invocation. If the function returns false, the command is not executed
 - `on_error`: Error handling function
@@ -73,6 +73,37 @@ are multiple attributes you can use on parameters:
 - `#[lazy]`: Can be used on Option and Vec parameters and is equivalent to regular expressions' laziness (prefix-only)
 - `#[flag]`: Can be used on a bool parameter to set the bool to true if the user typed the parameter name literally (prefix-only)
     - For example with `async fn my_command(ctx: Context<'_>, #[flag] my_flag: bool)`, `~my_command` would set my_flag to false, and `~my_command my_flag` would set my_flag to true
+
+# Help text
+
+Documentation comments are used as command help text. The first paragraph is the command
+description (`Command::description`) and all following paragraphs are the multiline help text
+(`Command::help_text`).
+
+In the multiline help text, put `\` at the end of a line to escape the newline.
+
+Example:
+
+```rust
+/// This is the description of my cool command, it can span multiple
+/// lines if you need to
+///
+/// Here in the following paragraphs, you can give information on how \
+/// to use the command that will be shown in your command's help.
+///
+/// You could also put example invocations here:
+/// `~coolcommand test`
+#[poise::command(slash_command)]
+pub async fn coolcommand(ctx: Context<'_>, s: String) -> Result<(), Error> { ... }
+```
+results in
+```rust
+poise::Command {
+    description: Some("This is the description of my cool command, it can span multiple lines if you need to".into()),
+    help_text: Some("Here in the following paragraphs, you can give information on how to use the command that will be shown in your command's help.\n\nYou could also put example invocations here:\n`~coolcommand test`".into()),
+    ...
+}
+```
 
 # Internals
 
