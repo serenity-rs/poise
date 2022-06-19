@@ -36,6 +36,7 @@ pub enum ReplyHandle<'a> {
 impl ReplyHandle<'_> {
     #[cold]
     #[track_caller]
+    /// Panics for when the variant is autocomplete
     fn autocomplete_panic() -> ! {
         panic!("reply is a no-op in autocomplete context")
     }
