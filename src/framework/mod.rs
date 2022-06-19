@@ -286,12 +286,13 @@ fn spawn_edit_tracker_purge_task<U: 'static + Send + Sync, E: 'static>(
     framework: std::sync::Arc<Framework<U, E>>,
 ) -> tokio::task::JoinHandle<()> {
     tokio::spawn(async move {
-        loop {
-            if let Some(edit_tracker) = &framework.options.prefix_options.edit_tracker {
+        if let Some(edit_tracker) = &framework.options.prefix_options.edit_tracker {
+            loop {
                 edit_tracker.write().unwrap().purge();
+
+                // not sure if the purging interval should be configurable
+                tokio::time::sleep(std::time::Duration::from_secs(60)).await;
             }
-            // not sure if the purging interval should be configurable
-            tokio::time::sleep(std::time::Duration::from_secs(60)).await;
         }
     })
 }
