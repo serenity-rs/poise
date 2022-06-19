@@ -152,7 +152,9 @@ pub async fn register_application_commands_buttons<U, E>(
         })
         .await?;
 
-    let interaction = reply.message().await?
+    let interaction = reply
+        .message()
+        .await?
         .await_component_interaction(ctx.discord())
         .author_id(ctx.author().id)
         .await;
