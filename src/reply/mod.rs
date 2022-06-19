@@ -1,6 +1,8 @@
 //! Infrastructure for replying, i.e. sending a message in a command context
 
 mod builder;
+use std::borrow::Cow;
+
 pub use builder::*;
 
 mod send_reply;
@@ -32,16 +34,36 @@ pub enum ReplyHandle<'a> {
 }
 
 impl ReplyHandle<'_> {
+    #[cold]
+    #[track_caller]
+    fn autocomplete_panic() -> ! {
+        panic!("reply is a no-op in autocomplete context")
+    }
+
     /// Retrieve the message object of the sent reply.
     ///
+    /// If you don't need ownership of Message, you can use [`ReplyHandle::message`]
+    ///
     /// Only needs to do an HTTP request in the application command response case
-    pub async fn message(self) -> Result<serenity::Message, serenity::Error> {
+    pub async fn into_message(self) -> Result<serenity::Message, serenity::Error> {
         match self {
             Self::Known(msg) => Ok(*msg),
             Self::Unknown { http, interaction } => interaction.get_interaction_response(http).await,
-            Self::Autocomplete => {
-                panic!("reply is a no-op in autocomplete context; can't retrieve message")
-            }
+            Self::Autocomplete => Self::autocomplete_panic(),
+        }
+    }
+
+    /// Retrieve the message object of the sent reply.
+    ///
+    /// Returns a reference to the known Message object, or fetches the message from the discord API.
+    pub async fn message<'a>(&'a self) -> Result<Cow<'a, serenity::Message>, serenity::Error> {
+        match self {
+            Self::Known(msg) => Ok(Cow::Borrowed(msg)),
+            Self::Unknown { http, interaction } => interaction
+                .get_interaction_response(http)
+                .await
+                .map(Cow::Owned),
+            Self::Autocomplete => Self::autocomplete_panic(),
         }
     }
 
@@ -80,9 +102,7 @@ impl ReplyHandle<'_> {
                     })
                     .await?;
             }
-            Self::Autocomplete => {
-                panic!("reply is a no-op in autocomplete context; can't edit message")
-            }
+            Self::Autocomplete => Self::autocomplete_panic(),
         }
         Ok(())
     }
