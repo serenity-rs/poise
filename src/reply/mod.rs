@@ -7,11 +7,13 @@ mod send_reply;
 pub use send_reply::*;
 
 use crate::serenity_prelude as serenity;
+use std::borrow::Cow;
 
 /// Returned from [`send_reply()`] to retrieve the sent message object.
 ///
 /// Discord sometimes returns the [`serenity::Message`] object directly, but sometimes you have to
 /// request it manually. This enum abstracts over the two cases
+#[derive(Clone)]
 pub enum ReplyHandle<'a> {
     /// When sending a normal message or application command followup response, Discord returns the
     /// message object directly
@@ -34,14 +36,27 @@ pub enum ReplyHandle<'a> {
 impl ReplyHandle<'_> {
     /// Retrieve the message object of the sent reply.
     ///
+    /// If you don't need ownership of Message, you can use [`ReplyHandle::message`]
+    ///
     /// Only needs to do an HTTP request in the application command response case
-    pub async fn message(self) -> Result<serenity::Message, serenity::Error> {
+    pub async fn into_message(self) -> Result<serenity::Message, serenity::Error> {
         match self {
             Self::Known(msg) => Ok(*msg),
             Self::Unknown { http, interaction } => interaction.get_interaction_response(http).await,
-            Self::Autocomplete => {
-                panic!("reply is a no-op in autocomplete context; can't retrieve message")
-            }
+            Self::Autocomplete => panic!("reply is a no-op in autocomplete context"),
+        }
+    }
+
+    /// Retrieve the message object of the sent reply.
+    ///
+    /// Returns a reference to the known Message object, or fetches the message from the discord API.
+    pub async fn message(&self) -> Result<Cow<'_, serenity::Message>, serenity::Error> {
+        match self {
+            Self::Known(msg) => Ok(Cow::Borrowed(msg)),
+            Self::Unknown { http, interaction } => Ok(Cow::Owned(
+                interaction.get_interaction_response(http).await?,
+            )),
+            Self::Autocomplete => panic!("reply is a no-op in autocomplete context"),
         }
     }
 
@@ -80,9 +95,7 @@ impl ReplyHandle<'_> {
                     })
                     .await?;
             }
-            Self::Autocomplete => {
-                panic!("reply is a no-op in autocomplete context; can't edit message")
-            }
+            Self::Autocomplete => panic!("reply is a no-op in autocomplete context"),
         }
         Ok(())
     }
