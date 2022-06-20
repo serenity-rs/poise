@@ -1,19 +1,19 @@
 //! Infrastructure for replying, i.e. sending a message in a command context
 
 mod builder;
-use std::borrow::Cow;
-
 pub use builder::*;
 
 mod send_reply;
 pub use send_reply::*;
 
 use crate::serenity_prelude as serenity;
+use std::borrow::Cow;
 
 /// Returned from [`send_reply()`] to retrieve the sent message object.
 ///
 /// Discord sometimes returns the [`serenity::Message`] object directly, but sometimes you have to
 /// request it manually. This enum abstracts over the two cases
+#[derive(Clone)]
 pub enum ReplyHandle<'a> {
     /// When sending a normal message or application command followup response, Discord returns the
     /// message object directly
@@ -57,13 +57,12 @@ impl ReplyHandle<'_> {
     /// Retrieve the message object of the sent reply.
     ///
     /// Returns a reference to the known Message object, or fetches the message from the discord API.
-    pub async fn message<'a>(&'a self) -> Result<Cow<'a, serenity::Message>, serenity::Error> {
+    pub async fn message(&self) -> Result<Cow<'_, serenity::Message>, serenity::Error> {
         match self {
             Self::Known(msg) => Ok(Cow::Borrowed(msg)),
-            Self::Unknown { http, interaction } => interaction
-                .get_interaction_response(http)
-                .await
-                .map(Cow::Owned),
+            Self::Unknown { http, interaction } => Ok(Cow::Owned(
+                interaction.get_interaction_response(http).await?,
+            )),
             Self::Autocomplete => Self::autocomplete_panic(),
         }
     }
