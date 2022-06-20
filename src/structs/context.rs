@@ -196,6 +196,7 @@ impl<'a, U, E> Context<'a, U, E> {
     }
 
     /// Return a ID that uniquely identifies this command invocation.
+    #[cfg(any(feature = "chrono", feature = "time"))]
     pub fn id(&self) -> u64 {
         match self {
             Self::Application(ctx) => ctx.interaction.id().0,
@@ -210,7 +211,14 @@ impl<'a, U, E> Context<'a, U, E> {
 
                     // Calculate Discord's datetime representation (millis since Discord epoch) and
                     // insert those bits into the ID
-                    id |= ((edited_timestamp.timestamp_millis() - 1420070400000) as u64) << 22;
+
+                    #[cfg(feature = "time")]
+                    let timestamp_millis = edited_timestamp.unix_timestamp_nanos() / 1_000_000;
+
+                    #[cfg(not(feature = "time"))]
+                    let timestamp_millis = edited_timestamp.timestamp_millis();
+
+                    id |= ((timestamp_millis - 1420070400000) as u64) << 22;
                 }
                 id
             }
