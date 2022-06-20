@@ -34,13 +34,6 @@ pub enum ReplyHandle<'a> {
 }
 
 impl ReplyHandle<'_> {
-    #[cold]
-    #[track_caller]
-    /// Panics for when the variant is autocomplete
-    fn autocomplete_panic() -> ! {
-        panic!("reply is a no-op in autocomplete context")
-    }
-
     /// Retrieve the message object of the sent reply.
     ///
     /// If you don't need ownership of Message, you can use [`ReplyHandle::message`]
@@ -50,7 +43,7 @@ impl ReplyHandle<'_> {
         match self {
             Self::Known(msg) => Ok(*msg),
             Self::Unknown { http, interaction } => interaction.get_interaction_response(http).await,
-            Self::Autocomplete => Self::autocomplete_panic(),
+            Self::Autocomplete => panic!("reply is a no-op in autocomplete context"),
         }
     }
 
@@ -63,7 +56,7 @@ impl ReplyHandle<'_> {
             Self::Unknown { http, interaction } => Ok(Cow::Owned(
                 interaction.get_interaction_response(http).await?,
             )),
-            Self::Autocomplete => Self::autocomplete_panic(),
+            Self::Autocomplete => panic!("reply is a no-op in autocomplete context"),
         }
     }
 
@@ -102,7 +95,7 @@ impl ReplyHandle<'_> {
                     })
                     .await?;
             }
-            Self::Autocomplete => Self::autocomplete_panic(),
+            Self::Autocomplete => panic!("reply is a no-op in autocomplete context"),
         }
         Ok(())
     }
