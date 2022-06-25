@@ -167,6 +167,8 @@ impl<'a, U, E> Context<'a, U, E> {
     /// request failed
     ///
     /// Warning: can clone the entire Member instance out of the cache
+    ///
+    /// [`ApplicationContext`]: crate::ApplicationContext
     pub async fn author_member(&'a self) -> Option<Cow<'a, serenity::Member>> {
         if let Self::Application(ctx) = self {
             ctx.interaction.member().map(Cow::Borrowed)
