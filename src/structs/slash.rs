@@ -18,7 +18,7 @@ pub enum ApplicationCommandOrAutocompleteInteraction<'a> {
 
 impl<'a> ApplicationCommandOrAutocompleteInteraction<'a> {
     /// Returns the data field of the underlying interaction
-    pub fn data(self) -> &'a serenity::ApplicationCommandInteractionData {
+    pub fn data(self) -> &'a serenity::CommandData {
         match self {
             Self::ApplicationCommand(x) => &x.data,
             Self::Autocomplete(x) => &x.data,
@@ -90,7 +90,7 @@ pub struct ApplicationContext<'a, U, E> {
     /// **Not** equivalent to `self.interaction.data().options`. That one refers to just the
     /// top-level command arguments, whereas [`Self::args`] is the options of the actual
     /// subcommand, if any.
-    pub args: &'a [serenity::ApplicationCommandInteractionDataOption],
+    pub args: &'a [serenity::CommandDataOption],
     /// Keeps track of whether an initial response has been sent.
     ///
     /// Discord requires different HTTP endpoints for initial and additional responses.
@@ -137,7 +137,7 @@ impl<U, E> ApplicationContext<'_, U, E> {
         {
             interaction
                 .create_interaction_response(self.discord, |f| {
-                    f.kind(serenity::InteractionResponseType::DeferredChannelMessageWithSource)
+                    f.kind(serenity::interaction::InteractionResponseType::DeferredChannelMessageWithSource)
                         .interaction_response_data(|b| b.ephemeral(ephemeral))
                 })
                 .await?;

@@ -95,7 +95,7 @@ async fn _send_application_reply<'a, 'b, U, E>(
     } else {
         interaction
             .create_interaction_response(ctx.discord, |r| {
-                r.kind(serenity::InteractionResponseType::ChannelMessageWithSource)
+                r.kind(serenity::interaction::InteractionResponseType::ChannelMessageWithSource)
                     .interaction_response_data(|f| {
                         data.to_slash_initial_response(f);
                         f

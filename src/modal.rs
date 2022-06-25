@@ -61,7 +61,7 @@ async fn execute<U: Send + Sync, E, M: Modal>(
     // Send acknowledgement so that the pop-up is closed
     response
         .create_interaction_response(ctx.discord, |b| {
-            b.kind(serenity::InteractionResponseType::DeferredUpdateMessage)
+            b.kind(serenity::interaction::InteractionResponseType::DeferredUpdateMessage)
         })
         .await?;
 
