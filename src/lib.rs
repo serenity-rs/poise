@@ -250,6 +250,9 @@ pub use serenity;
 /// use poise::serenity_prelude as serenity;
 /// ```
 pub mod serenity_prelude {
+    pub use serenity::model::application::interaction::{
+        Interaction, InteractionResponseType, InteractionType, MessageInteraction,
+    };
     #[doc(no_inline)]
     pub use serenity::{
         async_trait,
@@ -261,10 +264,14 @@ pub mod serenity_prelude {
         collector::*,
         http::*,
         model::{
-            event::*,
-            interactions::{
-                application_command::*, autocomplete::*, message_component::*, modal::*, *,
+            application::{
+                command::*,
+                component::*,
+                interaction::{
+                    application_command::*, autocomplete::*, message_component::*, modal::*, *,
+                },
             },
+            event::*,
             prelude::*,
         },
         prelude::*,
