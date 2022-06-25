@@ -86,3 +86,25 @@ jobs:
           override: true
       - run: rustup component add clippy
       - run: RUSTFLAGS="-C target-cpu=haswell" cargo clippy --all-features -- -D warnings
+
+  docs:
+    name: Build docs
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v2
+
+      - name: Install toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          profile: minimal
+          override: true
+
+      - name: Build docs
+        env:
+          RUSTFLAGS: -C target-cpu=haswell # for simd-json
+          RUSTDOCFLAGS: --cfg doc_nightly -D rustdoc::broken_intra_doc_links
+        run: |
+          cargo +nightly doc --no-deps --all-features -Z rustdoc-scrape-examples=examples
