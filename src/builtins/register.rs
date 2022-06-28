@@ -70,11 +70,11 @@ pub async fn register_application_commands<U, E>(
         return Ok(());
     }
 
-    let commands = &ctx.framework().options().commands;
-    let commands_builder = create_application_commands(commands);
+    let commands_builder = create_application_commands(&ctx.framework().options().commands);
+    let num_commands = commands_builder.0.len();
 
     if global {
-        ctx.say(format!("Registering {} commands...", commands.len()))
+        ctx.say(format!("Registering {} commands...", num_commands))
             .await?;
         serenity::ApplicationCommand::set_global_application_commands(ctx.discord(), |b| {
             *b = commands_builder;
@@ -90,7 +90,7 @@ pub async fn register_application_commands<U, E>(
             }
         };
 
-        ctx.say(format!("Registering {} commands...", commands.len()))
+        ctx.say(format!("Registering {} commands...", num_commands))
             .await?;
         guild_id
             .set_application_commands(ctx.discord(), |b| {
@@ -111,8 +111,8 @@ pub async fn register_application_commands<U, E>(
 pub async fn register_application_commands_buttons<U, E>(
     ctx: crate::Context<'_, U, E>,
 ) -> Result<(), serenity::Error> {
-    let commands = &ctx.framework().options().commands;
-    let create_commands = create_application_commands(commands);
+    let create_commands = create_application_commands(&ctx.framework().options().commands);
+    let num_commands = create_commands.0.len();
 
     let is_bot_owner = ctx.framework().options().owners.contains(&ctx.author().id);
     if !is_bot_owner {
@@ -181,7 +181,7 @@ pub async fn register_application_commands_buttons<U, E>(
 
     if global {
         if register {
-            ctx.say(format!("Registering {} global commands...", commands.len()))
+            ctx.say(format!("Registering {} global commands...", num_commands))
                 .await?;
             serenity::ApplicationCommand::set_global_application_commands(ctx.discord(), |b| {
                 *b = create_commands;
@@ -202,7 +202,7 @@ pub async fn register_application_commands_buttons<U, E>(
             }
         };
         if register {
-            ctx.say(format!("Registering {} guild commands...", commands.len()))
+            ctx.say(format!("Registering {} guild commands...", num_commands))
                 .await?;
             guild_id
                 .set_application_commands(ctx.discord(), |b| {
