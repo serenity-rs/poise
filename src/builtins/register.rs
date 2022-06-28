@@ -13,7 +13,7 @@ use crate::serenity_prelude as serenity;
 /// let commands = &ctx.framework().options().commands;
 /// let create_commands = poise::builtins::create_application_commands(commands);
 ///
-/// serenity::ApplicationCommand::set_global_application_commands(ctx.discord(), |b| {
+/// serenity::Command::set_global_application_commands(ctx.discord(), |b| {
 ///     *b = create_commands; // replace the given builder with the one prepared by poise
 ///     b
 /// }).await?;

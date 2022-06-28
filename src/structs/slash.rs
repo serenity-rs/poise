@@ -196,7 +196,7 @@ pub struct CommandParameter<U, E> {
     /// ```rust
     /// # use poise::serenity_prelude as serenity;
     /// # let _: fn(&mut serenity::CreateApplicationCommandOption) -> &mut serenity::CreateApplicationCommandOption =
-    /// |b| b.kind(serenity::ApplicationCommandOptionType::Integer).min_int_value(0).max_int_value(u32::MAX)
+    /// |b| b.kind(serenity::CommandOptionType::Integer).min_int_value(0).max_int_value(u32::MAX)
     /// # ;
     /// ```
     #[derivative(Debug = "ignore")]
