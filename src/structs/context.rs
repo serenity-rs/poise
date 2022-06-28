@@ -160,15 +160,13 @@ impl<'a, U, E> Context<'a, U, E> {
     // Doesn't fit in with the rest of the functions here but it's convenient
     /// Returns the author of the invoking message or interaction, as a [`serenity::Member`]
     ///
-    /// Returns a reference to the inner member object if in an [`ApplicationContext`], otherwise
+    /// Returns a reference to the inner member object if in an [`crate.:ApplicationContext`], otherwise
     /// clones the member out of the cache, or fetches from the discord API.
     ///
     /// Returns None if this command was invoked in DMs, or if the member cache lookup or HTTP
     /// request failed
     ///
     /// Warning: can clone the entire Member instance out of the cache
-    ///
-    /// [`ApplicationContext`]: crate::ApplicationContext
     pub async fn author_member(&'a self) -> Option<Cow<'a, serenity::Member>> {
         if let Self::Application(ctx) = self {
             ctx.interaction.member().map(Cow::Borrowed)
