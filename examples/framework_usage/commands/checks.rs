@@ -60,7 +60,12 @@ async fn is_ferris(ctx: Context<'_>) -> Result<bool, Error> {
 }
 
 /// Crab party... only for "Ferris"!
-#[poise::command(prefix_command, slash_command, check = "is_ferris")]
+#[poise::command(
+    prefix_command,
+    slash_command,
+    check = "is_ferris",
+    // You can write `check = ...` multiple times to add multiple checks
+)]
 pub async fn ferrisparty(ctx: Context<'_>) -> Result<(), Error> {
     let response = "```\n".to_owned()
         + &r"    _~^~^~_
