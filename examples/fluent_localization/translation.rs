@@ -18,18 +18,22 @@ fn format(bundle: &FluentBundle, pattern: &fluent_syntax::ast::Pattern<&str>) ->
 
 pub fn get(ctx: Context<'_>, key: &str) -> String {
     let translations = &ctx.data().translations;
-    let bundle = ctx
-        .locale()
-        .and_then(|locale| translations.other.get(locale))
-        .unwrap_or(&translations.main);
-
-    match bundle.get_message(key).and_then(|m| m.value()) {
-        Some(pattern) => format(bundle, pattern),
-        None => {
+    ctx.locale()
+        // Try to get the language-specific translation
+        .and_then(|locale| {
+            let bundle = translations.other.get(locale)?;
+            Some(format(bundle, bundle.get_message(key)?.value()?))
+        })
+        // Otherwise, fall back on main translation
+        .or_else(|| {
+            let bundle = &translations.main;
+            Some(format(bundle, bundle.get_message(key)?.value()?))
+        })
+        // If this translation key is not present in any translation files whatsoever
+        .unwrap_or_else(|| {
             log::warn!("unknown fluent key `{}`", key);
             key.to_string()
-        }
-    }
+        })
 }
 
 pub fn read_ftl() -> Result<Translations, Error> {
