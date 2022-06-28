@@ -154,6 +154,15 @@ async fn _send_prefix_reply<'a, U, E>(
     Ok(Box::new(if let Some(mut response) = existing_response {
         response
             .edit(ctx.discord, |f| {
+                // Reset the message. We don't want leftovers of the previous message (e.g. user
+                // sends a message with `.content("abc")` in a track_edits command, and the edited
+                // message happens to contain embeds, we don't want to keep those embeds)
+                // (*f = Default::default() won't do)
+                f.content("");
+                f.set_embeds(Vec::new());
+                f.components(|b| b);
+                f.0.insert("attachments", serenity::json::json! { [] });
+
                 reply.to_prefix_edit(f);
                 f
             })
