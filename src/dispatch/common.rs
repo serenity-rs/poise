@@ -154,10 +154,7 @@ pub async fn check_permissions_and_cooldown<'a, U, E>(
 
     // Only continue if command checks returns true. First perform global checks, then command
     // checks (if necessary)
-    for check in [ctx.framework().options().command_check, cmd.check]
-        .iter()
-        .flatten()
-    {
+    for check in Option::iter(&ctx.framework().options().command_check).chain(&cmd.checks) {
         match check(ctx).await {
             Ok(true) => {}
             Ok(false) => {

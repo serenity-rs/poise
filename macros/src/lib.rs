@@ -28,7 +28,7 @@ for example for command-specific help (i.e. `~help command_name`). Escape newlin
 - `broadcast_typing`: Trigger a typing indicator while command runs (only applies to prefix commands I think)
 - `help_text_fn`: Path to a string-returning function which is used for command help text instead of documentation comments
     - Useful if you have many commands with very similar help messages: you can abstract the common parts into a function
-- `check`: Path to a function which is invoked for every invocation. If the function returns false, the command is not executed
+- `check`: Path to a function which is invoked for every invocation. If the function returns false, the command is not executed (can be used multiple times)
 - `on_error`: Error handling function
 - `rename`: Choose an alternative command name instead of the function name
     - Useful if your command name is a Rust keyword, like `move`

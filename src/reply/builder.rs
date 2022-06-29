@@ -210,12 +210,10 @@ impl<'att> CreateReply<'att> {
             reference_message: _, // can't edit reference message afterwards
         } = self;
 
-        // Empty string resets content (happens when user replaces text with embed)
-        f.content(content.as_deref().unwrap_or(""));
-
-        f.set_embeds(embeds);
-
-        f.0.insert("attachments", serenity::json::json! { [] }); // reset attachments
+        if let Some(content) = content {
+            f.content(content);
+        }
+        f.add_embeds(embeds);
         for attachment in attachments {
             f.attachment(attachment);
         }
@@ -227,13 +225,12 @@ impl<'att> CreateReply<'att> {
             });
         }
 
-        // When components is None, this will still be run to reset the components.
-        f.components(|f| {
-            if let Some(components) = components {
+        if let Some(components) = components {
+            f.components(|f| {
                 *f = components;
-            }
-            f
-        });
+                f
+            });
+        }
     }
 
     /// Serialize this response builder to a [`serenity::CreateMessage`]

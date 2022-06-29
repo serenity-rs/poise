@@ -92,9 +92,9 @@ pub struct Command<U, E> {
     /// Command-specific override for [`crate::FrameworkOptions::on_error`]
     #[derivative(Debug = "ignore")]
     pub on_error: Option<fn(crate::FrameworkError<'_, U, E>) -> BoxFuture<'_, ()>>,
-    /// If this function returns false, this command will not be executed.
+    /// If any of these functions returns false, this command will not be executed.
     #[derivative(Debug = "ignore")]
-    pub check: Option<fn(crate::Context<'_, U, E>) -> BoxFuture<'_, Result<bool, E>>>,
+    pub checks: Vec<fn(crate::Context<'_, U, E>) -> BoxFuture<'_, Result<bool, E>>>,
     /// List of parameters for this command
     ///
     /// Used for registering and parsing slash commands. Can also be used in help commands

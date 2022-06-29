@@ -23,7 +23,8 @@ pub struct CommandArgs {
     track_edits: bool,
     broadcast_typing: bool,
     help_text_fn: Option<syn::Path>,
-    check: Option<syn::Path>,
+    #[darling(multiple)]
+    check: Vec<syn::Path>,
     on_error: Option<syn::Path>,
     rename: Option<String>,
     #[darling(multiple)]
@@ -272,11 +273,8 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
         },
     };
 
-    // Box::pin the check and on_error callbacks in order to store them in a struct
-    let check = match &inv.args.check {
-        Some(check) => quote::quote! { Some(|ctx| Box::pin(#check(ctx))) },
-        None => quote::quote! { None },
-    };
+    let checks = &inv.args.check;
+    // Box::pin the callback in order to store it in a struct
     let on_error = match &inv.args.on_error {
         Some(on_error) => quote::quote! { Some(|err| Box::pin(#on_error(err))) },
         None => quote::quote! { None },
@@ -339,7 +337,7 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
                 guild_only: #guild_only,
                 dm_only: #dm_only,
                 nsfw_only: #nsfw_only,
-                check: #check,
+                checks: vec![ #( |ctx| Box::pin(#checks(ctx)) ),* ],
                 on_error: #on_error,
                 parameters: vec![ #( #parameters ),* ],
                 custom_data: #custom_data,
