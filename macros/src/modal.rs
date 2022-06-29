@@ -107,7 +107,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
         impl #impl_generics poise::Modal for #struct_ident #ty_generics #where_clause {
             fn create(mut defaults: Option<Self>) -> serenity::CreateInteractionResponse<'static> {
                 let mut b = serenity::CreateInteractionResponse::default();
-                b.kind(serenity::interaction::InteractionResponseType::Modal);
+                b.kind(serenity::InteractionResponseType::Modal);
                 b.interaction_response_data(|b| {
                     b.custom_id("0").title(#modal_title).components(|b| b #( #builders )* )
                 });

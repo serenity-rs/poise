@@ -133,7 +133,7 @@ pub async fn boop(ctx: Context<'_>) -> Result<(), Error> {
         .await?;
 
         mci.create_interaction_response(ctx.discord(), |ir| {
-            ir.kind(serenity::interaction::InteractionResponseType::DeferredUpdateMessage)
+            ir.kind(serenity::InteractionResponseType::DeferredUpdateMessage)
         })
         .await?;
     }

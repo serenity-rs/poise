@@ -167,5 +167,5 @@ event! {
     #[cfg(not(feature = "cache"))]
     voice_state_update => VoiceStateUpdate { new: serenity::VoiceState },
     webhook_update => WebhookUpdate { guild_id: serenity::GuildId, belongs_to_channel_id: serenity::ChannelId },
-    interaction_create => InteractionCreate { interaction: serenity::interaction::Interaction },
+    interaction_create => InteractionCreate { interaction: serenity::Interaction },
 }
