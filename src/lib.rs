@@ -250,9 +250,6 @@ pub use serenity;
 /// use poise::serenity_prelude as serenity;
 /// ```
 pub mod serenity_prelude {
-    pub use serenity::model::application::interaction::{
-        Interaction, InteractionResponseType, InteractionType, MessageInteraction,
-    };
     #[doc(no_inline)]
     pub use serenity::{
         async_trait,
@@ -263,6 +260,17 @@ pub mod serenity_prelude {
         },
         collector::*,
         http::*,
+        // Explicit imports to resolve ambiguity between model::prelude::* and
+        // model::application::interaction::* due to deprecated same-named type aliases
+        model::{
+            application::interaction::{
+                Interaction, InteractionResponseType, InteractionType,
+                MessageFlags as InteractionResponseFlags, MessageInteraction,
+            },
+            // There's two MessageFlags in serenity. The interaction response specific one was
+            // renamed to InteractionResponseFlags above so we can keep this one's name the same
+            channel::MessageFlags,
+        },
         model::{
             application::{
                 command::*,
