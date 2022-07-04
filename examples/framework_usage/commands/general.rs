@@ -161,7 +161,7 @@ pub async fn voiceinfo(
         channel.rtc_region.unwrap_or_default(),
         channel
             .video_quality_mode
-            .unwrap_or(serenity::VideoQualityMode::Unknown)
+            .unwrap_or(serenity::VideoQualityMode::Unknown(255))
     );
 
     ctx.say(response).await?;
