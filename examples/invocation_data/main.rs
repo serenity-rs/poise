@@ -51,7 +51,7 @@ async fn main() {
         .token(std::env::var("TOKEN").unwrap())
         .user_data_setup(move |ctx, _, framework| {
             Box::pin(async move {
-                poise::serenity_prelude::GuildId(703332075914264606)
+                poise::serenity_prelude::GuildId::new(703332075914264606)
                     .set_application_commands(ctx, |b| {
                         *b = poise::samples::create_application_commands(
                             &framework.options().commands,

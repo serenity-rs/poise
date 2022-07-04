@@ -21,7 +21,7 @@ async fn user_permissions(
         None => return None, // Guild not in cache
     };
     #[cfg(not(feature = "cache"))]
-    let guild = match ctx.http.get_guild(guild_id.0).await {
+    let guild = match ctx.http.get_guild(guild_id.get()).await {
         Ok(x) => x,
         Err(_) => return None,
     };
@@ -46,7 +46,7 @@ async fn user_permissions(
     // If member not in cache (probably because presences intent is not enabled), retrieve via HTTP
     let member = match cached_member {
         Some(x) => x,
-        None => match ctx.http.get_member(guild_id.0, user_id.0).await {
+        None => match ctx.http.get_member(guild_id.get(), user_id.get()).await {
             Ok(member) => member,
             Err(_) => return None,
         },

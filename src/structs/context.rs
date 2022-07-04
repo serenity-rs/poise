@@ -201,9 +201,9 @@ impl<'a, U, E> Context<'a, U, E> {
     #[cfg(any(feature = "chrono", feature = "time"))]
     pub fn id(&self) -> u64 {
         match self {
-            Self::Application(ctx) => ctx.interaction.id().0,
+            Self::Application(ctx) => ctx.interaction.id().get(),
             Self::Prefix(ctx) => {
-                let mut id = ctx.msg.id.0;
+                let mut id = ctx.msg.id.get();
                 if let Some(edited_timestamp) = ctx.msg.edited_timestamp {
                     // We replace the 42 datetime bits with msg.timestamp_edited so that the ID is
                     // unique even after edits
