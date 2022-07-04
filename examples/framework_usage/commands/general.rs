@@ -1,4 +1,5 @@
 use crate::{Context, Error};
+use futures::StreamExt;
 use poise::serenity_prelude as serenity;
 use std::fmt::Write as _;
 
@@ -117,13 +118,14 @@ pub async fn boop(ctx: Context<'_>) -> Result<(), Error> {
     .await?;
 
     let mut boop_count = 0;
-    while let Some(mci) = serenity::CollectComponentInteraction::new(ctx.discord())
+    let mut collector = serenity::ComponentInteractionCollectorBuilder::new(&ctx.discord().shard)
         .author_id(ctx.author().id)
         .channel_id(ctx.channel_id())
         .timeout(std::time::Duration::from_secs(120))
         .filter(move |mci| mci.data.custom_id == uuid_boop.to_string())
-        .await
-    {
+        .build();
+
+    while let Some(mci) = collector.next().await {
         boop_count += 1;
 
         let mut msg = mci.message.clone();
