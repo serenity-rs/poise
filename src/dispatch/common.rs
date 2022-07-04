@@ -17,7 +17,7 @@ async fn user_permissions(
 
     #[cfg(feature = "cache")]
     let guild = match ctx.cache.guild(guild_id) {
-        Some(x) => x,
+        Some(x) => x.clone(),
         None => return None, // Guild not in cache
     };
     #[cfg(not(feature = "cache"))]
@@ -91,7 +91,7 @@ pub async fn check_permissions_and_cooldown<'a, U, E>(
             Some(guild_id) => {
                 #[cfg(feature = "cache")]
                 if ctx.framework().options().require_cache_for_guild_check
-                    && ctx.discord().cache.guild_field(guild_id, |_| ()).is_none()
+                    && ctx.discord().cache.guild(guild_id).is_none()
                 {
                     return Err(crate::FrameworkError::GuildOnly { ctx });
                 }
