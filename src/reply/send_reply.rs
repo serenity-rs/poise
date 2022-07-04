@@ -161,7 +161,8 @@ async fn _send_prefix_reply<'a, U, E>(
                 f.content("");
                 f.set_embeds(Vec::new());
                 f.components(|b| b);
-                f.0.insert("attachments", serenity::json::json! { [] });
+                // TODO: The new builder doesn't support this. Needs `set_attachments` method.
+                // f.0.insert("attachments", serenity::json::json! { [] });
 
                 reply.to_prefix_edit(f);
                 f

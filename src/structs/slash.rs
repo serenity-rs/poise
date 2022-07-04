@@ -196,7 +196,7 @@ pub struct CommandParameter<U, E> {
     /// ```rust
     /// # use poise::serenity_prelude as serenity;
     /// # let _: fn(&mut serenity::CreateApplicationCommandOption) -> &mut serenity::CreateApplicationCommandOption =
-    /// |b| b.kind(serenity::CommandOptionType::Integer).min_int_value(0).max_int_value(u32::MAX)
+    /// |b| b.kind(serenity::CommandOptionType::Integer).min_int_value(0).max_int_value(u64::MAX)
     /// # ;
     /// ```
     #[derivative(Debug = "ignore")]
@@ -229,7 +229,7 @@ impl<U, E> CommandParameter<U, E> {
             .description(self.description?)
             .set_autocomplete(self.autocomplete_callback.is_some());
         if let Some(channel_types) = &self.channel_types {
-            builder.channel_types(channel_types);
+            builder.channel_types(channel_types.clone());
         }
         (self.type_setter?)(&mut builder);
         Some(builder)

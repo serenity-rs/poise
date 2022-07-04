@@ -214,6 +214,9 @@ impl<'att> CreateReply<'att> {
             f.content(content);
         }
         f.add_embeds(embeds);
+
+        // TODO: The new builder doesn't support this. Needs `set_attachments` method.
+        // f.0.insert("attachments", serenity::json::json! { [] }); // reset attachments
         for attachment in attachments {
             f.attachment(attachment);
         }
