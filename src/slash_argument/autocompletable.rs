@@ -1,3 +1,5 @@
+//! Hosts just the AutocompleteChoice type. This type will probably move somewhere else
+
 /// A single autocomplete choice, displayed in Discord UI
 ///
 /// This type can be returned by functions set via the `#[autocomplete = ]` attribute on slash

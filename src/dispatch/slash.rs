@@ -174,6 +174,9 @@ pub async fn dispatch_autocomplete<'a, U, E>(
 
     // If this parameter supports autocomplete...
     if let Some(autocomplete_callback) = focused_parameter.autocomplete_callback {
+        #[allow(unused_imports)]
+        use ::serenity::json::prelude::*; // as_str() access via trait for simd-json
+
         // Generate an autocomplete response
         let partial_input = focused_option.value.as_ref().ok_or(None)?;
         let partial_input = partial_input.as_str().ok_or_else(|| {
