@@ -16,7 +16,7 @@ async fn my_check(ctx: Context<'_>) -> Result<bool, Error> {
     Ok(true)
 }
 
-async fn my_autocomplete(ctx: Context<'_>, _: u32) -> impl Iterator<Item = u32> {
+async fn my_autocomplete(ctx: Context<'_>, _: &str) -> impl Iterator<Item = u32> {
     println!(
         "In autocomplete: {:?}",
         ctx.invocation_data::<&str>().await.as_deref()
