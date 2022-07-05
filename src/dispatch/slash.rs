@@ -175,8 +175,12 @@ pub async fn dispatch_autocomplete<'a, U, E>(
     // If this parameter supports autocomplete...
     if let Some(autocomplete_callback) = focused_parameter.autocomplete_callback {
         // Generate an autocomplete response
-        let focused_option_json = focused_option.value.as_ref().ok_or(None)?;
-        let autocomplete_response = match autocomplete_callback(ctx, focused_option_json).await {
+        let partial_input = focused_option.value.as_ref().ok_or(None)?;
+        let partial_input = partial_input.as_str().ok_or_else(|| {
+            log::warn!("unexpected non-string autocomplete input");
+            None
+        })?;
+        let autocomplete_response = match autocomplete_callback(ctx, partial_input).await {
             Ok(x) => x,
             Err(e) => {
                 log::warn!("couldn't generate autocomplete response: {}", e);

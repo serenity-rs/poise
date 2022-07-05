@@ -208,7 +208,7 @@ pub struct CommandParameter<U, E> {
     pub autocomplete_callback: Option<
         for<'a> fn(
             crate::ApplicationContext<'a, U, E>,
-            &'a serenity::json::Value,
+            &'a str,
         ) -> BoxFuture<
             'a,
             Result<serenity::CreateAutocompleteResponse, crate::SlashArgError>,
