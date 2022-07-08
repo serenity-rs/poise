@@ -59,12 +59,19 @@ async fn is_ferris(ctx: Context<'_>) -> Result<bool, Error> {
     Ok(name.eq_ignore_ascii_case("ferris"))
 }
 
+/// Always passes the check and prints a line on the console
+async fn noisy_check(_ctx: Context<'_>) -> Result<bool, Error> {
+    println!("Noisy check has been called!");
+    Ok(true)
+}
+
 /// Crab party... only for "Ferris"!
 #[poise::command(
     prefix_command,
     slash_command,
     check = "is_ferris",
     // You can write `check = ...` multiple times to add multiple checks
+    check = "noisy_check",
 )]
 pub async fn ferrisparty(ctx: Context<'_>) -> Result<(), Error> {
     let response = "```\n".to_owned()
