@@ -47,7 +47,15 @@ impl<U, E> Framework<U, E> {
     /// Create a framework builder to configure, create and run a framework.
     ///
     /// For more information, see [`FrameworkBuilder`]
+    #[deprecated = "Please use Framework::builder instead"]
     pub fn build() -> FrameworkBuilder<U, E> {
+        FrameworkBuilder::default()
+    }
+
+    /// Create a framework builder to configure, create and run a framework.
+    ///
+    /// For more information, see [`FrameworkBuilder`]
+    pub fn builder() -> FrameworkBuilder<U, E> {
         FrameworkBuilder::default()
     }
 

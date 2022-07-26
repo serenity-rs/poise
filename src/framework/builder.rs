@@ -139,7 +139,7 @@ impl<U, E> FrameworkBuilder<U, E> {
     /// # async fn command2(ctx: poise::Context<'_, (), Error>) -> Result<(), Error> { Ok(()) }
     ///
     /// # #[allow(deprecated)] // just for this example
-    /// poise::Framework::build()
+    /// poise::Framework::builder()
     ///     // framework setup...
     ///     .commands([command1, command2])
     ///     // framework startup...
