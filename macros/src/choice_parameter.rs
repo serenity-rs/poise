@@ -87,7 +87,7 @@ pub fn choice_parameter(input: syn::DeriveInput) -> Result<TokenStream, darling:
             }
 
             fn create(builder: &mut poise::serenity_prelude::CreateApplicationCommandOption) {
-                builder.kind(poise::serenity_prelude::CommandOptionType::Integer); 
+                builder.kind(poise::serenity_prelude::CommandOptionType::Integer);
             }
 
             fn choices() -> Vec<poise::CommandParameterChoice> {
