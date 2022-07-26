@@ -1,5 +1,5 @@
 [![Build](https://img.shields.io/github/workflow/status/kangalioo/poise/CI)](https://kangalioo.github.io/poise/)
-[![crates.io](https://img.shields.io/crates/v/poise.svg)](https://docs.rs/poise/)
+[![crates.io](https://img.shields.io/crates/v/poise.svg)](https://crates.io/crates/poise)
 [![Docs](https://img.shields.io/badge/docs-online-informational)](https://docs.rs/poise/)
 [![Docs (git)](https://img.shields.io/badge/docs%20%28git%29-online-informational)](https://kangalioo.github.io/poise/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
