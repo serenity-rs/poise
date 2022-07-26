@@ -16,7 +16,7 @@ async fn my_check(ctx: Context<'_>) -> Result<bool, Error> {
     Ok(true)
 }
 
-async fn my_autocomplete(ctx: Context<'_>, _: u32) -> impl Iterator<Item = u32> {
+async fn my_autocomplete(ctx: Context<'_>, _: &str) -> impl Iterator<Item = u32> {
     println!(
         "In autocomplete: {:?}",
         ctx.invocation_data::<&str>().await.as_deref()
@@ -47,7 +47,7 @@ pub async fn invocation_data_test(
 
 #[tokio::main]
 async fn main() {
-    poise::Framework::build()
+    poise::Framework::builder()
         .token(std::env::var("TOKEN").unwrap())
         .user_data_setup(move |ctx, _, framework| {
             Box::pin(async move {

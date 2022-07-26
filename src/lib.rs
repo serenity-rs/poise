@@ -131,8 +131,8 @@ async fn error_handler(error: poise::FrameworkError<'_, Data, Error>) {
 # #[poise::command(prefix_command)] async fn command3(ctx: Context<'_>) -> Result<(), Error> { Ok(()) }
 
 # async {
-// Use `Framework::build()` to create a framework builder and supply basic data to the framework:
-poise::Framework::build()
+// Use `Framework::builder()` to create a framework builder and supply basic data to the framework:
+poise::Framework::builder()
     .token("...")
     .user_data_setup(|_, _, _| Box::pin(async move {
         // construct user data here (invoked when bot connects to Discord)
@@ -261,11 +261,26 @@ pub mod serenity_prelude {
         },
         collector::*,
         http::*,
+        // Explicit imports to resolve ambiguity between model::prelude::* and
+        // model::application::interaction::* due to deprecated same-named type aliases
         model::{
-            event::*,
-            interactions::{
-                application_command::*, autocomplete::*, message_component::*, modal::*, *,
+            application::interaction::{
+                Interaction, InteractionResponseType, InteractionType,
+                MessageFlags as InteractionResponseFlags, MessageInteraction,
             },
+            // There's two MessageFlags in serenity. The interaction response specific one was
+            // renamed to InteractionResponseFlags above so we can keep this one's name the same
+            channel::MessageFlags,
+        },
+        model::{
+            application::{
+                command::*,
+                component::*,
+                interaction::{
+                    application_command::*, autocomplete::*, message_component::*, modal::*, *,
+                },
+            },
+            event::*,
             prelude::*,
         },
         prelude::*,

@@ -56,11 +56,15 @@ fn pop_from(args: &str) -> Result<(&str, CodeBlock), CodeBlockError> {
         rest = &code_block[(code_block_end + 3)..];
         let mut code_block = &code_block[..code_block_end];
 
-        // If a word is preceded directly by the three backticks and succeeded directly by a
+        // If a string is preceded directly by the three backticks and succeeded directly by a
         // newline, it's interpreted as the code block language
         let mut language = None;
         if let Some(first_newline) = code_block.find('\n') {
-            if !code_block[..first_newline].contains(char::is_whitespace) {
+            // Experimentation revealed language idents may only consist of [A-Za-z0-9+-._]
+            let is_valid = code_block[..first_newline]
+                .chars()
+                .all(|c| c.is_ascii_alphanumeric() || "+-._".contains(c));
+            if is_valid {
                 language = Some(&code_block[..first_newline]);
                 code_block = &code_block[(first_newline + 1)..];
             }
@@ -127,6 +131,14 @@ fn test_pop_code_block() {
         ("```rust\nhi```", "hi", Some("rust")),
         ("```rust  hi```", "rust  hi", None),
         ("```rust\n\n\n\n\nhi\n\n\n\n```", "hi", Some("rust")),
+        ("```+__....-.+.++\nhi\n```", "hi", Some("+__....-.+.++")),
+        ("```+__.:...-.+.++\nhi\n```", "+__.:...-.+.++\nhi", None),
+        // https://discord.com/channels/273534239310479360/592856094527848449/997519220369797131
+        (
+            "```#![feature(never_type)]\nfn uwu(_: &!) {}\n```",
+            "#![feature(never_type)]\nfn uwu(_: &!) {}",
+            None,
+        ),
     ] {
         assert_eq!(
             pop_from(string).unwrap().1,

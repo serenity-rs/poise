@@ -137,10 +137,10 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
 /// An autocomplete function that can be used for the command parameter in your help function.
 ///
 /// See examples/framework_usage for an example
-pub async fn autocomplete_command<U, E>(
-    ctx: crate::Context<'_, U, E>,
-    partial: String,
-) -> impl Iterator<Item = String> + '_ {
+pub async fn autocomplete_command<'a, U, E>(
+    ctx: crate::Context<'a, U, E>,
+    partial: &'a str,
+) -> impl Iterator<Item = String> + 'a {
     ctx.framework()
         .options()
         .commands

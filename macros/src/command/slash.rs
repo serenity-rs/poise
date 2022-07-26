@@ -37,21 +37,21 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
             Some(autocomplete_fn) => {
                 quote::quote! { Some(|
                     ctx: poise::ApplicationContext<'_, _, _>,
-                    json_value: &poise::serenity::json::Value,
+                    partial: &str,
                 | Box::pin(async move {
                     use ::poise::futures_util::{Stream, StreamExt};
 
-                    let partial_input = poise::extract_autocomplete_argument!(#type_, json_value)?;
-
                     let choices_stream = ::poise::into_stream!(
-                        #autocomplete_fn(ctx.into(), partial_input).await
+                        #autocomplete_fn(ctx.into(), partial).await
                     );
                     let choices_json = choices_stream
                         .take(25)
+                        // T or AutocompleteChoice<T> -> AutocompleteChoice<T>
                         .map(|value| poise::AutocompleteChoice::from(value))
+                        // AutocompleteChoice<T> -> serde_json::Value
                         .map(|choice| poise::serenity::json::json!({
                             "name": choice.name,
-                            "value": poise::autocomplete_argument_into_json!(#type_, choice.value),
+                            "value": poise::serenity::json::Value::from(choice.value),
                         }))
                         .collect()
                         .await;

@@ -286,7 +286,7 @@ async fn main() {
 
     // The Framework builder will automatically retrieve the bot owner and application ID via the
     // passed token, so that information need not be passed here
-    poise::Framework::build()
+    poise::Framework::builder()
         // Configure the client with your Discord bot token in the environment.
         .token(std::env::var("DISCORD_TOKEN").expect("Expected DISCORD_TOKEN in the environment"))
         .options(options)

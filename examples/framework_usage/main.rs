@@ -140,7 +140,7 @@ async fn main() {
         ..Default::default()
     };
 
-    poise::Framework::build()
+    poise::Framework::builder()
         .token(var("TOKEN").expect("Missing `TOKEN` env var, see README for more information."))
         .user_data_setup(move |_ctx, _ready, _framework| {
             Box::pin(async move {

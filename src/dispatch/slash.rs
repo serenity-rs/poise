@@ -5,20 +5,17 @@ use crate::serenity_prelude as serenity;
 /// Check if the interaction with the given name and arguments matches any framework command
 fn find_matching_command<'a, 'b, U, E>(
     interaction_name: &str,
-    interaction_options: &'b [serenity::ApplicationCommandInteractionDataOption],
+    interaction_options: &'b [serenity::CommandDataOption],
     commands: &'a [crate::Command<U, E>],
-) -> Option<(
-    &'a crate::Command<U, E>,
-    &'b [serenity::ApplicationCommandInteractionDataOption],
-)> {
+) -> Option<(&'a crate::Command<U, E>, &'b [serenity::CommandDataOption])> {
     commands.iter().find_map(|cmd| {
         if interaction_name != cmd.name && Some(interaction_name) != cmd.context_menu_name {
             return None;
         }
 
         if let Some(sub_interaction) = interaction_options.iter().find(|option| {
-            option.kind == serenity::ApplicationCommandOptionType::SubCommand
-                || option.kind == serenity::ApplicationCommandOptionType::SubCommandGroup
+            option.kind == serenity::CommandOptionType::SubCommand
+                || option.kind == serenity::CommandOptionType::SubCommandGroup
         }) {
             find_matching_command(
                 &sub_interaction.name,
@@ -107,14 +104,14 @@ pub async fn dispatch_interaction<'a, U, E>(
         ctx.command,
     ));
     let action_result = match interaction.data.kind {
-        serenity::ApplicationCommandType::ChatInput => {
+        serenity::CommandType::ChatInput => {
             let action = ctx
                 .command
                 .slash_action
                 .ok_or(command_structure_mismatch_error)?;
             action(ctx).await
         }
-        serenity::ApplicationCommandType::User => {
+        serenity::CommandType::User => {
             match (ctx.command.context_menu_action, &interaction.data.target()) {
                 (
                     Some(crate::ContextMenuCommandAction::User(action)),
@@ -123,7 +120,7 @@ pub async fn dispatch_interaction<'a, U, E>(
                 _ => return Err(command_structure_mismatch_error),
             }
         }
-        serenity::ApplicationCommandType::Message => {
+        serenity::CommandType::Message => {
             match (ctx.command.context_menu_action, &interaction.data.target()) {
                 (
                     Some(crate::ContextMenuCommandAction::Message(action)),
@@ -174,9 +171,16 @@ pub async fn dispatch_autocomplete<'a, U, E>(
 
     // If this parameter supports autocomplete...
     if let Some(autocomplete_callback) = focused_parameter.autocomplete_callback {
+        #[allow(unused_imports)]
+        use ::serenity::json::prelude::*; // as_str() access via trait for simd-json
+
         // Generate an autocomplete response
-        let focused_option_json = focused_option.value.as_ref().ok_or(None)?;
-        let autocomplete_response = match autocomplete_callback(ctx, focused_option_json).await {
+        let partial_input = focused_option.value.as_ref().ok_or(None)?;
+        let partial_input = partial_input.as_str().ok_or_else(|| {
+            log::warn!("unexpected non-string autocomplete input");
+            None
+        })?;
+        let autocomplete_response = match autocomplete_callback(ctx, partial_input).await {
             Ok(x) => x,
             Err(e) => {
                 log::warn!("couldn't generate autocomplete response: {}", e);
