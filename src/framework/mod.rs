@@ -24,7 +24,7 @@ pub struct Framework<U, E> {
     options: crate::FrameworkOptions<U, E>,
 
     /// Will be initialized to Some on construction, and then taken out on startup
-    client: std::sync::Mutex<Option<serenity::Client>>,
+    client: parking_lot::Mutex<Option<serenity::Client>>,
     /// Initialized to Some during construction; so shouldn't be None at any observable point
     shard_manager: std::sync::Arc<tokio::sync::Mutex<serenity::ShardManager>>,
     /// Filled with Some on construction. Taken out and executed on first Ready gateway event
@@ -115,7 +115,7 @@ impl<U, E> Framework<U, E> {
             user_data_setup: Mutex::new(Some(Box::new(user_data_setup))),
             options,
             shard_manager: client.shard_manager.clone(),
-            client: Mutex::new(Some(client)),
+            client: parking_lot::Mutex::new(Some(client)),
         });
         let _: Result<_, _> = framework_cell.set(framework.clone());
         Ok(framework)
@@ -135,7 +135,6 @@ impl<U, E> Framework<U, E> {
         let client = self
             .client
             .lock()
-            .unwrap()
             .take()
             .expect("Prepared client is missing");
 
@@ -176,6 +175,13 @@ impl<U, E> Framework<U, E> {
     // Returns a reference so you can plug it into [`FrameworkContext`]
     pub fn shard_manager(&self) -> &std::sync::Arc<tokio::sync::Mutex<serenity::ShardManager>> {
         &self.shard_manager
+    }
+
+    /// Returns the serenity client. Panics if the framework has already started!
+    pub fn client(&self) -> impl std::ops::DerefMut<Target = serenity::Client> + '_ {
+        parking_lot::MutexGuard::map(self.client.lock(), |c| {
+            c.as_mut().expect("framework has started")
+        })
     }
 
     /// Retrieves user data, or blocks until it has been initialized (once the Ready event has been

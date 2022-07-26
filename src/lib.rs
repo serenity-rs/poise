@@ -28,6 +28,51 @@ command to register slash commands, after which you can use those, too.
 See examples/framework_usage/ in the git repository for a full-featured example bot, showcasing most
 features of poise: `cargo run --example=framework_usage`
 
+# Introduction to serenity
+
+Serenity is the Discord API wrapper library poise is built on top of. Using poise automatically
+means using serenity, so here's a couple tips:
+
+## `impl Trait` parameters
+
+Many serenity functions take an argument of type [`impl CacheHttp`](serenity::CacheHttp) or
+[`impl AsRef<Http>`](serenity::Http). Here, you commonly pass in
+[`&serenity::Context`](serenity::Context), which you can get from
+[`poise::Context`](crate::Context) via [`ctx.discord()`](crate::Context::discord)
+
+## Gateway intents
+
+To run a Discord bot, you need to set _gateway intents_: a list of event types you want to receive
+from Discord. A sensible default is [`serenity::GatewayIntents::non_privileged()`] which contains
+all event types except privileged ones. Privileged intents require manual enabling in your bot
+dashboard to use (and large bots require whitelisting by Discord). A notable privileged intent
+is [MESSAGE_CONTENT](serenity::GatewayIntents::MESSAGE_CONTENT) which is required for poise prefix
+commands.
+
+To set multiple gateway events, use the OR operator:
+`serenity::GatewayIntents::non_privileged() | serenity::GatewayIntents::MESSAGE_CONTENT`
+
+## Discord actions outside a command
+
+You can run Discord actions outside of commands by cloning and storing [`serenity::CacheAndHttp`]/
+[`Arc<serenity::Http>`](serenity::Http)/[`Arc<serenity::Cache>`](serenity::Cache). You can get
+those either from [`serenity::Context`] (passed to
+[`user_data_setup`](crate::FrameworkBuilder::user_data_setup) and all commands via
+[`ctx.discord()`](crate::Context::discord)) or before starting the framework via
+[`framework.client()`](crate::Framework::client)[`.cache_and_http`](serenity::Client::cache_and_http).
+
+Pass your `CacheAndHttp` or `Arc<Http>` to serenity functions in place of the usual
+`serenity::Context`
+
+## Finding serenity methods
+
+Many serenity structs have an ID field. Some useful methods are defined only on the Id types.
+For example:
+- [`serenity::Guild`] and [`serenity::GuildId`]
+- [`serenity::User`] and [`serenity::UserId`]
+- [`serenity::Role`] and [`serenity::RoleId`]
+- ...
+
 # Introduction to slash commands
 
 Discord slash commands can be a bit unintuitive at first. If you're unfamiliar, please read this
@@ -240,7 +285,6 @@ pub use async_trait::async_trait;
 pub use futures_core;
 pub use futures_util;
 pub use poise_macros::*;
-pub use serenity;
 
 /// This module re-exports a bunch of items from all over serenity. Useful if you can't
 /// remember the full paths of serenity items.
@@ -287,6 +331,7 @@ pub mod serenity_prelude {
         *,
     };
 }
+use serenity_prelude as serenity; // private alias for crate docs intradoc-links
 
 use std::future::Future;
 use std::pin::Pin;
