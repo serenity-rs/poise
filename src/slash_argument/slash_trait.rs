@@ -98,7 +98,7 @@ where
     }
 
     fn create(self, builder: &mut serenity::CreateApplicationCommandOption) {
-        builder.kind(serenity::ApplicationCommandOptionType::String);
+        builder.kind(serenity::CommandOptionType::String);
     }
 }
 
@@ -124,7 +124,7 @@ macro_rules! impl_for_integer {
                 builder
                     .min_number_value(f64::max(<$t>::MIN as f64, -9007199254740991.))
                     .max_number_value(f64::min(<$t>::MAX as f64, 9007199254740991.))
-                    .kind(serenity::ApplicationCommandOptionType::Integer);
+                    .kind(serenity::CommandOptionType::Integer);
             }
         }
     )* };
@@ -148,7 +148,7 @@ macro_rules! impl_for_float {
             }
 
             fn create(self, builder: &mut serenity::CreateApplicationCommandOption) {
-                builder.kind(serenity::ApplicationCommandOptionType::Number);
+                builder.kind(serenity::CommandOptionType::Number);
             }
         }
     )* };
@@ -169,7 +169,7 @@ impl SlashArgumentHack<bool> for &PhantomData<bool> {
     }
 
     fn create(self, builder: &mut serenity::CreateApplicationCommandOption) {
-        builder.kind(serenity::ApplicationCommandOptionType::Boolean);
+        builder.kind(serenity::CommandOptionType::Boolean);
     }
 }
 
@@ -205,7 +205,7 @@ impl SlashArgumentHack<serenity::Attachment> for &PhantomData<serenity::Attachme
     }
 
     fn create(self, builder: &mut serenity::CreateApplicationCommandOption) {
-        builder.kind(serenity::ApplicationCommandOptionType::Attachment);
+        builder.kind(serenity::CommandOptionType::Attachment);
     }
 }
 
@@ -241,7 +241,7 @@ macro_rules! impl_slash_argument {
             }
 
             fn create(self, builder: &mut serenity::CreateApplicationCommandOption) {
-                builder.kind(serenity::ApplicationCommandOptionType::$slash_param_type);
+                builder.kind(serenity::CommandOptionType::$slash_param_type);
             }
         }
     };

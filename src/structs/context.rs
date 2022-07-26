@@ -270,7 +270,7 @@ impl<'a, U, E> Context<'a, U, E> {
                 };
 
                 // Check slash command
-                if interaction.data.kind == serenity::ApplicationCommandType::ChatInput {
+                if interaction.data.kind == serenity::CommandType::ChatInput {
                     return if let Some(action) = ctx.command.slash_action {
                         action(ctx).await
                     } else {
