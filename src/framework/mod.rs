@@ -1,9 +1,10 @@
 //! The central Framework struct that ties everything together.
 
-mod builder;
 pub use builder::*;
 
 use crate::{serenity_prelude as serenity, BoxFuture};
+
+mod builder;
 
 /// The main framework struct which stores all data and handles message and interaction dispatch.
 ///
@@ -123,10 +124,27 @@ impl<U, E> Framework<U, E> {
 
     /// Small utility function for starting the framework that is agnostic over client sharding
     ///
-    /// Used internally by [`Self::start()`] and [`Self::start_autosharded()`]
+    /// You can use these shortcut methods to start the framework with a single shard
+    /// or with automatic sharding: [`Framework::start`], [`Framework::start_autosharded`]
+    ///
+    /// # Examples
+    ///
+    /// Start shards in a range
+    /// ```rust,no_run
+    /// # async fn _test(framework: std::sync::Arc<poise::Framework<(), ()>>) -> Result<(), serenity::Error> {
+    /// let shard_range = [3, 7];
+    /// let total_shards = 8;
+    ///
+    /// framework
+    ///     .start_with(|mut client| async move {
+    ///         client.start_shard_range(shard_range, total_shards).await
+    ///    })
+    ///    .await?;
+    /// # Ok(()) };
+    /// ```
     pub async fn start_with<F: std::future::Future<Output = serenity::Result<()>>>(
         self: std::sync::Arc<Self>,
-        start: fn(serenity::Client) -> F,
+        start: impl FnOnce(serenity::Client) -> F,
     ) -> Result<(), serenity::Error>
     where
         U: Send + Sync + 'static,
@@ -147,7 +165,9 @@ impl<U, E> Framework<U, E> {
         Ok(())
     }
 
-    /// Starts the framework.
+    /// Starts the framework with a shard. Calls [`serenity::Client::start`] internally.
+    ///
+    /// See [`Framework::start_with`] for other sharding configurations.
     pub async fn start(self: std::sync::Arc<Self>) -> Result<(), serenity::Error>
     where
         U: Send + Sync + 'static,
@@ -157,7 +177,10 @@ impl<U, E> Framework<U, E> {
             .await
     }
 
-    /// Starts the framework. Calls [`serenity::Client::start_autosharded`] internally
+    /// Starts the framework with automatic sharding.
+    /// Calls [`serenity::Client::start_autosharded`] internally.
+    ///
+    /// See [`Framework::start_with`] for other sharding configurations.
     pub async fn start_autosharded(self: std::sync::Arc<Self>) -> Result<(), serenity::Error>
     where
         U: Send + Sync + 'static,
