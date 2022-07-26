@@ -124,34 +124,23 @@ impl<U, E> Framework<U, E> {
 
     /// Small utility function for starting the framework that is agnostic over client sharding
     ///
-    /// You can use these shortcut methods to start the framework a single shard
-    /// or with automatic sharding.
-    ///
-    /// See [`Framework::start`] or [`Framework::start_autosharded`]
+    /// You can use these shortcut methods to start the framework with a single shard
+    /// or with automatic sharding: [`Framework::start`], [`Framework::start_autosharded`]
     ///
     /// # Examples
     ///
     /// Start shards in a range
     /// ```rust,no_run
-    /// # use std::sync::Arc;
-    /// # use poise::serenity_prelude as serenity;
-    /// # type Error = Box<dyn std::error::Error + Send + Sync>;
-    /// # type Context<'a> = poise::Context<'a, (), Error>;
-    /// # async {
-    /// let framework: Arc<poise::Framework<(), Error>> = poise::Framework::builder()
-    ///     .options(poise::FrameworkOptions { ..Default::default() })
-    ///     .token("...")
-    ///     .intents(serenity::GatewayIntents::non_privileged())
-    ///     .user_data_setup(|_, _, _| Box::pin(async move { Ok(()) }))
-    ///     .build()
-    ///     .await?;
-    ///
+    /// # async fn _test(framework: std::sync::Arc<poise::Framework<(), ()>>) -> Result<(), serenity::Error> {
     /// let shard_range = [3, 7];
     /// let total_shards = 8;
     ///
-    /// framework.start_with(|mut client| async move { client.start_shard_range(shard_range, total_shards).await }).await?;
-    ///
-    /// # Ok::<(), Error>(()) };
+    /// framework
+    ///     .start_with(|mut client| async move {
+    ///         client.start_shard_range(shard_range, total_shards).await
+    ///    })
+    ///    .await?;
+    /// # Ok(()) };
     /// ```
     pub async fn start_with<F: std::future::Future<Output = serenity::Result<()>>>(
         self: std::sync::Arc<Self>,
