@@ -126,7 +126,7 @@ impl<U, E> Framework<U, E> {
     /// Used internally by [`Self::start()`] and [`Self::start_autosharded()`]
     pub async fn start_with<F: std::future::Future<Output = serenity::Result<()>>>(
         self: std::sync::Arc<Self>,
-        start: fn(serenity::Client) -> F,
+        start: impl FnOnce(serenity::Client) -> F,
     ) -> Result<(), serenity::Error>
     where
         U: Send + Sync + 'static,
