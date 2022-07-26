@@ -1,0 +1,10 @@
+welcome = welcome
+    .description = Welcomes a user
+    .user = user
+    .user-description = The user to welcome
+    .message = message
+    .message-description = The message to send
+Ask = Welcome to our cool server! Ask me if you need help
+GoodPerson = Welcome to the club, you're now a good person. Well, I hope.
+Controller = I hope that you brought a controller to play together!
+Coffee = Hey, do you want a coffee?

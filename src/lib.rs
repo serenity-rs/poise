@@ -6,6 +6,7 @@
 #![allow(clippy::type_complexity)]
 // native #[non_exhaustive] is awful because you can't do struct update syntax with it (??)
 #![allow(clippy::manual_non_exhaustive)]
+#![allow(deprecated)]
 
 /*!
 Poise is an opinionated Discord bot framework with a few distinctive features:
@@ -87,7 +88,7 @@ type Context<'a> = poise::Context<'a, Data, Error>;
     hide_in_help,
     required_permissions = "SEND_MESSAGES",
     aliases("bigounce", "abomination"),
-    explanation_fn = "my_huge_ass_command_help",
+    help_text_fn = "my_huge_ass_command_help",
     check = "check",
     on_error = "error_handler",
 )]

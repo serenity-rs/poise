@@ -35,7 +35,7 @@ impl syn::fold::Fold for AllLifetimesToStatic {
     }
 }
 
-/// Darling utility type that accepts a list of things, e.g. `#[attr(thing1, thing2)]`
+/// Darling utility type that accepts a list of things, e.g. `#[attr(thing1, thing2...)]`
 #[derive(Debug)]
 pub struct List<T>(pub Vec<T>);
 impl<T: darling::FromMeta> darling::FromMeta for List<T> {
@@ -50,5 +50,32 @@ impl<T: darling::FromMeta> darling::FromMeta for List<T> {
 impl<T> Default for List<T> {
     fn default() -> Self {
         Self(Default::default())
+    }
+}
+
+/// Darling utility type that accepts a 2-tuple list of things, e.g. `#[attr(thing1, thing2)]`
+#[derive(Debug)]
+pub struct Tuple2<T>(pub T, pub T);
+impl<T: darling::FromMeta> darling::FromMeta for Tuple2<T> {
+    fn from_list(items: &[::syn::NestedMeta]) -> darling::Result<Self> {
+        Ok(match items {
+            [a, b] => Self(T::from_nested_meta(a)?, T::from_nested_meta(b)?),
+            _ => {
+                return Err(syn::Error::new(
+                    proc_macro2::Span::call_site(),
+                    "expected two items `(\"a\", \"b\")`",
+                )
+                .into())
+            }
+        })
+    }
+}
+
+pub fn vec_tuple_2_to_hash_map(v: Vec<Tuple2<String>>) -> proc_macro2::TokenStream {
+    let (keys, values): (Vec<String>, Vec<String>) = v.into_iter().map(|x| (x.0, x.1)).unzip();
+    quote::quote! {
+        std::collections::HashMap::from([
+            #( (#keys.to_string(), #values.to_string()) )*
+        ])
     }
 }
