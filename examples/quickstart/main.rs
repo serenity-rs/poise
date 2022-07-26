@@ -25,7 +25,7 @@ async fn register(ctx: Context<'_>) -> Result<(), Error> {
 
 #[tokio::main]
 async fn main() {
-    let framework = poise::Framework::build()
+    let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
             commands: vec![age(), register()],
             ..Default::default()
