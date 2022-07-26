@@ -1,9 +1,10 @@
 //! The central Framework struct that ties everything together.
 
-mod builder;
 pub use builder::*;
 
 use crate::{serenity_prelude as serenity, BoxFuture};
+
+mod builder;
 
 /// The main framework struct which stores all data and handles message and interaction dispatch.
 ///
@@ -128,32 +129,29 @@ impl<U, E> Framework<U, E> {
     ///
     /// See [`Framework::start`] or [`Framework::start_autosharded`]
     ///
-    /// For other sharding configuration see the following examples
-    /// ```rust,no_run
-    /// use serenity::prelude::GatewayIntents;
-    /// use poise::{Framework, FrameworkOptions};
+    /// # Examples
     ///
-    /// let framework = Framework::builder()
-    ///     // Required values
+    /// Start shards in a range
+    /// ```rust,no_run
+    /// # use std::sync::Arc;
+    /// # use poise::serenity_prelude as serenity;
+    /// # type Error = Box<dyn std::error::Error + Send + Sync>;
+    /// # type Context<'a> = poise::Context<'a, (), Error>;
+    /// # async {
+    /// let framework: Arc<poise::Framework<(), Error>> = poise::Framework::builder()
+    ///     .options(poise::FrameworkOptions { ..Default::default() })
+    ///     .token("...")
+    ///     .intents(serenity::GatewayIntents::non_privileged())
+    ///     .user_data_setup(|_, _, _| Box::pin(async move { Ok(()) }))
     ///     .build()
     ///     .await?;
     ///
-    /// // Shard with id
-    /// let (id, total_count) = (2, 5);
-    /// framework.start_with(|mut c| async move { c.start_shard(id, total_count).await })
-    ///     .await?;
+    /// let shard_range = [3, 7];
+    /// let total_shards = 8;
     ///
-    /// // Number of shards
-    /// let total_count = 4;
-    /// framework.start_with(|mut c| async move { c.start_shards(total_count).await })
-    ///     .await?;
+    /// framework.start_with(|mut client| async move { client.start_shard_range(shard_range, total_shards).await }).await?;
     ///
-    /// // Shard range
-    /// let range = [3, 7];
-    /// let total_count = 8;
-    /// framework.start_with(|mut c| async move { c.start_shard_range(range, total_count).await })
-    ///     .await?;
-    ///
+    /// # Ok::<(), Error>(()) };
     /// ```
     pub async fn start_with<F: std::future::Future<Output = serenity::Result<()>>>(
         self: std::sync::Arc<Self>,
