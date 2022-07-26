@@ -31,7 +31,9 @@ pub struct Command<U, E> {
     /// Subcommands of this command, if any
     pub subcommands: Vec<Command<U, E>>,
     /// Main name of the command. Aliases (prefix-only) can be set in [`Self::aliases`].
-    pub name: &'static str,
+    pub name: String,
+    /// Localized names with locale string as the key (slash-only)
+    pub name_localizations: std::collections::HashMap<String, String>,
     /// Full name including parent command names.
     ///
     /// Initially set to just [`Self::name`] and properly populated when the framework is started.
@@ -46,11 +48,14 @@ pub struct Command<U, E> {
     /// Whether to hide this command in help menus.
     pub hide_in_help: bool,
     /// Short description of the command. Displayed inline in help menus and similar.
-    pub inline_help: Option<&'static str>,
+    // TODO: rename to description
+    pub description: Option<String>,
+    /// Localized descriptions with locale string as the key (slash-only)
+    pub description_localizations: std::collections::HashMap<String, String>,
     /// Multiline description with detailed usage instructions. Displayed in the command specific
     /// help: `~help command_name`
     // TODO: fix the inconsistency that this is String and everywhere else it's &'static str
-    pub multiline_help: Option<fn() -> String>,
+    pub help_text: Option<fn() -> String>,
     /// Handles command cooldowns. Mainly for framework internal use
     pub cooldowns: std::sync::Mutex<crate::Cooldowns>,
     /// After the first response, whether to post subsequent responses as edits to the initial
@@ -132,8 +137,14 @@ impl<U, E> Command<U, E> {
 
         let mut builder = serenity::CreateApplicationCommandOption::default();
         builder
-            .name(self.name)
-            .description(self.inline_help.unwrap_or("A slash command"));
+            .name(&self.name)
+            .description(self.description.as_deref().unwrap_or("A slash command"));
+        for (locale, name) in &self.name_localizations {
+            builder.name_localized(locale, name);
+        }
+        for (locale, description) in &self.description_localizations {
+            builder.description_localized(locale, description);
+        }
 
         if self.subcommands.is_empty() {
             builder.kind(serenity::CommandOptionType::SubCommand);
@@ -163,8 +174,14 @@ impl<U, E> Command<U, E> {
 
         let mut builder = serenity::CreateApplicationCommand::default();
         builder
-            .name(self.name)
-            .description(self.inline_help.unwrap_or("A slash command"));
+            .name(&self.name)
+            .description(self.description.as_deref().unwrap_or("A slash command"));
+        for (locale, name) in &self.name_localizations {
+            builder.name_localized(locale, name);
+        }
+        for (locale, description) in &self.description_localizations {
+            builder.description_localized(locale, description);
+        }
 
         // This is_empty check is needed because Discord special cases empty
         // default_member_permissions to mean "admin-only" (yes it's stupid)
@@ -196,7 +213,8 @@ impl<U, E> Command<U, E> {
 
         let mut builder = serenity::CreateApplicationCommand::default();
         builder
-            .name(self.context_menu_name.unwrap_or(self.name))
+            // TODO: localization?
+            .name(self.context_menu_name.unwrap_or(&self.name))
             .kind(match context_menu_action {
                 crate::ContextMenuCommandAction::User(_) => serenity::CommandType::User,
                 crate::ContextMenuCommandAction::Message(_) => serenity::CommandType::Message,
@@ -206,13 +224,14 @@ impl<U, E> Command<U, E> {
     }
 
     /// **Deprecated**
-    #[deprecated = "Please use `crate::Command { category: \"...\", ..command() }` instead"]
+    #[deprecated = "Please use `poise::Command { category: \"...\", ..command() }` instead"]
     pub fn category(&mut self, category: &'static str) -> &mut Self {
         self.category = Some(category);
         self
     }
 
     /// Insert a subcommand
+    #[deprecated = "Please use `poise::Command { subcommands: vec![...], ..command() }` instead"]
     pub fn subcommand(
         &mut self,
         mut subcommand: crate::Command<U, E>,

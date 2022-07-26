@@ -14,17 +14,23 @@ pub struct CommandArgs {
     context_menu_command: Option<String>,
 
     // When changing these, document it in parent file!
+    // TODO: decide why darling(multiple) feels wrong here but not in e.g. localizations (because
+    //  if it's actually irrational, the inconsistency should be fixed)
     subcommands: crate::util::List<syn::Path>,
     aliases: crate::util::List<String>,
     invoke_on_edit: bool,
     reuse_response: bool,
     track_edits: bool,
     broadcast_typing: bool,
-    explanation_fn: Option<syn::Path>,
+    help_text_fn: Option<syn::Path>,
     #[darling(multiple)]
     check: Vec<syn::Path>,
     on_error: Option<syn::Path>,
     rename: Option<String>,
+    #[darling(multiple)]
+    name_localized: Vec<crate::util::Tuple2<String>>,
+    #[darling(multiple)]
+    description_localized: Vec<crate::util::Tuple2<String>>,
     discard_spare_arguments: bool,
     hide_in_help: bool,
     ephemeral: bool,
@@ -54,6 +60,10 @@ struct ParamArgs {
     // When changing these, document it in parent file!
     description: Option<String>,
     rename: Option<String>,
+    #[darling(multiple)]
+    name_localized: Vec<crate::util::Tuple2<String>>,
+    #[darling(multiple)]
+    description_localized: Vec<crate::util::Tuple2<String>>,
     autocomplete: Option<syn::Path>,
     channel_types: Option<crate::util::List<syn::Ident>>,
     min: Option<syn::Lit>,
@@ -76,7 +86,7 @@ pub struct Invocation {
     command_name: String,
     parameters: Vec<CommandParameter>,
     description: Option<String>,
-    explanation: Option<String>,
+    help_text: Option<String>,
     function: syn::ItemFn,
     default_member_permissions: syn::Expr,
     required_permissions: syn::Expr,
@@ -90,28 +100,24 @@ fn extract_help_from_doc_comments(attrs: &[syn::Attribute]) -> (Option<String>, 
         if attr.path == quote::format_ident!("doc").into() {
             for token in attr.tokens.clone() {
                 if let Ok(literal) = syn::parse2::<syn::LitStr>(token.into()) {
-                    let literal = literal.value();
-                    let literal = literal.strip_prefix(' ').unwrap_or(&literal);
-
-                    doc_lines += literal;
+                    doc_lines += literal.value().trim(); // Trim lines like rustdoc does
                     doc_lines += "\n";
                 }
             }
         }
     }
 
-    // Apply newline escapes
+    // Trim trailing newline and apply newline escapes
     let doc_lines = doc_lines.trim().replace("\\\n", "");
 
-    if doc_lines.is_empty() {
-        return (None, None);
-    }
+    let mut paragraphs = doc_lines.splitn(2, "\n\n").filter(|x| !x.is_empty()); // "".split => [""]
 
-    let mut paragraphs = doc_lines.splitn(2, "\n\n");
-    let inline_help = paragraphs.next().unwrap().replace("\n", " ");
-    let multiline_help = paragraphs.next().map(|x| x.to_owned());
+    // Pop first paragraph as description if needed (but no newlines bc description is single line)
+    let description = paragraphs.next().map(|x| x.replace("\n", " "));
+    // Use rest of doc comments as help text
+    let help_text = paragraphs.next().map(|x| x.to_owned());
 
-    (Some(inline_help), multiline_help)
+    (description, help_text)
 }
 
 pub fn command(
@@ -169,7 +175,7 @@ pub fn command(
     }
 
     // Extract the command descriptions from the function doc comments
-    let (description, explanation) = extract_help_from_doc_comments(&function.attrs);
+    let (description, help_text) = extract_help_from_doc_comments(&function.attrs);
 
     fn permissions_to_tokens(
         perms: &Option<syn::punctuated::Punctuated<syn::Ident, syn::Token![|]>>,
@@ -193,7 +199,7 @@ pub fn command(
             .unwrap_or_else(|| function.sig.ident.to_string()),
         parameters,
         description,
-        explanation,
+        help_text,
         args,
         function,
         default_member_permissions,
@@ -238,7 +244,10 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
     let command_name = &inv.command_name;
     let context_menu_name = wrap_option(inv.args.context_menu_command.as_ref());
 
-    let description = wrap_option(inv.description.as_ref());
+    let description = match &inv.description {
+        Some(x) => quote::quote! { Some(#x.to_string()) },
+        None => quote::quote! { None },
+    };
     let hide_in_help = &inv.args.hide_in_help;
     let category = wrap_option(inv.args.category.as_ref());
 
@@ -256,9 +265,9 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
     let dm_only = inv.args.dm_only;
     let nsfw_only = inv.args.nsfw_only;
 
-    let explanation = match &inv.args.explanation_fn {
-        Some(explanation_fn) => quote::quote! { Some(#explanation_fn) },
-        None => match &inv.explanation {
+    let help_text = match &inv.args.help_text_fn {
+        Some(help_text_fn) => quote::quote! { Some(#help_text_fn) },
+        None => match &inv.help_text {
             Some(extracted_explanation) => quote::quote! { Some(|| #extracted_explanation.into()) },
             None => quote::quote! { None },
         },
@@ -284,6 +293,10 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
         None => quote::quote! { Box::new(()) },
     };
 
+    let name_localizations = crate::util::vec_tuple_2_to_hash_map(inv.args.name_localized);
+    let description_localizations =
+        crate::util::vec_tuple_2_to_hash_map(inv.args.description_localized);
+
     let function_name = std::mem::replace(&mut inv.function.sig.ident, syn::parse_quote! { inner });
     let function_visibility = &inv.function.vis;
     let function = &inv.function;
@@ -300,12 +313,14 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
                 context_menu_action: #context_menu_action,
 
                 subcommands: vec![ #( #subcommands() ),* ],
-                name: #command_name,
+                name: #command_name.to_string(),
+                name_localizations: #name_localizations,
                 qualified_name: String::from(#command_name), // properly filled in later by Framework
                 identifying_name: String::from(#identifying_name),
                 category: #category,
-                inline_help: #description,
-                multiline_help: #explanation,
+                description: #description,
+                description_localizations: #description_localizations,
+                help_text: #help_text,
                 hide_in_help: #hide_in_help,
                 cooldowns: std::sync::Mutex::new(::poise::Cooldowns::new(::poise::CooldownConfig {
                     global: #global_cooldown.map(std::time::Duration::from_secs),

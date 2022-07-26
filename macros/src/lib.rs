@@ -18,13 +18,15 @@ for example for command-specific help (i.e. `~help command_name`). Escape newlin
 - `prefix_command`: Generate a prefix command
 - `slash_command`: Generate a slash command
 - `context_menu_command`: Generate a context menu command
+- `description_localized`: Adds localized description of the parameter `description_localized("locale", "Description")` (slash-only)
+- `name_localized`: Adds localized name of the parameter `name_localized("locale", "new_name")` (slash-only)
 - `subcommands`: List of subcommands `subcommands("foo", "bar", "baz")`
 - `aliases`: Command name aliases (only applies to prefix commands)
 - `invoke_on_edit`: Reruns the command if an existing invocation message is edited (prefix only)
 - `reuse_response`: After the first response, post subsequent responses as edits to the initial message (prefix only)
 - `track_edits`: Shorthand for `invoke_on_edit` and `reuse_response` (prefix only)
 - `broadcast_typing`: Trigger a typing indicator while command runs (only applies to prefix commands I think)
-- `explanation_fn`: Path to a string-returning function which is used for the detailed explanations instead of documentation comments
+- `help_text_fn`: Path to a string-returning function which is used for command help text instead of documentation comments
     - Useful if you have many commands with very similar help messages: you can abstract the common parts into a function
 - `check`: Path to a function which is invoked for every invocation. If the function returns false, the command is not executed (can be used multiple times)
 - `on_error`: Error handling function
@@ -60,15 +62,48 @@ All following parameters are inputs to the command. You can use all types that i
 You can also wrap types in `Option` or `Vec` to make them optional or variadic. In addition, there
 are multiple attributes you can use on parameters:
 - `#[description = ""]`: Sets description of the parameter (slash-only)
-- `#[autocomplete = ""]`: Sets the autocomplete callback (slash-only)
+- `#[description_localized("locale", "Description")]`: Adds localized description of the parameter (slash-only)
+- `#[name_localized("locale", "new_name")]`: Adds localized name of the parameter (slash-only)
+- `#[autocomplete = "callback()"]`: Sets the autocomplete callback (slash-only)
 - `#[channel_types("", "")]`: For channel parameters, restricts allowed channel types (slash-only)
-- `#[rename = ""]`: Changes the user-facing name of the parameter (slash-only)
+- `#[rename = "new_name"]`: Changes the user-facing name of the parameter (slash-only)
 - `#[min = 0]`: Minimum value for this number parameter (slash-only)
 - `#[max = 0]`: Maximum value for this number parameter (slash-only)
 - `#[rest]`: Use the entire rest of the message for this parameter (prefix-only)
 - `#[lazy]`: Can be used on Option and Vec parameters and is equivalent to regular expressions' laziness (prefix-only)
 - `#[flag]`: Can be used on a bool parameter to set the bool to true if the user typed the parameter name literally (prefix-only)
     - For example with `async fn my_command(ctx: Context<'_>, #[flag] my_flag: bool)`, `~my_command` would set my_flag to false, and `~my_command my_flag` would set my_flag to true
+
+# Help text
+
+Documentation comments are used as command help text. The first paragraph is the command
+description (`Command::description`) and all following paragraphs are the multiline help text
+(`Command::help_text`).
+
+In the multiline help text, put `\` at the end of a line to escape the newline.
+
+Example:
+
+```rust
+/// This is the description of my cool command, it can span multiple
+/// lines if you need to
+///
+/// Here in the following paragraphs, you can give information on how \
+/// to use the command that will be shown in your command's help.
+///
+/// You could also put example invocations here:
+/// `~coolcommand test`
+#[poise::command(slash_command)]
+pub async fn coolcommand(ctx: Context<'_>, s: String) -> Result<(), Error> { ... }
+```
+results in
+```rust
+poise::Command {
+    description: Some("This is the description of my cool command, it can span multiple lines if you need to".into()),
+    help_text: Some("Here in the following paragraphs, you can give information on how to use the command that will be shown in your command's help.\n\nYou could also put example invocations here:\n`~coolcommand test`".into()),
+    ...
+}
+```
 
 # Internals
 
@@ -91,7 +126,7 @@ fn my_command() -> poise::Command<Data, Error> {
 
     poise::Command {
         name: "my_command",
-        inline_help: "This is a command",
+        description: "This is a command",
         prefix_action: Some(|ctx| Box::pin(async move {
             inner(ctx.into()).await
         })),
@@ -144,8 +179,31 @@ Example invocations:
 - `~yourcommand "The first choice"` - without the quotes, each word would count as a separate argument
 - `~yourcommand ChoiceB`
 - `~yourcommand cHoIcEb` - names are case-insensitive
+
+# Localization
+
+In slash commands, you can take advantage of Discord's localization.
+
+```rust
+#[derive(poise::ChoiceParameter)]
+pub enum Food {
+    #[name_localized("de", "Eier")]
+    #[name_localized("es-ES", "Huevos")]
+    Eggs,
+    #[name_localized("de", "Pizza")]
+    #[name_localized("es-ES", "Pizza")]
+    Pizza,
+    #[name_localized("de", "Müsli")]
+    #[name_localized("es-ES", "Muesli")]
+    Cereals,
+}
+```
+
+When invoking your slash command, users will be shown the name matching their locale.
+
+You can also set localized choice names programmatically; see `CommandParameter::choices`
 */
-#[proc_macro_derive(ChoiceParameter, attributes(name))]
+#[proc_macro_derive(ChoiceParameter, attributes(name, name_localized))]
 pub fn choice_parameter(input: TokenStream) -> TokenStream {
     let enum_ = syn::parse_macro_input!(input as syn::DeriveInput);
 

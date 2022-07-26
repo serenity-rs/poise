@@ -44,10 +44,11 @@ async fn help_single_command<U, E>(
     });
 
     let reply = if let Some(command) = command {
-        match command.multiline_help {
+        match command.help_text {
             Some(f) => f(),
             None => command
-                .inline_help
+                .description
+                .as_deref()
                 .unwrap_or("No help available")
                 .to_owned(),
         }
@@ -112,7 +113,7 @@ async fn help_all_commands<U, E>(
                 prefix,
                 command.name,
                 " ".repeat(padding),
-                command.inline_help.unwrap_or("")
+                command.description.as_deref().unwrap_or("")
             );
         }
     }
@@ -126,7 +127,7 @@ async fn help_all_commands<U, E>(
                 Some(crate::ContextMenuCommandAction::Message(_)) => "message",
                 None => continue,
             };
-            let name = command.context_menu_name.unwrap_or(command.name);
+            let name = command.context_menu_name.unwrap_or(&command.name);
             let _ = writeln!(menu, "  {} (on {})", name, kind);
         }
     }

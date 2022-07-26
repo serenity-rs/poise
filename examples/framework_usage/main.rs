@@ -97,6 +97,7 @@ async fn main() {
             checks::lennyface(),
             checks::permissions_v2(),
             subcommands::parent(),
+            localization::welcome(),
         ],
         prefix_options: poise::PrefixFrameworkOptions {
             prefix: Some("~".into()),

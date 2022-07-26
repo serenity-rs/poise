@@ -134,7 +134,7 @@ where
     };
 
     for command in commands {
-        let primary_name_matches = string_equal(command.name, command_name);
+        let primary_name_matches = string_equal(&command.name, command_name);
         let alias_matches = command
             .aliases
             .iter()

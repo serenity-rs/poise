@@ -1,17 +1,16 @@
 use super::Invocation;
-use crate::util::{extract_type_parameter, wrap_option};
+use crate::util::extract_type_parameter;
 use syn::spanned::Spanned as _;
 
 pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStream>, syn::Error> {
     let mut parameter_structs = Vec::new();
     for param in &inv.parameters {
-        if inv.args.slash_command && param.args.description.is_none() {
-            return Err(syn::Error::new(
-                param.span,
-                "slash command parameters must have a description",
-            ));
-        }
-        let description = wrap_option(param.args.description.as_ref());
+        // no #[description] check here even if slash_command set, so users can programatically
+        // supply descriptions later (e.g. via translation framework like fluent)
+        let description = match &param.args.description {
+            Some(x) => quote::quote! { Some(#x.to_string()) },
+            None => quote::quote! { None },
+        };
 
         let (mut required, type_) = match extract_type_parameter("Option", &param.type_)
             .or_else(|| extract_type_parameter("Vec", &param.type_))
@@ -29,6 +28,10 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
             Some(rename) => rename.clone(),
             None => param.name.to_string(),
         };
+        let name_locales = param.args.name_localized.iter().map(|x| &x.0);
+        let name_localized_values = param.args.name_localized.iter().map(|x| &x.1);
+        let description_locales = param.args.description_localized.iter().map(|x| &x.0);
+        let description_localized_values = param.args.description_localized.iter().map(|x| &x.1);
 
         let autocomplete_callback = match &param.args.autocomplete {
             Some(autocomplete_fn) => {
@@ -62,6 +65,7 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
         };
 
         // We can just cast to f64 here because Discord only uses f64 precision anyways
+        // TODO: move this to poise::CommandParameter::{min, max} fields
         let min_value_setter = match &param.args.min {
             Some(x) => quote::quote! { o.min_number_value(#x as f64); },
             None => quote::quote! {},
@@ -77,6 +81,11 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
             }) },
             false => quote::quote! { None },
         };
+        // TODO: theoretically a problem that we don't store choices for non slash commands
+        let choices = match inv.args.slash_command {
+            true => quote::quote! { poise::slash_argument_choices!(#type_) },
+            false => quote::quote! { vec![] },
+        };
 
         let channel_types = match &param.args.channel_types {
             Some(crate::util::List(channel_types)) => quote::quote! { Some(
@@ -88,11 +97,18 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
         parameter_structs.push((
             quote::quote! {
                 ::poise::CommandParameter {
-                    name: #param_name,
+                    name: #param_name.to_string(),
+                    name_localizations: vec![
+                        #( (#name_locales.to_string(), #name_localized_values.to_string()) )*
+                    ].into_iter().collect(),
                     description: #description,
+                    description_localizations: vec![
+                        #( (#description_locales.to_string(), #description_localized_values.to_string()) )*
+                    ].into_iter().collect(),
                     required: #required,
                     channel_types: #channel_types,
                     type_setter: #type_setter,
+                    choices: #choices,
                     autocomplete_callback: #autocomplete_callback,
                 }
             },
