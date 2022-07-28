@@ -108,6 +108,8 @@ pub async fn register_application_commands<U, E>(
 /// Spawns four buttons to register or delete application commands globally or in the current guild
 ///
 /// Upgraded version of [`register_application_commands`]
+///
+/// ![Screenshot of output](https://imgur.com/rTbTaDs.png)
 pub async fn register_application_commands_buttons<U, E>(
     ctx: crate::Context<'_, U, E>,
 ) -> Result<(), serenity::Error> {
