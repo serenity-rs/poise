@@ -28,7 +28,7 @@ pub async fn send_reply<'att, U, E>(
 ) -> Result<crate::ReplyHandle<'_>, serenity::Error> {
     Ok(match ctx {
         crate::Context::Prefix(ctx) => {
-            crate::ReplyHandle::Known(crate::send_prefix_reply(ctx, builder).await?)
+            crate::ReplyHandle(super::ReplyHandleInner::Prefix(crate::send_prefix_reply(ctx, builder).await?))
         }
         crate::Context::Application(ctx) => crate::send_application_reply(ctx, builder).await?,
     })
@@ -71,7 +71,7 @@ async fn _send_application_reply<'a, U, E>(
     let interaction = match ctx.interaction {
         crate::ApplicationCommandOrAutocompleteInteraction::ApplicationCommand(x) => x,
         crate::ApplicationCommandOrAutocompleteInteraction::Autocomplete(_) => {
-            return Ok(crate::ReplyHandle::Autocomplete)
+            return Ok(crate::ReplyHandle(super::ReplyHandleInner::Autocomplete))
         }
     };
 
@@ -83,8 +83,8 @@ async fn _send_application_reply<'a, U, E>(
         .has_sent_initial_response
         .load(std::sync::atomic::Ordering::SeqCst);
 
-    Ok(if has_sent_initial_response {
-        crate::ReplyHandle::Known(Box::new(
+    let followup = if has_sent_initial_response {
+        Some(Box::new(
             interaction
                 .create_followup_message(ctx.discord, |f| {
                     data.to_slash_followup_response(f);
@@ -105,11 +105,14 @@ async fn _send_application_reply<'a, U, E>(
         ctx.has_sent_initial_response
             .store(true, std::sync::atomic::Ordering::SeqCst);
 
-        crate::ReplyHandle::Unknown {
-            http: &ctx.discord.http,
-            interaction,
-        }
-    })
+        None
+    };
+
+    Ok(crate::ReplyHandle(crate::ReplyHandleInner::Application {
+        http: &ctx.discord.http,
+        interaction,
+        followup,
+    }))
 }
 
 /// Prefix-specific reply function. For more details, see [`crate::send_reply`].

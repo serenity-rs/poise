@@ -9,29 +9,34 @@ pub use send_reply::*;
 use crate::serenity_prelude as serenity;
 use std::borrow::Cow;
 
-/// Returned from [`send_reply()`] to retrieve the sent message object.
-///
-/// Discord sometimes returns the [`serenity::Message`] object directly, but sometimes you have to
-/// request it manually. This enum abstracts over the two cases
+/// Private enum so we can extend, split apart, or merge variants without breaking changes
 #[derive(Clone)]
-pub enum ReplyHandle<'a> {
-    /// When sending a normal message or application command followup response, Discord returns the
-    /// message object directly
-    Known(Box<serenity::Message>),
-    /// When sending an initial application command response, you need to request the message object
-    /// seperately
-    Unknown {
+pub(super) enum ReplyHandleInner<'a> {
+    /// A reply sent to a prefix command, i.e. a normal standalone message
+    Prefix(Box<serenity::Message>),
+    /// An application command response
+    Application {
         /// Serenity HTTP instance that can be used to request the interaction response message
         /// object
         http: &'a serenity::Http,
         /// Interaction which contains the necessary data to request the interaction response
         /// message object
         interaction: &'a serenity::ApplicationCommandInteraction,
+        /// If this is a followup response, the Message object (which Discord only returns for
+        /// followup responses, not initial)
+        followup: Option<Box<serenity::Message>>,
     },
     /// Reply was attempted to be sent in autocomplete context, resulting in a no-op. Calling
     /// methods on this variant will panic
     Autocomplete,
 }
+
+/// Returned from [`send_reply()`] to operate on the sent message
+///
+/// Discord sometimes returns the [`serenity::Message`] object directly, but sometimes you have to
+/// request it manually. This enum abstracts over the two cases
+#[derive(Clone)]
+pub struct ReplyHandle<'a>(pub(super) ReplyHandleInner<'a>);
 
 impl ReplyHandle<'_> {
     /// Retrieve the message object of the sent reply.
@@ -40,28 +45,36 @@ impl ReplyHandle<'_> {
     ///
     /// Only needs to do an HTTP request in the application command response case
     pub async fn into_message(self) -> Result<serenity::Message, serenity::Error> {
-        match self {
-            Self::Known(msg) => Ok(*msg),
-            Self::Unknown { http, interaction } => interaction.get_interaction_response(http).await,
-            Self::Autocomplete => panic!("reply is a no-op in autocomplete context"),
+        use ReplyHandleInner::*;
+        match self.0 {
+            Prefix(msg) | Application { followup: Some(msg), .. } => Ok(*msg),
+            Application { http, interaction, followup: None } => {
+                interaction.get_interaction_response(http).await
+            },
+            Autocomplete => panic!("reply is a no-op in autocomplete context"),
         }
     }
 
     /// Retrieve the message object of the sent reply.
     ///
     /// Returns a reference to the known Message object, or fetches the message from the discord API.
+    ///
+    /// To get an owned [`serenity::Message`], use [`Self::into_message()`]
     pub async fn message(&self) -> Result<Cow<'_, serenity::Message>, serenity::Error> {
-        match self {
-            Self::Known(msg) => Ok(Cow::Borrowed(msg)),
-            Self::Unknown { http, interaction } => Ok(Cow::Owned(
+        use ReplyHandleInner::*;
+        match &self.0 {
+            Prefix(msg) | Application { followup: Some(msg), .. } => Ok(Cow::Borrowed(msg)),
+            Application { http, interaction, followup: None } => Ok(Cow::Owned(
                 interaction.get_interaction_response(http).await?,
             )),
-            Self::Autocomplete => panic!("reply is a no-op in autocomplete context"),
+            Autocomplete => panic!("reply is a no-op in autocomplete context"),
         }
     }
 
     /// Edits the message that this [`ReplyHandle`] points to
     // TODO: return the edited Message object?
+    // TODO: should I eliminate the ctx parameter by storing it in self instead? Would infect
+    //  ReplyHandle with <U, E> type parameters
     pub async fn edit<'att, U, E>(
         &self,
         ctx: crate::Context<'_, U, E>,
@@ -78,8 +91,8 @@ impl ReplyHandle<'_> {
             callback(ctx, &mut reply);
         }
 
-        match self {
-            Self::Known(msg) => {
+        match &self.0 {
+            ReplyHandleInner::Prefix(msg) => {
                 msg.clone()
                     .edit(ctx.discord(), |b| {
                         reply.to_prefix_edit(b);
@@ -87,7 +100,7 @@ impl ReplyHandle<'_> {
                     })
                     .await?;
             }
-            Self::Unknown { http, interaction } => {
+            ReplyHandleInner::Application { http, interaction, followup: None } => {
                 interaction
                     .edit_original_interaction_response(http, |b| {
                         reply.to_slash_initial_response_edit(b);
@@ -95,7 +108,15 @@ impl ReplyHandle<'_> {
                     })
                     .await?;
             }
-            Self::Autocomplete => panic!("reply is a no-op in autocomplete context"),
+            ReplyHandleInner::Application { http, interaction, followup: Some(msg) } => {
+                interaction
+                    .edit_followup_message(http, msg.id, |b| {
+                        reply.to_slash_followup_response(b);
+                        b
+                    })
+                    .await?;
+            }
+            ReplyHandleInner::Autocomplete => panic!("reply is a no-op in autocomplete context"),
         }
         Ok(())
     }
