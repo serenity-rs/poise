@@ -71,7 +71,7 @@ pub fn choice_parameter(input: syn::DeriveInput) -> Result<TokenStream, darling:
             async fn extract(
                 _: &poise::serenity_prelude::Context,
                 _: poise::ApplicationCommandOrAutocompleteInteraction<'_>,
-                value: &poise::serenity::json::Value,
+                value: &poise::serenity_prelude::json::Value,
             ) -> ::std::result::Result<Self, poise::SlashArgError> {
                 use poise::serenity_prelude::json::prelude::*;
                 let choice_key = value

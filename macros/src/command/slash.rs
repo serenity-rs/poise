@@ -49,15 +49,15 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
                         // T or AutocompleteChoice<T> -> AutocompleteChoice<T>
                         .map(|value| poise::AutocompleteChoice::from(value))
                         // AutocompleteChoice<T> -> serde_json::Value
-                        .map(|choice| poise::serenity::json::json!({
+                        .map(|choice| poise::serenity_prelude::json::json!({
                             "name": choice.name,
-                            "value": poise::serenity::json::Value::from(choice.value),
+                            "value": poise::serenity_prelude::json::Value::from(choice.value),
                         }))
                         .collect()
                         .await;
 
-                    let mut response = poise::serenity::builder::CreateAutocompleteResponse::default();
-                    response.set_choices(poise::serenity::json::Value::Array(choices_json));
+                    let mut response = poise::serenity_prelude::CreateAutocompleteResponse::default();
+                    response.set_choices(poise::serenity_prelude::json::Value::Array(choices_json));
                     Ok(response)
                 })) }
             }
