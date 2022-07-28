@@ -47,10 +47,16 @@ impl ReplyHandle<'_> {
     pub async fn into_message(self) -> Result<serenity::Message, serenity::Error> {
         use ReplyHandleInner::*;
         match self.0 {
-            Prefix(msg) | Application { followup: Some(msg), .. } => Ok(*msg),
-            Application { http, interaction, followup: None } => {
-                interaction.get_interaction_response(http).await
-            },
+            Prefix(msg)
+            | Application {
+                followup: Some(msg),
+                ..
+            } => Ok(*msg),
+            Application {
+                http,
+                interaction,
+                followup: None,
+            } => interaction.get_interaction_response(http).await,
             Autocomplete => panic!("reply is a no-op in autocomplete context"),
         }
     }
@@ -63,8 +69,16 @@ impl ReplyHandle<'_> {
     pub async fn message(&self) -> Result<Cow<'_, serenity::Message>, serenity::Error> {
         use ReplyHandleInner::*;
         match &self.0 {
-            Prefix(msg) | Application { followup: Some(msg), .. } => Ok(Cow::Borrowed(msg)),
-            Application { http, interaction, followup: None } => Ok(Cow::Owned(
+            Prefix(msg)
+            | Application {
+                followup: Some(msg),
+                ..
+            } => Ok(Cow::Borrowed(msg)),
+            Application {
+                http,
+                interaction,
+                followup: None,
+            } => Ok(Cow::Owned(
                 interaction.get_interaction_response(http).await?,
             )),
             Autocomplete => panic!("reply is a no-op in autocomplete context"),
@@ -100,7 +114,11 @@ impl ReplyHandle<'_> {
                     })
                     .await?;
             }
-            ReplyHandleInner::Application { http, interaction, followup: None } => {
+            ReplyHandleInner::Application {
+                http,
+                interaction,
+                followup: None,
+            } => {
                 interaction
                     .edit_original_interaction_response(http, |b| {
                         reply.to_slash_initial_response_edit(b);
@@ -108,7 +126,11 @@ impl ReplyHandle<'_> {
                     })
                     .await?;
             }
-            ReplyHandleInner::Application { http, interaction, followup: Some(msg) } => {
+            ReplyHandleInner::Application {
+                http,
+                interaction,
+                followup: Some(msg),
+            } => {
                 interaction
                     .edit_followup_message(http, msg.id, |b| {
                         reply.to_slash_followup_response(b);

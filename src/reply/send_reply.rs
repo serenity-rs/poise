@@ -27,9 +27,9 @@ pub async fn send_reply<'att, U, E>(
     builder: impl for<'a> FnOnce(&'a mut crate::CreateReply<'att>) -> &'a mut crate::CreateReply<'att>,
 ) -> Result<crate::ReplyHandle<'_>, serenity::Error> {
     Ok(match ctx {
-        crate::Context::Prefix(ctx) => {
-            crate::ReplyHandle(super::ReplyHandleInner::Prefix(crate::send_prefix_reply(ctx, builder).await?))
-        }
+        crate::Context::Prefix(ctx) => crate::ReplyHandle(super::ReplyHandleInner::Prefix(
+            crate::send_prefix_reply(ctx, builder).await?,
+        )),
         crate::Context::Application(ctx) => crate::send_application_reply(ctx, builder).await?,
     })
 }
