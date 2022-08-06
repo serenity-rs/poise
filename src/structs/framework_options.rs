@@ -88,7 +88,7 @@ where
             on_error: |error| {
                 Box::pin(async move {
                     if let Err(e) = crate::builtins::on_error(error).await {
-                        println!("Error while handling error: {}", e);
+                        log::error!("Error while handling error: {}", e);
                     }
                 })
             },

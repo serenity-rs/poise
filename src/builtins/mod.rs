@@ -11,7 +11,9 @@ pub use register::*;
 
 use crate::serenity_prelude as serenity;
 
-/// An error handler that prints the error into the console and also into the Discord chat.
+/// An error handler that logs errors either via the [`log`] crate or via a Discord message. Set
+/// up a logger (e.g. `env_logger::init()`) to see the logged errors from this method.
+///
 /// If the user invoked the command wrong ([`crate::FrameworkError::ArgumentParse`]), the command
 /// help is displayed and the user is directed to the help menu.
 ///
@@ -20,7 +22,7 @@ use crate::serenity_prelude as serenity;
 /// ```rust,no_run
 /// # async { let error: poise::FrameworkError<'_, (), &str> = todo!();
 /// if let Err(e) = poise::builtins::on_error(error).await {
-///     println!("Fatal error while sending error message: {}", e);
+///     log::error!("Fatal error while sending error message: {}", e);
 /// }
 /// # };
 /// ```
@@ -28,8 +30,10 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
     error: crate::FrameworkError<'_, U, E>,
 ) -> Result<(), serenity::Error> {
     match error {
-        crate::FrameworkError::Setup { error } => println!("Error in user data setup: {}", error),
-        crate::FrameworkError::Listener { error, event, .. } => println!(
+        crate::FrameworkError::Setup { error } => {
+            log::error!("Error in user data setup: {}", error)
+        }
+        crate::FrameworkError::Listener { error, event, .. } => log::error!(
             "User event listener encountered an error on {} event: {}",
             event.name(),
             error
@@ -56,13 +60,14 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
             ctx.say(response).await?;
         }
         crate::FrameworkError::CommandStructureMismatch { ctx, description } => {
-            println!(
+            log::error!(
                 "Error: failed to deserialize interaction arguments for `/{}`: {}",
-                ctx.command.name, description,
+                ctx.command.name,
+                description,
             );
         }
         crate::FrameworkError::CommandCheckFailed { ctx, error } => {
-            println!(
+            log::error!(
                 "A command check failed in command {} for user {}: {:?}",
                 ctx.command().name,
                 ctx.author().name,
@@ -126,7 +131,7 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
             ctx.send(|b| b.content(response).ephemeral(true)).await?;
         }
         crate::FrameworkError::DynamicPrefix { error } => {
-            println!("Dynamic prefix failed: {}", error);
+            log::error!("Dynamic prefix failed: {}", error);
         }
         crate::FrameworkError::__NonExhaustive => panic!(),
     }
