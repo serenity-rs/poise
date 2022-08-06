@@ -22,6 +22,11 @@ API updates:
 - `Framework::start_with()` now takes `impl FnOnce` instead of `fn`
   - To be usable with with `serenity::Client`'s `start_shard`, `start_shard_range`, and `start_shards` methods
 - Removed `serenity` re-export at crate root (`serenity_prelude` still exists!)
+- Command fields renamed: `inline_help` => `description`, `multiline_help` => `help_text`
+- Command and parameter `name` and `description` fields changed from `&'static str` to `String`
+  - To make them overrideable at runtime
+- Autocomplete functions' partial input parameter is now always `&str`
+  - Was previously String, [i/u][8/16/32/64], f[32/64], depending on parameter type
 
 Behavior changes:
 - Fix identifying_name command attribute not being applied
