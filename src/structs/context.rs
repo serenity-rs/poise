@@ -4,6 +4,17 @@ use std::borrow::Cow;
 
 use crate::serenity_prelude as serenity;
 
+// needed for proc macro
+#[doc(hidden)]
+pub trait _GetGenerics {
+    type U;
+    type E;
+}
+impl<U, E> _GetGenerics for Context<'_, U, E> {
+    type U = U;
+    type E = E;
+}
+
 /// Wrapper around either [`crate::ApplicationContext`] or [`crate::PrefixContext`]
 #[derive(Debug)]
 pub enum Context<'a, U, E> {
