@@ -114,3 +114,120 @@ pub enum FrameworkError<'a, U, E> {
     #[doc(hidden)]
     __NonExhaustive,
 }
+
+macro_rules! full_command_name {
+    ($ctx:expr) => {
+        format_args!("{}{}", $ctx.prefix(), $ctx.command().qualified_name)
+    };
+}
+
+impl<U, E: std::fmt::Display> std::fmt::Display for FrameworkError<'_, U, E> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Setup { error: _ } => write!(f, "poise setup error"),
+            Self::Listener {
+                error: _,
+                ctx: _,
+                event,
+                framework: _,
+            } => write!(f, "error in {} event listener", event.name()),
+            Self::Command { error: _, ctx } => {
+                write!(f, "error in command `{}`", full_command_name!(ctx))
+            }
+            Self::ArgumentParse {
+                error: _,
+                input,
+                ctx,
+            } => write!(
+                f,
+                "failed to parse argument in command `{}` on input {:?}",
+                full_command_name!(ctx),
+                input
+            ),
+            Self::CommandStructureMismatch { description, ctx } => write!(
+                f,
+                "unexpected application command structure in command `{}`: {}",
+                full_command_name!(crate::Context::Application(*ctx)),
+                description
+            ),
+            Self::CooldownHit {
+                remaining_cooldown,
+                ctx,
+            } => write!(
+                f,
+                "cooldown hit in command `{}` ({:?} remaining)",
+                full_command_name!(ctx),
+                remaining_cooldown
+            ),
+            Self::MissingBotPermissions {
+                missing_permissions,
+                ctx,
+            } => write!(
+                f,
+                "bot is missing permisions ({}) to execute command `{}`",
+                missing_permissions,
+                full_command_name!(ctx),
+            ),
+            Self::MissingUserPermissions {
+                missing_permissions,
+                ctx,
+            } => write!(
+                f,
+                "user is or may be missing permisions ({:?}) to execute command `{}`",
+                missing_permissions,
+                full_command_name!(ctx),
+            ),
+            Self::NotAnOwner { ctx } => write!(
+                f,
+                "owner-only command `{}` cannot be run by non-owners",
+                full_command_name!(ctx)
+            ),
+            Self::GuildOnly { ctx } => write!(
+                f,
+                "guild-only command `{}` cannot run in DMs",
+                full_command_name!(ctx)
+            ),
+            Self::DmOnly { ctx } => write!(
+                f,
+                "DM-only command `{}` cannot run in guilds",
+                full_command_name!(ctx)
+            ),
+            Self::NsfwOnly { ctx } => write!(
+                f,
+                "nsfw-only command `{}` cannot run in non-nsfw channels",
+                full_command_name!(ctx)
+            ),
+            Self::CommandCheckFailed { error: _, ctx } => write!(
+                f,
+                "pre-command check for command `{}` either denied access or errored",
+                full_command_name!(ctx)
+            ),
+            Self::DynamicPrefix { error: _ } => write!(f, "dynamic prefix callback errored"),
+            Self::__NonExhaustive => unreachable!(),
+        }
+    }
+}
+
+impl<'a, U: std::fmt::Debug, E: std::error::Error + 'static> std::error::Error
+    for FrameworkError<'a, U, E>
+{
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            Self::Setup { error, .. } => Some(error),
+            Self::Listener { error, .. } => Some(error),
+            Self::Command { error, .. } => Some(error),
+            Self::ArgumentParse { error, .. } => Some(&**error),
+            Self::CommandStructureMismatch { .. } => None,
+            Self::CooldownHit { .. } => None,
+            Self::MissingBotPermissions { .. } => None,
+            Self::MissingUserPermissions { .. } => None,
+            Self::NotAnOwner { .. } => None,
+            Self::GuildOnly { .. } => None,
+            Self::DmOnly { .. } => None,
+            Self::NsfwOnly { .. } => None,
+            Self::CommandCheckFailed { error, .. } => error.as_ref().map(|x| x as _),
+            Self::DynamicPrefix { error, .. } => Some(error),
+            Self::__NonExhaustive => unreachable!(),
+        }
+    }
+}
