@@ -237,7 +237,7 @@ async fn raw_dispatch_event<U, E>(
                     let _: Result<_, _> = framework.user_data.set(user_data);
                 }
                 Err(error) => {
-                    (framework.options.on_error)(crate::FrameworkError::Setup { error }).await
+                    (framework.options.on_error)(crate::FrameworkError::Setup { error, framework, data_about_bot, ctx }).await
                 }
             }
         } else {

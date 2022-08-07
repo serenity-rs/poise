@@ -136,7 +136,7 @@ pub async fn dispatch_event<U: Send + Sync, E>(
         (framework.options.listener)(ctx, event, framework, framework.user_data().await).await
     {
         let error = crate::FrameworkError::Listener {
-            ctx: ctx.clone(),
+            ctx,
             error,
             event,
             framework,

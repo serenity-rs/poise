@@ -11,6 +11,14 @@ pub enum FrameworkError<'a, U, E> {
     Setup {
         /// Error which was thrown in the setup code
         error: E,
+        /// The Framework passed to the event
+        #[derivative(Debug = "ignore")]
+        framework: &'a crate::Framework<U, E>,
+        /// Discord Ready event data present during setup
+        data_about_bot: &'a serenity::Ready,
+        /// The serenity Context passed to the event
+        #[derivative(Debug = "ignore")]
+        ctx: &'a serenity::Context,
     },
     /// User code threw an error in generic event listener
     Listener {
@@ -18,7 +26,7 @@ pub enum FrameworkError<'a, U, E> {
         error: E,
         /// The serenity Context passed to the event
         #[derivative(Debug = "ignore")]
-        ctx: serenity::Context,
+        ctx: &'a serenity::Context,
         /// Which event was being processed when the error occurred
         event: &'a crate::Event<'a>,
         /// The Framework passed to the event
@@ -109,10 +117,38 @@ pub enum FrameworkError<'a, U, E> {
     DynamicPrefix {
         /// Error which was thrown in the dynamic prefix code
         error: E,
+        /// General context
+        #[derivative(Debug = "ignore")]
+        ctx: crate::PartialContext<'a, U, E>,
+        /// Message which the dynamic prefix callback was evaluated upon
+        msg: &'a serenity::Message,
     },
     // #[non_exhaustive] forbids struct update syntax for ?? reason
     #[doc(hidden)]
     __NonExhaustive,
+}
+
+impl<'a, U, E> FrameworkError<'a, U, E> {
+    /// Returns the [`serenity::Context`] of this error
+    pub fn discord(&self) -> &'a serenity::Context {
+        match *self {
+            Self::Setup { ctx, .. } => ctx,
+            Self::Listener { ctx, .. } => ctx,
+            Self::Command { ctx, .. } => ctx.discord(),
+            Self::ArgumentParse { ctx, .. } => ctx.discord(),
+            Self::CommandStructureMismatch { ctx, .. } => ctx.discord,
+            Self::CooldownHit { ctx, .. } => ctx.discord(),
+            Self::MissingBotPermissions { ctx, .. } => ctx.discord(),
+            Self::MissingUserPermissions { ctx, .. } => ctx.discord(),
+            Self::NotAnOwner { ctx, .. } => ctx.discord(),
+            Self::GuildOnly { ctx, .. } => ctx.discord(),
+            Self::DmOnly { ctx, .. } => ctx.discord(),
+            Self::NsfwOnly { ctx, .. } => ctx.discord(),
+            Self::CommandCheckFailed { ctx, .. } => ctx.discord(),
+            Self::DynamicPrefix { ctx, .. } => ctx.discord,
+            Self::__NonExhaustive => unreachable!(),
+        }
+    }
 }
 
 macro_rules! full_command_name {
@@ -124,7 +160,12 @@ macro_rules! full_command_name {
 impl<U, E: std::fmt::Display> std::fmt::Display for FrameworkError<'_, U, E> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Setup { error: _ } => write!(f, "poise setup error"),
+            Self::Setup {
+                error: _,
+                framework: _,
+                data_about_bot: _,
+                ctx: _,
+            } => write!(f, "poise setup error"),
             Self::Listener {
                 error: _,
                 ctx: _,
@@ -202,7 +243,17 @@ impl<U, E: std::fmt::Display> std::fmt::Display for FrameworkError<'_, U, E> {
                 "pre-command check for command `{}` either denied access or errored",
                 full_command_name!(ctx)
             ),
-            Self::DynamicPrefix { error: _ } => write!(f, "dynamic prefix callback errored"),
+            Self::DynamicPrefix {
+                error: _,
+                ctx: _,
+                msg,
+            } => {
+                write!(
+                    f,
+                    "dynamic prefix callback errored on message {:?}",
+                    msg.content
+                )
+            }
             Self::__NonExhaustive => unreachable!(),
         }
     }

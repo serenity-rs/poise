@@ -414,6 +414,13 @@ pub struct PartialContext<'a, U, E> {
     pub data: &'a U,
 }
 
+impl<U, E> Copy for PartialContext<'_, U, E> {}
+impl<U, E> Clone for PartialContext<'_, U, E> {
+    fn clone(&self) -> Self {
+        *self
+    }
+}
+
 impl<'a, U, E> From<Context<'a, U, E>> for PartialContext<'a, U, E> {
     fn from(ctx: Context<'a, U, E>) -> Self {
         Self {

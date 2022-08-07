@@ -10,15 +10,16 @@ async fn strip_prefix<'a, U, E>(
     ctx: &'a serenity::Context,
     msg: &'a serenity::Message,
 ) -> Option<(&'a str, &'a str)> {
+    let partial_ctx = crate::PartialContext {
+        guild_id: msg.guild_id,
+        channel_id: msg.channel_id,
+        author: &msg.author,
+        discord: ctx,
+        framework,
+        data: framework.user_data().await,
+    };
+
     if let Some(dynamic_prefix) = framework.options.prefix_options.dynamic_prefix {
-        let partial_ctx = crate::PartialContext {
-            guild_id: msg.guild_id,
-            channel_id: msg.channel_id,
-            author: &msg.author,
-            discord: ctx,
-            framework,
-            data: framework.user_data().await,
-        };
         match dynamic_prefix(partial_ctx).await {
             Ok(prefix) => {
                 if let Some(prefix) = prefix {
@@ -28,7 +29,12 @@ async fn strip_prefix<'a, U, E>(
                 }
             }
             Err(error) => {
-                (framework.options.on_error)(crate::FrameworkError::DynamicPrefix { error }).await;
+                (framework.options.on_error)(crate::FrameworkError::DynamicPrefix {
+                    error,
+                    ctx: partial_ctx,
+                    msg,
+                })
+                .await;
             }
         }
     }
@@ -67,7 +73,12 @@ async fn strip_prefix<'a, U, E>(
                 }
             }
             Err(error) => {
-                (framework.options.on_error)(crate::FrameworkError::DynamicPrefix { error }).await;
+                (framework.options.on_error)(crate::FrameworkError::DynamicPrefix {
+                    error,
+                    ctx: partial_ctx,
+                    msg,
+                })
+                .await;
             }
         }
     }

@@ -30,7 +30,7 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
     error: crate::FrameworkError<'_, U, E>,
 ) -> Result<(), serenity::Error> {
     match error {
-        crate::FrameworkError::Setup { error } => {
+        crate::FrameworkError::Setup { error, .. } => {
             log::error!("Error in user data setup: {}", error)
         }
         crate::FrameworkError::Listener { error, event, .. } => log::error!(
@@ -130,8 +130,12 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
             let response = "You cannot run this command outside NSFW channels.";
             ctx.send(|b| b.content(response).ephemeral(true)).await?;
         }
-        crate::FrameworkError::DynamicPrefix { error } => {
-            log::error!("Dynamic prefix failed: {}", error);
+        crate::FrameworkError::DynamicPrefix { error, msg, .. } => {
+            log::error!(
+                "Dynamic prefix failed for message {:?}: {}",
+                msg.content,
+                error
+            );
         }
         crate::FrameworkError::__NonExhaustive => panic!(),
     }
