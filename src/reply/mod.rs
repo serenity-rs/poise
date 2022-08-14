@@ -109,6 +109,13 @@ impl ReplyHandle<'_> {
             ReplyHandleInner::Prefix(msg) => {
                 msg.clone()
                     .edit(ctx.discord(), |b| {
+                        // Clear builder so that adding embeds or attachments won't add on top of
+                        // the pre-edit items but replace them (which is apparently the more
+                        // intuitive behavior). Notably, setting the builder to default doesn't
+                        // mean the entire message is reset to empty: Discord only updates parts
+                        // of the message that have had a modification specified
+                        *b = Default::default();
+
                         reply.to_prefix_edit(b);
                         b
                     })
