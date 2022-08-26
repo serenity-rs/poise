@@ -1,3 +1,5 @@
+//! Simple module for the FrameworkError struct and its impls
+
 use crate::serenity_prelude as serenity;
 
 /// Any error that can occur while the bot runs. Either thrown by user code (those variants will
@@ -151,6 +153,7 @@ impl<'a, U, E> FrameworkError<'a, U, E> {
     }
 }
 
+/// Simple macro to deduplicate code. Can't be a function due to lifetime issues with format_args
 macro_rules! full_command_name {
     ($ctx:expr) => {
         format_args!("{}{}", $ctx.prefix(), $ctx.command().qualified_name)
