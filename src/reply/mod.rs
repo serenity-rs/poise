@@ -41,6 +41,9 @@ pub struct ReplyHandle<'a>(pub(super) ReplyHandleInner<'a>);
 impl ReplyHandle<'_> {
     /// Retrieve the message object of the sent reply.
     ///
+    /// Note: to delete or edit, use [`ReplyHandle::delete()`] and [`ReplyHandle::edit()`] directly!
+    /// Doing it via the methods from a Message object will fail for ephemeral messages
+    ///
     /// If you don't need ownership of Message, you can use [`ReplyHandle::message`]
     ///
     /// Only needs to do an HTTP request in the application command response case
@@ -62,6 +65,9 @@ impl ReplyHandle<'_> {
     }
 
     /// Retrieve the message object of the sent reply.
+    ///
+    /// Note: to delete or edit, use [`ReplyHandle::delete()`] and [`ReplyHandle::edit()`] directly!
+    /// Doing it via the methods from a Message object will fail for ephemeral messages
     ///
     /// Returns a reference to the known Message object, or fetches the message from the discord API.
     ///
@@ -146,6 +152,31 @@ impl ReplyHandle<'_> {
                     .await?;
             }
             ReplyHandleInner::Autocomplete => panic!("reply is a no-op in autocomplete context"),
+        }
+        Ok(())
+    }
+
+    /// Deletes this message
+    pub async fn delete<U, E>(&self, ctx: crate::Context<'_, U, E>) -> Result<(), serenity::Error> {
+        match &self.0 {
+            ReplyHandleInner::Prefix(msg) => msg.delete(ctx.discord()).await?,
+            ReplyHandleInner::Application {
+                http: _,
+                interaction,
+                followup,
+            } => match followup {
+                Some(followup) => {
+                    interaction
+                        .delete_followup_message(ctx.discord(), followup.id)
+                        .await?
+                }
+                None => {
+                    interaction
+                        .delete_original_interaction_response(ctx.discord())
+                        .await?
+                }
+            },
+            ReplyHandleInner::Autocomplete => panic!("delete is a no-op in autocomplete context"),
         }
         Ok(())
     }
