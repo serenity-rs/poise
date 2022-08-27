@@ -240,6 +240,8 @@ serenity::Member, serenity::UserId, serenity::ReactionType, serenity::GatewayInt
 # About the weird name
 I'm bad at names. Google lists "poise" as a synonym to "serenity" which is the Discord library
 underlying this framework, so that's what I chose.
+
+Also, poise is a stat in Dark Souls
 */
 
 mod prefix_argument;
