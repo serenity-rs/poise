@@ -182,18 +182,3 @@ pub async fn check_permissions_and_cooldown<'a, U, E>(
 
     Ok(())
 }
-
-/// Should be invoked after running a command. As long as the command didn't fail due to argument
-/// parsing, this function will trigger the cooldown counter
-pub fn trigger_cooldown_maybe<U, E>(
-    ctx: crate::Context<'_, U, E>,
-    res: &Result<(), crate::FrameworkError<'_, U, E>>,
-) {
-    if !ctx.framework().options.manual_cooldowns {
-        if let Err(crate::FrameworkError::ArgumentParse { .. }) = res {
-            // Argument parse errors shouldn't count towards cooldown
-        } else {
-            ctx.command().cooldowns.lock().unwrap().start_cooldown(ctx);
-        }
-    }
-}

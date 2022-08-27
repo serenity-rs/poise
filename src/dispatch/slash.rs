@@ -131,7 +131,6 @@ pub async fn dispatch_interaction<'a, U, E>(
         }
         _ => return Err(None),
     };
-    super::common::trigger_cooldown_maybe(ctx.into(), &action_result);
     action_result.map_err(|e| Some((e, ctx.command)))?;
 
     (framework.options.post_command)(crate::Context::Application(ctx)).await;

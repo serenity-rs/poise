@@ -60,6 +60,10 @@ pub fn generate_prefix_action(inv: &Invocation) -> Result<proc_macro2::TokenStre
                 ctx: ctx.into(),
             })?;
 
+            if !ctx.framework.options.manual_cooldowns {
+                ctx.command.cooldowns.lock().unwrap().start_cooldown(ctx.into());
+            }
+
             inner(ctx.into(), #( #param_names, )* )
                 .await
                 .map_err(|error| poise::FrameworkError::Command {

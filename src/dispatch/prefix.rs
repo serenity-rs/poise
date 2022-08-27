@@ -250,7 +250,6 @@ where
 
     // Execute command
     let action_result = (action)(ctx).await;
-    super::common::trigger_cooldown_maybe(ctx.into(), &action_result);
     action_result.map_err(|e| Some((e, command)))?;
 
     (framework.options.post_command)(crate::Context::Prefix(ctx)).await;
