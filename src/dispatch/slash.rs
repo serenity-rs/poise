@@ -13,13 +13,17 @@ fn find_matching_command<'a, 'b, U, E>(
             return None;
         }
 
-        if let Some(sub_interaction) = interaction_options.iter().find(|option| {
-            option.kind == serenity::CommandOptionType::SubCommand
-                || option.kind == serenity::CommandOptionType::SubCommandGroup
-        }) {
+        if let Some((sub_interaction_name, sub_interaction_options)) = interaction_options
+            .iter()
+            .find_map(|option| match &option.value {
+                serenity::CommandDataOptionValue::SubCommand(o)
+                | serenity::CommandDataOptionValue::SubCommandGroup(o) => Some((&option.name, o)),
+                _ => None,
+            })
+        {
             find_matching_command(
-                &sub_interaction.name,
-                &sub_interaction.options,
+                sub_interaction_name,
+                sub_interaction_options,
                 &cmd.subcommands,
             )
         } else {
@@ -112,7 +116,7 @@ pub async fn dispatch_interaction<'a, U, E>(
             action(ctx).await
         }
         serenity::CommandType::User => {
-            match (ctx.command.context_menu_action, &interaction.data.target()) {
+            match (ctx.command.context_menu_action, interaction.data.target()) {
                 (
                     Some(crate::ContextMenuCommandAction::User(action)),
                     Some(serenity::ResolvedTarget::User(user, _)),
@@ -121,11 +125,11 @@ pub async fn dispatch_interaction<'a, U, E>(
             }
         }
         serenity::CommandType::Message => {
-            match (ctx.command.context_menu_action, &interaction.data.target()) {
+            match (ctx.command.context_menu_action, interaction.data.target()) {
                 (
                     Some(crate::ContextMenuCommandAction::Message(action)),
                     Some(serenity::ResolvedTarget::Message(message)),
-                ) => action(ctx, *message.clone()).await,
+                ) => action(ctx, message.clone()).await,
                 _ => return Err(command_structure_mismatch_error),
             }
         }
@@ -143,7 +147,7 @@ pub async fn dispatch_interaction<'a, U, E>(
 pub async fn dispatch_autocomplete<'a, U, E>(
     framework: crate::FrameworkContext<'a, U, E>,
     ctx: &'a serenity::Context,
-    interaction: &'a serenity::AutocompleteInteraction,
+    interaction: &'a serenity::ApplicationCommandInteraction,
     // Need to pass this in from outside because of lifetime issues
     has_sent_initial_response: &'a std::sync::atomic::AtomicBool,
     // Need to pass this in from outside because of lifetime issues
@@ -159,13 +163,20 @@ pub async fn dispatch_autocomplete<'a, U, E>(
     .await?;
 
     // Find which parameter is focused by the user
-    let focused_option = ctx.args.iter().find(|o| o.focused).ok_or(None)?;
+    let (focused_option_name, partial_input) = ctx
+        .args
+        .iter()
+        .find_map(|o| match &o.value {
+            serenity::CommandDataOptionValue::Autocomplete { value, .. } => Some((&o.name, value)),
+            _ => None,
+        })
+        .ok_or(None)?;
 
     // Find the matching parameter from our Command object
     let parameters = &ctx.command.parameters;
     let focused_parameter = parameters
         .iter()
-        .find(|p| p.name == focused_option.name)
+        .find(|p| &p.name == focused_option_name)
         .ok_or(None)?;
 
     // If this parameter supports autocomplete...
@@ -174,11 +185,6 @@ pub async fn dispatch_autocomplete<'a, U, E>(
         use ::serenity::json::prelude::*; // as_str() access via trait for simd-json
 
         // Generate an autocomplete response
-        let partial_input = focused_option.value.as_ref().ok_or(None)?;
-        let partial_input = partial_input.as_str().ok_or_else(|| {
-            log::warn!("unexpected non-string autocomplete input");
-            None
-        })?;
         let autocomplete_response = match autocomplete_callback(ctx, partial_input).await {
             Ok(x) => x,
             Err(e) => {
@@ -189,10 +195,7 @@ pub async fn dispatch_autocomplete<'a, U, E>(
 
         // Send the generates autocomplete response
         if let Err(e) = interaction
-            .create_autocomplete_response(&ctx.discord.http, |b| {
-                *b = autocomplete_response;
-                b
-            })
+            .create_autocomplete_response(&ctx.discord.http, autocomplete_response)
             .await
         {
             log::warn!("couldn't send autocomplete response: {}", e);

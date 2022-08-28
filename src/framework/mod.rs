@@ -132,7 +132,7 @@ impl<U, E> Framework<U, E> {
     /// Start shards in a range
     /// ```rust,no_run
     /// # async fn _test(framework: std::sync::Arc<poise::Framework<(), ()>>) -> Result<(), serenity::Error> {
-    /// let shard_range = [3, 7];
+    /// let shard_range = 3..7;
     /// let total_shards = 8;
     ///
     /// framework
@@ -140,7 +140,7 @@ impl<U, E> Framework<U, E> {
     ///         client.start_shard_range(shard_range, total_shards).await
     ///    })
     ///    .await?;
-    /// # Ok(()) };
+    /// # Ok(()) }
     /// ```
     pub async fn start_with<F: std::future::Future<Output = serenity::Result<()>>>(
         self: std::sync::Arc<Self>,

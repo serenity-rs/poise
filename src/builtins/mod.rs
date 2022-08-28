@@ -197,7 +197,8 @@ pub async fn servers<U, E>(ctx: crate::Context<'_, U, E>) -> Result<(), serenity
     let mut guilds = guild_ids
         .into_iter()
         .filter_map(|guild_id| {
-            ctx.discord().cache.guild_field(guild_id, |guild| Guild {
+            let guild = ctx.discord().cache.guild(guild_id)?;
+            Some(Guild {
                 name: guild.name.clone(),
                 num_members: guild.member_count,
                 is_public: guild.features.iter().any(|x| x == "DISCOVERABLE"),

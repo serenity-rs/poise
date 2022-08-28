@@ -434,16 +434,17 @@ async fn about_role(
     ctx: Context<'_>,
     #[description = "Name of the role"] potential_role_name: String,
 ) -> Result<(), Error> {
-    if let Some(guild) = ctx.guild() {
+    let role_id = ctx
+        .guild()
         // `role_by_name()` allows us to attempt attaining a reference to a role
         // via its name.
-        if let Some(role) = guild.role_by_name(&potential_role_name) {
-            if let Err(why) = ctx.say(format!("Role-ID: {}", role.id)).await {
-                println!("Error sending message: {:?}", why);
-            }
-
-            return Ok(());
+        .and_then(|guild| guild.role_by_name(&potential_role_name).map(|role| role.id));
+    if let Some(role_id) = role_id {
+        if let Err(why) = ctx.say(format!("Role-ID: {}", role_id)).await {
+            println!("Error sending message: {:?}", why);
         }
+
+        return Ok(());
     }
 
     poise::say_reply(
@@ -615,7 +616,10 @@ async fn slow_mode(
     let say_content = if let Some(rate_limit) = rate_limit {
         if let Err(why) = ctx
             .channel_id()
-            .edit(ctx.discord(), |c| c.rate_limit_per_user(rate_limit))
+            .edit(
+                ctx.discord(),
+                serenity::EditChannel::default().rate_limit_per_user(rate_limit),
+            )
             .await
         {
             println!("Error setting channel's slow mode rate: {:?}", why);

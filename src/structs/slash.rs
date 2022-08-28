@@ -8,12 +8,13 @@ use crate::{serenity_prelude as serenity, BoxFuture};
 /// [`crate::ApplicationContext`] because command checks are invoked for autocomplete interactions
 /// too: we don't want poise accidentally leaking sensitive information through autocomplete
 /// suggestions
+// TODO: inline this struct once merged into main branch
 #[derive(Copy, Clone, Debug)]
 pub enum ApplicationCommandOrAutocompleteInteraction<'a> {
     /// An application command interaction
     ApplicationCommand(&'a serenity::ApplicationCommandInteraction),
     /// An autocomplete interaction
-    Autocomplete(&'a serenity::AutocompleteInteraction),
+    Autocomplete(&'a serenity::ApplicationCommandInteraction),
 }
 
 impl<'a> ApplicationCommandOrAutocompleteInteraction<'a> {
@@ -144,10 +145,14 @@ impl<U, E> ApplicationContext<'_, U, E> {
             .load(std::sync::atomic::Ordering::SeqCst)
         {
             interaction
-                .create_interaction_response(self.discord, |f| {
-                    f.kind(serenity::InteractionResponseType::DeferredChannelMessageWithSource)
-                        .interaction_response_data(|b| b.ephemeral(ephemeral))
-                })
+                .create_interaction_response(
+                    self.discord,
+                    serenity::CreateInteractionResponse::default()
+                        .kind(serenity::InteractionResponseType::DeferredChannelMessageWithSource)
+                        .interaction_response_data(
+                            serenity::CreateInteractionResponseData::default().ephemeral(ephemeral),
+                        ),
+                )
                 .await?;
             self.has_sent_initial_response
                 .store(true, std::sync::atomic::Ordering::SeqCst);
@@ -218,12 +223,14 @@ pub struct CommandParameter<U, E> {
     /// For example a u32 [`CommandParameter`] would store this as the [`Self::type_setter`]:
     /// ```rust
     /// # use poise::serenity_prelude as serenity;
-    /// # let _: fn(&mut serenity::CreateApplicationCommandOption) -> &mut serenity::CreateApplicationCommandOption =
-    /// |b| b.kind(serenity::CommandOptionType::Integer).min_int_value(0).max_int_value(u32::MAX)
+    /// # let _: fn(serenity::CreateApplicationCommandOption) -> serenity::CreateApplicationCommandOption =
+    /// |b| b.kind(serenity::CommandOptionType::Integer).min_int_value(0).max_int_value(u64::MAX)
     /// # ;
     /// ```
     #[derivative(Debug = "ignore")]
-    pub type_setter: Option<fn(&mut serenity::CreateApplicationCommandOption)>,
+    pub type_setter: Option<
+        fn(serenity::CreateApplicationCommandOption) -> serenity::CreateApplicationCommandOption,
+    >,
     /// Optionally, a callback that is invoked on autocomplete interactions. This closure should
     /// extract the partial argument from the given JSON value and generate the autocomplete
     /// response which contains the list of autocomplete suggestions.
@@ -245,29 +252,30 @@ impl<U, E> CommandParameter<U, E> {
     pub fn create_as_slash_command_option(
         &self,
     ) -> Option<serenity::CreateApplicationCommandOption> {
-        let mut builder = serenity::CreateApplicationCommandOption::default();
-        builder
+        let mut b = serenity::CreateApplicationCommandOption::new(
+            serenity::CommandOptionType::Unknown(0), // Will be overwritten by type_setter below
+            &self.name,
+            self.description
+                .as_deref()
+                .unwrap_or("A slash command parameter"),
+        );
+
+        b = b
             .required(self.required)
-            .name(&self.name)
-            .description(
-                self.description
-                    .as_deref()
-                    .unwrap_or("A slash command parameter"),
-            )
             .set_autocomplete(self.autocomplete_callback.is_some());
         for (locale, name) in &self.name_localizations {
-            builder.name_localized(locale, name);
+            b = b.name_localized(locale, name);
         }
         for (locale, description) in &self.description_localizations {
-            builder.description_localized(locale, description);
+            b = b.description_localized(locale, description);
         }
         if let Some(channel_types) = &self.channel_types {
-            builder.channel_types(channel_types);
+            b = b.channel_types(channel_types.clone());
         }
         for (i, choice) in self.choices.iter().enumerate() {
-            builder.add_int_choice_localized(&choice.name, i as _, choice.localizations.iter());
+            b = b.add_int_choice_localized(&choice.name, i as _, choice.localizations.iter());
         }
-        (self.type_setter?)(&mut builder);
-        Some(builder)
+        b = (self.type_setter?)(b);
+        Some(b)
     }
 }

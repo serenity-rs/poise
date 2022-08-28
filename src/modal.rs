@@ -44,10 +44,7 @@ async fn execute<U: Send + Sync, E, M: Modal>(
 
     // Send modal
     interaction
-        .create_interaction_response(ctx.discord, |b| {
-            *b = M::create(defaults);
-            b
-        })
+        .create_interaction_response(ctx.discord, M::create(defaults))
         .await?;
     ctx.has_sent_initial_response
         .store(true, std::sync::atomic::Ordering::SeqCst);
@@ -55,14 +52,17 @@ async fn execute<U: Send + Sync, E, M: Modal>(
     // Wait for user to submit
     let response = serenity::CollectModalInteraction::new(&ctx.discord.shard)
         .author_id(interaction.user.id)
+        .collect_single()
         .await
         .unwrap();
 
     // Send acknowledgement so that the pop-up is closed
     response
-        .create_interaction_response(ctx.discord, |b| {
-            b.kind(serenity::InteractionResponseType::DeferredUpdateMessage)
-        })
+        .create_interaction_response(
+            ctx.discord,
+            serenity::CreateInteractionResponse::default()
+                .kind(serenity::InteractionResponseType::DeferredUpdateMessage),
+        )
         .await?;
 
     M::parse(response.data.clone()).map_err(serenity::Error::Other)

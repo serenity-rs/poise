@@ -17,11 +17,11 @@ async fn user_permissions(
 
     #[cfg(feature = "cache")]
     let guild = match ctx.cache.guild(guild_id) {
-        Some(x) => x,
+        Some(x) => x.clone(),
         None => return None, // Guild not in cache
     };
     #[cfg(not(feature = "cache"))]
-    let guild = match ctx.http.get_guild(guild_id.0).await {
+    let guild = match ctx.http.get_guild(guild_id.get()).await {
         Ok(x) => x,
         Err(_) => return None,
     };
@@ -46,7 +46,7 @@ async fn user_permissions(
     // If member not in cache (probably because presences intent is not enabled), retrieve via HTTP
     let member = match cached_member {
         Some(x) => x,
-        None => match ctx.http.get_member(guild_id.0, user_id.0).await {
+        None => match ctx.http.get_member(guild_id.get(), user_id.get()).await {
             Ok(member) => member,
             Err(_) => return None,
         },
@@ -91,7 +91,7 @@ pub async fn check_permissions_and_cooldown<'a, U, E>(
             Some(guild_id) => {
                 #[cfg(feature = "cache")]
                 if ctx.framework().options().require_cache_for_guild_check
-                    && ctx.discord().cache.guild_field(guild_id, |_| ()).is_none()
+                    && ctx.discord().cache.guild(guild_id).is_none()
                 {
                     return Err(crate::FrameworkError::GuildOnly { ctx });
                 }

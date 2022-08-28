@@ -96,12 +96,12 @@ where
             pre_command: |_| Box::pin(async {}),
             post_command: |_| Box::pin(async {}),
             command_check: None,
-            allowed_mentions: Some({
-                let mut f = serenity::CreateAllowedMentions::default();
-                // Only support direct user pings by default
-                f.empty_parse().parse(serenity::ParseValue::Users);
-                f
-            }),
+            allowed_mentions: Some(
+                serenity::CreateAllowedMentions::default()
+                    // Only support direct user pings by default
+                    .empty_parse()
+                    .parse(serenity::ParseValue::Users),
+            ),
             reply_callback: None,
             manual_cooldowns: false,
             require_cache_for_guild_check: false,

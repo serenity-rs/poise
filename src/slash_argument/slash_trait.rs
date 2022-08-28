@@ -18,7 +18,7 @@ pub trait SlashArgument: Sized {
     async fn extract(
         ctx: &serenity::Context,
         interaction: crate::ApplicationCommandOrAutocompleteInteraction<'_>,
-        value: &serenity::json::Value,
+        value: &serenity::CommandDataOptionValue,
     ) -> Result<Self, SlashArgError>;
 
     /// Create a slash command parameter equivalent to type T.
@@ -27,7 +27,9 @@ pub trait SlashArgument: Sized {
     /// filling in `name()`, `description()`, and possibly `required()` or other fields.
     ///
     /// Don't call this method directly! Use [`crate::create_slash_argument!`]
-    fn create(builder: &mut serenity::CreateApplicationCommandOption);
+    fn create(
+        builder: serenity::CreateApplicationCommandOption,
+    ) -> serenity::CreateApplicationCommandOption;
 
     /// If this is a choice parameter, returns the choices
     ///
@@ -46,10 +48,13 @@ pub trait SlashArgumentHack<T>: Sized {
         self,
         ctx: &serenity::Context,
         interaction: crate::ApplicationCommandOrAutocompleteInteraction<'_>,
-        value: &serenity::json::Value,
+        value: &serenity::CommandDataOptionValue,
     ) -> Result<T, SlashArgError>;
 
-    fn create(self, builder: &mut serenity::CreateApplicationCommandOption);
+    fn create(
+        self,
+        builder: serenity::CreateApplicationCommandOption,
+    ) -> serenity::CreateApplicationCommandOption;
 
     fn choices(self) -> Vec<crate::CommandParameterChoice> {
         Vec::new()
@@ -98,7 +103,7 @@ where
         self,
         ctx: &serenity::Context,
         interaction: crate::ApplicationCommandOrAutocompleteInteraction<'_>,
-        value: &serenity::json::Value,
+        value: &serenity::CommandDataOptionValue,
     ) -> Result<T, SlashArgError> {
         let string = value
             .as_str()
@@ -116,8 +121,11 @@ where
         })
     }
 
-    fn create(self, builder: &mut serenity::CreateApplicationCommandOption) {
-        builder.kind(serenity::CommandOptionType::String);
+    fn create(
+        self,
+        builder: serenity::CreateApplicationCommandOption,
+    ) -> serenity::CreateApplicationCommandOption {
+        builder.kind(serenity::CommandOptionType::String)
     }
 }
 
@@ -130,7 +138,7 @@ macro_rules! impl_for_integer {
                 self,
                 _: &serenity::Context,
                 _: crate::ApplicationCommandOrAutocompleteInteraction<'_>,
-                value: &serenity::json::Value,
+                value: &serenity::CommandDataOptionValue,
             ) -> Result<$t, SlashArgError> {
                 value
                     .as_i64()
@@ -139,11 +147,11 @@ macro_rules! impl_for_integer {
                     .map_err(|_| SlashArgError::CommandStructureMismatch("received out of bounds integer"))
             }
 
-            fn create(self, builder: &mut serenity::CreateApplicationCommandOption) {
+            fn create(self, builder: serenity::CreateApplicationCommandOption) -> serenity::CreateApplicationCommandOption {
                 builder
                     .min_number_value(f64::max(<$t>::MIN as f64, -9007199254740991.))
                     .max_number_value(f64::min(<$t>::MAX as f64, 9007199254740991.))
-                    .kind(serenity::CommandOptionType::Integer);
+                    .kind(serenity::CommandOptionType::Integer)
             }
         }
     )* };
@@ -159,15 +167,15 @@ macro_rules! impl_for_float {
                 self,
                 _: &serenity::Context,
                 _: crate::ApplicationCommandOrAutocompleteInteraction<'_>,
-                value: &serenity::json::Value,
+                value: &serenity::CommandDataOptionValue,
             ) -> Result<$t, SlashArgError> {
                 Ok(value
                     .as_f64()
                     .ok_or(SlashArgError::CommandStructureMismatch("expected float"))? as $t)
             }
 
-            fn create(self, builder: &mut serenity::CreateApplicationCommandOption) {
-                builder.kind(serenity::CommandOptionType::Number);
+            fn create(self, builder: serenity::CreateApplicationCommandOption) -> serenity::CreateApplicationCommandOption {
+                builder.kind(serenity::CommandOptionType::Number)
             }
         }
     )* };
@@ -180,15 +188,18 @@ impl SlashArgumentHack<bool> for &PhantomData<bool> {
         self,
         _: &serenity::Context,
         _: crate::ApplicationCommandOrAutocompleteInteraction<'_>,
-        value: &serenity::json::Value,
+        value: &serenity::CommandDataOptionValue,
     ) -> Result<bool, SlashArgError> {
         Ok(value
             .as_bool()
             .ok_or(SlashArgError::CommandStructureMismatch("expected bool"))?)
     }
 
-    fn create(self, builder: &mut serenity::CreateApplicationCommandOption) {
-        builder.kind(serenity::CommandOptionType::Boolean);
+    fn create(
+        self,
+        builder: serenity::CreateApplicationCommandOption,
+    ) -> serenity::CreateApplicationCommandOption {
+        builder.kind(serenity::CommandOptionType::Boolean)
     }
 }
 
@@ -198,7 +209,7 @@ impl SlashArgumentHack<serenity::Attachment> for &PhantomData<serenity::Attachme
         self,
         _: &serenity::Context,
         interaction: crate::ApplicationCommandOrAutocompleteInteraction<'_>,
-        value: &Value,
+        value: &serenity::CommandDataOptionValue,
     ) -> Result<serenity::Attachment, SlashArgError> {
         let attachment_id = serenity::AttachmentId(
             value
@@ -223,8 +234,11 @@ impl SlashArgumentHack<serenity::Attachment> for &PhantomData<serenity::Attachme
             ))
     }
 
-    fn create(self, builder: &mut serenity::CreateApplicationCommandOption) {
-        builder.kind(serenity::CommandOptionType::Attachment);
+    fn create(
+        self,
+        builder: serenity::CreateApplicationCommandOption,
+    ) -> serenity::CreateApplicationCommandOption {
+        builder.kind(serenity::CommandOptionType::Attachment)
     }
 }
 
@@ -234,13 +248,16 @@ impl<T: SlashArgument + Sync> SlashArgumentHack<T> for &PhantomData<T> {
         self,
         ctx: &serenity::Context,
         interaction: crate::ApplicationCommandOrAutocompleteInteraction<'_>,
-        value: &serenity::json::Value,
+        value: &serenity::CommandDataOptionValue,
     ) -> Result<T, SlashArgError> {
         <T as SlashArgument>::extract(ctx, interaction, value).await
     }
 
-    fn create(self, builder: &mut serenity::CreateApplicationCommandOption) {
-        <T as SlashArgument>::create(builder);
+    fn create(
+        self,
+        builder: serenity::CreateApplicationCommandOption,
+    ) -> serenity::CreateApplicationCommandOption {
+        <T as SlashArgument>::create(builder)
     }
 
     fn choices(self) -> Vec<crate::CommandParameterChoice> {
@@ -257,14 +274,17 @@ macro_rules! impl_slash_argument {
                 self,
                 ctx: &serenity::Context,
                 interaction: crate::ApplicationCommandOrAutocompleteInteraction<'_>,
-                value: &serenity::json::Value,
+                value: &serenity::CommandDataOptionValue,
             ) -> Result<$type, SlashArgError> {
                 // We can parse IDs by falling back to the generic serenity::ArgumentConvert impl
                 PhantomData::<$type>.extract(ctx, interaction, value).await
             }
 
-            fn create(self, builder: &mut serenity::CreateApplicationCommandOption) {
-                builder.kind(serenity::CommandOptionType::$slash_param_type);
+            fn create(
+                self,
+                builder: serenity::CreateApplicationCommandOption,
+            ) -> serenity::CreateApplicationCommandOption {
+                builder.kind(serenity::CommandOptionType::$slash_param_type)
             }
         }
     };

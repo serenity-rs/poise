@@ -145,10 +145,8 @@ impl<'a, U, E> Context<'a, U, E> {
 
     // Doesn't fit in with the rest of the functions here but it's convenient
     /// Return the guild of this context, if we are inside a guild.
-    ///
-    /// Warning: clones the entire Guild instance out of the cache
     #[cfg(feature = "cache")]
-    pub fn guild(&self) -> Option<serenity::Guild> {
+    pub fn guild(&self) -> Option<serenity::GuildRef<'_>> {
         self.guild_id()?.to_guild_cached(self.discord())
     }
 
@@ -162,7 +160,7 @@ impl<'a, U, E> Context<'a, U, E> {
     pub async fn partial_guild(&self) -> Option<serenity::PartialGuild> {
         #[cfg(feature = "cache")]
         if let Some(guild) = self.guild_id()?.to_guild_cached(self.discord()) {
-            return Some(guild.into());
+            return Some(guild.clone().into());
         }
 
         self.guild_id()?.to_partial_guild(self.discord()).await.ok()
@@ -210,9 +208,9 @@ impl<'a, U, E> Context<'a, U, E> {
     #[cfg(any(feature = "chrono", feature = "time"))]
     pub fn id(&self) -> u64 {
         match self {
-            Self::Application(ctx) => ctx.interaction.id().0,
+            Self::Application(ctx) => ctx.interaction.id().get(),
             Self::Prefix(ctx) => {
-                let mut id = ctx.msg.id.0;
+                let mut id = ctx.msg.id.get();
                 if let Some(edited_timestamp) = ctx.msg.edited_timestamp {
                     // We replace the 42 datetime bits with msg.timestamp_edited so that the ID is
                     // unique even after edits
@@ -291,7 +289,7 @@ impl<'a, U, E> Context<'a, U, E> {
 
                 // Check context menu command
                 if let (Some(action), Some(target)) =
-                    (ctx.command.context_menu_action, &interaction.data.target())
+                    (ctx.command.context_menu_action, interaction.data.target())
                 {
                     return match action {
                         crate::ContextMenuCommandAction::User(action) => {
@@ -303,7 +301,7 @@ impl<'a, U, E> Context<'a, U, E> {
                         }
                         crate::ContextMenuCommandAction::Message(action) => {
                             if let serenity::ResolvedTarget::Message(message) = target {
-                                action(ctx, *message.clone()).await
+                                action(ctx, message.clone()).await
                             } else {
                                 Ok(())
                             }

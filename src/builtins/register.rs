@@ -13,35 +13,32 @@ use crate::serenity_prelude as serenity;
 /// let commands = &ctx.framework().options().commands;
 /// let create_commands = poise::builtins::create_application_commands(commands);
 ///
-/// serenity::Command::set_global_application_commands(ctx.discord(), |b| {
-///     *b = create_commands; // replace the given builder with the one prepared by poise
-///     b
-/// }).await?;
+/// serenity::Command::set_global_application_commands(ctx.discord(), create_commands).await?;
 /// # Ok(()) }
 /// ```
 pub fn create_application_commands<U, E>(
     commands: &[crate::Command<U, E>],
-) -> serenity::CreateApplicationCommands {
+) -> Vec<serenity::CreateApplicationCommand> {
     /// We decided to extract context menu commands recursively, despite the subcommand hierarchy
     /// not being preserved. Because it's more confusing to just silently discard context menu
     /// commands if they're not top-level commands.
     /// https://discord.com/channels/381880193251409931/919310428344029265/947970605985189989
     fn recursively_add_context_menu_commands<U, E>(
-        builder: &mut serenity::CreateApplicationCommands,
+        builder: &mut Vec<serenity::CreateApplicationCommand>,
         command: &crate::Command<U, E>,
     ) {
         if let Some(context_menu_command) = command.create_as_context_menu_command() {
-            builder.add_application_command(context_menu_command);
+            builder.push(context_menu_command);
         }
         for subcommand in &command.subcommands {
             recursively_add_context_menu_commands(builder, subcommand);
         }
     }
 
-    let mut commands_builder = serenity::CreateApplicationCommands::default();
+    let mut commands_builder = Vec::new();
     for command in commands {
         if let Some(slash_command) = command.create_as_slash_command() {
-            commands_builder.add_application_command(slash_command);
+            commands_builder.push(slash_command);
         }
         recursively_add_context_menu_commands(&mut commands_builder, command);
     }
@@ -71,16 +68,12 @@ pub async fn register_application_commands<U, E>(
     }
 
     let commands_builder = create_application_commands(&ctx.framework().options().commands);
-    let num_commands = commands_builder.0.len();
+    let num_commands = commands_builder.len();
 
     if global {
         ctx.say(format!("Registering {} commands...", num_commands))
             .await?;
-        serenity::Command::set_global_application_commands(ctx.discord(), |b| {
-            *b = commands_builder;
-            b
-        })
-        .await?;
+        serenity::Command::set_global_application_commands(ctx.discord(), commands_builder).await?;
     } else {
         let guild_id = match ctx.guild_id() {
             Some(x) => x,
@@ -93,10 +86,7 @@ pub async fn register_application_commands<U, E>(
         ctx.say(format!("Registering {} commands...", num_commands))
             .await?;
         guild_id
-            .set_application_commands(ctx.discord(), |b| {
-                *b = commands_builder;
-                b
-            })
+            .set_application_commands(ctx.discord(), commands_builder)
             .await?;
     }
 
@@ -114,7 +104,7 @@ pub async fn register_application_commands_buttons<U, E>(
     ctx: crate::Context<'_, U, E>,
 ) -> Result<(), serenity::Error> {
     let create_commands = create_application_commands(&ctx.framework().options().commands);
-    let num_commands = create_commands.0.len();
+    let num_commands = create_commands.len();
 
     let is_bot_owner = ctx.framework().options().owners.contains(&ctx.author().id);
     if !is_bot_owner {
@@ -125,43 +115,57 @@ pub async fn register_application_commands_buttons<U, E>(
     let reply = ctx
         .send(|m| {
             m.content("Choose what to do with the commands:")
-                .components(|c| {
-                    c.create_action_row(|r| {
-                        r.create_button(|b| {
-                            b.custom_id("register.global")
-                                .label("Register globally")
-                                .style(serenity::ButtonStyle::Primary)
-                        })
-                        .create_button(|b| {
-                            b.custom_id("unregister.global")
-                                .label("Delete globally")
-                                .style(serenity::ButtonStyle::Danger)
-                        })
-                    })
-                    .create_action_row(|r| {
-                        r.create_button(|b| {
-                            b.custom_id("register.guild")
-                                .label("Register in guild")
-                                .style(serenity::ButtonStyle::Primary)
-                        })
-                        .create_button(|b| {
-                            b.custom_id("unregister.guild")
-                                .label("Delete in guild")
-                                .style(serenity::ButtonStyle::Danger)
-                        })
-                    })
-                })
+                .components(
+                    serenity::CreateComponents::default()
+                        .add_action_row(
+                            serenity::CreateActionRow::default()
+                                .add_button(
+                                    serenity::CreateButton::default()
+                                        .custom_id("register.global")
+                                        .label("Register globally")
+                                        .style(serenity::ButtonStyle::Primary),
+                                )
+                                .add_button(
+                                    serenity::CreateButton::default()
+                                        .custom_id("unregister.global")
+                                        .label("Delete globally")
+                                        .style(serenity::ButtonStyle::Danger),
+                                ),
+                        )
+                        .add_action_row(
+                            serenity::CreateActionRow::default()
+                                .add_button(
+                                    serenity::CreateButton::default()
+                                        .custom_id("register.guild")
+                                        .label("Register in guild")
+                                        .style(serenity::ButtonStyle::Primary),
+                                )
+                                .add_button(
+                                    serenity::CreateButton::default()
+                                        .custom_id("unregister.guild")
+                                        .label("Delete in guild")
+                                        .style(serenity::ButtonStyle::Danger),
+                                ),
+                        ),
+                )
         })
         .await?;
 
     let interaction = reply
         .message()
         .await?
-        .await_component_interaction(ctx.discord())
+        .component_interaction_collector(&ctx.discord().shard)
         .author_id(ctx.author().id)
+        .collect_single()
         .await;
 
-    reply.edit(ctx, |b| b.components(|b| b)).await?; // remove buttons after button press
+    // remove buttons after button press
+    reply
+        .edit(ctx, |b| {
+            b.components(serenity::builder::CreateComponents::default())
+        })
+        .await?;
+
     let pressed_button_id = match &interaction {
         Some(m) => &m.data.custom_id,
         None => {
@@ -185,14 +189,11 @@ pub async fn register_application_commands_buttons<U, E>(
         if register {
             ctx.say(format!("Registering {} global commands...", num_commands))
                 .await?;
-            serenity::Command::set_global_application_commands(ctx.discord(), |b| {
-                *b = create_commands;
-                b
-            })
-            .await?;
+            serenity::Command::set_global_application_commands(ctx.discord(), create_commands)
+                .await?;
         } else {
             ctx.say("Unregistering global commands...").await?;
-            serenity::Command::set_global_application_commands(ctx.discord(), |b| b).await?;
+            serenity::Command::set_global_application_commands(ctx.discord(), Vec::new()).await?;
         }
     } else {
         let guild_id = match ctx.guild_id() {
@@ -206,15 +207,12 @@ pub async fn register_application_commands_buttons<U, E>(
             ctx.say(format!("Registering {} guild commands...", num_commands))
                 .await?;
             guild_id
-                .set_application_commands(ctx.discord(), |b| {
-                    *b = create_commands;
-                    b
-                })
+                .set_application_commands(ctx.discord(), create_commands)
                 .await?;
         } else {
             ctx.say("Unregistering guild commands...").await?;
             guild_id
-                .set_application_commands(ctx.discord(), |b| b)
+                .set_application_commands(ctx.discord(), Vec::new())
                 .await?;
         }
     }

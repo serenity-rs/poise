@@ -299,6 +299,7 @@ pub mod serenity_prelude {
     pub use serenity::{
         async_trait,
         builder::*,
+        cache::*,
         client::{
             bridge::gateway::{event::*, *},
             *,
@@ -320,9 +321,7 @@ pub mod serenity_prelude {
             application::{
                 command::*,
                 component::*,
-                interaction::{
-                    application_command::*, autocomplete::*, message_component::*, modal::*, *,
-                },
+                interaction::{application_command::*, message_component::*, modal::*, *},
             },
             event::*,
             prelude::*,

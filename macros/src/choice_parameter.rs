@@ -64,20 +64,20 @@ pub fn choice_parameter(input: syn::DeriveInput) -> Result<TokenStream, darling:
     }
 
     let enum_ident = &input.ident;
-    let indices = 0_u64..(variant_idents.len() as _);
+    let indices = 0_i64..(variant_idents.len() as _);
     Ok(quote::quote! {
         #[poise::async_trait]
         impl poise::SlashArgument for #enum_ident {
             async fn extract(
                 _: &poise::serenity_prelude::Context,
                 _: poise::ApplicationCommandOrAutocompleteInteraction<'_>,
-                value: &poise::serenity_prelude::json::Value,
+                value: &poise::serenity_prelude::CommandDataOptionValue,
             ) -> ::std::result::Result<Self, poise::SlashArgError> {
                 use poise::serenity_prelude::json::prelude::*;
                 let choice_key = value
-                    .as_u64()
+                    .as_i64()
                     .ok_or(poise::SlashArgError::CommandStructureMismatch(
-                        "expected u64",
+                        "expected integer",
                     ))?;
 
                 match choice_key {
@@ -86,8 +86,8 @@ pub fn choice_parameter(input: syn::DeriveInput) -> Result<TokenStream, darling:
                 }
             }
 
-            fn create(builder: &mut poise::serenity_prelude::CreateApplicationCommandOption) {
-                builder.kind(poise::serenity_prelude::CommandOptionType::Integer);
+            fn create(builder: poise::serenity_prelude::CreateApplicationCommandOption) -> poise::serenity_prelude::CreateApplicationCommandOption {
+                builder.kind(poise::serenity_prelude::CommandOptionType::Integer)
             }
 
             fn choices() -> Vec<poise::CommandParameterChoice> {

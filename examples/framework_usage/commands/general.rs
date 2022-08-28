@@ -104,37 +104,44 @@ pub async fn boop(ctx: Context<'_>) -> Result<(), Error> {
     let uuid_boop = ctx.id();
 
     ctx.send(|m| {
-        m.content("I want some boops!").components(|c| {
-            c.create_action_row(|ar| {
-                ar.create_button(|b| {
-                    b.style(serenity::ButtonStyle::Primary)
+        m.content("I want some boops!").components(
+            serenity::CreateComponents::default().add_action_row(
+                serenity::CreateActionRow::default().add_button(
+                    serenity::CreateButton::default()
+                        .style(serenity::ButtonStyle::Primary)
                         .label("Boop me!")
-                        .custom_id(uuid_boop)
-                })
-            })
-        })
+                        .custom_id(uuid_boop.to_string()),
+                ),
+            ),
+        )
     })
     .await?;
 
     let mut boop_count = 0;
-    while let Some(mci) = serenity::CollectComponentInteraction::new(ctx.discord())
+    while let Some(mci) = serenity::ComponentInteractionCollectorBuilder::new(&ctx.discord().shard)
         .author_id(ctx.author().id)
         .channel_id(ctx.channel_id())
         .timeout(std::time::Duration::from_secs(120))
-        .filter(move |mci| mci.data.custom_id == uuid_boop.to_string())
+        .filter(std::sync::Arc::new(move |mci| {
+            mci.data.custom_id == uuid_boop.to_string()
+        }))
+        .collect_single()
         .await
     {
         boop_count += 1;
 
         let mut msg = mci.message.clone();
-        msg.edit(ctx.discord(), |m| {
-            m.content(format!("Boop count: {}", boop_count))
-        })
+        msg.edit(
+            ctx.discord(),
+            serenity::EditMessage::default().content(format!("Boop count: {}", boop_count)),
+        )
         .await?;
 
-        mci.create_interaction_response(ctx.discord(), |ir| {
-            ir.kind(serenity::InteractionResponseType::DeferredUpdateMessage)
-        })
+        mci.create_interaction_response(
+            ctx.discord(),
+            serenity::CreateInteractionResponse::default()
+                .kind(serenity::InteractionResponseType::DeferredUpdateMessage),
+        )
         .await?;
     }
 
@@ -161,7 +168,7 @@ pub async fn voiceinfo(
         channel.rtc_region.unwrap_or_default(),
         channel
             .video_quality_mode
-            .unwrap_or(serenity::VideoQualityMode::Unknown)
+            .unwrap_or(serenity::VideoQualityMode::Unknown(0))
     );
 
     ctx.say(response).await?;
@@ -173,16 +180,21 @@ pub async fn test_reuse_response(ctx: Context<'_>) -> Result<(), Error> {
     let image_url = "https://raw.githubusercontent.com/serenity-rs/serenity/current/logo.png";
     ctx.send(|b| {
         b.content("message 1")
-            .embed(|b| b.description("embed 1").image(image_url))
-            .components(|b| {
-                b.create_action_row(|b| {
-                    b.create_button(|b| {
-                        b.label("button 1")
+            .embed(
+                serenity::CreateEmbed::default()
+                    .description("embed 1")
+                    .image(image_url),
+            )
+            .components(
+                serenity::CreateComponents::default().add_action_row(
+                    serenity::CreateActionRow::default().add_button(
+                        serenity::CreateButton::default()
+                            .label("button 1")
                             .style(serenity::ButtonStyle::Primary)
-                            .custom_id(1)
-                    })
-                })
-            })
+                            .custom_id("1"),
+                    ),
+                ),
+            )
     })
     .await?;
 
@@ -191,16 +203,21 @@ pub async fn test_reuse_response(ctx: Context<'_>) -> Result<(), Error> {
     let image_url = "https://raw.githubusercontent.com/serenity-rs/serenity/current/examples/e09_create_message_builder/ferris_eyes.png";
     ctx.send(|b| {
         b.content("message 2")
-            .embed(|b| b.description("embed 2").image(image_url))
-            .components(|b| {
-                b.create_action_row(|b| {
-                    b.create_button(|b| {
-                        b.label("button 2")
-                            .style(serenity::ButtonStyle::Danger)
-                            .custom_id(2)
-                    })
-                })
-            })
+            .embed(
+                serenity::CreateEmbed::default()
+                    .description("embed 2")
+                    .image(image_url),
+            )
+            .components(
+                serenity::CreateComponents::default().add_action_row(
+                    serenity::CreateActionRow::default().add_button(
+                        serenity::CreateButton::default()
+                            .label("button 2")
+                            .style(serenity::ButtonStyle::Primary)
+                            .custom_id("2"),
+                    ),
+                ),
+            )
     })
     .await?;
 

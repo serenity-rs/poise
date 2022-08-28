@@ -114,17 +114,7 @@ impl ReplyHandle<'_> {
         match &self.0 {
             ReplyHandleInner::Prefix(msg) => {
                 msg.clone()
-                    .edit(ctx.discord(), |b| {
-                        // Clear builder so that adding embeds or attachments won't add on top of
-                        // the pre-edit items but replace them (which is apparently the more
-                        // intuitive behavior). Notably, setting the builder to default doesn't
-                        // mean the entire message is reset to empty: Discord only updates parts
-                        // of the message that have had a modification specified
-                        *b = Default::default();
-
-                        reply.to_prefix_edit(b);
-                        b
-                    })
+                    .edit(ctx.discord(), reply.to_prefix_edit())
                     .await?;
             }
             ReplyHandleInner::Application {
@@ -133,10 +123,10 @@ impl ReplyHandle<'_> {
                 followup: None,
             } => {
                 interaction
-                    .edit_original_interaction_response(http, |b| {
-                        reply.to_slash_initial_response_edit(b);
-                        b
-                    })
+                    .edit_original_interaction_response(
+                        http,
+                        reply.to_slash_initial_response_edit(),
+                    )
                     .await?;
             }
             ReplyHandleInner::Application {
@@ -145,10 +135,7 @@ impl ReplyHandle<'_> {
                 followup: Some(msg),
             } => {
                 interaction
-                    .edit_followup_message(http, msg.id, |b| {
-                        reply.to_slash_followup_response(b);
-                        b
-                    })
+                    .edit_followup_message(http, msg.id, reply.to_slash_followup_response())
                     .await?;
             }
             ReplyHandleInner::Autocomplete => panic!("reply is a no-op in autocomplete context"),

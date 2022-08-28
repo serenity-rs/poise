@@ -121,7 +121,6 @@ event! {
     #[cfg(not(feature = "cache"))]
     guild_role_update => GuildRoleUpdate { new: serenity::Role },
     guild_stickers_update => GuildStickersUpdate { guild_id: serenity::GuildId, current_state: std::collections::HashMap<serenity::StickerId, serenity::Sticker>},
-    guild_unavailable => GuildUnavailable { guild_id: serenity::GuildId },
     #[cfg(feature = "cache")]
     guild_update => GuildUpdate { old_data_if_available: Option<serenity::Guild>, new_but_incomplete: serenity::PartialGuild },
     #[cfg(not(feature = "cache"))]
@@ -156,7 +155,6 @@ event! {
     thread_members_update => ThreadMembersUpdate { thread_members_update: serenity::ThreadMembersUpdateEvent },
     thread_update => ThreadUpdate { thread: serenity::GuildChannel },
     typing_start => TypingStart { event: serenity::TypingStartEvent },
-    unknown => Unknown { name: String, raw: serenity::json::Value },
     #[cfg(feature = "cache")]
     user_update => UserUpdate { old_data: serenity::CurrentUser, new: serenity::CurrentUser },
     #[cfg(not(feature = "cache"))]

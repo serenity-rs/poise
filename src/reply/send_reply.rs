@@ -10,11 +10,11 @@ use crate::serenity_prelude as serenity;
 /// Note: panics when called in an autocomplete context!
 ///
 /// ```rust,no_run
-/// # #[tokio::main] async fn main() -> Result<(), Box<dyn std::error::Error>> {
-/// # let ctx: poise::Context<'_, (), ()> = todo!();
+/// # use poise::serenity_prelude as serenity;
+/// # async fn _test(ctx: poise::Context<'_, (), ()>) -> Result<(), Box<dyn std::error::Error>> {
 /// ctx.send(|f| f
 ///     .content("Works for slash and prefix commands")
-///     .embed(|f| f
+///     .embed(serenity::CreateEmbed::default()
 ///         .title("Much versatile, very wow")
 ///         .description("I need more documentation ok?")
 ///     )
@@ -86,21 +86,17 @@ async fn _send_application_reply<'a, U, E>(
     let followup = if has_sent_initial_response {
         Some(Box::new(
             interaction
-                .create_followup_message(ctx.discord, |f| {
-                    data.to_slash_followup_response(f);
-                    f
-                })
+                .create_followup_message(ctx.discord, data.to_slash_followup_response())
                 .await?,
         ))
     } else {
         interaction
-            .create_interaction_response(ctx.discord, |r| {
-                r.kind(serenity::InteractionResponseType::ChannelMessageWithSource)
-                    .interaction_response_data(|f| {
-                        data.to_slash_initial_response(f);
-                        f
-                    })
-            })
+            .create_interaction_response(
+                ctx.discord,
+                serenity::CreateInteractionResponse::default()
+                    .kind(serenity::InteractionResponseType::ChannelMessageWithSource)
+                    .interaction_response_data(data.to_slash_initial_response()),
+            )
             .await?;
         ctx.has_sent_initial_response
             .store(true, std::sync::atomic::Ordering::SeqCst);
@@ -155,21 +151,7 @@ async fn _send_prefix_reply<'a, U, E>(
         .cloned();
 
     Ok(Box::new(if let Some(mut response) = existing_response {
-        response
-            .edit(ctx.discord, |f| {
-                // Reset the message. We don't want leftovers of the previous message (e.g. user
-                // sends a message with `.content("abc")` in a track_edits command, and the edited
-                // message happens to contain embeds, we don't want to keep those embeds)
-                // (*f = Default::default() won't do)
-                f.content("");
-                f.set_embeds(Vec::new());
-                f.components(|b| b);
-                f.0.insert("attachments", serenity::json::json! { [] });
-
-                reply.to_prefix_edit(f);
-                f
-            })
-            .await?;
+        response.edit(ctx.discord, reply.to_prefix_edit()).await?;
 
         // If the entry still exists after the await, update it to the new contents
         if let Some(mut edit_tracker) = lock_edit_tracker() {
@@ -181,10 +163,7 @@ async fn _send_prefix_reply<'a, U, E>(
         let new_response = ctx
             .msg
             .channel_id
-            .send_message(ctx.discord, |m| {
-                reply.to_prefix(m);
-                m
-            })
+            .send_message(ctx.discord, reply.to_prefix())
             .await?;
         if let Some(track_edits) = &mut lock_edit_tracker() {
             track_edits.set_bot_response(ctx.msg, new_response.clone());
