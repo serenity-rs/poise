@@ -22,10 +22,10 @@ use crate::serenity_prelude as serenity;
 /// ).await?;
 /// # Ok(()) }
 /// ```
-pub async fn send_reply<'att, U, E>(
-    ctx: crate::Context<'_, U, E>,
-    builder: impl for<'a> FnOnce(&'a mut crate::CreateReply<'att>) -> &'a mut crate::CreateReply<'att>,
-) -> Result<crate::ReplyHandle<'_>, serenity::Error> {
+pub async fn send_reply<'a, 'att, U, E>(
+    ctx: crate::Context<'a, U, E>,
+    builder: crate::CreateReply<'att>,
+) -> Result<crate::ReplyHandle<'a>, serenity::Error> {
     Ok(match ctx {
         crate::Context::Prefix(ctx) => crate::ReplyHandle(super::ReplyHandleInner::Prefix(
             crate::send_prefix_reply(ctx, builder).await?,
@@ -41,7 +41,7 @@ pub async fn say_reply<U, E>(
     ctx: crate::Context<'_, U, E>,
     text: impl Into<String>,
 ) -> Result<crate::ReplyHandle<'_>, serenity::Error> {
-    send_reply(ctx, |m| m.content(text.into())).await
+    send_reply(ctx, crate::CreateReply::default().content(text.into())).await
 }
 
 /// Send a response to an interaction (slash command or context menu command invocation).
@@ -50,23 +50,17 @@ pub async fn say_reply<U, E>(
 /// [followup](serenity::ApplicationCommandInteraction::create_followup_message) is sent.
 ///
 /// No-op if autocomplete context
-pub async fn send_application_reply<'att, U, E>(
-    ctx: crate::ApplicationContext<'_, U, E>,
-    builder: impl for<'a> FnOnce(&'a mut crate::CreateReply<'att>) -> &'a mut crate::CreateReply<'att>,
-) -> Result<crate::ReplyHandle<'_>, serenity::Error> {
-    let mut data = crate::CreateReply {
-        ephemeral: ctx.command.ephemeral,
-        allowed_mentions: ctx.framework.options().allowed_mentions.clone(),
-        ..Default::default()
-    };
-    builder(&mut data);
-    _send_application_reply(ctx, data).await
+pub async fn send_application_reply<'a, 'att, U, E>(
+    ctx: crate::ApplicationContext<'a, U, E>,
+    builder: crate::CreateReply<'att>,
+) -> Result<crate::ReplyHandle<'a>, serenity::Error> {
+    _send_application_reply(ctx, builder.complete_from_ctx(ctx.into())).await
 }
 
 /// private version of [`send_application_reply`] that isn't generic over the builder to minimize monomorphization-related codegen bloat
 async fn _send_application_reply<'a, U, E>(
     ctx: crate::ApplicationContext<'a, U, E>,
-    mut data: crate::CreateReply<'_>,
+    data: crate::CreateReply<'_>,
 ) -> Result<crate::ReplyHandle<'a>, serenity::Error> {
     let interaction = match ctx.interaction {
         crate::ApplicationCommandOrAutocompleteInteraction::ApplicationCommand(x) => x,
@@ -74,10 +68,6 @@ async fn _send_application_reply<'a, U, E>(
             return Ok(crate::ReplyHandle(super::ReplyHandleInner::Autocomplete))
         }
     };
-
-    if let Some(callback) = ctx.framework.options().reply_callback {
-        callback(ctx.into(), &mut data);
-    }
 
     let has_sent_initial_response = ctx
         .has_sent_initial_response
@@ -114,26 +104,16 @@ async fn _send_application_reply<'a, U, E>(
 /// Prefix-specific reply function. For more details, see [`crate::send_reply`].
 pub async fn send_prefix_reply<'att, U, E>(
     ctx: crate::PrefixContext<'_, U, E>,
-    builder: impl for<'a> FnOnce(&'a mut crate::CreateReply<'att>) -> &'a mut crate::CreateReply<'att>,
+    builder: crate::CreateReply<'att>,
 ) -> Result<Box<serenity::Message>, serenity::Error> {
-    let mut reply = crate::CreateReply {
-        ephemeral: ctx.command.ephemeral,
-        allowed_mentions: ctx.framework.options().allowed_mentions.clone(),
-        ..Default::default()
-    };
-    builder(&mut reply);
-    _send_prefix_reply(ctx, reply).await
+    _send_prefix_reply(ctx, builder.complete_from_ctx(ctx.into())).await
 }
 
 /// private version of [`send_prefix_reply`] that isn't generic over the builder to minimize monomorphization-related codegen bloat
 async fn _send_prefix_reply<'a, U, E>(
     ctx: crate::PrefixContext<'_, U, E>,
-    mut reply: crate::CreateReply<'a>,
+    reply: crate::CreateReply<'a>,
 ) -> Result<Box<serenity::Message>, serenity::Error> {
-    if let Some(callback) = ctx.framework.options().reply_callback {
-        callback(ctx.into(), &mut reply);
-    }
-
     // This must only return None when we _actually_ want to reuse the existing response! There are
     // no checks later
     let lock_edit_tracker = || {

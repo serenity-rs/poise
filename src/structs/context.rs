@@ -82,8 +82,6 @@ impl<'a, U, E> Context<'a, U, E> {
     }
 
     /// Shorthand of [`crate::say_reply`]
-    ///
-    /// Note: panics when called in an autocomplete context!
     pub async fn say(
         self,
         text: impl Into<String>,
@@ -92,13 +90,9 @@ impl<'a, U, E> Context<'a, U, E> {
     }
 
     /// Shorthand of [`crate::send_reply`]
-    ///
-    /// Note: panics when called in an autocomplete context!
     pub async fn send<'att>(
         self,
-        builder: impl for<'b> FnOnce(
-            &'b mut crate::CreateReply<'att>,
-        ) -> &'b mut crate::CreateReply<'att>,
+        builder: crate::CreateReply<'att>,
     ) -> Result<crate::ReplyHandle<'a>, serenity::Error> {
         crate::send_reply(self, builder).await
     }

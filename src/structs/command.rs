@@ -233,7 +233,7 @@ impl<U, E> Command<U, E> {
 
     /// **Deprecated**
     #[deprecated = "Please use `poise::Command { category: \"...\", ..command() }` instead"]
-    pub fn category(&mut self, category: &'static str) -> &mut Self {
+    pub fn category(mut self, category: &'static str) -> Self {
         self.category = Some(category);
         self
     }
@@ -241,10 +241,10 @@ impl<U, E> Command<U, E> {
     /// Insert a subcommand
     #[deprecated = "Please use `poise::Command { subcommands: vec![...], ..command() }` instead"]
     pub fn subcommand(
-        &mut self,
+        mut self,
         mut subcommand: crate::Command<U, E>,
-        meta_builder: impl FnOnce(&mut Self) -> &mut Self,
-    ) -> &mut Self {
+        meta_builder: impl FnOnce(&mut Self) -> Self,
+    ) -> Self {
         meta_builder(&mut subcommand);
         self.subcommands.push(subcommand);
         self

@@ -12,7 +12,9 @@ pub struct CreateReply<'att> {
     /// Message attachments.
     pub attachments: Vec<serenity::AttachmentType<'att>>,
     /// Whether the message is ephemeral (only has an effect in application commands)
-    pub ephemeral: bool,
+    ///
+    /// If None, it's initialized to [`Command::ephemeral`]
+    pub ephemeral: Option<bool>,
     /// Message components, that is, buttons and select menus.
     pub components: Option<serenity::CreateComponents>,
     /// The allowed mentions for the message.
@@ -23,7 +25,7 @@ pub struct CreateReply<'att> {
 
 impl<'att> CreateReply<'att> {
     /// Set the content of the message.
-    pub fn content(&mut self, content: impl Into<String>) -> &mut Self {
+    pub fn content(mut self, content: impl Into<String>) -> Self {
         self.content = Some(content.into());
         self
     }
@@ -31,7 +33,7 @@ impl<'att> CreateReply<'att> {
     /// Adds an embed to the message.
     ///
     /// Existing embeds are kept.
-    pub fn embed(&mut self, b: serenity::CreateEmbed) -> &mut Self {
+    pub fn embed(mut self, b: serenity::CreateEmbed) -> Self {
         self.embeds.push(b);
         self
     }
@@ -39,7 +41,7 @@ impl<'att> CreateReply<'att> {
     /// Set components (buttons and select menus) for this message.
     ///
     /// Any previously set components will be overwritten.
-    pub fn components(&mut self, b: serenity::CreateComponents) -> &mut Self {
+    pub fn components(mut self, b: serenity::CreateComponents) -> Self {
         self.components = Some(b);
         self
     }
@@ -47,7 +49,7 @@ impl<'att> CreateReply<'att> {
     /// Add an attachment.
     ///
     /// This will not have an effect in a slash command's initial response!
-    pub fn attachment(&mut self, attachment: serenity::AttachmentType<'att>) -> &mut Self {
+    pub fn attachment(mut self, attachment: serenity::AttachmentType<'att>) -> Self {
         self.attachments.push(attachment);
         self
     }
@@ -60,25 +62,33 @@ impl<'att> CreateReply<'att> {
     /// has previously been deferred, the ephemerality is decided by the defer operation. I.e.
     /// if you deferred the response without enabling ephemeral, the initial response will not be
     /// ephemeral.
-    pub fn ephemeral(&mut self, ephemeral: bool) -> &mut Self {
-        self.ephemeral = ephemeral;
+    pub fn ephemeral(mut self, ephemeral: bool) -> Self {
+        self.ephemeral = Some(ephemeral);
         self
     }
 
     /// Set the allowed mentions for the message.
     ///
     /// See [`serenity::CreateAllowedMentions`] for more information.
-    pub fn allowed_mentions(&mut self, b: serenity::CreateAllowedMentions) -> &mut Self {
+    pub fn allowed_mentions(mut self, b: serenity::CreateAllowedMentions) -> Self {
         self.allowed_mentions = Some(b);
         self
     }
 
     /// Set the reference message this message is a reply to.
-    pub fn reference_message(
-        &mut self,
-        reference: impl Into<serenity::MessageReference>,
-    ) -> &mut Self {
+    pub fn reference_message(mut self, reference: impl Into<serenity::MessageReference>) -> Self {
         self.reference_message = Some(reference.into());
+        self
+    }
+
+    pub(crate) fn complete_from_ctx<U, E>(mut self, ctx: crate::Context<'_, U, E>) -> Self {
+        self.ephemeral.get_or_insert(ctx.command().ephemeral);
+        if let Some(allowed_mentions) = ctx.framework().options().allowed_mentions.clone() {
+            self.allowed_mentions.get_or_insert(allowed_mentions);
+        }
+        if let Some(callback) = ctx.framework().options().reply_callback {
+            self = callback(ctx, self);
+        }
         self
     }
 }
@@ -109,7 +119,7 @@ impl<'att> CreateReply<'att> {
         if let Some(components) = components {
             f = f.components(components);
         }
-        f = f.ephemeral(ephemeral);
+        f = f.ephemeral(ephemeral.unwrap_or(false));
         f = f.add_files(attachments);
 
         f
@@ -138,7 +148,7 @@ impl<'att> CreateReply<'att> {
         if let Some(allowed_mentions) = allowed_mentions {
             f = f.allowed_mentions(allowed_mentions);
         }
-        f = f.ephemeral(ephemeral);
+        f = f.ephemeral(ephemeral.unwrap_or(false));
         f = f.add_files(attachments);
 
         f

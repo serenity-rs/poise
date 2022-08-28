@@ -113,8 +113,9 @@ pub async fn register_application_commands_buttons<U, E>(
     }
 
     let reply = ctx
-        .send(|m| {
-            m.content("Choose what to do with the commands:")
+        .send(
+            crate::CreateReply::default()
+                .content("Choose what to do with the commands:")
                 .components(
                     serenity::CreateComponents::default()
                         .add_action_row(
@@ -147,8 +148,8 @@ pub async fn register_application_commands_buttons<U, E>(
                                         .style(serenity::ButtonStyle::Danger),
                                 ),
                         ),
-                )
-        })
+                ),
+        )
         .await?;
 
     let interaction = reply
@@ -161,9 +162,11 @@ pub async fn register_application_commands_buttons<U, E>(
 
     // remove buttons after button press
     reply
-        .edit(ctx, |b| {
-            b.components(serenity::builder::CreateComponents::default())
-        })
+        .edit(
+            ctx,
+            crate::CreateReply::default()
+                .components(serenity::builder::CreateComponents::default()),
+        )
         .await?;
 
     let pressed_button_id = match &interaction {

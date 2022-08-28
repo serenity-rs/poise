@@ -31,7 +31,9 @@ pub struct FrameworkOptions<U, E> {
     ///
     /// Allows you to modify every outgoing message in a central place
     #[derivative(Debug = "ignore")]
-    pub reply_callback: Option<fn(crate::Context<'_, U, E>, &mut crate::CreateReply<'_>)>,
+    pub reply_callback: Option<
+        for<'a> fn(crate::Context<'_, U, E>, crate::CreateReply<'a>) -> crate::CreateReply<'a>,
+    >,
     /// If `true`, disables automatic cooldown handling before every command invocation.
     ///
     /// Useful for implementing custom cooldown behavior. See [`crate::Command::cooldowns`] and

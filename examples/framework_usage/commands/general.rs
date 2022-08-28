@@ -103,18 +103,20 @@ pub async fn choice(
 pub async fn boop(ctx: Context<'_>) -> Result<(), Error> {
     let uuid_boop = ctx.id();
 
-    ctx.send(|m| {
-        m.content("I want some boops!").components(
-            serenity::CreateComponents::default().add_action_row(
-                serenity::CreateActionRow::default().add_button(
-                    serenity::CreateButton::default()
-                        .style(serenity::ButtonStyle::Primary)
-                        .label("Boop me!")
-                        .custom_id(uuid_boop.to_string()),
+    ctx.send(
+        poise::CreateReply::default()
+            .content("I want some boops!")
+            .components(
+                serenity::CreateComponents::default().add_action_row(
+                    serenity::CreateActionRow::default().add_button(
+                        serenity::CreateButton::default()
+                            .style(serenity::ButtonStyle::Primary)
+                            .label("Boop me!")
+                            .custom_id(uuid_boop.to_string()),
+                    ),
                 ),
             ),
-        )
-    })
+    )
     .await?;
 
     let mut boop_count = 0;
@@ -178,8 +180,9 @@ pub async fn voiceinfo(
 #[poise::command(slash_command, prefix_command, reuse_response)]
 pub async fn test_reuse_response(ctx: Context<'_>) -> Result<(), Error> {
     let image_url = "https://raw.githubusercontent.com/serenity-rs/serenity/current/logo.png";
-    ctx.send(|b| {
-        b.content("message 1")
+    ctx.send(
+        poise::CreateReply::default()
+            .content("message 1")
             .embed(
                 serenity::CreateEmbed::default()
                     .description("embed 1")
@@ -194,15 +197,16 @@ pub async fn test_reuse_response(ctx: Context<'_>) -> Result<(), Error> {
                             .custom_id("1"),
                     ),
                 ),
-            )
-    })
+            ),
+    )
     .await?;
 
     tokio::time::sleep(std::time::Duration::from_secs(2)).await;
 
     let image_url = "https://raw.githubusercontent.com/serenity-rs/serenity/current/examples/e09_create_message_builder/ferris_eyes.png";
-    ctx.send(|b| {
-        b.content("message 2")
+    ctx.send(
+        poise::CreateReply::default()
+            .content("message 2")
             .embed(
                 serenity::CreateEmbed::default()
                     .description("embed 2")
@@ -217,8 +221,8 @@ pub async fn test_reuse_response(ctx: Context<'_>) -> Result<(), Error> {
                             .custom_id("2"),
                     ),
                 ),
-            )
-    })
+            ),
+    )
     .await?;
 
     Ok(())
