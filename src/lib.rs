@@ -296,10 +296,12 @@ pub use poise_macros::*;
 /// ```
 pub mod serenity_prelude {
     #[doc(no_inline)]
+    #[cfg(feature = "cache")]
+    pub use serenity::cache::*;
+    #[doc(no_inline)]
     pub use serenity::{
         async_trait,
         builder::*,
-        cache::*,
         client::{
             bridge::gateway::{event::*, *},
             *,
