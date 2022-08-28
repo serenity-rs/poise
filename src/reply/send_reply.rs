@@ -12,7 +12,7 @@ use crate::serenity_prelude as serenity;
 /// ```rust,no_run
 /// # use poise::serenity_prelude as serenity;
 /// # async fn _test(ctx: poise::Context<'_, (), ()>) -> Result<(), Box<dyn std::error::Error>> {
-/// ctx.send(|f| f
+/// ctx.send(poise::CreateReply::default()
 ///     .content("Works for slash and prefix commands")
 ///     .embed(serenity::CreateEmbed::default()
 ///         .title("Much versatile, very wow")

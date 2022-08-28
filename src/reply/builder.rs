@@ -81,6 +81,10 @@ impl<'att> CreateReply<'att> {
         self
     }
 
+    /// Utility function that sets up a CreateReply builder with data that it always has (as
+    /// configured in the framework or the command)
+    ///
+    /// Invoked in every place where a CreateReply is accepted and sent to Discord
     pub(crate) fn complete_from_ctx<U, E>(mut self, ctx: crate::Context<'_, U, E>) -> Self {
         self.ephemeral.get_or_insert(ctx.command().ephemeral);
         if let Some(allowed_mentions) = ctx.framework().options().allowed_mentions.clone() {

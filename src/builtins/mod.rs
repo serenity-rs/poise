@@ -11,6 +11,8 @@ pub use register::*;
 
 use crate::serenity_prelude as serenity;
 
+/// Utility function to avoid verbose
+/// `ctx.send(crate::CreateReply::default().content(...).ephemeral(...))`
 async fn say_ephemeral<U, E>(
     ctx: crate::Context<'_, U, E>,
     msg: &str,
