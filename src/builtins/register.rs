@@ -2,7 +2,7 @@
 
 use crate::serenity_prelude as serenity;
 
-/// Collects all commands into a [`serenity::CreateApplicationCommands`] builder, which can be used
+/// Collects all commands into a `Vec<serenity::CreateApplicationCommand>`, which can be used
 /// to register the commands on Discord
 ///
 /// Also see [`register_application_commands_buttons`] for a ready to use register command
