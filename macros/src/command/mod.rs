@@ -313,7 +313,7 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
                 context_menu_action: #context_menu_action,
 
                 subcommands: vec![ #( #subcommands() ),* ],
-                name: #command_name.to_string(),
+                name: #command_name.to_owned(),
                 name_localizations: #name_localizations,
                 qualified_name: String::from(#command_name), // properly filled in later by Framework
                 identifying_name: String::from(#identifying_name),
