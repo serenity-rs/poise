@@ -301,6 +301,7 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
     let function_visibility = &inv.function.vis;
     let function = &inv.function;
     Ok(quote::quote! {
+        #[allow(clippy::str_to_string)]
         #function_visibility fn #function_name() -> ::poise::Command<
             <#ctx_type_with_static as poise::_GetGenerics>::U,
             <#ctx_type_with_static as poise::_GetGenerics>::E,
@@ -313,7 +314,7 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
                 context_menu_action: #context_menu_action,
 
                 subcommands: vec![ #( #subcommands() ),* ],
-                name: #command_name.to_owned(),
+                name: #command_name.to_string(),
                 name_localizations: #name_localizations,
                 qualified_name: String::from(#command_name), // properly filled in later by Framework
                 identifying_name: String::from(#identifying_name),
