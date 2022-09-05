@@ -71,14 +71,14 @@ pub fn choice_parameter(input: syn::DeriveInput) -> Result<TokenStream, darling:
             async fn extract(
                 _: &poise::serenity_prelude::Context,
                 _: poise::ApplicationCommandOrAutocompleteInteraction<'_>,
-                value: &poise::serenity_prelude::CommandDataOptionValue,
+                value: &poise::serenity_prelude::ResolvedValue<'_>,
             ) -> ::std::result::Result<Self, poise::SlashArgError> {
-                use poise::serenity_prelude::json::prelude::*;
-                let choice_key = value
-                    .as_i64()
-                    .ok_or(poise::SlashArgError::CommandStructureMismatch(
+                let choice_key = match value {
+                    poise::serenity_prelude::ResolvedValue::Integer(i) => i,
+                    _ => return Err(poise::SlashArgError::CommandStructureMismatch(
                         "expected integer",
-                    ))?;
+                    )),
+                };
 
                 match choice_key {
                     #( #indices => Ok(Self::#variant_idents), )*

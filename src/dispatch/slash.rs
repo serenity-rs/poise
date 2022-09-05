@@ -5,9 +5,9 @@ use crate::serenity_prelude as serenity;
 /// Check if the interaction with the given name and arguments matches any framework command
 fn find_matching_command<'a, 'b, U, E>(
     interaction_name: &str,
-    interaction_options: &'b [serenity::CommandDataOption],
+    interaction_options: &'b [serenity::ResolvedOption<'b>],
     commands: &'a [crate::Command<U, E>],
-) -> Option<(&'a crate::Command<U, E>, &'b [serenity::CommandDataOption])> {
+) -> Option<(&'a crate::Command<U, E>, &'b [serenity::ResolvedOption<'b>])> {
     commands.iter().find_map(|cmd| {
         if interaction_name != cmd.name && Some(interaction_name) != cmd.context_menu_name {
             return None;
@@ -16,8 +16,8 @@ fn find_matching_command<'a, 'b, U, E>(
         if let Some((sub_interaction_name, sub_interaction_options)) = interaction_options
             .iter()
             .find_map(|option| match &option.value {
-                serenity::CommandDataOptionValue::SubCommand(o)
-                | serenity::CommandDataOptionValue::SubCommandGroup(o) => Some((&option.name, o)),
+                serenity::ResolvedValue::SubCommand(o)
+                | serenity::ResolvedValue::SubCommandGroup(o) => Some((&option.name, o)),
                 _ => None,
             })
         {
@@ -38,15 +38,17 @@ pub async fn extract_command_and_run_checks<'a, U, E>(
     framework: crate::FrameworkContext<'a, U, E>,
     ctx: &'a serenity::Context,
     interaction: crate::ApplicationCommandOrAutocompleteInteraction<'a>,
+    // need to pass the following in for lifetime reasons
     has_sent_initial_response: &'a std::sync::atomic::AtomicBool,
     invocation_data: &'a tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
+    options: &'a [serenity::ResolvedOption<'a>],
 ) -> Result<
     crate::ApplicationContext<'a, U, E>,
     Option<(crate::FrameworkError<'a, U, E>, &'a crate::Command<U, E>)>,
 > {
     let search_result = find_matching_command(
         &interaction.data().name,
-        &interaction.data().options,
+        options,
         &framework.options.commands,
     );
     let (command, leaf_interaction_options) = search_result.ok_or_else(|| {
@@ -85,6 +87,8 @@ pub async fn dispatch_interaction<'a, U, E>(
     has_sent_initial_response: &'a std::sync::atomic::AtomicBool,
     // Need to pass this in from outside because of lifetime issues
     invocation_data: &'a tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
+    // Need to pass this in from outside because of lifetime issues
+    options: &'a [serenity::ResolvedOption<'a>],
 ) -> Result<(), Option<(crate::FrameworkError<'a, U, E>, &'a crate::Command<U, E>)>> {
     let ctx = extract_command_and_run_checks(
         framework,
@@ -92,6 +96,7 @@ pub async fn dispatch_interaction<'a, U, E>(
         crate::ApplicationCommandOrAutocompleteInteraction::ApplicationCommand(interaction),
         has_sent_initial_response,
         invocation_data,
+        options,
     )
     .await?;
 
@@ -152,6 +157,8 @@ pub async fn dispatch_autocomplete<'a, U, E>(
     has_sent_initial_response: &'a std::sync::atomic::AtomicBool,
     // Need to pass this in from outside because of lifetime issues
     invocation_data: &'a tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
+    // Need to pass this in from outside because of lifetime issues
+    options: &'a [serenity::ResolvedOption<'a>],
 ) -> Result<(), Option<(crate::FrameworkError<'a, U, E>, &'a crate::Command<U, E>)>> {
     let ctx = extract_command_and_run_checks(
         framework,
@@ -159,6 +166,7 @@ pub async fn dispatch_autocomplete<'a, U, E>(
         crate::ApplicationCommandOrAutocompleteInteraction::Autocomplete(interaction),
         has_sent_initial_response,
         invocation_data,
+        options,
     )
     .await?;
 
@@ -167,7 +175,7 @@ pub async fn dispatch_autocomplete<'a, U, E>(
         .args
         .iter()
         .find_map(|o| match &o.value {
-            serenity::CommandDataOptionValue::Autocomplete { value, .. } => Some((&o.name, value)),
+            serenity::ResolvedValue::Autocomplete { value, .. } => Some((&o.name, value)),
             _ => None,
         })
         .ok_or(None)?;

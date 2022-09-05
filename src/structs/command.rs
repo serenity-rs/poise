@@ -178,10 +178,8 @@ impl<U, E> Command<U, E> {
     pub fn create_as_slash_command(&self) -> Option<serenity::CreateApplicationCommand> {
         self.slash_action?;
 
-        let mut b = serenity::CreateApplicationCommand::new(
-            &self.name,
-            self.description.as_deref().unwrap_or("A slash command"),
-        );
+        let mut b = serenity::CreateApplicationCommand::new(&self.name)
+            .description(self.description.as_deref().unwrap_or("A slash command"));
 
         for (locale, name) in &self.name_localizations {
             b = b.name_localized(locale, name);
@@ -219,16 +217,12 @@ impl<U, E> Command<U, E> {
         let context_menu_action = self.context_menu_action?;
 
         // TODO: localization?
-        let builder = serenity::CreateApplicationCommand::new(
-            self.context_menu_name.unwrap_or(&self.name),
-            // Dummy string. Serenity forces us to pass a description, but context menu commands dont have one
-            "",
-        )
-        .kind(match context_menu_action {
+        let name = self.context_menu_name.unwrap_or(&self.name);
+        let kind = match context_menu_action {
             crate::ContextMenuCommandAction::User(_) => serenity::CommandType::User,
             crate::ContextMenuCommandAction::Message(_) => serenity::CommandType::Message,
-        });
-        Some(builder)
+        };
+        Some(serenity::CreateApplicationCommand::new(name).kind(kind))
     }
 
     /// **Deprecated**

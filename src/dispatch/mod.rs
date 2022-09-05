@@ -98,13 +98,13 @@ pub async fn dispatch_event<U: Send + Sync, E>(
         crate::Event::InteractionCreate {
             interaction: serenity::Interaction::ApplicationCommand(interaction),
         } => {
-            let invocation_data = tokio::sync::Mutex::new(Box::new(()) as _);
             if let Err(Some((error, command))) = slash::dispatch_interaction(
                 framework,
                 ctx,
                 interaction,
                 &std::sync::atomic::AtomicBool::new(false),
-                &invocation_data,
+                &tokio::sync::Mutex::new(Box::new(()) as _),
+                &interaction.data.options(),
             )
             .await
             {
@@ -114,13 +114,13 @@ pub async fn dispatch_event<U: Send + Sync, E>(
         crate::Event::InteractionCreate {
             interaction: serenity::Interaction::Autocomplete(interaction),
         } => {
-            let invocation_data = tokio::sync::Mutex::new(Box::new(()) as _);
             if let Err(Some((error, command))) = slash::dispatch_autocomplete(
                 framework,
                 ctx,
                 interaction,
                 &std::sync::atomic::AtomicBool::new(false),
-                &invocation_data,
+                &tokio::sync::Mutex::new(Box::new(()) as _),
+                &interaction.data.options(),
             )
             .await
             {
