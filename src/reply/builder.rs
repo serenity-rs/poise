@@ -13,7 +13,7 @@ pub struct CreateReply<'att> {
     pub attachments: Vec<serenity::AttachmentType<'att>>,
     /// Whether the message is ephemeral (only has an effect in application commands)
     ///
-    /// If None, it's initialized to [`Command::ephemeral`]
+    /// If None, it's initialized to [`crate::Command::ephemeral`]
     pub ephemeral: Option<bool>,
     /// Message components, that is, buttons and select menus.
     pub components: Option<serenity::CreateComponents>,
