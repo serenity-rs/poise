@@ -135,6 +135,19 @@ impl<'a, U, E> Context<'a, U, E> {
         }
     }
 
+    /// Return the category ID of this context, if we are inside a category
+    pub async fn category_id(&self) -> Result<Option<serenity::ChannelId>, serenity::Error> {
+        let chan = self.discord().cache.channel(self.channel_id());
+        let chan = match chan {
+            Some(chan) => chan,
+            None => self.discord().http.get_channel(self.channel_id().0).await?,
+        };
+        Ok(match chan {
+            serenity::Channel::Guild(chan) => chan.parent_id,
+            _ => None
+        })
+    }
+
     /// Returns the guild ID of this context, if we are inside a guild
     pub fn guild_id(&self) -> Option<serenity::GuildId> {
         match self {
