@@ -136,16 +136,16 @@ impl<'a, U, E> Context<'a, U, E> {
     }
 
     /// Return the category ID of this context, if we are inside a category
+    ///
+    /// If we're not in a category channel, or not even in a guild, Ok(None) is returned.
+    /// If retrieving channel data failed, Err(...) is returned.
     pub async fn category_id(&self) -> Result<Option<serenity::ChannelId>, serenity::Error> {
-        let chan = self.discord().cache.channel(self.channel_id());
-        let chan = match chan {
-            Some(chan) => chan,
-            None => self.discord().http.get_channel(self.channel_id().0).await?,
-        };
-        Ok(match chan {
-            serenity::Channel::Guild(chan) => chan.parent_id,
-            _ => None
-        })
+        Ok(self
+            .channel_id()
+            .to_channel(self.discord())
+            .await?
+            .guild()
+            .and_then(|chan| chan.parent_id))
     }
 
     /// Returns the guild ID of this context, if we are inside a guild
