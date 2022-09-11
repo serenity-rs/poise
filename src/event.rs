@@ -81,8 +81,8 @@ event! {
     #[cfg(feature = "cache")]
     cache_ready => CacheReady { guilds: Vec<serenity::GuildId> },
     channel_create<'a> => ChannelCreate { channel: &'a serenity::GuildChannel },
-    category_create<'a> => CategoryCreate { category: &'a serenity::ChannelCategory },
-    category_delete<'a> => CategoryDelete { category: &'a serenity::ChannelCategory },
+    category_create<'a> => CategoryCreate { category: &'a serenity::GuildChannel },
+    category_delete<'a> => CategoryDelete { category: &'a serenity::GuildChannel },
     channel_delete<'a> => ChannelDelete { channel: &'a serenity::GuildChannel },
     channel_pins_update => ChannelPinsUpdate { pin: serenity::ChannelPinsUpdateEvent },
     #[cfg(feature = "cache")]
