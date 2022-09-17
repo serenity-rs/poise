@@ -283,10 +283,9 @@ pub mod samples {
     pub use crate::builtins::*;
 }
 
-#[doc(no_inline)]
-pub use async_trait::async_trait;
-pub use futures_core;
-pub use futures_util;
+#[doc(hidden)]
+pub use {async_trait::async_trait, futures_util};
+
 pub use poise_macros::*;
 
 /// This module re-exports a bunch of items from all over serenity. Useful if you can't
@@ -334,12 +333,9 @@ pub mod serenity_prelude {
         *,
     };
 }
-use serenity_prelude as serenity; // private alias for crate docs intradoc-links
-
-use std::future::Future;
-use std::pin::Pin;
+use serenity_prelude as serenity; // private alias for crate root docs intradoc-links
 
 /// Shorthand for a wrapped async future with a lifetime, used by many parts of this framework.
 ///
 /// An owned future has the `'static` lifetime.
-pub type BoxFuture<'a, T> = Pin<Box<dyn Future<Output = T> + Send + 'a>>;
+pub type BoxFuture<'a, T> = std::pin::Pin<Box<dyn std::future::Future<Output = T> + Send + 'a>>;
