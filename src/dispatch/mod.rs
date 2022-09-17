@@ -4,7 +4,9 @@ mod common;
 mod prefix;
 mod slash;
 
-pub use prefix::{dispatch_message, find_command, run_invocation};
+pub use common::*;
+pub use prefix::*;
+pub use slash::*;
 
 use crate::serenity_prelude as serenity;
 
@@ -60,7 +62,7 @@ pub async fn dispatch_event<U: Send + Sync, E>(
                 prefix::dispatch_message(framework, ctx, new_message, trigger, &invocation_data)
                     .await
             {
-                error.handle(&framework.options).await;
+                error.handle(framework.options).await;
             }
         }
         crate::Event::MessageUpdate { event, .. } => {
@@ -83,7 +85,7 @@ pub async fn dispatch_event<U: Send + Sync, E>(
                         prefix::dispatch_message(framework, ctx, &msg, trigger, &invocation_data)
                             .await
                     {
-                        error.handle(&framework.options).await;
+                        error.handle(framework.options).await;
                     }
                 }
             }
@@ -101,7 +103,7 @@ pub async fn dispatch_event<U: Send + Sync, E>(
             )
             .await
             {
-                error.handle(&framework.options).await;
+                error.handle(framework.options).await;
             }
         }
         crate::Event::InteractionCreate {
@@ -117,7 +119,7 @@ pub async fn dispatch_event<U: Send + Sync, E>(
             )
             .await
             {
-                error.handle(&framework.options).await;
+                error.handle(framework.options).await;
             }
         }
         _ => {}

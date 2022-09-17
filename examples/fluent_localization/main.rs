@@ -43,7 +43,7 @@ async fn main() {
     let translations = translation::read_ftl().expect("failed to read translation files");
     translation::apply_translations(&translations, &mut commands);
 
-    poise::Framework::build()
+    poise::Framework::builder()
         .token(std::env::var("TOKEN").unwrap())
         .intents(serenity::GatewayIntents::non_privileged())
         .options(poise::FrameworkOptions {

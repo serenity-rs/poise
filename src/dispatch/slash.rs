@@ -43,7 +43,7 @@ pub async fn extract_command_and_run_checks<'a, U, E>(
         &framework.options.commands,
     );
     let (command, leaf_interaction_options) =
-        search_result.ok_or_else(|| crate::FrameworkError::UnknownInteraction {
+        search_result.ok_or(crate::FrameworkError::UnknownInteraction {
             ctx,
             framework,
             interaction,
@@ -187,7 +187,7 @@ pub async fn dispatch_autocomplete<'a, U, E>(
     let partial_input =
         partial_input
             .as_str()
-            .ok_or_else(|| crate::FrameworkError::CommandStructureMismatch {
+            .ok_or(crate::FrameworkError::CommandStructureMismatch {
                 ctx,
                 description: "unexpected non-string autocomplete input",
             })?;

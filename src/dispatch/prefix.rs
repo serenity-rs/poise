@@ -183,6 +183,8 @@ pub async fn dispatch_message<'a, U: Send + Sync, E>(
     Ok(())
 }
 
+/// Given a Message and some context data, parses prefix, command etc. out of the message and
+/// returns the resulting [`crate::PrefixContext`]. To run the command, see [`run_invocation`].
 pub async fn parse_invocation<'a, U: Send + Sync, E>(
     framework: crate::FrameworkContext<'a, U, E>,
     ctx: &'a serenity::Context,
@@ -213,7 +215,7 @@ pub async fn parse_invocation<'a, U: Send + Sync, E>(
         msg_content,
         framework.options.prefix_options.case_insensitive_commands,
     )
-    .ok_or_else(|| crate::FrameworkError::UnknownCommand {
+    .ok_or(crate::FrameworkError::UnknownCommand {
         ctx,
         msg,
         prefix,
@@ -244,11 +246,11 @@ pub async fn parse_invocation<'a, U: Send + Sync, E>(
     }))
 }
 
-/// Given an existing parsed command invocation, run it, including all the before and after code
-/// like checks and built in filters from edit tracking
-pub async fn run_invocation<'a, U, E>(
-    ctx: crate::PrefixContext<'a, U, E>,
-) -> Result<(), crate::FrameworkError<'a, U, E>> {
+/// Given an existing parsed command invocation from [`parse_invocation`], run it, including all the
+/// before and after code like checks and built in filters from edit tracking
+pub async fn run_invocation<U, E>(
+    ctx: crate::PrefixContext<'_, U, E>,
+) -> Result<(), crate::FrameworkError<'_, U, E>> {
     // Check if we should disregard this invocation if it was triggered by an edit
     if ctx.trigger == crate::MessageDispatchTrigger::MessageEdit && !ctx.command.invoke_on_edit {
         return Ok(());
