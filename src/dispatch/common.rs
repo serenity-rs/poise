@@ -79,8 +79,9 @@ async fn missing_permissions<U, E>(
 #[allow(clippy::needless_lifetimes)] // false positive (clippy issue 7271)
 pub async fn check_permissions_and_cooldown<'a, U, E>(
     ctx: crate::Context<'a, U, E>,
-    cmd: &crate::Command<U, E>,
 ) -> Result<(), crate::FrameworkError<'a, U, E>> {
+    let cmd = ctx.command();
+
     if cmd.owners_only && !ctx.framework().options().owners.contains(&ctx.author().id) {
         return Err(crate::FrameworkError::NotAnOwner { ctx });
     }

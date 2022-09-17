@@ -100,9 +100,7 @@ async fn strip_prefix<'a, U, E>(
     None
 }
 
-/// Find a command or subcommand within `&[Command]`, given a command invocation without a prefix.
-/// Returns the verbatim command name string as well as the command arguments (i.e. the remaining
-/// string).
+/// Find a command or subcommand within `&[Command]`, given a command name
 ///
 /// ```rust
 /// #[poise::command(prefix_command)]
@@ -127,9 +125,9 @@ async fn strip_prefix<'a, U, E>(
 /// );
 pub fn find_command<'a, U, E>(
     commands: &'a [crate::Command<U, E>],
-    remaining_message: &'a str,
+    command_name: &'a str,
     case_insensitive: bool,
-) -> Option<(&'a crate::Command<U, E>, &'a str, &'a str)>
+) -> Option<&'a crate::Command<U, E>>
 where
     U: Send + Sync,
 {
@@ -137,11 +135,6 @@ where
         |a: &str, b: &str| a.eq_ignore_ascii_case(b)
     } else {
         |a: &str, b: &str| a == b
-    };
-
-    let (command_name, remaining_message) = {
-        let mut iter = remaining_message.splitn(2, char::is_whitespace);
-        (iter.next().unwrap(), iter.next().unwrap_or("").trim_start())
     };
 
     for command in commands {
@@ -155,66 +148,78 @@ where
         }
 
         return Some(
-            find_command(&command.subcommands, remaining_message, case_insensitive).unwrap_or((
-                command,
-                command_name,
-                remaining_message,
-            )),
+            find_command(&command.subcommands, command_name, case_insensitive).unwrap_or(command),
         );
     }
 
     None
 }
 
-/// Manually dispatches a message with the prefix framework.
-///
-/// Returns:
-/// - Ok(()) if a command was successfully dispatched and run
-/// - Err(None) if no command was dispatched, for example if the message didn't contain a command or
-///   the cooldown limits were reached
-/// - Err(Some(error: UserError)) if any user code yielded an error
-pub async fn dispatch_message<'a, U, E>(
+/// Manually dispatches a message with the prefix framework
+pub async fn dispatch_message<'a, U: Send + Sync, E>(
     framework: crate::FrameworkContext<'a, U, E>,
     ctx: &'a serenity::Context,
     msg: &'a serenity::Message,
-    triggered_by_edit: bool,
-    previously_tracked: bool,
+    trigger: crate::MessageDispatchTrigger,
     invocation_data: &'a tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
-) -> Result<(), Option<(crate::FrameworkError<'a, U, E>, &'a crate::Command<U, E>)>>
-where
-    U: Send + Sync,
-{
+) -> Result<(), crate::FrameworkError<'a, U, E>> {
+    if let Some(ctx) = parse_invocation(framework, ctx, msg, trigger, invocation_data).await? {
+        run_invocation(ctx).await?;
+    }
+    Ok(())
+}
+
+pub async fn parse_invocation<'a, U: Send + Sync, E>(
+    framework: crate::FrameworkContext<'a, U, E>,
+    ctx: &'a serenity::Context,
+    msg: &'a serenity::Message,
+    trigger: crate::MessageDispatchTrigger,
+    invocation_data: &'a tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
+) -> Result<Option<crate::PrefixContext<'a, U, E>>, crate::FrameworkError<'a, U, E>> {
     // Check if we're allowed to invoke from bot messages
     if msg.author.bot && framework.options.prefix_options.ignore_bots {
-        return Err(None);
+        return Ok(None);
     }
 
     // Check if we're allowed to execute our own messages
     if framework.bot_id == msg.author.id && !framework.options.prefix_options.execute_self_messages
     {
-        return Err(None);
+        return Ok(None);
     }
 
-    // Strip prefix and whitespace between prefix and command
-    let (prefix, msg_content) = strip_prefix(framework, ctx, msg).await.ok_or(None)?;
+    // Strip prefix, trim whitespace between prefix and rest, split rest into command name and args
+    let (prefix, msg_content) = match strip_prefix(framework, ctx, msg).await {
+        Some(x) => x,
+        None => return Ok(None),
+    };
     let msg_content = msg_content.trim_start();
+    let (invoked_command_name, args) = {
+        let mut iter = msg_content.splitn(2, char::is_whitespace);
+        (iter.next().unwrap(), iter.next().unwrap_or("").trim_start())
+    };
 
-    let (command, invoked_command_name, args) = find_command(
+    let command = find_command(
         &framework.options.commands,
         msg_content,
         framework.options.prefix_options.case_insensitive_commands,
     )
-    .ok_or(None)?;
-    let action = command.prefix_action.ok_or(None)?;
+    .ok_or_else(|| crate::FrameworkError::UnknownCommand {
+        ctx,
+        msg,
+        prefix,
+        invoked_command_name,
+        args,
+        framework,
+        invocation_data,
+        trigger,
+    })?;
+    let action = match command.prefix_action {
+        Some(x) => x,
+        // This command doesn't have a prefix implementation
+        None => return Ok(None),
+    };
 
-    // Check if we should disregard this invocation if it was triggered by an edit
-    let should_execute_if_triggered_by_edit = command.invoke_on_edit
-        || (!previously_tracked && framework.options.prefix_options.execute_untracked_edits);
-    if triggered_by_edit && !should_execute_if_triggered_by_edit {
-        return Err(None);
-    }
-
-    let ctx = crate::PrefixContext {
+    Ok(Some(crate::PrefixContext {
         discord: ctx,
         msg,
         prefix,
@@ -224,35 +229,50 @@ where
         data: framework.user_data().await,
         command,
         invocation_data,
+        trigger,
+        action,
         __non_exhaustive: (),
-    };
+    }))
+}
 
-    super::common::check_permissions_and_cooldown(ctx.into(), command)
-        .await
-        .map_err(|e| Some((e, command)))?;
+/// Given an existing parsed command invocation, run it, including all the before and after code
+/// like checks and built in filters from edit tracking
+pub async fn run_invocation<'a, U, E>(
+    ctx: crate::PrefixContext<'a, U, E>,
+) -> Result<(), crate::FrameworkError<'a, U, E>> {
+    // Check if we should disregard this invocation if it was triggered by an edit
+    if ctx.trigger == crate::MessageDispatchTrigger::MessageEdit && !ctx.command.invoke_on_edit {
+        return Ok(());
+    }
+    if ctx.trigger == crate::MessageDispatchTrigger::MessageEditFromInvalid
+        && !ctx.framework.options.prefix_options.execute_untracked_edits
+    {
+        return Ok(());
+    }
+
+    super::common::check_permissions_and_cooldown(ctx.into()).await?;
 
     // Typing is broadcasted as long as this object is alive
-    let _typing_broadcaster = if command.broadcast_typing {
-        msg.channel_id.start_typing(&ctx.discord.http).ok()
+    let _typing_broadcaster = if ctx.command.broadcast_typing {
+        ctx.msg.channel_id.start_typing(&ctx.discord.http).ok()
     } else {
         None
     };
 
-    (framework.options.pre_command)(crate::Context::Prefix(ctx)).await;
+    (ctx.framework.options.pre_command)(crate::Context::Prefix(ctx)).await;
 
     // Store that this command is currently running; so that if the invocation message is being
     // edited before a response message is registered, we don't accidentally treat it as an
     // execute_untracked_edits situation and start an infinite loop
     // Reported by vicky5124 https://discord.com/channels/381880193251409931/381912587505500160/897981367604903966
-    if let Some(edit_tracker) = &framework.options.prefix_options.edit_tracker {
+    if let Some(edit_tracker) = &ctx.framework.options.prefix_options.edit_tracker {
         edit_tracker.write().unwrap().track_command(ctx.msg);
     }
 
     // Execute command
-    let action_result = (action)(ctx).await;
-    action_result.map_err(|e| Some((e, command)))?;
+    (ctx.action)(ctx).await?;
 
-    (framework.options.post_command)(crate::Context::Prefix(ctx)).await;
+    (ctx.framework.options.post_command)(crate::Context::Prefix(ctx)).await;
 
     Ok(())
 }

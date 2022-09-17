@@ -2,6 +2,18 @@
 
 use crate::{serenity_prelude as serenity, BoxFuture};
 
+/// The event that triggered a prefix command execution
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub enum MessageDispatchTrigger {
+    /// The invocation message was posted directly (common case)
+    MessageCreate,
+    /// The message was edited, and was already a valid invocation pre-edit
+    MessageEdit,
+    /// The message was edited, and was not a valid invocation pre-edit (i.e. user typoed the
+    /// command, then fixed it)
+    MessageEditFromInvalid,
+}
+
 /// Prefix-specific context passed to command invocations.
 ///
 /// Contains the trigger message, the Discord connection management stuff, and the user data.
@@ -32,6 +44,14 @@ pub struct PrefixContext<'a, U, E> {
     pub data: &'a U,
     /// Custom user data carried across a single command invocation
     pub invocation_data: &'a tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
+    /// How this command invocation was triggered
+    pub trigger: MessageDispatchTrigger,
+    /// The function that is called to execute the actual command
+    #[derivative(Debug = "ignore")]
+    pub action: fn(
+        PrefixContext<'_, U, E>,
+    ) -> crate::BoxFuture<'_, Result<(), crate::FrameworkError<'_, U, E>>>,
+
     // #[non_exhaustive] forbids struct update syntax for ?? reason
     #[doc(hidden)]
     pub __non_exhaustive: (),
