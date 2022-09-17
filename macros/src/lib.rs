@@ -1,3 +1,7 @@
+/*!
+Procedural macros used in poise, like [`command`]
+*/
+
 mod choice_parameter;
 mod command;
 mod modal;

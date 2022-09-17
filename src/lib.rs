@@ -244,39 +244,26 @@ underlying this framework, so that's what I chose.
 Also, poise is a stat in Dark Souls
 */
 
-mod prefix_argument;
-pub use prefix_argument::*;
-
-mod slash_argument;
-pub use slash_argument::*;
-
-mod event;
-pub use event::{Event, EventWrapper};
-
-mod structs;
-pub use structs::*;
-
-mod dispatch;
-pub use dispatch::*;
-
-mod framework;
-pub use framework::*;
-
-mod reply;
-pub use reply::*;
-
-mod cooldown;
-pub use cooldown::*;
-
-mod modal;
-pub use modal::*;
-
-mod track_edits;
-pub use track_edits::*;
-
-pub(crate) mod util;
-
 pub mod builtins;
+pub mod cooldown;
+pub mod dispatch;
+pub mod event;
+pub mod framework;
+pub mod modal;
+pub mod prefix_argument;
+pub mod reply;
+pub mod slash_argument;
+pub mod structs;
+pub mod track_edits;
+mod util;
+pub use poise_macros as macros;
+
+#[doc(no_inline)]
+pub use {
+    cooldown::*, dispatch::*, event::*, framework::*, macros::*, modal::*, prefix_argument::*,
+    reply::*, slash_argument::*, structs::*, track_edits::*,
+};
+
 /// See [`builtins`]
 #[deprecated = "`samples` module was renamed to `builtins`"]
 pub mod samples {
@@ -285,8 +272,6 @@ pub mod samples {
 
 #[doc(hidden)]
 pub use {async_trait::async_trait, futures_util};
-
-pub use poise_macros::*;
 
 /// This module re-exports a bunch of items from all over serenity. Useful if you can't
 /// remember the full paths of serenity items.
