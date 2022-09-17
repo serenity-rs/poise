@@ -100,7 +100,12 @@ async fn strip_prefix<'a, U, E>(
     None
 }
 
-/// Find a command or subcommand within `&[Command]`, given a command name
+/// Find a command or subcommand within `&[Command]`, given a command invocation without a prefix.
+/// Returns the verbatim command name string as well as the command arguments (i.e. the remaining
+/// string).
+///
+/// The API must be like this (as opposed to just taking the command name upfront) because of
+/// subcommands.
 ///
 /// ```rust
 /// #[poise::command(prefix_command)]
@@ -125,9 +130,9 @@ async fn strip_prefix<'a, U, E>(
 /// );
 pub fn find_command<'a, U, E>(
     commands: &'a [crate::Command<U, E>],
-    command_name: &'a str,
+    remaining_message: &'a str,
     case_insensitive: bool,
-) -> Option<&'a crate::Command<U, E>>
+) -> Option<(&'a crate::Command<U, E>, &'a str, &'a str)>
 where
     U: Send + Sync,
 {
@@ -135,6 +140,11 @@ where
         |a: &str, b: &str| a.eq_ignore_ascii_case(b)
     } else {
         |a: &str, b: &str| a == b
+    };
+
+    let (command_name, remaining_message) = {
+        let mut iter = remaining_message.splitn(2, char::is_whitespace);
+        (iter.next().unwrap(), iter.next().unwrap_or("").trim_start())
     };
 
     for command in commands {
@@ -148,7 +158,11 @@ where
         }
 
         return Some(
-            find_command(&command.subcommands, command_name, case_insensitive).unwrap_or(command),
+            find_command(&command.subcommands, remaining_message, case_insensitive).unwrap_or((
+                command,
+                command_name,
+                remaining_message,
+            )),
         );
     }
 
@@ -193,12 +207,8 @@ pub async fn parse_invocation<'a, U: Send + Sync, E>(
         None => return Ok(None),
     };
     let msg_content = msg_content.trim_start();
-    let (invoked_command_name, args) = {
-        let mut iter = msg_content.splitn(2, char::is_whitespace);
-        (iter.next().unwrap(), iter.next().unwrap_or("").trim_start())
-    };
 
-    let command = find_command(
+    let (command, invoked_command_name, args) = find_command(
         &framework.options.commands,
         msg_content,
         framework.options.prefix_options.case_insensitive_commands,
@@ -207,8 +217,7 @@ pub async fn parse_invocation<'a, U: Send + Sync, E>(
         ctx,
         msg,
         prefix,
-        invoked_command_name,
-        args,
+        msg_content,
         framework,
         invocation_data,
         trigger,

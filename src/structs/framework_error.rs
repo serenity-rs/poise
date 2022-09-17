@@ -134,10 +134,10 @@ pub enum FrameworkError<'a, U, E> {
         msg: &'a serenity::Message,
         /// The prefix that was recognized
         prefix: &'a str,
-        /// The following command name that was not recognized
-        invoked_command_name: &'a str,
-        /// The rest of the message
-        args: &'a str,
+        /// The rest of the message (after the prefix) which was not recognized as a command
+        ///
+        /// This is a single field instead of two fields (command name and args) due to subcommands
+        msg_content: &'a str,
         /// Framework context
         #[derivative(Debug = "ignore")]
         framework: crate::FrameworkContext<'a, U, E>,
@@ -324,11 +324,8 @@ impl<U, E: std::fmt::Display> std::fmt::Display for FrameworkError<'_, U, E> {
                     msg.content
                 )
             }
-            Self::UnknownCommand {
-                invoked_command_name,
-                ..
-            } => {
-                write!(f, "unknown command `{}`", invoked_command_name)
+            Self::UnknownCommand { msg_content, .. } => {
+                write!(f, "unknown command `{}`", msg_content)
             }
             Self::UnknownInteraction { interaction, .. } => {
                 write!(f, "unknown interaction `{}`", interaction.data().name)

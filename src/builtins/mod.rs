@@ -138,14 +138,14 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
             );
         }
         crate::FrameworkError::UnknownCommand {
-            invoked_command_name,
+            msg_content,
             prefix,
             ..
         } => {
             log::warn!(
-                "Recognized prefix `{}`, but didn't recognize command name `{}`",
+                "Recognized prefix `{}`, but didn't recognize command name in `{}`",
                 prefix,
-                invoked_command_name,
+                msg_content,
             );
         }
         crate::FrameworkError::UnknownInteraction { interaction, .. } => {
