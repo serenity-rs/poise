@@ -75,7 +75,7 @@ impl EditTracker {
     /// not in cache. Also returns a bool with `true` if this message was previously tracked
     ///
     /// Returns None if the command shouldn't be re-run, e.g. if the message content wasn't edited
-    pub(crate) fn process_message_update(
+    pub fn process_message_update(
         &mut self,
         user_msg_update: &serenity::MessageUpdateEvent,
         ignore_edits_if_not_yet_responded: bool,
@@ -137,7 +137,7 @@ impl EditTracker {
 
     /// Notify the [`EditTracker`] that the given user message should be associated with the given
     /// bot response. Overwrites any previous associated bot response
-    pub(crate) fn set_bot_response(
+    pub fn set_bot_response(
         &mut self,
         user_msg: &serenity::Message,
         bot_response: serenity::Message,
@@ -150,9 +150,9 @@ impl EditTracker {
     }
 
     /// Store that this command is currently running; so that if the command is editing its own
-    /// invocation message, we don't accidentally treat it as an execute_untracked_edits situation
-    /// and start an infinite loop
-    pub(crate) fn track_command(&mut self, user_msg: &serenity::Message) {
+    /// invocation message (e.g. removing embeds), we don't accidentally treat it as an
+    /// execute_untracked_edits situation and start an infinite loop
+    pub fn track_command(&mut self, user_msg: &serenity::Message) {
         if !self.cache.iter().any(|(m, _)| m.id == user_msg.id) {
             self.cache.push((user_msg.clone(), None));
         }
