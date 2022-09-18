@@ -118,7 +118,51 @@ async fn command_name(
 
 See [`#[poise::command]`](command) for detailed information.
 
+### Subcommands
+Commands in poise have a tree structure. Every commands refers to a list of subcommands, which you
+can easily set using the [`command`] macro like so:
+
+```rust
+# type Error = Box<dyn std::error::Error + Send + Sync>;
+# type Context<'a> = poise::Context<'a, (), Error>;
+#[poise::command(prefix_command, slash_command, subcommands("child1", "child2"))]
+pub async fn parent(ctx: Context<'_>, arg: String) -> Result<(), Error> { Ok(()) }
+
+#[poise::command(prefix_command, slash_command)]
+pub async fn child1(ctx: Context<'_>, arg: String) -> Result<(), Error> { Ok(()) }
+#[poise::command(prefix_command, slash_command)]
+pub async fn child2(ctx: Context<'_>, arg: String) -> Result<(), Error> { Ok(()) }
+```
+
+With this setup, users can call `~parent [arg]` or `~parent child1 [arg]` or `~parent child2 [arg]`.
+Slash command subcommands are also supported, but the base command (`/parent`) [cannot be used](https://discord.com/developers/docs/interactions/application-commands#subcommands-and-subcommand-groups)
+as per Discord; only the leaf commands (`/parent child1 [arg]`, `/parent child2 [arg]`).
+
+When adding the commands to the framework, add just the parent command (since it fully contains its
+subcommands):
+
+```rust
+# type Error = Box<dyn std::error::Error + Send + Sync>;
+# type Context<'a> = poise::Context<'a, (), Error>;
+# #[poise::command(prefix_command)]
+# pub async fn parent(ctx: Context<'_>, arg: String) -> Result<(), Error> { Ok(()) }
+let options = poise::FrameworkOptions {
+    commands: vec![
+        parent(),
+    ],
+    ..Default::default()
+};
+```
+
+Subcommands are stored in [`Command::subcommands`]. As with all [`Command`] fields, you can
+programmatically modify those any way you'd like. The [`command`] macro is just a convenience thing
+to set the fields for you.
+
+For another example of subcommands, see `examples/framework_usage/commands/subcommands.rs`.
+
 ### Big example to showcase many command features
+
+Also see the [`command`] macro docs
 
 ```rust
 use poise::serenity_prelude as serenity;
