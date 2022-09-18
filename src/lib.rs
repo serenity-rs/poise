@@ -65,7 +65,7 @@ those either from [`serenity::Context`] (passed to
 Pass your `CacheAndHttp` or `Arc<Http>` to serenity functions in place of the usual
 `serenity::Context`
 
-## Finding serenity methods
+## Useful serenity methods
 
 Many serenity structs have an ID field. Some useful methods are defined only on the Id types.
 For example:
@@ -73,6 +73,13 @@ For example:
 - [`serenity::User`] and [`serenity::UserId`]
 - [`serenity::Role`] and [`serenity::RoleId`]
 - ...
+
+Some examples for methods you should have in your repertoire:
+- [`serenity::GuildId::to_guild_cached`] and [`serenity::GuildId::to_partial_guild`] to access full
+    guild data
+- [`serenity::ChannelId::to_channel`] to access full channel data
+- [`serenity::Channel::guild`] to try convert a generic [`serenity::Channel`] into a
+    [`serenity::GuildChannel`], to access guild specific channel data
 
 # Introduction to slash commands
 
