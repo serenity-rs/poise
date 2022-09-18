@@ -81,7 +81,8 @@ Discord slash commands can be a bit unintuitive at first. If you're unfamiliar, 
 To activate a slash command, your bot
 needs to _register_ in on Discord. You may want to do this manually, with a `register` command
 (poise provides [`builtins::register_application_commands_buttons`] as a starting point for that), or you
-may want to re-register commands automatically on every bot startup. Choose what you prefer
+may want to re-register commands automatically on every bot startup. Choose what you prefer. Also
+see [Registering Slash Commands](#registering-slash-commands).
 
 Commands can be registered _globally_ or _per guild_. Global commands are available on every guild
 your bot is invited on, but it takes up to an hour for global registration to roll out. Per guild
@@ -255,6 +256,29 @@ poise::Framework::builder()
     .run().await?;
 # Ok::<(), Error>(()) };
 ```
+
+## Registering slash commands
+
+As explained in [Introduction to slash commands](introduction-to-slash-commands), slash
+commands need to be _registered_ to Discord. Poise provides several ways to do it, with varying
+degree of abstraction. (Note: you can access a list of framework commands from anywhere with
+[`ctx.framework().options.commands`](Context::framework)).
+
+The easiest way is with [`builtins::register_application_commands_buttons`].
+It spawns a message with buttons to register and unregister all commands, globally or in the current
+guild (see its docs).
+
+A more flexible approach is to serialize the commands to a [`serenity::CreateApplicationCommands`]
+using [`builtins::create_application_commands`]. That way, you can call serenity's registration
+functions manually:
+- [`serenity::Command::set_global_application_commands`]
+- [`serenity::GuildId::set_application_commands`]
+
+For example, you could call this function in [`FrameworkBuilder::user_data_setup`] to automatically
+register commands on startup. Also see the docs of [`builtins::create_application_commands`].
+
+The lowest level of abstraction for registering commands is [`Command::create_as_slash_command`]
+and [`Command::create_as_context_menu_command`].
 
 # Tips and tricks
 
