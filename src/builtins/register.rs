@@ -150,18 +150,6 @@ pub async fn register_application_commands_buttons<U, E>(
                 .components(|c| {
                     c.create_action_row(|r| {
                         r.create_button(|b| {
-                            b.custom_id("register.global")
-                                .label("Register globally")
-                                .style(serenity::ButtonStyle::Primary)
-                        })
-                        .create_button(|b| {
-                            b.custom_id("unregister.global")
-                                .label("Delete globally")
-                                .style(serenity::ButtonStyle::Danger)
-                        })
-                    })
-                    .create_action_row(|r| {
-                        r.create_button(|b| {
                             b.custom_id("register.guild")
                                 .label("Register in guild")
                                 .style(serenity::ButtonStyle::Primary)
@@ -169,6 +157,18 @@ pub async fn register_application_commands_buttons<U, E>(
                         .create_button(|b| {
                             b.custom_id("unregister.guild")
                                 .label("Delete in guild")
+                                .style(serenity::ButtonStyle::Danger)
+                        })
+                    })
+                    .create_action_row(|r| {
+                        r.create_button(|b| {
+                            b.custom_id("register.global")
+                                .label("Register globally")
+                                .style(serenity::ButtonStyle::Primary)
+                        })
+                        .create_button(|b| {
+                            b.custom_id("unregister.global")
+                                .label("Delete globally")
                                 .style(serenity::ButtonStyle::Danger)
                         })
                     })
