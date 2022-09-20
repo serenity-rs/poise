@@ -171,7 +171,7 @@ pub async fn autocomplete_command<'a, U, E>(
         .options()
         .commands
         .iter()
-        .filter(move |cmd| cmd.name.starts_with(&partial))
+        .filter(move |cmd| cmd.name.starts_with(partial))
         .map(|cmd| cmd.name.to_string())
 }
 
