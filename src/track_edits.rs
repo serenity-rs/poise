@@ -151,7 +151,7 @@ impl EditTracker {
 
     /// Store that this command is currently running; so that if the command is editing its own
     /// invocation message (e.g. removing embeds), we don't accidentally treat it as an
-    /// execute_untracked_edits situation and start an infinite loop
+    /// `execute_untracked_edits` situation and start an infinite loop
     pub fn track_command(&mut self, user_msg: &serenity::Message) {
         if !self.cache.iter().any(|(m, _)| m.id == user_msg.id) {
             self.cache.push((user_msg.clone(), None));

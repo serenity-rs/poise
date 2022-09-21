@@ -31,7 +31,7 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
 ) -> Result<(), serenity::Error> {
     match error {
         crate::FrameworkError::Setup { error, .. } => {
-            log::error!("Error in user data setup: {}", error)
+            log::error!("Error in user data setup: {}", error);
         }
         crate::FrameworkError::Listener { error, event, .. } => log::error!(
             "User event listener encountered an error on {} event: {}",
@@ -162,7 +162,7 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
 
 /// An autocomplete function that can be used for the command parameter in your help function.
 ///
-/// See examples/framework_usage for an example
+/// See `examples/framework_usage` for an example
 pub async fn autocomplete_command<'a, U, E>(
     ctx: crate::Context<'a, U, E>,
     partial: &'a str,

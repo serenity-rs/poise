@@ -1,4 +1,4 @@
-//! Just contains Context and PartialContext structs
+//! Just contains Context and `PartialContext` structs
 
 use std::borrow::Cow;
 
@@ -266,7 +266,7 @@ impl<'a, U, E> Context<'a, U, E> {
         }
     }
 
-    /// Actual implementation of rerun() that returns FrameworkError for implementation convenience
+    /// Actual implementation of rerun() that returns `FrameworkError` for implementation convenience
     async fn rerun_inner(self) -> Result<(), crate::FrameworkError<'a, U, E>> {
         match self {
             Self::Application(ctx) => {
@@ -369,8 +369,8 @@ impl<'a, U, E> Context<'a, U, E> {
 
     /// Stores the given value as the data for this command invocation
     ///
-    /// This data is carried across the pre_command hook, checks, main command execution, and
-    /// post_command. It may be useful to cache data or pass information to later phases of command
+    /// This data is carried across the `pre_command` hook, checks, main command execution, and
+    /// `post_command`. It may be useful to cache data or pass information to later phases of command
     /// execution.
     pub async fn set_invocation_data<T: 'static + Send + Sync>(&self, data: T) {
         *self.invocation_data_raw().lock().await = Box::new(data);

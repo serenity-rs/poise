@@ -1,4 +1,4 @@
-//! Simple module for the FrameworkError struct and its impls
+//! Simple module for the `FrameworkError` struct and its impls
 
 use crate::serenity_prelude as serenity;
 
@@ -210,7 +210,7 @@ impl<'a, U, E> FrameworkError<'a, U, E> {
         })
     }
 
-    /// Calls the appropriate on_error function (command-specific or global) with this error
+    /// Calls the appropriate `on_error` function (command-specific or global) with this error
     pub async fn handle(self, framework_options: &crate::FrameworkOptions<U, E>) {
         let on_error = self
             .ctx()
@@ -220,7 +220,7 @@ impl<'a, U, E> FrameworkError<'a, U, E> {
     }
 }
 
-/// Simple macro to deduplicate code. Can't be a function due to lifetime issues with format_args
+/// Simple macro to deduplicate code. Can't be a function due to lifetime issues with `format_args`
 macro_rules! full_command_name {
     ($ctx:expr) => {
         format_args!("{}{}", $ctx.prefix(), $ctx.command().qualified_name)
