@@ -168,12 +168,12 @@ impl ReplyHandle<'_> {
                 Some(followup) => {
                     interaction
                         .delete_followup_message(ctx.discord(), followup.id)
-                        .await?
+                        .await?;
                 }
                 None => {
                     interaction
                         .delete_original_interaction_response(ctx.discord())
-                        .await?
+                        .await?;
                 }
             },
             ReplyHandleInner::Autocomplete => panic!("delete is a no-op in autocomplete context"),

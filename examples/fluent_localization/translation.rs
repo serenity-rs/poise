@@ -72,7 +72,7 @@ pub fn read_ftl() -> Result<Translations, Error> {
         let locale = locale.to_str().ok_or("invalid filename UTF-8")?;
 
         // Load .ftl resource
-        let file_contents = std::fs::read_to_string(&path)?;
+        let file_contents = std::fs::read_to_string(path)?;
         let resource = fluent::FluentResource::try_new(file_contents)
             .map_err(|(_, e)| format!("failed to parse {:?}: {:?}", path, e))?;
 

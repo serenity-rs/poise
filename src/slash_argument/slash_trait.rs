@@ -248,7 +248,7 @@ impl<T: SlashArgument + Sync> SlashArgumentHack<T> for &PhantomData<T> {
     }
 }
 
-/// Implements SlashArgumentHack for a model type that is represented in interactions via an ID
+/// Implements `SlashArgumentHack` for a model type that is represented in interactions via an ID
 macro_rules! impl_slash_argument {
     ($type:ty, $slash_param_type:ident) => {
         #[async_trait::async_trait]
