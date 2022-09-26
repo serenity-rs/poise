@@ -218,6 +218,35 @@ impl<'a, U, E> FrameworkError<'a, U, E> {
             .unwrap_or(framework_options.on_error);
         on_error(self).await;
     }
+
+    /// Converts from a specialized slash argument error
+    ///
+    /// Mainly used in the desugared [`crate::command`] macro
+    pub fn from_slash_arg_error(
+        error: crate::SlashArgError,
+        ctx: crate::ApplicationContext<'a, U, E>,
+    ) -> Self {
+        match error {
+            crate::SlashArgError::CommandStructureMismatch(description) => {
+                crate::FrameworkError::CommandStructureMismatch { ctx, description }
+            }
+            crate::SlashArgError::Parse { error, input } => crate::FrameworkError::ArgumentParse {
+                ctx: ctx.into(),
+                error,
+                input: Some(input),
+            },
+            crate::SlashArgError::Invalid(description) => crate::FrameworkError::ArgumentParse {
+                ctx: ctx.into(),
+                error: description.into(),
+                input: None,
+            },
+            crate::SlashArgError::Http(error) => crate::FrameworkError::ArgumentParse {
+                ctx: ctx.into(),
+                error: error.into(),
+                input: None,
+            },
+        }
+    }
 }
 
 /// Simple macro to deduplicate code. Can't be a function due to lifetime issues with `format_args`
