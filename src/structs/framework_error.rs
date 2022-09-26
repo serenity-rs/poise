@@ -1,4 +1,4 @@
-//! Simple module for the FrameworkError struct and its impls
+//! Simple module for the `FrameworkError` struct and its impls
 
 use crate::serenity_prelude as serenity;
 
@@ -125,6 +125,39 @@ pub enum FrameworkError<'a, U, E> {
         /// Message which the dynamic prefix callback was evaluated upon
         msg: &'a serenity::Message,
     },
+    /// A message had the correct prefix but the following string was not a recognized command
+    UnknownCommand {
+        /// Serenity's Context
+        #[derivative(Debug = "ignore")]
+        ctx: &'a serenity::Context,
+        /// The message in question
+        msg: &'a serenity::Message,
+        /// The prefix that was recognized
+        prefix: &'a str,
+        /// The rest of the message (after the prefix) which was not recognized as a command
+        ///
+        /// This is a single field instead of two fields (command name and args) due to subcommands
+        msg_content: &'a str,
+        /// Framework context
+        #[derivative(Debug = "ignore")]
+        framework: crate::FrameworkContext<'a, U, E>,
+        /// See [`crate::Context::invocation_data`]
+        #[derivative(Debug = "ignore")]
+        invocation_data: &'a tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
+        /// Which event triggered the message parsing routine
+        trigger: crate::MessageDispatchTrigger,
+    },
+    /// The command name from the interaction is unrecognized
+    UnknownInteraction {
+        #[derivative(Debug = "ignore")]
+        /// Serenity's Context
+        ctx: &'a serenity::Context,
+        /// Framework context
+        #[derivative(Debug = "ignore")]
+        framework: crate::FrameworkContext<'a, U, E>,
+        /// The interaction in question
+        interaction: crate::ApplicationCommandOrAutocompleteInteraction<'a>,
+    },
     // #[non_exhaustive] forbids struct update syntax for ?? reason
     #[doc(hidden)]
     __NonExhaustive,
@@ -148,12 +181,46 @@ impl<'a, U, E> FrameworkError<'a, U, E> {
             Self::NsfwOnly { ctx, .. } => ctx.discord(),
             Self::CommandCheckFailed { ctx, .. } => ctx.discord(),
             Self::DynamicPrefix { ctx, .. } => ctx.discord,
+            Self::UnknownCommand { ctx, .. } => ctx,
+            Self::UnknownInteraction { ctx, .. } => ctx,
             Self::__NonExhaustive => unreachable!(),
         }
     }
+
+    /// Returns the [`crate::Context`] of this error, if it has one
+    pub fn ctx(&self) -> Option<crate::Context<'a, U, E>> {
+        Some(match *self {
+            Self::Command { ctx, .. } => ctx,
+            Self::ArgumentParse { ctx, .. } => ctx,
+            Self::CommandStructureMismatch { ctx, .. } => crate::Context::Application(ctx),
+            Self::CooldownHit { ctx, .. } => ctx,
+            Self::MissingBotPermissions { ctx, .. } => ctx,
+            Self::MissingUserPermissions { ctx, .. } => ctx,
+            Self::NotAnOwner { ctx, .. } => ctx,
+            Self::GuildOnly { ctx, .. } => ctx,
+            Self::DmOnly { ctx, .. } => ctx,
+            Self::NsfwOnly { ctx, .. } => ctx,
+            Self::CommandCheckFailed { ctx, .. } => ctx,
+            Self::Setup { .. }
+            | Self::Listener { .. }
+            | Self::UnknownCommand { .. }
+            | Self::UnknownInteraction { .. }
+            | Self::DynamicPrefix { .. } => return None,
+            Self::__NonExhaustive => unreachable!(),
+        })
+    }
+
+    /// Calls the appropriate `on_error` function (command-specific or global) with this error
+    pub async fn handle(self, framework_options: &crate::FrameworkOptions<U, E>) {
+        let on_error = self
+            .ctx()
+            .and_then(|c| c.command().on_error)
+            .unwrap_or(framework_options.on_error);
+        on_error(self).await;
+    }
 }
 
-/// Simple macro to deduplicate code. Can't be a function due to lifetime issues with format_args
+/// Simple macro to deduplicate code. Can't be a function due to lifetime issues with `format_args`
 macro_rules! full_command_name {
     ($ctx:expr) => {
         format_args!("{}{}", $ctx.prefix(), $ctx.command().qualified_name)
@@ -257,6 +324,12 @@ impl<U, E: std::fmt::Display> std::fmt::Display for FrameworkError<'_, U, E> {
                     msg.content
                 )
             }
+            Self::UnknownCommand { msg_content, .. } => {
+                write!(f, "unknown command `{}`", msg_content)
+            }
+            Self::UnknownInteraction { interaction, .. } => {
+                write!(f, "unknown interaction `{}`", interaction.data().name)
+            }
             Self::__NonExhaustive => unreachable!(),
         }
     }
@@ -281,6 +354,8 @@ impl<'a, U: std::fmt::Debug, E: std::error::Error + 'static> std::error::Error
             Self::NsfwOnly { .. } => None,
             Self::CommandCheckFailed { error, .. } => error.as_ref().map(|x| x as _),
             Self::DynamicPrefix { error, .. } => Some(error),
+            Self::UnknownCommand { .. } => None,
+            Self::UnknownInteraction { .. } => None,
             Self::__NonExhaustive => unreachable!(),
         }
     }

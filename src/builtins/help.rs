@@ -93,10 +93,11 @@ async fn help_all_commands<U, E>(
                         Some(dynamic_prefix_callback) => {
                             match dynamic_prefix_callback(crate::PartialContext::from(ctx)).await {
                                 Ok(Some(dynamic_prefix)) => dynamic_prefix,
-                                Err(_) | Ok(None) => String::from(""),
+                                // `String::new()` defaults to "" which is what we want
+                                Err(_) | Ok(None) => String::new(),
                             }
                         }
-                        None => String::from(""),
+                        None => String::new(),
                     },
                 }
             } else {

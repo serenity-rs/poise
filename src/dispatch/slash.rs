@@ -42,22 +42,18 @@ pub async fn extract_command_and_run_checks<'a, U, E>(
     has_sent_initial_response: &'a std::sync::atomic::AtomicBool,
     invocation_data: &'a tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
     options: &'a [serenity::ResolvedOption<'a>],
-) -> Result<
-    crate::ApplicationContext<'a, U, E>,
-    Option<(crate::FrameworkError<'a, U, E>, &'a crate::Command<U, E>)>,
-> {
+) -> Result<crate::ApplicationContext<'a, U, E>, crate::FrameworkError<'a, U, E>> {
     let search_result = find_matching_command(
         &interaction.data().name,
         options,
         &framework.options.commands,
     );
-    let (command, leaf_interaction_options) = search_result.ok_or_else(|| {
-        log::warn!(
-            "received unknown interaction \"{}\"",
-            interaction.data().name
-        );
-        None
-    })?;
+    let (command, leaf_interaction_options) =
+        search_result.ok_or(crate::FrameworkError::UnknownInteraction {
+            ctx,
+            framework,
+            interaction,
+        })?;
 
     let ctx = crate::ApplicationContext {
         data: framework.user_data().await,
@@ -71,9 +67,7 @@ pub async fn extract_command_and_run_checks<'a, U, E>(
         __non_exhaustive: (),
     };
 
-    super::common::check_permissions_and_cooldown(ctx.into(), command)
-        .await
-        .map_err(|e| Some((e, command)))?;
+    super::common::check_permissions_and_cooldown(ctx.into()).await?;
 
     Ok(ctx)
 }
@@ -89,7 +83,7 @@ pub async fn dispatch_interaction<'a, U, E>(
     invocation_data: &'a tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
     // Need to pass this in from outside because of lifetime issues
     options: &'a [serenity::ResolvedOption<'a>],
-) -> Result<(), Option<(crate::FrameworkError<'a, U, E>, &'a crate::Command<U, E>)>> {
+) -> Result<(), crate::FrameworkError<'a, U, E>> {
     let ctx = extract_command_and_run_checks(
         framework,
         ctx,
@@ -104,14 +98,11 @@ pub async fn dispatch_interaction<'a, U, E>(
 
     // Check which interaction type we received and grab the command action and, if context menu,
     // the resolved click target, and execute the action
-    let command_structure_mismatch_error = Some((
-        crate::FrameworkError::CommandStructureMismatch {
-            ctx,
-            description: "received interaction type but command contained no \
+    let command_structure_mismatch_error = crate::FrameworkError::CommandStructureMismatch {
+        ctx,
+        description: "received interaction type but command contained no \
                 matching action or interaction contained no matching context menu object",
-        },
-        ctx.command,
-    ));
+    };
     let action_result = match interaction.data.kind {
         serenity::CommandType::ChatInput => {
             let action = ctx
@@ -138,9 +129,12 @@ pub async fn dispatch_interaction<'a, U, E>(
                 _ => return Err(command_structure_mismatch_error),
             }
         }
-        _ => return Err(None),
+        other => {
+            log::warn!("unknown interaction command type: {:?}", other);
+            return Ok(());
+        }
     };
-    action_result.map_err(|e| Some((e, ctx.command)))?;
+    action_result?;
 
     (framework.options.post_command)(crate::Context::Application(ctx)).await;
 
@@ -159,7 +153,7 @@ pub async fn dispatch_autocomplete<'a, U, E>(
     invocation_data: &'a tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
     // Need to pass this in from outside because of lifetime issues
     options: &'a [serenity::ResolvedOption<'a>],
-) -> Result<(), Option<(crate::FrameworkError<'a, U, E>, &'a crate::Command<U, E>)>> {
+) -> Result<(), crate::FrameworkError<'a, U, E>> {
     let ctx = extract_command_and_run_checks(
         framework,
         ctx,
@@ -171,43 +165,51 @@ pub async fn dispatch_autocomplete<'a, U, E>(
     .await?;
 
     // Find which parameter is focused by the user
-    let (focused_option_name, partial_input) = ctx
-        .args
-        .iter()
-        .find_map(|o| match &o.value {
-            serenity::ResolvedValue::Autocomplete { value, .. } => Some((&o.name, value)),
-            _ => None,
-        })
-        .ok_or(None)?;
+    let (focused_option_name, partial_input) = match ctx.args.iter().find_map(|o| match &o.value {
+        serenity::ResolvedValue::Autocomplete { value, .. } => Some((&o.name, value)),
+        _ => None,
+    }) {
+        Some(x) => x,
+        None => {
+            log::warn!("no option is focused in autocomplete interaction");
+            return Ok(());
+        }
+    };
 
     // Find the matching parameter from our Command object
     let parameters = &ctx.command.parameters;
     let focused_parameter = parameters
         .iter()
-        .find(|p| &p.name == focused_option_name)
-        .ok_or(None)?;
+        .find(|p| p.name == *focused_option_name)
+        .ok_or(crate::FrameworkError::CommandStructureMismatch {
+            ctx,
+            description: "focused autocomplete parameter name not recognized",
+        })?;
 
-    // If this parameter supports autocomplete...
-    if let Some(autocomplete_callback) = focused_parameter.autocomplete_callback {
-        #[allow(unused_imports)]
-        use ::serenity::json::prelude::*; // as_str() access via trait for simd-json
+    // Only continue if this parameter supports autocomplete and Discord has given us a partial value
+    let autocomplete_callback = match focused_parameter.autocomplete_callback {
+        Some(x) => x,
+        _ => return Ok(()),
+    };
 
-        // Generate an autocomplete response
-        let autocomplete_response = match autocomplete_callback(ctx, partial_input).await {
-            Ok(x) => x,
-            Err(e) => {
-                log::warn!("couldn't generate autocomplete response: {}", e);
-                return Err(None);
-            }
-        };
+    #[allow(unused_imports)]
+    use ::serenity::json::prelude::*; // as_str() access via trait for simd-json
 
-        // Send the generates autocomplete response
-        if let Err(e) = interaction
-            .create_autocomplete_response(&ctx.discord.http, autocomplete_response)
-            .await
-        {
-            log::warn!("couldn't send autocomplete response: {}", e);
+    // Generate an autocomplete response
+    let autocomplete_response = match autocomplete_callback(ctx, partial_input).await {
+        Ok(x) => x,
+        Err(e) => {
+            log::warn!("couldn't generate autocomplete response: {}", e);
+            return Ok(());
         }
+    };
+
+    // Send the generates autocomplete response
+    if let Err(e) = interaction
+        .create_autocomplete_response(&ctx.discord.http, autocomplete_response)
+        .await
+    {
+        log::warn!("couldn't send autocomplete response: {}", e);
     }
 
     Ok(())

@@ -47,7 +47,7 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
 ) -> Result<(), serenity::Error> {
     match error {
         crate::FrameworkError::Setup { error, .. } => {
-            log::error!("Error in user data setup: {}", error)
+            log::error!("Error in user data setup: {}", error);
         }
         crate::FrameworkError::Listener { error, event, .. } => log::error!(
             "User event listener encountered an error on {} event: {}",
@@ -153,6 +153,23 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
                 error
             );
         }
+        crate::FrameworkError::UnknownCommand {
+            msg_content,
+            prefix,
+            ..
+        } => {
+            log::warn!(
+                "Recognized prefix `{}`, but didn't recognize command name in `{}`",
+                prefix,
+                msg_content,
+            );
+        }
+        crate::FrameworkError::UnknownInteraction { interaction, .. } => {
+            log::warn!(
+                "received unknown interaction \"{}\"",
+                interaction.data().name
+            );
+        }
         crate::FrameworkError::__NonExhaustive => panic!(),
     }
 
@@ -161,7 +178,7 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
 
 /// An autocomplete function that can be used for the command parameter in your help function.
 ///
-/// See examples/framework_usage for an example
+/// See `examples/framework_usage` for an example
 pub async fn autocomplete_command<'a, U, E>(
     ctx: crate::Context<'a, U, E>,
     partial: &'a str,
@@ -170,7 +187,7 @@ pub async fn autocomplete_command<'a, U, E>(
         .options()
         .commands
         .iter()
-        .filter(move |cmd| cmd.name.starts_with(&partial))
+        .filter(move |cmd| cmd.name.starts_with(partial))
         .map(|cmd| cmd.name.to_string())
 }
 

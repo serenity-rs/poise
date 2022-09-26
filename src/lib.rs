@@ -65,7 +65,7 @@ those either from [`serenity::Context`] (passed to
 Pass your `CacheAndHttp` or `Arc<Http>` to serenity functions in place of the usual
 `serenity::Context`
 
-## Finding serenity methods
+## Useful serenity methods
 
 Many serenity structs have an ID field. Some useful methods are defined only on the Id types.
 For example:
@@ -74,6 +74,13 @@ For example:
 - [`serenity::Role`] and [`serenity::RoleId`]
 - ...
 
+Some examples for methods you should have in your repertoire:
+- [`serenity::GuildId::to_guild_cached`] and [`serenity::GuildId::to_partial_guild`] to access full
+    guild data
+- [`serenity::ChannelId::to_channel`] to access full channel data
+- [`serenity::Channel::guild`] to try convert a generic [`serenity::Channel`] into a
+    [`serenity::GuildChannel`], to access guild specific channel data
+
 # Introduction to slash commands
 
 Discord slash commands can be a bit unintuitive at first. If you're unfamiliar, please read this
@@ -81,7 +88,8 @@ Discord slash commands can be a bit unintuitive at first. If you're unfamiliar, 
 To activate a slash command, your bot
 needs to _register_ in on Discord. You may want to do this manually, with a `register` command
 (poise provides [`builtins::register_application_commands_buttons`] as a starting point for that), or you
-may want to re-register commands automatically on every bot startup. Choose what you prefer
+may want to re-register commands automatically on every bot startup. Choose what you prefer. Also
+see [Registering Slash Commands](#registering-slash-commands).
 
 Commands can be registered _globally_ or _per guild_. Global commands are available on every guild
 your bot is invited on, but it takes up to an hour for global registration to roll out. Per guild
@@ -118,7 +126,51 @@ async fn command_name(
 
 See [`#[poise::command]`](command) for detailed information.
 
+### Subcommands
+Commands in poise have a tree structure. Every commands refers to a list of subcommands, which you
+can easily set using the [`command`] macro like so:
+
+```rust
+# type Error = Box<dyn std::error::Error + Send + Sync>;
+# type Context<'a> = poise::Context<'a, (), Error>;
+#[poise::command(prefix_command, slash_command, subcommands("child1", "child2"))]
+pub async fn parent(ctx: Context<'_>, arg: String) -> Result<(), Error> { Ok(()) }
+
+#[poise::command(prefix_command, slash_command)]
+pub async fn child1(ctx: Context<'_>, arg: String) -> Result<(), Error> { Ok(()) }
+#[poise::command(prefix_command, slash_command)]
+pub async fn child2(ctx: Context<'_>, arg: String) -> Result<(), Error> { Ok(()) }
+```
+
+With this setup, users can call `~parent [arg]` or `~parent child1 [arg]` or `~parent child2 [arg]`.
+Slash command subcommands are also supported, but the base command (`/parent`) [cannot be used](https://discord.com/developers/docs/interactions/application-commands#subcommands-and-subcommand-groups)
+as per Discord; only the leaf commands (`/parent child1 [arg]`, `/parent child2 [arg]`).
+
+When adding the commands to the framework, add just the parent command (since it fully contains its
+subcommands):
+
+```rust
+# type Error = Box<dyn std::error::Error + Send + Sync>;
+# type Context<'a> = poise::Context<'a, (), Error>;
+# #[poise::command(prefix_command)]
+# pub async fn parent(ctx: Context<'_>, arg: String) -> Result<(), Error> { Ok(()) }
+let options = poise::FrameworkOptions {
+    commands: vec![
+        parent(),
+    ],
+    ..Default::default()
+};
+```
+
+Subcommands are stored in [`Command::subcommands`]. As with all [`Command`] fields, you can
+programmatically modify those any way you'd like. The [`command`] macro is just a convenience thing
+to set the fields for you.
+
+For another example of subcommands, see `examples/framework_usage/commands/subcommands.rs`.
+
 ### Big example to showcase many command features
+
+Also see the [`command`] macro docs
 
 ```rust
 use poise::serenity_prelude as serenity;
@@ -212,6 +264,29 @@ poise::Framework::builder()
 # Ok::<(), Error>(()) };
 ```
 
+## Registering slash commands
+
+As explained in [Introduction to slash commands](introduction-to-slash-commands), slash
+commands need to be _registered_ to Discord. Poise provides several ways to do it, with varying
+degree of abstraction. (Note: you can access a list of framework commands from anywhere with
+[`ctx.framework().options.commands`](Context::framework)).
+
+The easiest way is with [`builtins::register_application_commands_buttons`].
+It spawns a message with buttons to register and unregister all commands, globally or in the current
+guild (see its docs).
+
+A more flexible approach is to serialize the commands to a [`serenity::CreateApplicationCommands`]
+using [`builtins::create_application_commands`]. That way, you can call serenity's registration
+functions manually:
+- [`serenity::Command::set_global_application_commands`]
+- [`serenity::GuildId::set_application_commands`]
+
+For example, you could call this function in [`FrameworkBuilder::user_data_setup`] to automatically
+register commands on startup. Also see the docs of [`builtins::create_application_commands`].
+
+The lowest level of abstraction for registering commands is [`Command::create_as_slash_command`]
+and [`Command::create_as_context_menu_command`].
+
 # Tips and tricks
 
 ## Type aliases
@@ -240,52 +315,38 @@ serenity::Member, serenity::UserId, serenity::ReactionType, serenity::GatewayInt
 # About the weird name
 I'm bad at names. Google lists "poise" as a synonym to "serenity" which is the Discord library
 underlying this framework, so that's what I chose.
+
+Also, poise is a stat in Dark Souls
 */
 
-mod prefix_argument;
-pub use prefix_argument::*;
-
-mod slash_argument;
-pub use slash_argument::*;
-
-mod event;
-pub use event::{Event, EventWrapper};
-
-mod structs;
-pub use structs::*;
-
-mod dispatch;
-pub use dispatch::*;
-
-mod framework;
-pub use framework::*;
-
-mod reply;
-pub use reply::*;
-
-mod cooldown;
-pub use cooldown::*;
-
-mod modal;
-pub use modal::*;
-
-mod track_edits;
-pub use track_edits::*;
-
-pub(crate) mod util;
-
 pub mod builtins;
+pub mod cooldown;
+pub mod dispatch;
+pub mod event;
+pub mod framework;
+pub mod modal;
+pub mod prefix_argument;
+pub mod reply;
+pub mod slash_argument;
+pub mod structs;
+pub mod track_edits;
+mod util;
+pub use poise_macros as macros;
+
+#[doc(no_inline)]
+pub use {
+    cooldown::*, dispatch::*, event::*, framework::*, macros::*, modal::*, prefix_argument::*,
+    reply::*, slash_argument::*, structs::*, track_edits::*,
+};
+
 /// See [`builtins`]
 #[deprecated = "`samples` module was renamed to `builtins`"]
 pub mod samples {
     pub use crate::builtins::*;
 }
 
-#[doc(no_inline)]
-pub use async_trait::async_trait;
-pub use futures_core;
-pub use futures_util;
-pub use poise_macros::*;
+#[doc(hidden)]
+pub use {async_trait::async_trait, futures_util};
 
 /// This module re-exports a bunch of items from all over serenity. Useful if you can't
 /// remember the full paths of serenity items.
@@ -333,12 +394,9 @@ pub mod serenity_prelude {
         *,
     };
 }
-use serenity_prelude as serenity; // private alias for crate docs intradoc-links
-
-use std::future::Future;
-use std::pin::Pin;
+use serenity_prelude as serenity; // private alias for crate root docs intradoc-links
 
 /// Shorthand for a wrapped async future with a lifetime, used by many parts of this framework.
 ///
 /// An owned future has the `'static` lifetime.
-pub type BoxFuture<'a, T> = Pin<Box<dyn Future<Output = T> + Send + 'a>>;
+pub type BoxFuture<'a, T> = std::pin::Pin<Box<dyn std::future::Future<Output = T> + Send + 'a>>;

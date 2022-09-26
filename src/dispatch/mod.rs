@@ -4,7 +4,9 @@ mod common;
 mod prefix;
 mod slash;
 
-pub use prefix::{dispatch_message, find_command};
+pub use common::*;
+pub use prefix::*;
+pub use slash::*;
 
 use crate::serenity_prelude as serenity;
 
@@ -55,17 +57,12 @@ pub async fn dispatch_event<U: Send + Sync, E>(
     match event {
         crate::Event::Message { new_message } => {
             let invocation_data = tokio::sync::Mutex::new(Box::new(()) as _);
-            if let Err(Some((error, command))) = prefix::dispatch_message(
-                framework,
-                ctx,
-                new_message,
-                false,
-                false,
-                &invocation_data,
-            )
-            .await
+            let trigger = crate::MessageDispatchTrigger::MessageCreate;
+            if let Err(error) =
+                prefix::dispatch_message(framework, ctx, new_message, trigger, &invocation_data)
+                    .await
             {
-                command.on_error.unwrap_or(framework.options.on_error)(error).await;
+                error.handle(framework.options).await;
             }
         }
         crate::Event::MessageUpdate { event, .. } => {
@@ -80,17 +77,15 @@ pub async fn dispatch_event<U: Send + Sync, E>(
 
                 if let Some((msg, previously_tracked)) = msg {
                     let invocation_data = tokio::sync::Mutex::new(Box::new(()) as _);
-                    if let Err(Some((error, command))) = prefix::dispatch_message(
-                        framework,
-                        ctx,
-                        &msg,
-                        true,
-                        previously_tracked,
-                        &invocation_data,
-                    )
-                    .await
+                    let trigger = match previously_tracked {
+                        true => crate::MessageDispatchTrigger::MessageEditFromInvalid,
+                        false => crate::MessageDispatchTrigger::MessageEdit,
+                    };
+                    if let Err(error) =
+                        prefix::dispatch_message(framework, ctx, &msg, trigger, &invocation_data)
+                            .await
                     {
-                        command.on_error.unwrap_or(framework.options.on_error)(error).await;
+                        error.handle(framework.options).await;
                     }
                 }
             }
@@ -98,7 +93,7 @@ pub async fn dispatch_event<U: Send + Sync, E>(
         crate::Event::InteractionCreate {
             interaction: serenity::Interaction::ApplicationCommand(interaction),
         } => {
-            if let Err(Some((error, command))) = slash::dispatch_interaction(
+            if let Err(error) = slash::dispatch_interaction(
                 framework,
                 ctx,
                 interaction,
@@ -108,13 +103,13 @@ pub async fn dispatch_event<U: Send + Sync, E>(
             )
             .await
             {
-                command.on_error.unwrap_or(framework.options.on_error)(error).await;
+                error.handle(framework.options).await;
             }
         }
         crate::Event::InteractionCreate {
             interaction: serenity::Interaction::Autocomplete(interaction),
         } => {
-            if let Err(Some((error, command))) = slash::dispatch_autocomplete(
+            if let Err(error) = slash::dispatch_autocomplete(
                 framework,
                 ctx,
                 interaction,
@@ -124,7 +119,7 @@ pub async fn dispatch_event<U: Send + Sync, E>(
             )
             .await
             {
-                command.on_error.unwrap_or(framework.options.on_error)(error).await;
+                error.handle(framework.options).await;
             }
         }
         _ => {}

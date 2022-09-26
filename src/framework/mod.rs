@@ -15,7 +15,7 @@ mod builder;
 /// - sets up user data on the first Ready event
 /// - keeps track of shard manager and bot ID automatically
 ///
-/// You can build a bot without [`Framework`]: see the manual_dispatch example in the repository
+/// You can build a bot without [`Framework`]: see the `manual_dispatch` example in the repository
 pub struct Framework<U, E> {
     /// Stores user data. Is initialized on first Ready event
     user_data: once_cell::sync::OnceCell<U>,
@@ -268,7 +268,7 @@ async fn raw_dispatch_event<U, E>(
 
 /// Traverses commands recursively and sets [`crate::Command::qualified_name`] to its actual value
 pub fn set_qualified_names<U, E>(commands: &mut [crate::Command<U, E>]) {
-    /// Fills in qualified_name fields by appending command name to the parent command name
+    /// Fills in `qualified_name` fields by appending command name to the parent command name
     fn set_subcommand_qualified_names<U, E>(parents: &str, commands: &mut [crate::Command<U, E>]) {
         for cmd in commands {
             cmd.qualified_name = format!("{} {}", parents, cmd.name);
@@ -280,7 +280,7 @@ pub fn set_qualified_names<U, E>(commands: &mut [crate::Command<U, E>]) {
     }
 }
 
-/// Prints a warning on stderr if a prefix is configured but MESSAGE_CONTENT is not set
+/// Prints a warning on stderr if a prefix is configured but `MESSAGE_CONTENT` is not set
 fn message_content_intent_sanity_check<U, E>(
     prefix_options: &crate::PrefixFrameworkOptions<U, E>,
     intents: serenity::GatewayIntents,
@@ -323,7 +323,7 @@ pub async fn insert_owners_from_http(
 /// Important to avoid the edit tracker gobbling up unlimited memory
 ///
 /// NOT PUB because it's not useful to outside users because it requires a full blown Framework
-/// Because e.g. taking a PrefixFrameworkOptions reference won't work because tokio tasks need to be
+/// Because e.g. taking a `PrefixFrameworkOptions` reference won't work because tokio tasks need to be
 /// 'static
 fn spawn_edit_tracker_purge_task<U: 'static + Send + Sync, E: 'static>(
     framework: std::sync::Arc<Framework<U, E>>,

@@ -44,7 +44,6 @@ pub async fn welcome(
     let message = message
         .localized_name(ctx.locale().unwrap_or(""))
         .unwrap_or_else(|| message.name());
-    ctx.say(format!("<@{}> {}", user.id.0, message.to_string()))
-        .await?;
+    ctx.say(format!("<@{}> {}", user.id.0, message)).await?;
     Ok(())
 }

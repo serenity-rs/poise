@@ -1,3 +1,7 @@
+/*!
+Procedural macros used in poise, like [`macro@command`]
+*/
+
 mod choice_parameter;
 mod command;
 mod modal;
@@ -107,7 +111,7 @@ poise::Command {
 
 # Internals
 
-Internally, this attribute macro generates a function with a single [`poise::Command`]
+Internally, this attribute macro generates a function with a single `poise::Command`
 return type, which contains all data about this command. For example, it transforms a function of
 this form:
 ```rust

@@ -51,15 +51,13 @@ async fn main() {
         .token(std::env::var("TOKEN").unwrap())
         .user_data_setup(move |ctx, _, framework| {
             Box::pin(async move {
-                poise::serenity_prelude::GuildId(
-                    std::num::NonZeroU64::new(703332075914264606).unwrap(),
-                )
-                .set_application_commands(
-                    ctx,
-                    poise::samples::create_application_commands(&framework.options().commands),
-                )
-                .await
-                .unwrap();
+                poise::serenity_prelude::GuildId::new(703332075914264606)
+                    .set_application_commands(
+                        ctx,
+                        poise::builtins::create_application_commands(&framework.options().commands),
+                    )
+                    .await
+                    .unwrap();
                 Ok(())
             })
         })
@@ -104,7 +102,7 @@ async fn main() {
                                 ctx.invocation_data::<&str>().await.as_deref()
                             );
                         }
-                        err => poise::samples::on_error(err).await.unwrap(),
+                        err => poise::builtins::on_error(err).await.unwrap(),
                     }
                 })
             },

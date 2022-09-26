@@ -100,6 +100,28 @@ pub async fn register_application_commands<U, E>(
 /// Upgraded version of [`register_application_commands`]
 ///
 /// ![Screenshot of output](https://imgur.com/rTbTaDs.png)
+///
+/// You probably want to use this by wrapping it in a small `register` command:
+/// ```rust
+/// # type Error = Box<dyn std::error::Error + Send + Sync>;
+/// # type Context<'a> = poise::Context<'a, (), Error>;
+/// #[poise::command(prefix_command)]
+/// pub async fn register(ctx: Context<'_>) -> Result<(), Error> {
+///     poise::builtins::register_application_commands_buttons(ctx).await?;
+///     Ok(())
+/// }
+///
+/// // ...
+/// poise::FrameworkOptions {
+///     commands: vec![
+///         // ...
+///         register(),
+///     ],
+/// #   ..Default::default()
+/// };
+/// ```
+///
+/// Which you can call like any prefix command, for example `@your_bot register`.
 pub async fn register_application_commands_buttons<U, E>(
     ctx: crate::Context<'_, U, E>,
 ) -> Result<(), serenity::Error> {
@@ -122,21 +144,6 @@ pub async fn register_application_commands_buttons<U, E>(
                             serenity::CreateActionRow::default()
                                 .add_button(
                                     serenity::CreateButton::default()
-                                        .custom_id("register.global")
-                                        .label("Register globally")
-                                        .style(serenity::ButtonStyle::Primary),
-                                )
-                                .add_button(
-                                    serenity::CreateButton::default()
-                                        .custom_id("unregister.global")
-                                        .label("Delete globally")
-                                        .style(serenity::ButtonStyle::Danger),
-                                ),
-                        )
-                        .add_action_row(
-                            serenity::CreateActionRow::default()
-                                .add_button(
-                                    serenity::CreateButton::default()
                                         .custom_id("register.guild")
                                         .label("Register in guild")
                                         .style(serenity::ButtonStyle::Primary),
@@ -145,6 +152,21 @@ pub async fn register_application_commands_buttons<U, E>(
                                     serenity::CreateButton::default()
                                         .custom_id("unregister.guild")
                                         .label("Delete in guild")
+                                        .style(serenity::ButtonStyle::Danger),
+                                ),
+                        )
+                        .add_action_row(
+                            serenity::CreateActionRow::default()
+                                .add_button(
+                                    serenity::CreateButton::default()
+                                        .custom_id("register.global")
+                                        .label("Register globally")
+                                        .style(serenity::ButtonStyle::Primary),
+                                )
+                                .add_button(
+                                    serenity::CreateButton::default()
+                                        .custom_id("unregister.global")
+                                        .label("Delete globally")
                                         .style(serenity::ButtonStyle::Danger),
                                 ),
                         ),

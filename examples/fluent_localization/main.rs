@@ -1,7 +1,7 @@
 mod translation;
 
 use poise::serenity_prelude as serenity;
-use translation::get;
+use translation::tr;
 
 pub struct Data {
     translations: translation::Translations,
@@ -24,8 +24,27 @@ pub async fn welcome(
     user: serenity::User,
     message: WelcomeChoice,
 ) -> Result<(), Error> {
-    ctx.say(format!("<@{}> {}", user.id.0, get(ctx, message.name())))
+    ctx.say(format!("<@{}> {}", user.id.0, tr!(ctx, message.name())))
         .await?;
+    Ok(())
+}
+
+#[poise::command(slash_command)]
+pub async fn info(ctx: Context<'_>) -> Result<(), Error> {
+    let guild = ctx
+        .partial_guild()
+        .await
+        .ok_or_else(|| tr!(ctx, "not-in-guild-error"))?;
+
+    let response = tr!(ctx, "guild-info",
+        name: &*guild.name,
+        emojiCount: guild.emojis.len(),
+        emojis: guild.emojis.values().map(|e| e.to_string()).collect::<String>(),
+        roleCount: guild.roles.len(),
+        stickerCount: guild.stickers.len(),
+    );
+
+    ctx.say(response).await?;
     Ok(())
 }
 
@@ -39,7 +58,7 @@ async fn register(ctx: Context<'_>) -> Result<(), Error> {
 async fn main() {
     env_logger::init();
 
-    let mut commands = vec![welcome(), register()];
+    let mut commands = vec![welcome(), info(), register()];
     let translations = translation::read_ftl().expect("failed to read translation files");
     translation::apply_translations(&translations, &mut commands);
 

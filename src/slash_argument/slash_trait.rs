@@ -185,7 +185,7 @@ impl<T: SlashArgument + Sync> SlashArgumentHack<T> for &PhantomData<T> {
     }
 }
 
-/// Versatile macro to implement SlashArgumentHack for simple types
+/// Versatile macro to implement `SlashArgumentHack` for simple types
 macro_rules! impl_slash_argument {
     ($type:ty, |$ctx:pat, $interaction:pat, $slash_param_type:ident ( $($arg:pat),* )| $extractor:expr) => {
         #[async_trait::async_trait]

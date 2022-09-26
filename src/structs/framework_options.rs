@@ -1,4 +1,4 @@
-//! Just contains FrameworkOptions
+//! Just contains `FrameworkOptions`
 
 use crate::{serenity_prelude as serenity, BoxFuture};
 
