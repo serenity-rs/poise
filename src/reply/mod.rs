@@ -95,10 +95,10 @@ impl ReplyHandle<'_> {
     // TODO: return the edited Message object?
     // TODO: should I eliminate the ctx parameter by storing it in self instead? Would infect
     //  ReplyHandle with <U, E> type parameters
-    pub async fn edit<'att, U, E>(
+    pub async fn edit<U, E>(
         &self,
         ctx: crate::Context<'_, U, E>,
-        reply: CreateReply<'att>,
+        reply: CreateReply,
     ) -> Result<(), serenity::Error> {
         let reply = reply.complete_from_ctx(ctx);
 

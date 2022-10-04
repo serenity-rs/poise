@@ -37,7 +37,7 @@ pub trait PopArgument<'a>: Sized {
     async fn pop_from(
         args: &'a str,
         attachment_index: usize,
-        ctx: &serenity::Context,
+        ctx: &serenity::CacheAndHttp,
         msg: &serenity::Message,
     ) -> Result<(&'a str, usize, Self), (Box<dyn std::error::Error + Send + Sync>, Option<String>)>;
 }
@@ -49,7 +49,7 @@ pub trait PopArgumentHack<'a, T>: Sized {
         self,
         args: &'a str,
         attachment_index: usize,
-        ctx: &serenity::Context,
+        ctx: &serenity::CacheAndHttp,
         msg: &serenity::Message,
     ) -> Result<(&'a str, usize, T), (Box<dyn std::error::Error + Send + Sync>, Option<String>)>;
 }
@@ -63,7 +63,7 @@ where
         self,
         args: &'a str,
         attachment_index: usize,
-        ctx: &serenity::Context,
+        ctx: &serenity::CacheAndHttp,
         msg: &serenity::Message,
     ) -> Result<(&'a str, usize, T), (Box<dyn std::error::Error + Send + Sync>, Option<String>)>
     {
@@ -82,7 +82,7 @@ impl<'a, T: PopArgument<'a> + Send + Sync> PopArgumentHack<'a, T> for &PhantomDa
         self,
         args: &'a str,
         attachment_index: usize,
-        ctx: &serenity::Context,
+        ctx: &serenity::CacheAndHttp,
         msg: &serenity::Message,
     ) -> Result<(&'a str, usize, T), (Box<dyn std::error::Error + Send + Sync>, Option<String>)>
     {
@@ -96,7 +96,7 @@ impl<'a> PopArgumentHack<'a, bool> for &PhantomData<bool> {
         self,
         args: &'a str,
         attachment_index: usize,
-        ctx: &serenity::Context,
+        ctx: &serenity::CacheAndHttp,
         msg: &serenity::Message,
     ) -> Result<(&'a str, usize, bool), (Box<dyn std::error::Error + Send + Sync>, Option<String>)>
     {
@@ -118,7 +118,7 @@ impl<'a> PopArgumentHack<'a, serenity::Attachment> for &PhantomData<serenity::At
         self,
         args: &'a str,
         attachment_index: usize,
-        ctx: &serenity::Context,
+        ctx: &serenity::CacheAndHttp,
         msg: &serenity::Message,
     ) -> Result<
         (&'a str, usize, serenity::Attachment),

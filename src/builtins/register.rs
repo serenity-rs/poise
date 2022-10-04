@@ -143,31 +143,35 @@ pub async fn register_application_commands_buttons<U, E>(
                         .add_action_row(
                             serenity::CreateActionRow::default()
                                 .add_button(
-                                    serenity::CreateButton::default()
-                                        .custom_id("register.guild")
-                                        .label("Register in guild")
-                                        .style(serenity::ButtonStyle::Primary),
+                                    serenity::CreateButton::new(
+                                        serenity::ButtonStyle::Primary,
+                                        "register.guild",
+                                    )
+                                    .label("Register in guild"),
                                 )
                                 .add_button(
-                                    serenity::CreateButton::default()
-                                        .custom_id("unregister.guild")
-                                        .label("Delete in guild")
-                                        .style(serenity::ButtonStyle::Danger),
+                                    serenity::CreateButton::new(
+                                        serenity::ButtonStyle::Danger,
+                                        "unregister.guild",
+                                    )
+                                    .label("Delete in guild"),
                                 ),
                         )
                         .add_action_row(
                             serenity::CreateActionRow::default()
                                 .add_button(
-                                    serenity::CreateButton::default()
-                                        .custom_id("register.global")
-                                        .label("Register globally")
-                                        .style(serenity::ButtonStyle::Primary),
+                                    serenity::CreateButton::new(
+                                        serenity::ButtonStyle::Primary,
+                                        "register.global",
+                                    )
+                                    .label("Register globally"),
                                 )
                                 .add_button(
-                                    serenity::CreateButton::default()
-                                        .custom_id("unregister.global")
-                                        .label("Delete globally")
-                                        .style(serenity::ButtonStyle::Danger),
+                                    serenity::CreateButton::new(
+                                        serenity::ButtonStyle::Danger,
+                                        "unregister.global",
+                                    )
+                                    .label("Delete globally"),
                                 ),
                         ),
                 ),

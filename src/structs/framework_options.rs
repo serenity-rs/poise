@@ -31,9 +31,8 @@ pub struct FrameworkOptions<U, E> {
     ///
     /// Allows you to modify every outgoing message in a central place
     #[derivative(Debug = "ignore")]
-    pub reply_callback: Option<
-        for<'a> fn(crate::Context<'_, U, E>, crate::CreateReply<'a>) -> crate::CreateReply<'a>,
-    >,
+    pub reply_callback:
+        Option<for<'a> fn(crate::Context<'_, U, E>, crate::CreateReply) -> crate::CreateReply>,
     /// If `true`, disables automatic cooldown handling before every command invocation.
     ///
     /// Useful for implementing custom cooldown behavior. See [`crate::Command::cooldowns`] and
@@ -101,8 +100,7 @@ where
             allowed_mentions: Some(
                 serenity::CreateAllowedMentions::default()
                     // Only support direct user pings by default
-                    .empty_parse()
-                    .parse(serenity::ParseValue::Users),
+                    .all_users(true),
             ),
             reply_callback: None,
             manual_cooldowns: false,

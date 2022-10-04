@@ -92,7 +92,7 @@ impl<'a, U, E> Context<'a, U, E> {
     /// Shorthand of [`crate::send_reply`]
     pub async fn send<'att>(
         self,
-        builder: crate::CreateReply<'att>,
+        builder: crate::CreateReply,
     ) -> Result<crate::ReplyHandle<'a>, serenity::Error> {
         crate::send_reply(self, builder).await
     }
@@ -385,6 +385,15 @@ impl<'a, U, E> Context<'a, U, E> {
         match self {
             Context::Application(ctx) => Some(ctx.interaction.locale()),
             Context::Prefix(_) => None,
+        }
+    }
+
+    /// Creates a [`serenity::CacheAndHttp`] from the serenity Context
+    pub fn cache_and_http(&self) -> serenity::CacheAndHttp {
+        serenity::CacheAndHttp {
+            http: self.discord().http.clone(),
+            #[cfg(feature = "cache")]
+            cache: self.discord().cache.clone(),
         }
     }
 }

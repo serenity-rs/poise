@@ -13,35 +13,21 @@ pub mod serenity_prelude {
     pub use serenity::{
         async_trait,
         builder::*,
+        model::application::{command::*, component::*},
+        model::prelude::*,
+        prelude::*,
+        utils::*,
+        *,
+    };
+    #[doc(no_inline)]
+    #[cfg(feature = "full_serenity")]
+    pub use serenity::{
         client::{
             bridge::gateway::{event::*, *},
             *,
         },
         collector::*,
         http::*,
-        // Explicit imports to resolve ambiguity between model::prelude::* and
-        // model::application::interaction::* due to deprecated same-named type aliases
-        model::{
-            application::interaction::{
-                Interaction, InteractionResponseType, InteractionType,
-                MessageFlags as InteractionResponseFlags, MessageInteraction,
-            },
-            // There's two MessageFlags in serenity. The interaction response specific one was
-            // renamed to InteractionResponseFlags above so we can keep this one's name the same
-            channel::MessageFlags,
-        },
-        model::{
-            application::{
-                command::*,
-                component::*,
-                interaction::{application_command::*, message_component::*, modal::*, *},
-            },
-            event::*,
-            prelude::*,
-        },
-        prelude::*,
-        utils::*,
-        *,
     };
 }
 

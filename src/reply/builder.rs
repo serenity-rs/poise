@@ -4,13 +4,13 @@ use crate::serenity_prelude as serenity;
 
 /// Message builder that abstracts over prefix and application command responses
 #[derive(Default, Clone)]
-pub struct CreateReply<'att> {
+pub struct CreateReply {
     /// Message content.
     pub content: Option<String>,
     /// Embeds, if present.
     pub embeds: Vec<serenity::CreateEmbed>,
     /// Message attachments.
-    pub attachments: Vec<serenity::AttachmentType<'att>>,
+    pub attachments: Vec<serenity::CreateAttachment>,
     /// Whether the message is ephemeral (only has an effect in application commands)
     ///
     /// If None, it's initialized to [`crate::Command::ephemeral`]
@@ -23,7 +23,7 @@ pub struct CreateReply<'att> {
     pub reference_message: Option<serenity::MessageReference>,
 }
 
-impl<'att> CreateReply<'att> {
+impl CreateReply {
     /// Set the content of the message.
     pub fn content(mut self, content: impl Into<String>) -> Self {
         self.content = Some(content.into());
@@ -49,7 +49,7 @@ impl<'att> CreateReply<'att> {
     /// Add an attachment.
     ///
     /// This will not have an effect in a slash command's initial response!
-    pub fn attachment(mut self, attachment: serenity::AttachmentType<'att>) -> Self {
+    pub fn attachment(mut self, attachment: serenity::CreateAttachment) -> Self {
         self.attachments.push(attachment);
         self
     }
@@ -99,9 +99,9 @@ impl<'att> CreateReply<'att> {
 
 /// Methods to create a message builder from any type from this [`CreateReply`]. Used by poise
 /// internally to actually send a response to Discord
-impl<'att> CreateReply<'att> {
+impl CreateReply {
     /// Serialize this response builder to a [`serenity::CreateInteractionResponseData`]
-    pub fn to_slash_initial_response(self) -> serenity::CreateInteractionResponseData<'att> {
+    pub fn to_slash_initial_response(self) -> serenity::CreateInteractionResponseData {
         let mut f = serenity::CreateInteractionResponseData::default();
         let crate::CreateReply {
             content,
@@ -130,7 +130,7 @@ impl<'att> CreateReply<'att> {
     }
 
     /// Serialize this response builder to a [`serenity::CreateInteractionResponseFollowup`]
-    pub fn to_slash_followup_response(self) -> serenity::CreateInteractionResponseFollowup<'att> {
+    pub fn to_slash_followup_response(self) -> serenity::CreateInteractionResponseFollowup {
         let mut f = serenity::CreateInteractionResponseFollowup::default();
         let crate::CreateReply {
             content,
@@ -186,7 +186,7 @@ impl<'att> CreateReply<'att> {
     }
 
     /// Serialize this response builder to a [`serenity::EditMessage`]
-    pub fn to_prefix_edit(self) -> serenity::EditMessage<'att> {
+    pub fn to_prefix_edit(self) -> serenity::EditMessage {
         let mut f = serenity::EditMessage::default();
         let crate::CreateReply {
             content,
@@ -218,7 +218,7 @@ impl<'att> CreateReply<'att> {
     }
 
     /// Serialize this response builder to a [`serenity::CreateMessage`]
-    pub fn to_prefix(self) -> serenity::CreateMessage<'att> {
+    pub fn to_prefix(self) -> serenity::CreateMessage {
         let mut m = serenity::CreateMessage::default();
         let crate::CreateReply {
             content,

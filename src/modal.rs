@@ -108,7 +108,7 @@ pub trait Modal: Sized {
     ///
     /// Optionally takes an initialized instance as pre-filled values of this modal (see
     /// [`Self::execute_with_defaults()`] for more info)
-    fn create(defaults: Option<Self>) -> serenity::CreateInteractionResponse<'static>;
+    fn create(defaults: Option<Self>) -> serenity::CreateInteractionResponse;
 
     /// Parses a received modal submit interaction into this type
     ///

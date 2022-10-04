@@ -22,10 +22,10 @@ use crate::serenity_prelude as serenity;
 /// ).await?;
 /// # Ok(()) }
 /// ```
-pub async fn send_reply<'a, 'att, U, E>(
-    ctx: crate::Context<'a, U, E>,
-    builder: crate::CreateReply<'att>,
-) -> Result<crate::ReplyHandle<'a>, serenity::Error> {
+pub async fn send_reply<U, E>(
+    ctx: crate::Context<'_, U, E>,
+    builder: crate::CreateReply,
+) -> Result<crate::ReplyHandle<'_>, serenity::Error> {
     Ok(match ctx {
         crate::Context::Prefix(ctx) => crate::ReplyHandle(super::ReplyHandleInner::Prefix(
             crate::send_prefix_reply(ctx, builder).await?,
@@ -50,18 +50,18 @@ pub async fn say_reply<U, E>(
 /// [followup](serenity::ApplicationCommandInteraction::create_followup_message) is sent.
 ///
 /// No-op if autocomplete context
-pub async fn send_application_reply<'a, 'att, U, E>(
-    ctx: crate::ApplicationContext<'a, U, E>,
-    builder: crate::CreateReply<'att>,
-) -> Result<crate::ReplyHandle<'a>, serenity::Error> {
+pub async fn send_application_reply<U, E>(
+    ctx: crate::ApplicationContext<'_, U, E>,
+    builder: crate::CreateReply,
+) -> Result<crate::ReplyHandle<'_>, serenity::Error> {
     _send_application_reply(ctx, builder.complete_from_ctx(ctx.into())).await
 }
 
 /// private version of [`send_application_reply`] that isn't generic over the builder to minimize monomorphization-related codegen bloat
-async fn _send_application_reply<'a, U, E>(
-    ctx: crate::ApplicationContext<'a, U, E>,
-    data: crate::CreateReply<'_>,
-) -> Result<crate::ReplyHandle<'a>, serenity::Error> {
+async fn _send_application_reply<U, E>(
+    ctx: crate::ApplicationContext<'_, U, E>,
+    data: crate::CreateReply,
+) -> Result<crate::ReplyHandle<'_>, serenity::Error> {
     let interaction = match ctx.interaction {
         crate::ApplicationCommandOrAutocompleteInteraction::ApplicationCommand(x) => x,
         crate::ApplicationCommandOrAutocompleteInteraction::Autocomplete(_) => {
@@ -104,7 +104,7 @@ async fn _send_application_reply<'a, U, E>(
 /// Prefix-specific reply function. For more details, see [`crate::send_reply`].
 pub async fn send_prefix_reply<'att, U, E>(
     ctx: crate::PrefixContext<'_, U, E>,
-    builder: crate::CreateReply<'att>,
+    builder: crate::CreateReply,
 ) -> Result<Box<serenity::Message>, serenity::Error> {
     _send_prefix_reply(ctx, builder.complete_from_ctx(ctx.into())).await
 }
@@ -112,7 +112,7 @@ pub async fn send_prefix_reply<'att, U, E>(
 /// private version of [`send_prefix_reply`] that isn't generic over the builder to minimize monomorphization-related codegen bloat
 async fn _send_prefix_reply<'a, U, E>(
     ctx: crate::PrefixContext<'_, U, E>,
-    reply: crate::CreateReply<'a>,
+    reply: crate::CreateReply,
 ) -> Result<Box<serenity::Message>, serenity::Error> {
     // This must only return None when we _actually_ want to reuse the existing response! There are
     // no checks later

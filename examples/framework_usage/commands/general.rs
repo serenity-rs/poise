@@ -109,10 +109,11 @@ pub async fn boop(ctx: Context<'_>) -> Result<(), Error> {
             .components(
                 serenity::CreateComponents::default().add_action_row(
                     serenity::CreateActionRow::default().add_button(
-                        serenity::CreateButton::default()
-                            .style(serenity::ButtonStyle::Primary)
-                            .label("Boop me!")
-                            .custom_id(uuid_boop.to_string()),
+                        serenity::CreateButton::new(
+                            serenity::ButtonStyle::Primary,
+                            uuid_boop.to_string(),
+                        )
+                        .label("Boop me!"),
                     ),
                 ),
             ),
@@ -191,10 +192,8 @@ pub async fn test_reuse_response(ctx: Context<'_>) -> Result<(), Error> {
             .components(
                 serenity::CreateComponents::default().add_action_row(
                     serenity::CreateActionRow::default().add_button(
-                        serenity::CreateButton::default()
-                            .label("button 1")
-                            .style(serenity::ButtonStyle::Primary)
-                            .custom_id("1"),
+                        serenity::CreateButton::new(serenity::ButtonStyle::Primary, "1")
+                            .label("button 1"),
                     ),
                 ),
             ),
@@ -215,10 +214,8 @@ pub async fn test_reuse_response(ctx: Context<'_>) -> Result<(), Error> {
             .components(
                 serenity::CreateComponents::default().add_action_row(
                     serenity::CreateActionRow::default().add_button(
-                        serenity::CreateButton::default()
-                            .label("button 2")
-                            .style(serenity::ButtonStyle::Primary)
-                            .custom_id("2"),
+                        serenity::CreateButton::new(serenity::ButtonStyle::Primary, "2")
+                            .label("button 2"),
                     ),
                 ),
             ),
