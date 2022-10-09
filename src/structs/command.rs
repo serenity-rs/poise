@@ -189,6 +189,10 @@ impl<U, E> Command<U, E> {
             builder.default_member_permissions(self.default_member_permissions);
         }
 
+        if self.guild_only {
+            builder.dm_permission(false);
+        }
+
         if self.subcommands.is_empty() {
             for param in &self.parameters {
                 // Using `?` because if this command has slash-incompatible parameters, we cannot
@@ -219,6 +223,10 @@ impl<U, E> Command<U, E> {
                 crate::ContextMenuCommandAction::User(_) => serenity::CommandType::User,
                 crate::ContextMenuCommandAction::Message(_) => serenity::CommandType::Message,
             });
+
+        if self.guild_only {
+            builder.dm_permission(false);
+        }
 
         Some(builder)
     }
