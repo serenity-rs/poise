@@ -191,6 +191,8 @@ impl<U, E> Command<U, E> {
 
         if self.guild_only {
             builder.dm_permission(false);
+        } else if self.dm_only {
+            builder.dm_permission(true);
         }
 
         if self.subcommands.is_empty() {
@@ -226,6 +228,8 @@ impl<U, E> Command<U, E> {
 
         if self.guild_only {
             builder.dm_permission(false);
+        } else if self.dm_only {
+            builder.dm_permission(true);
         }
 
         Some(builder)
