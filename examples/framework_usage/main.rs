@@ -84,6 +84,7 @@ async fn main() {
             general::totalsize(),
             general::modal(),
             general::punish(),
+            general::servers(),
             context_menu::user_info(),
             context_menu::echo(),
             autocomplete::greet(),

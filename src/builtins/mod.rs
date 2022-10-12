@@ -211,21 +211,28 @@ pub async fn servers<U, E>(ctx: crate::Context<'_, U, E>) -> Result<(), serenity
     }
 
     let guild_ids = ctx.discord().cache.guilds();
+    let mut num_unavailable_guilds = 0;
     let mut guilds = guild_ids
-        .into_iter()
-        .filter_map(|guild_id| {
+        .iter()
+        .map(|&guild_id| {
             ctx.discord().cache.guild_field(guild_id, |guild| Guild {
                 name: guild.name.clone(),
                 num_members: guild.member_count,
                 is_public: guild.features.iter().any(|x| x == "DISCOVERABLE"),
             })
         })
+        .filter_map(|guild| {
+            if guild.is_none() {
+                num_unavailable_guilds += 1;
+            }
+            guild
+        })
         .collect::<Vec<_>>();
     guilds.sort_by_key(|guild| u64::MAX - guild.num_members); // descending sort
 
     let mut num_private_guilds = 0;
     let mut num_private_guild_members = 0;
-    let mut response = format!("I am currently in {} servers!\n", guilds.len());
+    let mut response = format!("I am currently in {} servers!\n", guild_ids.len());
     for guild in guilds {
         if guild.is_public || show_private_guilds {
             let _ = writeln!(
@@ -243,6 +250,13 @@ pub async fn servers<U, E>(ctx: crate::Context<'_, U, E>) -> Result<(), serenity
             response,
             "- [{} private servers with {} members total]",
             num_private_guilds, num_private_guild_members
+        );
+    }
+    if num_unavailable_guilds > 0 {
+        let _ = writeln!(
+            response,
+            "- [{} unavailable servers (cache is not ready yet)]",
+            num_unavailable_guilds
         );
     }
 
