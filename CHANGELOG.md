@@ -1,3 +1,12 @@
+# 0.4.1
+
+Behavior changes:
+- Slash commands marked guild_only don't show up in DMs anymore
+  - Using Discord's dm_permission field on commands
+- `poise::builtins::servers` now doesn't omit unavailable guilds from guild count and list anymore
+
+Detailed changelog: https://github.com/kangalioo/poise/compare/v0.4.0...v0.4.1
+
 # 0.4.0
 
 New features:
