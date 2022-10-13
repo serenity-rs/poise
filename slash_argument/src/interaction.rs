@@ -51,8 +51,8 @@ impl<'a> ApplicationCommandOrAutocompleteInteraction<'a> {
     /// Returns the member field of the underlying interaction
     pub fn member(self) -> Option<&'a serenity::Member> {
         match self {
-            Self::ApplicationCommand(x) => x.member.as_ref().map(|b| b.as_ref()),
-            Self::Autocomplete(x) => x.member.as_ref().map(|b| b.as_ref()),
+            Self::ApplicationCommand(x) => x.member.as_deref(),
+            Self::Autocomplete(x) => x.member.as_deref(),
         }
     }
 
