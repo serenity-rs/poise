@@ -12,3 +12,15 @@ Poise is an opinionated Discord bot framework with a few distinctive features:
 - flexible argument parsing: command parameters are defined with normal Rust types and parsed automatically
 
 # [See documentation for more info](https://docs.rs/poise/)
+
+
+<br />
+<br />
+
+# Projects
+Projects of third parties that can be used for inspiration.
+
+*Note: this topic differs from examples as these projects are not reviewed/monitored by the poise team. Due diligence is required.*
+
+- [Dexscreener pricebot](https://github.com/keiveulbugs/Dexscreener_pricebot) 
+  - Noticeable features: Embeds, API calls & Ephemeral messages
