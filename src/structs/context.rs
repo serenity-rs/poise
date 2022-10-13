@@ -170,7 +170,7 @@ impl<'a, U, E> Context<'a, U, E> {
     /// request failed
     ///
     /// Warning: can clone the entire Member instance out of the cache
-    pub async fn author_member(&'a self) -> Option<Cow<'a, Box<serenity::Member>>> {
+    pub async fn author_member(&'a self) -> Option<Cow<'a, serenity::Member>> {
         if let Self::Application(ctx) = self {
             ctx.interaction.member().map(Cow::Borrowed)
         } else {
@@ -178,7 +178,6 @@ impl<'a, U, E> Context<'a, U, E> {
                 .member(self.discord(), self.author().id)
                 .await
                 .ok()
-                .map(Box::new)
                 .map(Cow::Owned)
         }
     }
