@@ -48,7 +48,7 @@ pub struct FrameworkOptions<U, E> {
     #[derivative(Debug = "ignore")]
     pub listener: for<'a> fn(
         &'a serenity::Context,
-        &'a crate::Event<'a>,
+        &'a crate::Event,
         crate::FrameworkContext<'a, U, E>,
         // TODO: redundant with framework
         &'a U,

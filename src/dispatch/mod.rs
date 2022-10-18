@@ -52,7 +52,7 @@ impl<'a, U, E> FrameworkContext<'a, U, E> {
 pub async fn dispatch_event<U: Send + Sync, E>(
     framework: crate::FrameworkContext<'_, U, E>,
     ctx: &serenity::Context,
-    event: &crate::Event<'_>,
+    event: &crate::Event,
 ) {
     match event {
         crate::Event::Message { new_message } => {
