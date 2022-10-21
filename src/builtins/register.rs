@@ -1,4 +1,5 @@
 //! Utilities for registering application commands
+
 use crate::serenity_prelude as serenity;
 
 /// Collects all commands into a [`serenity::CreateApplicationCommands`] builder, which can be used
@@ -152,13 +153,13 @@ pub async fn register_application_commands_buttons<U, E>(
                             b.custom_id("register.guild")
                                 .label("Register in guild")
                                 .style(serenity::ButtonStyle::Primary)
-                                .emoji(serenity::ReactionType::Unicode("📋".to_string()))
+                                .emoji('📋')
                         })
                         .create_button(|b| {
                             b.custom_id("unregister.guild")
                                 .label("Delete in guild")
                                 .style(serenity::ButtonStyle::Danger)
-                                .emoji(serenity::ReactionType::Unicode("🗑️".to_string()))
+                                .emoji('🗑')
                         })
                     })
                     .create_action_row(|r| {
@@ -166,13 +167,13 @@ pub async fn register_application_commands_buttons<U, E>(
                             b.custom_id("register.global")
                                 .label("Register globally")
                                 .style(serenity::ButtonStyle::Primary)
-                                .emoji(serenity::ReactionType::Unicode("📋".to_string()))
+                                .emoji('📋')
                         })
                         .create_button(|b| {
                             b.custom_id("unregister.global")
                                 .label("Delete globally")
                                 .style(serenity::ButtonStyle::Danger)
-                                .emoji(serenity::ReactionType::Unicode("🗑️".to_string()))
+                                .emoji('🗑')
                         })
                     })
                 })
@@ -186,9 +187,7 @@ pub async fn register_application_commands_buttons<U, E>(
         .author_id(ctx.author().id)
         .await;
 
-    reply.edit(ctx, |b| b.components(|b| b)).await?; // remove buttons after button press
-    // NOTE: Can this be done in one .edit?
-    reply.edit(ctx, |b| b.content("Processing... Please wait.")).await?; // Edit message to processing after button press 
+    reply.edit(ctx, |b| b.components(|b| b).content("Processing... Please wait.")).await?; // remove buttons after button press and edit message
     let pressed_button_id = match &interaction {
         Some(m) => &m.data.custom_id,
         None => {
