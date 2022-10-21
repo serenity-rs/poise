@@ -188,6 +188,8 @@ pub async fn register_application_commands_buttons<U, E>(
         .await;
 
     reply.edit(ctx, |b| b.components(|b| b)).await?; // remove buttons after button press
+    // NOTE: Can this be done in one .edit?
+    reply.edit(ctx, |b| b.content("Processing... Please wait.")).await?; // Edit message to processing after button press 
     let pressed_button_id = match &interaction {
         Some(m) => &m.data.custom_id,
         None => {
