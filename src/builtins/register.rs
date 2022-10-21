@@ -187,11 +187,16 @@ pub async fn register_application_commands_buttons<U, E>(
         .author_id(ctx.author().id)
         .await;
 
-    reply.edit(ctx, |b| b.components(|b| b).content("Processing... Please wait.")).await?; // remove buttons after button press and edit message
+    reply
+        .edit(ctx, |b| {
+            b.components(|b| b).content("Processing... Please wait.")
+        })
+        .await?; // remove buttons after button press and edit message
     let pressed_button_id = match &interaction {
         Some(m) => &m.data.custom_id,
         None => {
-            ctx.say(":warning: You didn't interact in time - please run the command again.").await?;
+            ctx.say(":warning: You didn't interact in time - please run the command again.")
+                .await?;
             return Ok(());
         }
     };
@@ -211,8 +216,11 @@ pub async fn register_application_commands_buttons<U, E>(
 
     if global {
         if register {
-            ctx.say(format!(":gear: Registering {} global commands...", num_commands))
-                .await?;
+            ctx.say(format!(
+                ":gear: Registering {} global commands...",
+                num_commands
+            ))
+            .await?;
             serenity::Command::set_global_application_commands(ctx.discord(), |b| {
                 *b = create_commands;
                 b
@@ -231,8 +239,11 @@ pub async fn register_application_commands_buttons<U, E>(
             }
         };
         if register {
-            ctx.say(format!(":gear: Registering {} guild commands...", num_commands))
-                .await?;
+            ctx.say(format!(
+                ":gear: Registering {} guild commands...",
+                num_commands
+            ))
+            .await?;
             guild_id
                 .set_application_commands(ctx.discord(), |b| {
                     *b = create_commands;
@@ -249,7 +260,11 @@ pub async fn register_application_commands_buttons<U, E>(
 
     // Calulate time taken and send message
     let time_taken = start_time.elapsed();
-    ctx.say(format!(":white_check_mark: Done! Took {}ms", time_taken.as_millis())).await?;
-    
+    ctx.say(format!(
+        ":white_check_mark: Done! Took {}ms",
+        time_taken.as_millis()
+    ))
+    .await?;
+
     Ok(())
 }
