@@ -41,11 +41,12 @@ async fn execute<U: Send + Sync, E, M: Modal>(
     defaults: Option<M>,
 ) -> Result<M, serenity::Error> {
     let interaction = ctx.interaction.unwrap();
+    let interaction_id = interaction.id.to_string();
 
     // Send modal
     interaction
         .create_interaction_response(ctx.discord, |b| {
-            *b = M::create(defaults);
+            *b = M::create(defaults, interaction_id.clone());
             b
         })
         .await?;
@@ -54,7 +55,7 @@ async fn execute<U: Send + Sync, E, M: Modal>(
 
     // Wait for user to submit
     let response = serenity::CollectModalInteraction::new(&ctx.discord.shard)
-        .author_id(interaction.user.id)
+        .filter(move |d| d.data.custom_id == interaction_id)
         .await
         .unwrap();
 
@@ -108,7 +109,10 @@ pub trait Modal: Sized {
     ///
     /// Optionally takes an initialized instance as pre-filled values of this modal (see
     /// [`Self::execute_with_defaults()`] for more info)
-    fn create(defaults: Option<Self>) -> serenity::CreateInteractionResponse<'static>;
+    fn create(
+        defaults: Option<Self>,
+        custom_id: String,
+    ) -> serenity::CreateInteractionResponse<'static>;
 
     /// Parses a received modal submit interaction into this type
     ///
