@@ -1,5 +1,4 @@
 //! Utilities for registering application commands
-
 use crate::serenity_prelude as serenity;
 
 /// Collects all commands into a [`serenity::CreateApplicationCommands`] builder, which can be used
@@ -209,6 +208,8 @@ pub async fn register_application_commands_buttons<U, E>(
         }
     };
 
+    let start_time = std::time::Instant::now();
+
     if global {
         if register {
             ctx.say(format!(":gear: Registering {} global commands...", num_commands))
@@ -247,6 +248,9 @@ pub async fn register_application_commands_buttons<U, E>(
         }
     }
 
-    ctx.say(":white_check_mark: Done!").await?;
+    // Calulate time taken and send message
+    let time_taken = start_time.elapsed();
+    ctx.say(format!(":white_check_mark: Done! Took {}ms", time_taken.as_millis())).await?;
+    
     Ok(())
 }
