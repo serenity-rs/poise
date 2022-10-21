@@ -46,7 +46,7 @@ async fn execute<U: Send + Sync, E, M: Modal>(
     // Send modal
     interaction
         .create_interaction_response(ctx.discord, |b| {
-            *b = M::create(defaults, interaction.id.to_string());
+            *b = M::create(defaults, interaction_id.clone());
             b
         })
         .await?;
