@@ -433,3 +433,30 @@ impl<'a, U, E> From<Context<'a, U, E>> for PartialContext<'a, U, E> {
         }
     }
 }
+
+impl<'a, U, E> AsRef<serenity::Http> for Context<'a, U, E> {
+    fn as_ref(&self) -> &serenity::Http {
+        &self.discord().http
+    }
+}
+
+#[cfg(feature = "cache")]
+impl<'a, U, E> AsRef<serenity::Cache> for Context<'a, U, E> {
+    fn as_ref(&self) -> &serenity::Cache {
+        &self.discord().cache
+    }
+}
+
+impl<'a, U, E> serenity::CacheHttp for Context<'a, U, E>
+where
+    U: Sync,
+{
+    fn http(&self) -> &serenity::Http {
+        &self.discord().http
+    }
+
+    #[cfg(feature = "cache")]
+    fn cache(&self) -> Option<&std::sync::Arc<serenity::Cache>> {
+        Some(&self.discord().cache)
+    }
+}
