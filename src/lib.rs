@@ -350,4 +350,5 @@ pub use {async_trait::async_trait, futures_util};
 pub use poise_slash_argument::*;
 pub use poise_utils::*;
 
+#[allow(unused_imports)]
 use serenity_prelude as serenity; // private alias for crate root docs intradoc-links
