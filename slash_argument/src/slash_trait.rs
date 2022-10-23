@@ -53,7 +53,7 @@ pub trait SlashArgumentHack<T>: Sized {
 
     fn create(
         self,
-        builder: serenity::CreateApplicationCommandOption,
+        builder: serenity::builder::CreateApplicationCommandOption,
     ) -> serenity::CreateApplicationCommandOption;
 
     fn choices(self) -> Vec<crate::CommandParameterChoice> {
