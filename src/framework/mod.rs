@@ -224,7 +224,7 @@ impl<U, E> Framework<U, E> {
 async fn raw_dispatch_event<U, E>(
     framework: &crate::Framework<U, E>,
     ctx: &serenity::Context,
-    event: &crate::Event<'_>,
+    event: &crate::Event,
 ) where
     U: Send + Sync,
 {
