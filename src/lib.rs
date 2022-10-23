@@ -275,7 +275,7 @@ The easiest way is with [`builtins::register_application_commands_buttons`].
 It spawns a message with buttons to register and unregister all commands, globally or in the current
 guild (see its docs).
 
-A more flexible approach is to serialize the commands to a [`serenity::CreateApplicationCommands`]
+A more flexible approach is to serialize the commands to a `Vec<`[`serenity::CreateCommand`]`>`
 using [`builtins::create_application_commands`]. That way, you can call serenity's registration
 functions manually:
 - [`serenity::Command::set_global_application_commands`]
@@ -349,3 +349,6 @@ pub use {async_trait::async_trait, futures_util};
 
 pub use poise_slash_argument::*;
 pub use poise_utils::*;
+
+#[allow(unused_imports)]
+use serenity_prelude as serenity; // private alias for crate root docs intradoc-links

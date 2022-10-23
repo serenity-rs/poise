@@ -132,10 +132,10 @@ impl<U, E> Eq for Command<U, E> {}
 impl<U, E> Command<U, E> {
     /// Serializes this Command into an application command option, which is the form which Discord
     /// requires subcommands to be in
-    fn create_as_subcommand(&self) -> Option<serenity::CreateApplicationCommandOption> {
+    fn create_as_subcommand(&self) -> Option<serenity::CreateCommandOption> {
         self.slash_action?;
 
-        let mut b = serenity::CreateApplicationCommandOption::new(
+        let mut b = serenity::CreateCommandOption::new(
             if self.subcommands.is_empty() {
                 serenity::CommandOptionType::SubCommand
             } else {
@@ -175,10 +175,10 @@ impl<U, E> Command<U, E> {
 
     /// Generates a slash command builder from this [`Command`] instance. This can be used
     /// to register this command on Discord's servers
-    pub fn create_as_slash_command(&self) -> Option<serenity::CreateApplicationCommand> {
+    pub fn create_as_slash_command(&self) -> Option<serenity::CreateCommand> {
         self.slash_action?;
 
-        let mut b = serenity::CreateApplicationCommand::new(&self.name)
+        let mut b = serenity::CreateCommand::new(&self.name)
             .description(self.description.as_deref().unwrap_or("A slash command"));
 
         for (locale, name) in &self.name_localizations {
@@ -213,7 +213,7 @@ impl<U, E> Command<U, E> {
 
     /// Generates a context menu command builder from this [`Command`] instance. This can be used
     /// to register this command on Discord's servers
-    pub fn create_as_context_menu_command(&self) -> Option<serenity::CreateApplicationCommand> {
+    pub fn create_as_context_menu_command(&self) -> Option<serenity::CreateCommand> {
         let context_menu_action = self.context_menu_action?;
 
         // TODO: localization?
@@ -222,7 +222,7 @@ impl<U, E> Command<U, E> {
             crate::ContextMenuCommandAction::User(_) => serenity::CommandType::User,
             crate::ContextMenuCommandAction::Message(_) => serenity::CommandType::Message,
         };
-        Some(serenity::CreateApplicationCommand::new(name).kind(kind))
+        Some(serenity::CreateCommand::new(name).kind(kind))
     }
 
     /// **Deprecated**

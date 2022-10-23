@@ -86,7 +86,7 @@ pub fn choice_parameter(input: syn::DeriveInput) -> Result<TokenStream, darling:
                 }
             }
 
-            fn create(builder: poise::serenity_prelude::CreateApplicationCommandOption) -> poise::serenity_prelude::CreateApplicationCommandOption {
+            fn create(builder: poise::serenity_prelude::CreateCommandOption) -> poise::serenity_prelude::CreateCommandOption {
                 builder.kind(poise::serenity_prelude::CommandOptionType::Integer)
             }
 

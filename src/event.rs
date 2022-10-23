@@ -9,18 +9,18 @@ use crate::{serenity_prelude as serenity, BoxFuture};
 pub struct EventWrapper<F>(pub F)
 where
     // gotta have this generic bound in the struct as well, or type inference will break down the line
-    F: Send + Sync + for<'a> Fn(serenity::Context, Event<'a>) -> BoxFuture<'a, ()>;
+    F: Send + Sync + for<'a> Fn(serenity::Context, Event) -> BoxFuture<'static, ()>;
 
 /// Small macro to concisely generate the `EventWrapper` code while handling every possible event
 macro_rules! event {
-    ($lt1:lifetime $(
+    ($(
         $( #[$attr:meta] )?
         $fn_name:ident $(<$lt2:lifetime>)? => $variant_name:ident { $( $arg_name:ident: $arg_type:ty ),* },
     )*) => {
         #[serenity::async_trait]
         impl<F> serenity::EventHandler for EventWrapper<F>
         where
-            F: Send + Sync + for<'a> Fn(serenity::Context, Event<'a>) -> BoxFuture<'a, ()>
+            F: Send + Sync + for<'a> Fn(serenity::Context, Event) -> BoxFuture<'static, ()>
         {
             $(
                 $( #[$attr] )?
@@ -36,7 +36,7 @@ macro_rules! event {
         #[allow(clippy::large_enum_variant)]
         #[allow(missing_docs)]
         #[derive(Debug, Clone)]
-        pub enum Event<$lt1> {
+        pub enum Event {
             $(
                 $( #[$attr] )?
                 $variant_name { $( $arg_name: $arg_type ),* },
@@ -46,7 +46,7 @@ macro_rules! event {
             __NonExhaustive,
         }
 
-        impl Event<'_> {
+        impl Event {
             /// Return the name of the event type
             pub fn name(&self) -> &'static str {
                 match self {
@@ -77,13 +77,12 @@ macro_rules! event {
 // generated from serenity/client/event_handler.rs
 // with help from vscode multiline editing and some manual cleanup
 event! {
-    'a
     #[cfg(feature = "cache")]
     cache_ready => CacheReady { guilds: Vec<serenity::GuildId> },
-    channel_create<'a> => ChannelCreate { channel: &'a serenity::GuildChannel },
-    category_create<'a> => CategoryCreate { category: &'a serenity::GuildChannel },
-    category_delete<'a> => CategoryDelete { category: &'a serenity::GuildChannel },
-    channel_delete<'a> => ChannelDelete { channel: &'a serenity::GuildChannel, messages: Option<Vec<serenity::Message>> },
+    channel_create => ChannelCreate { channel: serenity::GuildChannel },
+    category_create => CategoryCreate { category: serenity::GuildChannel },
+    category_delete => CategoryDelete { category: serenity::GuildChannel },
+    channel_delete => ChannelDelete { channel: serenity::GuildChannel, messages: Option<Vec<serenity::Message>> },
     channel_pins_update => ChannelPinsUpdate { pin: serenity::ChannelPinsUpdateEvent },
     channel_update => ChannelUpdate { old: Option<serenity::Channel>, new: serenity::Channel },
     guild_ban_addition => GuildBanAddition { guild_id: serenity::GuildId, banned_user: serenity::User },

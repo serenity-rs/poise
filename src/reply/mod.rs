@@ -21,7 +21,7 @@ pub(super) enum ReplyHandleInner<'a> {
         http: &'a serenity::Http,
         /// Interaction which contains the necessary data to request the interaction response
         /// message object
-        interaction: &'a serenity::ApplicationCommandInteraction,
+        interaction: &'a serenity::CommandInteraction,
         /// If this is a followup response, the Message object (which Discord only returns for
         /// followup responses, not initial)
         followup: Option<Box<serenity::Message>>,

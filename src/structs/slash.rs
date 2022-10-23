@@ -64,13 +64,12 @@ impl<U, E> ApplicationContext<'_, U, E> {
             interaction
                 .create_interaction_response(
                     self.discord,
-                    serenity::CreateInteractionResponse::default()
-                        .kind(serenity::InteractionResponseType::DeferredChannelMessageWithSource)
-                        .interaction_response_data(
-                            serenity::CreateInteractionResponseData::default().ephemeral(ephemeral),
-                        ),
+                    serenity::CreateInteractionResponse::Defer(
+                        serenity::CreateInteractionResponseMessage::default().ephemeral(ephemeral),
+                    ),
                 )
                 .await?;
+
             self.has_sent_initial_response
                 .store(true, std::sync::atomic::Ordering::SeqCst);
         }
@@ -131,14 +130,12 @@ pub struct CommandParameter<U, E> {
     /// For example a u32 [`CommandParameter`] would store this as the [`Self::type_setter`]:
     /// ```rust
     /// # use poise::serenity_prelude as serenity;
-    /// # let _: fn(serenity::CreateApplicationCommandOption) -> serenity::CreateApplicationCommandOption =
+    /// # let _: fn(serenity::CreateCommandOption) -> serenity::CreateCommandOption =
     /// |b| b.kind(serenity::CommandOptionType::Integer).min_int_value(0).max_int_value(u64::MAX)
     /// # ;
     /// ```
     #[derivative(Debug = "ignore")]
-    pub type_setter: Option<
-        fn(serenity::CreateApplicationCommandOption) -> serenity::CreateApplicationCommandOption,
-    >,
+    pub type_setter: Option<fn(serenity::CreateCommandOption) -> serenity::CreateCommandOption>,
     /// Optionally, a callback that is invoked on autocomplete interactions. This closure should
     /// extract the partial argument from the given JSON value and generate the autocomplete
     /// response which contains the list of autocomplete suggestions.
@@ -157,10 +154,8 @@ pub struct CommandParameter<U, E> {
 impl<U, E> CommandParameter<U, E> {
     /// Generates a slash command parameter builder from this [`CommandParameter`] instance. This
     /// can be used to register the command on Discord's servers
-    pub fn create_as_slash_command_option(
-        &self,
-    ) -> Option<serenity::CreateApplicationCommandOption> {
-        let mut b = serenity::CreateApplicationCommandOption::new(
+    pub fn create_as_slash_command_option(&self) -> Option<serenity::CreateCommandOption> {
+        let mut b = serenity::CreateCommandOption::new(
             serenity::CommandOptionType::Unknown(0), // Will be overwritten by type_setter below
             &self.name,
             self.description

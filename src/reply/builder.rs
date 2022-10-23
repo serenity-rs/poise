@@ -16,7 +16,7 @@ pub struct CreateReply {
     /// If None, it's initialized to [`crate::Command::ephemeral`]
     pub ephemeral: Option<bool>,
     /// Message components, that is, buttons and select menus.
-    pub components: Option<serenity::CreateComponents>,
+    pub components: Option<Vec<serenity::CreateActionRow>>,
     /// The allowed mentions for the message.
     pub allowed_mentions: Option<serenity::CreateAllowedMentions>,
     /// The reference message this message is a reply to.
@@ -41,7 +41,7 @@ impl CreateReply {
     /// Set components (buttons and select menus) for this message.
     ///
     /// Any previously set components will be overwritten.
-    pub fn components(mut self, b: serenity::CreateComponents) -> Self {
+    pub fn components(mut self, b: Vec<serenity::CreateActionRow>) -> Self {
         self.components = Some(b);
         self
     }
@@ -100,9 +100,9 @@ impl CreateReply {
 /// Methods to create a message builder from any type from this [`CreateReply`]. Used by poise
 /// internally to actually send a response to Discord
 impl CreateReply {
-    /// Serialize this response builder to a [`serenity::CreateInteractionResponseData`]
-    pub fn to_slash_initial_response(self) -> serenity::CreateInteractionResponseData {
-        let mut f = serenity::CreateInteractionResponseData::default();
+    /// Serialize this response builder to a [`serenity::CreateInteractionResponseMessage`]
+    pub fn to_slash_initial_response(self) -> serenity::CreateInteractionResponseMessage {
+        let mut f = serenity::CreateInteractionResponseMessage::default();
         let crate::CreateReply {
             content,
             embeds,

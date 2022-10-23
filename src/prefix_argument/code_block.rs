@@ -110,7 +110,7 @@ impl<'a> PopArgument<'a> for CodeBlock {
     async fn pop_from(
         args: &'a str,
         attachment_index: usize,
-        _: &serenity::CacheAndHttp,
+        _: &serenity::Context,
         _: &serenity::Message,
     ) -> Result<(&'a str, usize, Self), (Box<dyn std::error::Error + Send + Sync>, Option<String>)>
     {

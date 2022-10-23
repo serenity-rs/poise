@@ -27,9 +27,7 @@ pub trait SlashArgument: Sized {
     /// filling in `name()`, `description()`, and possibly `required()` or other fields.
     ///
     /// Don't call this method directly! Use [`crate::create_slash_argument!`]
-    fn create(
-        builder: serenity::CreateApplicationCommandOption,
-    ) -> serenity::CreateApplicationCommandOption;
+    fn create(builder: serenity::CreateCommandOption) -> serenity::CreateCommandOption;
 
     /// If this is a choice parameter, returns the choices
     ///
@@ -53,8 +51,8 @@ pub trait SlashArgumentHack<T>: Sized {
 
     fn create(
         self,
-        builder: serenity::CreateApplicationCommandOption,
-    ) -> serenity::CreateApplicationCommandOption;
+        builder: serenity::builder::CreateCommandOption,
+    ) -> serenity::CreateCommandOption;
 
     fn choices(self) -> Vec<crate::CommandParameterChoice> {
         Vec::new()
@@ -122,10 +120,7 @@ where
         })
     }
 
-    fn create(
-        self,
-        builder: serenity::CreateApplicationCommandOption,
-    ) -> serenity::CreateApplicationCommandOption {
+    fn create(self, builder: serenity::CreateCommandOption) -> serenity::CreateCommandOption {
         builder.kind(serenity::CommandOptionType::String)
     }
 }
@@ -151,7 +146,7 @@ macro_rules! impl_for_integer {
                 }
             }
 
-            fn create(self, builder: serenity::CreateApplicationCommandOption) -> serenity::CreateApplicationCommandOption {
+            fn create(self, builder: serenity::CreateCommandOption) -> serenity::CreateCommandOption {
                 builder
                     .min_number_value(f64::max(<$t>::MIN as f64, -9007199254740991.))
                     .max_number_value(f64::min(<$t>::MAX as f64, 9007199254740991.))
@@ -173,10 +168,7 @@ impl<T: SlashArgument + Sync> SlashArgumentHack<T> for &PhantomData<T> {
         <T as SlashArgument>::extract(ctx, interaction, value).await
     }
 
-    fn create(
-        self,
-        builder: serenity::CreateApplicationCommandOption,
-    ) -> serenity::CreateApplicationCommandOption {
+    fn create(self, builder: serenity::CreateCommandOption) -> serenity::CreateCommandOption {
         <T as SlashArgument>::create(builder)
     }
 
@@ -206,8 +198,8 @@ macro_rules! impl_slash_argument {
 
             fn create(
                 self,
-                builder: serenity::CreateApplicationCommandOption,
-            ) -> serenity::CreateApplicationCommandOption {
+                builder: serenity::CreateCommandOption,
+            ) -> serenity::CreateCommandOption {
                 builder.kind(serenity::CommandOptionType::$slash_param_type)
             }
         }

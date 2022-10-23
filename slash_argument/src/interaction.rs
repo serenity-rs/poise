@@ -10,9 +10,9 @@ use crate::serenity_prelude as serenity;
 #[derive(Copy, Clone, Debug)]
 pub enum ApplicationCommandOrAutocompleteInteraction<'a> {
     /// An application command interaction
-    ApplicationCommand(&'a serenity::ApplicationCommandInteraction),
+    ApplicationCommand(&'a serenity::CommandInteraction),
     /// An autocomplete interaction
-    Autocomplete(&'a serenity::ApplicationCommandInteraction),
+    Autocomplete(&'a serenity::CommandInteraction),
 }
 
 impl<'a> ApplicationCommandOrAutocompleteInteraction<'a> {
@@ -51,8 +51,8 @@ impl<'a> ApplicationCommandOrAutocompleteInteraction<'a> {
     /// Returns the member field of the underlying interaction
     pub fn member(self) -> Option<&'a serenity::Member> {
         match self {
-            Self::ApplicationCommand(x) => x.member.as_ref(),
-            Self::Autocomplete(x) => x.member.as_ref(),
+            Self::ApplicationCommand(x) => x.member.as_deref(),
+            Self::Autocomplete(x) => x.member.as_deref(),
         }
     }
 
@@ -64,8 +64,8 @@ impl<'a> ApplicationCommandOrAutocompleteInteraction<'a> {
         }
     }
 
-    /// Returns the inner [`serenity::ApplicationCommandInteraction`] and panics otherwise
-    pub fn unwrap(self) -> &'a serenity::ApplicationCommandInteraction {
+    /// Returns the inner [`serenity::CommandInteraction`] and panics otherwise
+    pub fn unwrap(self) -> &'a serenity::CommandInteraction {
         match self {
             ApplicationCommandOrAutocompleteInteraction::ApplicationCommand(x) => x,
             ApplicationCommandOrAutocompleteInteraction::Autocomplete(_) => {
