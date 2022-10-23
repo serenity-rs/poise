@@ -65,22 +65,24 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
         };
         let min_length = field_attrs.min_length.into_iter();
         let max_length = field_attrs.max_length.into_iter();
+
         builders.push(quote::quote! {
-            .add_action_row(serenity::CreateActionRow::default().add_input_text({
-                let mut b = serenity::CreateInputText::new(#style, #label, stringify!(#field_ident));
-                if let Some(defaults) = &mut defaults {
-                    // Can use `defaults.#field_ident` directly in Edition 2021 due to more
-                    // specific closure capture rules
-                    let default = std::mem::take(&mut defaults.#field_ident);
-                    // Option::from().unwrap_or_default() dance to handle both T and Option<T>
-                    b = b.value(Option::from(default).unwrap_or_else(String::new));
-                }
-                b
-                    #( .placeholder(#placeholder) )*
-                    .required(#required)
-                    #( .min_length(#min_length) )*
-                    #( .max_length(#max_length) )*
-            }))
+            serenity::CreateActionRow::InputText(serenity::CreateInputText::new(#style, #label, stringify!(#field_ident))),
+            // .add_action_row(serenity::CreateActionRow::default().add_input_text({
+            //     let mut b = serenity::CreateInputText::new(#style, #label, stringify!(#field_ident));
+            //     if let Some(defaults) = &mut defaults {
+            //         // Can use `defaults.#field_ident` directly in Edition 2021 due to more
+            //         // specific closure capture rules
+            //         let default = std::mem::take(&mut defaults.#field_ident);
+            //         // Option::from().unwrap_or_default() dance to handle both T and Option<T>
+            //         b = b.value(Option::from(default).unwrap_or_else(String::new));
+            //     }
+            //     b
+            //         #( .placeholder(#placeholder) )*
+            //         .required(#required)
+            //         #( .min_length(#min_length) )*
+            //         #( .max_length(#max_length) )*
+            // }))
         });
 
         // Create modal parser code for this field
@@ -102,13 +104,8 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
         use poise::serenity_prelude as serenity;
         impl #impl_generics poise::Modal for #struct_ident #ty_generics #where_clause {
             fn create(mut defaults: Option<Self>) -> serenity::CreateInteractionResponse {
-                serenity::CreateInteractionResponse::default()
-                    .kind(serenity::InteractionResponseType::Modal)
-                    .interaction_response_data(serenity::CreateInteractionResponseData::default()
-                        .custom_id("0")
-                        .title(#modal_title)
-                        .components(serenity::CreateComponents::default() #( #builders )* )
-                    )
+                serenity::CreateInteractionResponse::Modal(serenity::CreateModal::new().custom_id("0").title(#modal_title).components(vec![#( #builders )*])
+                )
             }
 
             fn parse(mut data: serenity::ModalSubmitInteractionData) -> ::std::result::Result<Self, &'static str> {
