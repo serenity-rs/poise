@@ -100,7 +100,7 @@ impl CreateReply {
 /// Methods to create a message builder from any type from this [`CreateReply`]. Used by poise
 /// internally to actually send a response to Discord
 impl CreateReply {
-    /// Serialize this response builder to a [`serenity::CreateInteractionResponseData`]
+    /// Serialize this response builder to a [`serenity::CreateInteractionResponseMessage`]
     pub fn to_slash_initial_response(self) -> serenity::CreateInteractionResponseMessage {
         let mut f = serenity::CreateInteractionResponseMessage::default();
         let crate::CreateReply {

@@ -27,9 +27,7 @@ pub trait SlashArgument: Sized {
     /// filling in `name()`, `description()`, and possibly `required()` or other fields.
     ///
     /// Don't call this method directly! Use [`crate::create_slash_argument!`]
-    fn create(
-        builder: serenity::CreateCommandOption,
-    ) -> serenity::CreateCommandOption;
+    fn create(builder: serenity::CreateCommandOption) -> serenity::CreateCommandOption;
 
     /// If this is a choice parameter, returns the choices
     ///
@@ -122,10 +120,7 @@ where
         })
     }
 
-    fn create(
-        self,
-        builder: serenity::CreateCommandOption,
-    ) -> serenity::CreateCommandOption {
+    fn create(self, builder: serenity::CreateCommandOption) -> serenity::CreateCommandOption {
         builder.kind(serenity::CommandOptionType::String)
     }
 }
@@ -173,10 +168,7 @@ impl<T: SlashArgument + Sync> SlashArgumentHack<T> for &PhantomData<T> {
         <T as SlashArgument>::extract(ctx, interaction, value).await
     }
 
-    fn create(
-        self,
-        builder: serenity::CreateCommandOption,
-    ) -> serenity::CreateCommandOption {
+    fn create(self, builder: serenity::CreateCommandOption) -> serenity::CreateCommandOption {
         <T as SlashArgument>::create(builder)
     }
 
