@@ -67,22 +67,21 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
         let max_length = field_attrs.max_length.into_iter();
 
         builders.push(quote::quote! {
-            serenity::CreateActionRow::InputText(serenity::CreateInputText::new(#style, #label, stringify!(#field_ident))),
-            // .add_action_row(serenity::CreateActionRow::default().add_input_text({
-            //     let mut b = serenity::CreateInputText::new(#style, #label, stringify!(#field_ident));
-            //     if let Some(defaults) = &mut defaults {
-            //         // Can use `defaults.#field_ident` directly in Edition 2021 due to more
-            //         // specific closure capture rules
-            //         let default = std::mem::take(&mut defaults.#field_ident);
-            //         // Option::from().unwrap_or_default() dance to handle both T and Option<T>
-            //         b = b.value(Option::from(default).unwrap_or_else(String::new));
-            //     }
-            //     b
-            //         #( .placeholder(#placeholder) )*
-            //         .required(#required)
-            //         #( .min_length(#min_length) )*
-            //         #( .max_length(#max_length) )*
-            // }))
+            serenity::CreateActionRow::InputText({
+                let mut b = serenity::CreateInputText::new(#style, #label, stringify!(#field_ident));
+                if let Some(defaults) = &mut defaults {
+                    // Can use `defaults.#field_ident` directly in Edition 2021 due to more
+                    // specific closure capture rules
+                    let default = std::mem::take(&mut defaults.#field_ident);
+                    // Option::from().unwrap_or_default() dance to handle both T and Option<T>
+                    b = b.value(Option::from(default).unwrap_or_else(String::new));
+                }
+                b
+                    #( .placeholder(#placeholder) )*
+                    .required(#required)
+                    #( .min_length(#min_length) )*
+                    #( .max_length(#max_length) )*
+            }),
         });
 
         // Create modal parser code for this field
