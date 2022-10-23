@@ -130,7 +130,7 @@ pub struct CommandParameter<U, E> {
     /// For example a u32 [`CommandParameter`] would store this as the [`Self::type_setter`]:
     /// ```rust
     /// # use poise::serenity_prelude as serenity;
-    /// # let _: fn(serenity::CreateApplicationCommandOption) -> serenity::CreateApplicationCommandOption =
+    /// # let _: fn(serenity::CreateCommandOption) -> serenity::CreateCommandOption =
     /// |b| b.kind(serenity::CommandOptionType::Integer).min_int_value(0).max_int_value(u64::MAX)
     /// # ;
     /// ```

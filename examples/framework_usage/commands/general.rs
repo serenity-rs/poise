@@ -1,5 +1,5 @@
 use crate::{Context, Error};
-use poise::serenity_prelude as serenity;
+use poise::serenity_prelude::{self as serenity, CreateActionRow};
 use std::fmt::Write as _;
 
 /// Vote for something
@@ -106,17 +106,13 @@ pub async fn boop(ctx: Context<'_>) -> Result<(), Error> {
     ctx.send(
         poise::CreateReply::default()
             .content("I want some boops!")
-            .components(
-                serenity::CreateComponents::default().add_action_row(
-                    serenity::CreateActionRow::default().add_button(
-                        serenity::CreateButton::new(
-                            serenity::ButtonStyle::Primary,
-                            uuid_boop.to_string(),
-                        )
-                        .label("Boop me!"),
-                    ),
+            .components(vec![serenity::CreateActionRow::Buttons(vec![
+                serenity::CreateButton::new(
+                    "Boop me!",
+                    serenity::ButtonStyle::Primary,
+                    uuid_boop.to_string(),
                 ),
-            ),
+            ])]),
     )
     .await?;
 
@@ -142,8 +138,7 @@ pub async fn boop(ctx: Context<'_>) -> Result<(), Error> {
 
         mci.create_interaction_response(
             ctx.discord(),
-            serenity::CreateInteractionResponse::default()
-                .kind(serenity::InteractionResponseType::DeferredUpdateMessage),
+            serenity::CreateInteractionResponse::Acknowledge,
         )
         .await?;
     }
@@ -181,6 +176,7 @@ pub async fn voiceinfo(
 #[poise::command(slash_command, prefix_command, reuse_response)]
 pub async fn test_reuse_response(ctx: Context<'_>) -> Result<(), Error> {
     let image_url = "https://raw.githubusercontent.com/serenity-rs/serenity/current/logo.png";
+
     ctx.send(
         poise::CreateReply::default()
             .content("message 1")
@@ -189,20 +185,16 @@ pub async fn test_reuse_response(ctx: Context<'_>) -> Result<(), Error> {
                     .description("embed 1")
                     .image(image_url),
             )
-            .components(
-                serenity::CreateComponents::default().add_action_row(
-                    serenity::CreateActionRow::default().add_button(
-                        serenity::CreateButton::new(serenity::ButtonStyle::Primary, "1")
-                            .label("button 1"),
-                    ),
-                ),
-            ),
+            .components(vec![serenity::CreateActionRow::Buttons(vec![
+                serenity::CreateButton::new("button 1", serenity::ButtonStyle::Primary, "1"),
+            ])]),
     )
     .await?;
 
     tokio::time::sleep(std::time::Duration::from_secs(2)).await;
 
     let image_url = "https://raw.githubusercontent.com/serenity-rs/serenity/current/examples/e09_create_message_builder/ferris_eyes.png";
+
     ctx.send(
         poise::CreateReply::default()
             .content("message 2")
@@ -211,14 +203,9 @@ pub async fn test_reuse_response(ctx: Context<'_>) -> Result<(), Error> {
                     .description("embed 2")
                     .image(image_url),
             )
-            .components(
-                serenity::CreateComponents::default().add_action_row(
-                    serenity::CreateActionRow::default().add_button(
-                        serenity::CreateButton::new(serenity::ButtonStyle::Primary, "2")
-                            .label("button 2"),
-                    ),
-                ),
-            ),
+            .components(vec![serenity::CreateActionRow::Buttons(vec![
+                serenity::CreateButton::new("button 2", serenity::ButtonStyle::Primary, "2"),
+            ])]),
     )
     .await?;
 
