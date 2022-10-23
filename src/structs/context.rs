@@ -433,3 +433,15 @@ impl<'a, U, E> From<Context<'a, U, E>> for PartialContext<'a, U, E> {
         }
     }
 }
+
+impl<'a, U, E> AsRef<serenity::Http> for Context<'a, U, E> {
+    fn as_ref(&self) -> &serenity::Http {
+        &self.discord().http
+    }
+}
+
+impl<'a, U, E> AsRef<serenity::Cache> for Context<'a, U, E> {
+    fn as_ref(&self) -> &serenity::Cache {
+        &self.discord().cache
+    }
+}
