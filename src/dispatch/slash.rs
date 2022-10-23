@@ -76,7 +76,7 @@ pub async fn extract_command_and_run_checks<'a, U, E>(
 pub async fn dispatch_interaction<'a, U, E>(
     framework: crate::FrameworkContext<'a, U, E>,
     ctx: &'a serenity::Context,
-    interaction: &'a serenity::ApplicationCommandInteraction,
+    interaction: &'a serenity::CommandInteraction,
     // Need to pass this in from outside because of lifetime issues
     has_sent_initial_response: &'a std::sync::atomic::AtomicBool,
     // Need to pass this in from outside because of lifetime issues
@@ -146,7 +146,7 @@ pub async fn dispatch_interaction<'a, U, E>(
 pub async fn dispatch_autocomplete<'a, U, E>(
     framework: crate::FrameworkContext<'a, U, E>,
     ctx: &'a serenity::Context,
-    interaction: &'a serenity::ApplicationCommandInteraction,
+    interaction: &'a serenity::CommandInteraction,
     // Need to pass this in from outside because of lifetime issues
     has_sent_initial_response: &'a std::sync::atomic::AtomicBool,
     // Need to pass this in from outside because of lifetime issues
