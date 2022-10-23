@@ -101,8 +101,8 @@ impl CreateReply {
 /// internally to actually send a response to Discord
 impl CreateReply {
     /// Serialize this response builder to a [`serenity::CreateInteractionResponseData`]
-    pub fn to_slash_initial_response(self) -> serenity::CreateInteractionResponseData {
-        let mut f = serenity::CreateInteractionResponseData::default();
+    pub fn to_slash_initial_response(self) -> serenity::CreateInteractionResponseMessage {
+        let mut f = serenity::CreateInteractionResponseMessage::default();
         let crate::CreateReply {
             content,
             embeds,
