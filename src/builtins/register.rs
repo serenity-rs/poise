@@ -138,43 +138,32 @@ pub async fn register_application_commands_buttons<U, E>(
         .send(
             crate::CreateReply::default()
                 .content("Choose what to do with the commands:")
-                .components(
-                    serenity::CreateComponents::default()
-                        .add_action_row(
-                            serenity::CreateActionRow::default()
-                                .add_button(
-                                    serenity::CreateButton::new(
-                                        serenity::ButtonStyle::Primary,
-                                        "register.guild",
-                                    )
-                                    .label("Register in guild"),
-                                )
-                                .add_button(
-                                    serenity::CreateButton::new(
-                                        serenity::ButtonStyle::Danger,
-                                        "unregister.guild",
-                                    )
-                                    .label("Delete in guild"),
-                                ),
-                        )
-                        .add_action_row(
-                            serenity::CreateActionRow::default()
-                                .add_button(
-                                    serenity::CreateButton::new(
-                                        serenity::ButtonStyle::Primary,
-                                        "register.global",
-                                    )
-                                    .label("Register globally"),
-                                )
-                                .add_button(
-                                    serenity::CreateButton::new(
-                                        serenity::ButtonStyle::Danger,
-                                        "unregister.global",
-                                    )
-                                    .label("Delete globally"),
-                                ),
+                .components(vec![
+                    serenity::CreateActionRow::Buttons(vec![
+                        serenity::CreateButton::new(
+                            "Register in guild",
+                            serenity::ButtonStyle::Primary,
+                            "register.guild",
                         ),
-                ),
+                        serenity::CreateButton::new(
+                            "Delete in guild",
+                            serenity::ButtonStyle::Danger,
+                            "unregister.guild",
+                        ),
+                    ]),
+                    serenity::CreateActionRow::Buttons(vec![
+                        serenity::CreateButton::new(
+                            "Register globally",
+                            serenity::ButtonStyle::Primary,
+                            "register.global",
+                        ),
+                        serenity::CreateButton::new(
+                            "Delete globally",
+                            serenity::ButtonStyle::Danger,
+                            "unregister.global",
+                        ),
+                    ]),
+                ]),
         )
         .await?;
 
@@ -188,11 +177,7 @@ pub async fn register_application_commands_buttons<U, E>(
 
     // remove buttons after button press
     reply
-        .edit(
-            ctx,
-            crate::CreateReply::default()
-                .components(serenity::builder::CreateComponents::default()),
-        )
+        .edit(ctx, crate::CreateReply::default().components(vec![]))
         .await?;
 
     let pressed_button_id = match &interaction {

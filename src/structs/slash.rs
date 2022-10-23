@@ -135,7 +135,7 @@ pub struct CommandParameter<U, E> {
     /// # ;
     /// ```
     #[derivative(Debug = "ignore")]
-    pub type_setter: Option<fn(serenity::CommandOption) -> serenity::CommandOption>,
+    pub type_setter: Option<fn(serenity::CreateCommandOption) -> serenity::CreateCommandOption>,
     /// Optionally, a callback that is invoked on autocomplete interactions. This closure should
     /// extract the partial argument from the given JSON value and generate the autocomplete
     /// response which contains the list of autocomplete suggestions.

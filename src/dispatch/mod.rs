@@ -91,7 +91,7 @@ pub async fn dispatch_event<U: Send + Sync, E>(
             }
         }
         crate::Event::InteractionCreate {
-            interaction: serenity::Interaction::ApplicationCommand(interaction),
+            interaction: serenity::Interaction::Command(interaction),
         } => {
             if let Err(error) = slash::dispatch_interaction(
                 framework,
