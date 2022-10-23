@@ -13,14 +13,14 @@ Poise is an opinionated Discord bot framework with a few distinctive features:
 
 # [See documentation for more info](https://docs.rs/poise/)
 
+# Bots using poise
 
-<br />
-<br />
+Alongside notable features you could take inspiration from.
 
-# Projects
-Projects of third parties that can be used for inspiration.
+- [Dexscreener Pricebot](https://github.com/keiveulbugs/Dexscreener_pricebot) by [@keiveulbugs](https://github.com/keiveulbugs): embeds, API calls, ephemeral messages
+- [TTS Bot](https://github.com/Discord-TTS/Bot/) by [@GnomedDev](https://github.com/GnomedDev): localization, database, voice
+- [Scripty](https://github.com/scripty-bot/scripty) by [@tazz4843](https://github.com/tazz4843): localization, database, voice
+- [Etternabot](https://github.com/kangalioo/Etternabot) by [@kangalioo](https://github.com/kangalioo): response transformation, variadic and lazy arguments
+- [Rustbot](https://github.com/kangalioo/rustbot) by [@kangalioo](https://github.com/kangalioo): database, custom prefixes
 
-*Note: this topic differs from examples as these projects are not reviewed/monitored by the poise team. Due diligence is required.*
-
-- [Dexscreener pricebot](https://github.com/keiveulbugs/Dexscreener_pricebot) 
-  - Noticeable features: Embeds, API calls & Ephemeral messages
+For more projects, see GitHub's [Used By page](https://github.com/kangalioo/poise/network/dependents).
