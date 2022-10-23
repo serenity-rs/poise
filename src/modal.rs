@@ -60,8 +60,7 @@ async fn execute<U: Send + Sync, E, M: Modal>(
     response
         .create_interaction_response(
             ctx.discord,
-            serenity::CreateInteractionResponse::default()
-                .kind(serenity::InteractionResponseType::DeferredUpdateMessage),
+            serenity::CreateInteractionResponse::Acknowledge,
         )
         .await?;
 

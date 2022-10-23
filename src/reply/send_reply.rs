@@ -83,9 +83,7 @@ async fn _send_application_reply<U, E>(
         interaction
             .create_interaction_response(
                 ctx.discord,
-                serenity::CreateInteractionResponse::default()
-                    .kind(serenity::InteractionResponseType::ChannelMessageWithSource)
-                    .interaction_response_data(data.to_slash_initial_response()),
+                serenity::CreateInteractionResponse::Message(data.to_slash_initial_response()),
             )
             .await?;
         ctx.has_sent_initial_response
