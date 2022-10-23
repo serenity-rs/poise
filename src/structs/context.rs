@@ -445,3 +445,16 @@ impl<'a, U, E> AsRef<serenity::Cache> for Context<'a, U, E> {
         &self.discord().cache
     }
 }
+
+impl<'a, U, E> serenity::CacheHttp for Context<'a, U, E>
+where
+    U: Send + Sync,
+{
+    fn http(&self) -> &serenity::Http {
+        &self.discord().http
+    }
+
+    fn cache(&self) -> Option<&std::sync::Arc<serenity::Cache>> {
+        Some(&self.discord().cache)
+    }
+}
