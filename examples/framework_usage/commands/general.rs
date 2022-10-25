@@ -1,5 +1,5 @@
 use crate::{Context, Error};
-use poise::serenity_prelude::{self as serenity, CreateActionRow};
+use poise::serenity_prelude as serenity;
 use std::fmt::Write as _;
 
 /// Vote for something
