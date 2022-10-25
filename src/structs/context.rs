@@ -263,12 +263,8 @@ impl<'a, U, E> Context<'a, U, E> {
             Self::Application(ctx) => {
                 // Skip autocomplete interactions
                 let interaction = match ctx.interaction {
-                    crate::ApplicationCommandOrAutocompleteInteraction::ApplicationCommand(
-                        interaction,
-                    ) => interaction,
-                    crate::ApplicationCommandOrAutocompleteInteraction::Autocomplete(_) => {
-                        return Ok(())
-                    }
+                    crate::CommandOrAutocompleteInteraction::Command(interaction) => interaction,
+                    crate::CommandOrAutocompleteInteraction::Autocomplete(_) => return Ok(()),
                 };
 
                 // Check slash command

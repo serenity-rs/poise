@@ -70,7 +70,7 @@ pub fn choice_parameter(input: syn::DeriveInput) -> Result<TokenStream, darling:
         impl poise::SlashArgument for #enum_ident {
             async fn extract(
                 _: &poise::serenity_prelude::CacheAndHttp,
-                _: poise::ApplicationCommandOrAutocompleteInteraction<'_>,
+                _: poise::CommandOrAutocompleteInteraction<'_>,
                 value: &poise::serenity_prelude::ResolvedValue<'_>,
             ) -> ::std::result::Result<Self, poise::SlashArgError> {
                 let choice_key = match value {

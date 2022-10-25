@@ -4,9 +4,9 @@ use super::SlashArgError;
 use std::convert::TryInto as _;
 use std::marker::PhantomData;
 
-use crate::serenity_prelude as serenity;
 #[allow(unused_imports)] // import is required if serenity simd_json feature is enabled
-use serenity::json::prelude::*;
+use crate::serenity::json::prelude::*;
+use crate::serenity_prelude as serenity;
 
 /// Implement this trait on types that you want to use as a slash command parameter.
 #[async_trait::async_trait]
@@ -17,7 +17,7 @@ pub trait SlashArgument: Sized {
     /// Don't call this method directly! Use [`crate::extract_slash_argument!`]
     async fn extract(
         ctx: &serenity::CacheAndHttp,
-        interaction: crate::ApplicationCommandOrAutocompleteInteraction<'_>,
+        interaction: crate::CommandOrAutocompleteInteraction<'_>,
         value: &serenity::ResolvedValue<'_>,
     ) -> Result<Self, SlashArgError>;
 
@@ -45,7 +45,7 @@ pub trait SlashArgumentHack<T>: Sized {
     async fn extract(
         self,
         ctx: &serenity::CacheAndHttp,
-        interaction: crate::ApplicationCommandOrAutocompleteInteraction<'_>,
+        interaction: crate::CommandOrAutocompleteInteraction<'_>,
         value: &serenity::ResolvedValue<'_>,
     ) -> Result<T, SlashArgError>;
 
@@ -100,7 +100,7 @@ where
     async fn extract(
         self,
         ctx: &serenity::CacheAndHttp,
-        interaction: crate::ApplicationCommandOrAutocompleteInteraction<'_>,
+        interaction: crate::CommandOrAutocompleteInteraction<'_>,
         value: &serenity::ResolvedValue<'_>,
     ) -> Result<T, SlashArgError> {
         let string = match *value {
@@ -133,7 +133,7 @@ macro_rules! impl_for_integer {
             async fn extract(
                 self,
                 _: &serenity::CacheAndHttp,
-                _: crate::ApplicationCommandOrAutocompleteInteraction<'_>,
+                _: crate::CommandOrAutocompleteInteraction<'_>,
                 value: &serenity::ResolvedValue<'_>,
             ) -> Result<$t, SlashArgError> {
                 match *value {
@@ -162,7 +162,7 @@ impl<T: SlashArgument + Sync> SlashArgumentHack<T> for &PhantomData<T> {
     async fn extract(
         self,
         ctx: &serenity::CacheAndHttp,
-        interaction: crate::ApplicationCommandOrAutocompleteInteraction<'_>,
+        interaction: crate::CommandOrAutocompleteInteraction<'_>,
         value: &serenity::ResolvedValue<'_>,
     ) -> Result<T, SlashArgError> {
         <T as SlashArgument>::extract(ctx, interaction, value).await
@@ -185,7 +185,7 @@ macro_rules! impl_slash_argument {
             async fn extract(
                 self,
                 $ctx: &serenity::CacheAndHttp,
-                $interaction: crate::ApplicationCommandOrAutocompleteInteraction<'_>,
+                $interaction: crate::CommandOrAutocompleteInteraction<'_>,
                 value: &serenity::ResolvedValue<'_>,
             ) -> Result<$type, SlashArgError> {
                 match *value {

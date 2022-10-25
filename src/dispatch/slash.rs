@@ -37,7 +37,7 @@ fn find_matching_command<'a, 'b, U, E>(
 pub async fn extract_command_and_run_checks<'a, U, E>(
     framework: crate::FrameworkContext<'a, U, E>,
     ctx: &'a serenity::Context,
-    interaction: crate::ApplicationCommandOrAutocompleteInteraction<'a>,
+    interaction: crate::CommandOrAutocompleteInteraction<'a>,
     // need to pass the following in for lifetime reasons
     has_sent_initial_response: &'a std::sync::atomic::AtomicBool,
     invocation_data: &'a tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
@@ -87,7 +87,7 @@ pub async fn dispatch_interaction<'a, U, E>(
     let ctx = extract_command_and_run_checks(
         framework,
         ctx,
-        crate::ApplicationCommandOrAutocompleteInteraction::ApplicationCommand(interaction),
+        crate::CommandOrAutocompleteInteraction::Command(interaction),
         has_sent_initial_response,
         invocation_data,
         options,
@@ -157,7 +157,7 @@ pub async fn dispatch_autocomplete<'a, U, E>(
     let ctx = extract_command_and_run_checks(
         framework,
         ctx,
-        crate::ApplicationCommandOrAutocompleteInteraction::Autocomplete(interaction),
+        crate::CommandOrAutocompleteInteraction::Autocomplete(interaction),
         has_sent_initial_response,
         invocation_data,
         options,

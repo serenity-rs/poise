@@ -1,9 +1,9 @@
 //! Infrastructure to parse received slash command arguments into Rust types.
 
+#[allow(unused_imports)] // import is required if serenity simd_json feature is enabled
+use crate::serenity::json::prelude::*;
 #[allow(unused_imports)] // required for introdoc-links in doc comments
 use crate::serenity_prelude as serenity;
-#[allow(unused_imports)] // import is required if serenity simd_json feature is enabled
-use serenity::json::prelude::*;
 
 /// Possible errors when parsing slash command arguments
 #[derive(Debug)]
@@ -28,6 +28,36 @@ pub enum SlashArgError {
     ),
     /// HTTP error occured while retrieving the model type from Discord
     Http(serenity::Error),
+}
+impl SlashArgError {
+    /// Converts this specialized slash argument error to a full FrameworkError
+    ///
+    /// Mainly used in the desugared [`crate::command`] macro
+    pub fn to_framework_error<U, E>(
+        self,
+        ctx: crate::ApplicationContext<'_, U, E>,
+    ) -> crate::FrameworkError<'_, U, E> {
+        match self {
+            crate::SlashArgError::CommandStructureMismatch(description) => {
+                crate::FrameworkError::CommandStructureMismatch { ctx, description }
+            }
+            crate::SlashArgError::Parse { error, input } => crate::FrameworkError::ArgumentParse {
+                ctx: ctx.into(),
+                error,
+                input: Some(input),
+            },
+            crate::SlashArgError::Invalid(description) => crate::FrameworkError::ArgumentParse {
+                ctx: ctx.into(),
+                error: description.into(),
+                input: None,
+            },
+            crate::SlashArgError::Http(error) => crate::FrameworkError::ArgumentParse {
+                ctx: ctx.into(),
+                error: error.into(),
+                input: None,
+            },
+        }
+    }
 }
 impl From<serenity::Error> for SlashArgError {
     fn from(error: serenity::Error) -> Self {
@@ -117,7 +147,7 @@ directly.
 # #[tokio::main] async fn main() -> Result<(), Box<dyn std::error::Error>> {
 # use poise::serenity_prelude as serenity;
 let ctx: serenity::Context = todo!();
-let interaction: poise::ApplicationCommandOrAutocompleteInteraction = todo!();
+let interaction: poise::CommandOrAutocompleteInteraction = todo!();
 let args: &[serenity::ResolvedOption] = todo!();
 
 let (arg1, arg2) = poise::parse_slash_args!(

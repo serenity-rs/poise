@@ -63,8 +63,8 @@ async fn _send_application_reply<U, E>(
     data: crate::CreateReply,
 ) -> Result<crate::ReplyHandle<'_>, serenity::Error> {
     let interaction = match ctx.interaction {
-        crate::ApplicationCommandOrAutocompleteInteraction::ApplicationCommand(x) => x,
-        crate::ApplicationCommandOrAutocompleteInteraction::Autocomplete(_) => {
+        crate::CommandOrAutocompleteInteraction::Command(x) => x,
+        crate::CommandOrAutocompleteInteraction::Autocomplete(_) => {
             return Ok(crate::ReplyHandle(super::ReplyHandleInner::Autocomplete))
         }
     };

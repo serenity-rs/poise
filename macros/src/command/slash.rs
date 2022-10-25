@@ -163,7 +163,7 @@ pub fn generate_slash_action(inv: &Invocation) -> Result<proc_macro2::TokenStrea
             let ( #( #param_identifiers, )* ) = ::poise::parse_slash_args!(
                 &cache_and_http, ctx.interaction, ctx.args =>
                 #( (#param_names: #param_types), )*
-            ).await.map_err(|error| poise::FrameworkError::from_slash_arg_error(error, ctx))?;
+            ).await.map_err(|error| error.to_framework_error(ctx))?;
 
             if !ctx.framework.options.manual_cooldowns {
                 ctx.command.cooldowns.lock().unwrap().start_cooldown(ctx.into());
