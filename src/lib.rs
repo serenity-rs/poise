@@ -368,6 +368,7 @@ pub mod serenity_prelude {
             *,
         },
         collector::*,
+        gateway::*,
         http::*,
         model::application::{command::*, component::*},
         model::prelude::*,
