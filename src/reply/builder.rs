@@ -24,6 +24,11 @@ pub struct CreateReply {
 }
 
 impl CreateReply {
+    /// Creates a new blank [`CreateReply`]
+    pub fn new() -> Self {
+        Self::default()
+    }
+
     /// Set the content of the message.
     pub fn content(mut self, content: impl Into<String>) -> Self {
         self.content = Some(content.into());
