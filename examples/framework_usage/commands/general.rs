@@ -107,11 +107,8 @@ pub async fn boop(ctx: Context<'_>) -> Result<(), Error> {
         poise::CreateReply::default()
             .content("I want some boops!")
             .components(vec![serenity::CreateActionRow::Buttons(vec![
-                serenity::CreateButton::new(
-                    "Boop me!",
-                    serenity::ButtonStyle::Primary,
-                    uuid_boop.to_string(),
-                ),
+                serenity::CreateButton::new("Boop me!", uuid_boop.to_string())
+                    .style(serenity::ButtonStyle::Primary),
             ])]),
     )
     .await?;
@@ -136,7 +133,7 @@ pub async fn boop(ctx: Context<'_>) -> Result<(), Error> {
         )
         .await?;
 
-        mci.create_interaction_response(
+        mci.create_response(
             ctx.discord(),
             serenity::CreateInteractionResponse::Acknowledge,
         )
@@ -186,7 +183,7 @@ pub async fn test_reuse_response(ctx: Context<'_>) -> Result<(), Error> {
                     .image(image_url),
             )
             .components(vec![serenity::CreateActionRow::Buttons(vec![
-                serenity::CreateButton::new("button 1", serenity::ButtonStyle::Primary, "1"),
+                serenity::CreateButton::new("button 1", "1").style(serenity::ButtonStyle::Primary),
             ])]),
     )
     .await?;
@@ -204,7 +201,7 @@ pub async fn test_reuse_response(ctx: Context<'_>) -> Result<(), Error> {
                     .image(image_url),
             )
             .components(vec![serenity::CreateActionRow::Buttons(vec![
-                serenity::CreateButton::new("button 2", serenity::ButtonStyle::Primary, "2"),
+                serenity::CreateButton::new("button 2", "2").style(serenity::ButtonStyle::Primary),
             ])]),
     )
     .await?;
