@@ -59,7 +59,7 @@ impl ReplyHandle<'_> {
                 http,
                 interaction,
                 followup: None,
-            } => interaction.get_interaction_response(http).await,
+            } => interaction.get_response(http).await,
             Autocomplete => panic!("reply is a no-op in autocomplete context"),
         }
     }
@@ -84,9 +84,7 @@ impl ReplyHandle<'_> {
                 http,
                 interaction,
                 followup: None,
-            } => Ok(Cow::Owned(
-                interaction.get_interaction_response(http).await?,
-            )),
+            } => Ok(Cow::Owned(interaction.get_response(http).await?)),
             Autocomplete => panic!("reply is a no-op in autocomplete context"),
         }
     }
@@ -114,10 +112,7 @@ impl ReplyHandle<'_> {
                 followup: None,
             } => {
                 interaction
-                    .edit_original_interaction_response(
-                        http,
-                        reply.to_slash_initial_response_edit(),
-                    )
+                    .edit_response(http, reply.to_slash_initial_response_edit())
                     .await?;
             }
             ReplyHandleInner::Application {
@@ -126,7 +121,7 @@ impl ReplyHandle<'_> {
                 followup: Some(msg),
             } => {
                 interaction
-                    .edit_followup_message(http, msg.id, reply.to_slash_followup_response())
+                    .edit_followup(http, msg.id, reply.to_slash_followup_response())
                     .await?;
             }
             ReplyHandleInner::Autocomplete => panic!("reply is a no-op in autocomplete context"),
@@ -145,13 +140,11 @@ impl ReplyHandle<'_> {
             } => match followup {
                 Some(followup) => {
                     interaction
-                        .delete_followup_message(ctx.discord(), followup.id)
+                        .delete_followup(ctx.discord(), followup.id)
                         .await?;
                 }
                 None => {
-                    interaction
-                        .delete_original_interaction_response(ctx.discord())
-                        .await?;
+                    interaction.delete_response(ctx.discord()).await?;
                 }
             },
             ReplyHandleInner::Autocomplete => panic!("delete is a no-op in autocomplete context"),

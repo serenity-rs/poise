@@ -145,7 +145,7 @@ impl<U, E> ApplicationContext<'_, U, E> {
             .load(std::sync::atomic::Ordering::SeqCst)
         {
             interaction
-                .create_interaction_response(
+                .create_response(
                     self.discord,
                     serenity::CreateInteractionResponse::Defer(
                         serenity::CreateInteractionResponseMessage::default().ephemeral(ephemeral),

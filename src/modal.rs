@@ -7,7 +7,7 @@ use crate::serenity_prelude as serenity;
 /// _Takes_ the String out of the data. Logs warnings on unexpected state
 #[doc(hidden)]
 pub fn find_modal_text(
-    data: &mut serenity::ModalSubmitInteractionData,
+    data: &mut serenity::ModalInteractionData,
     custom_id: &str,
 ) -> Option<String> {
     for row in &mut data.components {
@@ -44,7 +44,7 @@ async fn execute<U: Send + Sync, E, M: Modal>(
 
     // Send modal
     interaction
-        .create_interaction_response(ctx.discord, M::create(defaults))
+        .create_response(ctx.discord, M::create(defaults))
         .await?;
     ctx.has_sent_initial_response
         .store(true, std::sync::atomic::Ordering::SeqCst);
@@ -58,7 +58,7 @@ async fn execute<U: Send + Sync, E, M: Modal>(
 
     // Send acknowledgement so that the pop-up is closed
     response
-        .create_interaction_response(
+        .create_response(
             ctx.discord,
             serenity::CreateInteractionResponse::Acknowledge,
         )
@@ -113,7 +113,7 @@ pub trait Modal: Sized {
     ///
     /// Returns an error if a field was missing. This should never happen, because Discord will only
     /// let users submit when all required fields are filled properly
-    fn parse(data: serenity::ModalSubmitInteractionData) -> Result<Self, &'static str>;
+    fn parse(data: serenity::ModalInteractionData) -> Result<Self, &'static str>;
 
     /// Convenience function for showing the modal and waiting for a response
     ///

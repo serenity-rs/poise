@@ -107,7 +107,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                 )
             }
 
-            fn parse(mut data: serenity::ModalSubmitInteractionData) -> ::std::result::Result<Self, &'static str> {
+            fn parse(mut data: serenity::ModalInteractionData) -> ::std::result::Result<Self, &'static str> {
                 Ok(Self { #( #parsers )* })
             }
         }

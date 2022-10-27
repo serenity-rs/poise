@@ -76,12 +76,12 @@ async fn _send_application_reply<U, E>(
     let followup = if has_sent_initial_response {
         Some(Box::new(
             interaction
-                .create_followup_message(ctx.discord, data.to_slash_followup_response())
+                .create_followup(ctx.discord, data.to_slash_followup_response())
                 .await?,
         ))
     } else {
         interaction
-            .create_interaction_response(
+            .create_response(
                 ctx.discord,
                 serenity::CreateInteractionResponse::Message(data.to_slash_initial_response()),
             )
