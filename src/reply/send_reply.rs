@@ -47,7 +47,7 @@ pub async fn say_reply<U, E>(
 /// Send a response to an interaction (slash command or context menu command invocation).
 ///
 /// If a response to this interaction has already been sent, a
-/// [followup](serenity::CommandInteraction::create_followup_message) is sent.
+/// [followup](serenity::CommandInteraction::create_followup) is sent.
 ///
 /// No-op if autocomplete context
 pub async fn send_application_reply<U, E>(
