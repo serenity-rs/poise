@@ -146,7 +146,7 @@ directly.
 ```rust,no_run
 # #[tokio::main] async fn main() -> Result<(), Box<dyn std::error::Error>> {
 # use poise::serenity_prelude as serenity;
-let ctx: serenity::Context = todo!();
+let ctx: serenity::CacheAndHttp = todo!();
 let interaction: poise::CommandOrAutocompleteInteraction = todo!();
 let args: &[serenity::ResolvedOption] = todo!();
 
