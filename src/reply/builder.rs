@@ -65,11 +65,6 @@ impl<'att> CreateReply<'att> {
     /// Toggles whether the message is an ephemeral response (only invoking user can see it).
     ///
     /// This only has an effect in slash commands!
-    ///
-    /// If this is the initial response and this response
-    /// has previously been deferred, the ephemerality is decided by the defer operation. I.e.
-    /// if you deferred the response without enabling ephemeral, the initial response will not be
-    /// ephemeral.
     pub fn ephemeral(&mut self, ephemeral: bool) -> &mut Self {
         self.ephemeral = ephemeral;
         self
