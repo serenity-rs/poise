@@ -16,14 +16,21 @@ macro_rules! _parse_prefix {
         (Option<$type:ty $(,)?>)
         $( $rest:tt )*
     ) => {
+        // Try parse the next argument
         match $crate::pop_prefix_argument!($type, &$args, $attachment_index, $ctx, $msg).await {
+            // On success, we get a new `$args` which contains only the rest of the args
             Ok(($args, $attachment_index, token)) => {
+                // On success, store `Some(token)` for the parsed argument
                 let token: Option<$type> = Some(token);
+                // And parse the rest of the arguments
                 $crate::_parse_prefix!($ctx $msg $args $attachment_index => [ $error $($preamble)* token ] $($rest)* );
+                // If the code gets here, parsing the rest of the argument has failed
             },
             Err(e) => $error = e,
         }
         let token: Option<$type> = None;
+        // Parse the next arguments without changing the current arg string, thereby skipping the
+        // current param
         $crate::_parse_prefix!($ctx $msg $args $attachment_index => [ $error $($preamble)* token ] $($rest)* );
     };
 
