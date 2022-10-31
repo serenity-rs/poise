@@ -330,7 +330,11 @@ pub mod slash_argument;
 pub mod structs;
 pub mod track_edits;
 mod util;
-pub use poise_macros as macros;
+pub mod macros {
+    //! Procedural macros used in poise, like [`command`]
+    #[doc(inline)]
+    pub use poise_macros::*;
+}
 
 #[doc(no_inline)]
 pub use {
