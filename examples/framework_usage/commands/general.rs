@@ -321,8 +321,19 @@ pub async fn punish(
     Ok(())
 }
 
+#[cfg(feature = "cache")]
 #[poise::command(slash_command, prefix_command)]
 pub async fn servers(ctx: Context<'_>) -> Result<(), Error> {
     poise::builtins::servers(ctx).await?;
+    Ok(())
+}
+
+#[poise::command(slash_command, prefix_command)]
+pub async fn reply(ctx: Context<'_>) -> Result<(), Error> {
+    ctx.send(|b| {
+        b.content(format!("Hello {}!", ctx.author().name))
+            .reply(true)
+    })
+    .await?;
     Ok(())
 }

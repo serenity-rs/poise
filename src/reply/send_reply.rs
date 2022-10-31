@@ -182,7 +182,7 @@ async fn _send_prefix_reply<'a, U, E>(
             .msg
             .channel_id
             .send_message(ctx.discord, |m| {
-                reply.to_prefix(m);
+                reply.to_prefix(m, ctx.msg);
                 m
             })
             .await?;
