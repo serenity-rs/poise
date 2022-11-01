@@ -350,23 +350,45 @@ impl<'a, U, E> Context<'a, U, E> {
         }
     }
 
-    // TODO: implement invocation_string. Needs hierarchy of parent commands available, e.g. as
-    // `parent_commands: Vec<&'a Command>` field. But... do I want to do that?
-    /* pub fn invocation_string(&self) -> String {
+    /// Returns the string with which this command was invoked.
+    ///
+    /// For example `"/slash_command subcommand arg1:value1 arg2:value2"`.
+    pub fn invocation_string(&self) -> String {
         match self {
             Context::Application(ctx) => {
                 let mut string = String::from("/");
-                string += ctx.interaction.data().name; // ... ah crap we need to traverse hierarchy of parent commands
-                for arg in ctx.args {
+                for parent_command in ctx.parent_commands {
+                    string += &parent_command.name;
                     string += " ";
-                    string += arg.name;
-                    string += ":";
-                    strińg +=
                 }
-            },
+                string += &ctx.command.name;
+                for arg in ctx.args {
+                    if let Some(value) = &arg.value {
+                        #[allow(unused_imports)] // required for simd-json
+                        use ::serenity::json::prelude::*;
+                        use std::fmt::Write as _;
+
+                        string += " ";
+                        string += &arg.name;
+                        string += ":";
+                        if let Some(x) = value.as_bool() {
+                            let _ = write!(string, "{}", x);
+                        } else if let Some(x) = value.as_i64() {
+                            let _ = write!(string, "{}", x);
+                        } else if let Some(x) = value.as_u64() {
+                            let _ = write!(string, "{}", x);
+                        } else if let Some(x) = value.as_f64() {
+                            let _ = write!(string, "{}", x);
+                        } else if let Some(x) = value.as_str() {
+                            let _ = write!(string, "{}", x);
+                        }
+                    }
+                }
+                string
+            }
             Context::Prefix(ctx) => ctx.msg.content.clone(),
         }
-    } */
+    }
 
     /// Returns the raw type erased invocation data
     fn invocation_data_raw(&self) -> &tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>> {
