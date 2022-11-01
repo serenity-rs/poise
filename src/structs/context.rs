@@ -236,6 +236,15 @@ impl<'a, U, E> Context<'a, U, E> {
         }
     }
 
+    /// If the invoked command was a subcommand, these are the parent commands, ordered top-level
+    /// downwards.
+    pub fn parent_commands(&self) -> &'a [&'a crate::Command<U, E>] {
+        match self {
+            Self::Prefix(x) => x.parent_commands,
+            Self::Application(x) => x.parent_commands,
+        }
+    }
+
     /// Returns a reference to the command.
     pub fn command(&self) -> &'a crate::Command<U, E> {
         match self {

@@ -132,6 +132,7 @@ pub fn find_command<'a, U, E>(
     commands: &'a [crate::Command<U, E>],
     remaining_message: &'a str,
     case_insensitive: bool,
+    parent_commands: &mut Vec<&'a crate::Command<U, E>>,
 ) -> Option<(&'a crate::Command<U, E>, &'a str, &'a str)>
 where
     U: Send + Sync,
@@ -157,12 +158,18 @@ where
             continue;
         }
 
+        parent_commands.push(command);
         return Some(
-            find_command(&command.subcommands, remaining_message, case_insensitive).unwrap_or((
-                command,
-                command_name,
+            find_command(
+                &command.subcommands,
                 remaining_message,
-            )),
+                case_insensitive,
+                parent_commands,
+            )
+            .unwrap_or_else(|| {
+                parent_commands.pop();
+                (command, command_name, remaining_message)
+            }),
         );
     }
 
@@ -176,8 +183,18 @@ pub async fn dispatch_message<'a, U: Send + Sync, E>(
     msg: &'a serenity::Message,
     trigger: crate::MessageDispatchTrigger,
     invocation_data: &'a tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
+    parent_commands: &'a mut Vec<&'a crate::Command<U, E>>,
 ) -> Result<(), crate::FrameworkError<'a, U, E>> {
-    if let Some(ctx) = parse_invocation(framework, ctx, msg, trigger, invocation_data).await? {
+    if let Some(ctx) = parse_invocation(
+        framework,
+        ctx,
+        msg,
+        trigger,
+        invocation_data,
+        parent_commands,
+    )
+    .await?
+    {
         run_invocation(ctx).await?;
     }
     Ok(())
@@ -191,6 +208,7 @@ pub async fn parse_invocation<'a, U: Send + Sync, E>(
     msg: &'a serenity::Message,
     trigger: crate::MessageDispatchTrigger,
     invocation_data: &'a tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
+    parent_commands: &'a mut Vec<&'a crate::Command<U, E>>,
 ) -> Result<Option<crate::PrefixContext<'a, U, E>>, crate::FrameworkError<'a, U, E>> {
     // Check if we're allowed to invoke from bot messages
     if msg.author.bot && framework.options.prefix_options.ignore_bots {
@@ -214,6 +232,7 @@ pub async fn parse_invocation<'a, U: Send + Sync, E>(
         &framework.options.commands,
         msg_content,
         framework.options.prefix_options.case_insensitive_commands,
+        parent_commands,
     )
     .ok_or(crate::FrameworkError::UnknownCommand {
         ctx,
@@ -238,6 +257,7 @@ pub async fn parse_invocation<'a, U: Send + Sync, E>(
         args,
         framework,
         data: framework.user_data().await,
+        parent_commands,
         command,
         invocation_data,
         trigger,
