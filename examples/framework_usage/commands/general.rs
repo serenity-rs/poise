@@ -1,5 +1,5 @@
 use crate::{Context, Error};
-use poise::{serenity_prelude as serenity, CreateReply};
+use poise::serenity_prelude as serenity;
 use std::fmt::Write as _;
 
 /// Vote for something
@@ -333,7 +333,7 @@ pub async fn servers(ctx: Context<'_>) -> Result<(), Error> {
 #[poise::command(slash_command, prefix_command)]
 pub async fn reply(ctx: Context<'_>) -> Result<(), Error> {
     ctx.send(
-        CreateReply::new()
+        poise::CreateReply::new()
             .content(format!("Hello {}!", ctx.author().name))
             .reply(true),
     )
