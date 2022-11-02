@@ -92,19 +92,14 @@ impl<U, E> Framework<U, E> {
 
         let framework_cell = Arc::new(once_cell::sync::OnceCell::<Arc<Self>>::new());
         let framework_cell_2 = framework_cell.clone();
-        let existing_event_handler = client_builder.get_event_handler();
         let event_handler = crate::EventWrapper(move |ctx, event| {
             // unwrap_used: we will only receive events once the client has been started, by which
             // point framework_cell has been initialized
             #[allow(clippy::unwrap_used)]
             let framework = framework_cell_2.get().unwrap().clone();
-            let existing_event_handler = existing_event_handler.clone();
 
             Box::pin(async move {
                 raw_dispatch_event(&*framework, &ctx, &event).await;
-                if let Some(handler) = existing_event_handler {
-                    event.dispatch(ctx, &*handler).await;
-                }
             }) as _
         });
 
