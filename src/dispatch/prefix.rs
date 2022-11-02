@@ -116,18 +116,26 @@ async fn strip_prefix<'a, U, E>(
 /// async fn command3(ctx: poise::Context<'_, (), ()>) -> Result<(), ()> { Ok(()) }
 /// let commands = vec![command1(), command2()];
 ///
+/// let mut parent_commands = Vec::new();
 /// assert_eq!(
-///     poise::find_command(&commands, "command1 my arguments", false),
+///     poise::find_command(&commands, "command1 my arguments", false, &mut parent_commands),
 ///     Some((&commands[0], "command1", "my arguments")),
 /// );
+/// assert!(parent_commands.is_empty());
+///
+/// parent_commands.clear();
 /// assert_eq!(
-///     poise::find_command(&commands, "command2 command3 my arguments", false),
+///     poise::find_command(&commands, "command2 command3 my arguments", false, &mut parent_commands),
 ///     Some((&commands[1].subcommands[0], "command3", "my arguments")),
 /// );
+/// assert_eq!(&parent_commands, &[&commands[1]]);
+///
+/// parent_commands.clear();
 /// assert_eq!(
-///     poise::find_command(&commands, "CoMmAnD2 cOmMaNd99 my arguments", true),
+///     poise::find_command(&commands, "CoMmAnD2 cOmMaNd99 my arguments", true, &mut parent_commands),
 ///     Some((&commands[1], "CoMmAnD2", "cOmMaNd99 my arguments")),
 /// );
+/// assert!(parent_commands.is_empty());
 pub fn find_command<'a, U, E>(
     commands: &'a [crate::Command<U, E>],
     remaining_message: &'a str,
