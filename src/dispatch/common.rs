@@ -71,6 +71,8 @@ async fn missing_permissions<U, E>(
     Some(required_permissions - permissions?)
 }
 
+/// See [`check_permissions_and_cooldown`]. Runs the check only for a single command. The caller
+/// should call this multiple time for each parent command to achieve the check inheritance logic.
 async fn check_permissions_and_cooldown_single<'a, U, E>(
     ctx: crate::Context<'a, U, E>,
     cmd: &'a crate::Command<U, E>,
