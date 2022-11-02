@@ -19,8 +19,8 @@ pub struct CreateReply {
     pub components: Option<Vec<serenity::CreateActionRow>>,
     /// The allowed mentions for the message.
     pub allowed_mentions: Option<serenity::CreateAllowedMentions>,
-    /// The reference message this message is a reply to.
-    pub reference_message: Option<serenity::MessageReference>,
+    /// Whether this message is an inline reply.
+    pub reply: bool,
 }
 
 impl CreateReply {
@@ -62,11 +62,6 @@ impl CreateReply {
     /// Toggles whether the message is an ephemeral response (only invoking user can see it).
     ///
     /// This only has an effect in slash commands!
-    ///
-    /// If this is the initial response and this response
-    /// has previously been deferred, the ephemerality is decided by the defer operation. I.e.
-    /// if you deferred the response without enabling ephemeral, the initial response will not be
-    /// ephemeral.
     pub fn ephemeral(mut self, ephemeral: bool) -> Self {
         self.ephemeral = Some(ephemeral);
         self
@@ -80,9 +75,13 @@ impl CreateReply {
         self
     }
 
-    /// Set the reference message this message is a reply to.
-    pub fn reference_message(mut self, reference: impl Into<serenity::MessageReference>) -> Self {
-        self.reference_message = Some(reference.into());
+    /// Makes this message an inline reply to another message like [`serenity::Message::reply`]
+    /// (prefix-only, because slash commands are always inline replies anyways).
+    ///
+    /// To disable the ping, set [`Self::allowed_mentions`] with
+    /// [`serenity::CreateAllowedMentions::replied_user`] set to false.
+    pub fn reply(mut self, reply: bool) -> Self {
+        self.reply = reply;
         self
     }
 
@@ -115,7 +114,7 @@ impl CreateReply {
             components,
             ephemeral,
             allowed_mentions,
-            reference_message: _, // can't reply to a message in interactions
+            reply: _, // can't reply to a message in interactions
         } = self;
 
         if let Some(content) = content {
@@ -144,7 +143,7 @@ impl CreateReply {
             components,
             ephemeral,
             allowed_mentions,
-            reference_message: _,
+            reply: _,
         } = self;
 
         if let Some(content) = content {
@@ -173,7 +172,7 @@ impl CreateReply {
             components,
             ephemeral: _, // can't edit ephemerality in retrospect
             allowed_mentions,
-            reference_message: _,
+            reply: _,
         } = self;
 
         if let Some(content) = content {
@@ -200,7 +199,7 @@ impl CreateReply {
             components,
             ephemeral: _, // not supported in prefix
             allowed_mentions,
-            reference_message: _, // can't edit reference message afterwards
+            reply: _, // can't edit reference message afterwards
         } = self;
 
         if let Some(content) = content {
@@ -223,7 +222,7 @@ impl CreateReply {
     }
 
     /// Serialize this response builder to a [`serenity::CreateMessage`]
-    pub fn to_prefix(self) -> serenity::CreateMessage {
+    pub fn to_prefix(self, invocation_message: &serenity::Message) -> serenity::CreateMessage {
         let mut m = serenity::CreateMessage::default();
         let crate::CreateReply {
             content,
@@ -232,7 +231,7 @@ impl CreateReply {
             components,
             ephemeral: _, // not supported in prefix
             allowed_mentions,
-            reference_message,
+            reply,
         } = self;
 
         if let Some(content) = content {
@@ -245,8 +244,8 @@ impl CreateReply {
         if let Some(components) = components {
             m = m.components(components);
         }
-        if let Some(reference_message) = reference_message {
-            m = m.reference_message(reference_message);
+        if reply {
+            m = m.reference_message(invocation_message);
         }
 
         for attachment in attachments {

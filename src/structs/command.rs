@@ -194,6 +194,10 @@ impl<U, E> Command<U, E> {
             b = b.default_member_permissions(self.default_member_permissions);
         }
 
+        if self.guild_only {
+            b = b.dm_permission(false);
+        }
+
         if self.subcommands.is_empty() {
             for param in &self.parameters {
                 // Using `?` because if this command has slash-incompatible parameters, we cannot
@@ -222,7 +226,11 @@ impl<U, E> Command<U, E> {
             crate::ContextMenuCommandAction::User(_) => serenity::CommandType::User,
             crate::ContextMenuCommandAction::Message(_) => serenity::CommandType::Message,
         };
-        Some(serenity::CreateCommand::new(name).kind(kind))
+        Some(
+            serenity::CreateCommand::new(name)
+                .kind(kind)
+                .dm_permission(!self.guild_only),
+        )
     }
 
     /// **Deprecated**

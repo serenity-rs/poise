@@ -1,3 +1,49 @@
+# 0.4.1
+
+Behavior changes:
+- Slash commands marked guild_only don't show up in DMs anymore
+  - Using Discord's dm_permission field on commands
+- `poise::builtins::servers` now doesn't omit unavailable guilds from guild count and list anymore
+
+Detailed changelog: https://github.com/kangalioo/poise/compare/v0.4.0...v0.4.1
+
+# 0.4.0
+
+New features:
+- Added std::error::Error impl for FrameworkError
+- Added `FrameworkError::discord() -> &serenity::Context` method
+- Added `FrameworkError::ctx() -> Option<poise::Context>` method
+- Added `FrameworkError::handle()` method which calls the appropriate on_error function on itself
+- Added Copy and Clone impl for PartialContext
+- Added `ReplyHandle::delete()`
+- Added `FrameworkError::UnknownCommand` and `FrameworkError::UnknownInteraction`
+  - These error cases would previously just `log::warn!()`
+- Exposed internals of `dispatch_message()` as new functions `parse_invocation()` and `run_invocation()`
+- Added trigger and action callback to PrefixContext
+- Made EditTracker methods public: `process_message_update()`, `set_bot_response()`, `track_command()`
+
+API updates:
+- Added or changed fields of some FrameworkError enum variants
+- Removed `cmd: &Command` parameter from check_permissions_and_cooldown (Context already includes it)
+- triggered_by_edit and previously_tracked bool parameters replaced by new MessageDispatchTrigger enum
+- Simplified return type of `dispatch_message()`, `dispatch_interaction()`, and `dispatch_autocomplete()` to `Result<(), FrameworkError>`
+- Simplified return type of `extract_command_and_run_checks()` to `Result<ApplicationContext, FrameworkError>`
+- Removed `futures_core` re-export
+
+Behavior changes:
+- Internal warnings now use `log::warn!()`/`log::error!()` instead of `eprintln!()`
+  - That way, you can mute them or handle them specially
+- Default `FrameworkError::DynamicPrefix` handler now prints message content
+- `ReplyHandle::edit()` now replaces existing attachments and embeds instead of adding on top
+- Cooldowns are now triggered before command execution instead of after
+- Added `log::warn!()` in some weird code paths that shouldn't be hit
+- When a focused autocomplete option has an unrecognized name and when the autocomplete value is not a string, `FrameworkError::CommandStructureMismatch` is now thrown
+  - Instead of discarding the error
+- `register_application_commands_buttons()` switched order of rows
+  - Guild-specific actions are at the top because they are more common and less destructive
+
+Detailed changelog: https://github.com/kangalioo/poise/compare/v0.3.0...v0.4.0
+
 # 0.3.0
 
 New features:

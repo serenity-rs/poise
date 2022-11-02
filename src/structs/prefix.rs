@@ -36,6 +36,8 @@ pub struct PrefixContext<'a, U, E> {
     /// Useful if you need the list of commands, for example for a custom help command
     #[derivative(Debug = "ignore")]
     pub framework: crate::FrameworkContext<'a, U, E>,
+    /// If the invoked command was a subcommand, these are the parent commands, ordered top down.
+    pub parent_commands: &'a [&'a crate::Command<U, E>],
     /// The command object which is the current command
     pub command: &'a crate::Command<U, E>,
     /// Your custom user data

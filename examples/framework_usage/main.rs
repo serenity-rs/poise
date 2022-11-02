@@ -84,6 +84,9 @@ async fn main() {
             general::totalsize(),
             general::modal(),
             general::punish(),
+            #[cfg(feature = "cache")]
+            general::servers(),
+            general::reply(),
             context_menu::user_info(),
             context_menu::echo(),
             autocomplete::greet(),
@@ -141,7 +144,10 @@ async fn main() {
     };
 
     poise::Framework::builder()
-        .token(var("TOKEN").expect("Missing `TOKEN` env var, see README for more information."))
+        .token(
+            var("DISCORD_TOKEN")
+                .expect("Missing `DISCORD_TOKEN` env var, see README for more information."),
+        )
         .user_data_setup(move |_ctx, _ready, _framework| {
             Box::pin(async move {
                 Ok(Data {

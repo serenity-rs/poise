@@ -7,6 +7,7 @@ fn find_matching_command<'a, 'b, U, E>(
     interaction_name: &str,
     interaction_options: &'b [serenity::ResolvedOption<'b>],
     commands: &'a [crate::Command<U, E>],
+    parent_commands: &mut Vec<&'a crate::Command<U, E>>,
 ) -> Option<(&'a crate::Command<U, E>, &'b [serenity::ResolvedOption<'b>])> {
     commands.iter().find_map(|cmd| {
         if interaction_name != cmd.name && Some(interaction_name) != cmd.context_menu_name {
@@ -21,10 +22,12 @@ fn find_matching_command<'a, 'b, U, E>(
                 _ => None,
             })
         {
+            parent_commands.push(cmd);
             find_matching_command(
                 sub_interaction_name,
                 sub_interaction_options,
                 &cmd.subcommands,
+                parent_commands,
             )
         } else {
             Some((cmd, interaction_options))
@@ -42,11 +45,13 @@ pub async fn extract_command_and_run_checks<'a, U, E>(
     has_sent_initial_response: &'a std::sync::atomic::AtomicBool,
     invocation_data: &'a tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
     options: &'a [serenity::ResolvedOption<'a>],
+    parent_commands: &'a mut Vec<&'a crate::Command<U, E>>,
 ) -> Result<crate::ApplicationContext<'a, U, E>, crate::FrameworkError<'a, U, E>> {
     let search_result = find_matching_command(
         &interaction.data().name,
         options,
         &framework.options.commands,
+        parent_commands,
     );
     let (command, leaf_interaction_options) =
         search_result.ok_or(crate::FrameworkError::UnknownInteraction {
@@ -62,6 +67,7 @@ pub async fn extract_command_and_run_checks<'a, U, E>(
         interaction,
         args: leaf_interaction_options,
         command,
+        parent_commands,
         has_sent_initial_response,
         invocation_data,
         __non_exhaustive: (),
@@ -83,6 +89,8 @@ pub async fn dispatch_interaction<'a, U, E>(
     invocation_data: &'a tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
     // Need to pass this in from outside because of lifetime issues
     options: &'a [serenity::ResolvedOption<'a>],
+    // Need to pass this in from outside because of lifetime issues
+    parent_commands: &'a mut Vec<&'a crate::Command<U, E>>,
 ) -> Result<(), crate::FrameworkError<'a, U, E>> {
     let ctx = extract_command_and_run_checks(
         framework,
@@ -91,6 +99,7 @@ pub async fn dispatch_interaction<'a, U, E>(
         has_sent_initial_response,
         invocation_data,
         options,
+        parent_commands,
     )
     .await?;
 
@@ -153,6 +162,8 @@ pub async fn dispatch_autocomplete<'a, U, E>(
     invocation_data: &'a tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
     // Need to pass this in from outside because of lifetime issues
     options: &'a [serenity::ResolvedOption<'a>],
+    // Need to pass this in from outside because of lifetime issues
+    parent_commands: &'a mut Vec<&'a crate::Command<U, E>>,
 ) -> Result<(), crate::FrameworkError<'a, U, E>> {
     let ctx = extract_command_and_run_checks(
         framework,
@@ -161,6 +172,7 @@ pub async fn dispatch_autocomplete<'a, U, E>(
         has_sent_initial_response,
         invocation_data,
         options,
+        parent_commands,
     )
     .await?;
 

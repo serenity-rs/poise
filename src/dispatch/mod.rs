@@ -57,10 +57,17 @@ pub async fn dispatch_event<U: Send + Sync, E>(
     match event {
         crate::Event::Message { new_message } => {
             let invocation_data = tokio::sync::Mutex::new(Box::new(()) as _);
+            let mut parent_commands = Vec::new();
             let trigger = crate::MessageDispatchTrigger::MessageCreate;
-            if let Err(error) =
-                prefix::dispatch_message(framework, ctx, new_message, trigger, &invocation_data)
-                    .await
+            if let Err(error) = prefix::dispatch_message(
+                framework,
+                ctx,
+                new_message,
+                trigger,
+                &invocation_data,
+                &mut parent_commands,
+            )
+            .await
             {
                 error.handle(framework.options).await;
             }
@@ -77,13 +84,20 @@ pub async fn dispatch_event<U: Send + Sync, E>(
 
                 if let Some((msg, previously_tracked)) = msg {
                     let invocation_data = tokio::sync::Mutex::new(Box::new(()) as _);
+                    let mut parent_commands = Vec::new();
                     let trigger = match previously_tracked {
                         true => crate::MessageDispatchTrigger::MessageEditFromInvalid,
                         false => crate::MessageDispatchTrigger::MessageEdit,
                     };
-                    if let Err(error) =
-                        prefix::dispatch_message(framework, ctx, &msg, trigger, &invocation_data)
-                            .await
+                    if let Err(error) = prefix::dispatch_message(
+                        framework,
+                        ctx,
+                        &msg,
+                        trigger,
+                        &invocation_data,
+                        &mut parent_commands,
+                    )
+                    .await
                     {
                         error.handle(framework.options).await;
                     }
@@ -93,13 +107,16 @@ pub async fn dispatch_event<U: Send + Sync, E>(
         crate::Event::InteractionCreate {
             interaction: serenity::Interaction::Command(interaction),
         } => {
+            let invocation_data = tokio::sync::Mutex::new(Box::new(()) as _);
+            let mut parent_commands = Vec::new();
             if let Err(error) = slash::dispatch_interaction(
                 framework,
                 ctx,
                 interaction,
                 &std::sync::atomic::AtomicBool::new(false),
-                &tokio::sync::Mutex::new(Box::new(()) as _),
+                &invocation_data,
                 &interaction.data.options(),
+                &mut parent_commands,
             )
             .await
             {
@@ -109,13 +126,16 @@ pub async fn dispatch_event<U: Send + Sync, E>(
         crate::Event::InteractionCreate {
             interaction: serenity::Interaction::Autocomplete(interaction),
         } => {
+            let invocation_data = tokio::sync::Mutex::new(Box::new(()) as _);
+            let mut parent_commands = Vec::new();
             if let Err(error) = slash::dispatch_autocomplete(
                 framework,
                 ctx,
                 interaction,
                 &std::sync::atomic::AtomicBool::new(false),
-                &tokio::sync::Mutex::new(Box::new(()) as _),
+                &invocation_data,
                 &interaction.data.options(),
+                &mut parent_commands,
             )
             .await
             {

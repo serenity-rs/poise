@@ -141,15 +141,19 @@ pub async fn register_application_commands_buttons<U, E>(
                 .components(vec![
                     serenity::CreateActionRow::Buttons(vec![
                         serenity::CreateButton::new("Register in guild", "register.guild")
-                            .style(serenity::ButtonStyle::Primary),
+                            .style(serenity::ButtonStyle::Primary)
+                            .emoji('📋'),
                         serenity::CreateButton::new("Delete in guild", "unregister.guild")
-                            .style(serenity::ButtonStyle::Danger),
+                            .style(serenity::ButtonStyle::Danger)
+                            .emoji('🗑'),
                     ]),
                     serenity::CreateActionRow::Buttons(vec![
                         serenity::CreateButton::new("Register globally", "register.global")
-                            .style(serenity::ButtonStyle::Primary),
+                            .style(serenity::ButtonStyle::Primary)
+                            .emoji('📋'),
                         serenity::CreateButton::new("Delete globally", "unregister.global")
-                            .style(serenity::ButtonStyle::Danger),
+                            .style(serenity::ButtonStyle::Danger)
+                            .emoji('🗑'),
                     ]),
                 ]),
         )
@@ -165,13 +169,19 @@ pub async fn register_application_commands_buttons<U, E>(
 
     // remove buttons after button press
     reply
-        .edit(ctx, crate::CreateReply::default().components(vec![]))
+        .edit(
+            ctx,
+            crate::CreateReply::default()
+                .components(vec![])
+                .content("Processing... Please wait."),
+        )
         .await?;
 
     let pressed_button_id = match &interaction {
         Some(m) => &m.data.custom_id,
         None => {
-            ctx.say("You didn't interact in time").await?;
+            ctx.say(":warning: You didn't interact in time - please run the command again.")
+                .await?;
             return Ok(());
         }
     };
@@ -187,38 +197,53 @@ pub async fn register_application_commands_buttons<U, E>(
         }
     };
 
+    let start_time = std::time::Instant::now();
+
     if global {
         if register {
-            ctx.say(format!("Registering {} global commands...", num_commands))
-                .await?;
+            ctx.say(format!(
+                ":gear: Registering {} global commands...",
+                num_commands
+            ))
+            .await?;
             serenity::Command::set_global_application_commands(ctx.discord(), create_commands)
                 .await?;
         } else {
-            ctx.say("Unregistering global commands...").await?;
+            ctx.say(":gear: Unregistering global commands...").await?;
             serenity::Command::set_global_application_commands(ctx.discord(), Vec::new()).await?;
         }
     } else {
         let guild_id = match ctx.guild_id() {
             Some(x) => x,
             None => {
-                ctx.say("Must be called in guild").await?;
+                ctx.say(":x: Must be called in guild").await?;
                 return Ok(());
             }
         };
         if register {
-            ctx.say(format!("Registering {} guild commands...", num_commands))
-                .await?;
+            ctx.say(format!(
+                ":gear: Registering {} guild commands...",
+                num_commands
+            ))
+            .await?;
             guild_id
                 .set_application_commands(ctx.discord(), create_commands)
                 .await?;
         } else {
-            ctx.say("Unregistering guild commands...").await?;
+            ctx.say(":gear: Unregistering guild commands...").await?;
             guild_id
                 .set_application_commands(ctx.discord(), Vec::new())
                 .await?;
         }
     }
 
-    ctx.say("Done!").await?;
+    // Calulate time taken and send message
+    let time_taken = start_time.elapsed();
+    ctx.say(format!(
+        ":white_check_mark: Done! Took {}ms",
+        time_taken.as_millis()
+    ))
+    .await?;
+
     Ok(())
 }

@@ -71,17 +71,12 @@ async fn missing_permissions<U, E>(
     Some(required_permissions - permissions?)
 }
 
-/// Checks if the invoker is allowed to execute this command at this point in time
-///
-/// Doesn't actually start the cooldown timer! This should be done by the caller later, after
-/// argument parsing.
-/// (A command that didn't even get past argument parsing shouldn't trigger cooldowns)
-#[allow(clippy::needless_lifetimes)] // false positive (clippy issue 7271)
-pub async fn check_permissions_and_cooldown<'a, U, E>(
+/// See [`check_permissions_and_cooldown`]. Runs the check only for a single command. The caller
+/// should call this multiple time for each parent command to achieve the check inheritance logic.
+async fn check_permissions_and_cooldown_single<'a, U, E>(
     ctx: crate::Context<'a, U, E>,
+    cmd: &'a crate::Command<U, E>,
 ) -> Result<(), crate::FrameworkError<'a, U, E>> {
-    let cmd = ctx.command();
-
     if cmd.owners_only && !ctx.framework().options().owners.contains(&ctx.author().id) {
         return Err(crate::FrameworkError::NotAnOwner { ctx });
     }
@@ -180,6 +175,23 @@ pub async fn check_permissions_and_cooldown<'a, U, E>(
             });
         }
     }
+
+    Ok(())
+}
+
+/// Checks if the invoker is allowed to execute this command at this point in time
+///
+/// Doesn't actually start the cooldown timer! This should be done by the caller later, after
+/// argument parsing.
+/// (A command that didn't even get past argument parsing shouldn't trigger cooldowns)
+#[allow(clippy::needless_lifetimes)] // false positive (clippy issue 7271)
+pub async fn check_permissions_and_cooldown<'a, U, E>(
+    ctx: crate::Context<'a, U, E>,
+) -> Result<(), crate::FrameworkError<'a, U, E>> {
+    for parent_command in ctx.parent_commands() {
+        check_permissions_and_cooldown_single(ctx, parent_command).await?;
+    }
+    check_permissions_and_cooldown_single(ctx, ctx.command()).await?;
 
     Ok(())
 }

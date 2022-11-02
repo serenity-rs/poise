@@ -141,7 +141,7 @@ async fn _send_prefix_reply<'a, U, E>(
         let new_response = ctx
             .msg
             .channel_id
-            .send_message(ctx.discord, reply.to_prefix())
+            .send_message(ctx.discord, reply.to_prefix(ctx.msg))
             .await?;
         if let Some(track_edits) = &mut lock_edit_tracker() {
             track_edits.set_bot_response(ctx.msg, new_response.clone());

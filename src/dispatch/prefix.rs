@@ -116,22 +116,31 @@ async fn strip_prefix<'a, U, E>(
 /// async fn command3(ctx: poise::Context<'_, (), ()>) -> Result<(), ()> { Ok(()) }
 /// let commands = vec![command1(), command2()];
 ///
+/// let mut parent_commands = Vec::new();
 /// assert_eq!(
-///     poise::find_command(&commands, "command1 my arguments", false),
+///     poise::find_command(&commands, "command1 my arguments", false, &mut parent_commands),
 ///     Some((&commands[0], "command1", "my arguments")),
 /// );
+/// assert!(parent_commands.is_empty());
+///
+/// parent_commands.clear();
 /// assert_eq!(
-///     poise::find_command(&commands, "command2 command3 my arguments", false),
+///     poise::find_command(&commands, "command2 command3 my arguments", false, &mut parent_commands),
 ///     Some((&commands[1].subcommands[0], "command3", "my arguments")),
 /// );
+/// assert_eq!(&parent_commands, &[&commands[1]]);
+///
+/// parent_commands.clear();
 /// assert_eq!(
-///     poise::find_command(&commands, "CoMmAnD2 cOmMaNd99 my arguments", true),
+///     poise::find_command(&commands, "CoMmAnD2 cOmMaNd99 my arguments", true, &mut parent_commands),
 ///     Some((&commands[1], "CoMmAnD2", "cOmMaNd99 my arguments")),
 /// );
+/// assert!(parent_commands.is_empty());
 pub fn find_command<'a, U, E>(
     commands: &'a [crate::Command<U, E>],
     remaining_message: &'a str,
     case_insensitive: bool,
+    parent_commands: &mut Vec<&'a crate::Command<U, E>>,
 ) -> Option<(&'a crate::Command<U, E>, &'a str, &'a str)>
 where
     U: Send + Sync,
@@ -157,12 +166,18 @@ where
             continue;
         }
 
+        parent_commands.push(command);
         return Some(
-            find_command(&command.subcommands, remaining_message, case_insensitive).unwrap_or((
-                command,
-                command_name,
+            find_command(
+                &command.subcommands,
                 remaining_message,
-            )),
+                case_insensitive,
+                parent_commands,
+            )
+            .unwrap_or_else(|| {
+                parent_commands.pop();
+                (command, command_name, remaining_message)
+            }),
         );
     }
 
@@ -176,8 +191,18 @@ pub async fn dispatch_message<'a, U: Send + Sync, E>(
     msg: &'a serenity::Message,
     trigger: crate::MessageDispatchTrigger,
     invocation_data: &'a tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
+    parent_commands: &'a mut Vec<&'a crate::Command<U, E>>,
 ) -> Result<(), crate::FrameworkError<'a, U, E>> {
-    if let Some(ctx) = parse_invocation(framework, ctx, msg, trigger, invocation_data).await? {
+    if let Some(ctx) = parse_invocation(
+        framework,
+        ctx,
+        msg,
+        trigger,
+        invocation_data,
+        parent_commands,
+    )
+    .await?
+    {
         run_invocation(ctx).await?;
     }
     Ok(())
@@ -191,6 +216,7 @@ pub async fn parse_invocation<'a, U: Send + Sync, E>(
     msg: &'a serenity::Message,
     trigger: crate::MessageDispatchTrigger,
     invocation_data: &'a tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
+    parent_commands: &'a mut Vec<&'a crate::Command<U, E>>,
 ) -> Result<Option<crate::PrefixContext<'a, U, E>>, crate::FrameworkError<'a, U, E>> {
     // Check if we're allowed to invoke from bot messages
     if msg.author.bot && framework.options.prefix_options.ignore_bots {
@@ -214,6 +240,7 @@ pub async fn parse_invocation<'a, U: Send + Sync, E>(
         &framework.options.commands,
         msg_content,
         framework.options.prefix_options.case_insensitive_commands,
+        parent_commands,
     )
     .ok_or(crate::FrameworkError::UnknownCommand {
         ctx,
@@ -238,6 +265,7 @@ pub async fn parse_invocation<'a, U: Send + Sync, E>(
         args,
         framework,
         data: framework.user_data().await,
+        parent_commands,
         command,
         invocation_data,
         trigger,

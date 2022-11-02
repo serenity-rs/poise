@@ -6,7 +6,6 @@
 #![allow(clippy::type_complexity)]
 // native #[non_exhaustive] is awful because you can't do struct update syntax with it (??)
 #![allow(clippy::manual_non_exhaustive)]
-#![allow(deprecated)]
 
 /*!
 Poise is an opinionated Discord bot framework with a few distinctive features:
@@ -331,7 +330,11 @@ pub mod slash_argument;
 pub mod structs;
 pub mod track_edits;
 mod util;
-pub use poise_macros as macros;
+pub mod macros {
+    //! Procedural macros used in poise, like [`command`]
+    #[doc(inline)]
+    pub use poise_macros::*;
+}
 
 #[doc(no_inline)]
 pub use {

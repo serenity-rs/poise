@@ -227,6 +227,15 @@ impl<'a, U, E> Context<'a, U, E> {
         }
     }
 
+    /// If the invoked command was a subcommand, these are the parent commands, ordered top-level
+    /// downwards.
+    pub fn parent_commands(&self) -> &'a [&'a crate::Command<U, E>] {
+        match self {
+            Self::Prefix(x) => x.parent_commands,
+            Self::Application(x) => x.parent_commands,
+        }
+    }
+
     /// Returns a reference to the command.
     pub fn command(&self) -> &'a crate::Command<U, E> {
         match self {
@@ -328,23 +337,72 @@ impl<'a, U, E> Context<'a, U, E> {
         }
     }
 
-    // TODO: implement invocation_string. Needs hierarchy of parent commands available, e.g. as
-    // `parent_commands: Vec<&'a Command>` field. But... do I want to do that?
-    /* pub fn invocation_string(&self) -> String {
+    /// Returns the string with which this command was invoked.
+    ///
+    /// For example `"/slash_command subcommand arg1:value1 arg2:value2"`.
+    pub fn invocation_string(&self) -> String {
         match self {
             Context::Application(ctx) => {
                 let mut string = String::from("/");
-                string += ctx.interaction.data().name; // ... ah crap we need to traverse hierarchy of parent commands
+                for parent_command in ctx.parent_commands {
+                    string += &parent_command.name;
+                    string += " ";
+                }
+                string += &ctx.command.name;
                 for arg in ctx.args {
+                    #[allow(unused_imports)] // required for simd-json
+                    use ::serenity::json::prelude::*;
+                    use std::fmt::Write as _;
+
                     string += " ";
                     string += arg.name;
                     string += ":";
-                    strińg +=
+                    let _ = match arg.value {
+                        // This was verified to match Discord behavior when copy-pasting a not-yet
+                        // sent slash command invocation
+                        serenity::ResolvedValue::Attachment(_) => write!(string, ""),
+                        serenity::ResolvedValue::Boolean(x) => write!(string, "{}", x),
+                        serenity::ResolvedValue::Integer(x) => write!(string, "{}", x),
+                        serenity::ResolvedValue::Number(x) => write!(string, "{}", x),
+                        serenity::ResolvedValue::String(x) => write!(string, "{}", x),
+                        serenity::ResolvedValue::Channel(x) => {
+                            write!(string, "#{}", x.name.as_deref().unwrap_or(""))
+                        }
+                        serenity::ResolvedValue::Role(x) => write!(string, "@{}", x.name),
+                        serenity::ResolvedValue::User(x, _) => {
+                            write!(string, "@{}#{:04}", x.name, x.discriminator)
+                        }
+
+                        serenity::ResolvedValue::Unresolved(_)
+                        | serenity::ResolvedValue::SubCommand(_)
+                        | serenity::ResolvedValue::SubCommandGroup(_)
+                        | serenity::ResolvedValue::Autocomplete { .. } => {
+                            log::warn!("unexpected interaction option type");
+                            Ok(())
+                        }
+                        // We need this because ResolvedValue is #[non_exhaustive]
+                        _ => {
+                            log::warn!("newly-added unknown interaction option type");
+                            Ok(())
+                        }
+                    };
+                    // if let Some(x) = arg.value.as_bool() {
+                    //     let _ = write!(string, "{}", x);
+                    // } else if let Some(x) = arg.value.as_i64() {
+                    //     let _ = write!(string, "{}", x);
+                    // } else if let Some(x) = arg.value.as_u64() {
+                    //     let _ = write!(string, "{}", x);
+                    // } else if let Some(x) = arg.value.as_f64() {
+                    //     let _ = write!(string, "{}", x);
+                    // } else if let Some(x) = arg.value.as_str() {
+                    //     let _ = write!(string, "{}", x);
+                    // }
                 }
-            },
+                string
+            }
             Context::Prefix(ctx) => ctx.msg.content.clone(),
         }
-    } */
+    }
 
     /// Returns the raw type erased invocation data
     fn invocation_data_raw(&self) -> &tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>> {
