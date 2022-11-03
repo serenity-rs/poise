@@ -290,7 +290,7 @@ async fn main() {
         // Configure the client with your Discord bot token in the environment.
         .token(std::env::var("DISCORD_TOKEN").expect("Expected DISCORD_TOKEN in the environment"))
         .options(options)
-        .user_data_setup(|_ctx, _data_about_bot, _framework| {
+        .setup(|_ctx, _data_about_bot, _framework| {
             Box::pin(async move {
                 Ok(Data {
                     command_counter: std::sync::Mutex::new(std::collections::HashMap::new()),

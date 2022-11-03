@@ -69,7 +69,7 @@ async fn main() {
             commands,
             ..Default::default()
         })
-        .user_data_setup(move |_, _, _| Box::pin(async move { Ok(Data { translations }) }))
+        .setup(move |_, _, _| Box::pin(async move { Ok(Data { translations }) }))
         .run()
         .await
         .unwrap();

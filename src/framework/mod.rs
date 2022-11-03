@@ -29,7 +29,7 @@ pub struct Framework<U, E> {
     /// Initialized to Some during construction; so shouldn't be None at any observable point
     shard_manager: std::sync::Arc<tokio::sync::Mutex<serenity::ShardManager>>,
     /// Filled with Some on construction. Taken out and executed on first Ready gateway event
-    user_data_setup: std::sync::Mutex<
+    setup: std::sync::Mutex<
         Option<
             Box<
                 dyn Send
@@ -70,7 +70,7 @@ impl<U, E> Framework<U, E> {
     /// course of action on error.
     pub async fn new<F>(
         client_builder: serenity::ClientBuilder,
-        user_data_setup: F,
+        setup: F,
         mut options: crate::FrameworkOptions<U, E>,
     ) -> Result<std::sync::Arc<Self>, serenity::Error>
     where
@@ -113,7 +113,7 @@ impl<U, E> Framework<U, E> {
         let framework = Arc::new(Self {
             user_data: once_cell::sync::OnceCell::new(),
             bot_id: once_cell::sync::OnceCell::new(),
-            user_data_setup: Mutex::new(Some(Box::new(user_data_setup))),
+            setup: Mutex::new(Some(Box::new(setup))),
             options,
             shard_manager: client.shard_manager.clone(),
             client: parking_lot::Mutex::new(Some(client)),
@@ -230,9 +230,9 @@ async fn raw_dispatch_event<U, E>(
 {
     if let crate::Event::Ready { data_about_bot } = event {
         let _: Result<_, _> = framework.bot_id.set(data_about_bot.user.id);
-        let user_data_setup = Option::take(&mut *framework.user_data_setup.lock().unwrap());
-        if let Some(user_data_setup) = user_data_setup {
-            match user_data_setup(ctx, data_about_bot, framework).await {
+        let setup = Option::take(&mut *framework.setup.lock().unwrap());
+        if let Some(setup) = setup {
+            match setup(ctx, data_about_bot, framework).await {
                 Ok(user_data) => {
                     let _: Result<_, _> = framework.user_data.set(user_data);
                 }

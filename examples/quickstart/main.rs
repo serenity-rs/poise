@@ -26,7 +26,7 @@ async fn main() {
         })
         .token(std::env::var("DISCORD_TOKEN").expect("missing DISCORD_TOKEN"))
         .intents(serenity::GatewayIntents::non_privileged())
-        .user_data_setup(|ctx, ready, framework| Box::pin(async move {
+        .setup(|ctx, ready, framework| Box::pin(async move {
             let builder = poise::builtins::create_application_commands(&framework.options().commands);
             serenity::Command::set_global_application_commands(ctx, |b| {*b = builder; b}).await?;
             Ok(Data {})
