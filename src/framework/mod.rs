@@ -211,11 +211,12 @@ impl<U, E> Framework<U, E> {
 
     /// Retrieves the bot's ID, or blocks until it has been initialized
     /// (once the Ready event has been received).
-    pub async fn bot_id(&self) -> UserId {
-        block_until_set(&self.bot_id).await
+    pub async fn bot_id(&self) -> serenity::UserId {
+        *block_until_set(&self.bot_id).await
     }
 }
 
+/// Busy loops over the given [`OnceCell`] until it has been set with a 100ms delay between each loop.
 async fn block_until_set<D>(cell: &OnceCell<D>) -> &D {
     loop {
         match cell.get() {
