@@ -1,6 +1,7 @@
 //! The central Framework struct that ties everything together.
 
 pub use builder::*;
+use once_cell::sync::OnceCell;
 
 use crate::{serenity_prelude as serenity, BoxFuture};
 
@@ -18,9 +19,9 @@ mod builder;
 /// You can build a bot without [`Framework`]: see the `manual_dispatch` example in the repository
 pub struct Framework<U, E> {
     /// Stores user data. Is initialized on first Ready event
-    user_data: once_cell::sync::OnceCell<U>,
+    user_data: OnceCell<U>,
     /// Stores bot ID. Is initialized on first Ready event
-    bot_id: once_cell::sync::OnceCell<serenity::UserId>,
+    bot_id: OnceCell<serenity::UserId>,
     /// Stores the framework options
     options: crate::FrameworkOptions<U, E>,
 
@@ -90,7 +91,7 @@ impl<U, E> Framework<U, E> {
         set_qualified_names(&mut options.commands);
         message_content_intent_sanity_check(&options.prefix_options, client_builder.get_intents());
 
-        let framework_cell = Arc::new(once_cell::sync::OnceCell::<Arc<Self>>::new());
+        let framework_cell = Arc::new(OnceCell::<Arc<Self>>::new());
         let framework_cell_2 = framework_cell.clone();
         let event_handler = crate::EventWrapper(move |ctx, event| {
             // unwrap_used: we will only receive events once the client has been started, by which
@@ -106,8 +107,8 @@ impl<U, E> Framework<U, E> {
         let client: serenity::Client = client_builder.event_handler(event_handler).await?;
 
         let framework = Arc::new(Self {
-            user_data: once_cell::sync::OnceCell::new(),
-            bot_id: once_cell::sync::OnceCell::new(),
+            user_data: OnceCell::new(),
+            bot_id: OnceCell::new(),
             user_data_setup: Mutex::new(Some(Box::new(user_data_setup))),
             options,
             shard_manager: client.shard_manager.clone(),
@@ -202,14 +203,24 @@ impl<U, E> Framework<U, E> {
         })
     }
 
-    /// Retrieves user data, or blocks until it has been initialized (once the Ready event has been
-    /// received).
+    /// Retrieves user data, or blocks until it has been initialized
+    /// (once the Ready event has been received).
     pub async fn user_data(&self) -> &U {
-        loop {
-            match self.user_data.get() {
-                Some(x) => break x,
-                None => tokio::time::sleep(std::time::Duration::from_millis(100)).await,
-            }
+        block_until_set(&self.user_data).await
+    }
+
+    /// Retrieves the bot's ID, or blocks until it has been initialized
+    /// (once the Ready event has been received).
+    pub async fn bot_id(&self) -> UserId {
+        block_until_set(&self.bot_id).await
+    }
+}
+
+async fn block_until_set<D>(cell: &OnceCell<D>) -> &D {
+    loop {
+        match cell.get() {
+            Some(x) => break x,
+            None => tokio::time::sleep(std::time::Duration::from_millis(100)).await,
         }
     }
 }
