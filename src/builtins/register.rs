@@ -47,6 +47,43 @@ pub fn create_application_commands<U, E>(
     }
     commands_builder
 }
+
+/// Registers the given list of application commands to Discord as global commands.
+///
+/// Thin wrapper around [`create_application_commands`] that funnels the returned builder into
+/// [`serenity::Command::set_global_application_commands`].
+pub async fn register_globally<U, E>(
+    http: impl AsRef<serenity::Http>,
+    commands: &[crate::Command<U, E>],
+) -> Result<(), serenity::Error> {
+    let builder = create_application_commands(commands);
+    serenity::Command::set_global_application_commands(http, |b| {
+        *b = builder;
+        b
+    })
+    .await?;
+    Ok(())
+}
+
+/// Registers the given list of application commands to Discord as guild-specific commands.
+///
+/// Thin wrapper around [`create_application_commands`] that funnels the returned builder into
+/// [`serenity::GuildId::set_application_commands`].
+pub async fn register_in_guild<U, E>(
+    http: impl AsRef<serenity::Http>,
+    commands: &[crate::Command<U, E>],
+    guild_id: serenity::GuildId,
+) -> Result<(), serenity::Error> {
+    let builder = create_application_commands(commands);
+    guild_id
+        .set_application_commands(http, |b| {
+            *b = builder;
+            b
+        })
+        .await?;
+    Ok(())
+}
+
 /// _Note: you probably want [`register_application_commands_buttons`] instead; it's easier and more
 /// powerful_
 ///
