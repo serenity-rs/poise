@@ -17,22 +17,20 @@ async fn age(
     Ok(())
 }
 
-#[poise::command(prefix_command)]
-async fn register(ctx: Context<'_>) -> Result<(), Error> {
-    poise::builtins::register_application_commands_buttons(ctx).await?;
-    Ok(())
-}
-
 #[tokio::main]
 async fn main() {
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
-            commands: vec![age(), register()],
+            commands: vec![age()],
             ..Default::default()
         })
         .token(std::env::var("DISCORD_TOKEN").expect("missing DISCORD_TOKEN"))
         .intents(serenity::GatewayIntents::non_privileged())
-        .user_data_setup(move |_ctx, _ready, _framework| Box::pin(async move { Ok(Data {}) }));
+        .user_data_setup(|ctx, ready, framework| Box::pin(async move {
+            let builder = poise::builtins::create_application_commands(&framework.options().commands);
+            serenity::Command::set_global_application_commands(ctx, |b| {*b = builder; b}).await?;
+            Ok(Data {})
+        }));
 
     framework.run().await.unwrap();
 }
