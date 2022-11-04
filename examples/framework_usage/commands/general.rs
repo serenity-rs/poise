@@ -107,7 +107,8 @@ pub async fn boop(ctx: Context<'_>) -> Result<(), Error> {
         poise::CreateReply::default()
             .content("I want some boops!")
             .components(vec![serenity::CreateActionRow::Buttons(vec![
-                serenity::CreateButton::new("Boop me!", uuid_boop.to_string())
+                serenity::CreateButton::new(uuid_boop.to_string())
+                    .label("Boop!")
                     .style(serenity::ButtonStyle::Primary),
             ])]),
     )
@@ -183,7 +184,9 @@ pub async fn test_reuse_response(ctx: Context<'_>) -> Result<(), Error> {
                     .image(image_url),
             )
             .components(vec![serenity::CreateActionRow::Buttons(vec![
-                serenity::CreateButton::new("button 1", "1").style(serenity::ButtonStyle::Primary),
+                serenity::CreateButton::new("1")
+                    .label("button 1")
+                    .style(serenity::ButtonStyle::Primary),
             ])]),
     )
     .await?;
@@ -201,7 +204,9 @@ pub async fn test_reuse_response(ctx: Context<'_>) -> Result<(), Error> {
                     .image(image_url),
             )
             .components(vec![serenity::CreateActionRow::Buttons(vec![
-                serenity::CreateButton::new("button 2", "2").style(serenity::ButtonStyle::Primary),
+                serenity::CreateButton::new("2")
+                    .label("button 2")
+                    .style(serenity::ButtonStyle::Primary),
             ])]),
     )
     .await?;
