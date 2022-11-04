@@ -140,18 +140,22 @@ pub async fn register_application_commands_buttons<U, E>(
                 .content("Choose what to do with the commands:")
                 .components(vec![
                     serenity::CreateActionRow::Buttons(vec![
-                        serenity::CreateButton::new("Register in guild", "register.guild")
+                        serenity::CreateButton::new("register.guild")
+                            .label("Register in guild")
                             .style(serenity::ButtonStyle::Primary)
                             .emoji('📋'),
-                        serenity::CreateButton::new("Delete in guild", "unregister.guild")
+                        serenity::CreateButton::new("unregister.guild")
+                            .label("Delete in guild")
                             .style(serenity::ButtonStyle::Danger)
                             .emoji('🗑'),
                     ]),
                     serenity::CreateActionRow::Buttons(vec![
-                        serenity::CreateButton::new("Register globally", "register.global")
+                        serenity::CreateButton::new("register.global")
+                            .label("Register globally")
                             .style(serenity::ButtonStyle::Primary)
                             .emoji('📋'),
-                        serenity::CreateButton::new("Delete globally", "unregister.global")
+                        serenity::CreateButton::new("unregister.global")
+                            .label("Delete globally")
                             .style(serenity::ButtonStyle::Danger)
                             .emoji('🗑'),
                     ]),
