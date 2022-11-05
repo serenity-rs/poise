@@ -1,7 +1,6 @@
 //! The central Framework struct that ties everything together.
 
 pub use builder::*;
-use once_cell::sync::OnceCell;
 
 use crate::{serenity_prelude as serenity, BoxFuture};
 
@@ -19,9 +18,9 @@ mod builder;
 /// You can build a bot without [`Framework`]: see the `manual_dispatch` example in the repository
 pub struct Framework<U, E> {
     /// Stores user data. Is initialized on first Ready event
-    user_data: OnceCell<U>,
+    user_data: once_cell::sync::OnceCell<U>,
     /// Stores bot ID. Is initialized on first Ready event
-    bot_id: OnceCell<serenity::UserId>,
+    bot_id: once_cell::sync::OnceCell<serenity::UserId>,
     /// Stores the framework options
     options: crate::FrameworkOptions<U, E>,
 
