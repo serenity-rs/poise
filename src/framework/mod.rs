@@ -90,7 +90,7 @@ impl<U, E> Framework<U, E> {
         set_qualified_names(&mut options.commands);
         message_content_intent_sanity_check(&options.prefix_options, client_builder.get_intents());
 
-        let framework_cell = Arc::new(OnceCell::<Arc<Self>>::new());
+        let framework_cell = Arc::new(once_cell::sync::OnceCell::<Arc<Self>>::new());
         let framework_cell_2 = framework_cell.clone();
         let event_handler = crate::EventWrapper(move |ctx, event| {
             // unwrap_used: we will only receive events once the client has been started, by which
@@ -106,8 +106,8 @@ impl<U, E> Framework<U, E> {
         let client: serenity::Client = client_builder.event_handler(event_handler).await?;
 
         let framework = Arc::new(Self {
-            user_data: OnceCell::new(),
-            bot_id: OnceCell::new(),
+            user_data: once_cell::sync::OnceCell::new(),
+            bot_id: once_cell::sync::OnceCell::new(),
             user_data_setup: Mutex::new(Some(Box::new(user_data_setup))),
             options,
             shard_manager: client.shard_manager.clone(),
@@ -215,8 +215,9 @@ impl<U, E> Framework<U, E> {
     }
 }
 
-/// Busy loops over the given [`OnceCell`] until it has been set with a 100ms delay between each loop.
-async fn block_until_set<D>(cell: &OnceCell<D>) -> &D {
+/// Busy loops over the given [`once_cell::sync::OnceCell`] until it has been set with a 100ms delay
+/// between each loop.
+async fn block_until_set<D>(cell: &once_cell::sync::OnceCell<D>) -> &D {
     loop {
         match cell.get() {
             Some(x) => break x,
