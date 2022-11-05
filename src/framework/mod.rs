@@ -202,14 +202,26 @@ impl<U, E> Framework<U, E> {
         })
     }
 
-    /// Retrieves user data, or blocks until it has been initialized (once the Ready event has been
-    /// received).
+    /// Retrieves user data, or blocks until it has been initialized
+    /// (once the Ready event has been received).
     pub async fn user_data(&self) -> &U {
-        loop {
-            match self.user_data.get() {
-                Some(x) => break x,
-                None => tokio::time::sleep(std::time::Duration::from_millis(100)).await,
-            }
+        block_until_set(&self.user_data).await
+    }
+
+    /// Retrieves the bot's ID, or blocks until it has been initialized
+    /// (once the Ready event has been received).
+    pub async fn bot_id(&self) -> serenity::UserId {
+        *block_until_set(&self.bot_id).await
+    }
+}
+
+/// Busy loops over the given [`once_cell::sync::OnceCell`] until it has been set with a 100ms delay
+/// between each loop.
+async fn block_until_set<D>(cell: &once_cell::sync::OnceCell<D>) -> &D {
+    loop {
+        match cell.get() {
+            Some(x) => break x,
+            None => tokio::time::sleep(std::time::Duration::from_millis(100)).await,
         }
     }
 }
