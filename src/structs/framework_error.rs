@@ -22,9 +22,9 @@ pub enum FrameworkError<'a, U, E> {
         #[derivative(Debug = "ignore")]
         ctx: &'a serenity::Context,
     },
-    /// User code threw an error in generic event listener
-    Listener {
-        /// Error which was thrown in the listener code
+    /// User code threw an error in generic event event handler
+    EventHandler {
+        /// Error which was thrown in the event handler code
         error: E,
         /// The serenity Context passed to the event
         #[derivative(Debug = "ignore")]
@@ -168,7 +168,7 @@ impl<'a, U, E> FrameworkError<'a, U, E> {
     pub fn discord(&self) -> &'a serenity::Context {
         match *self {
             Self::Setup { ctx, .. } => ctx,
-            Self::Listener { ctx, .. } => ctx,
+            Self::EventHandler { ctx, .. } => ctx,
             Self::Command { ctx, .. } => ctx.discord(),
             Self::ArgumentParse { ctx, .. } => ctx.discord(),
             Self::CommandStructureMismatch { ctx, .. } => ctx.discord,
@@ -202,7 +202,7 @@ impl<'a, U, E> FrameworkError<'a, U, E> {
             Self::NsfwOnly { ctx, .. } => ctx,
             Self::CommandCheckFailed { ctx, .. } => ctx,
             Self::Setup { .. }
-            | Self::Listener { .. }
+            | Self::EventHandler { .. }
             | Self::UnknownCommand { .. }
             | Self::UnknownInteraction { .. }
             | Self::DynamicPrefix { .. } => return None,
@@ -236,12 +236,12 @@ impl<U, E: std::fmt::Display> std::fmt::Display for FrameworkError<'_, U, E> {
                 data_about_bot: _,
                 ctx: _,
             } => write!(f, "poise setup error"),
-            Self::Listener {
+            Self::EventHandler {
                 error: _,
                 ctx: _,
                 event,
                 framework: _,
-            } => write!(f, "error in {} event listener", event.name()),
+            } => write!(f, "error in {} event event handler", event.name()),
             Self::Command { error: _, ctx } => {
                 write!(f, "error in command `{}`", full_command_name!(ctx))
             }
@@ -341,7 +341,7 @@ impl<'a, U: std::fmt::Debug, E: std::error::Error + 'static> std::error::Error
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         match self {
             Self::Setup { error, .. } => Some(error),
-            Self::Listener { error, .. } => Some(error),
+            Self::EventHandler { error, .. } => Some(error),
             Self::Command { error, .. } => Some(error),
             Self::ArgumentParse { error, .. } => Some(&**error),
             Self::CommandStructureMismatch { .. } => None,

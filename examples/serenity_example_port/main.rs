@@ -21,7 +21,7 @@ type Error = Box<dyn std::error::Error + Send + Sync>;
 /// This type alias will save us some typing, because the Context type is needed often
 type Context<'a> = poise::Context<'a, Data, Error>;
 
-async fn event_listener(
+async fn event_event_handler(
     _ctx: &serenity::Context,
     event: &poise::Event<'_>,
     _framework: poise::FrameworkContext<'_, Data, Error>,
@@ -164,9 +164,9 @@ async fn on_error(error: poise::FrameworkError<'_, Data, Error>) {
                 error
             );
         }
-        poise::FrameworkError::Listener { error, event, .. } => {
+        poise::FrameworkError::EventHandler { error, event, .. } => {
             println!(
-                "Listener returned error during {:?} event: {:?}",
+                "EventHandler returned error during {:?} event: {:?}",
                 event.name(),
                 error
             );
@@ -258,8 +258,8 @@ async fn main() {
             multiply(),
             slow_mode(),
         ],
-        listener: |ctx, event, framework, user_data| {
-            Box::pin(event_listener(ctx, event, framework, user_data))
+        event_handler: |ctx, event, framework, user_data| {
+            Box::pin(event_event_handler(ctx, event, framework, user_data))
         },
         on_error: |error| Box::pin(on_error(error)),
         // Set a function to be called prior to each command execution. This

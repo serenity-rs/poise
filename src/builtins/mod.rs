@@ -33,8 +33,8 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
         crate::FrameworkError::Setup { error, .. } => {
             log::error!("Error in user data setup: {}", error);
         }
-        crate::FrameworkError::Listener { error, event, .. } => log::error!(
-            "User event listener encountered an error on {} event: {}",
+        crate::FrameworkError::EventHandler { error, event, .. } => log::error!(
+            "User event event handler encountered an error on {} event: {}",
             event.name(),
             error
         ),
