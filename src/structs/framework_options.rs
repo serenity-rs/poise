@@ -52,7 +52,7 @@ pub struct FrameworkOptions<U, E> {
         // TODO: redundant with framework
         &'a U,
     ) -> BoxFuture<'a, Result<(), E>>,
-    /// Renamed to [`Self::event_handler!`]
+    /// Renamed to [`Self::event_handler`]!
     #[deprecated = "renamed to event_handler"]
     pub listener: (),
     /// Prefix command specific options.

@@ -25,10 +25,12 @@ async fn main() {
         })
         .token(std::env::var("DISCORD_TOKEN").expect("missing DISCORD_TOKEN"))
         .intents(serenity::GatewayIntents::non_privileged())
-        .setup(|ctx, _ready, framework| Box::pin(async move {
-            poise::builtins::register_globally(ctx, &framework.options().commands).await?;
-            Ok(Data {})
-        }));
+        .setup(|ctx, _ready, framework| {
+            Box::pin(async move {
+                poise::builtins::register_globally(ctx, &framework.options().commands).await?;
+                Ok(Data {})
+            })
+        });
 
     framework.run().await.unwrap();
 }

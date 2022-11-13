@@ -22,7 +22,7 @@ async fn main() {
         .intents(
             serenity::GatewayIntents::non_privileged() | serenity::GatewayIntents::MESSAGE_CONTENT,
         )
-        .user_data_setup(move |ctx, _ready, framework| {
+        .setup(move |ctx, _ready, framework| {
             Box::pin(async move {
                 let guild_id =
                     serenity::GuildId(std::env::var("GUILD_ID").unwrap().parse().unwrap());
