@@ -51,7 +51,7 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
                         // AutocompleteChoice<T> -> serde_json::Value
                         .map(|choice| poise::serenity_prelude::json::json!({
                             "name": choice.name,
-                            "value": poise::serenity_prelude::json::Value::from(choice.value),
+                            "value": choice.value,
                         }))
                         .collect()
                         .await;
