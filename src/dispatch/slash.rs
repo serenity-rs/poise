@@ -56,7 +56,7 @@ pub async fn extract_command_and_run_checks<'a, U, E>(
 
     let ctx = crate::ApplicationContext {
         data: framework.user_data().await,
-        discord: ctx,
+        serenity_context: ctx,
         framework,
         interaction,
         args: leaf_interaction_options,
@@ -213,7 +213,7 @@ pub async fn dispatch_autocomplete<'a, U, E>(
 
     // Send the generates autocomplete response
     if let Err(e) = interaction
-        .create_autocomplete_response(&ctx.discord.http, |b| {
+        .create_autocomplete_response(&ctx.serenity_context.http, |b| {
             *b = autocomplete_response;
             b
         })

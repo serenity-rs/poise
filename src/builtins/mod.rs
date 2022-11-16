@@ -193,7 +193,7 @@ pub async fn servers<U, E>(ctx: crate::Context<'_, U, E>) -> Result<(), serenity
 
     let mut show_private_guilds = false;
     if let crate::Context::Application(_) = ctx {
-        if let Ok(app) = ctx.discord().http.get_current_application_info().await {
+        if let Ok(app) = ctx.sc().http.get_current_application_info().await {
             if app.owner.id == ctx.author().id {
                 show_private_guilds = true;
             }
@@ -210,12 +210,12 @@ pub async fn servers<U, E>(ctx: crate::Context<'_, U, E>) -> Result<(), serenity
         is_public: bool,
     }
 
-    let guild_ids = ctx.discord().cache.guilds();
+    let guild_ids = ctx.sc().cache.guilds();
     let mut num_unavailable_guilds = 0;
     let mut guilds = guild_ids
         .iter()
         .map(|&guild_id| {
-            ctx.discord().cache.guild_field(guild_id, |guild| Guild {
+            ctx.sc().cache.guild_field(guild_id, |guild| Guild {
                 name: guild.name.clone(),
                 num_members: guild.member_count,
                 is_public: guild.features.iter().any(|x| x == "DISCOVERABLE"),

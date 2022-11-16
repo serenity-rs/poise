@@ -117,7 +117,7 @@ pub async fn boop(ctx: Context<'_>) -> Result<(), Error> {
     .await?;
 
     let mut boop_count = 0;
-    while let Some(mci) = serenity::CollectComponentInteraction::new(ctx.discord())
+    while let Some(mci) = serenity::CollectComponentInteraction::new(ctx)
         .author_id(ctx.author().id)
         .channel_id(ctx.channel_id())
         .timeout(std::time::Duration::from_secs(120))
@@ -127,12 +127,10 @@ pub async fn boop(ctx: Context<'_>) -> Result<(), Error> {
         boop_count += 1;
 
         let mut msg = mci.message.clone();
-        msg.edit(ctx.discord(), |m| {
-            m.content(format!("Boop count: {}", boop_count))
-        })
-        .await?;
+        msg.edit(ctx, |m| m.content(format!("Boop count: {}", boop_count)))
+            .await?;
 
-        mci.create_interaction_response(ctx.discord(), |ir| {
+        mci.create_interaction_response(ctx, |ir| {
             ir.kind(serenity::InteractionResponseType::DeferredUpdateMessage)
         })
         .await?;

@@ -114,7 +114,7 @@ impl ReplyHandle<'_> {
         match &self.0 {
             ReplyHandleInner::Prefix(msg) => {
                 msg.clone()
-                    .edit(ctx.discord(), |b| {
+                    .edit(ctx.sc(), |b| {
                         // Clear builder so that adding embeds or attachments won't add on top of
                         // the pre-edit items but replace them (which is apparently the more
                         // intuitive behavior). Notably, setting the builder to default doesn't
@@ -159,7 +159,7 @@ impl ReplyHandle<'_> {
     /// Deletes this message
     pub async fn delete<U, E>(&self, ctx: crate::Context<'_, U, E>) -> Result<(), serenity::Error> {
         match &self.0 {
-            ReplyHandleInner::Prefix(msg) => msg.delete(ctx.discord()).await?,
+            ReplyHandleInner::Prefix(msg) => msg.delete(ctx.sc()).await?,
             ReplyHandleInner::Application {
                 http: _,
                 interaction,
@@ -167,12 +167,12 @@ impl ReplyHandle<'_> {
             } => match followup {
                 Some(followup) => {
                     interaction
-                        .delete_followup_message(ctx.discord(), followup.id)
+                        .delete_followup_message(ctx, followup.id)
                         .await?;
                 }
                 None => {
                     interaction
-                        .delete_original_interaction_response(ctx.discord())
+                        .delete_original_interaction_response(ctx)
                         .await?;
                 }
             },

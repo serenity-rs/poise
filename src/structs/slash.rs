@@ -90,7 +90,7 @@ impl<'a> ApplicationCommandOrAutocompleteInteraction<'a> {
 pub struct ApplicationContext<'a, U, E> {
     /// Serenity's context, like HTTP or cache
     #[derivative(Debug = "ignore")]
-    pub discord: &'a serenity::Context,
+    pub serenity_context: &'a serenity::Context,
     /// The interaction which triggered this command execution.
     pub interaction: ApplicationCommandOrAutocompleteInteraction<'a>,
     /// Slash command arguments
@@ -146,7 +146,7 @@ impl<U, E> ApplicationContext<'_, U, E> {
             .load(std::sync::atomic::Ordering::SeqCst)
         {
             interaction
-                .create_interaction_response(self.discord, |f| {
+                .create_interaction_response(self.serenity_context, |f| {
                     f.kind(serenity::InteractionResponseType::DeferredChannelMessageWithSource)
                         .interaction_response_data(|b| b.ephemeral(ephemeral))
                 })

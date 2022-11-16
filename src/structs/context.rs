@@ -77,7 +77,11 @@ impl<'a, U, E> Context<'a, U, E> {
                 ctx.defer_response(false).await?;
                 None
             }
-            Self::Prefix(ctx) => Some(ctx.msg.channel_id.start_typing(&ctx.discord.http)?),
+            Self::Prefix(ctx) => Some(
+                ctx.msg
+                    .channel_id
+                    .start_typing(&ctx.serenity_context.http)?,
+            ),
         })
     }
 
@@ -104,11 +108,27 @@ impl<'a, U, E> Context<'a, U, E> {
     }
 
     /// Return the stored [`serenity::Context`] within the underlying context type.
-    pub fn discord(&self) -> &'a serenity::Context {
+    pub fn serenity_context(&self) -> &'a serenity::Context {
         match self {
-            Self::Application(ctx) => ctx.discord,
-            Self::Prefix(ctx) => ctx.discord,
+            Self::Application(ctx) => ctx.serenity_context,
+            Self::Prefix(ctx) => ctx.serenity_context,
         }
+    }
+
+    /// See [`Self::serenity_context`].
+    #[deprecated = "poise::Context can now be passed directly into most serenity functions. Otherwise, use `.serenity_context()` now"]
+    pub fn discord(&self) -> &'a serenity::Context {
+        self.serenity_context()
+    }
+
+    // Poise internals can't pass `poise::Context` into `impl CacheHttp` parameters, because
+    // `CacheHttp: Send + Sync` so poise internals would need to add noisy `U: Send + Sync`
+    // everywhere.
+    // Poise internals also can't continue to call `.discord()` because it's deprecated. And
+    // `.serenity_context()` is too long. So we have this instead.
+    #[doc(hidden)]
+    pub fn sc(&self) -> &'a serenity::Context {
+        self.serenity_context()
     }
 
     /// Returns a view into data stored by the framework, like configuration
@@ -149,7 +169,7 @@ impl<'a, U, E> Context<'a, U, E> {
     /// Warning: clones the entire Guild instance out of the cache
     #[cfg(feature = "cache")]
     pub fn guild(&self) -> Option<serenity::Guild> {
-        self.guild_id()?.to_guild_cached(self.discord())
+        self.guild_id()?.to_guild_cached(self)
     }
 
     // Doesn't fit in with the rest of the functions here but it's convenient
@@ -161,11 +181,11 @@ impl<'a, U, E> Context<'a, U, E> {
     /// Returns None if in DMs, or if the guild HTTP request fails
     pub async fn partial_guild(&self) -> Option<serenity::PartialGuild> {
         #[cfg(feature = "cache")]
-        if let Some(guild) = self.guild_id()?.to_guild_cached(self.discord()) {
+        if let Some(guild) = self.guild_id()?.to_guild_cached(self) {
             return Some(guild.into());
         }
 
-        self.guild_id()?.to_partial_guild(self.discord()).await.ok()
+        self.guild_id()?.to_partial_guild(self).await.ok()
     }
 
     // Doesn't fit in with the rest of the functions here but it's convenient
@@ -183,7 +203,7 @@ impl<'a, U, E> Context<'a, U, E> {
             ctx.interaction.member().map(Cow::Borrowed)
         } else {
             self.guild_id()?
-                .member(self.discord(), self.author().id)
+                .member(self.sc(), self.author().id)
                 .await
                 .ok()
                 .map(Cow::Owned)
@@ -428,6 +448,35 @@ impl<'a, U, E> Context<'a, U, E> {
     }
 }
 
+// Forwards for serenity::Context's impls. With these, poise::Context can be passed in as-is to
+// serenity API functions.
+#[cfg(feature = "cache")]
+impl<U, E> AsRef<serenity::Cache> for Context<'_, U, E> {
+    fn as_ref(&self) -> &serenity::Cache {
+        &self.serenity_context().cache
+    }
+}
+impl<U, E> AsRef<serenity::Http> for Context<'_, U, E> {
+    fn as_ref(&self) -> &serenity::Http {
+        &self.serenity_context().http
+    }
+}
+impl<U, E> AsRef<serenity::ShardMessenger> for Context<'_, U, E> {
+    fn as_ref(&self) -> &serenity::ShardMessenger {
+        &self.serenity_context().shard
+    }
+}
+impl<U: Sync, E> serenity::CacheHttp for Context<'_, U, E> {
+    fn http(&self) -> &serenity::Http {
+        &self.serenity_context().http
+    }
+
+    #[cfg(feature = "cache")]
+    fn cache(&self) -> Option<&std::sync::Arc<serenity::Cache>> {
+        Some(&self.serenity_context().cache)
+    }
+}
+
 /// Trimmed down, more general version of [`Context`]
 pub struct PartialContext<'a, U, E> {
     /// ID of the guild, if not invoked in DMs
@@ -437,7 +486,7 @@ pub struct PartialContext<'a, U, E> {
     /// ID of the invocation author
     pub author: &'a serenity::User,
     /// Serenity's context, like HTTP or cache
-    pub discord: &'a serenity::Context,
+    pub serenity_context: &'a serenity::Context,
     /// Useful if you need the list of commands, for example for a custom help command
     pub framework: crate::FrameworkContext<'a, U, E>,
     /// Your custom user data
@@ -458,7 +507,7 @@ impl<'a, U, E> From<Context<'a, U, E>> for PartialContext<'a, U, E> {
             guild_id: ctx.guild_id(),
             channel_id: ctx.channel_id(),
             author: ctx.author(),
-            discord: ctx.discord(),
+            serenity_context: ctx.serenity_context(),
             framework: ctx.framework(),
             data: ctx.data(),
         }

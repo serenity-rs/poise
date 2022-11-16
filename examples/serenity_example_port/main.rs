@@ -378,7 +378,7 @@ async fn say(
             .clean_role(false)
     };
 
-    let content = serenity::content_safe(ctx.discord(), &content, &settings, {
+    let content = serenity::content_safe(ctx, &content, &settings, {
         // If we are in a prefix command, we pass the Users that were mentioned in the message
         // to avoid them needing to be fetched from cache
         if let poise::Context::Prefix(ctx) = ctx {
@@ -497,7 +497,7 @@ async fn latency(ctx: Context<'_>) -> Result<(), Error> {
     // over the shard, so we'll get the information about the shard runner for
     // the shard this command was sent over.
     let runner = runners
-        .get(&serenity::ShardId(ctx.discord().shard_id))
+        .get(&serenity::ShardId(ctx.shard_id))
         .ok_or("No shard found")?;
 
     ctx.say(format!("The shard latency is {:?}", runner.latency))
@@ -585,8 +585,8 @@ async fn bird(
 #[poise::command(prefix_command, slash_command, category = "General")]
 async fn am_i_admin(ctx: Context<'_>) -> Result<(), Error> {
     if let Some(guild_id) = ctx.guild_id() {
-        for role in guild_id.member(ctx.discord(), ctx.author().id).await?.roles {
-            if role.to_role_cached(ctx.discord()).map_or(false, |r| {
+        for role in guild_id.member(ctx, ctx.author().id).await?.roles {
+            if role.to_role_cached(ctx).map_or(false, |r| {
                 r.has_permission(serenity::Permissions::ADMINISTRATOR)
             }) {
                 ctx.say("Yes, you are.").await?;
@@ -615,7 +615,7 @@ async fn slow_mode(
     let say_content = if let Some(rate_limit) = rate_limit {
         if let Err(why) = ctx
             .channel_id()
-            .edit(ctx.discord(), |c| c.rate_limit_per_user(rate_limit))
+            .edit(ctx, |c| c.rate_limit_per_user(rate_limit))
             .await
         {
             println!("Error setting channel's slow mode rate: {:?}", why);
@@ -626,8 +626,7 @@ async fn slow_mode(
                 rate_limit
             )
         }
-    } else if let Some(serenity::Channel::Guild(channel)) =
-        ctx.channel_id().to_channel_cached(ctx.discord())
+    } else if let Some(serenity::Channel::Guild(channel)) = ctx.channel_id().to_channel_cached(ctx)
     {
         format!(
             "Current slow mode rate is `{}` seconds.",

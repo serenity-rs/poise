@@ -86,7 +86,7 @@ async fn _send_application_reply<'a, U, E>(
     let followup = if has_sent_initial_response {
         Some(Box::new(
             interaction
-                .create_followup_message(ctx.discord, |f| {
+                .create_followup_message(ctx.serenity_context, |f| {
                     data.to_slash_followup_response(f);
                     f
                 })
@@ -94,7 +94,7 @@ async fn _send_application_reply<'a, U, E>(
         ))
     } else {
         interaction
-            .create_interaction_response(ctx.discord, |r| {
+            .create_interaction_response(ctx.serenity_context, |r| {
                 r.kind(serenity::InteractionResponseType::ChannelMessageWithSource)
                     .interaction_response_data(|f| {
                         data.to_slash_initial_response(f);
@@ -109,7 +109,7 @@ async fn _send_application_reply<'a, U, E>(
     };
 
     Ok(crate::ReplyHandle(crate::ReplyHandleInner::Application {
-        http: &ctx.discord.http,
+        http: &ctx.serenity_context.http,
         interaction,
         followup,
     }))
@@ -156,7 +156,7 @@ async fn _send_prefix_reply<'a, U, E>(
 
     Ok(Box::new(if let Some(mut response) = existing_response {
         response
-            .edit(ctx.discord, |f| {
+            .edit(ctx.serenity_context, |f| {
                 // Reset the message. We don't want leftovers of the previous message (e.g. user
                 // sends a message with `.content("abc")` in a track_edits command, and the edited
                 // message happens to contain embeds, we don't want to keep those embeds)
@@ -181,7 +181,7 @@ async fn _send_prefix_reply<'a, U, E>(
         let new_response = ctx
             .msg
             .channel_id
-            .send_message(ctx.discord, |m| {
+            .send_message(ctx.serenity_context, |m| {
                 reply.to_prefix(m, ctx.msg);
                 m
             })

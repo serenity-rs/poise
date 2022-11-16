@@ -44,14 +44,14 @@ pub async fn delete(
     ctx: Context<'_>,
     #[description = "Message to be deleted"] msg: serenity::Message,
 ) -> Result<(), Error> {
-    msg.delete(ctx.discord()).await?;
+    msg.delete(ctx).await?;
     Ok(())
 }
 
 /// Returns true if username is Ferris
 async fn is_ferris(ctx: Context<'_>) -> Result<bool, Error> {
     let nickname = match ctx.guild_id() {
-        Some(guild_id) => ctx.author().nick_in(ctx.discord(), guild_id).await,
+        Some(guild_id) => ctx.author().nick_in(ctx, guild_id).await,
         None => None,
     };
     let name = nickname.as_ref().unwrap_or(&ctx.author().name);

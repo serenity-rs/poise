@@ -165,22 +165,22 @@ pub enum FrameworkError<'a, U, E> {
 
 impl<'a, U, E> FrameworkError<'a, U, E> {
     /// Returns the [`serenity::Context`] of this error
-    pub fn discord(&self) -> &'a serenity::Context {
+    pub fn serenity_context(&self) -> &'a serenity::Context {
         match *self {
             Self::Setup { ctx, .. } => ctx,
             Self::EventHandler { ctx, .. } => ctx,
-            Self::Command { ctx, .. } => ctx.discord(),
-            Self::ArgumentParse { ctx, .. } => ctx.discord(),
-            Self::CommandStructureMismatch { ctx, .. } => ctx.discord,
-            Self::CooldownHit { ctx, .. } => ctx.discord(),
-            Self::MissingBotPermissions { ctx, .. } => ctx.discord(),
-            Self::MissingUserPermissions { ctx, .. } => ctx.discord(),
-            Self::NotAnOwner { ctx, .. } => ctx.discord(),
-            Self::GuildOnly { ctx, .. } => ctx.discord(),
-            Self::DmOnly { ctx, .. } => ctx.discord(),
-            Self::NsfwOnly { ctx, .. } => ctx.discord(),
-            Self::CommandCheckFailed { ctx, .. } => ctx.discord(),
-            Self::DynamicPrefix { ctx, .. } => ctx.discord,
+            Self::Command { ctx, .. } => ctx.serenity_context(),
+            Self::ArgumentParse { ctx, .. } => ctx.serenity_context(),
+            Self::CommandStructureMismatch { ctx, .. } => ctx.serenity_context,
+            Self::CooldownHit { ctx, .. } => ctx.serenity_context(),
+            Self::MissingBotPermissions { ctx, .. } => ctx.serenity_context(),
+            Self::MissingUserPermissions { ctx, .. } => ctx.serenity_context(),
+            Self::NotAnOwner { ctx, .. } => ctx.serenity_context(),
+            Self::GuildOnly { ctx, .. } => ctx.serenity_context(),
+            Self::DmOnly { ctx, .. } => ctx.serenity_context(),
+            Self::NsfwOnly { ctx, .. } => ctx.serenity_context(),
+            Self::CommandCheckFailed { ctx, .. } => ctx.serenity_context(),
+            Self::DynamicPrefix { ctx, .. } => ctx.serenity_context,
             Self::UnknownCommand { ctx, .. } => ctx,
             Self::UnknownInteraction { ctx, .. } => ctx,
             Self::__NonExhaustive => unreachable!(),

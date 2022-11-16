@@ -22,7 +22,7 @@ pub enum MessageDispatchTrigger {
 pub struct PrefixContext<'a, U, E> {
     /// Serenity's context, like HTTP or cache
     #[derivative(Debug = "ignore")]
-    pub discord: &'a serenity::Context,
+    pub serenity_context: &'a serenity::Context,
     /// The invoking user message
     pub msg: &'a serenity::Message,
     /// Prefix used by the user to invoke this command

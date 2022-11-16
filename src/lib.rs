@@ -36,9 +36,8 @@ means using serenity, so here's a couple tips:
 ## `impl Trait` parameters
 
 Many serenity functions take an argument of type [`impl CacheHttp`](serenity::CacheHttp) or
-[`impl AsRef<Http>`](serenity::Http). Here, you commonly pass in
-[`&serenity::Context`](serenity::Context), which you can get from
-[`poise::Context`](crate::Context) via [`ctx.discord()`](crate::Context::discord)
+[`impl AsRef<Http>`](serenity::Http). You can pass in any type that imlements these traits, like
+[`crate::Context`] or [`serenity::Context`].
 
 ## Gateway intents
 
@@ -58,7 +57,7 @@ You can run Discord actions outside of commands by cloning and storing [`serenit
 [`Arc<serenity::Http>`](serenity::Http)/[`Arc<serenity::Cache>`](serenity::Cache). You can get
 those either from [`serenity::Context`] (passed to
 [`setup`](crate::FrameworkBuilder::setup) and all commands via
-[`ctx.discord()`](crate::Context::discord)) or before starting the framework via
+[`ctx.serenity_framework()`](crate::Context::discord)) or before starting the framework via
 [`framework.client()`](crate::Framework::client)[`.cache_and_http`](serenity::Client::cache_and_http).
 
 Pass your `CacheAndHttp` or `Arc<Http>` to serenity functions in place of the usual
