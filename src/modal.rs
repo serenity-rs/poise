@@ -35,11 +35,26 @@ pub fn find_modal_text(
     None
 }
 
-/// See [`Modal::execute`]
-async fn execute<U: Send + Sync, E, M: Modal>(
+/// Convenience function for showing the modal and waiting for a response.
+///
+/// If the user doesn't submit before the timeout expires, `None` is returned.
+///
+/// Note: a modal must be the first response to a command. You cannot send any messages before,
+/// or the modal will fail.
+///
+/// This function:
+/// 1. sends the modal via [`Self::create()`]
+/// 2. waits for the user to submit via [`serenity::CollectModalInteraction`]
+/// 3. acknowledges the submitted data so that Discord closes the pop-up for the user
+/// 4. parses the submitted data via [`Self::parse()`], wrapping errors in [`serenity::Error::Other`]
+///
+/// If you need more specialized behavior, you can copy paste the implementation of this function
+/// and adjust to your needs. The code of this function is just a starting point.
+pub async fn execute_modal<U: Send + Sync, E, M: Modal>(
     ctx: crate::ApplicationContext<'_, U, E>,
     defaults: Option<M>,
-) -> Result<M, serenity::Error> {
+    timeout: Option<std::time::Duration>,
+) -> Result<Option<M>, serenity::Error> {
     let interaction = ctx.interaction.unwrap();
     let interaction_id = interaction.id.to_string();
 
@@ -56,6 +71,7 @@ async fn execute<U: Send + Sync, E, M: Modal>(
     // Wait for user to submit
     let response = serenity::CollectModalInteraction::new(&ctx.serenity_context.shard)
         .filter(move |d| d.data.custom_id == interaction_id)
+        .timeout(timeout.unwrap_or(std::time::Duration::from_secs(3600)))
         .await
         .unwrap();
 
@@ -66,7 +82,9 @@ async fn execute<U: Send + Sync, E, M: Modal>(
         })
         .await?;
 
-    M::parse(response.data.clone()).map_err(serenity::Error::Other)
+    Ok(Some(
+        M::parse(response.data.clone()).map_err(serenity::Error::Other)?,
+    ))
 }
 
 /// Derivable trait for modal interactions, Discords version of interactive forms
@@ -120,45 +138,20 @@ pub trait Modal: Sized {
     /// let users submit when all required fields are filled properly
     fn parse(data: serenity::ModalSubmitInteractionData) -> Result<Self, &'static str>;
 
-    /// Convenience function for showing the modal and waiting for a response
-    ///
-    /// Note: a modal must be the first response to a command. You cannot send any messages before,
-    /// or the modal will fail
-    ///
-    /// This function:
-    /// 1. sends the modal via [`Self::create()`]
-    /// 2. waits for the user to submit via [`serenity::CollectModalInteraction`]
-    /// 3. acknowledges the submitted data so that Discord closes the pop-up for the user
-    /// 4. parses the submitted data via [`Self::parse()`], wrapping errors in [`serenity::Error::Other`]
+    /// Calls `execute_modal(ctx, None, None)`. See [`execute_modal`]
     // TODO: add execute_with_defaults? Or add a `defaults: Option<Self>` param?
     async fn execute<U: Send + Sync, E>(
         ctx: crate::ApplicationContext<'_, U, E>,
-    ) -> Result<Self, serenity::Error> {
-        execute(ctx, None::<Self>).await
+    ) -> Result<Option<Self>, serenity::Error> {
+        execute_modal(ctx, None::<Self>, None).await
     }
 
-    /// Like [`Self::execute()`], but with a parameter to set default values for the fields.
-    ///
-    /// ```rust
-    /// # async fn _foo(ctx: poise::ApplicationContext<'_, (), ()>) -> Result<(), serenity::Error> {
-    /// # use poise::Modal as _;
-    /// #[derive(Default, poise::Modal)]
-    /// struct MyModal {
-    ///     field_1: String,
-    ///     field_2: String,
-    /// }
-    ///
-    /// # let ctx: poise::ApplicationContext<'static, (), ()> = todo!();
-    /// MyModal::execute_with_defaults(ctx, MyModal {
-    ///     field_1: "Default value".into(),
-    ///     ..Default::default()
-    /// }).await?;
-    /// # Ok(()) }
-    /// ```
+    /// Calls `execute_modal(ctx, Some(defaults), None)`. See [`execute_modal`]
+    // TODO: deprecate this in favor of execute_modal()?
     async fn execute_with_defaults<U: Send + Sync, E>(
         ctx: crate::ApplicationContext<'_, U, E>,
         defaults: Self,
-    ) -> Result<Self, serenity::Error> {
-        execute(ctx, Some(defaults)).await
+    ) -> Result<Option<Self>, serenity::Error> {
+        execute_modal(ctx, Some(defaults), None).await
     }
 }
