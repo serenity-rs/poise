@@ -43,10 +43,10 @@ pub fn find_modal_text(
 /// or the modal will fail.
 ///
 /// This function:
-/// 1. sends the modal via [`Self::create()`]
+/// 1. sends the modal via [`Modal::create()`]
 /// 2. waits for the user to submit via [`serenity::CollectModalInteraction`]
 /// 3. acknowledges the submitted data so that Discord closes the pop-up for the user
-/// 4. parses the submitted data via [`Self::parse()`], wrapping errors in [`serenity::Error::Other`]
+/// 4. parses the submitted data via [`Modal::parse()`], wrapping errors in [`serenity::Error::Other`]
 ///
 /// If you need more specialized behavior, you can copy paste the implementation of this function
 /// and adjust to your needs. The code of this function is just a starting point.
