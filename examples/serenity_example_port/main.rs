@@ -497,7 +497,7 @@ async fn latency(ctx: Context<'_>) -> Result<(), Error> {
     // over the shard, so we'll get the information about the shard runner for
     // the shard this command was sent over.
     let runner = runners
-        .get(&serenity::ShardId(ctx.shard_id))
+        .get(&serenity::ShardId(ctx.serenity_context().shard_id))
         .ok_or("No shard found")?;
 
     ctx.say(format!("The shard latency is {:?}", runner.latency))
