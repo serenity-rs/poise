@@ -51,10 +51,8 @@ async fn execute<U: Send + Sync, E, M: Modal>(
         .store(true, std::sync::atomic::Ordering::SeqCst);
 
     // Wait for user to submit
-    let response = serenity::ModalInteractionCollectorBuilder::new(&ctx.discord.shard)
-        .filter(std::sync::Arc::new(move |d| {
-            d.data.custom_id == interaction_id
-        }))
+    let response = serenity::ModalInteractionCollector::new(&ctx.discord.shard)
+        .filter(move |d| d.data.custom_id == interaction_id)
         .collect_single()
         .await
         .unwrap();
