@@ -47,8 +47,7 @@ pub struct FrameworkOptions<U, E> {
     /// deletions or guild updates.
     #[derivative(Debug = "ignore")]
     pub listener: for<'a> fn(
-        &'a serenity::Context,
-        &'a crate::Event,
+        &'a serenity::FullEvent,
         crate::FrameworkContext<'a, U, E>,
         // TODO: redundant with framework
         &'a U,
@@ -56,10 +55,12 @@ pub struct FrameworkOptions<U, E> {
     /// Prefix command specific options.
     pub prefix_options: crate::PrefixFrameworkOptions<U, E>,
     /// User IDs which are allowed to use owners_only commands
-    ///
-    /// If using [`crate::FrameworkBuilder`], automatically initialized with the bot application
-    /// owner and team members
     pub owners: std::collections::HashSet<serenity::UserId>,
+    /// If true, [`Self::owners`] is automatically initialized with the results of
+    /// [`serenity::Http::get_current_application_info()`].
+    ///
+    /// True by default.
+    pub initialize_owners: bool,
     // #[non_exhaustive] forbids struct update syntax for ?? reason
     #[doc(hidden)]
     pub __non_exhaustive: (),
@@ -93,7 +94,7 @@ where
                     }
                 })
             },
-            listener: |_, _, _, _| Box::pin(async { Ok(()) }),
+            listener: |_, _, _| Box::pin(async { Ok(()) }),
             pre_command: |_| Box::pin(async {}),
             post_command: |_| Box::pin(async {}),
             command_check: None,
@@ -107,6 +108,7 @@ where
             require_cache_for_guild_check: false,
             prefix_options: Default::default(),
             owners: Default::default(),
+            initialize_owners: true,
             __non_exhaustive: (),
         }
     }

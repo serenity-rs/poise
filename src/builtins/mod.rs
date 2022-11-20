@@ -51,7 +51,7 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
         }
         crate::FrameworkError::Listener { error, event, .. } => log::error!(
             "User event listener encountered an error on {} event: {}",
-            event.name(),
+            event.snake_case_name(),
             error
         ),
         crate::FrameworkError::Command { ctx, error } => {

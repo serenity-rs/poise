@@ -64,11 +64,11 @@ impl EditTracker {
     /// Note: [`EditTracker`] will only purge messages outside the duration when [`Self::purge`]
     /// is called. If you supply the created [`EditTracker`] to [`crate::Framework`], the framework
     /// will take care of that by calling [`Self::purge`] periodically.
-    pub fn for_timespan(duration: std::time::Duration) -> std::sync::RwLock<Self> {
-        std::sync::RwLock::new(Self {
+    pub fn for_timespan(duration: std::time::Duration) -> std::sync::Arc<std::sync::RwLock<Self>> {
+        std::sync::Arc::new(std::sync::RwLock::new(Self {
             max_duration: duration,
             cache: Vec::new(),
-        })
+        }))
     }
 
     /// Returns a copy of a newly up-to-date cached message, or a brand new generated message when

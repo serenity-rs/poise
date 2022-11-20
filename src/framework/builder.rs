@@ -164,10 +164,7 @@ impl<U, E> FrameworkBuilder<U, E> {
         self
     }
 
-    /// Build the framework with the specified configuration.
-    ///
-    /// For more information, see [`FrameworkBuilder`]
-    pub async fn build(self) -> Result<std::sync::Arc<crate::Framework<U, E>>, serenity::Error>
+    async fn generic_run(self, autosharded: bool) -> Result<(), serenity::Error>
     where
         U: Send + Sync + 'static,
         E: Send + 'static,
@@ -192,32 +189,31 @@ and enable MESSAGE_CONTENT in your Discord bot dashboard
 
         // Build framework options by concatenating user-set options with commands and owners
         options.commands.extend(self.commands);
-        if self.initialize_owners {
-            if let Err(e) = super::insert_owners_from_http(&token, &mut options.owners).await {
-                log::warn!("Failed to insert owners from HTTP: {}", e);
-            }
-        }
+        options.initialize_owners = self.initialize_owners;
 
         // Create serenity client
-        let mut client_builder = serenity::ClientBuilder::new(token, intents);
+        let mut client_builder = serenity::ClientBuilder::new(token, intents)
+            .framework(crate::Framework::new(options, user_data_setup));
         if let Some(client_settings) = self.client_settings {
             client_builder = client_settings(client_builder);
         }
 
-        // Create framework with specified settings
-        crate::Framework::new(client_builder, user_data_setup, options).await
+        // Run serenity client
+        let mut client = client_builder.await?;
+        if autosharded {
+            client.start_autosharded().await
+        } else {
+            client.start().await
+        }
     }
 
     /// Start the framework with the specified configuration.
-    ///
-    /// [`FrameworkBuilder::run`] is just a shorthand that calls [`FrameworkBuilder::build`] and
-    /// starts the returned framework
     pub async fn run(self) -> Result<(), serenity::Error>
     where
         U: Send + Sync + 'static,
         E: Send + 'static,
     {
-        self.build().await?.start().await
+        self.generic_run(false).await
     }
 
     /// Autosharded version of [`Self::run`]
@@ -226,6 +222,6 @@ and enable MESSAGE_CONTENT in your Discord bot dashboard
         U: Send + Sync + 'static,
         E: Send + 'static,
     {
-        self.build().await?.start_autosharded().await
+        self.generic_run(true).await
     }
 }

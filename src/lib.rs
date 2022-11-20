@@ -321,7 +321,6 @@ Also, poise is a stat in Dark Souls
 pub mod builtins;
 pub mod cooldown;
 pub mod dispatch;
-pub mod event;
 pub mod framework;
 pub mod modal;
 pub mod prefix_argument;
@@ -338,8 +337,8 @@ pub mod macros {
 
 #[doc(no_inline)]
 pub use {
-    cooldown::*, dispatch::*, event::*, framework::*, macros::*, modal::*, prefix_argument::*,
-    reply::*, slash_argument::*, structs::*, track_edits::*,
+    cooldown::*, dispatch::*, framework::*, macros::*, modal::*, prefix_argument::*, reply::*,
+    slash_argument::*, structs::*, track_edits::*,
 };
 
 /// See [`builtins`]
@@ -371,6 +370,7 @@ pub mod serenity_prelude {
             *,
         },
         collector::*,
+        framework::*,
         gateway::*,
         http::*,
         model::application::{command::*, component::*},

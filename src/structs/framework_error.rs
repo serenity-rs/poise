@@ -26,11 +26,8 @@ pub enum FrameworkError<'a, U, E> {
     Listener {
         /// Error which was thrown in the listener code
         error: E,
-        /// The serenity Context passed to the event
-        #[derivative(Debug = "ignore")]
-        ctx: &'a serenity::Context,
         /// Which event was being processed when the error occurred
-        event: &'a crate::Event,
+        event: &'a serenity::FullEvent,
         /// The Framework passed to the event
         #[derivative(Debug = "ignore")]
         framework: crate::FrameworkContext<'a, U, E>,
@@ -164,11 +161,12 @@ pub enum FrameworkError<'a, U, E> {
 }
 
 impl<'a, U, E> FrameworkError<'a, U, E> {
-    /// Returns the [`serenity::Context`] of this error
-    pub fn discord(&self) -> &'a serenity::Context {
-        match *self {
+    /// Returns the [`serenity::Context`] of this error, except on [`Self::Listener`] (not all
+    /// event types have a Context available).
+    pub fn discord(&self) -> Option<&'a serenity::Context> {
+        Some(match *self {
             Self::Setup { ctx, .. } => ctx,
-            Self::Listener { ctx, .. } => ctx,
+            Self::Listener { .. } => return None,
             Self::Command { ctx, .. } => ctx.discord(),
             Self::ArgumentParse { ctx, .. } => ctx.discord(),
             Self::CommandStructureMismatch { ctx, .. } => ctx.discord,
@@ -184,7 +182,7 @@ impl<'a, U, E> FrameworkError<'a, U, E> {
             Self::UnknownCommand { ctx, .. } => ctx,
             Self::UnknownInteraction { ctx, .. } => ctx,
             Self::__NonExhaustive => unreachable!(),
-        }
+        })
     }
 
     /// Returns the [`crate::Context`] of this error, if it has one
@@ -238,10 +236,9 @@ impl<U, E: std::fmt::Display> std::fmt::Display for FrameworkError<'_, U, E> {
             } => write!(f, "poise setup error"),
             Self::Listener {
                 error: _,
-                ctx: _,
                 event,
                 framework: _,
-            } => write!(f, "error in {} event listener", event.name()),
+            } => write!(f, "error in {} event listener", event.snake_case_name()),
             Self::Command { error: _, ctx } => {
                 write!(f, "error in command `{}`", full_command_name!(ctx))
             }

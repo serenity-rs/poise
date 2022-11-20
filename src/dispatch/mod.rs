@@ -51,11 +51,10 @@ impl<'a, U, E> FrameworkContext<'a, U, E> {
 /// Central event handling function of this library
 pub async fn dispatch_event<U: Send + Sync, E>(
     framework: crate::FrameworkContext<'_, U, E>,
-    ctx: &serenity::Context,
-    event: &crate::Event,
+    event: &serenity::FullEvent,
 ) {
     match event {
-        crate::Event::Message { new_message } => {
+        serenity::FullEvent::Message { ctx, new_message } => {
             let invocation_data = tokio::sync::Mutex::new(Box::new(()) as _);
             let mut parent_commands = Vec::new();
             let trigger = crate::MessageDispatchTrigger::MessageCreate;
@@ -72,7 +71,7 @@ pub async fn dispatch_event<U: Send + Sync, E>(
                 error.handle(framework.options).await;
             }
         }
-        crate::Event::MessageUpdate { event, .. } => {
+        serenity::FullEvent::MessageUpdate { ctx, event, .. } => {
             if let Some(edit_tracker) = &framework.options.prefix_options.edit_tracker {
                 let msg = edit_tracker.write().unwrap().process_message_update(
                     event,
@@ -104,7 +103,8 @@ pub async fn dispatch_event<U: Send + Sync, E>(
                 }
             }
         }
-        crate::Event::InteractionCreate {
+        serenity::FullEvent::InteractionCreate {
+            ctx,
             interaction: serenity::Interaction::Command(interaction),
         } => {
             let invocation_data = tokio::sync::Mutex::new(Box::new(()) as _);
@@ -123,7 +123,8 @@ pub async fn dispatch_event<U: Send + Sync, E>(
                 error.handle(framework.options).await;
             }
         }
-        crate::Event::InteractionCreate {
+        serenity::FullEvent::InteractionCreate {
+            ctx,
             interaction: serenity::Interaction::Autocomplete(interaction),
         } => {
             let invocation_data = tokio::sync::Mutex::new(Box::new(()) as _);
@@ -148,10 +149,9 @@ pub async fn dispatch_event<U: Send + Sync, E>(
     // Do this after the framework's Ready handling, so that get_user_data() doesnt
     // potentially block infinitely
     if let Err(error) =
-        (framework.options.listener)(ctx, event, framework, framework.user_data().await).await
+        (framework.options.listener)(event, framework, framework.user_data().await).await
     {
         let error = crate::FrameworkError::Listener {
-            ctx,
             error,
             event,
             framework,
