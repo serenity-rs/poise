@@ -164,6 +164,7 @@ impl<U, E> FrameworkBuilder<U, E> {
         self
     }
 
+    /// Helper function for `run()` and `run_autosharded()`
     async fn generic_run(self, autosharded: bool) -> Result<(), serenity::Error>
     where
         U: Send + Sync + 'static,

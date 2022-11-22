@@ -123,7 +123,7 @@ pub trait Modal: Sized {
     ///
     /// This function:
     /// 1. sends the modal via [`Self::create()`]
-    /// 2. waits for the user to submit via [`serenity::CollectModalInteraction`]
+    /// 2. waits for the user to submit via [`serenity::ModalInteractionCollector`]
     /// 3. acknowledges the submitted data so that Discord closes the pop-up for the user
     /// 4. parses the submitted data via [`Self::parse()`], wrapping errors in [`serenity::Error::Other`]
     // TODO: add execute_with_defaults? Or add a `defaults: Option<Self>` param?

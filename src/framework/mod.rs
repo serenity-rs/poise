@@ -42,6 +42,7 @@ pub struct Framework<U, E> {
         >,
     >,
 
+    /// Handle to the background task in order to `abort()` it on `Drop`
     edit_tracker_purge_task: once_cell::sync::OnceCell<tokio::task::JoinHandle<()>>,
 }
 
