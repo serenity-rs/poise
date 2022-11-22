@@ -1,3 +1,30 @@
+# 0.5.0
+
+New features:
+- Added `Context::parent_commands()`
+- Added `Context::invocation_string()`
+- Added `builtins::register_in_guild()` and `builtins::register_globally()` convenience functions
+- The return value of autocomplete callbacks can be any serializable type now
+- `Context` can now be passed directly into most serenity API functions
+  - Because it now implements `AsRef<Cache>`, `AsRef<Http>`, `AsRef<ShardMessenger>`, and `CacheHttp` traits
+- Added `execute_modal()` function with support for modal timeouts
+
+API updates:
+- `Modal::create()` gained a `custom_id: String` parameter
+  - To make it possible to tell apart two modal interactions
+- Removed `CreateReply::reference_message(MessageReference)` in favor of `CreateReply::reply(bool)`
+  - For the unusual case of setting a different reference message than the invocation (why would you? I'm genuinely interested), you can still convert the `CreateReply` into `serenity::CreateMessage` manually via `.to_prefix()` and call `serenity::CreateMessage`'s `reference_message()` method
+- Renamed `FrameworkBuilder::user_data_setup()` method to `setup()`
+- Renamed `FrameworkOptions::listener` field to `event_handler`
+- Renamed `Context::discord()` method to `serenity_context()`
+
+Behavior changes:
+- `register_application_commands_buttons()` now has emojis, reworked wording, and prints the time taken to register
+- `Modal::execute()` always responds to the correct modal now
+- When a subcommand is invoked, all parent commands' checks are run too, now
+
+Detailed changelog: https://github.com/kangalioo/poise/compare/v0.4.1...v0.5.0
+
 # 0.4.1
 
 Behavior changes:
