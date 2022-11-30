@@ -148,8 +148,12 @@ async fn check_permissions_and_cooldown_single<'a, U, E>(
         None => {}
     }
 
-    // Only continue if command checks returns true. First perform global checks, then command
-    // checks (if necessary)
+    // Only continue if command checks returns true or
+    // `FrameworkOptions::skip_checks_for_owners` is set to true
+    // First perform global checks, then command checks (if necessary)
+    if ctx.framework().options.skip_checks_for_owners {
+        return Ok(());
+    }
     for check in Option::iter(&ctx.framework().options().command_check).chain(&cmd.checks) {
         match check(ctx).await {
             Ok(true) => {}
