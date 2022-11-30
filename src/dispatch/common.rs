@@ -78,7 +78,9 @@ async fn check_permissions_and_cooldown_single<'a, U, E>(
     cmd: &'a crate::Command<U, E>,
 ) -> Result<(), crate::FrameworkError<'a, U, E>> {
     // Skip command checks if `FrameworkOptions::skip_checks_for_owners` is set to true
-    if ctx.framework().options.skip_checks_for_owners {
+    if ctx.framework().options.skip_checks_for_owners
+        && ctx.framework().options().owners.contains(&ctx.author().id)
+    {
         return Ok(());
     }
 
