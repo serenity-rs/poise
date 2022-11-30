@@ -77,6 +77,13 @@ async fn check_permissions_and_cooldown_single<'a, U, E>(
     ctx: crate::Context<'a, U, E>,
     cmd: &'a crate::Command<U, E>,
 ) -> Result<(), crate::FrameworkError<'a, U, E>> {
+    // Skip command checks if `FrameworkOptions::skip_checks_for_owners` is set to true
+    if ctx.framework().options.skip_checks_for_owners
+        && ctx.framework().options().owners.contains(&ctx.author().id)
+    {
+        return Ok(());
+    }
+
     if cmd.owners_only && !ctx.framework().options().owners.contains(&ctx.author().id) {
         return Err(crate::FrameworkError::NotAnOwner { ctx });
     }
@@ -148,8 +155,8 @@ async fn check_permissions_and_cooldown_single<'a, U, E>(
         None => {}
     }
 
-    // Only continue if command checks returns true. First perform global checks, then command
-    // checks (if necessary)
+    // Only continue if command checks returns true
+    // First perform global checks, then command checks (if necessary)
     for check in Option::iter(&ctx.framework().options().command_check).chain(&cmd.checks) {
         match check(ctx).await {
             Ok(true) => {}

@@ -23,6 +23,8 @@ pub struct FrameworkOptions<U, E> {
     /// If individual commands add their own check, both callbacks are run and must return true.
     #[derivative(Debug = "ignore")]
     pub command_check: Option<fn(crate::Context<'_, U, E>) -> BoxFuture<'_, Result<bool, E>>>,
+    /// If set to true, skips command checks if command was issued by [`FrameworkOptions::owners`]
+    pub skip_checks_for_owners: bool,
     /// Default set of allowed mentions to use for all responses
     ///
     /// By default, user pings are allowed and role pings and everyone pings are filtered
@@ -101,6 +103,7 @@ where
             pre_command: |_| Box::pin(async {}),
             post_command: |_| Box::pin(async {}),
             command_check: None,
+            skip_checks_for_owners: false,
             allowed_mentions: Some({
                 let mut f = serenity::CreateAllowedMentions::default();
                 // Only support direct user pings by default
