@@ -1,3 +1,12 @@
+# 0.5.1
+
+New features:
+- Added `FrameworkOptions::skip_checks_for_owner`
+
+Behavior changes:
+- `execute_modal` doesn't panic anymore when the timeout is reached
+- Checking user permissions properly falls back to HTTP when cache is enabled but empty
+
 # 0.5.0
 
 New features:
