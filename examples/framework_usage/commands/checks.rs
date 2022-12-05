@@ -98,16 +98,19 @@ pub async fn ferrisparty(ctx: Context<'_>) -> Result<(), Error> {
     channel_cooldown = 2,
     member_cooldown = 3,
 )]
-pub async fn add(
+pub async fn cooldowns(ctx: Context<'_>) -> Result<(), Error> {
+    ctx.say("You successfully called the command").await?;
+    Ok(())
+}
+
+#[poise::command(prefix_command, slash_command)]
+pub async fn minmax(
     ctx: Context<'_>,
-    #[description = "First operand"] a: f64,
-    #[description = "Second operand"]
     #[min = -15]
     #[max = 28.765]
-    b: f32,
+    value: f32,
 ) -> Result<(), Error> {
-    ctx.say(format!("Result: {}", a + b as f64)).await?;
-
+    ctx.say(format!("You submitted number {}", value)).await?;
     Ok(())
 }
 
