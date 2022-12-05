@@ -72,8 +72,11 @@ pub async fn execute_modal<U: Send + Sync, E, M: Modal>(
     let response = serenity::CollectModalInteraction::new(&ctx.serenity_context.shard)
         .filter(move |d| d.data.custom_id == interaction_id)
         .timeout(timeout.unwrap_or(std::time::Duration::from_secs(3600)))
-        .await
-        .unwrap();
+        .await;
+    let response = match response {
+        Some(x) => x,
+        None => return Ok(None),
+    };
 
     // Send acknowledgement so that the pop-up is closed
     response
