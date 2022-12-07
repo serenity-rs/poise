@@ -25,14 +25,18 @@ async fn register(ctx: Context<'_>) -> Result<(), Error> {
 
 #[tokio::main]
 async fn main() {
-    let framework = poise::Framework::builder()
-        .options(poise::FrameworkOptions {
+    let token = std::env::var("DISCORD_TOKEN").expect("missing DISCORD_TOKEN");
+    let intents = serenity::GatewayIntents::non_privileged();
+    let framework = poise::Framework::new(
+        poise::FrameworkOptions {
             commands: vec![age(), register()],
             ..Default::default()
-        })
-        .token(std::env::var("DISCORD_TOKEN").expect("missing DISCORD_TOKEN"))
-        .intents(serenity::GatewayIntents::non_privileged())
-        .user_data_setup(move |_ctx, _ready, _framework| Box::pin(async move { Ok(Data {}) }));
-
-    framework.run().await.unwrap();
+        },
+        move |_ctx, _ready, _framework| Box::pin(async move { Ok(Data {}) }),
+    );
+    let mut client = serenity::Client::builder(token, intents)
+        .framework(framework)
+        .await
+        .unwrap();
+    client.start().await.unwrap();
 }
