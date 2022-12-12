@@ -32,7 +32,9 @@ pub trait SlashArgument: Sized {
     /// If this is a choice parameter, returns the choices
     ///
     /// Don't call this method directly! Use [`crate::slash_argument_choices!`]
-    fn choices() -> Vec<crate::CommandParameterChoice>;
+    fn choices() -> Vec<crate::CommandParameterChoice> {
+        Vec::new()
+    }
 }
 
 /// Implemented for all types that can be used as a function parameter in a slash command.
@@ -125,9 +127,8 @@ where
 macro_rules! impl_for_integer {
     ($($t:ty)*) => { $(
         #[async_trait::async_trait]
-        impl SlashArgumentHack<$t> for &PhantomData<$t> {
+        impl SlashArgument for $t {
             async fn extract(
-                self,
                 _: &serenity::Context,
                 _: crate::ApplicationCommandOrAutocompleteInteraction<'_>,
                 value: &serenity::json::Value,
@@ -139,7 +140,7 @@ macro_rules! impl_for_integer {
                     .map_err(|_| SlashArgError::CommandStructureMismatch("received out of bounds integer"))
             }
 
-            fn create(self, builder: &mut serenity::CreateApplicationCommandOption) {
+            fn create(builder: &mut serenity::CreateApplicationCommandOption) {
                 builder
                     .min_number_value(f64::max(<$t>::MIN as f64, -9007199254740991.))
                     .max_number_value(f64::min(<$t>::MAX as f64, 9007199254740991.))
@@ -252,9 +253,8 @@ impl<T: SlashArgument + Sync> SlashArgumentHack<T> for &PhantomData<T> {
 macro_rules! impl_slash_argument {
     ($type:ty, $slash_param_type:ident) => {
         #[async_trait::async_trait]
-        impl SlashArgumentHack<$type> for &PhantomData<$type> {
+        impl SlashArgument for $type {
             async fn extract(
-                self,
                 ctx: &serenity::Context,
                 interaction: crate::ApplicationCommandOrAutocompleteInteraction<'_>,
                 value: &serenity::json::Value,
@@ -263,7 +263,7 @@ macro_rules! impl_slash_argument {
                 PhantomData::<$type>.extract(ctx, interaction, value).await
             }
 
-            fn create(self, builder: &mut serenity::CreateApplicationCommandOption) {
+            fn create(builder: &mut serenity::CreateApplicationCommandOption) {
                 builder.kind(serenity::CommandOptionType::$slash_param_type);
             }
         }
