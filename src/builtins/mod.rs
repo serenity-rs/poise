@@ -191,14 +191,7 @@ pub async fn autocomplete_command<'a, U, E>(
 pub async fn servers<U, E>(ctx: crate::Context<'_, U, E>) -> Result<(), serenity::Error> {
     use std::fmt::Write as _;
 
-    let mut show_private_guilds = false;
-    if let crate::Context::Application(_) = ctx {
-        if let Ok(app) = ctx.sc().http.get_current_application_info().await {
-            if app.owner.id == ctx.author().id {
-                show_private_guilds = true;
-            }
-        }
-    }
+    let show_private_guilds = ctx.framework().options().owners.contains(&ctx.author().id);
 
     /// Stores details of a guild for the purposes of listing it in the bot guild list
     struct Guild {
