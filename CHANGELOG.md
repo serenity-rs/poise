@@ -8,6 +8,8 @@ Behavior changes:
 - Editing commands not marked track_edits no longer re-runs the command
 - `builtins::servers` now shows hidden statistics for the entire bot team, not just owner
 
+Detailed changelog: https://github.com/kangalioo/poise/compare/v0.5.1...v0.5.2
+
 # 0.5.1
 
 New features:
@@ -16,6 +18,8 @@ New features:
 Behavior changes:
 - `execute_modal` doesn't panic anymore when the timeout is reached
 - Checking user permissions properly falls back to HTTP when cache is enabled but empty
+
+Detailed changelog: https://github.com/kangalioo/poise/compare/v0.5.0...v0.5.1
 
 # 0.5.0
 
