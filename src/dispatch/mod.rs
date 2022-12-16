@@ -86,8 +86,8 @@ pub async fn dispatch_event<U: Send + Sync, E>(
                     let invocation_data = tokio::sync::Mutex::new(Box::new(()) as _);
                     let mut parent_commands = Vec::new();
                     let trigger = match previously_tracked {
-                        true => crate::MessageDispatchTrigger::MessageEditFromInvalid,
-                        false => crate::MessageDispatchTrigger::MessageEdit,
+                        true => crate::MessageDispatchTrigger::MessageEdit,
+                        false => crate::MessageDispatchTrigger::MessageEditFromInvalid,
                     };
                     if let Err(error) = prefix::dispatch_message(
                         framework,
