@@ -1,3 +1,13 @@
+# 0.5.2
+
+New features:
+- Added `track_deletion` feature to commands
+- Added all of `Context`'s methods to `PrefixContext` and `ApplicationContext`
+
+Behavior changes:
+- Editing commands not marked track_edits no longer re-runs the command
+- `builtins::servers` now shows hidden statistics for the entire bot team, not just owner
+
 # 0.5.1
 
 New features:
