@@ -308,7 +308,10 @@ pub async fn run_invocation<U, E>(
     // execute_untracked_edits situation and start an infinite loop
     // Reported by vicky5124 https://discord.com/channels/381880193251409931/381912587505500160/897981367604903966
     if let Some(edit_tracker) = &ctx.framework.options.prefix_options.edit_tracker {
-        edit_tracker.write().unwrap().track_command(ctx.msg);
+        edit_tracker
+            .write()
+            .unwrap()
+            .track_command(ctx.msg, ctx.command.track_deletion);
     }
 
     // Execute command

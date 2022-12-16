@@ -104,6 +104,21 @@ pub async fn dispatch_event<U: Send + Sync, E>(
                 }
             }
         }
+        crate::Event::MessageDelete {
+            deleted_message_id, ..
+        } => {
+            if let Some(edit_tracker) = &framework.options.prefix_options.edit_tracker {
+                let bot_response = edit_tracker
+                    .write()
+                    .unwrap()
+                    .process_message_delete(*deleted_message_id);
+                if let Some(bot_response) = bot_response {
+                    if let Err(e) = bot_response.delete(ctx).await {
+                        log::warn!("failed to delete bot response: {}", e);
+                    }
+                }
+            }
+        }
         crate::Event::InteractionCreate {
             interaction: serenity::Interaction::ApplicationCommand(interaction),
         } => {

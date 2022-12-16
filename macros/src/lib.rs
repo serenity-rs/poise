@@ -27,8 +27,9 @@ for example for command-specific help (i.e. `~help command_name`). Escape newlin
 - `subcommands`: List of subcommands `subcommands("foo", "bar", "baz")`
 - `aliases`: Command name aliases (only applies to prefix commands)
 - `invoke_on_edit`: Reruns the command if an existing invocation message is edited (prefix only)
+- `track_deletion`: Deletes the bot response to a command if the command message is deleted (prefix only)
 - `reuse_response`: After the first response, post subsequent responses as edits to the initial message (prefix only)
-- `track_edits`: Shorthand for `invoke_on_edit` and `reuse_response` (prefix only)
+- `track_edits`: Shorthand for `invoke_on_edit`, `track_deletion`, and `reuse_response` (prefix only)
 - `broadcast_typing`: Trigger a typing indicator while command runs (only applies to prefix commands I think)
 - `help_text_fn`: Path to a string-returning function which is used for command help text instead of documentation comments
     - Useful if you have many commands with very similar help messages: you can abstract the common parts into a function

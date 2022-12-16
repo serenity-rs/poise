@@ -20,6 +20,7 @@ pub struct CommandArgs {
     aliases: crate::util::List<String>,
     invoke_on_edit: bool,
     reuse_response: bool,
+    track_deletion: bool,
     track_edits: bool,
     broadcast_typing: bool,
     help_text_fn: Option<syn::Path>,
@@ -282,6 +283,7 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
 
     let invoke_on_edit = inv.args.invoke_on_edit || inv.args.track_edits;
     let reuse_response = inv.args.reuse_response || inv.args.track_edits;
+    let track_deletion = inv.args.track_deletion || inv.args.track_edits;
     let broadcast_typing = inv.args.broadcast_typing;
     let aliases = &inv.args.aliases.0;
     let subcommands = &inv.args.subcommands.0;
@@ -345,6 +347,7 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
 
                 aliases: &[ #( #aliases, )* ],
                 invoke_on_edit: #invoke_on_edit,
+                track_deletion: #track_deletion,
                 broadcast_typing: #broadcast_typing,
 
                 context_menu_name: #context_menu_name,
