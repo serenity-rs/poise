@@ -1,4 +1,4 @@
-[![Build](https://img.shields.io/github/workflow/status/kangalioo/poise/CI)](https://kangalioo.github.io/poise/)
+[![Build](https://img.shields.io/github/actions/workflow/status/kangalioo/poise/ci.yml?branch=develop)](https://kangalioo.github.io/poise/)
 [![crates.io](https://img.shields.io/crates/v/poise.svg)](https://crates.io/crates/poise)
 [![Docs](https://img.shields.io/badge/docs-online-informational)](https://docs.rs/poise/)
 [![Docs (git)](https://img.shields.io/badge/docs%20%28git%29-online-informational)](https://kangalioo.github.io/poise/)
