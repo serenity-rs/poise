@@ -9,6 +9,9 @@ pub use help::*;
 mod register;
 pub use register::*;
 
+mod paginate;
+pub use paginate::*;
+
 use crate::serenity_prelude as serenity;
 
 /// An error handler that logs errors either via the [`log`] crate or via a Discord message. Set

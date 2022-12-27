@@ -1,4 +1,5 @@
 mod inherit_checks;
+mod misc;
 
 use poise::serenity_prelude as serenity;
 
@@ -11,7 +12,7 @@ pub struct Data {}
 async fn main() {
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
-            commands: vec![inherit_checks::parent()],
+            commands: vec![inherit_checks::parent(), misc::paginate()],
             prefix_options: poise::PrefixFrameworkOptions {
                 prefix: Some("~".into()),
                 ..Default::default()
