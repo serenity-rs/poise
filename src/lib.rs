@@ -54,14 +54,14 @@ To set multiple gateway events, use the OR operator:
 
 ## Discord actions outside a command
 
-You can run Discord actions outside of commands by cloning and storing [`serenity::CacheAndHttp`]/
+You can run Discord actions outside of commands by cloning and storing
 [`Arc<serenity::Http>`](serenity::Http)/[`Arc<serenity::Cache>`](serenity::Cache). You can get
 those either from [`serenity::Context`] (passed to
 [`user_data_setup`](crate::FrameworkBuilder::user_data_setup) and all commands via
 [`ctx.discord()`](crate::Context::discord)) or before starting the client via
 [`cache_and_http`](serenity::Client::cache_and_http).
 
-Pass your `CacheAndHttp` or `Arc<Http>` to serenity functions in place of the usual
+Pass `Arc<Http>` to serenity functions in place of the usual
 `serenity::Context`
 
 ## Useful serenity methods

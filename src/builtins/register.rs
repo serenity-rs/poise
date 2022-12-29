@@ -166,9 +166,8 @@ pub async fn register_application_commands_buttons<U, E>(
     let interaction = reply
         .message()
         .await?
-        .component_interaction_collector(&ctx.discord().shard)
+        .await_component_interaction(&ctx.discord().shard)
         .author_id(ctx.author().id)
-        .collect_single()
         .await;
 
     // remove buttons after button press

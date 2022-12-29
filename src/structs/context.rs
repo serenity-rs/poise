@@ -440,15 +440,6 @@ impl<'a, U, E> Context<'a, U, E> {
             Context::Prefix(_) => None,
         }
     }
-
-    /// Creates a [`serenity::CacheAndHttp`] from the serenity Context
-    pub fn cache_and_http(&self) -> serenity::CacheAndHttp {
-        serenity::CacheAndHttp {
-            http: self.discord().http.clone(),
-            #[cfg(feature = "cache")]
-            cache: self.discord().cache.clone(),
-        }
-    }
 }
 
 /// Trimmed down, more general version of [`Context`]

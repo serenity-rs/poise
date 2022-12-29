@@ -255,7 +255,9 @@ mod test {
 
         // Create dummy discord context; it will not be accessed in this test
         let ctx = serenity::Context {
-            data: std::sync::Arc::new(serenity::RwLock::new(serenity::TypeMap::new())),
+            data: std::sync::Arc::new(
+                tokio::sync::RwLock::new(::serenity::prelude::TypeMap::new()),
+            ),
             shard: ::serenity::client::bridge::gateway::ShardMessenger::new(
                 futures::channel::mpsc::unbounded().0,
             ),

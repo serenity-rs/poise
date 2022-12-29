@@ -159,9 +159,8 @@ pub fn generate_slash_action(inv: &Invocation) -> Result<proc_macro2::TokenStrea
             // why clippy doesn't turn off this lint inside macros in the first place
             #[allow(clippy::needless_question_mark)]
 
-            let cache_and_http = poise::Context::Application(ctx).cache_and_http();
             let ( #( #param_identifiers, )* ) = ::poise::parse_slash_args!(
-                &cache_and_http, ctx.interaction, ctx.args =>
+                &ctx, ctx.interaction, ctx.args =>
                 #( (#param_names: #param_types), )*
             ).await.map_err(|error| error.to_framework_error(ctx))?;
 
