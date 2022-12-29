@@ -179,7 +179,7 @@ to use this macro directly.
 # #[tokio::main] async fn main() -> Result<(), Box<dyn std::error::Error>> {
 # use poise::serenity_prelude as serenity;
 # let ctx = serenity::Context {
-#     data: std::sync::Arc::new(serenity::RwLock::new(serenity::TypeMap::new())),
+#     data: std::sync::Arc::new(::serenity::prelude::RwLock::new(::serenity::prelude::TypeMap::new())),
 #     shard: ::serenity::client::bridge::gateway::ShardMessenger::new(
 #         futures::channel::mpsc::unbounded().0,
 #     ),

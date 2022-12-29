@@ -228,40 +228,43 @@ async fn error_handler(error: poise::FrameworkError<'_, Data, Error>) {
 
 # async {
 // Use `Framework::builder()` to create a framework builder and supply basic data to the framework:
-poise::Framework::builder()
-    .token("...")
-    .user_data_setup(|_, _, _| Box::pin(async move {
-        // construct user data here (invoked when bot connects to Discord)
-        Ok(())
-    }))
-
-    // Most configuration is done via the `FrameworkOptions` struct, which you can define with
-    // a struct literal (hint: use `..Default::default()` to fill uninitialized
-    // settings with their default value):
-    .options(poise::FrameworkOptions {
-        on_error: |err| Box::pin(my_error_function(err)),
-        prefix_options: poise::PrefixFrameworkOptions {
-            prefix: Some("~".into()),
-            edit_tracker: Some(poise::EditTracker::for_timespan(std::time::Duration::from_secs(3600))),
-            case_insensitive_commands: true,
-            ..Default::default()
-        },
-        // This is also where commands go
-        commands: vec![
-            command1(),
-            command2(),
-            // You can also modify a command by changing the fields of its Command instance
-            poise::Command {
-                // [override fields here]
-                ..command3()
-            }
-        ],
-        ..Default::default()
-    })
-
-    .run().await?;
-# Ok::<(), Error>(()) };
+# let framework_options = poise::FrameworkOptions {
+#         on_error: |err| Box::pin(my_error_function(err)),
+#         prefix_options: poise::PrefixFrameworkOptions {
+#             prefix: Some("~".into()),
+#             edit_tracker: Some(poise::EditTracker::for_timespan(
+#                 std::time::Duration::from_secs(3600),
+#             )),
+#             case_insensitive_commands: true,
+#             ..Default::default()
+#         },
+#         // This is also where commands go
+#         commands: vec![
+#             command1(),
+#             command2(),
+#             // You can also modify a command by changing the fields of its Command instance
+#             poise::Command {
+#                 // [override fields here]
+#                 ..command3()
+#             },
+#         ],
+#         ..Default::default()
+#     };
+#
+#     let framework = poise::Framework::new(framework_options, |_, _, _| {
+#         Box::pin(async move {
+#             // construct user data here (invoked when bot connects to Discord)
+#             Ok(())
+#         })
+#     });
+#
+#
+#     serenity::Client::builder("token", serenity::all::GatewayIntents::non_privileged())
+#         .framework(framework)
+#         .await;
+# };
 ```
+
 
 ## Registering slash commands
 
