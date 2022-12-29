@@ -107,7 +107,7 @@ macro_rules! _parse_slash {
     // Extract Option<T>
     ($ctx:ident, $interaction:ident, $args:ident => $name:ident: Option<$type:ty $(,)*>) => {
         if let Some(arg) = $args.iter().find(|arg| arg.name == stringify!($name)) {
-            Some($crate::extract_slash_argument!($type, $ctx.discord, $interaction, &arg.value)
+            Some($crate::extract_slash_argument!($type, $ctx, $interaction, &arg.value)
                 .await?)
         } else {
             None
