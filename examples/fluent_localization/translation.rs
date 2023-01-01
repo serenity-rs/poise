@@ -45,8 +45,8 @@ pub fn format(
 }
 
 /// Retrieves the appropriate language file depending on user locale and calls [`format`]
-pub fn get<'a>(
-    ctx: Context<'a>,
+pub fn get(
+    ctx: Context<'_>,
     id: &str,
     attr: Option<&str>,
     args: Option<&fluent::FluentArgs<'_>>,
