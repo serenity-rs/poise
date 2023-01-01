@@ -7,7 +7,7 @@
     clippy::missing_docs_in_private_items,
     clippy::unused_async,
     rust_2018_idioms,
-    missing_docs,
+    missing_docs
 )]
 /*!
 Poise is an opinionated Discord bot framework with a few distinctive features:
