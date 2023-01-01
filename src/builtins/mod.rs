@@ -166,6 +166,7 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
 /// An autocomplete function that can be used for the command parameter in your help function.
 ///
 /// See `examples/framework_usage` for an example
+#[allow(clippy::unused_async)] // Required for the return type
 pub async fn autocomplete_command<'a, U, E>(
     ctx: crate::Context<'a, U, E>,
     partial: &'a str,

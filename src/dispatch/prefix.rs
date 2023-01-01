@@ -16,7 +16,7 @@ async fn strip_prefix<'a, U, E>(
         author: &msg.author,
         serenity_context: ctx,
         framework,
-        data: framework.user_data().await,
+        data: framework.user_data(),
     };
 
     if let Some(dynamic_prefix) = framework.options.prefix_options.dynamic_prefix {
@@ -66,7 +66,7 @@ async fn strip_prefix<'a, U, E>(
     }
 
     if let Some(dynamic_prefix) = framework.options.prefix_options.stripped_dynamic_prefix {
-        match dynamic_prefix(ctx, msg, framework.user_data().await).await {
+        match dynamic_prefix(ctx, msg, framework.user_data()).await {
             Ok(result) => {
                 if let Some((prefix, content)) = result {
                     return Some((prefix, content));
@@ -264,7 +264,7 @@ pub async fn parse_invocation<'a, U: Send + Sync, E>(
         invoked_command_name,
         args,
         framework,
-        data: framework.user_data().await,
+        data: framework.user_data(),
         parent_commands,
         command,
         invocation_data,
