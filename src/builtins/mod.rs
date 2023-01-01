@@ -53,12 +53,9 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
                 None => "Please check the help menu for usage information".into(),
             };
             let response = if let Some(input) = input {
-                format!(
-                    "**Cannot parse `{}` as argument: {}**\n{}",
-                    input, error, usage
-                )
+                format!("**Cannot parse `{input}` as argument: {error}**\n{usage}")
             } else {
-                format!("**{}**\n{}", error, usage)
+                format!("**{error}**\n{usage}")
             };
             ctx.say(response).await?;
         }
@@ -92,8 +89,7 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
             ctx,
         } => {
             let msg = format!(
-                "Command cannot be executed because the bot is lacking permissions: {}",
-                missing_permissions,
+                "Command cannot be executed because the bot is lacking permissions: {missing_permissions}",
             );
             ctx.send(|b| b.content(msg).ephemeral(true)).await?;
         }
@@ -244,15 +240,13 @@ pub async fn servers<U, E>(ctx: crate::Context<'_, U, E>) -> Result<(), serenity
     if num_private_guilds > 0 {
         let _ = writeln!(
             response,
-            "- [{} private servers with {} members total]",
-            num_private_guilds, num_private_guild_members
+            "- [{num_private_guilds} private servers with {num_private_guild_members} members total]"
         );
     }
     if num_unavailable_guilds > 0 {
         let _ = writeln!(
             response,
-            "- [{} unavailable servers (cache is not ready yet)]",
-            num_unavailable_guilds
+            "- [{num_unavailable_guilds} unavailable servers (cache is not ready yet)]"
         );
     }
 

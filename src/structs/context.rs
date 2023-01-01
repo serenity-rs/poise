@@ -391,15 +391,15 @@ context_methods! {
                         string += &arg.name;
                         string += ":";
                         if let Some(x) = value.as_bool() {
-                            let _ = write!(string, "{}", x);
+                            let _ = write!(string, "{x}");
                         } else if let Some(x) = value.as_i64() {
-                            let _ = write!(string, "{}", x);
+                            let _ = write!(string, "{x}");
                         } else if let Some(x) = value.as_u64() {
-                            let _ = write!(string, "{}", x);
+                            let _ = write!(string, "{x}");
                         } else if let Some(x) = value.as_f64() {
-                            let _ = write!(string, "{}", x);
+                            let _ = write!(string, "{x}");
                         } else if let Some(x) = value.as_str() {
-                            let _ = write!(string, "{}", x);
+                            let _ = write!(string, "{x}");
                         }
                     }
                 }

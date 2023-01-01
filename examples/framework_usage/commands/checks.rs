@@ -110,7 +110,7 @@ pub async fn minmax(
     #[max = 28.765]
     value: f32,
 ) -> Result<(), Error> {
-    ctx.say(format!("You submitted number {}", value)).await?;
+    ctx.say(format!("You submitted number {value}")).await?;
     Ok(())
 }
 

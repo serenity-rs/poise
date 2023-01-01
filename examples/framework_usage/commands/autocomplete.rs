@@ -39,10 +39,7 @@ async fn autocomplete_number(
     [1_u32, 2, 3, 4, 5]
         .iter()
         .map(|&n| poise::AutocompleteChoice {
-            name: format!(
-                "{} (why did discord even give autocomplete choices separate labels)",
-                n
-            ),
+            name: format!("{n} (why did discord even give autocomplete choices separate labels)"),
             value: n,
         })
 }
@@ -58,9 +55,9 @@ pub async fn greet(
     #[autocomplete = "autocomplete_number"]
     number: Option<u32>,
 ) -> Result<(), Error> {
-    let mut response = format!("Hello {}", name);
+    let mut response = format!("Hello {name}");
     if let Some(number) = number {
-        let _ = write!(response, "#{}", number);
+        let _ = write!(response, "#{number}");
     }
     response += "!";
 

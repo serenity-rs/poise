@@ -74,15 +74,15 @@ pub fn read_ftl() -> Result<Translations, Error> {
         // Load .ftl resource
         let file_contents = std::fs::read_to_string(path)?;
         let resource = fluent::FluentResource::try_new(file_contents)
-            .map_err(|(_, e)| format!("failed to parse {:?}: {:?}", path, e))?;
+            .map_err(|(_, e)| format!("failed to parse {path:?}: {e:?}"))?;
 
         // Associate .ftl resource with locale and bundle it
         let mut bundle = FluentBundle::new_concurrent(vec![locale
             .parse()
-            .map_err(|e| format!("invalid locale `{}`: {}", locale, e))?]);
+            .map_err(|e| format!("invalid locale `{locale}`: {e}"))?]);
         bundle
             .add_resource(resource)
-            .map_err(|e| format!("failed to add resource to bundle: {:?}", e))?;
+            .map_err(|e| format!("failed to add resource to bundle: {e:?}"))?;
 
         Ok((locale.to_string(), bundle))
     }

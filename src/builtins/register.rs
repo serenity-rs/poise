@@ -111,7 +111,7 @@ pub async fn register_application_commands<U, E>(
     let num_commands = commands_builder.0.len();
 
     if global {
-        ctx.say(format!("Registering {} commands...", num_commands))
+        ctx.say(format!("Registering {num_commands} commands..."))
             .await?;
         serenity::Command::set_global_application_commands(ctx, |b| {
             *b = commands_builder;
@@ -127,7 +127,7 @@ pub async fn register_application_commands<U, E>(
             }
         };
 
-        ctx.say(format!("Registering {} commands...", num_commands))
+        ctx.say(format!("Registering {num_commands} commands..."))
             .await?;
         guild_id
             .set_application_commands(ctx, |b| {
@@ -254,8 +254,7 @@ pub async fn register_application_commands_buttons<U, E>(
     if global {
         if register {
             ctx.say(format!(
-                ":gear: Registering {} global commands...",
-                num_commands
+                ":gear: Registering {num_commands} global commands..."
             ))
             .await?;
             serenity::Command::set_global_application_commands(ctx, |b| {
@@ -277,8 +276,7 @@ pub async fn register_application_commands_buttons<U, E>(
         };
         if register {
             ctx.say(format!(
-                ":gear: Registering {} guild commands...",
-                num_commands
+                ":gear: Registering {num_commands} guild commands..."
             ))
             .await?;
             guild_id

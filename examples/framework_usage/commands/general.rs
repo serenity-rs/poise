@@ -17,10 +17,7 @@ pub async fn vote(
         *num_votes
     };
 
-    let response = format!(
-        "Successfully voted for {0}. {0} now has {1} votes!",
-        choice, num_votes
-    );
+    let response = format!("Successfully voted for {choice}. {choice} now has {num_votes} votes!");
     ctx.say(response).await?;
     Ok(())
 }
@@ -40,14 +37,14 @@ pub async fn getvotes(
     if let Some(choice) = choice {
         let num_votes = *ctx.data().votes.lock().unwrap().get(&choice).unwrap_or(&0);
         let response = match num_votes {
-            0 => format!("Nobody has voted for {} yet", choice),
-            _ => format!("{} people have voted for {}", num_votes, choice),
+            0 => format!("Nobody has voted for {choice} yet"),
+            _ => format!("{num_votes} people have voted for {choice}"),
         };
         ctx.say(response).await?;
     } else {
         let mut response = String::new();
         for (choice, num_votes) in ctx.data().votes.lock().unwrap().iter() {
-            let _ = writeln!(response, "{}: {} votes", choice, num_votes);
+            let _ = writeln!(response, "{choice}: {num_votes} votes");
         }
 
         if response.is_empty() {
@@ -94,7 +91,7 @@ pub async fn choice(
     ctx: Context<'_>,
     #[description = "The choice you want to choose"] choice: MyStringChoice,
 ) -> Result<(), Error> {
-    ctx.say(format!("You entered {:?}", choice)).await?;
+    ctx.say(format!("You entered {choice:?}")).await?;
     Ok(())
 }
 
@@ -127,7 +124,7 @@ pub async fn boop(ctx: Context<'_>) -> Result<(), Error> {
         boop_count += 1;
 
         let mut msg = mci.message.clone();
-        msg.edit(ctx, |m| m.content(format!("Boop count: {}", boop_count)))
+        msg.edit(ctx, |m| m.content(format!("Boop count: {boop_count}")))
             .await?;
 
         mci.create_interaction_response(ctx, |ir| {
@@ -226,7 +223,7 @@ pub async fn code(
     args: poise::KeyValueArgs,
     code: poise::CodeBlock,
 ) -> Result<(), Error> {
-    ctx.say(format!("Key value args: {:?}\nCode: {}", args, code))
+    ctx.say(format!("Key value args: {args:?}\nCode: {code}"))
         .await?;
     Ok(())
 }
@@ -288,7 +285,7 @@ pub async fn modal(
     use poise::Modal as _;
 
     let data = MyModal::execute(ctx).await?;
-    println!("Got data: {:?}", data);
+    println!("Got data: {data:?}");
 
     Ok(())
 }

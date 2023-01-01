@@ -173,7 +173,7 @@ async fn on_error(error: poise::FrameworkError<'_, Data, Error>) {
         }
         error => {
             if let Err(e) = poise::builtins::on_error(error).await {
-                println!("Error while handling error: {}", e)
+                println!("Error while handling error: {e}")
             }
         }
     }
@@ -342,7 +342,7 @@ async fn commands(ctx: Context<'_>) -> Result<(), Error> {
     let mut contents = "Commands used:\n".to_string();
 
     for (k, v) in &*ctx.data().command_counter.lock().unwrap() {
-        writeln!(contents, "- {name}: {amount}", name = k, amount = v)?;
+        writeln!(contents, "- {k}: {v}")?;
     }
 
     ctx.say(contents).await?;
@@ -418,7 +418,7 @@ async fn some_long_command(
     #[rest]
     args: String,
 ) -> Result<(), Error> {
-    ctx.say(format!("Arguments: {:?}", args)).await?;
+    ctx.say(format!("Arguments: {args:?}")).await?;
 
     Ok(())
 }
@@ -439,7 +439,7 @@ async fn about_role(
         // via its name.
         if let Some(role) = guild.role_by_name(&potential_role_name) {
             if let Err(why) = ctx.say(format!("Role-ID: {}", role.id)).await {
-                println!("Error sending message: {:?}", why);
+                println!("Error sending message: {why:?}");
             }
 
             return Ok(());
@@ -448,7 +448,7 @@ async fn about_role(
 
     poise::say_reply(
         ctx,
-        format!("Could not find role named: {:?}", potential_role_name),
+        format!("Could not find role named: {potential_role_name:?}"),
     )
     .await?;
 
@@ -571,7 +571,7 @@ async fn bird(
 ) -> Result<(), Error> {
     let say_content = match bird_name {
         None => ":bird: can find animals for you.".to_string(),
-        Some(bird_name) => format!(":bird: could not find animal named: `{}`.", bird_name),
+        Some(bird_name) => format!(":bird: could not find animal named: `{bird_name}`."),
     };
 
     ctx.say(say_content).await?;
@@ -618,13 +618,10 @@ async fn slow_mode(
             .edit(ctx, |c| c.rate_limit_per_user(rate_limit))
             .await
         {
-            println!("Error setting channel's slow mode rate: {:?}", why);
-            format!("Failed to set slow mode to `{}` seconds.", rate_limit)
+            println!("Error setting channel's slow mode rate: {why:?}");
+            format!("Failed to set slow mode to `{rate_limit}` seconds.")
         } else {
-            format!(
-                "Successfully set slow mode rate to `{}` seconds.",
-                rate_limit
-            )
+            format!("Successfully set slow mode rate to `{rate_limit}` seconds.")
         }
     } else if let Some(serenity::Channel::Guild(channel)) = ctx.channel_id().to_channel_cached(ctx)
     {

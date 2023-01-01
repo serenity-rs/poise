@@ -28,12 +28,11 @@ impl std::fmt::Display for SlashArgError {
             Self::CommandStructureMismatch(detail) => {
                 write!(
                     f,
-                    "Bot author did not register their commands correctly ({})",
-                    detail
+                    "Bot author did not register their commands correctly ({detail})"
                 )
             }
             Self::Parse { error, input } => {
-                write!(f, "Failed to parse `{}` as argument: {}", input, error)
+                write!(f, "Failed to parse `{input}` as argument: {error}")
             }
         }
     }

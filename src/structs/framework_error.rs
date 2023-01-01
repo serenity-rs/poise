@@ -325,7 +325,7 @@ impl<U, E: std::fmt::Display> std::fmt::Display for FrameworkError<'_, U, E> {
                 )
             }
             Self::UnknownCommand { msg_content, .. } => {
-                write!(f, "unknown command `{}`", msg_content)
+                write!(f, "unknown command `{msg_content}`")
             }
             Self::UnknownInteraction { interaction, .. } => {
                 write!(f, "unknown interaction `{}`", interaction.data().name)

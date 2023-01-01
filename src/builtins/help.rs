@@ -53,7 +53,7 @@ async fn help_single_command<U, E>(
                 .to_owned(),
         }
     } else {
-        format!("No such command `{}`", command_name)
+        format!("No such command `{command_name}`")
     };
 
     ctx.send(|b| b.content(reply).ephemeral(config.ephemeral))
@@ -129,7 +129,7 @@ async fn help_all_commands<U, E>(
                 None => continue,
             };
             let name = command.context_menu_name.unwrap_or(&command.name);
-            let _ = writeln!(menu, "  {} (on {})", name, kind);
+            let _ = writeln!(menu, "  {name} (on {kind})");
         }
     }
 
