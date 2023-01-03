@@ -9,7 +9,9 @@ pub use help::*;
 mod register;
 pub use register::*;
 
+#[cfg(any(feature = "chrono", feature = "time"))]
 mod paginate;
+#[cfg(any(feature = "chrono", feature = "time"))]
 pub use paginate::*;
 
 use crate::serenity_prelude as serenity;
