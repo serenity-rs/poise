@@ -16,7 +16,7 @@ pub trait SlashArgument: Sized {
     ///
     /// Don't call this method directly! Use [`crate::extract_slash_argument!`]
     async fn extract(
-        ctx: &serenity::CacheAndHttp,
+        ctx: &impl serenity::CacheHttp,
         interaction: crate::CommandOrAutocompleteInteraction<'_>,
         value: &serenity::ResolvedValue<'_>,
     ) -> Result<Self, SlashArgError>;
@@ -44,7 +44,7 @@ pub trait SlashArgument: Sized {
 pub trait SlashArgumentHack<T>: Sized {
     async fn extract(
         self,
-        ctx: &serenity::CacheAndHttp,
+        ctx: &impl serenity::CacheHttp,
         interaction: crate::CommandOrAutocompleteInteraction<'_>,
         value: &serenity::ResolvedValue<'_>,
     ) -> Result<T, SlashArgError>;
@@ -99,7 +99,7 @@ where
 {
     async fn extract(
         self,
-        ctx: &serenity::CacheAndHttp,
+        ctx: &impl serenity::CacheHttp,
         interaction: crate::CommandOrAutocompleteInteraction<'_>,
         value: &serenity::ResolvedValue<'_>,
     ) -> Result<T, SlashArgError> {
@@ -132,7 +132,7 @@ macro_rules! impl_for_integer {
         impl SlashArgumentHack<$t> for &PhantomData<$t> {
             async fn extract(
                 self,
-                _: &serenity::CacheAndHttp,
+                _: &impl serenity::CacheHttp,
                 _: crate::CommandOrAutocompleteInteraction<'_>,
                 value: &serenity::ResolvedValue<'_>,
             ) -> Result<$t, SlashArgError> {
@@ -161,7 +161,7 @@ impl_for_integer!(i8 i16 i32 i64 isize u8 u16 u32 u64 usize);
 impl<T: SlashArgument + Sync> SlashArgumentHack<T> for &PhantomData<T> {
     async fn extract(
         self,
-        ctx: &serenity::CacheAndHttp,
+        ctx: &impl serenity::CacheHttp,
         interaction: crate::CommandOrAutocompleteInteraction<'_>,
         value: &serenity::ResolvedValue<'_>,
     ) -> Result<T, SlashArgError> {
@@ -184,7 +184,7 @@ macro_rules! impl_slash_argument {
         impl SlashArgumentHack<$type> for &PhantomData<$type> {
             async fn extract(
                 self,
-                $ctx: &serenity::CacheAndHttp,
+                $ctx: &impl serenity::CacheHttp,
                 $interaction: crate::CommandOrAutocompleteInteraction<'_>,
                 value: &serenity::ResolvedValue<'_>,
             ) -> Result<$type, SlashArgError> {

@@ -53,7 +53,6 @@ async fn execute<U: Send + Sync, E, M: Modal>(
     // Wait for user to submit
     let response = serenity::ModalInteractionCollector::new(&ctx.discord.shard)
         .filter(move |d| d.data.custom_id == interaction_id)
-        .collect_single()
         .await
         .unwrap();
 

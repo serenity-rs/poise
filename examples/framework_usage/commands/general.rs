@@ -120,7 +120,6 @@ pub async fn boop(ctx: Context<'_>) -> Result<(), Error> {
         .channel_id(ctx.channel_id())
         .timeout(std::time::Duration::from_secs(120))
         .filter(move |mci| mci.data.custom_id == uuid_boop.to_string())
-        .collect_single()
         .await
     {
         boop_count += 1;

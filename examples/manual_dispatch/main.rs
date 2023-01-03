@@ -31,7 +31,8 @@ impl serenity::EventHandler for Handler {
             shard_manager: &shard_manager,
         };
 
-        poise::dispatch_event(framework_data, &ctx, &poise::Event::Message { new_message }).await;
+        let event = serenity::FullEvent::Message { ctx, new_message };
+        poise::dispatch_event(framework_data, &event).await;
     }
 
     // For slash commands or edit tracking to work, forward interaction_create and message_update

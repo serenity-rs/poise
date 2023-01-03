@@ -54,14 +54,14 @@ To set multiple gateway events, use the OR operator:
 
 ## Discord actions outside a command
 
-You can run Discord actions outside of commands by cloning and storing [`serenity::CacheAndHttp`]/
+You can run Discord actions outside of commands by cloning and storing [`serenity::CacheHttp`]/
 [`Arc<serenity::Http>`](serenity::Http)/[`Arc<serenity::Cache>`](serenity::Cache). You can get
 those either from [`serenity::Context`] (passed to
 [`user_data_setup`](crate::FrameworkBuilder::user_data_setup) and all commands via
 [`ctx.discord()`](crate::Context::discord)) or before starting the client via
 [`cache_and_http`](serenity::Client::cache_and_http).
 
-Pass your `CacheAndHttp` or `Arc<Http>` to serenity functions in place of the usual
+Pass your `CacheHttp` or `Arc<Http>` to serenity functions in place of the usual
 `serenity::Context`
 
 ## Useful serenity methods
@@ -227,40 +227,42 @@ async fn error_handler(error: poise::FrameworkError<'_, Data, Error>) {
 # #[poise::command(prefix_command)] async fn command3(ctx: Context<'_>) -> Result<(), Error> { Ok(()) }
 
 # async {
-// Use `Framework::builder()` to create a framework builder and supply basic data to the framework:
-poise::Framework::builder()
-    .token("...")
-    .user_data_setup(|_, _, _| Box::pin(async move {
-        // construct user data here (invoked when bot connects to Discord)
-        Ok(())
-    }))
-
-    // Most configuration is done via the `FrameworkOptions` struct, which you can define with
-    // a struct literal (hint: use `..Default::default()` to fill uninitialized
-    // settings with their default value):
-    .options(poise::FrameworkOptions {
-        on_error: |err| Box::pin(my_error_function(err)),
-        prefix_options: poise::PrefixFrameworkOptions {
-            prefix: Some("~".into()),
-            edit_tracker: Some(poise::EditTracker::for_timespan(std::time::Duration::from_secs(3600))),
-            case_insensitive_commands: true,
-            ..Default::default()
-        },
-        // This is also where commands go
-        commands: vec![
-            command1(),
-            command2(),
-            // You can also modify a command by changing the fields of its Command instance
-            poise::Command {
-                // [override fields here]
-                ..command3()
-            }
-        ],
-        ..Default::default()
-    })
-
-    .run().await?;
-# Ok::<(), Error>(()) };
+// Use `FrameworkOptions` to supply basic data to the framework:
+# let framework_options = poise::FrameworkOptions {
+#         on_error: |err| Box::pin(my_error_function(err)),
+#         prefix_options: poise::PrefixFrameworkOptions {
+#             prefix: Some("~".into()),
+#             edit_tracker: Some(poise::EditTracker::for_timespan(
+#                 std::time::Duration::from_secs(3600),
+#             )),
+#             case_insensitive_commands: true,
+#             ..Default::default()
+#         },
+#         // This is also where commands go
+#         commands: vec![
+#             command1(),
+#             command2(),
+#             // You can also modify a command by changing the fields of its Command instance
+#             poise::Command {
+#                 // [override fields here]
+#                 ..command3()
+#             },
+#         ],
+#         ..Default::default()
+#     };
+#
+#     let framework = poise::Framework::new(framework_options, |_, _, _| {
+#         Box::pin(async move {
+#             // construct user data here (invoked when bot connects to Discord)
+#             Ok(())
+#         })
+#     });
+#
+#
+#     serenity::Client::builder("token", serenity::all::GatewayIntents::non_privileged())
+#         .framework(framework)
+#         .await;
+# };
 ```
 
 ## Registering slash commands

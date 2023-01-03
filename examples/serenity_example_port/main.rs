@@ -22,13 +22,12 @@ type Error = Box<dyn std::error::Error + Send + Sync>;
 type Context<'a> = poise::Context<'a, Data, Error>;
 
 async fn event_listener(
-    _ctx: &serenity::Context,
-    event: &poise::Event,
+    event: &serenity::FullEvent,
     _framework: poise::FrameworkContext<'_, Data, Error>,
     _user_data: &Data,
 ) -> Result<(), Error> {
     match event {
-        poise::Event::Ready { data_about_bot } => {
+        serenity::FullEvent::Ready { data_about_bot, .. } => {
             println!("{} is connected!", data_about_bot.user.name)
         }
         _ => {}
@@ -167,7 +166,7 @@ async fn on_error(error: poise::FrameworkError<'_, Data, Error>) {
         poise::FrameworkError::Listener { error, event, .. } => {
             println!(
                 "Listener returned error during {:?} event: {:?}",
-                event.name(),
+                event.snake_case_name(),
                 error
             );
         }
@@ -258,8 +257,8 @@ async fn main() {
             multiply(),
             slow_mode(),
         ],
-        listener: |ctx, event, framework, user_data| {
-            Box::pin(event_listener(ctx, event, framework, user_data))
+        listener: |event, framework, user_data| {
+            Box::pin(event_listener(event, framework, user_data))
         },
         on_error: |error| Box::pin(on_error(error)),
         // Set a function to be called prior to each command execution. This
