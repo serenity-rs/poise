@@ -1,12 +1,14 @@
 #![cfg_attr(doc_nightly, feature(doc_cfg, doc_auto_cfg))]
 #![doc(test(attr(deny(deprecated))))]
-#![warn(rust_2018_idioms)]
-#![warn(missing_docs)]
-#![warn(clippy::missing_docs_in_private_items)]
-#![allow(clippy::type_complexity)]
 // native #[non_exhaustive] is awful because you can't do struct update syntax with it (??)
 #![allow(clippy::manual_non_exhaustive)]
-
+#![allow(clippy::type_complexity)]
+#![warn(
+    clippy::missing_docs_in_private_items,
+    clippy::unused_async,
+    rust_2018_idioms,
+    missing_docs
+)]
 /*!
 Poise is an opinionated Discord bot framework with a few distinctive features:
 - edit tracking: when user edits their message, automatically update bot response
