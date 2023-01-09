@@ -43,6 +43,7 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
         ),
         crate::FrameworkError::Command { ctx, error } => {
             let error = error.to_string();
+            eprintln!("An error occured in a command: {}", error);
             ctx.say(error).await?;
         }
         crate::FrameworkError::ArgumentParse { ctx, input, error } => {
