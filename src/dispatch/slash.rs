@@ -55,7 +55,7 @@ pub async fn extract_command_and_run_checks<'a, U, E>(
         })?;
 
     let ctx = crate::ApplicationContext {
-        data: framework.user_data().await,
+        data: framework.user_data(),
         serenity_context: ctx,
         framework,
         interaction,
