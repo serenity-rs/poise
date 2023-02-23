@@ -99,11 +99,11 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
                 ::poise::CommandParameter {
                     name: #param_name.to_string(),
                     name_localizations: vec![
-                        #( (#name_locales.to_string(), #name_localized_values.to_string()) )*
+                        #( (#name_locales.to_string(), #name_localized_values.to_string()) ),*
                     ].into_iter().collect(),
                     description: #description,
                     description_localizations: vec![
-                        #( (#description_locales.to_string(), #description_localized_values.to_string()) )*
+                        #( (#description_locales.to_string(), #description_localized_values.to_string()) ),*
                     ].into_iter().collect(),
                     required: #required,
                     channel_types: #channel_types,
