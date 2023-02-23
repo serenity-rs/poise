@@ -75,7 +75,7 @@ pub fn vec_tuple_2_to_hash_map(v: Vec<Tuple2<String>>) -> proc_macro2::TokenStre
     let (keys, values): (Vec<String>, Vec<String>) = v.into_iter().map(|x| (x.0, x.1)).unzip();
     quote::quote! {
         std::collections::HashMap::from([
-            #( (#keys.to_string(), #values.to_string()) )*
+            #( (#keys.to_string(), #values.to_string()) ),*
         ])
     }
 }

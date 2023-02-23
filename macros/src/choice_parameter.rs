@@ -94,7 +94,7 @@ pub fn choice_parameter(input: syn::DeriveInput) -> Result<TokenStream, darling:
                 vec![ #( poise::CommandParameterChoice {
                     name: #names.to_string(),
                     localizations: std::collections::HashMap::from([
-                        #( (#locales.to_string(), #localized_names.to_string()) )*
+                        #( (#locales.to_string(), #localized_names.to_string()) ),*
                     ]),
                 }, )* ]
             }
