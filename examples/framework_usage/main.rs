@@ -155,6 +155,7 @@ async fn main() {
         )
         .setup(move |_ctx, _ready, _framework| {
             Box::pin(async move {
+                println!("Logged in as {}", _ready.user.name);
                 Ok(Data {
                     votes: Mutex::new(HashMap::new()),
                 })
