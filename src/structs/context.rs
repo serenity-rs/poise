@@ -77,7 +77,7 @@ impl<'a, U, E> Context<'a, U, E> {
                 ctx.defer_response(false).await?;
                 None
             }
-            Self::Prefix(ctx) => Some(ctx.msg.channel_id.start_typing(&ctx.discord.http)?),
+            Self::Prefix(ctx) => Some(ctx.msg.channel_id.start_typing(&ctx.discord.http)),
         })
     }
 

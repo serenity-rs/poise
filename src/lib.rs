@@ -6,6 +6,8 @@
 #![allow(clippy::type_complexity)]
 // native #[non_exhaustive] is awful because you can't do struct update syntax with it (??)
 #![allow(clippy::manual_non_exhaustive)]
+// I don't want to have inconsistent style for when expr is an ident vs not
+#![allow(clippy::uninlined_format_args)]
 
 /*!
 Poise is an opinionated Discord bot framework with a few distinctive features:
@@ -59,7 +61,7 @@ You can run Discord actions outside of commands by cloning and storing [`serenit
 those either from [`serenity::Context`] (passed to
 [`user_data_setup`](crate::FrameworkBuilder::user_data_setup) and all commands via
 [`ctx.discord()`](crate::Context::discord)) or before starting the client via
-[`cache_and_http`](serenity::Client::cache_and_http).
+[`http`](serenity::Client::http) and [`cache`](serenity::Client::cache).
 
 Pass your `CacheHttp` or `Arc<Http>` to serenity functions in place of the usual
 `serenity::Context`

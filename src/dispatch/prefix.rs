@@ -293,7 +293,7 @@ pub async fn run_invocation<U, E>(
 
     // Typing is broadcasted as long as this object is alive
     let _typing_broadcaster = if ctx.command.broadcast_typing {
-        ctx.msg.channel_id.start_typing(&ctx.discord.http).ok()
+        Some(ctx.msg.channel_id.start_typing(&ctx.discord.http))
     } else {
         None
     };
