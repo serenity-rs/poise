@@ -390,6 +390,7 @@ pub mod serenity_prelude {
                 },
             },
             event::*,
+            guild::automod::*,
             prelude::*,
         },
         prelude::*,
