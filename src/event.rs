@@ -6,6 +6,21 @@ use crate::{serenity_prelude as serenity, BoxFuture};
 /// enum and propagates it to a callback.
 ///
 /// Packaging every event into a singular type can make it easier to pass around and process.
+///
+/// ```rust
+/// use serenity::prelude::*;
+///
+/// let handler = poise::EventWrapper(|ctx, event| Box::pin(async move {
+///     println!("Received an event: {:?}", event);
+/// }));
+///
+/// # let token = "";
+/// # let intents = GatewayIntents::empty();
+/// Client::builder(token, intents)
+///     .event_handler(handler)
+///     // ...
+/// # ;
+/// ```
 pub struct EventWrapper<F>(pub F)
 where
     // gotta have this generic bound in the struct as well, or type inference will break down the line
