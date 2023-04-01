@@ -42,6 +42,10 @@ for example for command-specific help (i.e. `~help command_name`). Escape newlin
 - `ephemeral`: Make bot responses ephemeral if possible
     - Only poise's function, like `poise::send_reply`, respect this preference
 - `required_permissions`: Permissions which the command caller needs to have
+- `default_member_permissions`: Like `required_permissions`, but checked server-side (slash only)
+    - Due to being checked server-side, users without the required permissions are prevented from executing the command in the first place, which is a better experience
+    - However, `default_member_permissions` has no effect on subcommands, which always inherit their permissions from the top-level command
+    - Also, guild owners can freely change the required permissions for any bot command for their guild
 - `required_bot_permissions`: Permissions which the bot is known to need
 - `owners_only`: Restricts command callers to a configurable list of owners (see FrameworkOptions)
 - `guild_only`: Restricts command callers to only run on a guild
