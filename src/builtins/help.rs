@@ -64,6 +64,7 @@ async fn help_single_command<U, E>(
     Ok(())
 }
 
+/// Writes a single line of the help menu, like "  /ping        Emits a ping message\n"
 async fn append_command_line<U, E>(
     ctx: crate::Context<'_, U, E>,
     menu: &mut String,
