@@ -12,6 +12,8 @@ pub struct HelpConfiguration<'a> {
     pub ephemeral: bool,
     /// Whether to list context menu commands as well
     pub show_context_menu_commands: bool,
+    /// Whether to list context menu commands as well
+    pub show_subcommands: bool,
 }
 
 impl Default for HelpConfiguration<'_> {
@@ -20,6 +22,7 @@ impl Default for HelpConfiguration<'_> {
             extra_text_at_bottom: "",
             ephemeral: true,
             show_context_menu_commands: false,
+            show_subcommands: false,
         }
     }
 }
@@ -61,6 +64,54 @@ async fn help_single_command<U, E>(
     Ok(())
 }
 
+/// Writes a single line of the help menu, like "  /ping        Emits a ping message\n"
+async fn append_command_line<U, E>(
+    ctx: crate::Context<'_, U, E>,
+    menu: &mut String,
+    command: &crate::Command<U, E>,
+    indent: &str,
+) {
+    if command.hide_in_help {
+        return;
+    }
+
+    let prefix = if command.slash_action.is_some() {
+        String::from("/")
+    } else if command.prefix_action.is_some() {
+        let options = &ctx.framework().options().prefix_options;
+
+        match &options.prefix {
+            Some(fixed_prefix) => fixed_prefix.clone(),
+            None => match options.dynamic_prefix {
+                Some(dynamic_prefix_callback) => {
+                    match dynamic_prefix_callback(crate::PartialContext::from(ctx)).await {
+                        Ok(Some(dynamic_prefix)) => dynamic_prefix,
+                        // `String::new()` defaults to "" which is what we want
+                        Err(_) | Ok(None) => String::new(),
+                    }
+                }
+                None => String::new(),
+            },
+        }
+    } else {
+        // This is not a prefix or slash command, i.e. probably a context menu only command
+        // which we will only show later
+        return;
+    };
+
+    let total_command_name_length = prefix.chars().count() + command.name.chars().count();
+    let padding = 12_usize.saturating_sub(total_command_name_length) + 1;
+    let _ = writeln!(
+        menu,
+        "{}{}{}{}{}",
+        indent,
+        prefix,
+        command.name,
+        " ".repeat(padding),
+        command.description.as_deref().unwrap_or("")
+    );
+}
+
 /// Code for printing an overview of all commands (e.g. `~help`)
 async fn help_all_commands<U, E>(
     ctx: crate::Context<'_, U, E>,
@@ -78,44 +129,12 @@ async fn help_all_commands<U, E>(
         menu += category_name.unwrap_or("Commands");
         menu += ":\n";
         for command in commands {
-            if command.hide_in_help {
-                continue;
-            }
-
-            let prefix = if command.slash_action.is_some() {
-                String::from("/")
-            } else if command.prefix_action.is_some() {
-                let options = &ctx.framework().options().prefix_options;
-
-                match &options.prefix {
-                    Some(fixed_prefix) => fixed_prefix.clone(),
-                    None => match options.dynamic_prefix {
-                        Some(dynamic_prefix_callback) => {
-                            match dynamic_prefix_callback(crate::PartialContext::from(ctx)).await {
-                                Ok(Some(dynamic_prefix)) => dynamic_prefix,
-                                // `String::new()` defaults to "" which is what we want
-                                Err(_) | Ok(None) => String::new(),
-                            }
-                        }
-                        None => String::new(),
-                    },
+            append_command_line(ctx, &mut menu, command, "  ").await;
+            if config.show_subcommands {
+                for command in &command.subcommands {
+                    append_command_line(ctx, &mut menu, command, "    ").await;
                 }
-            } else {
-                // This is not a prefix or slash command, i.e. probably a context menu only command
-                // which we will only show later
-                continue;
-            };
-
-            let total_command_name_length = prefix.chars().count() + command.name.chars().count();
-            let padding = 12_usize.saturating_sub(total_command_name_length) + 1;
-            let _ = writeln!(
-                menu,
-                "  {}{}{}{}",
-                prefix,
-                command.name,
-                " ".repeat(padding),
-                command.description.as_deref().unwrap_or("")
-            );
+            }
         }
     }
 

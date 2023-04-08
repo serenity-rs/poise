@@ -30,6 +30,7 @@ async fn help(
             extra_text_at_bottom: "\
 This is an example bot made to showcase features of my custom Discord bot framework",
             show_context_menu_commands: true,
+            show_subcommands: false,
             ..Default::default()
         },
     )
