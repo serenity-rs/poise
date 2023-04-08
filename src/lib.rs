@@ -312,6 +312,70 @@ serenity::Member, serenity::UserId, serenity::ReactionType, serenity::GatewayInt
 # );
 ```
 
+## Unit testing
+
+Unit testing a Discord bot is difficult, because mocking the Discord API is an uphill battle.
+Your best bet for unit testing a Discord bot is to extract the "business logic" into a separate
+function - the part of your commands that doesn't call serenity functions - and unit test that.
+
+Example:
+
+```rust
+# type Error = Box<dyn std::error::Error>;
+# type Context<'a> = poise::Context<'a, (), Error>;
+#[poise::command(slash_command)]
+pub async fn calc(ctx: Context<'_>, expr: String) -> Result<(), Error> {
+    let ops: &[(char, fn(f64, f64) -> f64)] = &[
+        ('+', |a, b| a + b), ('-', |a, b| a - b), ('*', |a, b| a * b), ('/', |a, b| a / b)
+    ];
+    for &(operator, operator_fn) in ops {
+        if let Some((a, b)) = expr.split_once(operator) {
+            let result: f64 = (operator_fn)(a.trim().parse()?, b.trim().parse()?);
+            ctx.say(format!("Result: {}", result)).await?;
+            return Ok(());
+        }
+    }
+    ctx.say("No valid operator found in expression!").await?;
+    Ok(())
+}
+```
+
+Can be transformed into
+
+```rust
+# type Error = Box<dyn std::error::Error>;
+# type Context<'a> = poise::Context<'a, (), Error>;
+fn calc_inner(expr: &str) -> Option<f64> {
+    let ops: &[(char, fn(f64, f64) -> f64)] = &[
+        ('+', |a, b| a + b), ('-', |a, b| a - b), ('*', |a, b| a * b), ('/', |a, b| a / b)
+    ];
+    for &(operator, operator_fn) in ops {
+        if let Some((a, b)) = expr.split_once(operator) {
+            let result: f64 = (operator_fn)(a.trim().parse().ok()?, b.trim().parse().ok()?);
+            return Some(result);
+        }
+    }
+    None
+}
+
+#[poise::command(slash_command)]
+pub async fn calc(ctx: Context<'_>, expr: String) -> Result<(), Error> {
+    match calc_inner(&expr) {
+        Some(result) => ctx.say(format!("Result: {}", result)).await?,
+        None => ctx.say("Failed to evaluate expression!").await?,
+    };
+    Ok(())
+}
+
+// Now we can test the function!!!
+#[test]
+fn test_calc() {
+    assert_eq!(calc_inner("4 + 5"), Some(9.0));
+    assert_eq!(calc_inner("4 / 5"), Some(0.2));
+    assert_eq!(calc_inner("4 ^ 5"), None);
+}
+```
+
 # About the weird name
 I'm bad at names. Google lists "poise" as a synonym to "serenity" which is the Discord library
 underlying this framework, so that's what I chose.
