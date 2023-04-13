@@ -71,7 +71,7 @@ async fn main() {
                 let guild_id =
                     serenity::GuildId(std::env::var("GUILD_ID").unwrap().parse().unwrap());
                 guild_id
-                    .set_application_commands(
+                    .set_commands(
                         ctx,
                         poise::builtins::create_application_commands(&framework.options().commands),
                     )

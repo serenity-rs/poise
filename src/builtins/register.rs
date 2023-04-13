@@ -86,7 +86,7 @@ pub async fn register_application_commands<U, E>(
         ctx.say(format!("Registering {} commands...", num_commands))
             .await?;
         guild_id
-            .set_application_commands(ctx.discord(), commands_builder)
+            .set_commands(ctx.discord(), commands_builder)
             .await?;
     }
 
@@ -230,12 +230,12 @@ pub async fn register_application_commands_buttons<U, E>(
             ))
             .await?;
             guild_id
-                .set_application_commands(ctx.discord(), create_commands)
+                .set_commands(ctx.discord(), create_commands)
                 .await?;
         } else {
             ctx.say(":gear: Unregistering guild commands...").await?;
             guild_id
-                .set_application_commands(ctx.discord(), Vec::new())
+                .set_commands(ctx.discord(), Vec::new())
                 .await?;
         }
     }
