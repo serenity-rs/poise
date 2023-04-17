@@ -180,7 +180,7 @@ to use this macro directly.
 # use poise::serenity_prelude as serenity;
 # let ctx = serenity::Context {
 #     data: std::sync::Arc::new(tokio::sync::RwLock::new(::serenity::prelude::TypeMap::new())),
-#     shard: ::serenity::client::bridge::gateway::ShardMessenger::new(
+#     shard: ::serenity::gateway::ShardMessenger::new(
 #         futures::channel::mpsc::unbounded().0,
 #     ),
 #     shard_id: Default::default(),
