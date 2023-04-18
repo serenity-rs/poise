@@ -52,7 +52,7 @@ async fn main() {
         .user_data_setup(move |ctx, _, framework| {
             Box::pin(async move {
                 poise::serenity_prelude::GuildId::new(703332075914264606)
-                    .set_application_commands(
+                    .set_commands(
                         ctx,
                         poise::builtins::create_application_commands(&framework.options().commands),
                     )

@@ -281,8 +281,8 @@ guild (see its docs).
 A more flexible approach is to serialize the commands to a `Vec<`[`serenity::CreateCommand`]`>`
 using [`builtins::create_application_commands`]. That way, you can call serenity's registration
 functions manually:
-- [`serenity::Command::set_global_application_commands`]
-- [`serenity::GuildId::set_application_commands`]
+- [`serenity::Command::set_global_commands`]
+- [`serenity::GuildId::set_commands`]
 
 For example, you could call this function in [`FrameworkBuilder::user_data_setup`] to automatically
 register commands on startup. Also see the docs of [`builtins::create_application_commands`].
