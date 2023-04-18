@@ -209,8 +209,7 @@ pub async fn register_application_commands_buttons<U, E>(
                 num_commands
             ))
             .await?;
-            serenity::Command::set_global_commands(ctx.discord(), create_commands)
-                .await?;
+            serenity::Command::set_global_commands(ctx.discord(), create_commands).await?;
         } else {
             ctx.say(":gear: Unregistering global commands...").await?;
             serenity::Command::set_global_commands(ctx.discord(), Vec::new()).await?;
@@ -234,9 +233,7 @@ pub async fn register_application_commands_buttons<U, E>(
                 .await?;
         } else {
             ctx.say(":gear: Unregistering guild commands...").await?;
-            guild_id
-                .set_commands(ctx.discord(), Vec::new())
-                .await?;
+            guild_id.set_commands(ctx.discord(), Vec::new()).await?;
         }
     }
 
