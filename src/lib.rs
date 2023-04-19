@@ -468,3 +468,14 @@ use serenity_prelude as serenity; // private alias for crate root docs intradoc-
 ///
 /// An owned future has the `'static` lifetime.
 pub type BoxFuture<'a, T> = std::pin::Pin<Box<dyn std::future::Future<Output = T> + Send + 'a>>;
+
+/// Internal wrapper function for catch_unwind that respects the `handle_panics` feature flag
+async fn catch_unwind_maybe<T>(
+    fut: impl std::future::Future<Output = T>,
+) -> Result<T, Box<dyn std::any::Any + Send + 'static>> {
+    #[cfg(feature = "handle_panics")]
+    let res = futures_util::FutureExt::catch_unwind(std::panic::AssertUnwindSafe(fut)).await;
+    #[cfg(not(feature = "handle_panics"))]
+    let res = Ok(fut.await);
+    res
+}

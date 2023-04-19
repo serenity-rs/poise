@@ -173,7 +173,7 @@ pub async fn dispatch_interaction<'a, U, E>(
         parent_commands,
     )?;
 
-    futures_util::FutureExt::catch_unwind(std::panic::AssertUnwindSafe(run_command(ctx)))
+    crate::catch_unwind_maybe(run_command(ctx))
         .await
         .map_err(|payload| crate::FrameworkError::CommandPanic {
             payload,
@@ -281,7 +281,7 @@ pub async fn dispatch_autocomplete<'a, U, E>(
         parent_commands,
     )?;
 
-    futures_util::FutureExt::catch_unwind(std::panic::AssertUnwindSafe(run_autocomplete(ctx)))
+    crate::catch_unwind_maybe(run_autocomplete(ctx))
         .await
         .map_err(|payload| crate::FrameworkError::CommandPanic {
             payload,
