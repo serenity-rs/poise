@@ -237,9 +237,12 @@ async fn run_autocomplete<U, E>(
         }
     };
 
-    let crate::ApplicationCommandOrAutocompleteInteraction::Autocomplete(interaction) = ctx.interaction else {
-        log::warn!("a non-autocomplete interaction was given to run_autocomplete()");
-        return Ok(());
+    let interaction = match ctx.interaction {
+        crate::ApplicationCommandOrAutocompleteInteraction::Autocomplete(x) => x,
+        _ => {
+            log::warn!("a non-autocomplete interaction was given to run_autocomplete()");
+            return Ok(());
+        }
     };
 
     // Send the generates autocomplete response
