@@ -203,7 +203,12 @@ pub async fn dispatch_message<'a, U: Send + Sync, E>(
     )
     .await?
     {
-        run_invocation(ctx).await?;
+        futures_util::FutureExt::catch_unwind(std::panic::AssertUnwindSafe(run_invocation(ctx)))
+            .await
+            .map_err(|payload| crate::FrameworkError::CommandPanic {
+                payload,
+                ctx: ctx.into(),
+            })??;
     }
     Ok(())
 }

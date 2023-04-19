@@ -164,15 +164,23 @@ pub async fn dispatch_interaction<'a, U, E>(
     // Need to pass this in from outside because of lifetime issues
     parent_commands: &'a mut Vec<&'a crate::Command<U, E>>,
 ) -> Result<(), crate::FrameworkError<'a, U, E>> {
-    run_command(extract_command(
+    let ctx = extract_command(
         framework,
         ctx,
         crate::ApplicationCommandOrAutocompleteInteraction::ApplicationCommand(interaction),
         has_sent_initial_response,
         invocation_data,
         parent_commands,
-    )?)
-    .await
+    )?;
+
+    futures_util::FutureExt::catch_unwind(std::panic::AssertUnwindSafe(run_command(ctx)))
+        .await
+        .map_err(|payload| crate::FrameworkError::CommandPanic {
+            payload,
+            ctx: ctx.into(),
+        })??;
+
+    Ok(())
 }
 
 /// Given the extracted application command data from [`extract_command`], runs the autocomplete
@@ -261,13 +269,21 @@ pub async fn dispatch_autocomplete<'a, U, E>(
     // Need to pass this in from outside because of lifetime issues
     parent_commands: &'a mut Vec<&'a crate::Command<U, E>>,
 ) -> Result<(), crate::FrameworkError<'a, U, E>> {
-    run_autocomplete(extract_command(
+    let ctx = extract_command(
         framework,
         ctx,
         crate::ApplicationCommandOrAutocompleteInteraction::Autocomplete(interaction),
         has_sent_initial_response,
         invocation_data,
         parent_commands,
-    )?)
-    .await
+    )?;
+
+    futures_util::FutureExt::catch_unwind(std::panic::AssertUnwindSafe(run_autocomplete(ctx)))
+        .await
+        .map_err(|payload| crate::FrameworkError::CommandPanic {
+            payload,
+            ctx: ctx.into(),
+        })??;
+
+    Ok(())
 }
