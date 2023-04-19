@@ -48,6 +48,18 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
             eprintln!("An error occured in a command: {}", error);
             ctx.say(error).await?;
         }
+        crate::FrameworkError::CommandPanic { ctx, payload: _ } => {
+            // Not showing the payload to the user because it may contain sensitive info
+            ctx.send(|b| {
+                b.embed(|b| {
+                    b.title("Internal error")
+                        .color((255, 0, 0))
+                        .description("An unexpected internal error has occurred.")
+                })
+                .ephemeral(true)
+            })
+            .await?;
+        }
         crate::FrameworkError::ArgumentParse { ctx, input, error } => {
             // If we caught an argument parse error, give a helpful error message with the
             // command explanation if available

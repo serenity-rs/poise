@@ -42,6 +42,17 @@ pub enum FrameworkError<'a, U, E> {
         /// General context
         ctx: crate::Context<'a, U, E>,
     },
+    /// Panic occured at any phase of command execution after constructing the `crate::Context`.
+    ///
+    /// This feature is intended as a last-resort safeguard to gracefully print an error message to
+    /// the user on a panic. Panics should only be thrown for bugs in the code, don't use this for
+    /// normal errors!
+    CommandPanic {
+        /// Panic payload which was thrown in the command code
+        payload: Box<dyn std::any::Any + Send + 'static>,
+        /// Command context
+        ctx: crate::Context<'a, U, E>,
+    },
     /// A command argument failed to parse from the Discord message or interaction content
     ArgumentParse {
         /// Error which was thrown by the parameter type's parsing routine
@@ -170,6 +181,7 @@ impl<'a, U, E> FrameworkError<'a, U, E> {
             Self::Setup { ctx, .. } => ctx,
             Self::EventHandler { ctx, .. } => ctx,
             Self::Command { ctx, .. } => ctx.serenity_context(),
+            Self::CommandPanic { ctx, .. } => ctx.serenity_context(),
             Self::ArgumentParse { ctx, .. } => ctx.serenity_context(),
             Self::CommandStructureMismatch { ctx, .. } => ctx.serenity_context,
             Self::CooldownHit { ctx, .. } => ctx.serenity_context(),
@@ -191,6 +203,7 @@ impl<'a, U, E> FrameworkError<'a, U, E> {
     pub fn ctx(&self) -> Option<crate::Context<'a, U, E>> {
         Some(match *self {
             Self::Command { ctx, .. } => ctx,
+            Self::CommandPanic { ctx, .. } => ctx,
             Self::ArgumentParse { ctx, .. } => ctx,
             Self::CommandStructureMismatch { ctx, .. } => crate::Context::Application(ctx),
             Self::CooldownHit { ctx, .. } => ctx,
@@ -244,6 +257,9 @@ impl<U, E: std::fmt::Display> std::fmt::Display for FrameworkError<'_, U, E> {
             } => write!(f, "error in {} event event handler", event.name()),
             Self::Command { error: _, ctx } => {
                 write!(f, "error in command `{}`", full_command_name!(ctx))
+            }
+            Self::CommandPanic { ctx, payload: _ } => {
+                write!(f, "panic in command `{}`", full_command_name!(ctx))
             }
             Self::ArgumentParse {
                 error: _,
@@ -343,6 +359,7 @@ impl<'a, U: std::fmt::Debug, E: std::error::Error + 'static> std::error::Error
             Self::Setup { error, .. } => Some(error),
             Self::EventHandler { error, .. } => Some(error),
             Self::Command { error, .. } => Some(error),
+            Self::CommandPanic { .. } => None,
             Self::ArgumentParse { error, .. } => Some(&**error),
             Self::CommandStructureMismatch { .. } => None,
             Self::CooldownHit { .. } => None,
