@@ -33,17 +33,26 @@ impl<U, E> Clone for FrameworkContext<'_, U, E> {
 }
 impl<'a, U, E> FrameworkContext<'a, U, E> {
     /// Returns the stored framework options, including commands.
+    ///
+    /// This function exists for API compatiblity with [`crate::Framework`]. On this type, you can
+    /// also just access the public `options` field.
     pub fn options(&self) -> &'a crate::FrameworkOptions<U, E> {
         self.options
     }
 
     /// Returns the serenity's client shard manager.
+    ///
+    /// This function exists for API compatiblity with [`crate::Framework`]. On this type, you can
+    /// also just access the public `shard_manager` field.
     pub fn shard_manager(&self) -> std::sync::Arc<tokio::sync::Mutex<serenity::ShardManager>> {
         self.shard_manager.clone()
     }
 
     /// Retrieves user data
-    pub fn user_data(&self) -> &'a U {
+    ///
+    /// This function exists for API compatiblity with [`crate::Framework`]. On this type, you can
+    /// also just access the public `user_data` field.
+    pub async fn user_data(&self) -> &'a U {
         self.user_data
     }
 }
@@ -161,7 +170,7 @@ pub async fn dispatch_event<U: Send + Sync, E>(
     // Do this after the framework's Ready handling, so that get_user_data() doesnt
     // potentially block infinitely
     if let Err(error) =
-        (framework.options.event_handler)(ctx, event, framework, framework.user_data()).await
+        (framework.options.event_handler)(ctx, event, framework, framework.user_data).await
     {
         let error = crate::FrameworkError::EventHandler {
             ctx,
