@@ -103,16 +103,16 @@ jobs:
           RUSTFLAGS: -C target-cpu=haswell # for simd-json
           RUSTDOCFLAGS: --cfg doc_nightly -D rustdoc::broken_intra_doc_links
       
-      # If on develop branch (as opposed to PR or whatever), publish docs to github pages
+      # If on current/next branch (as opposed to PR or whatever), publish docs to github pages
       - name: Move files
-        if: github.ref == 'refs/heads/develop'
+        if: github.ref == 'refs/heads/current' || github.ref == 'refs/heads/next'
         shell: bash
         run: |
           DIR=${GITHUB_REF#refs/heads/}
           mkdir -p ./docs/$DIR
           mv ./target/doc/* ./docs/$DIR/
       - name: Deploy docs
-        if: github.ref == 'refs/heads/develop'
+        if: github.ref == 'refs/heads/current' || github.ref == 'refs/heads/next'
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}

@@ -1,1 +1,1 @@
-<!-- please base the PR on the develop branch if possible 😇 -->
+<!-- base the PR on the current branch, if it has no breaking changes, and on the next branch, if it does -->
