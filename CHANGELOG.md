@@ -1,3 +1,18 @@
+# 0.5.3
+
+New features:
+- Added `builtins::paginate()` as an example implementation of pagination
+- Added missing events in `EventWrapper` (#144)
+- Added `FrameworkError::CommandPanic` to allow custom handling of panics (#140)
+  - `builtins::on_error` responds with an "Internal error" embed when encountering `CommandPanic`
+
+Behavior changes:
+- `builtins::on_error` now prints `FrameworkError::Command` not just in Discord chat, but in console as well
+  - because responding in Discord sometimes doesn't work, see 0a03fb905ca0bc3b2ee0701fe35d3c89ecf5a654
+- Fixed a compile error when `name_localized` or `description_localized` are used multiple times (#143)
+
+Detailed changelog: https://github.com/kangalioo/poise/compare/v0.5.2...v0.5.3
+
 # 0.5.2
 
 New features:
