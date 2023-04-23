@@ -49,7 +49,13 @@ pub enum FrameworkError<'a, U, E> {
     /// normal errors!
     CommandPanic {
         /// Panic payload which was thrown in the command code
-        payload: Box<dyn std::any::Any + Send + 'static>,
+        ///
+        /// If a panic was thrown via [`std::panic::panic_any()`] and the payload was neither &str,
+        /// nor String, the payload is `None`.
+        ///
+        /// The reason the original [`Box<dyn Any + Send>`] payload isn't provided here is that it
+        /// would make [`FrameworkError`] not [`Sync`] anymore.
+        payload: Option<String>,
         /// Command context
         ctx: crate::Context<'a, U, E>,
     },
