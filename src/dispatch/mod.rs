@@ -52,6 +52,7 @@ impl<'a, U, E> FrameworkContext<'a, U, E> {
     ///
     /// This function exists for API compatiblity with [`crate::Framework`]. On this type, you can
     /// also just access the public `user_data` field.
+    #[allow(clippy::unused_async)] // for API compatibility with Framework
     pub async fn user_data(&self) -> &'a U {
         self.user_data
     }
