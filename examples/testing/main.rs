@@ -12,7 +12,12 @@ pub struct Data {}
 async fn main() {
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
-            commands: vec![inherit_checks::parent(), misc::paginate(), misc::div()],
+            commands: vec![
+                inherit_checks::parent(),
+                misc::paginate(),
+                misc::div(),
+                misc::stringlen(),
+            ],
             prefix_options: poise::PrefixFrameworkOptions {
                 prefix: Some("~".into()),
                 ..Default::default()
