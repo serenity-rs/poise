@@ -1,3 +1,10 @@
+# 0.5.5
+
+New features:
+- Added `#[min_length]` and `#[max_length]` support for slash command string parameters
+
+Detailed changelog: https://github.com/kangalioo/poise/compare/v0.5.4...v0.5.5
+
 # 0.5.4
 
 API updates:
