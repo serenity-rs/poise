@@ -24,7 +24,10 @@ pub fn find_modal_text(
         };
 
         if text.custom_id == custom_id {
-            let value = std::mem::take(&mut text.value);
+            let Some(value) = std::mem::take(&mut text.value) else {
+                log::warn!("modal field is null");
+                return None;
+            };
             return if value.is_empty() { None } else { Some(value) };
         }
     }

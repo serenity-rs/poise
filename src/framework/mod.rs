@@ -254,7 +254,9 @@ pub async fn insert_owners_from_http(
 ) -> Result<(), serenity::Error> {
     let application_info = http.get_current_application_info().await?;
 
-    owners.insert(application_info.owner.id);
+    if let Some(owner) = application_info.owner {
+        owners.insert(owner.id);
+    }
     if let Some(team) = application_info.team {
         for member in team.members {
             // This `if` currently always evaluates to true but it becomes important once
