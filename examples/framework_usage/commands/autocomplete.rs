@@ -39,7 +39,7 @@ async fn autocomplete_number(
     [1_u32, 2, 3, 4, 5]
         .iter()
         .map(|&n| poise::AutocompleteChoice {
-            name: format!(
+            label: format!(
                 "{} (why did discord even give autocomplete choices separate labels)",
                 n
             ),

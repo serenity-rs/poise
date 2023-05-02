@@ -18,6 +18,8 @@ pub struct CooldownConfig {
     pub channel: Option<Duration>,
     /// This cooldown operates on a per-member basis
     pub member: Option<Duration>,
+    #[doc(hidden)]
+    pub __non_exhaustive: (),
 }
 
 /// Handles cooldowns for a single command

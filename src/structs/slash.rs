@@ -193,6 +193,8 @@ pub struct CommandParameterChoice {
     pub name: String,
     /// Localized labels with locale string as the key (slash-only)
     pub localizations: std::collections::HashMap<String, String>,
+    #[doc(hidden)]
+    pub __non_exhaustive: (),
 }
 
 /// A single parameter of a [`crate::Command`]
@@ -239,6 +241,8 @@ pub struct CommandParameter<U, E> {
             Result<serenity::CreateAutocompleteResponse, crate::SlashArgError>,
         >,
     >,
+    #[doc(hidden)]
+    pub __non_exhaustive: (),
 }
 
 impl<U, E> CommandParameter<U, E> {

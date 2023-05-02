@@ -14,6 +14,8 @@ pub struct HelpConfiguration<'a> {
     pub show_context_menu_commands: bool,
     /// Whether to list context menu commands as well
     pub show_subcommands: bool,
+    #[doc(hidden)]
+    pub __non_exhaustive: (),
 }
 
 impl Default for HelpConfiguration<'_> {
@@ -23,6 +25,7 @@ impl Default for HelpConfiguration<'_> {
             ephemeral: true,
             show_context_menu_commands: false,
             show_subcommands: false,
+            __non_exhaustive: (),
         }
     }
 }

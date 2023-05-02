@@ -110,6 +110,7 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
                     type_setter: #type_setter,
                     choices: #choices,
                     autocomplete_callback: #autocomplete_callback,
+                    __non_exhaustive: (),
                 }
             },
             required,

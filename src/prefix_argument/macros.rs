@@ -119,7 +119,7 @@ macro_rules! _parse_prefix {
     ) => {
         let input = $args.trim_start();
         if input.is_empty() {
-            $error = ($crate::TooFewArguments.into(), None);
+            $error = ($crate::TooFewArguments::default().into(), None);
         } else {
             match <$type as $crate::serenity_prelude::ArgumentConvert>::convert(
                 $ctx, $msg.guild_id, Some($msg.channel_id), input
@@ -232,7 +232,7 @@ macro_rules! parse_prefix_args {
             let attachment_index = $attachment_index;
 
             let mut error: (Box<dyn std::error::Error + Send + Sync>, Option<String>)
-                = (Box::new($crate::TooManyArguments) as _, None);
+                = (Box::new($crate::TooManyArguments { __non_exhaustive: () }) as _, None);
 
             $crate::_parse_prefix!(
                 ctx msg args attachment_index => [error]
