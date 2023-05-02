@@ -637,6 +637,8 @@ pub struct PartialContext<'a, U, E> {
     /// Your custom user data
     // TODO: redundant with framework
     pub data: &'a U,
+    #[doc(hidden)]
+    pub __non_exhaustive: (),
 }
 
 impl<U, E> Copy for PartialContext<'_, U, E> {}
@@ -655,6 +657,7 @@ impl<'a, U, E> From<Context<'a, U, E>> for PartialContext<'a, U, E> {
             serenity_context: ctx.serenity_context(),
             framework: ctx.framework(),
             data: ctx.data(),
+            __non_exhaustive: (),
         }
     }
 }

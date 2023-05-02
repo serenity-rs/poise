@@ -19,6 +19,8 @@ pub struct CreateReply<'att> {
     pub allowed_mentions: Option<serenity::CreateAllowedMentions>,
     /// Whether this message is an inline reply.
     pub reply: bool,
+    #[doc(hidden)]
+    pub __non_exhaustive: (),
 }
 
 impl<'att> CreateReply<'att> {
@@ -107,6 +109,7 @@ impl<'att> CreateReply<'att> {
             ephemeral,
             allowed_mentions,
             reply: _, // can't reply to a message in interactions
+            __non_exhaustive: (),
         } = self;
 
         if let Some(content) = content {
@@ -142,6 +145,7 @@ impl<'att> CreateReply<'att> {
             ephemeral,
             allowed_mentions,
             reply: _,
+            __non_exhaustive: (),
         } = self;
 
         if let Some(content) = content {
@@ -174,6 +178,7 @@ impl<'att> CreateReply<'att> {
             ephemeral: _, // can't edit ephemerality in retrospect
             allowed_mentions,
             reply: _,
+            __non_exhaustive: (),
         } = self;
 
         if let Some(content) = content {
@@ -204,6 +209,7 @@ impl<'att> CreateReply<'att> {
             ephemeral: _, // not supported in prefix
             allowed_mentions,
             reply: _, // can't edit reference message afterwards
+            __non_exhaustive: (),
         } = self;
 
         if let Some(content) = content {
@@ -243,6 +249,7 @@ impl<'att> CreateReply<'att> {
             ephemeral: _, // not supported in prefix
             allowed_mentions,
             reply,
+            __non_exhaustive: (),
         } = self;
 
         if let Some(content) = content {

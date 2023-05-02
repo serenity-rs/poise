@@ -17,6 +17,7 @@ async fn strip_prefix<'a, U, E>(
         serenity_context: ctx,
         framework,
         data: framework.user_data,
+        __non_exhaustive: (),
     };
 
     if let Some(dynamic_prefix) = framework.options.prefix_options.dynamic_prefix {

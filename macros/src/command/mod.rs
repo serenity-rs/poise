@@ -363,6 +363,7 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
                     guild: #guild_cooldown.map(std::time::Duration::from_secs),
                     channel: #channel_cooldown.map(std::time::Duration::from_secs),
                     member: #member_cooldown.map(std::time::Duration::from_secs),
+                    __non_exhaustive: (),
                 })),
                 reuse_response: #reuse_response,
                 default_member_permissions: #default_member_permissions,
