@@ -61,6 +61,7 @@ async fn strip_prefix<'a, U, E>(
                     None
                 }
             }
+            crate::Prefix::__NonExhaustive => unreachable!(),
         })
     {
         return Some((prefix, content));

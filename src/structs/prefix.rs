@@ -12,6 +12,8 @@ pub enum MessageDispatchTrigger {
     /// The message was edited, and was not a valid invocation pre-edit (i.e. user typoed the
     /// command, then fixed it)
     MessageEditFromInvalid,
+    #[doc(hidden)]
+    __NonExhaustive,
 }
 
 /// Prefix-specific context passed to command invocations.
@@ -77,6 +79,8 @@ pub enum Prefix {
     Literal(&'static str),
     /// Regular expression which matches the prefix
     Regex(regex::Regex),
+    #[doc(hidden)]
+    __NonExhaustive,
 }
 
 /// Prefix-specific framework configuration

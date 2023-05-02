@@ -14,6 +14,7 @@ pub enum ApplicationCommandOrAutocompleteInteraction<'a> {
     ApplicationCommand(&'a serenity::ApplicationCommandInteraction),
     /// An autocomplete interaction
     Autocomplete(&'a serenity::AutocompleteInteraction),
+    // Not non_exhaustive, this type is deliberately just two possible variants
 }
 
 impl<'a> ApplicationCommandOrAutocompleteInteraction<'a> {
@@ -178,6 +179,8 @@ pub enum ContextMenuCommandAction<U, E> {
             serenity::Message,
         ) -> BoxFuture<'_, Result<(), crate::FrameworkError<'_, U, E>>>,
     ),
+    #[doc(hidden)]
+    __NonExhaustive,
 }
 impl<U, E> Copy for ContextMenuCommandAction<U, E> {}
 impl<U, E> Clone for ContextMenuCommandAction<U, E> {

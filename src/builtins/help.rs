@@ -148,6 +148,7 @@ async fn help_all_commands<U, E>(
             let kind = match command.context_menu_action {
                 Some(crate::ContextMenuCommandAction::User(_)) => "user",
                 Some(crate::ContextMenuCommandAction::Message(_)) => "message",
+                Some(crate::ContextMenuCommandAction::__NonExhaustive) => unreachable!(),
                 None => continue,
             };
             let name = command.context_menu_name.unwrap_or(&command.name);
