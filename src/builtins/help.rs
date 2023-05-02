@@ -30,34 +30,127 @@ impl Default for HelpConfiguration<'_> {
     }
 }
 
+/// Convenience function to align descriptions behind commands
+struct PaddedCommandList(Vec<(String, Option<String>)>);
+
+impl PaddedCommandList {
+    /// Creates a new [`PaddedCommandList`]
+    fn new() -> Self {
+        Self(Vec::new())
+    }
+
+    /// Add a command & description combo to the list
+    fn push_command(&mut self, command: String, description: String) {
+        self.0.push((command, Some(description)));
+    }
+
+    /// Add category
+    fn push_category(&mut self, category: &str) {
+        if !self.0.is_empty() {
+            self.0.push(("".to_string(), None));
+        }
+        let mut category = category.to_string();
+        category += ":";
+        self.0.push((category, None));
+    }
+
+    /// Convert the list into a string with aligned descriptions
+    fn into_string(self) -> String {
+        let longest_command = self
+            .0
+            .iter()
+            .filter_map(|(command, description)| {
+                if description.is_some() {
+                    Some(command.len())
+                } else {
+                    None
+                }
+            })
+            .max()
+            .unwrap_or(0);
+        let mut text = String::new();
+        for (command, description) in self.0 {
+            if let Some(description) = description {
+                let padding = " ".repeat(longest_command - command.len() + 3);
+                writeln!(text, "{}{}{}", command, padding, description).unwrap();
+            } else {
+                writeln!(text, "{}", command).unwrap();
+            }
+        }
+        text
+    }
+}
+
 /// Code for printing help of a specific command (e.g. `~help my_command`)
 async fn help_single_command<U, E>(
     ctx: crate::Context<'_, U, E>,
     command_name: &str,
     config: HelpConfiguration<'_>,
 ) -> Result<(), serenity::Error> {
-    let command = ctx.framework().options().commands.iter().find(|command| {
-        if command.name.eq_ignore_ascii_case(command_name) {
-            return true;
-        }
+    let mut commands = &ctx.framework().options().commands;
+    // Context menu commands can have whitespace in their names, so search for
+    // those first.
+    let mut command = commands.iter().find(|command| {
         if let Some(context_menu_name) = command.context_menu_name {
             if context_menu_name.eq_ignore_ascii_case(command_name) {
                 return true;
             }
         }
-
         false
     });
+    // If that failed, split the command name by whitespace and search for each
+    if command.is_none() {
+        for token in command_name.split_whitespace() {
+            command = commands.iter().find(|command| {
+                if command.name.eq_ignore_ascii_case(token) {
+                    return true;
+                }
+                false
+            });
+            if let Some(command) = command {
+                commands = &command.subcommands;
+            } else {
+                break;
+            }
+        }
+    }
 
     let reply = if let Some(command) = command {
-        match command.help_text {
-            Some(f) => f(),
-            None => command
-                .description
-                .as_deref()
-                .unwrap_or("No help available")
-                .to_owned(),
+        let prefix = if command.slash_action.is_some() {
+            String::from("/")
+        } else if command.prefix_action.is_some() {
+            let options = &ctx.framework().options().prefix_options;
+            match &options.prefix {
+                Some(fixed_prefix) => fixed_prefix.clone(),
+                None => match options.dynamic_prefix {
+                    Some(dynamic_prefix_callback) => {
+                        match dynamic_prefix_callback(crate::PartialContext::from(ctx)).await {
+                            Ok(Some(dynamic_prefix)) => dynamic_prefix,
+                            _ => String::new(),
+                        }
+                    }
+                    None => String::new(),
+                },
+            }
+        } else {
+            String::new()
+        };
+
+        let mut text = match (&command.description, command.help_text) {
+            (Some(description), Some(help_text)) => format!("{}\n\n{}", description, help_text()),
+            (Some(description), None) => description.to_owned(),
+            (None, Some(help_text)) => help_text(),
+            (None, None) => "No help available".to_string(),
+        };
+        if !command.subcommands.is_empty() {
+            text += "\n\n```\nSubcommands:\n";
+            let mut commandlist = PaddedCommandList::new();
+            let subprefix = format!("  {}{}", prefix, command_name);
+            preformat_subcommands(&mut commandlist, command, &subprefix);
+            text += &commandlist.into_string();
+            text += "```";
         }
+        format!("**`{}{}`**\n\n{}", prefix, command_name, text)
     } else {
         format!("No such command `{}`", command_name)
     };
@@ -67,59 +160,57 @@ async fn help_single_command<U, E>(
     Ok(())
 }
 
-/// Writes a single line of the help menu, like "  /ping        Emits a ping message\n"
-async fn append_command_line<U, E>(
-    ctx: crate::Context<'_, U, E>,
-    menu: &mut String,
+/// Recursively formats all subcommands
+fn preformat_subcommands<U, E>(
+    commands: &mut PaddedCommandList,
+    command: &crate::Command<U, E>,
+    prefix: &str,
+) {
+    for subcommand in &command.subcommands {
+        let command = format!("{} {}", prefix, subcommand.name);
+        let description = subcommand.description.as_deref().unwrap_or("").to_string();
+        commands.push_command(command, description);
+        // We could recurse here, but things can get cluttered quickly.
+        // Instead, we show (using this function) subsubcommands when
+        // the user asks for help on the subcommand.
+    }
+}
+
+/// Preformat lines (except for padding,) like `("  /ping", "Emits a ping message")`
+fn preformat_command<U, E>(
+    commands: &mut PaddedCommandList,
+    config: &HelpConfiguration<'_>,
     command: &crate::Command<U, E>,
     indent: &str,
+    options_prefix: Option<&str>,
 ) {
-    if command.hide_in_help {
-        return;
-    }
-
     let prefix = if command.slash_action.is_some() {
         String::from("/")
     } else if command.prefix_action.is_some() {
-        let options = &ctx.framework().options().prefix_options;
-
-        match &options.prefix {
-            Some(fixed_prefix) => fixed_prefix.clone(),
-            None => match options.dynamic_prefix {
-                Some(dynamic_prefix_callback) => {
-                    match dynamic_prefix_callback(crate::PartialContext::from(ctx)).await {
-                        Ok(Some(dynamic_prefix)) => dynamic_prefix,
-                        // `String::new()` defaults to "" which is what we want
-                        Err(_) | Ok(None) => String::new(),
-                    }
-                }
-                None => String::new(),
-            },
-        }
+        options_prefix.map(String::from).unwrap_or_default()
     } else {
         // This is not a prefix or slash command, i.e. probably a context menu only command
-        // which we will only show later
-        return;
+        // This should have been filtered out in `generate_all_commands`
+        unreachable!();
     };
 
-    let total_command_name_length = prefix.chars().count() + command.name.chars().count();
-    let padding = 12_usize.saturating_sub(total_command_name_length) + 1;
-    let _ = writeln!(
-        menu,
-        "{}{}{}{}{}",
-        indent,
-        prefix,
-        command.name,
-        " ".repeat(padding),
-        command.description.as_deref().unwrap_or("")
+    let prefix = format!("{}{}{}", indent, prefix, command.name);
+    commands.push_command(
+        prefix.clone(),
+        command.description.as_deref().unwrap_or("").to_string(),
     );
+    if config.show_subcommands {
+        preformat_subcommands(commands, command, &prefix)
+    }
 }
 
-/// Code for printing an overview of all commands (e.g. `~help`)
-async fn help_all_commands<U, E>(
+/// Create help text for `help_all_commands`
+///
+/// This is a separate function so we can have tests for it
+async fn generate_all_commands<U, E>(
     ctx: crate::Context<'_, U, E>,
-    config: HelpConfiguration<'_>,
-) -> Result<(), serenity::Error> {
+    config: &HelpConfiguration<'_>,
+) -> Result<String, serenity::Error> {
     let mut categories = crate::util::OrderedMap::<Option<&str>, Vec<&crate::Command<U, E>>>::new();
     for cmd in &ctx.framework().options().commands {
         categories
@@ -127,19 +218,45 @@ async fn help_all_commands<U, E>(
             .push(cmd);
     }
 
-    let mut menu = String::from("```\n");
-    for (category_name, commands) in categories {
-        menu += category_name.unwrap_or("Commands");
-        menu += ":\n";
-        for command in commands {
-            append_command_line(ctx, &mut menu, command, "  ").await;
-            if config.show_subcommands {
-                for command in &command.subcommands {
-                    append_command_line(ctx, &mut menu, command, "    ").await;
+    let options = &ctx.framework().options().prefix_options;
+    let options_prefix: Option<String> = match &options.prefix {
+        Some(fixed_prefix) => Some(fixed_prefix.clone()),
+        None => match options.dynamic_prefix {
+            Some(dynamic_prefix_callback) => {
+                match dynamic_prefix_callback(crate::PartialContext::from(ctx)).await {
+                    Ok(dynamic_prefix) => dynamic_prefix,
+                    _ => None,
                 }
             }
+            None => None,
+        },
+    };
+
+    let mut menu = String::from("```\n");
+
+    let mut commandlist = PaddedCommandList::new();
+    for (category_name, commands) in categories {
+        let commands = commands
+            .into_iter()
+            .filter(|cmd| {
+                !cmd.hide_in_help && (cmd.prefix_action.is_some() || cmd.slash_action.is_some())
+            })
+            .collect::<Vec<_>>();
+        if commands.is_empty() {
+            continue;
+        }
+        commandlist.push_category(category_name.unwrap_or("Commands"));
+        for command in commands {
+            preformat_command(
+                &mut commandlist,
+                config,
+                command,
+                "  ",
+                options_prefix.as_deref(),
+            );
         }
     }
+    menu += &commandlist.into_string();
 
     if config.show_context_menu_commands {
         menu += "\nContext menu commands:\n";
@@ -160,6 +277,15 @@ async fn help_all_commands<U, E>(
     menu += config.extra_text_at_bottom;
     menu += "\n```";
 
+    Ok(menu)
+}
+
+/// Code for printing an overview of all commands (e.g. `~help`)
+async fn help_all_commands<U, E>(
+    ctx: crate::Context<'_, U, E>,
+    config: HelpConfiguration<'_>,
+) -> Result<(), serenity::Error> {
+    let menu = generate_all_commands(ctx, &config).await?;
     ctx.send(|b| b.content(menu).ephemeral(config.ephemeral))
         .await?;
     Ok(())
