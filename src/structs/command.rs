@@ -227,6 +227,7 @@ impl<U, E> Command<U, E> {
             .kind(match context_menu_action {
                 crate::ContextMenuCommandAction::User(_) => serenity::CommandType::User,
                 crate::ContextMenuCommandAction::Message(_) => serenity::CommandType::Message,
+                crate::ContextMenuCommandAction::__NonExhaustive => unreachable!(),
             });
 
         if self.guild_only {

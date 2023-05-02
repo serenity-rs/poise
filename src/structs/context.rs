@@ -22,6 +22,7 @@ pub enum Context<'a, U, E> {
     Application(crate::ApplicationContext<'a, U, E>),
     /// Prefix command context
     Prefix(crate::PrefixContext<'a, U, E>),
+    // Not non_exhaustive.. adding a whole new category of commands would justify breakage lol
 }
 impl<U, E> Clone for Context<'_, U, E> {
     fn clone(&self) -> Self {
@@ -554,6 +555,7 @@ impl<'a, U, E> Context<'a, U, E> {
                                 Ok(())
                             }
                         }
+                        crate::ContextMenuCommandAction::__NonExhaustive => unreachable!(),
                     };
                 }
             }

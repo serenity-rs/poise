@@ -179,6 +179,7 @@ pub fn generate_slash_action(inv: &Invocation) -> Result<proc_macro2::TokenStrea
                         input: Some(input),
                     }
                 },
+                poise::SlashArgError::__NonExhaustive => unreachable!(),
             })?;
 
             if !ctx.framework.options.manual_cooldowns {

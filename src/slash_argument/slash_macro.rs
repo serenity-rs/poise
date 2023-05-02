@@ -21,6 +21,8 @@ pub enum SlashArgError {
         /// Original input string
         input: String,
     },
+    #[doc(hidden)]
+    __NonExhaustive,
 }
 impl std::fmt::Display for SlashArgError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -35,6 +37,7 @@ impl std::fmt::Display for SlashArgError {
             Self::Parse { error, input } => {
                 write!(f, "Failed to parse `{}` as argument: {}", input, error)
             }
+            Self::__NonExhaustive => unreachable!(),
         }
     }
 }
@@ -43,6 +46,7 @@ impl std::error::Error for SlashArgError {
         match self {
             Self::Parse { error, input: _ } => Some(&**error),
             Self::CommandStructureMismatch(_) => None,
+            Self::__NonExhaustive => unreachable!(),
         }
     }
 }
