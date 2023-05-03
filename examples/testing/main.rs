@@ -17,10 +17,25 @@ async fn main() {
                 misc::paginate(),
                 misc::div(),
                 misc::stringlen(),
+                misc::role(),
             ],
             prefix_options: poise::PrefixFrameworkOptions {
                 prefix: Some("~".into()),
                 ..Default::default()
+            },
+            on_error: |error| {
+                Box::pin(async move {
+                    match error {
+                        poise::FrameworkError::ArgumentParse { error, .. } => {
+                            if let Some(error) = error.downcast_ref::<serenity::RoleParseError>() {
+                                println!("Found a RoleParseError: {:?}", error);
+                            } else {
+                                println!("Not a RoleParseError :(");
+                            }
+                        }
+                        other => poise::builtins::on_error(other).await.unwrap(),
+                    }
+                })
             },
             ..Default::default()
         })

@@ -1,4 +1,5 @@
 use crate::{Context, Error};
+use poise::serenity_prelude as serenity;
 
 #[poise::command(slash_command, prefix_command)]
 pub async fn paginate(ctx: Context<'_>) -> Result<(), Error> {
@@ -28,5 +29,12 @@ pub async fn stringlen(
     s: String,
 ) -> Result<(), Error> {
     ctx.say(format!("you wrote: {}", s)).await?;
+    Ok(())
+}
+
+#[poise::command(prefix_command)]
+pub async fn role(ctx: Context<'_>, role: serenity::Role) -> Result<(), Error> {
+    ctx.say(format!("yes this is indeed a role: {:?}", role))
+        .await?;
     Ok(())
 }
