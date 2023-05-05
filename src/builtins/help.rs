@@ -87,7 +87,7 @@ async fn help_single_command<U, E>(
     command_name: &str,
     config: HelpConfiguration<'_>,
 ) -> Result<(), serenity::Error> {
-    let mut commands = &ctx.framework().options().commands;
+    let commands = &ctx.framework().options().commands;
     // Try interpret the command name as a context menu command first
     let mut command = commands.iter().find(|command| {
         if let Some(context_menu_name) = command.context_menu_name {
