@@ -143,10 +143,7 @@ pub fn find_command<'a, U, E>(
     remaining_message: &'a str,
     case_insensitive: bool,
     parent_commands: &mut Vec<&'a crate::Command<U, E>>,
-) -> Option<(&'a crate::Command<U, E>, &'a str, &'a str)>
-where
-    U: Send + Sync,
-{
+) -> Option<(&'a crate::Command<U, E>, &'a str, &'a str)> {
     let string_equal = if case_insensitive {
         |a: &str, b: &str| a.eq_ignore_ascii_case(b)
     } else {

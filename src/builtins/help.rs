@@ -88,8 +88,7 @@ async fn help_single_command<U, E>(
     config: HelpConfiguration<'_>,
 ) -> Result<(), serenity::Error> {
     let mut commands = &ctx.framework().options().commands;
-    // Context menu commands can have whitespace in their names, so search for
-    // those first.
+    // Try interpret the command name as a context menu command first
     let mut command = commands.iter().find(|command| {
         if let Some(context_menu_name) = command.context_menu_name {
             if context_menu_name.eq_ignore_ascii_case(command_name) {
@@ -98,20 +97,10 @@ async fn help_single_command<U, E>(
         }
         false
     });
-    // If that failed, split the command name by whitespace and search for each
+    // Then interpret command name as a normal command (possibly nested subcommand)
     if command.is_none() {
-        for token in command_name.split_whitespace() {
-            command = commands.iter().find(|command| {
-                if command.name.eq_ignore_ascii_case(token) {
-                    return true;
-                }
-                false
-            });
-            if let Some(command) = command {
-                commands = &command.subcommands;
-            } else {
-                break;
-            }
+        if let Some((c, _, _)) = crate::find_command(commands, command_name, true, &mut vec![]) {
+            command = Some(c);
         }
     }
 
