@@ -11,7 +11,7 @@ You can start any of the examples by running `cargo run` with the `--example` fl
 Unix:
 
 ```bash
-set DISCORD_TOKEN="your_token"
+export DISCORD_TOKEN="your_token"
 cargo run --example=framework_usage
 ```
 
