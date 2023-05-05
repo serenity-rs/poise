@@ -161,7 +161,11 @@ async fn context_food(
 }
 
 /// Give a user some random fruit
-#[poise::command(slash_command, context_menu_command = "Give fruit", category = "Context menu but also slash/prefix")]
+#[poise::command(
+    slash_command,
+    context_menu_command = "Give fruit",
+    category = "Context menu but also slash/prefix"
+)]
 async fn context_fruit(
     ctx: Context<'_>,
     #[description = "User to give fruit to"] user: serenity::User,
@@ -177,7 +181,11 @@ async fn context_fruit(
 }
 
 /// Give a user some random vegetable
-#[poise::command(prefix_command, context_menu_command = "Give vegetable", category = "Context menu but also slash/prefix")]
+#[poise::command(
+    prefix_command,
+    context_menu_command = "Give vegetable",
+    category = "Context menu but also slash/prefix"
+)]
 async fn context_vegetable(
     ctx: Context<'_>,
     #[description = "User to give vegetable to"] user: serenity::User,
@@ -193,7 +201,12 @@ async fn context_vegetable(
 }
 
 /// Give a user some random meat
-#[poise::command(prefix_command, slash_command, context_menu_command = "Give meat", category = "Context menu but also slash/prefix")]
+#[poise::command(
+    prefix_command,
+    slash_command,
+    context_menu_command = "Give meat",
+    category = "Context menu but also slash/prefix"
+)]
 async fn context_meat(
     ctx: Context<'_>,
     #[description = "User to give meat to"] user: serenity::User,
