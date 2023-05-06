@@ -29,6 +29,9 @@ impl<T: ChoiceParameter> crate::SlashArgument for T {
         _: crate::ApplicationCommandOrAutocompleteInteraction<'_>,
         value: &serenity::json::Value,
     ) -> ::std::result::Result<Self, crate::SlashArgError> {
+        #[allow(unused_imports)]
+        use ::serenity::json::prelude::*; // Required for simd-json :|
+
         let choice_key = value
             .as_u64()
             .ok_or(crate::SlashArgError::CommandStructureMismatch(
