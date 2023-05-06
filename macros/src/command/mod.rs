@@ -78,7 +78,7 @@ struct ParamArgs {
 
 /// Part of the Invocation struct. Represents a single parameter of a Discord command.
 struct CommandParameter {
-    name: syn::Ident,
+    name: Option<syn::Ident>,
     type_: syn::Type,
     args: ParamArgs,
     span: proc_macro2::Span,
@@ -156,10 +156,8 @@ pub fn command(
             }
         };
         let name = match &*pattern.pat {
-            syn::Pat::Ident(pat_ident) => &pat_ident.ident,
-            x => {
-                return Err(syn::Error::new(x.span(), "must use an identifier pattern here").into())
-            }
+            syn::Pat::Ident(pat_ident) => Some(pat_ident.ident.clone()),
+            _ => None,
         };
 
         let attrs = pattern
@@ -170,7 +168,7 @@ pub fn command(
         let attrs = <ParamArgs as darling::FromMeta>::from_list(&attrs)?;
 
         parameters.push(CommandParameter {
-            name: name.clone(),
+            name,
             type_: (*pattern.ty).clone(),
             args: attrs,
             span: command_param.span(),

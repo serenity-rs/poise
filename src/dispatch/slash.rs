@@ -205,7 +205,13 @@ async fn run_autocomplete<U, E>(
     let parameters = &ctx.command.parameters;
     let focused_parameter = parameters
         .iter()
-        .find(|p| p.name == focused_option.name)
+        .find(|p| match &p.name {
+            Some(param_name) => *param_name == focused_option.name,
+            None => {
+                log::warn!("name-less parameter ended up in slash command");
+                false
+            }
+        })
         .ok_or(crate::FrameworkError::CommandStructureMismatch {
             ctx,
             description: "focused autocomplete parameter name not recognized",

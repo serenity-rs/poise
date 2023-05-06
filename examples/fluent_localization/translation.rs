@@ -117,17 +117,23 @@ pub fn apply_translations(
             );
 
             for parameter in &mut command.parameters {
+                // Skip parameters with no name
+                let parameter_name = match &parameter.name {
+                    Some(x) => x,
+                    None => continue,
+                };
+
                 // Insert localized parameter name and description
                 parameter.name_localizations.insert(
                     locale.clone(),
-                    format(bundle, &command.name, Some(&parameter.name), None).unwrap(),
+                    format(bundle, &command.name, Some(&parameter_name), None).unwrap(),
                 );
                 parameter.description_localizations.insert(
                     locale.clone(),
                     format(
                         bundle,
                         &command.name,
-                        Some(&format!("{}-description", parameter.name)),
+                        Some(&format!("{}-description", parameter_name)),
                         None,
                     )
                     .unwrap(),
@@ -157,13 +163,20 @@ pub fn apply_translations(
             Some(format(bundle, &command.name, Some("description"), None).unwrap());
 
         for parameter in &mut command.parameters {
+            // Skip parameters with no name
+            let parameter_name = match parameter.name.clone() {
+                Some(x) => x,
+                None => continue,
+            };
+
             // Set fallback parameter name and description to en-US
-            parameter.name = format(bundle, &command.name, Some(&parameter.name), None).unwrap();
+            parameter.name =
+                Some(format(bundle, &command.name, Some(&parameter_name), None).unwrap());
             parameter.description = Some(
                 format(
                     bundle,
                     &command.name,
-                    Some(&format!("{}-description", parameter.name)),
+                    Some(&format!("{}-description", parameter_name)),
                     None,
                 )
                 .unwrap(),

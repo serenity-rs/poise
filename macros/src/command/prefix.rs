@@ -27,7 +27,12 @@ fn quote_parameter(p: &super::CommandParameter) -> Result<proc_macro2::TokenStre
             if p.type_ != syn::parse_quote! { bool } {
                 return Err(syn::Error::new(p.type_.span(), "Must use bool for flags").into());
             }
-            let literal = proc_macro2::Literal::string(&p.name.to_string());
+            let literal = match &p.name {
+                Some(name) => proc_macro2::Literal::string(&name.to_string()),
+                _ => {
+                    return Err(syn::Error::new(p.span, "#[flag] requires a parameter name").into())
+                }
+            };
             quote::quote! { #[flag] (#literal) }
         }
         Modifier::Lazy => quote::quote! { #[lazy] (#type_) },
@@ -37,7 +42,19 @@ fn quote_parameter(p: &super::CommandParameter) -> Result<proc_macro2::TokenStre
 }
 
 pub fn generate_prefix_action(inv: &Invocation) -> Result<proc_macro2::TokenStream, syn::Error> {
-    let param_names = inv.parameters.iter().map(|p| &p.name).collect::<Vec<_>>();
+    let param_names: Vec<syn::Ident> = inv
+        .parameters
+        .iter()
+        .enumerate()
+        .map(|(i, p)| match &p.name {
+            Some(x) => x.clone(),
+            // Generate a synthetic variable name for command parameters without a name
+            None => syn::Ident::new(
+                &format!("non_ident_param_{}", i),
+                proc_macro2::Span::mixed_site(),
+            ),
+        })
+        .collect::<Vec<_>>();
     let param_specs = inv
         .parameters
         .iter()

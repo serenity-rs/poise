@@ -39,3 +39,18 @@ pub async fn role(ctx: Context<'_>, role: serenity::Role) -> Result<(), Error> {
         .await?;
     Ok(())
 }
+
+/// Tests patterns as parameter names
+#[poise::command(prefix_command)]
+pub async fn pattern_parameters(
+    ctx: Context<'_>,
+    _: poise::CodeBlock,
+    poise::CodeBlock {
+        code: _,
+        language: _,
+        ..
+    }: poise::CodeBlock,
+) -> Result<(), Error> {
+    ctx.say("successfully received two code blocks").await?;
+    Ok(())
+}

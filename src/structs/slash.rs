@@ -205,7 +205,11 @@ pub struct CommandParameterChoice {
 #[derivative(Debug(bound = ""))]
 pub struct CommandParameter<U, E> {
     /// Name of this command parameter
-    pub name: String,
+    ///
+    /// This field is optional because text commands (prefix commands) don't need parameter names.
+    /// This field is None when a pattern like `_` or `CodeBlock { code, lang, .. }` is used in
+    /// place of a name in the function parameter.
+    pub name: Option<String>,
     /// Localized names with locale string as the key (slash-only)
     pub name_localizations: std::collections::HashMap<String, String>,
     /// Description of the command. Required for slash commands
@@ -257,7 +261,7 @@ impl<U, E> CommandParameter<U, E> {
         let mut builder = serenity::CreateApplicationCommandOption::default();
         builder
             .required(self.required)
-            .name(&self.name)
+            .name(self.name.as_ref()?)
             .description(
                 self.description
                     .as_deref()

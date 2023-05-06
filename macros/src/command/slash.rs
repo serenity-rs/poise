@@ -1,5 +1,5 @@
 use super::Invocation;
-use crate::util::extract_type_parameter;
+use crate::util::{extract_type_parameter, wrap_option_to_string};
 use syn::spanned::Spanned as _;
 
 pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStream>, syn::Error> {
@@ -25,8 +25,8 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
         }
 
         let param_name = match &param.args.rename {
-            Some(rename) => rename.clone(),
-            None => param.name.to_string(),
+            Some(rename) => wrap_option_to_string(Some(rename)),
+            None => wrap_option_to_string(param.name.as_ref().map(|x| x.to_string())),
         };
         let name_locales = param.args.name_localized.iter().map(|x| &x.0);
         let name_localized_values = param.args.name_localized.iter().map(|x| &x.1);
@@ -108,7 +108,7 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
         parameter_structs.push((
             quote::quote! {
                 ::poise::CommandParameter {
-                    name: #param_name.to_string(),
+                    name: #param_name,
                     name_localizations: vec![
                         #( (#name_locales.to_string(), #name_localized_values.to_string()) ),*
                     ].into_iter().collect(),
@@ -148,24 +148,24 @@ pub fn generate_slash_action(inv: &Invocation) -> Result<proc_macro2::TokenStrea
         }
     }
 
-    let param_identifiers = inv.parameters.iter().map(|p| &p.name).collect::<Vec<_>>();
-    let param_names = inv
-        .parameters
-        .iter()
-        .map(|p| match &p.args.rename {
-            Some(rename) => syn::Ident::new(rename, p.name.span()),
-            None => p.name.clone(),
-        })
-        .collect::<Vec<_>>();
+    let mut param_identifiers: Vec<syn::Ident> = Vec::new();
+    let mut param_names: Vec<syn::Ident> = Vec::new();
+    let mut param_types: Vec<syn::Type> = Vec::new();
+    for p in &inv.parameters {
+        let param_ident = p.name.clone().ok_or_else(|| {
+            syn::Error::new(p.span, "parameter must have a name in slash commands")
+        })?;
 
-    let param_types = inv
-        .parameters
-        .iter()
-        .map(|p| match p.args.flag {
+        param_identifiers.push(param_ident.clone());
+        param_names.push(match &p.args.rename {
+            Some(rename) => syn::Ident::new(rename, p.name.span()),
+            None => param_ident,
+        });
+        param_types.push(match p.args.flag {
             true => syn::parse_quote! { FLAG },
             false => p.type_.clone(),
-        })
-        .collect::<Vec<_>>();
+        });
+    }
 
     Ok(quote::quote! {
         |ctx| Box::pin(async move {
