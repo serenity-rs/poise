@@ -11,7 +11,7 @@ use std::borrow::Cow;
 
 /// Private enum so we can extend, split apart, or merge variants without breaking changes
 #[derive(Clone)]
-pub(super) enum ReplyHandleInner<'a> {
+enum ReplyHandleInner<'a> {
     /// A reply sent to a prefix command, i.e. a normal standalone message
     Prefix(Box<serenity::Message>),
     /// An application command response
@@ -36,7 +36,7 @@ pub(super) enum ReplyHandleInner<'a> {
 /// Discord sometimes returns the [`serenity::Message`] object directly, but sometimes you have to
 /// request it manually. This enum abstracts over the two cases
 #[derive(Clone)]
-pub struct ReplyHandle<'a>(pub(super) ReplyHandleInner<'a>);
+pub struct ReplyHandle<'a>(ReplyHandleInner<'a>);
 
 impl ReplyHandle<'_> {
     /// Retrieve the message object of the sent reply.
