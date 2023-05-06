@@ -1,7 +1,7 @@
 mod prefix;
 mod slash;
 
-use crate::util::wrap_option;
+use crate::util::{wrap_option, wrap_option_to_string};
 use proc_macro::TokenStream;
 use syn::spanned::Spanned as _;
 
@@ -243,14 +243,14 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
         .clone()
         .unwrap_or_else(|| inv.function.sig.ident.to_string());
     let command_name = &inv.command_name;
-    let context_menu_name = wrap_option(inv.args.context_menu_command.as_ref());
+    let context_menu_name = wrap_option_to_string(inv.args.context_menu_command.as_ref());
 
     let description = match &inv.description {
         Some(x) => quote::quote! { Some(#x.to_string()) },
         None => quote::quote! { None },
     };
     let hide_in_help = &inv.args.hide_in_help;
-    let category = wrap_option(inv.args.category.as_ref());
+    let category = wrap_option_to_string(inv.args.category.as_ref());
 
     let global_cooldown = wrap_option(inv.args.global_cooldown);
     let user_cooldown = wrap_option(inv.args.user_cooldown);
@@ -267,9 +267,9 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
     let nsfw_only = inv.args.nsfw_only;
 
     let help_text = match &inv.args.help_text_fn {
-        Some(help_text_fn) => quote::quote! { Some(#help_text_fn) },
+        Some(help_text_fn) => quote::quote! { Some(#help_text_fn()) },
         None => match &inv.help_text {
-            Some(extracted_explanation) => quote::quote! { Some(|| #extracted_explanation.into()) },
+            Some(extracted_explanation) => quote::quote! { Some(#extracted_explanation.into()) },
             None => quote::quote! { None },
         },
     };
@@ -346,7 +346,7 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
                 parameters: vec![ #( #parameters ),* ],
                 custom_data: #custom_data,
 
-                aliases: &[ #( #aliases, )* ],
+                aliases: vec![ #( #aliases.to_string(), )* ],
                 invoke_on_edit: #invoke_on_edit,
                 track_deletion: #track_deletion,
                 broadcast_typing: #broadcast_typing,

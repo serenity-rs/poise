@@ -93,7 +93,7 @@ async fn help_single_command<U, E>(
     let commands = &ctx.framework().options().commands;
     // Try interpret the command name as a context menu command first
     let mut command = commands.iter().find(|command| {
-        if let Some(context_menu_name) = command.context_menu_name {
+        if let Some(context_menu_name) = &command.context_menu_name {
             if context_menu_name.eq_ignore_ascii_case(command_name) {
                 return true;
             }
@@ -128,16 +128,16 @@ async fn help_single_command<U, E>(
             String::new()
         };
 
-        let mut text = match (&command.description, command.help_text) {
+        let mut text = match (&command.description, &command.help_text) {
             (Some(description), Some(help_text)) => {
                 if config.include_description {
-                    format!("{}\n\n{}", description, help_text())
+                    format!("{}\n\n{}", description, help_text)
                 } else {
-                    help_text()
+                    help_text.clone()
                 }
             }
             (Some(description), None) => description.to_owned(),
-            (None, Some(help_text)) => help_text(),
+            (None, Some(help_text)) => help_text.clone(),
             (None, None) => "No help available".to_string(),
         };
         if !command.subcommands.is_empty() {
@@ -212,7 +212,7 @@ async fn generate_all_commands<U, E>(
     let mut categories = crate::util::OrderedMap::<Option<&str>, Vec<&crate::Command<U, E>>>::new();
     for cmd in &ctx.framework().options().commands {
         categories
-            .get_or_insert_with(cmd.category, Vec::new)
+            .get_or_insert_with(cmd.category.as_deref(), Vec::new)
             .push(cmd);
     }
 
@@ -266,7 +266,10 @@ async fn generate_all_commands<U, E>(
                 Some(crate::ContextMenuCommandAction::__NonExhaustive) => unreachable!(),
                 None => continue,
             };
-            let name = command.context_menu_name.unwrap_or(&command.name);
+            let name = command
+                .context_menu_name
+                .as_deref()
+                .unwrap_or(&command.name);
             let _ = writeln!(menu, "  {} (on {})", name, kind);
         }
     }
