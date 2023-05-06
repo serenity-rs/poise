@@ -48,7 +48,6 @@ pub struct Command<U, E> {
     /// Whether to hide this command in help menus.
     pub hide_in_help: bool,
     /// Short description of the command. Displayed inline in help menus and similar.
-    // TODO: rename to description
     pub description: Option<String>,
     /// Localized descriptions with locale string as the key (slash-only)
     pub description_localizations: std::collections::HashMap<String, String>,

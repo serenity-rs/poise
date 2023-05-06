@@ -441,6 +441,28 @@ context_methods! {
             Context::Prefix(_) => None,
         }
     }
+
+    /// Builds a [`crate::CreateReply`] by combining the builder closure with the defaults that were
+    /// pre-configured in poise.
+    ///
+    /// This is primarily an internal function and only exposed for people who want to manually
+    /// convert [`crate::CreateReply`] instances into Discord requests.
+    (reply_builder self builder)
+    (pub fn reply_builder<'att>(
+        self,
+        builder: impl for<'b> FnOnce(&'b mut crate::CreateReply<'att>) -> &'b mut crate::CreateReply<'att>,
+    ) -> crate::CreateReply<'att>) {
+        let mut reply = crate::CreateReply {
+            ephemeral: self.command().ephemeral,
+            allowed_mentions: self.framework().options().allowed_mentions.clone(),
+            ..Default::default()
+        };
+        builder(&mut reply);
+        if let Some(callback) = self.framework().options().reply_callback {
+            callback(self, &mut reply);
+        }
+        reply
+    }
 }
 
 impl<'a, U, E> Context<'a, U, E> {

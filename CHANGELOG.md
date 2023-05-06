@@ -1,3 +1,21 @@
+# 0.5.5
+
+New features:
+- Added `#[min_length]` and `#[max_length]` support for slash command string parameters
+
+Detailed changelog: https://github.com/kangalioo/poise/compare/v0.5.4...v0.5.5
+
+# 0.5.4
+
+API updates:
+- The `payload` field of `FrameworkError::CommandPanic` has been changed from `Box<dyn Any + Send>` to `Option<String>`
+  - This is technically a breaking change
+  - However, the newly introduced `payload` field in 0.5.3 made `FrameworkError` accidentally not Sync anymore
+  - And `FrameworkError::CommandPanic` has only been introduced a few days ago in 0.5.3
+  - Therefore, I think it's ok to release this as a patch release to reverse the accidental breaking change from 0.5.3
+
+Detailed changelog: https://github.com/kangalioo/poise/compare/v0.5.3...v0.5.4
+
 # 0.5.3
 
 New features:

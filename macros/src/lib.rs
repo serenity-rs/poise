@@ -78,6 +78,8 @@ are multiple attributes you can use on parameters:
 - `#[rename = "new_name"]`: Changes the user-facing name of the parameter (slash-only)
 - `#[min = 0]`: Minimum value for this number parameter (slash-only)
 - `#[max = 0]`: Maximum value for this number parameter (slash-only)
+- `#[min_length = 0]`: Minimum length for this string parameter (slash-only)
+- `#[max_length = 1]`: Maximum length for this string parameter (slash-only)
 - `#[rest]`: Use the entire rest of the message for this parameter (prefix-only)
 - `#[lazy]`: Can be used on Option and Vec parameters and is equivalent to regular expressions' laziness (prefix-only)
 - `#[flag]`: Can be used on a bool parameter to set the bool to true if the user typed the parameter name literally (prefix-only)

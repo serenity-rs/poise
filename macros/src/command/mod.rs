@@ -69,6 +69,8 @@ struct ParamArgs {
     channel_types: Option<crate::util::List<syn::Ident>>,
     min: Option<syn::Lit>,
     max: Option<syn::Lit>,
+    min_length: Option<syn::Lit>,
+    max_length: Option<syn::Lit>,
     lazy: bool,
     flag: bool,
     rest: bool,

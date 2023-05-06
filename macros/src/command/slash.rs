@@ -74,10 +74,20 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
             Some(x) => quote::quote! { o.max_number_value(#x as f64); },
             None => quote::quote! {},
         };
+        // TODO: move this to poise::CommandParameter::{min_length, max_length} fields
+        let min_length_setter = match &param.args.min_length {
+            Some(x) => quote::quote! { o.min_length(#x); },
+            None => quote::quote! {},
+        };
+        let max_length_setter = match &param.args.max_length {
+            Some(x) => quote::quote! { o.max_length(#x); },
+            None => quote::quote! {},
+        };
         let type_setter = match inv.args.slash_command {
             true => quote::quote! { Some(|o| {
                 poise::create_slash_argument!(#type_, o);
                 #min_value_setter #max_value_setter
+                #min_length_setter #max_length_setter
             }) },
             false => quote::quote! { None },
         };
