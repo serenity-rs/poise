@@ -3,7 +3,7 @@
 use super::*;
 
 /// Error thrown when parsing a malformed [`CodeBlock`] ([`CodeBlock::pop_from`])
-#[derive(Default, Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Default, Debug, Clone)]
 pub struct CodeBlockError {
     #[doc(hidden)]
     pub __non_exhaustive: (),
@@ -151,14 +151,14 @@ fn test_pop_code_block() {
             pop_from(string).unwrap().1,
             CodeBlock {
                 code: code.into(),
-                language: language.map(|x| x.into())
+                language: language.map(|x| x.into()),
                 __non_exhaustive: (),
             }
         );
     }
 
-    assert_eq!(pop_from(""), Err(CodeBlockError));
-    assert_eq!(pop_from("''"), Err(CodeBlockError));
-    assert_eq!(pop_from("``"), Err(CodeBlockError));
-    assert_eq!(pop_from("``````"), Err(CodeBlockError));
+    assert!(pop_from("").is_err());
+    assert!(pop_from("''").is_err());
+    assert!(pop_from("``").is_err());
+    assert!(pop_from("``````").is_err());
 }

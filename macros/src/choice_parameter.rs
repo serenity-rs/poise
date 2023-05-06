@@ -97,6 +97,7 @@ pub fn choice_parameter(input: syn::DeriveInput) -> Result<TokenStream, darling:
                     localizations: std::collections::HashMap::from([
                         #( (#locales.to_string(), #localized_names.to_string()) ),*
                     ]),
+                    __non_exhaustive: (),
                 }, )* ]
             }
         }
