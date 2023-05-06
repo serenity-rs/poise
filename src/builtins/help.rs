@@ -14,6 +14,8 @@ pub struct HelpConfiguration<'a> {
     pub show_context_menu_commands: bool,
     /// Whether to list context menu commands as well
     pub show_subcommands: bool,
+    /// Whether to include [`crate::Command::description`] (above [`crate::Command::help_text`]).
+    pub include_description: bool,
     #[doc(hidden)]
     pub __non_exhaustive: (),
 }
@@ -25,6 +27,7 @@ impl Default for HelpConfiguration<'_> {
             ephemeral: true,
             show_context_menu_commands: false,
             show_subcommands: false,
+            include_description: true,
             __non_exhaustive: (),
         }
     }
@@ -126,7 +129,13 @@ async fn help_single_command<U, E>(
         };
 
         let mut text = match (&command.description, command.help_text) {
-            (Some(description), Some(help_text)) => format!("{}\n\n{}", description, help_text()),
+            (Some(description), Some(help_text)) => {
+                if config.include_description {
+                    format!("{}\n\n{}", description, help_text())
+                } else {
+                    help_text()
+                }
+            }
             (Some(description), None) => description.to_owned(),
             (None, Some(help_text)) => help_text(),
             (None, None) => "No help available".to_string(),
