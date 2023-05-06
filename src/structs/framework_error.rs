@@ -87,7 +87,7 @@ pub enum FrameworkError<'a, U, E> {
         ctx: crate::Context<'a, U, E>,
     },
     /// Command was invoked but the bot is lacking the permissions specified in
-    /// [`crate::Command::required_bot_permissions`]
+    /// [`crate::Command::required_permissions`]
     MissingBotPermissions {
         /// Which permissions in particular the bot is lacking for this command
         missing_permissions: serenity::Permissions,
