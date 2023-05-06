@@ -1,4 +1,5 @@
 use crate::{Context, Error};
+#[allow(unused_imports)]
 use poise::serenity_prelude as serenity;
 
 #[poise::command(slash_command, prefix_command)]

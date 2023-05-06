@@ -298,7 +298,8 @@ mod test {
                 "yoo".into(),
                 crate::CodeBlock {
                     code: "that's cool".into(),
-                    language: None
+                    language: None,
+                    __non_exhaustive: (),
                 },
                 "!".into()
             ),
