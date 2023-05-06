@@ -90,6 +90,7 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
             false => quote::quote! { None },
         };
         // TODO: theoretically a problem that we don't store choices for non slash commands
+        // TODO: move this to poise::CommandParameter::choices (is there a reason not to?)
         let choices = match inv.args.slash_command {
             true => quote::quote! { poise::slash_argument_choices!(#type_) },
             false => quote::quote! { vec![] },
