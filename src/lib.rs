@@ -492,9 +492,9 @@ async fn catch_unwind_maybe<T>(
 
 #[cfg(test)]
 mod tests {
-    fn assert_send_sync<T: Send + Sync>() {}
+    fn _assert_send_sync<T: Send + Sync>() {}
 
     fn _test_framework_error_send_sync<'a, U: Send + Sync + 'static, E: Send + Sync + 'static>() {
-        assert_send_sync::<crate::FrameworkError<'a, U, E>>();
+        _assert_send_sync::<crate::FrameworkError<'a, U, E>>();
     }
 }
