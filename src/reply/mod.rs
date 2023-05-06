@@ -100,16 +100,7 @@ impl ReplyHandle<'_> {
         ctx: crate::Context<'_, U, E>,
         builder: impl for<'a> FnOnce(&'a mut CreateReply<'att>) -> &'a mut CreateReply<'att>,
     ) -> Result<(), serenity::Error> {
-        // TODO: deduplicate this block of code
-        let mut reply = crate::CreateReply {
-            ephemeral: ctx.command().ephemeral,
-            allowed_mentions: ctx.framework().options().allowed_mentions.clone(),
-            ..Default::default()
-        };
-        builder(&mut reply);
-        if let Some(callback) = ctx.framework().options().reply_callback {
-            callback(ctx, &mut reply);
-        }
+        let reply = ctx.reply_builder(builder);
 
         match &self.0 {
             ReplyHandleInner::Prefix(msg) => {
