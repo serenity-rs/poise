@@ -370,7 +370,12 @@ impl<'a, U, E> Context<'a, U, E> {
                         }
                         serenity::ResolvedValue::Role(x) => write!(string, "@{}", x.name),
                         serenity::ResolvedValue::User(x, _) => {
-                            write!(string, "@{}#{:04}", x.name, x.discriminator)
+                            string.push('@');
+                            string.push_str(&x.name);
+                            if let Some(discrim) = x.discriminator {
+                                let _ = write!(string, "#{discrim:04}");
+                            }
+                            Ok(())
                         }
 
                         serenity::ResolvedValue::Unresolved(_)
