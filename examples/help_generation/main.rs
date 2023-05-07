@@ -251,7 +251,7 @@ async fn food_react(
     slash_command,
     context_menu_command = "React with fruit",
     ephemeral,
-    category = "No slash/prefix",
+    category = "No slash/prefix"
 )]
 async fn fruit_react(
     ctx: Context<'_>,
@@ -269,7 +269,7 @@ async fn fruit_react(
     slash_command,
     context_menu_command = "React with vegetable",
     ephemeral,
-    category = "No slash/prefix",
+    category = "No slash/prefix"
 )]
 async fn vegetable_react(
     ctx: Context<'_>,
