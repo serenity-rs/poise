@@ -238,20 +238,39 @@ macro_rules! parse_prefix_args {
 
 #[cfg(test)]
 mod test {
+    use std::sync::Arc;
+
     use super::*;
 
     #[tokio::test]
     async fn test_parse_args() {
         use crate::serenity_prelude as serenity;
 
+        // create a one-off client to get the shard manager
+        let client = serenity::Client::builder("example", serenity::GatewayIntents::empty())
+            .await
+            .unwrap();
+        let manager = client.shard_manager.clone();
+        drop(client);
+
+        let shard_runner_opts = ::serenity::gateway::ShardRunnerOptions {
+            data: Arc::default(),
+            event_handlers: vec![],
+            raw_event_handlers: vec![],
+            framework: None,
+            manager,
+            #[cfg(feature = "cache")]
+            cache: Default::default(),
+            http: Arc::new(::serenity::http::Http::new("example")),
+        };
+        let shard_runner = ::serenity::gateway::ShardRunner::new(shard_runner_opts);
+
         // Create dummy discord context; it will not be accessed in this test
         let ctx = serenity::Context {
-            data: std::sync::Arc::new(
-                tokio::sync::RwLock::new(::serenity::prelude::TypeMap::new()),
-            ),
-            shard: ::serenity::gateway::ShardMessenger::new(futures::channel::mpsc::unbounded().0),
+            data: Arc::new(tokio::sync::RwLock::new(::serenity::prelude::TypeMap::new())),
+            shard: ::serenity::gateway::ShardMessenger::new(&shard_runner),
             shard_id: Default::default(),
-            http: std::sync::Arc::new(::serenity::http::Http::new("example")),
+            http: Arc::new(::serenity::http::Http::new("example")),
             #[cfg(feature = "cache")]
             cache: Default::default(),
         };
