@@ -239,10 +239,11 @@ fn preformat_subcommands<U, E>(
     let as_context_command = command.slash_action.is_none() && command.prefix_action.is_none();
     for subcommand in &command.subcommands {
         let command = if as_context_command {
-            let Some(name) = format_context_menu_name(subcommand) else {
+            let name = format_context_menu_name(subcommand);
+            if name.is_none() {
                 continue;
             };
-            name
+            name.unwrap()
         } else {
             format!("{} {}", prefix, subcommand.name)
         };
@@ -328,10 +329,11 @@ async fn generate_all_commands<U, E>(
         menu += "\nContext menu commands:\n";
 
         for command in &ctx.framework().options().commands {
-            let Some(name) = format_context_menu_name(command) else {
+            let name = format_context_menu_name(command);
+            if name.is_none() {
                 continue;
             };
-            let _ = writeln!(menu, "  {}", name);
+            let _ = writeln!(menu, "  {}", name.unwrap());
         }
     }
 
