@@ -62,15 +62,20 @@ async fn main() {
     let translations = translation::read_ftl().expect("failed to read translation files");
     translation::apply_translations(&translations, &mut commands);
 
-    poise::Framework::builder()
-        .token(std::env::var("TOKEN").unwrap())
-        .intents(serenity::GatewayIntents::non_privileged())
-        .options(poise::FrameworkOptions {
+    serenity::Client::builder(
+        std::env::var("TOKEN").unwrap(),
+        serenity::GatewayIntents::non_privileged(),
+    )
+    .framework(poise::Framework::new(
+        poise::FrameworkOptions {
             commands,
             ..Default::default()
-        })
-        .user_data_setup(move |_, _, _| Box::pin(async move { Ok(Data { translations }) }))
-        .run()
-        .await
-        .unwrap();
+        },
+        move |_, _, _| Box::pin(async move { Ok(Data { translations }) }),
+    ))
+    .await
+    .unwrap()
+    .start()
+    .await
+    .unwrap();
 }

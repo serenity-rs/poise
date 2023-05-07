@@ -4,6 +4,8 @@
 //! This module has a test command which stores a dummy payload to check that this string is
 //! available in all phases of command execution
 
+use serenity::prelude::GatewayIntents;
+
 type Error = &'static str;
 type Context<'a> = poise::Context<'a, (), Error>;
 
@@ -47,21 +49,12 @@ pub async fn invocation_data_test(
 
 #[tokio::main]
 async fn main() {
-    poise::Framework::builder()
-        .token(std::env::var("TOKEN").unwrap())
-        .user_data_setup(move |ctx, _, framework| {
-            Box::pin(async move {
-                poise::serenity_prelude::GuildId::new(703332075914264606)
-                    .set_commands(
-                        ctx,
-                        poise::builtins::create_application_commands(&framework.options().commands),
-                    )
-                    .await
-                    .unwrap();
-                Ok(())
-            })
-        })
-        .options(poise::FrameworkOptions {
+    serenity::Client::builder(
+        std::env::var("TOKEN").unwrap(),
+        GatewayIntents::non_privileged(),
+    )
+    .framework(poise::Framework::new(
+        poise::FrameworkOptions {
             pre_command: |ctx| {
                 Box::pin(async move {
                     println!(
@@ -113,8 +106,23 @@ async fn main() {
                 ..Default::default()
             },
             ..Default::default()
-        })
-        .run()
-        .await
-        .unwrap();
+        },
+        move |ctx, _, framework| {
+            Box::pin(async move {
+                poise::serenity_prelude::GuildId::new(703332075914264606)
+                    .set_commands(
+                        ctx,
+                        poise::builtins::create_application_commands(&framework.options().commands),
+                    )
+                    .await
+                    .unwrap();
+                Ok(())
+            })
+        },
+    ))
+    .await
+    .unwrap()
+    .start()
+    .await
+    .unwrap();
 }
