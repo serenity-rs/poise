@@ -53,20 +53,20 @@ async fn parent(_ctx: Context<'_>) -> Result<(), Error> {
 
 #[tokio::main]
 async fn main() {
-    let framework = poise::Framework::builder()
-        .options(poise::FrameworkOptions {
+    let mut client = serenity::Client::builder(
+        std::env::var("DISCORD_TOKEN").unwrap(),
+        serenity::GatewayIntents::non_privileged() | serenity::GatewayIntents::MESSAGE_CONTENT,
+    )
+    .framework(poise::Framework::new(
+        poise::FrameworkOptions {
             commands: vec![parent()],
             prefix_options: poise::PrefixFrameworkOptions {
                 prefix: Some("~".into()),
                 ..Default::default()
             },
             ..Default::default()
-        })
-        .token(std::env::var("DISCORD_TOKEN").unwrap())
-        .intents(
-            serenity::GatewayIntents::non_privileged() | serenity::GatewayIntents::MESSAGE_CONTENT,
-        )
-        .user_data_setup(move |ctx, _ready, framework| {
+        },
+        move |ctx, _ready, framework| {
             Box::pin(async move {
                 let guild_id =
                     serenity::GuildId(std::env::var("GUILD_ID").unwrap().parse().unwrap());
@@ -78,7 +78,10 @@ async fn main() {
                     .await?;
                 Ok(Data {})
             })
-        });
+        },
+    ))
+    .await
+    .unwrap();
 
-    framework.run().await.unwrap();
+    client.start().await.unwrap();
 }

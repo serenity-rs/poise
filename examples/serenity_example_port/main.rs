@@ -283,22 +283,28 @@ async fn main() {
         ..Default::default()
     };
 
-    // The Framework builder will automatically retrieve the bot owner and application ID via the
-    // passed token, so that information need not be passed here
-    poise::Framework::builder()
+    serenity::Client::builder(
         // Configure the client with your Discord bot token in the environment.
-        .token(std::env::var("DISCORD_TOKEN").expect("Expected DISCORD_TOKEN in the environment"))
-        .options(options)
-        .user_data_setup(|_ctx, _data_about_bot, _framework| {
+        std::env::var("DISCORD_TOKEN").expect("Expected DISCORD_TOKEN in the environment"),
+        serenity::GatewayIntents::non_privileged(),
+    )
+    // The Framework will automatically retrieve the bot owner and application ID via the
+    // passed token, so that information need not be passed here
+    .framework(poise::Framework::new(
+        options,
+        |_ctx, _data_about_bot, _framework| {
             Box::pin(async move {
                 Ok(Data {
                     command_counter: std::sync::Mutex::new(std::collections::HashMap::new()),
                 })
             })
-        })
-        .run()
-        .await
-        .expect("Client error");
+        },
+    ))
+    .await
+    .expect("build client")
+    .start()
+    .await
+    .expect("Client error");
 
     // INFO: currently not supported by poise
     /*
