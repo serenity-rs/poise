@@ -34,21 +34,21 @@ impl Default for HelpConfiguration<'_> {
 }
 
 /// Convenience function to align descriptions behind commands
-struct PaddedCommandList(Vec<(String, Option<String>)>);
+struct TwoColumnList(Vec<(String, Option<String>)>);
 
-impl PaddedCommandList {
-    /// Creates a new [`PaddedCommandList`]
+impl TwoColumnList {
+    /// Creates a new [`TwoColumnList`]
     fn new() -> Self {
         Self(Vec::new())
     }
 
-    /// Add a command & description combo to the list
-    fn push_command(&mut self, command: String, description: String) {
+    /// Add a line that needs the padding between the columns
+    fn push_two_colums(&mut self, command: String, description: String) {
         self.0.push((command, Some(description)));
     }
 
-    /// Add category
-    fn push_category(&mut self, category: &str) {
+    /// Add a line that doesn't influence the first columns's width
+    fn push_heading(&mut self, category: &str) {
         if !self.0.is_empty() {
             self.0.push(("".to_string(), None));
         }
@@ -84,6 +84,41 @@ impl PaddedCommandList {
     }
 }
 
+/// Get the prefix from options
+async fn get_prefix_from_options<U, E>(ctx: crate::Context<'_, U, E>) -> Option<String> {
+    let options = &ctx.framework().options().prefix_options;
+    match &options.prefix {
+        Some(fixed_prefix) => Some(fixed_prefix.clone()),
+        None => match options.dynamic_prefix {
+            Some(dynamic_prefix_callback) => {
+                match dynamic_prefix_callback(crate::PartialContext::from(ctx)).await {
+                    Ok(Some(dynamic_prefix)) => Some(dynamic_prefix),
+                    _ => None,
+                }
+            }
+            None => None,
+        },
+    }
+}
+
+/// Format context menu command name
+fn format_context_menu_name<U, E>(command: &crate::Command<U, E>) -> Option<String> {
+    let kind = match command.context_menu_action {
+        Some(crate::ContextMenuCommandAction::User(_)) => "user",
+        Some(crate::ContextMenuCommandAction::Message(_)) => "message",
+        Some(crate::ContextMenuCommandAction::__NonExhaustive) => unreachable!(),
+        None => return None,
+    };
+    Some(format!(
+        "{} (on {})",
+        command
+            .context_menu_name
+            .as_deref()
+            .unwrap_or(&command.name),
+        kind
+    ))
+}
+
 /// Code for printing help of a specific command (e.g. `~help my_command`)
 async fn help_single_command<U, E>(
     ctx: crate::Context<'_, U, E>,
@@ -108,25 +143,36 @@ async fn help_single_command<U, E>(
     }
 
     let reply = if let Some(command) = command {
-        let prefix = if command.slash_action.is_some() {
-            String::from("/")
-        } else if command.prefix_action.is_some() {
-            let options = &ctx.framework().options().prefix_options;
-            match &options.prefix {
-                Some(fixed_prefix) => fixed_prefix.clone(),
-                None => match options.dynamic_prefix {
-                    Some(dynamic_prefix_callback) => {
-                        match dynamic_prefix_callback(crate::PartialContext::from(ctx)).await {
-                            Ok(Some(dynamic_prefix)) => dynamic_prefix,
-                            _ => String::new(),
-                        }
-                    }
-                    None => String::new(),
-                },
+        let mut invocations = Vec::new();
+        let mut subprefix = None;
+        if command.slash_action.is_some() {
+            invocations.push(format!("`/{}`", command.name));
+            subprefix = Some(format!("  /{}", command.name));
+        }
+        if command.prefix_action.is_some() {
+            let prefix = match get_prefix_from_options(ctx).await {
+                Some(prefix) => prefix,
+                // None can happen if the prefix is dynamic, and the callback
+                // fails due to help being invoked with slash or context menu
+                // commands. Not sure there's a better way to handle this.
+                None => String::from("<prefix>"),
+            };
+            invocations.push(format!("`{}{}`", prefix, command.name));
+            if subprefix.is_none() {
+                subprefix = Some(format!("  {}{}", prefix, command.name));
             }
-        } else {
-            String::new()
-        };
+        }
+        if command.context_menu_name.is_some() && command.context_menu_action.is_some() {
+            // Since command.context_menu_action is Some, this unwrap is safe
+            invocations.push(format_context_menu_name(command).unwrap());
+            if subprefix.is_none() {
+                subprefix = Some(String::from("  "));
+            }
+        }
+        // At least one of the three if blocks should have triggered
+        assert!(subprefix.is_some());
+        assert!(!invocations.is_empty());
+        let invocations = invocations.join("\n");
 
         let mut text = match (&command.description, &command.help_text) {
             (Some(description), Some(help_text)) => {
@@ -140,15 +186,41 @@ async fn help_single_command<U, E>(
             (None, Some(help_text)) => help_text.clone(),
             (None, None) => "No help available".to_string(),
         };
+        if !command.parameters.is_empty() {
+            text += "\n\n```\nParameters:\n";
+            let mut parameterlist = TwoColumnList::new();
+            for parameter in &command.parameters {
+                let name = parameter.name.as_deref().unwrap_or("").to_string();
+                let description = parameter.description.as_deref().unwrap_or("");
+                let description = format!(
+                    "({}) {}",
+                    if parameter.required {
+                        "required"
+                    } else {
+                        "optional"
+                    },
+                    description,
+                );
+                parameterlist.push_two_colums(name, description);
+            }
+            text += &parameterlist.into_string();
+            text += "```";
+        }
         if !command.subcommands.is_empty() {
             text += "\n\n```\nSubcommands:\n";
-            let mut commandlist = PaddedCommandList::new();
-            let subprefix = format!("  {}{}", prefix, command_name);
-            preformat_subcommands(&mut commandlist, command, &subprefix);
+            let mut commandlist = TwoColumnList::new();
+            // Subcommands can exist on context menu commands, but there's no
+            // hierarchy in the menu, so just display them as a list without
+            // subprefix.
+            preformat_subcommands(
+                &mut commandlist,
+                command,
+                &subprefix.unwrap_or_else(|| String::from("  ")),
+            );
             text += &commandlist.into_string();
             text += "```";
         }
-        format!("**`{}{}`**\n\n{}", prefix, command_name, text)
+        format!("**{}**\n\n{}", invocations, text)
     } else {
         format!("No such command `{}`", command_name)
     };
@@ -160,14 +232,23 @@ async fn help_single_command<U, E>(
 
 /// Recursively formats all subcommands
 fn preformat_subcommands<U, E>(
-    commands: &mut PaddedCommandList,
+    commands: &mut TwoColumnList,
     command: &crate::Command<U, E>,
     prefix: &str,
 ) {
+    let as_context_command = command.slash_action.is_none() && command.prefix_action.is_none();
     for subcommand in &command.subcommands {
-        let command = format!("{} {}", prefix, subcommand.name);
+        let command = if as_context_command {
+            let name = format_context_menu_name(subcommand);
+            if name.is_none() {
+                continue;
+            };
+            name.unwrap()
+        } else {
+            format!("{} {}", prefix, subcommand.name)
+        };
         let description = subcommand.description.as_deref().unwrap_or("").to_string();
-        commands.push_command(command, description);
+        commands.push_two_colums(command, description);
         // We could recurse here, but things can get cluttered quickly.
         // Instead, we show (using this function) subsubcommands when
         // the user asks for help on the subcommand.
@@ -176,7 +257,7 @@ fn preformat_subcommands<U, E>(
 
 /// Preformat lines (except for padding,) like `("  /ping", "Emits a ping message")`
 fn preformat_command<U, E>(
-    commands: &mut PaddedCommandList,
+    commands: &mut TwoColumnList,
     config: &HelpConfiguration<'_>,
     command: &crate::Command<U, E>,
     indent: &str,
@@ -193,7 +274,7 @@ fn preformat_command<U, E>(
     };
 
     let prefix = format!("{}{}{}", indent, prefix, command.name);
-    commands.push_command(
+    commands.push_two_colums(
         prefix.clone(),
         command.description.as_deref().unwrap_or("").to_string(),
     );
@@ -216,23 +297,11 @@ async fn generate_all_commands<U, E>(
             .push(cmd);
     }
 
-    let options = &ctx.framework().options().prefix_options;
-    let options_prefix: Option<String> = match &options.prefix {
-        Some(fixed_prefix) => Some(fixed_prefix.clone()),
-        None => match options.dynamic_prefix {
-            Some(dynamic_prefix_callback) => {
-                match dynamic_prefix_callback(crate::PartialContext::from(ctx)).await {
-                    Ok(dynamic_prefix) => dynamic_prefix,
-                    _ => None,
-                }
-            }
-            None => None,
-        },
-    };
+    let options_prefix = get_prefix_from_options(ctx).await;
 
     let mut menu = String::from("```\n");
 
-    let mut commandlist = PaddedCommandList::new();
+    let mut commandlist = TwoColumnList::new();
     for (category_name, commands) in categories {
         let commands = commands
             .into_iter()
@@ -243,7 +312,7 @@ async fn generate_all_commands<U, E>(
         if commands.is_empty() {
             continue;
         }
-        commandlist.push_category(category_name.unwrap_or("Commands"));
+        commandlist.push_heading(category_name.unwrap_or("Commands"));
         for command in commands {
             preformat_command(
                 &mut commandlist,
@@ -260,17 +329,11 @@ async fn generate_all_commands<U, E>(
         menu += "\nContext menu commands:\n";
 
         for command in &ctx.framework().options().commands {
-            let kind = match command.context_menu_action {
-                Some(crate::ContextMenuCommandAction::User(_)) => "user",
-                Some(crate::ContextMenuCommandAction::Message(_)) => "message",
-                Some(crate::ContextMenuCommandAction::__NonExhaustive) => unreachable!(),
-                None => continue,
+            let name = format_context_menu_name(command);
+            if name.is_none() {
+                continue;
             };
-            let name = command
-                .context_menu_name
-                .as_deref()
-                .unwrap_or(&command.name);
-            let _ = writeln!(menu, "  {} (on {})", name, kind);
+            let _ = writeln!(menu, "  {}", name.unwrap());
         }
     }
 
