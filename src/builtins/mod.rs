@@ -172,7 +172,7 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
                 interaction.data().name
             );
         }
-        crate::FrameworkError::__NonExhaustive => panic!(),
+        crate::FrameworkError::__NonExhaustive(unreachable) => match unreachable {},
     }
 
     Ok(())
