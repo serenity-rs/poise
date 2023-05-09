@@ -222,12 +222,60 @@ async fn context_meat(
 }
 
 /// React to a message with random food
-#[poise::command(slash_command, context_menu_command = "React with food", ephemeral)]
+// This command intentionally doesn't have a slash/prefix command, and its own
+// category, so that we can test whether the category shows up in the help
+// message. It shouldn't.
+#[poise::command(
+    context_menu_command = "React with food",
+    ephemeral,
+    category = "No slash/prefix",
+    subcommands("fruit_react", "vegetable_react")
+)]
 async fn food_react(
     ctx: Context<'_>,
     #[description = "Message to react to (enter a link or ID)"] msg: serenity::Message,
 ) -> Result<(), Error> {
     let reaction = FOOD[rand::thread_rng().gen_range(0..FOOD.len())].to_string();
+    msg.react(ctx, serenity::ReactionType::Unicode(reaction))
+        .await?;
+    ctx.say("Reacted!").await?;
+    Ok(())
+}
+
+// These next two commands are subcommands of `food_react`, so they're not
+// visible in the overview help command. But they should still show up in
+// `?help react with food`
+
+/// React to a message with a random fruit
+#[poise::command(
+    slash_command,
+    context_menu_command = "React with fruit",
+    ephemeral,
+    category = "No slash/prefix"
+)]
+async fn fruit_react(
+    ctx: Context<'_>,
+    #[description = "Message to react to (enter a link or ID)"] msg: serenity::Message,
+) -> Result<(), Error> {
+    let reaction = FRUIT[rand::thread_rng().gen_range(0..FRUIT.len())].to_string();
+    msg.react(ctx, serenity::ReactionType::Unicode(reaction))
+        .await?;
+    ctx.say("Reacted!").await?;
+    Ok(())
+}
+
+/// React to a message with a random vegetable
+#[poise::command(
+    slash_command,
+    context_menu_command = "React with vegetable",
+    ephemeral,
+    category = "No slash/prefix"
+)]
+async fn vegetable_react(
+    ctx: Context<'_>,
+    #[description = "Message to react to (enter a link or ID)"] msg: serenity::Message,
+) -> Result<(), Error> {
+    let reaction = VEGETABLES[rand::thread_rng().gen_range(0..VEGETABLES.len())].to_string();
     msg.react(ctx, serenity::ReactionType::Unicode(reaction))
         .await?;
     ctx.say("Reacted!").await?;
