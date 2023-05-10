@@ -274,7 +274,7 @@ impl<U, E: std::fmt::Display> std::fmt::Display for FrameworkError<'_, U, E> {
             Self::SubcommandRequired { ctx } => {
                 write!(
                     f,
-                    "invalid subcommand for command `{}`",
+                    "expected subcommand for command `{}`",
                     full_command_name!(ctx)
                 )
             }

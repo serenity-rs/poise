@@ -49,7 +49,16 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
             ctx.say(error).await?;
         }
         crate::FrameworkError::SubcommandRequired { ctx } => {
-            let response = "You didn't specified or you have specified invalid subcommand.";
+            let subcommands = ctx
+                .command()
+                .subcommands
+                .iter()
+                .map(|s| &*s.name)
+                .collect::<Vec<_>>();
+            let response = format!(
+                "You must specify one of the following subcommands: {}",
+                subcommands.join(", ")
+            );
             ctx.send(|b| b.content(response).ephemeral(true)).await?;
         }
         crate::FrameworkError::CommandPanic { ctx, payload: _ } => {
