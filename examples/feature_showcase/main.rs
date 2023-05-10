@@ -15,6 +15,7 @@ mod panic_handler;
 mod parameter_attributes;
 mod raw_identifiers;
 mod response_with_reply;
+mod subcommand_required;
 mod subcommands;
 mod track_edits;
 
@@ -65,6 +66,7 @@ async fn main() {
                 // raw_identifiers::r#move(), // Currently doesn't work (issue #170)
                 response_with_reply::reply(),
                 subcommands::parent(),
+                subcommand_required::parent_subcommand_required(),
                 track_edits::test_reuse_response(),
                 track_edits::add(),
             ],

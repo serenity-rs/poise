@@ -18,6 +18,7 @@ pub struct CommandArgs {
     //  if it's actually irrational, the inconsistency should be fixed)
     subcommands: crate::util::List<syn::Path>,
     aliases: crate::util::List<String>,
+    subcommand_required: bool,
     invoke_on_edit: bool,
     reuse_response: bool,
     track_deletion: bool,
@@ -146,6 +147,18 @@ pub fn command(
         return Err(syn::Error::new(proc_macro2::Span::call_site(), err_msg).into());
     }
 
+    // If subcommand_required is set to true, then the command cannot have any arguments
+    if args.subcommand_required && function.sig.inputs.len() > 1 {
+        let err_msg = "subcommand_required is set to true, but the command has arguments";
+        return Err(syn::Error::new(proc_macro2::Span::call_site(), err_msg).into());
+    }
+
+    // If subcommand_required is set to true, then the command must have at least one subcommand
+    if args.subcommand_required && args.subcommands.0.is_empty() {
+        let err_msg = "subcommand_required is set to true, but the command has no subcommands";
+        return Err(syn::Error::new(proc_macro2::Span::call_site(), err_msg).into());
+    }
+
     // Collect argument names/types/attributes to insert into generated function
     let mut parameters = Vec::new();
     for command_param in function.sig.inputs.iter_mut().skip(1) {
@@ -263,6 +276,7 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
     let default_member_permissions = &inv.default_member_permissions;
     let required_permissions = &inv.required_permissions;
     let required_bot_permissions = &inv.required_bot_permissions;
+    let subcommand_required = inv.args.subcommand_required;
     let owners_only = inv.args.owners_only;
     let guild_only = inv.args.guild_only;
     let dm_only = inv.args.dm_only;
@@ -318,6 +332,7 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
                 context_menu_action: #context_menu_action,
 
                 subcommands: vec![ #( #subcommands() ),* ],
+                subcommand_required: #subcommand_required,
                 name: #command_name.to_string(),
                 name_localizations: #name_localizations,
                 qualified_name: String::from(#command_name), // properly filled in later by Framework

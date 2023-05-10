@@ -48,6 +48,19 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
             eprintln!("An error occured in a command: {}", error);
             ctx.say(error).await?;
         }
+        crate::FrameworkError::SubcommandRequired { ctx } => {
+            let subcommands = ctx
+                .command()
+                .subcommands
+                .iter()
+                .map(|s| &*s.name)
+                .collect::<Vec<_>>();
+            let response = format!(
+                "You must specify one of the following subcommands: {}",
+                subcommands.join(", ")
+            );
+            ctx.send(|b| b.content(response).ephemeral(true)).await?;
+        }
         crate::FrameworkError::CommandPanic { ctx, payload: _ } => {
             // Not showing the payload to the user because it may contain sensitive info
             ctx.send(|b| {
