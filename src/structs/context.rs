@@ -162,17 +162,6 @@ context_methods! {
         self.serenity_context()
     }
 
-    // Poise internals can't pass `poise::Context` into `impl CacheHttp` parameters, because
-    // `CacheHttp: Send + Sync` so poise internals would need to add noisy `U: Send + Sync`
-    // everywhere.
-    // Poise internals also can't continue to call `.discord()` because it's deprecated. And
-    // `.serenity_context()` is too long. So we have this instead.
-    #[doc(hidden)]
-    (sc self)
-    (pub fn sc(self) -> &'a serenity::Context) {
-        self.serenity_context()
-    }
-
     /// Returns a view into data stored by the framework, like configuration
     (framework self)
     (pub fn framework(self) -> crate::FrameworkContext<'a, U, E>) {
@@ -252,7 +241,7 @@ context_methods! {
             ctx.interaction.member().map(Cow::Borrowed)
         } else {
             self.guild_id()?
-                .member(self.sc(), self.author().id)
+                .member(self.serenity_context(), self.author().id)
                 .await
                 .ok()
                 .map(Cow::Owned)
@@ -462,6 +451,23 @@ context_methods! {
             callback(self, &mut reply);
         }
         reply
+    }
+
+    /// Returns serenity's cache which stores various useful data received from the gateway
+    ///
+    /// Shorthand for [`.serenity_context().cache`](serenity::Context::cache)
+    #[cfg(feature = "cache")]
+    (cache self)
+    (pub fn cache(self) -> &'a serenity::Cache) {
+        &self.serenity_context().cache
+    }
+
+    /// Returns serenity's raw Discord API client to make raw API requests, if needed.
+    ///
+    /// Shorthand for [`.serenity_context().http`](serenity::Context::http)
+    (http self)
+    (pub fn http(self) -> &'a serenity::Http) {
+        &self.serenity_context().http
     }
 }
 

@@ -46,7 +46,13 @@ async fn missing_permissions<U, E>(
         return Some(serenity::Permissions::empty());
     }
 
-    let permissions = user_permissions(ctx.sc(), ctx.guild_id(), ctx.channel_id(), user).await;
+    let permissions = user_permissions(
+        ctx.serenity_context(),
+        ctx.guild_id(),
+        ctx.channel_id(),
+        user,
+    )
+    .await;
     Some(required_permissions - permissions?)
 }
 
@@ -73,7 +79,7 @@ async fn check_permissions_and_cooldown_single<'a, U, E>(
             Some(guild_id) => {
                 #[cfg(feature = "cache")]
                 if ctx.framework().options().require_cache_for_guild_check
-                    && ctx.sc().cache.guild_field(guild_id, |_| ()).is_none()
+                    && ctx.cache().guild_field(guild_id, |_| ()).is_none()
                 {
                     return Err(crate::FrameworkError::GuildOnly { ctx });
                 }
@@ -88,7 +94,7 @@ async fn check_permissions_and_cooldown_single<'a, U, E>(
     }
 
     if cmd.nsfw_only {
-        let channel = match ctx.channel_id().to_channel(ctx.sc()).await {
+        let channel = match ctx.channel_id().to_channel(ctx.serenity_context()).await {
             Ok(channel) => channel,
             Err(e) => {
                 log::warn!("Error when getting channel: {}", e);

@@ -194,7 +194,7 @@ pub enum FrameworkError<'a, U, E> {
     },
     // #[non_exhaustive] forbids struct update syntax for ?? reason
     #[doc(hidden)]
-    __NonExhaustive,
+    __NonExhaustive(std::convert::Infallible),
 }
 
 impl<'a, U, E> FrameworkError<'a, U, E> {
@@ -218,7 +218,7 @@ impl<'a, U, E> FrameworkError<'a, U, E> {
             Self::DynamicPrefix { ctx, .. } => ctx.serenity_context,
             Self::UnknownCommand { ctx, .. } => ctx,
             Self::UnknownInteraction { ctx, .. } => ctx,
-            Self::__NonExhaustive => unreachable!(),
+            Self::__NonExhaustive(unreachable) => match unreachable {},
         }
     }
 
@@ -242,7 +242,7 @@ impl<'a, U, E> FrameworkError<'a, U, E> {
             | Self::UnknownCommand { .. }
             | Self::UnknownInteraction { .. }
             | Self::DynamicPrefix { .. } => return None,
-            Self::__NonExhaustive => unreachable!(),
+            Self::__NonExhaustive(unreachable) => match unreachable {},
         })
     }
 
@@ -392,7 +392,7 @@ impl<U, E: std::fmt::Display> std::fmt::Display for FrameworkError<'_, U, E> {
             Self::UnknownInteraction { interaction, .. } => {
                 write!(f, "unknown interaction `{}`", interaction.data().name)
             }
-            Self::__NonExhaustive => unreachable!(),
+            Self::__NonExhaustive(unreachable) => match *unreachable {},
         }
     }
 }
@@ -419,7 +419,7 @@ impl<'a, U: std::fmt::Debug, E: std::error::Error + 'static> std::error::Error
             Self::DynamicPrefix { error, .. } => Some(error),
             Self::UnknownCommand { .. } => None,
             Self::UnknownInteraction { .. } => None,
-            Self::__NonExhaustive => unreachable!(),
+            Self::__NonExhaustive(unreachable) => match *unreachable {},
         }
     }
 }

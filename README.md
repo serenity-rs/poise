@@ -11,7 +11,7 @@ Poise is an opinionated Discord bot framework with a few distinctive features:
 - slash commands: completely define both normal and slash commands with a single function
 - flexible argument parsing: command parameters are defined with normal Rust types and parsed automatically
 
-# [See documentation for more info](https://docs.rs/poise/)
+# See [API documentation](https://docs.rs/poise/) and [examples](examples)
 
 # Bots using poise
 

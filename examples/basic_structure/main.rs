@@ -1,7 +1,6 @@
 #![warn(clippy::str_to_string)]
 
 mod commands;
-use commands::*;
 
 use poise::serenity_prelude as serenity;
 use std::{collections::HashMap, env::var, sync::Mutex, time::Duration};
@@ -13,37 +12,6 @@ type Context<'a> = poise::Context<'a, Data, Error>;
 // Custom user data passed to all command functions
 pub struct Data {
     votes: Mutex<HashMap<String, u32>>,
-}
-
-/// Show this help menu
-#[poise::command(prefix_command, track_edits, slash_command)]
-async fn help(
-    ctx: Context<'_>,
-    #[description = "Specific command to show help about"]
-    #[autocomplete = "poise::builtins::autocomplete_command"]
-    command: Option<String>,
-) -> Result<(), Error> {
-    poise::builtins::help(
-        ctx,
-        command.as_deref(),
-        poise::builtins::HelpConfiguration {
-            extra_text_at_bottom: "\
-This is an example bot made to showcase features of my custom Discord bot framework",
-            show_context_menu_commands: true,
-            show_subcommands: false,
-            ..Default::default()
-        },
-    )
-    .await?;
-    Ok(())
-}
-
-/// Registers or unregisters application commands in this guild or globally
-#[poise::command(prefix_command, hide_in_help)]
-async fn register(ctx: Context<'_>) -> Result<(), Error> {
-    poise::builtins::register_application_commands_buttons(ctx).await?;
-
-    Ok(())
 }
 
 async fn on_error(error: poise::FrameworkError<'_, Data, Error>) {
@@ -67,44 +35,10 @@ async fn on_error(error: poise::FrameworkError<'_, Data, Error>) {
 async fn main() {
     env_logger::init();
 
+    // FrameworkOptions contains all of poise's configuration option in one struct
+    // Every option can be omitted to use its default value
     let options = poise::FrameworkOptions {
-        commands: vec![
-            help(),
-            register(),
-            general::vote(),
-            general::getvotes(),
-            general::addmultiple(),
-            general::choice(),
-            general::boop(),
-            general::voiceinfo(),
-            general::test_reuse_response(),
-            general::oracle(),
-            general::code(),
-            general::say(),
-            general::file_details(),
-            general::totalsize(),
-            general::modal(),
-            general::punish(),
-            #[cfg(feature = "cache")]
-            general::servers(),
-            general::reply(),
-            general::add(),
-            context_menu::user_info(),
-            context_menu::echo(),
-            autocomplete::greet(),
-            checks::shutdown(),
-            checks::modonly(),
-            checks::delete(),
-            checks::ferrisparty(),
-            checks::cooldowns(),
-            checks::minmax(),
-            checks::get_guild_name(),
-            checks::only_in_dms(),
-            checks::lennyface(),
-            checks::permissions_v2(),
-            subcommands::parent(),
-            localization::welcome(),
-        ],
+        commands: vec![commands::help(), commands::vote(), commands::getvotes()],
         prefix_options: poise::PrefixFrameworkOptions {
             prefix: Some("~".into()),
             edit_tracker: Some(poise::EditTracker::for_timespan(Duration::from_secs(3600))),
@@ -154,9 +88,10 @@ async fn main() {
             var("DISCORD_TOKEN")
                 .expect("Missing `DISCORD_TOKEN` env var, see README for more information."),
         )
-        .setup(move |_ctx, _ready, _framework| {
+        .setup(move |ctx, _ready, framework| {
             Box::pin(async move {
                 println!("Logged in as {}", _ready.user.name);
+                poise::builtins::register_globally(ctx, &framework.options().commands).await?;
                 Ok(Data {
                     votes: Mutex::new(HashMap::new()),
                 })
