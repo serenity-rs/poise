@@ -6,10 +6,15 @@ use crate::{Context, Error};
 /// Discord doesn't permit invoking the root command of a slash command if it has subcommands.
 /// This command can be invoked only with `parent child1` and `parent child2`, due to `subcommand_required` parameter.
 /// If you want to allow `parent` to be invoked without subcommand, remove `subcommand_required` parameter
-#[poise::command(prefix_command, slash_command, subcommands("child1", "child2"), subcommand_required)]
+#[poise::command(
+    prefix_command,
+    slash_command,
+    subcommands("child1", "child2"),
+    subcommand_required
+)]
 // Omit 'ctx' parameter here. It is not needed, because this function will never be called.
 // TODO: Add a way to remove 'ctx' parameter, when `subcommand_required` is set
-pub async fn parent(_: Context<'_>) -> Result<(), Error> {
+pub async fn parent_subcommand_required(_: Context<'_>) -> Result<(), Error> {
     // This will never be called, because `subcommand_required` parameter is set
     Ok(())
 }
