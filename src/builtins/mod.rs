@@ -47,6 +47,10 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
             let error = error.to_string();
             eprintln!("An error occured in a command: {}", error);
             ctx.say(error).await?;
+        },
+        crate::FrameworkError::SubcommandRequired { ctx } => {
+            let response = "You didn't specified or you have specified invalid subcommand.";
+            ctx.send(|b| b.content(response).ephemeral(true)).await?;
         }
         crate::FrameworkError::CommandPanic { ctx, payload: _ } => {
             // Not showing the payload to the user because it may contain sensitive info
@@ -172,7 +176,7 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
                 interaction.data().name
             );
         }
-        crate::FrameworkError::__NonExhaustive => panic!(),
+        crate::FrameworkError::__NonExhaustive(_) => panic!(),
     }
 
     Ok(())

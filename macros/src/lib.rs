@@ -50,6 +50,7 @@ for example for command-specific help (i.e. `~help command_name`). Escape newlin
 - `guild_only`: Restricts command callers to only run on a guild
 - `dm_only`: Restricts command callers to only run on a DM
 - `nsfw_only`: Restricts command callers to only run on a NSFW channel
+- `subcommand_required`: Require a subcommand to be specified, when this is specified, original command CANNOT have any arguments
 - `check`: Path to a function which is invoked for every invocation. If the function returns false, the command is not executed (can be used multiple times)
 
 ## Help-related arguments
