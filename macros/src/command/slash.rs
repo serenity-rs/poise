@@ -170,15 +170,15 @@ pub fn generate_slash_action(inv: &Invocation) -> Result<proc_macro2::TokenStrea
                 ctx.serenity_context, ctx.interaction, ctx.args =>
                 #( (#param_names: #param_types), )*
             ).await.map_err(|error| match error {
-                poise::SlashArgError::CommandStructureMismatch(description) => {
-                    poise::FrameworkError::CommandStructureMismatch { ctx, description }
+                poise::SlashArgError::CommandStructureMismatch { description, .. } => {
+                    poise::FrameworkError::new_command_structure_mismatch(ctx, description)
                 },
-                poise::SlashArgError::Parse { error, input } => {
-                    poise::FrameworkError::ArgumentParse {
-                        ctx: ctx.into(),
+                poise::SlashArgError::Parse { error, input, .. } => {
+                    poise::FrameworkError::new_argument_parse(
+                        ctx.into(),
+                        Some(input),
                         error,
-                        input: Some(input),
-                    }
+                    )
                 },
                 poise::SlashArgError::__NonExhaustive => unreachable!(),
             })?;
@@ -189,10 +189,10 @@ pub fn generate_slash_action(inv: &Invocation) -> Result<proc_macro2::TokenStrea
 
             inner(ctx.into(), #( #param_identifiers, )*)
                 .await
-                .map_err(|error| poise::FrameworkError::Command {
+                .map_err(|error| poise::FrameworkError::new_command(
+                    ctx.into(),
                     error,
-                    ctx: ctx.into(),
-                })
+                ))
         })
     })
 }
@@ -219,10 +219,10 @@ pub fn generate_context_menu_action(
 
                 inner(ctx.into(), value)
                     .await
-                    .map_err(|error| poise::FrameworkError::Command {
+                    .map_err(|error| poise::FrameworkError::new_command(
+                        ctx.into(),
                         error,
-                        ctx: ctx.into(),
-                    })
+                    ))
             })
         })
     })

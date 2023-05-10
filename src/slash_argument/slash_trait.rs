@@ -104,7 +104,9 @@ where
     ) -> Result<T, SlashArgError> {
         let string = value
             .as_str()
-            .ok_or(SlashArgError::CommandStructureMismatch("expected string"))?;
+            .ok_or(SlashArgError::CommandStructureMismatch {
+                description: "expected string",
+            })?;
         T::convert(
             ctx,
             interaction.guild_id(),
@@ -135,9 +137,9 @@ macro_rules! impl_for_integer {
             ) -> Result<$t, SlashArgError> {
                 value
                     .as_i64()
-                    .ok_or(SlashArgError::CommandStructureMismatch("expected integer"))?
+                    .ok_or(SlashArgError::CommandStructureMismatch { description: "expected integer" })?
                     .try_into()
-                    .map_err(|_| SlashArgError::CommandStructureMismatch("received out of bounds integer"))
+                    .map_err(|_| SlashArgError::CommandStructureMismatch { description: "received out of bounds integer" })
             }
 
             fn create(builder: &mut serenity::CreateApplicationCommandOption) {
@@ -164,7 +166,7 @@ macro_rules! impl_for_float {
             ) -> Result<$t, SlashArgError> {
                 Ok(value
                     .as_f64()
-                    .ok_or(SlashArgError::CommandStructureMismatch("expected float"))? as $t)
+                    .ok_or(SlashArgError::CommandStructureMismatch { description: "expected float" })? as $t)
             }
 
             fn create(self, builder: &mut serenity::CreateApplicationCommandOption) {
@@ -185,7 +187,9 @@ impl SlashArgumentHack<bool> for &PhantomData<bool> {
     ) -> Result<bool, SlashArgError> {
         Ok(value
             .as_bool()
-            .ok_or(SlashArgError::CommandStructureMismatch("expected bool"))?)
+            .ok_or(SlashArgError::CommandStructureMismatch {
+                description: "expected bool",
+            })?)
     }
 
     fn create(self, builder: &mut serenity::CreateApplicationCommandOption) {
@@ -204,12 +208,12 @@ impl SlashArgumentHack<serenity::Attachment> for &PhantomData<serenity::Attachme
         let attachment_id = serenity::AttachmentId(
             value
                 .as_str()
-                .ok_or(SlashArgError::CommandStructureMismatch(
-                    "expected attachment id",
-                ))?
+                .ok_or(SlashArgError::CommandStructureMismatch {
+                    description: "expected attachment id",
+                })?
                 .parse()
-                .map_err(|_| {
-                    SlashArgError::CommandStructureMismatch("improper attachment id passed")
+                .map_err(|_| SlashArgError::CommandStructureMismatch {
+                    description: "improper attachment id passed",
                 })?,
         );
 
@@ -219,9 +223,9 @@ impl SlashArgumentHack<serenity::Attachment> for &PhantomData<serenity::Attachme
             .attachments
             .get(&attachment_id)
             .cloned()
-            .ok_or(SlashArgError::CommandStructureMismatch(
-                "attachment id with no attachment",
-            ))
+            .ok_or(SlashArgError::CommandStructureMismatch {
+                description: "attachment id with no attachment",
+            })
     }
 
     fn create(self, builder: &mut serenity::CreateApplicationCommandOption) {

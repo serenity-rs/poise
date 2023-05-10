@@ -34,13 +34,13 @@ impl<T: ChoiceParameter> crate::SlashArgument for T {
 
         let choice_key = value
             .as_u64()
-            .ok_or(crate::SlashArgError::CommandStructureMismatch(
-                "expected u64",
-            ))?;
+            .ok_or(crate::SlashArgError::CommandStructureMismatch {
+                description: "expected u64",
+            })?;
 
-        Self::from_index(choice_key as _).ok_or(crate::SlashArgError::CommandStructureMismatch(
-            "out of bounds choice key",
-        ))
+        Self::from_index(choice_key as _).ok_or(crate::SlashArgError::CommandStructureMismatch {
+            description: "out of bounds choice key",
+        })
     }
 
     fn create(builder: &mut serenity::CreateApplicationCommandOption) {

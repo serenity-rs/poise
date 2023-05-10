@@ -190,7 +190,7 @@ async fn help_single_command<U, E>(
             text += "\n\n```\nParameters:\n";
             let mut parameterlist = TwoColumnList::new();
             for parameter in &command.parameters {
-                let name = parameter.name.as_deref().unwrap_or("").to_string();
+                let name = parameter.name.clone();
                 let description = parameter.description.as_deref().unwrap_or("");
                 let description = format!(
                     "({}) {}",
