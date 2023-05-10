@@ -102,8 +102,7 @@ async fn strip_prefix<'a, U, E>(
 
 /// Find a command or subcommand within `&[Command]`, given a command invocation without a prefix.
 /// Returns the verbatim command name string as well as the command arguments (i.e. the remaining
-/// string). Also returns `is_subcommand` parameter, indicating if the command was found as a
-/// subcommand of another command.
+/// string).
 ///
 /// The API must be like this (as opposed to just taking the command name upfront) because of
 /// subcommands.
@@ -119,22 +118,22 @@ async fn strip_prefix<'a, U, E>(
 ///
 /// let mut parent_commands = Vec::new();
 /// assert_eq!(
-///     poise::find_command(&commands, "command1 my arguments", false, &mut parent_commands, false),
-///     Some((&commands[0], "command1", "my arguments", false)),
+///     poise::find_command(&commands, "command1 my arguments", false, &mut parent_commands),
+///     Some((&commands[0], "command1", "my arguments")),
 /// );
 /// assert!(parent_commands.is_empty());
 ///
 /// parent_commands.clear();
 /// assert_eq!(
-///     poise::find_command(&commands, "command2 command3 my arguments", false, &mut parent_commands, false),
-///     Some((&commands[1].subcommands[0], "command3", "my arguments", true)),
+///     poise::find_command(&commands, "command2 command3 my arguments", false, &mut parent_commands),
+///     Some((&commands[1].subcommands[0], "command3", "my arguments")),
 /// );
 /// assert_eq!(&parent_commands, &[&commands[1]]);
 ///
 /// parent_commands.clear();
 /// assert_eq!(
-///     poise::find_command(&commands, "CoMmAnD2 cOmMaNd99 my arguments", true, &mut parent_commands, false),
-///     Some((&commands[1], "CoMmAnD2", "cOmMaNd99 my arguments", true)),
+///     poise::find_command(&commands, "CoMmAnD2 cOmMaNd99 my arguments", true, &mut parent_commands),
+///     Some((&commands[1], "CoMmAnD2", "cOmMaNd99 my arguments")),
 /// );
 /// assert!(parent_commands.is_empty());
 pub fn find_command<'a, U, E>(
@@ -142,9 +141,7 @@ pub fn find_command<'a, U, E>(
     remaining_message: &'a str,
     case_insensitive: bool,
     parent_commands: &mut Vec<&'a crate::Command<U, E>>,
-    // Whether the command was found as a subcommand of another command
-    is_subcommand: bool,
-) -> Option<(&'a crate::Command<U, E>, &'a str, &'a str, bool)>
+) -> Option<(&'a crate::Command<U, E>, &'a str, &'a str)>
 where
     U: Send + Sync,
 {
@@ -176,11 +173,10 @@ where
                 remaining_message,
                 case_insensitive,
                 parent_commands,
-                true
             )
             .unwrap_or_else(|| {
                 parent_commands.pop();
-                (command, command_name, remaining_message, is_subcommand)
+                (command, command_name, remaining_message)
             }),
         );
     }
@@ -245,12 +241,11 @@ pub async fn parse_invocation<'a, U: Send + Sync, E>(
     };
     let msg_content = msg_content.trim_start();
 
-    let (command, invoked_command_name, args, is_subcommand) = find_command(
+    let (command, invoked_command_name, args) = find_command(
         &framework.options.commands,
         msg_content,
         framework.options.prefix_options.case_insensitive_commands,
         parent_commands,
-        false
     )
     .ok_or(crate::FrameworkError::UnknownCommand {
         ctx,
@@ -268,7 +263,7 @@ pub async fn parse_invocation<'a, U: Send + Sync, E>(
         None => return Ok(None),
     };
 
-    let context = crate::PrefixContext {
+    Ok(Some(crate::PrefixContext {
         serenity_context: ctx,
         msg,
         prefix,
@@ -282,13 +277,7 @@ pub async fn parse_invocation<'a, U: Send + Sync, E>(
         trigger,
         action,
         __non_exhaustive: (),
-    };
-
-    if command.subcommand_required && !is_subcommand {
-        return Err(crate::FrameworkError::SubcommandRequired { ctx: crate::Context::Prefix(context) });
-    }
-
-    Ok(Some(context))
+    }))
 }
 
 /// Given an existing parsed command invocation from [`parse_invocation`], run it, including all the
@@ -304,6 +293,14 @@ pub async fn run_invocation<U, E>(
         && !ctx.framework.options.prefix_options.execute_untracked_edits
     {
         return Ok(());
+    }
+
+    if ctx.command.subcommand_required {
+        // None of this command's subcommands were invoked, or else we'd have the subcommand in
+        // ctx.command and not the parent command
+        return Err(crate::FrameworkError::SubcommandRequired {
+            ctx: crate::Context::Prefix(ctx),
+        });
     }
 
     super::common::check_permissions_and_cooldown(ctx.into()).await?;

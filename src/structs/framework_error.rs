@@ -272,7 +272,11 @@ impl<U, E: std::fmt::Display> std::fmt::Display for FrameworkError<'_, U, E> {
                 write!(f, "error in command `{}`", full_command_name!(ctx))
             }
             Self::SubcommandRequired { ctx } => {
-                write!(f, "invalid subcommand for command `{}`", full_command_name!(ctx))
+                write!(
+                    f,
+                    "invalid subcommand for command `{}`",
+                    full_command_name!(ctx)
+                )
             }
             Self::CommandPanic { ctx, payload: _ } => {
                 write!(f, "panic in command `{}`", full_command_name!(ctx))
