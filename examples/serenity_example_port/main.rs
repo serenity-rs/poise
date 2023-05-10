@@ -157,7 +157,7 @@ async fn post_command(ctx: Context<'_>) {
 
 async fn on_error(error: poise::FrameworkError<'_, Data, Error>) {
     match error {
-        poise::FrameworkError::Command { error, ctx } => {
+        poise::FrameworkError::Command { error, ctx, .. } => {
             println!(
                 "Command '{}' returned error {:?}",
                 ctx.command().name,
