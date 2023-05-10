@@ -33,6 +33,6 @@ async fn child1(_ctx: Context<'_>) -> Result<(), Error> {
     subcommands("child1"),
     check = "parent_check"
 )]
-pub async fn parent(_ctx: Context<'_>) -> Result<(), Error> {
+pub async fn parent_checks(_ctx: Context<'_>) -> Result<(), Error> {
     Ok(())
 }
