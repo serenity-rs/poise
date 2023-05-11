@@ -52,7 +52,7 @@ async fn user_permissions(
         },
     };
 
-    guild.user_permissions_in(&channel, &member).ok()
+    Some(guild.user_permissions_in(&channel, &member))
 }
 
 /// Retrieves the set of permissions that are lacking, relative to the given required permission set
