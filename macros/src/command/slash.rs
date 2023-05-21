@@ -49,10 +49,7 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
                         // T or AutocompleteChoice<T> -> AutocompleteChoice<T>
                         .map(|value| poise::AutocompleteChoice::from(value))
                         // poise::AutocompleteChoice<T> -> serenity::AutocompleteChoice
-                        .map(|choice| poise::serenity_prelude::AutocompleteChoice {
-                            name: choice.name,
-                            value: choice.value.into(),
-                        })
+                        .map(|choice| choice.to_serenity())
                         .collect()
                         .await;
 
