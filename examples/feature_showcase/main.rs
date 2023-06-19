@@ -9,6 +9,7 @@ mod collector;
 mod context_menu;
 mod inherit_checks;
 mod localization;
+mod mci_modal_response;
 mod modal;
 mod paginate;
 mod panic_handler;
@@ -69,6 +70,7 @@ async fn main() {
                 subcommand_required::parent_subcommand_required(),
                 track_edits::test_reuse_response(),
                 track_edits::add(),
+                mci_modal_response::mci_modal_response(),
             ],
             prefix_options: poise::PrefixFrameworkOptions {
                 prefix: Some("~".into()),

@@ -107,7 +107,6 @@ pub async fn execute_modal<U: Send + Sync, E, M: Modal>(
 pub async fn execute_component_interaction<U: Send + Sync, E, M: Modal>(
     ctx: crate::ApplicationContext<'_, U, E>,
     mci: Arc<serenity::MessageComponentInteraction>,
-    serenity_context: &serenity::Context,
     defaults: Option<M>,
     timeout: Option<std::time::Duration>,
 ) -> Result<Option<M>, serenity::Error> {
@@ -115,7 +114,7 @@ pub async fn execute_component_interaction<U: Send + Sync, E, M: Modal>(
     let interaction_id = interaction.id.to_string();
 
     // Send modal
-    mci.create_interaction_response(serenity_context, |b| {
+    mci.create_interaction_response(ctx.serenity_context(), |b| {
         *b = M::create(defaults, interaction_id.clone());
         b
     })
@@ -204,13 +203,12 @@ pub trait Modal: Sized {
         execute_modal(ctx, None::<Self>, None).await
     }
 
-    /// Calls `execute_component_interaction(ctx, mic, serenity_context, None, None)`. See [`execute_modal`]
+    /// Calls `execute_component_interaction(ctx, mic, None, None)`. See [`execute_modal`]
     async fn execute_component_interaction<U: Send + Sync, E>(
         ctx: crate::ApplicationContext<'_, U, E>,
         mci: Arc<serenity::MessageComponentInteraction>,
-        serenity_context: &serenity::Context,
     ) -> Result<Option<Self>, serenity::Error> {
-        execute_component_interaction(ctx, mci, serenity_context, None::<Self>, None).await
+        execute_component_interaction(ctx, mci, None::<Self>, None).await
     }
 
     /// Calls `execute_modal(ctx, Some(defaults), None)`. See [`execute_modal`]
