@@ -29,7 +29,7 @@ pub async fn mci_modal_response(
     while let Some(mci) =
         poise::serenity_prelude::CollectComponentInteraction::new(ctx.serenity_context())
             .timeout(std::time::Duration::from_secs(120))
-            .filter(move |mci| mci.data.custom_id == "enter_details")
+            .filter(move |mci| mci.data.custom_id == "open_modal")
             .await
     {
         let data = MyModal::execute_component_interaction(ctx, mci).await?;
