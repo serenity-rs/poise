@@ -556,6 +556,13 @@ impl<U, E> AsRef<serenity::ShardMessenger> for Context<'_, U, E> {
         &self.serenity_context().shard
     }
 }
+// Originally added as part of component interaction modals; not sure if this impl is really
+// required by anything else... It makes sense to have though imo
+impl<U, E> AsRef<serenity::Context> for Context<'_, U, E> {
+    fn as_ref(&self) -> &serenity::Context {
+        self.serenity_context()
+    }
+}
 impl<U: Sync, E> serenity::CacheHttp for Context<'_, U, E> {
     fn http(&self) -> &serenity::Http {
         &self.serenity_context().http

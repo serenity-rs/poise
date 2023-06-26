@@ -56,6 +56,7 @@ async fn main() {
                 inherit_checks::parent_checks(),
                 localization::welcome(),
                 modal::modal(),
+                modal::component_modal(),
                 paginate::paginate(),
                 panic_handler::div(),
                 parameter_attributes::addmultiple(),
