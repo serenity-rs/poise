@@ -90,9 +90,6 @@ impl<'att> CreateReply<'att> {
     /// [`serenity::CreateAllowedMentions::replied_user`] set to false.
     pub fn reply(&mut self, reply: bool) -> &mut Self {
         self.reply = reply;
-        let mut allowed_mentions = serenity::CreateAllowedMentions::default();
-        allowed_mentions.replied_user(true);
-        self.allowed_mentions = Some(allowed_mentions);
         self
     }
 }
