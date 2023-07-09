@@ -154,6 +154,16 @@ context_methods! {
         }
     }
 
+    /// Create a [`crate::CooldownContext`] based off the underlying context type.
+    (cooldown_context self)
+    (pub fn cooldown_context(self) -> crate::CooldownContext) {
+        crate::CooldownContext {
+            user_id: self.author().id,
+            channel_id: self.channel_id(),
+            guild_id: self.guild_id()
+        }
+    }
+
     /// See [`Self::serenity_context`].
     #[deprecated = "poise::Context can now be passed directly into most serenity functions. Otherwise, use `.serenity_context()` now"]
     #[allow(deprecated)]
