@@ -90,6 +90,9 @@ impl<'att> CreateReply<'att> {
     /// [`serenity::CreateAllowedMentions::replied_user`] set to false.
     pub fn reply(&mut self, reply: bool) -> &mut Self {
         self.reply = reply;
+        let mut allowed_mentions = serenity::CreateAllowedMentions::default();
+        allowed_mentions.replied_user(true);
+        self.allowed_mentions = Some(allowed_mentions);
         self
     }
 }
@@ -249,6 +252,14 @@ impl<'att> CreateReply<'att> {
             m.content(content);
         }
         m.set_embeds(embeds);
+
+        if reply {
+            m.reference_message(invocation_message);
+            if allowed_mentions.is_none() {
+                m.allowed_mentions(|m| m.replied_user(true));
+            };
+        }
+
         if let Some(allowed_mentions) = allowed_mentions {
             m.allowed_mentions(|m| {
                 *m = allowed_mentions;
@@ -261,10 +272,6 @@ impl<'att> CreateReply<'att> {
                 c
             });
         }
-        if reply {
-            m.reference_message(invocation_message);
-        }
-
         for attachment in attachments {
             m.add_file(attachment);
         }
