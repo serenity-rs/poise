@@ -2,7 +2,7 @@
 
 use crate::serenity_prelude as serenity;
 // I usually don't really do imports, but these are very convenient
-use crate::util::OrderedMap;
+use std::collections::HashMap;
 use std::time::{Duration, Instant};
 
 /// Subset of [`crate::Context`] so that [`Cooldowns`] can be used without requiring a full [Context](`crate::Context`)
@@ -38,18 +38,18 @@ pub struct CooldownConfig {
 ///
 /// You probably don't need to use this directly. `#[poise::command]` automatically generates a
 /// cooldown handler.
-#[derive(Default, Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Default, Clone, Debug, PartialEq, Eq)]
 pub struct CooldownTracker {
     /// Stores the timestamp of the last global invocation
     global_invocation: Option<Instant>,
     /// Stores the timestamps of the last invocation per user
-    user_invocations: OrderedMap<serenity::UserId, Instant>,
+    user_invocations: HashMap<serenity::UserId, Instant>,
     /// Stores the timestamps of the last invocation per guild
-    guild_invocations: OrderedMap<serenity::GuildId, Instant>,
+    guild_invocations: HashMap<serenity::GuildId, Instant>,
     /// Stores the timestamps of the last invocation per channel
-    channel_invocations: OrderedMap<serenity::ChannelId, Instant>,
+    channel_invocations: HashMap<serenity::ChannelId, Instant>,
     /// Stores the timestamps of the last invocation per member (user and guild)
-    member_invocations: OrderedMap<(serenity::UserId, serenity::GuildId), Instant>,
+    member_invocations: HashMap<(serenity::UserId, serenity::GuildId), Instant>,
 }
 
 /// **Renamed to [`CooldownTracker`]**
@@ -60,10 +60,10 @@ impl CooldownTracker {
     pub fn new() -> Self {
         Self {
             global_invocation: None,
-            user_invocations: OrderedMap::new(),
-            guild_invocations: OrderedMap::new(),
-            channel_invocations: OrderedMap::new(),
-            member_invocations: OrderedMap::new(),
+            user_invocations: HashMap::new(),
+            guild_invocations: HashMap::new(),
+            channel_invocations: HashMap::new(),
+            member_invocations: HashMap::new(),
         }
     }
 
