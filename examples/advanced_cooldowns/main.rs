@@ -15,11 +15,11 @@ async fn dynamic_cooldowns(ctx: Context<'_>) -> Result<(), Error> {
             cooldown_durations.user = Some(std::time::Duration::from_secs(10));
         }
 
-        match cooldown_tracker.remaining_cooldown(ctx, &cooldown_durations) {
+        match cooldown_tracker.remaining_cooldown(ctx.cooldown_context(), &cooldown_durations) {
             Some(remaining) => {
                 return Err(format!("Please wait {} seconds", remaining.as_secs()).into())
             }
-            None => cooldown_tracker.start_cooldown(ctx),
+            None => cooldown_tracker.start_cooldown(ctx.cooldown_context()),
         }
     };
 
