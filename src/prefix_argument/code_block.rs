@@ -57,7 +57,7 @@ fn pop_from(args: &str) -> Result<(&str, CodeBlock), CodeBlockError> {
 
     let rest;
     let mut code_block = if let Some(code_block) = args.strip_prefix("```") {
-        let code_block_end = code_block.find("```").ok_or(CodeBlockError::default())?;
+        let code_block_end = code_block.find("```").ok_or_else(CodeBlockError::default)?;
         rest = &code_block[(code_block_end + 3)..];
         let mut code_block = &code_block[..code_block_end];
 
@@ -85,7 +85,7 @@ fn pop_from(args: &str) -> Result<(&str, CodeBlock), CodeBlockError> {
             __non_exhaustive: (),
         }
     } else if let Some(code_line) = args.strip_prefix('`') {
-        let code_line_end = code_line.find('`').ok_or(CodeBlockError::default())?;
+        let code_line_end = code_line.find('`').ok_or_else(CodeBlockError::default)?;
         rest = &code_line[(code_line_end + 1)..];
         let code_line = &code_line[..code_line_end];
 
