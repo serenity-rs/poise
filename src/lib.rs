@@ -430,6 +430,7 @@ pub mod serenity_prelude {
         async_trait,
         builder::*,
         client::{
+            self, // Resolve ambiguous re-export
             bridge::gateway::{event::*, *},
             *,
         },
@@ -445,6 +446,13 @@ pub mod serenity_prelude {
             // There's two MessageFlags in serenity. The interaction response specific one was
             // renamed to InteractionResponseFlags above so we can keep this one's name the same
             channel::MessageFlags,
+            // Disambiguate several types/modules where names are re-used within serenity
+            // In general, we prefer the model types as they are more relevant when using poise
+            error,
+            event::{self, EventType},
+            gateway,
+            guild::automod::Action,
+            prelude,
         },
         model::{
             application::{
