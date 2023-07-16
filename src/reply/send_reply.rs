@@ -5,7 +5,7 @@ use crate::serenity_prelude as serenity;
 /// Send a message in the given context: normal message if prefix command, interaction response
 /// if application command.
 ///
-/// If you just want to send a string, use [`say_reply`].
+/// If you just want to send a string, use [`say_reply`] or [`reply_reply`].
 ///
 /// Note: panics when called in an autocomplete context!
 ///
@@ -42,6 +42,18 @@ pub async fn say_reply<U, E>(
     text: impl Into<String>,
 ) -> Result<crate::ReplyHandle<'_>, serenity::Error> {
     send_reply(ctx, |m| m.content(text.into())).await
+}
+
+/// Shorthand of [`send_reply`] for text-only messages, and reply to the reference message for [`crate::PrefixContext`]
+///
+/// for [`crate::ApplicationContext`], this is the same as [`say_reply`].
+///
+/// Note: panics when called in an autocomplete context!
+pub async fn reply_reply<U, E>(
+    ctx: crate::Context<'_, U, E>,
+    text: impl Into<String>,
+) -> Result<crate::ReplyHandle<'_>, serenity::Error> {
+    send_reply(ctx, |m| m.content(text.into()).reply(true)).await
 }
 
 /// Send a response to an interaction (slash command or context menu command invocation).

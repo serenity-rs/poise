@@ -131,6 +131,21 @@ context_methods! {
         crate::say_reply(self, text).await
     }
 
+    /// Shorthand of [`crate::reply_reply`]
+    ///
+    /// reply to the reference message in prefix commands
+    ///
+    /// for slash commands, this is the same as [`say`].
+    ///
+    /// Note: panics when called in an autocomplete context!
+    await (say self text)
+    (pub async fn reply(
+        self,
+        text: impl Into<String>,
+    ) -> Result<crate::ReplyHandle<'a>, serenity::Error>) {
+        crate::reply_reply(self, text).await
+    }
+
     /// Shorthand of [`crate::send_reply`]
     ///
     /// Note: panics when called in an autocomplete context!
