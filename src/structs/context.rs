@@ -131,9 +131,13 @@ context_methods! {
         crate::say_reply(self, text).await
     }
 
-    /// reply to the reference message in prefix commands
+    /// Like [`Self::say`], but formats the message as a reply to the user's command
+    /// message.
     ///
-    /// for slash commands, this is the same as [`say`].
+    /// Equivalent to `.send(|b| b.content("...").reply(true))`.
+    ///
+    /// Only has an effect in prefix context, because slash command responses are always
+    /// formatted as a reply.
     ///
     /// Note: panics when called in an autocomplete context!
     await (reply self text)
@@ -141,7 +145,7 @@ context_methods! {
         self,
         text: impl Into<String>,
     ) -> Result<crate::ReplyHandle<'a>, serenity::Error>) {
-        crate::send_reply(self, |m| m.content(text.into()).reply(true)).await
+        self.send(|b| b.content(text).reply(true)).await
     }
 
     /// Shorthand of [`crate::send_reply`]
