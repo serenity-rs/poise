@@ -8,7 +8,8 @@ Poise supports several pre-command checks (sorted by order of execution):
 - cooldowns
 */
 use crate::{Context, Error};
-use poise::serenity_prelude as serenity;
+use poise::{serenity_prelude as serenity, CooldownConfig};
+use std::time::Duration;
 
 #[poise::command(prefix_command, owners_only, hide_in_help)]
 pub async fn shutdown(ctx: Context<'_>) -> Result<(), Error> {
@@ -86,7 +87,6 @@ pub async fn ferrisparty(ctx: Context<'_>) -> Result<(), Error> {
     Ok(())
 }
 
-/// Add two numbers
 #[poise::command(
     prefix_command,
     track_edits,
@@ -99,6 +99,29 @@ pub async fn ferrisparty(ctx: Context<'_>) -> Result<(), Error> {
     member_cooldown = 3,
 )]
 pub async fn cooldowns(ctx: Context<'_>) -> Result<(), Error> {
+    ctx.say("You successfully called the command").await?;
+    Ok(())
+}
+
+async fn random_cooldowns(ctx: Context<'_>) -> Result<bool, Error> {
+    ctx.command()
+        .cooldowns
+        .lock()
+        .unwrap()
+        .set_config(CooldownConfig {
+            global: Some(Duration::from_secs_f32(rand::random()) * 10),
+            user: Some(Duration::from_secs_f32(rand::random()) * 10),
+            guild: Some(Duration::from_secs_f32(rand::random()) * 10),
+            channel: Some(Duration::from_secs_f32(rand::random()) * 10),
+            member: Some(Duration::from_secs_f32(rand::random()) * 10),
+            __non_exhaustive: (),
+        });
+
+    Ok(true)
+}
+
+#[poise::command(prefix_command, track_edits, slash_command, check = "random_cooldowns")]
+pub async fn dynamic_cooldowns(ctx: Context<'_>) -> Result<(), Error> {
     ctx.say("You successfully called the command").await?;
     Ok(())
 }

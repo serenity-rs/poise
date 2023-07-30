@@ -120,6 +120,11 @@ impl Cooldowns {
             self.member_invocations.insert((ctx.user_id, guild_id), now);
         }
     }
+
+    /// Updates the [`CooldownConfig`] in use by this [`Cooldowns`]
+    pub fn set_config(&mut self, config: CooldownConfig) {
+        self.cooldown = config;
+    }
 }
 
 impl<'a> From<&'a serenity::Message> for CooldownContext {
