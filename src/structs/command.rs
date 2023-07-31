@@ -58,7 +58,7 @@ pub struct Command<U, E> {
     // TODO: fix the inconsistency that this is String and everywhere else it's &'static str
     pub help_text: Option<fn() -> String>,
     /// Handles command cooldowns. Mainly for framework internal use
-    pub cooldowns: std::sync::Mutex<crate::Cooldowns>,
+    pub cooldowns: std::sync::Mutex<crate::CooldownTracker>,
     /// After the first response, whether to post subsequent responses as edits to the initial
     /// message
     ///
