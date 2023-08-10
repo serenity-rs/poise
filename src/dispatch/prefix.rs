@@ -255,6 +255,7 @@ pub async fn parse_invocation<'a, U: Send + Sync, E>(
         invocation_data,
         trigger,
     })?;
+
     let action = match command.prefix_action {
         Some(x) => x,
         // This command doesn't have a prefix implementation
@@ -291,6 +292,14 @@ pub async fn run_invocation<U, E>(
         && !ctx.framework.options.prefix_options.execute_untracked_edits
     {
         return Ok(());
+    }
+
+    if ctx.command.subcommand_required {
+        // None of this command's subcommands were invoked, or else we'd have the subcommand in
+        // ctx.command and not the parent command
+        return Err(crate::FrameworkError::SubcommandRequired {
+            ctx: crate::Context::Prefix(ctx),
+        });
     }
 
     super::common::check_permissions_and_cooldown(ctx.into()).await?;

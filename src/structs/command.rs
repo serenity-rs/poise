@@ -30,6 +30,8 @@ pub struct Command<U, E> {
     // ============= Command type agnostic data
     /// Subcommands of this command, if any
     pub subcommands: Vec<Command<U, E>>,
+    /// Require a subcommand to be invoked
+    pub subcommand_required: bool,
     /// Main name of the command. Aliases (prefix-only) can be set in [`Self::aliases`].
     pub name: String,
     /// Localized names with locale string as the key (slash-only)
@@ -55,7 +57,7 @@ pub struct Command<U, E> {
     /// help: `~help command_name`
     pub help_text: Option<String>,
     /// Handles command cooldowns. Mainly for framework internal use
-    pub cooldowns: std::sync::Mutex<crate::Cooldowns>,
+    pub cooldowns: std::sync::Mutex<crate::CooldownTracker>,
     /// After the first response, whether to post subsequent responses as edits to the initial
     /// message
     ///

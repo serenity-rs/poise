@@ -132,6 +132,23 @@ context_methods! {
         crate::say_reply(self, text).await
     }
 
+    /// Like [`Self::say`], but formats the message as a reply to the user's command
+    /// message.
+    ///
+    /// Equivalent to `.send(|b| b.content("...").reply(true))`.
+    ///
+    /// Only has an effect in prefix context, because slash command responses are always
+    /// formatted as a reply.
+    ///
+    /// Note: panics when called in an autocomplete context!
+    await (reply self text)
+    (pub async fn reply(
+        self,
+        text: impl Into<String>,
+    ) -> Result<crate::ReplyHandle<'a>, serenity::Error>) {
+        self.send(|b| b.content(text).reply(true)).await
+    }
+
     /// Shorthand of [`crate::send_reply`]
     ///
     /// Note: panics when called in an autocomplete context!
@@ -566,6 +583,13 @@ impl<U, E> AsRef<serenity::Http> for Context<'_, U, E> {
 impl<U, E> AsRef<serenity::ShardMessenger> for Context<'_, U, E> {
     fn as_ref(&self) -> &serenity::ShardMessenger {
         &self.serenity_context().shard
+    }
+}
+// Originally added as part of component interaction modals; not sure if this impl is really
+// required by anything else... It makes sense to have though imo
+impl<U, E> AsRef<serenity::Context> for Context<'_, U, E> {
+    fn as_ref(&self) -> &serenity::Context {
+        self.serenity_context()
     }
 }
 impl<U: Sync, E> serenity::CacheHttp for Context<'_, U, E> {
