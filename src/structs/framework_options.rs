@@ -37,7 +37,7 @@ pub struct FrameworkOptions<U, E> {
     /// If `true`, disables automatic cooldown handling before every command invocation.
     ///
     /// Useful for implementing custom cooldown behavior. See [`crate::Command::cooldowns`] and
-    /// the methods on [`crate::Cooldowns`] for how to do that.
+    /// the methods on [`crate::CooldownTracker`] for how to do that.
     pub manual_cooldowns: bool,
     /// If `true`, changes behavior of guild_only command check to abort execution if the guild is
     /// not in cache.

@@ -58,6 +58,9 @@ pub struct Command<U, E> {
     pub help_text: Option<String>,
     /// Handles command cooldowns. Mainly for framework internal use
     pub cooldowns: std::sync::Mutex<crate::CooldownTracker>,
+    /// The [`CooldownConfig`](crate::CooldownConfig) that will be used
+    /// with the [`CooldownTracker`](crate::CooldownTracker)
+    pub cooldown_config: std::sync::Mutex<crate::CooldownConfig>,
     /// After the first response, whether to post subsequent responses as edits to the initial
     /// message
     ///

@@ -40,10 +40,6 @@ pub struct CooldownConfig {
 /// cooldown handler.
 #[derive(Default, Clone, Debug, PartialEq, Eq)]
 pub struct CooldownTracker {
-    /// Stores the cooldown durations
-    /// Will be removed in next version in favor of passing the config on demand to functions
-    cooldown: CooldownConfig,
-
     /// Stores the timestamp of the last global invocation
     global_invocation: Option<Instant>,
     /// Stores the timestamps of the last invocation per user
@@ -61,24 +57,8 @@ pub use CooldownTracker as Cooldowns;
 
 impl CooldownTracker {
     /// Create a new cooldown tracker
-    pub fn new_2() -> Self {
+    pub fn new() -> Self {
         Self {
-            /// Removed in next version; unused by new API
-            cooldown: CooldownConfig::default(),
-
-            global_invocation: None,
-            user_invocations: HashMap::new(),
-            guild_invocations: HashMap::new(),
-            channel_invocations: HashMap::new(),
-            member_invocations: HashMap::new(),
-        }
-    }
-
-    /// **Will be replaced by [`Self::new_2()`] in the next breaking version**
-    pub fn new(config: CooldownConfig) -> Self {
-        Self {
-            cooldown: config,
-
             global_invocation: None,
             user_invocations: HashMap::new(),
             guild_invocations: HashMap::new(),
@@ -89,7 +69,7 @@ impl CooldownTracker {
 
     /// Queries the cooldown buckets and checks if all cooldowns have expired and command
     /// execution may proceed. If not, Some is returned with the remaining cooldown
-    pub fn remaining_cooldown_2(
+    pub fn remaining_cooldown(
         &self,
         ctx: CooldownContext,
         cooldown_durations: &CooldownConfig,
@@ -127,11 +107,6 @@ impl CooldownTracker {
                 Some(cooldown_left)
             })
             .max()
-    }
-
-    /// **Will be replaced by [`Self::remaining_cooldown_2`] in the next breaking version**
-    pub fn remaining_cooldown(&self, ctx: CooldownContext) -> Option<Duration> {
-        self.remaining_cooldown_2(ctx, &self.cooldown)
     }
 
     /// Indicates that a command has been executed and all associated cooldowns should start running

@@ -103,6 +103,26 @@ pub async fn cooldowns(ctx: Context<'_>) -> Result<(), Error> {
     Ok(())
 }
 
+/// Overrides the user cooldown for a specific user
+async fn dynamic_cooldown_check(ctx: Context<'_>) -> Result<bool, Error> {
+    let mut cooldown_durations = ctx.command().cooldown_config.lock().unwrap();
+
+    // You can change the cooldown duration depending on the message author, for example
+    if ctx.author().id.0 == 472029906943868929 {
+        cooldown_durations.user = Some(std::time::Duration::from_secs(10));
+    } else {
+        cooldown_durations.user = None
+    }
+
+    Ok(true)
+}
+
+#[poise::command(prefix_command, slash_command, check = "dynamic_cooldown_check")]
+pub async fn dynamic_cooldowns(ctx: Context<'_>) -> Result<(), Error> {
+    ctx.say("You successfully called the command").await?;
+    Ok(())
+}
+
 #[poise::command(prefix_command, slash_command)]
 pub async fn minmax(
     ctx: Context<'_>,

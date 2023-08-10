@@ -14,12 +14,13 @@ async fn dynamic_cooldowns(ctx: Context<'_>) -> Result<(), Error> {
         if ctx.author().id.0 == 472029906943868929 {
             cooldown_durations.user = Some(std::time::Duration::from_secs(10));
         }
+        let cooldown_ctx = ctx.cooldown_context();
 
-        match cooldown_tracker.remaining_cooldown_2(ctx, &cooldown_durations) {
+        match cooldown_tracker.remaining_cooldown(cooldown_ctx.clone(), &cooldown_durations) {
             Some(remaining) => {
                 return Err(format!("Please wait {} seconds", remaining.as_secs()).into())
             }
-            None => cooldown_tracker.start_cooldown(ctx),
+            None => cooldown_tracker.start_cooldown(cooldown_ctx),
         }
     };
 
