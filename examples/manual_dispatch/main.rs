@@ -25,7 +25,7 @@ impl serenity::EventHandler for Handler {
         // FrameworkContext contains all data that poise::Framework usually manages
         let shard_manager = (*self.shard_manager.lock().unwrap()).clone().unwrap();
         let framework_data = poise::FrameworkContext {
-            bot_id: serenity::UserId(std::num::NonZeroU64::new(846453852164587620).unwrap()),
+            bot_id: 846453852164587620.into(),
             options: &self.options,
             user_data: &(),
             shard_manager: &shard_manager,

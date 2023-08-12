@@ -108,7 +108,7 @@ async fn dynamic_cooldown_check(ctx: Context<'_>) -> Result<bool, Error> {
     let mut cooldown_durations = ctx.command().cooldown_config.lock().unwrap();
 
     // You can change the cooldown duration depending on the message author, for example
-    if ctx.author().id.0 == std::num::NonZeroU64::new(472029906943868929).unwrap() {
+    if ctx.author().id == 472029906943868929 {
         cooldown_durations.user = Some(std::time::Duration::from_secs(10));
     } else {
         cooldown_durations.user = None

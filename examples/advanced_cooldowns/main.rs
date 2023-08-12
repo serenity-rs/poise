@@ -11,7 +11,7 @@ async fn dynamic_cooldowns(ctx: Context<'_>) -> Result<(), Error> {
 
         // You can change the cooldown duration depending on the message author, for example
         let mut cooldown_durations = poise::CooldownConfig::default();
-        if ctx.author().id.0 == std::num::NonZeroU64::new(472029906943868929).unwrap() {
+        if ctx.author().id == 472029906943868929 {
             cooldown_durations.user = Some(std::time::Duration::from_secs(10));
         }
         let cooldown_ctx = ctx.cooldown_context();
