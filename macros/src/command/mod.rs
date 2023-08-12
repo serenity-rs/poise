@@ -1,7 +1,7 @@
 mod prefix;
 mod slash;
 
-use crate::util::wrap_option;
+use crate::util::{wrap_option, wrap_option_to_string};
 use proc_macro::TokenStream;
 use syn::spanned::Spanned as _;
 
@@ -18,8 +18,10 @@ pub struct CommandArgs {
     //  if it's actually irrational, the inconsistency should be fixed)
     subcommands: crate::util::List<syn::Path>,
     aliases: crate::util::List<String>,
+    subcommand_required: bool,
     invoke_on_edit: bool,
     reuse_response: bool,
+    track_deletion: bool,
     track_edits: bool,
     broadcast_typing: bool,
     help_text_fn: Option<syn::Path>,
@@ -68,6 +70,8 @@ struct ParamArgs {
     channel_types: Option<crate::util::List<syn::Ident>>,
     min: Option<syn::Lit>,
     max: Option<syn::Lit>,
+    min_length: Option<syn::Lit>,
+    max_length: Option<syn::Lit>,
     lazy: bool,
     flag: bool,
     rest: bool,
@@ -75,7 +79,7 @@ struct ParamArgs {
 
 /// Part of the Invocation struct. Represents a single parameter of a Discord command.
 struct CommandParameter {
-    name: syn::Ident,
+    name: Option<syn::Ident>,
     type_: syn::Type,
     args: ParamArgs,
     span: proc_macro2::Span,
@@ -143,6 +147,18 @@ pub fn command(
         return Err(syn::Error::new(proc_macro2::Span::call_site(), err_msg).into());
     }
 
+    // If subcommand_required is set to true, then the command cannot have any arguments
+    if args.subcommand_required && function.sig.inputs.len() > 1 {
+        let err_msg = "subcommand_required is set to true, but the command has arguments";
+        return Err(syn::Error::new(proc_macro2::Span::call_site(), err_msg).into());
+    }
+
+    // If subcommand_required is set to true, then the command must have at least one subcommand
+    if args.subcommand_required && args.subcommands.0.is_empty() {
+        let err_msg = "subcommand_required is set to true, but the command has no subcommands";
+        return Err(syn::Error::new(proc_macro2::Span::call_site(), err_msg).into());
+    }
+
     // Collect argument names/types/attributes to insert into generated function
     let mut parameters = Vec::new();
     for command_param in function.sig.inputs.iter_mut().skip(1) {
@@ -153,10 +169,8 @@ pub fn command(
             }
         };
         let name = match &*pattern.pat {
-            syn::Pat::Ident(pat_ident) => &pat_ident.ident,
-            x => {
-                return Err(syn::Error::new(x.span(), "must use an identifier pattern here").into())
-            }
+            syn::Pat::Ident(pat_ident) => Some(pat_ident.ident.clone()),
+            _ => None,
         };
 
         let attrs = pattern
@@ -167,7 +181,7 @@ pub fn command(
         let attrs = <ParamArgs as darling::FromMeta>::from_list(&attrs)?;
 
         parameters.push(CommandParameter {
-            name: name.clone(),
+            name,
             type_: (*pattern.ty).clone(),
             args: attrs,
             span: command_param.span(),
@@ -242,14 +256,14 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
         .clone()
         .unwrap_or_else(|| inv.function.sig.ident.to_string());
     let command_name = &inv.command_name;
-    let context_menu_name = wrap_option(inv.args.context_menu_command.as_ref());
+    let context_menu_name = wrap_option_to_string(inv.args.context_menu_command.as_ref());
 
     let description = match &inv.description {
         Some(x) => quote::quote! { Some(#x.to_string()) },
         None => quote::quote! { None },
     };
     let hide_in_help = &inv.args.hide_in_help;
-    let category = wrap_option(inv.args.category.as_ref());
+    let category = wrap_option_to_string(inv.args.category.as_ref());
 
     let global_cooldown = wrap_option(inv.args.global_cooldown);
     let user_cooldown = wrap_option(inv.args.user_cooldown);
@@ -260,15 +274,16 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
     let default_member_permissions = &inv.default_member_permissions;
     let required_permissions = &inv.required_permissions;
     let required_bot_permissions = &inv.required_bot_permissions;
+    let subcommand_required = inv.args.subcommand_required;
     let owners_only = inv.args.owners_only;
     let guild_only = inv.args.guild_only;
     let dm_only = inv.args.dm_only;
     let nsfw_only = inv.args.nsfw_only;
 
     let help_text = match &inv.args.help_text_fn {
-        Some(help_text_fn) => quote::quote! { Some(#help_text_fn) },
+        Some(help_text_fn) => quote::quote! { Some(#help_text_fn()) },
         None => match &inv.help_text {
-            Some(extracted_explanation) => quote::quote! { Some(|| #extracted_explanation.into()) },
+            Some(extracted_explanation) => quote::quote! { Some(#extracted_explanation.into()) },
             None => quote::quote! { None },
         },
     };
@@ -282,6 +297,7 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
 
     let invoke_on_edit = inv.args.invoke_on_edit || inv.args.track_edits;
     let reuse_response = inv.args.reuse_response || inv.args.track_edits;
+    let track_deletion = inv.args.track_deletion || inv.args.track_edits;
     let broadcast_typing = inv.args.broadcast_typing;
     let aliases = &inv.args.aliases.0;
     let subcommands = &inv.args.subcommands.0;
@@ -314,6 +330,7 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
                 context_menu_action: #context_menu_action,
 
                 subcommands: vec![ #( #subcommands() ),* ],
+                subcommand_required: #subcommand_required,
                 name: #command_name.to_string(),
                 name_localizations: #name_localizations,
                 qualified_name: String::from(#command_name), // properly filled in later by Framework
@@ -323,13 +340,15 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
                 description_localizations: #description_localizations,
                 help_text: #help_text,
                 hide_in_help: #hide_in_help,
-                cooldowns: std::sync::Mutex::new(::poise::Cooldowns::new(::poise::CooldownConfig {
+                cooldowns: std::sync::Mutex::new(::poise::Cooldowns::new()),
+                cooldown_config: std::sync::Mutex::new(::poise::CooldownConfig {
                     global: #global_cooldown.map(std::time::Duration::from_secs),
                     user: #user_cooldown.map(std::time::Duration::from_secs),
                     guild: #guild_cooldown.map(std::time::Duration::from_secs),
                     channel: #channel_cooldown.map(std::time::Duration::from_secs),
                     member: #member_cooldown.map(std::time::Duration::from_secs),
-                })),
+                    __non_exhaustive: (),
+                }),
                 reuse_response: #reuse_response,
                 default_member_permissions: #default_member_permissions,
                 required_permissions: #required_permissions,
@@ -343,8 +362,9 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
                 parameters: vec![ #( #parameters ),* ],
                 custom_data: #custom_data,
 
-                aliases: &[ #( #aliases, )* ],
+                aliases: vec![ #( #aliases.to_string(), )* ],
                 invoke_on_edit: #invoke_on_edit,
+                track_deletion: #track_deletion,
                 broadcast_typing: #broadcast_typing,
 
                 context_menu_name: #context_menu_name,

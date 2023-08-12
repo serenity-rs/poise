@@ -32,7 +32,9 @@ pub trait SlashArgument: Sized {
     /// If this is a choice parameter, returns the choices
     ///
     /// Don't call this method directly! Use [`crate::slash_argument_choices!`]
-    fn choices() -> Vec<crate::CommandParameterChoice>;
+    fn choices() -> Vec<crate::CommandParameterChoice> {
+        Vec::new()
+    }
 }
 
 /// Implemented for all types that can be used as a function parameter in a slash command.
@@ -105,7 +107,11 @@ where
     ) -> Result<T, SlashArgError> {
         let string = match *value {
             serenity::ResolvedValue::String(s) => s,
-            _ => return Err(SlashArgError::CommandStructureMismatch("expected string")),
+            _ => {
+                return Err(SlashArgError::CommandStructureMismatch {
+                    description: "expected string",
+                })
+            }
         };
         T::convert(
             ctx,
@@ -129,9 +135,8 @@ where
 macro_rules! impl_for_integer {
     ($($t:ty)*) => { $(
         #[async_trait::async_trait]
-        impl SlashArgumentHack<$t> for &PhantomData<$t> {
+        impl SlashArgument for $t {
             async fn extract(
-                self,
                 _: &impl serenity::CacheHttp,
                 _: crate::CommandOrAutocompleteInteraction<'_>,
                 value: &serenity::ResolvedValue<'_>,
@@ -139,14 +144,16 @@ macro_rules! impl_for_integer {
                 match *value {
                     serenity::ResolvedValue::Integer(x) => x
                         .try_into()
-                        .map_err(|_| SlashArgError::CommandStructureMismatch(
-                            "received out of bounds integer"
-                        )),
-                    _ => Err(SlashArgError::CommandStructureMismatch("expected integer")),
+                        .map_err(|_| SlashArgError::CommandStructureMismatch {
+                            description: "received out of bounds integer",
+                        }),
+                    _ => Err(SlashArgError::CommandStructureMismatch {
+                        description: "expected integer",
+                    }),
                 }
             }
 
-            fn create(self, builder: serenity::CreateCommandOption) -> serenity::CreateCommandOption {
+            fn create(builder: serenity::CreateCommandOption) -> serenity::CreateCommandOption {
                 builder
                     .min_number_value(f64::max(<$t>::MIN as f64, -9007199254740991.))
                     .max_number_value(f64::min(<$t>::MAX as f64, 9007199254740991.))
@@ -181,23 +188,21 @@ impl<T: SlashArgument + Sync> SlashArgumentHack<T> for &PhantomData<T> {
 macro_rules! impl_slash_argument {
     ($type:ty, |$ctx:pat, $interaction:pat, $slash_param_type:ident ( $($arg:pat),* )| $extractor:expr) => {
         #[async_trait::async_trait]
-        impl SlashArgumentHack<$type> for &PhantomData<$type> {
+        impl SlashArgument for $type {
             async fn extract(
-                self,
                 $ctx: &impl serenity::CacheHttp,
                 $interaction: crate::CommandOrAutocompleteInteraction<'_>,
                 value: &serenity::ResolvedValue<'_>,
             ) -> Result<$type, SlashArgError> {
                 match *value {
                     serenity::ResolvedValue::$slash_param_type( $($arg),* ) => Ok( $extractor ),
-                    _ => Err(SlashArgError::CommandStructureMismatch(
-                        concat!("expected ", stringify!($slash_param_type))
-                    )),
+                    _ => Err(SlashArgError::CommandStructureMismatch {
+                        description: concat!("expected ", stringify!($slash_param_type))
+                    }),
                 }
             }
 
             fn create(
-                self,
                 builder: serenity::CreateCommandOption,
             ) -> serenity::CreateCommandOption {
                 builder.kind(serenity::CommandOptionType::$slash_param_type)

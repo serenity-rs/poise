@@ -29,7 +29,7 @@ fn pop_string(args: &str) -> Result<(&str, String), crate::TooFewArguments> {
 
     let args = args.trim_start();
     if args.is_empty() {
-        return Err(crate::TooFewArguments);
+        return Err(crate::TooFewArguments::default());
     }
 
     let mut output = String::new();
@@ -60,8 +60,11 @@ fn pop_string(args: &str) -> Result<(&str, String), crate::TooFewArguments> {
 }
 
 /// Error thrown if user passes too many arguments to a command
-#[derive(Debug)]
-pub struct TooManyArguments;
+#[derive(Default, Debug)]
+pub struct TooManyArguments {
+    #[doc(hidden)]
+    pub __non_exhaustive: (),
+}
 impl std::fmt::Display for TooManyArguments {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_str("Too many arguments were passed")
@@ -70,8 +73,11 @@ impl std::fmt::Display for TooManyArguments {
 impl std::error::Error for TooManyArguments {}
 
 /// Error thrown if user passes too few arguments to a command
-#[derive(Debug)]
-pub struct TooFewArguments;
+#[derive(Default, Debug)]
+pub struct TooFewArguments {
+    #[doc(hidden)]
+    pub __non_exhaustive: (),
+}
 impl std::fmt::Display for TooFewArguments {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_str("Too few arguments were passed")
@@ -80,8 +86,11 @@ impl std::fmt::Display for TooFewArguments {
 impl std::error::Error for TooFewArguments {}
 
 /// Error thrown in prefix invocation when there's too few attachments
-#[derive(Debug)]
-pub struct MissingAttachment;
+#[derive(Default, Debug)]
+pub struct MissingAttachment {
+    #[doc(hidden)]
+    pub __non_exhaustive: (),
+}
 impl std::fmt::Display for MissingAttachment {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_str("A required attachment is missing")
@@ -91,8 +100,11 @@ impl std::error::Error for MissingAttachment {}
 
 /// Error thrown when the user enters a string that is not recognized by a
 /// ChoiceParameter-derived enum
-#[derive(Debug)]
-pub struct InvalidChoice;
+#[derive(Default, Debug)]
+pub struct InvalidChoice {
+    #[doc(hidden)]
+    pub __non_exhaustive: (),
+}
 impl std::fmt::Display for InvalidChoice {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_str("You entered a non-existent choice")
@@ -101,8 +113,11 @@ impl std::fmt::Display for InvalidChoice {
 impl std::error::Error for InvalidChoice {}
 
 /// Error thrown when the user enters a string that is not recognized as a boolean
-#[derive(Debug)]
-pub struct InvalidBool;
+#[derive(Default, Debug)]
+pub struct InvalidBool {
+    #[doc(hidden)]
+    pub __non_exhaustive: (),
+}
 impl std::fmt::Display for InvalidBool {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_str("Expected a string like `yes` or `no` for the boolean parameter")

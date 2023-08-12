@@ -10,6 +10,7 @@ use crate::serenity_prelude as serenity;
 #[derivative(Debug)]
 pub enum FrameworkError<'a, U, E> {
     /// User code threw an error in user data setup
+    #[non_exhaustive]
     Setup {
         /// Error which was thrown in the setup code
         error: E,
@@ -22,9 +23,10 @@ pub enum FrameworkError<'a, U, E> {
         #[derivative(Debug = "ignore")]
         ctx: &'a serenity::Context,
     },
-    /// User code threw an error in generic event listener
-    Listener {
-        /// Error which was thrown in the listener code
+    /// User code threw an error in generic event event handler
+    #[non_exhaustive]
+    EventHandler {
+        /// Error which was thrown in the event handler code
         error: E,
         /// Which event was being processed when the error occurred
         event: &'a serenity::FullEvent,
@@ -33,13 +35,38 @@ pub enum FrameworkError<'a, U, E> {
         framework: crate::FrameworkContext<'a, U, E>,
     },
     /// Error occured during command execution
+    #[non_exhaustive]
     Command {
         /// Error which was thrown in the command code
         error: E,
         /// General context
         ctx: crate::Context<'a, U, E>,
     },
+    /// Command was invoked without specifying a subcommand, but the command has `subcommand_required` set
+    SubcommandRequired {
+        /// General context
+        ctx: crate::Context<'a, U, E>,
+    },
+    /// Panic occured at any phase of command execution after constructing the `crate::Context`.
+    ///
+    /// This feature is intended as a last-resort safeguard to gracefully print an error message to
+    /// the user on a panic. Panics should only be thrown for bugs in the code, don't use this for
+    /// normal errors!
+    #[non_exhaustive]
+    CommandPanic {
+        /// Panic payload which was thrown in the command code
+        ///
+        /// If a panic was thrown via [`std::panic::panic_any()`] and the payload was neither &str,
+        /// nor String, the payload is `None`.
+        ///
+        /// The reason the original [`Box<dyn Any + Send>`] payload isn't provided here is that it
+        /// would make [`FrameworkError`] not [`Sync`] anymore.
+        payload: Option<String>,
+        /// Command context
+        ctx: crate::Context<'a, U, E>,
+    },
     /// A command argument failed to parse from the Discord message or interaction content
+    #[non_exhaustive]
     ArgumentParse {
         /// Error which was thrown by the parameter type's parsing routine
         error: Box<dyn std::error::Error + Send + Sync>,
@@ -53,6 +80,7 @@ pub enum FrameworkError<'a, U, E> {
     ///
     /// Most often the result of the bot not having registered the command in Discord, so Discord
     /// stores an outdated version of the command and its parameters.
+    #[non_exhaustive]
     CommandStructureMismatch {
         /// Developer-readable description of the type mismatch
         description: &'static str,
@@ -60,6 +88,7 @@ pub enum FrameworkError<'a, U, E> {
         ctx: crate::ApplicationContext<'a, U, E>,
     },
     /// Command was invoked before its cooldown expired
+    #[non_exhaustive]
     CooldownHit {
         /// Time until the command may be invoked for the next time in the given context
         remaining_cooldown: std::time::Duration,
@@ -67,7 +96,8 @@ pub enum FrameworkError<'a, U, E> {
         ctx: crate::Context<'a, U, E>,
     },
     /// Command was invoked but the bot is lacking the permissions specified in
-    /// [`crate::Command::required_bot_permissions`]
+    /// [`crate::Command::required_permissions`]
+    #[non_exhaustive]
     MissingBotPermissions {
         /// Which permissions in particular the bot is lacking for this command
         missing_permissions: serenity::Permissions,
@@ -76,6 +106,7 @@ pub enum FrameworkError<'a, U, E> {
     },
     /// Command was invoked but the user is lacking the permissions specified in
     /// [`crate::Command::required_bot_permissions`]
+    #[non_exhaustive]
     MissingUserPermissions {
         /// List of permissions that the user is lacking. May be None if retrieving the user's
         /// permissions failed
@@ -84,26 +115,31 @@ pub enum FrameworkError<'a, U, E> {
         ctx: crate::Context<'a, U, E>,
     },
     /// A non-owner tried to invoke an owners-only command
+    #[non_exhaustive]
     NotAnOwner {
         /// General context
         ctx: crate::Context<'a, U, E>,
     },
     /// Command was invoked but the channel was a DM channel
+    #[non_exhaustive]
     GuildOnly {
         /// General context
         ctx: crate::Context<'a, U, E>,
     },
     /// Command was invoked but the channel was a non-DM channel
+    #[non_exhaustive]
     DmOnly {
         /// General context
         ctx: crate::Context<'a, U, E>,
     },
     /// Command was invoked but the channel wasn't a NSFW channel
+    #[non_exhaustive]
     NsfwOnly {
         /// General context
         ctx: crate::Context<'a, U, E>,
     },
     /// Provided pre-command check either errored, or returned false, so command execution aborted
+    #[non_exhaustive]
     CommandCheckFailed {
         /// If execution wasn't aborted because of an error but because it successfully returned
         /// false, this field is None
@@ -113,6 +149,7 @@ pub enum FrameworkError<'a, U, E> {
     },
     /// [`crate::PrefixFrameworkOptions::dynamic_prefix`] or
     /// [`crate::PrefixFrameworkOptions::stripped_dynamic_prefix`] returned an error
+    #[non_exhaustive]
     DynamicPrefix {
         /// Error which was thrown in the dynamic prefix code
         error: E,
@@ -123,6 +160,7 @@ pub enum FrameworkError<'a, U, E> {
         msg: &'a serenity::Message,
     },
     /// A message had the correct prefix but the following string was not a recognized command
+    #[non_exhaustive]
     UnknownCommand {
         /// Serenity's Context
         #[derivative(Debug = "ignore")]
@@ -145,6 +183,7 @@ pub enum FrameworkError<'a, U, E> {
         trigger: crate::MessageDispatchTrigger,
     },
     /// The command name from the interaction is unrecognized
+    #[non_exhaustive]
     UnknownInteraction {
         #[derivative(Debug = "ignore")]
         /// Serenity's Context
@@ -157,31 +196,33 @@ pub enum FrameworkError<'a, U, E> {
     },
     // #[non_exhaustive] forbids struct update syntax for ?? reason
     #[doc(hidden)]
-    __NonExhaustive,
+    __NonExhaustive(std::convert::Infallible),
 }
 
 impl<'a, U, E> FrameworkError<'a, U, E> {
-    /// Returns the [`serenity::Context`] of this error, except on [`Self::Listener`] (not all
+    /// Returns the [`serenity::Context`] of this error, except on [`Self::EventHandler`] (not all
     /// event types have a Context available).
-    pub fn discord(&self) -> Option<&'a serenity::Context> {
+    pub fn serenity_context(&self) -> Option<&'a serenity::Context> {
         Some(match *self {
             Self::Setup { ctx, .. } => ctx,
-            Self::Listener { .. } => return None,
-            Self::Command { ctx, .. } => ctx.discord(),
-            Self::ArgumentParse { ctx, .. } => ctx.discord(),
-            Self::CommandStructureMismatch { ctx, .. } => ctx.discord,
-            Self::CooldownHit { ctx, .. } => ctx.discord(),
-            Self::MissingBotPermissions { ctx, .. } => ctx.discord(),
-            Self::MissingUserPermissions { ctx, .. } => ctx.discord(),
-            Self::NotAnOwner { ctx, .. } => ctx.discord(),
-            Self::GuildOnly { ctx, .. } => ctx.discord(),
-            Self::DmOnly { ctx, .. } => ctx.discord(),
-            Self::NsfwOnly { ctx, .. } => ctx.discord(),
-            Self::CommandCheckFailed { ctx, .. } => ctx.discord(),
-            Self::DynamicPrefix { ctx, .. } => ctx.discord,
+            Self::EventHandler { .. } => return None,
+            Self::Command { ctx, .. } => ctx.serenity_context(),
+            Self::SubcommandRequired { ctx } => ctx.serenity_context(),
+            Self::CommandPanic { ctx, .. } => ctx.serenity_context(),
+            Self::ArgumentParse { ctx, .. } => ctx.serenity_context(),
+            Self::CommandStructureMismatch { ctx, .. } => ctx.serenity_context,
+            Self::CooldownHit { ctx, .. } => ctx.serenity_context(),
+            Self::MissingBotPermissions { ctx, .. } => ctx.serenity_context(),
+            Self::MissingUserPermissions { ctx, .. } => ctx.serenity_context(),
+            Self::NotAnOwner { ctx, .. } => ctx.serenity_context(),
+            Self::GuildOnly { ctx, .. } => ctx.serenity_context(),
+            Self::DmOnly { ctx, .. } => ctx.serenity_context(),
+            Self::NsfwOnly { ctx, .. } => ctx.serenity_context(),
+            Self::CommandCheckFailed { ctx, .. } => ctx.serenity_context(),
+            Self::DynamicPrefix { ctx, .. } => ctx.serenity_context,
             Self::UnknownCommand { ctx, .. } => ctx,
             Self::UnknownInteraction { ctx, .. } => ctx,
-            Self::__NonExhaustive => unreachable!(),
+            Self::__NonExhaustive(unreachable) => match unreachable {},
         })
     }
 
@@ -189,6 +230,8 @@ impl<'a, U, E> FrameworkError<'a, U, E> {
     pub fn ctx(&self) -> Option<crate::Context<'a, U, E>> {
         Some(match *self {
             Self::Command { ctx, .. } => ctx,
+            Self::SubcommandRequired { ctx } => ctx,
+            Self::CommandPanic { ctx, .. } => ctx,
             Self::ArgumentParse { ctx, .. } => ctx,
             Self::CommandStructureMismatch { ctx, .. } => crate::Context::Application(ctx),
             Self::CooldownHit { ctx, .. } => ctx,
@@ -200,11 +243,11 @@ impl<'a, U, E> FrameworkError<'a, U, E> {
             Self::NsfwOnly { ctx, .. } => ctx,
             Self::CommandCheckFailed { ctx, .. } => ctx,
             Self::Setup { .. }
-            | Self::Listener { .. }
+            | Self::EventHandler { .. }
             | Self::UnknownCommand { .. }
             | Self::UnknownInteraction { .. }
             | Self::DynamicPrefix { .. } => return None,
-            Self::__NonExhaustive => unreachable!(),
+            Self::__NonExhaustive(unreachable) => match unreachable {},
         })
     }
 
@@ -215,6 +258,29 @@ impl<'a, U, E> FrameworkError<'a, U, E> {
             .and_then(|c| c.command().on_error)
             .unwrap_or(framework_options.on_error);
         on_error(self).await;
+    }
+}
+
+/// Support functions for the macro, which can't create these #[non_exhaustive] enum variants
+#[doc(hidden)]
+impl<'a, U, E> FrameworkError<'a, U, E> {
+    pub fn new_command(ctx: crate::Context<'a, U, E>, error: E) -> Self {
+        Self::Command { error, ctx }
+    }
+
+    pub fn new_argument_parse(
+        ctx: crate::Context<'a, U, E>,
+        input: Option<String>,
+        error: Box<dyn std::error::Error + Send + Sync>,
+    ) -> Self {
+        Self::ArgumentParse { error, input, ctx }
+    }
+
+    pub fn new_command_structure_mismatch(
+        ctx: crate::ApplicationContext<'a, U, E>,
+        description: &'static str,
+    ) -> Self {
+        Self::CommandStructureMismatch { description, ctx }
     }
 }
 
@@ -234,13 +300,27 @@ impl<U, E: std::fmt::Display> std::fmt::Display for FrameworkError<'_, U, E> {
                 data_about_bot: _,
                 ctx: _,
             } => write!(f, "poise setup error"),
-            Self::Listener {
+            Self::EventHandler {
                 error: _,
                 event,
                 framework: _,
-            } => write!(f, "error in {} event listener", event.snake_case_name()),
+            } => write!(
+                f,
+                "error in {} event event handler",
+                event.snake_case_name()
+            ),
             Self::Command { error: _, ctx } => {
                 write!(f, "error in command `{}`", full_command_name!(ctx))
+            }
+            Self::SubcommandRequired { ctx } => {
+                write!(
+                    f,
+                    "expected subcommand for command `{}`",
+                    full_command_name!(ctx)
+                )
+            }
+            Self::CommandPanic { ctx, payload: _ } => {
+                write!(f, "panic in command `{}`", full_command_name!(ctx))
             }
             Self::ArgumentParse {
                 error: _,
@@ -327,7 +407,7 @@ impl<U, E: std::fmt::Display> std::fmt::Display for FrameworkError<'_, U, E> {
             Self::UnknownInteraction { interaction, .. } => {
                 write!(f, "unknown interaction `{}`", interaction.data().name)
             }
-            Self::__NonExhaustive => unreachable!(),
+            Self::__NonExhaustive(unreachable) => match *unreachable {},
         }
     }
 }
@@ -338,8 +418,10 @@ impl<'a, U: std::fmt::Debug, E: std::error::Error + 'static> std::error::Error
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         match self {
             Self::Setup { error, .. } => Some(error),
-            Self::Listener { error, .. } => Some(error),
+            Self::EventHandler { error, .. } => Some(error),
             Self::Command { error, .. } => Some(error),
+            Self::SubcommandRequired { .. } => None,
+            Self::CommandPanic { .. } => None,
             Self::ArgumentParse { error, .. } => Some(&**error),
             Self::CommandStructureMismatch { .. } => None,
             Self::CooldownHit { .. } => None,
@@ -353,7 +435,7 @@ impl<'a, U: std::fmt::Debug, E: std::error::Error + 'static> std::error::Error
             Self::DynamicPrefix { error, .. } => Some(error),
             Self::UnknownCommand { .. } => None,
             Self::UnknownInteraction { .. } => None,
-            Self::__NonExhaustive => unreachable!(),
+            Self::__NonExhaustive(unreachable) => match *unreachable {},
         }
     }
 }

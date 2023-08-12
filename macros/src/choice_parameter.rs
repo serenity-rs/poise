@@ -64,74 +64,42 @@ pub fn choice_parameter(input: syn::DeriveInput) -> Result<TokenStream, darling:
     }
 
     let enum_ident = &input.ident;
-    let indices = 0_i64..(variant_idents.len() as _);
+    let indices = 0_usize..(variant_idents.len() as _);
     Ok(quote::quote! {
-        #[poise::async_trait]
-        impl poise::SlashArgument for #enum_ident {
-            async fn extract(
-                _: &impl poise::serenity_prelude::CacheHttp,
-                _: poise::CommandOrAutocompleteInteraction<'_>,
-                value: &poise::serenity_prelude::ResolvedValue<'_>,
-            ) -> ::std::result::Result<Self, poise::SlashArgError> {
-                let choice_key = match value {
-                    poise::serenity_prelude::ResolvedValue::Integer(i) => i,
-                    _ => return Err(poise::SlashArgError::CommandStructureMismatch(
-                        "expected integer",
-                    )),
-                };
-
-                match choice_key {
-                    #( #indices => Ok(Self::#variant_idents), )*
-                    _ => Err(poise::SlashArgError::CommandStructureMismatch("out of bounds choice key")),
-                }
-            }
-
-            fn create(builder: poise::serenity_prelude::CreateCommandOption) -> poise::serenity_prelude::CreateCommandOption {
-                builder.kind(poise::serenity_prelude::CommandOptionType::Integer)
-            }
-
-            fn choices() -> Vec<poise::CommandParameterChoice> {
+        impl poise::ChoiceParameter for #enum_ident {
+            fn list() -> Vec<poise::CommandParameterChoice> {
                 vec![ #( poise::CommandParameterChoice {
                     name: #names.to_string(),
                     localizations: std::collections::HashMap::from([
-                        #( (#locales.to_string(), #localized_names.to_string()) )*
+                        #( (#locales.to_string(), #localized_names.to_string()) ),*
                     ]),
+                    __non_exhaustive: (),
                 }, )* ]
             }
-        }
 
-        impl std::str::FromStr for #enum_ident {
-            type Err = poise::InvalidChoice;
-
-            fn from_str(s: &str) -> ::std::result::Result<Self, Self::Err> {
-                #(
-                    if s.eq_ignore_ascii_case(#names)
-                        #( || s.eq_ignore_ascii_case(#alternative_names) )*
-                    {
-                        Ok(Self::#variant_idents)
-                    } else
-                )* {
-                    Err(poise::InvalidChoice)
+            fn from_index(index: usize) -> Option<Self> {
+                match index {
+                    #( #indices => Some(Self::#variant_idents), )*
+                    _ => None,
                 }
             }
-        }
 
-        impl std::fmt::Display for #enum_ident {
-            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                f.write_str(self.name())
+            fn from_name(name: &str) -> Option<Self> {
+                #( if name.eq_ignore_ascii_case(#names)
+                    #( || name.eq_ignore_ascii_case(#alternative_names) )*
+                {
+                    return Some(Self::#variant_idents);
+                } )*
+                None
             }
-        }
 
-        impl #enum_ident {
-            /// Returns the non-localized name of this choice
-            pub fn name(&self) -> &'static str {
+            fn name(&self) -> &'static str {
                 match self {
                     #( Self::#variant_idents => #names, )*
                 }
             }
 
-            /// Returns the localized name for the given locale, if one is set
-            pub fn localized_name(&self, locale: &str) -> Option<&'static str> {
+            fn localized_name(&self, locale: &str) -> Option<&'static str> {
                 match self {
                     #( Self::#variant_idents => match locale {
                         #( #locales => Some(#localized_names), )*

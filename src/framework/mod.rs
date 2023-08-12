@@ -28,7 +28,7 @@ pub struct Framework<U, E> {
     shard_manager:
         once_cell::sync::OnceCell<std::sync::Arc<tokio::sync::Mutex<serenity::ShardManager>>>,
     /// Filled with Some on construction. Taken out and executed on first Ready gateway event
-    user_data_setup: std::sync::Mutex<
+    setup: std::sync::Mutex<
         Option<
             Box<
                 dyn Send
@@ -71,7 +71,7 @@ impl<U, E> Framework<U, E> {
     /// user ID or connected guilds can be made available to the user data setup function. The user
     /// data setup is not allowed to return Result because there would be no reasonable
     /// course of action on error.
-    pub fn new<F>(options: crate::FrameworkOptions<U, E>, user_data_setup: F) -> Self
+    pub fn new<F>(options: crate::FrameworkOptions<U, E>, setup: F) -> Self
     where
         F: Send
             + Sync
@@ -87,7 +87,7 @@ impl<U, E> Framework<U, E> {
         Self {
             user_data: once_cell::sync::OnceCell::new(),
             bot_id: once_cell::sync::OnceCell::new(),
-            user_data_setup: std::sync::Mutex::new(Some(Box::new(user_data_setup))),
+            setup: std::sync::Mutex::new(Some(Box::new(setup))),
             options,
             shard_manager: once_cell::sync::OnceCell::new(),
             edit_tracker_purge_task: once_cell::sync::OnceCell::new(),
@@ -182,9 +182,9 @@ where
     } = event
     {
         let _: Result<_, _> = framework.bot_id.set(data_about_bot.user.id);
-        let user_data_setup = Option::take(&mut *framework.user_data_setup.lock().unwrap());
-        if let Some(user_data_setup) = user_data_setup {
-            match user_data_setup(ctx, data_about_bot, framework).await {
+        let setup = Option::take(&mut *framework.setup.lock().unwrap());
+        if let Some(setup) = setup {
+            match setup(ctx, data_about_bot, framework).await {
                 Ok(user_data) => {
                     let _: Result<_, _> = framework.user_data.set(user_data);
                 }

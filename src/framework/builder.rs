@@ -7,15 +7,15 @@ use crate::BoxFuture;
 ///
 /// If one of the following required values is missing, the builder will panic on start:
 /// - [`Self::token`]
-/// - [`Self::user_data_setup`]
+/// - [`Self::setup`]
 /// - [`Self::options`]
 /// - [`Self::intents`]
 ///
 /// Before starting, the builder will make an HTTP request to retrieve the bot's application ID and
 /// owner, if [`Self::initialize_owners`] is set (true by default).
 pub struct FrameworkBuilder<U, E> {
-    /// Callback for user data setup
-    user_data_setup: Option<
+    /// Callback for startup code and user data creation
+    setup: Option<
         Box<
             dyn Send
                 + Sync
@@ -44,7 +44,7 @@ pub struct FrameworkBuilder<U, E> {
 impl<U, E> Default for FrameworkBuilder<U, E> {
     fn default() -> Self {
         Self {
-            user_data_setup: Default::default(),
+            setup: Default::default(),
             options: Default::default(),
             client_settings: Default::default(),
             token: Default::default(),
@@ -63,9 +63,9 @@ impl<U, E> FrameworkBuilder<U, E> {
         panic!("Please set the prefix via FrameworkOptions::prefix_options::prefix");
     }
 
-    /// Set a callback to be invoked to create the user data instance
+    /// Sets the setup callback which also returns the user data struct.
     #[must_use]
-    pub fn user_data_setup<F>(mut self, user_data_setup: F) -> Self
+    pub fn setup<F>(mut self, setup: F) -> Self
     where
         F: Send
             + Sync
@@ -76,8 +76,25 @@ impl<U, E> FrameworkBuilder<U, E> {
                 &'a crate::Framework<U, E>,
             ) -> BoxFuture<'a, Result<U, E>>,
     {
-        self.user_data_setup = Some(Box::new(user_data_setup) as _);
+        self.setup = Some(Box::new(setup) as _);
         self
+    }
+
+    /// Sets the setup callback which also returns the user data struct.
+    #[must_use]
+    #[deprecated = "renamed to .setup()"]
+    pub fn user_data_setup<F>(self, setup: F) -> Self
+    where
+        F: Send
+            + Sync
+            + 'static
+            + for<'a> FnOnce(
+                &'a serenity::Context,
+                &'a serenity::Ready,
+                &'a crate::Framework<U, E>,
+            ) -> BoxFuture<'a, Result<U, E>>,
+    {
+        self.setup(setup)
     }
 
     /// Configure framework options
@@ -183,8 +200,8 @@ and enable MESSAGE_CONTENT in your Discord bot dashboard
 
 ",
         );
-        let user_data_setup = self
-            .user_data_setup
+        let setup = self
+            .setup
             .expect("No user data setup function was provided to the framework");
         let mut options = self.options.expect("No framework options provided");
 
@@ -194,7 +211,7 @@ and enable MESSAGE_CONTENT in your Discord bot dashboard
 
         // Create serenity client
         let mut client_builder = serenity::ClientBuilder::new(token, intents)
-            .framework(crate::Framework::new(options, user_data_setup));
+            .framework(crate::Framework::new(options, setup));
         if let Some(client_settings) = self.client_settings {
             client_builder = client_settings(client_builder);
         }

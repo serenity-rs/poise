@@ -1,3 +1,86 @@
+# 0.5.5
+
+New features:
+- Added `#[min_length]` and `#[max_length]` support for slash command string parameters
+
+Detailed changelog: https://github.com/kangalioo/poise/compare/v0.5.4...v0.5.5
+
+# 0.5.4
+
+API updates:
+- The `payload` field of `FrameworkError::CommandPanic` has been changed from `Box<dyn Any + Send>` to `Option<String>`
+  - This is technically a breaking change
+  - However, the newly introduced `payload` field in 0.5.3 made `FrameworkError` accidentally not Sync anymore
+  - And `FrameworkError::CommandPanic` has only been introduced a few days ago in 0.5.3
+  - Therefore, I think it's ok to release this as a patch release to reverse the accidental breaking change from 0.5.3
+
+Detailed changelog: https://github.com/kangalioo/poise/compare/v0.5.3...v0.5.4
+
+# 0.5.3
+
+New features:
+- Added `builtins::paginate()` as an example implementation of pagination
+- Added missing events in `EventWrapper` (#144)
+- Added `FrameworkError::CommandPanic` to allow custom handling of panics (#140)
+  - `builtins::on_error` responds with an "Internal error" embed when encountering `CommandPanic`
+
+Behavior changes:
+- `builtins::on_error` now prints `FrameworkError::Command` not just in Discord chat, but in console as well
+  - because responding in Discord sometimes doesn't work, see 0a03fb905ca0bc3b2ee0701fe35d3c89ecf5a654
+- Fixed a compile error when `name_localized` or `description_localized` are used multiple times (#143)
+
+Detailed changelog: https://github.com/kangalioo/poise/compare/v0.5.2...v0.5.3
+
+# 0.5.2
+
+New features:
+- Added `track_deletion` feature to commands
+- Added all of `Context`'s methods to `PrefixContext` and `ApplicationContext`
+
+Behavior changes:
+- Editing commands not marked track_edits no longer re-runs the command
+- `builtins::servers` now shows hidden statistics for the entire bot team, not just owner
+
+Detailed changelog: https://github.com/kangalioo/poise/compare/v0.5.1...v0.5.2
+
+# 0.5.1
+
+New features:
+- Added `FrameworkOptions::skip_checks_for_owner`
+
+Behavior changes:
+- `execute_modal` doesn't panic anymore when the timeout is reached
+- Checking user permissions properly falls back to HTTP when cache is enabled but empty
+
+Detailed changelog: https://github.com/kangalioo/poise/compare/v0.5.0...v0.5.1
+
+# 0.5.0
+
+New features:
+- Added `Context::parent_commands()`
+- Added `Context::invocation_string()`
+- Added `builtins::register_in_guild()` and `builtins::register_globally()` convenience functions
+- The return value of autocomplete callbacks can be any serializable type now
+- `Context` can now be passed directly into most serenity API functions
+  - Because it now implements `AsRef<Cache>`, `AsRef<Http>`, `AsRef<ShardMessenger>`, and `CacheHttp` traits
+- Added `execute_modal()` function with support for modal timeouts
+
+API updates:
+- `Modal::create()` gained a `custom_id: String` parameter
+  - To make it possible to tell apart two modal interactions
+- Removed `CreateReply::reference_message(MessageReference)` in favor of `CreateReply::reply(bool)`
+  - For the unusual case of setting a different reference message than the invocation (why would you? I'm genuinely interested), you can still convert the `CreateReply` into `serenity::CreateMessage` manually via `.to_prefix()` and call `serenity::CreateMessage`'s `reference_message()` method
+- Renamed `FrameworkBuilder::user_data_setup()` method to `setup()`
+- Renamed `FrameworkOptions::listener` field to `event_handler`
+- Renamed `Context::discord()` method to `serenity_context()`
+
+Behavior changes:
+- `register_application_commands_buttons()` now has emojis, reworked wording, and prints the time taken to register
+- `Modal::execute()` always responds to the correct modal now
+- When a subcommand is invoked, all parent commands' checks are run too, now
+
+Detailed changelog: https://github.com/kangalioo/poise/compare/v0.4.1...v0.5.0
+
 # 0.4.1
 
 Behavior changes:

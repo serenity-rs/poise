@@ -14,7 +14,7 @@ Release guide:
     Behavior changes:
     - ...
 
-    Detailed changelog: https://github.com/kangalioo/poise/compare/v0.2.2...v0.3.0
+    Detailed changelog: https://github.com/serenity-rs/poise/compare/v0.2.2...v0.3.0
     ```
 - Push version bump commit
   - Add changelog to CHANGELOG.md

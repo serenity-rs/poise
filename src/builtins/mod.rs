@@ -9,6 +9,11 @@ pub use help::*;
 mod register;
 pub use register::*;
 
+#[cfg(feature = "chrono")]
+mod paginate;
+#[cfg(feature = "chrono")]
+pub use paginate::*;
+
 use crate::serenity_prelude as serenity;
 
 /// Utility function to avoid verbose
@@ -47,23 +52,49 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
 ) -> Result<(), serenity::Error> {
     match error {
         crate::FrameworkError::Setup { error, .. } => {
-            log::error!("Error in user data setup: {}", error);
+            eprintln!("Error in user data setup: {}", error);
         }
-        crate::FrameworkError::Listener { error, event, .. } => log::error!(
-            "User event listener encountered an error on {} event: {}",
+        crate::FrameworkError::EventHandler { error, event, .. } => log::error!(
+            "User event event handler encountered an error on {} event: {}",
             event.snake_case_name(),
             error
         ),
         crate::FrameworkError::Command { ctx, error } => {
             let error = error.to_string();
+            eprintln!("An error occured in a command: {}", error);
             ctx.say(error).await?;
+        }
+        crate::FrameworkError::SubcommandRequired { ctx } => {
+            let subcommands = ctx
+                .command()
+                .subcommands
+                .iter()
+                .map(|s| &*s.name)
+                .collect::<Vec<_>>();
+            let response = format!(
+                "You must specify one of the following subcommands: {}",
+                subcommands.join(", ")
+            );
+            say_ephemeral(ctx, response.as_str(), true).await?;
+        }
+        crate::FrameworkError::CommandPanic { ctx, payload: _ } => {
+            // Not showing the payload to the user because it may contain sensitive info
+            ctx.send(
+                crate::CreateReply::default().embed(
+                    serenity::CreateEmbed::default()
+                        .title("Internal error")
+                        .color(serenity::Color::RED)
+                        .description("An unexpected internal error has occurred."),
+                ),
+            )
+            .await?;
         }
         crate::FrameworkError::ArgumentParse { ctx, input, error } => {
             // If we caught an argument parse error, give a helpful error message with the
             // command explanation if available
-            let usage = match ctx.command().help_text {
-                Some(help_text) => help_text(),
-                None => "Please check the help menu for usage information".into(),
+            let usage = match &ctx.command().help_text {
+                Some(help_text) => &**help_text,
+                None => "Please check the help menu for usage information",
             };
             let response = if let Some(input) = input {
                 format!(
@@ -170,7 +201,7 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
                 interaction.data().name
             );
         }
-        crate::FrameworkError::__NonExhaustive => panic!(),
+        crate::FrameworkError::__NonExhaustive(unreachable) => match unreachable {},
     }
 
     Ok(())
@@ -179,6 +210,7 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
 /// An autocomplete function that can be used for the command parameter in your help function.
 ///
 /// See `examples/framework_usage` for an example
+#[allow(clippy::unused_async)] // Required for the return type
 pub async fn autocomplete_command<'a, U, E>(
     ctx: crate::Context<'a, U, E>,
     partial: &'a str,
@@ -207,16 +239,7 @@ pub async fn autocomplete_command<'a, U, E>(
 pub async fn servers<U, E>(ctx: crate::Context<'_, U, E>) -> Result<(), serenity::Error> {
     use std::fmt::Write as _;
 
-    let mut show_private_guilds = false;
-    if let crate::Context::Application(_) = ctx {
-        if let Ok(app) = ctx.discord().http.get_current_application_info().await {
-            if let Some(owner) = &app.owner {
-                if owner.id == ctx.author().id {
-                    show_private_guilds = true;
-                }
-            }
-        }
-    }
+    let show_private_guilds = ctx.framework().options().owners.contains(&ctx.author().id);
 
     /// Stores details of a guild for the purposes of listing it in the bot guild list
     struct Guild {
@@ -228,12 +251,12 @@ pub async fn servers<U, E>(ctx: crate::Context<'_, U, E>) -> Result<(), serenity
         is_public: bool,
     }
 
-    let guild_ids = ctx.discord().cache.guilds();
+    let guild_ids = ctx.cache().guilds();
     let mut num_unavailable_guilds = 0;
     let mut guilds = guild_ids
         .iter()
         .map(|&guild_id| {
-            let guild = ctx.discord().cache.guild(guild_id)?;
+            let guild = ctx.cache().guild(guild_id)?;
             Some(Guild {
                 name: guild.name.clone(),
                 num_members: guild.member_count,

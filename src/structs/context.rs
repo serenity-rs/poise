@@ -22,6 +22,7 @@ pub enum Context<'a, U, E> {
     Application(crate::ApplicationContext<'a, U, E>),
     /// Prefix command context
     Prefix(crate::PrefixContext<'a, U, E>),
+    // Not non_exhaustive.. adding a whole new category of commands would justify breakage lol
 }
 impl<U, E> Clone for Context<'_, U, E> {
     fn clone(&self) -> Self {
@@ -39,7 +40,39 @@ impl<'a, U, E> From<crate::PrefixContext<'a, U, E>> for Context<'a, U, E> {
         Self::Prefix(x)
     }
 }
-impl<'a, U, E> Context<'a, U, E> {
+/// Macro to generate Context methods and also PrefixContext and ApplicationContext methods that
+/// delegate to Context
+macro_rules! context_methods {
+    ( $(
+        $( #[$($attrs:tt)*] )*
+        // pub $(async $($dummy:block)?)? fn $fn_name:ident $()
+        // $fn_name:ident ($($sig:tt)*) $body:block
+        $($await:ident)? ( $fn_name:ident $self:ident $($arg:ident)* )
+        ( $($sig:tt)* ) $body:block
+    )* ) => {
+        impl<'a, U, E> Context<'a, U, E> { $(
+            $( #[$($attrs)*] )*
+            $($sig)* $body
+        )* }
+
+        impl<'a, U, E> crate::PrefixContext<'a, U, E> { $(
+            $( #[$($attrs)*] )*
+            $($sig)* {
+                $crate::Context::Prefix($self).$fn_name($($arg)*) $(.$await)?
+            }
+        )* }
+
+        impl<'a, U, E> crate::ApplicationContext<'a, U, E> { $(
+            $( #[$($attrs)*] )*
+            $($sig)* {
+                $crate::Context::Application($self).$fn_name($($arg)*) $(.$await)?
+            }
+        )* }
+    };
+}
+// Note how you have to surround the function signature in parantheses, and also add a line before
+// the signature with the function name, parameter names and maybe `await` token
+context_methods! {
     /// Defer the response, giving the bot multiple minutes to respond without the user seeing an
     /// "interaction failed error".
     ///
@@ -49,7 +82,8 @@ impl<'a, U, E> Context<'a, U, E> {
     /// No-op if this is an autocomplete context
     ///
     /// This will make the response public; to make it ephemeral, use [`Self::defer_ephemeral()`].
-    pub async fn defer(self) -> Result<(), serenity::Error> {
+    await (defer self)
+    (pub async fn defer(self) -> Result<(), serenity::Error>) {
         if let Self::Application(ctx) = self {
             ctx.defer_response(false).await?;
         }
@@ -59,7 +93,8 @@ impl<'a, U, E> Context<'a, U, E> {
     /// See [`Self::defer()`]
     ///
     /// This will make the response ephemeral; to make it public, use [`Self::defer()`].
-    pub async fn defer_ephemeral(self) -> Result<(), serenity::Error> {
+    await (defer_ephemeral self)
+    (pub async fn defer_ephemeral(self) -> Result<(), serenity::Error>) {
         if let Self::Application(ctx) = self {
             ctx.defer_response(true).await?;
         }
@@ -71,42 +106,88 @@ impl<'a, U, E> Context<'a, U, E> {
     /// If this is a prefix command, a typing broadcast is started until the return value is
     /// dropped.
     // #[must_use = "The typing broadcast will only persist if you store it"] // currently doesn't work
-    pub async fn defer_or_broadcast(self) -> Result<Option<serenity::Typing>, serenity::Error> {
+    await (defer_or_broadcast self)
+    (pub async fn defer_or_broadcast(self) -> Result<Option<serenity::Typing>, serenity::Error>) {
         Ok(match self {
             Self::Application(ctx) => {
                 ctx.defer_response(false).await?;
                 None
             }
-            Self::Prefix(ctx) => Some(ctx.msg.channel_id.start_typing(&ctx.discord.http)),
+            Self::Prefix(ctx) => Some(
+                ctx.msg
+                    .channel_id
+                    .start_typing(&ctx.serenity_context.http),
+            ),
         })
     }
 
     /// Shorthand of [`crate::say_reply`]
-    pub async fn say(
+
+    await (say self text)
+    (pub async fn say(
         self,
         text: impl Into<String>,
-    ) -> Result<crate::ReplyHandle<'a>, serenity::Error> {
+    ) -> Result<crate::ReplyHandle<'a>, serenity::Error>) {
         crate::say_reply(self, text).await
     }
 
+    /// Like [`Self::say`], but formats the message as a reply to the user's command
+    /// message.
+    ///
+    /// Equivalent to `.send(|b| b.content("...").reply(true))`.
+    ///
+    /// Only has an effect in prefix context, because slash command responses are always
+    /// formatted as a reply.
+    ///
+    /// Note: panics when called in an autocomplete context!
+    await (reply self text)
+    (pub async fn reply(
+        self,
+        text: impl Into<String>,
+    ) -> Result<crate::ReplyHandle<'a>, serenity::Error>) {
+        self.send(crate::CreateReply::new().content(text).reply(true)).await
+    }
+
     /// Shorthand of [`crate::send_reply`]
-    pub async fn send<'att>(
+
+    await (send self builder)
+    (pub async fn send<'att>(
         self,
         builder: crate::CreateReply,
-    ) -> Result<crate::ReplyHandle<'a>, serenity::Error> {
+    ) -> Result<crate::ReplyHandle<'a>, serenity::Error>) {
         crate::send_reply(self, builder).await
     }
 
     /// Return the stored [`serenity::Context`] within the underlying context type.
-    pub fn discord(&self) -> &'a serenity::Context {
+    (serenity_context self)
+    (pub fn serenity_context(self) -> &'a serenity::Context) {
         match self {
-            Self::Application(ctx) => ctx.discord,
-            Self::Prefix(ctx) => ctx.discord,
+            Self::Application(ctx) => ctx.serenity_context,
+            Self::Prefix(ctx) => ctx.serenity_context,
         }
     }
 
+    /// Create a [`crate::CooldownContext`] based off the underlying context type.
+    (cooldown_context self)
+    (pub fn cooldown_context(self) -> crate::CooldownContext) {
+        crate::CooldownContext {
+            user_id: self.author().id,
+            channel_id: self.channel_id(),
+            guild_id: self.guild_id()
+        }
+    }
+
+    /// See [`Self::serenity_context`].
+    #[deprecated = "poise::Context can now be passed directly into most serenity functions. Otherwise, use `.serenity_context()` now"]
+    #[allow(deprecated)]
+    (discord self)
+    (pub fn discord(self) -> &'a serenity::Context) {
+        self.serenity_context()
+    }
+
     /// Returns a view into data stored by the framework, like configuration
-    pub fn framework(&self) -> crate::FrameworkContext<'a, U, E> {
+    (framework self)
+    (pub fn framework(self) -> crate::FrameworkContext<'a, U, E>) {
         match self {
             Self::Application(ctx) => ctx.framework,
             Self::Prefix(ctx) => ctx.framework,
@@ -114,7 +195,8 @@ impl<'a, U, E> Context<'a, U, E> {
     }
 
     /// Return a reference to your custom user data
-    pub fn data(&self) -> &'a U {
+    (data self)
+    (pub fn data(self) -> &'a U) {
         match self {
             Self::Application(ctx) => ctx.data,
             Self::Prefix(ctx) => ctx.data,
@@ -122,7 +204,8 @@ impl<'a, U, E> Context<'a, U, E> {
     }
 
     /// Return the channel ID of this context
-    pub fn channel_id(&self) -> serenity::ChannelId {
+    (channel_id self)
+    (pub fn channel_id(self) -> serenity::ChannelId) {
         match self {
             Self::Application(ctx) => ctx.interaction.channel_id(),
             Self::Prefix(ctx) => ctx.msg.channel_id,
@@ -130,7 +213,8 @@ impl<'a, U, E> Context<'a, U, E> {
     }
 
     /// Returns the guild ID of this context, if we are inside a guild
-    pub fn guild_id(&self) -> Option<serenity::GuildId> {
+    (guild_id self)
+    (pub fn guild_id(self) -> Option<serenity::GuildId>) {
         match self {
             Self::Application(ctx) => ctx.interaction.guild_id(),
             Self::Prefix(ctx) => ctx.msg.guild_id,
@@ -140,8 +224,9 @@ impl<'a, U, E> Context<'a, U, E> {
     // Doesn't fit in with the rest of the functions here but it's convenient
     /// Return the guild of this context, if we are inside a guild.
     #[cfg(feature = "cache")]
-    pub fn guild(&self) -> Option<serenity::GuildRef<'_>> {
-        self.guild_id()?.to_guild_cached(self.discord())
+    (guild self)
+    (pub fn guild(self) -> Option<serenity::GuildRef<'a>>) {
+        self.guild_id()?.to_guild_cached(self.serenity_context())
     }
 
     // Doesn't fit in with the rest of the functions here but it's convenient
@@ -151,13 +236,14 @@ impl<'a, U, E> Context<'a, U, E> {
     /// an HTTP request
     ///
     /// Returns None if in DMs, or if the guild HTTP request fails
-    pub async fn partial_guild(&self) -> Option<serenity::PartialGuild> {
+    await (partial_guild self)
+    (pub async fn partial_guild(self) -> Option<serenity::PartialGuild>) {
         #[cfg(feature = "cache")]
-        if let Some(guild) = self.guild_id()?.to_guild_cached(self.discord()) {
+        if let Some(guild) = self.guild_id()?.to_guild_cached(&self) {
             return Some(guild.clone().into());
         }
 
-        self.guild_id()?.to_partial_guild(self.discord()).await.ok()
+        self.guild_id()?.to_partial_guild(self.serenity_context()).await.ok()
     }
 
     // Doesn't fit in with the rest of the functions here but it's convenient
@@ -170,12 +256,13 @@ impl<'a, U, E> Context<'a, U, E> {
     /// request failed
     ///
     /// Warning: can clone the entire Member instance out of the cache
-    pub async fn author_member(&'a self) -> Option<Cow<'a, serenity::Member>> {
+    await (author_member self)
+    (pub async fn author_member(self) -> Option<Cow<'a, serenity::Member>>) {
         if let Self::Application(ctx) = self {
             ctx.interaction.member().map(Cow::Borrowed)
         } else {
             self.guild_id()?
-                .member(self.discord(), self.author().id)
+                .member(self.serenity_context(), self.author().id)
                 .await
                 .ok()
                 .map(Cow::Owned)
@@ -183,7 +270,8 @@ impl<'a, U, E> Context<'a, U, E> {
     }
 
     /// Return the datetime of the invoking message or interaction
-    pub fn created_at(&self) -> serenity::Timestamp {
+    (created_at self)
+    (pub fn created_at(self) -> serenity::Timestamp) {
         match self {
             Self::Application(ctx) => ctx.interaction.id().created_at(),
             Self::Prefix(ctx) => ctx.msg.timestamp,
@@ -191,7 +279,8 @@ impl<'a, U, E> Context<'a, U, E> {
     }
 
     /// Get the author of the command message or application command.
-    pub fn author(&self) -> &'a serenity::User {
+    (author self)
+    (pub fn author(self) -> &'a serenity::User) {
         match self {
             Self::Application(ctx) => ctx.interaction.user(),
             Self::Prefix(ctx) => &ctx.msg.author,
@@ -199,7 +288,8 @@ impl<'a, U, E> Context<'a, U, E> {
     }
 
     /// Return a ID that uniquely identifies this command invocation.
-    pub fn id(&self) -> u64 {
+    (id self)
+    (pub fn id(self) -> u64) {
         match self {
             Self::Application(ctx) => ctx.interaction.id().get(),
             Self::Prefix(ctx) => {
@@ -229,7 +319,8 @@ impl<'a, U, E> Context<'a, U, E> {
 
     /// If the invoked command was a subcommand, these are the parent commands, ordered top-level
     /// downwards.
-    pub fn parent_commands(&self) -> &'a [&'a crate::Command<U, E>] {
+    (parent_commands self)
+    (pub fn parent_commands(self) -> &'a [&'a crate::Command<U, E>]) {
         match self {
             Self::Prefix(x) => x.parent_commands,
             Self::Application(x) => x.parent_commands,
@@ -237,7 +328,8 @@ impl<'a, U, E> Context<'a, U, E> {
     }
 
     /// Returns a reference to the command.
-    pub fn command(&self) -> &'a crate::Command<U, E> {
+    (command self)
+    (pub fn command(self) -> &'a crate::Command<U, E>) {
         match self {
             Self::Prefix(x) => x.command,
             Self::Application(x) => x.command,
@@ -246,7 +338,8 @@ impl<'a, U, E> Context<'a, U, E> {
 
     /// Returns the prefix this command was invoked with, or a slash (`/`), if this is an
     /// application command.
-    pub fn prefix(&self) -> &'a str {
+    (prefix self)
+    (pub fn prefix(self) -> &'a str) {
         match self {
             Context::Prefix(ctx) => ctx.prefix,
             Context::Application(_) => "/",
@@ -259,72 +352,20 @@ impl<'a, U, E> Context<'a, U, E> {
     ///
     /// In slash contexts, the given command name will always be returned verbatim, since there are
     /// no slash command aliases and the user has no control over spelling
-    pub fn invoked_command_name(&self) -> &'a str {
+    (invoked_command_name self)
+    (pub fn invoked_command_name(self) -> &'a str) {
         match self {
             Self::Prefix(ctx) => ctx.invoked_command_name,
             Self::Application(ctx) => &ctx.interaction.data().name,
         }
     }
 
-    /// Actual implementation of rerun() that returns `FrameworkError` for implementation convenience
-    async fn rerun_inner(self) -> Result<(), crate::FrameworkError<'a, U, E>> {
-        match self {
-            Self::Application(ctx) => {
-                // Skip autocomplete interactions
-                let interaction = match ctx.interaction {
-                    crate::CommandOrAutocompleteInteraction::Command(interaction) => interaction,
-                    crate::CommandOrAutocompleteInteraction::Autocomplete(_) => return Ok(()),
-                };
-
-                // Check slash command
-                if interaction.data.kind == serenity::CommandType::ChatInput {
-                    return if let Some(action) = ctx.command.slash_action {
-                        action(ctx).await
-                    } else {
-                        Ok(())
-                    };
-                }
-
-                // Check context menu command
-                if let (Some(action), Some(target)) =
-                    (ctx.command.context_menu_action, interaction.data.target())
-                {
-                    return match action {
-                        crate::ContextMenuCommandAction::User(action) => {
-                            if let serenity::ResolvedTarget::User(user, _) = target {
-                                action(ctx, user.clone()).await
-                            } else {
-                                Ok(())
-                            }
-                        }
-                        crate::ContextMenuCommandAction::Message(action) => {
-                            if let serenity::ResolvedTarget::Message(message) = target {
-                                action(ctx, message.clone()).await
-                            } else {
-                                Ok(())
-                            }
-                        }
-                    };
-                }
-            }
-            Self::Prefix(ctx) => {
-                if let Some(action) = ctx.command.prefix_action {
-                    return action(ctx).await;
-                }
-            }
-        }
-
-        // Fallback if the Command doesn't have the action it needs to execute this context
-        // (This should never happen, because if this context cannot be executed, how could this
-        // method have been called)
-        Ok(())
-    }
-
     /// Re-runs this entire command invocation
     ///
     /// Permission checks are omitted; the command code is directly executed as a function. The
     /// result is returned by this function
-    pub async fn rerun(self) -> Result<(), E> {
+    await (rerun self)
+    (pub async fn rerun(self) -> Result<(), E>) {
         match self.rerun_inner().await {
             Ok(()) => Ok(()),
             Err(crate::FrameworkError::Command { error, ctx: _ }) => Err(error),
@@ -340,7 +381,8 @@ impl<'a, U, E> Context<'a, U, E> {
     /// Returns the string with which this command was invoked.
     ///
     /// For example `"/slash_command subcommand arg1:value1 arg2:value2"`.
-    pub fn invocation_string(&self) -> String {
+    (invocation_string self)
+    (pub fn invocation_string(self) -> String) {
         match self {
             Context::Application(ctx) => {
                 let mut string = String::from("/");
@@ -391,29 +433,10 @@ impl<'a, U, E> Context<'a, U, E> {
                             Ok(())
                         }
                     };
-                    // if let Some(x) = arg.value.as_bool() {
-                    //     let _ = write!(string, "{}", x);
-                    // } else if let Some(x) = arg.value.as_i64() {
-                    //     let _ = write!(string, "{}", x);
-                    // } else if let Some(x) = arg.value.as_u64() {
-                    //     let _ = write!(string, "{}", x);
-                    // } else if let Some(x) = arg.value.as_f64() {
-                    //     let _ = write!(string, "{}", x);
-                    // } else if let Some(x) = arg.value.as_str() {
-                    //     let _ = write!(string, "{}", x);
-                    // }
                 }
                 string
             }
             Context::Prefix(ctx) => ctx.msg.content.clone(),
-        }
-    }
-
-    /// Returns the raw type erased invocation data
-    fn invocation_data_raw(&self) -> &tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>> {
-        match self {
-            Context::Application(ctx) => ctx.invocation_data,
-            Context::Prefix(ctx) => ctx.invocation_data,
         }
     }
 
@@ -422,16 +445,18 @@ impl<'a, U, E> Context<'a, U, E> {
     /// This data is carried across the `pre_command` hook, checks, main command execution, and
     /// `post_command`. It may be useful to cache data or pass information to later phases of command
     /// execution.
-    pub async fn set_invocation_data<T: 'static + Send + Sync>(&self, data: T) {
+    await (set_invocation_data self data)
+    (pub async fn set_invocation_data<T: 'static + Send + Sync>(self, data: T)) {
         *self.invocation_data_raw().lock().await = Box::new(data);
     }
 
     /// Attempts to get the invocation data with the requested type
     ///
     /// If the stored invocation data has a different type than requested, None is returned
-    pub async fn invocation_data<T: 'static>(
-        &self,
-    ) -> Option<impl std::ops::DerefMut<Target = T> + '_> {
+    await (invocation_data self)
+    (pub async fn invocation_data<T: 'static>(
+        self,
+    ) -> Option<impl std::ops::DerefMut<Target = T> + 'a>) {
         tokio::sync::MutexGuard::try_map(self.invocation_data_raw().lock().await, |any| {
             any.downcast_mut()
         })
@@ -439,16 +464,130 @@ impl<'a, U, E> Context<'a, U, E> {
     }
 
     /// If available, returns the locale (selected language) of the invoking user
-    pub fn locale(&self) -> Option<&str> {
+    (locale self)
+    (pub fn locale(self) -> Option<&'a str>) {
         match self {
             Context::Application(ctx) => Some(ctx.interaction.locale()),
             Context::Prefix(_) => None,
         }
     }
 
-    /// Creates a [`serenity::CacheHttp`] from the serenity Context
-    pub fn cache_and_http(&self) -> impl serenity::CacheHttp + 'a {
-        self.discord()
+    /// Returns serenity's cache which stores various useful data received from the gateway
+    ///
+    /// Shorthand for [`.serenity_context().cache`](serenity::Context::cache)
+    #[cfg(feature = "cache")]
+    (cache self)
+    (pub fn cache(self) -> &'a serenity::Cache) {
+        &self.serenity_context().cache
+    }
+
+    /// Returns serenity's raw Discord API client to make raw API requests, if needed.
+    ///
+    /// Shorthand for [`.serenity_context().http`](serenity::Context::http)
+    (http self)
+    (pub fn http(self) -> &'a serenity::Http) {
+        &self.serenity_context().http
+    }
+}
+
+impl<'a, U, E> Context<'a, U, E> {
+    /// Actual implementation of rerun() that returns `FrameworkError` for implementation convenience
+    async fn rerun_inner(self) -> Result<(), crate::FrameworkError<'a, U, E>> {
+        match self {
+            Self::Application(ctx) => {
+                // Skip autocomplete interactions
+                let interaction = match ctx.interaction {
+                    crate::CommandOrAutocompleteInteraction::Command(interaction) => interaction,
+                    crate::CommandOrAutocompleteInteraction::Autocomplete(_) => return Ok(()),
+                };
+
+                // Check slash command
+                if interaction.data.kind == serenity::CommandType::ChatInput {
+                    return if let Some(action) = ctx.command.slash_action {
+                        action(ctx).await
+                    } else {
+                        Ok(())
+                    };
+                }
+
+                // Check context menu command
+                if let (Some(action), Some(target)) =
+                    (ctx.command.context_menu_action, &interaction.data.target())
+                {
+                    return match action {
+                        crate::ContextMenuCommandAction::User(action) => {
+                            if let serenity::ResolvedTarget::User(user, _) = target {
+                                action(ctx, (*user).clone()).await
+                            } else {
+                                Ok(())
+                            }
+                        }
+                        crate::ContextMenuCommandAction::Message(action) => {
+                            if let serenity::ResolvedTarget::Message(message) = target {
+                                action(ctx, (*message).clone()).await
+                            } else {
+                                Ok(())
+                            }
+                        }
+                        crate::ContextMenuCommandAction::__NonExhaustive => unreachable!(),
+                    };
+                }
+            }
+            Self::Prefix(ctx) => {
+                if let Some(action) = ctx.command.prefix_action {
+                    return action(ctx).await;
+                }
+            }
+        }
+
+        // Fallback if the Command doesn't have the action it needs to execute this context
+        // (This should never happen, because if this context cannot be executed, how could this
+        // method have been called)
+        Ok(())
+    }
+
+    /// Returns the raw type erased invocation data
+    fn invocation_data_raw(self) -> &'a tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>> {
+        match self {
+            Context::Application(ctx) => ctx.invocation_data,
+            Context::Prefix(ctx) => ctx.invocation_data,
+        }
+    }
+}
+
+// Forwards for serenity::Context's impls. With these, poise::Context can be passed in as-is to
+// serenity API functions.
+#[cfg(feature = "cache")]
+impl<U, E> AsRef<serenity::Cache> for Context<'_, U, E> {
+    fn as_ref(&self) -> &serenity::Cache {
+        &self.serenity_context().cache
+    }
+}
+impl<U, E> AsRef<serenity::Http> for Context<'_, U, E> {
+    fn as_ref(&self) -> &serenity::Http {
+        &self.serenity_context().http
+    }
+}
+impl<U, E> AsRef<serenity::ShardMessenger> for Context<'_, U, E> {
+    fn as_ref(&self) -> &serenity::ShardMessenger {
+        &self.serenity_context().shard
+    }
+}
+// Originally added as part of component interaction modals; not sure if this impl is really
+// required by anything else... It makes sense to have though imo
+impl<U, E> AsRef<serenity::Context> for Context<'_, U, E> {
+    fn as_ref(&self) -> &serenity::Context {
+        self.serenity_context()
+    }
+}
+impl<U: Sync, E> serenity::CacheHttp for Context<'_, U, E> {
+    fn http(&self) -> &serenity::Http {
+        &self.serenity_context().http
+    }
+
+    #[cfg(feature = "cache")]
+    fn cache(&self) -> Option<&std::sync::Arc<serenity::Cache>> {
+        Some(&self.serenity_context().cache)
     }
 }
 
@@ -461,12 +600,14 @@ pub struct PartialContext<'a, U, E> {
     /// ID of the invocation author
     pub author: &'a serenity::User,
     /// Serenity's context, like HTTP or cache
-    pub discord: &'a serenity::Context,
+    pub serenity_context: &'a serenity::Context,
     /// Useful if you need the list of commands, for example for a custom help command
     pub framework: crate::FrameworkContext<'a, U, E>,
     /// Your custom user data
     // TODO: redundant with framework
     pub data: &'a U,
+    #[doc(hidden)]
+    pub __non_exhaustive: (),
 }
 
 impl<U, E> Copy for PartialContext<'_, U, E> {}
@@ -482,36 +623,10 @@ impl<'a, U, E> From<Context<'a, U, E>> for PartialContext<'a, U, E> {
             guild_id: ctx.guild_id(),
             channel_id: ctx.channel_id(),
             author: ctx.author(),
-            discord: ctx.discord(),
+            serenity_context: ctx.serenity_context(),
             framework: ctx.framework(),
             data: ctx.data(),
+            __non_exhaustive: (),
         }
-    }
-}
-
-impl<'a, U, E> AsRef<serenity::Http> for Context<'a, U, E> {
-    fn as_ref(&self) -> &serenity::Http {
-        &self.discord().http
-    }
-}
-
-#[cfg(feature = "cache")]
-impl<'a, U, E> AsRef<serenity::Cache> for Context<'a, U, E> {
-    fn as_ref(&self) -> &serenity::Cache {
-        &self.discord().cache
-    }
-}
-
-impl<'a, U, E> serenity::CacheHttp for Context<'a, U, E>
-where
-    U: Sync,
-{
-    fn http(&self) -> &serenity::Http {
-        &self.discord().http
-    }
-
-    #[cfg(feature = "cache")]
-    fn cache(&self) -> Option<&std::sync::Arc<serenity::Cache>> {
-        Some(&self.discord().cache)
     }
 }

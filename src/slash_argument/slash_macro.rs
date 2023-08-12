@@ -13,8 +13,13 @@ pub enum SlashArgError {
     ///
     /// Most often the result of the bot not having registered the command in Discord, so Discord
     /// stores an outdated version of the command and its parameters.
-    CommandStructureMismatch(&'static str),
+    #[non_exhaustive]
+    CommandStructureMismatch {
+        /// A short string describing what specifically is wrong/unexpected
+        description: &'static str,
+    },
     /// A string parameter was found, but it could not be parsed into the target type.
+    #[non_exhaustive]
     Parse {
         /// Error that occured while parsing the string into the target type
         error: Box<dyn std::error::Error + Send + Sync>,
@@ -28,7 +33,17 @@ pub enum SlashArgError {
     ),
     /// HTTP error occured while retrieving the model type from Discord
     Http(serenity::Error),
+    #[doc(hidden)]
+    __NonExhaustive,
 }
+/// Support functions for macro which can't create #[non_exhaustive] enum variants
+#[doc(hidden)]
+impl SlashArgError {
+    pub fn new_command_structure_mismatch(description: &'static str) -> Self {
+        Self::CommandStructureMismatch { description }
+    }
+}
+
 impl SlashArgError {
     /// Converts this specialized slash argument error to a full FrameworkError
     ///
@@ -38,24 +53,25 @@ impl SlashArgError {
         ctx: crate::ApplicationContext<'_, U, E>,
     ) -> crate::FrameworkError<'_, U, E> {
         match self {
-            crate::SlashArgError::CommandStructureMismatch(description) => {
+            Self::CommandStructureMismatch { description } => {
                 crate::FrameworkError::CommandStructureMismatch { ctx, description }
             }
-            crate::SlashArgError::Parse { error, input } => crate::FrameworkError::ArgumentParse {
+            Self::Parse { error, input } => crate::FrameworkError::ArgumentParse {
                 ctx: ctx.into(),
                 error,
                 input: Some(input),
             },
-            crate::SlashArgError::Invalid(description) => crate::FrameworkError::ArgumentParse {
+            Self::Invalid(description) => crate::FrameworkError::ArgumentParse {
                 ctx: ctx.into(),
                 error: description.into(),
                 input: None,
             },
-            crate::SlashArgError::Http(error) => crate::FrameworkError::ArgumentParse {
+            Self::Http(error) => crate::FrameworkError::ArgumentParse {
                 ctx: ctx.into(),
                 error: error.into(),
                 input: None,
             },
+            Self::__NonExhaustive => unreachable!(),
         }
     }
 }
@@ -67,11 +83,11 @@ impl From<serenity::Error> for SlashArgError {
 impl std::fmt::Display for SlashArgError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::CommandStructureMismatch(detail) => {
+            Self::CommandStructureMismatch { description } => {
                 write!(
                     f,
                     "Bot author did not register their commands correctly ({})",
-                    detail
+                    description
                 )
             }
             Self::Parse { error, input } => {
@@ -87,6 +103,7 @@ impl std::fmt::Display for SlashArgError {
                     error
                 )
             }
+            Self::__NonExhaustive => unreachable!(),
         }
     }
 }
@@ -94,9 +111,10 @@ impl std::error::Error for SlashArgError {
     fn cause(&self) -> Option<&dyn std::error::Error> {
         match self {
             Self::Parse { error, input: _ } => Some(&**error),
-            Self::CommandStructureMismatch(_) => None,
+            Self::CommandStructureMismatch { description: _ } => None,
             Self::Invalid(_) => None,
             Self::Http(error) => Some(error),
+            Self::__NonExhaustive => unreachable!(),
         }
     }
 }
@@ -132,7 +150,7 @@ macro_rules! _parse_slash {
     // Extract T
     ($ctx:ident, $interaction:ident, $args:ident => $name:ident: $($type:tt)*) => {
         $crate::_parse_slash!($ctx, $interaction, $args => $name: Option<$($type)*>)
-            .ok_or($crate::SlashArgError::CommandStructureMismatch("a required argument is missing"))?
+            .ok_or($crate::SlashArgError::new_command_structure_mismatch("a required argument is missing"))?
     };
 }
 

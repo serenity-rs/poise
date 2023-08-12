@@ -1,5 +1,5 @@
 use super::Invocation;
-use crate::util::extract_type_parameter;
+use crate::util::{extract_type_parameter, wrap_option_to_string};
 use syn::spanned::Spanned as _;
 
 pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStream>, syn::Error> {
@@ -25,8 +25,8 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
         }
 
         let param_name = match &param.args.rename {
-            Some(rename) => rename.clone(),
-            None => param.name.to_string(),
+            Some(rename) => wrap_option_to_string(Some(rename)),
+            None => wrap_option_to_string(param.name.as_ref().map(|x| x.to_string())),
         };
         let name_locales = param.args.name_localized.iter().map(|x| &x.0);
         let name_localized_values = param.args.name_localized.iter().map(|x| &x.1);
@@ -69,14 +69,25 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
             Some(x) => quote::quote! { .max_number_value(#x as f64) },
             None => quote::quote! {},
         };
+        // TODO: move this to poise::CommandParameter::{min_length, max_length} fields
+        let min_length_setter = match &param.args.min_length {
+            Some(x) => quote::quote! { .min_length(#x) },
+            None => quote::quote! {},
+        };
+        let max_length_setter = match &param.args.max_length {
+            Some(x) => quote::quote! { .max_length(#x) },
+            None => quote::quote! {},
+        };
         let type_setter = match inv.args.slash_command {
             true => quote::quote! { Some(|o| {
                 poise::create_slash_argument!(#type_, o)
                 #min_value_setter #max_value_setter
+                #min_length_setter #max_length_setter
             }) },
             false => quote::quote! { None },
         };
         // TODO: theoretically a problem that we don't store choices for non slash commands
+        // TODO: move this to poise::CommandParameter::choices (is there a reason not to?)
         let choices = match inv.args.slash_command {
             true => quote::quote! { poise::slash_argument_choices!(#type_) },
             false => quote::quote! { vec![] },
@@ -92,19 +103,20 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
         parameter_structs.push((
             quote::quote! {
                 ::poise::CommandParameter {
-                    name: #param_name.to_string(),
+                    name: #param_name,
                     name_localizations: vec![
-                        #( (#name_locales.to_string(), #name_localized_values.to_string()) )*
+                        #( (#name_locales.to_string(), #name_localized_values.to_string()) ),*
                     ].into_iter().collect(),
                     description: #description,
                     description_localizations: vec![
-                        #( (#description_locales.to_string(), #description_localized_values.to_string()) )*
+                        #( (#description_locales.to_string(), #description_localized_values.to_string()) ),*
                     ].into_iter().collect(),
                     required: #required,
                     channel_types: #channel_types,
                     type_setter: #type_setter,
                     choices: #choices,
                     autocomplete_callback: #autocomplete_callback,
+                    __non_exhaustive: (),
                 }
             },
             required,
@@ -131,24 +143,24 @@ pub fn generate_slash_action(inv: &Invocation) -> Result<proc_macro2::TokenStrea
         }
     }
 
-    let param_identifiers = inv.parameters.iter().map(|p| &p.name).collect::<Vec<_>>();
-    let param_names = inv
-        .parameters
-        .iter()
-        .map(|p| match &p.args.rename {
-            Some(rename) => syn::Ident::new(rename, p.name.span()),
-            None => p.name.clone(),
-        })
-        .collect::<Vec<_>>();
+    let mut param_identifiers: Vec<syn::Ident> = Vec::new();
+    let mut param_names: Vec<syn::Ident> = Vec::new();
+    let mut param_types: Vec<syn::Type> = Vec::new();
+    for p in &inv.parameters {
+        let param_ident = p.name.clone().ok_or_else(|| {
+            syn::Error::new(p.span, "parameter must have a name in slash commands")
+        })?;
 
-    let param_types = inv
-        .parameters
-        .iter()
-        .map(|p| match p.args.flag {
+        param_identifiers.push(param_ident.clone());
+        param_names.push(match &p.args.rename {
+            Some(rename) => syn::Ident::new(rename, p.name.span()),
+            None => param_ident,
+        });
+        param_types.push(match p.args.flag {
             true => syn::parse_quote! { FLAG },
             false => p.type_.clone(),
-        })
-        .collect::<Vec<_>>();
+        });
+    }
 
     Ok(quote::quote! {
         |ctx| Box::pin(async move {
@@ -156,22 +168,21 @@ pub fn generate_slash_action(inv: &Invocation) -> Result<proc_macro2::TokenStrea
             // why clippy doesn't turn off this lint inside macros in the first place
             #[allow(clippy::needless_question_mark)]
 
-            let cache_and_http = poise::Context::Application(ctx).cache_and_http();
             let ( #( #param_identifiers, )* ) = ::poise::parse_slash_args!(
-                &cache_and_http, ctx.interaction, ctx.args =>
+                ctx.serenity_context, ctx.interaction, ctx.args =>
                 #( (#param_names: #param_types), )*
             ).await.map_err(|error| error.to_framework_error(ctx))?;
 
             if !ctx.framework.options.manual_cooldowns {
-                ctx.command.cooldowns.lock().unwrap().start_cooldown(ctx.into());
+                ctx.command.cooldowns.lock().unwrap().start_cooldown(ctx.cooldown_context());
             }
 
             inner(ctx.into(), #( #param_identifiers, )*)
                 .await
-                .map_err(|error| poise::FrameworkError::Command {
+                .map_err(|error| poise::FrameworkError::new_command(
+                    ctx.into(),
                     error,
-                    ctx: ctx.into(),
-                })
+                ))
         })
     })
 }
@@ -193,15 +204,15 @@ pub fn generate_context_menu_action(
         <#param_type as ::poise::ContextMenuParameter<_, _>>::to_action(|ctx, value| {
             Box::pin(async move {
                 if !ctx.framework.options.manual_cooldowns {
-                    ctx.command.cooldowns.lock().unwrap().start_cooldown(ctx.into());
+                    ctx.command.cooldowns.lock().unwrap().start_cooldown(ctx.cooldown_context());
                 }
 
                 inner(ctx.into(), value)
                     .await
-                    .map_err(|error| poise::FrameworkError::Command {
+                    .map_err(|error| poise::FrameworkError::new_command(
+                        ctx.into(),
                         error,
-                        ctx: ctx.into(),
-                    })
+                    ))
             })
         })
     })

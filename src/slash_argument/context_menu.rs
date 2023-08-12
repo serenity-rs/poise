@@ -1,4 +1,4 @@
-//! Contains a simple trai, implemented for all context meun command compatible parameter types
+//! Contains a simple trait, implemented for all context menu command compatible parameter types
 use crate::serenity_prelude as serenity;
 use crate::BoxFuture;
 

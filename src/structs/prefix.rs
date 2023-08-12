@@ -12,6 +12,8 @@ pub enum MessageDispatchTrigger {
     /// The message was edited, and was not a valid invocation pre-edit (i.e. user typoed the
     /// command, then fixed it)
     MessageEditFromInvalid,
+    #[doc(hidden)]
+    __NonExhaustive,
 }
 
 /// Prefix-specific context passed to command invocations.
@@ -22,7 +24,7 @@ pub enum MessageDispatchTrigger {
 pub struct PrefixContext<'a, U, E> {
     /// Serenity's context, like HTTP or cache
     #[derivative(Debug = "ignore")]
-    pub discord: &'a serenity::Context,
+    pub serenity_context: &'a serenity::Context,
     /// The invoking user message
     pub msg: &'a serenity::Message,
     /// Prefix used by the user to invoke this command
@@ -77,6 +79,8 @@ pub enum Prefix {
     Literal(&'static str),
     /// Regular expression which matches the prefix
     Regex(regex::Regex),
+    #[doc(hidden)]
+    __NonExhaustive,
 }
 
 /// Prefix-specific framework configuration

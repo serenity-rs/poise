@@ -15,16 +15,7 @@ async fn user_permissions(
         None => return Some(serenity::Permissions::all()), // no permission checks in DMs
     };
 
-    #[cfg(feature = "cache")]
-    let guild = match ctx.cache.guild(guild_id) {
-        Some(x) => x.clone(),
-        None => return None, // Guild not in cache
-    };
-    #[cfg(not(feature = "cache"))]
-    let guild = match ctx.http.get_guild(guild_id).await {
-        Ok(x) => x,
-        Err(_) => return None,
-    };
+    let guild = guild_id.to_partial_guild(ctx).await.ok()?;
 
     // Use to_channel so that it can fallback on HTTP for threads (which aren't in cache usually)
     let channel = match channel_id.to_channel(ctx).await {
@@ -38,19 +29,7 @@ async fn user_permissions(
         Err(_) => return None,
     };
 
-    #[cfg(feature = "cache")]
-    let cached_member = guild.members.get(&user_id).cloned();
-    #[cfg(not(feature = "cache"))]
-    let cached_member = None;
-
-    // If member not in cache (probably because presences intent is not enabled), retrieve via HTTP
-    let member = match cached_member {
-        Some(x) => x,
-        None => match ctx.http.get_member(guild_id, user_id).await {
-            Ok(member) => member,
-            Err(_) => return None,
-        },
-    };
+    let member = guild.member(ctx, user_id).await.ok()?;
 
     Some(guild.user_permissions_in(&channel, &member))
 }
@@ -67,7 +46,13 @@ async fn missing_permissions<U, E>(
         return Some(serenity::Permissions::empty());
     }
 
-    let permissions = user_permissions(ctx.discord(), ctx.guild_id(), ctx.channel_id(), user).await;
+    let permissions = user_permissions(
+        ctx.serenity_context(),
+        ctx.guild_id(),
+        ctx.channel_id(),
+        user,
+    )
+    .await;
     Some(required_permissions - permissions?)
 }
 
@@ -77,6 +62,13 @@ async fn check_permissions_and_cooldown_single<'a, U, E>(
     ctx: crate::Context<'a, U, E>,
     cmd: &'a crate::Command<U, E>,
 ) -> Result<(), crate::FrameworkError<'a, U, E>> {
+    // Skip command checks if `FrameworkOptions::skip_checks_for_owners` is set to true
+    if ctx.framework().options.skip_checks_for_owners
+        && ctx.framework().options().owners.contains(&ctx.author().id)
+    {
+        return Ok(());
+    }
+
     if cmd.owners_only && !ctx.framework().options().owners.contains(&ctx.author().id) {
         return Err(crate::FrameworkError::NotAnOwner { ctx });
     }
@@ -87,7 +79,7 @@ async fn check_permissions_and_cooldown_single<'a, U, E>(
             Some(guild_id) => {
                 #[cfg(feature = "cache")]
                 if ctx.framework().options().require_cache_for_guild_check
-                    && ctx.discord().cache.guild(guild_id).is_none()
+                    && ctx.cache().guild(guild_id).is_none()
                 {
                     return Err(crate::FrameworkError::GuildOnly { ctx });
                 }
@@ -102,7 +94,7 @@ async fn check_permissions_and_cooldown_single<'a, U, E>(
     }
 
     if cmd.nsfw_only {
-        let channel = match ctx.channel_id().to_channel(ctx.discord()).await {
+        let channel = match ctx.channel_id().to_channel(ctx.serenity_context()).await {
             Ok(channel) => channel,
             Err(e) => {
                 log::warn!("Error when getting channel: {}", e);
@@ -148,8 +140,8 @@ async fn check_permissions_and_cooldown_single<'a, U, E>(
         None => {}
     }
 
-    // Only continue if command checks returns true. First perform global checks, then command
-    // checks (if necessary)
+    // Only continue if command checks returns true
+    // First perform global checks, then command checks (if necessary)
     for check in Option::iter(&ctx.framework().options().command_check).chain(&cmd.checks) {
         match check(ctx).await {
             Ok(true) => {}
@@ -166,8 +158,12 @@ async fn check_permissions_and_cooldown_single<'a, U, E>(
     }
 
     if !ctx.framework().options().manual_cooldowns {
-        let cooldowns = &cmd.cooldowns;
-        let remaining_cooldown = cooldowns.lock().unwrap().remaining_cooldown(ctx);
+        let cooldown_tracker = &cmd.cooldowns;
+        let cooldown_config = cmd.cooldown_config.lock().unwrap();
+        let remaining_cooldown = cooldown_tracker
+            .lock()
+            .unwrap()
+            .remaining_cooldown(ctx.cooldown_context(), &cooldown_config);
         if let Some(remaining_cooldown) = remaining_cooldown {
             return Err(crate::FrameworkError::CooldownHit {
                 ctx,
