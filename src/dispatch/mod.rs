@@ -21,7 +21,7 @@ pub struct FrameworkContext<'a, U, E> {
     /// Your provided user data
     pub user_data: &'a U,
     /// Serenity shard manager. Can be used for example to shutdown the bot
-    pub shard_manager: &'a std::sync::Arc<tokio::sync::Mutex<serenity::ShardManager>>,
+    pub shard_manager: &'a std::sync::Arc<serenity::ShardManager>,
     // deliberately not non exhaustive because you need to create FrameworkContext from scratch
     // to run your own event loop
 }
@@ -38,7 +38,7 @@ impl<'a, U, E> FrameworkContext<'a, U, E> {
     }
 
     /// Returns the serenity's client shard manager.
-    pub fn shard_manager(&self) -> std::sync::Arc<tokio::sync::Mutex<serenity::ShardManager>> {
+    pub fn shard_manager(&self) -> std::sync::Arc<serenity::ShardManager> {
         self.shard_manager.clone()
     }
 
