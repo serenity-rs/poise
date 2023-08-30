@@ -25,8 +25,7 @@ pub struct Framework<U, E> {
     options: crate::FrameworkOptions<U, E>,
 
     /// Initialized during construction; so shouldn't be None at any observable point
-    shard_manager:
-        once_cell::sync::OnceCell<std::sync::Arc<serenity::ShardManager>>,
+    shard_manager: once_cell::sync::OnceCell<std::sync::Arc<serenity::ShardManager>>,
     /// Filled with Some on construction. Taken out and executed on first Ready gateway event
     user_data_setup: std::sync::Mutex<
         Option<
