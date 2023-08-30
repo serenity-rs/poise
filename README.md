@@ -3,7 +3,7 @@
 [![Docs](https://img.shields.io/badge/docs-online-informational)](https://docs.rs/poise/)
 [![Docs (git)](https://img.shields.io/badge/docs%20%28git%29-online-informational)](https://kangalioo.github.io/poise/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-![Rust: 1.66+](https://img.shields.io/badge/rust-1.66+-93450a)
+![Rust: 1.72+](https://img.shields.io/badge/rust-1.72+-93450a)
 
 # Poise
 Poise is an opinionated Discord bot framework with a few distinctive features:
