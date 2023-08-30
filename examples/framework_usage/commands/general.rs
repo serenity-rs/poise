@@ -269,7 +269,8 @@ pub async fn totalsize(
     ctx: Context<'_>,
     #[description = "File to rename"] files: Vec<serenity::Attachment>,
 ) -> Result<(), Error> {
-    let total = files.iter().map(|f| f.size).sum::<u64>();
+    // we cast to u64 here as (10 files times 500mb each) > u32::MAX (~4.2gb)
+    let total = files.iter().map(|f| f.size as u64).sum::<u64>();
 
     ctx.say(format!(
         "Total file size: `{}B`. Average size: `{}B`",
