@@ -25,8 +25,7 @@ pub struct Framework<U, E> {
     options: crate::FrameworkOptions<U, E>,
 
     /// Initialized during construction; so shouldn't be None at any observable point
-    shard_manager:
-        once_cell::sync::OnceCell<std::sync::Arc<tokio::sync::Mutex<serenity::ShardManager>>>,
+    shard_manager: once_cell::sync::OnceCell<std::sync::Arc<serenity::ShardManager>>,
     /// Filled with Some on construction. Taken out and executed on first Ready gateway event
     user_data_setup: std::sync::Mutex<
         Option<
@@ -101,7 +100,7 @@ impl<U, E> Framework<U, E> {
 
     /// Returns the serenity's client shard manager.
     // Returns a reference so you can plug it into [`FrameworkContext`]
-    pub fn shard_manager(&self) -> &std::sync::Arc<tokio::sync::Mutex<serenity::ShardManager>> {
+    pub fn shard_manager(&self) -> &std::sync::Arc<serenity::ShardManager> {
         self.shard_manager
             .get()
             .expect("not None at any observable point")
@@ -138,7 +137,7 @@ impl<U: Send + Sync, E: Send> serenity::Framework for Framework<U, E> {
 
         message_content_intent_sanity_check(
             &self.options.prefix_options,
-            client.shard_manager.lock().await.intents(),
+            client.shard_manager.intents(),
         );
 
         let _ = self.shard_manager.set(client.shard_manager.clone());

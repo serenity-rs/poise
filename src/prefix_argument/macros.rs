@@ -238,7 +238,10 @@ macro_rules! parse_prefix_args {
 
 #[cfg(test)]
 mod test {
+    use serenity::all::{ShardId, ShardInfo};
+    use serenity::gateway::Shard;
     use std::sync::Arc;
+    use tokio::sync::Mutex;
 
     use super::*;
 
@@ -259,6 +262,18 @@ mod test {
             raw_event_handlers: vec![],
             framework: None,
             manager,
+            shard: Shard::new(
+                Arc::new(Mutex::new("wss://gateway.discord.gg".to_string())),
+                "",
+                ShardInfo {
+                    id: ShardId(0),
+                    total: 1,
+                },
+                Default::default(),
+                None,
+            )
+            .await
+            .expect("failed to create shard"),
             #[cfg(feature = "cache")]
             cache: Default::default(),
             http: Arc::new(::serenity::http::Http::new("example")),
@@ -269,7 +284,7 @@ mod test {
         let ctx = serenity::Context {
             data: Arc::new(tokio::sync::RwLock::new(::serenity::prelude::TypeMap::new())),
             shard: ::serenity::gateway::ShardMessenger::new(&shard_runner),
-            shard_id: Default::default(),
+            shard_id: ShardId(0),
             http: Arc::new(::serenity::http::Http::new("example")),
             #[cfg(feature = "cache")]
             cache: Default::default(),

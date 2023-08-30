@@ -496,14 +496,13 @@ async fn latency(ctx: Context<'_>) -> Result<(), Error> {
     // retrieving information about shards.
     let shard_manager = ctx.framework().shard_manager();
 
-    let manager = shard_manager.lock().await;
-    let runners = manager.runners.lock().await;
+    let runners = shard_manager.runners.lock().await;
 
     // Shards are backed by a "shard runner" responsible for processing events
     // over the shard, so we'll get the information about the shard runner for
     // the shard this command was sent over.
     let runner = runners
-        .get(&serenity::ShardId(ctx.discord().shard_id))
+        .get(&ctx.discord().shard_id)
         .ok_or("No shard found")?;
 
     ctx.say(format!("The shard latency is {:?}", runner.latency))
@@ -616,7 +615,7 @@ async fn am_i_admin(ctx: Context<'_>) -> Result<(), Error> {
 )]
 async fn slow_mode(
     ctx: Context<'_>,
-    #[description = "Minimum time between sending messages per user"] rate_limit: Option<u64>,
+    #[description = "Minimum time between sending messages per user"] rate_limit: Option<u16>,
 ) -> Result<(), Error> {
     let say_content = if let Some(rate_limit) = rate_limit {
         if let Err(why) = ctx

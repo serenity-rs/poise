@@ -15,8 +15,8 @@ struct StructAttributes {
 struct FieldAttributes {
     name: Option<String>,
     placeholder: Option<String>,
-    min_length: Option<u64>,
-    max_length: Option<u64>,
+    min_length: Option<u16>,
+    max_length: Option<u16>,
     paragraph: Option<()>,
 }
 
