@@ -257,6 +257,7 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
         .identifying_name
         .clone()
         .unwrap_or_else(|| inv.function.sig.ident.to_string());
+    let source_code_name = inv.function.sig.ident.to_string();
     let command_name = &inv.command_name;
     let context_menu_name = wrap_option(inv.args.context_menu_command.as_ref());
 
@@ -337,6 +338,7 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
                 name_localizations: #name_localizations,
                 qualified_name: String::from(#command_name), // properly filled in later by Framework
                 identifying_name: String::from(#identifying_name),
+                source_code_name: String::from(#source_code_name),
                 category: #category,
                 description: #description,
                 description_localizations: #description_localizations,

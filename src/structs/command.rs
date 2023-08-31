@@ -45,6 +45,8 @@ pub struct Command<U, E> {
     /// Can be configured via the [`crate::command`] macro (though it's probably not needed for most
     /// bots). If not explicitly configured, it falls back to the command function name.
     pub identifying_name: String,
+    /// The name of the `#[poise::command]`-annotated function
+    pub source_code_name: String,
     /// Identifier for the category that this command will be displayed in for help commands.
     pub category: Option<&'static str>,
     /// Whether to hide this command in help menus.
