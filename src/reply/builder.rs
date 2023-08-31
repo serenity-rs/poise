@@ -168,7 +168,7 @@ impl CreateReply {
         let crate::CreateReply {
             content,
             embeds,
-            attachments: _, // no support for attachment edits in serenity yet
+            attachments,
             components,
             ephemeral: _, // can't edit ephemerality in retrospect
             allowed_mentions,
@@ -184,6 +184,9 @@ impl CreateReply {
         }
         if let Some(allowed_mentions) = allowed_mentions {
             f = f.allowed_mentions(allowed_mentions);
+        }
+        for attachment in attachments {
+            f = f.new_attachment(attachment);
         }
 
         f
