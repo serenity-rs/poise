@@ -27,7 +27,10 @@ fn quote_parameter(p: &super::CommandParameter) -> Result<proc_macro2::TokenStre
             if p.type_ != syn::parse_quote! { bool } {
                 return Err(syn::Error::new(p.type_.span(), "Must use bool for flags").into());
             }
-            let literal = proc_macro2::Literal::string(&p.name.to_string());
+            // TODO: doesn't work for r#keywords :( I cant be arsed to fix this rn because basically
+            // nobody uses this feature anyways and I'd have to go change the macro_rules macro to
+            // not accept non-quoted idents anymore
+            let literal = proc_macro2::Literal::string(&p.ident.to_string());
             quote::quote! { #[flag] (#literal) }
         }
         Modifier::Lazy => quote::quote! { #[lazy] (#type_) },
@@ -37,7 +40,7 @@ fn quote_parameter(p: &super::CommandParameter) -> Result<proc_macro2::TokenStre
 }
 
 pub fn generate_prefix_action(inv: &Invocation) -> Result<proc_macro2::TokenStream, syn::Error> {
-    let param_names = inv.parameters.iter().map(|p| &p.name).collect::<Vec<_>>();
+    let param_idents = inv.parameters.iter().map(|p| &p.ident).collect::<Vec<_>>();
     let param_specs = inv
         .parameters
         .iter()
@@ -50,7 +53,7 @@ pub fn generate_prefix_action(inv: &Invocation) -> Result<proc_macro2::TokenStre
 
     Ok(quote::quote! {
         |ctx| Box::pin(async move {
-            let ( #( #param_names, )* .. ) = ::poise::parse_prefix_args!(
+            let ( #( #param_idents, )* .. ) = ::poise::parse_prefix_args!(
                 ctx.serenity_context, ctx.msg, ctx.args, 0 =>
                 #( #param_specs, )*
                 #wildcard_arg
@@ -64,7 +67,7 @@ pub fn generate_prefix_action(inv: &Invocation) -> Result<proc_macro2::TokenStre
                 ctx.command.cooldowns.lock().unwrap().start_cooldown(ctx.into());
             }
 
-            inner(ctx.into(), #( #param_names, )* )
+            inner(ctx.into(), #( #param_idents, )* )
                 .await
                 .map_err(|error| poise::FrameworkError::Command {
                     error,

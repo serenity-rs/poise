@@ -24,10 +24,7 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
             required = false;
         }
 
-        let param_name = match &param.args.rename {
-            Some(rename) => rename.clone(),
-            None => param.name.to_string(),
-        };
+        let param_name = &param.name;
         let name_locales = param.args.name_localized.iter().map(|x| &x.0);
         let name_localized_values = param.args.name_localized.iter().map(|x| &x.1);
         let description_locales = param.args.description_localized.iter().map(|x| &x.0);
@@ -146,15 +143,8 @@ pub fn generate_slash_action(inv: &Invocation) -> Result<proc_macro2::TokenStrea
         }
     }
 
-    let param_identifiers = inv.parameters.iter().map(|p| &p.name).collect::<Vec<_>>();
-    let param_names = inv
-        .parameters
-        .iter()
-        .map(|p| match &p.args.rename {
-            Some(rename) => syn::Ident::new(rename, p.name.span()),
-            None => p.name.clone(),
-        })
-        .collect::<Vec<_>>();
+    let param_identifiers = inv.parameters.iter().map(|p| &p.ident).collect::<Vec<_>>();
+    let param_names = inv.parameters.iter().map(|p| &p.name).collect::<Vec<_>>();
 
     let param_types = inv
         .parameters

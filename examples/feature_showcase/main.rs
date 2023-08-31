@@ -64,7 +64,7 @@ async fn main() {
                 parameter_attributes::say(),
                 parameter_attributes::punish(),
                 parameter_attributes::stringlen(),
-                // raw_identifiers::r#move(), // Currently doesn't work (issue #170)
+                raw_identifiers::r#move(),
                 response_with_reply::reply(),
                 subcommands::parent(),
                 subcommand_required::parent_subcommand_required(),

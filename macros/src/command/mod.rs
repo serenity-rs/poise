@@ -79,7 +79,8 @@ struct ParamArgs {
 
 /// Part of the Invocation struct. Represents a single parameter of a Discord command.
 struct CommandParameter {
-    name: syn::Ident,
+    ident: syn::Ident,
+    name: String,
     type_: syn::Type,
     args: ParamArgs,
     span: proc_macro2::Span,
@@ -87,7 +88,6 @@ struct CommandParameter {
 
 /// Passed to prefix and slash command spec generators; contains info to be included in command spec
 pub struct Invocation {
-    command_name: String,
     parameters: Vec<CommandParameter>,
     description: Option<String>,
     help_text: Option<String>,
@@ -168,7 +168,7 @@ pub fn command(
                 return Err(syn::Error::new(r.span(), "self argument is invalid here").into());
             }
         };
-        let name = match &*pattern.pat {
+        let ident = match &*pattern.pat {
             syn::Pat::Ident(pat_ident) => &pat_ident.ident,
             x => {
                 return Err(syn::Error::new(x.span(), "must use an identifier pattern here").into())
@@ -183,7 +183,11 @@ pub fn command(
         let attrs = <ParamArgs as darling::FromMeta>::from_list(&attrs)?;
 
         parameters.push(CommandParameter {
-            name: name.clone(),
+            ident: ident.clone(),
+            name: attrs
+                .rename
+                .clone()
+                .unwrap_or_else(|| ident.to_string().trim_start_matches("r#").to_string()),
             type_: (*pattern.ty).clone(),
             args: attrs,
             span: command_param.span(),
@@ -209,10 +213,6 @@ pub fn command(
     let required_bot_permissions = permissions_to_tokens(&args.required_bot_permissions);
 
     let inv = Invocation {
-        command_name: args
-            .rename
-            .clone()
-            .unwrap_or_else(|| function.sig.ident.to_string()),
         parameters,
         description,
         help_text,
@@ -252,13 +252,23 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
         None => None,
     });
 
+    let function_name = inv
+        .function
+        .sig
+        .ident
+        .to_string()
+        .trim_start_matches("r#")
+        .to_string();
     let identifying_name = inv
         .args
         .identifying_name
         .clone()
-        .unwrap_or_else(|| inv.function.sig.ident.to_string());
-    let source_code_name = inv.function.sig.ident.to_string();
-    let command_name = &inv.command_name;
+        .unwrap_or_else(|| function_name.clone());
+    let command_name = &inv
+        .args
+        .rename
+        .clone()
+        .unwrap_or_else(|| function_name.clone());
     let context_menu_name = wrap_option(inv.args.context_menu_command.as_ref());
 
     let description = match &inv.description {
@@ -316,12 +326,13 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
     let description_localizations =
         crate::util::vec_tuple_2_to_hash_map(inv.args.description_localized);
 
-    let function_name = std::mem::replace(&mut inv.function.sig.ident, syn::parse_quote! { inner });
+    let function_ident =
+        std::mem::replace(&mut inv.function.sig.ident, syn::parse_quote! { inner });
     let function_visibility = &inv.function.vis;
     let function = &inv.function;
     Ok(quote::quote! {
         #[allow(clippy::str_to_string)]
-        #function_visibility fn #function_name() -> ::poise::Command<
+        #function_visibility fn #function_ident() -> ::poise::Command<
             <#ctx_type_with_static as poise::_GetGenerics>::U,
             <#ctx_type_with_static as poise::_GetGenerics>::E,
         > {
@@ -338,7 +349,7 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
                 name_localizations: #name_localizations,
                 qualified_name: String::from(#command_name), // properly filled in later by Framework
                 identifying_name: String::from(#identifying_name),
-                source_code_name: String::from(#source_code_name),
+                source_code_name: String::from(#function_name),
                 category: #category,
                 description: #description,
                 description_localizations: #description_localizations,

@@ -51,8 +51,8 @@ impl std::error::Error for SlashArgError {
 #[macro_export]
 macro_rules! _parse_slash {
     // Extract Option<T>
-    ($ctx:ident, $interaction:ident, $args:ident => $name:ident: Option<$type:ty $(,)*>) => {
-        if let Some(arg) = $args.iter().find(|arg| arg.name == stringify!($name)) {
+    ($ctx:ident, $interaction:ident, $args:ident => $name:literal: Option<$type:ty $(,)*>) => {
+        if let Some(arg) = $args.iter().find(|arg| arg.name == $name) {
             let arg = arg.value
             .as_ref()
             .ok_or($crate::SlashArgError::CommandStructureMismatch("expected argument value"))?;
@@ -65,7 +65,7 @@ macro_rules! _parse_slash {
 
     // Extract Vec<T> (delegating to Option<T> because slash commands don't support variadic
     // arguments right now)
-    ($ctx:ident, $interaction:ident, $args:ident => $name:ident: Vec<$type:ty $(,)*>) => {
+    ($ctx:ident, $interaction:ident, $args:ident => $name:literal: Vec<$type:ty $(,)*>) => {
         match $crate::_parse_slash!($ctx, $interaction, $args => $name: Option<$type>) {
             Some(value) => vec![value],
             None => vec![],
@@ -73,13 +73,13 @@ macro_rules! _parse_slash {
     };
 
     // Extract #[flag]
-    ($ctx:ident, $interaction:ident, $args:ident => $name:ident: FLAG) => {
+    ($ctx:ident, $interaction:ident, $args:ident => $name:literal: FLAG) => {
         $crate::_parse_slash!($ctx, $interaction, $args => $name: Option<bool>)
             .unwrap_or(false)
     };
 
     // Extract T
-    ($ctx:ident, $interaction:ident, $args:ident => $name:ident: $($type:tt)*) => {
+    ($ctx:ident, $interaction:ident, $args:ident => $name:literal: $($type:tt)*) => {
         $crate::_parse_slash!($ctx, $interaction, $args => $name: Option<$($type)*>)
             .ok_or($crate::SlashArgError::CommandStructureMismatch("a required argument is missing"))?
     };
@@ -101,7 +101,7 @@ let args: &[serenity::CommandDataOption] = todo!();
 
 let (arg1, arg2) = poise::parse_slash_args!(
     &ctx, interaction,
-    args => (arg1: String), (arg2: Option<u32>)
+    args => ("arg1": String), ("arg2": Option<u32>)
 ).await?;
 
 # Ok(()) }
@@ -110,7 +110,7 @@ let (arg1, arg2) = poise::parse_slash_args!(
 #[macro_export]
 macro_rules! parse_slash_args {
     ($ctx:expr, $interaction:expr, $args:expr => $(
-        ( $name:ident: $($type:tt)* )
+        ( $name:literal: $($type:tt)* )
     ),* $(,)? ) => {
         async /* not move! */ {
             use $crate::SlashArgumentHack;
