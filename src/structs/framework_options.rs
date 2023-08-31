@@ -107,7 +107,10 @@ where
             allowed_mentions: Some({
                 let mut f = serenity::CreateAllowedMentions::default();
                 // Only support direct user pings by default
-                f.empty_parse().parse(serenity::ParseValue::Users);
+                f.empty_parse()
+                    .parse(serenity::ParseValue::Users)
+                    // https://github.com/serenity-rs/poise/issues/176
+                    .replied_user(true);
                 f
             }),
             reply_callback: None,
