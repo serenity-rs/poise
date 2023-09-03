@@ -10,7 +10,7 @@ type Context<'a> = poise::Context<'a, Data, Error>;
 
 // Custom user data passed to all command functions
 pub struct Data {
-    pongs: AtomicU32,
+    poise_mentions: AtomicU32,
 }
 
 #[tokio::main]
@@ -32,7 +32,7 @@ async fn main() {
         .setup(move |_ctx, _ready, _framework| {
             Box::pin(async move {
                 Ok(Data {
-                    pongs: AtomicU32::new(0),
+                    poise_mentions: AtomicU32::new(0),
                 })
             })
         })
@@ -56,11 +56,11 @@ async fn event_handler(
             println!("Logged in as {}", data_about_bot.user.name);
         }
         Event::Message { new_message } => {
-            if new_message.content == "!ping" {
-                let pongs = data.pongs.load(Ordering::SeqCst) + 1;
-                data.pongs.store(pongs, Ordering::SeqCst);
+            if new_message.content.to_lowercase().contains("poise") {
+                let mentions = data.poise_mentions.load(Ordering::SeqCst) + 1;
+                data.poise_mentions.store(mentions, Ordering::SeqCst);
                 new_message
-                    .reply(ctx, format!("Pong nr. {}", pongs))
+                    .reply(ctx, format!("Poise has been mentioned {} times", mentions))
                     .await?;
             }
         }
