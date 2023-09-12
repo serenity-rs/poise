@@ -38,8 +38,8 @@ pub async fn paginate<U, E>(
 ) -> Result<(), serenity::Error> {
     // Define some unique identifiers for the navigation buttons
     let ctx_id = ctx.id();
-    let prev_button_id = format!("{}prev", ctx.id());
-    let next_button_id = format!("{}next", ctx.id());
+    let prev_button_id = format!("{}prev", ctx_id);
+    let next_button_id = format!("{}next", ctx_id);
 
     // Send the embed with the first page as content
     let mut current_page = 0;
