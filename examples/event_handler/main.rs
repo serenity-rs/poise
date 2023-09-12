@@ -6,6 +6,7 @@ use poise::Event;
 
 // Types used by all command functions
 type Error = Box<dyn std::error::Error + Send + Sync>;
+#[allow(unused)]
 type Context<'a> = poise::Context<'a, Data, Error>;
 
 // Custom user data passed to all command functions

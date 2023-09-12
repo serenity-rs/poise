@@ -453,13 +453,26 @@ pub mod serenity_prelude {
                     application_command::*, autocomplete::*, message_component::*, modal::*, *,
                 },
             },
-            event::*,
+            event::{
+                EventType, /* overwrite collision with model::guild::automod::EventType */
+                *,
+            },
             guild::automod::*,
-            prelude::*,
+            prelude::{
+                error, /* overwrite collision with http::error (there's no reason why model::error gets the "error" name and http::error doesn't, but I couldn't find a way to rename both modules, or disable both modules, so I _had_ to keep the confusing "error" name for the module) */
+                event, /* overwrite collision with client::bridge::gateway::event */
+                Action, /* overwrite collision with model::guild::automod::Action */
+                *,
+            },
         },
         prelude::*,
         utils::*,
-        *,
+        {
+            client,  /* overwrite collision with http::client */
+            gateway, /* overwrite collision with client::bridge::gateway */
+            prelude, /* overwrite collision with prelude::prelude (?) */
+            *,
+        },
     };
 }
 use serenity_prelude as serenity; // private alias for crate root docs intradoc-links
