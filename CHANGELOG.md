@@ -1,3 +1,22 @@
+# 0.5.6
+
+New features:
+- Added `cache()`, `http()`, `reply()`, `ping()` methods to `Context`, `ApplicationContext`, `PrefixContext`
+- Added `subcommand_required` command attribute
+  - When a command with subcommand_required is invoked without a subcommand (only possible as a text/prefix command), an error is thrown
+- Added `execute_modal_on_component_interaction` utility function
+  - Previously, poise only features a utility function for opening modals from command invocations
+- Added `remaining_cooldown_2` as the successor to `remaining_cooldown` which allows changing the cooldown config on a per-invocation basis instead of per-command
+  - In the next breaking release, `remaining_cooldown` will be replaced with `remaining_cooldown_2`
+- Added `Command.source_code_name`
+
+Behavior changes:
+- Reply messages (i.e. reference_message set to Some) now ping by default
+  - This matches the default from serenity and the default from the Discord client
+- Raw identifiers can now be used for command names and command parameter names
+
+Detailed changelog: https://github.com/kangalioo/poise/compare/v0.5.5...v0.5.6
+
 # 0.5.5
 
 New features:
