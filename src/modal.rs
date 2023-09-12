@@ -65,8 +65,7 @@ async fn execute_modal_generic<
     // Send acknowledgement so that the pop-up is closed
     response
         .create_interaction_response(ctx, |b| {
-            b.kind(serenity::InteractionResponseType::DeferredChannelMessageWithSource)
-                .interaction_response_data(|d| d.ephemeral(true))
+            b.kind(serenity::InteractionResponseType::DeferredUpdateMessage)
         })
         .await?;
 
