@@ -225,84 +225,65 @@ pub async fn servers<U, E>(ctx: crate::Context<'_, U, E>) -> Result<(), serenity
 
     let show_private_guilds = ctx.framework().options().owners.contains(&ctx.author().id);
 
-    /// Stores details of a guild for the purposes of listing it in the bot guild list
-    struct Guild {
-        /// Name of the guild
-        name: String,
-        /// Number of members in the guild
-        num_members: u64,
-        /// Whether the guild is public
-        is_public: bool,
-    }
-
-    let guild_ids = ctx.cache().guilds();
-    let mut num_unavailable_guilds = 0;
-    let mut guilds = guild_ids
-        .iter()
-        .map(|&guild_id| {
-            ctx.cache().guild_field(guild_id, |guild| Guild {
-                name: guild.name.clone(),
-                num_members: guild.member_count,
-                is_public: guild.features.iter().any(|x| x == "DISCOVERABLE"),
-            })
-        })
-        .filter_map(|guild| {
-            if guild.is_none() {
-                num_unavailable_guilds += 1;
+    // Aggregate all guilds and sort them by size
+    let mut hidden_guilds = 0;
+    let mut hidden_guilds_members = 0;
+    let mut shown_guilds = Vec::<(String, u64)>::new();
+    for guild_id in ctx.cache().guilds() {
+        match ctx.cache().guild_field(guild_id, |g| {
+            (
+                g.name.clone(),
+                g.member_count,
+                g.features.iter().any(|x| x == "DISCOVERABLE"),
+            )
+        }) {
+            Some((name, member_count, is_public)) => {
+                if !is_public && !show_private_guilds {
+                    hidden_guilds += 1; // private guild whose name and size shouldn't be exposed
+                } else {
+                    shown_guilds.push((name, member_count))
+                }
             }
-            guild
-        })
-        .collect::<Vec<_>>();
-    guilds.sort_by_key(|guild| u64::MAX - guild.num_members); // descending sort
-
-    let mut num_private_guilds = 0;
-    let mut num_private_guild_members = 0;
-    let mut response_header = format!("I am currently in {} servers!\n", guild_ids.len());
-    let mut response_servers = String::with_capacity(guild_ids.len().min(50) * 32);
-    let response_limit = 2000;
-
-    let mut single_server = String::with_capacity(32);
-
-    for guild in guilds {
-        if guild.is_public || show_private_guilds {
-            single_server.clear();
-            let _ = writeln!(
-                single_server,
-                "- **{}** ({} members)",
-                guild.name, guild.num_members
-            );
-            if response_servers.len() + single_server.len() < response_limit {
-                response_servers.push_str(&single_server);
-            }
-        } else {
-            num_private_guilds += 1;
-            num_private_guild_members += guild.num_members;
+            None => hidden_guilds += 1, // uncached guild
         }
     }
-    if num_private_guilds > 0 {
-        let _ = writeln!(
-            response_header,
-            "- [{} private servers with {} members total]",
-            num_private_guilds, num_private_guild_members
-        );
-    }
-    if num_unavailable_guilds > 0 {
-        let _ = writeln!(
-            response_header,
-            "- [{} unavailable servers (cache is not ready yet)]", //len = 46 + 3 +
-            num_unavailable_guilds
-        );
-    }
+    shown_guilds.sort_by_key(|(_, member)| u64::MAX - member); // sort largest guilds first
 
+    // Iterate guilds and build up the response message line by line
+    let mut response = format!(
+        "I am currently in {} servers!\n",
+        shown_guilds.len() + hidden_guilds
+    );
     if show_private_guilds {
-        response_header += "\n_Showing private guilds because you are a bot owner_\n";
-        // len = 54
+        response.insert_str(0, "_Showing private guilds because you are a bot owner_\n");
+    }
+    let mut guilds = shown_guilds.into_iter().peekable();
+    while let Some((name, member_count)) = guilds.peek() {
+        let line = format!("- **{}** ({} members)\n", name, member_count);
+
+        // Make sure we don't exceed a certain number of characters below the 2000 char limit so
+        // we have enough space for the remaining servers line
+        if response.len() + line.len() > 1900 {
+            for (_remaining_guild_name, members) in guilds {
+                hidden_guilds += 1;
+                hidden_guilds_members += members;
+            }
+            break;
+        }
+
+        response += &line;
+        guilds.next(); // advance peekable iterator
+    }
+    if hidden_guilds > 0 {
+        let _ = writeln!(
+            response,
+            "- {} remaining servers with {} members total",
+            hidden_guilds, hidden_guilds_members
+        );
     }
 
-    ctx.send(|b| b.content(response_header).ephemeral(show_private_guilds))
-        .await?;
-
-    ctx.send(|b| b.content(response_servers).ephemeral(show_private_guilds))
+    // If we show sensitive data (private guilds), it mustn't be made public, so it's ephemeral
+    ctx.send(|b| b.content(response).ephemeral(show_private_guilds))
         .await?;
 
     Ok(())
