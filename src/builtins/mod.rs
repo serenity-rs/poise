@@ -257,14 +257,23 @@ pub async fn servers<U, E>(ctx: crate::Context<'_, U, E>) -> Result<(), serenity
 
     let mut num_private_guilds = 0;
     let mut num_private_guild_members = 0;
-    let mut response = format!("I am currently in {} servers!\n", guild_ids.len());
+    let mut response_header = format!("I am currently in {} servers!\n", guild_ids.len());
+    let mut response_servers = String::with_capacity(guild_ids.len().min(50) * 32);
+    let response_limit = 2000;
+
+    let mut single_server = String::with_capacity(32);
+
     for guild in guilds {
         if guild.is_public || show_private_guilds {
+            single_server.clear();
             let _ = writeln!(
-                response,
+                single_server,
                 "- **{}** ({} members)",
                 guild.name, guild.num_members
             );
+            if response_servers.len() + single_server.len() < response_limit {
+                response_servers.push_str(&single_server);
+            }
         } else {
             num_private_guilds += 1;
             num_private_guild_members += guild.num_members;
@@ -272,24 +281,28 @@ pub async fn servers<U, E>(ctx: crate::Context<'_, U, E>) -> Result<(), serenity
     }
     if num_private_guilds > 0 {
         let _ = writeln!(
-            response,
+            response_header,
             "- [{} private servers with {} members total]",
             num_private_guilds, num_private_guild_members
         );
     }
     if num_unavailable_guilds > 0 {
         let _ = writeln!(
-            response,
-            "- [{} unavailable servers (cache is not ready yet)]",
+            response_header,
+            "- [{} unavailable servers (cache is not ready yet)]", //len = 46 + 3 +
             num_unavailable_guilds
         );
     }
 
     if show_private_guilds {
-        response += "\n_Showing private guilds because you are the bot owner_\n";
+        response_header += "\n_Showing private guilds because you are a bot owner_\n";
+        // len = 54
     }
 
-    ctx.send(|b| b.content(response).ephemeral(show_private_guilds))
+    ctx.send(|b| b.content(response_header).ephemeral(show_private_guilds))
+        .await?;
+
+    ctx.send(|b| b.content(response_servers).ephemeral(show_private_guilds))
         .await?;
 
     Ok(())
