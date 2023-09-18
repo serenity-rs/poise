@@ -263,7 +263,7 @@ pub async fn servers<U, E>(ctx: crate::Context<'_, U, E>) -> Result<(), serenity
 
         // Make sure we don't exceed a certain number of characters below the 2000 char limit so
         // we have enough space for the remaining servers line
-        if response.len() + line.len() > 1900 {
+        if response.len() + line.len() > 1940 {
             for (_remaining_guild_name, members) in guilds {
                 hidden_guilds += 1;
                 hidden_guilds_members += members;
@@ -280,6 +280,15 @@ pub async fn servers<U, E>(ctx: crate::Context<'_, U, E>) -> Result<(), serenity
             "- {} remaining servers with {} members total",
             hidden_guilds, hidden_guilds_members
         );
+    }
+
+    // Final safe guard (shouldn't be hit at the time of writing)
+    if response.len() > 2000 {
+        let mut truncate_at = 2000;
+        while !response.is_char_boundary(truncate_at) {
+            truncate_at -= 1;
+        }
+        response.truncate(truncate_at);
     }
 
     // If we show sensitive data (private guilds), it mustn't be made public, so it's ephemeral
