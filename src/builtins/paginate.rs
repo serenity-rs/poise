@@ -48,7 +48,7 @@ pub async fn paginate<U, E>(
             .embed(serenity::CreateEmbed::default())
             .components(vec![serenity::CreateActionRow::Buttons(vec![
                 serenity::CreateButton::new(&prev_button_id).emoji('◀'),
-                serenity::CreateButton::new(&prev_button_id).emoji('▶'),
+                serenity::CreateButton::new(&next_button_id).emoji('▶'),
             ])]),
     )
     .await?;
