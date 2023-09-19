@@ -33,16 +33,26 @@ impl<U, E> Clone for FrameworkContext<'_, U, E> {
 }
 impl<'a, U, E> FrameworkContext<'a, U, E> {
     /// Returns the stored framework options, including commands.
+    ///
+    /// This function exists for API compatiblity with [`crate::Framework`]. On this type, you can
+    /// also just access the public `options` field.
     pub fn options(&self) -> &'a crate::FrameworkOptions<U, E> {
         self.options
     }
 
     /// Returns the serenity's client shard manager.
+    ///
+    /// This function exists for API compatiblity with [`crate::Framework`]. On this type, you can
+    /// also just access the public `shard_manager` field.
     pub fn shard_manager(&self) -> std::sync::Arc<serenity::ShardManager> {
         self.shard_manager.clone()
     }
 
     /// Retrieves user data
+    ///
+    /// This function exists for API compatiblity with [`crate::Framework`]. On this type, you can
+    /// also just access the public `user_data` field.
+    #[allow(clippy::unused_async)] // for API compatibility with Framework
     pub async fn user_data(&self) -> &'a U {
         self.user_data
     }
@@ -85,8 +95,8 @@ pub async fn dispatch_event<U: Send + Sync, E>(
                     let invocation_data = tokio::sync::Mutex::new(Box::new(()) as _);
                     let mut parent_commands = Vec::new();
                     let trigger = match previously_tracked {
-                        true => crate::MessageDispatchTrigger::MessageEditFromInvalid,
-                        false => crate::MessageDispatchTrigger::MessageEdit,
+                        true => crate::MessageDispatchTrigger::MessageEdit,
+                        false => crate::MessageDispatchTrigger::MessageEditFromInvalid,
                     };
                     if let Err(error) = prefix::dispatch_message(
                         framework,
@@ -99,6 +109,23 @@ pub async fn dispatch_event<U: Send + Sync, E>(
                     .await
                     {
                         error.handle(framework.options).await;
+                    }
+                }
+            }
+        }
+        serenity::FullEvent::MessageDelete {
+            ctx,
+            deleted_message_id,
+            ..
+        } => {
+            if let Some(edit_tracker) = &framework.options.prefix_options.edit_tracker {
+                let bot_response = edit_tracker
+                    .write()
+                    .unwrap()
+                    .process_message_delete(*deleted_message_id);
+                if let Some(bot_response) = bot_response {
+                    if let Err(e) = bot_response.delete(ctx).await {
+                        log::warn!("failed to delete bot response: {}", e);
                     }
                 }
             }
@@ -149,9 +176,9 @@ pub async fn dispatch_event<U: Send + Sync, E>(
     // Do this after the framework's Ready handling, so that get_user_data() doesnt
     // potentially block infinitely
     if let Err(error) =
-        (framework.options.listener)(event, framework, framework.user_data().await).await
+        (framework.options.event_handler)(event, framework, framework.user_data).await
     {
-        let error = crate::FrameworkError::Listener {
+        let error = crate::FrameworkError::EventHandler {
             error,
             event,
             framework,

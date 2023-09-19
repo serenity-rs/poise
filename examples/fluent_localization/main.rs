@@ -24,6 +24,8 @@ pub async fn welcome(
     user: serenity::User,
     message: WelcomeChoice,
 ) -> Result<(), Error> {
+    use poise::ChoiceParameter as _;
+
     ctx.say(format!("<@{}> {}", user.id.0, tr!(ctx, message.name())))
         .await?;
     Ok(())

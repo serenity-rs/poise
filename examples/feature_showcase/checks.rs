@@ -39,14 +39,14 @@ pub async fn delete(
     ctx: Context<'_>,
     #[description = "Message to be deleted"] msg: serenity::Message,
 ) -> Result<(), Error> {
-    msg.delete(ctx.discord()).await?;
+    msg.delete(ctx).await?;
     Ok(())
 }
 
 /// Returns true if username is Ferris
 async fn is_ferris(ctx: Context<'_>) -> Result<bool, Error> {
     let nickname = match ctx.guild_id() {
-        Some(guild_id) => ctx.author().nick_in(ctx.discord(), guild_id).await,
+        Some(guild_id) => ctx.author().nick_in(ctx, guild_id).await,
         None => None,
     };
     let name = nickname.as_ref().unwrap_or(&ctx.author().name);
@@ -93,16 +93,39 @@ pub async fn ferrisparty(ctx: Context<'_>) -> Result<(), Error> {
     channel_cooldown = 2,
     member_cooldown = 3,
 )]
-pub async fn add(
+pub async fn cooldowns(ctx: Context<'_>) -> Result<(), Error> {
+    ctx.say("You successfully called the command").await?;
+    Ok(())
+}
+
+/// Overrides the user cooldown for a specific user
+async fn dynamic_cooldown_check(ctx: Context<'_>) -> Result<bool, Error> {
+    let mut cooldown_durations = ctx.command().cooldown_config.lock().unwrap();
+
+    // You can change the cooldown duration depending on the message author, for example
+    if ctx.author().id == 472029906943868929 {
+        cooldown_durations.user = Some(std::time::Duration::from_secs(10));
+    } else {
+        cooldown_durations.user = None
+    }
+
+    Ok(true)
+}
+
+#[poise::command(prefix_command, slash_command, check = "dynamic_cooldown_check")]
+pub async fn dynamic_cooldowns(ctx: Context<'_>) -> Result<(), Error> {
+    ctx.say("You successfully called the command").await?;
+    Ok(())
+}
+
+#[poise::command(prefix_command, slash_command)]
+pub async fn minmax(
     ctx: Context<'_>,
-    #[description = "First operand"] a: f64,
-    #[description = "Second operand"]
     #[min = -15]
     #[max = 28.765]
-    b: f32,
+    value: f32,
 ) -> Result<(), Error> {
-    ctx.say(format!("Result: {}", a + b as f64)).await?;
-
+    ctx.say(format!("You submitted number {}", value)).await?;
     Ok(())
 }
 

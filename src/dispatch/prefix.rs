@@ -14,9 +14,10 @@ async fn strip_prefix<'a, U, E>(
         guild_id: msg.guild_id,
         channel_id: msg.channel_id,
         author: &msg.author,
-        discord: ctx,
+        serenity_context: ctx,
         framework,
-        data: framework.user_data().await,
+        data: framework.user_data,
+        __non_exhaustive: (),
     };
 
     if let Some(dynamic_prefix) = framework.options.prefix_options.dynamic_prefix {
@@ -60,13 +61,14 @@ async fn strip_prefix<'a, U, E>(
                     None
                 }
             }
+            crate::Prefix::__NonExhaustive => unreachable!(),
         })
     {
         return Some((prefix, content));
     }
 
     if let Some(dynamic_prefix) = framework.options.prefix_options.stripped_dynamic_prefix {
-        match dynamic_prefix(ctx, msg, framework.user_data().await).await {
+        match dynamic_prefix(ctx, msg, framework.user_data).await {
             Ok(result) => {
                 if let Some((prefix, content)) = result {
                     return Some((prefix, content));
@@ -141,10 +143,7 @@ pub fn find_command<'a, U, E>(
     remaining_message: &'a str,
     case_insensitive: bool,
     parent_commands: &mut Vec<&'a crate::Command<U, E>>,
-) -> Option<(&'a crate::Command<U, E>, &'a str, &'a str)>
-where
-    U: Send + Sync,
-{
+) -> Option<(&'a crate::Command<U, E>, &'a str, &'a str)> {
     let string_equal = if case_insensitive {
         |a: &str, b: &str| a.eq_ignore_ascii_case(b)
     } else {
@@ -203,7 +202,12 @@ pub async fn dispatch_message<'a, U: Send + Sync, E>(
     )
     .await?
     {
-        run_invocation(ctx).await?;
+        crate::catch_unwind_maybe(run_invocation(ctx))
+            .await
+            .map_err(|payload| crate::FrameworkError::CommandPanic {
+                payload,
+                ctx: ctx.into(),
+            })??;
     }
     Ok(())
 }
@@ -251,6 +255,7 @@ pub async fn parse_invocation<'a, U: Send + Sync, E>(
         invocation_data,
         trigger,
     })?;
+
     let action = match command.prefix_action {
         Some(x) => x,
         // This command doesn't have a prefix implementation
@@ -258,13 +263,13 @@ pub async fn parse_invocation<'a, U: Send + Sync, E>(
     };
 
     Ok(Some(crate::PrefixContext {
-        discord: ctx,
+        serenity_context: ctx,
         msg,
         prefix,
         invoked_command_name,
         args,
         framework,
-        data: framework.user_data().await,
+        data: framework.user_data,
         parent_commands,
         command,
         invocation_data,
@@ -289,11 +294,19 @@ pub async fn run_invocation<U, E>(
         return Ok(());
     }
 
+    if ctx.command.subcommand_required {
+        // None of this command's subcommands were invoked, or else we'd have the subcommand in
+        // ctx.command and not the parent command
+        return Err(crate::FrameworkError::SubcommandRequired {
+            ctx: crate::Context::Prefix(ctx),
+        });
+    }
+
     super::common::check_permissions_and_cooldown(ctx.into()).await?;
 
     // Typing is broadcasted as long as this object is alive
     let _typing_broadcaster = if ctx.command.broadcast_typing {
-        Some(ctx.msg.channel_id.start_typing(&ctx.discord.http))
+        Some(ctx.msg.channel_id.start_typing(&ctx.serenity_context.http))
     } else {
         None
     };
@@ -305,7 +318,10 @@ pub async fn run_invocation<U, E>(
     // execute_untracked_edits situation and start an infinite loop
     // Reported by vicky5124 https://discord.com/channels/381880193251409931/381912587505500160/897981367604903966
     if let Some(edit_tracker) = &ctx.framework.options.prefix_options.edit_tracker {
-        edit_tracker.write().unwrap().track_command(ctx.msg);
+        edit_tracker
+            .write()
+            .unwrap()
+            .track_command(ctx.msg, ctx.command.track_deletion);
     }
 
     // Execute command

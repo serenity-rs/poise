@@ -26,6 +26,14 @@ pub fn wrap_option<T: quote::ToTokens>(literal: Option<T>) -> syn::Expr {
     }
 }
 
+/// Converts None => `None` and Some(x) => `Some(#x.to_string())`
+pub fn wrap_option_to_string<T: quote::ToTokens>(literal: Option<T>) -> syn::Expr {
+    match literal {
+        Some(literal) => syn::parse_quote! { Some(#literal.to_string()) },
+        None => syn::parse_quote! { None },
+    }
+}
+
 /// Syn Fold to make all lifetimes 'static. Used to access trait items of a type without having its
 /// concrete lifetime available
 pub struct AllLifetimesToStatic;
@@ -75,7 +83,7 @@ pub fn vec_tuple_2_to_hash_map(v: Vec<Tuple2<String>>) -> proc_macro2::TokenStre
     let (keys, values): (Vec<String>, Vec<String>) = v.into_iter().map(|x| (x.0, x.1)).unzip();
     quote::quote! {
         std::collections::HashMap::from([
-            #( (#keys.to_string(), #values.to_string()) )*
+            #( (#keys.to_string(), #values.to_string()) ),*
         ])
     }
 }

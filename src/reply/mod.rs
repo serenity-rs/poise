@@ -11,7 +11,7 @@ use std::borrow::Cow;
 
 /// Private enum so we can extend, split apart, or merge variants without breaking changes
 #[derive(Clone)]
-pub(super) enum ReplyHandleInner<'a> {
+enum ReplyHandleInner<'a> {
     /// A reply sent to a prefix command, i.e. a normal standalone message
     Prefix(Box<serenity::Message>),
     /// An application command response
@@ -36,7 +36,7 @@ pub(super) enum ReplyHandleInner<'a> {
 /// Discord sometimes returns the [`serenity::Message`] object directly, but sometimes you have to
 /// request it manually. This enum abstracts over the two cases
 #[derive(Clone)]
-pub struct ReplyHandle<'a>(pub(super) ReplyHandleInner<'a>);
+pub struct ReplyHandle<'a>(ReplyHandleInner<'a>);
 
 impl ReplyHandle<'_> {
     /// Retrieve the message object of the sent reply.
@@ -103,7 +103,7 @@ impl ReplyHandle<'_> {
         match &self.0 {
             ReplyHandleInner::Prefix(msg) => {
                 msg.clone()
-                    .edit(ctx.discord(), reply.to_prefix_edit())
+                    .edit(ctx.serenity_context(), reply.to_prefix_edit())
                     .await?;
             }
             ReplyHandleInner::Application {
@@ -132,19 +132,17 @@ impl ReplyHandle<'_> {
     /// Deletes this message
     pub async fn delete<U, E>(&self, ctx: crate::Context<'_, U, E>) -> Result<(), serenity::Error> {
         match &self.0 {
-            ReplyHandleInner::Prefix(msg) => msg.delete(ctx.discord()).await?,
+            ReplyHandleInner::Prefix(msg) => msg.delete(ctx.serenity_context()).await?,
             ReplyHandleInner::Application {
                 http: _,
                 interaction,
                 followup,
             } => match followup {
                 Some(followup) => {
-                    interaction
-                        .delete_followup(ctx.discord(), followup.id)
-                        .await?;
+                    interaction.delete_followup(ctx, followup.id).await?;
                 }
                 None => {
-                    interaction.delete_response(ctx.discord()).await?;
+                    interaction.delete_response(ctx).await?;
                 }
             },
             ReplyHandleInner::Autocomplete => panic!("delete is a no-op in autocomplete context"),

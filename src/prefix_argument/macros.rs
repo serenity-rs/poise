@@ -119,7 +119,7 @@ macro_rules! _parse_prefix {
     ) => {
         let input = $args.trim_start();
         if input.is_empty() {
-            $error = ($crate::TooFewArguments.into(), None);
+            $error = ($crate::TooFewArguments::default().into(), None);
         } else {
             match <$type as $crate::serenity_prelude::ArgumentConvert>::convert(
                 $ctx, $msg.guild_id, Some($msg.channel_id), input
@@ -223,7 +223,7 @@ macro_rules! parse_prefix_args {
             let attachment_index = $attachment_index;
 
             let mut error: (Box<dyn std::error::Error + Send + Sync>, Option<String>)
-                = (Box::new($crate::TooManyArguments) as _, None);
+                = (Box::new($crate::TooManyArguments { __non_exhaustive: () }) as _, None);
 
             $crate::_parse_prefix!(
                 ctx msg args attachment_index => [error]
@@ -254,6 +254,21 @@ mod test {
             .await
             .unwrap();
         let manager = client.shard_manager.clone();
+
+        let shard_id = serenity::ShardId(0);
+        let shard = serenity::Shard::new(
+            client.ws_url.clone(),
+            "example",
+            serenity::ShardInfo {
+                id: shard_id,
+                total: 1,
+            },
+            serenity::GatewayIntents::empty(),
+            None,
+        )
+        .await
+        .unwrap();
+
         drop(client);
 
         let shard_runner_opts = ::serenity::gateway::ShardRunnerOptions {
@@ -262,18 +277,7 @@ mod test {
             raw_event_handlers: vec![],
             framework: None,
             manager,
-            shard: Shard::new(
-                Arc::new(Mutex::new("wss://gateway.discord.gg".to_string())),
-                "",
-                ShardInfo {
-                    id: ShardId(0),
-                    total: 1,
-                },
-                Default::default(),
-                None,
-            )
-            .await
-            .expect("failed to create shard"),
+            shard,
             #[cfg(feature = "cache")]
             cache: Default::default(),
             http: Arc::new(::serenity::http::Http::new("example")),
@@ -284,7 +288,7 @@ mod test {
         let ctx = serenity::Context {
             data: Arc::new(tokio::sync::RwLock::new(::serenity::prelude::TypeMap::new())),
             shard: ::serenity::gateway::ShardMessenger::new(&shard_runner),
-            shard_id: ShardId(0),
+            shard_id,
             http: Arc::new(::serenity::http::Http::new("example")),
             #[cfg(feature = "cache")]
             cache: Default::default(),
@@ -323,7 +327,8 @@ mod test {
                 "yoo".into(),
                 crate::CodeBlock {
                     code: "that's cool".into(),
-                    language: None
+                    language: None,
+                    __non_exhaustive: (),
                 },
                 "!".into()
             ),

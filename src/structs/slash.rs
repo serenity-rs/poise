@@ -15,6 +15,7 @@ pub enum CommandOrAutocompleteInteraction<'a> {
     Command(&'a serenity::CommandInteraction),
     /// An autocomplete interaction
     Autocomplete(&'a serenity::CommandInteraction),
+    // Not non_exhaustive, this type is deliberately just two possible variants
 }
 
 impl<'a> CommandOrAutocompleteInteraction<'a> {
@@ -91,7 +92,7 @@ impl<'a> CommandOrAutocompleteInteraction<'a> {
 pub struct ApplicationContext<'a, U, E> {
     /// Serenity's context, like HTTP or cache
     #[derivative(Debug = "ignore")]
-    pub discord: &'a serenity::Context,
+    pub serenity_context: &'a serenity::Context,
     /// The interaction which triggered this command execution.
     pub interaction: CommandOrAutocompleteInteraction<'a>,
     /// Slash command arguments
@@ -148,7 +149,7 @@ impl<U, E> ApplicationContext<'_, U, E> {
         {
             interaction
                 .create_response(
-                    self.discord,
+                    self.serenity_context,
                     serenity::CreateInteractionResponse::Defer(
                         serenity::CreateInteractionResponseMessage::default().ephemeral(ephemeral),
                     ),
@@ -182,6 +183,8 @@ pub enum ContextMenuCommandAction<U, E> {
             serenity::Message,
         ) -> BoxFuture<'_, Result<(), crate::FrameworkError<'_, U, E>>>,
     ),
+    #[doc(hidden)]
+    __NonExhaustive,
 }
 impl<U, E> Copy for ContextMenuCommandAction<U, E> {}
 impl<U, E> Clone for ContextMenuCommandAction<U, E> {
@@ -197,6 +200,8 @@ pub struct CommandParameterChoice {
     pub name: String,
     /// Localized labels with locale string as the key (slash-only)
     pub localizations: std::collections::HashMap<String, String>,
+    #[doc(hidden)]
+    pub __non_exhaustive: (),
 }
 
 /// A single parameter of a [`crate::Command`]
@@ -204,7 +209,11 @@ pub struct CommandParameterChoice {
 #[derivative(Debug(bound = ""))]
 pub struct CommandParameter<U, E> {
     /// Name of this command parameter
-    pub name: String,
+    ///
+    /// This field is optional because text commands (prefix commands) don't need parameter names.
+    /// This field is None when a pattern like `_` or `CodeBlock { code, lang, .. }` is used in
+    /// place of a name in the function parameter.
+    pub name: Option<String>,
     /// Localized names with locale string as the key (slash-only)
     pub name_localizations: std::collections::HashMap<String, String>,
     /// Description of the command. Required for slash commands
@@ -243,6 +252,8 @@ pub struct CommandParameter<U, E> {
             Result<serenity::CreateAutocompleteResponse, crate::SlashArgError>,
         >,
     >,
+    #[doc(hidden)]
+    pub __non_exhaustive: (),
 }
 
 impl<U, E> CommandParameter<U, E> {
@@ -251,7 +262,7 @@ impl<U, E> CommandParameter<U, E> {
     pub fn create_as_slash_command_option(&self) -> Option<serenity::CreateCommandOption> {
         let mut b = serenity::CreateCommandOption::new(
             serenity::CommandOptionType::Unknown(0), // Will be overwritten by type_setter below
-            &self.name,
+            self.name.as_ref()?,
             self.description
                 .as_deref()
                 .unwrap_or("A slash command parameter"),

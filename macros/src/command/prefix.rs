@@ -27,7 +27,12 @@ fn quote_parameter(p: &super::CommandParameter) -> Result<proc_macro2::TokenStre
             if p.type_ != syn::parse_quote! { bool } {
                 return Err(syn::Error::new(p.type_.span(), "Must use bool for flags").into());
             }
-            let literal = proc_macro2::Literal::string(&p.name.to_string());
+            let literal = match &p.name {
+                Some(name) => proc_macro2::Literal::string(&name.to_string()),
+                _ => {
+                    return Err(syn::Error::new(p.span, "#[flag] requires a parameter name").into())
+                }
+            };
             quote::quote! { #[flag] (#literal) }
         }
         Modifier::Lazy => quote::quote! { #[lazy] (#type_) },
@@ -37,7 +42,19 @@ fn quote_parameter(p: &super::CommandParameter) -> Result<proc_macro2::TokenStre
 }
 
 pub fn generate_prefix_action(inv: &Invocation) -> Result<proc_macro2::TokenStream, syn::Error> {
-    let param_names = inv.parameters.iter().map(|p| &p.name).collect::<Vec<_>>();
+    let param_names: Vec<syn::Ident> = inv
+        .parameters
+        .iter()
+        .enumerate()
+        .map(|(i, p)| match &p.name {
+            Some(x) => x.clone(),
+            // Generate a synthetic variable name for command parameters without a name
+            None => syn::Ident::new(
+                &format!("non_ident_param_{}", i),
+                proc_macro2::Span::mixed_site(),
+            ),
+        })
+        .collect::<Vec<_>>();
     let param_specs = inv
         .parameters
         .iter()
@@ -50,27 +67,26 @@ pub fn generate_prefix_action(inv: &Invocation) -> Result<proc_macro2::TokenStre
 
     Ok(quote::quote! {
         |ctx| Box::pin(async move {
-            let ctx_discord = &ctx.discord;
             let ( #( #param_names, )* .. ) = ::poise::parse_prefix_args!(
-                ctx_discord, ctx.msg, ctx.args, 0 =>
+                ctx.serenity_context, ctx.msg, ctx.args, 0 =>
                 #( #param_specs, )*
                 #wildcard_arg
-            ).await.map_err(|(error, input)| poise::FrameworkError::ArgumentParse {
-                error,
+            ).await.map_err(|(error, input)| poise::FrameworkError::new_argument_parse(
+                ctx.into(),
                 input,
-                ctx: ctx.into(),
-            })?;
+                error,
+            ))?;
 
             if !ctx.framework.options.manual_cooldowns {
-                ctx.command.cooldowns.lock().unwrap().start_cooldown(ctx.into());
+                ctx.command.cooldowns.lock().unwrap().start_cooldown(ctx.cooldown_context());
             }
 
             inner(ctx.into(), #( #param_names, )* )
                 .await
-                .map_err(|error| poise::FrameworkError::Command {
+                .map_err(|error| poise::FrameworkError::new_command(
+                    ctx.into(),
                     error,
-                    ctx: ctx.into(),
-                })
+                ))
         })
     })
 }

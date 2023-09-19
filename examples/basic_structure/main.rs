@@ -1,7 +1,6 @@
 #![warn(clippy::str_to_string)]
 
 mod commands;
-use commands::*;
 
 use poise::serenity_prelude as serenity;
 use std::{collections::HashMap, env::var, sync::Mutex, time::Duration};
@@ -15,43 +14,13 @@ pub struct Data {
     votes: Mutex<HashMap<String, u32>>,
 }
 
-/// Show this help menu
-#[poise::command(prefix_command, track_edits, slash_command)]
-async fn help(
-    ctx: Context<'_>,
-    #[description = "Specific command to show help about"]
-    #[autocomplete = "poise::builtins::autocomplete_command"]
-    command: Option<String>,
-) -> Result<(), Error> {
-    poise::builtins::help(
-        ctx,
-        command.as_deref(),
-        poise::builtins::HelpConfiguration {
-            extra_text_at_bottom: "\
-This is an example bot made to showcase features of my custom Discord bot framework",
-            show_context_menu_commands: true,
-            ..Default::default()
-        },
-    )
-    .await?;
-    Ok(())
-}
-
-/// Registers or unregisters application commands in this guild or globally
-#[poise::command(prefix_command, hide_in_help)]
-async fn register(ctx: Context<'_>) -> Result<(), Error> {
-    poise::builtins::register_application_commands_buttons(ctx).await?;
-
-    Ok(())
-}
-
 async fn on_error(error: poise::FrameworkError<'_, Data, Error>) {
     // This is our custom error handler
     // They are many errors that can occur, so we only handle the ones we want to customize
     // and forward the rest to the default handler
     match error {
         poise::FrameworkError::Setup { error, .. } => panic!("Failed to start bot: {:?}", error),
-        poise::FrameworkError::Command { error, ctx } => {
+        poise::FrameworkError::Command { error, ctx, .. } => {
             println!("Error in command `{}`: {:?}", ctx.command().name, error,);
         }
         error => {
@@ -66,42 +35,10 @@ async fn on_error(error: poise::FrameworkError<'_, Data, Error>) {
 async fn main() {
     env_logger::init();
 
+    // FrameworkOptions contains all of poise's configuration option in one struct
+    // Every option can be omitted to use its default value
     let options = poise::FrameworkOptions {
-        commands: vec![
-            help(),
-            register(),
-            general::vote(),
-            general::getvotes(),
-            general::addmultiple(),
-            general::choice(),
-            general::boop(),
-            general::voiceinfo(),
-            general::test_reuse_response(),
-            general::oracle(),
-            general::code(),
-            general::say(),
-            general::file_details(),
-            general::totalsize(),
-            general::modal(),
-            general::punish(),
-            #[cfg(feature = "cache")]
-            general::servers(),
-            general::reply(),
-            context_menu::user_info(),
-            context_menu::echo(),
-            autocomplete::greet(),
-            checks::shutdown(),
-            checks::modonly(),
-            checks::delete(),
-            checks::ferrisparty(),
-            checks::add(),
-            checks::get_guild_name(),
-            checks::only_in_dms(),
-            checks::lennyface(),
-            checks::permissions_v2(),
-            subcommands::parent(),
-            localization::welcome(),
-        ],
+        commands: vec![commands::help(), commands::vote(), commands::getvotes()],
         prefix_options: poise::PrefixFrameworkOptions {
             prefix: Some("~".into()),
             edit_tracker: Some(poise::EditTracker::for_timespan(Duration::from_secs(3600))),
@@ -134,16 +71,24 @@ async fn main() {
                 Ok(true)
             })
         }),
-        listener: |event, _framework, _data| {
+        /// Enforce command checks even for owners (enforced by default)
+        /// Set to true to bypass checks, which is useful for testing
+        skip_checks_for_owners: false,
+        event_handler: |event, _framework, _data| {
             Box::pin(async move {
-                println!("Got an event in listener: {:?}", event.snake_case_name());
+                println!(
+                    "Got an event in event handler: {:?}",
+                    event.snake_case_name()
+                );
                 Ok(())
             })
         },
         ..Default::default()
     };
-    let framework = poise::Framework::new(options, move |_ctx, _ready, _framework| {
+    let framework = poise::Framework::new(options, move |ctx, ready, framework| {
         Box::pin(async move {
+            println!("Logged in as {}", ready.user.name);
+            poise::builtins::register_globally(ctx, &framework.options().commands).await?;
             Ok(Data {
                 votes: Mutex::new(HashMap::new()),
             })

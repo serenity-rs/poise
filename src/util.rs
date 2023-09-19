@@ -17,6 +17,7 @@ impl<K: Eq, V> OrderedMap<K, V> {
     }
 
     /// Finds a value in the map by the given key
+    #[allow(dead_code)]
     pub fn get(&self, k: &K) -> Option<&V> {
         self.0
             .iter()
@@ -25,6 +26,7 @@ impl<K: Eq, V> OrderedMap<K, V> {
     }
 
     /// Inserts a key value pair into the map
+    #[allow(dead_code)]
     pub fn insert(&mut self, k: K, v: V) {
         match self.0.iter_mut().find(|entry| entry.0 == k) {
             Some(entry) => entry.1 = v,

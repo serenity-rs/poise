@@ -1,9 +1,8 @@
 use poise::serenity_prelude as serenity;
 
+struct Data {} // User data, which is stored and accessible in all command invocations
 type Error = Box<dyn std::error::Error + Send + Sync>;
 type Context<'a> = poise::Context<'a, Data, Error>;
-// User data, which is stored and accessible in all command invocations
-struct Data {}
 
 /// Displays your or another user's account creation date
 #[poise::command(slash_command, prefix_command)]
@@ -17,22 +16,21 @@ async fn age(
     Ok(())
 }
 
-#[poise::command(prefix_command)]
-async fn register(ctx: Context<'_>) -> Result<(), Error> {
-    poise::builtins::register_application_commands_buttons(ctx).await?;
-    Ok(())
-}
-
 #[tokio::main]
 async fn main() {
     let token = std::env::var("DISCORD_TOKEN").expect("missing DISCORD_TOKEN");
     let intents = serenity::GatewayIntents::non_privileged();
     let framework = poise::Framework::new(
         poise::FrameworkOptions {
-            commands: vec![age(), register()],
+            commands: vec![age()],
             ..Default::default()
         },
-        move |_ctx, _ready, _framework| Box::pin(async move { Ok(Data {}) }),
+        |ctx, _ready, framework| {
+            Box::pin(async move {
+                poise::builtins::register_globally(ctx, &framework.options().commands).await?;
+                Ok(Data {})
+            })
+        },
     );
     let mut client = serenity::Client::builder(token, intents)
         .framework(framework)

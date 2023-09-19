@@ -30,6 +30,8 @@ pub struct Command<U, E> {
     // ============= Command type agnostic data
     /// Subcommands of this command, if any
     pub subcommands: Vec<Command<U, E>>,
+    /// Require a subcommand to be invoked
+    pub subcommand_required: bool,
     /// Main name of the command. Aliases (prefix-only) can be set in [`Self::aliases`].
     pub name: String,
     /// Localized names with locale string as the key (slash-only)
@@ -44,20 +46,21 @@ pub struct Command<U, E> {
     /// bots). If not explicitly configured, it falls back to the command function name.
     pub identifying_name: String,
     /// Identifier for the category that this command will be displayed in for help commands.
-    pub category: Option<&'static str>,
+    pub category: Option<String>,
     /// Whether to hide this command in help menus.
     pub hide_in_help: bool,
     /// Short description of the command. Displayed inline in help menus and similar.
-    // TODO: rename to description
     pub description: Option<String>,
     /// Localized descriptions with locale string as the key (slash-only)
     pub description_localizations: std::collections::HashMap<String, String>,
     /// Multiline description with detailed usage instructions. Displayed in the command specific
     /// help: `~help command_name`
-    // TODO: fix the inconsistency that this is String and everywhere else it's &'static str
-    pub help_text: Option<fn() -> String>,
+    pub help_text: Option<String>,
     /// Handles command cooldowns. Mainly for framework internal use
-    pub cooldowns: std::sync::Mutex<crate::Cooldowns>,
+    pub cooldowns: std::sync::Mutex<crate::CooldownTracker>,
+    /// The [`CooldownConfig`](crate::CooldownConfig) that will be used
+    /// with the [`CooldownTracker`](crate::CooldownTracker)
+    pub cooldown_config: std::sync::Mutex<crate::CooldownConfig>,
     /// After the first response, whether to post subsequent responses as edits to the initial
     /// message
     ///
@@ -105,15 +108,17 @@ pub struct Command<U, E> {
 
     // ============= Prefix-specific data
     /// Alternative triggers for the command (prefix-only)
-    pub aliases: &'static [&'static str],
+    pub aliases: Vec<String>,
     /// Whether to rerun the command if an existing invocation message is edited (prefix-only)
     pub invoke_on_edit: bool,
+    /// Whether to delete the bot response if an existing invocation message is deleted (prefix-only)
+    pub track_deletion: bool,
     /// Whether to broadcast a typing indicator while executing this commmand (prefix-only)
     pub broadcast_typing: bool,
 
     // ============= Application-specific data
     /// Context menu specific name for this command, displayed in Discord's context menu
-    pub context_menu_name: Option<&'static str>,
+    pub context_menu_name: Option<String>,
     /// Whether responses to this command should be ephemeral by default (application-only)
     pub ephemeral: bool,
 
@@ -221,10 +226,11 @@ impl<U, E> Command<U, E> {
         let context_menu_action = self.context_menu_action?;
 
         // TODO: localization?
-        let name = self.context_menu_name.unwrap_or(&self.name);
+        let name = self.context_menu_name.as_deref().unwrap_or(&self.name);
         let kind = match context_menu_action {
             crate::ContextMenuCommandAction::User(_) => serenity::CommandType::User,
             crate::ContextMenuCommandAction::Message(_) => serenity::CommandType::Message,
+            crate::ContextMenuCommandAction::__NonExhaustive => unreachable!(),
         };
         Some(
             serenity::CreateCommand::new(name)
@@ -235,7 +241,7 @@ impl<U, E> Command<U, E> {
 
     /// **Deprecated**
     #[deprecated = "Please use `poise::Command { category: \"...\", ..command() }` instead"]
-    pub fn category(mut self, category: &'static str) -> Self {
+    pub fn category(mut self, category: String) -> Self {
         self.category = Some(category);
         self
     }

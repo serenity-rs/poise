@@ -36,15 +36,15 @@ async fn autocomplete_number(
     _partial: &str,
 ) -> impl Iterator<Item = poise::AutocompleteChoice<u32>> {
     // Dummy choices
-    [1_u32, 2, 3, 4, 5]
-        .iter()
-        .map(|&n| poise::AutocompleteChoice {
-            name: format!(
+    [1_u32, 2, 3, 4, 5].iter().map(|&n| {
+        poise::AutocompleteChoice::new_with_value(
+            format!(
                 "{} (why did discord even give autocomplete choices separate labels)",
                 n
             ),
-            value: n,
-        })
+            n,
+        )
+    })
 }
 
 /// Greet a user. Showcasing autocomplete!

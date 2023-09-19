@@ -67,7 +67,8 @@ where
         msg: &serenity::Message,
     ) -> Result<(&'a str, usize, T), (Box<dyn std::error::Error + Send + Sync>, Option<String>)>
     {
-        let (args, string) = pop_string(args).map_err(|_| (TooFewArguments.into(), None))?;
+        let (args, string) =
+            pop_string(args).map_err(|_| (TooFewArguments::default().into(), None))?;
         let object = T::convert(ctx, msg.guild_id, Some(msg.channel_id), &string)
             .await
             .map_err(|e| (e.into(), Some(string)))?;
@@ -100,12 +101,13 @@ impl<'a> PopArgumentHack<'a, bool> for &PhantomData<bool> {
         msg: &serenity::Message,
     ) -> Result<(&'a str, usize, bool), (Box<dyn std::error::Error + Send + Sync>, Option<String>)>
     {
-        let (args, string) = pop_string(args).map_err(|_| (TooFewArguments.into(), None))?;
+        let (args, string) =
+            pop_string(args).map_err(|_| (TooFewArguments::default().into(), None))?;
 
         let value = match string.to_ascii_lowercase().trim() {
             "yes" | "y" | "true" | "t" | "1" | "enable" | "on" => true,
             "no" | "n" | "false" | "f" | "0" | "disable" | "off" => false,
-            _ => return Err((InvalidBool.into(), Some(string))),
+            _ => return Err((InvalidBool::default().into(), Some(string))),
         };
 
         Ok((args.trim_start(), attachment_index, value))
@@ -127,7 +129,7 @@ impl<'a> PopArgumentHack<'a, serenity::Attachment> for &PhantomData<serenity::At
         let attachment = msg
             .attachments
             .get(attachment_index)
-            .ok_or_else(|| (MissingAttachment.into(), None))?
+            .ok_or_else(|| (MissingAttachment::default().into(), None))?
             .clone(); // `.clone()` is more clear than `.to_owned()` and is the same.
 
         Ok((args, attachment_index + 1, attachment))

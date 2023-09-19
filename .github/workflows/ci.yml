@@ -39,7 +39,7 @@ jobs:
           - name: no features
             # don't test examples because they need collector feature
             command: cargo test --no-default-features --features serenity/rustls_backend --lib --tests
-          
+
           - name: all features + simd_json
             command: cargo test --all-features --features serenity/simd_json --lib --tests --examples
             rustflags: -C target-cpu=haswell # needed for simd_json
@@ -103,16 +103,16 @@ jobs:
           RUSTFLAGS: -C target-cpu=haswell # for simd-json
           RUSTDOCFLAGS: --cfg doc_nightly -D warnings
       
-      # If on develop branch (as opposed to PR or whatever), publish docs to github pages
+      # If on current/next branch (as opposed to PR or whatever), publish docs to github pages
       - name: Move files
-        if: github.ref == 'refs/heads/develop'
+        if: github.ref == 'refs/heads/current' || github.ref == 'refs/heads/next'
         shell: bash
         run: |
           DIR=${GITHUB_REF#refs/heads/}
           mkdir -p ./docs/$DIR
           mv ./target/doc/* ./docs/$DIR/
       - name: Deploy docs
-        if: github.ref == 'refs/heads/develop'
+        if: github.ref == 'refs/heads/current' || github.ref == 'refs/heads/next'
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
