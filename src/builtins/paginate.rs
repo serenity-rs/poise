@@ -45,7 +45,7 @@ pub async fn paginate<U, E>(
     let mut current_page = 0;
     ctx.send(
         crate::CreateReply::default()
-            .embed(serenity::CreateEmbed::default())
+            .embed(serenity::CreateEmbed::default().description(pages[current_page]))
             .components(vec![serenity::CreateActionRow::Buttons(vec![
                 serenity::CreateButton::new(&prev_button_id).emoji('◀'),
                 serenity::CreateButton::new(&next_button_id).emoji('▶'),
