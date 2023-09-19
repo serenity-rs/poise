@@ -238,7 +238,10 @@ macro_rules! parse_prefix_args {
 
 #[cfg(test)]
 mod test {
+    use serenity::all::{ShardId, ShardInfo};
+    use serenity::gateway::Shard;
     use std::sync::Arc;
+    use tokio::sync::Mutex;
 
     use super::*;
 

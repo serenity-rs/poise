@@ -16,8 +16,7 @@ async fn ping(ctx: poise::Context<'_, (), Error>) -> Result<(), Error> {
 
 struct Handler {
     options: poise::FrameworkOptions<(), Error>,
-    shard_manager:
-        std::sync::Mutex<Option<std::sync::Arc<tokio::sync::Mutex<serenity::ShardManager>>>>,
+    shard_manager: std::sync::Mutex<Option<std::sync::Arc<serenity::ShardManager>>>,
 }
 #[serenity::async_trait]
 impl serenity::EventHandler for Handler {
