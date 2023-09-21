@@ -5,7 +5,7 @@
 /// This type can be returned by functions set via the `#[autocomplete = ]` attribute on slash
 /// command parameters.
 ///
-/// For more information, see the autocomplete.rs file in the `framework_usage` example
+/// For more information, see the autocomplete.rs file in the `feature_showcase` example
 pub struct AutocompleteChoice<T> {
     /// Name of the choice, displayed in the Discord UI
     pub name: String,

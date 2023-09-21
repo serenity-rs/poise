@@ -27,8 +27,8 @@ Poise is an opinionated Discord bot framework with a few distinctive features:
 To run commands, ping your bot and write the command name and arguments after. Run the register
 command to register slash commands, after which you can use those, too.
 
-See examples/framework_usage/ in the git repository for a full-featured example bot, showcasing most
-features of poise: `cargo run --example=framework_usage`
+See examples/feature_showcase/ in the git repository for a full-featured example bot, showcasing most
+features of poise: `cargo run --example=feature_showcase`
 
 # Introduction to serenity
 
@@ -166,7 +166,7 @@ Subcommands are stored in [`Command::subcommands`]. As with all [`Command`] fiel
 programmatically modify those any way you'd like. The [`command`] macro is just a convenience thing
 to set the fields for you.
 
-For another example of subcommands, see `examples/framework_usage/commands/subcommands.rs`.
+For another example of subcommands, see `examples/feature_showcase/subcommands.rs`.
 
 ### Big example to showcase many command features
 
