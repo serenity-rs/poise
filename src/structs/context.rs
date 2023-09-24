@@ -569,41 +569,48 @@ impl<'a, U, E> Context<'a, U, E> {
     }
 }
 
-// Forwards for serenity::Context's impls. With these, poise::Context can be passed in as-is to
-// serenity API functions.
-#[cfg(feature = "cache")]
-impl<U, E> AsRef<serenity::Cache> for Context<'_, U, E> {
-    fn as_ref(&self) -> &serenity::Cache {
-        &self.serenity_context().cache
-    }
-}
-impl<U, E> AsRef<serenity::Http> for Context<'_, U, E> {
-    fn as_ref(&self) -> &serenity::Http {
-        &self.serenity_context().http
-    }
-}
-impl<U, E> AsRef<serenity::ShardMessenger> for Context<'_, U, E> {
-    fn as_ref(&self) -> &serenity::ShardMessenger {
-        &self.serenity_context().shard
-    }
-}
-// Originally added as part of component interaction modals; not sure if this impl is really
-// required by anything else... It makes sense to have though imo
-impl<U, E> AsRef<serenity::Context> for Context<'_, U, E> {
-    fn as_ref(&self) -> &serenity::Context {
-        self.serenity_context()
-    }
-}
-impl<U: Sync, E> serenity::CacheHttp for Context<'_, U, E> {
-    fn http(&self) -> &serenity::Http {
-        &self.serenity_context().http
-    }
+/// Forwards for serenity::Context's impls. With these, poise's Context types can be passed in as-is
+/// to serenity API functions.
+macro_rules! context_trait_impls {
+    ($($type:tt)*) => {
+        #[cfg(feature = "cache")]
+        impl<U, E> AsRef<serenity::Cache> for $($type)*<'_, U, E> {
+            fn as_ref(&self) -> &serenity::Cache {
+                &self.serenity_context().cache
+            }
+        }
+        impl<U, E> AsRef<serenity::Http> for $($type)*<'_, U, E> {
+            fn as_ref(&self) -> &serenity::Http {
+                &self.serenity_context().http
+            }
+        }
+        impl<U, E> AsRef<serenity::ShardMessenger> for $($type)*<'_, U, E> {
+            fn as_ref(&self) -> &serenity::ShardMessenger {
+                &self.serenity_context().shard
+            }
+        }
+        // Originally added as part of component interaction modals; not sure if this impl is really
+        // required by anything else... It makes sense to have though imo
+        impl<U, E> AsRef<serenity::Context> for $($type)*<'_, U, E> {
+            fn as_ref(&self) -> &serenity::Context {
+                self.serenity_context()
+            }
+        }
+        impl<U: Sync, E> serenity::CacheHttp for $($type)*<'_, U, E> {
+            fn http(&self) -> &serenity::Http {
+                &self.serenity_context().http
+            }
 
-    #[cfg(feature = "cache")]
-    fn cache(&self) -> Option<&std::sync::Arc<serenity::Cache>> {
-        Some(&self.serenity_context().cache)
-    }
+            #[cfg(feature = "cache")]
+            fn cache(&self) -> Option<&std::sync::Arc<serenity::Cache>> {
+                Some(&self.serenity_context().cache)
+            }
+        }
+    };
 }
+context_trait_impls!(Context);
+context_trait_impls!(crate::ApplicationContext);
+context_trait_impls!(crate::PrefixContext);
 
 /// Trimmed down, more general version of [`Context`]
 pub struct PartialContext<'a, U, E> {
