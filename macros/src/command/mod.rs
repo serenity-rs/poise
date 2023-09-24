@@ -328,11 +328,12 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
 
     let function_ident =
         std::mem::replace(&mut inv.function.sig.ident, syn::parse_quote! { inner });
+    let function_generics = &inv.function.sig.generics;
     let function_visibility = &inv.function.vis;
     let function = &inv.function;
     Ok(quote::quote! {
         #[allow(clippy::str_to_string)]
-        #function_visibility fn #function_ident() -> ::poise::Command<
+        #function_visibility fn #function_ident#function_generics() -> ::poise::Command<
             <#ctx_type_with_static as poise::_GetGenerics>::U,
             <#ctx_type_with_static as poise::_GetGenerics>::E,
         > {
