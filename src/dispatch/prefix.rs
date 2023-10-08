@@ -91,7 +91,7 @@ async fn strip_prefix<'a, U, E>(
             msg.content
                 .strip_prefix("<@")?
                 .trim_start_matches('!')
-                .strip_prefix(&framework.bot_id.0.to_string())?
+                .strip_prefix(&framework.bot_id.to_string())?
                 .strip_prefix('>')
         })() {
             let mention_prefix = &msg.content[..(msg.content.len() - stripped_content.len())];
