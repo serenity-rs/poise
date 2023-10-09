@@ -26,7 +26,7 @@ pub async fn welcome(
 ) -> Result<(), Error> {
     use poise::ChoiceParameter as _;
 
-    ctx.say(format!("<@{}> {}", user.id.0, tr!(ctx, message.name())))
+    ctx.say(format!("<@{}> {}", user.id, tr!(ctx, message.name())))
         .await?;
     Ok(())
 }
