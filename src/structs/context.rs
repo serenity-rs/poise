@@ -218,10 +218,8 @@ context_methods! {
     #[cfg(feature = "cache")]
     await (guild_channel self)
     (pub async fn guild_channel(self) -> Option<serenity::GuildChannel>) {
-        if let Ok(channel) = self.channel_id().to_channel(self.serenity_context()).await {
-            if let serenity::Channel::Guild(guild_channel) = channel {
-                return Some(guild_channel);
-            }
+        if let Ok(serenity::Channel::Guild(guild_channel)) = self.channel_id().to_channel(self.serenity_context()).await {
+            return Some(guild_channel);
         }
         None
     }
