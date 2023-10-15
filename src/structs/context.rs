@@ -2,6 +2,8 @@
 
 use std::borrow::Cow;
 
+use ::serenity::model::prelude::GuildChannel;
+
 use crate::serenity_prelude as serenity;
 
 // needed for proc macro
@@ -212,6 +214,18 @@ context_methods! {
             Self::Application(ctx) => ctx.interaction.guild_id(),
             Self::Prefix(ctx) => ctx.msg.guild_id,
         }
+    }
+
+    /// Return the guild channel of this context, if we are inside a guild.
+    #[cfg(feature = "cache")]
+    await (guild_channel self)
+    (pub async fn guild_channel(self) -> Option<serenity::GuildChannel>) {
+        if let Ok(channel) = self.channel_id().to_channel(self.serenity_context()).await {
+            if let serenity::Channel::Guild(guild_channel) = channel {
+                return Some(guild_channel);
+            }
+        }
+        None
     }
 
     // Doesn't fit in with the rest of the functions here but it's convenient
