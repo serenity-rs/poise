@@ -2,8 +2,6 @@
 
 use std::borrow::Cow;
 
-use ::serenity::model::prelude::GuildChannel;
-
 use crate::serenity_prelude as serenity;
 
 // needed for proc macro
