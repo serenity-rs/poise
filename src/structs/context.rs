@@ -214,6 +214,16 @@ context_methods! {
         }
     }
 
+    /// Return the guild channel of this context, if we are inside a guild.
+    #[cfg(feature = "cache")]
+    await (guild_channel self)
+    (pub async fn guild_channel(self) -> Option<serenity::GuildChannel>) {
+        if let Ok(serenity::Channel::Guild(guild_channel)) = self.channel_id().to_channel(self.serenity_context()).await {
+            return Some(guild_channel);
+        }
+        None
+    }
+
     // Doesn't fit in with the rest of the functions here but it's convenient
     /// Return the guild of this context, if we are inside a guild.
     ///
