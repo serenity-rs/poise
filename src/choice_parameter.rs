@@ -30,7 +30,7 @@ impl<T: ChoiceParameter> crate::SlashArgument for T {
         value: &serenity::ResolvedValue<'_>,
     ) -> Result<Self, crate::SlashArgError> {
         #[allow(unused_imports)]
-        use ::serenity::json::prelude::*; // Required for simd-json :|
+        use ::serenity::json; // Required for simd-json :|
         use std::convert::TryInto as _;
 
         let choice_key = match *value {
