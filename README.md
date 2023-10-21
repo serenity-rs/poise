@@ -12,7 +12,12 @@ Poise is an opinionated Discord bot framework with a few distinctive features:
 - text commands: commands are agnostic over old text-based commands and slash commands
 - edit tracking: when user edits their message, automatically update bot response
 
-# See [API documentation](https://docs.rs/poise/) and [examples](examples)
+# How to use
+
+Most information is in the [API documentation](https://docs.rs/poise/). Also take a look at the
+[examples](examples), especially `feature_showcase`, to learn what poise can do.
+
+For further questions, don't hesitate to join the support server: https://discord.gg/serenity-rs.
 
 # Bots using poise
 
