@@ -144,6 +144,8 @@ pub struct PrefixFrameworkOptions<U, E> {
     pub execute_self_messages: bool,
     /// Whether to ignore messages from bots for command invoking. Default `true`
     pub ignore_bots: bool,
+    /// Whether to ignore commands contained within thread creation messages. Default `true`
+    pub ignore_thread_creation: bool,
     /// Whether command names should be compared case-insensitively.
     pub case_insensitive_commands: bool,
     /* // TODO: implement
@@ -173,6 +175,7 @@ impl<U, E> Default for PrefixFrameworkOptions<U, E> {
             ignore_edits_if_not_yet_responded: false,
             execute_self_messages: false,
             ignore_bots: true,
+            ignore_thread_creation: true,
             case_insensitive_commands: true,
             // help_when_mentioned: true,
             // help_commmand: None,

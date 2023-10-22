@@ -234,6 +234,13 @@ pub async fn parse_invocation<'a, U: Send + Sync, E>(
         return Ok(None);
     }
 
+    // Check if we can execute commands contained in thread creation messages
+    if msg.kind == serenity::channel::MessageType::ThreadCreated
+        && framework.options.prefix_options.ignore_thread_creation
+    {
+        return Ok(None);
+    }
+
     // Strip prefix, trim whitespace between prefix and rest, split rest into command name and args
     let (prefix, msg_content) = match strip_prefix(framework, ctx, msg).await {
         Some(x) => x,
