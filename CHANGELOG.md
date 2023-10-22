@@ -1,3 +1,20 @@
+# 0.5.7
+
+New features:
+- Added serenity trait impls for ApplicationContext and PrefixContext as well
+  - Previously, `AsRef<Cache>`, `AsRef<Http>`, `AsRef<ShardMessenger>`, `AsRef<Context>`, and `CacheHttp` were only implemented for `poise::Context`
+  - With these impls, poise's context types can be used as-is for the context parameter in serenity functions
+- Support generics in `#[poise::command]`-annotated functions
+- Added `Context.guild_channel()`
+
+Behavior changes:
+- Improved formatting of `builtins::servers` command
+  - More compact and respects the message character limit
+- Titles from thread creations are not interpreted as command invocations anymore
+  - To return to previous behavior, set `PrefixFrameworkOptions.ignore_thread_creation` to `false`
+
+Detailed changelog: https://github.com/kangalioo/poise/compare/v0.5.6...v0.5.7
+
 # 0.5.6
 
 New features:
