@@ -1,21 +1,5 @@
 Release guide:
-- Write changelog
-  - Add PR number in parantheses if change comes from PR
-  - Template:
-    ```
-    # 0.3.0
-
-    New features:
-    - ...
-
-    API updates:
-    - ...
-
-    Behavior changes:
-    - ...
-
-    Detailed changelog: https://github.com/serenity-rs/poise/compare/v0.2.2...v0.3.0
-    ```
+- Write changelog (see CHANGELOG.md for template)
 - Push version bump commit
   - Add changelog to CHANGELOG.md
   - Update /Cargo.toml version
