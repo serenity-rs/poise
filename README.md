@@ -14,11 +14,12 @@ Poise is an opinionated Discord bot framework with a few distinctive features:
 
 # How to use
 
-Most information is in the [API documentation](https://docs.rs/poise/). If you're using a
-development version, you probably want to look at the documentation for
+Most information is in the [API documentation](https://docs.rs/poise/). Also take a
+look at the [examples](examples), especially [`feature_showcase`](https://github.com/ev3nvy/poise/tree/current/examples/feature_showcase), to learn what poise can do.
+
+If you're using a development version from git directly, you probably want to look at the documentation for
 [`current`](https://serenity-rs.github.io/poise/current), [`next`](https://serenity-rs.github.io/poise/next)
-or [`serenity-next`](https://serenity-rs.github.io/poise/serenity-next) branch instead. Also take a
-look at the [examples](examples), especially `feature_showcase`, to learn what poise can do.
+or [`serenity-next`](https://serenity-rs.github.io/poise/serenity-next) branch instead.
 
 For further questions, don't hesitate to join the support server: https://discord.gg/serenity-rs.
 
