@@ -103,16 +103,15 @@ jobs:
           RUSTFLAGS: -C target-cpu=haswell # for simd-json
           RUSTDOCFLAGS: --cfg doc_nightly -D warnings
       
-      # If on current/next branch (as opposed to PR or whatever), publish docs to github pages
+      # If on current/next/serenity-next branch (as opposed to PR or whatever), publish docs to github pages
       - name: Move files
-        if: github.ref == 'refs/heads/current' || github.ref == 'refs/heads/next'
+        if: github.ref_name == 'current' || github.ref_name == 'next' || github.ref_name == 'serenity-next'
         shell: bash
         run: |
-          DIR=${GITHUB_REF#refs/heads/}
-          mkdir -p ./docs/$DIR
-          mv ./target/doc/* ./docs/$DIR/
+          mkdir -p ./docs/${{ github.ref_name }}
+          mv ./target/doc/* ./docs/${{ github.ref_name }}/
       - name: Deploy docs
-        if: github.ref == 'refs/heads/current' || github.ref == 'refs/heads/next'
+        if: github.ref_name == 'current' || github.ref_name == 'next' || github.ref_name == 'serenity-next'
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
