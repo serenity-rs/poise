@@ -52,6 +52,7 @@ pub fn generate_prefix_action(inv: &Invocation) -> Result<proc_macro2::TokenStre
     };
 
     Ok(quote::quote! {
+        #[allow(clippy::used_underscore_binding)]
         |ctx| Box::pin(async move {
             let ( #( #param_idents, )* .. ) = ::poise::parse_prefix_args!(
                 ctx.serenity_context, ctx.msg, ctx.args, 0 =>
