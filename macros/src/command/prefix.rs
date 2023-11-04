@@ -1,4 +1,5 @@
 use super::Invocation;
+use quote::format_ident;
 use syn::spanned::Spanned as _;
 
 fn quote_parameter(p: &super::CommandParameter) -> Result<proc_macro2::TokenStream, syn::Error> {
@@ -14,23 +15,20 @@ fn quote_parameter(p: &super::CommandParameter) -> Result<proc_macro2::TokenStre
         (false, true, false) => Modifier::Rest,
         (false, false, true) => Modifier::Flag,
         _ => {
-            return Err(syn::Error::new(
-                p.span,
-                "modifiers like #[lazy] or #[rest] currently cannot be used together",
-            )
-            .into())
+            let message = "modifiers like #[lazy] or #[rest] currently cannot be used together";
+            return Err(syn::Error::new(p.span, message));
         }
     };
     let type_ = &p.type_;
     Ok(match modifier {
         Modifier::Flag => {
             if p.type_ != syn::parse_quote! { bool } {
-                return Err(syn::Error::new(p.type_.span(), "Must use bool for flags").into());
+                return Err(syn::Error::new(p.type_.span(), "Must use bool for flags"));
             }
             // TODO: doesn't work for r#keywords :( I cant be arsed to fix this rn because basically
             // nobody uses this feature anyways and I'd have to go change the macro_rules macro to
             // not accept non-quoted idents anymore
-            let literal = proc_macro2::Literal::string(&p.ident.to_string());
+            let literal = proc_macro2::Literal::string(&p.name);
             quote::quote! { #[flag] (#literal) }
         }
         Modifier::Lazy => quote::quote! { #[lazy] (#type_) },
@@ -40,7 +38,9 @@ fn quote_parameter(p: &super::CommandParameter) -> Result<proc_macro2::TokenStre
 }
 
 pub fn generate_prefix_action(inv: &Invocation) -> Result<proc_macro2::TokenStream, syn::Error> {
-    let param_idents = inv.parameters.iter().map(|p| &p.ident).collect::<Vec<_>>();
+    let param_idents = (0..inv.parameters.len())
+        .map(|i| format_ident!("poise_param_{i}"))
+        .collect::<Vec<_>>();
     let param_specs = inv
         .parameters
         .iter()
@@ -52,7 +52,6 @@ pub fn generate_prefix_action(inv: &Invocation) -> Result<proc_macro2::TokenStre
     };
 
     Ok(quote::quote! {
-        #[allow(clippy::used_underscore_binding)]
         |ctx| Box::pin(async move {
             let ( #( #param_idents, )* .. ) = ::poise::parse_prefix_args!(
                 ctx.serenity_context, ctx.msg, ctx.args, 0 =>
