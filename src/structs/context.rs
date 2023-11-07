@@ -393,7 +393,7 @@ context_methods! {
                 string += &ctx.command.name;
                 for arg in ctx.args {
                     #[allow(unused_imports)] // required for simd-json
-                    use ::serenity::json::prelude::*;
+                    use ::serenity::json::*;
                     use std::fmt::Write as _;
 
                     string += " ";
