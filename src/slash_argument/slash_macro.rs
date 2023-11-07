@@ -1,7 +1,7 @@
 //! Infrastructure to parse received slash command arguments into Rust types.
 
 #[allow(unused_imports)] // import is required if serenity simd_json feature is enabled
-use crate::serenity::json::prelude::*;
+use crate::serenity::json::*;
 #[allow(unused_imports)] // required for introdoc-links in doc comments
 use crate::serenity_prelude as serenity;
 

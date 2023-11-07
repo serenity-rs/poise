@@ -216,7 +216,7 @@ impl CreateReply {
         }
         f = f.add_embeds(embeds);
         for attachment in attachments {
-            f = f.attachment(attachment);
+            f = f.new_attachment(attachment);
         }
 
         if let Some(allowed_mentions) = allowed_mentions {
