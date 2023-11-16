@@ -49,7 +49,7 @@ impl CooldownTracker {
     /// Create a new cooldown tracker
     pub fn new_2() -> Self {
         Self {
-            /// Removed in next version; unused by new API
+            // Removed in next version; unused by new API
             cooldown: CooldownConfig::default(),
 
             global_invocation: None,
