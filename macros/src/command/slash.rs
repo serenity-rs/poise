@@ -1,5 +1,6 @@
 use super::Invocation;
 use crate::util::extract_type_parameter;
+use quote::format_ident;
 use syn::spanned::Spanned as _;
 
 pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStream>, syn::Error> {
@@ -143,7 +144,9 @@ pub fn generate_slash_action(inv: &Invocation) -> Result<proc_macro2::TokenStrea
         }
     }
 
-    let param_identifiers = inv.parameters.iter().map(|p| &p.ident).collect::<Vec<_>>();
+    let param_identifiers = (0..inv.parameters.len())
+        .map(|i| format_ident!("poise_param_{i}"))
+        .collect::<Vec<_>>();
     let param_names = inv.parameters.iter().map(|p| &p.name).collect::<Vec<_>>();
 
     let param_types = inv

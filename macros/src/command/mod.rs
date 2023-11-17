@@ -79,7 +79,6 @@ struct ParamArgs {
 
 /// Part of the Invocation struct. Represents a single parameter of a Discord command.
 struct CommandParameter {
-    ident: syn::Ident,
     name: String,
     type_: syn::Type,
     args: ParamArgs,
@@ -162,16 +161,12 @@ pub fn command(
     // Collect argument names/types/attributes to insert into generated function
     let mut parameters = Vec::new();
     for command_param in function.sig.inputs.iter_mut().skip(1) {
+        let span = command_param.span();
+
         let pattern = match command_param {
-            syn::FnArg::Typed(x) => &mut *x,
+            syn::FnArg::Typed(x) => x,
             syn::FnArg::Receiver(r) => {
                 return Err(syn::Error::new(r.span(), "self argument is invalid here").into());
-            }
-        };
-        let ident = match &*pattern.pat {
-            syn::Pat::Ident(pat_ident) => &pat_ident.ident,
-            x => {
-                return Err(syn::Error::new(x.span(), "must use an identifier pattern here").into())
             }
         };
 
@@ -182,15 +177,19 @@ pub fn command(
             .collect::<Result<Vec<_>, _>>()?;
         let attrs = <ParamArgs as darling::FromMeta>::from_list(&attrs)?;
 
+        let name = if let Some(rename) = &attrs.rename {
+            rename.clone()
+        } else if let syn::Pat::Ident(ident) = &*pattern.pat {
+            ident.ident.to_string().trim_start_matches("r#").into()
+        } else {
+            let message = "#[rename = \"...\"] must be specified for pattern parameters";
+            return Err(syn::Error::new(pattern.pat.span(), message).into());
+        };
         parameters.push(CommandParameter {
-            ident: ident.clone(),
-            name: attrs
-                .rename
-                .clone()
-                .unwrap_or_else(|| ident.to_string().trim_start_matches("r#").to_string()),
+            name,
             type_: (*pattern.ty).clone(),
             args: attrs,
-            span: command_param.span(),
+            span,
         });
     }
 
