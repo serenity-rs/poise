@@ -5,7 +5,7 @@ use crate::{serenity_prelude as serenity, BoxFuture};
 /// Type returned from `#[poise::command]` annotated functions, which contains all of the generated
 /// prefix and application commands
 #[derive(derivative::Derivative)]
-#[derivative(Default, Debug(bound = ""))]
+#[derivative(Default(bound = ""), Debug(bound = ""))]
 pub struct Command<U, E> {
     // =============
     /// Callback to execute when this command is invoked in a prefix context
