@@ -39,7 +39,7 @@ impl syn::fold::Fold for AllLifetimesToStatic {
 #[derive(Debug)]
 pub struct List<T>(pub Vec<T>);
 impl<T: darling::FromMeta> darling::FromMeta for List<T> {
-    fn from_list(items: &[::syn::NestedMeta]) -> darling::Result<Self> {
+    fn from_list(items: &[::darling::ast::NestedMeta]) -> darling::Result<Self> {
         items
             .iter()
             .map(|item| T::from_nested_meta(item))
@@ -57,7 +57,7 @@ impl<T> Default for List<T> {
 #[derive(Debug)]
 pub struct Tuple2<T>(pub T, pub T);
 impl<T: darling::FromMeta> darling::FromMeta for Tuple2<T> {
-    fn from_list(items: &[::syn::NestedMeta]) -> darling::Result<Self> {
+    fn from_list(items: &[::darling::ast::NestedMeta]) -> darling::Result<Self> {
         Ok(match items {
             [a, b] => Self(T::from_nested_meta(a)?, T::from_nested_meta(b)?),
             _ => {

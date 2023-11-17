@@ -35,22 +35,22 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
         }
     };
 
-    let struct_attrs = input
+    let struct_attrs: Vec<_> = input
         .attrs
-        .iter()
-        .map(|attr| attr.parse_meta().map(syn::NestedMeta::Meta))
-        .collect::<Result<Vec<_>, _>>()?;
+        .into_iter()
+        .map(|attr| darling::ast::NestedMeta::Meta(attr.meta))
+        .collect();
     let struct_attrs = <StructAttributes as darling::FromMeta>::from_list(&struct_attrs)?;
 
     let mut builders = Vec::new();
     let mut parsers = Vec::new();
     for field in fields {
         // Extract data from syn::Field
-        let field_attrs = field
+        let field_attrs: Vec<_> = field
             .attrs
-            .iter()
-            .map(|attr| attr.parse_meta().map(syn::NestedMeta::Meta))
-            .collect::<Result<Vec<_>, _>>()?;
+            .into_iter()
+            .map(|attr| darling::ast::NestedMeta::Meta(attr.meta))
+            .collect();
         let field_attrs = <FieldAttributes as darling::FromMeta>::from_list(&field_attrs)?;
         let field_ident = field.ident.unwrap();
 

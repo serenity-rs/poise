@@ -185,7 +185,11 @@ exact desugaring
 */
 #[proc_macro_attribute]
 pub fn command(args: TokenStream, function: TokenStream) -> TokenStream {
-    let args = syn::parse_macro_input!(args as Vec<syn::NestedMeta>);
+    let args = match darling::ast::NestedMeta::parse_meta_list(args.into()) {
+        Ok(x) => x,
+        Err(e) => return e.into_compile_error().into(),
+    };
+
     let args = match <command::CommandArgs as darling::FromMeta>::from_list(&args) {
         Ok(x) => x,
         Err(e) => return e.write_errors().into(),
