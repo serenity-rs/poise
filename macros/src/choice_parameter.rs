@@ -41,11 +41,11 @@ pub fn choice_parameter(input: syn::DeriveInput) -> Result<TokenStream, darling:
             .into());
         }
 
-        let attrs = variant
+        let attrs: Vec<_> = variant
             .attrs
             .into_iter()
-            .map(|attr| attr.parse_meta().map(syn::NestedMeta::Meta))
-            .collect::<Result<Vec<_>, _>>()?;
+            .map(|attr| darling::ast::NestedMeta::Meta(attr.meta))
+            .collect();
         let mut attrs = <VariantAttribute as darling::FromMeta>::from_list(&attrs)?;
 
         let main_name = if attrs.name.is_empty() {

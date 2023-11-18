@@ -100,11 +100,13 @@ pub struct Invocation {
 fn extract_help_from_doc_comments(attrs: &[syn::Attribute]) -> (Option<String>, Option<String>) {
     let mut doc_lines = String::new();
     for attr in attrs {
-        if attr.path == quote::format_ident!("doc").into() {
-            for token in attr.tokens.clone() {
-                if let Ok(literal) = syn::parse2::<syn::LitStr>(token.into()) {
-                    doc_lines += literal.value().trim(); // Trim lines like rustdoc does
-                    doc_lines += "\n";
+        if let syn::Meta::NameValue(doc_attr) = &attr.meta {
+            if doc_attr.path == quote::format_ident!("doc").into() {
+                if let syn::Expr::Lit(lit_expr) = &doc_attr.value {
+                    if let syn::Lit::Str(literal) = &lit_expr.lit {
+                        doc_lines += literal.value().trim(); // Trim lines like rustdoc does
+                        doc_lines += "\n";
+                    }
                 }
             }
         }
@@ -170,11 +172,11 @@ pub fn command(
             }
         };
 
-        let attrs = pattern
+        let attrs: Vec<_> = pattern
             .attrs
             .drain(..)
-            .map(|attr| attr.parse_meta().map(syn::NestedMeta::Meta))
-            .collect::<Result<Vec<_>, _>>()?;
+            .map(|attr| darling::ast::NestedMeta::Meta(attr.meta))
+            .collect();
         let attrs = <ParamArgs as darling::FromMeta>::from_list(&attrs)?;
 
         let name = if let Some(rename) = &attrs.rename {
@@ -332,7 +334,7 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
     let function = &inv.function;
     Ok(quote::quote! {
         #[allow(clippy::str_to_string)]
-        #function_visibility fn #function_ident#function_generics() -> ::poise::Command<
+        #function_visibility fn #function_ident #function_generics() -> ::poise::Command<
             <#ctx_type_with_static as poise::_GetGenerics>::U,
             <#ctx_type_with_static as poise::_GetGenerics>::E,
         > {
