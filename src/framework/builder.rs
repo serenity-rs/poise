@@ -211,7 +211,7 @@ and enable MESSAGE_CONTENT in your Discord bot dashboard
         options.commands.extend(self.commands);
         if self.initialize_owners {
             if let Err(e) = super::insert_owners_from_http(&token, &mut options.owners).await {
-                log::warn!("Failed to insert owners from HTTP: {}", e);
+                tracing::warn!("Failed to insert owners from HTTP: {}", e);
             }
         }
 

@@ -141,7 +141,7 @@ async fn run_command<U, E>(
             }
         }
         other => {
-            log::warn!("unknown interaction command type: {:?}", other);
+            tracing::warn!("unknown interaction command type: {:?}", other);
             return Ok(());
         }
     };
@@ -194,7 +194,7 @@ async fn run_autocomplete<U, E>(
     let focused_option = match ctx.args.iter().find(|o| o.focused) {
         Some(x) => x,
         None => {
-            log::warn!("no option is focused in autocomplete interaction");
+            tracing::warn!("no option is focused in autocomplete interaction");
             return Ok(());
         }
     };
@@ -232,7 +232,7 @@ async fn run_autocomplete<U, E>(
     let autocomplete_response = match autocomplete_callback(ctx, partial_input).await {
         Ok(x) => x,
         Err(e) => {
-            log::warn!("couldn't generate autocomplete response: {}", e);
+            tracing::warn!("couldn't generate autocomplete response: {}", e);
             return Ok(());
         }
     };
@@ -240,7 +240,7 @@ async fn run_autocomplete<U, E>(
     let interaction = match ctx.interaction {
         crate::ApplicationCommandOrAutocompleteInteraction::Autocomplete(x) => x,
         _ => {
-            log::warn!("a non-autocomplete interaction was given to run_autocomplete()");
+            tracing::warn!("a non-autocomplete interaction was given to run_autocomplete()");
             return Ok(());
         }
     };
@@ -253,7 +253,7 @@ async fn run_autocomplete<U, E>(
         })
         .await
     {
-        log::warn!("couldn't send autocomplete response: {}", e);
+        tracing::warn!("couldn't send autocomplete response: {}", e);
     }
 
     Ok(())

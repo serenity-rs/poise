@@ -124,7 +124,7 @@ pub async fn dispatch_event<U: Send + Sync, E>(
                     .process_message_delete(*deleted_message_id);
                 if let Some(bot_response) = bot_response {
                     if let Err(e) = bot_response.delete(ctx).await {
-                        log::warn!("failed to delete bot response: {}", e);
+                        tracing::warn!("failed to delete bot response: {}", e);
                     }
                 }
             }

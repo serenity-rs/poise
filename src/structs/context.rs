@@ -504,7 +504,7 @@ context_methods! {
         match self.framework().shard_manager.lock().await.runners.lock().await.get(&serenity::ShardId(self.serenity_context().shard_id)) {
             Some(runner) => runner.latency.unwrap_or(std::time::Duration::ZERO),
             None => {
-                log::error!("current shard is not in shard_manager.runners, this shouldn't happen");
+                tracing::error!("current shard is not in shard_manager.runners, this shouldn't happen");
                 std::time::Duration::ZERO
             }
         }

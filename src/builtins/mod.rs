@@ -16,8 +16,8 @@ pub use paginate::*;
 
 use crate::serenity_prelude as serenity;
 
-/// An error handler that logs errors either via the [`log`] crate or via a Discord message. Set
-/// up a logger (e.g. `env_logger::init()`) to see the logged errors from this method.
+/// An error handler that logs errors either via the [`tracing`] crate or via a Discord message. Set
+/// up a tracing subscriber (e.g. `tracing_subscriber::fmt::init()`) to see the logged errors from this method.
 ///
 /// If the user invoked the command wrong ([`crate::FrameworkError::ArgumentParse`]), the command
 /// help is displayed and the user is directed to the help menu.
@@ -27,7 +27,7 @@ use crate::serenity_prelude as serenity;
 /// ```rust,no_run
 /// # async { let error: poise::FrameworkError<'_, (), &str> = todo!();
 /// if let Err(e) = poise::builtins::on_error(error).await {
-///     log::error!("Fatal error while sending error message: {}", e);
+///     tracing::error!("Fatal error while sending error message: {}", e);
 /// }
 /// # };
 /// ```
@@ -38,7 +38,7 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
         crate::FrameworkError::Setup { error, .. } => {
             eprintln!("Error in user data setup: {}", error);
         }
-        crate::FrameworkError::EventHandler { error, event, .. } => log::error!(
+        crate::FrameworkError::EventHandler { error, event, .. } => tracing::error!(
             "User event event handler encountered an error on {} event: {}",
             event.name(),
             error
@@ -91,14 +91,14 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
             ctx.say(response).await?;
         }
         crate::FrameworkError::CommandStructureMismatch { ctx, description } => {
-            log::error!(
+            tracing::error!(
                 "Error: failed to deserialize interaction arguments for `/{}`: {}",
                 ctx.command.name,
                 description,
             );
         }
         crate::FrameworkError::CommandCheckFailed { ctx, error } => {
-            log::error!(
+            tracing::error!(
                 "A command check failed in command {} for user {}: {:?}",
                 ctx.command().name,
                 ctx.author().name,
@@ -162,7 +162,7 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
             ctx.send(|b| b.content(response).ephemeral(true)).await?;
         }
         crate::FrameworkError::DynamicPrefix { error, msg, .. } => {
-            log::error!(
+            tracing::error!(
                 "Dynamic prefix failed for message {:?}: {}",
                 msg.content,
                 error
@@ -173,14 +173,14 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
             prefix,
             ..
         } => {
-            log::warn!(
+            tracing::warn!(
                 "Recognized prefix `{}`, but didn't recognize command name in `{}`",
                 prefix,
                 msg_content,
             );
         }
         crate::FrameworkError::UnknownInteraction { interaction, .. } => {
-            log::warn!(
+            tracing::warn!(
                 "received unknown interaction \"{}\"",
                 interaction.data().name
             );

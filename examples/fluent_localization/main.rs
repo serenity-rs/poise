@@ -1,6 +1,7 @@
 mod translation;
 
 use poise::serenity_prelude as serenity;
+use tracing_subscriber::EnvFilter;
 use translation::tr;
 
 pub struct Data {
@@ -56,7 +57,9 @@ async fn register(ctx: Context<'_>) -> Result<(), Error> {
 
 #[tokio::main]
 async fn main() {
-    env_logger::init();
+    tracing_subscriber::fmt()
+        .with_env_filter(EnvFilter::from_default_env())
+        .init();
 
     let mut commands = vec![welcome(), info(), register()];
     let translations = translation::read_ftl().expect("failed to read translation files");

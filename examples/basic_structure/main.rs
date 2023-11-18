@@ -4,6 +4,7 @@ mod commands;
 
 use poise::serenity_prelude as serenity;
 use std::{collections::HashMap, env::var, sync::Mutex, time::Duration};
+use tracing_subscriber::EnvFilter;
 
 // Types used by all command functions
 type Error = Box<dyn std::error::Error + Send + Sync>;
@@ -33,7 +34,9 @@ async fn on_error(error: poise::FrameworkError<'_, Data, Error>) {
 
 #[tokio::main]
 async fn main() {
-    env_logger::init();
+    tracing_subscriber::fmt()
+        .with_env_filter(EnvFilter::from_default_env())
+        .init();
 
     // FrameworkOptions contains all of poise's configuration option in one struct
     // Every option can be omitted to use its default value

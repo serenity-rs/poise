@@ -59,7 +59,7 @@ pub fn get(
         .or_else(|| format(&translations.main, id, attr, args))
         // If this message ID is not present in any translation files whatsoever
         .unwrap_or_else(|| {
-            log::warn!("unknown fluent message identifier `{}`", id);
+            tracing::warn!("unknown fluent message identifier `{}`", id);
             id.to_string()
         })
 }

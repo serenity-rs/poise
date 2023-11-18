@@ -290,7 +290,9 @@ fn message_content_intent_sanity_check<U, E>(
         || prefix_options.stripped_dynamic_prefix.is_some();
     let can_receive_message_content = intents.contains(serenity::GatewayIntents::MESSAGE_CONTENT);
     if is_prefix_configured && !can_receive_message_content {
-        log::warn!("Warning: MESSAGE_CONTENT intent not set; prefix commands will not be received");
+        tracing::warn!(
+            "Warning: MESSAGE_CONTENT intent not set; prefix commands will not be received"
+        );
     }
 }
 
