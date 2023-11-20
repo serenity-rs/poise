@@ -3,7 +3,6 @@ use std::sync::atomic::{AtomicU32, Ordering};
 
 use poise::serenity_prelude as serenity;
 use poise::Event;
-use tracing_subscriber::EnvFilter;
 
 // Types used by all command functions
 type Error = Box<dyn std::error::Error + Send + Sync>;
@@ -17,9 +16,7 @@ pub struct Data {
 
 #[tokio::main]
 async fn main() {
-    tracing_subscriber::fmt()
-        .with_env_filter(EnvFilter::from_default_env())
-        .init();
+    env_logger::init();
 
     let options = poise::FrameworkOptions {
         event_handler: |_ctx, event, _framework, _data| {

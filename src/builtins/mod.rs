@@ -17,7 +17,8 @@ pub use paginate::*;
 use crate::serenity_prelude as serenity;
 
 /// An error handler that logs errors either via the [`tracing`] crate or via a Discord message. Set
-/// up a tracing subscriber (e.g. `tracing_subscriber::fmt::init()`) to see the logged errors from this method.
+/// up a logger (e.g. `env_logger::init()`) or a tracing subscriber
+/// (e.g. `tracing_subscriber::fmt::init()`) to see the logged errors from this method.
 ///
 /// If the user invoked the command wrong ([`crate::FrameworkError::ArgumentParse`]), the command
 /// help is displayed and the user is directed to the help menu.
