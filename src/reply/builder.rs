@@ -12,7 +12,7 @@ pub struct CreateReply<'att> {
     /// Message attachments.
     pub attachments: Vec<serenity::AttachmentType<'att>>,
     /// Whether the message is ephemeral (only has an effect in application commands)
-    pub ephemeral: bool,
+    pub ephemeral: Option<bool>,
     /// Message components, that is, buttons and select menus.
     pub components: Option<serenity::CreateComponents>,
     /// The allowed mentions for the message.
@@ -25,7 +25,7 @@ pub struct CreateReply<'att> {
 
 impl<'att> CreateReply<'att> {
     /// Set the content of the message.
-    pub fn content(&mut self, content: impl Into<String>) -> &mut Self {
+    pub fn content(mut self, content: impl Into<String>) -> Self {
         self.content = Some(content.into());
         self
     }
@@ -33,12 +33,7 @@ impl<'att> CreateReply<'att> {
     /// Adds an embed to the message.
     ///
     /// Existing embeds are kept.
-    pub fn embed(
-        &mut self,
-        f: impl FnOnce(&mut serenity::CreateEmbed) -> &mut serenity::CreateEmbed,
-    ) -> &mut Self {
-        let mut embed = serenity::CreateEmbed::default();
-        f(&mut embed);
+    pub fn embed(mut self, embed: serenity::CreateEmbed) -> Self {
         self.embeds.push(embed);
         self
     }
@@ -46,12 +41,7 @@ impl<'att> CreateReply<'att> {
     /// Set components (buttons and select menus) for this message.
     ///
     /// Any previously set components will be overwritten.
-    pub fn components(
-        &mut self,
-        f: impl FnOnce(&mut serenity::CreateComponents) -> &mut serenity::CreateComponents,
-    ) -> &mut Self {
-        let mut components = serenity::CreateComponents::default();
-        f(&mut components);
+    pub fn components(mut self, components: serenity::CreateComponents) -> Self {
         self.components = Some(components);
         self
     }
@@ -59,7 +49,7 @@ impl<'att> CreateReply<'att> {
     /// Add an attachment.
     ///
     /// This will not have an effect in a slash command's initial response!
-    pub fn attachment(&mut self, attachment: serenity::AttachmentType<'att>) -> &mut Self {
+    pub fn attachment(mut self, attachment: serenity::AttachmentType<'att>) -> Self {
         self.attachments.push(attachment);
         self
     }
@@ -67,20 +57,15 @@ impl<'att> CreateReply<'att> {
     /// Toggles whether the message is an ephemeral response (only invoking user can see it).
     ///
     /// This only has an effect in slash commands!
-    pub fn ephemeral(&mut self, ephemeral: bool) -> &mut Self {
-        self.ephemeral = ephemeral;
+    pub fn ephemeral(mut self, ephemeral: bool) -> Self {
+        self.ephemeral = Some(ephemeral);
         self
     }
 
     /// Set the allowed mentions for the message.
     ///
     /// See [`serenity::CreateAllowedMentions`] for more information.
-    pub fn allowed_mentions(
-        &mut self,
-        f: impl FnOnce(&mut serenity::CreateAllowedMentions) -> &mut serenity::CreateAllowedMentions,
-    ) -> &mut Self {
-        let mut allowed_mentions = serenity::CreateAllowedMentions::default();
-        f(&mut allowed_mentions);
+    pub fn allowed_mentions(mut self, allowed_mentions: serenity::CreateAllowedMentions) -> Self {
         self.allowed_mentions = Some(allowed_mentions);
         self
     }
@@ -90,7 +75,7 @@ impl<'att> CreateReply<'att> {
     ///
     /// To disable the ping, set [`Self::allowed_mentions`] with
     /// [`serenity::CreateAllowedMentions::replied_user`] set to false.
-    pub fn reply(&mut self, reply: bool) -> &mut Self {
+    pub fn reply(mut self, reply: bool) -> Self {
         self.reply = reply;
         self
     }
@@ -128,7 +113,9 @@ impl<'att> CreateReply<'att> {
                 f
             });
         }
-        f.ephemeral(ephemeral);
+        if let Some(ephemeral) = ephemeral {
+            f.ephemeral(ephemeral);
+        }
         f.add_files(attachments);
     }
 
@@ -164,7 +151,9 @@ impl<'att> CreateReply<'att> {
                 f
             });
         }
-        f.ephemeral(ephemeral);
+        if let Some(ephemeral) = ephemeral {
+            f.ephemeral(ephemeral);
+        }
         f.add_files(attachments);
     }
 

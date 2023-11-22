@@ -98,7 +98,7 @@ impl ReplyHandle<'_> {
     pub async fn edit<'att, U, E>(
         &self,
         ctx: crate::Context<'_, U, E>,
-        builder: impl for<'a> FnOnce(&'a mut CreateReply<'att>) -> &'a mut CreateReply<'att>,
+        builder: CreateReply<'att>,
     ) -> Result<(), serenity::Error> {
         let reply = ctx.reply_builder(builder);
 

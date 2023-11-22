@@ -146,7 +146,7 @@ context_methods! {
         self,
         text: impl Into<String>,
     ) -> Result<crate::ReplyHandle<'a>, serenity::Error>) {
-        self.send(|b| b.content(text).reply(true)).await
+        self.send(crate::CreateReply::default().content(text).reply(true)).await
     }
 
     /// Shorthand of [`crate::send_reply`]
@@ -155,9 +155,7 @@ context_methods! {
     await (send self builder)
     (pub async fn send<'att>(
         self,
-        builder: impl for<'b> FnOnce(
-            &'b mut crate::CreateReply<'att>,
-        ) -> &'b mut crate::CreateReply<'att>,
+        builder: crate::CreateReply<'att>,
     ) -> Result<crate::ReplyHandle<'a>, serenity::Error>) {
         crate::send_reply(self, builder).await
     }
@@ -474,20 +472,14 @@ context_methods! {
     /// This is primarily an internal function and only exposed for people who want to manually
     /// convert [`crate::CreateReply`] instances into Discord requests.
     (reply_builder self builder)
-    (pub fn reply_builder<'att>(
-        self,
-        builder: impl for<'b> FnOnce(&'b mut crate::CreateReply<'att>) -> &'b mut crate::CreateReply<'att>,
-    ) -> crate::CreateReply<'att>) {
-        let mut reply = crate::CreateReply {
-            ephemeral: self.command().ephemeral,
-            allowed_mentions: self.framework().options().allowed_mentions.clone(),
-            ..Default::default()
-        };
-        builder(&mut reply);
+    (pub fn reply_builder<'att>(self, mut builder: crate::CreateReply<'att>) -> crate::CreateReply<'att>) {
+        builder.allowed_mentions = builder.allowed_mentions.or_else(|| self.framework().options().allowed_mentions.clone());
+
         if let Some(callback) = self.framework().options().reply_callback {
-            callback(self, &mut reply);
+            callback(self, &mut builder);
         }
-        reply
+
+        builder
     }
 
     /// Returns serenity's cache which stores various useful data received from the gateway

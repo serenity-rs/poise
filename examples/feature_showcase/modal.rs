@@ -1,4 +1,5 @@
 use crate::{Data, Error};
+use poise::serenity_prelude as serenity;
 
 #[derive(Debug, poise::Modal)]
 #[allow(dead_code)] // fields only used for Debug print
@@ -22,19 +23,22 @@ pub async fn modal(ctx: poise::ApplicationContext<'_, Data, Error>) -> Result<()
 /// present.
 #[poise::command(prefix_command, slash_command)]
 pub async fn component_modal(ctx: crate::Context<'_>) -> Result<(), Error> {
-    ctx.send(|m| {
-        m.content("Click the button below to open the modal")
-            .components(|c| {
-                c.create_action_row(|a| {
-                    a.create_button(|b| {
-                        b.custom_id("open_modal")
-                            .label("Open modal")
-                            .style(poise::serenity_prelude::ButtonStyle::Success)
-                    })
-                })
+    let mut components = serenity::CreateComponents::default();
+    let reply = {
+        components.create_action_row(|a| {
+            a.create_button(|b| {
+                b.custom_id("open_modal")
+                    .label("Open modal")
+                    .style(poise::serenity_prelude::ButtonStyle::Success)
             })
-    })
-    .await?;
+        });
+
+        poise::CreateReply::default()
+            .content("Click the button below to open the modal")
+            .components(components)
+    };
+
+    ctx.send(reply).await?;
 
     while let Some(mci) =
         poise::serenity_prelude::CollectComponentInteraction::new(ctx.serenity_context())

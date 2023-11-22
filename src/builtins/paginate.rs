@@ -42,19 +42,25 @@ pub async fn paginate<U, E>(
     let next_button_id = format!("{}next", ctx_id);
 
     // Send the embed with the first page as content
-    let mut current_page = 0;
-    ctx.send(|b| {
-        b.embed(|b| b.description(pages[current_page]))
-            .components(|b| {
-                b.create_action_row(|b| {
-                    b.create_button(|b| b.custom_id(&prev_button_id).emoji('◀'))
-                        .create_button(|b| b.custom_id(&next_button_id).emoji('▶'))
-                })
-            })
-    })
-    .await?;
+    let reply = {
+        let mut embed = serenity::CreateEmbed::default();
+        embed.description(pages[0]);
+
+        let mut components = serenity::CreateComponents::default();
+        components.create_action_row(|b| {
+            b.create_button(|b| b.custom_id(&prev_button_id).emoji('◀'))
+                .create_button(|b| b.custom_id(&next_button_id).emoji('▶'))
+        });
+
+        crate::CreateReply::default()
+            .embed(embed)
+            .components(components)
+    };
+
+    ctx.send(reply).await?;
 
     // Loop through incoming interactions with the navigation buttons
+    let mut current_page = 0;
     while let Some(press) = serenity::CollectComponentInteraction::new(ctx)
         // We defined our button IDs to start with `ctx_id`. If they don't, some other command's
         // button was pressed

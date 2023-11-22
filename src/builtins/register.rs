@@ -181,41 +181,42 @@ pub async fn register_application_commands_buttons<U, E>(
         return Ok(());
     }
 
-    let reply = ctx
-        .send(|m| {
-            m.content("Choose what to do with the commands:")
-                .components(|c| {
-                    c.create_action_row(|r| {
-                        r.create_button(|b| {
-                            b.custom_id("register.guild")
-                                .label("Register in guild")
-                                .style(serenity::ButtonStyle::Primary)
-                                .emoji('📋')
-                        })
-                        .create_button(|b| {
-                            b.custom_id("unregister.guild")
-                                .label("Delete in guild")
-                                .style(serenity::ButtonStyle::Danger)
-                                .emoji('🗑')
-                        })
-                    })
-                    .create_action_row(|r| {
-                        r.create_button(|b| {
-                            b.custom_id("register.global")
-                                .label("Register globally")
-                                .style(serenity::ButtonStyle::Primary)
-                                .emoji('📋')
-                        })
-                        .create_button(|b| {
-                            b.custom_id("unregister.global")
-                                .label("Delete globally")
-                                .style(serenity::ButtonStyle::Danger)
-                                .emoji('🗑')
-                        })
-                    })
-                })
+    let mut components = serenity::CreateComponents::default();
+    components
+        .create_action_row(|r| {
+            r.create_button(|b| {
+                b.custom_id("register.guild")
+                    .label("Register in guild")
+                    .style(serenity::ButtonStyle::Primary)
+                    .emoji('📋')
+            })
+            .create_button(|b| {
+                b.custom_id("unregister.guild")
+                    .label("Delete in guild")
+                    .style(serenity::ButtonStyle::Danger)
+                    .emoji('🗑')
+            })
         })
-        .await?;
+        .create_action_row(|r| {
+            r.create_button(|b| {
+                b.custom_id("register.global")
+                    .label("Register globally")
+                    .style(serenity::ButtonStyle::Primary)
+                    .emoji('📋')
+            })
+            .create_button(|b| {
+                b.custom_id("unregister.global")
+                    .label("Delete globally")
+                    .style(serenity::ButtonStyle::Danger)
+                    .emoji('🗑')
+            })
+        });
+
+    let builder = crate::CreateReply::default()
+        .content("Choose what to do with the commands:")
+        .components(components);
+
+    let reply = ctx.send(builder).await?;
 
     let interaction = reply
         .message()
@@ -225,9 +226,12 @@ pub async fn register_application_commands_buttons<U, E>(
         .await;
 
     reply
-        .edit(ctx, |b| {
-            b.components(|b| b).content("Processing... Please wait.")
-        })
+        .edit(
+            ctx,
+            crate::CreateReply::default()
+                .components(serenity::CreateComponents::default())
+                .content("Processing... Please wait."),
+        )
         .await?; // remove buttons after button press and edit message
     let pressed_button_id = match &interaction {
         Some(m) => &m.data.custom_id,

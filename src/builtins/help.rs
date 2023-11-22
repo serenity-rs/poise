@@ -1,6 +1,6 @@
 //! Contains the built-in help command and surrounding infrastructure
 
-use crate::serenity_prelude as serenity;
+use crate::{serenity_prelude as serenity, CreateReply};
 use std::fmt::Write as _;
 
 /// Optional configuration for how the help message from [`help()`] looks
@@ -225,8 +225,11 @@ async fn help_single_command<U, E>(
         format!("No such command `{}`", command_name)
     };
 
-    ctx.send(|b| b.content(reply).ephemeral(config.ephemeral))
-        .await?;
+    let reply = CreateReply::default()
+        .content(reply)
+        .ephemeral(config.ephemeral);
+
+    ctx.send(reply).await?;
     Ok(())
 }
 
@@ -350,8 +353,11 @@ async fn help_all_commands<U, E>(
     config: HelpConfiguration<'_>,
 ) -> Result<(), serenity::Error> {
     let menu = generate_all_commands(ctx, &config).await?;
-    ctx.send(|b| b.content(menu).ephemeral(config.ephemeral))
-        .await?;
+    let reply = CreateReply::default()
+        .content(menu)
+        .ephemeral(config.ephemeral);
+
+    ctx.send(reply).await?;
     Ok(())
 }
 

@@ -22,10 +22,10 @@ use crate::serenity_prelude as serenity;
 /// ).await?;
 /// # Ok(()) }
 /// ```
-pub async fn send_reply<'att, U, E>(
-    ctx: crate::Context<'_, U, E>,
-    builder: impl for<'a> FnOnce(&'a mut crate::CreateReply<'att>) -> &'a mut crate::CreateReply<'att>,
-) -> Result<crate::ReplyHandle<'_>, serenity::Error> {
+pub async fn send_reply<'a, U, E>(
+    ctx: crate::Context<'a, U, E>,
+    builder: crate::CreateReply<'_>,
+) -> Result<crate::ReplyHandle<'a>, serenity::Error> {
     Ok(match ctx {
         crate::Context::Prefix(ctx) => super::ReplyHandle(super::ReplyHandleInner::Prefix(
             crate::send_prefix_reply(ctx, builder).await?,
@@ -41,7 +41,7 @@ pub async fn say_reply<U, E>(
     ctx: crate::Context<'_, U, E>,
     text: impl Into<String>,
 ) -> Result<crate::ReplyHandle<'_>, serenity::Error> {
-    send_reply(ctx, |m| m.content(text.into())).await
+    send_reply(ctx, crate::CreateReply::default().content(text.into())).await
 }
 
 /// Send a response to an interaction (slash command or context menu command invocation).
@@ -50,18 +50,12 @@ pub async fn say_reply<U, E>(
 /// [followup](serenity::ApplicationCommandInteraction::create_followup_message) is sent.
 ///
 /// No-op if autocomplete context
-pub async fn send_application_reply<'att, U, E>(
-    ctx: crate::ApplicationContext<'_, U, E>,
-    builder: impl for<'a> FnOnce(&'a mut crate::CreateReply<'att>) -> &'a mut crate::CreateReply<'att>,
-) -> Result<crate::ReplyHandle<'_>, serenity::Error> {
-    _send_application_reply(ctx, ctx.reply_builder(builder)).await
-}
-
-/// private version of [`send_application_reply`] that isn't generic over the builder to minimize monomorphization-related codegen bloat
-async fn _send_application_reply<'a, U, E>(
+pub async fn send_application_reply<'a, U, E>(
     ctx: crate::ApplicationContext<'a, U, E>,
-    data: crate::CreateReply<'_>,
+    builder: crate::CreateReply<'_>,
 ) -> Result<crate::ReplyHandle<'a>, serenity::Error> {
+    let builder = ctx.reply_builder(builder);
+
     let interaction = match ctx.interaction {
         crate::ApplicationCommandOrAutocompleteInteraction::ApplicationCommand(x) => x,
         crate::ApplicationCommandOrAutocompleteInteraction::Autocomplete(_) => {
@@ -77,7 +71,7 @@ async fn _send_application_reply<'a, U, E>(
         Some(Box::new(
             interaction
                 .create_followup_message(ctx.serenity_context, |f| {
-                    data.to_slash_followup_response(f);
+                    builder.to_slash_followup_response(f);
                     f
                 })
                 .await?,
@@ -87,7 +81,7 @@ async fn _send_application_reply<'a, U, E>(
             .create_interaction_response(ctx.serenity_context, |r| {
                 r.kind(serenity::InteractionResponseType::ChannelMessageWithSource)
                     .interaction_response_data(|f| {
-                        data.to_slash_initial_response(f);
+                        builder.to_slash_initial_response(f);
                         f
                     })
             })
@@ -106,18 +100,12 @@ async fn _send_application_reply<'a, U, E>(
 }
 
 /// Prefix-specific reply function. For more details, see [`crate::send_reply`].
-pub async fn send_prefix_reply<'att, U, E>(
-    ctx: crate::PrefixContext<'_, U, E>,
-    builder: impl for<'a> FnOnce(&'a mut crate::CreateReply<'att>) -> &'a mut crate::CreateReply<'att>,
+pub async fn send_prefix_reply<'a, U, E>(
+    ctx: crate::PrefixContext<'a, U, E>,
+    builder: crate::CreateReply<'_>,
 ) -> Result<Box<serenity::Message>, serenity::Error> {
-    _send_prefix_reply(ctx, ctx.reply_builder(builder)).await
-}
+    let builder = ctx.reply_builder(builder);
 
-/// private version of [`send_prefix_reply`] that isn't generic over the builder to minimize monomorphization-related codegen bloat
-async fn _send_prefix_reply<'a, U, E>(
-    ctx: crate::PrefixContext<'_, U, E>,
-    reply: crate::CreateReply<'a>,
-) -> Result<Box<serenity::Message>, serenity::Error> {
     // This must only return None when we _actually_ want to reuse the existing response! There are
     // no checks later
     let lock_edit_tracker = || {
@@ -148,7 +136,7 @@ async fn _send_prefix_reply<'a, U, E>(
                 f.components(|b| b);
                 f.0.insert("attachments", serenity::json::json! { [] });
 
-                reply.to_prefix_edit(f);
+                builder.to_prefix_edit(f);
                 f
             })
             .await?;
@@ -165,7 +153,7 @@ async fn _send_prefix_reply<'a, U, E>(
             .msg
             .channel_id
             .send_message(ctx.serenity_context, |m| {
-                reply.to_prefix(m, ctx.msg);
+                builder.to_prefix(m, ctx.msg);
                 m
             })
             .await?;
