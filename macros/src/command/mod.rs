@@ -357,14 +357,15 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
                 description_localizations: #description_localizations,
                 help_text: #help_text,
                 hide_in_help: #hide_in_help,
-                cooldowns: std::sync::Mutex::new(::poise::Cooldowns::new(::poise::CooldownConfig {
+                cooldowns: std::sync::Mutex::new(::poise::Cooldowns::new()),
+                cooldown_config: std::sync::RwLock::new(::poise::CooldownConfig {
                     global: #global_cooldown.map(std::time::Duration::from_secs),
                     user: #user_cooldown.map(std::time::Duration::from_secs),
                     guild: #guild_cooldown.map(std::time::Duration::from_secs),
                     channel: #channel_cooldown.map(std::time::Duration::from_secs),
                     member: #member_cooldown.map(std::time::Duration::from_secs),
-                    __non_exhaustive: (),
-                })),
+                    __non_exhaustive: ()
+                }),
                 reuse_response: #reuse_response,
                 default_member_permissions: #default_member_permissions,
                 required_permissions: #required_permissions,

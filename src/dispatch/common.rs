@@ -159,7 +159,8 @@ async fn check_permissions_and_cooldown_single<'a, U, E>(
 
     if !ctx.framework().options().manual_cooldowns {
         let cooldowns = &cmd.cooldowns;
-        let remaining_cooldown = cooldowns.lock().unwrap().remaining_cooldown(ctx);
+        let config = cmd.cooldown_config.read().unwrap();
+        let remaining_cooldown = cooldowns.lock().unwrap().remaining_cooldown(ctx, &config);
         if let Some(remaining_cooldown) = remaining_cooldown {
             return Err(crate::FrameworkError::CooldownHit {
                 ctx,

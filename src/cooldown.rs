@@ -28,10 +28,6 @@ pub struct CooldownConfig {
 /// cooldown handler.
 #[derive(Default, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct CooldownTracker {
-    /// Stores the cooldown durations
-    /// Will be removed in next version in favor of passing the config on demand to functions
-    cooldown: CooldownConfig,
-
     /// Stores the timestamp of the last global invocation
     global_invocation: Option<Instant>,
     /// Stores the timestamps of the last invocation per user
@@ -49,24 +45,8 @@ pub use CooldownTracker as Cooldowns;
 
 impl CooldownTracker {
     /// Create a new cooldown tracker
-    pub fn new_2() -> Self {
+    pub fn new() -> Self {
         Self {
-            // Removed in next version; unused by new API
-            cooldown: CooldownConfig::default(),
-
-            global_invocation: None,
-            user_invocations: OrderedMap::new(),
-            guild_invocations: OrderedMap::new(),
-            channel_invocations: OrderedMap::new(),
-            member_invocations: OrderedMap::new(),
-        }
-    }
-
-    /// **Will be replaced by [`Self::new_2()`] in the next breaking version**
-    pub fn new(config: CooldownConfig) -> Self {
-        Self {
-            cooldown: config,
-
             global_invocation: None,
             user_invocations: OrderedMap::new(),
             guild_invocations: OrderedMap::new(),
@@ -77,7 +57,7 @@ impl CooldownTracker {
 
     /// Queries the cooldown buckets and checks if all cooldowns have expired and command
     /// execution may proceed. If not, Some is returned with the remaining cooldown
-    pub fn remaining_cooldown_2<U, E>(
+    pub fn remaining_cooldown<U, E>(
         &self,
         ctx: crate::Context<'_, U, E>,
         cooldown_durations: &CooldownConfig,
@@ -115,11 +95,6 @@ impl CooldownTracker {
                 Some(cooldown_left)
             })
             .max()
-    }
-
-    /// **Will be replaced by [`Self::remaining_cooldown_2`] in the next breaking version**
-    pub fn remaining_cooldown<U, E>(&self, ctx: crate::Context<'_, U, E>) -> Option<Duration> {
-        self.remaining_cooldown_2(ctx, &self.cooldown)
     }
 
     /// Indicates that a command has been executed and all associated cooldowns should start running
