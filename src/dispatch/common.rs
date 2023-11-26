@@ -21,7 +21,7 @@ async fn user_permissions(
     let channel = match channel_id.to_channel(ctx).await {
         Ok(serenity::Channel::Guild(channel)) => channel,
         Ok(_other_channel) => {
-            log::warn!(
+            tracing::warn!(
                 "guild message was supposedly sent in a non-guild channel. Denying invocation"
             );
             return None;
@@ -97,7 +97,7 @@ async fn check_permissions_and_cooldown_single<'a, U, E>(
         let channel = match ctx.channel_id().to_channel(ctx.serenity_context()).await {
             Ok(channel) => channel,
             Err(e) => {
-                log::warn!("Error when getting channel: {}", e);
+                tracing::warn!("Error when getting channel: {}", e);
 
                 return Err(crate::FrameworkError::NsfwOnly { ctx });
             }

@@ -16,11 +16,11 @@ pub fn find_modal_text(
         let text = match row.components.get_mut(0) {
             Some(serenity::ActionRowComponent::InputText(text)) => text,
             Some(_) => {
-                log::warn!("unexpected non input text component in modal response");
+                tracing::warn!("unexpected non input text component in modal response");
                 continue;
             }
             None => {
-                log::warn!("empty action row in modal response");
+                tracing::warn!("empty action row in modal response");
                 continue;
             }
         };
@@ -30,7 +30,7 @@ pub fn find_modal_text(
             return if value.is_empty() { None } else { Some(value) };
         }
     }
-    log::warn!(
+    tracing::warn!(
         "{} not found in modal response (expected at least blank string)",
         custom_id
     );

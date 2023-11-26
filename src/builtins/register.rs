@@ -244,7 +244,7 @@ pub async fn register_application_commands_buttons<U, E>(
         "register.guild" => (true, false),
         "unregister.guild" => (false, false),
         other => {
-            log::warn!("unknown register button ID: {:?}", other);
+            tracing::warn!("unknown register button ID: {:?}", other);
             return Ok(());
         }
     };
