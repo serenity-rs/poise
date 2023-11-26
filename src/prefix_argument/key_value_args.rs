@@ -73,10 +73,10 @@ impl KeyValueArgs {
 
 #[async_trait::async_trait]
 impl<'a> PopArgument<'a> for KeyValueArgs {
-    async fn pop_from(
+    async fn pop_from<U: Send + Sync + 'static>(
         args: &'a str,
         attachment_index: usize,
-        _: &serenity::Context,
+        _: &serenity::Context<U>,
         _: &serenity::Message,
     ) -> Result<(&'a str, usize, Self), (Box<dyn std::error::Error + Send + Sync>, Option<String>)>
     {

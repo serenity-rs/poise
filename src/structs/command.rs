@@ -6,7 +6,7 @@ use crate::{serenity_prelude as serenity, BoxFuture};
 /// prefix and application commands
 #[derive(derivative::Derivative)]
 #[derivative(Default(bound = ""), Debug(bound = ""))]
-pub struct Command<U, E> {
+pub struct Command<U: Send + Sync + 'static, E> {
     // =============
     /// Callback to execute when this command is invoked in a prefix context
     #[derivative(Debug = "ignore")]
@@ -128,14 +128,14 @@ pub struct Command<U, E> {
     pub __non_exhaustive: (),
 }
 
-impl<U, E> PartialEq for Command<U, E> {
+impl<U: Send + Sync + 'static, E> PartialEq for Command<U, E> {
     fn eq(&self, other: &Self) -> bool {
         std::ptr::eq(self, other)
     }
 }
-impl<U, E> Eq for Command<U, E> {}
+impl<U: Send + Sync + 'static, E> Eq for Command<U, E> {}
 
-impl<U, E> Command<U, E> {
+impl<U: Send + Sync + 'static, E> Command<U, E> {
     /// Serializes this Command into an application command option, which is the form which Discord
     /// requires subcommands to be in
     fn create_as_subcommand(&self) -> Option<serenity::CreateCommandOption> {

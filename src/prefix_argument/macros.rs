@@ -179,9 +179,9 @@ to use this macro directly.
 # #[tokio::main] async fn main() -> Result<(), Box<dyn std::error::Error>> {
 # use poise::serenity_prelude as serenity;
 # let ctx = serenity::Context {
-#     data: Default::default(),
 #     shard: todo!(),
 #     shard_id: todo!(),
+#     data: std::sync::Arc::new(()),
 #     http: std::sync::Arc::new(::serenity::http::Http::new("example")),
 #     #[cfg(feature = "cache")]
 #     cache: Default::default(),

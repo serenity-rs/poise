@@ -10,32 +10,34 @@ pub trait _GetGenerics {
     type U;
     type E;
 }
-impl<U, E> _GetGenerics for Context<'_, U, E> {
+impl<U: Send + Sync + 'static, E> _GetGenerics for Context<'_, U, E> {
     type U = U;
     type E = E;
 }
 
 /// Wrapper around either [`crate::ApplicationContext`] or [`crate::PrefixContext`]
 #[derive(Debug)]
-pub enum Context<'a, U, E> {
+pub enum Context<'a, U: Send + Sync + 'static, E> {
     /// Application command context
     Application(crate::ApplicationContext<'a, U, E>),
     /// Prefix command context
     Prefix(crate::PrefixContext<'a, U, E>),
     // Not non_exhaustive.. adding a whole new category of commands would justify breakage lol
 }
-impl<U, E> Clone for Context<'_, U, E> {
+impl<U: Send + Sync + 'static, E> Clone for Context<'_, U, E> {
     fn clone(&self) -> Self {
         *self
     }
 }
-impl<U, E> Copy for Context<'_, U, E> {}
-impl<'a, U, E> From<crate::ApplicationContext<'a, U, E>> for Context<'a, U, E> {
+impl<U: Send + Sync + 'static, E> Copy for Context<'_, U, E> {}
+impl<'a, U: Send + Sync + 'static, E> From<crate::ApplicationContext<'a, U, E>>
+    for Context<'a, U, E>
+{
     fn from(x: crate::ApplicationContext<'a, U, E>) -> Self {
         Self::Application(x)
     }
 }
-impl<'a, U, E> From<crate::PrefixContext<'a, U, E>> for Context<'a, U, E> {
+impl<'a, U: Send + Sync + 'static, E> From<crate::PrefixContext<'a, U, E>> for Context<'a, U, E> {
     fn from(x: crate::PrefixContext<'a, U, E>) -> Self {
         Self::Prefix(x)
     }
@@ -50,19 +52,19 @@ macro_rules! context_methods {
         $($await:ident)? ( $fn_name:ident $self:ident $($arg:ident)* )
         ( $($sig:tt)* ) $body:block
     )* ) => {
-        impl<'a, U, E> Context<'a, U, E> { $(
+        impl<'a, U: Send + Sync + 'static, E> Context<'a, U, E> { $(
             $( #[$($attrs)*] )*
             $($sig)* $body
         )* }
 
-        impl<'a, U, E> crate::PrefixContext<'a, U, E> { $(
+        impl<'a, U: Send + Sync + 'static, E> crate::PrefixContext<'a, U, E> { $(
             $( #[$($attrs)*] )*
             $($sig)* {
                 $crate::Context::Prefix($self).$fn_name($($arg)*) $(.$await)?
             }
         )* }
 
-        impl<'a, U, E> crate::ApplicationContext<'a, U, E> { $(
+        impl<'a, U: Send + Sync + 'static, E> crate::ApplicationContext<'a, U, E> { $(
             $( #[$($attrs)*] )*
             $($sig)* {
                 $crate::Context::Application($self).$fn_name($($arg)*) $(.$await)?
@@ -162,7 +164,7 @@ context_methods! {
 
     /// Return the stored [`serenity::Context`] within the underlying context type.
     (serenity_context self)
-    (pub fn serenity_context(self) -> &'a serenity::Context) {
+    (pub fn serenity_context(self) -> &'a serenity::Context<U>) {
         match self {
             Self::Application(ctx) => ctx.serenity_context,
             Self::Prefix(ctx) => ctx.serenity_context,
@@ -183,7 +185,7 @@ context_methods! {
     #[deprecated = "poise::Context can now be passed directly into most serenity functions. Otherwise, use `.serenity_context()` now"]
     #[allow(deprecated)]
     (discord self)
-    (pub fn discord(self) -> &'a serenity::Context) {
+    (pub fn discord(self) -> &'a serenity::Context<U>) {
         self.serenity_context()
     }
 
@@ -199,10 +201,7 @@ context_methods! {
     /// Return a reference to your custom user data
     (data self)
     (pub fn data(self) -> &'a U) {
-        match self {
-            Self::Application(ctx) => ctx.data,
-            Self::Prefix(ctx) => ctx.data,
-        }
+        &self.serenity_context().data
     }
 
     /// Return the channel ID of this context
@@ -535,7 +534,7 @@ context_methods! {
     }
 }
 
-impl<'a, U, E> Context<'a, U, E> {
+impl<'a, U: Send + Sync + 'static, E> Context<'a, U, E> {
     /// Actual implementation of rerun() that returns `FrameworkError` for implementation convenience
     async fn rerun_inner(self) -> Result<(), crate::FrameworkError<'a, U, E>> {
         match self {
@@ -605,29 +604,29 @@ impl<'a, U, E> Context<'a, U, E> {
 macro_rules! context_trait_impls {
     ($($type:tt)*) => {
         #[cfg(feature = "cache")]
-        impl<U, E> AsRef<serenity::Cache> for $($type)*<'_, U, E> {
+        impl<U: Send + Sync + 'static, E> AsRef<serenity::Cache> for $($type)*<'_, U, E> {
             fn as_ref(&self) -> &serenity::Cache {
                 &self.serenity_context().cache
             }
         }
-        impl<U, E> AsRef<serenity::Http> for $($type)*<'_, U, E> {
+        impl<U: Send + Sync + 'static, E> AsRef<serenity::Http> for $($type)*<'_, U, E> {
             fn as_ref(&self) -> &serenity::Http {
                 &self.serenity_context().http
             }
         }
-        impl<U, E> AsRef<serenity::ShardMessenger> for $($type)*<'_, U, E> {
+        impl<U: Send + Sync + 'static, E> AsRef<serenity::ShardMessenger> for $($type)*<'_, U, E> {
             fn as_ref(&self) -> &serenity::ShardMessenger {
                 &self.serenity_context().shard
             }
         }
         // Originally added as part of component interaction modals; not sure if this impl is really
         // required by anything else... It makes sense to have though imo
-        impl<U, E> AsRef<serenity::Context> for $($type)*<'_, U, E> {
-            fn as_ref(&self) -> &serenity::Context {
+        impl<U: Send + Sync + 'static, E> AsRef<serenity::Context<U>> for $($type)*<'_, U, E> {
+            fn as_ref(&self) -> &serenity::Context<U> {
                 self.serenity_context()
             }
         }
-        impl<U: Send + Sync, E> serenity::CacheHttp for $($type)*<'_, U, E> {
+        impl<U: Send + Sync + 'static, E> serenity::CacheHttp for $($type)*<'_, U, E> {
             fn http(&self) -> &serenity::Http {
                 &self.serenity_context().http
             }
@@ -644,7 +643,7 @@ context_trait_impls!(crate::ApplicationContext);
 context_trait_impls!(crate::PrefixContext);
 
 /// Trimmed down, more general version of [`Context`]
-pub struct PartialContext<'a, U, E> {
+pub struct PartialContext<'a, U: Send + Sync + 'static, E> {
     /// ID of the guild, if not invoked in DMs
     pub guild_id: Option<serenity::GuildId>,
     /// ID of the invocation channel
@@ -652,24 +651,21 @@ pub struct PartialContext<'a, U, E> {
     /// ID of the invocation author
     pub author: &'a serenity::User,
     /// Serenity's context, like HTTP or cache
-    pub serenity_context: &'a serenity::Context,
+    pub serenity_context: &'a serenity::Context<U>,
     /// Useful if you need the list of commands, for example for a custom help command
     pub framework: crate::FrameworkContext<'a, U, E>,
-    /// Your custom user data
-    // TODO: redundant with framework
-    pub data: &'a U,
     #[doc(hidden)]
     pub __non_exhaustive: (),
 }
 
-impl<U, E> Copy for PartialContext<'_, U, E> {}
-impl<U, E> Clone for PartialContext<'_, U, E> {
+impl<U: Send + Sync + 'static, E> Copy for PartialContext<'_, U, E> {}
+impl<U: Send + Sync + 'static, E> Clone for PartialContext<'_, U, E> {
     fn clone(&self) -> Self {
         *self
     }
 }
 
-impl<'a, U, E> From<Context<'a, U, E>> for PartialContext<'a, U, E> {
+impl<'a, U: Send + Sync + 'static, E> From<Context<'a, U, E>> for PartialContext<'a, U, E> {
     fn from(ctx: Context<'a, U, E>) -> Self {
         Self {
             guild_id: ctx.guild_id(),
@@ -677,7 +673,6 @@ impl<'a, U, E> From<Context<'a, U, E>> for PartialContext<'a, U, E> {
             author: ctx.author(),
             serenity_context: ctx.serenity_context(),
             framework: ctx.framework(),
-            data: ctx.data(),
             __non_exhaustive: (),
         }
     }

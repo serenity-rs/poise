@@ -16,14 +16,14 @@ use crate::serenity_prelude as serenity;
 /// serenity::Command::set_global_commands(ctx, create_commands).await?;
 /// # Ok(()) }
 /// ```
-pub fn create_application_commands<U, E>(
+pub fn create_application_commands<U: Send + Sync + 'static, E>(
     commands: &[crate::Command<U, E>],
 ) -> Vec<serenity::CreateCommand> {
     /// We decided to extract context menu commands recursively, despite the subcommand hierarchy
     /// not being preserved. Because it's more confusing to just silently discard context menu
     /// commands if they're not top-level commands.
     /// https://discord.com/channels/381880193251409931/919310428344029265/947970605985189989
-    fn recursively_add_context_menu_commands<U, E>(
+    fn recursively_add_context_menu_commands<U: Send + Sync + 'static, E>(
         builder: &mut Vec<serenity::CreateCommand>,
         command: &crate::Command<U, E>,
     ) {
@@ -49,7 +49,7 @@ pub fn create_application_commands<U, E>(
 ///
 /// Thin wrapper around [`create_application_commands`] that funnels the returned builder into
 /// [`serenity::Command::set_global_commands`].
-pub async fn register_globally<U, E>(
+pub async fn register_globally<U: Send + Sync + 'static, E>(
     http: impl AsRef<serenity::Http>,
     commands: &[crate::Command<U, E>],
 ) -> Result<(), serenity::Error> {
@@ -62,7 +62,7 @@ pub async fn register_globally<U, E>(
 ///
 /// Thin wrapper around [`create_application_commands`] that funnels the returned builder into
 /// [`serenity::GuildId::set_commands`].
-pub async fn register_in_guild<U, E>(
+pub async fn register_in_guild<U: Send + Sync + 'static, E>(
     http: impl AsRef<serenity::Http>,
     commands: &[crate::Command<U, E>],
     guild_id: serenity::GuildId,
@@ -85,7 +85,7 @@ pub async fn register_in_guild<U, E>(
 ///
 /// Run with no arguments to register in guild, run with argument "global" to register globally.
 /// ```
-pub async fn register_application_commands<U, E>(
+pub async fn register_application_commands<U: Send + Sync + 'static, E>(
     ctx: crate::Context<'_, U, E>,
     global: bool,
 ) -> Result<(), serenity::Error> {
@@ -148,7 +148,7 @@ pub async fn register_application_commands<U, E>(
 /// ```
 ///
 /// Which you can call like any prefix command, for example `@your_bot register`.
-pub async fn register_application_commands_buttons<U, E>(
+pub async fn register_application_commands_buttons<U: Send + Sync + 'static, E>(
     ctx: crate::Context<'_, U, E>,
 ) -> Result<(), serenity::Error> {
     let create_commands = create_application_commands(&ctx.framework().options().commands);

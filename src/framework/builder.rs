@@ -8,17 +8,17 @@ use crate::BoxFuture;
 /// If one of the following required values is missing, the builder will panic on start:
 /// - [`Self::setup`]
 /// - [`Self::options`]
-pub struct FrameworkBuilder<U, E> {
+pub struct FrameworkBuilder<U: Send + Sync + 'static, E> {
     /// Callback for startup code and user data creation
     setup: Option<
         Box<
             dyn Send
                 + Sync
                 + for<'a> FnOnce(
-                    &'a serenity::Context,
+                    &'a serenity::Context<U>,
                     &'a serenity::Ready,
                     &'a crate::Framework<U, E>,
-                ) -> BoxFuture<'a, Result<U, E>>,
+                ) -> BoxFuture<'a, Result<(), E>>,
         >,
     >,
     /// Framework options
@@ -29,7 +29,7 @@ pub struct FrameworkBuilder<U, E> {
     initialize_owners: bool,
 }
 
-impl<U, E> Default for FrameworkBuilder<U, E> {
+impl<U: Send + Sync + 'static, E> Default for FrameworkBuilder<U, E> {
     fn default() -> Self {
         Self {
             setup: Default::default(),
@@ -40,7 +40,7 @@ impl<U, E> Default for FrameworkBuilder<U, E> {
     }
 }
 
-impl<U, E> FrameworkBuilder<U, E> {
+impl<U: Send + Sync + 'static, E> FrameworkBuilder<U, E> {
     /// Sets the setup callback which also returns the user data struct.
     #[must_use]
     pub fn setup<F>(mut self, setup: F) -> Self
@@ -49,10 +49,10 @@ impl<U, E> FrameworkBuilder<U, E> {
             + Sync
             + 'static
             + for<'a> FnOnce(
-                &'a serenity::Context,
+                &'a serenity::Context<U>,
                 &'a serenity::Ready,
                 &'a crate::Framework<U, E>,
-            ) -> BoxFuture<'a, Result<U, E>>,
+            ) -> BoxFuture<'a, Result<(), E>>,
     {
         self.setup = Some(Box::new(setup) as _);
         self

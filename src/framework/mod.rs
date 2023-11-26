@@ -18,9 +18,7 @@ mod builder;
 /// - keeps track of shard manager and bot ID automatically
 ///
 /// You can build a bot without [`Framework`]: see the `manual_dispatch` example in the repository
-pub struct Framework<U, E> {
-    /// Stores user data. Is initialized on first Ready event
-    user_data: std::sync::OnceLock<U>,
+pub struct Framework<U: Send + Sync + 'static, E> {
     /// Stores bot ID. Is initialized on first Ready event
     bot_id: std::sync::OnceLock<serenity::UserId>,
     /// Stores the framework options
@@ -35,10 +33,10 @@ pub struct Framework<U, E> {
                 dyn Send
                     + Sync
                     + for<'a> FnOnce(
-                        &'a serenity::Context,
+                        &'a serenity::Context<U>,
                         &'a serenity::Ready,
                         &'a Self,
-                    ) -> BoxFuture<'a, Result<U, E>>,
+                    ) -> BoxFuture<'a, Result<(), E>>,
             >,
         >,
     >,
@@ -47,7 +45,7 @@ pub struct Framework<U, E> {
     edit_tracker_purge_task: Option<tokio::task::JoinHandle<()>>,
 }
 
-impl<U, E> Framework<U, E> {
+impl<U: Send + Sync + 'static, E> Framework<U, E> {
     /// Create a framework builder to configure, create and run a framework.
     ///
     /// For more information, see [`FrameworkBuilder`]
@@ -75,15 +73,14 @@ impl<U, E> Framework<U, E> {
             + Sync
             + 'static
             + for<'a> FnOnce(
-                &'a serenity::Context,
+                &'a serenity::Context<U>,
                 &'a serenity::Ready,
                 &'a Self,
-            ) -> BoxFuture<'a, Result<U, E>>,
+            ) -> BoxFuture<'a, Result<(), E>>,
         U: Send + Sync + 'static,
         E: Send + 'static,
     {
         Self {
-            user_data: std::sync::OnceLock::new(),
             bot_id: std::sync::OnceLock::new(),
             setup: std::sync::Mutex::new(Some(Box::new(setup))),
             edit_tracker_purge_task: None,
@@ -104,20 +101,9 @@ impl<U, E> Framework<U, E> {
             .as_ref()
             .expect("framework should have started")
     }
-
-    /// Retrieves user data, or blocks until it has been initialized (once the Ready event has been
-    /// received).
-    pub async fn user_data(&self) -> &U {
-        loop {
-            match self.user_data.get() {
-                Some(x) => break x,
-                None => tokio::time::sleep(std::time::Duration::from_millis(100)).await,
-            }
-        }
-    }
 }
 
-impl<U, E> Drop for Framework<U, E> {
+impl<U: Send + Sync + 'static, E> Drop for Framework<U, E> {
     fn drop(&mut self) {
         if let Some(task) = &mut self.edit_tracker_purge_task {
             task.abort()
@@ -126,8 +112,8 @@ impl<U, E> Drop for Framework<U, E> {
 }
 
 #[serenity::async_trait]
-impl<U: Send + Sync, E: Send + Sync> serenity::Framework for Framework<U, E> {
-    async fn init(&mut self, client: &serenity::Client) {
+impl<U: Send + Sync + 'static, E: Send + Sync> serenity::Framework<U> for Framework<U, E> {
+    async fn init(&mut self, client: &serenity::Client<U>) {
         set_qualified_names(&mut self.options.commands);
 
         message_content_intent_sanity_check(
@@ -149,7 +135,7 @@ impl<U: Send + Sync, E: Send + Sync> serenity::Framework for Framework<U, E> {
         }
     }
 
-    async fn dispatch(&self, ctx: serenity::Context, event: serenity::FullEvent) {
+    async fn dispatch(&self, ctx: serenity::Context<U>, event: serenity::FullEvent) {
         raw_dispatch_event(self, ctx, event).await
     }
 }
@@ -158,7 +144,7 @@ impl<U: Send + Sync, E: Send + Sync> serenity::Framework for Framework<U, E> {
 /// Otherwise, it forwards the event to [`crate::dispatch_event`]
 async fn raw_dispatch_event<U, E>(
     framework: &Framework<U, E>,
-    ctx: serenity::Context,
+    ctx: serenity::Context<U>,
     event: serenity::FullEvent,
 ) where
     U: Send + Sync,
@@ -167,19 +153,14 @@ async fn raw_dispatch_event<U, E>(
         let _: Result<_, _> = framework.bot_id.set(data_about_bot.user.id);
         let setup = Option::take(&mut *framework.setup.lock().unwrap());
         if let Some(setup) = setup {
-            match setup(&ctx, data_about_bot, framework).await {
-                Ok(user_data) => {
-                    let _: Result<_, _> = framework.user_data.set(user_data);
-                }
-                Err(error) => {
-                    (framework.options.on_error)(crate::FrameworkError::Setup {
-                        error,
-                        framework,
-                        data_about_bot,
-                        ctx: &ctx,
-                    })
-                    .await
-                }
+            if let Err(error) = setup(&ctx, data_about_bot, framework).await {
+                (framework.options.on_error)(crate::FrameworkError::Setup {
+                    error,
+                    framework,
+                    data_about_bot,
+                    ctx: &ctx,
+                })
+                .await
             }
         } else {
             // ignoring duplicate Discord bot ready event
@@ -187,7 +168,6 @@ async fn raw_dispatch_event<U, E>(
         }
     }
 
-    let user_data = framework.user_data().await;
     let bot_id = *framework
         .bot_id
         .get()
@@ -195,16 +175,18 @@ async fn raw_dispatch_event<U, E>(
     let framework = crate::FrameworkContext {
         bot_id,
         options: &framework.options,
-        user_data,
         shard_manager: framework.shard_manager(),
     };
     crate::dispatch_event(framework, &ctx, event).await;
 }
 
 /// Traverses commands recursively and sets [`crate::Command::qualified_name`] to its actual value
-pub fn set_qualified_names<U, E>(commands: &mut [crate::Command<U, E>]) {
+pub fn set_qualified_names<U: Send + Sync + 'static, E>(commands: &mut [crate::Command<U, E>]) {
     /// Fills in `qualified_name` fields by appending command name to the parent command name
-    fn set_subcommand_qualified_names<U, E>(parents: &str, commands: &mut [crate::Command<U, E>]) {
+    fn set_subcommand_qualified_names<U: Send + Sync + 'static, E>(
+        parents: &str,
+        commands: &mut [crate::Command<U, E>],
+    ) {
         for cmd in commands {
             cmd.qualified_name = format!("{} {}", parents, cmd.name);
             set_subcommand_qualified_names(&cmd.qualified_name, &mut cmd.subcommands);
@@ -216,7 +198,7 @@ pub fn set_qualified_names<U, E>(commands: &mut [crate::Command<U, E>]) {
 }
 
 /// Prints a warning on stderr if a prefix is configured but `MESSAGE_CONTENT` is not set
-fn message_content_intent_sanity_check<U, E>(
+fn message_content_intent_sanity_check<U: Send + Sync + 'static, E>(
     prefix_options: &crate::PrefixFrameworkOptions<U, E>,
     intents: serenity::GatewayIntents,
 ) {

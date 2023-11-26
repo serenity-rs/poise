@@ -8,7 +8,7 @@ use crate::serenity_prelude as serenity;
 /// These errors are handled with the [`crate::FrameworkOptions::on_error`] callback
 #[derive(derivative::Derivative)]
 #[derivative(Debug)]
-pub enum FrameworkError<'a, U, E> {
+pub enum FrameworkError<'a, U: Send + Sync + 'static, E> {
     /// User code threw an error in user data setup
     #[non_exhaustive]
     Setup {
@@ -21,7 +21,7 @@ pub enum FrameworkError<'a, U, E> {
         data_about_bot: &'a serenity::Ready,
         /// The serenity Context passed to the event
         #[derivative(Debug = "ignore")]
-        ctx: &'a serenity::Context,
+        ctx: &'a serenity::Context<U>,
     },
     /// User code threw an error in generic event event handler
     #[non_exhaustive]
@@ -29,7 +29,7 @@ pub enum FrameworkError<'a, U, E> {
         /// Error which was thrown in the event handler code
         error: E,
         /// The serenity context passed to the event handler
-        ctx: &'a serenity::Context,
+        ctx: &'a serenity::Context<U>,
         /// Which event was being processed when the error occurred
         event: &'a serenity::FullEvent,
         /// The Framework passed to the event
@@ -166,7 +166,7 @@ pub enum FrameworkError<'a, U, E> {
     UnknownCommand {
         /// Serenity's Context
         #[derivative(Debug = "ignore")]
-        ctx: &'a serenity::Context,
+        ctx: &'a serenity::Context<U>,
         /// The message in question
         msg: &'a serenity::Message,
         /// The prefix that was recognized
@@ -189,7 +189,7 @@ pub enum FrameworkError<'a, U, E> {
     UnknownInteraction {
         #[derivative(Debug = "ignore")]
         /// Serenity's Context
-        ctx: &'a serenity::Context,
+        ctx: &'a serenity::Context<U>,
         /// Framework context
         #[derivative(Debug = "ignore")]
         framework: crate::FrameworkContext<'a, U, E>,
@@ -201,9 +201,9 @@ pub enum FrameworkError<'a, U, E> {
     __NonExhaustive(std::convert::Infallible),
 }
 
-impl<'a, U, E> FrameworkError<'a, U, E> {
+impl<'a, U: Send + Sync + 'static, E> FrameworkError<'a, U, E> {
     /// Returns the [`serenity::Context`] of this error
-    pub fn serenity_context(&self) -> &'a serenity::Context {
+    pub fn serenity_context(&self) -> &'a serenity::Context<U> {
         match *self {
             Self::Setup { ctx, .. } => ctx,
             Self::EventHandler { ctx, .. } => ctx,
@@ -264,7 +264,7 @@ impl<'a, U, E> FrameworkError<'a, U, E> {
 
 /// Support functions for the macro, which can't create these #[non_exhaustive] enum variants
 #[doc(hidden)]
-impl<'a, U, E> FrameworkError<'a, U, E> {
+impl<'a, U: Send + Sync + 'static, E> FrameworkError<'a, U, E> {
     pub fn new_command(ctx: crate::Context<'a, U, E>, error: E) -> Self {
         Self::Command { error, ctx }
     }
@@ -292,7 +292,9 @@ macro_rules! full_command_name {
     };
 }
 
-impl<U, E: std::fmt::Display> std::fmt::Display for FrameworkError<'_, U, E> {
+impl<U: Send + Sync + 'static, E: std::fmt::Display> std::fmt::Display
+    for FrameworkError<'_, U, E>
+{
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::Setup {
@@ -409,8 +411,10 @@ impl<U, E: std::fmt::Display> std::fmt::Display for FrameworkError<'_, U, E> {
     }
 }
 
-impl<'a, U: std::fmt::Debug, E: std::error::Error + 'static> std::error::Error
-    for FrameworkError<'a, U, E>
+impl<'a, U: Send + Sync + 'static, E> std::error::Error for FrameworkError<'a, U, E>
+where
+    U: std::fmt::Debug + Send + Sync + 'static,
+    E: std::error::Error + 'static,
 {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         match self {

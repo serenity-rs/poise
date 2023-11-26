@@ -4,7 +4,7 @@
 //! The original use case for this feature was to have the same command in two different bots
 
 #[poise::command(slash_command)]
-pub async fn example<U: Sync, E>(ctx: poise::Context<'_, U, E>) -> Result<(), E> {
+pub async fn example<U: Sync + Send, E>(ctx: poise::Context<'_, U, E>) -> Result<(), E> {
     ctx.say(format!(
         "My user data type is {} and the error type is {}",
         std::any::type_name::<U>(),

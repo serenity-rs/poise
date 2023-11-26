@@ -3,7 +3,7 @@ use crate::serenity_prelude as serenity;
 use crate::BoxFuture;
 
 /// Implemented for all types that can be used in a context menu command
-pub trait ContextMenuParameter<U, E> {
+pub trait ContextMenuParameter<U: Send + Sync + 'static, E> {
     /// Convert an action function pointer that takes Self as an argument into the appropriate
     /// [`crate::ContextMenuCommandAction`] variant.
     fn to_action(
@@ -14,7 +14,7 @@ pub trait ContextMenuParameter<U, E> {
     ) -> crate::ContextMenuCommandAction<U, E>;
 }
 
-impl<U, E> ContextMenuParameter<U, E> for serenity::User {
+impl<U: Send + Sync + 'static, E> ContextMenuParameter<U, E> for serenity::User {
     fn to_action(
         action: fn(
             crate::ApplicationContext<'_, U, E>,
@@ -25,7 +25,7 @@ impl<U, E> ContextMenuParameter<U, E> for serenity::User {
     }
 }
 
-impl<U, E> ContextMenuParameter<U, E> for serenity::Message {
+impl<U: Send + Sync + 'static, E> ContextMenuParameter<U, E> for serenity::Message {
     fn to_action(
         action: fn(
             crate::ApplicationContext<'_, U, E>,

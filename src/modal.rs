@@ -42,9 +42,10 @@ pub fn find_modal_text(
 /// interaction
 async fn execute_modal_generic<
     M: Modal,
+    U: Send + Sync,
     F: std::future::Future<Output = Result<(), serenity::Error>>,
 >(
-    ctx: &serenity::Context,
+    ctx: &serenity::Context<U>,
     create_interaction_response: impl FnOnce(serenity::CreateInteractionResponse) -> F,
     modal_custom_id: String,
     defaults: Option<M>,
@@ -119,8 +120,8 @@ pub async fn execute_modal<U: Send + Sync, E, M: Modal>(
 ///
 /// If you need more specialized behavior, you can copy paste the implementation of this function
 /// and adjust to your needs. The code of this function is just a starting point.
-pub async fn execute_modal_on_component_interaction<M: Modal>(
-    ctx: impl AsRef<serenity::Context>,
+pub async fn execute_modal_on_component_interaction<M: Modal, U: Send + Sync + 'static>(
+    ctx: impl AsRef<serenity::Context<U>>,
     interaction: serenity::ModalInteraction,
     defaults: Option<M>,
     timeout: Option<std::time::Duration>,

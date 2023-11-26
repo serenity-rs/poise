@@ -34,10 +34,10 @@ pub trait PopArgument<'a>: Sized {
     /// If parsing fails because the string is empty, use the `TooFewArguments` type as the error.
     ///
     /// Don't call this method directly! Use [`crate::pop_prefix_argument!`]
-    async fn pop_from(
+    async fn pop_from<U: Send + Sync + 'static>(
         args: &'a str,
         attachment_index: usize,
-        ctx: &serenity::Context,
+        ctx: &serenity::Context<U>,
         msg: &serenity::Message,
     ) -> Result<(&'a str, usize, Self), (Box<dyn std::error::Error + Send + Sync>, Option<String>)>;
 }
@@ -45,11 +45,11 @@ pub trait PopArgument<'a>: Sized {
 #[doc(hidden)]
 #[async_trait::async_trait]
 pub trait PopArgumentHack<'a, T>: Sized {
-    async fn pop_from(
+    async fn pop_from<U: Send + Sync>(
         self,
         args: &'a str,
         attachment_index: usize,
-        ctx: &serenity::Context,
+        ctx: &serenity::Context<U>,
         msg: &serenity::Message,
     ) -> Result<(&'a str, usize, T), (Box<dyn std::error::Error + Send + Sync>, Option<String>)>;
 }
@@ -59,11 +59,11 @@ impl<'a, T: serenity::ArgumentConvert + Send> PopArgumentHack<'a, T> for Phantom
 where
     T::Err: std::error::Error + Send + Sync + 'static,
 {
-    async fn pop_from(
+    async fn pop_from<U: Send + Sync>(
         self,
         args: &'a str,
         attachment_index: usize,
-        ctx: &serenity::Context,
+        ctx: &serenity::Context<U>,
         msg: &serenity::Message,
     ) -> Result<(&'a str, usize, T), (Box<dyn std::error::Error + Send + Sync>, Option<String>)>
     {
@@ -79,11 +79,11 @@ where
 
 #[async_trait::async_trait]
 impl<'a, T: PopArgument<'a> + Send + Sync> PopArgumentHack<'a, T> for &PhantomData<T> {
-    async fn pop_from(
+    async fn pop_from<U: Send + Sync + 'static>(
         self,
         args: &'a str,
         attachment_index: usize,
-        ctx: &serenity::Context,
+        ctx: &serenity::Context<U>,
         msg: &serenity::Message,
     ) -> Result<(&'a str, usize, T), (Box<dyn std::error::Error + Send + Sync>, Option<String>)>
     {
@@ -93,11 +93,11 @@ impl<'a, T: PopArgument<'a> + Send + Sync> PopArgumentHack<'a, T> for &PhantomDa
 
 #[async_trait::async_trait]
 impl<'a> PopArgumentHack<'a, bool> for &PhantomData<bool> {
-    async fn pop_from(
+    async fn pop_from<U: Send + Sync + 'static>(
         self,
         args: &'a str,
         attachment_index: usize,
-        ctx: &serenity::Context,
+        ctx: &serenity::Context<U>,
         msg: &serenity::Message,
     ) -> Result<(&'a str, usize, bool), (Box<dyn std::error::Error + Send + Sync>, Option<String>)>
     {
@@ -116,11 +116,11 @@ impl<'a> PopArgumentHack<'a, bool> for &PhantomData<bool> {
 
 #[async_trait::async_trait]
 impl<'a> PopArgumentHack<'a, serenity::Attachment> for &PhantomData<serenity::Attachment> {
-    async fn pop_from(
+    async fn pop_from<U: Send + Sync + 'static>(
         self,
         args: &'a str,
         attachment_index: usize,
-        ctx: &serenity::Context,
+        ctx: &serenity::Context<U>,
         msg: &serenity::Message,
     ) -> Result<
         (&'a str, usize, serenity::Attachment),

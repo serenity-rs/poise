@@ -23,7 +23,7 @@ use crate::serenity_prelude as serenity;
 /// ).await?;
 /// # Ok(()) }
 /// ```
-pub async fn send_reply<U, E>(
+pub async fn send_reply<U: Send + Sync + 'static, E>(
     ctx: crate::Context<'_, U, E>,
     builder: crate::CreateReply,
 ) -> Result<crate::ReplyHandle<'_>, serenity::Error> {
@@ -38,7 +38,7 @@ pub async fn send_reply<U, E>(
 /// Shorthand of [`send_reply`] for text-only messages
 ///
 /// Note: panics when called in an autocomplete context!
-pub async fn say_reply<U, E>(
+pub async fn say_reply<U: Send + Sync + 'static, E>(
     ctx: crate::Context<'_, U, E>,
     text: impl Into<String>,
 ) -> Result<crate::ReplyHandle<'_>, serenity::Error> {
@@ -51,7 +51,7 @@ pub async fn say_reply<U, E>(
 /// [followup](serenity::CommandInteraction::create_followup) is sent.
 ///
 /// No-op if autocomplete context
-pub async fn send_application_reply<U, E>(
+pub async fn send_application_reply<U: Send + Sync + 'static, E>(
     ctx: crate::ApplicationContext<'_, U, E>,
     builder: crate::CreateReply,
 ) -> Result<crate::ReplyHandle<'_>, serenity::Error> {
@@ -98,7 +98,7 @@ pub async fn send_application_reply<U, E>(
 }
 
 /// Prefix-specific reply function. For more details, see [`crate::send_reply`].
-pub async fn send_prefix_reply<U, E>(
+pub async fn send_prefix_reply<U: Send + Sync + 'static, E>(
     ctx: crate::PrefixContext<'_, U, E>,
     builder: crate::CreateReply,
 ) -> Result<Box<serenity::Message>, serenity::Error> {

@@ -5,7 +5,7 @@ use crate::{serenity_prelude as serenity, BoxFuture};
 /// Framework configuration
 #[derive(derivative::Derivative)]
 #[derivative(Debug(bound = ""))]
-pub struct FrameworkOptions<U, E> {
+pub struct FrameworkOptions<U: Send + Sync + 'static, E> {
     /// List of commands in the framework
     pub commands: Vec<crate::Command<U, E>>,
     /// Provide a callback to be invoked when any user code yields an error.
@@ -49,11 +49,9 @@ pub struct FrameworkOptions<U, E> {
     /// deletions or guild updates.
     #[derivative(Debug = "ignore")]
     pub event_handler: for<'a> fn(
-        &'a serenity::Context,
+        &'a serenity::Context<U>,
         &'a serenity::FullEvent,
         crate::FrameworkContext<'a, U, E>,
-        // TODO: redundant with framework
-        &'a U,
     ) -> BoxFuture<'a, Result<(), E>>,
     /// Renamed to [`Self::event_handler`]!
     #[deprecated = "renamed to event_handler"]
@@ -72,7 +70,7 @@ pub struct FrameworkOptions<U, E> {
     pub __non_exhaustive: (),
 }
 
-impl<U, E> FrameworkOptions<U, E> {
+impl<U: Send + Sync + 'static, E> FrameworkOptions<U, E> {
     /// Add a new command to the framework
     #[deprecated = "supply commands in FrameworkOptions directly with `commands: vec![...]`"]
     pub fn command(
@@ -85,7 +83,7 @@ impl<U, E> FrameworkOptions<U, E> {
     }
 }
 
-impl<U, E> Default for FrameworkOptions<U, E>
+impl<U: Send + Sync + 'static, E> Default for FrameworkOptions<U, E>
 where
     U: Send + Sync,
     E: std::fmt::Display + std::fmt::Debug + Send,
@@ -101,7 +99,7 @@ where
                     }
                 })
             },
-            event_handler: |_, _, _, _| Box::pin(async { Ok(()) }),
+            event_handler: |_, _, _| Box::pin(async { Ok(()) }),
             listener: (),
             pre_command: |_| Box::pin(async {}),
             post_command: |_| Box::pin(async {}),

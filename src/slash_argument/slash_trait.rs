@@ -15,8 +15,8 @@ pub trait SlashArgument: Sized {
     /// [`serenity::json::Value`].
     ///
     /// Don't call this method directly! Use [`crate::extract_slash_argument!`]
-    async fn extract(
-        ctx: &serenity::Context,
+    async fn extract<U: Send + Sync + 'static>(
+        ctx: &serenity::Context<U>,
         interaction: &serenity::CommandInteraction,
         value: &serenity::ResolvedValue<'_>,
     ) -> Result<Self, SlashArgError>;
@@ -44,9 +44,9 @@ pub trait SlashArgument: Sized {
 #[doc(hidden)]
 #[async_trait::async_trait]
 pub trait SlashArgumentHack<T>: Sized {
-    async fn extract(
+    async fn extract<U: Send + Sync + 'static>(
         self,
-        ctx: &serenity::Context,
+        ctx: &serenity::Context<U>,
         interaction: &serenity::CommandInteraction,
         value: &serenity::ResolvedValue<'_>,
     ) -> Result<T, SlashArgError>;
@@ -96,9 +96,9 @@ where
     T: serenity::ArgumentConvert + Send + Sync,
     T::Err: std::error::Error + Send + Sync + 'static,
 {
-    async fn extract(
+    async fn extract<U: Send + Sync + 'static>(
         self,
-        ctx: &serenity::Context,
+        ctx: &serenity::Context<U>,
         interaction: &serenity::CommandInteraction,
         value: &serenity::ResolvedValue<'_>,
     ) -> Result<T, SlashArgError> {
@@ -134,8 +134,8 @@ macro_rules! impl_for_integer {
     ($($t:ty)*) => { $(
         #[async_trait::async_trait]
         impl SlashArgument for $t {
-            async fn extract(
-                _: &serenity::Context,
+            async fn extract<U: Send + Sync + 'static>(
+                _: &serenity::Context<U>,
                 _: &serenity::CommandInteraction,
                 value: &serenity::ResolvedValue<'_>,
             ) -> Result<$t, SlashArgError> {
@@ -165,9 +165,9 @@ macro_rules! impl_for_float {
     ($($t:ty)*) => { $(
         #[async_trait::async_trait]
         impl SlashArgumentHack<$t> for &PhantomData<$t> {
-            async fn extract(
+            async fn extract<U: Send + Sync + 'static>(
                 self,
-                _: &serenity::Context,
+                _: &serenity::Context<U>,
                 _: &serenity::CommandInteraction,
                 value: &serenity::ResolvedValue<'_>,
             ) -> Result<$t, SlashArgError> {
@@ -187,9 +187,9 @@ impl_for_float!(f32 f64);
 
 #[async_trait::async_trait]
 impl SlashArgumentHack<bool> for &PhantomData<bool> {
-    async fn extract(
+    async fn extract<U: Send + Sync + 'static>(
         self,
-        _: &serenity::Context,
+        _: &serenity::Context<U>,
         _: &serenity::CommandInteraction,
         value: &serenity::ResolvedValue<'_>,
     ) -> Result<bool, SlashArgError> {
@@ -208,9 +208,9 @@ impl SlashArgumentHack<bool> for &PhantomData<bool> {
 
 #[async_trait::async_trait]
 impl SlashArgumentHack<serenity::Attachment> for &PhantomData<serenity::Attachment> {
-    async fn extract(
+    async fn extract<U: Send + Sync + 'static>(
         self,
-        _: &serenity::Context,
+        _: &serenity::Context<U>,
         interaction: &serenity::CommandInteraction,
         value: &serenity::ResolvedValue<'_>,
     ) -> Result<serenity::Attachment, SlashArgError> {
@@ -246,9 +246,9 @@ impl SlashArgumentHack<serenity::Attachment> for &PhantomData<serenity::Attachme
 
 #[async_trait::async_trait]
 impl<T: SlashArgument + Sync> SlashArgumentHack<T> for &PhantomData<T> {
-    async fn extract(
+    async fn extract<U: Send + Sync + 'static>(
         self,
-        ctx: &serenity::Context,
+        ctx: &serenity::Context<U>,
         interaction: &serenity::CommandInteraction,
         value: &serenity::ResolvedValue<'_>,
     ) -> Result<T, SlashArgError> {
@@ -269,8 +269,8 @@ macro_rules! impl_slash_argument {
     ($type:ty, $slash_param_type:ident) => {
         #[async_trait::async_trait]
         impl SlashArgument for $type {
-            async fn extract(
-                ctx: &serenity::Context,
+            async fn extract<U: Send + Sync + 'static>(
+                ctx: &serenity::Context<U>,
                 interaction: &serenity::CommandInteraction,
                 value: &serenity::ResolvedValue<'_>,
             ) -> Result<$type, SlashArgError> {

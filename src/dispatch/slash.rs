@@ -3,7 +3,7 @@
 use crate::serenity_prelude as serenity;
 
 /// Check if the interaction with the given name and arguments matches any framework command
-fn find_matching_command<'a, 'b, U, E>(
+fn find_matching_command<'a, 'b, U: Send + Sync + 'static, E>(
     interaction_name: &str,
     interaction_options: &'b [serenity::ResolvedOption<'b>],
     commands: &'a [crate::Command<U, E>],
@@ -38,9 +38,9 @@ fn find_matching_command<'a, 'b, U, E>(
 /// After this, the [`crate::ApplicationContext`] should be passed into [`run_command`] or
 /// [`run_autocomplete`].
 #[allow(clippy::too_many_arguments)] // We need to pass them all in to create Context.
-fn extract_command<'a, U, E>(
+fn extract_command<'a, U: Send + Sync + 'static, E>(
     framework: crate::FrameworkContext<'a, U, E>,
-    ctx: &'a serenity::Context,
+    ctx: &'a serenity::Context<U>,
     interaction: &'a serenity::CommandInteraction,
     interaction_type: crate::CommandInteractionType,
     has_sent_initial_response: &'a std::sync::atomic::AtomicBool,
@@ -62,7 +62,6 @@ fn extract_command<'a, U, E>(
         })?;
 
     Ok(crate::ApplicationContext {
-        data: framework.user_data,
         serenity_context: ctx,
         framework,
         interaction,
@@ -78,9 +77,9 @@ fn extract_command<'a, U, E>(
 
 /// Given an interaction, finds the matching framework command and checks if the user is allowed access
 #[allow(clippy::too_many_arguments)] // We need to pass them all in to create Context.
-pub async fn extract_command_and_run_checks<'a, U, E>(
+pub async fn extract_command_and_run_checks<'a, U: Send + Sync + 'static, E>(
     framework: crate::FrameworkContext<'a, U, E>,
-    ctx: &'a serenity::Context,
+    ctx: &'a serenity::Context<U>,
     interaction: &'a serenity::CommandInteraction,
     interaction_type: crate::CommandInteractionType,
     has_sent_initial_response: &'a std::sync::atomic::AtomicBool,
@@ -104,7 +103,7 @@ pub async fn extract_command_and_run_checks<'a, U, E>(
 
 /// Given the extracted application command data from [`extract_command`], runs the command,
 /// including all the before and after code like checks.
-async fn run_command<U, E>(
+async fn run_command<U: Send + Sync + 'static, E>(
     ctx: crate::ApplicationContext<'_, U, E>,
 ) -> Result<(), crate::FrameworkError<'_, U, E>> {
     super::common::check_permissions_and_cooldown(ctx.into()).await?;
@@ -163,9 +162,9 @@ async fn run_command<U, E>(
 }
 
 /// Dispatches this interaction onto framework commands, i.e. runs the associated command
-pub async fn dispatch_interaction<'a, U, E>(
+pub async fn dispatch_interaction<'a, U: Send + Sync + 'static, E>(
     framework: crate::FrameworkContext<'a, U, E>,
-    ctx: &'a serenity::Context,
+    ctx: &'a serenity::Context<U>,
     interaction: &'a serenity::CommandInteraction,
     // Need to pass this in from outside because of lifetime issues
     has_sent_initial_response: &'a std::sync::atomic::AtomicBool,
@@ -198,7 +197,7 @@ pub async fn dispatch_interaction<'a, U, E>(
 
 /// Given the extracted application command data from [`extract_command`], runs the autocomplete
 /// callbacks, including all the before and after code like checks.
-async fn run_autocomplete<U, E>(
+async fn run_autocomplete<U: Send + Sync + 'static, E>(
     ctx: crate::ApplicationContext<'_, U, E>,
 ) -> Result<(), crate::FrameworkError<'_, U, E>> {
     super::common::check_permissions_and_cooldown(ctx.into()).await?;
@@ -260,9 +259,9 @@ async fn run_autocomplete<U, E>(
 
 /// Dispatches this interaction onto framework commands, i.e. runs the associated autocomplete
 /// callback
-pub async fn dispatch_autocomplete<'a, U, E>(
+pub async fn dispatch_autocomplete<'a, U: Send + Sync + 'static, E>(
     framework: crate::FrameworkContext<'a, U, E>,
-    ctx: &'a serenity::Context,
+    ctx: &'a serenity::Context<U>,
     interaction: &'a serenity::CommandInteraction,
     // Need to pass the following in from outside because of lifetime issues
     has_sent_initial_response: &'a std::sync::atomic::AtomicBool,

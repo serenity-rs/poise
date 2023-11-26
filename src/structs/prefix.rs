@@ -21,10 +21,10 @@ pub enum MessageDispatchTrigger {
 /// Contains the trigger message, the Discord connection management stuff, and the user data.
 #[derive(derivative::Derivative)]
 #[derivative(Debug(bound = ""))]
-pub struct PrefixContext<'a, U, E> {
+pub struct PrefixContext<'a, U: Send + Sync + 'static, E> {
     /// Serenity's context, like HTTP or cache
     #[derivative(Debug = "ignore")]
-    pub serenity_context: &'a serenity::Context,
+    pub serenity_context: &'a serenity::Context<U>,
     /// The invoking user message
     pub msg: &'a serenity::Message,
     /// Prefix used by the user to invoke this command
@@ -42,10 +42,6 @@ pub struct PrefixContext<'a, U, E> {
     pub parent_commands: &'a [&'a crate::Command<U, E>],
     /// The command object which is the current command
     pub command: &'a crate::Command<U, E>,
-    /// Your custom user data
-    // TODO: redundant with framework
-    #[derivative(Debug = "ignore")]
-    pub data: &'a U,
     /// Custom user data carried across a single command invocation
     pub invocation_data: &'a tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
     /// How this command invocation was triggered
@@ -61,13 +57,13 @@ pub struct PrefixContext<'a, U, E> {
     pub __non_exhaustive: (),
 }
 // manual Copy+Clone implementations because Rust is getting confused about the type parameter
-impl<U, E> Clone for PrefixContext<'_, U, E> {
+impl<U: Send + Sync + 'static, E> Clone for PrefixContext<'_, U, E> {
     fn clone(&self) -> Self {
         *self
     }
 }
-impl<U, E> Copy for PrefixContext<'_, U, E> {}
-impl<U, E> crate::_GetGenerics for PrefixContext<'_, U, E> {
+impl<U: Send + Sync + 'static, E> Copy for PrefixContext<'_, U, E> {}
+impl<U: Send + Sync + 'static, E> crate::_GetGenerics for PrefixContext<'_, U, E> {
     type U = U;
     type E = E;
 }
@@ -86,7 +82,7 @@ pub enum Prefix {
 /// Prefix-specific framework configuration
 #[derive(derivative::Derivative)]
 #[derivative(Debug(bound = ""))]
-pub struct PrefixFrameworkOptions<U, E> {
+pub struct PrefixFrameworkOptions<U: Send + Sync + 'static, E> {
     /// The main bot prefix. Can be set to None if the bot supports only
     /// [dynamic prefixes](Self::dynamic_prefix).
     pub prefix: Option<String>,
@@ -108,7 +104,7 @@ pub struct PrefixFrameworkOptions<U, E> {
     ///
     /// Return value is a tuple of the prefix and the rest of the message:
     /// ```rust,no_run
-    /// # poise::PrefixFrameworkOptions::<(), ()> { stripped_dynamic_prefix: Some(|_, msg, _| Box::pin(async move {
+    /// # poise::PrefixFrameworkOptions::<(), ()> { stripped_dynamic_prefix: Some(|_, msg| Box::pin(async move {
     /// let my_cool_prefix = "$";
     /// if msg.content.starts_with(my_cool_prefix) {
     ///     return Ok(Some(msg.content.split_at(my_cool_prefix.len())));
@@ -119,9 +115,8 @@ pub struct PrefixFrameworkOptions<U, E> {
     #[derivative(Debug = "ignore")]
     pub stripped_dynamic_prefix: Option<
         for<'a> fn(
-            &'a serenity::Context,
+            &'a serenity::Context<U>,
             &'a serenity::Message,
-            &'a U,
         ) -> BoxFuture<'a, Result<Option<(&'a str, &'a str)>, E>>,
     >,
     /// Treat a bot mention (a ping) like a prefix
@@ -166,7 +161,7 @@ pub struct PrefixFrameworkOptions<U, E> {
     pub __non_exhaustive: (),
 }
 
-impl<U, E> Default for PrefixFrameworkOptions<U, E> {
+impl<U: Send + Sync + 'static, E> Default for PrefixFrameworkOptions<U, E> {
     fn default() -> Self {
         Self {
             prefix: None,

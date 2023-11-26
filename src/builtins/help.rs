@@ -85,7 +85,9 @@ impl TwoColumnList {
 }
 
 /// Get the prefix from options
-async fn get_prefix_from_options<U, E>(ctx: crate::Context<'_, U, E>) -> Option<String> {
+async fn get_prefix_from_options<U: Send + Sync + 'static, E>(
+    ctx: crate::Context<'_, U, E>,
+) -> Option<String> {
     let options = &ctx.framework().options().prefix_options;
     match &options.prefix {
         Some(fixed_prefix) => Some(fixed_prefix.clone()),
@@ -102,7 +104,9 @@ async fn get_prefix_from_options<U, E>(ctx: crate::Context<'_, U, E>) -> Option<
 }
 
 /// Format context menu command name
-fn format_context_menu_name<U, E>(command: &crate::Command<U, E>) -> Option<String> {
+fn format_context_menu_name<U: Send + Sync + 'static, E>(
+    command: &crate::Command<U, E>,
+) -> Option<String> {
     let kind = match command.context_menu_action {
         Some(crate::ContextMenuCommandAction::User(_)) => "user",
         Some(crate::ContextMenuCommandAction::Message(_)) => "message",
@@ -120,7 +124,7 @@ fn format_context_menu_name<U, E>(command: &crate::Command<U, E>) -> Option<Stri
 }
 
 /// Code for printing help of a specific command (e.g. `~help my_command`)
-async fn help_single_command<U, E>(
+async fn help_single_command<U: Send + Sync + 'static, E>(
     ctx: crate::Context<'_, U, E>,
     command_name: &str,
     config: HelpConfiguration<'_>,
@@ -234,7 +238,7 @@ async fn help_single_command<U, E>(
 }
 
 /// Recursively formats all subcommands
-fn preformat_subcommands<U, E>(
+fn preformat_subcommands<U: Send + Sync + 'static, E>(
     commands: &mut TwoColumnList,
     command: &crate::Command<U, E>,
     prefix: &str,
@@ -259,7 +263,7 @@ fn preformat_subcommands<U, E>(
 }
 
 /// Preformat lines (except for padding,) like `("  /ping", "Emits a ping message")`
-fn preformat_command<U, E>(
+fn preformat_command<U: Send + Sync + 'static, E>(
     commands: &mut TwoColumnList,
     config: &HelpConfiguration<'_>,
     command: &crate::Command<U, E>,
@@ -289,7 +293,7 @@ fn preformat_command<U, E>(
 /// Create help text for `help_all_commands`
 ///
 /// This is a separate function so we can have tests for it
-async fn generate_all_commands<U, E>(
+async fn generate_all_commands<U: Send + Sync + 'static, E>(
     ctx: crate::Context<'_, U, E>,
     config: &HelpConfiguration<'_>,
 ) -> Result<String, serenity::Error> {
@@ -348,7 +352,7 @@ async fn generate_all_commands<U, E>(
 }
 
 /// Code for printing an overview of all commands (e.g. `~help`)
-async fn help_all_commands<U, E>(
+async fn help_all_commands<U: Send + Sync + 'static, E>(
     ctx: crate::Context<'_, U, E>,
     config: HelpConfiguration<'_>,
 ) -> Result<(), serenity::Error> {
@@ -414,7 +418,7 @@ async fn help_all_commands<U, E>(
 /// Type ?help command for more info on a command.
 /// You can edit your message to the bot and the bot will edit its response.
 /// ```
-pub async fn help<U, E>(
+pub async fn help<U: Send + Sync + 'static, E>(
     ctx: crate::Context<'_, U, E>,
     command: Option<&str>,
     config: HelpConfiguration<'_>,

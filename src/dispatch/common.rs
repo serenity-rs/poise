@@ -4,8 +4,8 @@ use crate::serenity_prelude as serenity;
 
 /// Retrieves user permissions in the given channel. If unknown, returns None. If in DMs, returns
 /// `Permissions::all()`.
-async fn user_permissions(
-    ctx: &serenity::Context,
+async fn user_permissions<U: Send + Sync>(
+    ctx: &serenity::Context<U>,
     guild_id: Option<serenity::GuildId>,
     channel_id: serenity::ChannelId,
     user_id: serenity::UserId,
@@ -37,7 +37,7 @@ async fn user_permissions(
 /// Retrieves the set of permissions that are lacking, relative to the given required permission set
 ///
 /// Returns None if permissions couldn't be retrieved
-async fn missing_permissions<U, E>(
+async fn missing_permissions<U: Send + Sync + 'static, E>(
     ctx: crate::Context<'_, U, E>,
     user: serenity::UserId,
     required_permissions: serenity::Permissions,
@@ -61,7 +61,10 @@ async fn missing_permissions<U, E>(
 async fn check_permissions_and_cooldown_single<'a, U, E>(
     ctx: crate::Context<'a, U, E>,
     cmd: &'a crate::Command<U, E>,
-) -> Result<(), crate::FrameworkError<'a, U, E>> {
+) -> Result<(), crate::FrameworkError<'a, U, E>>
+where
+    U: Send + Sync + 'static,
+{
     // Skip command checks if `FrameworkOptions::skip_checks_for_owners` is set to true
     if ctx.framework().options.skip_checks_for_owners
         && ctx.framework().options().owners.contains(&ctx.author().id)
@@ -180,7 +183,10 @@ async fn check_permissions_and_cooldown_single<'a, U, E>(
 #[allow(clippy::needless_lifetimes)] // false positive (clippy issue 7271)
 pub async fn check_permissions_and_cooldown<'a, U, E>(
     ctx: crate::Context<'a, U, E>,
-) -> Result<(), crate::FrameworkError<'a, U, E>> {
+) -> Result<(), crate::FrameworkError<'a, U, E>>
+where
+    U: Send + Sync + 'static,
+{
     for parent_command in ctx.parent_commands() {
         check_permissions_and_cooldown_single(ctx, parent_command).await?;
     }

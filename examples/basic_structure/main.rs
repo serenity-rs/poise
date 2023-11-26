@@ -81,7 +81,7 @@ async fn main() {
         // Enforce command checks even for owners (enforced by default)
         // Set to true to bypass checks, which is useful for testing
         skip_checks_for_owners: false,
-        event_handler: |_ctx, event, _framework, _data| {
+        event_handler: |_ctx, event, _framework| {
             Box::pin(async move {
                 println!(
                     "Got an event in event handler: {:?}",
@@ -93,14 +93,16 @@ async fn main() {
         ..Default::default()
     };
 
+    let data = Data {
+        votes: Mutex::new(HashMap::new()),
+    };
+
     let framework = poise::Framework::builder()
         .setup(move |ctx, _ready, framework| {
             Box::pin(async move {
                 println!("Logged in as {}", _ready.user.name);
                 poise::builtins::register_globally(ctx, &framework.options().commands).await?;
-                Ok(Data {
-                    votes: Mutex::new(HashMap::new()),
-                })
+                Ok(())
             })
         })
         .options(options)
@@ -111,7 +113,7 @@ async fn main() {
     let intents =
         serenity::GatewayIntents::non_privileged() | serenity::GatewayIntents::MESSAGE_CONTENT;
 
-    let client = serenity::ClientBuilder::new(token, intents)
+    let client = serenity::ClientBuilder::new(token, intents, data)
         .framework(framework)
         .await;
 

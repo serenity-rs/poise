@@ -6,6 +6,7 @@
 
 use poise::serenity_prelude as serenity;
 
+type Data = ();
 type Error = serenity::Error;
 
 #[poise::command(prefix_command)]
@@ -19,14 +20,13 @@ struct Handler {
     shard_manager: std::sync::Mutex<Option<std::sync::Arc<serenity::ShardManager>>>,
 }
 #[serenity::async_trait]
-impl serenity::EventHandler for Handler {
-    async fn message(&self, ctx: serenity::Context, new_message: serenity::Message) {
+impl serenity::EventHandler<Data> for Handler {
+    async fn message(&self, ctx: serenity::Context<Data>, new_message: serenity::Message) {
         // FrameworkContext contains all data that poise::Framework usually manages
         let shard_manager = (*self.shard_manager.lock().unwrap()).clone().unwrap();
         let framework_data = poise::FrameworkContext {
             bot_id: serenity::UserId::new(846453852164587620),
             options: &self.options,
-            user_data: &(),
             shard_manager: &shard_manager,
         };
 
@@ -51,7 +51,7 @@ async fn main() -> Result<(), Error> {
     poise::set_qualified_names(&mut handler.options.commands); // some setup
 
     let handler = std::sync::Arc::new(handler);
-    let mut client = serenity::Client::builder(token, intents)
+    let mut client = serenity::Client::builder(token, intents, ())
         .event_handler_arc(handler.clone())
         .await?;
 

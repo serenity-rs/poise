@@ -14,10 +14,10 @@ pub enum CommandInteractionType {
 /// Application command specific context passed to command invocations.
 #[derive(derivative::Derivative)]
 #[derivative(Debug(bound = ""))]
-pub struct ApplicationContext<'a, U, E> {
+pub struct ApplicationContext<'a, U: Send + Sync + 'static, E> {
     /// Serenity's context, like HTTP or cache
     #[derivative(Debug = "ignore")]
-    pub serenity_context: &'a serenity::Context,
+    pub serenity_context: &'a serenity::Context<U>,
     /// The interaction which triggered this command execution.
     pub interaction: &'a serenity::CommandInteraction,
     /// The type of the interaction which triggered this command execution.
@@ -41,28 +41,24 @@ pub struct ApplicationContext<'a, U, E> {
     pub parent_commands: &'a [&'a crate::Command<U, E>],
     /// The command object which is the current command
     pub command: &'a crate::Command<U, E>,
-    /// Your custom user data
-    // TODO: redundant with framework
-    #[derivative(Debug = "ignore")]
-    pub data: &'a U,
     /// Custom user data carried across a single command invocation
     pub invocation_data: &'a tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
     // #[non_exhaustive] forbids struct update syntax for ?? reason
     #[doc(hidden)]
     pub __non_exhaustive: (),
 }
-impl<U, E> Clone for ApplicationContext<'_, U, E> {
+impl<U: Send + Sync + 'static, E> Clone for ApplicationContext<'_, U, E> {
     fn clone(&self) -> Self {
         *self
     }
 }
-impl<U, E> Copy for ApplicationContext<'_, U, E> {}
-impl<U, E> crate::_GetGenerics for ApplicationContext<'_, U, E> {
+impl<U: Send + Sync + 'static, E> Copy for ApplicationContext<'_, U, E> {}
+impl<U: Send + Sync + 'static, E> crate::_GetGenerics for ApplicationContext<'_, U, E> {
     type U = U;
     type E = E;
 }
 
-impl<U, E> ApplicationContext<'_, U, E> {
+impl<U: Send + Sync + 'static, E> ApplicationContext<'_, U, E> {
     /// See [`crate::Context::defer()`]
     pub async fn defer_response(&self, ephemeral: bool) -> Result<(), serenity::Error> {
         if !self
@@ -87,7 +83,7 @@ impl<U, E> ApplicationContext<'_, U, E> {
 /// Possible actions that a context menu entry can have
 #[derive(derivative::Derivative)]
 #[derivative(Debug(bound = ""))]
-pub enum ContextMenuCommandAction<U, E> {
+pub enum ContextMenuCommandAction<U: Send + Sync + 'static, E> {
     /// Context menu entry on a user
     User(
         #[derivative(Debug = "ignore")]
@@ -107,8 +103,8 @@ pub enum ContextMenuCommandAction<U, E> {
     #[doc(hidden)]
     __NonExhaustive,
 }
-impl<U, E> Copy for ContextMenuCommandAction<U, E> {}
-impl<U, E> Clone for ContextMenuCommandAction<U, E> {
+impl<U: Send + Sync + 'static, E> Copy for ContextMenuCommandAction<U, E> {}
+impl<U: Send + Sync + 'static, E> Clone for ContextMenuCommandAction<U, E> {
     fn clone(&self) -> Self {
         *self
     }
@@ -128,7 +124,7 @@ pub struct CommandParameterChoice {
 /// A single parameter of a [`crate::Command`]
 #[derive(Clone, derivative::Derivative)]
 #[derivative(Debug(bound = ""))]
-pub struct CommandParameter<U, E> {
+pub struct CommandParameter<U: Send + Sync + 'static, E> {
     /// Name of this command parameter
     pub name: String,
     /// Localized names with locale string as the key (slash-only)
@@ -173,7 +169,7 @@ pub struct CommandParameter<U, E> {
     pub __non_exhaustive: (),
 }
 
-impl<U, E> CommandParameter<U, E> {
+impl<U: Send + Sync + 'static, E> CommandParameter<U, E> {
     /// Generates a slash command parameter builder from this [`CommandParameter`] instance. This
     /// can be used to register the command on Discord's servers
     pub fn create_as_slash_command_option(&self) -> Option<serenity::CreateCommandOption> {

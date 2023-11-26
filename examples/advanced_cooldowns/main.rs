@@ -41,14 +41,15 @@ async fn main() {
         .setup(|ctx, _ready, framework| {
             Box::pin(async move {
                 poise::builtins::register_globally(ctx, &framework.options().commands).await?;
-                Ok(Data {})
+                Ok(())
             })
         })
         .build();
 
-    let client = serenity::Client::builder(token, serenity::GatewayIntents::non_privileged())
-        .framework(framework)
-        .await;
+    let client =
+        serenity::Client::builder(token, serenity::GatewayIntents::non_privileged(), Data {})
+            .framework(framework)
+            .await;
 
     client.unwrap().start().await.unwrap();
 }

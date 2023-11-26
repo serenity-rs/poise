@@ -233,11 +233,6 @@ use poise::serenity_prelude as serenity;
 // Use `Framework::builder()` to create a framework builder and supply basic data to the framework:
 
 let framework = poise::Framework::builder()
-    .setup(|_, _, _| Box::pin(async move {
-        // construct user data here (invoked when bot connects to Discord)
-        Ok(())
-    }))
-
     // Most configuration is done via the `FrameworkOptions` struct, which you can define with
     // a struct literal (hint: use `..Default::default()` to fill uninitialized
     // settings with their default value):
@@ -262,7 +257,7 @@ let framework = poise::Framework::builder()
         ..Default::default()
     }).build();
 
-let client = serenity::ClientBuilder::new("...", serenity::GatewayIntents::non_privileged())
+let client = serenity::ClientBuilder::new("...", serenity::GatewayIntents::non_privileged(), ())
     .framework(framework).await;
 
 client.unwrap().start().await.unwrap();

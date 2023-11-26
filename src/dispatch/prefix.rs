@@ -5,9 +5,9 @@ use crate::serenity_prelude as serenity;
 /// Checks if this message is a bot invocation by attempting to strip the prefix
 ///
 /// Returns tuple of stripped prefix and rest of the message, if any prefix matches
-async fn strip_prefix<'a, U, E>(
+async fn strip_prefix<'a, U: Send + Sync + 'static, E>(
     framework: crate::FrameworkContext<'a, U, E>,
-    ctx: &'a serenity::Context,
+    ctx: &'a serenity::Context<U>,
     msg: &'a serenity::Message,
 ) -> Option<(&'a str, &'a str)> {
     let partial_ctx = crate::PartialContext {
@@ -16,7 +16,6 @@ async fn strip_prefix<'a, U, E>(
         author: &msg.author,
         serenity_context: ctx,
         framework,
-        data: framework.user_data,
         __non_exhaustive: (),
     };
 
@@ -68,7 +67,7 @@ async fn strip_prefix<'a, U, E>(
     }
 
     if let Some(dynamic_prefix) = framework.options.prefix_options.stripped_dynamic_prefix {
-        match dynamic_prefix(ctx, msg, framework.user_data).await {
+        match dynamic_prefix(ctx, msg).await {
             Ok(result) => {
                 if let Some((prefix, content)) = result {
                     return Some((prefix, content));
@@ -138,7 +137,7 @@ async fn strip_prefix<'a, U, E>(
 ///     Some((&commands[1], "CoMmAnD2", "cOmMaNd99 my arguments")),
 /// );
 /// assert!(parent_commands.is_empty());
-pub fn find_command<'a, U, E>(
+pub fn find_command<'a, U: Send + Sync + 'static, E>(
     commands: &'a [crate::Command<U, E>],
     remaining_message: &'a str,
     case_insensitive: bool,
@@ -186,7 +185,7 @@ pub fn find_command<'a, U, E>(
 /// Manually dispatches a message with the prefix framework
 pub async fn dispatch_message<'a, U: Send + Sync, E>(
     framework: crate::FrameworkContext<'a, U, E>,
-    ctx: &'a serenity::Context,
+    ctx: &'a serenity::Context<U>,
     msg: &'a serenity::Message,
     trigger: crate::MessageDispatchTrigger,
     invocation_data: &'a tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
@@ -216,7 +215,7 @@ pub async fn dispatch_message<'a, U: Send + Sync, E>(
 /// returns the resulting [`crate::PrefixContext`]. To run the command, see [`run_invocation`].
 pub async fn parse_invocation<'a, U: Send + Sync, E>(
     framework: crate::FrameworkContext<'a, U, E>,
-    ctx: &'a serenity::Context,
+    ctx: &'a serenity::Context<U>,
     msg: &'a serenity::Message,
     trigger: crate::MessageDispatchTrigger,
     invocation_data: &'a tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
@@ -276,7 +275,6 @@ pub async fn parse_invocation<'a, U: Send + Sync, E>(
         invoked_command_name,
         args,
         framework,
-        data: framework.user_data,
         parent_commands,
         command,
         invocation_data,
@@ -288,7 +286,7 @@ pub async fn parse_invocation<'a, U: Send + Sync, E>(
 
 /// Given an existing parsed command invocation from [`parse_invocation`], run it, including all the
 /// before and after code like checks and built in filters from edit tracking
-pub async fn run_invocation<U, E>(
+pub async fn run_invocation<U: Send + Sync + 'static, E>(
     ctx: crate::PrefixContext<'_, U, E>,
 ) -> Result<(), crate::FrameworkError<'_, U, E>> {
     // Check if we should disregard this invocation if it was triggered by an edit

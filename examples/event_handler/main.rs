@@ -17,28 +17,23 @@ pub struct Data {
 async fn main() {
     env_logger::init();
 
+    let data = Data {
+        poise_mentions: AtomicU32::new(0),
+    };
+
     let token = var("DISCORD_TOKEN")
         .expect("Missing `DISCORD_TOKEN` env var, see README for more information.");
     let intents =
         serenity::GatewayIntents::non_privileged() | serenity::GatewayIntents::MESSAGE_CONTENT;
 
     let framework = poise::Framework::builder()
-        .setup(move |_ctx, _ready, _framework| {
-            Box::pin(async move {
-                Ok(Data {
-                    poise_mentions: AtomicU32::new(0),
-                })
-            })
-        })
         .options(poise::FrameworkOptions {
-            event_handler: |ctx, event, framework, data| {
-                Box::pin(event_handler(ctx, event, framework, data))
-            },
+            event_handler: |ctx, event, framework| Box::pin(event_handler(ctx, event, framework)),
             ..Default::default()
         })
         .build();
 
-    let client = serenity::ClientBuilder::new(token, intents)
+    let client = serenity::ClientBuilder::new(token, intents, data)
         .framework(framework)
         .await;
 
@@ -46,10 +41,9 @@ async fn main() {
 }
 
 async fn event_handler(
-    ctx: &serenity::Context,
+    ctx: &serenity::Context<Data>,
     event: &serenity::FullEvent,
     _framework: poise::FrameworkContext<'_, Data, Error>,
-    data: &Data,
 ) -> Result<(), Error> {
     match event {
         serenity::FullEvent::Ready { data_about_bot, .. } => {
@@ -57,8 +51,8 @@ async fn event_handler(
         }
         serenity::FullEvent::Message { new_message } => {
             if new_message.content.to_lowercase().contains("poise") {
-                let mentions = data.poise_mentions.load(Ordering::SeqCst) + 1;
-                data.poise_mentions.store(mentions, Ordering::SeqCst);
+                let mentions = ctx.data.poise_mentions.load(Ordering::SeqCst) + 1;
+                ctx.data.poise_mentions.store(mentions, Ordering::SeqCst);
                 new_message
                     .reply(ctx, format!("Poise has been mentioned {} times", mentions))
                     .await?;

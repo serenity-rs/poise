@@ -13,25 +13,23 @@ use crate::serenity_prelude as serenity;
 // TODO: integrate serenity::Context in here? Every place where FrameworkContext is passed is also
 // passed serenity::Context
 /// A view into data stored by [`crate::Framework`]
-pub struct FrameworkContext<'a, U, E> {
+pub struct FrameworkContext<'a, U: Send + Sync + 'static, E> {
     /// User ID of this bot
     pub bot_id: serenity::UserId,
     /// Framework configuration
     pub options: &'a crate::FrameworkOptions<U, E>,
-    /// Your provided user data
-    pub user_data: &'a U,
     /// Serenity shard manager. Can be used for example to shutdown the bot
     pub shard_manager: &'a std::sync::Arc<serenity::ShardManager>,
     // deliberately not non exhaustive because you need to create FrameworkContext from scratch
     // to run your own event loop
 }
-impl<U, E> Copy for FrameworkContext<'_, U, E> {}
-impl<U, E> Clone for FrameworkContext<'_, U, E> {
+impl<U: Send + Sync + 'static, E> Copy for FrameworkContext<'_, U, E> {}
+impl<U: Send + Sync + 'static, E> Clone for FrameworkContext<'_, U, E> {
     fn clone(&self) -> Self {
         *self
     }
 }
-impl<'a, U, E> FrameworkContext<'a, U, E> {
+impl<'a, U: Send + Sync + 'static, E> FrameworkContext<'a, U, E> {
     /// Returns the stored framework options, including commands.
     ///
     /// This function exists for API compatiblity with [`crate::Framework`]. On this type, you can
@@ -47,21 +45,12 @@ impl<'a, U, E> FrameworkContext<'a, U, E> {
     pub fn shard_manager(&self) -> std::sync::Arc<serenity::ShardManager> {
         self.shard_manager.clone()
     }
-
-    /// Retrieves user data
-    ///
-    /// This function exists for API compatiblity with [`crate::Framework`]. On this type, you can
-    /// also just access the public `user_data` field.
-    #[allow(clippy::unused_async)] // for API compatibility with Framework
-    pub async fn user_data(&self) -> &'a U {
-        self.user_data
-    }
 }
 
 /// Central event handling function of this library
 pub async fn dispatch_event<U: Send + Sync, E>(
     framework: crate::FrameworkContext<'_, U, E>,
-    ctx: &serenity::Context,
+    ctx: &serenity::Context<U>,
     event: serenity::FullEvent,
 ) {
     match &event {
@@ -123,7 +112,7 @@ pub async fn dispatch_event<U: Send + Sync, E>(
                     .unwrap()
                     .process_message_delete(*deleted_message_id);
                 if let Some(bot_response) = bot_response {
-                    if let Err(e) = bot_response.delete(ctx).await {
+                    if let Err(e) = bot_response.delete(&ctx).await {
                         tracing::warn!("failed to delete bot response: {}", e);
                     }
                 }
@@ -170,14 +159,10 @@ pub async fn dispatch_event<U: Send + Sync, E>(
         _ => {}
     }
 
-    // Do this after the framework's Ready handling, so that get_user_data() doesnt
-    // potentially block infinitely
-    if let Err(error) =
-        (framework.options.event_handler)(ctx, &event, framework, framework.user_data).await
-    {
+    if let Err(error) = (framework.options.event_handler)(ctx, &event, framework).await {
         let error = crate::FrameworkError::EventHandler {
-            error,
             ctx,
+            error,
             event: &event,
             framework,
         };

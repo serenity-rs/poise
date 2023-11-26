@@ -43,7 +43,8 @@ pub async fn component_modal(ctx: crate::Context<'_>) -> Result<(), Error> {
         .await
     {
         let data =
-            poise::execute_modal_on_component_interaction::<MyModal>(ctx, mci, None, None).await?;
+            poise::execute_modal_on_component_interaction::<MyModal, _>(ctx, mci, None, None)
+                .await?;
         println!("Got data: {:?}", data);
     }
     Ok(())

@@ -24,8 +24,8 @@ pub trait ChoiceParameter: Sized {
 
 #[async_trait::async_trait]
 impl<T: ChoiceParameter> crate::SlashArgument for T {
-    async fn extract(
-        _: &serenity::Context,
+    async fn extract<U: Send + Sync + 'static>(
+        _: &serenity::Context<U>,
         _: &serenity::CommandInteraction,
         value: &serenity::ResolvedValue<'_>,
     ) -> ::std::result::Result<Self, crate::SlashArgError> {
@@ -57,10 +57,10 @@ impl<T: ChoiceParameter> crate::SlashArgument for T {
 
 #[async_trait::async_trait]
 impl<'a, T: ChoiceParameter> crate::PopArgument<'a> for T {
-    async fn pop_from(
+    async fn pop_from<U: Send + Sync + 'static>(
         args: &'a str,
         attachment_index: usize,
-        ctx: &serenity::Context,
+        ctx: &serenity::Context<U>,
         msg: &serenity::Message,
     ) -> Result<(&'a str, usize, Self), (Box<dyn std::error::Error + Send + Sync>, Option<String>)>
     {

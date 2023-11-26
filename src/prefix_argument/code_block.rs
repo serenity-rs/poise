@@ -114,10 +114,10 @@ impl<'a> PopArgument<'a> for CodeBlock {
     /// Parse a single-line or multi-line code block. The output of `Self::code` should mirror what
     /// the official Discord client renders, and the output of `Self::language` should mirror the
     /// official Discord client's syntax highlighting, if existent.
-    async fn pop_from(
+    async fn pop_from<U: Send + Sync + 'static>(
         args: &'a str,
         attachment_index: usize,
-        _: &serenity::Context,
+        _: &serenity::Context<U>,
         _: &serenity::Message,
     ) -> Result<(&'a str, usize, Self), (Box<dyn std::error::Error + Send + Sync>, Option<String>)>
     {
