@@ -55,14 +55,14 @@ To set multiple gateway events, use the OR operator:
 
 ## Discord actions outside a command
 
-You can run Discord actions outside of commands by cloning and storing [`serenity::CacheAndHttp`]/
+You can run Discord actions outside of commands by cloning and storing [`serenity::CacheHttp`]/
 [`Arc<serenity::Http>`](serenity::Http)/[`Arc<serenity::Cache>`](serenity::Cache). You can get
 those either from [`serenity::Context`] (passed to
 [`setup`](crate::FrameworkBuilder::setup) and all commands via
-[`ctx.serenity_framework()`](crate::Context::discord)) or before starting the framework via
-[`framework.client()`](crate::Framework::client)[`.cache_and_http`](serenity::Client::cache_and_http).
+[`ctx.serenity_framework()`](crate::Context::discord)) or before starting the client via
+[`http`](serenity::Client::http) and [`cache`](serenity::Client::cache).
 
-Pass your `CacheAndHttp` or `Arc<Http>` to serenity functions in place of the usual
+Pass your `CacheHttp` or `Arc<Http>` to serenity functions in place of the usual
 `serenity::Context`
 
 ## Useful serenity methods
@@ -220,17 +220,19 @@ async fn error_handler(error: poise::FrameworkError<'_, Data, Error>) {
 ## Create and configure framework
 
 ```rust
+# use std::sync::Arc;
 # type Error = Box<dyn std::error::Error + Send + Sync>;
 # type Context<'a> = poise::Context<'a, (), Error>;
 # async fn my_error_function(_: poise::FrameworkError<'_, (), Error>) {}
 # #[poise::command(prefix_command)] async fn command1(ctx: Context<'_>) -> Result<(), Error> { Ok(()) }
 # #[poise::command(prefix_command)] async fn command2(ctx: Context<'_>) -> Result<(), Error> { Ok(()) }
 # #[poise::command(prefix_command)] async fn command3(ctx: Context<'_>) -> Result<(), Error> { Ok(()) }
+use poise::serenity_prelude as serenity;
 
 # async {
 // Use `Framework::builder()` to create a framework builder and supply basic data to the framework:
-poise::Framework::builder()
-    .token("...")
+
+let framework = poise::Framework::builder()
     .setup(|_, _, _| Box::pin(async move {
         // construct user data here (invoked when bot connects to Discord)
         Ok(())
@@ -243,7 +245,7 @@ poise::Framework::builder()
         on_error: |err| Box::pin(my_error_function(err)),
         prefix_options: poise::PrefixFrameworkOptions {
             prefix: Some("~".into()),
-            edit_tracker: Some(poise::EditTracker::for_timespan(std::time::Duration::from_secs(3600))),
+            edit_tracker: Some(Arc::new(poise::EditTracker::for_timespan(std::time::Duration::from_secs(3600)))),
             case_insensitive_commands: true,
             ..Default::default()
         },
@@ -258,9 +260,12 @@ poise::Framework::builder()
             }
         ],
         ..Default::default()
-    })
+    }).build();
 
-    .run().await?;
+let client = serenity::ClientBuilder::new("...", serenity::GatewayIntents::non_privileged())
+    .framework(framework).await;
+
+client.unwrap().start().await.unwrap();
 # Ok::<(), Error>(()) };
 ```
 
@@ -275,11 +280,11 @@ The easiest way is with [`builtins::register_application_commands_buttons`].
 It spawns a message with buttons to register and unregister all commands, globally or in the current
 guild (see its docs).
 
-A more flexible approach is to serialize the commands to a [`serenity::CreateApplicationCommands`]
+A more flexible approach is to serialize the commands to a [`Vec<serenity::CreateCommand>`]
 using [`builtins::create_application_commands`]. That way, you can call serenity's registration
 functions manually:
-- [`serenity::Command::set_global_application_commands`]
-- [`serenity::GuildId::set_application_commands`]
+- [`serenity::Command::set_global_commands`]
+- [`serenity::GuildId::set_commands`]
 
 For example, you could call this function in [`FrameworkBuilder::setup`] to automatically
 register commands on startup. Also see the docs of [`builtins::create_application_commands`].
@@ -384,9 +389,9 @@ Also, poise is a stat in Dark Souls
 */
 
 pub mod builtins;
+pub mod choice_parameter;
 pub mod cooldown;
 pub mod dispatch;
-pub mod event;
 pub mod framework;
 pub mod modal;
 pub mod prefix_argument;
@@ -403,8 +408,8 @@ pub mod macros {
 
 #[doc(no_inline)]
 pub use {
-    cooldown::*, dispatch::*, event::*, framework::*, macros::*, modal::*, prefix_argument::*,
-    reply::*, slash_argument::*, structs::*, track_edits::*,
+    choice_parameter::*, cooldown::*, dispatch::*, framework::*, macros::*, modal::*,
+    prefix_argument::*, reply::*, slash_argument::*, structs::*, track_edits::*,
 };
 
 /// See [`builtins`]
@@ -424,56 +429,7 @@ pub use {async_trait::async_trait, futures_util};
 /// use poise::serenity_prelude as serenity;
 /// ```
 pub mod serenity_prelude {
-    #[doc(no_inline)]
-    pub use serenity::{
-        async_trait,
-        builder::*,
-        client::{
-            bridge::gateway::{event::*, *},
-            *,
-        },
-        collector::*,
-        http::*,
-        // Explicit imports to resolve ambiguity between model::prelude::* and
-        // model::application::interaction::* due to deprecated same-named type aliases
-        model::{
-            application::interaction::{
-                Interaction, InteractionResponseType, InteractionType,
-                MessageFlags as InteractionResponseFlags, MessageInteraction,
-            },
-            // There's two MessageFlags in serenity. The interaction response specific one was
-            // renamed to InteractionResponseFlags above so we can keep this one's name the same
-            channel::MessageFlags,
-        },
-        model::{
-            application::{
-                command::*,
-                component::*,
-                interaction::{
-                    application_command::*, autocomplete::*, message_component::*, modal::*, *,
-                },
-            },
-            event::{
-                EventType, /* overwrite collision with model::guild::automod::EventType */
-                *,
-            },
-            guild::automod::*,
-            prelude::{
-                error, /* overwrite collision with http::error (there's no reason why model::error gets the "error" name and http::error doesn't, but I couldn't find a way to rename both modules, or disable both modules, so I _had_ to keep the confusing "error" name for the module) */
-                event, /* overwrite collision with client::bridge::gateway::event */
-                Action, /* overwrite collision with model::guild::automod::Action */
-                *,
-            },
-        },
-        prelude::*,
-        utils::*,
-        {
-            client,  /* overwrite collision with http::client */
-            gateway, /* overwrite collision with client::bridge::gateway */
-            prelude, /* overwrite collision with prelude::prelude (?) */
-            *,
-        },
-    };
+    pub use serenity::all::*;
 }
 use serenity_prelude as serenity; // private alias for crate root docs intradoc-links
 

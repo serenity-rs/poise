@@ -39,9 +39,7 @@ pub async fn voiceinfo(
         channel.bitrate.unwrap_or_default(),
         channel.user_limit.unwrap_or_default(),
         channel.rtc_region.unwrap_or_default(),
-        channel
-            .video_quality_mode
-            .unwrap_or(serenity::VideoQualityMode::Unknown)
+        channel.video_quality_mode
     );
 
     ctx.say(response).await?;

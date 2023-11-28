@@ -12,6 +12,8 @@ pub enum MessageDispatchTrigger {
     /// The message was edited, and was not a valid invocation pre-edit (i.e. user typoed the
     /// command, then fixed it)
     MessageEditFromInvalid,
+    #[doc(hidden)]
+    __NonExhaustive,
 }
 
 /// Prefix-specific context passed to command invocations.
@@ -77,6 +79,8 @@ pub enum Prefix {
     Literal(&'static str),
     /// Regular expression which matches the prefix
     Regex(regex::Regex),
+    #[doc(hidden)]
+    __NonExhaustive,
 }
 
 /// Prefix-specific framework configuration
@@ -124,7 +128,7 @@ pub struct PrefixFrameworkOptions<U, E> {
     pub mention_as_prefix: bool,
     /// If Some, the framework will react to message edits by editing the corresponding bot response
     /// with the new result.
-    pub edit_tracker: Option<std::sync::RwLock<crate::EditTracker>>,
+    pub edit_tracker: Option<std::sync::Arc<std::sync::RwLock<crate::EditTracker>>>,
     /// If the user makes a typo in their message and a subsequent edit creates a valid invocation,
     /// the bot will execute the command if this attribute is set. [`Self::edit_tracker`] does not
     /// need to be set for this.

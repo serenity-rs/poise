@@ -14,7 +14,7 @@ mod paginate;
 #[cfg(any(feature = "chrono", feature = "time"))]
 pub use paginate::*;
 
-use crate::serenity_prelude as serenity;
+use crate::{serenity_prelude as serenity, CreateReply};
 
 /// An error handler that logs errors either via the [`tracing`] crate or via a Discord message. Set
 /// up a logger (e.g. `env_logger::init()`) or a tracing subscriber
@@ -41,7 +41,7 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
         }
         crate::FrameworkError::EventHandler { error, event, .. } => tracing::error!(
             "User event event handler encountered an error on {} event: {}",
-            event.name(),
+            event.snake_case_name(),
             error
         ),
         crate::FrameworkError::Command { ctx, error } => {
@@ -60,26 +60,25 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
                 "You must specify one of the following subcommands: {}",
                 subcommands.join(", ")
             );
-            ctx.send(|b| b.content(response).ephemeral(true)).await?;
+            ctx.send(CreateReply::default().content(response).ephemeral(true))
+                .await?;
         }
         crate::FrameworkError::CommandPanic { ctx, payload: _ } => {
             // Not showing the payload to the user because it may contain sensitive info
-            ctx.send(|b| {
-                b.embed(|b| {
-                    b.title("Internal error")
-                        .color((255, 0, 0))
-                        .description("An unexpected internal error has occurred.")
-                })
-                .ephemeral(true)
-            })
-            .await?;
+            let embed = serenity::CreateEmbed::default()
+                .title("Internal error")
+                .color((255, 0, 0))
+                .description("An unexpected internal error has occurred.");
+
+            ctx.send(CreateReply::default().embed(embed).ephemeral(true))
+                .await?;
         }
         crate::FrameworkError::ArgumentParse { ctx, input, error } => {
             // If we caught an argument parse error, give a helpful error message with the
             // command explanation if available
-            let usage = match ctx.command().help_text {
-                Some(help_text) => help_text(),
-                None => "Please check the help menu for usage information".into(),
+            let usage = match &ctx.command().help_text {
+                Some(help_text) => &**help_text,
+                None => "Please check the help menu for usage information",
             };
             let response = if let Some(input) = input {
                 format!(
@@ -114,7 +113,8 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
                 "You're too fast. Please wait {} seconds before retrying",
                 remaining_cooldown.as_secs()
             );
-            ctx.send(|b| b.content(msg).ephemeral(true)).await?;
+            ctx.send(CreateReply::default().content(msg).ephemeral(true))
+                .await?;
         }
         crate::FrameworkError::MissingBotPermissions {
             missing_permissions,
@@ -124,7 +124,8 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
                 "Command cannot be executed because the bot is lacking permissions: {}",
                 missing_permissions,
             );
-            ctx.send(|b| b.content(msg).ephemeral(true)).await?;
+            ctx.send(CreateReply::default().content(msg).ephemeral(true))
+                .await?;
         }
         crate::FrameworkError::MissingUserPermissions {
             missing_permissions,
@@ -144,23 +145,28 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
                     ctx.command().name,
                 )
             };
-            ctx.send(|b| b.content(response).ephemeral(true)).await?;
+            ctx.send(CreateReply::default().content(response).ephemeral(true))
+                .await?;
         }
         crate::FrameworkError::NotAnOwner { ctx } => {
             let response = "Only bot owners can call this command";
-            ctx.send(|b| b.content(response).ephemeral(true)).await?;
+            ctx.send(CreateReply::default().content(response).ephemeral(true))
+                .await?;
         }
         crate::FrameworkError::GuildOnly { ctx } => {
             let response = "You cannot run this command in DMs.";
-            ctx.send(|b| b.content(response).ephemeral(true)).await?;
+            ctx.send(CreateReply::default().content(response).ephemeral(true))
+                .await?;
         }
         crate::FrameworkError::DmOnly { ctx } => {
             let response = "You cannot run this command outside DMs.";
-            ctx.send(|b| b.content(response).ephemeral(true)).await?;
+            ctx.send(CreateReply::default().content(response).ephemeral(true))
+                .await?;
         }
         crate::FrameworkError::NsfwOnly { ctx } => {
             let response = "You cannot run this command outside NSFW channels.";
-            ctx.send(|b| b.content(response).ephemeral(true)).await?;
+            ctx.send(CreateReply::default().content(response).ephemeral(true))
+                .await?;
         }
         crate::FrameworkError::DynamicPrefix { error, msg, .. } => {
             tracing::error!(
@@ -181,10 +187,7 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
             );
         }
         crate::FrameworkError::UnknownInteraction { interaction, .. } => {
-            tracing::warn!(
-                "received unknown interaction \"{}\"",
-                interaction.data().name
-            );
+            tracing::warn!("received unknown interaction \"{}\"", interaction.data.name);
         }
         crate::FrameworkError::__NonExhaustive(unreachable) => match unreachable {},
     }
@@ -231,18 +234,13 @@ pub async fn servers<U, E>(ctx: crate::Context<'_, U, E>) -> Result<(), serenity
     let mut hidden_guilds_members = 0;
     let mut shown_guilds = Vec::<(String, u64)>::new();
     for guild_id in ctx.cache().guilds() {
-        match ctx.cache().guild_field(guild_id, |g| {
-            (
-                g.name.clone(),
-                g.member_count,
-                g.features.iter().any(|x| x == "DISCOVERABLE"),
-            )
-        }) {
-            Some((name, member_count, is_public)) => {
+        match ctx.cache().guild(guild_id) {
+            Some(guild) => {
+                let is_public = guild.features.iter().any(|x| x == "DISCOVERABLE");
                 if !is_public && !show_private_guilds {
                     hidden_guilds += 1; // private guild whose name and size shouldn't be exposed
                 } else {
-                    shown_guilds.push((name, member_count))
+                    shown_guilds.push((guild.name.clone(), guild.member_count))
                 }
             }
             None => hidden_guilds += 1, // uncached guild
@@ -293,8 +291,10 @@ pub async fn servers<U, E>(ctx: crate::Context<'_, U, E>) -> Result<(), serenity
     }
 
     // If we show sensitive data (private guilds), it mustn't be made public, so it's ephemeral
-    ctx.send(|b| b.content(response).ephemeral(show_private_guilds))
-        .await?;
+    let reply = CreateReply::default()
+        .content(response)
+        .ephemeral(show_private_guilds);
 
+    ctx.send(reply).await?;
     Ok(())
 }

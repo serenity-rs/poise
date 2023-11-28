@@ -42,21 +42,15 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
                     let choices_stream = ::poise::into_stream!(
                         #autocomplete_fn(ctx.into(), partial).await
                     );
-                    let choices_json = choices_stream
+                    let choices_vec = choices_stream
                         .take(25)
                         // T or AutocompleteChoice<T> -> AutocompleteChoice<T>
-                        .map(|value| poise::AutocompleteChoice::from(value))
-                        // AutocompleteChoice<T> -> serde_json::Value
-                        .map(|choice| poise::serenity_prelude::json::json!({
-                            "name": choice.name,
-                            "value": choice.value,
-                        }))
+                        .map(poise::serenity_prelude::AutocompleteChoice::from)
                         .collect()
                         .await;
 
                     let mut response = poise::serenity_prelude::CreateAutocompleteResponse::default();
-                    response.set_choices(poise::serenity_prelude::json::Value::Array(choices_json));
-                    Ok(response)
+                    Ok(response.set_choices(choices_vec))
                 })) }
             }
             None => quote::quote! { None },
@@ -65,31 +59,32 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
         // We can just cast to f64 here because Discord only uses f64 precision anyways
         // TODO: move this to poise::CommandParameter::{min, max} fields
         let min_value_setter = match &param.args.min {
-            Some(x) => quote::quote! { o.min_number_value(#x as f64); },
+            Some(x) => quote::quote! { .min_number_value(#x as f64) },
             None => quote::quote! {},
         };
         let max_value_setter = match &param.args.max {
-            Some(x) => quote::quote! { o.max_number_value(#x as f64); },
+            Some(x) => quote::quote! { .max_number_value(#x as f64) },
             None => quote::quote! {},
         };
         // TODO: move this to poise::CommandParameter::{min_length, max_length} fields
         let min_length_setter = match &param.args.min_length {
-            Some(x) => quote::quote! { o.min_length(#x); },
+            Some(x) => quote::quote! { .min_length(#x) },
             None => quote::quote! {},
         };
         let max_length_setter = match &param.args.max_length {
-            Some(x) => quote::quote! { o.max_length(#x); },
+            Some(x) => quote::quote! { .max_length(#x) },
             None => quote::quote! {},
         };
         let type_setter = match inv.args.slash_command {
             true => quote::quote! { Some(|o| {
-                poise::create_slash_argument!(#type_, o);
+                poise::create_slash_argument!(#type_, o)
                 #min_value_setter #max_value_setter
                 #min_length_setter #max_length_setter
             }) },
             false => quote::quote! { None },
         };
         // TODO: theoretically a problem that we don't store choices for non slash commands
+        // TODO: move this to poise::CommandParameter::choices (is there a reason not to?)
         let choices = match inv.args.slash_command {
             true => quote::quote! { poise::slash_argument_choices!(#type_) },
             false => quote::quote! { vec![] },
@@ -118,6 +113,7 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
                     type_setter: #type_setter,
                     choices: #choices,
                     autocomplete_callback: #autocomplete_callback,
+                    __non_exhaustive: (),
                 }
             },
             required,
@@ -168,28 +164,29 @@ pub fn generate_slash_action(inv: &Invocation) -> Result<proc_macro2::TokenStrea
                 ctx.serenity_context, ctx.interaction, ctx.args =>
                 #( (#param_names: #param_types), )*
             ).await.map_err(|error| match error {
-                poise::SlashArgError::CommandStructureMismatch(description) => {
-                    poise::FrameworkError::CommandStructureMismatch { ctx, description }
+                poise::SlashArgError::CommandStructureMismatch { description, .. } => {
+                    poise::FrameworkError::new_command_structure_mismatch(ctx, description)
                 },
-                poise::SlashArgError::Parse { error, input } => {
-                    poise::FrameworkError::ArgumentParse {
-                        ctx: ctx.into(),
+                poise::SlashArgError::Parse { error, input, .. } => {
+                    poise::FrameworkError::new_argument_parse(
+                        ctx.into(),
+                        Some(input),
                         error,
-                        input: Some(input),
-                    }
+                    )
                 },
+                poise::SlashArgError::__NonExhaustive => unreachable!(),
             })?;
 
             if !ctx.framework.options.manual_cooldowns {
-                ctx.command.cooldowns.lock().unwrap().start_cooldown(ctx.into());
+                ctx.command.cooldowns.lock().unwrap().start_cooldown(ctx.cooldown_context());
             }
 
             inner(ctx.into(), #( #param_identifiers, )*)
                 .await
-                .map_err(|error| poise::FrameworkError::Command {
+                .map_err(|error| poise::FrameworkError::new_command(
+                    ctx.into(),
                     error,
-                    ctx: ctx.into(),
-                })
+                ))
         })
     })
 }
@@ -211,15 +208,15 @@ pub fn generate_context_menu_action(
         <#param_type as ::poise::ContextMenuParameter<_, _>>::to_action(|ctx, value| {
             Box::pin(async move {
                 if !ctx.framework.options.manual_cooldowns {
-                    ctx.command.cooldowns.lock().unwrap().start_cooldown(ctx.into());
+                    ctx.command.cooldowns.lock().unwrap().start_cooldown(ctx.cooldown_context());
                 }
 
                 inner(ctx.into(), value)
                     .await
-                    .map_err(|error| poise::FrameworkError::Command {
+                    .map_err(|error| poise::FrameworkError::new_command(
+                        ctx.into(),
                         error,
-                        ctx: ctx.into(),
-                    })
+                    ))
             })
         })
     })

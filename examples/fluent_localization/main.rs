@@ -24,7 +24,9 @@ pub async fn welcome(
     user: serenity::User,
     message: WelcomeChoice,
 ) -> Result<(), Error> {
-    ctx.say(format!("<@{}> {}", user.id.0, tr!(ctx, message.name())))
+    use poise::ChoiceParameter as _;
+
+    ctx.say(format!("<@{}> {}", user.id, tr!(ctx, message.name())))
         .await?;
     Ok(())
 }
@@ -62,15 +64,20 @@ async fn main() {
     let translations = translation::read_ftl().expect("failed to read translation files");
     translation::apply_translations(&translations, &mut commands);
 
-    poise::Framework::builder()
-        .token(std::env::var("TOKEN").unwrap())
-        .intents(serenity::GatewayIntents::non_privileged())
+    let token = std::env::var("TOKEN").unwrap();
+    let intents = serenity::GatewayIntents::non_privileged();
+
+    let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
             commands,
             ..Default::default()
         })
         .setup(move |_, _, _| Box::pin(async move { Ok(Data { translations }) }))
-        .run()
-        .await
-        .unwrap();
+        .build();
+
+    let client = serenity::ClientBuilder::new(token, intents)
+        .framework(framework)
+        .await;
+
+    client.unwrap().start().await.unwrap()
 }

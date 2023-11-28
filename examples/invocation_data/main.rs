@@ -4,6 +4,8 @@
 //! This module has a test command which stores a dummy payload to check that this string is
 //! available in all phases of command execution
 
+use poise::serenity_prelude as serenity;
+
 type Error = &'static str;
 type Context<'a> = poise::Context<'a, (), Error>;
 
@@ -16,7 +18,7 @@ async fn my_check(ctx: Context<'_>) -> Result<bool, Error> {
     Ok(true)
 }
 
-async fn my_autocomplete(ctx: Context<'_>, _: &str) -> impl Iterator<Item = u32> {
+async fn my_autocomplete(ctx: Context<'_>, _: &str) -> impl Iterator<Item = String> {
     println!(
         "In autocomplete: {:?}",
         ctx.invocation_data::<&str>().await.as_deref()
@@ -47,17 +49,18 @@ pub async fn invocation_data_test(
 
 #[tokio::main]
 async fn main() {
-    poise::Framework::builder()
-        .token(std::env::var("TOKEN").unwrap())
+    let token = std::env::var("TOKEN").unwrap();
+    let intents =
+        serenity::GatewayIntents::non_privileged() | serenity::GatewayIntents::MESSAGE_CONTENT;
+
+    let framework = poise::Framework::builder()
         .setup(move |ctx, _, framework| {
             Box::pin(async move {
-                poise::serenity_prelude::GuildId(703332075914264606)
-                    .set_application_commands(ctx, |b| {
-                        *b = poise::builtins::create_application_commands(
-                            &framework.options().commands,
-                        );
-                        b
-                    })
+                let commands =
+                    poise::builtins::create_application_commands(&framework.options().commands);
+
+                serenity::GuildId::new(703332075914264606)
+                    .set_commands(ctx, commands)
                     .await
                     .unwrap();
                 Ok(())
@@ -116,7 +119,11 @@ async fn main() {
             },
             ..Default::default()
         })
-        .run()
-        .await
-        .unwrap();
+        .build();
+
+    let client = serenity::ClientBuilder::new(token, intents)
+        .framework(framework)
+        .await;
+
+    client.unwrap().start().await.unwrap();
 }

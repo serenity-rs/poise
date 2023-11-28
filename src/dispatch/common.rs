@@ -31,7 +31,7 @@ async fn user_permissions(
 
     let member = guild.member(ctx, user_id).await.ok()?;
 
-    guild.user_permissions_in(&channel, &member).ok()
+    Some(guild.user_permissions_in(&channel, &member))
 }
 
 /// Retrieves the set of permissions that are lacking, relative to the given required permission set
@@ -79,7 +79,7 @@ async fn check_permissions_and_cooldown_single<'a, U, E>(
             Some(guild_id) => {
                 #[cfg(feature = "cache")]
                 if ctx.framework().options().require_cache_for_guild_check
-                    && ctx.cache().guild_field(guild_id, |_| ()).is_none()
+                    && ctx.cache().guild(guild_id).is_none()
                 {
                     return Err(crate::FrameworkError::GuildOnly { ctx });
                 }
@@ -158,8 +158,9 @@ async fn check_permissions_and_cooldown_single<'a, U, E>(
     }
 
     if !ctx.framework().options().manual_cooldowns {
-        let cooldowns = &cmd.cooldowns;
-        let remaining_cooldown = cooldowns.lock().unwrap().remaining_cooldown(ctx);
+        let cooldowns = cmd.cooldowns.lock().unwrap();
+        let config = cmd.cooldown_config.read().unwrap();
+        let remaining_cooldown = cooldowns.remaining_cooldown(ctx.cooldown_context(), &config);
         if let Some(remaining_cooldown) = remaining_cooldown {
             return Err(crate::FrameworkError::CooldownHit {
                 ctx,

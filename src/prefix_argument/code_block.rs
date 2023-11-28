@@ -3,8 +3,11 @@
 use super::*;
 
 /// Error thrown when parsing a malformed [`CodeBlock`] ([`CodeBlock::pop_from`])
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct CodeBlockError;
+#[derive(Default, Debug, Clone)]
+pub struct CodeBlockError {
+    #[doc(hidden)]
+    pub __non_exhaustive: (),
+}
 impl std::fmt::Display for CodeBlockError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_str("couldn't find a valid code block")
@@ -27,12 +30,14 @@ impl std::error::Error for CodeBlockError {}
 /// ```
 ///
 /// Can be used as a command parameter. For more information, see [`Self::pop_from`].
-#[derive(Debug, PartialEq, Eq, Clone, Hash)]
+#[derive(Default, Debug, PartialEq, Eq, Clone, Hash)]
 pub struct CodeBlock {
     /// The text inside the code block
     pub code: String,
     /// In multiline code blocks, the language code, if present
     pub language: Option<String>,
+    #[doc(hidden)]
+    pub __non_exhaustive: (),
 }
 
 impl std::fmt::Display for CodeBlock {
@@ -52,7 +57,7 @@ fn pop_from(args: &str) -> Result<(&str, CodeBlock), CodeBlockError> {
 
     let rest;
     let mut code_block = if let Some(code_block) = args.strip_prefix("```") {
-        let code_block_end = code_block.find("```").ok_or(CodeBlockError)?;
+        let code_block_end = code_block.find("```").ok_or(CodeBlockError::default())?;
         rest = &code_block[(code_block_end + 3)..];
         let mut code_block = &code_block[..code_block_end];
 
@@ -77,23 +82,25 @@ fn pop_from(args: &str) -> Result<(&str, CodeBlock), CodeBlockError> {
         CodeBlock {
             code: code_block.to_owned(),
             language: language.map(|x| x.to_owned()),
+            __non_exhaustive: (),
         }
     } else if let Some(code_line) = args.strip_prefix('`') {
-        let code_line_end = code_line.find('`').ok_or(CodeBlockError)?;
+        let code_line_end = code_line.find('`').ok_or(CodeBlockError::default())?;
         rest = &code_line[(code_line_end + 1)..];
         let code_line = &code_line[..code_line_end];
 
         CodeBlock {
             code: code_line.to_owned(),
             language: None,
+            __non_exhaustive: (),
         }
     } else {
-        return Err(CodeBlockError);
+        return Err(CodeBlockError::default());
     };
 
     // Empty codeblocks like `` are not rendered as codeblocks by Discord
     if code_block.code.is_empty() {
-        Err(CodeBlockError)
+        Err(CodeBlockError::default())
     } else {
         // discord likes to insert hair spaces at the end of code blocks sometimes for no reason
         code_block.code = code_block.code.trim_end_matches('\u{200a}').to_owned();
@@ -144,13 +151,14 @@ fn test_pop_code_block() {
             pop_from(string).unwrap().1,
             CodeBlock {
                 code: code.into(),
-                language: language.map(|x| x.into())
+                language: language.map(|x| x.into()),
+                __non_exhaustive: (),
             }
         );
     }
 
-    assert_eq!(pop_from(""), Err(CodeBlockError));
-    assert_eq!(pop_from("''"), Err(CodeBlockError));
-    assert_eq!(pop_from("``"), Err(CodeBlockError));
-    assert_eq!(pop_from("``````"), Err(CodeBlockError));
+    assert!(pop_from("").is_err());
+    assert!(pop_from("''").is_err());
+    assert!(pop_from("``").is_err());
+    assert!(pop_from("``````").is_err());
 }

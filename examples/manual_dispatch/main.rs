@@ -16,8 +16,7 @@ async fn ping(ctx: poise::Context<'_, (), Error>) -> Result<(), Error> {
 
 struct Handler {
     options: poise::FrameworkOptions<(), Error>,
-    shard_manager:
-        std::sync::Mutex<Option<std::sync::Arc<tokio::sync::Mutex<serenity::ShardManager>>>>,
+    shard_manager: std::sync::Mutex<Option<std::sync::Arc<serenity::ShardManager>>>,
 }
 #[serenity::async_trait]
 impl serenity::EventHandler for Handler {
@@ -25,13 +24,14 @@ impl serenity::EventHandler for Handler {
         // FrameworkContext contains all data that poise::Framework usually manages
         let shard_manager = (*self.shard_manager.lock().unwrap()).clone().unwrap();
         let framework_data = poise::FrameworkContext {
-            bot_id: serenity::UserId(846453852164587620),
+            bot_id: serenity::UserId::new(846453852164587620),
             options: &self.options,
             user_data: &(),
             shard_manager: &shard_manager,
         };
 
-        poise::dispatch_event(framework_data, &ctx, &poise::Event::Message { new_message }).await;
+        let event = serenity::FullEvent::Message { new_message };
+        poise::dispatch_event(framework_data, &ctx, event).await;
     }
 
     // For slash commands or edit tracking to work, forward interaction_create and message_update
@@ -54,6 +54,7 @@ async fn main() -> Result<(), Error> {
     let mut client = serenity::Client::builder(token, intents)
         .event_handler_arc(handler.clone())
         .await?;
+
     *handler.shard_manager.lock().unwrap() = Some(client.shard_manager.clone());
     client.start().await?;
 

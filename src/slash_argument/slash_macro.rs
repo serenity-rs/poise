@@ -1,7 +1,7 @@
 //! Infrastructure to parse received slash command arguments into Rust types.
 
 #[allow(unused_imports)] // import is required if serenity simdjson feature is enabled
-use crate::serenity::json::prelude::*;
+use crate::serenity::json::*;
 #[allow(unused_imports)] // required for introdoc-links in doc comments
 use crate::serenity_prelude as serenity;
 
@@ -13,28 +13,43 @@ pub enum SlashArgError {
     ///
     /// Most often the result of the bot not having registered the command in Discord, so Discord
     /// stores an outdated version of the command and its parameters.
-    CommandStructureMismatch(&'static str),
+    #[non_exhaustive]
+    CommandStructureMismatch {
+        /// A short string describing what specifically is wrong/unexpected
+        description: &'static str,
+    },
     /// A string parameter was found, but it could not be parsed into the target type.
+    #[non_exhaustive]
     Parse {
         /// Error that occured while parsing the string into the target type
         error: Box<dyn std::error::Error + Send + Sync>,
         /// Original input string
         input: String,
     },
+    #[doc(hidden)]
+    __NonExhaustive,
+}
+/// Support functions for macro which can't create #[non_exhaustive] enum variants
+#[doc(hidden)]
+impl SlashArgError {
+    pub fn new_command_structure_mismatch(description: &'static str) -> Self {
+        Self::CommandStructureMismatch { description }
+    }
 }
 impl std::fmt::Display for SlashArgError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::CommandStructureMismatch(detail) => {
+            Self::CommandStructureMismatch { description } => {
                 write!(
                     f,
                     "Bot author did not register their commands correctly ({})",
-                    detail
+                    description
                 )
             }
             Self::Parse { error, input } => {
                 write!(f, "Failed to parse `{}` as argument: {}", input, error)
             }
+            Self::__NonExhaustive => unreachable!(),
         }
     }
 }
@@ -42,7 +57,8 @@ impl std::error::Error for SlashArgError {
     fn cause(&self) -> Option<&dyn std::error::Error> {
         match self {
             Self::Parse { error, input: _ } => Some(&**error),
-            Self::CommandStructureMismatch(_) => None,
+            Self::CommandStructureMismatch { description: _ } => None,
+            Self::__NonExhaustive => unreachable!(),
         }
     }
 }
@@ -53,10 +69,7 @@ macro_rules! _parse_slash {
     // Extract Option<T>
     ($ctx:ident, $interaction:ident, $args:ident => $name:literal: Option<$type:ty $(,)*>) => {
         if let Some(arg) = $args.iter().find(|arg| arg.name == $name) {
-            let arg = arg.value
-            .as_ref()
-            .ok_or($crate::SlashArgError::CommandStructureMismatch("expected argument value"))?;
-            Some($crate::extract_slash_argument!($type, $ctx, $interaction, arg)
+            Some($crate::extract_slash_argument!($type, $ctx, $interaction, &arg.value)
                 .await?)
         } else {
             None
@@ -81,7 +94,7 @@ macro_rules! _parse_slash {
     // Extract T
     ($ctx:ident, $interaction:ident, $args:ident => $name:literal: $($type:tt)*) => {
         $crate::_parse_slash!($ctx, $interaction, $args => $name: Option<$($type)*>)
-            .ok_or($crate::SlashArgError::CommandStructureMismatch("a required argument is missing"))?
+            .ok_or($crate::SlashArgError::new_command_structure_mismatch("a required argument is missing"))?
     };
 }
 
@@ -96,11 +109,11 @@ directly.
 # #[tokio::main] async fn main() -> Result<(), Box<dyn std::error::Error>> {
 # use poise::serenity_prelude as serenity;
 let ctx: serenity::Context = todo!();
-let interaction: poise::ApplicationCommandOrAutocompleteInteraction = todo!();
-let args: &[serenity::CommandDataOption] = todo!();
+let interaction: serenity::CommandInteraction = todo!();
+let args: &[serenity::ResolvedOption] = todo!();
 
 let (arg1, arg2) = poise::parse_slash_args!(
-    &ctx, interaction,
+    &ctx, &interaction,
     args => ("arg1": String), ("arg2": Option<u32>)
 ).await?;
 

@@ -17,6 +17,7 @@ async fn strip_prefix<'a, U, E>(
         serenity_context: ctx,
         framework,
         data: framework.user_data,
+        __non_exhaustive: (),
     };
 
     if let Some(dynamic_prefix) = framework.options.prefix_options.dynamic_prefix {
@@ -60,6 +61,7 @@ async fn strip_prefix<'a, U, E>(
                     None
                 }
             }
+            crate::Prefix::__NonExhaustive => unreachable!(),
         })
     {
         return Some((prefix, content));
@@ -89,7 +91,7 @@ async fn strip_prefix<'a, U, E>(
             msg.content
                 .strip_prefix("<@")?
                 .trim_start_matches('!')
-                .strip_prefix(&framework.bot_id.0.to_string())?
+                .strip_prefix(&framework.bot_id.to_string())?
                 .strip_prefix('>')
         })() {
             let mention_prefix = &msg.content[..(msg.content.len() - stripped_content.len())];
@@ -141,10 +143,7 @@ pub fn find_command<'a, U, E>(
     remaining_message: &'a str,
     case_insensitive: bool,
     parent_commands: &mut Vec<&'a crate::Command<U, E>>,
-) -> Option<(&'a crate::Command<U, E>, &'a str, &'a str)>
-where
-    U: Send + Sync,
-{
+) -> Option<(&'a crate::Command<U, E>, &'a str, &'a str)> {
     let string_equal = if case_insensitive {
         |a: &str, b: &str| a.eq_ignore_ascii_case(b)
     } else {
@@ -235,7 +234,7 @@ pub async fn parse_invocation<'a, U: Send + Sync, E>(
     }
 
     // Check if we can execute commands contained in thread creation messages
-    if msg.kind == serenity::channel::MessageType::ThreadCreated
+    if msg.kind == serenity::MessageType::ThreadCreated
         && framework.options.prefix_options.ignore_thread_creation
     {
         return Ok(None);
@@ -314,10 +313,7 @@ pub async fn run_invocation<U, E>(
 
     // Typing is broadcasted as long as this object is alive
     let _typing_broadcaster = if ctx.command.broadcast_typing {
-        ctx.msg
-            .channel_id
-            .start_typing(&ctx.serenity_context.http)
-            .ok()
+        Some(ctx.msg.channel_id.start_typing(&ctx.serenity_context.http))
     } else {
         None
     };
