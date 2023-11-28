@@ -11,7 +11,7 @@ async fn dynamic_cooldowns(ctx: Context<'_>) -> Result<(), Error> {
 
         // You can change the cooldown duration depending on the message author, for example
         let mut cooldown_durations = poise::CooldownConfig::default();
-        if ctx.author().id.0 == 472029906943868929 {
+        if ctx.author().id == 472029906943868929 {
             cooldown_durations.user = Some(std::time::Duration::from_secs(10));
         }
 
@@ -29,6 +29,7 @@ async fn dynamic_cooldowns(ctx: Context<'_>) -> Result<(), Error> {
 
 #[tokio::main]
 async fn main() {
+    let token = std::env::var("DISCORD_TOKEN").expect("missing DISCORD_TOKEN");
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
             commands: vec![dynamic_cooldowns()],
@@ -37,14 +38,17 @@ async fn main() {
             manual_cooldowns: true,
             ..Default::default()
         })
-        .token(std::env::var("DISCORD_TOKEN").expect("missing DISCORD_TOKEN"))
-        .intents(serenity::GatewayIntents::non_privileged())
         .setup(|ctx, _ready, framework| {
             Box::pin(async move {
                 poise::builtins::register_globally(ctx, &framework.options().commands).await?;
                 Ok(Data {})
             })
-        });
+        })
+        .build();
 
-    framework.run().await.unwrap();
+    let client = serenity::Client::builder(token, serenity::GatewayIntents::non_privileged())
+        .framework(framework)
+        .await;
+
+    client.unwrap().start().await.unwrap();
 }

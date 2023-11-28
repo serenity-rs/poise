@@ -91,16 +91,21 @@ async fn main() {
             },
             ..Default::default()
         })
-        .token(std::env::var("DISCORD_TOKEN").unwrap())
-        .intents(
-            serenity::GatewayIntents::non_privileged() | serenity::GatewayIntents::MESSAGE_CONTENT,
-        )
         .setup(move |ctx, _ready, framework| {
             Box::pin(async move {
                 poise::builtins::register_globally(ctx, &framework.options().commands).await?;
                 Ok(Data {})
             })
-        });
+        })
+        .build();
 
-    framework.run().await.unwrap();
+    let token = std::env::var("DISCORD_TOKEN").unwrap();
+    let intents =
+        serenity::GatewayIntents::non_privileged() | serenity::GatewayIntents::MESSAGE_CONTENT;
+
+    let client = serenity::ClientBuilder::new(token, intents)
+        .framework(framework)
+        .await;
+
+    client.unwrap().start().await.unwrap()
 }

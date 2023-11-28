@@ -7,14 +7,11 @@ pub async fn boop(ctx: Context<'_>) -> Result<(), Error> {
     let uuid_boop = ctx.id();
 
     let reply = {
-        let mut components = serenity::CreateComponents::default();
-        components.create_action_row(|ar| {
-            ar.create_button(|b| {
-                b.style(serenity::ButtonStyle::Primary)
-                    .label("Boop me!")
-                    .custom_id(uuid_boop)
-            })
-        });
+        let components = vec![serenity::CreateActionRow::Buttons(vec![
+            serenity::CreateButton::new(format!("{uuid_boop}"))
+                .style(serenity::ButtonStyle::Primary)
+                .label("Boop me!"),
+        ])];
 
         CreateReply::default()
             .content("I want some boops!")
@@ -24,7 +21,7 @@ pub async fn boop(ctx: Context<'_>) -> Result<(), Error> {
     ctx.send(reply).await?;
 
     let mut boop_count = 0;
-    while let Some(mci) = serenity::CollectComponentInteraction::new(ctx)
+    while let Some(mci) = serenity::ComponentInteractionCollector::new(ctx)
         .author_id(ctx.author().id)
         .channel_id(ctx.channel_id())
         .timeout(std::time::Duration::from_secs(120))
@@ -34,13 +31,14 @@ pub async fn boop(ctx: Context<'_>) -> Result<(), Error> {
         boop_count += 1;
 
         let mut msg = mci.message.clone();
-        msg.edit(ctx, |m| m.content(format!("Boop count: {}", boop_count)))
-            .await?;
-
-        mci.create_interaction_response(ctx, |ir| {
-            ir.kind(serenity::InteractionResponseType::DeferredUpdateMessage)
-        })
+        msg.edit(
+            ctx,
+            serenity::EditMessage::new().content(format!("Boop count: {boop_count}")),
+        )
         .await?;
+
+        mci.create_response(ctx, serenity::CreateInteractionResponse::Acknowledge)
+            .await?;
     }
 
     Ok(())

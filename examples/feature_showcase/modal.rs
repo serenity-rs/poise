@@ -23,15 +23,12 @@ pub async fn modal(ctx: poise::ApplicationContext<'_, Data, Error>) -> Result<()
 /// present.
 #[poise::command(prefix_command, slash_command)]
 pub async fn component_modal(ctx: crate::Context<'_>) -> Result<(), Error> {
-    let mut components = serenity::CreateComponents::default();
     let reply = {
-        components.create_action_row(|a| {
-            a.create_button(|b| {
-                b.custom_id("open_modal")
-                    .label("Open modal")
-                    .style(poise::serenity_prelude::ButtonStyle::Success)
-            })
-        });
+        let components = vec![serenity::CreateActionRow::Buttons(vec![
+            serenity::CreateButton::new("open_modal")
+                .label("Open modal")
+                .style(poise::serenity_prelude::ButtonStyle::Success),
+        ])];
 
         poise::CreateReply::default()
             .content("Click the button below to open the modal")
@@ -40,11 +37,10 @@ pub async fn component_modal(ctx: crate::Context<'_>) -> Result<(), Error> {
 
     ctx.send(reply).await?;
 
-    while let Some(mci) =
-        poise::serenity_prelude::CollectComponentInteraction::new(ctx.serenity_context())
-            .timeout(std::time::Duration::from_secs(120))
-            .filter(move |mci| mci.data.custom_id == "open_modal")
-            .await
+    while let Some(mci) = serenity::ModalInteractionCollector::new(ctx.serenity_context())
+        .timeout(std::time::Duration::from_secs(120))
+        .filter(move |mci| mci.data.custom_id == "open_modal")
+        .await
     {
         let data =
             poise::execute_modal_on_component_interaction::<MyModal>(ctx, mci, None, None).await?;

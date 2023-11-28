@@ -1,6 +1,9 @@
-use crate::{Context, Error};
 use futures::{Stream, StreamExt};
 use std::fmt::Write as _;
+
+use poise::serenity_prelude as serenity;
+
+use crate::{Context, Error};
 
 // Poise supports autocomplete on slash command parameters. You need to provide an autocomplete
 // function, which will be called on demand when the user is typing a command.
@@ -12,7 +15,7 @@ use std::fmt::Write as _;
 // IntoIterator like Vec<T> and [T; N].
 //
 // The returned collection type must be a &str/String (or number, if you're implementing
-// autocomplete on a number type). Wrap the type in poise::AutocompleteChoice to set a custom label
+// autocomplete on a number type). Wrap the type in serenity::AutocompleteChoice to set a custom label
 // for each choice which will be displayed in the Discord UI.
 //
 // Example function return types (assuming non-number parameter -> autocomplete choices are string):
@@ -20,7 +23,7 @@ use std::fmt::Write as _;
 // - `-> Vec<String>`
 // - `-> impl Iterator<String>`
 // - `-> impl Iterator<&str>`
-// - `-> impl Iterator<poise::AutocompleteChoice<&str>>`
+// - `-> impl Iterator<serenity::AutocompleteChoice>
 
 async fn autocomplete_name<'a>(
     _ctx: Context<'_>,
@@ -34,10 +37,10 @@ async fn autocomplete_name<'a>(
 async fn autocomplete_number(
     _ctx: Context<'_>,
     _partial: &str,
-) -> impl Iterator<Item = poise::AutocompleteChoice<u32>> {
+) -> impl Iterator<Item = serenity::AutocompleteChoice> {
     // Dummy choices
     [1_u32, 2, 3, 4, 5].iter().map(|&n| {
-        poise::AutocompleteChoice::new_with_value(
+        serenity::AutocompleteChoice::new(
             format!("{n} (why did discord even give autocomplete choices separate labels)"),
             n,
         )

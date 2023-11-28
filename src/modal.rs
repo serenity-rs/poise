@@ -1,7 +1,5 @@
 //! Modal trait and utility items for implementing it (mainly for the derive macro)
 
-use std::sync::Arc;
-
 use crate::serenity_prelude as serenity;
 
 /// Meant for use in derived [`Modal::parse`] implementation
@@ -9,7 +7,7 @@ use crate::serenity_prelude as serenity;
 /// _Takes_ the String out of the data. Logs warnings on unexpected state
 #[doc(hidden)]
 pub fn find_modal_text(
-    data: &mut serenity::ModalSubmitInteractionData,
+    data: &mut serenity::ModalInteractionData,
     custom_id: &str,
 ) -> Option<String> {
     for row in &mut data.components {
@@ -26,8 +24,11 @@ pub fn find_modal_text(
         };
 
         if text.custom_id == custom_id {
-            let value = std::mem::take(&mut text.value);
-            return if value.is_empty() { None } else { Some(value) };
+            return match std::mem::take(&mut text.value) {
+                Some(val) if val.is_empty() => None,
+                Some(val) => Some(val),
+                None => None,
+            };
         }
     }
     tracing::warn!(
@@ -44,7 +45,7 @@ async fn execute_modal_generic<
     F: std::future::Future<Output = Result<(), serenity::Error>>,
 >(
     ctx: &serenity::Context,
-    create_interaction_response: impl FnOnce(serenity::CreateInteractionResponse<'static>) -> F,
+    create_interaction_response: impl FnOnce(serenity::CreateInteractionResponse) -> F,
     modal_custom_id: String,
     defaults: Option<M>,
     timeout: Option<std::time::Duration>,
@@ -53,7 +54,7 @@ async fn execute_modal_generic<
     create_interaction_response(M::create(defaults, modal_custom_id.clone())).await?;
 
     // Wait for user to submit
-    let response = serenity::CollectModalInteraction::new(&ctx.shard)
+    let response = serenity::collector::ModalInteractionCollector::new(&ctx.shard)
         .filter(move |d| d.data.custom_id == modal_custom_id)
         .timeout(timeout.unwrap_or(std::time::Duration::from_secs(3600)))
         .await;
@@ -64,9 +65,7 @@ async fn execute_modal_generic<
 
     // Send acknowledgement so that the pop-up is closed
     response
-        .create_interaction_response(ctx, |b| {
-            b.kind(serenity::InteractionResponseType::DeferredUpdateMessage)
-        })
+        .create_response(ctx, serenity::CreateInteractionResponse::Acknowledge)
         .await?;
 
     Ok(Some(
@@ -83,7 +82,7 @@ async fn execute_modal_generic<
 ///
 /// This function:
 /// 1. sends the modal via [`Modal::create()`]
-/// 2. waits for the user to submit via [`serenity::CollectModalInteraction`]
+/// 2. waits for the user to submit via [`serenity::ModalInteractionCollector`]
 /// 3. acknowledges the submitted data so that Discord closes the pop-up for the user
 /// 4. parses the submitted data via [`Modal::parse()`], wrapping errors in [`serenity::Error::Other`]
 ///
@@ -94,15 +93,10 @@ pub async fn execute_modal<U: Send + Sync, E, M: Modal>(
     defaults: Option<M>,
     timeout: Option<std::time::Duration>,
 ) -> Result<Option<M>, serenity::Error> {
-    let interaction = ctx.interaction.unwrap();
+    let interaction = ctx.interaction;
     let response = execute_modal_generic(
         ctx.serenity_context,
-        |resp| {
-            interaction.create_interaction_response(ctx.http(), |b| {
-                *b = resp;
-                b
-            })
-        },
+        |resp| interaction.create_response(ctx, resp),
         interaction.id.to_string(),
         defaults,
         timeout,
@@ -119,7 +113,7 @@ pub async fn execute_modal<U: Send + Sync, E, M: Modal>(
 ///
 /// This function:
 /// 1. sends the modal via [`Modal::create()`] as a mci interaction response
-/// 2. waits for the user to submit via [`serenity::CollectModalInteraction`]
+/// 2. waits for the user to submit via [`serenity::ModalInteractionCollector`]
 /// 3. acknowledges the submitted data so that Discord closes the pop-up for the user
 /// 4. parses the submitted data via [`Modal::parse()`], wrapping errors in [`serenity::Error::Other`]
 ///
@@ -127,18 +121,13 @@ pub async fn execute_modal<U: Send + Sync, E, M: Modal>(
 /// and adjust to your needs. The code of this function is just a starting point.
 pub async fn execute_modal_on_component_interaction<M: Modal>(
     ctx: impl AsRef<serenity::Context>,
-    interaction: Arc<serenity::MessageComponentInteraction>,
+    interaction: serenity::ModalInteraction,
     defaults: Option<M>,
     timeout: Option<std::time::Duration>,
 ) -> Result<Option<M>, serenity::Error> {
     execute_modal_generic(
         ctx.as_ref(),
-        |resp| {
-            interaction.create_interaction_response(ctx.as_ref(), |b| {
-                *b = resp;
-                b
-            })
-        },
+        |resp| interaction.create_response(ctx.as_ref(), resp),
         interaction.id.to_string(),
         defaults,
         timeout,
@@ -186,16 +175,13 @@ pub trait Modal: Sized {
     ///
     /// Optionally takes an initialized instance as pre-filled values of this modal (see
     /// [`Self::execute_with_defaults()`] for more info)
-    fn create(
-        defaults: Option<Self>,
-        custom_id: String,
-    ) -> serenity::CreateInteractionResponse<'static>;
+    fn create(defaults: Option<Self>, custom_id: String) -> serenity::CreateInteractionResponse;
 
     /// Parses a received modal submit interaction into this type
     ///
     /// Returns an error if a field was missing. This should never happen, because Discord will only
     /// let users submit when all required fields are filled properly
-    fn parse(data: serenity::ModalSubmitInteractionData) -> Result<Self, &'static str>;
+    fn parse(data: serenity::ModalInteractionData) -> Result<Self, &'static str>;
 
     /// Calls `execute_modal(ctx, None, None)`. See [`execute_modal`]
     ///

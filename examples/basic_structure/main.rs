@@ -3,7 +3,12 @@
 mod commands;
 
 use poise::serenity_prelude as serenity;
-use std::{collections::HashMap, env::var, sync::Mutex, time::Duration};
+use std::{
+    collections::HashMap,
+    env::var,
+    sync::{Arc, Mutex},
+    time::Duration,
+};
 
 // Types used by all command functions
 type Error = Box<dyn std::error::Error + Send + Sync>;
@@ -41,7 +46,9 @@ async fn main() {
         commands: vec![commands::help(), commands::vote(), commands::getvotes()],
         prefix_options: poise::PrefixFrameworkOptions {
             prefix: Some("~".into()),
-            edit_tracker: Some(poise::EditTracker::for_timespan(Duration::from_secs(3600))),
+            edit_tracker: Some(Arc::new(poise::EditTracker::for_timespan(
+                Duration::from_secs(3600),
+            ))),
             additional_prefixes: vec![
                 poise::Prefix::Literal("hey bot"),
                 poise::Prefix::Literal("hey bot,"),
@@ -76,18 +83,17 @@ async fn main() {
         skip_checks_for_owners: false,
         event_handler: |_ctx, event, _framework, _data| {
             Box::pin(async move {
-                println!("Got an event in event handler: {:?}", event.name());
+                println!(
+                    "Got an event in event handler: {:?}",
+                    event.snake_case_name()
+                );
                 Ok(())
             })
         },
         ..Default::default()
     };
 
-    poise::Framework::builder()
-        .token(
-            var("DISCORD_TOKEN")
-                .expect("Missing `DISCORD_TOKEN` env var, see README for more information."),
-        )
+    let framework = poise::Framework::builder()
         .setup(move |ctx, _ready, framework| {
             Box::pin(async move {
                 println!("Logged in as {}", _ready.user.name);
@@ -98,10 +104,16 @@ async fn main() {
             })
         })
         .options(options)
-        .intents(
-            serenity::GatewayIntents::non_privileged() | serenity::GatewayIntents::MESSAGE_CONTENT,
-        )
-        .run()
-        .await
-        .unwrap();
+        .build();
+
+    let token = var("DISCORD_TOKEN")
+        .expect("Missing `DISCORD_TOKEN` env var, see README for more information.");
+    let intents =
+        serenity::GatewayIntents::non_privileged() | serenity::GatewayIntents::MESSAGE_CONTENT;
+
+    let client = serenity::ClientBuilder::new(token, intents)
+        .framework(framework)
+        .await;
+
+    client.unwrap().start().await.unwrap()
 }

@@ -28,11 +28,10 @@ pub enum FrameworkError<'a, U, E> {
     EventHandler {
         /// Error which was thrown in the event handler code
         error: E,
-        /// The serenity Context passed to the event
-        #[derivative(Debug = "ignore")]
+        /// The serenity context passed to the event handler
         ctx: &'a serenity::Context,
         /// Which event was being processed when the error occurred
-        event: &'a crate::Event<'a>,
+        event: &'a serenity::FullEvent,
         /// The Framework passed to the event
         #[derivative(Debug = "ignore")]
         framework: crate::FrameworkContext<'a, U, E>,
@@ -195,7 +194,7 @@ pub enum FrameworkError<'a, U, E> {
         #[derivative(Debug = "ignore")]
         framework: crate::FrameworkContext<'a, U, E>,
         /// The interaction in question
-        interaction: crate::ApplicationCommandOrAutocompleteInteraction<'a>,
+        interaction: &'a serenity::CommandInteraction,
     },
     // #[non_exhaustive] forbids struct update syntax for ?? reason
     #[doc(hidden)]
@@ -302,12 +301,11 @@ impl<U, E: std::fmt::Display> std::fmt::Display for FrameworkError<'_, U, E> {
                 data_about_bot: _,
                 ctx: _,
             } => write!(f, "poise setup error"),
-            Self::EventHandler {
-                error: _,
-                ctx: _,
-                event,
-                framework: _,
-            } => write!(f, "error in {} event event handler", event.name()),
+            Self::EventHandler { event, .. } => write!(
+                f,
+                "error in {} event event handler",
+                event.snake_case_name()
+            ),
             Self::Command { error: _, ctx } => {
                 write!(f, "error in command `{}`", full_command_name!(ctx))
             }
@@ -404,7 +402,7 @@ impl<U, E: std::fmt::Display> std::fmt::Display for FrameworkError<'_, U, E> {
                 write!(f, "unknown command `{}`", msg_content)
             }
             Self::UnknownInteraction { interaction, .. } => {
-                write!(f, "unknown interaction `{}`", interaction.data().name)
+                write!(f, "unknown interaction `{}`", interaction.data.name)
             }
             Self::__NonExhaustive(unreachable) => match *unreachable {},
         }

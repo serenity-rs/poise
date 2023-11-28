@@ -41,7 +41,7 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
         }
         crate::FrameworkError::EventHandler { error, event, .. } => tracing::error!(
             "User event event handler encountered an error on {} event: {}",
-            event.name(),
+            event.snake_case_name(),
             error
         ),
         crate::FrameworkError::Command { ctx, error } => {
@@ -65,8 +65,7 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
         }
         crate::FrameworkError::CommandPanic { ctx, payload: _ } => {
             // Not showing the payload to the user because it may contain sensitive info
-            let mut embed = serenity::CreateEmbed::default();
-            embed
+            let embed = serenity::CreateEmbed::default()
                 .title("Internal error")
                 .color((255, 0, 0))
                 .description("An unexpected internal error has occurred.");
@@ -188,10 +187,7 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
             );
         }
         crate::FrameworkError::UnknownInteraction { interaction, .. } => {
-            tracing::warn!(
-                "received unknown interaction \"{}\"",
-                interaction.data().name
-            );
+            tracing::warn!("received unknown interaction \"{}\"", interaction.data.name);
         }
         crate::FrameworkError::__NonExhaustive(unreachable) => match unreachable {},
     }
@@ -238,18 +234,13 @@ pub async fn servers<U, E>(ctx: crate::Context<'_, U, E>) -> Result<(), serenity
     let mut hidden_guilds_members = 0;
     let mut shown_guilds = Vec::<(String, u64)>::new();
     for guild_id in ctx.cache().guilds() {
-        match ctx.cache().guild_field(guild_id, |g| {
-            (
-                g.name.clone(),
-                g.member_count,
-                g.features.iter().any(|x| x == "DISCOVERABLE"),
-            )
-        }) {
-            Some((name, member_count, is_public)) => {
+        match ctx.cache().guild(guild_id) {
+            Some(guild) => {
+                let is_public = guild.features.iter().any(|x| x == "DISCOVERABLE");
                 if !is_public && !show_private_guilds {
                     hidden_guilds += 1; // private guild whose name and size shouldn't be exposed
                 } else {
-                    shown_guilds.push((name, member_count))
+                    shown_guilds.push((guild.name.clone(), guild.member_count))
                 }
             }
             None => hidden_guilds += 1, // uncached guild

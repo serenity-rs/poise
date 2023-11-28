@@ -1,7 +1,7 @@
 //! Infrastructure to parse received slash command arguments into Rust types.
 
 #[allow(unused_imports)] // import is required if serenity simdjson feature is enabled
-use crate::serenity::json::prelude::*;
+use crate::serenity::json::*;
 #[allow(unused_imports)] // required for introdoc-links in doc comments
 use crate::serenity_prelude as serenity;
 
@@ -69,10 +69,7 @@ macro_rules! _parse_slash {
     // Extract Option<T>
     ($ctx:ident, $interaction:ident, $args:ident => $name:literal: Option<$type:ty $(,)*>) => {
         if let Some(arg) = $args.iter().find(|arg| arg.name == $name) {
-            let arg = arg.value
-            .as_ref()
-            .ok_or($crate::SlashArgError::new_command_structure_mismatch("expected argument value"))?;
-            Some($crate::extract_slash_argument!($type, $ctx, $interaction, arg)
+            Some($crate::extract_slash_argument!($type, $ctx, $interaction, &arg.value)
                 .await?)
         } else {
             None
@@ -112,11 +109,11 @@ directly.
 # #[tokio::main] async fn main() -> Result<(), Box<dyn std::error::Error>> {
 # use poise::serenity_prelude as serenity;
 let ctx: serenity::Context = todo!();
-let interaction: poise::ApplicationCommandOrAutocompleteInteraction = todo!();
-let args: &[serenity::CommandDataOption] = todo!();
+let interaction: serenity::CommandInteraction = todo!();
+let args: &[serenity::ResolvedOption] = todo!();
 
 let (arg1, arg2) = poise::parse_slash_args!(
-    &ctx, interaction,
+    &ctx, &interaction,
     args => ("arg1": String), ("arg2": Option<u32>)
 ).await?;
 

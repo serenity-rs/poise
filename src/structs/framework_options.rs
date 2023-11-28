@@ -33,7 +33,8 @@ pub struct FrameworkOptions<U, E> {
     ///
     /// Allows you to modify every outgoing message in a central place
     #[derivative(Debug = "ignore")]
-    pub reply_callback: Option<fn(crate::Context<'_, U, E>, &mut crate::CreateReply<'_>)>,
+    pub reply_callback:
+        Option<fn(crate::Context<'_, U, E>, crate::CreateReply) -> crate::CreateReply>,
     /// If `true`, disables automatic cooldown handling before every command invocation.
     ///
     /// Useful for implementing custom cooldown behavior. See [`crate::Command::cooldowns`] and
@@ -49,7 +50,7 @@ pub struct FrameworkOptions<U, E> {
     #[derivative(Debug = "ignore")]
     pub event_handler: for<'a> fn(
         &'a serenity::Context,
-        &'a crate::Event<'a>,
+        &'a serenity::FullEvent,
         crate::FrameworkContext<'a, U, E>,
         // TODO: redundant with framework
         &'a U,
@@ -60,10 +61,12 @@ pub struct FrameworkOptions<U, E> {
     /// Prefix command specific options.
     pub prefix_options: crate::PrefixFrameworkOptions<U, E>,
     /// User IDs which are allowed to use owners_only commands
-    ///
-    /// If using [`crate::FrameworkBuilder`], automatically initialized with the bot application
-    /// owner and team members
     pub owners: std::collections::HashSet<serenity::UserId>,
+    /// If true, [`Self::owners`] is automatically initialized with the results of
+    /// [`serenity::Http::get_current_application_info()`].
+    ///
+    /// True by default.
+    pub initialize_owners: bool,
     // #[non_exhaustive] forbids struct update syntax for ?? reason
     #[doc(hidden)]
     pub __non_exhaustive: (),
@@ -104,20 +107,19 @@ where
             post_command: |_| Box::pin(async {}),
             command_check: None,
             skip_checks_for_owners: false,
-            allowed_mentions: Some({
-                let mut f = serenity::CreateAllowedMentions::default();
+            allowed_mentions: Some(
                 // Only support direct user pings by default
-                f.empty_parse()
-                    .parse(serenity::ParseValue::Users)
+                serenity::CreateAllowedMentions::default()
+                    .all_users(true)
                     // https://github.com/serenity-rs/poise/issues/176
-                    .replied_user(true);
-                f
-            }),
+                    .replied_user(true),
+            ),
             reply_callback: None,
             manual_cooldowns: false,
             require_cache_for_guild_check: false,
             prefix_options: Default::default(),
             owners: Default::default(),
+            initialize_owners: true,
             __non_exhaustive: (),
         }
     }

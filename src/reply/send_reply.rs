@@ -10,11 +10,12 @@ use crate::serenity_prelude as serenity;
 /// Note: panics when called in an autocomplete context!
 ///
 /// ```rust,no_run
+/// # use poise::serenity_prelude as serenity;
 /// # #[tokio::main] async fn main() -> Result<(), Box<dyn std::error::Error>> {
 /// # let ctx: poise::Context<'_, (), ()> = todo!();
-/// ctx.send(|f| f
+/// ctx.send(poise::CreateReply::default()
 ///     .content("Works for slash and prefix commands")
-///     .embed(|f| f
+///     .embed(serenity::CreateEmbed::new()
 ///         .title("Much versatile, very wow")
 ///         .description("I need more documentation ok?")
 ///     )
@@ -22,10 +23,10 @@ use crate::serenity_prelude as serenity;
 /// ).await?;
 /// # Ok(()) }
 /// ```
-pub async fn send_reply<'a, U, E>(
-    ctx: crate::Context<'a, U, E>,
-    builder: crate::CreateReply<'_>,
-) -> Result<crate::ReplyHandle<'a>, serenity::Error> {
+pub async fn send_reply<U, E>(
+    ctx: crate::Context<'_, U, E>,
+    builder: crate::CreateReply,
+) -> Result<crate::ReplyHandle<'_>, serenity::Error> {
     Ok(match ctx {
         crate::Context::Prefix(ctx) => super::ReplyHandle(super::ReplyHandleInner::Prefix(
             crate::send_prefix_reply(ctx, builder).await?,
@@ -47,44 +48,41 @@ pub async fn say_reply<U, E>(
 /// Send a response to an interaction (slash command or context menu command invocation).
 ///
 /// If a response to this interaction has already been sent, a
-/// [followup](serenity::ApplicationCommandInteraction::create_followup_message) is sent.
+/// [followup](serenity::CommandInteraction::create_followup) is sent.
 ///
 /// No-op if autocomplete context
-pub async fn send_application_reply<'a, U, E>(
-    ctx: crate::ApplicationContext<'a, U, E>,
-    builder: crate::CreateReply<'_>,
-) -> Result<crate::ReplyHandle<'a>, serenity::Error> {
+pub async fn send_application_reply<U, E>(
+    ctx: crate::ApplicationContext<'_, U, E>,
+    builder: crate::CreateReply,
+) -> Result<crate::ReplyHandle<'_>, serenity::Error> {
     let builder = ctx.reply_builder(builder);
 
-    let interaction = match ctx.interaction {
-        crate::ApplicationCommandOrAutocompleteInteraction::ApplicationCommand(x) => x,
-        crate::ApplicationCommandOrAutocompleteInteraction::Autocomplete(_) => {
-            return Ok(super::ReplyHandle(super::ReplyHandleInner::Autocomplete))
-        }
-    };
+    if ctx.interaction_type == crate::CommandInteractionType::Autocomplete {
+        return Ok(super::ReplyHandle(super::ReplyHandleInner::Autocomplete));
+    }
 
     let has_sent_initial_response = ctx
         .has_sent_initial_response
         .load(std::sync::atomic::Ordering::SeqCst);
 
     let followup = if has_sent_initial_response {
-        Some(Box::new(
-            interaction
-                .create_followup_message(ctx.serenity_context, |f| {
-                    builder.to_slash_followup_response(f);
-                    f
-                })
-                .await?,
-        ))
+        Some(Box::new({
+            let builder = builder
+                .to_slash_followup_response(serenity::CreateInteractionResponseFollowup::new());
+
+            ctx.interaction
+                .create_followup(ctx.serenity_context, builder)
+                .await?
+        }))
     } else {
-        interaction
-            .create_interaction_response(ctx.serenity_context, |r| {
-                r.kind(serenity::InteractionResponseType::ChannelMessageWithSource)
-                    .interaction_response_data(|f| {
-                        builder.to_slash_initial_response(f);
-                        f
-                    })
-            })
+        let builder =
+            builder.to_slash_initial_response(serenity::CreateInteractionResponseMessage::new());
+
+        ctx.interaction
+            .create_response(
+                ctx.serenity_context,
+                serenity::CreateInteractionResponse::Message(builder),
+            )
             .await?;
         ctx.has_sent_initial_response
             .store(true, std::sync::atomic::Ordering::SeqCst);
@@ -94,15 +92,15 @@ pub async fn send_application_reply<'a, U, E>(
 
     Ok(super::ReplyHandle(super::ReplyHandleInner::Application {
         http: &ctx.serenity_context.http,
-        interaction,
+        interaction: ctx.interaction,
         followup,
     }))
 }
 
 /// Prefix-specific reply function. For more details, see [`crate::send_reply`].
-pub async fn send_prefix_reply<'a, U, E>(
-    ctx: crate::PrefixContext<'a, U, E>,
-    builder: crate::CreateReply<'_>,
+pub async fn send_prefix_reply<U, E>(
+    ctx: crate::PrefixContext<'_, U, E>,
+    builder: crate::CreateReply,
 ) -> Result<Box<serenity::Message>, serenity::Error> {
     let builder = ctx.reply_builder(builder);
 
@@ -126,18 +124,18 @@ pub async fn send_prefix_reply<'a, U, E>(
 
     Ok(Box::new(if let Some(mut response) = existing_response {
         response
-            .edit(ctx.serenity_context, |f| {
+            .edit(ctx.serenity_context, {
                 // Reset the message. We don't want leftovers of the previous message (e.g. user
                 // sends a message with `.content("abc")` in a track_edits command, and the edited
                 // message happens to contain embeds, we don't want to keep those embeds)
                 // (*f = Default::default() won't do)
-                f.content("");
-                f.set_embeds(Vec::new());
-                f.components(|b| b);
-                f.0.insert("attachments", serenity::json::json! { [] });
+                let b = serenity::EditMessage::new()
+                    .content("")
+                    .embeds(Vec::new())
+                    .components(Vec::new())
+                    .remove_all_attachments();
 
-                builder.to_prefix_edit(f);
-                f
+                builder.to_prefix_edit(b)
             })
             .await?;
 
@@ -152,10 +150,7 @@ pub async fn send_prefix_reply<'a, U, E>(
         let new_response = ctx
             .msg
             .channel_id
-            .send_message(ctx.serenity_context, |m| {
-                builder.to_prefix(m, ctx.msg);
-                m
-            })
+            .send_message(ctx.serenity_context, builder.to_prefix(ctx.msg.into()))
             .await?;
         // We don't check ctx.command.reuse_response because we need to store bot responses for
         // track_deletion too

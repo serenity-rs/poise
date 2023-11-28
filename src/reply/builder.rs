@@ -4,17 +4,17 @@ use crate::serenity_prelude as serenity;
 
 /// Message builder that abstracts over prefix and application command responses
 #[derive(Default, Clone)]
-pub struct CreateReply<'att> {
+pub struct CreateReply {
     /// Message content.
     pub content: Option<String>,
     /// Embeds, if present.
     pub embeds: Vec<serenity::CreateEmbed>,
     /// Message attachments.
-    pub attachments: Vec<serenity::AttachmentType<'att>>,
+    pub attachments: Vec<serenity::CreateAttachment>,
     /// Whether the message is ephemeral (only has an effect in application commands)
     pub ephemeral: Option<bool>,
     /// Message components, that is, buttons and select menus.
-    pub components: Option<serenity::CreateComponents>,
+    pub components: Option<Vec<serenity::CreateActionRow>>,
     /// The allowed mentions for the message.
     pub allowed_mentions: Option<serenity::CreateAllowedMentions>,
     /// Whether this message is an inline reply.
@@ -23,7 +23,7 @@ pub struct CreateReply<'att> {
     pub __non_exhaustive: (),
 }
 
-impl<'att> CreateReply<'att> {
+impl CreateReply {
     /// Set the content of the message.
     pub fn content(mut self, content: impl Into<String>) -> Self {
         self.content = Some(content.into());
@@ -41,7 +41,7 @@ impl<'att> CreateReply<'att> {
     /// Set components (buttons and select menus) for this message.
     ///
     /// Any previously set components will be overwritten.
-    pub fn components(mut self, components: serenity::CreateComponents) -> Self {
+    pub fn components(mut self, components: Vec<serenity::CreateActionRow>) -> Self {
         self.components = Some(components);
         self
     }
@@ -49,7 +49,7 @@ impl<'att> CreateReply<'att> {
     /// Add an attachment.
     ///
     /// This will not have an effect in a slash command's initial response!
-    pub fn attachment(mut self, attachment: serenity::AttachmentType<'att>) -> Self {
+    pub fn attachment(mut self, attachment: serenity::CreateAttachment) -> Self {
         self.attachments.push(attachment);
         self
     }
@@ -83,9 +83,12 @@ impl<'att> CreateReply<'att> {
 
 /// Methods to create a message builder from any type from this [`CreateReply`]. Used by poise
 /// internally to actually send a response to Discord
-impl<'att> CreateReply<'att> {
-    /// Serialize this response builder to a [`serenity::CreateInteractionResponseData`]
-    pub fn to_slash_initial_response(self, f: &mut serenity::CreateInteractionResponseData<'att>) {
+impl CreateReply {
+    /// Serialize this response builder to a [`serenity::CreateInteractionResponseMessage`]
+    pub fn to_slash_initial_response(
+        self,
+        mut builder: serenity::CreateInteractionResponseMessage,
+    ) -> serenity::CreateInteractionResponseMessage {
         let crate::CreateReply {
             content,
             embeds,
@@ -98,32 +101,26 @@ impl<'att> CreateReply<'att> {
         } = self;
 
         if let Some(content) = content {
-            f.content(content);
+            builder = builder.content(content);
         }
-        f.set_embeds(embeds);
         if let Some(allowed_mentions) = allowed_mentions {
-            f.allowed_mentions(|f| {
-                *f = allowed_mentions.clone();
-                f
-            });
+            builder = builder.allowed_mentions(allowed_mentions);
         }
         if let Some(components) = components {
-            f.components(|f| {
-                f.0 = components.0;
-                f
-            });
+            builder = builder.components(components);
         }
         if let Some(ephemeral) = ephemeral {
-            f.ephemeral(ephemeral);
+            builder = builder.ephemeral(ephemeral);
         }
-        f.add_files(attachments);
+
+        builder.add_files(attachments).embeds(embeds)
     }
 
     /// Serialize this response builder to a [`serenity::CreateInteractionResponseFollowup`]
     pub fn to_slash_followup_response(
         self,
-        f: &mut serenity::CreateInteractionResponseFollowup<'att>,
-    ) {
+        mut builder: serenity::CreateInteractionResponseFollowup,
+    ) -> serenity::CreateInteractionResponseFollowup {
         let crate::CreateReply {
             content,
             embeds,
@@ -136,29 +133,27 @@ impl<'att> CreateReply<'att> {
         } = self;
 
         if let Some(content) = content {
-            f.content(content);
+            builder = builder.content(content);
         }
-        f.set_embeds(embeds);
+        builder = builder.embeds(embeds);
         if let Some(components) = components {
-            f.components(|c| {
-                c.0 = components.0;
-                c
-            });
+            builder = builder.components(components)
         }
         if let Some(allowed_mentions) = allowed_mentions {
-            f.allowed_mentions(|f| {
-                *f = allowed_mentions.clone();
-                f
-            });
+            builder = builder.allowed_mentions(allowed_mentions);
         }
         if let Some(ephemeral) = ephemeral {
-            f.ephemeral(ephemeral);
+            builder = builder.ephemeral(ephemeral);
         }
-        f.add_files(attachments);
+
+        builder.add_files(attachments)
     }
 
     /// Serialize this response builder to a [`serenity::EditInteractionResponse`]
-    pub fn to_slash_initial_response_edit(self, f: &mut serenity::EditInteractionResponse) {
+    pub fn to_slash_initial_response_edit(
+        self,
+        mut builder: serenity::EditInteractionResponse,
+    ) -> serenity::EditInteractionResponse {
         let crate::CreateReply {
             content,
             embeds,
@@ -171,25 +166,20 @@ impl<'att> CreateReply<'att> {
         } = self;
 
         if let Some(content) = content {
-            f.content(content);
+            builder = builder.content(content);
         }
-        f.set_embeds(embeds);
         if let Some(components) = components {
-            f.components(|c| {
-                c.0 = components.0;
-                c
-            });
+            builder = builder.components(components);
         }
         if let Some(allowed_mentions) = allowed_mentions {
-            f.allowed_mentions(|f| {
-                *f = allowed_mentions.clone();
-                f
-            });
+            builder = builder.allowed_mentions(allowed_mentions);
         }
+
+        builder.embeds(embeds)
     }
 
     /// Serialize this response builder to a [`serenity::EditMessage`]
-    pub fn to_prefix_edit(self, f: &mut serenity::EditMessage<'att>) {
+    pub fn to_prefix_edit(self, mut builder: serenity::EditMessage) -> serenity::EditMessage {
         let crate::CreateReply {
             content,
             embeds,
@@ -201,35 +191,29 @@ impl<'att> CreateReply<'att> {
             __non_exhaustive: (),
         } = self;
 
-        if let Some(content) = content {
-            f.content(content);
-        }
-        f.add_embeds(embeds);
+        let mut attachments_builder = serenity::EditAttachments::new();
         for attachment in attachments {
-            f.attachment(attachment);
+            attachments_builder = attachments_builder.add(attachment);
         }
 
+        if let Some(content) = content {
+            builder = builder.content(content);
+        }
         if let Some(allowed_mentions) = allowed_mentions {
-            f.allowed_mentions(|b| {
-                *b = allowed_mentions;
-                b
-            });
+            builder = builder.allowed_mentions(allowed_mentions);
+        }
+        if let Some(components) = components {
+            builder = builder.components(components);
         }
 
-        if let Some(components) = components {
-            f.components(|f| {
-                *f = components;
-                f
-            });
-        }
+        builder.embeds(embeds).attachments(attachments_builder)
     }
 
     /// Serialize this response builder to a [`serenity::CreateMessage`]
     pub fn to_prefix(
         self,
-        m: &mut serenity::CreateMessage<'att>,
-        invocation_message: &serenity::Message,
-    ) {
+        invocation_message: serenity::MessageReference,
+    ) -> serenity::CreateMessage {
         let crate::CreateReply {
             content,
             embeds,
@@ -241,28 +225,24 @@ impl<'att> CreateReply<'att> {
             __non_exhaustive: (),
         } = self;
 
+        let mut builder = serenity::CreateMessage::new();
         if let Some(content) = content {
-            m.content(content);
+            builder = builder.content(content);
         }
-        m.set_embeds(embeds);
         if let Some(allowed_mentions) = allowed_mentions {
-            m.allowed_mentions(|m| {
-                *m = allowed_mentions;
-                m
-            });
+            builder = builder.allowed_mentions(allowed_mentions);
         }
         if let Some(components) = components {
-            m.components(|c| {
-                c.0 = components.0;
-                c
-            });
+            builder = builder.components(components);
         }
         if reply {
-            m.reference_message(invocation_message);
+            builder = builder.reference_message(invocation_message);
         }
 
         for attachment in attachments {
-            m.add_file(attachment);
+            builder = builder.add_file(attachment);
         }
+
+        builder.embeds(embeds)
     }
 }

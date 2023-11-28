@@ -6,17 +6,15 @@ pub async fn test_reuse_response(ctx: Context<'_>) -> Result<(), Error> {
     let image_url = "https://raw.githubusercontent.com/serenity-rs/serenity/current/logo.png";
 
     let reply = {
-        let mut embed = serenity::CreateEmbed::default();
-        embed.description("embed 1").image(image_url);
+        let embed = serenity::CreateEmbed::default()
+            .description("embed 1")
+            .image(image_url);
 
-        let mut components = serenity::CreateComponents::default();
-        components.create_action_row(|b| {
-            b.create_button(|b| {
-                b.label("button 1")
-                    .style(serenity::ButtonStyle::Primary)
-                    .custom_id(1)
-            })
-        });
+        let components = vec![serenity::CreateActionRow::Buttons(vec![
+            serenity::CreateButton::new("1")
+                .label("button 1")
+                .style(serenity::ButtonStyle::Primary),
+        ])];
 
         poise::CreateReply::default()
             .content("message 1")
@@ -30,17 +28,15 @@ pub async fn test_reuse_response(ctx: Context<'_>) -> Result<(), Error> {
 
     let image_url = "https://raw.githubusercontent.com/serenity-rs/serenity/current/examples/e09_create_message_builder/ferris_eyes.png";
     let reply = {
-        let mut embed = serenity::CreateEmbed::default();
-        embed.description("embed 2").image(image_url);
+        let embed = serenity::CreateEmbed::default()
+            .description("embed 2")
+            .image(image_url);
 
-        let mut components = serenity::CreateComponents::default();
-        components.create_action_row(|b| {
-            b.create_button(|b| {
-                b.label("button 2")
-                    .style(serenity::ButtonStyle::Danger)
-                    .custom_id(2)
-            })
-        });
+        let components = vec![serenity::CreateActionRow::Buttons(vec![
+            serenity::CreateButton::new("2")
+                .label("button 2")
+                .style(serenity::ButtonStyle::Danger),
+        ])];
 
         poise::CreateReply::default()
             .content("message 2")

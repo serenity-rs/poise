@@ -42,21 +42,15 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
                     let choices_stream = ::poise::into_stream!(
                         #autocomplete_fn(ctx.into(), partial).await
                     );
-                    let choices_json = choices_stream
+                    let choices_vec = choices_stream
                         .take(25)
                         // T or AutocompleteChoice<T> -> AutocompleteChoice<T>
-                        .map(|value| poise::AutocompleteChoice::from(value))
-                        // AutocompleteChoice<T> -> serde_json::Value
-                        .map(|choice| poise::serenity_prelude::json::json!({
-                            "name": choice.label,
-                            "value": choice.value,
-                        }))
+                        .map(poise::serenity_prelude::AutocompleteChoice::from)
                         .collect()
                         .await;
 
                     let mut response = poise::serenity_prelude::CreateAutocompleteResponse::default();
-                    response.set_choices(poise::serenity_prelude::json::Value::Array(choices_json));
-                    Ok(response)
+                    Ok(response.set_choices(choices_vec))
                 })) }
             }
             None => quote::quote! { None },
@@ -65,25 +59,25 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
         // We can just cast to f64 here because Discord only uses f64 precision anyways
         // TODO: move this to poise::CommandParameter::{min, max} fields
         let min_value_setter = match &param.args.min {
-            Some(x) => quote::quote! { o.min_number_value(#x as f64); },
+            Some(x) => quote::quote! { .min_number_value(#x as f64) },
             None => quote::quote! {},
         };
         let max_value_setter = match &param.args.max {
-            Some(x) => quote::quote! { o.max_number_value(#x as f64); },
+            Some(x) => quote::quote! { .max_number_value(#x as f64) },
             None => quote::quote! {},
         };
         // TODO: move this to poise::CommandParameter::{min_length, max_length} fields
         let min_length_setter = match &param.args.min_length {
-            Some(x) => quote::quote! { o.min_length(#x); },
+            Some(x) => quote::quote! { .min_length(#x) },
             None => quote::quote! {},
         };
         let max_length_setter = match &param.args.max_length {
-            Some(x) => quote::quote! { o.max_length(#x); },
+            Some(x) => quote::quote! { .max_length(#x) },
             None => quote::quote! {},
         };
         let type_setter = match inv.args.slash_command {
             true => quote::quote! { Some(|o| {
-                poise::create_slash_argument!(#type_, o);
+                poise::create_slash_argument!(#type_, o)
                 #min_value_setter #max_value_setter
                 #min_length_setter #max_length_setter
             }) },

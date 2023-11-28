@@ -21,7 +21,7 @@ pub struct FrameworkContext<'a, U, E> {
     /// Your provided user data
     pub user_data: &'a U,
     /// Serenity shard manager. Can be used for example to shutdown the bot
-    pub shard_manager: &'a std::sync::Arc<tokio::sync::Mutex<serenity::ShardManager>>,
+    pub shard_manager: &'a std::sync::Arc<serenity::ShardManager>,
     // deliberately not non exhaustive because you need to create FrameworkContext from scratch
     // to run your own event loop
 }
@@ -44,7 +44,7 @@ impl<'a, U, E> FrameworkContext<'a, U, E> {
     ///
     /// This function exists for API compatiblity with [`crate::Framework`]. On this type, you can
     /// also just access the public `shard_manager` field.
-    pub fn shard_manager(&self) -> std::sync::Arc<tokio::sync::Mutex<serenity::ShardManager>> {
+    pub fn shard_manager(&self) -> std::sync::Arc<serenity::ShardManager> {
         self.shard_manager.clone()
     }
 
@@ -62,10 +62,10 @@ impl<'a, U, E> FrameworkContext<'a, U, E> {
 pub async fn dispatch_event<U: Send + Sync, E>(
     framework: crate::FrameworkContext<'_, U, E>,
     ctx: &serenity::Context,
-    event: &crate::Event<'_>,
+    event: serenity::FullEvent,
 ) {
-    match event {
-        crate::Event::Message { new_message } => {
+    match &event {
+        serenity::FullEvent::Message { new_message } => {
             let invocation_data = tokio::sync::Mutex::new(Box::new(()) as _);
             let mut parent_commands = Vec::new();
             let trigger = crate::MessageDispatchTrigger::MessageCreate;
@@ -82,7 +82,7 @@ pub async fn dispatch_event<U: Send + Sync, E>(
                 error.handle(framework.options).await;
             }
         }
-        crate::Event::MessageUpdate { event, .. } => {
+        serenity::FullEvent::MessageUpdate { event, .. } => {
             if let Some(edit_tracker) = &framework.options.prefix_options.edit_tracker {
                 let msg = edit_tracker.write().unwrap().process_message_update(
                     event,
@@ -114,7 +114,7 @@ pub async fn dispatch_event<U: Send + Sync, E>(
                 }
             }
         }
-        crate::Event::MessageDelete {
+        serenity::FullEvent::MessageDelete {
             deleted_message_id, ..
         } => {
             if let Some(edit_tracker) = &framework.options.prefix_options.edit_tracker {
@@ -129,8 +129,8 @@ pub async fn dispatch_event<U: Send + Sync, E>(
                 }
             }
         }
-        crate::Event::InteractionCreate {
-            interaction: serenity::Interaction::ApplicationCommand(interaction),
+        serenity::FullEvent::InteractionCreate {
+            interaction: serenity::Interaction::Command(interaction),
         } => {
             let invocation_data = tokio::sync::Mutex::new(Box::new(()) as _);
             let mut parent_commands = Vec::new();
@@ -140,6 +140,7 @@ pub async fn dispatch_event<U: Send + Sync, E>(
                 interaction,
                 &std::sync::atomic::AtomicBool::new(false),
                 &invocation_data,
+                &interaction.data.options(),
                 &mut parent_commands,
             )
             .await
@@ -147,7 +148,7 @@ pub async fn dispatch_event<U: Send + Sync, E>(
                 error.handle(framework.options).await;
             }
         }
-        crate::Event::InteractionCreate {
+        serenity::FullEvent::InteractionCreate {
             interaction: serenity::Interaction::Autocomplete(interaction),
         } => {
             let invocation_data = tokio::sync::Mutex::new(Box::new(()) as _);
@@ -158,6 +159,7 @@ pub async fn dispatch_event<U: Send + Sync, E>(
                 interaction,
                 &std::sync::atomic::AtomicBool::new(false),
                 &invocation_data,
+                &interaction.data.options(),
                 &mut parent_commands,
             )
             .await
@@ -171,12 +173,12 @@ pub async fn dispatch_event<U: Send + Sync, E>(
     // Do this after the framework's Ready handling, so that get_user_data() doesnt
     // potentially block infinitely
     if let Err(error) =
-        (framework.options.event_handler)(ctx, event, framework, framework.user_data).await
+        (framework.options.event_handler)(ctx, &event, framework, framework.user_data).await
     {
         let error = crate::FrameworkError::EventHandler {
-            ctx,
             error,
-            event,
+            ctx,
+            event: &event,
             framework,
         };
         (framework.options.on_error)(error).await;

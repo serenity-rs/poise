@@ -1,5 +1,7 @@
 //! The central Framework struct that ties everything together.
 
+use std::sync::Arc;
+
 pub use builder::*;
 
 use crate::{serenity_prelude as serenity, BoxFuture};
@@ -18,16 +20,14 @@ mod builder;
 /// You can build a bot without [`Framework`]: see the `manual_dispatch` example in the repository
 pub struct Framework<U, E> {
     /// Stores user data. Is initialized on first Ready event
-    user_data: once_cell::sync::OnceCell<U>,
+    user_data: std::sync::OnceLock<U>,
     /// Stores bot ID. Is initialized on first Ready event
-    bot_id: once_cell::sync::OnceCell<serenity::UserId>,
+    bot_id: std::sync::OnceLock<serenity::UserId>,
     /// Stores the framework options
     options: crate::FrameworkOptions<U, E>,
 
-    /// Will be initialized to Some on construction, and then taken out on startup
-    client: parking_lot::Mutex<Option<serenity::Client>>,
     /// Initialized to Some during construction; so shouldn't be None at any observable point
-    shard_manager: std::sync::Arc<tokio::sync::Mutex<serenity::ShardManager>>,
+    shard_manager: Option<Arc<serenity::ShardManager>>,
     /// Filled with Some on construction. Taken out and executed on first Ready gateway event
     setup: std::sync::Mutex<
         Option<
@@ -42,6 +42,9 @@ pub struct Framework<U, E> {
             >,
         >,
     >,
+
+    /// Handle to the background task in order to `abort()` it on `Drop`
+    edit_tracker_purge_task: Option<tokio::task::JoinHandle<()>>,
 }
 
 impl<U, E> Framework<U, E> {
@@ -62,17 +65,11 @@ impl<U, E> Framework<U, E> {
 
     /// Setup a new [`Framework`]. For more ergonomic setup, please see [`FrameworkBuilder`]
     ///
-    /// This function is async and returns Result because it already initializes the Discord client.
-    ///
     /// The user data callback is invoked as soon as the bot is logged in. That way, bot data like
     /// user ID or connected guilds can be made available to the user data setup function. The user
     /// data setup is not allowed to return Result because there would be no reasonable
     /// course of action on error.
-    pub async fn new<F>(
-        client_builder: serenity::ClientBuilder,
-        setup: F,
-        mut options: crate::FrameworkOptions<U, E>,
-    ) -> Result<std::sync::Arc<Self>, serenity::Error>
+    pub fn new<F>(options: crate::FrameworkOptions<U, E>, setup: F) -> Self
     where
         F: Send
             + Sync
@@ -85,108 +82,14 @@ impl<U, E> Framework<U, E> {
         U: Send + Sync + 'static,
         E: Send + 'static,
     {
-        use std::sync::{Arc, Mutex};
-
-        set_qualified_names(&mut options.commands);
-        message_content_intent_sanity_check(&options.prefix_options, client_builder.get_intents());
-
-        let framework_cell = Arc::new(once_cell::sync::OnceCell::<Arc<Self>>::new());
-        let framework_cell_2 = framework_cell.clone();
-        let existing_event_handler = client_builder.get_event_handler();
-        let event_handler = crate::EventWrapper(move |ctx, event| {
-            // unwrap_used: we will only receive events once the client has been started, by which
-            // point framework_cell has been initialized
-            #[allow(clippy::unwrap_used)]
-            let framework = framework_cell_2.get().unwrap().clone();
-            let existing_event_handler = existing_event_handler.clone();
-
-            Box::pin(async move {
-                raw_dispatch_event(&*framework, &ctx, &event).await;
-                if let Some(handler) = existing_event_handler {
-                    event.dispatch(ctx, &*handler).await;
-                }
-            }) as _
-        });
-
-        let client: serenity::Client = client_builder.event_handler(event_handler).await?;
-
-        let framework = Arc::new(Self {
-            user_data: once_cell::sync::OnceCell::new(),
-            bot_id: once_cell::sync::OnceCell::new(),
-            setup: Mutex::new(Some(Box::new(setup))),
+        Self {
+            user_data: std::sync::OnceLock::new(),
+            bot_id: std::sync::OnceLock::new(),
+            setup: std::sync::Mutex::new(Some(Box::new(setup))),
+            edit_tracker_purge_task: None,
+            shard_manager: None,
             options,
-            shard_manager: client.shard_manager.clone(),
-            client: parking_lot::Mutex::new(Some(client)),
-        });
-        let _: Result<_, _> = framework_cell.set(framework.clone());
-        Ok(framework)
-    }
-
-    /// Small utility function for starting the framework that is agnostic over client sharding
-    ///
-    /// You can use these shortcut methods to start the framework with a single shard
-    /// or with automatic sharding: [`Framework::start`], [`Framework::start_autosharded`]
-    ///
-    /// # Examples
-    ///
-    /// Start shards in a range
-    /// ```rust,no_run
-    /// # async fn _test(framework: std::sync::Arc<poise::Framework<(), ()>>) -> Result<(), serenity::Error> {
-    /// let shard_range = [3, 7];
-    /// let total_shards = 8;
-    ///
-    /// framework
-    ///     .start_with(|mut client| async move {
-    ///         client.start_shard_range(shard_range, total_shards).await
-    ///    })
-    ///    .await?;
-    /// # Ok(()) };
-    /// ```
-    pub async fn start_with<F: std::future::Future<Output = serenity::Result<()>>>(
-        self: std::sync::Arc<Self>,
-        start: impl FnOnce(serenity::Client) -> F,
-    ) -> Result<(), serenity::Error>
-    where
-        U: Send + Sync + 'static,
-        E: Send + 'static,
-    {
-        let client = self
-            .client
-            .lock()
-            .take()
-            .expect("Prepared client is missing");
-
-        // This will run for as long as the bot is active
-        let edit_tracker_purge_task = spawn_edit_tracker_purge_task(self);
-        start(client).await?;
-        edit_tracker_purge_task.abort();
-
-        Ok(())
-    }
-
-    /// Starts the framework with a shard. Calls [`serenity::Client::start`] internally.
-    ///
-    /// See [`Framework::start_with`] for other sharding configurations.
-    pub async fn start(self: std::sync::Arc<Self>) -> Result<(), serenity::Error>
-    where
-        U: Send + Sync + 'static,
-        E: Send + 'static,
-    {
-        self.start_with(|mut c| async move { c.start().await })
-            .await
-    }
-
-    /// Starts the framework with automatic sharding.
-    /// Calls [`serenity::Client::start_autosharded`] internally.
-    ///
-    /// See [`Framework::start_with`] for other sharding configurations.
-    pub async fn start_autosharded(self: std::sync::Arc<Self>) -> Result<(), serenity::Error>
-    where
-        U: Send + Sync + 'static,
-        E: Send + 'static,
-    {
-        self.start_with(|mut c| async move { c.start_autosharded().await })
-            .await
+        }
     }
 
     /// Return the stored framework options, including commands.
@@ -196,15 +99,10 @@ impl<U, E> Framework<U, E> {
 
     /// Returns the serenity's client shard manager.
     // Returns a reference so you can plug it into [`FrameworkContext`]
-    pub fn shard_manager(&self) -> &std::sync::Arc<tokio::sync::Mutex<serenity::ShardManager>> {
-        &self.shard_manager
-    }
-
-    /// Returns the serenity client. Panics if the framework has already started!
-    pub fn client(&self) -> impl std::ops::DerefMut<Target = serenity::Client> + '_ {
-        parking_lot::MutexGuard::map(self.client.lock(), |c| {
-            c.as_mut().expect("framework has started")
-        })
+    pub fn shard_manager(&self) -> &Arc<serenity::ShardManager> {
+        self.shard_manager
+            .as_ref()
+            .expect("framework should have started")
     }
 
     /// Retrieves user data, or blocks until it has been initialized (once the Ready event has been
@@ -219,20 +117,57 @@ impl<U, E> Framework<U, E> {
     }
 }
 
+impl<U, E> Drop for Framework<U, E> {
+    fn drop(&mut self) {
+        if let Some(task) = &mut self.edit_tracker_purge_task {
+            task.abort()
+        }
+    }
+}
+
+#[serenity::async_trait]
+impl<U: Send + Sync, E: Send + Sync> serenity::Framework for Framework<U, E> {
+    async fn init(&mut self, client: &serenity::Client) {
+        set_qualified_names(&mut self.options.commands);
+
+        message_content_intent_sanity_check(
+            &self.options.prefix_options,
+            client.shard_manager.intents(),
+        );
+
+        self.shard_manager = Some(client.shard_manager.clone());
+
+        if self.options.initialize_owners {
+            if let Err(e) = insert_owners_from_http(&client.http, &mut self.options.owners).await {
+                tracing::warn!("Failed to insert owners from HTTP: {e}");
+            }
+        }
+
+        if let Some(edit_tracker) = &self.options.prefix_options.edit_tracker {
+            self.edit_tracker_purge_task =
+                Some(spawn_edit_tracker_purge_task(edit_tracker.clone()));
+        }
+    }
+
+    async fn dispatch(&self, ctx: serenity::Context, event: serenity::FullEvent) {
+        raw_dispatch_event(self, ctx, event).await
+    }
+}
+
 /// If the incoming event is Ready, this method executes the user data setup logic
 /// Otherwise, it forwards the event to [`crate::dispatch_event`]
 async fn raw_dispatch_event<U, E>(
-    framework: &crate::Framework<U, E>,
-    ctx: &serenity::Context,
-    event: &crate::Event<'_>,
+    framework: &Framework<U, E>,
+    ctx: serenity::Context,
+    event: serenity::FullEvent,
 ) where
     U: Send + Sync,
 {
-    if let crate::Event::Ready { data_about_bot } = event {
+    if let serenity::FullEvent::Ready { data_about_bot } = &event {
         let _: Result<_, _> = framework.bot_id.set(data_about_bot.user.id);
         let setup = Option::take(&mut *framework.setup.lock().unwrap());
         if let Some(setup) = setup {
-            match setup(ctx, data_about_bot, framework).await {
+            match setup(&ctx, data_about_bot, framework).await {
                 Ok(user_data) => {
                     let _: Result<_, _> = framework.user_data.set(user_data);
                 }
@@ -241,7 +176,7 @@ async fn raw_dispatch_event<U, E>(
                         error,
                         framework,
                         data_about_bot,
-                        ctx,
+                        ctx: &ctx,
                     })
                     .await
                 }
@@ -261,9 +196,9 @@ async fn raw_dispatch_event<U, E>(
         bot_id,
         options: &framework.options,
         user_data,
-        shard_manager: &framework.shard_manager,
+        shard_manager: framework.shard_manager(),
     };
-    crate::dispatch_event(framework, ctx, event).await;
+    crate::dispatch_event(framework, &ctx, event).await;
 }
 
 /// Traverses commands recursively and sets [`crate::Command::qualified_name`] to its actual value
@@ -299,14 +234,15 @@ fn message_content_intent_sanity_check<U, E>(
 /// Runs [`serenity::Http::get_current_application_info`] and inserts owner data into
 /// [`crate::FrameworkOptions::owners`]
 pub async fn insert_owners_from_http(
-    token: &str,
+    http: &serenity::Http,
     owners: &mut std::collections::HashSet<serenity::UserId>,
 ) -> Result<(), serenity::Error> {
-    let application_info = serenity::Http::new(token)
-        .get_current_application_info()
-        .await?;
+    let application_info = http.get_current_application_info().await?;
 
-    owners.insert(application_info.owner.id);
+    if let Some(owner) = application_info.owner {
+        owners.insert(owner.id);
+    }
+
     if let Some(team) = application_info.team {
         for member in team.members {
             // This `if` currently always evaluates to true but it becomes important once
@@ -327,17 +263,15 @@ pub async fn insert_owners_from_http(
 /// NOT PUB because it's not useful to outside users because it requires a full blown Framework
 /// Because e.g. taking a `PrefixFrameworkOptions` reference won't work because tokio tasks need to be
 /// 'static
-fn spawn_edit_tracker_purge_task<U: 'static + Send + Sync, E: 'static>(
-    framework: std::sync::Arc<Framework<U, E>>,
+fn spawn_edit_tracker_purge_task(
+    edit_tracker: Arc<std::sync::RwLock<crate::EditTracker>>,
 ) -> tokio::task::JoinHandle<()> {
     tokio::spawn(async move {
-        if let Some(edit_tracker) = &framework.options.prefix_options.edit_tracker {
-            loop {
-                edit_tracker.write().unwrap().purge();
+        loop {
+            edit_tracker.write().unwrap().purge();
 
-                // not sure if the purging interval should be configurable
-                tokio::time::sleep(std::time::Duration::from_secs(60)).await;
-            }
+            // not sure if the purging interval should be configurable
+            tokio::time::sleep(std::time::Duration::from_secs(60)).await;
         }
     })
 }

@@ -43,25 +43,21 @@ pub async fn paginate<U, E>(
 
     // Send the embed with the first page as content
     let reply = {
-        let mut embed = serenity::CreateEmbed::default();
-        embed.description(pages[0]);
-
-        let mut components = serenity::CreateComponents::default();
-        components.create_action_row(|b| {
-            b.create_button(|b| b.custom_id(&prev_button_id).emoji('◀'))
-                .create_button(|b| b.custom_id(&next_button_id).emoji('▶'))
-        });
+        let components = serenity::CreateActionRow::Buttons(vec![
+            serenity::CreateButton::new(&prev_button_id).emoji('◀'),
+            serenity::CreateButton::new(&next_button_id).emoji('▶'),
+        ]);
 
         crate::CreateReply::default()
-            .embed(embed)
-            .components(components)
+            .embed(serenity::CreateEmbed::default().description(pages[0]))
+            .components(vec![components])
     };
 
     ctx.send(reply).await?;
 
     // Loop through incoming interactions with the navigation buttons
     let mut current_page = 0;
-    while let Some(press) = serenity::CollectComponentInteraction::new(ctx)
+    while let Some(press) = serenity::collector::ComponentInteractionCollector::new(ctx)
         // We defined our button IDs to start with `ctx_id`. If they don't, some other command's
         // button was pressed
         .filter(move |press| press.data.custom_id.starts_with(&ctx_id.to_string()))
@@ -84,10 +80,13 @@ pub async fn paginate<U, E>(
 
         // Update the message with the new page contents
         press
-            .create_interaction_response(ctx, |b| {
-                b.kind(serenity::InteractionResponseType::UpdateMessage)
-                    .interaction_response_data(|b| b.embed(|b| b.description(pages[current_page])))
-            })
+            .create_response(
+                ctx.serenity_context(),
+                serenity::CreateInteractionResponse::UpdateMessage(
+                    serenity::CreateInteractionResponseMessage::new()
+                        .embed(serenity::CreateEmbed::new().description(pages[current_page])),
+                ),
+            )
             .await?;
     }
 

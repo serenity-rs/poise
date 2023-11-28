@@ -2,7 +2,6 @@ use std::env::var;
 use std::sync::atomic::{AtomicU32, Ordering};
 
 use poise::serenity_prelude as serenity;
-use poise::Event;
 
 // Types used by all command functions
 type Error = Box<dyn std::error::Error + Send + Sync>;
@@ -18,18 +17,12 @@ pub struct Data {
 async fn main() {
     env_logger::init();
 
-    let options = poise::FrameworkOptions {
-        event_handler: |_ctx, event, _framework, _data| {
-            Box::pin(event_handler(_ctx, event, _framework, _data))
-        },
-        ..Default::default()
-    };
+    let token = var("DISCORD_TOKEN")
+        .expect("Missing `DISCORD_TOKEN` env var, see README for more information.");
+    let intents =
+        serenity::GatewayIntents::non_privileged() | serenity::GatewayIntents::MESSAGE_CONTENT;
 
-    poise::Framework::builder()
-        .token(
-            var("DISCORD_TOKEN")
-                .expect("Missing `DISCORD_TOKEN` env var, see README for more information."),
-        )
+    let framework = poise::Framework::builder()
         .setup(move |_ctx, _ready, _framework| {
             Box::pin(async move {
                 Ok(Data {
@@ -37,26 +30,32 @@ async fn main() {
                 })
             })
         })
-        .options(options)
-        .intents(
-            serenity::GatewayIntents::non_privileged() | serenity::GatewayIntents::MESSAGE_CONTENT,
-        )
-        .run()
-        .await
-        .unwrap();
+        .options(poise::FrameworkOptions {
+            event_handler: |ctx, event, framework, data| {
+                Box::pin(event_handler(ctx, event, framework, data))
+            },
+            ..Default::default()
+        })
+        .build();
+
+    let client = serenity::ClientBuilder::new(token, intents)
+        .framework(framework)
+        .await;
+
+    client.unwrap().start().await.unwrap();
 }
 
 async fn event_handler(
     ctx: &serenity::Context,
-    event: &Event<'_>,
+    event: &serenity::FullEvent,
     _framework: poise::FrameworkContext<'_, Data, Error>,
     data: &Data,
 ) -> Result<(), Error> {
     match event {
-        Event::Ready { data_about_bot } => {
+        serenity::FullEvent::Ready { data_about_bot, .. } => {
             println!("Logged in as {}", data_about_bot.user.name);
         }
-        Event::Message { new_message } => {
+        serenity::FullEvent::Message { new_message } => {
             if new_message.content.to_lowercase().contains("poise") {
                 let mentions = data.poise_mentions.load(Ordering::SeqCst) + 1;
                 data.poise_mentions.store(mentions, Ordering::SeqCst);

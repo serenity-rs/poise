@@ -91,7 +91,7 @@ async fn strip_prefix<'a, U, E>(
             msg.content
                 .strip_prefix("<@")?
                 .trim_start_matches('!')
-                .strip_prefix(&framework.bot_id.0.to_string())?
+                .strip_prefix(&framework.bot_id.to_string())?
                 .strip_prefix('>')
         })() {
             let mention_prefix = &msg.content[..(msg.content.len() - stripped_content.len())];
@@ -234,7 +234,7 @@ pub async fn parse_invocation<'a, U: Send + Sync, E>(
     }
 
     // Check if we can execute commands contained in thread creation messages
-    if msg.kind == serenity::channel::MessageType::ThreadCreated
+    if msg.kind == serenity::MessageType::ThreadCreated
         && framework.options.prefix_options.ignore_thread_creation
     {
         return Ok(None);
@@ -313,10 +313,7 @@ pub async fn run_invocation<U, E>(
 
     // Typing is broadcasted as long as this object is alive
     let _typing_broadcaster = if ctx.command.broadcast_typing {
-        ctx.msg
-            .channel_id
-            .start_typing(&ctx.serenity_context.http)
-            .ok()
+        Some(ctx.msg.channel_id.start_typing(&ctx.serenity_context.http))
     } else {
         None
     };

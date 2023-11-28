@@ -31,7 +31,7 @@ async fn user_permissions(
 
     let member = guild.member(ctx, user_id).await.ok()?;
 
-    guild.user_permissions_in(&channel, &member).ok()
+    Some(guild.user_permissions_in(&channel, &member))
 }
 
 /// Retrieves the set of permissions that are lacking, relative to the given required permission set
@@ -79,7 +79,7 @@ async fn check_permissions_and_cooldown_single<'a, U, E>(
             Some(guild_id) => {
                 #[cfg(feature = "cache")]
                 if ctx.framework().options().require_cache_for_guild_check
-                    && ctx.cache().guild_field(guild_id, |_| ()).is_none()
+                    && ctx.cache().guild(guild_id).is_none()
                 {
                     return Err(crate::FrameworkError::GuildOnly { ctx });
                 }

@@ -2,7 +2,7 @@
 
 use std::borrow::Cow;
 
-use crate::serenity_prelude as serenity;
+use crate::{serenity_prelude as serenity, CommandInteractionType};
 
 // needed for proc macro
 #[doc(hidden)]
@@ -116,7 +116,7 @@ context_methods! {
             Self::Prefix(ctx) => Some(
                 ctx.msg
                     .channel_id
-                    .start_typing(&ctx.serenity_context.http)?,
+                    .start_typing(&ctx.serenity_context.http),
             ),
         })
     }
@@ -155,7 +155,7 @@ context_methods! {
     await (send self builder)
     (pub async fn send<'att>(
         self,
-        builder: crate::CreateReply<'att>,
+        builder: crate::CreateReply,
     ) -> Result<crate::ReplyHandle<'a>, serenity::Error>) {
         crate::send_reply(self, builder).await
     }
@@ -209,7 +209,7 @@ context_methods! {
     (channel_id self)
     (pub fn channel_id(self) -> serenity::ChannelId) {
         match self {
-            Self::Application(ctx) => ctx.interaction.channel_id(),
+            Self::Application(ctx) => ctx.interaction.channel_id,
             Self::Prefix(ctx) => ctx.msg.channel_id,
         }
     }
@@ -218,7 +218,7 @@ context_methods! {
     (guild_id self)
     (pub fn guild_id(self) -> Option<serenity::GuildId>) {
         match self {
-            Self::Application(ctx) => ctx.interaction.guild_id(),
+            Self::Application(ctx) => ctx.interaction.guild_id,
             Self::Prefix(ctx) => ctx.msg.guild_id,
         }
     }
@@ -235,12 +235,10 @@ context_methods! {
 
     // Doesn't fit in with the rest of the functions here but it's convenient
     /// Return the guild of this context, if we are inside a guild.
-    ///
-    /// Warning: clones the entire Guild instance out of the cache
     #[cfg(feature = "cache")]
     (guild self)
-    (pub fn guild(self) -> Option<serenity::Guild>) {
-        self.guild_id()?.to_guild_cached(self)
+    (pub fn guild(self) -> Option<serenity::GuildRef<'a>>) {
+        self.guild_id()?.to_guild_cached(self.serenity_context())
     }
 
     // Doesn't fit in with the rest of the functions here but it's convenient
@@ -253,11 +251,11 @@ context_methods! {
     await (partial_guild self)
     (pub async fn partial_guild(self) -> Option<serenity::PartialGuild>) {
         #[cfg(feature = "cache")]
-        if let Some(guild) = self.guild_id()?.to_guild_cached(self) {
-            return Some(guild.into());
+        if let Some(guild) = self.guild() {
+            return Some(guild.clone().into());
         }
 
-        self.guild_id()?.to_partial_guild(self).await.ok()
+        self.guild_id()?.to_partial_guild(self.serenity_context()).await.ok()
     }
 
     // Doesn't fit in with the rest of the functions here but it's convenient
@@ -273,7 +271,7 @@ context_methods! {
     await (author_member self)
     (pub async fn author_member(self) -> Option<Cow<'a, serenity::Member>>) {
         if let Self::Application(ctx) = self {
-            ctx.interaction.member().map(Cow::Borrowed)
+            ctx.interaction.member.as_deref().map(Cow::Borrowed)
         } else {
             self.guild_id()?
                 .member(self.serenity_context(), self.author().id)
@@ -287,7 +285,7 @@ context_methods! {
     (created_at self)
     (pub fn created_at(self) -> serenity::Timestamp) {
         match self {
-            Self::Application(ctx) => ctx.interaction.id().created_at(),
+            Self::Application(ctx) => ctx.interaction.id.created_at(),
             Self::Prefix(ctx) => ctx.msg.timestamp,
         }
     }
@@ -296,7 +294,7 @@ context_methods! {
     (author self)
     (pub fn author(self) -> &'a serenity::User) {
         match self {
-            Self::Application(ctx) => ctx.interaction.user(),
+            Self::Application(ctx) => &ctx.interaction.user,
             Self::Prefix(ctx) => &ctx.msg.author,
         }
     }
@@ -306,9 +304,9 @@ context_methods! {
     (id self)
     (pub fn id(self) -> u64) {
         match self {
-            Self::Application(ctx) => ctx.interaction.id().0,
+            Self::Application(ctx) => ctx.interaction.id.get(),
             Self::Prefix(ctx) => {
-                let mut id = ctx.msg.id.0;
+                let mut id = ctx.msg.id.get();
                 if let Some(edited_timestamp) = ctx.msg.edited_timestamp {
                     // We replace the 42 datetime bits with msg.timestamp_edited so that the ID is
                     // unique even after edits
@@ -371,7 +369,7 @@ context_methods! {
     (pub fn invoked_command_name(self) -> &'a str) {
         match self {
             Self::Prefix(ctx) => ctx.invoked_command_name,
-            Self::Application(ctx) => &ctx.interaction.data().name,
+            Self::Application(ctx) => &ctx.interaction.data.name,
         }
     }
 
@@ -407,26 +405,48 @@ context_methods! {
                 }
                 string += &ctx.command.name;
                 for arg in ctx.args {
-                    if let Some(value) = &arg.value {
-                        #[allow(unused_imports)] // required for simd-json
-                        use ::serenity::json::prelude::*;
-                        use std::fmt::Write as _;
+                    #[allow(unused_imports)] // required for simd-json
+                    use ::serenity::json::*;
+                    use std::fmt::Write as _;
 
-                        string += " ";
-                        string += &arg.name;
-                        string += ":";
-                        if let Some(x) = value.as_bool() {
-                            let _ = write!(string, "{}", x);
-                        } else if let Some(x) = value.as_i64() {
-                            let _ = write!(string, "{}", x);
-                        } else if let Some(x) = value.as_u64() {
-                            let _ = write!(string, "{}", x);
-                        } else if let Some(x) = value.as_f64() {
-                            let _ = write!(string, "{}", x);
-                        } else if let Some(x) = value.as_str() {
-                            let _ = write!(string, "{}", x);
+                    string += " ";
+                    string += &arg.name;
+                    string += ":";
+
+                    let _ = match arg.value {
+                        // This was verified to match Discord behavior when copy-pasting a not-yet
+                        // sent slash command invocation
+                        serenity::ResolvedValue::Attachment(_) => write!(string, ""),
+                        serenity::ResolvedValue::Boolean(x) => write!(string, "{}", x),
+                        serenity::ResolvedValue::Integer(x) => write!(string, "{}", x),
+                        serenity::ResolvedValue::Number(x) => write!(string, "{}", x),
+                        serenity::ResolvedValue::String(x) => write!(string, "{}", x),
+                        serenity::ResolvedValue::Channel(x) => {
+                            write!(string, "#{}", x.name.as_deref().unwrap_or(""))
                         }
-                    }
+                        serenity::ResolvedValue::Role(x) => write!(string, "@{}", x.name),
+                        serenity::ResolvedValue::User(x, _) => {
+                            string.push('@');
+                            string.push_str(&x.name);
+                            if let Some(discrim) = x.discriminator {
+                                let _ = write!(string, "#{discrim:04}");
+                            }
+                            Ok(())
+                        }
+
+                        serenity::ResolvedValue::Unresolved(_)
+                        | serenity::ResolvedValue::SubCommand(_)
+                        | serenity::ResolvedValue::SubCommandGroup(_)
+                        | serenity::ResolvedValue::Autocomplete { .. } => {
+                            tracing::warn!("unexpected interaction option type");
+                            Ok(())
+                        }
+                        // We need this because ResolvedValue is #[non_exhaustive]
+                        _ => {
+                            tracing::warn!("newly-added unknown interaction option type");
+                            Ok(())
+                        }
+                    };
                 }
                 string
             }
@@ -461,7 +481,7 @@ context_methods! {
     (locale self)
     (pub fn locale(self) -> Option<&'a str>) {
         match self {
-            Context::Application(ctx) => Some(ctx.interaction.locale()),
+            Context::Application(ctx) => Some(&ctx.interaction.locale),
             Context::Prefix(_) => None,
         }
     }
@@ -471,12 +491,13 @@ context_methods! {
     ///
     /// This is primarily an internal function and only exposed for people who want to manually
     /// convert [`crate::CreateReply`] instances into Discord requests.
+    #[allow(unused_mut)] // side effect of how macro works
     (reply_builder self builder)
-    (pub fn reply_builder<'att>(self, mut builder: crate::CreateReply<'att>) -> crate::CreateReply<'att>) {
+    (pub fn reply_builder(self, mut builder: crate::CreateReply) -> crate::CreateReply) {
         builder.allowed_mentions = builder.allowed_mentions.or_else(|| self.framework().options().allowed_mentions.clone());
 
         if let Some(callback) = self.framework().options().reply_callback {
-            callback(self, &mut builder);
+            builder = callback(self, builder);
         }
 
         builder
@@ -504,7 +525,7 @@ context_methods! {
     /// If the shard has just connected, this value is zero.
     await (ping self)
     (pub async fn ping(self) -> std::time::Duration) {
-        match self.framework().shard_manager.lock().await.runners.lock().await.get(&serenity::ShardId(self.serenity_context().shard_id)) {
+        match self.framework().shard_manager.runners.lock().await.get(&self.serenity_context().shard_id) {
             Some(runner) => runner.latency.unwrap_or(std::time::Duration::ZERO),
             None => {
                 tracing::error!("current shard is not in shard_manager.runners, this shouldn't happen");
@@ -520,17 +541,12 @@ impl<'a, U, E> Context<'a, U, E> {
         match self {
             Self::Application(ctx) => {
                 // Skip autocomplete interactions
-                let interaction = match ctx.interaction {
-                    crate::ApplicationCommandOrAutocompleteInteraction::ApplicationCommand(
-                        interaction,
-                    ) => interaction,
-                    crate::ApplicationCommandOrAutocompleteInteraction::Autocomplete(_) => {
-                        return Ok(())
-                    }
-                };
+                if ctx.interaction_type == CommandInteractionType::Autocomplete {
+                    return Ok(());
+                }
 
                 // Check slash command
-                if interaction.data.kind == serenity::CommandType::ChatInput {
+                if ctx.interaction.data.kind == serenity::CommandType::ChatInput {
                     return if let Some(action) = ctx.command.slash_action {
                         action(ctx).await
                     } else {
@@ -539,20 +555,21 @@ impl<'a, U, E> Context<'a, U, E> {
                 }
 
                 // Check context menu command
-                if let (Some(action), Some(target)) =
-                    (ctx.command.context_menu_action, &interaction.data.target())
-                {
+                if let (Some(action), Some(target)) = (
+                    ctx.command.context_menu_action,
+                    &ctx.interaction.data.target(),
+                ) {
                     return match action {
                         crate::ContextMenuCommandAction::User(action) => {
                             if let serenity::ResolvedTarget::User(user, _) = target {
-                                action(ctx, user.clone()).await
+                                action(ctx, (*user).clone()).await
                             } else {
                                 Ok(())
                             }
                         }
                         crate::ContextMenuCommandAction::Message(action) => {
                             if let serenity::ResolvedTarget::Message(message) = target {
-                                action(ctx, *message.clone()).await
+                                action(ctx, (*message).clone()).await
                             } else {
                                 Ok(())
                             }
@@ -610,7 +627,7 @@ macro_rules! context_trait_impls {
                 self.serenity_context()
             }
         }
-        impl<U: Sync, E> serenity::CacheHttp for $($type)*<'_, U, E> {
+        impl<U: Send + Sync, E> serenity::CacheHttp for $($type)*<'_, U, E> {
             fn http(&self) -> &serenity::Http {
                 &self.serenity_context().http
             }

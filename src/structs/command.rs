@@ -138,34 +138,35 @@ impl<U, E> Eq for Command<U, E> {}
 impl<U, E> Command<U, E> {
     /// Serializes this Command into an application command option, which is the form which Discord
     /// requires subcommands to be in
-    fn create_as_subcommand(&self) -> Option<serenity::CreateApplicationCommandOption> {
+    fn create_as_subcommand(&self) -> Option<serenity::CreateCommandOption> {
         self.slash_action?;
 
-        let mut builder = serenity::CreateApplicationCommandOption::default();
-        builder
-            .name(&self.name)
-            .description(self.description.as_deref().unwrap_or("A slash command"));
+        let kind = if self.subcommands.is_empty() {
+            serenity::CommandOptionType::SubCommand
+        } else {
+            serenity::CommandOptionType::SubCommandGroup
+        };
+
+        let description = self.description.as_deref().unwrap_or("A slash command");
+        let mut builder = serenity::CreateCommandOption::new(kind, self.name.clone(), description);
+
         for (locale, name) in &self.name_localizations {
-            builder.name_localized(locale, name);
+            builder = builder.name_localized(locale, name);
         }
         for (locale, description) in &self.description_localizations {
-            builder.description_localized(locale, description);
+            builder = builder.description_localized(locale, description);
         }
 
         if self.subcommands.is_empty() {
-            builder.kind(serenity::CommandOptionType::SubCommand);
-
             for param in &self.parameters {
                 // Using `?` because if this command has slash-incompatible parameters, we cannot
                 // just ignore them but have to abort the creation process entirely
-                builder.add_sub_option(param.create_as_slash_command_option()?);
+                builder = builder.add_sub_option(param.create_as_slash_command_option()?);
             }
         } else {
-            builder.kind(serenity::CommandOptionType::SubCommandGroup);
-
             for subcommand in &self.subcommands {
                 if let Some(subcommand) = subcommand.create_as_subcommand() {
-                    builder.add_sub_option(subcommand);
+                    builder = builder.add_sub_option(subcommand);
                 }
             }
         }
@@ -175,40 +176,39 @@ impl<U, E> Command<U, E> {
 
     /// Generates a slash command builder from this [`Command`] instance. This can be used
     /// to register this command on Discord's servers
-    pub fn create_as_slash_command(&self) -> Option<serenity::CreateApplicationCommand> {
+    pub fn create_as_slash_command(&self) -> Option<serenity::CreateCommand> {
         self.slash_action?;
 
-        let mut builder = serenity::CreateApplicationCommand::default();
-        builder
-            .name(&self.name)
+        let mut builder = serenity::CreateCommand::new(self.name.clone())
             .description(self.description.as_deref().unwrap_or("A slash command"));
+
         for (locale, name) in &self.name_localizations {
-            builder.name_localized(locale, name);
+            builder = builder.name_localized(locale, name);
         }
         for (locale, description) in &self.description_localizations {
-            builder.description_localized(locale, description);
+            builder = builder.description_localized(locale, description);
         }
 
         // This is_empty check is needed because Discord special cases empty
         // default_member_permissions to mean "admin-only" (yes it's stupid)
         if !self.default_member_permissions.is_empty() {
-            builder.default_member_permissions(self.default_member_permissions);
+            builder = builder.default_member_permissions(self.default_member_permissions);
         }
 
         if self.guild_only {
-            builder.dm_permission(false);
+            builder = builder.dm_permission(false);
         }
 
         if self.subcommands.is_empty() {
             for param in &self.parameters {
                 // Using `?` because if this command has slash-incompatible parameters, we cannot
                 // just ignore them but have to abort the creation process entirely
-                builder.add_option(param.create_as_slash_command_option()?);
+                builder = builder.add_option(param.create_as_slash_command_option()?);
             }
         } else {
             for subcommand in &self.subcommands {
                 if let Some(subcommand) = subcommand.create_as_subcommand() {
-                    builder.add_option(subcommand);
+                    builder = builder.add_option(subcommand);
                 }
             }
         }
@@ -218,42 +218,21 @@ impl<U, E> Command<U, E> {
 
     /// Generates a context menu command builder from this [`Command`] instance. This can be used
     /// to register this command on Discord's servers
-    pub fn create_as_context_menu_command(&self) -> Option<serenity::CreateApplicationCommand> {
+    pub fn create_as_context_menu_command(&self) -> Option<serenity::CreateCommand> {
         let context_menu_action = self.context_menu_action?;
 
-        let mut builder = serenity::CreateApplicationCommand::default();
-        builder
-            // TODO: localization?
-            .name(self.context_menu_name.as_deref().unwrap_or(&self.name))
-            .kind(match context_menu_action {
-                crate::ContextMenuCommandAction::User(_) => serenity::CommandType::User,
-                crate::ContextMenuCommandAction::Message(_) => serenity::CommandType::Message,
-                crate::ContextMenuCommandAction::__NonExhaustive => unreachable!(),
-            });
+        // TODO: localization?
+        let name = self.context_menu_name.as_deref().unwrap_or(&self.name);
+        let mut builder = serenity::CreateCommand::new(name).kind(match context_menu_action {
+            crate::ContextMenuCommandAction::User(_) => serenity::CommandType::User,
+            crate::ContextMenuCommandAction::Message(_) => serenity::CommandType::Message,
+            crate::ContextMenuCommandAction::__NonExhaustive => unreachable!(),
+        });
 
         if self.guild_only {
-            builder.dm_permission(false);
+            builder = builder.dm_permission(false);
         }
 
         Some(builder)
-    }
-
-    /// **Deprecated**
-    #[deprecated = "Please use `poise::Command { category: \"...\", ..command() }` instead"]
-    pub fn category(&mut self, category: String) -> &mut Self {
-        self.category = Some(category);
-        self
-    }
-
-    /// Insert a subcommand
-    #[deprecated = "Please use `poise::Command { subcommands: vec![...], ..command() }` instead"]
-    pub fn subcommand(
-        &mut self,
-        mut subcommand: crate::Command<U, E>,
-        meta_builder: impl FnOnce(&mut Self) -> &mut Self,
-    ) -> &mut Self {
-        meta_builder(&mut subcommand);
-        self.subcommands.push(subcommand);
-        self
     }
 }

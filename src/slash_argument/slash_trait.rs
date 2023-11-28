@@ -5,7 +5,7 @@ use std::convert::TryInto as _;
 use std::marker::PhantomData;
 
 #[allow(unused_imports)] // import is required if serenity simdjson feature is enabled
-use crate::serenity::json::prelude::*;
+use crate::serenity::json::*;
 use crate::serenity_prelude as serenity;
 
 /// Implement this trait on types that you want to use as a slash command parameter.
@@ -17,8 +17,8 @@ pub trait SlashArgument: Sized {
     /// Don't call this method directly! Use [`crate::extract_slash_argument!`]
     async fn extract(
         ctx: &serenity::Context,
-        interaction: crate::ApplicationCommandOrAutocompleteInteraction<'_>,
-        value: &serenity::json::Value,
+        interaction: &serenity::CommandInteraction,
+        value: &serenity::ResolvedValue<'_>,
     ) -> Result<Self, SlashArgError>;
 
     /// Create a slash command parameter equivalent to type T.
@@ -27,7 +27,7 @@ pub trait SlashArgument: Sized {
     /// filling in `name()`, `description()`, and possibly `required()` or other fields.
     ///
     /// Don't call this method directly! Use [`crate::create_slash_argument!`]
-    fn create(builder: &mut serenity::CreateApplicationCommandOption);
+    fn create(builder: serenity::CreateCommandOption) -> serenity::CreateCommandOption;
 
     /// If this is a choice parameter, returns the choices
     ///
@@ -47,11 +47,11 @@ pub trait SlashArgumentHack<T>: Sized {
     async fn extract(
         self,
         ctx: &serenity::Context,
-        interaction: crate::ApplicationCommandOrAutocompleteInteraction<'_>,
-        value: &serenity::json::Value,
+        interaction: &serenity::CommandInteraction,
+        value: &serenity::ResolvedValue<'_>,
     ) -> Result<T, SlashArgError>;
 
-    fn create(self, builder: &mut serenity::CreateApplicationCommandOption);
+    fn create(self, builder: serenity::CreateCommandOption) -> serenity::CreateCommandOption;
 
     fn choices(self) -> Vec<crate::CommandParameterChoice> {
         Vec::new()
@@ -99,18 +99,22 @@ where
     async fn extract(
         self,
         ctx: &serenity::Context,
-        interaction: crate::ApplicationCommandOrAutocompleteInteraction<'_>,
-        value: &serenity::json::Value,
+        interaction: &serenity::CommandInteraction,
+        value: &serenity::ResolvedValue<'_>,
     ) -> Result<T, SlashArgError> {
-        let string = value
-            .as_str()
-            .ok_or(SlashArgError::CommandStructureMismatch {
-                description: "expected string",
-            })?;
+        let string = match value {
+            serenity::ResolvedValue::String(str) => *str,
+            _ => {
+                return Err(SlashArgError::CommandStructureMismatch {
+                    description: "expected string",
+                })
+            }
+        };
+
         T::convert(
             ctx,
-            interaction.guild_id(),
-            Some(interaction.channel_id()),
+            interaction.guild_id,
+            Some(interaction.channel_id),
             string,
         )
         .await
@@ -120,8 +124,8 @@ where
         })
     }
 
-    fn create(self, builder: &mut serenity::CreateApplicationCommandOption) {
-        builder.kind(serenity::CommandOptionType::String);
+    fn create(self, builder: serenity::CreateCommandOption) -> serenity::CreateCommandOption {
+        builder.kind(serenity::CommandOptionType::String)
     }
 }
 
@@ -132,21 +136,24 @@ macro_rules! impl_for_integer {
         impl SlashArgument for $t {
             async fn extract(
                 _: &serenity::Context,
-                _: crate::ApplicationCommandOrAutocompleteInteraction<'_>,
-                value: &serenity::json::Value,
+                _: &serenity::CommandInteraction,
+                value: &serenity::ResolvedValue<'_>,
             ) -> Result<$t, SlashArgError> {
+                let value = match value {
+                    serenity::ResolvedValue::Integer(int) => *int,
+                    _ => return Err(SlashArgError::CommandStructureMismatch { description: "expected integer" })
+                };
+
                 value
-                    .as_i64()
-                    .ok_or(SlashArgError::CommandStructureMismatch { description: "expected integer" })?
                     .try_into()
                     .map_err(|_| SlashArgError::CommandStructureMismatch { description: "received out of bounds integer" })
             }
 
-            fn create(builder: &mut serenity::CreateApplicationCommandOption) {
+            fn create(builder: serenity::CreateCommandOption) -> serenity::CreateCommandOption {
                 builder
                     .min_number_value(f64::max(<$t>::MIN as f64, -9007199254740991.))
                     .max_number_value(f64::min(<$t>::MAX as f64, 9007199254740991.))
-                    .kind(serenity::CommandOptionType::Integer);
+                    .kind(serenity::CommandOptionType::Integer)
             }
         }
     )* };
@@ -161,16 +168,17 @@ macro_rules! impl_for_float {
             async fn extract(
                 self,
                 _: &serenity::Context,
-                _: crate::ApplicationCommandOrAutocompleteInteraction<'_>,
-                value: &serenity::json::Value,
+                _: &serenity::CommandInteraction,
+                value: &serenity::ResolvedValue<'_>,
             ) -> Result<$t, SlashArgError> {
-                Ok(value
-                    .as_f64()
-                    .ok_or(SlashArgError::CommandStructureMismatch { description: "expected float" })? as $t)
+                match value {
+                    serenity::ResolvedValue::Number(float) => Ok(*float as $t),
+                    _ => Err(SlashArgError::CommandStructureMismatch { description: "expected float" })
+                }
             }
 
-            fn create(self, builder: &mut serenity::CreateApplicationCommandOption) {
-                builder.kind(serenity::CommandOptionType::Number);
+            fn create(self, builder: serenity::CreateCommandOption) -> serenity::CreateCommandOption {
+                builder.kind(serenity::CommandOptionType::Number)
             }
         }
     )* };
@@ -182,18 +190,19 @@ impl SlashArgumentHack<bool> for &PhantomData<bool> {
     async fn extract(
         self,
         _: &serenity::Context,
-        _: crate::ApplicationCommandOrAutocompleteInteraction<'_>,
-        value: &serenity::json::Value,
+        _: &serenity::CommandInteraction,
+        value: &serenity::ResolvedValue<'_>,
     ) -> Result<bool, SlashArgError> {
-        Ok(value
-            .as_bool()
-            .ok_or(SlashArgError::CommandStructureMismatch {
+        match value {
+            serenity::ResolvedValue::Boolean(val) => Ok(*val),
+            _ => Err(SlashArgError::CommandStructureMismatch {
                 description: "expected bool",
-            })?)
+            }),
+        }
     }
 
-    fn create(self, builder: &mut serenity::CreateApplicationCommandOption) {
-        builder.kind(serenity::CommandOptionType::Boolean);
+    fn create(self, builder: serenity::CreateCommandOption) -> serenity::CreateCommandOption {
+        builder.kind(serenity::CommandOptionType::Boolean)
     }
 }
 
@@ -202,23 +211,25 @@ impl SlashArgumentHack<serenity::Attachment> for &PhantomData<serenity::Attachme
     async fn extract(
         self,
         _: &serenity::Context,
-        interaction: crate::ApplicationCommandOrAutocompleteInteraction<'_>,
-        value: &Value,
+        interaction: &serenity::CommandInteraction,
+        value: &serenity::ResolvedValue<'_>,
     ) -> Result<serenity::Attachment, SlashArgError> {
-        let attachment_id = serenity::AttachmentId(
-            value
-                .as_str()
-                .ok_or(SlashArgError::CommandStructureMismatch {
+        let attachment_id = match value {
+            serenity::ResolvedValue::String(val) => {
+                val.parse()
+                    .map_err(|_| SlashArgError::CommandStructureMismatch {
+                        description: "improper attachment id passed",
+                    })?
+            }
+            _ => {
+                return Err(SlashArgError::CommandStructureMismatch {
                     description: "expected attachment id",
-                })?
-                .parse()
-                .map_err(|_| SlashArgError::CommandStructureMismatch {
-                    description: "improper attachment id passed",
-                })?,
-        );
+                })
+            }
+        };
 
         interaction
-            .data()
+            .data
             .resolved
             .attachments
             .get(&attachment_id)
@@ -228,8 +239,8 @@ impl SlashArgumentHack<serenity::Attachment> for &PhantomData<serenity::Attachme
             })
     }
 
-    fn create(self, builder: &mut serenity::CreateApplicationCommandOption) {
-        builder.kind(serenity::CommandOptionType::Attachment);
+    fn create(self, builder: serenity::CreateCommandOption) -> serenity::CreateCommandOption {
+        builder.kind(serenity::CommandOptionType::Attachment)
     }
 }
 
@@ -238,14 +249,14 @@ impl<T: SlashArgument + Sync> SlashArgumentHack<T> for &PhantomData<T> {
     async fn extract(
         self,
         ctx: &serenity::Context,
-        interaction: crate::ApplicationCommandOrAutocompleteInteraction<'_>,
-        value: &serenity::json::Value,
+        interaction: &serenity::CommandInteraction,
+        value: &serenity::ResolvedValue<'_>,
     ) -> Result<T, SlashArgError> {
         <T as SlashArgument>::extract(ctx, interaction, value).await
     }
 
-    fn create(self, builder: &mut serenity::CreateApplicationCommandOption) {
-        <T as SlashArgument>::create(builder);
+    fn create(self, builder: serenity::CreateCommandOption) -> serenity::CreateCommandOption {
+        <T as SlashArgument>::create(builder)
     }
 
     fn choices(self) -> Vec<crate::CommandParameterChoice> {
@@ -260,15 +271,15 @@ macro_rules! impl_slash_argument {
         impl SlashArgument for $type {
             async fn extract(
                 ctx: &serenity::Context,
-                interaction: crate::ApplicationCommandOrAutocompleteInteraction<'_>,
-                value: &serenity::json::Value,
+                interaction: &serenity::CommandInteraction,
+                value: &serenity::ResolvedValue<'_>,
             ) -> Result<$type, SlashArgError> {
                 // We can parse IDs by falling back to the generic serenity::ArgumentConvert impl
                 PhantomData::<$type>.extract(ctx, interaction, value).await
             }
 
-            fn create(builder: &mut serenity::CreateApplicationCommandOption) {
-                builder.kind(serenity::CommandOptionType::$slash_param_type);
+            fn create(builder: serenity::CreateCommandOption) -> serenity::CreateCommandOption {
+                builder.kind(serenity::CommandOptionType::$slash_param_type)
             }
         }
     };

@@ -26,25 +26,28 @@ pub trait ChoiceParameter: Sized {
 impl<T: ChoiceParameter> crate::SlashArgument for T {
     async fn extract(
         _: &serenity::Context,
-        _: crate::ApplicationCommandOrAutocompleteInteraction<'_>,
-        value: &serenity::json::Value,
+        _: &serenity::CommandInteraction,
+        value: &serenity::ResolvedValue<'_>,
     ) -> ::std::result::Result<Self, crate::SlashArgError> {
         #[allow(unused_imports)]
-        use ::serenity::json::prelude::*; // Required for simd-json :|
+        use ::serenity::json::*; // Required for simd-json :|
 
-        let choice_key = value
-            .as_u64()
-            .ok_or(crate::SlashArgError::CommandStructureMismatch {
-                description: "expected u64",
-            })?;
+        let choice_key = match value {
+            serenity::ResolvedValue::Integer(int) => *int as u64,
+            _ => {
+                return Err(crate::SlashArgError::CommandStructureMismatch {
+                    description: "expected u64",
+                })
+            }
+        };
 
         Self::from_index(choice_key as _).ok_or(crate::SlashArgError::CommandStructureMismatch {
             description: "out of bounds choice key",
         })
     }
 
-    fn create(builder: &mut serenity::CreateApplicationCommandOption) {
-        builder.kind(serenity::CommandOptionType::Integer);
+    fn create(builder: serenity::CreateCommandOption) -> serenity::CreateCommandOption {
+        builder.kind(serenity::CommandOptionType::Integer)
     }
 
     fn choices() -> Vec<crate::CommandParameterChoice> {
