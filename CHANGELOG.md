@@ -27,9 +27,32 @@ this find-and-replace regex (VSCode flavor):
 
 To quickly make GitHub usernames into clickable links, prepend each username with @ and then run
 this find-and-replace regex (VSCode flavor):
-- Find: (?<=Thanks to.*)(?<!\[)[@([^](https://github.com/([^),!. ]+)
+- Find: (?<=Thanks to.*)(?<!\[)@([a-z0-9]+)
 - Replace: [@$1](https://github.com/$1)
 -->
+
+# 0.6.0
+
+Now with serenity 0.12!
+
+
+New features:
+- `ChoiceParameter` is now not only a derive macro, but also a trait, so you can implement it manually ([bc250b8](https://github.com/serenity-rs/poise/commit/bc250b852d5dc3ef57c5ab1d27d6de0bf5599b0b))
+- `HelpConfiguration::include_description` can be used to toggle whether a single command's help output includes its `description`, or only its `help_text` ([0ad8ee6](https://github.com/serenity-rs/poise/commit/0ad8ee668ca2b131ec95cfd8f258f11d3f5b47fb))
+
+
+API updates:
+- A lot of structs and enum are now `#[non_exhaustive]` to allow backwards compatible new features in the future ([035e035](https://github.com/serenity-rs/poise/commit/035e03574956f68af582e3ac28478ac32273e172), [6c08cfb](https://github.com/serenity-rs/poise/commit/6c08cfba3af84b4a740611f46f380a3f92aaf810), [1cbfeef](https://github.com/serenity-rs/poise/commit/1cbfeefd7ac4fb26ab73cb61620717bb971a172c))
+- `Command` no longer has `Default` bounds on its generics ([695ae1d](https://github.com/serenity-rs/poise/commit/695ae1dd8aaeeaf37129c3d53e90e63daaaa7be0))
+- Changed some field types on `Command` to be more idiomatic ([6c08cfb](https://github.com/serenity-rs/poise/commit/6c08cfba3af84b4a740611f46f380a3f92aaf810))
+- `CooldownTracker` methods now take a dedicated user-constructable `CooldownContext` instead of `Context<'_, U, E>`, to make `CooldownTracker` usable outside poise internals ([bd73861](https://github.com/serenity-rs/poise/commit/bd73861d2679c26040353eba460d933c7d3a7a15))
+
+Behavior changes:
+- Rework of the help command to make it nicer ([d38d226](https://github.com/serenity-rs/poise/commit/d38d226e82bd443f7615f4a505fc6803860d15ee), [d038ee6](https://github.com/serenity-rs/poise/commit/d038ee69ade7fc5bb90327093f5a90436eb30d45))
+
+Detailed changelog: https://github.com/serenity-rs/poise/compare/v0.5.7...v0.6.0
+
+Thanks to [@kangalio](https://github.com/kangalio), [@docwilco](https://github.com/docwilco), [@drwilco](https://github.com/drwilco), [@GnomedDev](https://github.com/GnomedDev), [@scottbot95](https://github.com/scottbot95)!
 
 # 0.5.7
 
