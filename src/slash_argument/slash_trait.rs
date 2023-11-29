@@ -139,14 +139,16 @@ macro_rules! impl_for_integer {
                 _: &serenity::CommandInteraction,
                 value: &serenity::ResolvedValue<'_>,
             ) -> Result<$t, SlashArgError> {
-                let value = match value {
-                    serenity::ResolvedValue::Integer(int) => *int,
-                    _ => return Err(SlashArgError::CommandStructureMismatch { description: "expected integer" })
-                };
-
-                value
-                    .try_into()
-                    .map_err(|_| SlashArgError::CommandStructureMismatch { description: "received out of bounds integer" })
+                match *value {
+                    serenity::ResolvedValue::Integer(x) => x
+                        .try_into()
+                        .map_err(|_| SlashArgError::CommandStructureMismatch {
+                            description: "received out of bounds integer",
+                        }),
+                    _ => Err(SlashArgError::CommandStructureMismatch {
+                        description: "expected integer",
+                    }),
+                }
             }
 
             fn create(builder: serenity::CreateCommandOption) -> serenity::CreateCommandOption {
@@ -159,90 +161,6 @@ macro_rules! impl_for_integer {
     )* };
 }
 impl_for_integer!(i8 i16 i32 i64 isize u8 u16 u32 u64 usize);
-
-/// Implements slash argument trait for float types
-macro_rules! impl_for_float {
-    ($($t:ty)*) => { $(
-        #[async_trait::async_trait]
-        impl SlashArgumentHack<$t> for &PhantomData<$t> {
-            async fn extract(
-                self,
-                _: &serenity::Context,
-                _: &serenity::CommandInteraction,
-                value: &serenity::ResolvedValue<'_>,
-            ) -> Result<$t, SlashArgError> {
-                match value {
-                    serenity::ResolvedValue::Number(float) => Ok(*float as $t),
-                    _ => Err(SlashArgError::CommandStructureMismatch { description: "expected float" })
-                }
-            }
-
-            fn create(self, builder: serenity::CreateCommandOption) -> serenity::CreateCommandOption {
-                builder.kind(serenity::CommandOptionType::Number)
-            }
-        }
-    )* };
-}
-impl_for_float!(f32 f64);
-
-#[async_trait::async_trait]
-impl SlashArgumentHack<bool> for &PhantomData<bool> {
-    async fn extract(
-        self,
-        _: &serenity::Context,
-        _: &serenity::CommandInteraction,
-        value: &serenity::ResolvedValue<'_>,
-    ) -> Result<bool, SlashArgError> {
-        match value {
-            serenity::ResolvedValue::Boolean(val) => Ok(*val),
-            _ => Err(SlashArgError::CommandStructureMismatch {
-                description: "expected bool",
-            }),
-        }
-    }
-
-    fn create(self, builder: serenity::CreateCommandOption) -> serenity::CreateCommandOption {
-        builder.kind(serenity::CommandOptionType::Boolean)
-    }
-}
-
-#[async_trait::async_trait]
-impl SlashArgumentHack<serenity::Attachment> for &PhantomData<serenity::Attachment> {
-    async fn extract(
-        self,
-        _: &serenity::Context,
-        interaction: &serenity::CommandInteraction,
-        value: &serenity::ResolvedValue<'_>,
-    ) -> Result<serenity::Attachment, SlashArgError> {
-        let attachment_id = match value {
-            serenity::ResolvedValue::String(val) => {
-                val.parse()
-                    .map_err(|_| SlashArgError::CommandStructureMismatch {
-                        description: "improper attachment id passed",
-                    })?
-            }
-            _ => {
-                return Err(SlashArgError::CommandStructureMismatch {
-                    description: "expected attachment id",
-                })
-            }
-        };
-
-        interaction
-            .data
-            .resolved
-            .attachments
-            .get(&attachment_id)
-            .cloned()
-            .ok_or(SlashArgError::CommandStructureMismatch {
-                description: "attachment id with no attachment",
-            })
-    }
-
-    fn create(self, builder: serenity::CreateCommandOption) -> serenity::CreateCommandOption {
-        builder.kind(serenity::CommandOptionType::Attachment)
-    }
-}
 
 #[async_trait::async_trait]
 impl<T: SlashArgument + Sync> SlashArgumentHack<T> for &PhantomData<T> {
@@ -264,18 +182,22 @@ impl<T: SlashArgument + Sync> SlashArgumentHack<T> for &PhantomData<T> {
     }
 }
 
-/// Implements `SlashArgumentHack` for a model type that is represented in interactions via an ID
+/// Versatile macro to implement `SlashArgumentHack` for simple types
 macro_rules! impl_slash_argument {
-    ($type:ty, $slash_param_type:ident) => {
+    ($type:ty, |$ctx:pat, $interaction:pat, $slash_param_type:ident ( $($arg:pat),* )| $extractor:expr) => {
         #[async_trait::async_trait]
         impl SlashArgument for $type {
             async fn extract(
-                ctx: &serenity::Context,
-                interaction: &serenity::CommandInteraction,
+                $ctx: &serenity::Context,
+                $interaction: &serenity::CommandInteraction,
                 value: &serenity::ResolvedValue<'_>,
             ) -> Result<$type, SlashArgError> {
-                // We can parse IDs by falling back to the generic serenity::ArgumentConvert impl
-                PhantomData::<$type>.extract(ctx, interaction, value).await
+                match *value {
+                    serenity::ResolvedValue::$slash_param_type( $($arg),* ) => Ok( $extractor ),
+                    _ => Err(SlashArgError::CommandStructureMismatch {
+                        description: concat!("expected ", stringify!($slash_param_type))
+                    }),
+                }
             }
 
             fn create(builder: serenity::CreateCommandOption) -> serenity::CreateCommandOption {
@@ -284,8 +206,42 @@ macro_rules! impl_slash_argument {
         }
     };
 }
-impl_slash_argument!(serenity::Member, User);
-impl_slash_argument!(serenity::User, User);
-impl_slash_argument!(serenity::Channel, Channel);
-impl_slash_argument!(serenity::GuildChannel, Channel);
-impl_slash_argument!(serenity::Role, Role);
+
+impl_slash_argument!(f32, |_, _, Number(x)| x as f32);
+impl_slash_argument!(f64, |_, _, Number(x)| x);
+impl_slash_argument!(bool, |_, _, Boolean(x)| x);
+impl_slash_argument!(serenity::Attachment, |_, _, Attachment(att)| att.clone());
+impl_slash_argument!(serenity::Member, |ctx, interaction, User(user, _)| {
+    interaction
+        .guild_id
+        .ok_or(SlashArgError::Invalid("cannot use member parameter in DMs"))?
+        .member(ctx, user.id)
+        .await
+        .map_err(SlashArgError::Http)?
+});
+impl_slash_argument!(serenity::PartialMember, |_, _, User(_, member)| {
+    member
+        .ok_or(SlashArgError::Invalid("cannot use member parameter in DMs"))?
+        .clone()
+});
+impl_slash_argument!(serenity::User, |_, _, User(user, _)| user.clone());
+impl_slash_argument!(serenity::UserId, |_, _, User(user, _)| user.id);
+impl_slash_argument!(serenity::Channel, |ctx, _, Channel(channel)| {
+    channel
+        .id
+        .to_channel(ctx)
+        .await
+        .map_err(SlashArgError::Http)?
+});
+impl_slash_argument!(serenity::ChannelId, |_, _, Channel(channel)| channel.id);
+impl_slash_argument!(serenity::PartialChannel, |_, _, Channel(channel)| channel
+    .clone());
+impl_slash_argument!(serenity::GuildChannel, |ctx, _, Channel(channel)| {
+    let channel_res = channel.id.to_channel(ctx).await;
+    let channel = channel_res.map_err(SlashArgError::Http)?.guild();
+    channel.ok_or(SlashArgError::Http(serenity::Error::Model(
+        serenity::ModelError::InvalidChannelType,
+    )))?
+});
+impl_slash_argument!(serenity::Role, |_, _, Role(role)| role.clone());
+impl_slash_argument!(serenity::RoleId, |_, _, Role(role)| role.id);

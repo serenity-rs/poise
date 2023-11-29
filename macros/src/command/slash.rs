@@ -163,19 +163,7 @@ pub fn generate_slash_action(inv: &Invocation) -> Result<proc_macro2::TokenStrea
             let ( #( #param_identifiers, )* ) = ::poise::parse_slash_args!(
                 ctx.serenity_context, ctx.interaction, ctx.args =>
                 #( (#param_names: #param_types), )*
-            ).await.map_err(|error| match error {
-                poise::SlashArgError::CommandStructureMismatch { description, .. } => {
-                    poise::FrameworkError::new_command_structure_mismatch(ctx, description)
-                },
-                poise::SlashArgError::Parse { error, input, .. } => {
-                    poise::FrameworkError::new_argument_parse(
-                        ctx.into(),
-                        Some(input),
-                        error,
-                    )
-                },
-                poise::SlashArgError::__NonExhaustive => unreachable!(),
-            })?;
+            ).await.map_err(|error| error.to_framework_error(ctx))?;
 
             if !ctx.framework.options.manual_cooldowns {
                 ctx.command.cooldowns.lock().unwrap().start_cooldown(ctx.cooldown_context());

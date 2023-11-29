@@ -26,28 +26,73 @@ pub enum SlashArgError {
         /// Original input string
         input: String,
     },
+    /// The argument passed by the user is invalid in this context. E.g. a Member parameter in DMs
+    #[non_exhaustive]
+    Invalid(
+        /// Human readable description of the error
+        &'static str,
+    ),
+    /// HTTP error occured while retrieving the model type from Discord
+    Http(serenity::Error),
     #[doc(hidden)]
     __NonExhaustive,
 }
+
 /// Support functions for macro which can't create #[non_exhaustive] enum variants
 #[doc(hidden)]
 impl SlashArgError {
     pub fn new_command_structure_mismatch(description: &'static str) -> Self {
         Self::CommandStructureMismatch { description }
     }
+
+    pub fn to_framework_error<U, E>(
+        self,
+        ctx: crate::ApplicationContext<'_, U, E>,
+    ) -> crate::FrameworkError<'_, U, E> {
+        match self {
+            Self::CommandStructureMismatch { description } => {
+                crate::FrameworkError::CommandStructureMismatch { ctx, description }
+            }
+            Self::Parse { error, input } => crate::FrameworkError::ArgumentParse {
+                ctx: ctx.into(),
+                error,
+                input: Some(input),
+            },
+            Self::Invalid(description) => crate::FrameworkError::ArgumentParse {
+                ctx: ctx.into(),
+                error: description.into(),
+                input: None,
+            },
+            Self::Http(error) => crate::FrameworkError::ArgumentParse {
+                ctx: ctx.into(),
+                error: error.into(),
+                input: None,
+            },
+            Self::__NonExhaustive => unreachable!(),
+        }
+    }
 }
+
 impl std::fmt::Display for SlashArgError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::CommandStructureMismatch { description } => {
                 write!(
                     f,
-                    "Bot author did not register their commands correctly ({})",
-                    description
+                    "Bot author did not register their commands correctly ({description})",
                 )
             }
             Self::Parse { error, input } => {
-                write!(f, "Failed to parse `{}` as argument: {}", input, error)
+                write!(f, "Failed to parse `{input}` as argument: {error}")
+            }
+            Self::Invalid(description) => {
+                write!(f, "You can't use this parameter here: {description}",)
+            }
+            Self::Http(error) => {
+                write!(
+                    f,
+                    "Error occured while retrieving data from Discord: {error}",
+                )
             }
             Self::__NonExhaustive => unreachable!(),
         }
@@ -56,8 +101,9 @@ impl std::fmt::Display for SlashArgError {
 impl std::error::Error for SlashArgError {
     fn cause(&self) -> Option<&dyn std::error::Error> {
         match self {
+            Self::Http(error) => Some(error),
             Self::Parse { error, input: _ } => Some(&**error),
-            Self::CommandStructureMismatch { description: _ } => None,
+            Self::Invalid { .. } | Self::CommandStructureMismatch { .. } => None,
             Self::__NonExhaustive => unreachable!(),
         }
     }
