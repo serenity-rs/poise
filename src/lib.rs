@@ -38,7 +38,7 @@ means using serenity, so here's a couple tips:
 ## `impl Trait` parameters
 
 Many serenity functions take an argument of type [`impl CacheHttp`](serenity::CacheHttp) or
-[`impl AsRef<Http>`](serenity::Http). You can pass in any type that imlements these traits, like
+[`impl AsRef<Http>`](serenity::Http). You can pass in any type that implements these traits, like
 [`crate::Context`] or [`serenity::Context`].
 
 ## Gateway intents
