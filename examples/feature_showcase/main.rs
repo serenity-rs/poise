@@ -28,6 +28,8 @@ pub struct Data {}
 
 #[tokio::main]
 async fn main() {
+    env_logger::init();
+
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
             commands: vec![
@@ -77,6 +79,7 @@ async fn main() {
             },
             on_error: |error| {
                 Box::pin(async move {
+                    println!("what the hell");
                     match error {
                         poise::FrameworkError::ArgumentParse { error, .. } => {
                             if let Some(error) = error.downcast_ref::<serenity::RoleParseError>() {
