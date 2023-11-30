@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["check_permissions_and_cooldown","dispatch_autocomplete","dispatch_event","dispatch_interaction","dispatch_message","extract_command_and_run_checks","find_command","parse_invocation","run_invocation"],"struct":["FrameworkContext"]};

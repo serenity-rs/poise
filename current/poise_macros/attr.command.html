@@ -1,0 +1,171 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="This macro transforms plain functions into poise bot commands."><title>command in poise_macros - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../" data-static-root-path="../static.files/" data-current-crate="poise_macros" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (5facb422f 2023-11-28)" data-channel="nightly" data-search-js="search-56a624991a76cfad.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="sidebar-items.js"></script><script defer src="../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc attr"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button></nav><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../poise_macros/index.html">poise_macros</a><span class="version">0.6.0</span></h2></div><div class="sidebar-elems"></div></nav><main><div class="width-limiter"><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="main-heading"><h1>Attribute Macro <a href="index.html">poise_macros</a>::<wbr><a class="attr" href="#">command</a><button id="copy-path" title="Copy item path to clipboard"><img src="../static.files/clipboard-7571035ce49a181d.svg" width="19" height="18" alt="Copy item path"></button></h1><span class="out-of-band"><a class="src" href="../src/poise_macros/lib.rs.html#187-204">source</a> · <button id="toggle-all-docs" title="collapse all docs">[<span>&#x2212;</span>]</button></span></div><pre class="rust item-decl"><code>#[command]</code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>This macro transforms plain functions into poise bot commands.</p>
+<p>Documentation comments are used as help text. The first line is a single-line description,
+displayed in listings of your bot’s commands (i.e. <code>~help</code>). Following paragraphs are detailed explanations,
+for example for command-specific help (i.e. <code>~help command_name</code>). Escape newlines with <code>\</code></p>
+<h2 id="macro-arguments"><a href="#macro-arguments">Macro arguments</a></h2>
+<p><code>#[poise::command]</code> accepts a number of arguments to configure the command:</p>
+<h3 id="command-types"><a href="#command-types">Command types</a></h3>
+<ul>
+<li><code>prefix_command</code>: Generate a prefix command</li>
+<li><code>slash_command</code>: Generate a slash command</li>
+<li><code>context_menu_command</code>: Generate a context menu command</li>
+</ul>
+<h3 id="meta-properties"><a href="#meta-properties">Meta properties</a></h3>
+<ul>
+<li><code>subcommands</code>: List of subcommands <code>subcommands(&quot;foo&quot;, &quot;bar&quot;, &quot;baz&quot;)</code></li>
+<li><code>name_localized</code>: Adds localized name of the parameter <code>name_localized(&quot;locale&quot;, &quot;new_name&quot;)</code> (slash-only)</li>
+<li><code>description_localized</code>: Adds localized description of the parameter <code>description_localized(&quot;locale&quot;, &quot;Description&quot;)</code> (slash-only)</li>
+<li><code>rename</code>: Choose an alternative command name instead of the function name
+<ul>
+<li>Useful if your command name is a Rust keyword, like <code>move</code></li>
+</ul>
+</li>
+<li><code>aliases</code>: Command name aliases (only applies to prefix commands)</li>
+<li><code>category</code>: Category of this command which affects placement in the help command</li>
+<li><code>custom_data</code>: Arbitrary expression that will be boxed and stored in <code>Command::custom_data</code></li>
+<li><code>identifying_name</code>: Optionally, a unique identifier for this command for your personal usage</li>
+</ul>
+<h3 id="checks"><a href="#checks">Checks</a></h3>
+<ul>
+<li><code>required_permissions</code>: Permissions which the command caller needs to have</li>
+<li><code>required_bot_permissions</code>: Permissions which the bot is known to need</li>
+<li><code>default_member_permissions</code>: Like <code>required_permissions</code>, but checked server-side (slash only)
+<ul>
+<li>Due to being checked server-side, users without the required permissions are prevented from executing the command in the first place, which is a better experience</li>
+<li>However, <code>default_member_permissions</code> has no effect on subcommands, which always inherit their permissions from the top-level command</li>
+<li>Also, guild owners can freely change the required permissions for any bot command for their guild</li>
+</ul>
+</li>
+<li><code>owners_only</code>: Restricts command callers to a configurable list of owners (see FrameworkOptions)</li>
+<li><code>guild_only</code>: Restricts command callers to only run on a guild</li>
+<li><code>dm_only</code>: Restricts command callers to only run on a DM</li>
+<li><code>nsfw_only</code>: Restricts command callers to only run on a NSFW channel</li>
+<li><code>subcommand_required</code>: Requires a subcommand to be specified (prefix only)</li>
+<li><code>check</code>: Path to a function which is invoked for every invocation. If the function returns false, the command is not executed (can be used multiple times)</li>
+</ul>
+<h3 id="help-related-arguments"><a href="#help-related-arguments">Help-related arguments</a></h3>
+<ul>
+<li><code>hide_in_help</code>: Hide this command in help menus</li>
+<li><code>help_text_fn</code>: Path to a string-returning function which is used for command help text instead of documentation comments
+<ul>
+<li>Useful if you have many commands with very similar help messages: you can abstract the common parts into a function</li>
+</ul>
+</li>
+</ul>
+<h3 id="edit-tracking-prefix-only"><a href="#edit-tracking-prefix-only">Edit tracking (prefix only)</a></h3>
+<ul>
+<li><code>track_edits</code>: Shorthand for <code>invoke_on_edit</code>, <code>track_deletion</code>, and <code>reuse_response</code> (prefix only)</li>
+<li><code>invoke_on_edit</code>: Reruns the command if an existing invocation message is edited (prefix only)</li>
+<li><code>track_deletion</code>: Deletes the bot response to a command if the command message is deleted (prefix only)</li>
+<li><code>reuse_response</code>: After the first response, post subsequent responses as edits to the initial message (prefix only)</li>
+</ul>
+<h3 id="cooldown"><a href="#cooldown">Cooldown</a></h3>
+<ul>
+<li><code>global_cooldown</code>: Minimum duration in seconds between invocations, globally</li>
+<li><code>user_cooldown</code>: Minimum duration in seconds between invocations, per user</li>
+<li><code>guild_cooldown</code>: Minimum duration in seconds between invocations, per guild</li>
+<li><code>channel_cooldown</code>: Minimum duration in seconds between invocations, per channel</li>
+<li><code>member_cooldown</code>: Minimum duration in seconds between invocations, per guild member</li>
+</ul>
+<h3 id="other"><a href="#other">Other</a></h3>
+<ul>
+<li><code>on_error</code>: Error handling function</li>
+<li><code>broadcast_typing</code>: Trigger a typing indicator while command runs (prefix only)</li>
+<li><code>discard_spare_arguments</code>: Don’t throw an error if the user supplies too many arguments (prefix only)</li>
+<li><code>ephemeral</code>: Make bot responses ephemeral if possible (slash only)
+<ul>
+<li>Only poise’s function, like <code>poise::send_reply</code>, respect this preference</li>
+</ul>
+</li>
+</ul>
+<h2 id="function-parameters"><a href="#function-parameters">Function parameters</a></h2>
+<p><code>Context</code> is the first parameter of all command functions. It’s an enum over either PrefixContext or
+SlashContext, which contain a variety of context data each. Context provides some utility methods to
+access data present in both PrefixContext and SlashContext, like <code>author()</code> or <code>created_at()</code>.</p>
+<p>All following parameters are inputs to the command. You can use all types that implement
+<code>poise::PopArgumentAsync</code>, <code>poise::PopArgument</code>, <code>serenity::ArgumentConvert</code> or <code>std::str::FromStr</code>.
+You can also wrap types in <code>Option</code> or <code>Vec</code> to make them optional or variadic. In addition, there
+are multiple attributes you can use on parameters:</p>
+<h3 id="meta-properties-1"><a href="#meta-properties-1">Meta properties</a></h3>
+<ul>
+<li><code>#[description = &quot;&quot;]</code>: Sets description of the parameter (slash-only)</li>
+<li><code>#[description_localized(&quot;locale&quot;, &quot;Description&quot;)]</code>: Adds localized description of the parameter (slash-only)</li>
+<li><code>#[name_localized(&quot;locale&quot;, &quot;new_name&quot;)]</code>: Adds localized name of the parameter (slash-only)</li>
+<li><code>#[autocomplete = &quot;callback()&quot;]</code>: Sets the autocomplete callback (slash-only)</li>
+<li><code>#[rename = &quot;new_name&quot;]</code>: Changes the user-facing name of the parameter (slash-only)</li>
+</ul>
+<h3 id="input-filter-slash-only"><a href="#input-filter-slash-only">Input filter (slash only)</a></h3>
+<ul>
+<li><code>#[channel_types(&quot;&quot;, &quot;&quot;)]</code>: For channel parameters, restricts allowed channel types (slash-only)</li>
+<li><code>#[min = 0]</code>: Minimum value for this number parameter (slash-only)</li>
+<li><code>#[max = 0]</code>: Maximum value for this number parameter (slash-only)</li>
+<li><code>#[min_length = 0]</code>: Minimum length for this string parameter (slash-only)</li>
+<li><code>#[max_length = 1]</code>: Maximum length for this string parameter (slash-only)</li>
+</ul>
+<h3 id="parser-settings-prefix-only"><a href="#parser-settings-prefix-only">Parser settings (prefix only)</a></h3>
+<ul>
+<li><code>#[rest]</code>: Use the entire rest of the message for this parameter (prefix-only)</li>
+<li><code>#[lazy]</code>: Can be used on Option and Vec parameters and is equivalent to regular expressions’ laziness (prefix-only)</li>
+<li><code>#[flag]</code>: Can be used on a bool parameter to set the bool to true if the user typed the parameter name literally (prefix-only)
+<ul>
+<li>For example with <code>async fn my_command(ctx: Context&lt;'_&gt;, #[flag] my_flag: bool)</code>, <code>~my_command</code> would set my_flag to false, and <code>~my_command my_flag</code> would set my_flag to true</li>
+</ul>
+</li>
+</ul>
+<h2 id="help-text"><a href="#help-text">Help text</a></h2>
+<p>Documentation comments are used as command help text. The first paragraph is the command
+description (<code>Command::description</code>) and all following paragraphs are the multiline help text
+(<code>Command::help_text</code>).</p>
+<p>In the multiline help text, put <code>\</code> at the end of a line to escape the newline.</p>
+<p>Example:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="doccomment">/// This is the description of my cool command, it can span multiple
+/// lines if you need to
+///
+/// Here in the following paragraphs, you can give information on how \
+/// to use the command that will be shown in your command&#39;s help.
+///
+/// You could also put example invocations here:
+/// `~coolcommand test`
+</span><span class="attr">#[poise::command(slash_command)]
+</span><span class="kw">pub async fn </span>coolcommand(ctx: Context&lt;<span class="lifetime">&#39;_</span>&gt;, s: String) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; { ... }</code></pre></div>
+<p>results in</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>poise::Command {
+    description: <span class="prelude-val">Some</span>(<span class="string">&quot;This is the description of my cool command, it can span multiple lines if you need to&quot;</span>.into()),
+    help_text: <span class="prelude-val">Some</span>(<span class="string">&quot;Here in the following paragraphs, you can give information on how to use the command that will be shown in your command&#39;s help.\n\nYou could also put example invocations here:\n`~coolcommand test`&quot;</span>.into()),
+    ...
+}</code></pre></div>
+<h2 id="internals"><a href="#internals">Internals</a></h2>
+<p>Internally, this attribute macro generates a function with a single <code>poise::Command</code>
+return type, which contains all data about this command. For example, it transforms a function of
+this form:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="doccomment">/// This is a command
+</span><span class="attr">#[poise::command(slash_command, prefix_command)]
+</span><span class="kw">async fn </span>my_command(ctx: Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
+    <span class="comment">// code
+</span>}</code></pre></div>
+<p>into something like</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">fn </span>my_command() -&gt; poise::Command&lt;Data, Error&gt; {
+    <span class="kw">async fn </span>inner(ctx: Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
+        <span class="comment">// code
+    </span>}
+
+    poise::Command {
+        name: <span class="string">&quot;my_command&quot;</span>,
+        description: <span class="string">&quot;This is a command&quot;</span>,
+        prefix_action: <span class="prelude-val">Some</span>(|ctx| Box::pin(<span class="kw">async move </span>{
+            inner(ctx.into()).<span class="kw">await
+        </span>})),
+        slash_action: <span class="prelude-val">Some</span>(|ctx| Box::pin(<span class="kw">async move </span>{
+            inner(ctx.into()).<span class="kw">await
+        </span>})),
+        context_menu_action: <span class="prelude-val">None</span>,
+        <span class="comment">// ...
+    </span>}
+}</code></pre></div>
+<p>If you’re curious, you can use <a href="https://github.com/dtolnay/cargo-expand"><code>cargo expand</code></a> to see the
+exact desugaring</p>
+</div></details></section></div></main></body></html>

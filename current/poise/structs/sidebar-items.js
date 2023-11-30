@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["CommandInteractionType","Context","ContextMenuCommandAction","FrameworkError","MessageDispatchTrigger","Prefix"],"struct":["ApplicationContext","Command","CommandParameter","CommandParameterChoice","FrameworkOptions","PartialContext","PrefixContext","PrefixFrameworkOptions"]};

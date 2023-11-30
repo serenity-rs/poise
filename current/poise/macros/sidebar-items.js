@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"attr":["command"],"derive":["ChoiceParameter","Modal","SlashChoiceParameter"]};

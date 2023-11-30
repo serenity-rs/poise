@@ -1,0 +1,52 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="A help command that outputs text in a code block, groups commands by categories, and annotates commands with a slash if they exist as slash commands."><title>help in poise::builtins - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-9ee3a5e31a2afa3e.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="poise" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (5facb422f 2023-11-28)" data-channel="nightly" data-search-js="search-56a624991a76cfad.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="sidebar-items.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc fn"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button></nav><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../../poise/index.html">poise</a><span class="version">0.6.0</span></h2></div><div class="sidebar-elems"><h2><a href="index.html">In poise::builtins</a></h2></div></nav><main><div class="width-limiter"><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="main-heading"><h1>Function <a href="../index.html">poise</a>::<wbr><a href="index.html">builtins</a>::<wbr><a class="fn" href="#">help</a><button id="copy-path" title="Copy item path to clipboard"><img src="../../static.files/clipboard-7571035ce49a181d.svg" width="19" height="18" alt="Copy item path"></button></h1><span class="out-of-band"><a class="src" href="../../src/poise/builtins/help.rs.html#417-426">source</a> · <button id="toggle-all-docs" title="collapse all docs">[<span>&#x2212;</span>]</button></span></div><pre class="rust item-decl"><code>pub async fn help&lt;U, E&gt;(
+    ctx: <a class="enum" href="../structs/enum.Context.html" title="enum poise::structs::Context">Context</a>&lt;'_, U, E&gt;,
+    command: <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;&amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>&gt;,
+    config: <a class="struct" href="struct.HelpConfiguration.html" title="struct poise::builtins::HelpConfiguration">HelpConfiguration</a>&lt;'_&gt;
+) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.unit.html">()</a>, <a class="enum" href="../serenity_prelude/enum.Error.html" title="enum poise::serenity_prelude::Error">Error</a>&gt;</code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>A help command that outputs text in a code block, groups commands by categories, and annotates
+commands with a slash if they exist as slash commands.</p>
+<p>Example usage from Ferris, the Discord bot running in the Rust community server:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="doccomment">/// Show this menu
+</span><span class="attr">#[poise::command(prefix_command, track_edits, slash_command)]
+</span><span class="kw">pub async fn </span>help(
+    ctx: Context&lt;<span class="lifetime">&#39;_</span>&gt;,
+    <span class="attr">#[description = <span class="string">&quot;Specific command to show help about&quot;</span>] </span>command: <span class="prelude-ty">Option</span>&lt;String&gt;,
+) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
+    <span class="kw">let </span>config = poise::builtins::HelpConfiguration {
+        extra_text_at_bottom: <span class="string">&quot;\
+Type ?help command for more info on a command.
+You can edit your message to the bot and the bot will edit its response.&quot;</span>,
+        ..Default::default()
+    };
+    poise::builtins::help(ctx, command.as_deref(), config).<span class="kw">await</span><span class="question-mark">?</span>;
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+<p>Output:</p>
+<div class="example-wrap"><pre class="language-text"><code>Playground:
+  ?play        Compile and run Rust code in a playground
+  ?eval        Evaluate a single Rust expression
+  ?miri        Run code and detect undefined behavior using Miri
+  ?expand      Expand macros to their raw desugared form
+  ?clippy      Catch common mistakes using the Clippy linter
+  ?fmt         Format code using rustfmt
+  ?microbench  Benchmark small snippets of code
+  ?procmacro   Compile and use a procedural macro
+  ?godbolt     View assembly using Godbolt
+  ?mca         Run performance analysis using llvm-mca
+  ?llvmir      View LLVM IR using Godbolt
+Crates:
+  /crate       Lookup crates on crates.io
+  /doc         Lookup documentation
+Moderation:
+  /cleanup     Deletes the bot&#39;s messages for cleanup
+  /ban         Bans another person
+  ?move        Move a discussion to another channel
+  /rustify     Adds the Rustacean role to members
+Miscellaneous:
+  ?go          Evaluates Go code
+  /source      Links to the bot GitHub repo
+  /help        Show this menu
+
+Type ?help command for more info on a command.
+You can edit your message to the bot and the bot will edit its response.
+</code></pre></div></div></details></section></div></main></body></html>

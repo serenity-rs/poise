@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"macro":["parse_prefix_args","pop_prefix_argument"],"struct":["CodeBlock","CodeBlockError","InvalidBool","InvalidChoice","KeyValueArgs","MissingAttachment","TooFewArguments","TooManyArguments"],"trait":["PopArgument"]};
