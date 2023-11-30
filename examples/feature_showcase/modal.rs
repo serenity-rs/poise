@@ -37,7 +37,7 @@ pub async fn component_modal(ctx: crate::Context<'_>) -> Result<(), Error> {
 
     ctx.send(reply).await?;
 
-    while let Some(mci) = serenity::ModalInteractionCollector::new(ctx.serenity_context())
+    while let Some(mci) = serenity::ComponentInteractionCollector::new(ctx.serenity_context())
         .timeout(std::time::Duration::from_secs(120))
         .filter(move |mci| mci.data.custom_id == "open_modal")
         .await
