@@ -494,9 +494,11 @@ context_methods! {
     #[allow(unused_mut)] // side effect of how macro works
     (reply_builder self builder)
     (pub fn reply_builder(self, mut builder: crate::CreateReply) -> crate::CreateReply) {
-        builder.allowed_mentions = builder.allowed_mentions.or_else(|| self.framework().options().allowed_mentions.clone());
+        let fw_options = self.framework().options();
+        builder.ephemeral = builder.ephemeral.or(Some(self.command().ephemeral));
+        builder.allowed_mentions = builder.allowed_mentions.or_else(|| fw_options.allowed_mentions.clone());
 
-        if let Some(callback) = self.framework().options().reply_callback {
+        if let Some(callback) = fw_options.reply_callback {
             builder = callback(self, builder);
         }
 
