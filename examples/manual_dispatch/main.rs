@@ -52,7 +52,7 @@ async fn main() -> Result<(), Error> {
 
     let handler = std::sync::Arc::new(handler);
     let mut client = serenity::Client::builder(token, intents)
-        .event_handler_arc(handler.clone())
+        .event_handler::<Handler>(handler.clone())
         .await?;
 
     *handler.shard_manager.lock().unwrap() = Some(client.shard_manager.clone());
