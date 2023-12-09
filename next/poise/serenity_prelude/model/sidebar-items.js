@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["ModelError"],"mod":["application","channel","colour","connection","error","event","gateway","guild","id","invite","mention","misc","permissions","prelude","sticker","timestamp","user","voice","webhook"],"struct":["Colour","Permissions","Timestamp"],"type":["Color"]};

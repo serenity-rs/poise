@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"macro":["create_slash_argument","extract_slash_argument","parse_prefix_args","parse_slash_args","pop_prefix_argument","slash_argument_choices"],"mod":["builtins","choice_parameter","cooldown","dispatch","framework","macros","modal","prefix_argument","reply","samples","serenity_prelude","slash_argument","structs","track_edits"],"type":["BoxFuture"]};

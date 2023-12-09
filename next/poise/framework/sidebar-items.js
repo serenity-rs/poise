@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["insert_owners_from_http","set_qualified_names"],"struct":["Framework","FrameworkBuilder"]};
