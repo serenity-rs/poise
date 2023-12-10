@@ -238,7 +238,7 @@ pub async fn servers<U, E>(ctx: crate::Context<'_, U, E>) -> Result<(), serenity
     // Aggregate all guilds and sort them by size
     let mut hidden_guilds = 0;
     let mut hidden_guilds_members = 0;
-    let mut shown_guilds = Vec::<(String, u64)>::new();
+    let mut shown_guilds = Vec::new();
     for guild_id in ctx.cache().guilds() {
         match ctx.cache().guild(guild_id) {
             Some(guild) => {
