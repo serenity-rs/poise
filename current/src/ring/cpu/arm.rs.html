@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.5/src/cpu/arm.rs`."><title>arm.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="ring" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.5/src/cpu/arm.rs`."><title>arm.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="ring" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -355,7 +355,7 @@
 // purpose with or without fee is hereby granted, provided that the above
 // copyright notice and this permission notice appear in all copies.
 //
-// THE SOFTWARE IS PROVIDED &quot;AS IS&quot; AND THE AUTHORS DISCLAIM ALL WARRANTIES
+// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHORS DISCLAIM ALL WARRANTIES
 // WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
 // MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY
 // SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
@@ -364,52 +364,52 @@
 // CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 </span><span class="attr">#![cfg_attr(
-    not(any(target_arch = <span class="string">&quot;aarch64&quot;</span>, target_arch = <span class="string">&quot;arm&quot;</span>)),
+    not(any(target_arch = <span class="string">"aarch64"</span>, target_arch = <span class="string">"arm"</span>)),
     allow(dead_code)
 )]
 
 #[cfg(all(
-    any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>),
-    any(target_arch = <span class="string">&quot;aarch64&quot;</span>, target_arch = <span class="string">&quot;arm&quot;</span>)
+    any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"linux"</span>),
+    any(target_arch = <span class="string">"aarch64"</span>, target_arch = <span class="string">"arm"</span>)
 ))]
 </span><span class="kw">fn </span>detect_features() -&gt; u32 {
     <span class="kw">use </span>libc::c_ulong;
 
-    <span class="comment">// XXX: The `libc` crate doesn&#39;t provide `libc::getauxval` consistently
+    <span class="comment">// XXX: The `libc` crate doesn't provide `libc::getauxval` consistently
     // across all Android/Linux targets, e.g. musl.
-    </span><span class="kw">extern </span><span class="string">&quot;C&quot; </span>{
+    </span><span class="kw">extern </span><span class="string">"C" </span>{
         <span class="kw">fn </span>getauxval(type_: c_ulong) -&gt; c_ulong;
     }
 
     <span class="kw">const </span>AT_HWCAP: c_ulong = <span class="number">16</span>;
 
-    <span class="attr">#[cfg(target_arch = <span class="string">&quot;aarch64&quot;</span>)]
+    <span class="attr">#[cfg(target_arch = <span class="string">"aarch64"</span>)]
     </span><span class="kw">const </span>HWCAP_NEON: c_ulong = <span class="number">1 </span>&lt;&lt; <span class="number">1</span>;
 
-    <span class="attr">#[cfg(target_arch = <span class="string">&quot;arm&quot;</span>)]
+    <span class="attr">#[cfg(target_arch = <span class="string">"arm"</span>)]
     </span><span class="kw">const </span>HWCAP_NEON: c_ulong = <span class="number">1 </span>&lt;&lt; <span class="number">12</span>;
 
     <span class="kw">let </span>caps = <span class="kw">unsafe </span>{ getauxval(AT_HWCAP) };
 
     <span class="comment">// We assume NEON is available on AARCH64 because it is a required
     // feature.
-    </span><span class="attr">#[cfg(target_arch = <span class="string">&quot;aarch64&quot;</span>)]
+    </span><span class="attr">#[cfg(target_arch = <span class="string">"aarch64"</span>)]
     </span><span class="macro">debug_assert!</span>(caps &amp; HWCAP_NEON == HWCAP_NEON);
 
     <span class="kw">let </span><span class="kw-2">mut </span>features = <span class="number">0</span>;
 
-    <span class="comment">// OpenSSL and BoringSSL don&#39;t enable any other features if NEON isn&#39;t
+    <span class="comment">// OpenSSL and BoringSSL don't enable any other features if NEON isn't
     // available.
     </span><span class="kw">if </span>caps &amp; HWCAP_NEON == HWCAP_NEON {
         features = NEON.mask;
 
-        <span class="attr">#[cfg(target_arch = <span class="string">&quot;aarch64&quot;</span>)]
+        <span class="attr">#[cfg(target_arch = <span class="string">"aarch64"</span>)]
         </span><span class="kw">const </span>OFFSET: c_ulong = <span class="number">3</span>;
 
-        <span class="attr">#[cfg(target_arch = <span class="string">&quot;arm&quot;</span>)]
+        <span class="attr">#[cfg(target_arch = <span class="string">"arm"</span>)]
         </span><span class="kw">const </span>OFFSET: c_ulong = <span class="number">0</span>;
 
-        <span class="attr">#[cfg(target_arch = <span class="string">&quot;arm&quot;</span>)]
+        <span class="attr">#[cfg(target_arch = <span class="string">"arm"</span>)]
         </span><span class="kw">let </span>caps = {
             <span class="kw">const </span>AT_HWCAP2: c_ulong = <span class="number">26</span>;
             <span class="kw">unsafe </span>{ getauxval(AT_HWCAP2) }
@@ -433,12 +433,12 @@
     features
 }
 
-<span class="attr">#[cfg(all(target_os = <span class="string">&quot;fuchsia&quot;</span>, target_arch = <span class="string">&quot;aarch64&quot;</span>))]
+<span class="attr">#[cfg(all(target_os = <span class="string">"fuchsia"</span>, target_arch = <span class="string">"aarch64"</span>))]
 </span><span class="kw">fn </span>detect_features() -&gt; u32 {
     <span class="kw">type </span>zx_status_t = i32;
 
-    <span class="attr">#[link(name = <span class="string">&quot;zircon&quot;</span>)]
-    </span><span class="kw">extern </span><span class="string">&quot;C&quot; </span>{
+    <span class="attr">#[link(name = <span class="string">"zircon"</span>)]
+    </span><span class="kw">extern </span><span class="string">"C" </span>{
         <span class="kw">fn </span>zx_system_get_features(kind: u32, features: <span class="kw-2">*mut </span>u32) -&gt; zx_status_t;
     }
 
@@ -454,7 +454,7 @@
 
     <span class="kw">let </span><span class="kw-2">mut </span>features = <span class="number">0</span>;
 
-    <span class="comment">// OpenSSL and BoringSSL don&#39;t enable any other features if NEON isn&#39;t
+    <span class="comment">// OpenSSL and BoringSSL don't enable any other features if NEON isn't
     // available.
     </span><span class="kw">if </span>rc == ZX_OK &amp;&amp; (caps &amp; ZX_ARM64_FEATURE_ISA_ASIMD == ZX_ARM64_FEATURE_ISA_ASIMD) {
         features = NEON.mask;
@@ -473,7 +473,7 @@
     features
 }
 
-<span class="attr">#[cfg(all(target_os = <span class="string">&quot;windows&quot;</span>, target_arch = <span class="string">&quot;aarch64&quot;</span>))]
+<span class="attr">#[cfg(all(target_os = <span class="string">"windows"</span>, target_arch = <span class="string">"aarch64"</span>))]
 </span><span class="kw">fn </span>detect_features() -&gt; u32 {
     <span class="comment">// We do not need to check for the presence of NEON, as Armv8-A always has it
     </span><span class="kw">const </span>_ASSERT_NEON_DETECTED: () = <span class="macro">assert!</span>((ARMCAP_STATIC &amp; NEON.mask) == NEON.mask);
@@ -514,7 +514,7 @@
         <span class="kw">const </span>ARMCAP_STATIC: u32 = <span class="number">0
             </span>$(
                 | (
-                    <span class="kw">if </span><span class="macro">cfg!</span>(all(any(target_arch = <span class="string">&quot;aarch64&quot;</span>, target_arch = <span class="string">&quot;arm&quot;</span>),
+                    <span class="kw">if </span><span class="macro">cfg!</span>(all(any(target_arch = <span class="string">"aarch64"</span>, target_arch = <span class="string">"arm"</span>),
                                 target_feature = <span class="macro-nonterminal">$target_feature_name</span>)) {
                         <span class="macro-nonterminal">$name</span>.mask
                     } <span class="kw">else </span>{
@@ -523,7 +523,7 @@
                 )
             )+;
 
-        <span class="attr">#[cfg(all(test, any(target_arch = <span class="string">&quot;arm&quot;</span>, target_arch = <span class="string">&quot;aarch64&quot;</span>)))]
+        <span class="attr">#[cfg(all(test, any(target_arch = <span class="string">"arm"</span>, target_arch = <span class="string">"aarch64"</span>)))]
         </span><span class="kw">const </span>ALL_FEATURES: [Feature; <span class="number">4</span>] = [
             $(
                 <span class="macro-nonterminal">$name
@@ -545,15 +545,15 @@
 
         <span class="attr">#[cfg(all(
             any(
-                target_os = <span class="string">&quot;android&quot;</span>,
-                target_os = <span class="string">&quot;fuchsia&quot;</span>,
-                target_os = <span class="string">&quot;linux&quot;</span>,
-                target_os = <span class="string">&quot;windows&quot;
+                target_os = <span class="string">"android"</span>,
+                target_os = <span class="string">"fuchsia"</span>,
+                target_os = <span class="string">"linux"</span>,
+                target_os = <span class="string">"windows"
             </span>),
-            any(target_arch = <span class="string">&quot;arm&quot;</span>, target_arch = <span class="string">&quot;aarch64&quot;</span>)
+            any(target_arch = <span class="string">"arm"</span>, target_arch = <span class="string">"aarch64"</span>)
         ))]
         </span>{
-            <span class="comment">// SAFETY: See `OPENSSL_armcap_P`&#39;s safety documentation.
+            <span class="comment">// SAFETY: See `OPENSSL_armcap_P`'s safety documentation.
             </span><span class="kw">if </span><span class="self">self</span>.mask == <span class="self">self</span>.mask &amp; <span class="kw">unsafe </span>{ OPENSSL_armcap_P } {
                 <span class="kw">return </span><span class="bool-val">true</span>;
             }
@@ -566,29 +566,29 @@
 <span class="comment">// Assumes all target feature names are the same for ARM and AAarch64.
 </span><span class="macro">features! </span>{
     <span class="comment">// Keep in sync with `ARMV7_NEON`.
-    </span><span class="string">&quot;neon&quot; </span>=&gt; NEON {
+    </span><span class="string">"neon" </span>=&gt; NEON {
         mask: <span class="number">1 </span>&lt;&lt; <span class="number">0</span>,
     },
 
     <span class="comment">// Keep in sync with `ARMV8_AES`.
-    </span><span class="string">&quot;aes&quot; </span>=&gt; AES {
+    </span><span class="string">"aes" </span>=&gt; AES {
         mask: <span class="number">1 </span>&lt;&lt; <span class="number">2</span>,
     },
 
     <span class="comment">// Keep in sync with `ARMV8_SHA256`.
-    </span><span class="string">&quot;sha2&quot; </span>=&gt; SHA256 {
+    </span><span class="string">"sha2" </span>=&gt; SHA256 {
         mask: <span class="number">1 </span>&lt;&lt; <span class="number">4</span>,
     },
 
     <span class="comment">// Keep in sync with `ARMV8_PMULL`.
     //
-    // TODO(MSRV): There is no &quot;pmull&quot; feature listed from
+    // TODO(MSRV): There is no "pmull" feature listed from
     // `rustc --print cfg --target=aarch64-apple-darwin`. Originally ARMv8 tied
     // PMULL detection into AES detection, but later versions split it; see
     // https://developer.arm.com/downloads/-/exploration-tools/feature-names-for-a-profile
-    // &quot;Features introduced prior to 2020.&quot; Change this to use &quot;pmull&quot; when
+    // "Features introduced prior to 2020." Change this to use "pmull" when
     // that is supported.
-    </span><span class="string">&quot;aes&quot; </span>=&gt; PMULL {
+    </span><span class="string">"aes" </span>=&gt; PMULL {
         mask: <span class="number">1 </span>&lt;&lt; <span class="number">5</span>,
     },
 }
@@ -598,21 +598,21 @@
 //   `INIT`.
 // - See the safety invariants of `OPENSSL_armcap_P` below.
 </span><span class="attr">#[cfg(all(
-    any(target_arch = <span class="string">&quot;aarch64&quot;</span>, target_arch = <span class="string">&quot;arm&quot;</span>),
+    any(target_arch = <span class="string">"aarch64"</span>, target_arch = <span class="string">"arm"</span>),
     any(
-        target_os = <span class="string">&quot;android&quot;</span>,
-        target_os = <span class="string">&quot;fuchsia&quot;</span>,
-        target_os = <span class="string">&quot;linux&quot;</span>,
-        target_os = <span class="string">&quot;windows&quot;
+        target_os = <span class="string">"android"</span>,
+        target_os = <span class="string">"fuchsia"</span>,
+        target_os = <span class="string">"linux"</span>,
+        target_os = <span class="string">"windows"
     </span>)
 ))]
 </span><span class="kw">pub unsafe fn </span>initialize_OPENSSL_armcap_P() {
     <span class="kw">let </span>detected = detect_features();
-    <span class="kw">let </span>filtered = (<span class="kw">if </span><span class="macro">cfg!</span>(feature = <span class="string">&quot;unstable-testing-arm-no-hw&quot;</span>) {
+    <span class="kw">let </span>filtered = (<span class="kw">if </span><span class="macro">cfg!</span>(feature = <span class="string">"unstable-testing-arm-no-hw"</span>) {
         AES.mask | SHA256.mask | PMULL.mask
     } <span class="kw">else </span>{
         <span class="number">0
-    </span>}) | (<span class="kw">if </span><span class="macro">cfg!</span>(feature = <span class="string">&quot;unstable-testing-arm-no-neon&quot;</span>) {
+    </span>}) | (<span class="kw">if </span><span class="macro">cfg!</span>(feature = <span class="string">"unstable-testing-arm-no-neon"</span>) {
         NEON.mask
     } <span class="kw">else </span>{
         <span class="number">0
@@ -624,9 +624,9 @@
 <span class="comment">// Some non-Rust code still checks this even when it is statically known
 // the given feature is available, so we have to ensure that this is
 // initialized properly. Keep this in sync with the initialization in
-// BoringSSL&#39;s crypto.c.
+// BoringSSL's crypto.c.
 //
-// TODO: This should have &quot;hidden&quot; visibility but we don&#39;t have a way of
+// TODO: This should have "hidden" visibility but we don't have a way of
 // controlling that yet: https://github.com/rust-lang/rust/issues/73958.
 //
 // SAFETY:
@@ -641,7 +641,7 @@
 // - `OPENSSL_armcap_P` must always be a superset of `ARMCAP_STATIC`.
 // TODO: Remove all the direct accesses of this from assembly language code, and then replace this
 // with a `OnceCell&lt;u32&gt;` that will provide all the necessary safety guarantees.
-</span><span class="attr">#[cfg(any(target_arch = <span class="string">&quot;arm&quot;</span>, target_arch = <span class="string">&quot;aarch64&quot;</span>))]
+</span><span class="attr">#[cfg(any(target_arch = <span class="string">"arm"</span>, target_arch = <span class="string">"aarch64"</span>))]
 </span><span class="macro">prefixed_export! </span>{
     <span class="attr">#[allow(non_upper_case_globals)]
     </span><span class="kw">static </span><span class="kw-2">mut </span>OPENSSL_armcap_P: u32 = ARMCAP_STATIC;
@@ -649,31 +649,31 @@
 
 <span class="comment">// MSRV: Enforce 1.61.0 on some aarch64-* targets (aarch64-apple-*, in particular) prior to. Earlier
 // versions of Rust before did not report the AAarch64 CPU features correctly for these targets.
-// Cargo.toml specifies `rust-version` but versions before Rust 1.56 don&#39;t know about it.
+// Cargo.toml specifies `rust-version` but versions before Rust 1.56 don't know about it.
 //
 // ```
-// $ rustc +1.61.0 --print cfg --target=aarch64-apple-ios | grep -E &quot;neon|aes|sha|pmull&quot;
-// target_feature=&quot;aes&quot;
-// target_feature=&quot;neon&quot;
-// target_feature=&quot;sha2&quot;
-// $ rustc +1.61.0 --print cfg --target=aarch64-apple-darwin | grep -E &quot;neon|aes|sha|pmull&quot;
-// target_feature=&quot;aes&quot;
-// target_feature=&quot;neon&quot;
-// target_feature=&quot;sha2&quot;
-// target_feature=&quot;sha3&quot;
+// $ rustc +1.61.0 --print cfg --target=aarch64-apple-ios | grep -E "neon|aes|sha|pmull"
+// target_feature="aes"
+// target_feature="neon"
+// target_feature="sha2"
+// $ rustc +1.61.0 --print cfg --target=aarch64-apple-darwin | grep -E "neon|aes|sha|pmull"
+// target_feature="aes"
+// target_feature="neon"
+// target_feature="sha2"
+// target_feature="sha3"
 // ```
 </span><span class="attr">#[allow(clippy::assertions_on_constants)]
 </span><span class="kw">const </span>_AARCH64_HAS_NEON: () =
-    <span class="macro">assert!</span>(((ARMCAP_STATIC &amp; NEON.mask) == NEON.mask) || !<span class="macro">cfg!</span>(target_arch = <span class="string">&quot;aarch64&quot;</span>));
+    <span class="macro">assert!</span>(((ARMCAP_STATIC &amp; NEON.mask) == NEON.mask) || !<span class="macro">cfg!</span>(target_arch = <span class="string">"aarch64"</span>));
 <span class="attr">#[allow(clippy::assertions_on_constants)]
 </span><span class="kw">const </span>_AARCH64_APPLE_FEATURES: u32 = NEON.mask | AES.mask | SHA256.mask | PMULL.mask;
 <span class="attr">#[allow(clippy::assertions_on_constants)]
 </span><span class="kw">const </span>_AARCH64_APPLE_TARGETS_EXPECTED_FEATURES: () = <span class="macro">assert!</span>(
     ((ARMCAP_STATIC &amp; _AARCH64_APPLE_FEATURES) == _AARCH64_APPLE_FEATURES)
-        || !<span class="macro">cfg!</span>(all(target_arch = <span class="string">&quot;aarch64&quot;</span>, target_vendor = <span class="string">&quot;apple&quot;</span>))
+        || !<span class="macro">cfg!</span>(all(target_arch = <span class="string">"aarch64"</span>, target_vendor = <span class="string">"apple"</span>))
 );
 
-<span class="attr">#[cfg(all(test, any(target_arch = <span class="string">&quot;arm&quot;</span>, target_arch = <span class="string">&quot;aarch64&quot;</span>)))]
+<span class="attr">#[cfg(all(test, any(target_arch = <span class="string">"arm"</span>, target_arch = <span class="string">"aarch64"</span>)))]
 </span><span class="kw">mod </span>tests {
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
 

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-webpki-0.101.7/src/crl.rs`."><title>crl.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="webpki" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-webpki-0.101.7/src/crl.rs`."><title>crl.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="webpki" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -664,7 +664,7 @@
 // purpose with or without fee is hereby granted, provided that the above
 // copyright notice and this permission notice appear in all copies.
 //
-// THE SOFTWARE IS PROVIDED &quot;AS IS&quot; AND THE AUTHORS DISCLAIM ALL WARRANTIES
+// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHORS DISCLAIM ALL WARRANTIES
 // WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
 // MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR
 // ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
@@ -679,7 +679,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::x509::{remember_extension, set_extension_once, Extension};
 <span class="kw">use crate</span>::{der, public_values_eq, Error, SignatureAlgorithm, Time};
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
 </span><span class="kw">use </span>std::collections::HashMap;
 
 <span class="kw">use </span>private::Sealed;
@@ -697,7 +697,7 @@
     /// may yield an error if the CRL has malformed revoked certificates.
     </span><span class="kw">fn </span>find_serial(<span class="kw-2">&amp;</span><span class="self">self</span>, serial: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;BorrowedRevokedCert&gt;, Error&gt;;
 
-    <span class="doccomment">/// Verify the CRL signature using the issuer&#39;s subject public key information (SPKI)
+    <span class="doccomment">/// Verify the CRL signature using the issuer's subject public key information (SPKI)
     /// and a list of supported signature algorithms.
     </span><span class="kw">fn </span>verify_signature(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
@@ -709,13 +709,13 @@
 <span class="doccomment">/// Owned representation of a RFC 5280[^1] profile Certificate Revocation List (CRL).
 ///
 /// [^1]: &lt;https://www.rfc-editor.org/rfc/rfc5280#section-5&gt;
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
-#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;alloc&quot;</span>)))]
-#[allow(dead_code)] </span><span class="comment">// we parse some fields we don&#39;t expose now, but may choose to expose in the future.
+</span><span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
+#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"alloc"</span>)))]
+#[allow(dead_code)] </span><span class="comment">// we parse some fields we don't expose now, but may choose to expose in the future.
 </span><span class="attr">#[derive(Debug, Clone)]
 </span><span class="kw">pub struct </span>OwnedCertRevocationList {
     <span class="doccomment">/// A map of the revoked certificates contained in then CRL, keyed by the DER encoding
-    /// of the revoked cert&#39;s serial number.
+    /// of the revoked cert's serial number.
     </span>revoked_certs: HashMap&lt;Vec&lt;u8&gt;, OwnedRevokedCert&gt;,
 
     issuer: Vec&lt;u8&gt;,
@@ -723,10 +723,10 @@
     signed_data: signed_data::OwnedSignedData,
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
 </span><span class="kw">impl </span>Sealed <span class="kw">for </span>OwnedCertRevocationList {}
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
 </span><span class="kw">impl </span>CertRevocationList <span class="kw">for </span>OwnedCertRevocationList {
     <span class="kw">fn </span>issuer(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[u8] {
         <span class="kw-2">&amp;</span><span class="self">self</span>.issuer
@@ -760,19 +760,19 @@
 ///
 /// [^1]: &lt;https://www.rfc-editor.org/rfc/rfc5280#section-5&gt;
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>BorrowedCertRevocationList&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>BorrowedCertRevocationList&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// A `SignedData` structure that can be passed to `verify_signed_data`.
-    </span>signed_data: SignedData&lt;<span class="lifetime">&#39;a</span>&gt;,
+    </span>signed_data: SignedData&lt;<span class="lifetime">'a</span>&gt;,
 
     <span class="doccomment">/// Identifies the entity that has signed and issued this
     /// CRL.
-    </span>issuer: untrusted::Input&lt;<span class="lifetime">&#39;a</span>&gt;,
+    </span>issuer: untrusted::Input&lt;<span class="lifetime">'a</span>&gt;,
 
     <span class="doccomment">/// List of certificates revoked by the issuer in this CRL.
-    </span>revoked_certs: untrusted::Input&lt;<span class="lifetime">&#39;a</span>&gt;,
+    </span>revoked_certs: untrusted::Input&lt;<span class="lifetime">'a</span>&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; BorrowedCertRevocationList&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; BorrowedCertRevocationList&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Try to parse the given bytes as a RFC 5280[^1] profile Certificate Revocation List (CRL).
     ///
     /// Webpki does not support:
@@ -783,7 +783,7 @@
     ///   * CRLs larger than (2^32)-1 bytes in size.
     ///
     /// [^1]: &lt;https://www.rfc-editor.org/rfc/rfc5280#section-5&gt;
-    </span><span class="kw">pub fn </span>from_der(crl_der: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, Error&gt; {
+    </span><span class="kw">pub fn </span>from_der(crl_der: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, Error&gt; {
         <span class="comment">// Try to parse the CRL.
         </span><span class="kw">let </span>reader = untrusted::Input::from(crl_der);
         <span class="kw">let </span>(tbs_cert_list, signed_data) = reader.read_all(Error::BadDer, |crl_der| {
@@ -839,7 +839,7 @@
             <span class="comment">// RFC 5280 §5.1.2.6:
             //   When there are no revoked certificates, the revoked certificates list
             //   MUST be absent
-            // TODO(@cpu): Do we care to support empty CRLs if we don&#39;t support delta CRLs?
+            // TODO(@cpu): Do we care to support empty CRLs if we don't support delta CRLs?
             </span><span class="kw">let </span>revoked_certs = <span class="kw">if </span>tbs_cert_list.peek(Tag::Sequence.into()) {
                 der::expect_tag_and_get_value_limited(
                     tbs_cert_list,
@@ -894,10 +894,10 @@
 
     <span class="doccomment">/// Convert the CRL to an [`OwnedCertRevocationList`]. This may error if any of the revoked
     /// certificates in the CRL are malformed or contain unsupported features.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;alloc&quot;</span>)))]
+    </span><span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"alloc"</span>)))]
     </span><span class="kw">pub fn </span>to_owned(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;OwnedCertRevocationList, Error&gt; {
-        <span class="comment">// Parse and collect the CRL&#39;s revoked cert entries, ensuring there are no errors. With
+        <span class="comment">// Parse and collect the CRL's revoked cert entries, ensuring there are no errors. With
         // the full set in-hand, create a lookup map by serial number for fast revocation checking.
         </span><span class="kw">let </span>revoked_certs = <span class="self">self
             </span>.into_iter()
@@ -913,7 +913,7 @@
         })
     }
 
-    <span class="kw">fn </span>remember_extension(<span class="kw-2">&amp;mut </span><span class="self">self</span>, extension: <span class="kw-2">&amp;</span>Extension&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
+    <span class="kw">fn </span>remember_extension(<span class="kw-2">&amp;mut </span><span class="self">self</span>, extension: <span class="kw-2">&amp;</span>Extension&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
         remember_extension(extension, |id| {
             <span class="kw">match </span>id {
                 <span class="comment">// id-ce-cRLNumber 2.5.29.20 - RFC 5280 §5.2.3
@@ -933,7 +933,7 @@
                             <span class="prelude-val">Err</span>(Error::InvalidCrlNumber)
                         }
                     })<span class="question-mark">?</span>;
-                    <span class="comment">// We enforce the cRLNumber is sensible, but don&#39;t retain the value for use.
+                    <span class="comment">// We enforce the cRLNumber is sensible, but don't retain the value for use.
                     </span><span class="prelude-val">Ok</span>(())
                 }
 
@@ -950,12 +950,12 @@
                 // TODO(@cpu): We may want to parse this enough to be able to error on indirectCRL
                 //  bool == true, or to enforce validation based on onlyContainsUserCerts,
                 //  onlyContainsCACerts, and onlySomeReasons. For now we use the carve-out where
-                //  we&#39;ll treat it as understood without parsing and consider certificates not found
+                //  we'll treat it as understood without parsing and consider certificates not found
                 //  in the list as unknown.
                 </span><span class="number">28 </span>=&gt; <span class="prelude-val">Ok</span>(()),
 
                 <span class="comment">// id-ce-authorityKeyIdentifier 2.5.29.35 - RFC 5280 §5.2.1, §4.2.1.1
-                // We recognize the extension but don&#39;t retain its value for use.
+                // We recognize the extension but don't retain its value for use.
                 </span><span class="number">35 </span>=&gt; <span class="prelude-val">Ok</span>(()),
 
                 <span class="comment">// Unsupported extension
@@ -965,9 +965,9 @@
     }
 }
 
-<span class="kw">impl </span>Sealed <span class="kw">for </span>BorrowedCertRevocationList&lt;<span class="lifetime">&#39;_</span>&gt; {}
+<span class="kw">impl </span>Sealed <span class="kw">for </span>BorrowedCertRevocationList&lt;<span class="lifetime">'_</span>&gt; {}
 
-<span class="kw">impl </span>CertRevocationList <span class="kw">for </span>BorrowedCertRevocationList&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>CertRevocationList <span class="kw">for </span>BorrowedCertRevocationList&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>issuer(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[u8] {
         <span class="self">self</span>.issuer.as_slice_less_safe()
     }
@@ -1001,9 +1001,9 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>BorrowedCertRevocationList&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">type </span>Item = <span class="prelude-ty">Result</span>&lt;BorrowedRevokedCert&lt;<span class="lifetime">&#39;a</span>&gt;, Error&gt;;
-    <span class="kw">type </span>IntoIter = RevokedCerts&lt;<span class="lifetime">&#39;a</span>&gt;;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>BorrowedCertRevocationList&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">type </span>Item = <span class="prelude-ty">Result</span>&lt;BorrowedRevokedCert&lt;<span class="lifetime">'a</span>&gt;, Error&gt;;
+    <span class="kw">type </span>IntoIter = RevokedCerts&lt;<span class="lifetime">'a</span>&gt;;
 
     <span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; <span class="self">Self</span>::IntoIter {
         RevokedCerts {
@@ -1013,12 +1013,12 @@
 }
 
 <span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>RevokedCerts&lt;<span class="lifetime">&#39;a</span>&gt; {
-    reader: untrusted::Reader&lt;<span class="lifetime">&#39;a</span>&gt;,
+</span><span class="kw">pub struct </span>RevokedCerts&lt;<span class="lifetime">'a</span>&gt; {
+    reader: untrusted::Reader&lt;<span class="lifetime">'a</span>&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>RevokedCerts&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">type </span>Item = <span class="prelude-ty">Result</span>&lt;BorrowedRevokedCert&lt;<span class="lifetime">&#39;a</span>&gt;, Error&gt;;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Iterator <span class="kw">for </span>RevokedCerts&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">type </span>Item = <span class="prelude-ty">Result</span>&lt;BorrowedRevokedCert&lt;<span class="lifetime">'a</span>&gt;, Error&gt;;
 
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
         (!<span class="self">self</span>.reader.at_end()).then(|| BorrowedRevokedCert::from_der(<span class="kw-2">&amp;mut </span><span class="self">self</span>.reader))
@@ -1028,10 +1028,10 @@
 <span class="doccomment">/// Owned representation of a RFC 5280[^1] profile Certificate Revocation List (CRL) revoked
 /// certificate entry.
 ///
-/// Only available when the &quot;alloc&quot; feature is enabled.
+/// Only available when the "alloc" feature is enabled.
 ///
 /// [^1]: &lt;https://www.rfc-editor.org/rfc/rfc5280#section-5&gt;
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
 #[derive(Clone, Debug)]
 </span><span class="kw">pub struct </span>OwnedRevokedCert {
     <span class="doccomment">/// Serial number of the revoked certificate.
@@ -1052,7 +1052,7 @@
     </span><span class="kw">pub </span>invalidity_date: <span class="prelude-ty">Option</span>&lt;Time&gt;,
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
 </span><span class="kw">impl </span>OwnedRevokedCert {
     <span class="doccomment">/// Convert the owned representation of this revoked cert to a borrowed version.
     </span><span class="kw">pub fn </span>borrow(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; BorrowedRevokedCert {
@@ -1070,9 +1070,9 @@
 ///
 /// [^1]: &lt;https://www.rfc-editor.org/rfc/rfc5280#section-5&gt;
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>BorrowedRevokedCert&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>BorrowedRevokedCert&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Serial number of the revoked certificate.
-    </span><span class="kw">pub </span>serial_number: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+    </span><span class="kw">pub </span>serial_number: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
 
     <span class="doccomment">/// The date at which the CA processed the revocation.
     </span><span class="kw">pub </span>revocation_date: Time,
@@ -1089,10 +1089,10 @@
     </span><span class="kw">pub </span>invalidity_date: <span class="prelude-ty">Option</span>&lt;Time&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; BorrowedRevokedCert&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; BorrowedRevokedCert&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Construct an owned representation of the revoked certificate.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;alloc&quot;</span>)))]
+    </span><span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"alloc"</span>)))]
     </span><span class="kw">pub fn </span>to_owned(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; OwnedRevokedCert {
         OwnedRevokedCert {
             serial_number: <span class="self">self</span>.serial_number.to_vec(),
@@ -1102,7 +1102,7 @@
         }
     }
 
-    <span class="kw">fn </span>from_der(der: <span class="kw-2">&amp;mut </span>untrusted::Reader&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, Error&gt; {
+    <span class="kw">fn </span>from_der(der: <span class="kw-2">&amp;mut </span>untrusted::Reader&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, Error&gt; {
         der::nested(der, Tag::Sequence, Error::BadDer, |der| {
             <span class="comment">// RFC 5280 §4.1.2.2:
             //    Certificate users MUST be able to handle serialNumber values up to 20 octets.
@@ -1112,7 +1112,7 @@
             //    that are negative or zero.  Certificate users SHOULD be prepared to
             //    gracefully handle such certificates.
             // Like the handling in cert.rs we choose to be lenient here, not enforcing the length
-            // of a CRL revoked certificate&#39;s serial number is less than 20 octets in encoded form.
+            // of a CRL revoked certificate's serial number is less than 20 octets in encoded form.
             </span><span class="kw">let </span>serial_number = lenient_certificate_serial_number(der)
                 .map_err(|<span class="kw">_</span>| Error::InvalidSerialNumber)<span class="question-mark">?
                 </span>.as_slice_less_safe();
@@ -1162,7 +1162,7 @@
         })
     }
 
-    <span class="kw">fn </span>remember_extension(<span class="kw-2">&amp;mut </span><span class="self">self</span>, extension: <span class="kw-2">&amp;</span>Extension&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
+    <span class="kw">fn </span>remember_extension(<span class="kw-2">&amp;mut </span><span class="self">self</span>, extension: <span class="kw-2">&amp;</span>Extension&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
         remember_extension(extension, |id| {
             <span class="kw">match </span>id {
                 <span class="comment">// id-ce-cRLReasons 2.5.29.21 - RFC 5280 §5.3.1.
@@ -1216,7 +1216,7 @@
 
 <span class="kw">impl </span>RevocationReason {
     <span class="comment">// RFC 5280 §5.3.1.
-    </span><span class="kw">fn </span>from_der(value: untrusted::Input&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, Error&gt; {
+    </span><span class="kw">fn </span>from_der(value: untrusted::Input&lt;<span class="lifetime">'_</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, Error&gt; {
         value.read_all(Error::BadDer, |enumerated_reason| {
             <span class="kw">let </span>value = der::expect_tag(enumerated_reason, Tag::Enum)<span class="question-mark">?</span>;
             <span class="self">Self</span>::try_from(value.value().read_all(Error::BadDer, |reason| {
@@ -1278,12 +1278,12 @@
         <span class="kw">for </span>tc <span class="kw">in </span>testcases.iter() {
             <span class="kw">let </span>(id, expected) = tc;
             <span class="kw">let </span>actual = &lt;u8 <span class="kw">as </span>TryInto&lt;RevocationReason&gt;&gt;::try_into(<span class="kw-2">*</span>id)
-                .expect(<span class="string">&quot;unexpected reason code conversion error&quot;</span>);
+                .expect(<span class="string">"unexpected reason code conversion error"</span>);
             <span class="macro">assert_eq!</span>(actual, <span class="kw-2">*</span>expected);
-            <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
             </span>{
                 <span class="comment">// revocation reasons should be Debug.
-                </span><span class="macro">println!</span>(<span class="string">&quot;{:?}&quot;</span>, actual);
+                </span><span class="macro">println!</span>(<span class="string">"{:?}"</span>, actual);
             }
         }
 
@@ -1293,28 +1293,28 @@
     }
 
     <span class="attr">#[test]
-    #[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+    #[cfg(feature = <span class="string">"alloc"</span>)]
     </span><span class="comment">// redundant clone, clone_on_copy allowed to verify derived traits.
     </span><span class="attr">#[allow(clippy::redundant_clone, clippy::clone_on_copy)]
     </span><span class="kw">fn </span>test_derived_traits() {
         <span class="kw">let </span>crl = <span class="kw">crate</span>::crl::BorrowedCertRevocationList::from_der(<span class="macro">include_bytes!</span>(
-            <span class="string">&quot;../tests/crls/crl.valid.der&quot;
+            <span class="string">"../tests/crls/crl.valid.der"
         </span>))
         .unwrap();
-        <span class="macro">println!</span>(<span class="string">&quot;{:?}&quot;</span>, crl); <span class="comment">// BorrowedCertRevocationList should be debug.
+        <span class="macro">println!</span>(<span class="string">"{:?}"</span>, crl); <span class="comment">// BorrowedCertRevocationList should be debug.
 
         </span><span class="kw">let </span>owned_crl = crl.to_owned().unwrap();
-        <span class="macro">println!</span>(<span class="string">&quot;{:?}&quot;</span>, owned_crl); <span class="comment">// OwnedCertRevocationList should be debug.
+        <span class="macro">println!</span>(<span class="string">"{:?}"</span>, owned_crl); <span class="comment">// OwnedCertRevocationList should be debug.
         </span><span class="kw">let _ </span>= owned_crl.clone(); <span class="comment">// OwnedCertRevocationList should be clone.
 
         </span><span class="kw">let </span><span class="kw-2">mut </span>revoked_certs = crl.into_iter();
-        <span class="macro">println!</span>(<span class="string">&quot;{:?}&quot;</span>, revoked_certs); <span class="comment">// RevokedCert should be debug.
+        <span class="macro">println!</span>(<span class="string">"{:?}"</span>, revoked_certs); <span class="comment">// RevokedCert should be debug.
 
         </span><span class="kw">let </span>revoked_cert = revoked_certs.next().unwrap().unwrap();
-        <span class="macro">println!</span>(<span class="string">&quot;{:?}&quot;</span>, revoked_cert); <span class="comment">// BorrowedRevokedCert should be debug.
+        <span class="macro">println!</span>(<span class="string">"{:?}"</span>, revoked_cert); <span class="comment">// BorrowedRevokedCert should be debug.
 
         </span><span class="kw">let </span>owned_revoked_cert = revoked_cert.to_owned();
-        <span class="macro">println!</span>(<span class="string">&quot;{:?}&quot;</span>, owned_revoked_cert); <span class="comment">// OwnedRevokedCert should be debug.
+        <span class="macro">println!</span>(<span class="string">"{:?}"</span>, owned_revoked_cert); <span class="comment">// OwnedRevokedCert should be debug.
         </span><span class="kw">let _ </span>= owned_revoked_cert.clone(); <span class="comment">// OwnedRevokedCert should be clone.
     </span>}
 }

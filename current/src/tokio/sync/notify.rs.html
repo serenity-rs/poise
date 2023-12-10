@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/sync/notify.rs`."><title>notify.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/sync/notify.rs`."><title>notify.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1173,7 +1173,7 @@
 // When this module is compiled with `sync` enabled we will warn on
 // this lint. When `rt` is enabled we use `pub(crate)` which
 // triggers this warning but it is safe to ignore in this case.
-</span><span class="attr">#![cfg_attr(not(feature = <span class="string">&quot;sync&quot;</span>), allow(unreachable_pub, dead_code))]
+</span><span class="attr">#![cfg_attr(not(feature = <span class="string">"sync"</span>), allow(unreachable_pub, dead_code))]
 
 </span><span class="kw">use </span><span class="kw">crate</span>::loom::cell::UnsafeCell;
 <span class="kw">use </span><span class="kw">crate</span>::loom::sync::atomic::AtomicUsize;
@@ -1232,10 +1232,10 @@
 ///
 ///     let handle = tokio::spawn(async move {
 ///         notify2.notified().await;
-///         println!(&quot;received notification&quot;);
+///         println!("received notification");
 ///     });
 ///
-///     println!(&quot;sending notification&quot;);
+///     println!("sending notification");
 ///     notify.notify_one();
 ///
 ///     // Wait for task to receive notification.
@@ -1388,14 +1388,14 @@
     <span class="doccomment">/// Intrusive linked-list pointers.
     </span>pointers: linked_list::Pointers&lt;Waiter&gt;,
 
-    <span class="doccomment">/// Waiting task&#39;s waker. Depending on the value of `notification`,
+    <span class="doccomment">/// Waiting task's waker. Depending on the value of `notification`,
     /// this field is either protected by the `waiters` lock in
     /// `Notify`, or it is exclusively owned by the enclosing `Waiter`.
     </span>waker: UnsafeCell&lt;<span class="prelude-ty">Option</span>&lt;Waker&gt;&gt;,
 
     <span class="doccomment">/// Notification for this waiter.
-    /// * if it&#39;s `None`, then `waker` is protected by the `waiters` lock.
-    /// * if it&#39;s `Some`, then `waker` is exclusively owned by the
+    /// * if it's `None`, then `waker` is protected by the `waiters` lock.
+    /// * if it's `Some`, then `waker` is exclusively owned by the
     ///   enclosing `Waiter` and can be accessed without locking.
     </span>notification: AtomicNotification,
 
@@ -1476,18 +1476,18 @@
 <span class="doccomment">/// List used in `Notify::notify_waiters`. It wraps a guarded linked list
 /// and gates the access to it on `notify.waiters` mutex. It also empties
 /// the list on drop.
-</span><span class="kw">struct </span>NotifyWaitersList&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">struct </span>NotifyWaitersList&lt;<span class="lifetime">'a</span>&gt; {
     list: GuardedWaitList,
     is_empty: bool,
-    notify: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Notify,
+    notify: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Notify,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; NotifyWaitersList&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; NotifyWaitersList&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>new(
         unguarded_list: WaitList,
-        guard: Pin&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Waiter&gt;,
-        notify: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Notify,
-    ) -&gt; NotifyWaitersList&lt;<span class="lifetime">&#39;a</span>&gt; {
+        guard: Pin&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>Waiter&gt;,
+        notify: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Notify,
+    ) -&gt; NotifyWaitersList&lt;<span class="lifetime">'a</span>&gt; {
         <span class="kw">let </span>guard_ptr = NonNull::from(guard.get_ref());
         <span class="kw">let </span>list = unguarded_list.into_guarded(guard_ptr);
         NotifyWaitersList {
@@ -1510,7 +1510,7 @@
     }
 }
 
-<span class="kw">impl </span>Drop <span class="kw">for </span>NotifyWaitersList&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>Drop <span class="kw">for </span>NotifyWaitersList&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="comment">// If the list is not empty, we unlink all waiters from it.
         // We do not wake the waiters to avoid double panics.
@@ -1530,9 +1530,9 @@
 /// This future is fused, so once it has completed, any future calls to poll
 /// will immediately return `Poll::Ready`.
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>Notified&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>Notified&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// The `Notify` being received on.
-    </span>notify: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Notify,
+    </span>notify: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Notify,
 
     <span class="doccomment">/// The current state of the receiving process.
     </span>state: State,
@@ -1544,8 +1544,8 @@
     </span>waiter: Waiter,
 }
 
-<span class="kw">unsafe impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Send <span class="kw">for </span>Notified&lt;<span class="lifetime">&#39;a</span>&gt; {}
-<span class="kw">unsafe impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Sync <span class="kw">for </span>Notified&lt;<span class="lifetime">&#39;a</span>&gt; {}
+<span class="kw">unsafe impl</span>&lt;<span class="lifetime">'a</span>&gt; Send <span class="kw">for </span>Notified&lt;<span class="lifetime">'a</span>&gt; {}
+<span class="kw">unsafe impl</span>&lt;<span class="lifetime">'a</span>&gt; Sync <span class="kw">for </span>Notified&lt;<span class="lifetime">'a</span>&gt; {}
 
 <span class="attr">#[derive(Debug)]
 </span><span class="kw">enum </span>State {
@@ -1558,7 +1558,7 @@
 <span class="kw">const </span>STATE_MASK: usize = (<span class="number">1 </span>&lt;&lt; NOTIFY_WAITERS_SHIFT) - <span class="number">1</span>;
 <span class="kw">const </span>NOTIFY_WAITERS_CALLS_MASK: usize = !STATE_MASK;
 
-<span class="doccomment">/// Initial &quot;idle&quot; state.
+<span class="doccomment">/// Initial "idle" state.
 </span><span class="kw">const </span>EMPTY: usize = <span class="number">0</span>;
 
 <span class="doccomment">/// One or more threads are currently waiting to be notified.
@@ -1672,14 +1672,14 @@
     ///
     ///     tokio::spawn(async move {
     ///         notify2.notified().await;
-    ///         println!(&quot;received notification&quot;);
+    ///         println!("received notification");
     ///     });
     ///
-    ///     println!(&quot;sending notification&quot;);
+    ///     println!("sending notification");
     ///     notify.notify_one();
     /// }
     /// ```
-    </span><span class="kw">pub fn </span>notified(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Notified&lt;<span class="lifetime">&#39;_</span>&gt; {
+    </span><span class="kw">pub fn </span>notified(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Notified&lt;<span class="lifetime">'_</span>&gt; {
         <span class="comment">// we load the number of times notify_waiters
         // was called and store that in the future.
         </span><span class="kw">let </span>state = <span class="self">self</span>.state.load(SeqCst);
@@ -1718,15 +1718,15 @@
     ///
     ///     tokio::spawn(async move {
     ///         notify2.notified().await;
-    ///         println!(&quot;received notification&quot;);
+    ///         println!("received notification");
     ///     });
     ///
-    ///     println!(&quot;sending notification&quot;);
+    ///     println!("sending notification");
     ///     notify.notify_one();
     /// }
     /// ```
     </span><span class="comment">// Alias for old name in 0.x
-    </span><span class="attr">#[cfg_attr(docsrs, doc(alias = <span class="string">&quot;notify&quot;</span>))]
+    </span><span class="attr">#[cfg_attr(docsrs, doc(alias = <span class="string">"notify"</span>))]
     </span><span class="kw">pub fn </span>notify_one(<span class="kw-2">&amp;</span><span class="self">self</span>) {
         <span class="comment">// Load the current state
         </span><span class="kw">let </span><span class="kw-2">mut </span>curr = <span class="self">self</span>.state.load(SeqCst);
@@ -1784,13 +1784,13 @@
     ///     let notified2 = notify.notified();
     ///
     ///     let handle = tokio::spawn(async move {
-    ///         println!(&quot;sending notifications&quot;);
+    ///         println!("sending notifications");
     ///         notify2.notify_waiters();
     ///     });
     ///
     ///     notified1.await;
     ///     notified2.await;
-    ///     println!(&quot;received notifications&quot;);
+    ///     println!("received notifications");
     /// }
     /// ```
     </span><span class="kw">pub fn </span>notify_waiters(<span class="kw-2">&amp;</span><span class="self">self</span>) {
@@ -1828,7 +1828,7 @@
         </span><span class="kw">let </span><span class="kw-2">mut </span>list = NotifyWaitersList::new(std::mem::take(<span class="kw-2">&amp;mut *</span>waiters), guard.as_ref(), <span class="self">self</span>);
 
         <span class="kw">let </span><span class="kw-2">mut </span>wakers = WakeList::new();
-        <span class="lifetime">&#39;outer</span>: <span class="kw">loop </span>{
+        <span class="lifetime">'outer</span>: <span class="kw">loop </span>{
             <span class="kw">while </span>wakers.can_push() {
                 <span class="kw">match </span>list.pop_back_locked(<span class="kw-2">&amp;mut </span>waiters) {
                     <span class="prelude-val">Some</span>(waiter) =&gt; {
@@ -1846,7 +1846,7 @@
                         </span>waiter.notification.store_release(Notification::All);
                     }
                     <span class="prelude-val">None </span>=&gt; {
-                        <span class="kw">break </span><span class="lifetime">&#39;outer</span>;
+                        <span class="kw">break </span><span class="lifetime">'outer</span>;
                     }
                 }
             }
@@ -1925,7 +1925,7 @@
 
 <span class="comment">// ===== impl Notified =====
 
-</span><span class="kw">impl </span>Notified&lt;<span class="lifetime">&#39;_</span>&gt; {
+</span><span class="kw">impl </span>Notified&lt;<span class="lifetime">'_</span>&gt; {
     <span class="doccomment">/// Adds this future to the list of futures that are ready to receive
     /// wakeups from calls to [`notify_one`].
     ///
@@ -2057,7 +2057,7 @@
     <span class="kw">fn </span>poll_notified(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, waker: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>Waker&gt;) -&gt; Poll&lt;()&gt; {
         <span class="kw">let </span>(notify, state, notify_waiters_calls, waiter) = <span class="self">self</span>.project();
 
-        <span class="lifetime">&#39;outer_loop</span>: <span class="kw">loop </span>{
+        <span class="lifetime">'outer_loop</span>: <span class="kw">loop </span>{
             <span class="kw">match </span><span class="kw-2">*</span>state {
                 State::Init =&gt; {
                     <span class="kw">let </span>curr = notify.state.load(SeqCst);
@@ -2073,7 +2073,7 @@
                     <span class="kw">if </span>res.is_ok() {
                         <span class="comment">// Acquired the notification
                         </span><span class="kw-2">*</span>state = State::Done;
-                        <span class="kw">continue </span><span class="lifetime">&#39;outer_loop</span>;
+                        <span class="kw">continue </span><span class="lifetime">'outer_loop</span>;
                     }
 
                     <span class="comment">// Clone the waker before locking, a waker clone can be
@@ -2091,7 +2091,7 @@
                     // was created, then we are done
                     </span><span class="kw">if </span>get_num_notify_waiters_calls(curr) != <span class="kw-2">*</span>notify_waiters_calls {
                         <span class="kw-2">*</span>state = State::Done;
-                        <span class="kw">continue </span><span class="lifetime">&#39;outer_loop</span>;
+                        <span class="kw">continue </span><span class="lifetime">'outer_loop</span>;
                     }
 
                     <span class="comment">// Transition the state to WAITING.
@@ -2127,7 +2127,7 @@
                                     <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; {
                                         <span class="comment">// Acquired the notification
                                         </span><span class="kw-2">*</span>state = State::Done;
-                                        <span class="kw">continue </span><span class="lifetime">&#39;outer_loop</span>;
+                                        <span class="kw">continue </span><span class="lifetime">'outer_loop</span>;
                                     }
                                     <span class="prelude-val">Err</span>(actual) =&gt; {
                                         <span class="macro">assert_eq!</span>(get_state(actual), EMPTY);
@@ -2268,17 +2268,17 @@
     }
 }
 
-<span class="kw">impl </span>Future <span class="kw">for </span>Notified&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>Future <span class="kw">for </span>Notified&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">type </span>Output = ();
 
-    <span class="kw">fn </span>poll(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;()&gt; {
+    <span class="kw">fn </span>poll(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;()&gt; {
         <span class="self">self</span>.poll_notified(<span class="prelude-val">Some</span>(cx.waker()))
     }
 }
 
-<span class="kw">impl </span>Drop <span class="kw">for </span>Notified&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>Drop <span class="kw">for </span>Notified&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
-        <span class="comment">// Safety: The type only transitions to a &quot;Waiting&quot; state when pinned.
+        <span class="comment">// Safety: The type only transitions to a "Waiting" state when pinned.
         </span><span class="kw">let </span>(notify, state, <span class="kw">_</span>, waiter) = <span class="kw">unsafe </span>{ Pin::new_unchecked(<span class="self">self</span>).project() };
 
         <span class="comment">// This is where we ensure safety. The `Notified` value is being

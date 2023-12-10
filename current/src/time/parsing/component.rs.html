@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/time-0.3.30/src/parsing/component.rs`."><title>component.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="time" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="icon" href="https://avatars0.githubusercontent.com/u/55999857"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../time/index.html"><img src="https://avatars0.githubusercontent.com/u/55999857" alt="time"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/time-0.3.30/src/parsing/component.rs`."><title>component.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="time" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="icon" href="https://avatars0.githubusercontent.com/u/55999857"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../time/index.html"><img src="https://avatars0.githubusercontent.com/u/55999857" alt="time"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -349,7 +349,7 @@
 
 <span class="kw">use </span><span class="kw">crate</span>::convert::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::format_description::modifier;
-<span class="attr">#[cfg(feature = <span class="string">&quot;large-dates&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"large-dates"</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::parsing::combinator::n_to_m_digits_padded;
 <span class="kw">use </span><span class="kw">crate</span>::parsing::combinator::{
     any_digit, exactly_n_digits, exactly_n_digits_padded, first_match, n_to_m_digits, opt, sign,
@@ -358,19 +358,19 @@
 <span class="kw">use crate</span>::{Month, Weekday};
 
 <span class="comment">// region: date components
-</span><span class="doccomment">/// Parse the &quot;year&quot; component of a `Date`.
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>parse_year(input: <span class="kw-2">&amp;</span>[u8], modifiers: modifier::Year) -&gt; <span class="prelude-ty">Option</span>&lt;ParsedItem&lt;<span class="lifetime">&#39;_</span>, i32&gt;&gt; {
+</span><span class="doccomment">/// Parse the "year" component of a `Date`.
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>parse_year(input: <span class="kw-2">&amp;</span>[u8], modifiers: modifier::Year) -&gt; <span class="prelude-ty">Option</span>&lt;ParsedItem&lt;<span class="lifetime">'_</span>, i32&gt;&gt; {
     <span class="kw">match </span>modifiers.repr {
         modifier::YearRepr::Full =&gt; {
             <span class="kw">let </span>ParsedItem(input, sign) = opt(sign)(input);
-            <span class="attr">#[cfg(not(feature = <span class="string">&quot;large-dates&quot;</span>))]
+            <span class="attr">#[cfg(not(feature = <span class="string">"large-dates"</span>))]
             </span><span class="kw">let </span>ParsedItem(input, year) =
                 exactly_n_digits_padded::&lt;<span class="number">4</span>, u32&gt;(modifiers.padding)(input)<span class="question-mark">?</span>;
-            <span class="attr">#[cfg(feature = <span class="string">&quot;large-dates&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"large-dates"</span>)]
             </span><span class="kw">let </span>ParsedItem(input, year) =
                 n_to_m_digits_padded::&lt;<span class="number">4</span>, <span class="number">6</span>, u32&gt;(modifiers.padding)(input)<span class="question-mark">?</span>;
             <span class="kw">match </span>sign {
-                <span class="prelude-val">Some</span>(<span class="string">b&#39;-&#39;</span>) =&gt; <span class="prelude-val">Some</span>(ParsedItem(input, -(year <span class="kw">as </span>i32))),
+                <span class="prelude-val">Some</span>(<span class="string">b'-'</span>) =&gt; <span class="prelude-val">Some</span>(ParsedItem(input, -(year <span class="kw">as </span>i32))),
                 <span class="prelude-val">None </span><span class="kw">if </span>modifiers.sign_is_mandatory || year &gt;= <span class="number">10_000 </span>=&gt; <span class="prelude-val">None</span>,
                 <span class="kw">_ </span>=&gt; <span class="prelude-val">Some</span>(ParsedItem(input, year <span class="kw">as </span>i32)),
             }
@@ -381,11 +381,11 @@
     }
 }
 
-<span class="doccomment">/// Parse the &quot;month&quot; component of a `Date`.
+<span class="doccomment">/// Parse the "month" component of a `Date`.
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>parse_month(
     input: <span class="kw-2">&amp;</span>[u8],
     modifiers: modifier::Month,
-) -&gt; <span class="prelude-ty">Option</span>&lt;ParsedItem&lt;<span class="lifetime">&#39;_</span>, Month&gt;&gt; {
+) -&gt; <span class="prelude-ty">Option</span>&lt;ParsedItem&lt;<span class="lifetime">'_</span>, Month&gt;&gt; {
     <span class="kw">use </span>Month::<span class="kw-2">*</span>;
     <span class="kw">let </span>ParsedItem(remaining, value) = first_match(
         <span class="kw">match </span>modifiers.repr {
@@ -394,32 +394,32 @@
                     </span>.flat_map(|n| Month::from_number(n).ok());
             }
             modifier::MonthRepr::Long =&gt; [
-                (<span class="string">b&quot;January&quot;</span>.as_slice(), January),
-                (<span class="string">b&quot;February&quot;</span>.as_slice(), February),
-                (<span class="string">b&quot;March&quot;</span>.as_slice(), March),
-                (<span class="string">b&quot;April&quot;</span>.as_slice(), April),
-                (<span class="string">b&quot;May&quot;</span>.as_slice(), May),
-                (<span class="string">b&quot;June&quot;</span>.as_slice(), June),
-                (<span class="string">b&quot;July&quot;</span>.as_slice(), July),
-                (<span class="string">b&quot;August&quot;</span>.as_slice(), August),
-                (<span class="string">b&quot;September&quot;</span>.as_slice(), September),
-                (<span class="string">b&quot;October&quot;</span>.as_slice(), October),
-                (<span class="string">b&quot;November&quot;</span>.as_slice(), November),
-                (<span class="string">b&quot;December&quot;</span>.as_slice(), December),
+                (<span class="string">b"January"</span>.as_slice(), January),
+                (<span class="string">b"February"</span>.as_slice(), February),
+                (<span class="string">b"March"</span>.as_slice(), March),
+                (<span class="string">b"April"</span>.as_slice(), April),
+                (<span class="string">b"May"</span>.as_slice(), May),
+                (<span class="string">b"June"</span>.as_slice(), June),
+                (<span class="string">b"July"</span>.as_slice(), July),
+                (<span class="string">b"August"</span>.as_slice(), August),
+                (<span class="string">b"September"</span>.as_slice(), September),
+                (<span class="string">b"October"</span>.as_slice(), October),
+                (<span class="string">b"November"</span>.as_slice(), November),
+                (<span class="string">b"December"</span>.as_slice(), December),
             ],
             modifier::MonthRepr::Short =&gt; [
-                (<span class="string">b&quot;Jan&quot;</span>.as_slice(), January),
-                (<span class="string">b&quot;Feb&quot;</span>.as_slice(), February),
-                (<span class="string">b&quot;Mar&quot;</span>.as_slice(), March),
-                (<span class="string">b&quot;Apr&quot;</span>.as_slice(), April),
-                (<span class="string">b&quot;May&quot;</span>.as_slice(), May),
-                (<span class="string">b&quot;Jun&quot;</span>.as_slice(), June),
-                (<span class="string">b&quot;Jul&quot;</span>.as_slice(), July),
-                (<span class="string">b&quot;Aug&quot;</span>.as_slice(), August),
-                (<span class="string">b&quot;Sep&quot;</span>.as_slice(), September),
-                (<span class="string">b&quot;Oct&quot;</span>.as_slice(), October),
-                (<span class="string">b&quot;Nov&quot;</span>.as_slice(), November),
-                (<span class="string">b&quot;Dec&quot;</span>.as_slice(), December),
+                (<span class="string">b"Jan"</span>.as_slice(), January),
+                (<span class="string">b"Feb"</span>.as_slice(), February),
+                (<span class="string">b"Mar"</span>.as_slice(), March),
+                (<span class="string">b"Apr"</span>.as_slice(), April),
+                (<span class="string">b"May"</span>.as_slice(), May),
+                (<span class="string">b"Jun"</span>.as_slice(), June),
+                (<span class="string">b"Jul"</span>.as_slice(), July),
+                (<span class="string">b"Aug"</span>.as_slice(), August),
+                (<span class="string">b"Sep"</span>.as_slice(), September),
+                (<span class="string">b"Oct"</span>.as_slice(), October),
+                (<span class="string">b"Nov"</span>.as_slice(), November),
+                (<span class="string">b"Dec"</span>.as_slice(), December),
             ],
         },
         modifiers.case_sensitive,
@@ -427,99 +427,99 @@
     <span class="prelude-val">Some</span>(ParsedItem(remaining, value))
 }
 
-<span class="doccomment">/// Parse the &quot;week number&quot; component of a `Date`.
+<span class="doccomment">/// Parse the "week number" component of a `Date`.
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>parse_week_number(
     input: <span class="kw-2">&amp;</span>[u8],
     modifiers: modifier::WeekNumber,
-) -&gt; <span class="prelude-ty">Option</span>&lt;ParsedItem&lt;<span class="lifetime">&#39;_</span>, u8&gt;&gt; {
+) -&gt; <span class="prelude-ty">Option</span>&lt;ParsedItem&lt;<span class="lifetime">'_</span>, u8&gt;&gt; {
     exactly_n_digits_padded::&lt;<span class="number">2</span>, <span class="kw">_</span>&gt;(modifiers.padding)(input)
 }
 
-<span class="doccomment">/// Parse the &quot;weekday&quot; component of a `Date`.
+<span class="doccomment">/// Parse the "weekday" component of a `Date`.
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>parse_weekday(
     input: <span class="kw-2">&amp;</span>[u8],
     modifiers: modifier::Weekday,
-) -&gt; <span class="prelude-ty">Option</span>&lt;ParsedItem&lt;<span class="lifetime">&#39;_</span>, Weekday&gt;&gt; {
+) -&gt; <span class="prelude-ty">Option</span>&lt;ParsedItem&lt;<span class="lifetime">'_</span>, Weekday&gt;&gt; {
     first_match(
         <span class="kw">match </span>(modifiers.repr, modifiers.one_indexed) {
             (modifier::WeekdayRepr::Short, <span class="kw">_</span>) =&gt; [
-                (<span class="string">b&quot;Mon&quot;</span>.as_slice(), Weekday::Monday),
-                (<span class="string">b&quot;Tue&quot;</span>.as_slice(), Weekday::Tuesday),
-                (<span class="string">b&quot;Wed&quot;</span>.as_slice(), Weekday::Wednesday),
-                (<span class="string">b&quot;Thu&quot;</span>.as_slice(), Weekday::Thursday),
-                (<span class="string">b&quot;Fri&quot;</span>.as_slice(), Weekday::Friday),
-                (<span class="string">b&quot;Sat&quot;</span>.as_slice(), Weekday::Saturday),
-                (<span class="string">b&quot;Sun&quot;</span>.as_slice(), Weekday::Sunday),
+                (<span class="string">b"Mon"</span>.as_slice(), Weekday::Monday),
+                (<span class="string">b"Tue"</span>.as_slice(), Weekday::Tuesday),
+                (<span class="string">b"Wed"</span>.as_slice(), Weekday::Wednesday),
+                (<span class="string">b"Thu"</span>.as_slice(), Weekday::Thursday),
+                (<span class="string">b"Fri"</span>.as_slice(), Weekday::Friday),
+                (<span class="string">b"Sat"</span>.as_slice(), Weekday::Saturday),
+                (<span class="string">b"Sun"</span>.as_slice(), Weekday::Sunday),
             ],
             (modifier::WeekdayRepr::Long, <span class="kw">_</span>) =&gt; [
-                (<span class="string">b&quot;Monday&quot;</span>.as_slice(), Weekday::Monday),
-                (<span class="string">b&quot;Tuesday&quot;</span>.as_slice(), Weekday::Tuesday),
-                (<span class="string">b&quot;Wednesday&quot;</span>.as_slice(), Weekday::Wednesday),
-                (<span class="string">b&quot;Thursday&quot;</span>.as_slice(), Weekday::Thursday),
-                (<span class="string">b&quot;Friday&quot;</span>.as_slice(), Weekday::Friday),
-                (<span class="string">b&quot;Saturday&quot;</span>.as_slice(), Weekday::Saturday),
-                (<span class="string">b&quot;Sunday&quot;</span>.as_slice(), Weekday::Sunday),
+                (<span class="string">b"Monday"</span>.as_slice(), Weekday::Monday),
+                (<span class="string">b"Tuesday"</span>.as_slice(), Weekday::Tuesday),
+                (<span class="string">b"Wednesday"</span>.as_slice(), Weekday::Wednesday),
+                (<span class="string">b"Thursday"</span>.as_slice(), Weekday::Thursday),
+                (<span class="string">b"Friday"</span>.as_slice(), Weekday::Friday),
+                (<span class="string">b"Saturday"</span>.as_slice(), Weekday::Saturday),
+                (<span class="string">b"Sunday"</span>.as_slice(), Weekday::Sunday),
             ],
             (modifier::WeekdayRepr::Sunday, <span class="bool-val">false</span>) =&gt; [
-                (<span class="string">b&quot;1&quot;</span>.as_slice(), Weekday::Monday),
-                (<span class="string">b&quot;2&quot;</span>.as_slice(), Weekday::Tuesday),
-                (<span class="string">b&quot;3&quot;</span>.as_slice(), Weekday::Wednesday),
-                (<span class="string">b&quot;4&quot;</span>.as_slice(), Weekday::Thursday),
-                (<span class="string">b&quot;5&quot;</span>.as_slice(), Weekday::Friday),
-                (<span class="string">b&quot;6&quot;</span>.as_slice(), Weekday::Saturday),
-                (<span class="string">b&quot;0&quot;</span>.as_slice(), Weekday::Sunday),
+                (<span class="string">b"1"</span>.as_slice(), Weekday::Monday),
+                (<span class="string">b"2"</span>.as_slice(), Weekday::Tuesday),
+                (<span class="string">b"3"</span>.as_slice(), Weekday::Wednesday),
+                (<span class="string">b"4"</span>.as_slice(), Weekday::Thursday),
+                (<span class="string">b"5"</span>.as_slice(), Weekday::Friday),
+                (<span class="string">b"6"</span>.as_slice(), Weekday::Saturday),
+                (<span class="string">b"0"</span>.as_slice(), Weekday::Sunday),
             ],
             (modifier::WeekdayRepr::Sunday, <span class="bool-val">true</span>) =&gt; [
-                (<span class="string">b&quot;2&quot;</span>.as_slice(), Weekday::Monday),
-                (<span class="string">b&quot;3&quot;</span>.as_slice(), Weekday::Tuesday),
-                (<span class="string">b&quot;4&quot;</span>.as_slice(), Weekday::Wednesday),
-                (<span class="string">b&quot;5&quot;</span>.as_slice(), Weekday::Thursday),
-                (<span class="string">b&quot;6&quot;</span>.as_slice(), Weekday::Friday),
-                (<span class="string">b&quot;7&quot;</span>.as_slice(), Weekday::Saturday),
-                (<span class="string">b&quot;1&quot;</span>.as_slice(), Weekday::Sunday),
+                (<span class="string">b"2"</span>.as_slice(), Weekday::Monday),
+                (<span class="string">b"3"</span>.as_slice(), Weekday::Tuesday),
+                (<span class="string">b"4"</span>.as_slice(), Weekday::Wednesday),
+                (<span class="string">b"5"</span>.as_slice(), Weekday::Thursday),
+                (<span class="string">b"6"</span>.as_slice(), Weekday::Friday),
+                (<span class="string">b"7"</span>.as_slice(), Weekday::Saturday),
+                (<span class="string">b"1"</span>.as_slice(), Weekday::Sunday),
             ],
             (modifier::WeekdayRepr::Monday, <span class="bool-val">false</span>) =&gt; [
-                (<span class="string">b&quot;0&quot;</span>.as_slice(), Weekday::Monday),
-                (<span class="string">b&quot;1&quot;</span>.as_slice(), Weekday::Tuesday),
-                (<span class="string">b&quot;2&quot;</span>.as_slice(), Weekday::Wednesday),
-                (<span class="string">b&quot;3&quot;</span>.as_slice(), Weekday::Thursday),
-                (<span class="string">b&quot;4&quot;</span>.as_slice(), Weekday::Friday),
-                (<span class="string">b&quot;5&quot;</span>.as_slice(), Weekday::Saturday),
-                (<span class="string">b&quot;6&quot;</span>.as_slice(), Weekday::Sunday),
+                (<span class="string">b"0"</span>.as_slice(), Weekday::Monday),
+                (<span class="string">b"1"</span>.as_slice(), Weekday::Tuesday),
+                (<span class="string">b"2"</span>.as_slice(), Weekday::Wednesday),
+                (<span class="string">b"3"</span>.as_slice(), Weekday::Thursday),
+                (<span class="string">b"4"</span>.as_slice(), Weekday::Friday),
+                (<span class="string">b"5"</span>.as_slice(), Weekday::Saturday),
+                (<span class="string">b"6"</span>.as_slice(), Weekday::Sunday),
             ],
             (modifier::WeekdayRepr::Monday, <span class="bool-val">true</span>) =&gt; [
-                (<span class="string">b&quot;1&quot;</span>.as_slice(), Weekday::Monday),
-                (<span class="string">b&quot;2&quot;</span>.as_slice(), Weekday::Tuesday),
-                (<span class="string">b&quot;3&quot;</span>.as_slice(), Weekday::Wednesday),
-                (<span class="string">b&quot;4&quot;</span>.as_slice(), Weekday::Thursday),
-                (<span class="string">b&quot;5&quot;</span>.as_slice(), Weekday::Friday),
-                (<span class="string">b&quot;6&quot;</span>.as_slice(), Weekday::Saturday),
-                (<span class="string">b&quot;7&quot;</span>.as_slice(), Weekday::Sunday),
+                (<span class="string">b"1"</span>.as_slice(), Weekday::Monday),
+                (<span class="string">b"2"</span>.as_slice(), Weekday::Tuesday),
+                (<span class="string">b"3"</span>.as_slice(), Weekday::Wednesday),
+                (<span class="string">b"4"</span>.as_slice(), Weekday::Thursday),
+                (<span class="string">b"5"</span>.as_slice(), Weekday::Friday),
+                (<span class="string">b"6"</span>.as_slice(), Weekday::Saturday),
+                (<span class="string">b"7"</span>.as_slice(), Weekday::Sunday),
             ],
         },
         modifiers.case_sensitive,
     )(input)
 }
 
-<span class="doccomment">/// Parse the &quot;ordinal&quot; component of a `Date`.
+<span class="doccomment">/// Parse the "ordinal" component of a `Date`.
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>parse_ordinal(
     input: <span class="kw-2">&amp;</span>[u8],
     modifiers: modifier::Ordinal,
-) -&gt; <span class="prelude-ty">Option</span>&lt;ParsedItem&lt;<span class="lifetime">&#39;_</span>, NonZeroU16&gt;&gt; {
+) -&gt; <span class="prelude-ty">Option</span>&lt;ParsedItem&lt;<span class="lifetime">'_</span>, NonZeroU16&gt;&gt; {
     exactly_n_digits_padded::&lt;<span class="number">3</span>, <span class="kw">_</span>&gt;(modifiers.padding)(input)
 }
 
-<span class="doccomment">/// Parse the &quot;day&quot; component of a `Date`.
+<span class="doccomment">/// Parse the "day" component of a `Date`.
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>parse_day(
     input: <span class="kw-2">&amp;</span>[u8],
     modifiers: modifier::Day,
-) -&gt; <span class="prelude-ty">Option</span>&lt;ParsedItem&lt;<span class="lifetime">&#39;_</span>, NonZeroU8&gt;&gt; {
+) -&gt; <span class="prelude-ty">Option</span>&lt;ParsedItem&lt;<span class="lifetime">'_</span>, NonZeroU8&gt;&gt; {
     exactly_n_digits_padded::&lt;<span class="number">2</span>, <span class="kw">_</span>&gt;(modifiers.padding)(input)
 }
 <span class="comment">// endregion date components
 
 // region: time components
-</span><span class="doccomment">/// Indicate whether the hour is &quot;am&quot; or &quot;pm&quot;.
+</span><span class="doccomment">/// Indicate whether the hour is "am" or "pm".
 </span><span class="attr">#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">enum </span>Period {
     <span class="attr">#[allow(clippy::missing_docs_in_private_items)]
@@ -528,53 +528,53 @@
     </span>Pm,
 }
 
-<span class="doccomment">/// Parse the &quot;hour&quot; component of a `Time`.
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>parse_hour(input: <span class="kw-2">&amp;</span>[u8], modifiers: modifier::Hour) -&gt; <span class="prelude-ty">Option</span>&lt;ParsedItem&lt;<span class="lifetime">&#39;_</span>, u8&gt;&gt; {
+<span class="doccomment">/// Parse the "hour" component of a `Time`.
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>parse_hour(input: <span class="kw-2">&amp;</span>[u8], modifiers: modifier::Hour) -&gt; <span class="prelude-ty">Option</span>&lt;ParsedItem&lt;<span class="lifetime">'_</span>, u8&gt;&gt; {
     exactly_n_digits_padded::&lt;<span class="number">2</span>, <span class="kw">_</span>&gt;(modifiers.padding)(input)
 }
 
-<span class="doccomment">/// Parse the &quot;minute&quot; component of a `Time`.
+<span class="doccomment">/// Parse the "minute" component of a `Time`.
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>parse_minute(
     input: <span class="kw-2">&amp;</span>[u8],
     modifiers: modifier::Minute,
-) -&gt; <span class="prelude-ty">Option</span>&lt;ParsedItem&lt;<span class="lifetime">&#39;_</span>, u8&gt;&gt; {
+) -&gt; <span class="prelude-ty">Option</span>&lt;ParsedItem&lt;<span class="lifetime">'_</span>, u8&gt;&gt; {
     exactly_n_digits_padded::&lt;<span class="number">2</span>, <span class="kw">_</span>&gt;(modifiers.padding)(input)
 }
 
-<span class="doccomment">/// Parse the &quot;second&quot; component of a `Time`.
+<span class="doccomment">/// Parse the "second" component of a `Time`.
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>parse_second(
     input: <span class="kw-2">&amp;</span>[u8],
     modifiers: modifier::Second,
-) -&gt; <span class="prelude-ty">Option</span>&lt;ParsedItem&lt;<span class="lifetime">&#39;_</span>, u8&gt;&gt; {
+) -&gt; <span class="prelude-ty">Option</span>&lt;ParsedItem&lt;<span class="lifetime">'_</span>, u8&gt;&gt; {
     exactly_n_digits_padded::&lt;<span class="number">2</span>, <span class="kw">_</span>&gt;(modifiers.padding)(input)
 }
 
-<span class="doccomment">/// Parse the &quot;period&quot; component of a `Time`. Required if the hour is on a 12-hour clock.
+<span class="doccomment">/// Parse the "period" component of a `Time`. Required if the hour is on a 12-hour clock.
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>parse_period(
     input: <span class="kw-2">&amp;</span>[u8],
     modifiers: modifier::Period,
-) -&gt; <span class="prelude-ty">Option</span>&lt;ParsedItem&lt;<span class="lifetime">&#39;_</span>, Period&gt;&gt; {
+) -&gt; <span class="prelude-ty">Option</span>&lt;ParsedItem&lt;<span class="lifetime">'_</span>, Period&gt;&gt; {
     first_match(
         <span class="kw">if </span>modifiers.is_uppercase {
             [
-                (<span class="string">b&quot;AM&quot;</span>.as_slice(), Period::Am),
-                (<span class="string">b&quot;PM&quot;</span>.as_slice(), Period::Pm),
+                (<span class="string">b"AM"</span>.as_slice(), Period::Am),
+                (<span class="string">b"PM"</span>.as_slice(), Period::Pm),
             ]
         } <span class="kw">else </span>{
             [
-                (<span class="string">b&quot;am&quot;</span>.as_slice(), Period::Am),
-                (<span class="string">b&quot;pm&quot;</span>.as_slice(), Period::Pm),
+                (<span class="string">b"am"</span>.as_slice(), Period::Am),
+                (<span class="string">b"pm"</span>.as_slice(), Period::Pm),
             ]
         },
         modifiers.case_sensitive,
     )(input)
 }
 
-<span class="doccomment">/// Parse the &quot;subsecond&quot; component of a `Time`.
+<span class="doccomment">/// Parse the "subsecond" component of a `Time`.
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>parse_subsecond(
     input: <span class="kw-2">&amp;</span>[u8],
     modifiers: modifier::Subsecond,
-) -&gt; <span class="prelude-ty">Option</span>&lt;ParsedItem&lt;<span class="lifetime">&#39;_</span>, u32&gt;&gt; {
+) -&gt; <span class="prelude-ty">Option</span>&lt;ParsedItem&lt;<span class="lifetime">'_</span>, u32&gt;&gt; {
     <span class="kw">use </span>modifier::SubsecondDigits::<span class="kw-2">*</span>;
     <span class="prelude-val">Some</span>(<span class="kw">match </span>modifiers.digits {
         One =&gt; exactly_n_digits::&lt;<span class="number">1</span>, u32&gt;(input)<span class="question-mark">?</span>.map(|v| v * <span class="number">100_000_000</span>),
@@ -588,11 +588,11 @@
         Nine =&gt; exactly_n_digits::&lt;<span class="number">9</span>, <span class="kw">_</span>&gt;(input)<span class="question-mark">?</span>,
         OneOrMore =&gt; {
             <span class="kw">let </span>ParsedItem(<span class="kw-2">mut </span>input, <span class="kw-2">mut </span>value) =
-                any_digit(input)<span class="question-mark">?</span>.map(|v| (v - <span class="string">b&#39;0&#39;</span>) <span class="kw">as </span>u32 * <span class="number">100_000_000</span>);
+                any_digit(input)<span class="question-mark">?</span>.map(|v| (v - <span class="string">b'0'</span>) <span class="kw">as </span>u32 * <span class="number">100_000_000</span>);
 
             <span class="kw">let </span><span class="kw-2">mut </span>multiplier = <span class="number">10_000_000</span>;
             <span class="kw">while let </span><span class="prelude-val">Some</span>(ParsedItem(new_input, digit)) = any_digit(input) {
-                value += (digit - <span class="string">b&#39;0&#39;</span>) <span class="kw">as </span>u32 * multiplier;
+                value += (digit - <span class="string">b'0'</span>) <span class="kw">as </span>u32 * multiplier;
                 input = new_input;
                 multiplier /= <span class="number">10</span>;
             }
@@ -604,38 +604,38 @@
 <span class="comment">// endregion time components
 
 // region: offset components
-</span><span class="doccomment">/// Parse the &quot;hour&quot; component of a `UtcOffset`.
+</span><span class="doccomment">/// Parse the "hour" component of a `UtcOffset`.
 ///
-/// Returns the value and whether the value is negative. This is used for when &quot;-0&quot; is parsed.
+/// Returns the value and whether the value is negative. This is used for when "-0" is parsed.
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>parse_offset_hour(
     input: <span class="kw-2">&amp;</span>[u8],
     modifiers: modifier::OffsetHour,
-) -&gt; <span class="prelude-ty">Option</span>&lt;ParsedItem&lt;<span class="lifetime">&#39;_</span>, (i8, bool)&gt;&gt; {
+) -&gt; <span class="prelude-ty">Option</span>&lt;ParsedItem&lt;<span class="lifetime">'_</span>, (i8, bool)&gt;&gt; {
     <span class="kw">let </span>ParsedItem(input, sign) = opt(sign)(input);
     <span class="kw">let </span>ParsedItem(input, hour) = exactly_n_digits_padded::&lt;<span class="number">2</span>, u8&gt;(modifiers.padding)(input)<span class="question-mark">?</span>;
     <span class="kw">match </span>sign {
-        <span class="prelude-val">Some</span>(<span class="string">b&#39;-&#39;</span>) =&gt; <span class="prelude-val">Some</span>(ParsedItem(input, (-(hour <span class="kw">as </span>i8), <span class="bool-val">true</span>))),
+        <span class="prelude-val">Some</span>(<span class="string">b'-'</span>) =&gt; <span class="prelude-val">Some</span>(ParsedItem(input, (-(hour <span class="kw">as </span>i8), <span class="bool-val">true</span>))),
         <span class="prelude-val">None </span><span class="kw">if </span>modifiers.sign_is_mandatory =&gt; <span class="prelude-val">None</span>,
         <span class="kw">_ </span>=&gt; <span class="prelude-val">Some</span>(ParsedItem(input, (hour <span class="kw">as </span>i8, <span class="bool-val">false</span>))),
     }
 }
 
-<span class="doccomment">/// Parse the &quot;minute&quot; component of a `UtcOffset`.
+<span class="doccomment">/// Parse the "minute" component of a `UtcOffset`.
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>parse_offset_minute(
     input: <span class="kw-2">&amp;</span>[u8],
     modifiers: modifier::OffsetMinute,
-) -&gt; <span class="prelude-ty">Option</span>&lt;ParsedItem&lt;<span class="lifetime">&#39;_</span>, i8&gt;&gt; {
+) -&gt; <span class="prelude-ty">Option</span>&lt;ParsedItem&lt;<span class="lifetime">'_</span>, i8&gt;&gt; {
     <span class="prelude-val">Some</span>(
         exactly_n_digits_padded::&lt;<span class="number">2</span>, u8&gt;(modifiers.padding)(input)<span class="question-mark">?
             </span>.map(|offset_minute| offset_minute <span class="kw">as _</span>),
     )
 }
 
-<span class="doccomment">/// Parse the &quot;second&quot; component of a `UtcOffset`.
+<span class="doccomment">/// Parse the "second" component of a `UtcOffset`.
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>parse_offset_second(
     input: <span class="kw-2">&amp;</span>[u8],
     modifiers: modifier::OffsetSecond,
-) -&gt; <span class="prelude-ty">Option</span>&lt;ParsedItem&lt;<span class="lifetime">&#39;_</span>, i8&gt;&gt; {
+) -&gt; <span class="prelude-ty">Option</span>&lt;ParsedItem&lt;<span class="lifetime">'_</span>, i8&gt;&gt; {
     <span class="prelude-val">Some</span>(
         exactly_n_digits_padded::&lt;<span class="number">2</span>, u8&gt;(modifiers.padding)(input)<span class="question-mark">?
             </span>.map(|offset_second| offset_second <span class="kw">as _</span>),
@@ -647,7 +647,7 @@
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>parse_ignore(
     input: <span class="kw-2">&amp;</span>[u8],
     modifiers: modifier::Ignore,
-) -&gt; <span class="prelude-ty">Option</span>&lt;ParsedItem&lt;<span class="lifetime">&#39;_</span>, ()&gt;&gt; {
+) -&gt; <span class="prelude-ty">Option</span>&lt;ParsedItem&lt;<span class="lifetime">'_</span>, ()&gt;&gt; {
     <span class="kw">let </span>modifier::Ignore { count } = modifiers;
     <span class="kw">let </span>input = input.get((count.get() <span class="kw">as </span>usize)..)<span class="question-mark">?</span>;
     <span class="prelude-val">Some</span>(ParsedItem(input, ()))
@@ -657,7 +657,7 @@
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>parse_unix_timestamp(
     input: <span class="kw-2">&amp;</span>[u8],
     modifiers: modifier::UnixTimestamp,
-) -&gt; <span class="prelude-ty">Option</span>&lt;ParsedItem&lt;<span class="lifetime">&#39;_</span>, i128&gt;&gt; {
+) -&gt; <span class="prelude-ty">Option</span>&lt;ParsedItem&lt;<span class="lifetime">'_</span>, i128&gt;&gt; {
     <span class="kw">let </span>ParsedItem(input, sign) = opt(sign)(input);
     <span class="kw">let </span>ParsedItem(input, nano_timestamp) = <span class="kw">match </span>modifiers.precision {
         modifier::UnixTimestampPrecision::Second =&gt; {
@@ -671,7 +671,7 @@
     };
 
     <span class="kw">match </span>sign {
-        <span class="prelude-val">Some</span>(<span class="string">b&#39;-&#39;</span>) =&gt; <span class="prelude-val">Some</span>(ParsedItem(input, -(nano_timestamp <span class="kw">as </span>i128))),
+        <span class="prelude-val">Some</span>(<span class="string">b'-'</span>) =&gt; <span class="prelude-val">Some</span>(ParsedItem(input, -(nano_timestamp <span class="kw">as </span>i128))),
         <span class="prelude-val">None </span><span class="kw">if </span>modifiers.sign_is_mandatory =&gt; <span class="prelude-val">None</span>,
         <span class="kw">_ </span>=&gt; <span class="prelude-val">Some</span>(ParsedItem(input, nano_timestamp <span class="kw">as _</span>)),
     }
@@ -679,7 +679,7 @@
 
 <span class="doccomment">/// Parse the `end` component, which represents the end of input. If any input is remaining, `None`
 /// is returned.
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const fn </span>parse_end(input: <span class="kw-2">&amp;</span>[u8], end: modifier::End) -&gt; <span class="prelude-ty">Option</span>&lt;ParsedItem&lt;<span class="lifetime">&#39;_</span>, ()&gt;&gt; {
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const fn </span>parse_end(input: <span class="kw-2">&amp;</span>[u8], end: modifier::End) -&gt; <span class="prelude-ty">Option</span>&lt;ParsedItem&lt;<span class="lifetime">'_</span>, ()&gt;&gt; {
     <span class="kw">let </span>modifier::End {} = end;
 
     <span class="kw">if </span>input.is_empty() {

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/encoding_rs-0.8.33/src/mem.rs`."><title>mem.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="encoding_rs" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/encoding_rs-0.8.33/src/mem.rs`."><title>mem.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="encoding_rs" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -3370,7 +3370,7 @@
 //! outperform iterator-based conversions available in the Rust standard
 //! library.
 //!
-//! _Note:_ &quot;Latin1&quot; in this module refers to the Unicode range from U+0000 to
+//! _Note:_ "Latin1" in this module refers to the Unicode range from U+0000 to
 //! U+00FF, inclusive, and does not refer to the windows-1252 range. This
 //! in-memory encoding is sometimes used as a storage optimization of text
 //! when UTF-16 indexing and length semantics are exposed.
@@ -3378,11 +3378,11 @@
 //! The FFI binding for this module are in the
 //! [encoding_c_mem crate](https://github.com/hsivonen/encoding_c_mem).
 
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
 </span><span class="kw">use </span>alloc::borrow::Cow;
-<span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
 </span><span class="kw">use </span>alloc::string::String;
-<span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
 </span><span class="kw">use </span>alloc::vec::Vec;
 
 <span class="kw">use </span><span class="kw">super</span>::in_inclusive_range16;
@@ -3399,7 +3399,7 @@
 }
 
 <span class="macro">cfg_if! </span>{
-    <span class="kw">if </span><span class="attr">#[cfg(feature = <span class="string">&quot;simd-accel&quot;</span>)] </span>{
+    <span class="kw">if </span><span class="attr">#[cfg(feature = <span class="string">"simd-accel"</span>)] </span>{
         <span class="kw">use </span>::core::intrinsics::likely;
         <span class="kw">use </span>::core::intrinsics::unlikely;
     } <span class="kw">else </span>{
@@ -3423,7 +3423,7 @@
 </span><span class="kw">pub enum </span>Latin1Bidi {
     <span class="doccomment">/// Every character is below U+0100.
     </span>Latin1 = <span class="number">0</span>,
-    <span class="doccomment">/// There is at least one character that&#39;s U+0100 or higher, but there
+    <span class="doccomment">/// There is at least one character that's U+0100 or higher, but there
     /// are no right-to-left characters.
     </span>LeftToRight = <span class="number">1</span>,
     <span class="doccomment">/// There is at least one right-to-left character.
@@ -3437,7 +3437,7 @@
 <span class="attr">#[allow(unused_macros)]
 </span><span class="macro">macro_rules! </span>by_unit_check_alu {
     (<span class="macro-nonterminal">$name</span>:ident, <span class="macro-nonterminal">$unit</span>:ty, <span class="macro-nonterminal">$bound</span>:expr, <span class="macro-nonterminal">$mask</span>:ident) =&gt; {
-        <span class="attr">#[cfg_attr(feature = <span class="string">&quot;cargo-clippy&quot;</span>, allow(cast_ptr_alignment))]
+        <span class="attr">#[cfg_attr(feature = <span class="string">"cargo-clippy"</span>, allow(cast_ptr_alignment))]
         #[inline(always)]
         </span><span class="kw">fn </span><span class="macro-nonterminal">$name</span>(buffer: <span class="kw-2">&amp;</span>[<span class="macro-nonterminal">$unit</span>]) -&gt; bool {
             <span class="kw">let </span><span class="kw-2">mut </span>offset = <span class="number">0usize</span>;
@@ -3586,7 +3586,7 @@
 }
 
 <span class="macro">cfg_if! </span>{
-    <span class="kw">if </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;simd-accel&quot;</span>, any(target_feature = <span class="string">&quot;sse2&quot;</span>, all(target_endian = <span class="string">&quot;little&quot;</span>, target_arch = <span class="string">&quot;aarch64&quot;</span>), all(target_endian = <span class="string">&quot;little&quot;</span>, target_feature = <span class="string">&quot;neon&quot;</span>))))] </span>{
+    <span class="kw">if </span><span class="attr">#[cfg(all(feature = <span class="string">"simd-accel"</span>, any(target_feature = <span class="string">"sse2"</span>, all(target_endian = <span class="string">"little"</span>, target_arch = <span class="string">"aarch64"</span>), all(target_endian = <span class="string">"little"</span>, target_feature = <span class="string">"neon"</span>))))] </span>{
         <span class="kw">use </span><span class="kw">crate</span>::simd_funcs::<span class="kw-2">*</span>;
         <span class="kw">use </span>packed_simd::u8x16;
         <span class="kw">use </span>packed_simd::u16x8;
@@ -3609,7 +3609,7 @@
             <span class="kw">let </span>src = buffer.as_ptr();
             <span class="kw">let </span>len = buffer.len();
             <span class="kw">let </span><span class="kw-2">mut </span>offset = <span class="number">0usize</span>;
-            <span class="lifetime">&#39;outer</span>: <span class="kw">loop </span>{
+            <span class="lifetime">'outer</span>: <span class="kw">loop </span>{
                 <span class="kw">let </span>until_alignment = ((SIMD_ALIGNMENT - ((<span class="kw">unsafe </span>{ src.add(offset) } <span class="kw">as </span>usize) &amp; SIMD_ALIGNMENT_MASK)) &amp;
                                         SIMD_ALIGNMENT_MASK) / unit_size;
                 <span class="kw">if </span>until_alignment == <span class="number">0 </span>{
@@ -3637,7 +3637,7 @@
                     <span class="kw">let </span>offset_plus_stride = offset + SIMD_STRIDE_SIZE / unit_size;
                     <span class="kw">if </span>contains_surrogates(<span class="kw">unsafe </span>{ <span class="kw-2">*</span>(src.add(offset) <span class="kw">as </span><span class="kw-2">*const </span>u16x8) }) {
                         <span class="kw">if </span>offset_plus_stride == len {
-                            <span class="kw">break </span><span class="lifetime">&#39;outer</span>;
+                            <span class="kw">break </span><span class="lifetime">'outer</span>;
                         }
                         <span class="kw">let </span>offset_plus_stride_plus_one = offset_plus_stride + <span class="number">1</span>;
                         <span class="kw">let </span>(up_to, last_valid_low) = utf16_valid_up_to_alu(<span class="kw-2">&amp;</span>buffer[offset..offset_plus_stride_plus_one]);
@@ -3646,12 +3646,12 @@
                         }
                         <span class="kw">if </span>last_valid_low {
                             offset = offset_plus_stride_plus_one;
-                            <span class="kw">continue </span><span class="lifetime">&#39;outer</span>;
+                            <span class="kw">continue </span><span class="lifetime">'outer</span>;
                         }
                     }
                     offset = offset_plus_stride;
                     <span class="kw">if </span>offset &gt; len_minus_stride {
-                        <span class="kw">break </span><span class="lifetime">&#39;outer</span>;
+                        <span class="kw">break </span><span class="lifetime">'outer</span>;
                     }
                 }
             }
@@ -3673,7 +3673,7 @@
 
 <span class="doccomment">/// The second return value is true iff the last code unit of the slice was
 /// reached and turned out to be a low surrogate that is part of a valid pair.
-</span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;cargo-clippy&quot;</span>, allow(collapsible_if))]
+</span><span class="attr">#[cfg_attr(feature = <span class="string">"cargo-clippy"</span>, allow(collapsible_if))]
 #[inline(always)]
 </span><span class="kw">fn </span>utf16_valid_up_to_alu(buffer: <span class="kw-2">&amp;</span>[u16]) -&gt; (usize, bool) {
     <span class="kw">let </span>len = buffer.len();
@@ -3706,7 +3706,7 @@
                     }
                     <span class="kw">continue</span>;
                 }
-                <span class="comment">// The next code unit is not a low surrogate. Don&#39;t advance
+                <span class="comment">// The next code unit is not a low surrogate. Don't advance
                 // position and treat the high surrogate as unpaired.
                 // fall through
             </span>}
@@ -3718,7 +3718,7 @@
 }
 
 <span class="macro">cfg_if! </span>{
-    <span class="kw">if </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;simd-accel&quot;</span>, any(target_feature = <span class="string">&quot;sse2&quot;</span>, all(target_endian = <span class="string">&quot;little&quot;</span>, target_arch = <span class="string">&quot;aarch64&quot;</span>), all(target_endian = <span class="string">&quot;little&quot;</span>, target_feature = <span class="string">&quot;neon&quot;</span>))))] </span>{
+    <span class="kw">if </span><span class="attr">#[cfg(all(feature = <span class="string">"simd-accel"</span>, any(target_feature = <span class="string">"sse2"</span>, all(target_endian = <span class="string">"little"</span>, target_arch = <span class="string">"aarch64"</span>), all(target_endian = <span class="string">"little"</span>, target_feature = <span class="string">"neon"</span>))))] </span>{
         <span class="attr">#[inline(always)]
         </span><span class="kw">fn </span>is_str_latin1_impl(buffer: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Option</span>&lt;usize&gt; {
             <span class="kw">let </span><span class="kw-2">mut </span>offset = <span class="number">0usize</span>;
@@ -3807,7 +3807,7 @@
 }
 
 <span class="macro">cfg_if! </span>{
-    <span class="kw">if </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;simd-accel&quot;</span>, any(target_feature = <span class="string">&quot;sse2&quot;</span>, all(target_endian = <span class="string">&quot;little&quot;</span>, target_arch = <span class="string">&quot;aarch64&quot;</span>), all(target_endian = <span class="string">&quot;little&quot;</span>, target_feature = <span class="string">&quot;neon&quot;</span>))))] </span>{
+    <span class="kw">if </span><span class="attr">#[cfg(all(feature = <span class="string">"simd-accel"</span>, any(target_feature = <span class="string">"sse2"</span>, all(target_endian = <span class="string">"little"</span>, target_arch = <span class="string">"aarch64"</span>), all(target_endian = <span class="string">"little"</span>, target_feature = <span class="string">"neon"</span>))))] </span>{
         <span class="attr">#[inline(always)]
         </span><span class="kw">fn </span>is_utf16_bidi_impl(buffer: <span class="kw-2">&amp;</span>[u16]) -&gt; bool {
             <span class="kw">let </span><span class="kw-2">mut </span>offset = <span class="number">0usize</span>;
@@ -3857,7 +3857,7 @@
 }
 
 <span class="macro">cfg_if! </span>{
-    <span class="kw">if </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;simd-accel&quot;</span>, any(target_feature = <span class="string">&quot;sse2&quot;</span>, all(target_endian = <span class="string">&quot;little&quot;</span>, target_arch = <span class="string">&quot;aarch64&quot;</span>), all(target_endian = <span class="string">&quot;little&quot;</span>, target_feature = <span class="string">&quot;neon&quot;</span>))))] </span>{
+    <span class="kw">if </span><span class="attr">#[cfg(all(feature = <span class="string">"simd-accel"</span>, any(target_feature = <span class="string">"sse2"</span>, all(target_endian = <span class="string">"little"</span>, target_arch = <span class="string">"aarch64"</span>), all(target_endian = <span class="string">"little"</span>, target_feature = <span class="string">"neon"</span>))))] </span>{
         <span class="attr">#[inline(always)]
         </span><span class="kw">fn </span>check_utf16_for_latin1_and_bidi_impl(buffer: <span class="kw-2">&amp;</span>[u16]) -&gt; Latin1Bidi {
             <span class="kw">let </span><span class="kw-2">mut </span>offset = <span class="number">0usize</span>;
@@ -3869,7 +3869,7 @@
                 <span class="kw">if </span>until_alignment + (SIMD_STRIDE_SIZE / <span class="number">2</span>) &lt;= len {
                     <span class="kw">while </span>until_alignment != <span class="number">0 </span>{
                         <span class="kw">if </span>buffer[offset] &gt; <span class="number">0xFF </span>{
-                            <span class="comment">// This transition isn&#39;t optimal, since the aligment is recomputing
+                            <span class="comment">// This transition isn't optimal, since the aligment is recomputing
                             // but not tweaking further today.
                             </span><span class="kw">if </span>is_utf16_bidi_impl(<span class="kw-2">&amp;</span>buffer[offset..]) {
                                 <span class="kw">return </span>Latin1Bidi::Bidi;
@@ -3928,7 +3928,7 @@
             }
         }
     } <span class="kw">else </span>{
-        <span class="attr">#[cfg_attr(feature = <span class="string">&quot;cargo-clippy&quot;</span>, allow(cast_ptr_alignment))]
+        <span class="attr">#[cfg_attr(feature = <span class="string">"cargo-clippy"</span>, allow(cast_ptr_alignment))]
         #[inline(always)]
         </span><span class="kw">fn </span>check_utf16_for_latin1_and_bidi_impl(buffer: <span class="kw-2">&amp;</span>[u16]) -&gt; Latin1Bidi {
             <span class="kw">let </span><span class="kw-2">mut </span>offset = <span class="number">0usize</span>;
@@ -3989,7 +3989,7 @@
 
 <span class="doccomment">/// Checks whether the buffer is all-ASCII.
 ///
-/// May read the entire buffer even if it isn&#39;t all-ASCII. (I.e. the function
+/// May read the entire buffer even if it isn't all-ASCII. (I.e. the function
 /// is not guaranteed to fail fast.)
 </span><span class="kw">pub fn </span>is_ascii(buffer: <span class="kw-2">&amp;</span>[u8]) -&gt; bool {
     is_ascii_impl(buffer)
@@ -3998,7 +3998,7 @@
 <span class="doccomment">/// Checks whether the buffer is all-Basic Latin (i.e. UTF-16 representing
 /// only ASCII characters).
 ///
-/// May read the entire buffer even if it isn&#39;t all-ASCII. (I.e. the function
+/// May read the entire buffer even if it isn't all-ASCII. (I.e. the function
 /// is not guaranteed to fail fast.)
 </span><span class="kw">pub fn </span>is_basic_latin(buffer: <span class="kw-2">&amp;</span>[u16]) -&gt; bool {
     is_basic_latin_impl(buffer)
@@ -4025,7 +4025,7 @@
 <span class="doccomment">/// Checks whether the buffer represents only code point less than or equal
 /// to U+00FF.
 ///
-/// May read the entire buffer even if it isn&#39;t all-Latin1. (I.e. the function
+/// May read the entire buffer even if it isn't all-Latin1. (I.e. the function
 /// is not guaranteed to fail fast.)
 </span><span class="kw">pub fn </span>is_utf16_latin1(buffer: <span class="kw-2">&amp;</span>[u16]) -&gt; bool {
     is_utf16_latin1_impl(buffer)
@@ -4047,7 +4047,7 @@
 /// Returns `true` if the input is invalid UTF-8 or the input contains an
 /// RTL character. Returns `false` if the input is valid UTF-8 and contains
 /// no RTL characters.
-</span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;cargo-clippy&quot;</span>, allow(collapsible_if, cyclomatic_complexity))]
+</span><span class="attr">#[cfg_attr(feature = <span class="string">"cargo-clippy"</span>, allow(collapsible_if, cyclomatic_complexity))]
 #[inline]
 </span><span class="kw">pub fn </span>is_utf8_bidi(buffer: <span class="kw-2">&amp;</span>[u8]) -&gt; bool {
     <span class="comment">// As of rustc 1.25.0-nightly (73ac5d6a8 2018-01-11), this is faster
@@ -4055,7 +4055,7 @@
     // Russian and Japanese. However, this is considerably slower for Thai.
     // Chances are that the compiler makes some branch predictions that are
     // unfortunate for Thai. Not spending the time to manually optimize
-    // further at this time, since it&#39;s unclear if this variant even has
+    // further at this time, since it's unclear if this variant even has
     // use cases. However, this is worth revisiting once Rust gets the
     // ability to annotate relative priorities of match arms.
 
@@ -4089,19 +4089,19 @@
     // U+1EFFF: F0 9E BF BF
     // U+1F000: F0 9F 80 80
     </span><span class="kw">let </span><span class="kw-2">mut </span>src = buffer;
-    <span class="lifetime">&#39;outer</span>: <span class="kw">loop </span>{
+    <span class="lifetime">'outer</span>: <span class="kw">loop </span>{
         <span class="kw">if let </span><span class="prelude-val">Some</span>((<span class="kw-2">mut </span>byte, <span class="kw-2">mut </span>read)) = validate_ascii(src) {
             <span class="comment">// Check for the longest sequence to avoid checking twice for the
             // multi-byte sequences.
             </span><span class="kw">if </span>read + <span class="number">4 </span>&lt;= src.len() {
-                <span class="lifetime">&#39;inner</span>: <span class="kw">loop </span>{
+                <span class="lifetime">'inner</span>: <span class="kw">loop </span>{
                     <span class="comment">// At this point, `byte` is not included in `read`.
                     </span><span class="kw">match </span>byte {
                         <span class="number">0</span>..=<span class="number">0x7F </span>=&gt; {
                             <span class="comment">// ASCII: go back to SIMD.
                             </span>read += <span class="number">1</span>;
                             src = <span class="kw-2">&amp;</span>src[read..];
-                            <span class="kw">continue </span><span class="lifetime">&#39;outer</span>;
+                            <span class="kw">continue </span><span class="lifetime">'outer</span>;
                         }
                         <span class="number">0xC2</span>..=<span class="number">0xD5 </span>=&gt; {
                             <span class="comment">// Two-byte
@@ -4285,13 +4285,13 @@
                             <span class="kw">return </span><span class="bool-val">false</span>;
                         }
                         byte = src[read];
-                        <span class="kw">break </span><span class="lifetime">&#39;inner</span>;
+                        <span class="kw">break </span><span class="lifetime">'inner</span>;
                     }
                     byte = src[read];
-                    <span class="kw">continue </span><span class="lifetime">&#39;inner</span>;
+                    <span class="kw">continue </span><span class="lifetime">'inner</span>;
                 }
             }
-            <span class="comment">// We can&#39;t have a complete 4-byte sequence, but we could still have
+            <span class="comment">// We can't have a complete 4-byte sequence, but we could still have
             // a complete shorter sequence.
 
             // At this point, `byte` is not included in `read`.
@@ -4300,7 +4300,7 @@
                     <span class="comment">// ASCII: go back to SIMD.
                     </span>read += <span class="number">1</span>;
                     src = <span class="kw-2">&amp;</span>src[read..];
-                    <span class="kw">continue </span><span class="lifetime">&#39;outer</span>;
+                    <span class="kw">continue </span><span class="lifetime">'outer</span>;
                 }
                 <span class="number">0xC2</span>..=<span class="number">0xD5 </span>=&gt; {
                     <span class="comment">// Two-byte
@@ -4316,7 +4316,7 @@
                     <span class="comment">// We need to deal with the case where we came here with 3 bytes
                     // left, so we need to take a look at the last one.
                     </span>src = <span class="kw-2">&amp;</span>src[read..];
-                    <span class="kw">continue </span><span class="lifetime">&#39;outer</span>;
+                    <span class="kw">continue </span><span class="lifetime">'outer</span>;
                 }
                 <span class="number">0xD6 </span>=&gt; {
                     <span class="comment">// Two-byte, potentially bidi
@@ -4336,7 +4336,7 @@
                     <span class="comment">// We need to deal with the case where we came here with 3 bytes
                     // left, so we need to take a look at the last one.
                     </span>src = <span class="kw-2">&amp;</span>src[read..];
-                    <span class="kw">continue </span><span class="lifetime">&#39;outer</span>;
+                    <span class="kw">continue </span><span class="lifetime">'outer</span>;
                 }
                 <span class="comment">// two-byte starting with 0xD7 and above is bidi
                 </span><span class="number">0xE1 </span>| <span class="number">0xE3</span>..=<span class="number">0xEC </span>| <span class="number">0xEE </span>=&gt; {
@@ -4477,7 +4477,7 @@
 /// cause right-to-left behavior without the presence of right-to-left
 /// characters or right-to-left controls are not checked for. As a special
 /// case, U+FEFF is excluded from Arabic Presentation Forms-B.
-</span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;cargo-clippy&quot;</span>, allow(collapsible_if))]
+</span><span class="attr">#[cfg_attr(feature = <span class="string">"cargo-clippy"</span>, allow(collapsible_if))]
 #[inline]
 </span><span class="kw">pub fn </span>is_str_bidi(buffer: <span class="kw-2">&amp;</span>str) -&gt; bool {
     <span class="comment">// U+058F: D6 8F
@@ -4510,7 +4510,7 @@
     // U+1EFFF: F0 9E BF BF
     // U+1F000: F0 9F 80 80
     </span><span class="kw">let </span><span class="kw-2">mut </span>bytes = buffer.as_bytes();
-    <span class="lifetime">&#39;outer</span>: <span class="kw">loop </span>{
+    <span class="lifetime">'outer</span>: <span class="kw">loop </span>{
         <span class="comment">// TODO: Instead of just validating ASCII using SIMD, use SIMD
         // to check for non-ASCII lead bytes, too, to quickly conclude
         // that the vector consist entirely of CJK and below-Hebrew
@@ -4518,7 +4518,7 @@
         // Unfortunately, scripts above Arabic but below CJK share
         // lead bytes with RTL.
         </span><span class="kw">if let </span><span class="prelude-val">Some</span>((<span class="kw-2">mut </span>byte, <span class="kw-2">mut </span>read)) = validate_ascii(bytes) {
-            <span class="lifetime">&#39;inner</span>: <span class="kw">loop </span>{
+            <span class="lifetime">'inner</span>: <span class="kw">loop </span>{
                 <span class="comment">// At this point, `byte` is not included in `read`.
                 </span><span class="kw">if </span>byte &lt; <span class="number">0xE0 </span>{
                     <span class="kw">if </span>byte &gt;= <span class="number">0x80 </span>{
@@ -4542,10 +4542,10 @@
                         <span class="comment">// Intuitively, we should go back to the outer loop only
                         // if byte is 0x30 or above, so as to avoid trashing on
                         // ASCII space, comma and period in non-Latin context.
-                        // However, the extra branch seems to cost more than it&#39;s
+                        // However, the extra branch seems to cost more than it's
                         // worth.
                         </span>bytes = <span class="kw-2">&amp;</span>bytes[read..];
-                        <span class="kw">continue </span><span class="lifetime">&#39;outer</span>;
+                        <span class="kw">continue </span><span class="lifetime">'outer</span>;
                     }
                 } <span class="kw">else if </span>byte &lt; <span class="number">0xF0 </span>{
                     <span class="comment">// Three-byte
@@ -4613,7 +4613,7 @@
                     <span class="kw">return </span><span class="bool-val">false</span>;
                 }
                 byte = bytes[read];
-                <span class="kw">continue </span><span class="lifetime">&#39;inner</span>;
+                <span class="kw">continue </span><span class="lifetime">'inner</span>;
             }
         } <span class="kw">else </span>{
             <span class="kw">return </span><span class="bool-val">false</span>;
@@ -4791,7 +4791,7 @@
 /// Otherwise, returns `Latin1Bidi::Bidi` if `is_str_bidi()` would return
 /// `true`. Otherwise, returns `Latin1Bidi::LeftToRight`.
 </span><span class="kw">pub fn </span>check_str_for_latin1_and_bidi(buffer: <span class="kw-2">&amp;</span>str) -&gt; Latin1Bidi {
-    <span class="comment">// The transition from the latin1 check to the bidi check isn&#39;t
+    <span class="comment">// The transition from the latin1 check to the bidi check isn't
     // optimal but not tweaking it to perfection today.
     </span><span class="kw">if let </span><span class="prelude-val">Some</span>(offset) = is_str_latin1_impl(buffer) {
         <span class="kw">if </span>is_str_bidi(<span class="kw-2">&amp;</span>buffer[offset..]) {
@@ -4844,11 +4844,11 @@
                 <span class="kw">return </span>total_written;
             }
             DecoderResult::OutputFull =&gt; {
-                <span class="macro">unreachable!</span>(<span class="string">&quot;The assert at the top of the function should have caught this.&quot;</span>);
+                <span class="macro">unreachable!</span>(<span class="string">"The assert at the top of the function should have caught this."</span>);
             }
             DecoderResult::Malformed(<span class="kw">_</span>, <span class="kw">_</span>) =&gt; {
                 <span class="comment">// There should always be space for the U+FFFD, because
-                // otherwise we&#39;d have gotten OutputFull already.
+                // otherwise we'd have gotten OutputFull already.
                 </span>dst[total_written] = <span class="number">0xFFFD</span>;
                 total_written += <span class="number">1</span>;
             }
@@ -4869,12 +4869,12 @@
 </span><span class="kw">pub fn </span>convert_str_to_utf16(src: <span class="kw-2">&amp;</span>str, dst: <span class="kw-2">&amp;mut </span>[u16]) -&gt; usize {
     <span class="macro">assert!</span>(
         dst.len() &gt;= src.len(),
-        <span class="string">&quot;Destination must not be shorter than the source.&quot;
+        <span class="string">"Destination must not be shorter than the source."
     </span>);
     <span class="kw">let </span>bytes = src.as_bytes();
     <span class="kw">let </span><span class="kw-2">mut </span>read = <span class="number">0</span>;
     <span class="kw">let </span><span class="kw-2">mut </span>written = <span class="number">0</span>;
-    <span class="lifetime">&#39;outer</span>: <span class="kw">loop </span>{
+    <span class="lifetime">'outer</span>: <span class="kw">loop </span>{
         <span class="kw">let </span><span class="kw-2">mut </span>byte = {
             <span class="kw">let </span>src_remaining = <span class="kw-2">&amp;</span>bytes[read..];
             <span class="kw">let </span>dst_remaining = <span class="kw-2">&amp;mut </span>dst[written..];
@@ -4893,7 +4893,7 @@
                 }
             }
         };
-        <span class="lifetime">&#39;inner</span>: <span class="kw">loop </span>{
+        <span class="lifetime">'inner</span>: <span class="kw">loop </span>{
             <span class="comment">// At this point, `byte` is not included in `read`.
             </span><span class="kw">if </span>byte &lt; <span class="number">0xE0 </span>{
                 <span class="kw">if </span>byte &gt;= <span class="number">0x80 </span>{
@@ -4911,9 +4911,9 @@
                     <span class="comment">// Intuitively, we should go back to the outer loop only
                     // if byte is 0x30 or above, so as to avoid trashing on
                     // ASCII space, comma and period in non-Latin context.
-                    // However, the extra branch seems to cost more than it&#39;s
+                    // However, the extra branch seems to cost more than it's
                     // worth.
-                    </span><span class="kw">continue </span><span class="lifetime">&#39;outer</span>;
+                    </span><span class="kw">continue </span><span class="lifetime">'outer</span>;
                 }
             } <span class="kw">else if </span>byte &lt; <span class="number">0xF0 </span>{
                 <span class="comment">// Three-byte
@@ -4948,7 +4948,7 @@
                 <span class="kw">return </span>written;
             }
             byte = bytes[read];
-            <span class="kw">continue </span><span class="lifetime">&#39;inner</span>;
+            <span class="kw">continue </span><span class="lifetime">'inner</span>;
         }
     }
 }
@@ -4968,7 +4968,7 @@
 </span><span class="kw">pub fn </span>convert_utf8_to_utf16_without_replacement(src: <span class="kw-2">&amp;</span>[u8], dst: <span class="kw-2">&amp;mut </span>[u16]) -&gt; <span class="prelude-ty">Option</span>&lt;usize&gt; {
     <span class="macro">assert!</span>(
         dst.len() &gt;= src.len(),
-        <span class="string">&quot;Destination must not be shorter than the source.&quot;
+        <span class="string">"Destination must not be shorter than the source."
     </span>);
     <span class="kw">let </span>(read, written) = convert_utf8_to_utf16_up_to_invalid(src, dst);
     <span class="kw">if </span>read == src.len() {
@@ -4987,9 +4987,9 @@
 /// bytes claimed as written by the second item of the return tuple
 /// are left unmodified.
 ///
-/// Not all code units are read if there isn&#39;t enough output space.
+/// Not all code units are read if there isn't enough output space.
 ///
-/// Note  that this method isn&#39;t designed for general streamability but for
+/// Note  that this method isn't designed for general streamability but for
 /// not allocating memory for the worst case up front. Specifically,
 /// if the input starts with or ends with an unpaired surrogate, those are
 /// replaced with the REPLACEMENT CHARACTER.
@@ -5052,9 +5052,9 @@
 ///
 /// Returns the number of code units read and the number of bytes written.
 ///
-/// Not all code units are read if there isn&#39;t enough output space.
+/// Not all code units are read if there isn't enough output space.
 ///
-/// Note  that this method isn&#39;t designed for general streamability but for
+/// Note  that this method isn't designed for general streamability but for
 /// not allocating memory for the worst case up front. Specifically,
 /// if the input starts with or ends with an unpaired surrogate, those are
 /// replaced with the REPLACEMENT CHARACTER.
@@ -5104,7 +5104,7 @@
 </span><span class="kw">pub fn </span>convert_latin1_to_utf16(src: <span class="kw-2">&amp;</span>[u8], dst: <span class="kw-2">&amp;mut </span>[u16]) {
     <span class="macro">assert!</span>(
         dst.len() &gt;= src.len(),
-        <span class="string">&quot;Destination must not be shorter than the source.&quot;
+        <span class="string">"Destination must not be shorter than the source."
     </span>);
     <span class="comment">// TODO: On aarch64, the safe version autovectorizes to the same unpacking
     // instructions and this code, but, yet, the autovectorized version is
@@ -5120,7 +5120,7 @@
 ///
 /// Returns the number of bytes read and the number of bytes written.
 ///
-/// If the output isn&#39;t large enough, not all input is consumed.
+/// If the output isn't large enough, not all input is consumed.
 ///
 /// # Safety
 ///
@@ -5135,7 +5135,7 @@
     <span class="kw">let </span><span class="kw-2">mut </span>total_read = <span class="number">0usize</span>;
     <span class="kw">let </span><span class="kw-2">mut </span>total_written = <span class="number">0usize</span>;
     <span class="kw">loop </span>{
-        <span class="comment">// src can&#39;t advance more than dst
+        <span class="comment">// src can't advance more than dst
         </span><span class="kw">let </span>src_left = src_len - total_read;
         <span class="kw">let </span>dst_left = dst_len - total_written;
         <span class="kw">let </span>min_left = ::core::cmp::min(src_left, dst_left);
@@ -5186,7 +5186,7 @@
 </span><span class="kw">pub fn </span>convert_latin1_to_utf8(src: <span class="kw-2">&amp;</span>[u8], dst: <span class="kw-2">&amp;mut </span>[u8]) -&gt; usize {
     <span class="macro">assert!</span>(
         dst.len() &gt;= src.len() * <span class="number">2</span>,
-        <span class="string">&quot;Destination must not be shorter than the source times two.&quot;
+        <span class="string">"Destination must not be shorter than the source times two."
     </span>);
     <span class="kw">let </span>(read, written) = convert_latin1_to_utf8_partial(src, dst);
     <span class="macro">debug_assert_eq!</span>(read, src.len());
@@ -5200,7 +5200,7 @@
 ///
 /// Returns the number of bytes read and the number of bytes written.
 ///
-/// If the output isn&#39;t large enough, not all input is consumed.
+/// If the output isn't large enough, not all input is consumed.
 </span><span class="attr">#[inline]
 </span><span class="kw">pub fn </span>convert_latin1_to_str_partial(src: <span class="kw-2">&amp;</span>[u8], dst: <span class="kw-2">&amp;mut </span>str) -&gt; (usize, usize) {
     <span class="kw">let </span>bytes: <span class="kw-2">&amp;mut </span>[u8] = <span class="kw">unsafe </span>{ dst.as_bytes_mut() };
@@ -5235,7 +5235,7 @@
 </span><span class="kw">pub fn </span>convert_latin1_to_str(src: <span class="kw-2">&amp;</span>[u8], dst: <span class="kw-2">&amp;mut </span>str) -&gt; usize {
     <span class="macro">assert!</span>(
         dst.len() &gt;= src.len() * <span class="number">2</span>,
-        <span class="string">&quot;Destination must not be shorter than the source times two.&quot;
+        <span class="string">"Destination must not be shorter than the source times two."
     </span>);
     <span class="kw">let </span>(read, written) = convert_latin1_to_str_partial(src, dst);
     <span class="macro">debug_assert_eq!</span>(read, src.len());
@@ -5248,11 +5248,11 @@
 /// each output byte.
 ///
 /// If the input does not fulfill the condition stated above, this function
-/// panics if debug assertions are enabled (and fuzzing isn&#39;t) and otherwise
+/// panics if debug assertions are enabled (and fuzzing isn't) and otherwise
 /// does something that is memory-safe without any promises about any
-/// properties of the output. In particular, callers shouldn&#39;t assume the
+/// properties of the output. In particular, callers shouldn't assume the
 /// output to be the same across crate versions or CPU architectures and
-/// should not assume that non-ASCII input can&#39;t map to ASCII output.
+/// should not assume that non-ASCII input can't map to ASCII output.
 ///
 /// The length of the destination buffer must be at least the length of the
 /// source buffer.
@@ -5268,7 +5268,7 @@
 </span><span class="kw">pub fn </span>convert_utf8_to_latin1_lossy(src: <span class="kw-2">&amp;</span>[u8], dst: <span class="kw-2">&amp;mut </span>[u8]) -&gt; usize {
     <span class="macro">assert!</span>(
         dst.len() &gt;= src.len(),
-        <span class="string">&quot;Destination must not be shorter than the source.&quot;
+        <span class="string">"Destination must not be shorter than the source."
     </span>);
     <span class="macro">non_fuzz_debug_assert!</span>(is_utf8_latin1(src));
     <span class="kw">let </span>src_len = src.len();
@@ -5277,7 +5277,7 @@
     <span class="kw">let </span><span class="kw-2">mut </span>total_read = <span class="number">0usize</span>;
     <span class="kw">let </span><span class="kw-2">mut </span>total_written = <span class="number">0usize</span>;
     <span class="kw">loop </span>{
-        <span class="comment">// dst can&#39;t advance more than src
+        <span class="comment">// dst can't advance more than src
         </span><span class="kw">let </span>src_left = src_len - total_read;
         <span class="kw">if let </span><span class="prelude-val">Some</span>((non_ascii, consumed)) = <span class="kw">unsafe </span>{
             ascii_to_ascii(
@@ -5312,9 +5312,9 @@
 /// If the input does not fulfill the condition stated above, does something
 /// that is memory-safe without any promises about any properties of the
 /// output and will probably assert in debug builds in future versions.
-/// In particular, callers shouldn&#39;t assume the output to be the same across
+/// In particular, callers shouldn't assume the output to be the same across
 /// crate versions or CPU architectures and should not assume that non-ASCII
-/// input can&#39;t map to ASCII output.
+/// input can't map to ASCII output.
 ///
 /// The length of the destination buffer must be at least the length of the
 /// source buffer.
@@ -5330,7 +5330,7 @@
 </span><span class="kw">pub fn </span>convert_utf16_to_latin1_lossy(src: <span class="kw-2">&amp;</span>[u16], dst: <span class="kw-2">&amp;mut </span>[u8]) {
     <span class="macro">assert!</span>(
         dst.len() &gt;= src.len(),
-        <span class="string">&quot;Destination must not be shorter than the source.&quot;
+        <span class="string">"Destination must not be shorter than the source."
     </span>);
     <span class="comment">// non_fuzz_debug_assert!(is_utf16_latin1(src));
     </span><span class="kw">unsafe </span>{
@@ -5345,8 +5345,8 @@
 /// otherwise.
 ///
 /// Only available if the `alloc` feature is enabled (enabled by default).
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
-</span><span class="kw">pub fn </span>decode_latin1&lt;<span class="lifetime">&#39;a</span>&gt;(bytes: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; Cow&lt;<span class="lifetime">&#39;a</span>, str&gt; {
+</span><span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
+</span><span class="kw">pub fn </span>decode_latin1&lt;<span class="lifetime">'a</span>&gt;(bytes: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; Cow&lt;<span class="lifetime">'a</span>, str&gt; {
     <span class="kw">let </span>up_to = ascii_valid_up_to(bytes);
     <span class="comment">// &gt;= makes later things optimize better than ==
     </span><span class="kw">if </span>up_to &gt;= bytes.len() {
@@ -5372,18 +5372,18 @@
 /// each output byte.
 ///
 /// If the input does not fulfill the condition stated above, this function
-/// panics if debug assertions are enabled (and fuzzing isn&#39;t) and otherwise
+/// panics if debug assertions are enabled (and fuzzing isn't) and otherwise
 /// does something that is memory-safe without any promises about any
-/// properties of the output. In particular, callers shouldn&#39;t assume the
+/// properties of the output. In particular, callers shouldn't assume the
 /// output to be the same across crate versions or CPU architectures and
-/// should not assume that non-ASCII input can&#39;t map to ASCII output.
+/// should not assume that non-ASCII input can't map to ASCII output.
 ///
 /// Borrows if input is ASCII-only. Performs a single heap allocation
 /// otherwise.
 ///
 /// Only available if the `alloc` feature is enabled (enabled by default).
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
-</span><span class="kw">pub fn </span>encode_latin1_lossy&lt;<span class="lifetime">&#39;a</span>&gt;(string: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str) -&gt; Cow&lt;<span class="lifetime">&#39;a</span>, [u8]&gt; {
+</span><span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
+</span><span class="kw">pub fn </span>encode_latin1_lossy&lt;<span class="lifetime">'a</span>&gt;(string: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str) -&gt; Cow&lt;<span class="lifetime">'a</span>, [u8]&gt; {
     <span class="kw">let </span>bytes = string.as_bytes();
     <span class="kw">let </span>up_to = ascii_valid_up_to(bytes);
     <span class="comment">// &gt;= makes later things optimize better than ==
@@ -5450,7 +5450,7 @@
 </span><span class="kw">pub fn </span>copy_ascii_to_ascii(src: <span class="kw-2">&amp;</span>[u8], dst: <span class="kw-2">&amp;mut </span>[u8]) -&gt; usize {
     <span class="macro">assert!</span>(
         dst.len() &gt;= src.len(),
-        <span class="string">&quot;Destination must not be shorter than the source.&quot;
+        <span class="string">"Destination must not be shorter than the source."
     </span>);
     <span class="kw">if let </span><span class="prelude-val">Some</span>((<span class="kw">_</span>, consumed)) =
         <span class="kw">unsafe </span>{ ascii_to_ascii(src.as_ptr(), dst.as_mut_ptr(), src.len()) }
@@ -5476,7 +5476,7 @@
 </span><span class="kw">pub fn </span>copy_ascii_to_basic_latin(src: <span class="kw-2">&amp;</span>[u8], dst: <span class="kw-2">&amp;mut </span>[u16]) -&gt; usize {
     <span class="macro">assert!</span>(
         dst.len() &gt;= src.len(),
-        <span class="string">&quot;Destination must not be shorter than the source.&quot;
+        <span class="string">"Destination must not be shorter than the source."
     </span>);
     <span class="kw">if let </span><span class="prelude-val">Some</span>((<span class="kw">_</span>, consumed)) =
         <span class="kw">unsafe </span>{ ascii_to_basic_latin(src.as_ptr(), dst.as_mut_ptr(), src.len()) }
@@ -5502,7 +5502,7 @@
 </span><span class="kw">pub fn </span>copy_basic_latin_to_ascii(src: <span class="kw-2">&amp;</span>[u16], dst: <span class="kw-2">&amp;mut </span>[u8]) -&gt; usize {
     <span class="macro">assert!</span>(
         dst.len() &gt;= src.len(),
-        <span class="string">&quot;Destination must not be shorter than the source.&quot;
+        <span class="string">"Destination must not be shorter than the source."
     </span>);
     <span class="kw">if let </span><span class="prelude-val">Some</span>((<span class="kw">_</span>, consumed)) =
         <span class="kw">unsafe </span>{ basic_latin_to_ascii(src.as_ptr(), dst.as_mut_ptr(), src.len()) }
@@ -5516,7 +5516,7 @@
 <span class="comment">// Any copyright to the test code below this comment is dedicated to the
 // Public Domain. http://creativecommons.org/publicdomain/zero/1.0/
 
-</span><span class="attr">#[cfg(all(test, feature = <span class="string">&quot;alloc&quot;</span>))]
+</span><span class="attr">#[cfg(all(test, feature = <span class="string">"alloc"</span>))]
 </span><span class="kw">mod </span>tests {
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
 
@@ -5686,17 +5686,17 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_is_utf8_latin1_invalid() {
-        <span class="macro">assert!</span>(!is_utf8_latin1(<span class="string">b&quot;\xC3&quot;</span>));
-        <span class="macro">assert!</span>(!is_utf8_latin1(<span class="string">b&quot;a\xC3&quot;</span>));
-        <span class="macro">assert!</span>(!is_utf8_latin1(<span class="string">b&quot;\xFF&quot;</span>));
-        <span class="macro">assert!</span>(!is_utf8_latin1(<span class="string">b&quot;a\xFF&quot;</span>));
-        <span class="macro">assert!</span>(!is_utf8_latin1(<span class="string">b&quot;\xC3\xFF&quot;</span>));
-        <span class="macro">assert!</span>(!is_utf8_latin1(<span class="string">b&quot;a\xC3\xFF&quot;</span>));
+        <span class="macro">assert!</span>(!is_utf8_latin1(<span class="string">b"\xC3"</span>));
+        <span class="macro">assert!</span>(!is_utf8_latin1(<span class="string">b"a\xC3"</span>));
+        <span class="macro">assert!</span>(!is_utf8_latin1(<span class="string">b"\xFF"</span>));
+        <span class="macro">assert!</span>(!is_utf8_latin1(<span class="string">b"a\xFF"</span>));
+        <span class="macro">assert!</span>(!is_utf8_latin1(<span class="string">b"\xC3\xFF"</span>));
+        <span class="macro">assert!</span>(!is_utf8_latin1(<span class="string">b"a\xC3\xFF"</span>));
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_convert_utf8_to_utf16() {
-        <span class="kw">let </span>src = <span class="string">&quot;abcdefghijklmnopqrstu\u{1F4A9}v\u{2603}w\u{00B6}xyzz&quot;</span>;
+        <span class="kw">let </span>src = <span class="string">"abcdefghijklmnopqrstu\u{1F4A9}v\u{2603}w\u{00B6}xyzz"</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>dst: Vec&lt;u16&gt; = Vec::with_capacity(src.len() + <span class="number">1</span>);
         dst.resize(src.len() + <span class="number">1</span>, <span class="number">0</span>);
         <span class="kw">let </span>len = convert_utf8_to_utf16(src.as_bytes(), <span class="kw-2">&amp;mut </span>dst[..]);
@@ -5707,7 +5707,7 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_convert_str_to_utf16() {
-        <span class="kw">let </span>src = <span class="string">&quot;abcdefghijklmnopqrstu\u{1F4A9}v\u{2603}w\u{00B6}xyzz&quot;</span>;
+        <span class="kw">let </span>src = <span class="string">"abcdefghijklmnopqrstu\u{1F4A9}v\u{2603}w\u{00B6}xyzz"</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>dst: Vec&lt;u16&gt; = Vec::with_capacity(src.len());
         dst.resize(src.len(), <span class="number">0</span>);
         <span class="kw">let </span>len = convert_str_to_utf16(src, <span class="kw-2">&amp;mut </span>dst[..]);
@@ -5718,7 +5718,7 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_convert_utf16_to_utf8_partial() {
-        <span class="kw">let </span>reference = <span class="string">&quot;abcdefghijklmnopqrstu\u{1F4A9}v\u{2603}w\u{00B6}xyzz&quot;</span>;
+        <span class="kw">let </span>reference = <span class="string">"abcdefghijklmnopqrstu\u{1F4A9}v\u{2603}w\u{00B6}xyzz"</span>;
         <span class="kw">let </span>src: Vec&lt;u16&gt; = reference.encode_utf16().collect();
         <span class="kw">let </span><span class="kw-2">mut </span>dst: Vec&lt;u8&gt; = Vec::with_capacity(src.len() * <span class="number">3 </span>+ <span class="number">1</span>);
         dst.resize(src.len() * <span class="number">3 </span>+ <span class="number">1</span>, <span class="number">0</span>);
@@ -5730,7 +5730,7 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_convert_utf16_to_utf8() {
-        <span class="kw">let </span>reference = <span class="string">&quot;abcdefghijklmnopqrstu\u{1F4A9}v\u{2603}w\u{00B6}xyzz&quot;</span>;
+        <span class="kw">let </span>reference = <span class="string">"abcdefghijklmnopqrstu\u{1F4A9}v\u{2603}w\u{00B6}xyzz"</span>;
         <span class="kw">let </span>src: Vec&lt;u16&gt; = reference.encode_utf16().collect();
         <span class="kw">let </span><span class="kw-2">mut </span>dst: Vec&lt;u8&gt; = Vec::with_capacity(src.len() * <span class="number">3 </span>+ <span class="number">1</span>);
         dst.resize(src.len() * <span class="number">3 </span>+ <span class="number">1</span>, <span class="number">0</span>);
@@ -5758,7 +5758,7 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_convert_latin1_to_utf8_partial() {
         <span class="kw">let </span><span class="kw-2">mut </span>dst = [<span class="number">0u8</span>, <span class="number">2</span>];
-        <span class="kw">let </span>(read, written) = convert_latin1_to_utf8_partial(<span class="string">b&quot;a\xFF&quot;</span>, <span class="kw-2">&amp;mut </span>dst[..]);
+        <span class="kw">let </span>(read, written) = convert_latin1_to_utf8_partial(<span class="string">b"a\xFF"</span>, <span class="kw-2">&amp;mut </span>dst[..]);
         <span class="macro">assert_eq!</span>(read, <span class="number">1</span>);
         <span class="macro">assert_eq!</span>(written, <span class="number">1</span>);
     }
@@ -5804,7 +5804,7 @@
     #[should_panic]
     </span><span class="kw">fn </span>test_convert_utf8_to_latin1_lossy_panics() {
         <span class="kw">let </span><span class="kw-2">mut </span>dst = [<span class="number">0u8</span>; <span class="number">16</span>];
-        <span class="kw">let _ </span>= convert_utf8_to_latin1_lossy(<span class="string">&quot;\u{100}&quot;</span>.as_bytes(), <span class="kw-2">&amp;mut </span>dst[..]);
+        <span class="kw">let _ </span>= convert_utf8_to_latin1_lossy(<span class="string">"\u{100}"</span>.as_bytes(), <span class="kw-2">&amp;mut </span>dst[..]);
     }
 
     <span class="attr">#[test]
@@ -5872,28 +5872,28 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_is_char_bidi() {
-        <span class="macro">assert!</span>(!is_char_bidi(<span class="string">&#39;a&#39;</span>));
-        <span class="macro">assert!</span>(!is_char_bidi(<span class="string">&#39;\u{03B1}&#39;</span>));
-        <span class="macro">assert!</span>(!is_char_bidi(<span class="string">&#39;\u{3041}&#39;</span>));
-        <span class="macro">assert!</span>(!is_char_bidi(<span class="string">&#39;\u{1F4A9}&#39;</span>));
-        <span class="macro">assert!</span>(!is_char_bidi(<span class="string">&#39;\u{FE00}&#39;</span>));
-        <span class="macro">assert!</span>(!is_char_bidi(<span class="string">&#39;\u{202C}&#39;</span>));
-        <span class="macro">assert!</span>(!is_char_bidi(<span class="string">&#39;\u{FEFF}&#39;</span>));
-        <span class="macro">assert!</span>(is_char_bidi(<span class="string">&#39;\u{0590}&#39;</span>));
-        <span class="macro">assert!</span>(is_char_bidi(<span class="string">&#39;\u{08FF}&#39;</span>));
-        <span class="macro">assert!</span>(is_char_bidi(<span class="string">&#39;\u{061C}&#39;</span>));
-        <span class="macro">assert!</span>(is_char_bidi(<span class="string">&#39;\u{FB50}&#39;</span>));
-        <span class="macro">assert!</span>(is_char_bidi(<span class="string">&#39;\u{FDFF}&#39;</span>));
-        <span class="macro">assert!</span>(is_char_bidi(<span class="string">&#39;\u{FE70}&#39;</span>));
-        <span class="macro">assert!</span>(is_char_bidi(<span class="string">&#39;\u{FEFE}&#39;</span>));
-        <span class="macro">assert!</span>(is_char_bidi(<span class="string">&#39;\u{200F}&#39;</span>));
-        <span class="macro">assert!</span>(is_char_bidi(<span class="string">&#39;\u{202B}&#39;</span>));
-        <span class="macro">assert!</span>(is_char_bidi(<span class="string">&#39;\u{202E}&#39;</span>));
-        <span class="macro">assert!</span>(is_char_bidi(<span class="string">&#39;\u{2067}&#39;</span>));
-        <span class="macro">assert!</span>(is_char_bidi(<span class="string">&#39;\u{10800}&#39;</span>));
-        <span class="macro">assert!</span>(is_char_bidi(<span class="string">&#39;\u{10FFF}&#39;</span>));
-        <span class="macro">assert!</span>(is_char_bidi(<span class="string">&#39;\u{1E800}&#39;</span>));
-        <span class="macro">assert!</span>(is_char_bidi(<span class="string">&#39;\u{1EFFF}&#39;</span>));
+        <span class="macro">assert!</span>(!is_char_bidi(<span class="string">'a'</span>));
+        <span class="macro">assert!</span>(!is_char_bidi(<span class="string">'\u{03B1}'</span>));
+        <span class="macro">assert!</span>(!is_char_bidi(<span class="string">'\u{3041}'</span>));
+        <span class="macro">assert!</span>(!is_char_bidi(<span class="string">'\u{1F4A9}'</span>));
+        <span class="macro">assert!</span>(!is_char_bidi(<span class="string">'\u{FE00}'</span>));
+        <span class="macro">assert!</span>(!is_char_bidi(<span class="string">'\u{202C}'</span>));
+        <span class="macro">assert!</span>(!is_char_bidi(<span class="string">'\u{FEFF}'</span>));
+        <span class="macro">assert!</span>(is_char_bidi(<span class="string">'\u{0590}'</span>));
+        <span class="macro">assert!</span>(is_char_bidi(<span class="string">'\u{08FF}'</span>));
+        <span class="macro">assert!</span>(is_char_bidi(<span class="string">'\u{061C}'</span>));
+        <span class="macro">assert!</span>(is_char_bidi(<span class="string">'\u{FB50}'</span>));
+        <span class="macro">assert!</span>(is_char_bidi(<span class="string">'\u{FDFF}'</span>));
+        <span class="macro">assert!</span>(is_char_bidi(<span class="string">'\u{FE70}'</span>));
+        <span class="macro">assert!</span>(is_char_bidi(<span class="string">'\u{FEFE}'</span>));
+        <span class="macro">assert!</span>(is_char_bidi(<span class="string">'\u{200F}'</span>));
+        <span class="macro">assert!</span>(is_char_bidi(<span class="string">'\u{202B}'</span>));
+        <span class="macro">assert!</span>(is_char_bidi(<span class="string">'\u{202E}'</span>));
+        <span class="macro">assert!</span>(is_char_bidi(<span class="string">'\u{2067}'</span>));
+        <span class="macro">assert!</span>(is_char_bidi(<span class="string">'\u{10800}'</span>));
+        <span class="macro">assert!</span>(is_char_bidi(<span class="string">'\u{10FFF}'</span>));
+        <span class="macro">assert!</span>(is_char_bidi(<span class="string">'\u{1E800}'</span>));
+        <span class="macro">assert!</span>(is_char_bidi(<span class="string">'\u{1EFFF}'</span>));
     }
 
     <span class="attr">#[test]
@@ -5925,97 +5925,97 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_is_str_bidi() {
-        <span class="macro">assert!</span>(!is_str_bidi(<span class="string">&quot;abcdefghijklmnopaabcdefghijklmnop&quot;</span>));
-        <span class="macro">assert!</span>(!is_str_bidi(<span class="string">&quot;abcdefghijklmnop\u{03B1}abcdefghijklmnop&quot;</span>));
-        <span class="macro">assert!</span>(!is_str_bidi(<span class="string">&quot;abcdefghijklmnop\u{3041}abcdefghijklmnop&quot;</span>));
-        <span class="macro">assert!</span>(!is_str_bidi(<span class="string">&quot;abcdefghijklmnop\u{1F4A9}abcdefghijklmnop&quot;</span>));
-        <span class="macro">assert!</span>(!is_str_bidi(<span class="string">&quot;abcdefghijklmnop\u{FE00}abcdefghijklmnop&quot;</span>));
-        <span class="macro">assert!</span>(!is_str_bidi(<span class="string">&quot;abcdefghijklmnop\u{202C}abcdefghijklmnop&quot;</span>));
-        <span class="macro">assert!</span>(!is_str_bidi(<span class="string">&quot;abcdefghijklmnop\u{FEFF}abcdefghijklmnop&quot;</span>));
-        <span class="macro">assert!</span>(is_str_bidi(<span class="string">&quot;abcdefghijklmnop\u{0590}abcdefghijklmnop&quot;</span>));
-        <span class="macro">assert!</span>(is_str_bidi(<span class="string">&quot;abcdefghijklmnop\u{08FF}abcdefghijklmnop&quot;</span>));
-        <span class="macro">assert!</span>(is_str_bidi(<span class="string">&quot;abcdefghijklmnop\u{061C}abcdefghijklmnop&quot;</span>));
-        <span class="macro">assert!</span>(is_str_bidi(<span class="string">&quot;abcdefghijklmnop\u{FB50}abcdefghijklmnop&quot;</span>));
-        <span class="macro">assert!</span>(is_str_bidi(<span class="string">&quot;abcdefghijklmnop\u{FDFF}abcdefghijklmnop&quot;</span>));
-        <span class="macro">assert!</span>(is_str_bidi(<span class="string">&quot;abcdefghijklmnop\u{FE70}abcdefghijklmnop&quot;</span>));
-        <span class="macro">assert!</span>(is_str_bidi(<span class="string">&quot;abcdefghijklmnop\u{FEFE}abcdefghijklmnop&quot;</span>));
-        <span class="macro">assert!</span>(is_str_bidi(<span class="string">&quot;abcdefghijklmnop\u{200F}abcdefghijklmnop&quot;</span>));
-        <span class="macro">assert!</span>(is_str_bidi(<span class="string">&quot;abcdefghijklmnop\u{202B}abcdefghijklmnop&quot;</span>));
-        <span class="macro">assert!</span>(is_str_bidi(<span class="string">&quot;abcdefghijklmnop\u{202E}abcdefghijklmnop&quot;</span>));
-        <span class="macro">assert!</span>(is_str_bidi(<span class="string">&quot;abcdefghijklmnop\u{2067}abcdefghijklmnop&quot;</span>));
-        <span class="macro">assert!</span>(is_str_bidi(<span class="string">&quot;abcdefghijklmnop\u{10800}abcdefghijklmnop&quot;</span>));
-        <span class="macro">assert!</span>(is_str_bidi(<span class="string">&quot;abcdefghijklmnop\u{10FFF}abcdefghijklmnop&quot;</span>));
-        <span class="macro">assert!</span>(is_str_bidi(<span class="string">&quot;abcdefghijklmnop\u{1E800}abcdefghijklmnop&quot;</span>));
-        <span class="macro">assert!</span>(is_str_bidi(<span class="string">&quot;abcdefghijklmnop\u{1EFFF}abcdefghijklmnop&quot;</span>));
+        <span class="macro">assert!</span>(!is_str_bidi(<span class="string">"abcdefghijklmnopaabcdefghijklmnop"</span>));
+        <span class="macro">assert!</span>(!is_str_bidi(<span class="string">"abcdefghijklmnop\u{03B1}abcdefghijklmnop"</span>));
+        <span class="macro">assert!</span>(!is_str_bidi(<span class="string">"abcdefghijklmnop\u{3041}abcdefghijklmnop"</span>));
+        <span class="macro">assert!</span>(!is_str_bidi(<span class="string">"abcdefghijklmnop\u{1F4A9}abcdefghijklmnop"</span>));
+        <span class="macro">assert!</span>(!is_str_bidi(<span class="string">"abcdefghijklmnop\u{FE00}abcdefghijklmnop"</span>));
+        <span class="macro">assert!</span>(!is_str_bidi(<span class="string">"abcdefghijklmnop\u{202C}abcdefghijklmnop"</span>));
+        <span class="macro">assert!</span>(!is_str_bidi(<span class="string">"abcdefghijklmnop\u{FEFF}abcdefghijklmnop"</span>));
+        <span class="macro">assert!</span>(is_str_bidi(<span class="string">"abcdefghijklmnop\u{0590}abcdefghijklmnop"</span>));
+        <span class="macro">assert!</span>(is_str_bidi(<span class="string">"abcdefghijklmnop\u{08FF}abcdefghijklmnop"</span>));
+        <span class="macro">assert!</span>(is_str_bidi(<span class="string">"abcdefghijklmnop\u{061C}abcdefghijklmnop"</span>));
+        <span class="macro">assert!</span>(is_str_bidi(<span class="string">"abcdefghijklmnop\u{FB50}abcdefghijklmnop"</span>));
+        <span class="macro">assert!</span>(is_str_bidi(<span class="string">"abcdefghijklmnop\u{FDFF}abcdefghijklmnop"</span>));
+        <span class="macro">assert!</span>(is_str_bidi(<span class="string">"abcdefghijklmnop\u{FE70}abcdefghijklmnop"</span>));
+        <span class="macro">assert!</span>(is_str_bidi(<span class="string">"abcdefghijklmnop\u{FEFE}abcdefghijklmnop"</span>));
+        <span class="macro">assert!</span>(is_str_bidi(<span class="string">"abcdefghijklmnop\u{200F}abcdefghijklmnop"</span>));
+        <span class="macro">assert!</span>(is_str_bidi(<span class="string">"abcdefghijklmnop\u{202B}abcdefghijklmnop"</span>));
+        <span class="macro">assert!</span>(is_str_bidi(<span class="string">"abcdefghijklmnop\u{202E}abcdefghijklmnop"</span>));
+        <span class="macro">assert!</span>(is_str_bidi(<span class="string">"abcdefghijklmnop\u{2067}abcdefghijklmnop"</span>));
+        <span class="macro">assert!</span>(is_str_bidi(<span class="string">"abcdefghijklmnop\u{10800}abcdefghijklmnop"</span>));
+        <span class="macro">assert!</span>(is_str_bidi(<span class="string">"abcdefghijklmnop\u{10FFF}abcdefghijklmnop"</span>));
+        <span class="macro">assert!</span>(is_str_bidi(<span class="string">"abcdefghijklmnop\u{1E800}abcdefghijklmnop"</span>));
+        <span class="macro">assert!</span>(is_str_bidi(<span class="string">"abcdefghijklmnop\u{1EFFF}abcdefghijklmnop"</span>));
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_is_utf8_bidi() {
         <span class="macro">assert!</span>(!is_utf8_bidi(
-            <span class="string">&quot;abcdefghijklmnopaabcdefghijklmnop&quot;</span>.as_bytes()
+            <span class="string">"abcdefghijklmnopaabcdefghijklmnop"</span>.as_bytes()
         ));
         <span class="macro">assert!</span>(!is_utf8_bidi(
-            <span class="string">&quot;abcdefghijklmnop\u{03B1}abcdefghijklmnop&quot;</span>.as_bytes()
+            <span class="string">"abcdefghijklmnop\u{03B1}abcdefghijklmnop"</span>.as_bytes()
         ));
         <span class="macro">assert!</span>(!is_utf8_bidi(
-            <span class="string">&quot;abcdefghijklmnop\u{3041}abcdefghijklmnop&quot;</span>.as_bytes()
+            <span class="string">"abcdefghijklmnop\u{3041}abcdefghijklmnop"</span>.as_bytes()
         ));
         <span class="macro">assert!</span>(!is_utf8_bidi(
-            <span class="string">&quot;abcdefghijklmnop\u{1F4A9}abcdefghijklmnop&quot;</span>.as_bytes()
+            <span class="string">"abcdefghijklmnop\u{1F4A9}abcdefghijklmnop"</span>.as_bytes()
         ));
         <span class="macro">assert!</span>(!is_utf8_bidi(
-            <span class="string">&quot;abcdefghijklmnop\u{FE00}abcdefghijklmnop&quot;</span>.as_bytes()
+            <span class="string">"abcdefghijklmnop\u{FE00}abcdefghijklmnop"</span>.as_bytes()
         ));
         <span class="macro">assert!</span>(!is_utf8_bidi(
-            <span class="string">&quot;abcdefghijklmnop\u{202C}abcdefghijklmnop&quot;</span>.as_bytes()
+            <span class="string">"abcdefghijklmnop\u{202C}abcdefghijklmnop"</span>.as_bytes()
         ));
         <span class="macro">assert!</span>(!is_utf8_bidi(
-            <span class="string">&quot;abcdefghijklmnop\u{FEFF}abcdefghijklmnop&quot;</span>.as_bytes()
+            <span class="string">"abcdefghijklmnop\u{FEFF}abcdefghijklmnop"</span>.as_bytes()
         ));
         <span class="macro">assert!</span>(is_utf8_bidi(
-            <span class="string">&quot;abcdefghijklmnop\u{0590}abcdefghijklmnop&quot;</span>.as_bytes()
+            <span class="string">"abcdefghijklmnop\u{0590}abcdefghijklmnop"</span>.as_bytes()
         ));
         <span class="macro">assert!</span>(is_utf8_bidi(
-            <span class="string">&quot;abcdefghijklmnop\u{08FF}abcdefghijklmnop&quot;</span>.as_bytes()
+            <span class="string">"abcdefghijklmnop\u{08FF}abcdefghijklmnop"</span>.as_bytes()
         ));
         <span class="macro">assert!</span>(is_utf8_bidi(
-            <span class="string">&quot;abcdefghijklmnop\u{061C}abcdefghijklmnop&quot;</span>.as_bytes()
+            <span class="string">"abcdefghijklmnop\u{061C}abcdefghijklmnop"</span>.as_bytes()
         ));
         <span class="macro">assert!</span>(is_utf8_bidi(
-            <span class="string">&quot;abcdefghijklmnop\u{FB50}abcdefghijklmnop&quot;</span>.as_bytes()
+            <span class="string">"abcdefghijklmnop\u{FB50}abcdefghijklmnop"</span>.as_bytes()
         ));
         <span class="macro">assert!</span>(is_utf8_bidi(
-            <span class="string">&quot;abcdefghijklmnop\u{FDFF}abcdefghijklmnop&quot;</span>.as_bytes()
+            <span class="string">"abcdefghijklmnop\u{FDFF}abcdefghijklmnop"</span>.as_bytes()
         ));
         <span class="macro">assert!</span>(is_utf8_bidi(
-            <span class="string">&quot;abcdefghijklmnop\u{FE70}abcdefghijklmnop&quot;</span>.as_bytes()
+            <span class="string">"abcdefghijklmnop\u{FE70}abcdefghijklmnop"</span>.as_bytes()
         ));
         <span class="macro">assert!</span>(is_utf8_bidi(
-            <span class="string">&quot;abcdefghijklmnop\u{FEFE}abcdefghijklmnop&quot;</span>.as_bytes()
+            <span class="string">"abcdefghijklmnop\u{FEFE}abcdefghijklmnop"</span>.as_bytes()
         ));
         <span class="macro">assert!</span>(is_utf8_bidi(
-            <span class="string">&quot;abcdefghijklmnop\u{200F}abcdefghijklmnop&quot;</span>.as_bytes()
+            <span class="string">"abcdefghijklmnop\u{200F}abcdefghijklmnop"</span>.as_bytes()
         ));
         <span class="macro">assert!</span>(is_utf8_bidi(
-            <span class="string">&quot;abcdefghijklmnop\u{202B}abcdefghijklmnop&quot;</span>.as_bytes()
+            <span class="string">"abcdefghijklmnop\u{202B}abcdefghijklmnop"</span>.as_bytes()
         ));
         <span class="macro">assert!</span>(is_utf8_bidi(
-            <span class="string">&quot;abcdefghijklmnop\u{202E}abcdefghijklmnop&quot;</span>.as_bytes()
+            <span class="string">"abcdefghijklmnop\u{202E}abcdefghijklmnop"</span>.as_bytes()
         ));
         <span class="macro">assert!</span>(is_utf8_bidi(
-            <span class="string">&quot;abcdefghijklmnop\u{2067}abcdefghijklmnop&quot;</span>.as_bytes()
+            <span class="string">"abcdefghijklmnop\u{2067}abcdefghijklmnop"</span>.as_bytes()
         ));
         <span class="macro">assert!</span>(is_utf8_bidi(
-            <span class="string">&quot;abcdefghijklmnop\u{10800}abcdefghijklmnop&quot;</span>.as_bytes()
+            <span class="string">"abcdefghijklmnop\u{10800}abcdefghijklmnop"</span>.as_bytes()
         ));
         <span class="macro">assert!</span>(is_utf8_bidi(
-            <span class="string">&quot;abcdefghijklmnop\u{10FFF}abcdefghijklmnop&quot;</span>.as_bytes()
+            <span class="string">"abcdefghijklmnop\u{10FFF}abcdefghijklmnop"</span>.as_bytes()
         ));
         <span class="macro">assert!</span>(is_utf8_bidi(
-            <span class="string">&quot;abcdefghijklmnop\u{1E800}abcdefghijklmnop&quot;</span>.as_bytes()
+            <span class="string">"abcdefghijklmnop\u{1E800}abcdefghijklmnop"</span>.as_bytes()
         ));
         <span class="macro">assert!</span>(is_utf8_bidi(
-            <span class="string">&quot;abcdefghijklmnop\u{1EFFF}abcdefghijklmnop&quot;</span>.as_bytes()
+            <span class="string">"abcdefghijklmnop\u{1EFFF}abcdefghijklmnop"</span>.as_bytes()
         ));
     }
 
@@ -6123,91 +6123,91 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_check_str_for_latin1_and_bidi() {
         <span class="macro">assert_ne!</span>(
-            check_str_for_latin1_and_bidi(<span class="string">&quot;abcdefghijklmnopaabcdefghijklmnop&quot;</span>),
+            check_str_for_latin1_and_bidi(<span class="string">"abcdefghijklmnopaabcdefghijklmnop"</span>),
             Latin1Bidi::Bidi
         );
         <span class="macro">assert_ne!</span>(
-            check_str_for_latin1_and_bidi(<span class="string">&quot;abcdefghijklmnop\u{03B1}abcdefghijklmnop&quot;</span>),
+            check_str_for_latin1_and_bidi(<span class="string">"abcdefghijklmnop\u{03B1}abcdefghijklmnop"</span>),
             Latin1Bidi::Bidi
         );
         <span class="macro">assert_ne!</span>(
-            check_str_for_latin1_and_bidi(<span class="string">&quot;abcdefghijklmnop\u{3041}abcdefghijklmnop&quot;</span>),
+            check_str_for_latin1_and_bidi(<span class="string">"abcdefghijklmnop\u{3041}abcdefghijklmnop"</span>),
             Latin1Bidi::Bidi
         );
         <span class="macro">assert_ne!</span>(
-            check_str_for_latin1_and_bidi(<span class="string">&quot;abcdefghijklmnop\u{1F4A9}abcdefghijklmnop&quot;</span>),
+            check_str_for_latin1_and_bidi(<span class="string">"abcdefghijklmnop\u{1F4A9}abcdefghijklmnop"</span>),
             Latin1Bidi::Bidi
         );
         <span class="macro">assert_ne!</span>(
-            check_str_for_latin1_and_bidi(<span class="string">&quot;abcdefghijklmnop\u{FE00}abcdefghijklmnop&quot;</span>),
+            check_str_for_latin1_and_bidi(<span class="string">"abcdefghijklmnop\u{FE00}abcdefghijklmnop"</span>),
             Latin1Bidi::Bidi
         );
         <span class="macro">assert_ne!</span>(
-            check_str_for_latin1_and_bidi(<span class="string">&quot;abcdefghijklmnop\u{202C}abcdefghijklmnop&quot;</span>),
+            check_str_for_latin1_and_bidi(<span class="string">"abcdefghijklmnop\u{202C}abcdefghijklmnop"</span>),
             Latin1Bidi::Bidi
         );
         <span class="macro">assert_ne!</span>(
-            check_str_for_latin1_and_bidi(<span class="string">&quot;abcdefghijklmnop\u{FEFF}abcdefghijklmnop&quot;</span>),
+            check_str_for_latin1_and_bidi(<span class="string">"abcdefghijklmnop\u{FEFF}abcdefghijklmnop"</span>),
             Latin1Bidi::Bidi
         );
         <span class="macro">assert_eq!</span>(
-            check_str_for_latin1_and_bidi(<span class="string">&quot;abcdefghijklmnop\u{0590}abcdefghijklmnop&quot;</span>),
+            check_str_for_latin1_and_bidi(<span class="string">"abcdefghijklmnop\u{0590}abcdefghijklmnop"</span>),
             Latin1Bidi::Bidi
         );
         <span class="macro">assert_eq!</span>(
-            check_str_for_latin1_and_bidi(<span class="string">&quot;abcdefghijklmnop\u{08FF}abcdefghijklmnop&quot;</span>),
+            check_str_for_latin1_and_bidi(<span class="string">"abcdefghijklmnop\u{08FF}abcdefghijklmnop"</span>),
             Latin1Bidi::Bidi
         );
         <span class="macro">assert_eq!</span>(
-            check_str_for_latin1_and_bidi(<span class="string">&quot;abcdefghijklmnop\u{061C}abcdefghijklmnop&quot;</span>),
+            check_str_for_latin1_and_bidi(<span class="string">"abcdefghijklmnop\u{061C}abcdefghijklmnop"</span>),
             Latin1Bidi::Bidi
         );
         <span class="macro">assert_eq!</span>(
-            check_str_for_latin1_and_bidi(<span class="string">&quot;abcdefghijklmnop\u{FB50}abcdefghijklmnop&quot;</span>),
+            check_str_for_latin1_and_bidi(<span class="string">"abcdefghijklmnop\u{FB50}abcdefghijklmnop"</span>),
             Latin1Bidi::Bidi
         );
         <span class="macro">assert_eq!</span>(
-            check_str_for_latin1_and_bidi(<span class="string">&quot;abcdefghijklmnop\u{FDFF}abcdefghijklmnop&quot;</span>),
+            check_str_for_latin1_and_bidi(<span class="string">"abcdefghijklmnop\u{FDFF}abcdefghijklmnop"</span>),
             Latin1Bidi::Bidi
         );
         <span class="macro">assert_eq!</span>(
-            check_str_for_latin1_and_bidi(<span class="string">&quot;abcdefghijklmnop\u{FE70}abcdefghijklmnop&quot;</span>),
+            check_str_for_latin1_and_bidi(<span class="string">"abcdefghijklmnop\u{FE70}abcdefghijklmnop"</span>),
             Latin1Bidi::Bidi
         );
         <span class="macro">assert_eq!</span>(
-            check_str_for_latin1_and_bidi(<span class="string">&quot;abcdefghijklmnop\u{FEFE}abcdefghijklmnop&quot;</span>),
+            check_str_for_latin1_and_bidi(<span class="string">"abcdefghijklmnop\u{FEFE}abcdefghijklmnop"</span>),
             Latin1Bidi::Bidi
         );
         <span class="macro">assert_eq!</span>(
-            check_str_for_latin1_and_bidi(<span class="string">&quot;abcdefghijklmnop\u{200F}abcdefghijklmnop&quot;</span>),
+            check_str_for_latin1_and_bidi(<span class="string">"abcdefghijklmnop\u{200F}abcdefghijklmnop"</span>),
             Latin1Bidi::Bidi
         );
         <span class="macro">assert_eq!</span>(
-            check_str_for_latin1_and_bidi(<span class="string">&quot;abcdefghijklmnop\u{202B}abcdefghijklmnop&quot;</span>),
+            check_str_for_latin1_and_bidi(<span class="string">"abcdefghijklmnop\u{202B}abcdefghijklmnop"</span>),
             Latin1Bidi::Bidi
         );
         <span class="macro">assert_eq!</span>(
-            check_str_for_latin1_and_bidi(<span class="string">&quot;abcdefghijklmnop\u{202E}abcdefghijklmnop&quot;</span>),
+            check_str_for_latin1_and_bidi(<span class="string">"abcdefghijklmnop\u{202E}abcdefghijklmnop"</span>),
             Latin1Bidi::Bidi
         );
         <span class="macro">assert_eq!</span>(
-            check_str_for_latin1_and_bidi(<span class="string">&quot;abcdefghijklmnop\u{2067}abcdefghijklmnop&quot;</span>),
+            check_str_for_latin1_and_bidi(<span class="string">"abcdefghijklmnop\u{2067}abcdefghijklmnop"</span>),
             Latin1Bidi::Bidi
         );
         <span class="macro">assert_eq!</span>(
-            check_str_for_latin1_and_bidi(<span class="string">&quot;abcdefghijklmnop\u{10800}abcdefghijklmnop&quot;</span>),
+            check_str_for_latin1_and_bidi(<span class="string">"abcdefghijklmnop\u{10800}abcdefghijklmnop"</span>),
             Latin1Bidi::Bidi
         );
         <span class="macro">assert_eq!</span>(
-            check_str_for_latin1_and_bidi(<span class="string">&quot;abcdefghijklmnop\u{10FFF}abcdefghijklmnop&quot;</span>),
+            check_str_for_latin1_and_bidi(<span class="string">"abcdefghijklmnop\u{10FFF}abcdefghijklmnop"</span>),
             Latin1Bidi::Bidi
         );
         <span class="macro">assert_eq!</span>(
-            check_str_for_latin1_and_bidi(<span class="string">&quot;abcdefghijklmnop\u{1E800}abcdefghijklmnop&quot;</span>),
+            check_str_for_latin1_and_bidi(<span class="string">"abcdefghijklmnop\u{1E800}abcdefghijklmnop"</span>),
             Latin1Bidi::Bidi
         );
         <span class="macro">assert_eq!</span>(
-            check_str_for_latin1_and_bidi(<span class="string">&quot;abcdefghijklmnop\u{1EFFF}abcdefghijklmnop&quot;</span>),
+            check_str_for_latin1_and_bidi(<span class="string">"abcdefghijklmnop\u{1EFFF}abcdefghijklmnop"</span>),
             Latin1Bidi::Bidi
         );
     }
@@ -6215,91 +6215,91 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_check_utf8_for_latin1_and_bidi() {
         <span class="macro">assert_ne!</span>(
-            check_utf8_for_latin1_and_bidi(<span class="string">&quot;abcdefghijklmnopaabcdefghijklmnop&quot;</span>.as_bytes()),
+            check_utf8_for_latin1_and_bidi(<span class="string">"abcdefghijklmnopaabcdefghijklmnop"</span>.as_bytes()),
             Latin1Bidi::Bidi
         );
         <span class="macro">assert_ne!</span>(
-            check_utf8_for_latin1_and_bidi(<span class="string">&quot;abcdefghijklmnop\u{03B1}abcdefghijklmnop&quot;</span>.as_bytes()),
+            check_utf8_for_latin1_and_bidi(<span class="string">"abcdefghijklmnop\u{03B1}abcdefghijklmnop"</span>.as_bytes()),
             Latin1Bidi::Bidi
         );
         <span class="macro">assert_ne!</span>(
-            check_utf8_for_latin1_and_bidi(<span class="string">&quot;abcdefghijklmnop\u{3041}abcdefghijklmnop&quot;</span>.as_bytes()),
+            check_utf8_for_latin1_and_bidi(<span class="string">"abcdefghijklmnop\u{3041}abcdefghijklmnop"</span>.as_bytes()),
             Latin1Bidi::Bidi
         );
         <span class="macro">assert_ne!</span>(
-            check_utf8_for_latin1_and_bidi(<span class="string">&quot;abcdefghijklmnop\u{1F4A9}abcdefghijklmnop&quot;</span>.as_bytes()),
+            check_utf8_for_latin1_and_bidi(<span class="string">"abcdefghijklmnop\u{1F4A9}abcdefghijklmnop"</span>.as_bytes()),
             Latin1Bidi::Bidi
         );
         <span class="macro">assert_ne!</span>(
-            check_utf8_for_latin1_and_bidi(<span class="string">&quot;abcdefghijklmnop\u{FE00}abcdefghijklmnop&quot;</span>.as_bytes()),
+            check_utf8_for_latin1_and_bidi(<span class="string">"abcdefghijklmnop\u{FE00}abcdefghijklmnop"</span>.as_bytes()),
             Latin1Bidi::Bidi
         );
         <span class="macro">assert_ne!</span>(
-            check_utf8_for_latin1_and_bidi(<span class="string">&quot;abcdefghijklmnop\u{202C}abcdefghijklmnop&quot;</span>.as_bytes()),
+            check_utf8_for_latin1_and_bidi(<span class="string">"abcdefghijklmnop\u{202C}abcdefghijklmnop"</span>.as_bytes()),
             Latin1Bidi::Bidi
         );
         <span class="macro">assert_ne!</span>(
-            check_utf8_for_latin1_and_bidi(<span class="string">&quot;abcdefghijklmnop\u{FEFF}abcdefghijklmnop&quot;</span>.as_bytes()),
+            check_utf8_for_latin1_and_bidi(<span class="string">"abcdefghijklmnop\u{FEFF}abcdefghijklmnop"</span>.as_bytes()),
             Latin1Bidi::Bidi
         );
         <span class="macro">assert_eq!</span>(
-            check_utf8_for_latin1_and_bidi(<span class="string">&quot;abcdefghijklmnop\u{0590}abcdefghijklmnop&quot;</span>.as_bytes()),
+            check_utf8_for_latin1_and_bidi(<span class="string">"abcdefghijklmnop\u{0590}abcdefghijklmnop"</span>.as_bytes()),
             Latin1Bidi::Bidi
         );
         <span class="macro">assert_eq!</span>(
-            check_utf8_for_latin1_and_bidi(<span class="string">&quot;abcdefghijklmnop\u{08FF}abcdefghijklmnop&quot;</span>.as_bytes()),
+            check_utf8_for_latin1_and_bidi(<span class="string">"abcdefghijklmnop\u{08FF}abcdefghijklmnop"</span>.as_bytes()),
             Latin1Bidi::Bidi
         );
         <span class="macro">assert_eq!</span>(
-            check_utf8_for_latin1_and_bidi(<span class="string">&quot;abcdefghijklmnop\u{061C}abcdefghijklmnop&quot;</span>.as_bytes()),
+            check_utf8_for_latin1_and_bidi(<span class="string">"abcdefghijklmnop\u{061C}abcdefghijklmnop"</span>.as_bytes()),
             Latin1Bidi::Bidi
         );
         <span class="macro">assert_eq!</span>(
-            check_utf8_for_latin1_and_bidi(<span class="string">&quot;abcdefghijklmnop\u{FB50}abcdefghijklmnop&quot;</span>.as_bytes()),
+            check_utf8_for_latin1_and_bidi(<span class="string">"abcdefghijklmnop\u{FB50}abcdefghijklmnop"</span>.as_bytes()),
             Latin1Bidi::Bidi
         );
         <span class="macro">assert_eq!</span>(
-            check_utf8_for_latin1_and_bidi(<span class="string">&quot;abcdefghijklmnop\u{FDFF}abcdefghijklmnop&quot;</span>.as_bytes()),
+            check_utf8_for_latin1_and_bidi(<span class="string">"abcdefghijklmnop\u{FDFF}abcdefghijklmnop"</span>.as_bytes()),
             Latin1Bidi::Bidi
         );
         <span class="macro">assert_eq!</span>(
-            check_utf8_for_latin1_and_bidi(<span class="string">&quot;abcdefghijklmnop\u{FE70}abcdefghijklmnop&quot;</span>.as_bytes()),
+            check_utf8_for_latin1_and_bidi(<span class="string">"abcdefghijklmnop\u{FE70}abcdefghijklmnop"</span>.as_bytes()),
             Latin1Bidi::Bidi
         );
         <span class="macro">assert_eq!</span>(
-            check_utf8_for_latin1_and_bidi(<span class="string">&quot;abcdefghijklmnop\u{FEFE}abcdefghijklmnop&quot;</span>.as_bytes()),
+            check_utf8_for_latin1_and_bidi(<span class="string">"abcdefghijklmnop\u{FEFE}abcdefghijklmnop"</span>.as_bytes()),
             Latin1Bidi::Bidi
         );
         <span class="macro">assert_eq!</span>(
-            check_utf8_for_latin1_and_bidi(<span class="string">&quot;abcdefghijklmnop\u{200F}abcdefghijklmnop&quot;</span>.as_bytes()),
+            check_utf8_for_latin1_and_bidi(<span class="string">"abcdefghijklmnop\u{200F}abcdefghijklmnop"</span>.as_bytes()),
             Latin1Bidi::Bidi
         );
         <span class="macro">assert_eq!</span>(
-            check_utf8_for_latin1_and_bidi(<span class="string">&quot;abcdefghijklmnop\u{202B}abcdefghijklmnop&quot;</span>.as_bytes()),
+            check_utf8_for_latin1_and_bidi(<span class="string">"abcdefghijklmnop\u{202B}abcdefghijklmnop"</span>.as_bytes()),
             Latin1Bidi::Bidi
         );
         <span class="macro">assert_eq!</span>(
-            check_utf8_for_latin1_and_bidi(<span class="string">&quot;abcdefghijklmnop\u{202E}abcdefghijklmnop&quot;</span>.as_bytes()),
+            check_utf8_for_latin1_and_bidi(<span class="string">"abcdefghijklmnop\u{202E}abcdefghijklmnop"</span>.as_bytes()),
             Latin1Bidi::Bidi
         );
         <span class="macro">assert_eq!</span>(
-            check_utf8_for_latin1_and_bidi(<span class="string">&quot;abcdefghijklmnop\u{2067}abcdefghijklmnop&quot;</span>.as_bytes()),
+            check_utf8_for_latin1_and_bidi(<span class="string">"abcdefghijklmnop\u{2067}abcdefghijklmnop"</span>.as_bytes()),
             Latin1Bidi::Bidi
         );
         <span class="macro">assert_eq!</span>(
-            check_utf8_for_latin1_and_bidi(<span class="string">&quot;abcdefghijklmnop\u{10800}abcdefghijklmnop&quot;</span>.as_bytes()),
+            check_utf8_for_latin1_and_bidi(<span class="string">"abcdefghijklmnop\u{10800}abcdefghijklmnop"</span>.as_bytes()),
             Latin1Bidi::Bidi
         );
         <span class="macro">assert_eq!</span>(
-            check_utf8_for_latin1_and_bidi(<span class="string">&quot;abcdefghijklmnop\u{10FFF}abcdefghijklmnop&quot;</span>.as_bytes()),
+            check_utf8_for_latin1_and_bidi(<span class="string">"abcdefghijklmnop\u{10FFF}abcdefghijklmnop"</span>.as_bytes()),
             Latin1Bidi::Bidi
         );
         <span class="macro">assert_eq!</span>(
-            check_utf8_for_latin1_and_bidi(<span class="string">&quot;abcdefghijklmnop\u{1E800}abcdefghijklmnop&quot;</span>.as_bytes()),
+            check_utf8_for_latin1_and_bidi(<span class="string">"abcdefghijklmnop\u{1E800}abcdefghijklmnop"</span>.as_bytes()),
             Latin1Bidi::Bidi
         );
         <span class="macro">assert_eq!</span>(
-            check_utf8_for_latin1_and_bidi(<span class="string">&quot;abcdefghijklmnop\u{1EFFF}abcdefghijklmnop&quot;</span>.as_bytes()),
+            check_utf8_for_latin1_and_bidi(<span class="string">"abcdefghijklmnop\u{1EFFF}abcdefghijklmnop"</span>.as_bytes()),
             Latin1Bidi::Bidi
         );
     }
@@ -6480,15 +6480,15 @@
     <span class="attr">#[inline(always)]
     </span><span class="kw">pub fn </span>reference_is_char_bidi(c: char) -&gt; bool {
         <span class="kw">match </span>c {
-            <span class="string">&#39;\u{0590}&#39;</span>..=<span class="string">&#39;\u{08FF}&#39;
-            </span>| <span class="string">&#39;\u{FB1D}&#39;</span>..=<span class="string">&#39;\u{FDFF}&#39;
-            </span>| <span class="string">&#39;\u{FE70}&#39;</span>..=<span class="string">&#39;\u{FEFE}&#39;
-            </span>| <span class="string">&#39;\u{10800}&#39;</span>..=<span class="string">&#39;\u{10FFF}&#39;
-            </span>| <span class="string">&#39;\u{1E800}&#39;</span>..=<span class="string">&#39;\u{1EFFF}&#39;
-            </span>| <span class="string">&#39;\u{200F}&#39;
-            </span>| <span class="string">&#39;\u{202B}&#39;
-            </span>| <span class="string">&#39;\u{202E}&#39;
-            </span>| <span class="string">&#39;\u{2067}&#39; </span>=&gt; <span class="bool-val">true</span>,
+            <span class="string">'\u{0590}'</span>..=<span class="string">'\u{08FF}'
+            </span>| <span class="string">'\u{FB1D}'</span>..=<span class="string">'\u{FDFF}'
+            </span>| <span class="string">'\u{FE70}'</span>..=<span class="string">'\u{FEFE}'
+            </span>| <span class="string">'\u{10800}'</span>..=<span class="string">'\u{10FFF}'
+            </span>| <span class="string">'\u{1E800}'</span>..=<span class="string">'\u{1EFFF}'
+            </span>| <span class="string">'\u{200F}'
+            </span>| <span class="string">'\u{202B}'
+            </span>| <span class="string">'\u{202E}'
+            </span>| <span class="string">'\u{2067}' </span>=&gt; <span class="bool-val">true</span>,
             <span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
         }
     }
@@ -6614,94 +6614,94 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_is_utf8_bidi_edge_cases() {
-        <span class="macro">assert!</span>(!is_utf8_bidi(<span class="string">b&quot;\xD5\xBF\x61&quot;</span>));
-        <span class="macro">assert!</span>(!is_utf8_bidi(<span class="string">b&quot;\xD6\x80\x61&quot;</span>));
-        <span class="macro">assert!</span>(!is_utf8_bidi(<span class="string">b&quot;abc&quot;</span>));
-        <span class="macro">assert!</span>(is_utf8_bidi(<span class="string">b&quot;\xD5\xBF\xC2&quot;</span>));
-        <span class="macro">assert!</span>(is_utf8_bidi(<span class="string">b&quot;\xD6\x80\xC2&quot;</span>));
-        <span class="macro">assert!</span>(is_utf8_bidi(<span class="string">b&quot;ab\xC2&quot;</span>));
+        <span class="macro">assert!</span>(!is_utf8_bidi(<span class="string">b"\xD5\xBF\x61"</span>));
+        <span class="macro">assert!</span>(!is_utf8_bidi(<span class="string">b"\xD6\x80\x61"</span>));
+        <span class="macro">assert!</span>(!is_utf8_bidi(<span class="string">b"abc"</span>));
+        <span class="macro">assert!</span>(is_utf8_bidi(<span class="string">b"\xD5\xBF\xC2"</span>));
+        <span class="macro">assert!</span>(is_utf8_bidi(<span class="string">b"\xD6\x80\xC2"</span>));
+        <span class="macro">assert!</span>(is_utf8_bidi(<span class="string">b"ab\xC2"</span>));
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_decode_latin1() {
-        <span class="kw">match </span>decode_latin1(<span class="string">b&quot;ab&quot;</span>) {
+        <span class="kw">match </span>decode_latin1(<span class="string">b"ab"</span>) {
             Cow::Borrowed(s) =&gt; {
-                <span class="macro">assert_eq!</span>(s, <span class="string">&quot;ab&quot;</span>);
+                <span class="macro">assert_eq!</span>(s, <span class="string">"ab"</span>);
             }
             Cow::Owned(<span class="kw">_</span>) =&gt; {
-                <span class="macro">unreachable!</span>(<span class="string">&quot;Should have borrowed&quot;</span>);
+                <span class="macro">unreachable!</span>(<span class="string">"Should have borrowed"</span>);
             }
         }
-        <span class="macro">assert_eq!</span>(decode_latin1(<span class="string">b&quot;a\xE4&quot;</span>), <span class="string">&quot;a\u{E4}&quot;</span>);
+        <span class="macro">assert_eq!</span>(decode_latin1(<span class="string">b"a\xE4"</span>), <span class="string">"a\u{E4}"</span>);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_encode_latin1_lossy() {
-        <span class="kw">match </span>encode_latin1_lossy(<span class="string">&quot;ab&quot;</span>) {
+        <span class="kw">match </span>encode_latin1_lossy(<span class="string">"ab"</span>) {
             Cow::Borrowed(s) =&gt; {
-                <span class="macro">assert_eq!</span>(s, <span class="string">b&quot;ab&quot;</span>);
+                <span class="macro">assert_eq!</span>(s, <span class="string">b"ab"</span>);
             }
             Cow::Owned(<span class="kw">_</span>) =&gt; {
-                <span class="macro">unreachable!</span>(<span class="string">&quot;Should have borrowed&quot;</span>);
+                <span class="macro">unreachable!</span>(<span class="string">"Should have borrowed"</span>);
             }
         }
-        <span class="macro">assert_eq!</span>(encode_latin1_lossy(<span class="string">&quot;a\u{E4}&quot;</span>), <span class="kw-2">&amp;</span>(<span class="string">b&quot;a\xE4&quot;</span>)[..]);
+        <span class="macro">assert_eq!</span>(encode_latin1_lossy(<span class="string">"a\u{E4}"</span>), <span class="kw-2">&amp;</span>(<span class="string">b"a\xE4"</span>)[..]);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_convert_utf8_to_utf16_without_replacement() {
         <span class="kw">let </span><span class="kw-2">mut </span>buf = [<span class="number">0u16</span>; <span class="number">5</span>];
         <span class="macro">assert_eq!</span>(
-            convert_utf8_to_utf16_without_replacement(<span class="string">b&quot;ab&quot;</span>, <span class="kw-2">&amp;mut </span>buf[..<span class="number">2</span>]),
+            convert_utf8_to_utf16_without_replacement(<span class="string">b"ab"</span>, <span class="kw-2">&amp;mut </span>buf[..<span class="number">2</span>]),
             <span class="prelude-val">Some</span>(<span class="number">2</span>)
         );
-        <span class="macro">assert_eq!</span>(buf[<span class="number">0</span>], u16::from(<span class="string">b&#39;a&#39;</span>));
-        <span class="macro">assert_eq!</span>(buf[<span class="number">1</span>], u16::from(<span class="string">b&#39;b&#39;</span>));
+        <span class="macro">assert_eq!</span>(buf[<span class="number">0</span>], u16::from(<span class="string">b'a'</span>));
+        <span class="macro">assert_eq!</span>(buf[<span class="number">1</span>], u16::from(<span class="string">b'b'</span>));
         <span class="macro">assert_eq!</span>(buf[<span class="number">2</span>], <span class="number">0</span>);
         <span class="macro">assert_eq!</span>(
-            convert_utf8_to_utf16_without_replacement(<span class="string">b&quot;\xC3\xA4c&quot;</span>, <span class="kw-2">&amp;mut </span>buf[..<span class="number">3</span>]),
+            convert_utf8_to_utf16_without_replacement(<span class="string">b"\xC3\xA4c"</span>, <span class="kw-2">&amp;mut </span>buf[..<span class="number">3</span>]),
             <span class="prelude-val">Some</span>(<span class="number">2</span>)
         );
         <span class="macro">assert_eq!</span>(buf[<span class="number">0</span>], <span class="number">0xE4</span>);
-        <span class="macro">assert_eq!</span>(buf[<span class="number">1</span>], u16::from(<span class="string">b&#39;c&#39;</span>));
+        <span class="macro">assert_eq!</span>(buf[<span class="number">1</span>], u16::from(<span class="string">b'c'</span>));
         <span class="macro">assert_eq!</span>(buf[<span class="number">2</span>], <span class="number">0</span>);
         <span class="macro">assert_eq!</span>(
-            convert_utf8_to_utf16_without_replacement(<span class="string">b&quot;\xE2\x98\x83&quot;</span>, <span class="kw-2">&amp;mut </span>buf[..<span class="number">3</span>]),
+            convert_utf8_to_utf16_without_replacement(<span class="string">b"\xE2\x98\x83"</span>, <span class="kw-2">&amp;mut </span>buf[..<span class="number">3</span>]),
             <span class="prelude-val">Some</span>(<span class="number">1</span>)
         );
         <span class="macro">assert_eq!</span>(buf[<span class="number">0</span>], <span class="number">0x2603</span>);
-        <span class="macro">assert_eq!</span>(buf[<span class="number">1</span>], u16::from(<span class="string">b&#39;c&#39;</span>));
+        <span class="macro">assert_eq!</span>(buf[<span class="number">1</span>], u16::from(<span class="string">b'c'</span>));
         <span class="macro">assert_eq!</span>(buf[<span class="number">2</span>], <span class="number">0</span>);
         <span class="macro">assert_eq!</span>(
-            convert_utf8_to_utf16_without_replacement(<span class="string">b&quot;\xE2\x98\x83d&quot;</span>, <span class="kw-2">&amp;mut </span>buf[..<span class="number">4</span>]),
+            convert_utf8_to_utf16_without_replacement(<span class="string">b"\xE2\x98\x83d"</span>, <span class="kw-2">&amp;mut </span>buf[..<span class="number">4</span>]),
             <span class="prelude-val">Some</span>(<span class="number">2</span>)
         );
         <span class="macro">assert_eq!</span>(buf[<span class="number">0</span>], <span class="number">0x2603</span>);
-        <span class="macro">assert_eq!</span>(buf[<span class="number">1</span>], u16::from(<span class="string">b&#39;d&#39;</span>));
+        <span class="macro">assert_eq!</span>(buf[<span class="number">1</span>], u16::from(<span class="string">b'd'</span>));
         <span class="macro">assert_eq!</span>(buf[<span class="number">2</span>], <span class="number">0</span>);
         <span class="macro">assert_eq!</span>(
-            convert_utf8_to_utf16_without_replacement(<span class="string">b&quot;\xE2\x98\x83\xC3\xA4&quot;</span>, <span class="kw-2">&amp;mut </span>buf[..<span class="number">5</span>]),
+            convert_utf8_to_utf16_without_replacement(<span class="string">b"\xE2\x98\x83\xC3\xA4"</span>, <span class="kw-2">&amp;mut </span>buf[..<span class="number">5</span>]),
             <span class="prelude-val">Some</span>(<span class="number">2</span>)
         );
         <span class="macro">assert_eq!</span>(buf[<span class="number">0</span>], <span class="number">0x2603</span>);
         <span class="macro">assert_eq!</span>(buf[<span class="number">1</span>], <span class="number">0xE4</span>);
         <span class="macro">assert_eq!</span>(buf[<span class="number">2</span>], <span class="number">0</span>);
         <span class="macro">assert_eq!</span>(
-            convert_utf8_to_utf16_without_replacement(<span class="string">b&quot;\xF0\x9F\x93\x8E&quot;</span>, <span class="kw-2">&amp;mut </span>buf[..<span class="number">4</span>]),
+            convert_utf8_to_utf16_without_replacement(<span class="string">b"\xF0\x9F\x93\x8E"</span>, <span class="kw-2">&amp;mut </span>buf[..<span class="number">4</span>]),
             <span class="prelude-val">Some</span>(<span class="number">2</span>)
         );
         <span class="macro">assert_eq!</span>(buf[<span class="number">0</span>], <span class="number">0xD83D</span>);
         <span class="macro">assert_eq!</span>(buf[<span class="number">1</span>], <span class="number">0xDCCE</span>);
         <span class="macro">assert_eq!</span>(buf[<span class="number">2</span>], <span class="number">0</span>);
         <span class="macro">assert_eq!</span>(
-            convert_utf8_to_utf16_without_replacement(<span class="string">b&quot;\xF0\x9F\x93\x8Ee&quot;</span>, <span class="kw-2">&amp;mut </span>buf[..<span class="number">5</span>]),
+            convert_utf8_to_utf16_without_replacement(<span class="string">b"\xF0\x9F\x93\x8Ee"</span>, <span class="kw-2">&amp;mut </span>buf[..<span class="number">5</span>]),
             <span class="prelude-val">Some</span>(<span class="number">3</span>)
         );
         <span class="macro">assert_eq!</span>(buf[<span class="number">0</span>], <span class="number">0xD83D</span>);
         <span class="macro">assert_eq!</span>(buf[<span class="number">1</span>], <span class="number">0xDCCE</span>);
-        <span class="macro">assert_eq!</span>(buf[<span class="number">2</span>], u16::from(<span class="string">b&#39;e&#39;</span>));
+        <span class="macro">assert_eq!</span>(buf[<span class="number">2</span>], u16::from(<span class="string">b'e'</span>));
         <span class="macro">assert_eq!</span>(
-            convert_utf8_to_utf16_without_replacement(<span class="string">b&quot;\xF0\x9F\x93&quot;</span>, <span class="kw-2">&amp;mut </span>buf[..<span class="number">5</span>]),
+            convert_utf8_to_utf16_without_replacement(<span class="string">b"\xF0\x9F\x93"</span>, <span class="kw-2">&amp;mut </span>buf[..<span class="number">5</span>]),
             <span class="prelude-val">None
         </span>);
     }

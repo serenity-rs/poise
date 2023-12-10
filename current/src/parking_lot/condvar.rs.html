@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/parking_lot-0.12.1/src/condvar.rs`."><title>condvar.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="parking_lot" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/parking_lot-0.12.1/src/condvar.rs`."><title>condvar.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="parking_lot" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1269,7 +1269,7 @@
 <a href="#1269" id="1269">1269</a>
 <a href="#1270" id="1270">1270</a>
 <a href="#1271" id="1271">1271</a>
-</pre></div><pre class="rust"><code><span class="comment">// Copyright 2016 Amanieu d&#39;Antras
+</pre></div><pre class="rust"><code><span class="comment">// Copyright 2016 Amanieu d'Antras
 //
 // Licensed under the Apache License, Version 2.0, &lt;LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0&gt; or the MIT license &lt;LICENSE-MIT or
@@ -1354,7 +1354,7 @@
 ///     cvar.wait(&amp;mut started);
 /// }
 /// // Note that we used an if instead of a while loop above. This is only
-/// // possible because parking_lot&#39;s Condvar will never spuriously wake up.
+/// // possible because parking_lot's Condvar will never spuriously wake up.
 /// // This means that wait() will only return after notify_one or notify_all is
 /// // called.
 /// ```
@@ -1392,7 +1392,7 @@
     /// // do something with condvar, share it with other threads
     ///
     /// if !condvar.notify_one() {
-    ///     println!(&quot;Nobody was listening for this.&quot;);
+    ///     println!("Nobody was listening for this.");
     /// }
     /// ```
     </span><span class="attr">#[inline]
@@ -1425,7 +1425,7 @@
                 // requeue everything to the mutex. This is safe to do here
                 // since unlocking the mutex when the parked bit is set requires
                 // locking the queue. There is the possibility of a race if the
-                // mutex gets locked after we check, but that doesn&#39;t matter in
+                // mutex gets locked after we check, but that doesn't matter in
                 // this case.
                 </span><span class="kw">if unsafe </span>{ (<span class="kw-2">*</span>mutex).mark_parked_if_locked() } {
                     RequeueOp::RequeueOne
@@ -1488,7 +1488,7 @@
                 // requeue everything to the mutex. This is safe to do here
                 // since unlocking the mutex when the parked bit is set requires
                 // locking the queue. There is the possibility of a race if the
-                // mutex gets locked after we check, but that doesn&#39;t matter in
+                // mutex gets locked after we check, but that doesn't matter in
                 // this case.
                 </span><span class="kw">if unsafe </span>{ (<span class="kw-2">*</span>mutex).mark_parked_if_locked() } {
                     RequeueOp::RequeueAll
@@ -1523,7 +1523,7 @@
     /// This function will panic if another thread is waiting on the `Condvar`
     /// with a different `Mutex` object.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>wait&lt;T: <span class="question-mark">?</span>Sized&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, mutex_guard: <span class="kw-2">&amp;mut </span>MutexGuard&lt;<span class="lifetime">&#39;_</span>, T&gt;) {
+    </span><span class="kw">pub fn </span>wait&lt;T: <span class="question-mark">?</span>Sized&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, mutex_guard: <span class="kw-2">&amp;mut </span>MutexGuard&lt;<span class="lifetime">'_</span>, T&gt;) {
         <span class="self">self</span>.wait_until_internal(<span class="kw">unsafe </span>{ MutexGuard::mutex(mutex_guard).raw() }, <span class="prelude-val">None</span>);
     }
 
@@ -1553,7 +1553,7 @@
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>wait_until&lt;T: <span class="question-mark">?</span>Sized&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        mutex_guard: <span class="kw-2">&amp;mut </span>MutexGuard&lt;<span class="lifetime">&#39;_</span>, T&gt;,
+        mutex_guard: <span class="kw-2">&amp;mut </span>MutexGuard&lt;<span class="lifetime">'_</span>, T&gt;,
         timeout: Instant,
     ) -&gt; WaitTimeoutResult {
         <span class="self">self</span>.wait_until_internal(
@@ -1572,7 +1572,7 @@
                 <span class="kw">let </span>addr = <span class="self">self </span><span class="kw">as </span><span class="kw-2">*const </span><span class="kw">_ as </span>usize;
                 <span class="kw">let </span>lock_addr = mutex <span class="kw">as </span><span class="kw-2">*const </span><span class="kw">_ as </span><span class="kw-2">*mut </span><span class="kw">_</span>;
                 <span class="kw">let </span>validate = || {
-                    <span class="comment">// Ensure we don&#39;t use two different mutexes with the same
+                    <span class="comment">// Ensure we don't use two different mutexes with the same
                     // Condvar at the same time. This is done while locked to
                     // avoid races with notify_one
                     </span><span class="kw">let </span>state = <span class="self">self</span>.state.load(Ordering::Relaxed);
@@ -1590,7 +1590,7 @@
                 };
                 <span class="kw">let </span>timed_out = |k, was_last_thread| {
                     <span class="comment">// If we were requeued to a mutex, then we did not time out.
-                    // We&#39;ll just park ourselves on the mutex again when we try
+                    // We'll just park ourselves on the mutex again when we try
                     // to lock it later.
                     </span>requeued = k != addr;
 
@@ -1615,7 +1615,7 @@
             // that at this point the MutexGuard is still locked. It will be
             // unlocked by the unwinding logic.
             </span><span class="kw">if </span>bad_mutex {
-                <span class="macro">panic!</span>(<span class="string">&quot;attempted to use a condition variable with more than one mutex&quot;</span>);
+                <span class="macro">panic!</span>(<span class="string">"attempted to use a condition variable with more than one mutex"</span>);
             }
 
             <span class="comment">// ... and re-lock it once we are done sleeping
@@ -1649,7 +1649,7 @@
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>wait_for&lt;T: <span class="question-mark">?</span>Sized&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        mutex_guard: <span class="kw-2">&amp;mut </span>MutexGuard&lt;<span class="lifetime">&#39;_</span>, T&gt;,
+        mutex_guard: <span class="kw-2">&amp;mut </span>MutexGuard&lt;<span class="lifetime">'_</span>, T&gt;,
         timeout: Duration,
     ) -&gt; WaitTimeoutResult {
         <span class="kw">let </span>deadline = util::to_deadline(timeout);
@@ -1659,7 +1659,7 @@
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>wait_while_until_internal&lt;T, F&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        mutex_guard: <span class="kw-2">&amp;mut </span>MutexGuard&lt;<span class="lifetime">&#39;_</span>, T&gt;,
+        mutex_guard: <span class="kw-2">&amp;mut </span>MutexGuard&lt;<span class="lifetime">'_</span>, T&gt;,
         <span class="kw-2">mut </span>condition: F,
         timeout: <span class="prelude-ty">Option</span>&lt;Instant&gt;,
     ) -&gt; WaitTimeoutResult
@@ -1693,7 +1693,7 @@
     /// This function will panic if another thread is waiting on the `Condvar`
     /// with a different `Mutex` object.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>wait_while&lt;T, F&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, mutex_guard: <span class="kw-2">&amp;mut </span>MutexGuard&lt;<span class="lifetime">&#39;_</span>, T&gt;, condition: F)
+    </span><span class="kw">pub fn </span>wait_while&lt;T, F&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, mutex_guard: <span class="kw-2">&amp;mut </span>MutexGuard&lt;<span class="lifetime">'_</span>, T&gt;, condition: F)
     <span class="kw">where
         </span>T: <span class="question-mark">?</span>Sized,
         F: FnMut(<span class="kw-2">&amp;mut </span>T) -&gt; bool,
@@ -1731,7 +1731,7 @@
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>wait_while_until&lt;T, F&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        mutex_guard: <span class="kw-2">&amp;mut </span>MutexGuard&lt;<span class="lifetime">&#39;_</span>, T&gt;,
+        mutex_guard: <span class="kw-2">&amp;mut </span>MutexGuard&lt;<span class="lifetime">'_</span>, T&gt;,
         condition: F,
         timeout: Instant,
     ) -&gt; WaitTimeoutResult
@@ -1766,7 +1766,7 @@
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>wait_while_for&lt;T: <span class="question-mark">?</span>Sized, F&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        mutex_guard: <span class="kw-2">&amp;mut </span>MutexGuard&lt;<span class="lifetime">&#39;_</span>, T&gt;,
+        mutex_guard: <span class="kw-2">&amp;mut </span>MutexGuard&lt;<span class="lifetime">'_</span>, T&gt;,
         condition: F,
         timeout: Duration,
     ) -&gt; WaitTimeoutResult
@@ -1786,8 +1786,8 @@
 }
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>Condvar {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        f.pad(<span class="string">&quot;Condvar { .. }&quot;</span>)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        f.pad(<span class="string">"Condvar { .. }"</span>)
     }
 }
 
@@ -2086,9 +2086,9 @@
         <span class="kw">let </span>c = Arc::new(Condvar::new());
         <span class="kw">let </span>c2 = c.clone();
 
-        <span class="comment">// Make sure we don&#39;t leave the child thread dangling
-        </span><span class="kw">struct </span>PanicGuard&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Condvar);
-        <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Drop <span class="kw">for </span>PanicGuard&lt;<span class="lifetime">&#39;a</span>&gt; {
+        <span class="comment">// Make sure we don't leave the child thread dangling
+        </span><span class="kw">struct </span>PanicGuard&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span>Condvar);
+        <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Drop <span class="kw">for </span>PanicGuard&lt;<span class="lifetime">'a</span>&gt; {
             <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
                 <span class="self">self</span>.<span class="number">0</span>.notify_one();
             }
@@ -2130,7 +2130,7 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_debug_condvar() {
         <span class="kw">let </span>c = Condvar::new();
-        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, c), <span class="string">&quot;Condvar { .. }&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">"{:?}"</span>, c), <span class="string">"Condvar { .. }"</span>);
     }
 
     <span class="attr">#[test]
@@ -2149,7 +2149,7 @@
             <span class="comment">// Wait for the thread to get into wait()
             </span>MutexGuard::bump(<span class="kw-2">&amp;mut </span>g);
             <span class="comment">// Yield, so the other thread gets a chance to do something.
-            // (At least Miri needs this, because it doesn&#39;t preempt threads.)
+            // (At least Miri needs this, because it doesn't preempt threads.)
             </span>thread::yield_now();
         }
         <span class="comment">// The thread should have been requeued to the mutex, which we wake up now.
@@ -2183,8 +2183,8 @@
     }
 }
 
-<span class="doccomment">/// This module contains an integration test that is heavily inspired from WebKit&#39;s own integration
-/// tests for it&#39;s own Condvar.
+<span class="doccomment">/// This module contains an integration test that is heavily inspired from WebKit's own integration
+/// tests for it's own Condvar.
 </span><span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>webkit_queue_test {
     <span class="kw">use crate</span>::{Condvar, Mutex, MutexGuard};
@@ -2218,8 +2218,8 @@
 
     <span class="kw">fn </span>wait&lt;T: <span class="question-mark">?</span>Sized&gt;(
         condition: <span class="kw-2">&amp;</span>Condvar,
-        lock: <span class="kw-2">&amp;mut </span>MutexGuard&lt;<span class="lifetime">&#39;_</span>, T&gt;,
-        predicate: <span class="kw">impl </span>Fn(<span class="kw-2">&amp;mut </span>MutexGuard&lt;<span class="lifetime">&#39;_</span>, T&gt;) -&gt; bool,
+        lock: <span class="kw-2">&amp;mut </span>MutexGuard&lt;<span class="lifetime">'_</span>, T&gt;,
+        predicate: <span class="kw">impl </span>Fn(<span class="kw-2">&amp;mut </span>MutexGuard&lt;<span class="lifetime">'_</span>, T&gt;) -&gt; bool,
         timeout: <span class="kw-2">&amp;</span>Timeout,
     ) {
         <span class="kw">while </span>!predicate(lock) {
@@ -2290,7 +2290,7 @@
         thread::sleep(delay);
 
         <span class="kw">for </span>producer <span class="kw">in </span>producers.into_iter() {
-            producer.join().expect(<span class="string">&quot;Producer thread panicked&quot;</span>);
+            producer.join().expect(<span class="string">"Producer thread panicked"</span>);
         }
 
         {
@@ -2300,7 +2300,7 @@
         empty_condition.notify_all();
 
         <span class="kw">for </span>consumer <span class="kw">in </span>consumers.into_iter() {
-            consumer.join().expect(<span class="string">&quot;Consumer thread panicked&quot;</span>);
+            consumer.join().expect(<span class="string">"Consumer thread panicked"</span>);
         }
 
         <span class="kw">let </span><span class="kw-2">mut </span>output_vec = output_vec.lock();

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-0.21.9/src/suites.rs`."><title>suites.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="rustls" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-0.21.9/src/suites.rs`."><title>suites.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="rustls" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -342,9 +342,9 @@
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::fmt;
 
 <span class="kw">use </span><span class="kw">crate</span>::enums::{CipherSuite, ProtocolVersion, SignatureAlgorithm, SignatureScheme};
-<span class="attr">#[cfg(feature = <span class="string">&quot;tls12&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"tls12"</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::tls12::Tls12CipherSuite;
-<span class="attr">#[cfg(feature = <span class="string">&quot;tls12&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"tls12"</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::tls12::{
     TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
     <span class="comment">// TLS1.2 suites
@@ -358,7 +358,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::tls13::{
     TLS13_AES_128_GCM_SHA256, TLS13_AES_256_GCM_SHA384, TLS13_CHACHA20_POLY1305_SHA256,
 };
-<span class="attr">#[cfg(feature = <span class="string">&quot;tls12&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"tls12"</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::versions::TLS12;
 <span class="kw">use </span><span class="kw">crate</span>::versions::{SupportedProtocolVersion, TLS13};
 
@@ -385,7 +385,7 @@
     <span class="doccomment">/// How to do bulk encryption.
     </span><span class="kw">pub </span>bulk: BulkAlgorithm,
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) aead_algorithm: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>ring::aead::Algorithm,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) aead_algorithm: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>ring::aead::Algorithm,
 }
 
 <span class="doccomment">/// A cipher suite supported by rustls.
@@ -395,54 +395,54 @@
 </span><span class="attr">#[derive(Clone, Copy, PartialEq)]
 </span><span class="kw">pub enum </span>SupportedCipherSuite {
     <span class="doccomment">/// A TLS 1.2 cipher suite
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;tls12&quot;</span>)]
-    </span>Tls12(<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Tls12CipherSuite),
+    </span><span class="attr">#[cfg(feature = <span class="string">"tls12"</span>)]
+    </span>Tls12(<span class="kw-2">&amp;</span><span class="lifetime">'static </span>Tls12CipherSuite),
     <span class="doccomment">/// A TLS 1.3 cipher suite
-    </span>Tls13(<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Tls13CipherSuite),
+    </span>Tls13(<span class="kw-2">&amp;</span><span class="lifetime">'static </span>Tls13CipherSuite),
 }
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>SupportedCipherSuite {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         <span class="self">self</span>.suite().fmt(f)
     }
 }
 
 <span class="kw">impl </span>SupportedCipherSuite {
     <span class="doccomment">/// Which hash function to use with this suite.
-    </span><span class="kw">pub fn </span>hash_algorithm(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>ring::digest::Algorithm {
+    </span><span class="kw">pub fn </span>hash_algorithm(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'static </span>ring::digest::Algorithm {
         <span class="kw">match </span><span class="self">self </span>{
-            <span class="attr">#[cfg(feature = <span class="string">&quot;tls12&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"tls12"</span>)]
             </span><span class="self">Self</span>::Tls12(inner) =&gt; inner.hash_algorithm(),
             <span class="self">Self</span>::Tls13(inner) =&gt; inner.hash_algorithm(),
         }
     }
 
-    <span class="doccomment">/// The cipher suite&#39;s identifier
+    <span class="doccomment">/// The cipher suite's identifier
     </span><span class="kw">pub fn </span>suite(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; CipherSuite {
         <span class="self">self</span>.common().suite
     }
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>common(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>CipherSuiteCommon {
         <span class="kw">match </span><span class="self">self </span>{
-            <span class="attr">#[cfg(feature = <span class="string">&quot;tls12&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"tls12"</span>)]
             </span><span class="self">Self</span>::Tls12(inner) =&gt; <span class="kw-2">&amp;</span>inner.common,
             <span class="self">Self</span>::Tls13(inner) =&gt; <span class="kw-2">&amp;</span>inner.common,
         }
     }
 
-    <span class="attr">#[cfg(any(test, feature = <span class="string">&quot;quic&quot;</span>))]
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>tls13(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Tls13CipherSuite&gt; {
+    <span class="attr">#[cfg(any(test, feature = <span class="string">"quic"</span>))]
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>tls13(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'static </span>Tls13CipherSuite&gt; {
         <span class="kw">match </span><span class="self">self </span>{
-            <span class="attr">#[cfg(feature = <span class="string">&quot;tls12&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"tls12"</span>)]
             </span><span class="self">Self</span>::Tls12(<span class="kw">_</span>) =&gt; <span class="prelude-val">None</span>,
             <span class="self">Self</span>::Tls13(inner) =&gt; <span class="prelude-val">Some</span>(inner),
         }
     }
 
     <span class="doccomment">/// Return supported protocol version for the cipher suite.
-    </span><span class="kw">pub fn </span>version(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>SupportedProtocolVersion {
+    </span><span class="kw">pub fn </span>version(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'static </span>SupportedProtocolVersion {
         <span class="kw">match </span><span class="self">self </span>{
-            <span class="attr">#[cfg(feature = <span class="string">&quot;tls12&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"tls12"</span>)]
             </span><span class="self">Self</span>::Tls12(<span class="kw">_</span>) =&gt; <span class="kw-2">&amp;</span>TLS12,
             <span class="self">Self</span>::Tls13(<span class="kw">_</span>) =&gt; <span class="kw-2">&amp;</span>TLS13,
         }
@@ -453,7 +453,7 @@
     </span><span class="kw">pub fn </span>usable_for_signature_algorithm(<span class="kw-2">&amp;</span><span class="self">self</span>, _sig_alg: SignatureAlgorithm) -&gt; bool {
         <span class="kw">match </span><span class="self">self </span>{
             <span class="self">Self</span>::Tls13(<span class="kw">_</span>) =&gt; <span class="bool-val">true</span>, <span class="comment">// no constraint expressed by ciphersuite (e.g., TLS1.3)
-            </span><span class="attr">#[cfg(feature = <span class="string">&quot;tls12&quot;</span>)]
+            </span><span class="attr">#[cfg(feature = <span class="string">"tls12"</span>)]
             </span><span class="self">Self</span>::Tls12(inner) =&gt; inner
                 .sign
                 .iter()
@@ -469,24 +469,24 @@
     TLS13_AES_128_GCM_SHA256,
     TLS13_CHACHA20_POLY1305_SHA256,
     <span class="comment">// TLS1.2 suites
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;tls12&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"tls12"</span>)]
     </span>TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;tls12&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"tls12"</span>)]
     </span>TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;tls12&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"tls12"</span>)]
     </span>TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;tls12&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"tls12"</span>)]
     </span>TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;tls12&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"tls12"</span>)]
     </span>TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;tls12&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"tls12"</span>)]
     </span>TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
 ];
 
 <span class="doccomment">/// The cipher suite configuration that an application should use by default.
 ///
 /// This will be [`ALL_CIPHER_SUITES`] sans any supported cipher suites that
-/// shouldn&#39;t be enabled by most applications.
+/// shouldn't be enabled by most applications.
 </span><span class="kw">pub static </span>DEFAULT_CIPHER_SUITES: <span class="kw-2">&amp;</span>[SupportedCipherSuite] = ALL_CIPHER_SUITES;
 
 <span class="comment">// These both O(N^2)!
@@ -560,23 +560,23 @@
 /// After performing a handshake with rustls, these secrets can be extracted
 /// to configure kTLS for a socket, and have the kernel take over encryption
 /// and/or decryption.
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;secret_extraction&quot;</span>)]
-#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;secret_extraction&quot;</span>)))]
+</span><span class="attr">#[cfg(feature = <span class="string">"secret_extraction"</span>)]
+#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"secret_extraction"</span>)))]
 </span><span class="kw">pub struct </span>ExtractedSecrets {
-    <span class="doccomment">/// sequence number and secrets for the &quot;tx&quot; (transmit) direction
+    <span class="doccomment">/// sequence number and secrets for the "tx" (transmit) direction
     </span><span class="kw">pub </span>tx: (u64, ConnectionTrafficSecrets),
 
-    <span class="doccomment">/// sequence number and secrets for the &quot;rx&quot; (receive) direction
+    <span class="doccomment">/// sequence number and secrets for the "rx" (receive) direction
     </span><span class="kw">pub </span>rx: (u64, ConnectionTrafficSecrets),
 }
 
 <span class="doccomment">/// [ExtractedSecrets] minus the sequence numbers
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;secret_extraction&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">"secret_extraction"</span>)]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>PartiallyExtractedSecrets {
-    <span class="doccomment">/// secrets for the &quot;tx&quot; (transmit) direction
+    <span class="doccomment">/// secrets for the "tx" (transmit) direction
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) tx: ConnectionTrafficSecrets,
 
-    <span class="doccomment">/// secrets for the &quot;rx&quot; (receive) direction
+    <span class="doccomment">/// secrets for the "rx" (receive) direction
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) rx: ConnectionTrafficSecrets,
 }
 
@@ -585,8 +585,8 @@
 /// These can be used to configure kTLS for a socket in one direction.
 /// The only other piece of information needed is the sequence number,
 /// which is in [ExtractedSecrets].
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;secret_extraction&quot;</span>)]
-#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;secret_extraction&quot;</span>)))]
+</span><span class="attr">#[cfg(feature = <span class="string">"secret_extraction"</span>)]
+#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"secret_extraction"</span>)))]
 #[non_exhaustive]
 </span><span class="kw">pub enum </span>ConnectionTrafficSecrets {
     <span class="doccomment">/// Secrets for the AES_128_GCM AEAD algorithm
@@ -663,7 +663,7 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_scs_is_debug() {
-        <span class="macro">println!</span>(<span class="string">&quot;{:?}&quot;</span>, ALL_CIPHER_SUITES);
+        <span class="macro">println!</span>(<span class="string">"{:?}"</span>, ALL_CIPHER_SUITES);
     }
 
     <span class="attr">#[test]

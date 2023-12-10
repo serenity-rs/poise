@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/runtime/time/wheel/mod.rs`."><title>mod.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../../../" data-static-root-path="../../../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../../src-files.js"></script><script defer src="../../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/runtime/time/wheel/mod.rs`."><title>mod.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../../../" data-static-root-path="../../../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../../src-files.js"></script><script defer src="../../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -411,7 +411,7 @@
     }
 
     <span class="doccomment">/// Returns the number of milliseconds that have elapsed since the timing
-    /// wheel&#39;s creation.
+    /// wheel's creation.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>elapsed(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u64 {
         <span class="self">self</span>.elapsed
     }
@@ -473,7 +473,7 @@
             } <span class="kw">else </span>{
                 <span class="macro">debug_assert!</span>(
                     <span class="self">self</span>.elapsed &lt;= when,
-                    <span class="string">&quot;elapsed={}; when={}&quot;</span>,
+                    <span class="string">"elapsed={}; when={}"</span>,
                     <span class="self">self</span>.elapsed,
                     when
                 );
@@ -506,7 +506,7 @@
                 <span class="kw">_ </span>=&gt; {
                     <span class="comment">// in this case the poll did not indicate an expiration
                     // _and_ we were not able to find a next expiration in
-                    // the current list of timers.  advance to the poll&#39;s
+                    // the current list of timers.  advance to the poll's
                     // current time and do nothing else.
                     </span><span class="self">self</span>.set_elapsed(now);
                     <span class="kw">break</span>;
@@ -563,21 +563,21 @@
         res
     }
 
-    <span class="doccomment">/// iteratively find entries that are between the wheel&#39;s current
+    <span class="doccomment">/// iteratively find entries that are between the wheel's current
     /// time and the expiration time.  for each in that population either
     /// queue it for notification (in the case of the last level) or tier
     /// it down to the next level (in all other cases).
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>process_expiration(<span class="kw-2">&amp;mut </span><span class="self">self</span>, expiration: <span class="kw-2">&amp;</span>Expiration) {
         <span class="comment">// Note that we need to take _all_ of the entries off the list before
-        // processing any of them. This is important because it&#39;s possible that
+        // processing any of them. This is important because it's possible that
         // those entries might need to be reinserted into the same slot.
         //
         // This happens only on the highest level, when an entry is inserted
         // more than MAX_DURATION into the future. When this happens, we wrap
         // around, and process some entries a multiple of MAX_DURATION before
         // they actually need to be dropped down a level. We then reinsert them
-        // back into the same position; we must make sure we don&#39;t then process
-        // those entries again or we&#39;ll end up in an infinite loop.
+        // back into the same position; we must make sure we don't then process
+        // those entries again or we'll end up in an infinite loop.
         </span><span class="kw">let </span><span class="kw-2">mut </span>entries = <span class="self">self</span>.take_entries(expiration);
 
         <span class="kw">while let </span><span class="prelude-val">Some</span>(item) = entries.pop_back() {
@@ -585,7 +585,7 @@
                 <span class="macro">debug_assert_eq!</span>(<span class="kw">unsafe </span>{ item.cached_when() }, expiration.deadline);
             }
 
-            <span class="comment">// Try to expire the entry; this is cheap (doesn&#39;t synchronize) if
+            <span class="comment">// Try to expire the entry; this is cheap (doesn't synchronize) if
             // the timer is not expired, and updates cached_when.
             </span><span class="kw">match unsafe </span>{ item.mark_pending(expiration.deadline) } {
                 <span class="prelude-val">Ok</span>(()) =&gt; {
@@ -605,7 +605,7 @@
     <span class="kw">fn </span>set_elapsed(<span class="kw-2">&amp;mut </span><span class="self">self</span>, when: u64) {
         <span class="macro">assert!</span>(
             <span class="self">self</span>.elapsed &lt;= when,
-            <span class="string">&quot;elapsed={:?}; when={:?}&quot;</span>,
+            <span class="string">"elapsed={:?}; when={:?}"</span>,
             <span class="self">self</span>.elapsed,
             when
         );
@@ -654,7 +654,7 @@
             <span class="macro">assert_eq!</span>(
                 <span class="number">0</span>,
                 level_for(<span class="number">0</span>, pos),
-                <span class="string">&quot;level_for({}) -- binary = {:b}&quot;</span>,
+                <span class="string">"level_for({}) -- binary = {:b}"</span>,
                 pos,
                 pos
             );
@@ -666,7 +666,7 @@
                 <span class="macro">assert_eq!</span>(
                     level,
                     level_for(<span class="number">0</span>, a <span class="kw">as </span>u64),
-                    <span class="string">&quot;level_for({}) -- binary = {:b}&quot;</span>,
+                    <span class="string">"level_for({}) -- binary = {:b}"</span>,
                     a,
                     a
                 );
@@ -676,7 +676,7 @@
                     <span class="macro">assert_eq!</span>(
                         level,
                         level_for(<span class="number">0</span>, a <span class="kw">as </span>u64),
-                        <span class="string">&quot;level_for({}) -- binary = {:b}&quot;</span>,
+                        <span class="string">"level_for({}) -- binary = {:b}"</span>,
                         a,
                         a
                     );
@@ -687,7 +687,7 @@
                     <span class="macro">assert_eq!</span>(
                         level,
                         level_for(<span class="number">0</span>, a <span class="kw">as </span>u64),
-                        <span class="string">&quot;level_for({}) -- binary = {:b}&quot;</span>,
+                        <span class="string">"level_for({}) -- binary = {:b}"</span>,
                         a,
                         a
                     );

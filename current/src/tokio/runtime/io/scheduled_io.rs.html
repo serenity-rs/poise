@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/runtime/io/scheduled_io.rs`."><title>scheduled_io.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/runtime/io/scheduled_io.rs`."><title>scheduled_io.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -618,14 +618,14 @@
 </span><span class="comment">// # This struct should be cache padded to avoid false sharing. The cache padding rules are copied
 // from crossbeam-utils/src/cache_padded.rs
 //
-// Starting from Intel&#39;s Sandy Bridge, spatial prefetcher is now pulling pairs of 64-byte cache
+// Starting from Intel's Sandy Bridge, spatial prefetcher is now pulling pairs of 64-byte cache
 // lines at a time, so we have to align to 128 bytes rather than 64.
 //
 // Sources:
 // - https://www.intel.com/content/dam/www/public/us/en/documents/manuals/64-ia-32-architectures-optimization-manual.pdf
 // - https://github.com/facebook/folly/blob/1b5288e6eea6df074758f877c849b6e73bbb9fbb/folly/lang/Align.h#L107
 //
-// ARM&#39;s big.LITTLE architecture has asymmetric cores and &quot;big&quot; cores have 128-byte cache line size.
+// ARM's big.LITTLE architecture has asymmetric cores and "big" cores have 128-byte cache line size.
 //
 // Sources:
 // - https://www.mono-project.com/news/2016/09/12/arm64-icache/
@@ -636,9 +636,9 @@
 // - https://github.com/golang/go/blob/3dd58676054223962cd915bb0934d1f9f489d4d2/src/internal/cpu/cpu_ppc64x.go#L9
 </span><span class="attr">#[cfg_attr(
     any(
-        target_arch = <span class="string">&quot;x86_64&quot;</span>,
-        target_arch = <span class="string">&quot;aarch64&quot;</span>,
-        target_arch = <span class="string">&quot;powerpc64&quot;</span>,
+        target_arch = <span class="string">"x86_64"</span>,
+        target_arch = <span class="string">"aarch64"</span>,
+        target_arch = <span class="string">"powerpc64"</span>,
     ),
     repr(align(<span class="number">128</span>))
 )]
@@ -653,11 +653,11 @@
 // - https://github.com/torvalds/linux/blob/3516bd729358a2a9b090c1905bd2a3fa926e24c6/arch/hexagon/include/asm/cache.h#L12
 </span><span class="attr">#[cfg_attr(
     any(
-        target_arch = <span class="string">&quot;arm&quot;</span>,
-        target_arch = <span class="string">&quot;mips&quot;</span>,
-        target_arch = <span class="string">&quot;mips64&quot;</span>,
-        target_arch = <span class="string">&quot;sparc&quot;</span>,
-        target_arch = <span class="string">&quot;hexagon&quot;</span>,
+        target_arch = <span class="string">"arm"</span>,
+        target_arch = <span class="string">"mips"</span>,
+        target_arch = <span class="string">"mips64"</span>,
+        target_arch = <span class="string">"sparc"</span>,
+        target_arch = <span class="string">"hexagon"</span>,
     ),
     repr(align(<span class="number">32</span>))
 )]
@@ -665,13 +665,13 @@
 //
 // Sources:
 // - https://github.com/torvalds/linux/blob/3516bd729358a2a9b090c1905bd2a3fa926e24c6/arch/m68k/include/asm/cache.h#L9
-</span><span class="attr">#[cfg_attr(target_arch = <span class="string">&quot;m68k&quot;</span>, repr(align(<span class="number">16</span>)))]
+</span><span class="attr">#[cfg_attr(target_arch = <span class="string">"m68k"</span>, repr(align(<span class="number">16</span>)))]
 </span><span class="comment">// s390x has 256-byte cache line size.
 //
 // Sources:
 // - https://github.com/golang/go/blob/3dd58676054223962cd915bb0934d1f9f489d4d2/src/internal/cpu/cpu_s390x.go#L7
 // - https://github.com/torvalds/linux/blob/3516bd729358a2a9b090c1905bd2a3fa926e24c6/arch/s390/include/asm/cache.h#L13
-</span><span class="attr">#[cfg_attr(target_arch = <span class="string">&quot;s390x&quot;</span>, repr(align(<span class="number">256</span>)))]
+</span><span class="attr">#[cfg_attr(target_arch = <span class="string">"s390x"</span>, repr(align(<span class="number">256</span>)))]
 </span><span class="comment">// x86, riscv, wasm, and sparc64 have 64-byte cache line size.
 //
 // Sources:
@@ -683,23 +683,23 @@
 // All others are assumed to have 64-byte cache line size.
 </span><span class="attr">#[cfg_attr(
     not(any(
-        target_arch = <span class="string">&quot;x86_64&quot;</span>,
-        target_arch = <span class="string">&quot;aarch64&quot;</span>,
-        target_arch = <span class="string">&quot;powerpc64&quot;</span>,
-        target_arch = <span class="string">&quot;arm&quot;</span>,
-        target_arch = <span class="string">&quot;mips&quot;</span>,
-        target_arch = <span class="string">&quot;mips64&quot;</span>,
-        target_arch = <span class="string">&quot;sparc&quot;</span>,
-        target_arch = <span class="string">&quot;hexagon&quot;</span>,
-        target_arch = <span class="string">&quot;m68k&quot;</span>,
-        target_arch = <span class="string">&quot;s390x&quot;</span>,
+        target_arch = <span class="string">"x86_64"</span>,
+        target_arch = <span class="string">"aarch64"</span>,
+        target_arch = <span class="string">"powerpc64"</span>,
+        target_arch = <span class="string">"arm"</span>,
+        target_arch = <span class="string">"mips"</span>,
+        target_arch = <span class="string">"mips64"</span>,
+        target_arch = <span class="string">"sparc"</span>,
+        target_arch = <span class="string">"hexagon"</span>,
+        target_arch = <span class="string">"m68k"</span>,
+        target_arch = <span class="string">"s390x"</span>,
     )),
     repr(align(<span class="number">64</span>))
 )]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>ScheduledIo {
     <span class="kw">pub</span>(<span class="kw">super</span>) linked_list_pointers: UnsafeCell&lt;linked_list::Pointers&lt;<span class="self">Self</span>&gt;&gt;,
 
-    <span class="doccomment">/// Packs the resource&#39;s readiness and I/O driver latest tick.
+    <span class="doccomment">/// Packs the resource's readiness and I/O driver latest tick.
     </span>readiness: AtomicUsize,
 
     waiters: Mutex&lt;Waiters&gt;,
@@ -744,8 +744,8 @@
 }
 
 <span class="doccomment">/// Future returned by `readiness()`.
-</span><span class="kw">struct </span>Readiness&lt;<span class="lifetime">&#39;a</span>&gt; {
-    scheduled_io: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ScheduledIo,
+</span><span class="kw">struct </span>Readiness&lt;<span class="lifetime">'a</span>&gt; {
+    scheduled_io: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>ScheduledIo,
 
     state: State,
 
@@ -812,7 +812,7 @@
         </span><span class="macro">debug_assert!</span>(SHUTDOWN.unpack(current) == <span class="number">0 </span>|| <span class="macro">matches!</span>(tick, Tick::Clear(<span class="kw">_</span>)));
 
         <span class="kw">loop </span>{
-            <span class="comment">// Mask out the tick bits so that the modifying function doesn&#39;t see
+            <span class="comment">// Mask out the tick bits so that the modifying function doesn't see
             // them.
             </span><span class="kw">let </span>current_readiness = Ready::from_usize(current);
             <span class="kw">let </span>new = f(current_readiness);
@@ -873,7 +873,7 @@
             }
         }
 
-        <span class="lifetime">&#39;outer</span>: <span class="kw">loop </span>{
+        <span class="lifetime">'outer</span>: <span class="kw">loop </span>{
             <span class="kw">let </span><span class="kw-2">mut </span>iter = waiters.list.drain_filter(|w| ready.satisfies(w.interest));
 
             <span class="kw">while </span>wakers.can_push() {
@@ -887,7 +887,7 @@
                         }
                     }
                     <span class="prelude-val">None </span>=&gt; {
-                        <span class="kw">break </span><span class="lifetime">&#39;outer</span>;
+                        <span class="kw">break </span><span class="lifetime">'outer</span>;
                     }
                 }
             }
@@ -923,7 +923,7 @@
     /// and writer slots.
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>poll_readiness(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;,
+        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;,
         direction: Direction,
     ) -&gt; Poll&lt;ReadyEvent&gt; {
         <span class="kw">let </span>curr = <span class="self">self</span>.readiness.load(Acquire);
@@ -1010,11 +1010,11 @@
         <span class="self">self</span>.readiness_fut(interest).<span class="kw">await
     </span>}
 
-    <span class="comment">// This is in a separate function so that the borrow checker doesn&#39;t think
+    <span class="comment">// This is in a separate function so that the borrow checker doesn't think
     // we are borrowing the `UnsafeCell` possibly over await boundaries.
     //
     // Go figure.
-    </span><span class="kw">fn </span>readiness_fut(<span class="kw-2">&amp;</span><span class="self">self</span>, interest: Interest) -&gt; Readiness&lt;<span class="lifetime">&#39;_</span>&gt; {
+    </span><span class="kw">fn </span>readiness_fut(<span class="kw-2">&amp;</span><span class="self">self</span>, interest: Interest) -&gt; Readiness&lt;<span class="lifetime">'_</span>&gt; {
         Readiness {
             scheduled_io: <span class="self">self</span>,
             state: State::Init,
@@ -1048,10 +1048,10 @@
 
 <span class="comment">// ===== impl Readiness =====
 
-</span><span class="kw">impl </span>Future <span class="kw">for </span>Readiness&lt;<span class="lifetime">&#39;_</span>&gt; {
+</span><span class="kw">impl </span>Future <span class="kw">for </span>Readiness&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">type </span>Output = ReadyEvent;
 
-    <span class="kw">fn </span>poll(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
+    <span class="kw">fn </span>poll(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
         <span class="kw">use </span>std::sync::atomic::Ordering::SeqCst;
 
         <span class="kw">let </span>(scheduled_io, state, waiter) = <span class="kw">unsafe </span>{
@@ -1082,7 +1082,7 @@
                         });
                     }
 
-                    <span class="comment">// Wasn&#39;t ready, take the lock (and check again while locked).
+                    <span class="comment">// Wasn't ready, take the lock (and check again while locked).
                     </span><span class="kw">let </span><span class="kw-2">mut </span>waiters = scheduled_io.waiters.lock();
 
                     <span class="kw">let </span>curr = scheduled_io.readiness.load(SeqCst);
@@ -1122,7 +1122,7 @@
                     <span class="kw-2">*</span>state = State::Waiting;
                 }
                 State::Waiting =&gt; {
-                    <span class="comment">// Currently in the &quot;Waiting&quot; state, implying the caller has
+                    <span class="comment">// Currently in the "Waiting" state, implying the caller has
                     // a waiter stored in the waiter list (guarded by
                     // `notify.waiters`). In order to access the waker fields,
                     // we must hold the lock.
@@ -1160,7 +1160,7 @@
 
                     <span class="comment">// The returned tick might be newer than the event
                     // which notified our waker. This is ok because the future
-                    // still didn&#39;t return `Poll::Ready`.
+                    // still didn't return `Poll::Ready`.
                     </span><span class="kw">let </span>tick = TICK.unpack(curr) <span class="kw">as </span>u8;
 
                     <span class="comment">// The readiness state could have been cleared in the meantime,
@@ -1179,7 +1179,7 @@
     }
 }
 
-<span class="kw">impl </span>Drop <span class="kw">for </span>Readiness&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>Drop <span class="kw">for </span>Readiness&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="kw">let </span><span class="kw-2">mut </span>waiters = <span class="self">self</span>.scheduled_io.waiters.lock();
 
@@ -1192,6 +1192,6 @@
     }
 }
 
-<span class="kw">unsafe impl </span>Send <span class="kw">for </span>Readiness&lt;<span class="lifetime">&#39;_</span>&gt; {}
-<span class="kw">unsafe impl </span>Sync <span class="kw">for </span>Readiness&lt;<span class="lifetime">&#39;_</span>&gt; {}
+<span class="kw">unsafe impl </span>Send <span class="kw">for </span>Readiness&lt;<span class="lifetime">'_</span>&gt; {}
+<span class="kw">unsafe impl </span>Sync <span class="kw">for </span>Readiness&lt;<span class="lifetime">'_</span>&gt; {}
 </code></pre></div></section></main></body></html>

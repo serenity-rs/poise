@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/sync/batch_semaphore.rs`."><title>batch_semaphore.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/sync/batch_semaphore.rs`."><title>batch_semaphore.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -750,7 +750,7 @@
 <a href="#750" id="750">750</a>
 <a href="#751" id="751">751</a>
 <a href="#752" id="752">752</a>
-</pre></div><pre class="rust"><code><span class="attr">#![cfg_attr(not(feature = <span class="string">&quot;sync&quot;</span>), allow(unreachable_pub, dead_code))]
+</pre></div><pre class="rust"><code><span class="attr">#![cfg_attr(not(feature = <span class="string">"sync"</span>), allow(unreachable_pub, dead_code))]
 </span><span class="doccomment">//! # Implementation Details.
 //!
 //! The semaphore is implemented using an intrusive linked list of waiters. An
@@ -765,13 +765,13 @@
 //! from the front, the semaphore is fair. Tasks trying to acquire large numbers
 //! of permits at a time will always be woken eventually, even if many other
 //! tasks are acquiring smaller numbers of permits. This means that in a
-//! use-case like tokio&#39;s read-write lock, writers will not be starved by
+//! use-case like tokio's read-write lock, writers will not be starved by
 //! readers.
 </span><span class="kw">use </span><span class="kw">crate</span>::loom::cell::UnsafeCell;
 <span class="kw">use </span><span class="kw">crate</span>::loom::sync::atomic::AtomicUsize;
 <span class="kw">use </span><span class="kw">crate</span>::loom::sync::{Mutex, MutexGuard};
 <span class="kw">use </span><span class="kw">crate</span>::util::linked_list::{<span class="self">self</span>, LinkedList};
-<span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+<span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
 </span><span class="kw">use </span><span class="kw">crate</span>::util::trace;
 <span class="kw">use </span><span class="kw">crate</span>::util::WakeList;
 
@@ -788,7 +788,7 @@
     waiters: Mutex&lt;Waitlist&gt;,
     <span class="doccomment">/// The current number of available permits in the semaphore.
     </span>permits: AtomicUsize,
-    <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+    <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
     </span>resource_span: tracing::Span,
 }
 
@@ -820,9 +820,9 @@
 </span><span class="attr">#[derive(Debug)]
 </span><span class="kw">pub struct </span>AcquireError(());
 
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>Acquire&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>Acquire&lt;<span class="lifetime">'a</span>&gt; {
     node: Waiter,
-    semaphore: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Semaphore,
+    semaphore: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Semaphore,
     num_permits: u32,
     queued: bool,
 }
@@ -849,14 +849,14 @@
     /// This may only be accessed while the wait queue is locked.
     ///
     /// TODO: Ideally, we would be able to use loom to enforce that
-    /// this isn&#39;t accessed concurrently. However, it is difficult to
+    /// this isn't accessed concurrently. However, it is difficult to
     /// use a `UnsafeCell` here, since the `Link` trait requires _returning_
     /// references to `Pointers`, and `UnsafeCell` requires that checked access
     /// take place inside a closure. We should consider changing `Pointers` to
     /// use `UnsafeCell` internally.
     </span>pointers: linked_list::Pointers&lt;Waiter&gt;,
 
-    <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+    <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
     </span>ctx: trace::AsyncOpTracingCtx,
 
     <span class="doccomment">/// Should not be `Unpin`.
@@ -892,24 +892,24 @@
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(permits: usize) -&gt; <span class="self">Self </span>{
         <span class="macro">assert!</span>(
             permits &lt;= <span class="self">Self</span>::MAX_PERMITS,
-            <span class="string">&quot;a semaphore may not have more than MAX_PERMITS permits ({})&quot;</span>,
+            <span class="string">"a semaphore may not have more than MAX_PERMITS permits ({})"</span>,
             <span class="self">Self</span>::MAX_PERMITS
         );
 
-        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
         </span><span class="kw">let </span>resource_span = {
             <span class="kw">let </span>resource_span = <span class="macro">tracing::trace_span!</span>(
-                <span class="string">&quot;runtime.resource&quot;</span>,
-                concrete_type = <span class="string">&quot;Semaphore&quot;</span>,
-                kind = <span class="string">&quot;Sync&quot;</span>,
+                <span class="string">"runtime.resource"</span>,
+                concrete_type = <span class="string">"Semaphore"</span>,
+                kind = <span class="string">"Sync"</span>,
                 is_internal = <span class="bool-val">true
             </span>);
 
             resource_span.in_scope(|| {
                 <span class="macro">tracing::trace!</span>(
-                    target: <span class="string">&quot;runtime::resource::state_update&quot;</span>,
+                    target: <span class="string">"runtime::resource::state_update"</span>,
                     permits = permits,
-                    permits.op = <span class="string">&quot;override&quot;</span>,
+                    permits.op = <span class="string">"override"</span>,
                 )
             });
             resource_span
@@ -921,7 +921,7 @@
                 queue: LinkedList::new(),
                 closed: <span class="bool-val">false</span>,
             }),
-            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
             </span>resource_span,
         }
     }
@@ -939,7 +939,7 @@
                 queue: LinkedList::new(),
                 closed: <span class="bool-val">false</span>,
             }),
-            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
             </span>resource_span: tracing::Span::none(),
         }
     }
@@ -952,7 +952,7 @@
                 queue: LinkedList::new(),
                 closed: <span class="bool-val">true</span>,
             }),
-            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
             </span>resource_span: tracing::Span::none(),
         }
     }
@@ -966,7 +966,7 @@
                 queue: LinkedList::new(),
                 closed: <span class="bool-val">true</span>,
             }),
-            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
             </span>resource_span: tracing::Span::none(),
         }
     }
@@ -992,12 +992,12 @@
     /// permits and notifies all pending waiters.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>close(<span class="kw-2">&amp;</span><span class="self">self</span>) {
         <span class="kw">let </span><span class="kw-2">mut </span>waiters = <span class="self">self</span>.waiters.lock();
-        <span class="comment">// If the semaphore&#39;s permits counter has enough permits for an
+        <span class="comment">// If the semaphore's permits counter has enough permits for an
         // unqueued waiter to acquire all the permits it needs immediately,
-        // it won&#39;t touch the wait list. Therefore, we have to set a bit on
+        // it won't touch the wait list. Therefore, we have to set a bit on
         // the permit counter as well. However, we must do this while
         // holding the lock --- otherwise, if we set the bit and then wait
-        // to acquire the lock we&#39;ll enter an inconsistent state where the
+        // to acquire the lock we'll enter an inconsistent state where the
         // permit counter is closed, but the wait list is not.
         </span><span class="self">self</span>.permits.fetch_or(<span class="self">Self</span>::CLOSED, Release);
         waiters.closed = <span class="bool-val">true</span>;
@@ -1017,7 +1017,7 @@
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>try_acquire(<span class="kw-2">&amp;</span><span class="self">self</span>, num_permits: u32) -&gt; <span class="prelude-ty">Result</span>&lt;(), TryAcquireError&gt; {
         <span class="macro">assert!</span>(
             num_permits <span class="kw">as </span>usize &lt;= <span class="self">Self</span>::MAX_PERMITS,
-            <span class="string">&quot;a semaphore may not have more than MAX_PERMITS permits ({})&quot;</span>,
+            <span class="string">"a semaphore may not have more than MAX_PERMITS permits ({})"</span>,
             <span class="self">Self</span>::MAX_PERMITS
         );
         <span class="kw">let </span>num_permits = (num_permits <span class="kw">as </span>usize) &lt;&lt; <span class="self">Self</span>::PERMIT_SHIFT;
@@ -1045,34 +1045,34 @@
         }
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>acquire(<span class="kw-2">&amp;</span><span class="self">self</span>, num_permits: u32) -&gt; Acquire&lt;<span class="lifetime">&#39;_</span>&gt; {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>acquire(<span class="kw-2">&amp;</span><span class="self">self</span>, num_permits: u32) -&gt; Acquire&lt;<span class="lifetime">'_</span>&gt; {
         Acquire::new(<span class="self">self</span>, num_permits)
     }
 
-    <span class="doccomment">/// Release `rem` permits to the semaphore&#39;s wait list, starting from the
+    <span class="doccomment">/// Release `rem` permits to the semaphore's wait list, starting from the
     /// end of the queue.
     ///
     /// If `rem` exceeds the number of permits needed by the wait list, the
     /// remainder are assigned back to the semaphore.
-    </span><span class="kw">fn </span>add_permits_locked(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut </span>rem: usize, waiters: MutexGuard&lt;<span class="lifetime">&#39;_</span>, Waitlist&gt;) {
+    </span><span class="kw">fn </span>add_permits_locked(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut </span>rem: usize, waiters: MutexGuard&lt;<span class="lifetime">'_</span>, Waitlist&gt;) {
         <span class="kw">let </span><span class="kw-2">mut </span>wakers = WakeList::new();
         <span class="kw">let </span><span class="kw-2">mut </span>lock = <span class="prelude-val">Some</span>(waiters);
         <span class="kw">let </span><span class="kw-2">mut </span>is_empty = <span class="bool-val">false</span>;
         <span class="kw">while </span>rem &gt; <span class="number">0 </span>{
             <span class="kw">let </span><span class="kw-2">mut </span>waiters = lock.take().unwrap_or_else(|| <span class="self">self</span>.waiters.lock());
-            <span class="lifetime">&#39;inner</span>: <span class="kw">while </span>wakers.can_push() {
+            <span class="lifetime">'inner</span>: <span class="kw">while </span>wakers.can_push() {
                 <span class="comment">// Was the waiter assigned enough permits to wake it?
                 </span><span class="kw">match </span>waiters.queue.last() {
                     <span class="prelude-val">Some</span>(waiter) =&gt; {
                         <span class="kw">if </span>!waiter.assign_permits(<span class="kw-2">&amp;mut </span>rem) {
-                            <span class="kw">break </span><span class="lifetime">&#39;inner</span>;
+                            <span class="kw">break </span><span class="lifetime">'inner</span>;
                         }
                     }
                     <span class="prelude-val">None </span>=&gt; {
                         is_empty = <span class="bool-val">true</span>;
                         <span class="comment">// If we assigned permits to all the waiters in the queue, and there are
                         // still permits left over, assign them back to the semaphore.
-                        </span><span class="kw">break </span><span class="lifetime">&#39;inner</span>;
+                        </span><span class="kw">break </span><span class="lifetime">'inner</span>;
                     }
                 };
                 <span class="kw">let </span><span class="kw-2">mut </span>waiter = waiters.queue.pop_back().unwrap();
@@ -1087,25 +1087,25 @@
                 <span class="kw">let </span>permits = rem;
                 <span class="macro">assert!</span>(
                     permits &lt;= <span class="self">Self</span>::MAX_PERMITS,
-                    <span class="string">&quot;cannot add more than MAX_PERMITS permits ({})&quot;</span>,
+                    <span class="string">"cannot add more than MAX_PERMITS permits ({})"</span>,
                     <span class="self">Self</span>::MAX_PERMITS
                 );
                 <span class="kw">let </span>prev = <span class="self">self</span>.permits.fetch_add(rem &lt;&lt; <span class="self">Self</span>::PERMIT_SHIFT, Release);
                 <span class="kw">let </span>prev = prev &gt;&gt; <span class="self">Self</span>::PERMIT_SHIFT;
                 <span class="macro">assert!</span>(
                     prev + permits &lt;= <span class="self">Self</span>::MAX_PERMITS,
-                    <span class="string">&quot;number of added permits ({}) would overflow MAX_PERMITS ({})&quot;</span>,
+                    <span class="string">"number of added permits ({}) would overflow MAX_PERMITS ({})"</span>,
                     rem,
                     <span class="self">Self</span>::MAX_PERMITS
                 );
 
                 <span class="comment">// add remaining permits back
-                </span><span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+                </span><span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
                 </span><span class="self">self</span>.resource_span.in_scope(|| {
                     <span class="macro">tracing::trace!</span>(
-                    target: <span class="string">&quot;runtime::resource::state_update&quot;</span>,
+                    target: <span class="string">"runtime::resource::state_update"</span>,
                     permits = rem,
-                    permits.op = <span class="string">&quot;add&quot;</span>,
+                    permits.op = <span class="string">"add"</span>,
                     )
                 });
 
@@ -1122,7 +1122,7 @@
 
     <span class="kw">fn </span>poll_acquire(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;,
+        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;,
         num_permits: u32,
         node: Pin&lt;<span class="kw-2">&amp;mut </span>Waiter&gt;,
         queued: bool,
@@ -1148,7 +1148,7 @@
             <span class="kw">let </span><span class="kw-2">mut </span>remaining = <span class="number">0</span>;
             <span class="kw">let </span>total = curr
                 .checked_add(acquired)
-                .expect(<span class="string">&quot;number of permits must not overflow&quot;</span>);
+                .expect(<span class="string">"number of permits must not overflow"</span>);
             <span class="kw">let </span>(next, acq) = <span class="kw">if </span>total &gt;= needed {
                 <span class="kw">let </span>next = curr - (needed - acquired);
                 (next, needed &gt;&gt; <span class="self">Self</span>::PERMIT_SHIFT)
@@ -1159,9 +1159,9 @@
 
             <span class="kw">if </span>remaining &gt; <span class="number">0 </span>&amp;&amp; lock.is_none() {
                 <span class="comment">// No permits were immediately available, so this permit will
-                // (probably) need to wait. We&#39;ll need to acquire a lock on the
+                // (probably) need to wait. We'll need to acquire a lock on the
                 // wait queue before continuing. We need to do this _before_ the
-                // CAS that sets the new value of the semaphore&#39;s `permits`
+                // CAS that sets the new value of the semaphore's `permits`
                 // counter. Otherwise, if we subtract the permits and then
                 // acquire the lock, we might miss additional permits being
                 // added while waiting for the lock.
@@ -1173,17 +1173,17 @@
                     acquired += acq;
                     <span class="kw">if </span>remaining == <span class="number">0 </span>{
                         <span class="kw">if </span>!queued {
-                            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+                            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
                             </span><span class="self">self</span>.resource_span.in_scope(|| {
                                 <span class="macro">tracing::trace!</span>(
-                                    target: <span class="string">&quot;runtime::resource::state_update&quot;</span>,
+                                    target: <span class="string">"runtime::resource::state_update"</span>,
                                     permits = acquired,
-                                    permits.op = <span class="string">&quot;sub&quot;</span>,
+                                    permits.op = <span class="string">"sub"</span>,
                                 );
                                 <span class="macro">tracing::trace!</span>(
-                                    target: <span class="string">&quot;runtime::resource::async_op::state_update&quot;</span>,
+                                    target: <span class="string">"runtime::resource::async_op::state_update"</span>,
                                     permits_obtained = acquired,
-                                    permits.op = <span class="string">&quot;add&quot;</span>,
+                                    permits.op = <span class="string">"add"</span>,
                                 )
                             });
 
@@ -1192,7 +1192,7 @@
                             <span class="kw">break </span><span class="self">self</span>.waiters.lock();
                         }
                     }
-                    <span class="kw">break </span>lock.expect(<span class="string">&quot;lock must be acquired before waiting&quot;</span>);
+                    <span class="kw">break </span>lock.expect(<span class="string">"lock must be acquired before waiting"</span>);
                 }
                 <span class="prelude-val">Err</span>(actual) =&gt; curr = actual,
             }
@@ -1202,12 +1202,12 @@
             <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Err</span>(AcquireError::closed()));
         }
 
-        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
         </span><span class="self">self</span>.resource_span.in_scope(|| {
             <span class="macro">tracing::trace!</span>(
-                target: <span class="string">&quot;runtime::resource::state_update&quot;</span>,
+                target: <span class="string">"runtime::resource::state_update"</span>,
                 permits = acquired,
-                permits.op = <span class="string">&quot;sub&quot;</span>,
+                permits.op = <span class="string">"sub"</span>,
             )
         });
 
@@ -1249,9 +1249,9 @@
 }
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>Semaphore {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        fmt.debug_struct(<span class="string">&quot;Semaphore&quot;</span>)
-            .field(<span class="string">&quot;permits&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.available_permits())
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        fmt.debug_struct(<span class="string">"Semaphore"</span>)
+            .field(<span class="string">"permits"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.available_permits())
             .finish()
     }
 }
@@ -1259,13 +1259,13 @@
 <span class="kw">impl </span>Waiter {
     <span class="kw">fn </span>new(
         num_permits: u32,
-        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))] </span>ctx: trace::AsyncOpTracingCtx,
+        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))] </span>ctx: trace::AsyncOpTracingCtx,
     ) -&gt; <span class="self">Self </span>{
         Waiter {
             waker: UnsafeCell::new(<span class="prelude-val">None</span>),
             state: AtomicUsize::new(num_permits <span class="kw">as </span>usize),
             pointers: linked_list::Pointers::new(),
-            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
             </span>ctx,
             _p: PhantomPinned,
         }
@@ -1282,12 +1282,12 @@
             <span class="kw">match </span><span class="self">self</span>.state.compare_exchange(curr, next, AcqRel, Acquire) {
                 <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; {
                     <span class="kw-2">*</span>n -= assign;
-                    <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+                    <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
                     </span><span class="self">self</span>.ctx.async_op_span.in_scope(|| {
                         <span class="macro">tracing::trace!</span>(
-                            target: <span class="string">&quot;runtime::resource::async_op::state_update&quot;</span>,
+                            target: <span class="string">"runtime::resource::async_op::state_update"</span>,
                             permits_obtained = assign,
-                            permits.op = <span class="string">&quot;add&quot;</span>,
+                            permits.op = <span class="string">"add"</span>,
                         );
                     });
                     <span class="kw">return </span>next == <span class="number">0</span>;
@@ -1298,27 +1298,27 @@
     }
 }
 
-<span class="kw">impl </span>Future <span class="kw">for </span>Acquire&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>Future <span class="kw">for </span>Acquire&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">type </span>Output = <span class="prelude-ty">Result</span>&lt;(), AcquireError&gt;;
 
-    <span class="kw">fn </span>poll(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
-        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+    <span class="kw">fn </span>poll(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
+        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
         </span><span class="kw">let </span>_resource_span = <span class="self">self</span>.node.ctx.resource_span.clone().entered();
-        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
         </span><span class="kw">let </span>_async_op_span = <span class="self">self</span>.node.ctx.async_op_span.clone().entered();
-        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
         </span><span class="kw">let </span>_async_op_poll_span = <span class="self">self</span>.node.ctx.async_op_poll_span.clone().entered();
 
         <span class="kw">let </span>(node, semaphore, needed, queued) = <span class="self">self</span>.project();
 
         <span class="comment">// First, ensure the current task has enough budget to proceed.
-        </span><span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+        </span><span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
         </span><span class="kw">let </span>coop = <span class="macro">ready!</span>(<span class="macro">trace_poll_op!</span>(
-            <span class="string">&quot;poll_acquire&quot;</span>,
+            <span class="string">"poll_acquire"</span>,
             <span class="kw">crate</span>::runtime::coop::poll_proceed(cx),
         ));
 
-        <span class="attr">#[cfg(not(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>)))]
+        <span class="attr">#[cfg(not(all(tokio_unstable, feature = <span class="string">"tracing"</span>)))]
         </span><span class="kw">let </span>coop = <span class="macro">ready!</span>(<span class="kw">crate</span>::runtime::coop::poll_proceed(cx));
 
         <span class="kw">let </span>result = <span class="kw">match </span>semaphore.poll_acquire(cx, needed, node, <span class="kw-2">*</span>queued) {
@@ -1334,17 +1334,17 @@
             }
         };
 
-        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
-        </span><span class="kw">return </span><span class="macro">trace_poll_op!</span>(<span class="string">&quot;poll_acquire&quot;</span>, result);
+        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
+        </span><span class="kw">return </span><span class="macro">trace_poll_op!</span>(<span class="string">"poll_acquire"</span>, result);
 
-        <span class="attr">#[cfg(not(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>)))]
+        <span class="attr">#[cfg(not(all(tokio_unstable, feature = <span class="string">"tracing"</span>)))]
         </span><span class="kw">return </span>result;
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Acquire&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>new(semaphore: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Semaphore, num_permits: u32) -&gt; <span class="self">Self </span>{
-        <span class="attr">#[cfg(any(not(tokio_unstable), not(feature = <span class="string">&quot;tracing&quot;</span>)))]
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Acquire&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>new(semaphore: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Semaphore, num_permits: u32) -&gt; <span class="self">Self </span>{
+        <span class="attr">#[cfg(any(not(tokio_unstable), not(feature = <span class="string">"tracing"</span>)))]
         </span><span class="kw">return </span><span class="self">Self </span>{
             node: Waiter::new(num_permits),
             semaphore,
@@ -1352,24 +1352,24 @@
             queued: <span class="bool-val">false</span>,
         };
 
-        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
         </span><span class="kw">return </span>semaphore.resource_span.in_scope(|| {
             <span class="kw">let </span>async_op_span =
-                <span class="macro">tracing::trace_span!</span>(<span class="string">&quot;runtime.resource.async_op&quot;</span>, source = <span class="string">&quot;Acquire::new&quot;</span>);
+                <span class="macro">tracing::trace_span!</span>(<span class="string">"runtime.resource.async_op"</span>, source = <span class="string">"Acquire::new"</span>);
             <span class="kw">let </span>async_op_poll_span = async_op_span.in_scope(|| {
                 <span class="macro">tracing::trace!</span>(
-                    target: <span class="string">&quot;runtime::resource::async_op::state_update&quot;</span>,
+                    target: <span class="string">"runtime::resource::async_op::state_update"</span>,
                     permits_requested = num_permits,
-                    permits.op = <span class="string">&quot;override&quot;</span>,
+                    permits.op = <span class="string">"override"</span>,
                 );
 
                 <span class="macro">tracing::trace!</span>(
-                    target: <span class="string">&quot;runtime::resource::async_op::state_update&quot;</span>,
+                    target: <span class="string">"runtime::resource::async_op::state_update"</span>,
                     permits_obtained = <span class="number">0usize</span>,
-                    permits.op = <span class="string">&quot;override&quot;</span>,
+                    permits.op = <span class="string">"override"</span>,
                 );
 
-                <span class="macro">tracing::trace_span!</span>(<span class="string">&quot;runtime.resource.async_op.poll&quot;</span>)
+                <span class="macro">tracing::trace_span!</span>(<span class="string">"runtime.resource.async_op.poll"</span>)
             });
 
             <span class="kw">let </span>ctx = trace::AsyncOpTracingCtx {
@@ -1407,7 +1407,7 @@
     }
 }
 
-<span class="kw">impl </span>Drop <span class="kw">for </span>Acquire&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>Drop <span class="kw">for </span>Acquire&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="comment">// If the future is completed, there is no node in the wait list, so we
         // can skip acquiring the lock.
@@ -1437,7 +1437,7 @@
 // `UnsafeCell` is only accessed when the future is borrowed mutably (either in
 // `poll` or in `drop`). Therefore, it is safe (although not particularly
 // _useful_) for the future to be borrowed immutably across threads.
-</span><span class="kw">unsafe impl </span>Sync <span class="kw">for </span>Acquire&lt;<span class="lifetime">&#39;_</span>&gt; {}
+</span><span class="kw">unsafe impl </span>Sync <span class="kw">for </span>Acquire&lt;<span class="lifetime">'_</span>&gt; {}
 
 <span class="comment">// ===== impl AcquireError ====
 
@@ -1448,8 +1448,8 @@
 }
 
 <span class="kw">impl </span>fmt::Display <span class="kw">for </span>AcquireError {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        <span class="macro">write!</span>(fmt, <span class="string">&quot;semaphore closed&quot;</span>)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        <span class="macro">write!</span>(fmt, <span class="string">"semaphore closed"</span>)
     }
 }
 
@@ -1473,10 +1473,10 @@
 }
 
 <span class="kw">impl </span>fmt::Display <span class="kw">for </span>TryAcquireError {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         <span class="kw">match </span><span class="self">self </span>{
-            TryAcquireError::Closed =&gt; <span class="macro">write!</span>(fmt, <span class="string">&quot;semaphore closed&quot;</span>),
-            TryAcquireError::NoPermits =&gt; <span class="macro">write!</span>(fmt, <span class="string">&quot;no permits available&quot;</span>),
+            TryAcquireError::Closed =&gt; <span class="macro">write!</span>(fmt, <span class="string">"semaphore closed"</span>),
+            TryAcquireError::NoPermits =&gt; <span class="macro">write!</span>(fmt, <span class="string">"no permits available"</span>),
         }
     }
 }

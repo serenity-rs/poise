@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/socket2-0.5.5/src/socket.rs`."><title>socket.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="socket2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/socket2-0.5.5/src/socket.rs`."><title>socket.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="socket2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -2107,10 +2107,10 @@
 
 </span><span class="kw">use </span>std::fmt;
 <span class="kw">use </span>std::io::{<span class="self">self</span>, Read, Write};
-<span class="attr">#[cfg(not(target_os = <span class="string">&quot;redox&quot;</span>))]
+<span class="attr">#[cfg(not(target_os = <span class="string">"redox"</span>))]
 </span><span class="kw">use </span>std::io::{IoSlice, IoSliceMut};
 <span class="kw">use </span>std::mem::MaybeUninit;
-<span class="attr">#[cfg(not(target_os = <span class="string">&quot;nto&quot;</span>))]
+<span class="attr">#[cfg(not(target_os = <span class="string">"nto"</span>))]
 </span><span class="kw">use </span>std::net::Ipv6Addr;
 <span class="kw">use </span>std::net::{<span class="self">self</span>, Ipv4Addr, Shutdown};
 <span class="attr">#[cfg(unix)]
@@ -2120,10 +2120,10 @@
 <span class="kw">use </span>std::time::Duration;
 
 <span class="kw">use </span><span class="kw">crate</span>::sys::{<span class="self">self</span>, c_int, getsockopt, setsockopt, Bool};
-<span class="attr">#[cfg(all(unix, not(target_os = <span class="string">&quot;redox&quot;</span>)))]
+<span class="attr">#[cfg(all(unix, not(target_os = <span class="string">"redox"</span>)))]
 </span><span class="kw">use </span><span class="kw">crate</span>::MsgHdrMut;
 <span class="kw">use crate</span>::{Domain, Protocol, SockAddr, TcpKeepalive, Type};
-<span class="attr">#[cfg(not(target_os = <span class="string">&quot;redox&quot;</span>))]
+<span class="attr">#[cfg(not(target_os = <span class="string">"redox"</span>))]
 </span><span class="kw">use crate</span>::{MaybeUninitSlice, MsgHdr, RecvFlags};
 
 <span class="doccomment">/// Owned wrapper around a system socket.
@@ -2132,8 +2132,8 @@
 /// and an instance of `SOCKET` on Windows. This is the main type exported by
 /// this crate and is intended to mirror the raw semantics of sockets on
 /// platforms as closely as possible. Almost all methods correspond to
-/// precisely one libc or OS API call which is essentially just a &quot;Rustic
-/// translation&quot; of what&#39;s below.
+/// precisely one libc or OS API call which is essentially just a "Rustic
+/// translation" of what's below.
 ///
 /// ## Converting to and from other types
 ///
@@ -2161,7 +2161,7 @@
 /// // create a TCP listener
 /// let socket = Socket::new(Domain::IPV6, Type::STREAM, None)?;
 ///
-/// let address: SocketAddr = &quot;[::1]:12345&quot;.parse().unwrap();
+/// let address: SocketAddr = "[::1]:12345".parse().unwrap();
 /// let address = address.into();
 /// socket.bind(&amp;address)?;
 /// socket.listen(128)?;
@@ -2183,26 +2183,26 @@
     ///
     /// The caller must ensure `raw` is a valid file descriptor/socket. NOTE:
     /// this should really be marked `unsafe`, but this being an internal
-    /// function, often passed as mapping function, it&#39;s makes it very
+    /// function, often passed as mapping function, it's makes it very
     /// inconvenient to mark it as `unsafe`.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>from_raw(raw: sys::Socket) -&gt; Socket {
         Socket {
             inner: <span class="kw">unsafe </span>{
                 <span class="comment">// SAFETY: the caller must ensure that `raw` is a valid file
-                // descriptor, but when it isn&#39;t it could return I/O errors, or
-                // potentially close a fd it doesn&#39;t own. All of that isn&#39;t
-                // memory unsafe, so it&#39;s not desired but never memory unsafe or
+                // descriptor, but when it isn't it could return I/O errors, or
+                // potentially close a fd it doesn't own. All of that isn't
+                // memory unsafe, so it's not desired but never memory unsafe or
                 // causes UB.
                 //
                 // However there is one exception. We use `TcpStream` to
                 // represent the `Socket` internally (see `Inner` type),
-                // `TcpStream` has a layout optimisation that doesn&#39;t allow for
+                // `TcpStream` has a layout optimisation that doesn't allow for
                 // negative file descriptors (as those are always invalid).
                 // Violating this assumption (fd never negative) causes UB,
-                // something we don&#39;t want. So check for that we have this
+                // something we don't want. So check for that we have this
                 // `assert!`.
                 </span><span class="attr">#[cfg(unix)]
-                </span><span class="macro">assert!</span>(raw &gt;= <span class="number">0</span>, <span class="string">&quot;tried to create a `Socket` with an invalid fd&quot;</span>);
+                </span><span class="macro">assert!</span>(raw &gt;= <span class="number">0</span>, <span class="string">"tried to create a `Socket` with an invalid fd"</span>);
                 sys::socket_from_raw(raw)
             },
         }
@@ -2225,7 +2225,7 @@
     /// Additionally, on Apple platforms `SOCK_NOSIGPIPE` is set. On Windows,
     /// the socket is made non-inheritable.
     ///
-    /// [`Socket::new_raw`] can be used if you don&#39;t want these flags to be set.
+    /// [`Socket::new_raw`] can be used if you don't want these flags to be set.
     </span><span class="attr">#[doc = <span class="macro">man_links!</span>(socket(<span class="number">2</span>))]
     </span><span class="kw">pub fn </span>new(domain: Domain, ty: Type, protocol: <span class="prelude-ty">Option</span>&lt;Protocol&gt;) -&gt; io::Result&lt;Socket&gt; {
         <span class="kw">let </span>ty = set_common_type(ty);
@@ -2246,10 +2246,10 @@
     /// This function corresponds to `socketpair(2)`.
     ///
     /// This function sets the same flags as in done for [`Socket::new`],
-    /// [`Socket::pair_raw`] can be used if you don&#39;t want to set those flags.
+    /// [`Socket::pair_raw`] can be used if you don't want to set those flags.
     </span><span class="attr">#[doc = <span class="macro">man_links!</span>(unix: socketpair(<span class="number">2</span>))]
-    #[cfg(all(feature = <span class="string">&quot;all&quot;</span>, unix))]
-    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">&quot;all&quot;</span>, unix))))]
+    #[cfg(all(feature = <span class="string">"all"</span>, unix))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">"all"</span>, unix))))]
     </span><span class="kw">pub fn </span>pair(
         domain: Domain,
         ty: Type,
@@ -2265,8 +2265,8 @@
     <span class="doccomment">/// Creates a pair of sockets which are connected to each other.
     ///
     /// This function corresponds to `socketpair(2)`.
-    </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, unix))]
-    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">&quot;all&quot;</span>, unix))))]
+    </span><span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, unix))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">"all"</span>, unix))))]
     </span><span class="kw">pub fn </span>pair_raw(
         domain: Domain,
         ty: Type,
@@ -2298,7 +2298,7 @@
     /// # Notes
     ///
     /// When using a non-blocking connect (by setting the socket into
-    /// non-blocking mode before calling this function), socket option can&#39;t be
+    /// non-blocking mode before calling this function), socket option can't be
     /// set *while connecting*. This will cause errors on Windows. Socket
     /// options can be safely set before and after connecting the socket.
     </span><span class="kw">pub fn </span>connect(<span class="kw-2">&amp;</span><span class="self">self</span>, address: <span class="kw-2">&amp;</span>SockAddr) -&gt; io::Result&lt;()&gt; {
@@ -2359,32 +2359,32 @@
     /// `accept(2)` platforms that do not.
     ///
     /// This function sets the same flags as in done for [`Socket::new`],
-    /// [`Socket::accept_raw`] can be used if you don&#39;t want to set those flags.
+    /// [`Socket::accept_raw`] can be used if you don't want to set those flags.
     </span><span class="attr">#[doc = <span class="macro">man_links!</span>(accept(<span class="number">2</span>))]
     </span><span class="kw">pub fn </span>accept(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; io::Result&lt;(Socket, SockAddr)&gt; {
         <span class="comment">// Use `accept4` on platforms that support it.
         </span><span class="attr">#[cfg(any(
-            target_os = <span class="string">&quot;android&quot;</span>,
-            target_os = <span class="string">&quot;dragonfly&quot;</span>,
-            target_os = <span class="string">&quot;freebsd&quot;</span>,
-            target_os = <span class="string">&quot;fuchsia&quot;</span>,
-            target_os = <span class="string">&quot;illumos&quot;</span>,
-            target_os = <span class="string">&quot;linux&quot;</span>,
-            target_os = <span class="string">&quot;netbsd&quot;</span>,
-            target_os = <span class="string">&quot;openbsd&quot;</span>,
+            target_os = <span class="string">"android"</span>,
+            target_os = <span class="string">"dragonfly"</span>,
+            target_os = <span class="string">"freebsd"</span>,
+            target_os = <span class="string">"fuchsia"</span>,
+            target_os = <span class="string">"illumos"</span>,
+            target_os = <span class="string">"linux"</span>,
+            target_os = <span class="string">"netbsd"</span>,
+            target_os = <span class="string">"openbsd"</span>,
         ))]
         </span><span class="kw">return </span><span class="self">self</span>._accept4(libc::SOCK_CLOEXEC);
 
         <span class="comment">// Fall back to `accept` on platforms that do not support `accept4`.
         </span><span class="attr">#[cfg(not(any(
-            target_os = <span class="string">&quot;android&quot;</span>,
-            target_os = <span class="string">&quot;dragonfly&quot;</span>,
-            target_os = <span class="string">&quot;freebsd&quot;</span>,
-            target_os = <span class="string">&quot;fuchsia&quot;</span>,
-            target_os = <span class="string">&quot;illumos&quot;</span>,
-            target_os = <span class="string">&quot;linux&quot;</span>,
-            target_os = <span class="string">&quot;netbsd&quot;</span>,
-            target_os = <span class="string">&quot;openbsd&quot;</span>,
+            target_os = <span class="string">"android"</span>,
+            target_os = <span class="string">"dragonfly"</span>,
+            target_os = <span class="string">"freebsd"</span>,
+            target_os = <span class="string">"fuchsia"</span>,
+            target_os = <span class="string">"illumos"</span>,
+            target_os = <span class="string">"linux"</span>,
+            target_os = <span class="string">"netbsd"</span>,
+            target_os = <span class="string">"openbsd"</span>,
         )))]
         </span>{
             <span class="kw">let </span>(socket, addr) = <span class="self">self</span>.accept_raw()<span class="question-mark">?</span>;
@@ -2467,8 +2467,8 @@
     /// `O_NONBLOCK`.
     ///
     /// On Windows it is not possible retrieve the nonblocking mode status.
-    </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, unix))]
-    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">&quot;all&quot;</span>, unix))))]
+    </span><span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, unix))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">"all"</span>, unix))))]
     </span><span class="kw">pub fn </span>nonblocking(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; io::Result&lt;bool&gt; {
         sys::nonblocking(<span class="self">self</span>.as_raw())
     }
@@ -2526,7 +2526,7 @@
     ///
     /// [`recv`]: Socket::recv
     /// [`out_of_band_inline`]: Socket::out_of_band_inline
-    </span><span class="attr">#[cfg_attr(target_os = <span class="string">&quot;redox&quot;</span>, allow(rustdoc::broken_intra_doc_links))]
+    </span><span class="attr">#[cfg_attr(target_os = <span class="string">"redox"</span>, allow(rustdoc::broken_intra_doc_links))]
     </span><span class="kw">pub fn </span>recv_out_of_band(<span class="kw-2">&amp;</span><span class="self">self</span>, buf: <span class="kw-2">&amp;mut </span>[MaybeUninit&lt;u8&gt;]) -&gt; io::Result&lt;usize&gt; {
         <span class="self">self</span>.recv_with_flags(buf, sys::MSG_OOB)
     }
@@ -2569,11 +2569,11 @@
     /// Note that the [`io::Read::read_vectored`] implementation calls this
     /// function with `buf`s of type `&amp;mut [IoSliceMut]`, allowing initialised
     /// buffers to be used without using `unsafe`.
-    </span><span class="attr">#[cfg(not(target_os = <span class="string">&quot;redox&quot;</span>))]
-    #[cfg_attr(docsrs, doc(cfg(not(target_os = <span class="string">&quot;redox&quot;</span>))))]
+    </span><span class="attr">#[cfg(not(target_os = <span class="string">"redox"</span>))]
+    #[cfg_attr(docsrs, doc(cfg(not(target_os = <span class="string">"redox"</span>))))]
     </span><span class="kw">pub fn </span>recv_vectored(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        bufs: <span class="kw-2">&amp;mut </span>[MaybeUninitSlice&lt;<span class="lifetime">&#39;_</span>&gt;],
+        bufs: <span class="kw-2">&amp;mut </span>[MaybeUninitSlice&lt;<span class="lifetime">'_</span>&gt;],
     ) -&gt; io::Result&lt;(usize, RecvFlags)&gt; {
         <span class="self">self</span>.recv_vectored_with_flags(bufs, <span class="number">0</span>)
     }
@@ -2589,11 +2589,11 @@
     /// as [`recv_vectored`].
     ///
     /// [`recv_vectored`]: Socket::recv_vectored
-    </span><span class="attr">#[cfg(not(target_os = <span class="string">&quot;redox&quot;</span>))]
-    #[cfg_attr(docsrs, doc(cfg(not(target_os = <span class="string">&quot;redox&quot;</span>))))]
+    </span><span class="attr">#[cfg(not(target_os = <span class="string">"redox"</span>))]
+    #[cfg_attr(docsrs, doc(cfg(not(target_os = <span class="string">"redox"</span>))))]
     </span><span class="kw">pub fn </span>recv_vectored_with_flags(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        bufs: <span class="kw-2">&amp;mut </span>[MaybeUninitSlice&lt;<span class="lifetime">&#39;_</span>&gt;],
+        bufs: <span class="kw-2">&amp;mut </span>[MaybeUninitSlice&lt;<span class="lifetime">'_</span>&gt;],
         flags: c_int,
     ) -&gt; io::Result&lt;(usize, RecvFlags)&gt; {
         sys::recv_vectored(<span class="self">self</span>.as_raw(), bufs, flags)
@@ -2655,11 +2655,11 @@
     /// as [`recv_vectored`].
     ///
     /// [`recv_vectored`]: Socket::recv_vectored
-    </span><span class="attr">#[cfg(not(target_os = <span class="string">&quot;redox&quot;</span>))]
-    #[cfg_attr(docsrs, doc(cfg(not(target_os = <span class="string">&quot;redox&quot;</span>))))]
+    </span><span class="attr">#[cfg(not(target_os = <span class="string">"redox"</span>))]
+    #[cfg_attr(docsrs, doc(cfg(not(target_os = <span class="string">"redox"</span>))))]
     </span><span class="kw">pub fn </span>recv_from_vectored(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        bufs: <span class="kw-2">&amp;mut </span>[MaybeUninitSlice&lt;<span class="lifetime">&#39;_</span>&gt;],
+        bufs: <span class="kw-2">&amp;mut </span>[MaybeUninitSlice&lt;<span class="lifetime">'_</span>&gt;],
     ) -&gt; io::Result&lt;(usize, RecvFlags, SockAddr)&gt; {
         <span class="self">self</span>.recv_from_vectored_with_flags(bufs, <span class="number">0</span>)
     }
@@ -2675,11 +2675,11 @@
     /// as [`recv_vectored`].
     ///
     /// [`recv_vectored`]: Socket::recv_vectored
-    </span><span class="attr">#[cfg(not(target_os = <span class="string">&quot;redox&quot;</span>))]
-    #[cfg_attr(docsrs, doc(cfg(not(target_os = <span class="string">&quot;redox&quot;</span>))))]
+    </span><span class="attr">#[cfg(not(target_os = <span class="string">"redox"</span>))]
+    #[cfg_attr(docsrs, doc(cfg(not(target_os = <span class="string">"redox"</span>))))]
     </span><span class="kw">pub fn </span>recv_from_vectored_with_flags(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        bufs: <span class="kw-2">&amp;mut </span>[MaybeUninitSlice&lt;<span class="lifetime">&#39;_</span>&gt;],
+        bufs: <span class="kw-2">&amp;mut </span>[MaybeUninitSlice&lt;<span class="lifetime">'_</span>&gt;],
         flags: c_int,
     ) -&gt; io::Result&lt;(usize, RecvFlags, SockAddr)&gt; {
         sys::recv_from_vectored(<span class="self">self</span>.as_raw(), bufs, flags)
@@ -2701,7 +2701,7 @@
     /// # Note: Datagram Sockets
     /// For datagram sockets, the behavior of this method when `buf` is smaller than
     /// the datagram at the head of the receive queue differs between Windows and
-    /// Unix-like platforms (Linux, macOS, BSDs, etc: colloquially termed &quot;*nix&quot;).
+    /// Unix-like platforms (Linux, macOS, BSDs, etc: colloquially termed "*nix").
     ///
     /// On *nix platforms, the datagram is truncated to the length of `buf`.
     ///
@@ -2735,9 +2735,9 @@
     /// &lt;https://github.com/microsoft/Windows-classic-samples/blob/7cbd99ac1d2b4a0beffbaba29ea63d024ceff700/Samples/Win7Samples/netds/winsock/recvmsg/rmmc.cpp&gt;
     /// for an example (in C++).
     </span><span class="attr">#[doc = <span class="macro">man_links!</span>(recvmsg(<span class="number">2</span>))]
-    #[cfg(all(unix, not(target_os = <span class="string">&quot;redox&quot;</span>)))]
-    #[cfg_attr(docsrs, doc(cfg(all(unix, not(target_os = <span class="string">&quot;redox&quot;</span>)))))]
-    </span><span class="kw">pub fn </span>recvmsg(<span class="kw-2">&amp;</span><span class="self">self</span>, msg: <span class="kw-2">&amp;mut </span>MsgHdrMut&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;, flags: sys::c_int) -&gt; io::Result&lt;usize&gt; {
+    #[cfg(all(unix, not(target_os = <span class="string">"redox"</span>)))]
+    #[cfg_attr(docsrs, doc(cfg(all(unix, not(target_os = <span class="string">"redox"</span>)))))]
+    </span><span class="kw">pub fn </span>recvmsg(<span class="kw-2">&amp;</span><span class="self">self</span>, msg: <span class="kw-2">&amp;mut </span>MsgHdrMut&lt;<span class="lifetime">'_</span>, <span class="lifetime">'_</span>, <span class="lifetime">'_</span>&gt;, flags: sys::c_int) -&gt; io::Result&lt;usize&gt; {
         sys::recvmsg(<span class="self">self</span>.as_raw(), msg, flags)
     }
 
@@ -2761,9 +2761,9 @@
     }
 
     <span class="doccomment">/// Send data to the connected peer. Returns the amount of bytes written.
-    </span><span class="attr">#[cfg(not(target_os = <span class="string">&quot;redox&quot;</span>))]
-    #[cfg_attr(docsrs, doc(cfg(not(target_os = <span class="string">&quot;redox&quot;</span>))))]
-    </span><span class="kw">pub fn </span>send_vectored(<span class="kw-2">&amp;</span><span class="self">self</span>, bufs: <span class="kw-2">&amp;</span>[IoSlice&lt;<span class="lifetime">&#39;_</span>&gt;]) -&gt; io::Result&lt;usize&gt; {
+    </span><span class="attr">#[cfg(not(target_os = <span class="string">"redox"</span>))]
+    #[cfg_attr(docsrs, doc(cfg(not(target_os = <span class="string">"redox"</span>))))]
+    </span><span class="kw">pub fn </span>send_vectored(<span class="kw-2">&amp;</span><span class="self">self</span>, bufs: <span class="kw-2">&amp;</span>[IoSlice&lt;<span class="lifetime">'_</span>&gt;]) -&gt; io::Result&lt;usize&gt; {
         <span class="self">self</span>.send_vectored_with_flags(bufs, <span class="number">0</span>)
     }
 
@@ -2772,11 +2772,11 @@
     </span><span class="attr">#[doc = <span class="macro">man_links!</span>(sendmsg(<span class="number">2</span>))]
     </span><span class="doccomment">///
     /// [`send_vectored`]: Socket::send_vectored
-    </span><span class="attr">#[cfg(not(target_os = <span class="string">&quot;redox&quot;</span>))]
-    #[cfg_attr(docsrs, doc(cfg(not(target_os = <span class="string">&quot;redox&quot;</span>))))]
+    </span><span class="attr">#[cfg(not(target_os = <span class="string">"redox"</span>))]
+    #[cfg_attr(docsrs, doc(cfg(not(target_os = <span class="string">"redox"</span>))))]
     </span><span class="kw">pub fn </span>send_vectored_with_flags(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        bufs: <span class="kw-2">&amp;</span>[IoSlice&lt;<span class="lifetime">&#39;_</span>&gt;],
+        bufs: <span class="kw-2">&amp;</span>[IoSlice&lt;<span class="lifetime">'_</span>&gt;],
         flags: c_int,
     ) -&gt; io::Result&lt;usize&gt; {
         sys::send_vectored(<span class="self">self</span>.as_raw(), bufs, flags)
@@ -2789,7 +2789,7 @@
     ///
     /// [`send`]: Socket::send
     /// [`out_of_band_inline`]: Socket::out_of_band_inline
-    </span><span class="attr">#[cfg_attr(target_os = <span class="string">&quot;redox&quot;</span>, allow(rustdoc::broken_intra_doc_links))]
+    </span><span class="attr">#[cfg_attr(target_os = <span class="string">"redox"</span>, allow(rustdoc::broken_intra_doc_links))]
     </span><span class="kw">pub fn </span>send_out_of_band(<span class="kw-2">&amp;</span><span class="self">self</span>, buf: <span class="kw-2">&amp;</span>[u8]) -&gt; io::Result&lt;usize&gt; {
         <span class="self">self</span>.send_with_flags(buf, sys::MSG_OOB)
     }
@@ -2819,9 +2819,9 @@
     <span class="doccomment">/// Send data to a peer listening on `addr`. Returns the amount of bytes
     /// written.
     </span><span class="attr">#[doc = <span class="macro">man_links!</span>(sendmsg(<span class="number">2</span>))]
-    #[cfg(not(target_os = <span class="string">&quot;redox&quot;</span>))]
-    #[cfg_attr(docsrs, doc(cfg(not(target_os = <span class="string">&quot;redox&quot;</span>))))]
-    </span><span class="kw">pub fn </span>send_to_vectored(<span class="kw-2">&amp;</span><span class="self">self</span>, bufs: <span class="kw-2">&amp;</span>[IoSlice&lt;<span class="lifetime">&#39;_</span>&gt;], addr: <span class="kw-2">&amp;</span>SockAddr) -&gt; io::Result&lt;usize&gt; {
+    #[cfg(not(target_os = <span class="string">"redox"</span>))]
+    #[cfg_attr(docsrs, doc(cfg(not(target_os = <span class="string">"redox"</span>))))]
+    </span><span class="kw">pub fn </span>send_to_vectored(<span class="kw-2">&amp;</span><span class="self">self</span>, bufs: <span class="kw-2">&amp;</span>[IoSlice&lt;<span class="lifetime">'_</span>&gt;], addr: <span class="kw-2">&amp;</span>SockAddr) -&gt; io::Result&lt;usize&gt; {
         <span class="self">self</span>.send_to_vectored_with_flags(bufs, addr, <span class="number">0</span>)
     }
 
@@ -2829,11 +2829,11 @@
     /// arbitrary flags to the underlying `sendmsg`/`WSASendTo` call.
     ///
     /// [`send_to_vectored`]: Socket::send_to_vectored
-    </span><span class="attr">#[cfg(not(target_os = <span class="string">&quot;redox&quot;</span>))]
-    #[cfg_attr(docsrs, doc(cfg(not(target_os = <span class="string">&quot;redox&quot;</span>))))]
+    </span><span class="attr">#[cfg(not(target_os = <span class="string">"redox"</span>))]
+    #[cfg_attr(docsrs, doc(cfg(not(target_os = <span class="string">"redox"</span>))))]
     </span><span class="kw">pub fn </span>send_to_vectored_with_flags(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        bufs: <span class="kw-2">&amp;</span>[IoSlice&lt;<span class="lifetime">&#39;_</span>&gt;],
+        bufs: <span class="kw-2">&amp;</span>[IoSlice&lt;<span class="lifetime">'_</span>&gt;],
         addr: <span class="kw-2">&amp;</span>SockAddr,
         flags: c_int,
     ) -&gt; io::Result&lt;usize&gt; {
@@ -2842,9 +2842,9 @@
 
     <span class="doccomment">/// Send a message on a socket using a message structure.
     </span><span class="attr">#[doc = <span class="macro">man_links!</span>(sendmsg(<span class="number">2</span>))]
-    #[cfg(not(target_os = <span class="string">&quot;redox&quot;</span>))]
-    #[cfg_attr(docsrs, doc(cfg(not(target_os = <span class="string">&quot;redox&quot;</span>))))]
-    </span><span class="kw">pub fn </span>sendmsg(<span class="kw-2">&amp;</span><span class="self">self</span>, msg: <span class="kw-2">&amp;</span>MsgHdr&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;, flags: sys::c_int) -&gt; io::Result&lt;usize&gt; {
+    #[cfg(not(target_os = <span class="string">"redox"</span>))]
+    #[cfg_attr(docsrs, doc(cfg(not(target_os = <span class="string">"redox"</span>))))]
+    </span><span class="kw">pub fn </span>sendmsg(<span class="kw-2">&amp;</span><span class="self">self</span>, msg: <span class="kw-2">&amp;</span>MsgHdr&lt;<span class="lifetime">'_</span>, <span class="lifetime">'_</span>, <span class="lifetime">'_</span>&gt;, flags: sys::c_int) -&gt; io::Result&lt;usize&gt; {
         sys::sendmsg(<span class="self">self</span>.as_raw(), msg, flags)
     }
 }
@@ -2855,14 +2855,14 @@
 </span><span class="kw">const fn </span>set_common_type(ty: Type) -&gt; Type {
     <span class="comment">// On platforms that support it set `SOCK_CLOEXEC`.
     </span><span class="attr">#[cfg(any(
-        target_os = <span class="string">&quot;android&quot;</span>,
-        target_os = <span class="string">&quot;dragonfly&quot;</span>,
-        target_os = <span class="string">&quot;freebsd&quot;</span>,
-        target_os = <span class="string">&quot;fuchsia&quot;</span>,
-        target_os = <span class="string">&quot;illumos&quot;</span>,
-        target_os = <span class="string">&quot;linux&quot;</span>,
-        target_os = <span class="string">&quot;netbsd&quot;</span>,
-        target_os = <span class="string">&quot;openbsd&quot;</span>,
+        target_os = <span class="string">"android"</span>,
+        target_os = <span class="string">"dragonfly"</span>,
+        target_os = <span class="string">"freebsd"</span>,
+        target_os = <span class="string">"fuchsia"</span>,
+        target_os = <span class="string">"illumos"</span>,
+        target_os = <span class="string">"linux"</span>,
+        target_os = <span class="string">"netbsd"</span>,
+        target_os = <span class="string">"openbsd"</span>,
     ))]
     </span><span class="kw">let </span>ty = ty._cloexec();
 
@@ -2877,30 +2877,30 @@
 </span><span class="attr">#[inline(always)]
 #[allow(clippy::unnecessary_wraps)]
 </span><span class="kw">fn </span>set_common_flags(socket: Socket) -&gt; io::Result&lt;Socket&gt; {
-    <span class="comment">// On platforms that don&#39;t have `SOCK_CLOEXEC` use `FD_CLOEXEC`.
+    <span class="comment">// On platforms that don't have `SOCK_CLOEXEC` use `FD_CLOEXEC`.
     </span><span class="attr">#[cfg(all(
         unix,
         not(any(
-            target_os = <span class="string">&quot;android&quot;</span>,
-            target_os = <span class="string">&quot;dragonfly&quot;</span>,
-            target_os = <span class="string">&quot;freebsd&quot;</span>,
-            target_os = <span class="string">&quot;fuchsia&quot;</span>,
-            target_os = <span class="string">&quot;illumos&quot;</span>,
-            target_os = <span class="string">&quot;linux&quot;</span>,
-            target_os = <span class="string">&quot;netbsd&quot;</span>,
-            target_os = <span class="string">&quot;openbsd&quot;</span>,
-            target_os = <span class="string">&quot;espidf&quot;</span>,
-            target_os = <span class="string">&quot;vita&quot;</span>,
+            target_os = <span class="string">"android"</span>,
+            target_os = <span class="string">"dragonfly"</span>,
+            target_os = <span class="string">"freebsd"</span>,
+            target_os = <span class="string">"fuchsia"</span>,
+            target_os = <span class="string">"illumos"</span>,
+            target_os = <span class="string">"linux"</span>,
+            target_os = <span class="string">"netbsd"</span>,
+            target_os = <span class="string">"openbsd"</span>,
+            target_os = <span class="string">"espidf"</span>,
+            target_os = <span class="string">"vita"</span>,
         ))
     ))]
     </span>socket._set_cloexec(<span class="bool-val">true</span>)<span class="question-mark">?</span>;
 
     <span class="comment">// On Apple platforms set `NOSIGPIPE`.
     </span><span class="attr">#[cfg(any(
-        target_os = <span class="string">&quot;ios&quot;</span>,
-        target_os = <span class="string">&quot;macos&quot;</span>,
-        target_os = <span class="string">&quot;tvos&quot;</span>,
-        target_os = <span class="string">&quot;watchos&quot;</span>,
+        target_os = <span class="string">"ios"</span>,
+        target_os = <span class="string">"macos"</span>,
+        target_os = <span class="string">"tvos"</span>,
+        target_os = <span class="string">"watchos"</span>,
     ))]
     </span>socket._set_nosigpipe(<span class="bool-val">true</span>)<span class="question-mark">?</span>;
 
@@ -2912,11 +2912,11 @@
 /// `Index(0)` and `Address(Ipv4Addr::UNSPECIFIED)` are equivalent and indicate
 /// that an appropriate interface should be selected by the system.
 </span><span class="attr">#[cfg(not(any(
-    target_os = <span class="string">&quot;haiku&quot;</span>,
-    target_os = <span class="string">&quot;illumos&quot;</span>,
-    target_os = <span class="string">&quot;netbsd&quot;</span>,
-    target_os = <span class="string">&quot;redox&quot;</span>,
-    target_os = <span class="string">&quot;solaris&quot;</span>,
+    target_os = <span class="string">"haiku"</span>,
+    target_os = <span class="string">"illumos"</span>,
+    target_os = <span class="string">"netbsd"</span>,
+    target_os = <span class="string">"redox"</span>,
+    target_os = <span class="string">"solaris"</span>,
 )))]
 #[derive(Debug)]
 </span><span class="kw">pub enum </span>InterfaceIndexOrAddress {
@@ -3034,8 +3034,8 @@
     /// For more information about this option, see [`set_out_of_band_inline`].
     ///
     /// [`set_out_of_band_inline`]: Socket::set_out_of_band_inline
-    </span><span class="attr">#[cfg(not(target_os = <span class="string">&quot;redox&quot;</span>))]
-    #[cfg_attr(docsrs, doc(cfg(not(target_os = <span class="string">&quot;redox&quot;</span>))))]
+    </span><span class="attr">#[cfg(not(target_os = <span class="string">"redox"</span>))]
+    #[cfg_attr(docsrs, doc(cfg(not(target_os = <span class="string">"redox"</span>))))]
     </span><span class="kw">pub fn </span>out_of_band_inline(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; io::Result&lt;bool&gt; {
         <span class="kw">unsafe </span>{
             getsockopt::&lt;c_int&gt;(<span class="self">self</span>.as_raw(), sys::SOL_SOCKET, sys::SO_OOBINLINE)
@@ -3049,8 +3049,8 @@
     /// receive data stream. Otherwise, out-of-band data is passed only when the
     /// `MSG_OOB` flag is set during receiving. As per RFC6093, TCP sockets
     /// using the Urgent mechanism are encouraged to set this flag.
-    </span><span class="attr">#[cfg(not(target_os = <span class="string">&quot;redox&quot;</span>))]
-    #[cfg_attr(docsrs, doc(cfg(not(target_os = <span class="string">&quot;redox&quot;</span>))))]
+    </span><span class="attr">#[cfg(not(target_os = <span class="string">"redox"</span>))]
+    #[cfg_attr(docsrs, doc(cfg(not(target_os = <span class="string">"redox"</span>))))]
     </span><span class="kw">pub fn </span>set_out_of_band_inline(<span class="kw-2">&amp;</span><span class="self">self</span>, oob_inline: bool) -&gt; io::Result&lt;()&gt; {
         <span class="kw">unsafe </span>{
             setsockopt(
@@ -3076,7 +3076,7 @@
 
     <span class="doccomment">/// Set value for the `SO_RCVBUF` option on this socket.
     ///
-    /// Changes the size of the operating system&#39;s receive buffer associated
+    /// Changes the size of the operating system's receive buffer associated
     /// with the socket.
     </span><span class="kw">pub fn </span>set_recv_buffer_size(<span class="kw-2">&amp;</span><span class="self">self</span>, size: usize) -&gt; io::Result&lt;()&gt; {
         <span class="kw">unsafe </span>{
@@ -3121,7 +3121,7 @@
     ///
     /// This indicates that futher calls to `bind` may allow reuse of local
     /// addresses. For IPv4 sockets this means that a socket may bind even when
-    /// there&#39;s a socket already listening on this port.
+    /// there's a socket already listening on this port.
     </span><span class="kw">pub fn </span>set_reuse_address(<span class="kw-2">&amp;</span><span class="self">self</span>, reuse: bool) -&gt; io::Result&lt;()&gt; {
         <span class="kw">unsafe </span>{
             setsockopt(
@@ -3147,7 +3147,7 @@
 
     <span class="doccomment">/// Set value for the `SO_SNDBUF` option on this socket.
     ///
-    /// Changes the size of the operating system&#39;s send buffer associated with
+    /// Changes the size of the operating system's send buffer associated with
     /// the socket.
     </span><span class="kw">pub fn </span>set_send_buffer_size(<span class="kw-2">&amp;</span><span class="self">self</span>, size: usize) -&gt; io::Result&lt;()&gt; {
         <span class="kw">unsafe </span>{
@@ -3209,10 +3209,10 @@
     /// For more information about this option, see [`set_header_included`].
     ///
     /// [`set_header_included`]: Socket::set_header_included
-    </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, not(any(target_os = <span class="string">&quot;redox&quot;</span>, target_os = <span class="string">&quot;espidf&quot;</span>))))]
+    </span><span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, not(any(target_os = <span class="string">"redox"</span>, target_os = <span class="string">"espidf"</span>))))]
     #[cfg_attr(
         docsrs,
-        doc(cfg(all(feature = <span class="string">&quot;all&quot;</span>, not(any(target_os = <span class="string">&quot;redox&quot;</span>, target_os = <span class="string">&quot;espidf&quot;</span>)))))
+        doc(cfg(all(feature = <span class="string">"all"</span>, not(any(target_os = <span class="string">"redox"</span>, target_os = <span class="string">"espidf"</span>)))))
     )]
     </span><span class="kw">pub fn </span>header_included(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; io::Result&lt;bool&gt; {
         <span class="kw">unsafe </span>{
@@ -3233,13 +3233,13 @@
     /// [`IP_TTL`]: Socket::set_ttl
     /// [`IP_TOS`]: Socket::set_tos
     </span><span class="attr">#[cfg_attr(
-        any(target_os = <span class="string">&quot;fuchsia&quot;</span>, target_os = <span class="string">&quot;illumos&quot;</span>, target_os = <span class="string">&quot;solaris&quot;</span>),
+        any(target_os = <span class="string">"fuchsia"</span>, target_os = <span class="string">"illumos"</span>, target_os = <span class="string">"solaris"</span>),
         allow(rustdoc::broken_intra_doc_links)
     )]
-    #[cfg(all(feature = <span class="string">&quot;all&quot;</span>, not(any(target_os = <span class="string">&quot;redox&quot;</span>, target_os = <span class="string">&quot;espidf&quot;</span>))))]
+    #[cfg(all(feature = <span class="string">"all"</span>, not(any(target_os = <span class="string">"redox"</span>, target_os = <span class="string">"espidf"</span>))))]
     #[cfg_attr(
         docsrs,
-        doc(cfg(all(feature = <span class="string">&quot;all&quot;</span>, not(any(target_os = <span class="string">&quot;redox&quot;</span>, target_os = <span class="string">&quot;espidf&quot;</span>)))))
+        doc(cfg(all(feature = <span class="string">"all"</span>, not(any(target_os = <span class="string">"redox"</span>, target_os = <span class="string">"espidf"</span>)))))
     )]
     </span><span class="kw">pub fn </span>set_header_included(<span class="kw-2">&amp;</span><span class="self">self</span>, included: bool) -&gt; io::Result&lt;()&gt; {
         <span class="kw">unsafe </span>{
@@ -3257,8 +3257,8 @@
     /// For more information about this option, see [`set_ip_transparent`].
     ///
     /// [`set_ip_transparent`]: Socket::set_ip_transparent
-    </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))]
-    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))))]
+    </span><span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"linux"</span>))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"linux"</span>))))]
     </span><span class="kw">pub fn </span>ip_transparent(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; io::Result&lt;bool&gt; {
         <span class="kw">unsafe </span>{
             getsockopt::&lt;c_int&gt;(<span class="self">self</span>.as_raw(), sys::IPPROTO_IP, libc::IP_TRANSPARENT)
@@ -3281,8 +3281,8 @@
     ///
     /// TProxy redirection with the iptables TPROXY target also
     /// requires that this option be set on the redirected socket.
-    </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))]
-    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))))]
+    </span><span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"linux"</span>))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"linux"</span>))))]
     </span><span class="kw">pub fn </span>set_ip_transparent(<span class="kw-2">&amp;</span><span class="self">self</span>, transparent: bool) -&gt; io::Result&lt;()&gt; {
         <span class="kw">unsafe </span>{
             setsockopt(
@@ -3299,7 +3299,7 @@
     /// This function specifies a new multicast group for this socket to join.
     /// The address must be a valid multicast address, and `interface` is the
     /// address of the local interface with which the system should join the
-    /// multicast group. If it&#39;s [`Ipv4Addr::UNSPECIFIED`] (`INADDR_ANY`) then
+    /// multicast group. If it's [`Ipv4Addr::UNSPECIFIED`] (`INADDR_ANY`) then
     /// an appropriate interface is chosen by the system.
     </span><span class="kw">pub fn </span>join_multicast_v4(<span class="kw-2">&amp;</span><span class="self">self</span>, multiaddr: <span class="kw-2">&amp;</span>Ipv4Addr, interface: <span class="kw-2">&amp;</span>Ipv4Addr) -&gt; io::Result&lt;()&gt; {
         <span class="kw">let </span>mreq = sys::IpMreq {
@@ -3336,16 +3336,16 @@
     /// the local interface with which the system should join the multicast
     /// group. See [`InterfaceIndexOrAddress`].
     </span><span class="attr">#[cfg(not(any(
-        target_os = <span class="string">&quot;aix&quot;</span>,
-        target_os = <span class="string">&quot;haiku&quot;</span>,
-        target_os = <span class="string">&quot;illumos&quot;</span>,
-        target_os = <span class="string">&quot;netbsd&quot;</span>,
-        target_os = <span class="string">&quot;openbsd&quot;</span>,
-        target_os = <span class="string">&quot;redox&quot;</span>,
-        target_os = <span class="string">&quot;solaris&quot;</span>,
-        target_os = <span class="string">&quot;nto&quot;</span>,
-        target_os = <span class="string">&quot;espidf&quot;</span>,
-        target_os = <span class="string">&quot;vita&quot;</span>,
+        target_os = <span class="string">"aix"</span>,
+        target_os = <span class="string">"haiku"</span>,
+        target_os = <span class="string">"illumos"</span>,
+        target_os = <span class="string">"netbsd"</span>,
+        target_os = <span class="string">"openbsd"</span>,
+        target_os = <span class="string">"redox"</span>,
+        target_os = <span class="string">"solaris"</span>,
+        target_os = <span class="string">"nto"</span>,
+        target_os = <span class="string">"espidf"</span>,
+        target_os = <span class="string">"vita"</span>,
     )))]
     </span><span class="kw">pub fn </span>join_multicast_v4_n(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
@@ -3369,16 +3369,16 @@
     ///
     /// [`join_multicast_v4_n`]: Socket::join_multicast_v4_n
     </span><span class="attr">#[cfg(not(any(
-        target_os = <span class="string">&quot;aix&quot;</span>,
-        target_os = <span class="string">&quot;haiku&quot;</span>,
-        target_os = <span class="string">&quot;illumos&quot;</span>,
-        target_os = <span class="string">&quot;netbsd&quot;</span>,
-        target_os = <span class="string">&quot;openbsd&quot;</span>,
-        target_os = <span class="string">&quot;redox&quot;</span>,
-        target_os = <span class="string">&quot;solaris&quot;</span>,
-        target_os = <span class="string">&quot;nto&quot;</span>,
-        target_os = <span class="string">&quot;espidf&quot;</span>,
-        target_os = <span class="string">&quot;vita&quot;</span>,
+        target_os = <span class="string">"aix"</span>,
+        target_os = <span class="string">"haiku"</span>,
+        target_os = <span class="string">"illumos"</span>,
+        target_os = <span class="string">"netbsd"</span>,
+        target_os = <span class="string">"openbsd"</span>,
+        target_os = <span class="string">"redox"</span>,
+        target_os = <span class="string">"solaris"</span>,
+        target_os = <span class="string">"nto"</span>,
+        target_os = <span class="string">"espidf"</span>,
+        target_os = <span class="string">"vita"</span>,
     )))]
     </span><span class="kw">pub fn </span>leave_multicast_v4_n(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
@@ -3401,18 +3401,18 @@
     /// This function specifies a new multicast channel for this socket to join.
     /// The group must be a valid SSM group address, the source must be the address of the sender
     /// and `interface` is the address of the local interface with which the system should join the
-    /// multicast group. If it&#39;s [`Ipv4Addr::UNSPECIFIED`] (`INADDR_ANY`) then
+    /// multicast group. If it's [`Ipv4Addr::UNSPECIFIED`] (`INADDR_ANY`) then
     /// an appropriate interface is chosen by the system.
     </span><span class="attr">#[cfg(not(any(
-        target_os = <span class="string">&quot;dragonfly&quot;</span>,
-        target_os = <span class="string">&quot;haiku&quot;</span>,
-        target_os = <span class="string">&quot;netbsd&quot;</span>,
-        target_os = <span class="string">&quot;openbsd&quot;</span>,
-        target_os = <span class="string">&quot;redox&quot;</span>,
-        target_os = <span class="string">&quot;fuchsia&quot;</span>,
-        target_os = <span class="string">&quot;nto&quot;</span>,
-        target_os = <span class="string">&quot;espidf&quot;</span>,
-        target_os = <span class="string">&quot;vita&quot;</span>,
+        target_os = <span class="string">"dragonfly"</span>,
+        target_os = <span class="string">"haiku"</span>,
+        target_os = <span class="string">"netbsd"</span>,
+        target_os = <span class="string">"openbsd"</span>,
+        target_os = <span class="string">"redox"</span>,
+        target_os = <span class="string">"fuchsia"</span>,
+        target_os = <span class="string">"nto"</span>,
+        target_os = <span class="string">"espidf"</span>,
+        target_os = <span class="string">"vita"</span>,
     )))]
     </span><span class="kw">pub fn </span>join_ssm_v4(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
@@ -3441,15 +3441,15 @@
     ///
     /// [`join_ssm_v4`]: Socket::join_ssm_v4
     </span><span class="attr">#[cfg(not(any(
-        target_os = <span class="string">&quot;dragonfly&quot;</span>,
-        target_os = <span class="string">&quot;haiku&quot;</span>,
-        target_os = <span class="string">&quot;netbsd&quot;</span>,
-        target_os = <span class="string">&quot;openbsd&quot;</span>,
-        target_os = <span class="string">&quot;redox&quot;</span>,
-        target_os = <span class="string">&quot;fuchsia&quot;</span>,
-        target_os = <span class="string">&quot;nto&quot;</span>,
-        target_os = <span class="string">&quot;espidf&quot;</span>,
-        target_os = <span class="string">&quot;vita&quot;</span>,
+        target_os = <span class="string">"dragonfly"</span>,
+        target_os = <span class="string">"haiku"</span>,
+        target_os = <span class="string">"netbsd"</span>,
+        target_os = <span class="string">"openbsd"</span>,
+        target_os = <span class="string">"redox"</span>,
+        target_os = <span class="string">"fuchsia"</span>,
+        target_os = <span class="string">"nto"</span>,
+        target_os = <span class="string">"espidf"</span>,
+        target_os = <span class="string">"vita"</span>,
     )))]
     </span><span class="kw">pub fn </span>leave_ssm_v4(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
@@ -3541,7 +3541,7 @@
     ///
     /// Indicates the time-to-live value of outgoing multicast packets for
     /// this socket. The default value is 1 which means that multicast packets
-    /// don&#39;t leave the local network unless explicitly requested.
+    /// don't leave the local network unless explicitly requested.
     ///
     /// Note that this may not have any affect on IPv6 sockets.
     </span><span class="kw">pub fn </span>set_multicast_ttl_v4(<span class="kw-2">&amp;</span><span class="self">self</span>, ttl: u32) -&gt; io::Result&lt;()&gt; {
@@ -3582,10 +3582,10 @@
     /// NOTE: &lt;https://docs.microsoft.com/en-us/windows/win32/winsock/ipproto-ip-socket-options&gt;
     /// documents that not all versions of windows support `IP_TOS`.
     </span><span class="attr">#[cfg(not(any(
-        target_os = <span class="string">&quot;fuchsia&quot;</span>,
-        target_os = <span class="string">&quot;redox&quot;</span>,
-        target_os = <span class="string">&quot;solaris&quot;</span>,
-        target_os = <span class="string">&quot;illumos&quot;</span>,
+        target_os = <span class="string">"fuchsia"</span>,
+        target_os = <span class="string">"redox"</span>,
+        target_os = <span class="string">"solaris"</span>,
+        target_os = <span class="string">"illumos"</span>,
     )))]
     </span><span class="kw">pub fn </span>set_tos(<span class="kw-2">&amp;</span><span class="self">self</span>, tos: u32) -&gt; io::Result&lt;()&gt; {
         <span class="kw">unsafe </span>{ setsockopt(<span class="self">self</span>.as_raw(), sys::IPPROTO_IP, sys::IP_TOS, tos <span class="kw">as </span>c_int) }
@@ -3600,10 +3600,10 @@
     ///
     /// [`set_tos`]: Socket::set_tos
     </span><span class="attr">#[cfg(not(any(
-        target_os = <span class="string">&quot;fuchsia&quot;</span>,
-        target_os = <span class="string">&quot;redox&quot;</span>,
-        target_os = <span class="string">&quot;solaris&quot;</span>,
-        target_os = <span class="string">&quot;illumos&quot;</span>,
+        target_os = <span class="string">"fuchsia"</span>,
+        target_os = <span class="string">"redox"</span>,
+        target_os = <span class="string">"solaris"</span>,
+        target_os = <span class="string">"illumos"</span>,
     )))]
     </span><span class="kw">pub fn </span>tos(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; io::Result&lt;u32&gt; {
         <span class="kw">unsafe </span>{
@@ -3617,18 +3617,18 @@
     /// incoming packets. It contains a byte which specifies the
     /// Type of Service/Precedence field of the packet header.
     </span><span class="attr">#[cfg(not(any(
-        target_os = <span class="string">&quot;aix&quot;</span>,
-        target_os = <span class="string">&quot;dragonfly&quot;</span>,
-        target_os = <span class="string">&quot;fuchsia&quot;</span>,
-        target_os = <span class="string">&quot;illumos&quot;</span>,
-        target_os = <span class="string">&quot;netbsd&quot;</span>,
-        target_os = <span class="string">&quot;openbsd&quot;</span>,
-        target_os = <span class="string">&quot;redox&quot;</span>,
-        target_os = <span class="string">&quot;solaris&quot;</span>,
-        target_os = <span class="string">&quot;haiku&quot;</span>,
-        target_os = <span class="string">&quot;nto&quot;</span>,
-        target_os = <span class="string">&quot;espidf&quot;</span>,
-        target_os = <span class="string">&quot;vita&quot;</span>,
+        target_os = <span class="string">"aix"</span>,
+        target_os = <span class="string">"dragonfly"</span>,
+        target_os = <span class="string">"fuchsia"</span>,
+        target_os = <span class="string">"illumos"</span>,
+        target_os = <span class="string">"netbsd"</span>,
+        target_os = <span class="string">"openbsd"</span>,
+        target_os = <span class="string">"redox"</span>,
+        target_os = <span class="string">"solaris"</span>,
+        target_os = <span class="string">"haiku"</span>,
+        target_os = <span class="string">"nto"</span>,
+        target_os = <span class="string">"espidf"</span>,
+        target_os = <span class="string">"vita"</span>,
     )))]
     </span><span class="kw">pub fn </span>set_recv_tos(<span class="kw-2">&amp;</span><span class="self">self</span>, recv_tos: bool) -&gt; io::Result&lt;()&gt; {
         <span class="kw">unsafe </span>{
@@ -3647,18 +3647,18 @@
     ///
     /// [`set_recv_tos`]: Socket::set_recv_tos
     </span><span class="attr">#[cfg(not(any(
-        target_os = <span class="string">&quot;aix&quot;</span>,
-        target_os = <span class="string">&quot;dragonfly&quot;</span>,
-        target_os = <span class="string">&quot;fuchsia&quot;</span>,
-        target_os = <span class="string">&quot;illumos&quot;</span>,
-        target_os = <span class="string">&quot;netbsd&quot;</span>,
-        target_os = <span class="string">&quot;openbsd&quot;</span>,
-        target_os = <span class="string">&quot;redox&quot;</span>,
-        target_os = <span class="string">&quot;solaris&quot;</span>,
-        target_os = <span class="string">&quot;haiku&quot;</span>,
-        target_os = <span class="string">&quot;nto&quot;</span>,
-        target_os = <span class="string">&quot;espidf&quot;</span>,
-        target_os = <span class="string">&quot;vita&quot;</span>,
+        target_os = <span class="string">"aix"</span>,
+        target_os = <span class="string">"dragonfly"</span>,
+        target_os = <span class="string">"fuchsia"</span>,
+        target_os = <span class="string">"illumos"</span>,
+        target_os = <span class="string">"netbsd"</span>,
+        target_os = <span class="string">"openbsd"</span>,
+        target_os = <span class="string">"redox"</span>,
+        target_os = <span class="string">"solaris"</span>,
+        target_os = <span class="string">"haiku"</span>,
+        target_os = <span class="string">"nto"</span>,
+        target_os = <span class="string">"espidf"</span>,
+        target_os = <span class="string">"vita"</span>,
     )))]
     </span><span class="kw">pub fn </span>recv_tos(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; io::Result&lt;bool&gt; {
         <span class="kw">unsafe </span>{
@@ -3681,7 +3681,7 @@
     /// This function specifies a new multicast group for this socket to join.
     /// The address must be a valid multicast address, and `interface` is the
     /// index of the interface to join/leave (or 0 to indicate any interface).
-    </span><span class="attr">#[cfg(not(target_os = <span class="string">&quot;nto&quot;</span>))]
+    </span><span class="attr">#[cfg(not(target_os = <span class="string">"nto"</span>))]
     </span><span class="kw">pub fn </span>join_multicast_v6(<span class="kw-2">&amp;</span><span class="self">self</span>, multiaddr: <span class="kw-2">&amp;</span>Ipv6Addr, interface: u32) -&gt; io::Result&lt;()&gt; {
         <span class="kw">let </span>mreq = sys::Ipv6Mreq {
             ipv6mr_multiaddr: sys::to_in6_addr(multiaddr),
@@ -3705,7 +3705,7 @@
     /// For more information about this option, see [`join_multicast_v6`].
     ///
     /// [`join_multicast_v6`]: Socket::join_multicast_v6
-    </span><span class="attr">#[cfg(not(target_os = <span class="string">&quot;nto&quot;</span>))]
+    </span><span class="attr">#[cfg(not(target_os = <span class="string">"nto"</span>))]
     </span><span class="kw">pub fn </span>leave_multicast_v6(<span class="kw-2">&amp;</span><span class="self">self</span>, multiaddr: <span class="kw-2">&amp;</span>Ipv6Addr, interface: u32) -&gt; io::Result&lt;()&gt; {
         <span class="kw">let </span>mreq = sys::Ipv6Mreq {
             ipv6mr_multiaddr: sys::to_in6_addr(multiaddr),
@@ -3736,9 +3736,9 @@
 
     <span class="doccomment">/// Set the value of the `IPV6_MULTICAST_HOPS` option for this socket
     ///
-    /// Indicates the number of &quot;routers&quot; multicast packets will transit for
+    /// Indicates the number of "routers" multicast packets will transit for
     /// this socket. The default value is 1 which means that multicast packets
-    /// don&#39;t leave the local network unless explicitly requested.
+    /// don't leave the local network unless explicitly requested.
     </span><span class="kw">pub fn </span>set_multicast_hops_v6(<span class="kw-2">&amp;</span><span class="self">self</span>, hops: u32) -&gt; io::Result&lt;()&gt; {
         <span class="kw">unsafe </span>{
             setsockopt(
@@ -3866,16 +3866,16 @@
     ///
     /// [`set_recv_tclass_v6`]: Socket::set_recv_tclass_v6
     </span><span class="attr">#[cfg(not(any(
-        target_os = <span class="string">&quot;dragonfly&quot;</span>,
-        target_os = <span class="string">&quot;fuchsia&quot;</span>,
-        target_os = <span class="string">&quot;illumos&quot;</span>,
-        target_os = <span class="string">&quot;netbsd&quot;</span>,
-        target_os = <span class="string">&quot;openbsd&quot;</span>,
-        target_os = <span class="string">&quot;redox&quot;</span>,
-        target_os = <span class="string">&quot;solaris&quot;</span>,
-        target_os = <span class="string">&quot;haiku&quot;</span>,
-        target_os = <span class="string">&quot;espidf&quot;</span>,
-        target_os = <span class="string">&quot;vita&quot;</span>,
+        target_os = <span class="string">"dragonfly"</span>,
+        target_os = <span class="string">"fuchsia"</span>,
+        target_os = <span class="string">"illumos"</span>,
+        target_os = <span class="string">"netbsd"</span>,
+        target_os = <span class="string">"openbsd"</span>,
+        target_os = <span class="string">"redox"</span>,
+        target_os = <span class="string">"solaris"</span>,
+        target_os = <span class="string">"haiku"</span>,
+        target_os = <span class="string">"espidf"</span>,
+        target_os = <span class="string">"vita"</span>,
     )))]
     </span><span class="kw">pub fn </span>recv_tclass_v6(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; io::Result&lt;bool&gt; {
         <span class="kw">unsafe </span>{
@@ -3890,16 +3890,16 @@
     /// packets. It contains a byte which specifies the traffic class field of
     /// the packet header.
     </span><span class="attr">#[cfg(not(any(
-        target_os = <span class="string">&quot;dragonfly&quot;</span>,
-        target_os = <span class="string">&quot;fuchsia&quot;</span>,
-        target_os = <span class="string">&quot;illumos&quot;</span>,
-        target_os = <span class="string">&quot;netbsd&quot;</span>,
-        target_os = <span class="string">&quot;openbsd&quot;</span>,
-        target_os = <span class="string">&quot;redox&quot;</span>,
-        target_os = <span class="string">&quot;solaris&quot;</span>,
-        target_os = <span class="string">&quot;haiku&quot;</span>,
-        target_os = <span class="string">&quot;espidf&quot;</span>,
-        target_os = <span class="string">&quot;vita&quot;</span>,
+        target_os = <span class="string">"dragonfly"</span>,
+        target_os = <span class="string">"fuchsia"</span>,
+        target_os = <span class="string">"illumos"</span>,
+        target_os = <span class="string">"netbsd"</span>,
+        target_os = <span class="string">"openbsd"</span>,
+        target_os = <span class="string">"redox"</span>,
+        target_os = <span class="string">"solaris"</span>,
+        target_os = <span class="string">"haiku"</span>,
+        target_os = <span class="string">"espidf"</span>,
+        target_os = <span class="string">"vita"</span>,
     )))]
     </span><span class="kw">pub fn </span>set_recv_tclass_v6(<span class="kw-2">&amp;</span><span class="self">self</span>, recv_tclass: bool) -&gt; io::Result&lt;()&gt; {
         <span class="kw">unsafe </span>{
@@ -3924,23 +3924,23 @@
     /// This returns the value of `TCP_KEEPALIVE` on macOS and iOS and `TCP_KEEPIDLE` on all other
     /// supported Unix operating systems.
     </span><span class="attr">#[cfg(all(
-        feature = <span class="string">&quot;all&quot;</span>,
+        feature = <span class="string">"all"</span>,
         not(any(
             windows,
-            target_os = <span class="string">&quot;haiku&quot;</span>,
-            target_os = <span class="string">&quot;openbsd&quot;</span>,
-            target_os = <span class="string">&quot;vita&quot;
+            target_os = <span class="string">"haiku"</span>,
+            target_os = <span class="string">"openbsd"</span>,
+            target_os = <span class="string">"vita"
         </span>))
     ))]
     #[cfg_attr(
         docsrs,
         doc(cfg(all(
-            feature = <span class="string">&quot;all&quot;</span>,
+            feature = <span class="string">"all"</span>,
             not(any(
                 windows,
-                target_os = <span class="string">&quot;haiku&quot;</span>,
-                target_os = <span class="string">&quot;openbsd&quot;</span>,
-                target_os = <span class="string">&quot;vita&quot;
+                target_os = <span class="string">"haiku"</span>,
+                target_os = <span class="string">"openbsd"</span>,
+                target_os = <span class="string">"vita"
             </span>))
         )))
     )]
@@ -3954,37 +3954,37 @@
     ///
     /// [`set_tcp_keepalive`]: Socket::set_tcp_keepalive
     </span><span class="attr">#[cfg(all(
-        feature = <span class="string">&quot;all&quot;</span>,
+        feature = <span class="string">"all"</span>,
         any(
-            target_os = <span class="string">&quot;android&quot;</span>,
-            target_os = <span class="string">&quot;dragonfly&quot;</span>,
-            target_os = <span class="string">&quot;freebsd&quot;</span>,
-            target_os = <span class="string">&quot;fuchsia&quot;</span>,
-            target_os = <span class="string">&quot;illumos&quot;</span>,
-            target_os = <span class="string">&quot;ios&quot;</span>,
-            target_os = <span class="string">&quot;linux&quot;</span>,
-            target_os = <span class="string">&quot;macos&quot;</span>,
-            target_os = <span class="string">&quot;netbsd&quot;</span>,
-            target_os = <span class="string">&quot;tvos&quot;</span>,
-            target_os = <span class="string">&quot;watchos&quot;</span>,
+            target_os = <span class="string">"android"</span>,
+            target_os = <span class="string">"dragonfly"</span>,
+            target_os = <span class="string">"freebsd"</span>,
+            target_os = <span class="string">"fuchsia"</span>,
+            target_os = <span class="string">"illumos"</span>,
+            target_os = <span class="string">"ios"</span>,
+            target_os = <span class="string">"linux"</span>,
+            target_os = <span class="string">"macos"</span>,
+            target_os = <span class="string">"netbsd"</span>,
+            target_os = <span class="string">"tvos"</span>,
+            target_os = <span class="string">"watchos"</span>,
         )
     ))]
     #[cfg_attr(
         docsrs,
         doc(cfg(all(
-            feature = <span class="string">&quot;all&quot;</span>,
+            feature = <span class="string">"all"</span>,
             any(
-                target_os = <span class="string">&quot;android&quot;</span>,
-                target_os = <span class="string">&quot;dragonfly&quot;</span>,
-                target_os = <span class="string">&quot;freebsd&quot;</span>,
-                target_os = <span class="string">&quot;fuchsia&quot;</span>,
-                target_os = <span class="string">&quot;illumos&quot;</span>,
-                target_os = <span class="string">&quot;ios&quot;</span>,
-                target_os = <span class="string">&quot;linux&quot;</span>,
-                target_os = <span class="string">&quot;macos&quot;</span>,
-                target_os = <span class="string">&quot;netbsd&quot;</span>,
-                target_os = <span class="string">&quot;tvos&quot;</span>,
-                target_os = <span class="string">&quot;watchos&quot;</span>,
+                target_os = <span class="string">"android"</span>,
+                target_os = <span class="string">"dragonfly"</span>,
+                target_os = <span class="string">"freebsd"</span>,
+                target_os = <span class="string">"fuchsia"</span>,
+                target_os = <span class="string">"illumos"</span>,
+                target_os = <span class="string">"ios"</span>,
+                target_os = <span class="string">"linux"</span>,
+                target_os = <span class="string">"macos"</span>,
+                target_os = <span class="string">"netbsd"</span>,
+                target_os = <span class="string">"tvos"</span>,
+                target_os = <span class="string">"watchos"</span>,
             )
         )))
     )]
@@ -4001,37 +4001,37 @@
     ///
     /// [`set_tcp_keepalive`]: Socket::set_tcp_keepalive
     </span><span class="attr">#[cfg(all(
-        feature = <span class="string">&quot;all&quot;</span>,
+        feature = <span class="string">"all"</span>,
         any(
-            target_os = <span class="string">&quot;android&quot;</span>,
-            target_os = <span class="string">&quot;dragonfly&quot;</span>,
-            target_os = <span class="string">&quot;freebsd&quot;</span>,
-            target_os = <span class="string">&quot;fuchsia&quot;</span>,
-            target_os = <span class="string">&quot;illumos&quot;</span>,
-            target_os = <span class="string">&quot;ios&quot;</span>,
-            target_os = <span class="string">&quot;linux&quot;</span>,
-            target_os = <span class="string">&quot;macos&quot;</span>,
-            target_os = <span class="string">&quot;netbsd&quot;</span>,
-            target_os = <span class="string">&quot;tvos&quot;</span>,
-            target_os = <span class="string">&quot;watchos&quot;</span>,
+            target_os = <span class="string">"android"</span>,
+            target_os = <span class="string">"dragonfly"</span>,
+            target_os = <span class="string">"freebsd"</span>,
+            target_os = <span class="string">"fuchsia"</span>,
+            target_os = <span class="string">"illumos"</span>,
+            target_os = <span class="string">"ios"</span>,
+            target_os = <span class="string">"linux"</span>,
+            target_os = <span class="string">"macos"</span>,
+            target_os = <span class="string">"netbsd"</span>,
+            target_os = <span class="string">"tvos"</span>,
+            target_os = <span class="string">"watchos"</span>,
         )
     ))]
     #[cfg_attr(
         docsrs,
         doc(cfg(all(
-            feature = <span class="string">&quot;all&quot;</span>,
+            feature = <span class="string">"all"</span>,
             any(
-                target_os = <span class="string">&quot;android&quot;</span>,
-                target_os = <span class="string">&quot;dragonfly&quot;</span>,
-                target_os = <span class="string">&quot;freebsd&quot;</span>,
-                target_os = <span class="string">&quot;fuchsia&quot;</span>,
-                target_os = <span class="string">&quot;illumos&quot;</span>,
-                target_os = <span class="string">&quot;ios&quot;</span>,
-                target_os = <span class="string">&quot;linux&quot;</span>,
-                target_os = <span class="string">&quot;macos&quot;</span>,
-                target_os = <span class="string">&quot;netbsd&quot;</span>,
-                target_os = <span class="string">&quot;tvos&quot;</span>,
-                target_os = <span class="string">&quot;watchos&quot;</span>,
+                target_os = <span class="string">"android"</span>,
+                target_os = <span class="string">"dragonfly"</span>,
+                target_os = <span class="string">"freebsd"</span>,
+                target_os = <span class="string">"fuchsia"</span>,
+                target_os = <span class="string">"illumos"</span>,
+                target_os = <span class="string">"ios"</span>,
+                target_os = <span class="string">"linux"</span>,
+                target_os = <span class="string">"macos"</span>,
+                target_os = <span class="string">"netbsd"</span>,
+                target_os = <span class="string">"tvos"</span>,
+                target_os = <span class="string">"watchos"</span>,
             )
         )))
     )]
@@ -4124,28 +4124,28 @@
         <span class="self">self</span>.recv(buf)
     }
 
-    <span class="attr">#[cfg(not(target_os = <span class="string">&quot;redox&quot;</span>))]
-    </span><span class="kw">fn </span>read_vectored(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bufs: <span class="kw-2">&amp;mut </span>[IoSliceMut&lt;<span class="lifetime">&#39;_</span>&gt;]) -&gt; io::Result&lt;usize&gt; {
+    <span class="attr">#[cfg(not(target_os = <span class="string">"redox"</span>))]
+    </span><span class="kw">fn </span>read_vectored(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bufs: <span class="kw-2">&amp;mut </span>[IoSliceMut&lt;<span class="lifetime">'_</span>&gt;]) -&gt; io::Result&lt;usize&gt; {
         <span class="comment">// Safety: both `IoSliceMut` and `MaybeUninitSlice` promise to have the
         // same layout, that of `iovec`/`WSABUF`. Furthermore `recv_vectored`
         // promises to not write unitialised bytes to the `bufs` and pass it
         // directly to the `recvmsg` system call, so this is safe.
-        </span><span class="kw">let </span>bufs = <span class="kw">unsafe </span>{ <span class="kw-2">&amp;mut *</span>(bufs <span class="kw">as </span><span class="kw-2">*mut </span>[IoSliceMut&lt;<span class="lifetime">&#39;_</span>&gt;] <span class="kw">as </span><span class="kw-2">*mut </span>[MaybeUninitSlice&lt;<span class="lifetime">&#39;_</span>&gt;]) };
+        </span><span class="kw">let </span>bufs = <span class="kw">unsafe </span>{ <span class="kw-2">&amp;mut *</span>(bufs <span class="kw">as </span><span class="kw-2">*mut </span>[IoSliceMut&lt;<span class="lifetime">'_</span>&gt;] <span class="kw">as </span><span class="kw-2">*mut </span>[MaybeUninitSlice&lt;<span class="lifetime">'_</span>&gt;]) };
         <span class="self">self</span>.recv_vectored(bufs).map(|(n, <span class="kw">_</span>)| n)
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Read <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Socket {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Read <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>Socket {
     <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, buf: <span class="kw-2">&amp;mut </span>[u8]) -&gt; io::Result&lt;usize&gt; {
         <span class="comment">// Safety: see other `Read::read` impl.
         </span><span class="kw">let </span>buf = <span class="kw">unsafe </span>{ <span class="kw-2">&amp;mut *</span>(buf <span class="kw">as </span><span class="kw-2">*mut </span>[u8] <span class="kw">as </span><span class="kw-2">*mut </span>[MaybeUninit&lt;u8&gt;]) };
         <span class="self">self</span>.recv(buf)
     }
 
-    <span class="attr">#[cfg(not(target_os = <span class="string">&quot;redox&quot;</span>))]
-    </span><span class="kw">fn </span>read_vectored(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bufs: <span class="kw-2">&amp;mut </span>[IoSliceMut&lt;<span class="lifetime">&#39;_</span>&gt;]) -&gt; io::Result&lt;usize&gt; {
+    <span class="attr">#[cfg(not(target_os = <span class="string">"redox"</span>))]
+    </span><span class="kw">fn </span>read_vectored(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bufs: <span class="kw-2">&amp;mut </span>[IoSliceMut&lt;<span class="lifetime">'_</span>&gt;]) -&gt; io::Result&lt;usize&gt; {
         <span class="comment">// Safety: see other `Read::read` impl.
-        </span><span class="kw">let </span>bufs = <span class="kw">unsafe </span>{ <span class="kw-2">&amp;mut *</span>(bufs <span class="kw">as </span><span class="kw-2">*mut </span>[IoSliceMut&lt;<span class="lifetime">&#39;_</span>&gt;] <span class="kw">as </span><span class="kw-2">*mut </span>[MaybeUninitSlice&lt;<span class="lifetime">&#39;_</span>&gt;]) };
+        </span><span class="kw">let </span>bufs = <span class="kw">unsafe </span>{ <span class="kw-2">&amp;mut *</span>(bufs <span class="kw">as </span><span class="kw-2">*mut </span>[IoSliceMut&lt;<span class="lifetime">'_</span>&gt;] <span class="kw">as </span><span class="kw-2">*mut </span>[MaybeUninitSlice&lt;<span class="lifetime">'_</span>&gt;]) };
         <span class="self">self</span>.recv_vectored(bufs).map(|(n, <span class="kw">_</span>)| n)
     }
 }
@@ -4155,8 +4155,8 @@
         <span class="self">self</span>.send(buf)
     }
 
-    <span class="attr">#[cfg(not(target_os = <span class="string">&quot;redox&quot;</span>))]
-    </span><span class="kw">fn </span>write_vectored(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bufs: <span class="kw-2">&amp;</span>[IoSlice&lt;<span class="lifetime">&#39;_</span>&gt;]) -&gt; io::Result&lt;usize&gt; {
+    <span class="attr">#[cfg(not(target_os = <span class="string">"redox"</span>))]
+    </span><span class="kw">fn </span>write_vectored(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bufs: <span class="kw-2">&amp;</span>[IoSlice&lt;<span class="lifetime">'_</span>&gt;]) -&gt; io::Result&lt;usize&gt; {
         <span class="self">self</span>.send_vectored(bufs)
     }
 
@@ -4165,13 +4165,13 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Write <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Socket {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Write <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>Socket {
     <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, buf: <span class="kw-2">&amp;</span>[u8]) -&gt; io::Result&lt;usize&gt; {
         <span class="self">self</span>.send(buf)
     }
 
-    <span class="attr">#[cfg(not(target_os = <span class="string">&quot;redox&quot;</span>))]
-    </span><span class="kw">fn </span>write_vectored(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bufs: <span class="kw-2">&amp;</span>[IoSlice&lt;<span class="lifetime">&#39;_</span>&gt;]) -&gt; io::Result&lt;usize&gt; {
+    <span class="attr">#[cfg(not(target_os = <span class="string">"redox"</span>))]
+    </span><span class="kw">fn </span>write_vectored(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bufs: <span class="kw-2">&amp;</span>[IoSlice&lt;<span class="lifetime">'_</span>&gt;]) -&gt; io::Result&lt;usize&gt; {
         <span class="self">self</span>.send_vectored(bufs)
     }
 
@@ -4181,11 +4181,11 @@
 }
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>Socket {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        f.debug_struct(<span class="string">&quot;Socket&quot;</span>)
-            .field(<span class="string">&quot;raw&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.as_raw())
-            .field(<span class="string">&quot;local_addr&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.local_addr().ok())
-            .field(<span class="string">&quot;peer_addr&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.peer_addr().ok())
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        f.debug_struct(<span class="string">"Socket"</span>)
+            .field(<span class="string">"raw"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.as_raw())
+            .field(<span class="string">"local_addr"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.local_addr().ok())
+            .field(<span class="string">"peer_addr"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.peer_addr().ok())
             .finish()
     }
 }

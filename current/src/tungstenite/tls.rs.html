@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tungstenite-0.20.1/src/tls.rs`."><title>tls.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="tungstenite" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tungstenite-0.20.1/src/tls.rs`."><title>tls.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="tungstenite" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -256,15 +256,15 @@
     <span class="doccomment">/// Plain (non-TLS) connector.
     </span>Plain,
     <span class="doccomment">/// `native-tls` TLS connector.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;native-tls&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"native-tls"</span>)]
     </span>NativeTls(native_tls_crate::TlsConnector),
     <span class="doccomment">/// `rustls` TLS connector.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;__rustls-tls&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"__rustls-tls"</span>)]
     </span>Rustls(std::sync::Arc&lt;rustls::ClientConfig&gt;),
 }
 
 <span class="kw">mod </span>encryption {
-    <span class="attr">#[cfg(feature = <span class="string">&quot;native-tls&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"native-tls"</span>)]
     </span><span class="kw">pub mod </span>native_tls {
         <span class="kw">use </span>native_tls_crate::{HandshakeError <span class="kw">as </span>TlsHandshakeError, TlsConnector};
 
@@ -295,7 +295,7 @@
                         <span class="prelude-val">Err</span>(e) =&gt; <span class="kw">match </span>e {
                             TlsHandshakeError::Failure(f) =&gt; <span class="prelude-val">Err</span>(Error::Tls(f.into())),
                             TlsHandshakeError::WouldBlock(<span class="kw">_</span>) =&gt; {
-                                <span class="macro">panic!</span>(<span class="string">&quot;Bug: TLS handshake not blocked&quot;</span>)
+                                <span class="macro">panic!</span>(<span class="string">"Bug: TLS handshake not blocked"</span>)
                             }
                         },
                         <span class="prelude-val">Ok</span>(s) =&gt; <span class="prelude-val">Ok</span>(MaybeTlsStream::NativeTls(s)),
@@ -305,7 +305,7 @@
         }
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;__rustls-tls&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"__rustls-tls"</span>)]
     </span><span class="kw">pub mod </span>rustls {
         <span class="kw">use </span>rustls::{ClientConfig, ClientConnection, RootCertStore, ServerName, StreamOwned};
 
@@ -339,7 +339,7 @@
                             <span class="attr">#[allow(unused_mut)]
                             </span><span class="kw">let </span><span class="kw-2">mut </span>root_store = RootCertStore::empty();
 
-                            <span class="attr">#[cfg(feature = <span class="string">&quot;rustls-tls-native-roots&quot;</span>)]
+                            <span class="attr">#[cfg(feature = <span class="string">"rustls-tls-native-roots"</span>)]
                             </span>{
                                 <span class="kw">let </span>native_certs = rustls_native_certs::load_native_certs()<span class="question-mark">?</span>;
                                 <span class="kw">let </span>der_certs: Vec&lt;Vec&lt;u8&gt;&gt; =
@@ -347,9 +347,9 @@
                                 <span class="kw">let </span>total_number = der_certs.len();
                                 <span class="kw">let </span>(number_added, number_ignored) =
                                     root_store.add_parsable_certificates(<span class="kw-2">&amp;</span>der_certs);
-                                <span class="macro">log::debug!</span>(<span class="string">&quot;Added {number_added}/{total_number} native root certificates (ignored {number_ignored})&quot;</span>);
+                                <span class="macro">log::debug!</span>(<span class="string">"Added {number_added}/{total_number} native root certificates (ignored {number_ignored})"</span>);
                             }
-                            <span class="attr">#[cfg(feature = <span class="string">&quot;rustls-tls-webpki-roots&quot;</span>)]
+                            <span class="attr">#[cfg(feature = <span class="string">"rustls-tls-webpki-roots"</span>)]
                             </span>{
                                 root_store.add_server_trust_anchors(
                                     webpki_roots::TLS_SERVER_ROOTS.<span class="number">0</span>.iter().map(|ta| {
@@ -434,7 +434,7 @@
 {
     <span class="kw">let </span>request = request.into_client_request()<span class="question-mark">?</span>;
 
-    <span class="attr">#[cfg(any(feature = <span class="string">&quot;native-tls&quot;</span>, feature = <span class="string">&quot;__rustls-tls&quot;</span>))]
+    <span class="attr">#[cfg(any(feature = <span class="string">"native-tls"</span>, feature = <span class="string">"__rustls-tls"</span>))]
     </span><span class="kw">let </span>domain = <span class="kw">match </span>request.uri().host() {
         <span class="prelude-val">Some</span>(d) =&gt; <span class="prelude-val">Ok</span>(d.to_string()),
         <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Err</span>(Error::Url(UrlError::NoHostName)),
@@ -444,26 +444,26 @@
 
     <span class="kw">let </span>stream = <span class="kw">match </span>connector {
         <span class="prelude-val">Some</span>(conn) =&gt; <span class="kw">match </span>conn {
-            <span class="attr">#[cfg(feature = <span class="string">&quot;native-tls&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"native-tls"</span>)]
             </span>Connector::NativeTls(conn) =&gt; {
                 <span class="self">self</span>::encryption::native_tls::wrap_stream(stream, <span class="kw-2">&amp;</span>domain, mode, <span class="prelude-val">Some</span>(conn))
             }
-            <span class="attr">#[cfg(feature = <span class="string">&quot;__rustls-tls&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"__rustls-tls"</span>)]
             </span>Connector::Rustls(conn) =&gt; {
                 <span class="self">self</span>::encryption::rustls::wrap_stream(stream, <span class="kw-2">&amp;</span>domain, mode, <span class="prelude-val">Some</span>(conn))
             }
             Connector::Plain =&gt; <span class="self">self</span>::encryption::plain::wrap_stream(stream, mode),
         },
         <span class="prelude-val">None </span>=&gt; {
-            <span class="attr">#[cfg(feature = <span class="string">&quot;native-tls&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"native-tls"</span>)]
             </span>{
                 <span class="self">self</span>::encryption::native_tls::wrap_stream(stream, <span class="kw-2">&amp;</span>domain, mode, <span class="prelude-val">None</span>)
             }
-            <span class="attr">#[cfg(all(feature = <span class="string">&quot;__rustls-tls&quot;</span>, not(feature = <span class="string">&quot;native-tls&quot;</span>)))]
+            <span class="attr">#[cfg(all(feature = <span class="string">"__rustls-tls"</span>, not(feature = <span class="string">"native-tls"</span>)))]
             </span>{
                 <span class="self">self</span>::encryption::rustls::wrap_stream(stream, <span class="kw-2">&amp;</span>domain, mode, <span class="prelude-val">None</span>)
             }
-            <span class="attr">#[cfg(not(any(feature = <span class="string">&quot;native-tls&quot;</span>, feature = <span class="string">&quot;__rustls-tls&quot;</span>)))]
+            <span class="attr">#[cfg(not(any(feature = <span class="string">"native-tls"</span>, feature = <span class="string">"__rustls-tls"</span>)))]
             </span>{
                 <span class="self">self</span>::encryption::plain::wrap_stream(stream, mode)
             }

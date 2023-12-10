@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hyper-0.14.27/src/error.rs`."><title>error.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="hyper" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hyper-0.14.27/src/error.rs`."><title>error.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="hyper" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -663,7 +663,7 @@
 <a href="#663" id="663">663</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Error and Result module.
 
-</span><span class="attr">#[cfg(all(feature = <span class="string">&quot;client&quot;</span>, any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>)))]
+</span><span class="attr">#[cfg(all(feature = <span class="string">"client"</span>, any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>)))]
 </span><span class="kw">use </span><span class="kw">crate</span>::client::connect::Connected;
 <span class="kw">use </span>std::error::Error <span class="kw">as </span>StdError;
 <span class="kw">use </span>std::fmt;
@@ -681,7 +681,7 @@
 <span class="kw">struct </span>ErrorImpl {
     kind: Kind,
     cause: <span class="prelude-ty">Option</span>&lt;Cause&gt;,
-    <span class="attr">#[cfg(all(feature = <span class="string">&quot;client&quot;</span>, any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>)))]
+    <span class="attr">#[cfg(all(feature = <span class="string">"client"</span>, any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>)))]
     </span>connect_info: <span class="prelude-ty">Option</span>&lt;Connected&gt;,
 }
 
@@ -693,40 +693,40 @@
     </span><span class="attr">#[allow(unused)]
     </span>IncompleteMessage,
     <span class="doccomment">/// A connection received a message (or bytes) when not waiting for one.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;http1&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"http1"</span>)]
     </span>UnexpectedMessage,
     <span class="doccomment">/// A pending item was dropped before ever being processed.
     </span>Canceled,
     <span class="doccomment">/// Indicates a channel (client or body sender) is closed.
     </span>ChannelClosed,
     <span class="doccomment">/// An `io::Error` that occurred while trying to read or write to a network stream.
-    </span><span class="attr">#[cfg(any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>))]
+    </span><span class="attr">#[cfg(any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>))]
     </span>Io,
     <span class="doccomment">/// Error occurred while connecting.
     </span><span class="attr">#[allow(unused)]
     </span>Connect,
     <span class="doccomment">/// Error creating a TcpListener.
-    </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;tcp&quot;</span>, feature = <span class="string">&quot;server&quot;</span>))]
+    </span><span class="attr">#[cfg(all(feature = <span class="string">"tcp"</span>, feature = <span class="string">"server"</span>))]
     </span>Listen,
     <span class="doccomment">/// Error accepting on an Incoming stream.
-    </span><span class="attr">#[cfg(any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>))]
-    #[cfg(feature = <span class="string">&quot;server&quot;</span>)]
+    </span><span class="attr">#[cfg(any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>))]
+    #[cfg(feature = <span class="string">"server"</span>)]
     </span>Accept,
     <span class="doccomment">/// User took too long to send headers
-    </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;server&quot;</span>, feature = <span class="string">&quot;runtime&quot;</span>))]
+    </span><span class="attr">#[cfg(all(feature = <span class="string">"http1"</span>, feature = <span class="string">"server"</span>, feature = <span class="string">"runtime"</span>))]
     </span>HeaderTimeout,
     <span class="doccomment">/// Error while reading a body from connection.
-    </span><span class="attr">#[cfg(any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>, feature = <span class="string">&quot;stream&quot;</span>))]
+    </span><span class="attr">#[cfg(any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>, feature = <span class="string">"stream"</span>))]
     </span>Body,
     <span class="doccomment">/// Error while writing a body to connection.
-    </span><span class="attr">#[cfg(any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>))]
+    </span><span class="attr">#[cfg(any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>))]
     </span>BodyWrite,
     <span class="doccomment">/// Error calling AsyncWrite::shutdown()
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;http1&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"http1"</span>)]
     </span>Shutdown,
 
     <span class="doccomment">/// A general error from h2.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;http2&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"http2"</span>)]
     </span>Http2,
 }
 
@@ -734,10 +734,10 @@
 </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">enum </span>Parse {
     Method,
     Version,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;http1&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"http1"</span>)]
     </span>VersionH2,
     Uri,
-    <span class="attr">#[cfg_attr(not(all(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;server&quot;</span>)), allow(unused))]
+    <span class="attr">#[cfg_attr(not(all(feature = <span class="string">"http1"</span>, feature = <span class="string">"server"</span>)), allow(unused))]
     </span>UriTooLong,
     Header(Header),
     TooLarge,
@@ -749,68 +749,68 @@
 <span class="attr">#[derive(Debug)]
 </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">enum </span>Header {
     Token,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;http1&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"http1"</span>)]
     </span>ContentLengthInvalid,
-    <span class="attr">#[cfg(all(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;server&quot;</span>))]
+    <span class="attr">#[cfg(all(feature = <span class="string">"http1"</span>, feature = <span class="string">"server"</span>))]
     </span>TransferEncodingInvalid,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;http1&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"http1"</span>)]
     </span>TransferEncodingUnexpected,
 }
 
 <span class="attr">#[derive(Debug)]
 </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">enum </span>User {
-    <span class="doccomment">/// Error calling user&#39;s HttpBody::poll_data().
-    </span><span class="attr">#[cfg(any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>))]
+    <span class="doccomment">/// Error calling user's HttpBody::poll_data().
+    </span><span class="attr">#[cfg(any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>))]
     </span>Body,
     <span class="doccomment">/// The user aborted writing of the outgoing body.
     </span>BodyWriteAborted,
-    <span class="doccomment">/// Error calling user&#39;s MakeService.
-    </span><span class="attr">#[cfg(any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>))]
-    #[cfg(feature = <span class="string">&quot;server&quot;</span>)]
+    <span class="doccomment">/// Error calling user's MakeService.
+    </span><span class="attr">#[cfg(any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>))]
+    #[cfg(feature = <span class="string">"server"</span>)]
     </span>MakeService,
-    <span class="doccomment">/// Error from future of user&#39;s Service.
-    </span><span class="attr">#[cfg(any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>))]
+    <span class="doccomment">/// Error from future of user's Service.
+    </span><span class="attr">#[cfg(any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>))]
     </span>Service,
     <span class="doccomment">/// User tried to send a certain header in an unexpected context.
     ///
     /// For example, sending both `content-length` and `transfer-encoding`.
-    </span><span class="attr">#[cfg(any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>))]
-    #[cfg(feature = <span class="string">&quot;server&quot;</span>)]
+    </span><span class="attr">#[cfg(any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>))]
+    #[cfg(feature = <span class="string">"server"</span>)]
     </span>UnexpectedHeader,
     <span class="doccomment">/// User tried to create a Request with bad version.
-    </span><span class="attr">#[cfg(any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>))]
-    #[cfg(feature = <span class="string">&quot;client&quot;</span>)]
+    </span><span class="attr">#[cfg(any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>))]
+    #[cfg(feature = <span class="string">"client"</span>)]
     </span>UnsupportedVersion,
     <span class="doccomment">/// User tried to create a CONNECT Request with the Client.
-    </span><span class="attr">#[cfg(any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>))]
-    #[cfg(feature = <span class="string">&quot;client&quot;</span>)]
+    </span><span class="attr">#[cfg(any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>))]
+    #[cfg(feature = <span class="string">"client"</span>)]
     </span>UnsupportedRequestMethod,
     <span class="doccomment">/// User tried to respond with a 1xx (not 101) response code.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;http1&quot;</span>)]
-    #[cfg(feature = <span class="string">&quot;server&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"http1"</span>)]
+    #[cfg(feature = <span class="string">"server"</span>)]
     </span>UnsupportedStatusCode,
     <span class="doccomment">/// User tried to send a Request with Client with non-absolute URI.
-    </span><span class="attr">#[cfg(any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>))]
-    #[cfg(feature = <span class="string">&quot;client&quot;</span>)]
+    </span><span class="attr">#[cfg(any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>))]
+    #[cfg(feature = <span class="string">"client"</span>)]
     </span>AbsoluteUriRequired,
 
-    <span class="doccomment">/// User tried polling for an upgrade that doesn&#39;t exist.
+    <span class="doccomment">/// User tried polling for an upgrade that doesn't exist.
     </span>NoUpgrade,
 
     <span class="doccomment">/// User polled for an upgrade, but low-level API is not using upgrades.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;http1&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"http1"</span>)]
     </span>ManualUpgrade,
 
     <span class="doccomment">/// User called `server::Connection::without_shutdown()` on an HTTP/2 conn.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;server&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"server"</span>)]
     </span>WithoutShutdownNonHttp1,
 
     <span class="doccomment">/// The dispatch task is gone.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;client&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"client"</span>)]
     </span>DispatchGone,
 
     <span class="doccomment">/// User aborted in an FFI callback.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;ffi&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"ffi"</span>)]
     </span>AbortedByCallback,
 }
 
@@ -848,7 +848,7 @@
         <span class="macro">matches!</span>(<span class="self">self</span>.inner.kind, Kind::Canceled)
     }
 
-    <span class="doccomment">/// Returns true if a sender&#39;s channel is closed.
+    <span class="doccomment">/// Returns true if a sender's channel is closed.
     </span><span class="kw">pub fn </span>is_closed(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         <span class="macro">matches!</span>(<span class="self">self</span>.inner.kind, Kind::ChannelClosed)
     }
@@ -879,7 +879,7 @@
     }
 
     <span class="doccomment">/// Returns the info of the client connection on which this error occurred.
-    </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;client&quot;</span>, any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>)))]
+    </span><span class="attr">#[cfg(all(feature = <span class="string">"client"</span>, any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>)))]
     </span><span class="kw">pub fn </span>client_connect_info(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>Connected&gt; {
         <span class="self">self</span>.inner.connect_info.as_ref()
     }
@@ -889,7 +889,7 @@
             inner: Box::new(ErrorImpl {
                 kind,
                 cause: <span class="prelude-val">None</span>,
-                <span class="attr">#[cfg(all(feature = <span class="string">&quot;client&quot;</span>, any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>)))]
+                <span class="attr">#[cfg(all(feature = <span class="string">"client"</span>, any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>)))]
                 </span>connect_info: <span class="prelude-val">None</span>,
             }),
         }
@@ -900,18 +900,18 @@
         <span class="self">self
     </span>}
 
-    <span class="attr">#[cfg(all(feature = <span class="string">&quot;client&quot;</span>, any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>)))]
+    <span class="attr">#[cfg(all(feature = <span class="string">"client"</span>, any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>)))]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>with_client_connect_info(<span class="kw-2">mut </span><span class="self">self</span>, connect_info: Connected) -&gt; Error {
         <span class="self">self</span>.inner.connect_info = <span class="prelude-val">Some</span>(connect_info);
         <span class="self">self
     </span>}
 
-    <span class="attr">#[cfg(any(all(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;server&quot;</span>), feature = <span class="string">&quot;ffi&quot;</span>))]
+    <span class="attr">#[cfg(any(all(feature = <span class="string">"http1"</span>, feature = <span class="string">"server"</span>), feature = <span class="string">"ffi"</span>))]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>kind(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Kind {
         <span class="kw-2">&amp;</span><span class="self">self</span>.inner.kind
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>find_source&lt;E: StdError + <span class="lifetime">&#39;static</span>&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>E&gt; {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>find_source&lt;E: StdError + <span class="lifetime">'static</span>&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>E&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>cause = <span class="self">self</span>.source();
         <span class="kw">while let </span><span class="prelude-val">Some</span>(err) = cause {
             <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref </span>typed) = err.downcast_ref() {
@@ -924,7 +924,7 @@
         </span><span class="prelude-val">None
     </span>}
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;http2&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"http2"</span>)]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>h2_reason(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; h2::Reason {
         <span class="comment">// Find an h2::Reason somewhere in the cause stack, if it exists,
         // otherwise assume an INTERNAL_ERROR.
@@ -937,44 +937,44 @@
         Error::new(Kind::Canceled)
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;http1&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"http1"</span>)]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>new_incomplete() -&gt; Error {
         Error::new(Kind::IncompleteMessage)
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;http1&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"http1"</span>)]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>new_too_large() -&gt; Error {
         Error::new(Kind::Parse(Parse::TooLarge))
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;http1&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"http1"</span>)]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>new_version_h2() -&gt; Error {
         Error::new(Kind::Parse(Parse::VersionH2))
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;http1&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"http1"</span>)]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>new_unexpected_message() -&gt; Error {
         Error::new(Kind::UnexpectedMessage)
     }
 
-    <span class="attr">#[cfg(any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>))]
+    <span class="attr">#[cfg(any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>))]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>new_io(cause: std::io::Error) -&gt; Error {
         Error::new(Kind::Io).with(cause)
     }
 
-    <span class="attr">#[cfg(all(feature = <span class="string">&quot;server&quot;</span>, feature = <span class="string">&quot;tcp&quot;</span>))]
+    <span class="attr">#[cfg(all(feature = <span class="string">"server"</span>, feature = <span class="string">"tcp"</span>))]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>new_listen&lt;E: Into&lt;Cause&gt;&gt;(cause: E) -&gt; Error {
         Error::new(Kind::Listen).with(cause)
     }
 
-    <span class="attr">#[cfg(any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>))]
-    #[cfg(feature = <span class="string">&quot;server&quot;</span>)]
+    <span class="attr">#[cfg(any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>))]
+    #[cfg(feature = <span class="string">"server"</span>)]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>new_accept&lt;E: Into&lt;Cause&gt;&gt;(cause: E) -&gt; Error {
         Error::new(Kind::Accept).with(cause)
     }
 
-    <span class="attr">#[cfg(any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>))]
-    #[cfg(feature = <span class="string">&quot;client&quot;</span>)]
+    <span class="attr">#[cfg(any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>))]
+    #[cfg(feature = <span class="string">"client"</span>)]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>new_connect&lt;E: Into&lt;Cause&gt;&gt;(cause: E) -&gt; Error {
         Error::new(Kind::Connect).with(cause)
     }
@@ -983,12 +983,12 @@
         Error::new(Kind::ChannelClosed)
     }
 
-    <span class="attr">#[cfg(any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>, feature = <span class="string">&quot;stream&quot;</span>))]
+    <span class="attr">#[cfg(any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>, feature = <span class="string">"stream"</span>))]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>new_body&lt;E: Into&lt;Cause&gt;&gt;(cause: E) -&gt; Error {
         Error::new(Kind::Body).with(cause)
     }
 
-    <span class="attr">#[cfg(any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>))]
+    <span class="attr">#[cfg(any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>))]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>new_body_write&lt;E: Into&lt;Cause&gt;&gt;(cause: E) -&gt; Error {
         Error::new(Kind::BodyWrite).with(cause)
     }
@@ -1001,37 +1001,37 @@
         Error::new(Kind::User(user))
     }
 
-    <span class="attr">#[cfg(any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>))]
-    #[cfg(feature = <span class="string">&quot;server&quot;</span>)]
+    <span class="attr">#[cfg(any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>))]
+    #[cfg(feature = <span class="string">"server"</span>)]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>new_user_header() -&gt; Error {
         Error::new_user(User::UnexpectedHeader)
     }
 
-    <span class="attr">#[cfg(all(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;server&quot;</span>, feature = <span class="string">&quot;runtime&quot;</span>))]
+    <span class="attr">#[cfg(all(feature = <span class="string">"http1"</span>, feature = <span class="string">"server"</span>, feature = <span class="string">"runtime"</span>))]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>new_header_timeout() -&gt; Error {
         Error::new(Kind::HeaderTimeout)
     }
 
-    <span class="attr">#[cfg(any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>))]
-    #[cfg(feature = <span class="string">&quot;client&quot;</span>)]
+    <span class="attr">#[cfg(any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>))]
+    #[cfg(feature = <span class="string">"client"</span>)]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>new_user_unsupported_version() -&gt; Error {
         Error::new_user(User::UnsupportedVersion)
     }
 
-    <span class="attr">#[cfg(any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>))]
-    #[cfg(feature = <span class="string">&quot;client&quot;</span>)]
+    <span class="attr">#[cfg(any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>))]
+    #[cfg(feature = <span class="string">"client"</span>)]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>new_user_unsupported_request_method() -&gt; Error {
         Error::new_user(User::UnsupportedRequestMethod)
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;http1&quot;</span>)]
-    #[cfg(feature = <span class="string">&quot;server&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"http1"</span>)]
+    #[cfg(feature = <span class="string">"server"</span>)]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>new_user_unsupported_status_code() -&gt; Error {
         Error::new_user(User::UnsupportedStatusCode)
     }
 
-    <span class="attr">#[cfg(any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>))]
-    #[cfg(feature = <span class="string">&quot;client&quot;</span>)]
+    <span class="attr">#[cfg(any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>))]
+    #[cfg(feature = <span class="string">"client"</span>)]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>new_user_absolute_uri_required() -&gt; Error {
         Error::new_user(User::AbsoluteUriRequired)
     }
@@ -1040,154 +1040,154 @@
         Error::new_user(User::NoUpgrade)
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;http1&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"http1"</span>)]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>new_user_manual_upgrade() -&gt; Error {
         Error::new_user(User::ManualUpgrade)
     }
 
-    <span class="attr">#[cfg(any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>))]
-    #[cfg(feature = <span class="string">&quot;server&quot;</span>)]
+    <span class="attr">#[cfg(any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>))]
+    #[cfg(feature = <span class="string">"server"</span>)]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>new_user_make_service&lt;E: Into&lt;Cause&gt;&gt;(cause: E) -&gt; Error {
         Error::new_user(User::MakeService).with(cause)
     }
 
-    <span class="attr">#[cfg(any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>))]
+    <span class="attr">#[cfg(any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>))]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>new_user_service&lt;E: Into&lt;Cause&gt;&gt;(cause: E) -&gt; Error {
         Error::new_user(User::Service).with(cause)
     }
 
-    <span class="attr">#[cfg(any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>))]
+    <span class="attr">#[cfg(any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>))]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>new_user_body&lt;E: Into&lt;Cause&gt;&gt;(cause: E) -&gt; Error {
         Error::new_user(User::Body).with(cause)
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;server&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"server"</span>)]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>new_without_shutdown_not_h1() -&gt; Error {
         Error::new(Kind::User(User::WithoutShutdownNonHttp1))
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;http1&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"http1"</span>)]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>new_shutdown(cause: std::io::Error) -&gt; Error {
         Error::new(Kind::Shutdown).with(cause)
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;ffi&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"ffi"</span>)]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>new_user_aborted_by_callback() -&gt; Error {
         Error::new_user(User::AbortedByCallback)
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;client&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"client"</span>)]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>new_user_dispatch_gone() -&gt; Error {
         Error::new(Kind::User(User::DispatchGone))
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;http2&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"http2"</span>)]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>new_h2(cause: ::h2::Error) -&gt; Error {
         <span class="kw">if </span>cause.is_io() {
-            Error::new_io(cause.into_io().expect(<span class="string">&quot;h2::Error::is_io&quot;</span>))
+            Error::new_io(cause.into_io().expect(<span class="string">"h2::Error::is_io"</span>))
         } <span class="kw">else </span>{
             Error::new(Kind::Http2).with(cause)
         }
     }
 
-    <span class="doccomment">/// The error&#39;s standalone message, without the message from the source.
-    </span><span class="kw">pub fn </span>message(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl </span>fmt::Display + <span class="lifetime">&#39;_ </span>{
+    <span class="doccomment">/// The error's standalone message, without the message from the source.
+    </span><span class="kw">pub fn </span>message(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl </span>fmt::Display + <span class="lifetime">'_ </span>{
         <span class="self">self</span>.description()
     }
 
     <span class="kw">fn </span>description(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
         <span class="kw">match </span><span class="self">self</span>.inner.kind {
-            Kind::Parse(Parse::Method) =&gt; <span class="string">&quot;invalid HTTP method parsed&quot;</span>,
-            Kind::Parse(Parse::Version) =&gt; <span class="string">&quot;invalid HTTP version parsed&quot;</span>,
-            <span class="attr">#[cfg(feature = <span class="string">&quot;http1&quot;</span>)]
-            </span>Kind::Parse(Parse::VersionH2) =&gt; <span class="string">&quot;invalid HTTP version parsed (found HTTP2 preface)&quot;</span>,
-            Kind::Parse(Parse::Uri) =&gt; <span class="string">&quot;invalid URI&quot;</span>,
-            Kind::Parse(Parse::UriTooLong) =&gt; <span class="string">&quot;URI too long&quot;</span>,
-            Kind::Parse(Parse::Header(Header::Token)) =&gt; <span class="string">&quot;invalid HTTP header parsed&quot;</span>,
-            <span class="attr">#[cfg(feature = <span class="string">&quot;http1&quot;</span>)]
+            Kind::Parse(Parse::Method) =&gt; <span class="string">"invalid HTTP method parsed"</span>,
+            Kind::Parse(Parse::Version) =&gt; <span class="string">"invalid HTTP version parsed"</span>,
+            <span class="attr">#[cfg(feature = <span class="string">"http1"</span>)]
+            </span>Kind::Parse(Parse::VersionH2) =&gt; <span class="string">"invalid HTTP version parsed (found HTTP2 preface)"</span>,
+            Kind::Parse(Parse::Uri) =&gt; <span class="string">"invalid URI"</span>,
+            Kind::Parse(Parse::UriTooLong) =&gt; <span class="string">"URI too long"</span>,
+            Kind::Parse(Parse::Header(Header::Token)) =&gt; <span class="string">"invalid HTTP header parsed"</span>,
+            <span class="attr">#[cfg(feature = <span class="string">"http1"</span>)]
             </span>Kind::Parse(Parse::Header(Header::ContentLengthInvalid)) =&gt; {
-                <span class="string">&quot;invalid content-length parsed&quot;
+                <span class="string">"invalid content-length parsed"
             </span>}
-            <span class="attr">#[cfg(all(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;server&quot;</span>))]
+            <span class="attr">#[cfg(all(feature = <span class="string">"http1"</span>, feature = <span class="string">"server"</span>))]
             </span>Kind::Parse(Parse::Header(Header::TransferEncodingInvalid)) =&gt; {
-                <span class="string">&quot;invalid transfer-encoding parsed&quot;
+                <span class="string">"invalid transfer-encoding parsed"
             </span>}
-            <span class="attr">#[cfg(feature = <span class="string">&quot;http1&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"http1"</span>)]
             </span>Kind::Parse(Parse::Header(Header::TransferEncodingUnexpected)) =&gt; {
-                <span class="string">&quot;unexpected transfer-encoding parsed&quot;
+                <span class="string">"unexpected transfer-encoding parsed"
             </span>}
-            Kind::Parse(Parse::TooLarge) =&gt; <span class="string">&quot;message head is too large&quot;</span>,
-            Kind::Parse(Parse::Status) =&gt; <span class="string">&quot;invalid HTTP status-code parsed&quot;</span>,
+            Kind::Parse(Parse::TooLarge) =&gt; <span class="string">"message head is too large"</span>,
+            Kind::Parse(Parse::Status) =&gt; <span class="string">"invalid HTTP status-code parsed"</span>,
             Kind::Parse(Parse::Internal) =&gt; {
-                <span class="string">&quot;internal error inside Hyper and/or its dependencies, please report&quot;
+                <span class="string">"internal error inside Hyper and/or its dependencies, please report"
             </span>}
-            Kind::IncompleteMessage =&gt; <span class="string">&quot;connection closed before message completed&quot;</span>,
-            <span class="attr">#[cfg(feature = <span class="string">&quot;http1&quot;</span>)]
-            </span>Kind::UnexpectedMessage =&gt; <span class="string">&quot;received unexpected message from connection&quot;</span>,
-            Kind::ChannelClosed =&gt; <span class="string">&quot;channel closed&quot;</span>,
-            Kind::Connect =&gt; <span class="string">&quot;error trying to connect&quot;</span>,
-            Kind::Canceled =&gt; <span class="string">&quot;operation was canceled&quot;</span>,
-            <span class="attr">#[cfg(all(feature = <span class="string">&quot;server&quot;</span>, feature = <span class="string">&quot;tcp&quot;</span>))]
-            </span>Kind::Listen =&gt; <span class="string">&quot;error creating server listener&quot;</span>,
-            <span class="attr">#[cfg(any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>))]
-            #[cfg(feature = <span class="string">&quot;server&quot;</span>)]
-            </span>Kind::Accept =&gt; <span class="string">&quot;error accepting connection&quot;</span>,
-            <span class="attr">#[cfg(all(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;server&quot;</span>, feature = <span class="string">&quot;runtime&quot;</span>))]
-            </span>Kind::HeaderTimeout =&gt; <span class="string">&quot;read header from client timeout&quot;</span>,
-            <span class="attr">#[cfg(any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>, feature = <span class="string">&quot;stream&quot;</span>))]
-            </span>Kind::Body =&gt; <span class="string">&quot;error reading a body from connection&quot;</span>,
-            <span class="attr">#[cfg(any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>))]
-            </span>Kind::BodyWrite =&gt; <span class="string">&quot;error writing a body to connection&quot;</span>,
-            <span class="attr">#[cfg(feature = <span class="string">&quot;http1&quot;</span>)]
-            </span>Kind::Shutdown =&gt; <span class="string">&quot;error shutting down connection&quot;</span>,
-            <span class="attr">#[cfg(feature = <span class="string">&quot;http2&quot;</span>)]
-            </span>Kind::Http2 =&gt; <span class="string">&quot;http2 error&quot;</span>,
-            <span class="attr">#[cfg(any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>))]
-            </span>Kind::Io =&gt; <span class="string">&quot;connection error&quot;</span>,
+            Kind::IncompleteMessage =&gt; <span class="string">"connection closed before message completed"</span>,
+            <span class="attr">#[cfg(feature = <span class="string">"http1"</span>)]
+            </span>Kind::UnexpectedMessage =&gt; <span class="string">"received unexpected message from connection"</span>,
+            Kind::ChannelClosed =&gt; <span class="string">"channel closed"</span>,
+            Kind::Connect =&gt; <span class="string">"error trying to connect"</span>,
+            Kind::Canceled =&gt; <span class="string">"operation was canceled"</span>,
+            <span class="attr">#[cfg(all(feature = <span class="string">"server"</span>, feature = <span class="string">"tcp"</span>))]
+            </span>Kind::Listen =&gt; <span class="string">"error creating server listener"</span>,
+            <span class="attr">#[cfg(any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>))]
+            #[cfg(feature = <span class="string">"server"</span>)]
+            </span>Kind::Accept =&gt; <span class="string">"error accepting connection"</span>,
+            <span class="attr">#[cfg(all(feature = <span class="string">"http1"</span>, feature = <span class="string">"server"</span>, feature = <span class="string">"runtime"</span>))]
+            </span>Kind::HeaderTimeout =&gt; <span class="string">"read header from client timeout"</span>,
+            <span class="attr">#[cfg(any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>, feature = <span class="string">"stream"</span>))]
+            </span>Kind::Body =&gt; <span class="string">"error reading a body from connection"</span>,
+            <span class="attr">#[cfg(any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>))]
+            </span>Kind::BodyWrite =&gt; <span class="string">"error writing a body to connection"</span>,
+            <span class="attr">#[cfg(feature = <span class="string">"http1"</span>)]
+            </span>Kind::Shutdown =&gt; <span class="string">"error shutting down connection"</span>,
+            <span class="attr">#[cfg(feature = <span class="string">"http2"</span>)]
+            </span>Kind::Http2 =&gt; <span class="string">"http2 error"</span>,
+            <span class="attr">#[cfg(any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>))]
+            </span>Kind::Io =&gt; <span class="string">"connection error"</span>,
 
-            <span class="attr">#[cfg(any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>))]
-            </span>Kind::User(User::Body) =&gt; <span class="string">&quot;error from user&#39;s HttpBody stream&quot;</span>,
-            Kind::User(User::BodyWriteAborted) =&gt; <span class="string">&quot;user body write aborted&quot;</span>,
-            <span class="attr">#[cfg(any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>))]
-            #[cfg(feature = <span class="string">&quot;server&quot;</span>)]
-            </span>Kind::User(User::MakeService) =&gt; <span class="string">&quot;error from user&#39;s MakeService&quot;</span>,
-            <span class="attr">#[cfg(any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>))]
-            </span>Kind::User(User::Service) =&gt; <span class="string">&quot;error from user&#39;s Service&quot;</span>,
-            <span class="attr">#[cfg(any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>))]
-            #[cfg(feature = <span class="string">&quot;server&quot;</span>)]
-            </span>Kind::User(User::UnexpectedHeader) =&gt; <span class="string">&quot;user sent unexpected header&quot;</span>,
-            <span class="attr">#[cfg(any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>))]
-            #[cfg(feature = <span class="string">&quot;client&quot;</span>)]
-            </span>Kind::User(User::UnsupportedVersion) =&gt; <span class="string">&quot;request has unsupported HTTP version&quot;</span>,
-            <span class="attr">#[cfg(any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>))]
-            #[cfg(feature = <span class="string">&quot;client&quot;</span>)]
-            </span>Kind::User(User::UnsupportedRequestMethod) =&gt; <span class="string">&quot;request has unsupported HTTP method&quot;</span>,
-            <span class="attr">#[cfg(feature = <span class="string">&quot;http1&quot;</span>)]
-            #[cfg(feature = <span class="string">&quot;server&quot;</span>)]
+            <span class="attr">#[cfg(any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>))]
+            </span>Kind::User(User::Body) =&gt; <span class="string">"error from user's HttpBody stream"</span>,
+            Kind::User(User::BodyWriteAborted) =&gt; <span class="string">"user body write aborted"</span>,
+            <span class="attr">#[cfg(any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>))]
+            #[cfg(feature = <span class="string">"server"</span>)]
+            </span>Kind::User(User::MakeService) =&gt; <span class="string">"error from user's MakeService"</span>,
+            <span class="attr">#[cfg(any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>))]
+            </span>Kind::User(User::Service) =&gt; <span class="string">"error from user's Service"</span>,
+            <span class="attr">#[cfg(any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>))]
+            #[cfg(feature = <span class="string">"server"</span>)]
+            </span>Kind::User(User::UnexpectedHeader) =&gt; <span class="string">"user sent unexpected header"</span>,
+            <span class="attr">#[cfg(any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>))]
+            #[cfg(feature = <span class="string">"client"</span>)]
+            </span>Kind::User(User::UnsupportedVersion) =&gt; <span class="string">"request has unsupported HTTP version"</span>,
+            <span class="attr">#[cfg(any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>))]
+            #[cfg(feature = <span class="string">"client"</span>)]
+            </span>Kind::User(User::UnsupportedRequestMethod) =&gt; <span class="string">"request has unsupported HTTP method"</span>,
+            <span class="attr">#[cfg(feature = <span class="string">"http1"</span>)]
+            #[cfg(feature = <span class="string">"server"</span>)]
             </span>Kind::User(User::UnsupportedStatusCode) =&gt; {
-                <span class="string">&quot;response has 1xx status code, not supported by server&quot;
+                <span class="string">"response has 1xx status code, not supported by server"
             </span>}
-            <span class="attr">#[cfg(any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>))]
-            #[cfg(feature = <span class="string">&quot;client&quot;</span>)]
-            </span>Kind::User(User::AbsoluteUriRequired) =&gt; <span class="string">&quot;client requires absolute-form URIs&quot;</span>,
-            Kind::User(User::NoUpgrade) =&gt; <span class="string">&quot;no upgrade available&quot;</span>,
-            <span class="attr">#[cfg(feature = <span class="string">&quot;http1&quot;</span>)]
-            </span>Kind::User(User::ManualUpgrade) =&gt; <span class="string">&quot;upgrade expected but low level API in use&quot;</span>,
-            <span class="attr">#[cfg(feature = <span class="string">&quot;server&quot;</span>)]
+            <span class="attr">#[cfg(any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>))]
+            #[cfg(feature = <span class="string">"client"</span>)]
+            </span>Kind::User(User::AbsoluteUriRequired) =&gt; <span class="string">"client requires absolute-form URIs"</span>,
+            Kind::User(User::NoUpgrade) =&gt; <span class="string">"no upgrade available"</span>,
+            <span class="attr">#[cfg(feature = <span class="string">"http1"</span>)]
+            </span>Kind::User(User::ManualUpgrade) =&gt; <span class="string">"upgrade expected but low level API in use"</span>,
+            <span class="attr">#[cfg(feature = <span class="string">"server"</span>)]
             </span>Kind::User(User::WithoutShutdownNonHttp1) =&gt; {
-                <span class="string">&quot;without_shutdown() called on a non-HTTP/1 connection&quot;
+                <span class="string">"without_shutdown() called on a non-HTTP/1 connection"
             </span>}
-            <span class="attr">#[cfg(feature = <span class="string">&quot;client&quot;</span>)]
-            </span>Kind::User(User::DispatchGone) =&gt; <span class="string">&quot;dispatch task is gone&quot;</span>,
-            <span class="attr">#[cfg(feature = <span class="string">&quot;ffi&quot;</span>)]
-            </span>Kind::User(User::AbortedByCallback) =&gt; <span class="string">&quot;operation aborted by an application callback&quot;</span>,
+            <span class="attr">#[cfg(feature = <span class="string">"client"</span>)]
+            </span>Kind::User(User::DispatchGone) =&gt; <span class="string">"dispatch task is gone"</span>,
+            <span class="attr">#[cfg(feature = <span class="string">"ffi"</span>)]
+            </span>Kind::User(User::AbortedByCallback) =&gt; <span class="string">"operation aborted by an application callback"</span>,
         }
     }
 }
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>Error {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        <span class="kw">let </span><span class="kw-2">mut </span>f = f.debug_tuple(<span class="string">&quot;hyper::Error&quot;</span>);
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        <span class="kw">let </span><span class="kw-2">mut </span>f = f.debug_tuple(<span class="string">"hyper::Error"</span>);
         f.field(<span class="kw-2">&amp;</span><span class="self">self</span>.inner.kind);
         <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref </span>cause) = <span class="self">self</span>.inner.cause {
             f.field(cause);
@@ -1197,9 +1197,9 @@
 }
 
 <span class="kw">impl </span>fmt::Display <span class="kw">for </span>Error {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref </span>cause) = <span class="self">self</span>.inner.cause {
-            <span class="macro">write!</span>(f, <span class="string">&quot;{}: {}&quot;</span>, <span class="self">self</span>.description(), cause)
+            <span class="macro">write!</span>(f, <span class="string">"{}: {}"</span>, <span class="self">self</span>.description(), cause)
         } <span class="kw">else </span>{
             f.write_str(<span class="self">self</span>.description())
         }
@@ -1207,11 +1207,11 @@
 }
 
 <span class="kw">impl </span>StdError <span class="kw">for </span>Error {
-    <span class="kw">fn </span>source(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>(<span class="kw">dyn </span>StdError + <span class="lifetime">&#39;static</span>)&gt; {
+    <span class="kw">fn </span>source(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>(<span class="kw">dyn </span>StdError + <span class="lifetime">'static</span>)&gt; {
         <span class="self">self</span>.inner
             .cause
             .as_ref()
-            .map(|cause| <span class="kw-2">&amp;**</span>cause <span class="kw">as </span><span class="kw-2">&amp;</span>(<span class="kw">dyn </span>StdError + <span class="lifetime">&#39;static</span>))
+            .map(|cause| <span class="kw-2">&amp;**</span>cause <span class="kw">as </span><span class="kw-2">&amp;</span>(<span class="kw">dyn </span>StdError + <span class="lifetime">'static</span>))
     }
 }
 
@@ -1222,13 +1222,13 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;http1&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"http1"</span>)]
 </span><span class="kw">impl </span>Parse {
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>content_length_invalid() -&gt; <span class="self">Self </span>{
         Parse::Header(Header::ContentLengthInvalid)
     }
 
-    <span class="attr">#[cfg(all(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;server&quot;</span>))]
+    <span class="attr">#[cfg(all(feature = <span class="string">"http1"</span>, feature = <span class="string">"server"</span>))]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>transfer_encoding_invalid() -&gt; <span class="self">Self </span>{
         Parse::Header(Header::TransferEncodingInvalid)
     }
@@ -1277,15 +1277,15 @@
 }
 
 <span class="attr">#[doc(hidden)]
-</span><span class="kw">trait </span>AssertSendSync: Send + Sync + <span class="lifetime">&#39;static </span>{}
+</span><span class="kw">trait </span>AssertSendSync: Send + Sync + <span class="lifetime">'static </span>{}
 <span class="attr">#[doc(hidden)]
 </span><span class="kw">impl </span>AssertSendSync <span class="kw">for </span>Error {}
 
 <span class="comment">// ===== impl TimedOut ====
 
 </span><span class="kw">impl </span>fmt::Display <span class="kw">for </span>TimedOut {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        f.write_str(<span class="string">&quot;operation timed out&quot;</span>)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        f.write_str(<span class="string">"operation timed out"</span>)
     }
 }
 
@@ -1301,21 +1301,21 @@
         <span class="macro">assert_eq!</span>(mem::size_of::&lt;Error&gt;(), mem::size_of::&lt;usize&gt;());
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;http2&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"http2"</span>)]
     #[test]
     </span><span class="kw">fn </span>h2_reason_unknown() {
         <span class="kw">let </span>closed = Error::new_closed();
         <span class="macro">assert_eq!</span>(closed.h2_reason(), h2::Reason::INTERNAL_ERROR);
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;http2&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"http2"</span>)]
     #[test]
     </span><span class="kw">fn </span>h2_reason_one_level() {
         <span class="kw">let </span>body_err = Error::new_user_body(h2::Error::from(h2::Reason::ENHANCE_YOUR_CALM));
         <span class="macro">assert_eq!</span>(body_err.h2_reason(), h2::Reason::ENHANCE_YOUR_CALM);
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;http2&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"http2"</span>)]
     #[test]
     </span><span class="kw">fn </span>h2_reason_nested() {
         <span class="kw">let </span>recvd = Error::new_h2(h2::Error::from(h2::Reason::HTTP_1_1_REQUIRED));

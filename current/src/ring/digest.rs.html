@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.5/src/digest.rs`."><title>digest.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="ring" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.5/src/digest.rs`."><title>digest.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="ring" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -594,7 +594,7 @@
 // purpose with or without fee is hereby granted, provided that the above
 // copyright notice and this permission notice appear in all copies.
 //
-// THE SOFTWARE IS PROVIDED &quot;AS IS&quot; AND THE AUTHORS DISCLAIM ALL WARRANTIES
+// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHORS DISCLAIM ALL WARRANTIES
 // WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
 // MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY
 // SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
@@ -610,7 +610,7 @@
 
 </span><span class="comment">// Note on why are we doing things the hard way: It would be easy to implement
 // this using the C `EVP_MD`/`EVP_MD_CTX` interface. However, if we were to do
-// things that way, we&#39;d have a hard dependency on `malloc` and other overhead.
+// things that way, we'd have a hard dependency on `malloc` and other overhead.
 // The goal for this implementation is to drive the overhead as close to zero
 // as possible.
 
@@ -633,14 +633,14 @@
     // so a 64-bit counter is more than sufficient.
     </span>completed_data_blocks: u64,
 
-    <span class="doccomment">/// The context&#39;s algorithm.
-    </span><span class="kw">pub </span>algorithm: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Algorithm,
+    <span class="doccomment">/// The context's algorithm.
+    </span><span class="kw">pub </span>algorithm: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Algorithm,
 
     cpu_features: cpu::Features,
 }
 
 <span class="kw">impl </span>BlockContext {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(algorithm: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Algorithm) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(algorithm: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Algorithm) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             state: algorithm.initial_state,
             completed_data_blocks: <span class="number">0</span>,
@@ -680,8 +680,8 @@
             <span class="kw">unsafe </span>{
                 (<span class="self">self</span>.algorithm.block_data_order)(<span class="kw-2">&amp;mut </span><span class="self">self</span>.state, pending.as_ptr(), <span class="number">1</span>);
             }
-            <span class="comment">// We don&#39;t increase |self.completed_data_blocks| because the
-            // padding isn&#39;t data, and so it isn&#39;t included in the data length.
+            <span class="comment">// We don't increase |self.completed_data_blocks| because the
+            // padding isn't data, and so it isn't included in the data length.
             </span>padding_pos = <span class="number">0</span>;
         }
 
@@ -716,12 +716,12 @@
 /// ```
 /// use ring::digest;
 ///
-/// let one_shot = digest::digest(&amp;digest::SHA384, b&quot;hello, world&quot;);
+/// let one_shot = digest::digest(&amp;digest::SHA384, b"hello, world");
 ///
 /// let mut ctx = digest::Context::new(&amp;digest::SHA384);
-/// ctx.update(b&quot;hello&quot;);
-/// ctx.update(b&quot;, &quot;);
-/// ctx.update(b&quot;world&quot;);
+/// ctx.update(b"hello");
+/// ctx.update(b", ");
+/// ctx.update(b"world");
 /// let multi_part = ctx.finish();
 ///
 /// assert_eq!(&amp;one_shot.as_ref(), &amp;multi_part.as_ref());
@@ -736,7 +736,7 @@
 
 <span class="kw">impl </span>Context {
     <span class="doccomment">/// Constructs a new context.
-    </span><span class="kw">pub fn </span>new(algorithm: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Algorithm) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(algorithm: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Algorithm) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             block: BlockContext::new(algorithm),
             pending: [<span class="number">0u8</span>; MAX_BLOCK_LEN],
@@ -792,7 +792,7 @@
 
     <span class="doccomment">/// The algorithm that this context is using.
     </span><span class="attr">#[inline(always)]
-    </span><span class="kw">pub fn </span>algorithm(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Algorithm {
+    </span><span class="kw">pub fn </span>algorithm(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Algorithm {
         <span class="self">self</span>.block.algorithm
     }
 }
@@ -802,17 +802,17 @@
 /// # Examples:
 ///
 /// ```
-/// # #[cfg(feature = &quot;alloc&quot;)]
+/// # #[cfg(feature = "alloc")]
 /// # {
 /// use ring::{digest, test};
-/// let expected_hex = &quot;09ca7e4eaa6e8ae9c7d261167129184883644d07dfba7cbfbc4c8a2e08360d5b&quot;;
+/// let expected_hex = "09ca7e4eaa6e8ae9c7d261167129184883644d07dfba7cbfbc4c8a2e08360d5b";
 /// let expected: Vec&lt;u8&gt; = test::from_hex(expected_hex).unwrap();
-/// let actual = digest::digest(&amp;digest::SHA256, b&quot;hello, world&quot;);
+/// let actual = digest::digest(&amp;digest::SHA256, b"hello, world");
 ///
 /// assert_eq!(&amp;expected, &amp;actual.as_ref());
 /// # }
 /// ```
-</span><span class="kw">pub fn </span>digest(algorithm: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Algorithm, data: <span class="kw-2">&amp;</span>[u8]) -&gt; Digest {
+</span><span class="kw">pub fn </span>digest(algorithm: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Algorithm, data: <span class="kw-2">&amp;</span>[u8]) -&gt; Digest {
     <span class="kw">let </span><span class="kw-2">mut </span>ctx = Context::new(algorithm);
     ctx.update(data);
     ctx.finish()
@@ -824,13 +824,13 @@
 </span><span class="attr">#[derive(Clone, Copy)]
 </span><span class="kw">pub struct </span>Digest {
     value: Output,
-    algorithm: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Algorithm,
+    algorithm: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Algorithm,
 }
 
 <span class="kw">impl </span>Digest {
     <span class="doccomment">/// The algorithm that was used to calculate the digest value.
     </span><span class="attr">#[inline(always)]
-    </span><span class="kw">pub fn </span>algorithm(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Algorithm {
+    </span><span class="kw">pub fn </span>algorithm(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Algorithm {
         <span class="self">self</span>.algorithm
     }
 }
@@ -845,7 +845,7 @@
 
 <span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>Digest {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>core::fmt::Formatter) -&gt; core::fmt::Result {
-        <span class="macro">write!</span>(fmt, <span class="string">&quot;{:?}:&quot;</span>, <span class="self">self</span>.algorithm)<span class="question-mark">?</span>;
+        <span class="macro">write!</span>(fmt, <span class="string">"{:?}:"</span>, <span class="self">self</span>.algorithm)<span class="question-mark">?</span>;
         debug::write_hex_bytes(fmt, <span class="self">self</span>.as_ref())
     }
 }
@@ -859,7 +859,7 @@
     <span class="doccomment">/// The length of the length in the padding.
     </span>len_len: usize,
 
-    block_data_order: <span class="kw">unsafe extern </span><span class="string">&quot;C&quot; </span><span class="kw">fn</span>(state: <span class="kw-2">&amp;mut </span>State, data: <span class="kw-2">*const </span>u8, num: c::size_t),
+    block_data_order: <span class="kw">unsafe extern </span><span class="string">"C" </span><span class="kw">fn</span>(state: <span class="kw-2">&amp;mut </span>State, data: <span class="kw-2">*const </span>u8, num: c::size_t),
     format_output: <span class="kw">fn</span>(input: State) -&gt; Output,
 
     initial_state: State,
@@ -1012,7 +1012,7 @@
 <span class="doccomment">/// SHA-512/256 as specified in [FIPS 180-4].
 ///
 /// This is *not* the same as just truncating the output of SHA-512, as
-/// SHA-512/256 has its own initial state distinct from SHA-512&#39;s initial
+/// SHA-512/256 has its own initial state distinct from SHA-512's initial
 /// state.
 ///
 /// [FIPS 180-4]: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
@@ -1132,21 +1132,21 @@
             };
         }
 
-        <span class="kw">fn </span>max_input_test(alg: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>digest::Algorithm) {
+        <span class="kw">fn </span>max_input_test(alg: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>digest::Algorithm) {
             <span class="kw">let </span><span class="kw-2">mut </span>context = nearly_full_context(alg);
             <span class="kw">let </span>next_input = <span class="macro">vec!</span>[<span class="number">0u8</span>; alg.block_len - <span class="number">1</span>];
             context.update(<span class="kw-2">&amp;</span>next_input);
             <span class="kw">let _ </span>= context.finish(); <span class="comment">// no panic
         </span>}
 
-        <span class="kw">fn </span>too_long_input_test_block(alg: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>digest::Algorithm) {
+        <span class="kw">fn </span>too_long_input_test_block(alg: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>digest::Algorithm) {
             <span class="kw">let </span><span class="kw-2">mut </span>context = nearly_full_context(alg);
             <span class="kw">let </span>next_input = <span class="macro">vec!</span>[<span class="number">0u8</span>; alg.block_len];
             context.update(<span class="kw-2">&amp;</span>next_input);
             <span class="kw">let _ </span>= context.finish(); <span class="comment">// should panic
         </span>}
 
-        <span class="kw">fn </span>too_long_input_test_byte(alg: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>digest::Algorithm) {
+        <span class="kw">fn </span>too_long_input_test_byte(alg: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>digest::Algorithm) {
             <span class="kw">let </span><span class="kw-2">mut </span>context = nearly_full_context(alg);
             <span class="kw">let </span>next_input = <span class="macro">vec!</span>[<span class="number">0u8</span>; alg.block_len - <span class="number">1</span>];
             context.update(<span class="kw-2">&amp;</span>next_input); <span class="comment">// no panic
@@ -1154,10 +1154,10 @@
             <span class="kw">let _ </span>= context.finish(); <span class="comment">// should panic
         </span>}
 
-        <span class="kw">fn </span>nearly_full_context(alg: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>digest::Algorithm) -&gt; digest::Context {
+        <span class="kw">fn </span>nearly_full_context(alg: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>digest::Algorithm) -&gt; digest::Context {
             <span class="comment">// All implementations currently support up to 2^64-1 bits
             // of input; according to the spec, SHA-384 and SHA-512
-            // support up to 2^128-1, but that&#39;s not implemented yet.
+            // support up to 2^128-1, but that's not implemented yet.
             </span><span class="kw">let </span>max_bytes = <span class="number">1u64 </span>&lt;&lt; (<span class="number">64 </span>- <span class="number">3</span>);
             <span class="kw">let </span>max_blocks = max_bytes / polyfill::u64_from_usize(alg.block_len);
             digest::Context {

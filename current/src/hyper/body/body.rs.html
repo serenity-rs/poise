@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hyper-0.14.27/src/body/body.rs`."><title>body.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="hyper" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hyper-0.14.27/src/body/body.rs`."><title>body.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="hyper" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -783,7 +783,7 @@
 <a href="#783" id="783">783</a>
 <a href="#784" id="784">784</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::borrow::Cow;
-<span class="attr">#[cfg(feature = <span class="string">&quot;stream&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"stream"</span>)]
 </span><span class="kw">use </span>std::error::Error <span class="kw">as </span>StdError;
 <span class="kw">use </span>std::fmt;
 
@@ -791,19 +791,19 @@
 <span class="kw">use </span>futures_channel::mpsc;
 <span class="kw">use </span>futures_channel::oneshot;
 <span class="kw">use </span>futures_core::Stream; <span class="comment">// for mpsc::Receiver
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;stream&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">"stream"</span>)]
 </span><span class="kw">use </span>futures_util::TryStreamExt;
 <span class="kw">use </span>http::HeaderMap;
 <span class="kw">use </span>http_body::{Body <span class="kw">as </span>HttpBody, SizeHint};
 
 <span class="kw">use </span><span class="kw">super</span>::DecodedLength;
-<span class="attr">#[cfg(feature = <span class="string">&quot;stream&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"stream"</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::common::sync_wrapper::SyncWrapper;
 <span class="kw">use </span><span class="kw">crate</span>::common::Future;
-<span class="attr">#[cfg(all(feature = <span class="string">&quot;client&quot;</span>, any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>)))]
+<span class="attr">#[cfg(all(feature = <span class="string">"client"</span>, any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>)))]
 </span><span class="kw">use </span><span class="kw">crate</span>::common::Never;
 <span class="kw">use </span><span class="kw">crate</span>::common::{task, watch, Pin, Poll};
-<span class="attr">#[cfg(all(feature = <span class="string">&quot;http2&quot;</span>, any(feature = <span class="string">&quot;client&quot;</span>, feature = <span class="string">&quot;server&quot;</span>)))]
+<span class="attr">#[cfg(all(feature = <span class="string">"http2"</span>, any(feature = <span class="string">"client"</span>, feature = <span class="string">"server"</span>)))]
 </span><span class="kw">use </span><span class="kw">crate</span>::proto::h2::ping;
 
 <span class="kw">type </span>BodySender = mpsc::Sender&lt;<span class="prelude-ty">Result</span>&lt;Bytes, <span class="kw">crate</span>::Error&gt;&gt;;
@@ -816,7 +816,7 @@
 ///
 /// Note: To read the full body, use [`body::to_bytes`](crate::body::to_bytes())
 /// or [`body::aggregate`](crate::body::aggregate()).
-</span><span class="attr">#[must_use = <span class="string">&quot;streams do nothing unless polled&quot;</span>]
+</span><span class="attr">#[must_use = <span class="string">"streams do nothing unless polled"</span>]
 </span><span class="kw">pub struct </span>Body {
     kind: Kind,
     <span class="doccomment">/// Keep the extra bits in an `Option&lt;Box&lt;Extra&gt;&gt;`, so that
@@ -832,15 +832,15 @@
         data_rx: mpsc::Receiver&lt;<span class="prelude-ty">Result</span>&lt;Bytes, <span class="kw">crate</span>::Error&gt;&gt;,
         trailers_rx: oneshot::Receiver&lt;HeaderMap&gt;,
     },
-    <span class="attr">#[cfg(all(feature = <span class="string">&quot;http2&quot;</span>, any(feature = <span class="string">&quot;client&quot;</span>, feature = <span class="string">&quot;server&quot;</span>)))]
+    <span class="attr">#[cfg(all(feature = <span class="string">"http2"</span>, any(feature = <span class="string">"client"</span>, feature = <span class="string">"server"</span>)))]
     </span>H2 {
         ping: ping::Recorder,
         content_length: DecodedLength,
         recv: h2::RecvStream,
     },
-    <span class="attr">#[cfg(feature = <span class="string">&quot;ffi&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"ffi"</span>)]
     </span>Ffi(<span class="kw">crate</span>::ffi::UserBody),
-    <span class="attr">#[cfg(feature = <span class="string">&quot;stream&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"stream"</span>)]
     </span>Wrapped(
         SyncWrapper&lt;
             Pin&lt;Box&lt;<span class="kw">dyn </span>Stream&lt;Item = <span class="prelude-ty">Result</span>&lt;Bytes, Box&lt;<span class="kw">dyn </span>StdError + Send + Sync&gt;&gt;&gt; + Send&gt;&gt;,
@@ -851,28 +851,28 @@
 <span class="kw">struct </span>Extra {
     <span class="doccomment">/// Allow the client to pass a future to delay the `Body` from returning
     /// EOF. This allows the `Client` to try to put the idle connection
-    /// back into the pool before the body is &quot;finished&quot;.
+    /// back into the pool before the body is "finished".
     ///
     /// The reason for this is so that creating a new request after finishing
     /// streaming the body of a response could sometimes result in creating
-    /// a brand new connection, since the pool didn&#39;t know about the idle
+    /// a brand new connection, since the pool didn't know about the idle
     /// connection yet.
     </span>delayed_eof: <span class="prelude-ty">Option</span>&lt;DelayEof&gt;,
 }
 
-<span class="attr">#[cfg(all(feature = <span class="string">&quot;client&quot;</span>, any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>)))]
+<span class="attr">#[cfg(all(feature = <span class="string">"client"</span>, any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>)))]
 </span><span class="kw">type </span>DelayEofUntil = oneshot::Receiver&lt;Never&gt;;
 
 <span class="kw">enum </span>DelayEof {
-    <span class="doccomment">/// Initial state, stream hasn&#39;t seen EOF yet.
-    </span><span class="attr">#[cfg(any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>))]
-    #[cfg(feature = <span class="string">&quot;client&quot;</span>)]
+    <span class="doccomment">/// Initial state, stream hasn't seen EOF yet.
+    </span><span class="attr">#[cfg(any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>))]
+    #[cfg(feature = <span class="string">"client"</span>)]
     </span>NotEof(DelayEofUntil),
-    <span class="doccomment">/// Transitions to this state once we&#39;ve seen `poll` try to
+    <span class="doccomment">/// Transitions to this state once we've seen `poll` try to
     /// return EOF (`None`). This future is then polled, and
     /// when it completes, the Body finally returns EOF (`None`).
-    </span><span class="attr">#[cfg(any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>))]
-    #[cfg(feature = <span class="string">&quot;client&quot;</span>)]
+    </span><span class="attr">#[cfg(any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>))]
+    #[cfg(feature = <span class="string">"client"</span>)]
     </span>Eof(DelayEofUntil),
 }
 
@@ -889,7 +889,7 @@
 ///
 /// [`Body::channel()`]: struct.Body.html#method.channel
 /// [`Sender::abort()`]: struct.Sender.html#method.abort
-</span><span class="attr">#[must_use = <span class="string">&quot;Sender does nothing unless sent on&quot;</span>]
+</span><span class="attr">#[must_use = <span class="string">"Sender does nothing unless sent on"</span>]
 </span><span class="kw">pub struct </span>Sender {
     want_rx: watch::Receiver,
     data_tx: BodySender,
@@ -927,7 +927,7 @@
         <span class="kw">let </span>(data_tx, data_rx) = mpsc::channel(<span class="number">0</span>);
         <span class="kw">let </span>(trailers_tx, trailers_rx) = oneshot::channel();
 
-        <span class="comment">// If wanter is true, `Sender::poll_ready()` won&#39;t becoming ready
+        <span class="comment">// If wanter is true, `Sender::poll_ready()` won't becoming ready
         // until the `Body` has been polled for data once.
         </span><span class="kw">let </span>want = <span class="kw">if </span>wanter { WANT_PENDING } <span class="kw">else </span>{ WANT_READY };
 
@@ -955,9 +955,9 @@
     /// ```
     /// # use hyper::Body;
     /// let chunks: Vec&lt;Result&lt;_, std::io::Error&gt;&gt; = vec![
-    ///     Ok(&quot;hello&quot;),
-    ///     Ok(&quot; &quot;),
-    ///     Ok(&quot;world&quot;),
+    ///     Ok("hello"),
+    ///     Ok(" "),
+    ///     Ok("world"),
     /// ];
     ///
     /// let stream = futures_util::stream::iter(chunks);
@@ -969,13 +969,13 @@
     ///
     /// This function requires enabling the `stream` feature in your
     /// `Cargo.toml`.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;stream&quot;</span>)]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;stream&quot;</span>)))]
+    </span><span class="attr">#[cfg(feature = <span class="string">"stream"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"stream"</span>)))]
     </span><span class="kw">pub fn </span>wrap_stream&lt;S, O, E&gt;(stream: S) -&gt; Body
     <span class="kw">where
-        </span>S: Stream&lt;Item = <span class="prelude-ty">Result</span>&lt;O, E&gt;&gt; + Send + <span class="lifetime">&#39;static</span>,
-        O: Into&lt;Bytes&gt; + <span class="lifetime">&#39;static</span>,
-        E: Into&lt;Box&lt;<span class="kw">dyn </span>StdError + Send + Sync&gt;&gt; + <span class="lifetime">&#39;static</span>,
+        </span>S: Stream&lt;Item = <span class="prelude-ty">Result</span>&lt;O, E&gt;&gt; + Send + <span class="lifetime">'static</span>,
+        O: Into&lt;Bytes&gt; + <span class="lifetime">'static</span>,
+        E: Into&lt;Box&lt;<span class="kw">dyn </span>StdError + Send + Sync&gt;&gt; + <span class="lifetime">'static</span>,
     {
         <span class="kw">let </span>mapped = stream.map_ok(Into::into).map_err(Into::into);
         Body::new(Kind::Wrapped(SyncWrapper::new(Box::pin(mapped))))
@@ -985,13 +985,13 @@
         Body { kind, extra: <span class="prelude-val">None </span>}
     }
 
-    <span class="attr">#[cfg(all(feature = <span class="string">&quot;http2&quot;</span>, any(feature = <span class="string">&quot;client&quot;</span>, feature = <span class="string">&quot;server&quot;</span>)))]
+    <span class="attr">#[cfg(all(feature = <span class="string">"http2"</span>, any(feature = <span class="string">"client"</span>, feature = <span class="string">"server"</span>)))]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>h2(
         recv: h2::RecvStream,
         <span class="kw-2">mut </span>content_length: DecodedLength,
         ping: ping::Recorder,
     ) -&gt; <span class="self">Self </span>{
-        <span class="comment">// If the stream is already EOS, then the &quot;unknown length&quot; is clearly
+        <span class="comment">// If the stream is already EOS, then the "unknown length" is clearly
         // actually ZERO.
         </span><span class="kw">if </span>!content_length.is_exact() &amp;&amp; recv.is_end_stream() {
             content_length = DecodedLength::ZERO;
@@ -1005,8 +1005,8 @@
         body
     }
 
-    <span class="attr">#[cfg(any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>))]
-    #[cfg(feature = <span class="string">&quot;client&quot;</span>)]
+    <span class="attr">#[cfg(any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>))]
+    #[cfg(feature = <span class="string">"client"</span>)]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>delayed_eof(<span class="kw-2">&amp;mut </span><span class="self">self</span>, fut: DelayEofUntil) {
         <span class="self">self</span>.extra_mut().delayed_eof = <span class="prelude-val">Some</span>(DelayEof::NotEof(fut));
     }
@@ -1017,16 +1017,16 @@
             .and_then(|extra| extra.delayed_eof.take())
     }
 
-    <span class="attr">#[cfg(any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>))]
+    <span class="attr">#[cfg(any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>))]
     </span><span class="kw">fn </span>extra_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>Extra {
         <span class="self">self</span>.extra
             .get_or_insert_with(|| Box::new(Extra { delayed_eof: <span class="prelude-val">None </span>}))
     }
 
-    <span class="kw">fn </span>poll_eof(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;<span class="kw">crate</span>::Result&lt;Bytes&gt;&gt;&gt; {
+    <span class="kw">fn </span>poll_eof(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;<span class="kw">crate</span>::Result&lt;Bytes&gt;&gt;&gt; {
         <span class="kw">match </span><span class="self">self</span>.take_delayed_eof() {
-            <span class="attr">#[cfg(any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>))]
-            #[cfg(feature = <span class="string">&quot;client&quot;</span>)]
+            <span class="attr">#[cfg(any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>))]
+            #[cfg(feature = <span class="string">"client"</span>)]
             </span><span class="prelude-val">Some</span>(DelayEof::NotEof(<span class="kw-2">mut </span>delay)) =&gt; <span class="kw">match </span><span class="self">self</span>.poll_inner(cx) {
                 ok @ Poll::Ready(<span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(..))) | ok @ Poll::Pending =&gt; {
                     <span class="self">self</span>.extra_mut().delayed_eof = <span class="prelude-val">Some</span>(DelayEof::NotEof(delay));
@@ -1042,8 +1042,8 @@
                 },
                 Poll::Ready(<span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(e))) =&gt; Poll::Ready(<span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(e))),
             },
-            <span class="attr">#[cfg(any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>))]
-            #[cfg(feature = <span class="string">&quot;client&quot;</span>)]
+            <span class="attr">#[cfg(any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>))]
+            #[cfg(feature = <span class="string">"client"</span>)]
             </span><span class="prelude-val">Some</span>(DelayEof::Eof(<span class="kw-2">mut </span>delay)) =&gt; <span class="kw">match </span>Pin::new(<span class="kw-2">&amp;mut </span>delay).poll(cx) {
                 Poll::Ready(<span class="prelude-val">Ok</span>(never)) =&gt; <span class="kw">match </span>never {},
                 Poll::Pending =&gt; {
@@ -1053,15 +1053,15 @@
                 Poll::Ready(<span class="prelude-val">Err</span>(_done)) =&gt; Poll::Ready(<span class="prelude-val">None</span>),
             },
             <span class="attr">#[cfg(any(
-                not(any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>)),
-                not(feature = <span class="string">&quot;client&quot;</span>)
+                not(any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>)),
+                not(feature = <span class="string">"client"</span>)
             ))]
             </span><span class="prelude-val">Some</span>(delay_eof) =&gt; <span class="kw">match </span>delay_eof {},
             <span class="prelude-val">None </span>=&gt; <span class="self">self</span>.poll_inner(cx),
         }
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;ffi&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"ffi"</span>)]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>as_ffi_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span><span class="kw">crate</span>::ffi::UserBody {
         <span class="kw">match </span><span class="self">self</span>.kind {
             Kind::Ffi(<span class="kw-2">ref mut </span>body) =&gt; <span class="kw">return </span>body,
@@ -1076,7 +1076,7 @@
         }
     }
 
-    <span class="kw">fn </span>poll_inner(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;<span class="kw">crate</span>::Result&lt;Bytes&gt;&gt;&gt; {
+    <span class="kw">fn </span>poll_inner(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;<span class="kw">crate</span>::Result&lt;Bytes&gt;&gt;&gt; {
         <span class="kw">match </span><span class="self">self</span>.kind {
             Kind::Once(<span class="kw-2">ref mut </span>val) =&gt; Poll::Ready(val.take().map(<span class="prelude-val">Ok</span>)),
             Kind::Chan {
@@ -1095,7 +1095,7 @@
                     <span class="prelude-val">None </span>=&gt; Poll::Ready(<span class="prelude-val">None</span>),
                 }
             }
-            <span class="attr">#[cfg(all(feature = <span class="string">&quot;http2&quot;</span>, any(feature = <span class="string">&quot;client&quot;</span>, feature = <span class="string">&quot;server&quot;</span>)))]
+            <span class="attr">#[cfg(all(feature = <span class="string">"http2"</span>, any(feature = <span class="string">"client"</span>, feature = <span class="string">"server"</span>)))]
             </span>Kind::H2 {
                 <span class="kw-2">ref </span>ping,
                 recv: <span class="kw-2">ref mut </span>h2,
@@ -1111,10 +1111,10 @@
                 <span class="prelude-val">None </span>=&gt; Poll::Ready(<span class="prelude-val">None</span>),
             },
 
-            <span class="attr">#[cfg(feature = <span class="string">&quot;ffi&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"ffi"</span>)]
             </span>Kind::Ffi(<span class="kw-2">ref mut </span>body) =&gt; body.poll_data(cx),
 
-            <span class="attr">#[cfg(feature = <span class="string">&quot;stream&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"stream"</span>)]
             </span>Kind::Wrapped(<span class="kw-2">ref mut </span>s) =&gt; <span class="kw">match </span><span class="macro">ready!</span>(s.get_mut().as_mut().poll_next(cx)) {
                 <span class="prelude-val">Some</span>(res) =&gt; Poll::Ready(<span class="prelude-val">Some</span>(res.map_err(<span class="kw">crate</span>::Error::new_body))),
                 <span class="prelude-val">None </span>=&gt; Poll::Ready(<span class="prelude-val">None</span>),
@@ -1122,7 +1122,7 @@
         }
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;http1&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"http1"</span>)]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>take_full_data(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Bytes&gt; {
         <span class="kw">if let </span>Kind::Once(<span class="kw-2">ref mut </span>chunk) = <span class="self">self</span>.kind {
             chunk.take()
@@ -1146,17 +1146,17 @@
 
     <span class="kw">fn </span>poll_data(
         <span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;,
-        cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;,
+        cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;,
     ) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Data, <span class="self">Self</span>::Error&gt;&gt;&gt; {
         <span class="self">self</span>.poll_eof(cx)
     }
 
     <span class="kw">fn </span>poll_trailers(
-        <span class="attr">#[cfg_attr(not(feature = <span class="string">&quot;http2&quot;</span>), allow(unused_mut))] </span><span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;,
-        <span class="attr">#[cfg_attr(not(feature = <span class="string">&quot;http2&quot;</span>), allow(unused))] </span>cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;,
+        <span class="attr">#[cfg_attr(not(feature = <span class="string">"http2"</span>), allow(unused_mut))] </span><span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;,
+        <span class="attr">#[cfg_attr(not(feature = <span class="string">"http2"</span>), allow(unused))] </span>cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;,
     ) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;HeaderMap&gt;, <span class="self">Self</span>::Error&gt;&gt; {
         <span class="kw">match </span><span class="self">self</span>.kind {
-            <span class="attr">#[cfg(all(feature = <span class="string">&quot;http2&quot;</span>, any(feature = <span class="string">&quot;client&quot;</span>, feature = <span class="string">&quot;server&quot;</span>)))]
+            <span class="attr">#[cfg(all(feature = <span class="string">"http2"</span>, any(feature = <span class="string">"client"</span>, feature = <span class="string">"server"</span>)))]
             </span>Kind::H2 {
                 recv: <span class="kw-2">ref mut </span>h2,
                 <span class="kw-2">ref </span>ping,
@@ -1175,7 +1175,7 @@
                 <span class="prelude-val">Ok</span>(t) =&gt; Poll::Ready(<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(t))),
                 <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; Poll::Ready(<span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)),
             },
-            <span class="attr">#[cfg(feature = <span class="string">&quot;ffi&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"ffi"</span>)]
             </span>Kind::Ffi(<span class="kw-2">ref mut </span>body) =&gt; body.poll_trailers(cx),
             <span class="kw">_ </span>=&gt; Poll::Ready(<span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)),
         }
@@ -1185,11 +1185,11 @@
         <span class="kw">match </span><span class="self">self</span>.kind {
             Kind::Once(<span class="kw-2">ref </span>val) =&gt; val.is_none(),
             Kind::Chan { content_length, .. } =&gt; content_length == DecodedLength::ZERO,
-            <span class="attr">#[cfg(all(feature = <span class="string">&quot;http2&quot;</span>, any(feature = <span class="string">&quot;client&quot;</span>, feature = <span class="string">&quot;server&quot;</span>)))]
+            <span class="attr">#[cfg(all(feature = <span class="string">"http2"</span>, any(feature = <span class="string">"client"</span>, feature = <span class="string">"server"</span>)))]
             </span>Kind::H2 { recv: <span class="kw-2">ref </span>h2, .. } =&gt; h2.is_end_stream(),
-            <span class="attr">#[cfg(feature = <span class="string">&quot;ffi&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"ffi"</span>)]
             </span>Kind::Ffi(..) =&gt; <span class="bool-val">false</span>,
-            <span class="attr">#[cfg(feature = <span class="string">&quot;stream&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"stream"</span>)]
             </span>Kind::Wrapped(..) =&gt; <span class="bool-val">false</span>,
         }
     }
@@ -1210,27 +1210,27 @@
         <span class="kw">match </span><span class="self">self</span>.kind {
             Kind::Once(<span class="prelude-val">Some</span>(<span class="kw-2">ref </span>val)) =&gt; SizeHint::with_exact(val.len() <span class="kw">as </span>u64),
             Kind::Once(<span class="prelude-val">None</span>) =&gt; SizeHint::with_exact(<span class="number">0</span>),
-            <span class="attr">#[cfg(feature = <span class="string">&quot;stream&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"stream"</span>)]
             </span>Kind::Wrapped(..) =&gt; SizeHint::default(),
             Kind::Chan { content_length, .. } =&gt; <span class="macro">opt_len!</span>(content_length),
-            <span class="attr">#[cfg(all(feature = <span class="string">&quot;http2&quot;</span>, any(feature = <span class="string">&quot;client&quot;</span>, feature = <span class="string">&quot;server&quot;</span>)))]
+            <span class="attr">#[cfg(all(feature = <span class="string">"http2"</span>, any(feature = <span class="string">"client"</span>, feature = <span class="string">"server"</span>)))]
             </span>Kind::H2 { content_length, .. } =&gt; <span class="macro">opt_len!</span>(content_length),
-            <span class="attr">#[cfg(feature = <span class="string">&quot;ffi&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"ffi"</span>)]
             </span>Kind::Ffi(..) =&gt; SizeHint::default(),
         }
     }
 }
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>Body {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         <span class="attr">#[derive(Debug)]
         </span><span class="kw">struct </span>Streaming;
         <span class="attr">#[derive(Debug)]
         </span><span class="kw">struct </span>Empty;
         <span class="attr">#[derive(Debug)]
-        </span><span class="kw">struct </span>Full&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Bytes);
+        </span><span class="kw">struct </span>Full&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span>Bytes);
 
-        <span class="kw">let </span><span class="kw-2">mut </span>builder = f.debug_tuple(<span class="string">&quot;Body&quot;</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>builder = f.debug_tuple(<span class="string">"Body"</span>);
         <span class="kw">match </span><span class="self">self</span>.kind {
             Kind::Once(<span class="prelude-val">None</span>) =&gt; builder.field(<span class="kw-2">&amp;</span>Empty),
             Kind::Once(<span class="prelude-val">Some</span>(<span class="kw-2">ref </span>chunk)) =&gt; builder.field(<span class="kw-2">&amp;</span>Full(chunk)),
@@ -1245,11 +1245,11 @@
 ///
 /// This function requires enabling the `stream` feature in your
 /// `Cargo.toml`.
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;stream&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">"stream"</span>)]
 </span><span class="kw">impl </span>Stream <span class="kw">for </span>Body {
     <span class="kw">type </span>Item = <span class="kw">crate</span>::Result&lt;Bytes&gt;;
 
-    <span class="kw">fn </span>poll_next(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt;&gt; {
+    <span class="kw">fn </span>poll_next(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt;&gt; {
         HttpBody::poll_data(<span class="self">self</span>, cx)
     }
 }
@@ -1258,7 +1258,7 @@
 ///
 /// This function requires enabling the `stream` feature in your
 /// `Cargo.toml`.
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;stream&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">"stream"</span>)]
 </span><span class="kw">impl </span>From&lt;Box&lt;<span class="kw">dyn </span>Stream&lt;Item = <span class="prelude-ty">Result</span>&lt;Bytes, Box&lt;<span class="kw">dyn </span>StdError + Send + Sync&gt;&gt;&gt; + Send&gt;&gt; <span class="kw">for </span>Body {
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>from(
@@ -1286,16 +1286,16 @@
     }
 }
 
-<span class="kw">impl </span>From&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[u8]&gt; <span class="kw">for </span>Body {
+<span class="kw">impl </span>From&lt;<span class="kw-2">&amp;</span><span class="lifetime">'static </span>[u8]&gt; <span class="kw">for </span>Body {
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>from(slice: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[u8]) -&gt; Body {
+    </span><span class="kw">fn </span>from(slice: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>[u8]) -&gt; Body {
         Body::from(Bytes::from(slice))
     }
 }
 
-<span class="kw">impl </span>From&lt;Cow&lt;<span class="lifetime">&#39;static</span>, [u8]&gt;&gt; <span class="kw">for </span>Body {
+<span class="kw">impl </span>From&lt;Cow&lt;<span class="lifetime">'static</span>, [u8]&gt;&gt; <span class="kw">for </span>Body {
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>from(cow: Cow&lt;<span class="lifetime">&#39;static</span>, [u8]&gt;) -&gt; Body {
+    </span><span class="kw">fn </span>from(cow: Cow&lt;<span class="lifetime">'static</span>, [u8]&gt;) -&gt; Body {
         <span class="kw">match </span>cow {
             Cow::Borrowed(b) =&gt; Body::from(b),
             Cow::Owned(o) =&gt; Body::from(o),
@@ -1310,16 +1310,16 @@
     }
 }
 
-<span class="kw">impl </span>From&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str&gt; <span class="kw">for </span>Body {
+<span class="kw">impl </span>From&lt;<span class="kw-2">&amp;</span><span class="lifetime">'static </span>str&gt; <span class="kw">for </span>Body {
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>from(slice: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str) -&gt; Body {
+    </span><span class="kw">fn </span>from(slice: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str) -&gt; Body {
         Body::from(Bytes::from(slice.as_bytes()))
     }
 }
 
-<span class="kw">impl </span>From&lt;Cow&lt;<span class="lifetime">&#39;static</span>, str&gt;&gt; <span class="kw">for </span>Body {
+<span class="kw">impl </span>From&lt;Cow&lt;<span class="lifetime">'static</span>, str&gt;&gt; <span class="kw">for </span>Body {
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>from(cow: Cow&lt;<span class="lifetime">&#39;static</span>, str&gt;) -&gt; Body {
+    </span><span class="kw">fn </span>from(cow: Cow&lt;<span class="lifetime">'static</span>, str&gt;) -&gt; Body {
         <span class="kw">match </span>cow {
             Cow::Borrowed(b) =&gt; Body::from(b),
             Cow::Owned(o) =&gt; Body::from(o),
@@ -1329,7 +1329,7 @@
 
 <span class="kw">impl </span>Sender {
     <span class="doccomment">/// Check to see if this `Sender` can send more data.
-    </span><span class="kw">pub fn </span>poll_ready(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="kw">crate</span>::Result&lt;()&gt;&gt; {
+    </span><span class="kw">pub fn </span>poll_ready(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="kw">crate</span>::Result&lt;()&gt;&gt; {
         <span class="comment">// Check if the receiver end has tried polling for the body yet
         </span><span class="macro">ready!</span>(<span class="self">self</span>.poll_want(cx)<span class="question-mark">?</span>);
         <span class="self">self</span>.data_tx
@@ -1337,12 +1337,12 @@
             .map_err(|<span class="kw">_</span>| <span class="kw">crate</span>::Error::new_closed())
     }
 
-    <span class="kw">fn </span>poll_want(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="kw">crate</span>::Result&lt;()&gt;&gt; {
+    <span class="kw">fn </span>poll_want(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="kw">crate</span>::Result&lt;()&gt;&gt; {
         <span class="kw">match </span><span class="self">self</span>.want_rx.load(cx) {
             WANT_READY =&gt; Poll::Ready(<span class="prelude-val">Ok</span>(())),
             WANT_PENDING =&gt; Poll::Pending,
             watch::CLOSED =&gt; Poll::Ready(<span class="prelude-val">Err</span>(<span class="kw">crate</span>::Error::new_closed())),
-            unexpected =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;want_rx value: {}&quot;</span>, unexpected),
+            unexpected =&gt; <span class="macro">unreachable!</span>(<span class="string">"want_rx value: {}"</span>, unexpected),
         }
     }
 
@@ -1377,12 +1377,12 @@
     /// # Note
     ///
     /// This is mostly useful for when trying to send from some other thread
-    /// that doesn&#39;t have an async context. If in an async context, prefer
+    /// that doesn't have an async context. If in an async context, prefer
     /// `send_data()` instead.
     </span><span class="kw">pub fn </span>try_send_data(<span class="kw-2">&amp;mut </span><span class="self">self</span>, chunk: Bytes) -&gt; <span class="prelude-ty">Result</span>&lt;(), Bytes&gt; {
         <span class="self">self</span>.data_tx
             .try_send(<span class="prelude-val">Ok</span>(chunk))
-            .map_err(|err| err.into_inner().expect(<span class="string">&quot;just sent Ok&quot;</span>))
+            .map_err(|err| err.into_inner().expect(<span class="string">"just sent Ok"</span>))
     }
 
     <span class="doccomment">/// Aborts the body in an abnormal fashion.
@@ -1400,13 +1400,13 @@
 }
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>Sender {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         <span class="attr">#[derive(Debug)]
         </span><span class="kw">struct </span>Open;
         <span class="attr">#[derive(Debug)]
         </span><span class="kw">struct </span>Closed;
 
-        <span class="kw">let </span><span class="kw-2">mut </span>builder = f.debug_tuple(<span class="string">&quot;Sender&quot;</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>builder = f.debug_tuple(<span class="string">"Sender"</span>);
         <span class="kw">match </span><span class="self">self</span>.want_rx.peek() {
             watch::CLOSED =&gt; builder.field(<span class="kw-2">&amp;</span>Closed),
             <span class="kw">_ </span>=&gt; builder.field(<span class="kw-2">&amp;</span>Open),
@@ -1432,23 +1432,23 @@
         <span class="kw">let </span>body_expected_size = mem::size_of::&lt;u64&gt;() * <span class="number">6</span>;
         <span class="macro">assert!</span>(
             body_size &lt;= body_expected_size,
-            <span class="string">&quot;Body size = {} &lt;= {}&quot;</span>,
+            <span class="string">"Body size = {} &lt;= {}"</span>,
             body_size,
             body_expected_size,
         );
 
-        <span class="macro">assert_eq!</span>(body_size, mem::size_of::&lt;<span class="prelude-ty">Option</span>&lt;Body&gt;&gt;(), <span class="string">&quot;Option&lt;Body&gt;&quot;</span>);
+        <span class="macro">assert_eq!</span>(body_size, mem::size_of::&lt;<span class="prelude-ty">Option</span>&lt;Body&gt;&gt;(), <span class="string">"Option&lt;Body&gt;"</span>);
 
         <span class="macro">assert_eq!</span>(
             mem::size_of::&lt;Sender&gt;(),
             mem::size_of::&lt;usize&gt;() * <span class="number">5</span>,
-            <span class="string">&quot;Sender&quot;
+            <span class="string">"Sender"
         </span>);
 
         <span class="macro">assert_eq!</span>(
             mem::size_of::&lt;Sender&gt;(),
             mem::size_of::&lt;<span class="prelude-ty">Option</span>&lt;Sender&gt;&gt;(),
-            <span class="string">&quot;Option&lt;Sender&gt;&quot;
+            <span class="string">"Option&lt;Sender&gt;"
         </span>);
     }
 
@@ -1456,20 +1456,20 @@
     </span><span class="kw">fn </span>size_hint() {
         <span class="kw">fn </span>eq(body: Body, b: SizeHint, note: <span class="kw-2">&amp;</span>str) {
             <span class="kw">let </span>a = body.size_hint();
-            <span class="macro">assert_eq!</span>(a.lower(), b.lower(), <span class="string">&quot;lower for {:?}&quot;</span>, note);
-            <span class="macro">assert_eq!</span>(a.upper(), b.upper(), <span class="string">&quot;upper for {:?}&quot;</span>, note);
+            <span class="macro">assert_eq!</span>(a.lower(), b.lower(), <span class="string">"lower for {:?}"</span>, note);
+            <span class="macro">assert_eq!</span>(a.upper(), b.upper(), <span class="string">"upper for {:?}"</span>, note);
         }
 
-        eq(Body::from(<span class="string">&quot;Hello&quot;</span>), SizeHint::with_exact(<span class="number">5</span>), <span class="string">&quot;from str&quot;</span>);
+        eq(Body::from(<span class="string">"Hello"</span>), SizeHint::with_exact(<span class="number">5</span>), <span class="string">"from str"</span>);
 
-        eq(Body::empty(), SizeHint::with_exact(<span class="number">0</span>), <span class="string">&quot;empty&quot;</span>);
+        eq(Body::empty(), SizeHint::with_exact(<span class="number">0</span>), <span class="string">"empty"</span>);
 
-        eq(Body::channel().<span class="number">1</span>, SizeHint::new(), <span class="string">&quot;channel&quot;</span>);
+        eq(Body::channel().<span class="number">1</span>, SizeHint::new(), <span class="string">"channel"</span>);
 
         eq(
             Body::new_channel(DecodedLength::new(<span class="number">4</span>), <span class="comment">/*wanter =*/ </span><span class="bool-val">false</span>).<span class="number">1</span>,
             SizeHint::with_exact(<span class="number">4</span>),
-            <span class="string">&quot;channel with length&quot;</span>,
+            <span class="string">"channel with length"</span>,
         );
     }
 
@@ -1480,33 +1480,33 @@
         tx.abort();
 
         <span class="kw">let </span>err = rx.data().<span class="kw">await</span>.unwrap().unwrap_err();
-        <span class="macro">assert!</span>(err.is_body_write_aborted(), <span class="string">&quot;{:?}&quot;</span>, err);
+        <span class="macro">assert!</span>(err.is_body_write_aborted(), <span class="string">"{:?}"</span>, err);
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>channel_abort_when_buffer_is_full() {
         <span class="kw">let </span>(<span class="kw-2">mut </span>tx, <span class="kw-2">mut </span>rx) = Body::channel();
 
-        tx.try_send_data(<span class="string">&quot;chunk 1&quot;</span>.into()).expect(<span class="string">&quot;send 1&quot;</span>);
+        tx.try_send_data(<span class="string">"chunk 1"</span>.into()).expect(<span class="string">"send 1"</span>);
         <span class="comment">// buffer is full, but can still send abort
         </span>tx.abort();
 
-        <span class="kw">let </span>chunk1 = rx.data().<span class="kw">await</span>.expect(<span class="string">&quot;item 1&quot;</span>).expect(<span class="string">&quot;chunk 1&quot;</span>);
-        <span class="macro">assert_eq!</span>(chunk1, <span class="string">&quot;chunk 1&quot;</span>);
+        <span class="kw">let </span>chunk1 = rx.data().<span class="kw">await</span>.expect(<span class="string">"item 1"</span>).expect(<span class="string">"chunk 1"</span>);
+        <span class="macro">assert_eq!</span>(chunk1, <span class="string">"chunk 1"</span>);
 
         <span class="kw">let </span>err = rx.data().<span class="kw">await</span>.unwrap().unwrap_err();
-        <span class="macro">assert!</span>(err.is_body_write_aborted(), <span class="string">&quot;{:?}&quot;</span>, err);
+        <span class="macro">assert!</span>(err.is_body_write_aborted(), <span class="string">"{:?}"</span>, err);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>channel_buffers_one() {
         <span class="kw">let </span>(<span class="kw-2">mut </span>tx, _rx) = Body::channel();
 
-        tx.try_send_data(<span class="string">&quot;chunk 1&quot;</span>.into()).expect(<span class="string">&quot;send 1&quot;</span>);
+        tx.try_send_data(<span class="string">"chunk 1"</span>.into()).expect(<span class="string">"send 1"</span>);
 
         <span class="comment">// buffer is now full
-        </span><span class="kw">let </span>chunk2 = tx.try_send_data(<span class="string">&quot;chunk 2&quot;</span>.into()).expect_err(<span class="string">&quot;send 2&quot;</span>);
-        <span class="macro">assert_eq!</span>(chunk2, <span class="string">&quot;chunk 2&quot;</span>);
+        </span><span class="kw">let </span>chunk2 = tx.try_send_data(<span class="string">"chunk 2"</span>.into()).expect_err(<span class="string">"send 2"</span>);
+        <span class="macro">assert_eq!</span>(chunk2, <span class="string">"chunk 2"</span>);
     }
 
     <span class="attr">#[tokio::test]
@@ -1522,7 +1522,7 @@
 
         <span class="kw">let </span><span class="kw-2">mut </span>tx_ready = tokio_test::task::spawn(tx.ready());
 
-        <span class="macro">assert!</span>(tx_ready.poll().is_ready(), <span class="string">&quot;tx is ready immediately&quot;</span>);
+        <span class="macro">assert!</span>(tx_ready.poll().is_ready(), <span class="string">"tx is ready immediately"</span>);
     }
 
     <span class="attr">#[test]
@@ -1534,15 +1534,15 @@
 
         <span class="macro">assert!</span>(
             tx_ready.poll().is_pending(),
-            <span class="string">&quot;tx isn&#39;t ready before rx has been polled&quot;
+            <span class="string">"tx isn't ready before rx has been polled"
         </span>);
 
-        <span class="macro">assert!</span>(rx_data.poll().is_pending(), <span class="string">&quot;poll rx.data&quot;</span>);
-        <span class="macro">assert!</span>(tx_ready.is_woken(), <span class="string">&quot;rx poll wakes tx&quot;</span>);
+        <span class="macro">assert!</span>(rx_data.poll().is_pending(), <span class="string">"poll rx.data"</span>);
+        <span class="macro">assert!</span>(tx_ready.is_woken(), <span class="string">"rx poll wakes tx"</span>);
 
         <span class="macro">assert!</span>(
             tx_ready.poll().is_ready(),
-            <span class="string">&quot;tx is ready after rx has been polled&quot;
+            <span class="string">"tx is ready after rx has been polled"
         </span>);
     }
 
@@ -1554,15 +1554,15 @@
 
         <span class="macro">assert!</span>(
             tx_ready.poll().is_pending(),
-            <span class="string">&quot;tx isn&#39;t ready before rx has been polled&quot;
+            <span class="string">"tx isn't ready before rx has been polled"
         </span>);
 
         drop(rx);
-        <span class="macro">assert!</span>(tx_ready.is_woken(), <span class="string">&quot;dropping rx wakes tx&quot;</span>);
+        <span class="macro">assert!</span>(tx_ready.is_woken(), <span class="string">"dropping rx wakes tx"</span>);
 
         <span class="kw">match </span>tx_ready.poll() {
             Poll::Ready(<span class="prelude-val">Err</span>(<span class="kw-2">ref </span>e)) <span class="kw">if </span>e.is_closed() =&gt; (),
-            unexpected =&gt; <span class="macro">panic!</span>(<span class="string">&quot;tx poll ready unexpected: {:?}&quot;</span>, unexpected),
+            unexpected =&gt; <span class="macro">panic!</span>(<span class="string">"tx poll ready unexpected: {:?}"</span>, unexpected),
         }
     }
 }

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-webpki-0.101.7/src/verify_cert.rs`."><title>verify_cert.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="webpki" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-webpki-0.101.7/src/verify_cert.rs`."><title>verify_cert.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="webpki" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -841,7 +841,7 @@
 // purpose with or without fee is hereby granted, provided that the above
 // copyright notice and this permission notice appear in all copies.
 //
-// THE SOFTWARE IS PROVIDED &quot;AS IS&quot; AND THE AUTHORS DISCLAIM ALL WARRANTIES
+// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHORS DISCLAIM ALL WARRANTIES
 // WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
 // MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR
 // ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
@@ -858,12 +858,12 @@
     SignatureAlgorithm, TrustAnchor,
 };
 
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>ChainOptions&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>ChainOptions&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">pub</span>(<span class="kw">crate</span>) eku: KeyUsage,
-    <span class="kw">pub</span>(<span class="kw">crate</span>) supported_sig_algs: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>SignatureAlgorithm],
-    <span class="kw">pub</span>(<span class="kw">crate</span>) trust_anchors: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[TrustAnchor&lt;<span class="lifetime">&#39;a</span>&gt;],
-    <span class="kw">pub</span>(<span class="kw">crate</span>) intermediate_certs: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]],
-    <span class="kw">pub</span>(<span class="kw">crate</span>) crls: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw">dyn </span>CertRevocationList],
+    <span class="kw">pub</span>(<span class="kw">crate</span>) supported_sig_algs: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[<span class="kw-2">&amp;</span><span class="lifetime">'a </span>SignatureAlgorithm],
+    <span class="kw">pub</span>(<span class="kw">crate</span>) trust_anchors: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[TrustAnchor&lt;<span class="lifetime">'a</span>&gt;],
+    <span class="kw">pub</span>(<span class="kw">crate</span>) intermediate_certs: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]],
+    <span class="kw">pub</span>(<span class="kw">crate</span>) crls: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw">dyn </span>CertRevocationList],
 }
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>build_chain(opts: <span class="kw-2">&amp;</span>ChainOptions, cert: <span class="kw-2">&amp;</span>Cert, time: time::Time) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
@@ -1090,7 +1090,7 @@
             // &lt;https://github.com/nss-dev/nss/blob/bb4a1d38dd9e92923525ac6b5ed0288479f3f3fc/lib/mozpkix/lib/pkixbuild.cpp#L381-L393&gt;
             </span>build_chain_calls: <span class="number">200_000</span>,
 
-            <span class="comment">// This limit is taken from golang crypto/x509&#39;s default, see:
+            <span class="comment">// This limit is taken from golang crypto/x509's default, see:
             // &lt;https://github.com/golang/go/blob/ac17bb6f13979f2ab9fcd45f0758b43ed72d0973/src/crypto/x509/verify.go#L588-L592&gt;
             </span>name_constraint_comparisons: <span class="number">250_000</span>,
         }
@@ -1132,7 +1132,7 @@
     //            of per-lookup.
     //            https://github.com/rustls/webpki/issues/81
     // Note: The `verify_signature` method is part of a public trait in the exported API.
-    //       We can&#39;t add a budget argument to that fn in a semver compatible way and so must
+    //       We can't add a budget argument to that fn in a semver compatible way and so must
     //       consume signature budget here before calling verify_signature.
     </span>budget.consume_signature()<span class="question-mark">?</span>;
     crl.verify_signature(supported_sig_algs, issuer_spki.as_slice_less_safe())
@@ -1150,7 +1150,7 @@
 }
 
 <span class="comment">// When verifying CRL signed data we want to disambiguate the context of possible errors by mapping
-// them to CRL specific variants that a consumer can use to tell the issue was with the CRL&#39;s
+// them to CRL specific variants that a consumer can use to tell the issue was with the CRL's
 // signature, not a certificate.
 </span><span class="kw">fn </span>crl_signature_err(err: Error) -&gt; Error {
     <span class="kw">match </span>err {
@@ -1295,7 +1295,7 @@
     }
 
     <span class="doccomment">/// Construct a new [`KeyUsage`] requiring a certificate to support the specified OID.
-    </span><span class="kw">pub const fn </span>required(oid: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[u8]) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub const fn </span>required(oid: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>[u8]) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             inner: ExtendedKeyUsage::Required(KeyPurposeId::new(oid)),
         }
@@ -1336,7 +1336,7 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn </span>key_purpose_id_equals(<span class="kw-2">&amp;</span><span class="self">self</span>, value: untrusted::Input&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; bool {
+    <span class="kw">fn </span>key_purpose_id_equals(<span class="kw-2">&amp;</span><span class="self">self</span>, value: untrusted::Input&lt;<span class="lifetime">'_</span>&gt;) -&gt; bool {
         public_values_eq(
             <span class="kw">match </span><span class="self">self </span>{
                 ExtendedKeyUsage::Required(eku) =&gt; <span class="kw-2">*</span>eku,
@@ -1351,14 +1351,14 @@
 <span class="doccomment">/// An OID value indicating an Extended Key Usage (EKU) key purpose.
 </span><span class="attr">#[derive(Clone, Copy)]
 </span><span class="kw">struct </span>KeyPurposeId {
-    oid_value: untrusted::Input&lt;<span class="lifetime">&#39;static</span>&gt;,
+    oid_value: untrusted::Input&lt;<span class="lifetime">'static</span>&gt;,
 }
 
 <span class="kw">impl </span>KeyPurposeId {
     <span class="doccomment">/// Construct a new [`KeyPurposeId`].
     ///
     /// `oid` is the OBJECT IDENTIFIER in bytes.
-    </span><span class="kw">const fn </span>new(oid: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[u8]) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">const fn </span>new(oid: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>[u8]) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             oid_value: untrusted::Input::from(oid),
         }
@@ -1405,8 +1405,8 @@
         <span class="kw">let </span>bit_string = <span class="kw">match </span>input {
             <span class="prelude-val">Some</span>(input) =&gt; input,
             <span class="comment">// While RFC 5280 requires KeyUsage be present, historically the absence of a KeyUsage
-            // has been treated as &quot;Any Usage&quot;. We follow that convention here and assume the absence
-            // of KeyUsage implies the required_ku_bit_if_present we&#39;re checking for.
+            // has been treated as "Any Usage". We follow that convention here and assume the absence
+            // of KeyUsage implies the required_ku_bit_if_present we're checking for.
             </span><span class="prelude-val">None </span>=&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(()),
         };
 
@@ -1445,7 +1445,7 @@
 </span><span class="kw">mod </span>tests {
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
     </span><span class="kw">use </span><span class="kw">crate</span>::test_utils::{make_end_entity, make_issuer};
 
     <span class="attr">#[test]
@@ -1454,25 +1454,25 @@
             .key_purpose_id_equals(EKU_SERVER_AUTH.oid_value))
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
     </span><span class="kw">enum </span>TrustAnchorIsActualIssuer {
         Yes,
         No,
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
     </span><span class="kw">fn </span>build_degenerate_chain(
         intermediate_count: usize,
         trust_anchor_is_actual_issuer: TrustAnchorIsActualIssuer,
         budget: <span class="prelude-ty">Option</span>&lt;Budget&gt;,
     ) -&gt; ControlFlow&lt;Error, Error&gt; {
-        <span class="kw">let </span>ca_cert = make_issuer(<span class="string">&quot;Bogus Subject&quot;</span>, <span class="prelude-val">None</span>);
+        <span class="kw">let </span>ca_cert = make_issuer(<span class="string">"Bogus Subject"</span>, <span class="prelude-val">None</span>);
         <span class="kw">let </span>ca_cert_der = ca_cert.serialize_der().unwrap();
 
         <span class="kw">let </span><span class="kw-2">mut </span>intermediates = Vec::with_capacity(intermediate_count);
         <span class="kw">let </span><span class="kw-2">mut </span>issuer = ca_cert;
         <span class="kw">for _ in </span><span class="number">0</span>..intermediate_count {
-            <span class="kw">let </span>intermediate = make_issuer(<span class="string">&quot;Bogus Subject&quot;</span>, <span class="prelude-val">None</span>);
+            <span class="kw">let </span>intermediate = make_issuer(<span class="string">"Bogus Subject"</span>, <span class="prelude-val">None</span>);
             <span class="kw">let </span>intermediate_der = intermediate.serialize_der_with_signer(<span class="kw-2">&amp;</span>issuer).unwrap();
             intermediates.push(intermediate_der);
             issuer = intermediate;
@@ -1492,7 +1492,7 @@
     }
 
     <span class="attr">#[test]
-    #[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+    #[cfg(feature = <span class="string">"alloc"</span>)]
     </span><span class="kw">fn </span>test_too_many_signatures() {
         <span class="macro">assert!</span>(<span class="macro">matches!</span>(
             build_degenerate_chain(<span class="number">5</span>, TrustAnchorIsActualIssuer::Yes, <span class="prelude-val">None</span>),
@@ -1501,7 +1501,7 @@
     }
 
     <span class="attr">#[test]
-    #[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+    #[cfg(feature = <span class="string">"alloc"</span>)]
     </span><span class="kw">fn </span>test_too_many_path_calls() {
         <span class="macro">assert!</span>(<span class="macro">matches!</span>(
             build_degenerate_chain(
@@ -1519,15 +1519,15 @@
         ));
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
     </span><span class="kw">fn </span>build_linear_chain(chain_length: usize) -&gt; <span class="prelude-ty">Result</span>&lt;(), ControlFlow&lt;Error, Error&gt;&gt; {
-        <span class="kw">let </span>ca_cert = make_issuer(<span class="macro">format!</span>(<span class="string">&quot;Bogus Subject {chain_length}&quot;</span>), <span class="prelude-val">None</span>);
+        <span class="kw">let </span>ca_cert = make_issuer(<span class="macro">format!</span>(<span class="string">"Bogus Subject {chain_length}"</span>), <span class="prelude-val">None</span>);
         <span class="kw">let </span>ca_cert_der = ca_cert.serialize_der().unwrap();
 
         <span class="kw">let </span><span class="kw-2">mut </span>intermediates = Vec::with_capacity(chain_length);
         <span class="kw">let </span><span class="kw-2">mut </span>issuer = ca_cert;
         <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..chain_length {
-            <span class="kw">let </span>intermediate = make_issuer(<span class="macro">format!</span>(<span class="string">&quot;Bogus Subject {i}&quot;</span>), <span class="prelude-val">None</span>);
+            <span class="kw">let </span>intermediate = make_issuer(<span class="macro">format!</span>(<span class="string">"Bogus Subject {i}"</span>), <span class="prelude-val">None</span>);
             <span class="kw">let </span>intermediate_der = intermediate.serialize_der_with_signer(<span class="kw-2">&amp;</span>issuer).unwrap();
             intermediates.push(intermediate_der);
             issuer = intermediate;
@@ -1542,7 +1542,7 @@
     }
 
     <span class="attr">#[test]
-    #[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+    #[cfg(feature = <span class="string">"alloc"</span>)]
     </span><span class="kw">fn </span>longest_allowed_path() {
         <span class="macro">assert!</span>(build_linear_chain(<span class="number">1</span>).is_ok());
         <span class="macro">assert!</span>(build_linear_chain(<span class="number">2</span>).is_ok());
@@ -1553,7 +1553,7 @@
     }
 
     <span class="attr">#[test]
-    #[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+    #[cfg(feature = <span class="string">"alloc"</span>)]
     </span><span class="kw">fn </span>path_too_long() {
         <span class="macro">assert!</span>(<span class="macro">matches!</span>(
             build_linear_chain(<span class="number">7</span>),
@@ -1562,26 +1562,26 @@
     }
 
     <span class="attr">#[test]
-    #[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+    #[cfg(feature = <span class="string">"alloc"</span>)]
     </span><span class="kw">fn </span>name_constraint_budget() {
         <span class="comment">// Issue a trust anchor that imposes name constraints. The constraint should match
         // the end entity certificate SAN.
         </span><span class="kw">let </span>ca_cert = make_issuer(
-            <span class="string">&quot;Constrained Root&quot;</span>,
+            <span class="string">"Constrained Root"</span>,
             <span class="prelude-val">Some</span>(rcgen::NameConstraints {
-                permitted_subtrees: <span class="macro">vec!</span>[rcgen::GeneralSubtree::DnsName(<span class="string">&quot;.com&quot;</span>.into())],
+                permitted_subtrees: <span class="macro">vec!</span>[rcgen::GeneralSubtree::DnsName(<span class="string">".com"</span>.into())],
                 excluded_subtrees: <span class="macro">vec!</span>[],
             }),
         );
         <span class="kw">let </span>ca_cert_der = ca_cert.serialize_der().unwrap();
 
-        <span class="comment">// Create a series of intermediate issuers. We&#39;ll only use one in the actual built path,
+        <span class="comment">// Create a series of intermediate issuers. We'll only use one in the actual built path,
         // helping demonstrate that the name constraint budget is not expended checking certificates
         // that are not part of the path we compute.
         </span><span class="kw">const </span>NUM_INTERMEDIATES: usize = <span class="number">5</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>intermediates = Vec::with_capacity(NUM_INTERMEDIATES);
         <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..NUM_INTERMEDIATES {
-            intermediates.push(make_issuer(<span class="macro">format!</span>(<span class="string">&quot;Intermediate {i}&quot;</span>), <span class="prelude-val">None</span>));
+            intermediates.push(make_issuer(<span class="macro">format!</span>(<span class="string">"Intermediate {i}"</span>), <span class="prelude-val">None</span>));
         }
 
         <span class="comment">// Each intermediate should be issued by the trust anchor.
@@ -1597,16 +1597,16 @@
         // stuff enough names/constraints into the potential chains while staying within the path
         // depth limit and the build chain call limit.
         </span><span class="kw">let </span>passing_budget = Budget {
-            <span class="comment">// One comparison against the intermediate&#39;s distinguished name.
-            // One comparison against the EE&#39;s distinguished name.
-            // One comparison against the EE&#39;s SAN.
+            <span class="comment">// One comparison against the intermediate's distinguished name.
+            // One comparison against the EE's distinguished name.
+            // One comparison against the EE's SAN.
             //  = 3 total comparisons.
             </span>name_constraint_comparisons: <span class="number">3</span>,
             ..Budget::default()
         };
 
         <span class="comment">// Validation should succeed with the name constraint comparison budget allocated above.
-        // This shows that we&#39;re not consuming budget on unused intermediates: we didn&#39;t budget
+        // This shows that we're not consuming budget on unused intermediates: we didn't budget
         // enough comparisons for that to pass the overall chain building.
         </span><span class="macro">assert!</span>(verify_chain(
             <span class="kw-2">&amp;</span>ca_cert_der,
@@ -1639,7 +1639,7 @@
         ));
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
     </span><span class="kw">fn </span>verify_chain(
         trust_anchor_der: <span class="kw-2">&amp;</span>[u8],
         intermediates_der: <span class="kw-2">&amp;</span>[Vec&lt;u8&gt;],

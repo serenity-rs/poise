@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/futures-util-0.3.29/src/future/future/shared.rs`."><title>shared.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="futures_util" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/futures-util-0.3.29/src/future/future/shared.rs`."><title>shared.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="futures_util" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -425,7 +425,7 @@
 <span class="kw">use </span>std::sync::{Arc, Mutex, Weak};
 
 <span class="doccomment">/// Future for the [`shared`](super::FutureExt::shared) method.
-</span><span class="attr">#[must_use = <span class="string">&quot;futures do nothing unless you `.await` or poll them&quot;</span>]
+</span><span class="attr">#[must_use = <span class="string">"futures do nothing unless you `.await` or poll them"</span>]
 </span><span class="kw">pub struct </span>Shared&lt;Fut: Future&gt; {
     inner: <span class="prelude-ty">Option</span>&lt;Arc&lt;Inner&lt;Fut&gt;&gt;&gt;,
     waker_key: usize,
@@ -450,28 +450,28 @@
     }
 }
 
-<span class="comment">// The future itself is polled behind the `Arc`, so it won&#39;t be moved
+<span class="comment">// The future itself is polled behind the `Arc`, so it won't be moved
 // when `Shared` is moved.
 </span><span class="kw">impl</span>&lt;Fut: Future&gt; Unpin <span class="kw">for </span>Shared&lt;Fut&gt; {}
 
 <span class="kw">impl</span>&lt;Fut: Future&gt; fmt::Debug <span class="kw">for </span>Shared&lt;Fut&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        f.debug_struct(<span class="string">&quot;Shared&quot;</span>)
-            .field(<span class="string">&quot;inner&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.inner)
-            .field(<span class="string">&quot;waker_key&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.waker_key)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        f.debug_struct(<span class="string">"Shared"</span>)
+            .field(<span class="string">"inner"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.inner)
+            .field(<span class="string">"waker_key"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.waker_key)
             .finish()
     }
 }
 
 <span class="kw">impl</span>&lt;Fut: Future&gt; fmt::Debug <span class="kw">for </span>Inner&lt;Fut&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        f.debug_struct(<span class="string">&quot;Inner&quot;</span>).finish()
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        f.debug_struct(<span class="string">"Inner"</span>).finish()
     }
 }
 
 <span class="kw">impl</span>&lt;Fut: Future&gt; fmt::Debug <span class="kw">for </span>WeakShared&lt;Fut&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        f.debug_struct(<span class="string">&quot;WeakShared&quot;</span>).finish()
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        f.debug_struct(<span class="string">"WeakShared"</span>).finish()
     }
 }
 
@@ -519,15 +519,15 @@
 <span class="kw">where
     </span>Fut: Future,
 {
-    <span class="doccomment">/// Returns [`Some`] containing a reference to this [`Shared`]&#39;s output if
-    /// it has already been computed by a clone or [`None`] if it hasn&#39;t been
+    <span class="doccomment">/// Returns [`Some`] containing a reference to this [`Shared`]'s output if
+    /// it has already been computed by a clone or [`None`] if it hasn't been
     /// computed yet or this [`Shared`] already returned its output from
     /// [`poll`](Future::poll).
     </span><span class="kw">pub fn </span>peek(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>Fut::Output&gt; {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(inner) = <span class="self">self</span>.inner.as_ref() {
             <span class="kw">match </span>inner.notifier.state.load(SeqCst) {
                 COMPLETE =&gt; <span class="kw">unsafe </span>{ <span class="kw">return </span><span class="prelude-val">Some</span>(inner.output()) },
-                POISONED =&gt; <span class="macro">panic!</span>(<span class="string">&quot;inner future panicked during poll&quot;</span>),
+                POISONED =&gt; <span class="macro">panic!</span>(<span class="string">"inner future panicked during poll"</span>),
                 <span class="kw">_ </span>=&gt; {}
             }
         }
@@ -572,7 +572,7 @@
         <span class="self">self</span>.inner.as_ref().map(|arc| Arc::weak_count(arc))
     }
 
-    <span class="doccomment">/// Hashes the internal state of this `Shared` in a way that&#39;s compatible with `ptr_eq`.
+    <span class="doccomment">/// Hashes the internal state of this `Shared` in a way that's compatible with `ptr_eq`.
     </span><span class="kw">pub fn </span>ptr_hash&lt;H: Hasher&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, state: <span class="kw-2">&amp;mut </span>H) {
         <span class="kw">match </span><span class="self">self</span>.inner.as_ref() {
             <span class="prelude-val">Some</span>(arc) =&gt; {
@@ -622,7 +622,7 @@
     Fut::Output: Clone,
 {
     <span class="doccomment">/// Registers the current task to receive a wakeup when we are awoken.
-    </span><span class="kw">fn </span>record_waker(<span class="kw-2">&amp;</span><span class="self">self</span>, waker_key: <span class="kw-2">&amp;mut </span>usize, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) {
+    </span><span class="kw">fn </span>record_waker(<span class="kw-2">&amp;</span><span class="self">self</span>, waker_key: <span class="kw-2">&amp;mut </span>usize, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) {
         <span class="kw">let </span><span class="kw-2">mut </span>wakers_guard = <span class="self">self</span>.notifier.wakers.lock().unwrap();
 
         <span class="kw">let </span>wakers = <span class="kw">match </span>wakers_guard.as_mut() {
@@ -637,7 +637,7 @@
         } <span class="kw">else </span>{
             <span class="kw">match </span>wakers[<span class="kw-2">*</span>waker_key] {
                 <span class="prelude-val">Some</span>(<span class="kw-2">ref </span>old_waker) <span class="kw">if </span>new_waker.will_wake(old_waker) =&gt; {}
-                <span class="comment">// Could use clone_from here, but Waker doesn&#39;t specialize it.
+                <span class="comment">// Could use clone_from here, but Waker doesn't specialize it.
                 </span><span class="kw-2">ref mut </span>slot =&gt; <span class="kw-2">*</span>slot = <span class="prelude-val">Some</span>(new_waker.clone()),
             }
         }
@@ -674,14 +674,14 @@
 {
     <span class="kw">type </span>Output = Fut::Output;
 
-    <span class="kw">fn </span>poll(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
+    <span class="kw">fn </span>poll(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
         <span class="kw">let </span>this = <span class="kw-2">&amp;mut *</span><span class="self">self</span>;
 
-        <span class="kw">let </span>inner = this.inner.take().expect(<span class="string">&quot;Shared future polled again after completion&quot;</span>);
+        <span class="kw">let </span>inner = this.inner.take().expect(<span class="string">"Shared future polled again after completion"</span>);
 
         <span class="comment">// Fast path for when the wrapped future has already completed
         </span><span class="kw">if </span>inner.notifier.state.load(Acquire) == COMPLETE {
-            <span class="comment">// Safety: We&#39;re in the COMPLETE state
+            <span class="comment">// Safety: We're in the COMPLETE state
             </span><span class="kw">return unsafe </span>{ Poll::Ready(inner.take_or_clone_output()) };
         }
 
@@ -703,22 +703,22 @@
                 <span class="kw">return </span>Poll::Pending;
             }
             COMPLETE =&gt; {
-                <span class="comment">// Safety: We&#39;re in the COMPLETE state
+                <span class="comment">// Safety: We're in the COMPLETE state
                 </span><span class="kw">return unsafe </span>{ Poll::Ready(inner.take_or_clone_output()) };
             }
-            POISONED =&gt; <span class="macro">panic!</span>(<span class="string">&quot;inner future panicked during poll&quot;</span>),
+            POISONED =&gt; <span class="macro">panic!</span>(<span class="string">"inner future panicked during poll"</span>),
             <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
         }
 
         <span class="kw">let </span>waker = waker_ref(<span class="kw-2">&amp;</span>inner.notifier);
         <span class="kw">let </span><span class="kw-2">mut </span>cx = Context::from_waker(<span class="kw-2">&amp;</span>waker);
 
-        <span class="kw">struct </span>Reset&lt;<span class="lifetime">&#39;a</span>&gt; {
-            state: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>AtomicUsize,
+        <span class="kw">struct </span>Reset&lt;<span class="lifetime">'a</span>&gt; {
+            state: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>AtomicUsize,
             did_not_panic: bool,
         }
 
-        <span class="kw">impl </span>Drop <span class="kw">for </span>Reset&lt;<span class="lifetime">&#39;_</span>&gt; {
+        <span class="kw">impl </span>Drop <span class="kw">for </span>Reset&lt;<span class="lifetime">'_</span>&gt; {
             <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
                 <span class="kw">if </span>!<span class="self">self</span>.did_not_panic {
                     <span class="self">self</span>.state.store(POISONED, SeqCst);
@@ -771,7 +771,7 @@
         drop(reset); <span class="comment">// Make borrow checker happy
         </span>drop(wakers_guard);
 
-        <span class="comment">// Safety: We&#39;re in the COMPLETE state
+        <span class="comment">// Safety: We're in the COMPLETE state
         </span><span class="kw">unsafe </span>{ Poll::Ready(inner.take_or_clone_output()) }
     }
 }

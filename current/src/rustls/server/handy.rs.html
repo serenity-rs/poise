@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-0.21.9/src/server/handy.rs`."><title>handy.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="rustls" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-0.21.9/src/server/handy.rs`."><title>handy.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="rustls" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -414,7 +414,7 @@
         priv_key: <span class="kw-2">&amp;</span>key::PrivateKey,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, Error&gt; {
         <span class="kw">let </span>key = sign::any_supported_type(priv_key)
-            .map_err(|<span class="kw">_</span>| Error::General(<span class="string">&quot;invalid private key&quot;</span>.into()))<span class="question-mark">?</span>;
+            .map_err(|<span class="kw">_</span>| Error::General(<span class="string">"invalid private key"</span>.into()))<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">Self</span>(Arc::new(sign::CertifiedKey::new(chain, key))))
     }
 
@@ -467,11 +467,11 @@
     <span class="doccomment">/// Add a new `sign::CertifiedKey` to be used for the given SNI `name`.
     ///
     /// This function fails if `name` is not a valid DNS name, or if
-    /// it&#39;s not valid for the supplied certificate, or if the certificate
+    /// it's not valid for the supplied certificate, or if the certificate
     /// chain is syntactically faulty.
     </span><span class="kw">pub fn </span>add(<span class="kw-2">&amp;mut </span><span class="self">self</span>, name: <span class="kw-2">&amp;</span>str, ck: sign::CertifiedKey) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
         <span class="kw">let </span>checked_name = DnsNameRef::try_from(name)
-            .map_err(|<span class="kw">_</span>| Error::General(<span class="string">&quot;Bad DNS name&quot;</span>.into()))
+            .map_err(|<span class="kw">_</span>| Error::General(<span class="string">"Bad DNS name"</span>.into()))
             .map(|dns| dns.to_lowercase_owned())<span class="question-mark">?</span>;
 
         <span class="comment">// Check the certificate chain for validity:
@@ -485,23 +485,23 @@
 
         // Always reject an empty certificate chain.
         </span><span class="kw">let </span>end_entity_cert = ck.end_entity_cert().map_err(|<span class="kw">_</span>| {
-            Error::General(<span class="string">&quot;No end-entity certificate in certificate chain&quot;</span>.to_string())
+            Error::General(<span class="string">"No end-entity certificate in certificate chain"</span>.to_string())
         })<span class="question-mark">?</span>;
 
         <span class="comment">// Reject syntactically-invalid end-entity certificates.
         </span><span class="kw">let </span>end_entity_cert =
             webpki::EndEntityCert::try_from(end_entity_cert.as_ref()).map_err(|<span class="kw">_</span>| {
                 Error::General(
-                    <span class="string">&quot;End-entity certificate in certificate chain is syntactically invalid&quot;
+                    <span class="string">"End-entity certificate in certificate chain is syntactically invalid"
                         </span>.to_string(),
                 )
             })<span class="question-mark">?</span>;
 
-        <span class="comment">// Note that this doesn&#39;t fully validate that the certificate is valid; it only validates that the name is one
+        <span class="comment">// Note that this doesn't fully validate that the certificate is valid; it only validates that the name is one
         // that the certificate is valid for, if the certificate is
         // valid.
         </span><span class="kw">let </span>general_error =
-            || Error::General(<span class="string">&quot;The server certificate is not valid for the given name&quot;</span>.to_string());
+            || Error::General(<span class="string">"The server certificate is not valid for the given name"</span>.to_string());
 
         <span class="kw">let </span>name = webpki::DnsNameRef::try_from_ascii(checked_name.as_ref().as_bytes())
             .map_err(|<span class="kw">_</span>| general_error())<span class="question-mark">?</span>;
@@ -618,7 +618,7 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_resolvesservercertusingsni_handles_unknown_name() {
         <span class="kw">let </span>rscsni = ResolvesServerCertUsingSni::new();
-        <span class="kw">let </span>name = DnsNameRef::try_from(<span class="string">&quot;hello.com&quot;</span>)
+        <span class="kw">let </span>name = DnsNameRef::try_from(<span class="string">"hello.com"</span>)
             .unwrap()
             .to_owned();
         <span class="macro">assert!</span>(rscsni

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hyper-rustls-0.24.2/src/connector/builder.rs`."><title>builder.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="hyper_rustls" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hyper-rustls-0.24.2/src/connector/builder.rs`."><title>builder.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="hyper_rustls" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -377,10 +377,10 @@
 </pre></div><pre class="rust"><code><span class="kw">use </span>rustls::ClientConfig;
 
 <span class="kw">use </span><span class="kw">super</span>::HttpsConnector;
-<span class="attr">#[cfg(any(feature = <span class="string">&quot;rustls-native-certs&quot;</span>, feature = <span class="string">&quot;webpki-roots&quot;</span>))]
+<span class="attr">#[cfg(any(feature = <span class="string">"rustls-native-certs"</span>, feature = <span class="string">"webpki-roots"</span>))]
 </span><span class="kw">use </span><span class="kw">crate</span>::config::ConfigBuilderExt;
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;tokio-runtime&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"tokio-runtime"</span>)]
 </span><span class="kw">use </span>hyper::client::HttpConnector;
 
 <span class="doccomment">/// A builder for an [`HttpsConnector`]
@@ -393,7 +393,7 @@
 /// ```
 /// use hyper_rustls::HttpsConnectorBuilder;
 ///
-/// # #[cfg(all(feature = &quot;webpki-roots&quot;, feature = &quot;tokio-runtime&quot;, feature = &quot;http1&quot;))]
+/// # #[cfg(all(feature = "webpki-roots", feature = "tokio-runtime", feature = "http1"))]
 /// let https = HttpsConnectorBuilder::new()
 ///     .with_webpki_roots()
 ///     .https_only()
@@ -422,19 +422,19 @@
     </span><span class="kw">pub fn </span>with_tls_config(<span class="self">self</span>, config: ClientConfig) -&gt; ConnectorBuilder&lt;WantsSchemes&gt; {
         <span class="macro">assert!</span>(
             config.alpn_protocols.is_empty(),
-            <span class="string">&quot;ALPN protocols should not be pre-defined&quot;
+            <span class="string">"ALPN protocols should not be pre-defined"
         </span>);
         ConnectorBuilder(WantsSchemes { tls_config: config })
     }
 
-    <span class="doccomment">/// Shorthand for using rustls&#39; [safe defaults][with_safe_defaults]
+    <span class="doccomment">/// Shorthand for using rustls' [safe defaults][with_safe_defaults]
     /// and native roots
     ///
     /// See [`ConfigBuilderExt::with_native_roots`]
     ///
     /// [with_safe_defaults]: rustls::ConfigBuilder::with_safe_defaults
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;rustls-native-certs&quot;</span>)]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;rustls-native-certs&quot;</span>)))]
+    </span><span class="attr">#[cfg(feature = <span class="string">"rustls-native-certs"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"rustls-native-certs"</span>)))]
     </span><span class="kw">pub fn </span>with_native_roots(<span class="self">self</span>) -&gt; ConnectorBuilder&lt;WantsSchemes&gt; {
         <span class="self">self</span>.with_tls_config(
             ClientConfig::builder()
@@ -444,14 +444,14 @@
         )
     }
 
-    <span class="doccomment">/// Shorthand for using rustls&#39; [safe defaults][with_safe_defaults]
+    <span class="doccomment">/// Shorthand for using rustls' [safe defaults][with_safe_defaults]
     /// and Mozilla roots
     ///
     /// See [`ConfigBuilderExt::with_webpki_roots`]
     ///
     /// [with_safe_defaults]: rustls::ConfigBuilder::with_safe_defaults
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;webpki-roots&quot;</span>)]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;webpki-roots&quot;</span>)))]
+    </span><span class="attr">#[cfg(feature = <span class="string">"webpki-roots"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"webpki-roots"</span>)))]
     </span><span class="kw">pub fn </span>with_webpki_roots(<span class="self">self</span>) -&gt; ConnectorBuilder&lt;WantsSchemes&gt; {
         <span class="self">self</span>.with_tls_config(
             ClientConfig::builder()
@@ -519,10 +519,10 @@
         }
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;tokio-runtime&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"tokio-runtime"</span>)]
     </span><span class="kw">fn </span>build(<span class="self">self</span>) -&gt; HttpsConnector&lt;HttpConnector&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>http = HttpConnector::new();
-        <span class="comment">// HttpConnector won&#39;t enforce scheme, but HttpsConnector will
+        <span class="comment">// HttpConnector won't enforce scheme, but HttpsConnector will
         </span>http.enforce_http(<span class="bool-val">false</span>);
         <span class="self">self</span>.wrap_connector(http)
     }
@@ -532,7 +532,7 @@
     <span class="doccomment">/// Enable HTTP1
     ///
     /// This needs to be called explicitly, no protocol is enabled by default
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;http1&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"http1"</span>)]
     </span><span class="kw">pub fn </span>enable_http1(<span class="self">self</span>) -&gt; ConnectorBuilder&lt;WantsProtocols2&gt; {
         ConnectorBuilder(WantsProtocols2 { inner: <span class="self">self</span>.<span class="number">0 </span>})
     }
@@ -540,10 +540,10 @@
     <span class="doccomment">/// Enable HTTP2
     ///
     /// This needs to be called explicitly, no protocol is enabled by default
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;http2&quot;</span>)]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;http2&quot;</span>)))]
+    </span><span class="attr">#[cfg(feature = <span class="string">"http2"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"http2"</span>)))]
     </span><span class="kw">pub fn </span>enable_http2(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; ConnectorBuilder&lt;WantsProtocols3&gt; {
-        <span class="self">self</span>.<span class="number">0</span>.tls_config.alpn_protocols = <span class="macro">vec!</span>[<span class="string">b&quot;h2&quot;</span>.to_vec()];
+        <span class="self">self</span>.<span class="number">0</span>.tls_config.alpn_protocols = <span class="macro">vec!</span>[<span class="string">b"h2"</span>.to_vec()];
         ConnectorBuilder(WantsProtocols3 {
             inner: <span class="self">self</span>.<span class="number">0</span>,
             enable_http1: <span class="bool-val">false</span>,
@@ -554,18 +554,18 @@
     ///
     /// For now, this could enable both HTTP 1 and 2, depending on active features.
     /// In the future, other supported versions will be enabled as well.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;http2&quot;</span>)]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;http2&quot;</span>)))]
+    </span><span class="attr">#[cfg(feature = <span class="string">"http2"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"http2"</span>)))]
     </span><span class="kw">pub fn </span>enable_all_versions(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; ConnectorBuilder&lt;WantsProtocols3&gt; {
-        <span class="attr">#[cfg(feature = <span class="string">&quot;http1&quot;</span>)]
-        </span><span class="kw">let </span>alpn_protocols = <span class="macro">vec!</span>[<span class="string">b&quot;h2&quot;</span>.to_vec(), <span class="string">b&quot;http/1.1&quot;</span>.to_vec()];
-        <span class="attr">#[cfg(not(feature = <span class="string">&quot;http1&quot;</span>))]
-        </span><span class="kw">let </span>alpn_protocols = <span class="macro">vec!</span>[<span class="string">b&quot;h2&quot;</span>.to_vec()];
+        <span class="attr">#[cfg(feature = <span class="string">"http1"</span>)]
+        </span><span class="kw">let </span>alpn_protocols = <span class="macro">vec!</span>[<span class="string">b"h2"</span>.to_vec(), <span class="string">b"http/1.1"</span>.to_vec()];
+        <span class="attr">#[cfg(not(feature = <span class="string">"http1"</span>))]
+        </span><span class="kw">let </span>alpn_protocols = <span class="macro">vec!</span>[<span class="string">b"h2"</span>.to_vec()];
 
         <span class="self">self</span>.<span class="number">0</span>.tls_config.alpn_protocols = alpn_protocols;
         ConnectorBuilder(WantsProtocols3 {
             inner: <span class="self">self</span>.<span class="number">0</span>,
-            enable_http1: <span class="macro">cfg!</span>(feature = <span class="string">&quot;http1&quot;</span>),
+            enable_http1: <span class="macro">cfg!</span>(feature = <span class="string">"http1"</span>),
         })
     }
 
@@ -598,18 +598,18 @@
     <span class="doccomment">/// Enable HTTP2
     ///
     /// This needs to be called explicitly, no protocol is enabled by default
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;http2&quot;</span>)]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;http2&quot;</span>)))]
+    </span><span class="attr">#[cfg(feature = <span class="string">"http2"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"http2"</span>)))]
     </span><span class="kw">pub fn </span>enable_http2(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; ConnectorBuilder&lt;WantsProtocols3&gt; {
-        <span class="self">self</span>.<span class="number">0</span>.inner.tls_config.alpn_protocols = <span class="macro">vec!</span>[<span class="string">b&quot;h2&quot;</span>.to_vec(), <span class="string">b&quot;http/1.1&quot;</span>.to_vec()];
+        <span class="self">self</span>.<span class="number">0</span>.inner.tls_config.alpn_protocols = <span class="macro">vec!</span>[<span class="string">b"h2"</span>.to_vec(), <span class="string">b"http/1.1"</span>.to_vec()];
         ConnectorBuilder(WantsProtocols3 {
             inner: <span class="self">self</span>.<span class="number">0</span>.inner,
             enable_http1: <span class="bool-val">true</span>,
         })
     }
 
-    <span class="doccomment">/// This builds an [`HttpsConnector`] built on hyper&#39;s default [`HttpConnector`]
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;tokio-runtime&quot;</span>)]
+    <span class="doccomment">/// This builds an [`HttpsConnector`] built on hyper's default [`HttpConnector`]
+    </span><span class="attr">#[cfg(feature = <span class="string">"tokio-runtime"</span>)]
     </span><span class="kw">pub fn </span>build(<span class="self">self</span>) -&gt; HttpsConnector&lt;HttpConnector&gt; {
         <span class="self">self</span>.<span class="number">0</span>.inner.build()
     }
@@ -617,9 +617,9 @@
     <span class="doccomment">/// This wraps an arbitrary low-level connector into an [`HttpsConnector`]
     </span><span class="kw">pub fn </span>wrap_connector&lt;H&gt;(<span class="self">self</span>, conn: H) -&gt; HttpsConnector&lt;H&gt; {
         <span class="comment">// HTTP1-only, alpn_protocols stays empty
-        // HttpConnector doesn&#39;t have a way to say http1-only;
+        // HttpConnector doesn't have a way to say http1-only;
         // its connection pool may still support HTTP2
-        // though it won&#39;t be used
+        // though it won't be used
         </span><span class="self">self</span>.<span class="number">0</span>.inner.wrap_connector(conn)
     }
 }
@@ -629,7 +629,7 @@
 /// At this point a connector can be built, see
 /// [`build`](ConnectorBuilder&lt;WantsProtocols3&gt;::build) and
 /// [`wrap_connector`](ConnectorBuilder&lt;WantsProtocols3&gt;::wrap_connector).
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;http2&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">"http2"</span>)]
 </span><span class="kw">pub struct </span>WantsProtocols3 {
     inner: WantsProtocols1,
     <span class="comment">// ALPN is built piecemeal without the need to read back this field
@@ -637,10 +637,10 @@
     </span>enable_http1: bool,
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;http2&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"http2"</span>)]
 </span><span class="kw">impl </span>ConnectorBuilder&lt;WantsProtocols3&gt; {
-    <span class="doccomment">/// This builds an [`HttpsConnector`] built on hyper&#39;s default [`HttpConnector`]
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;tokio-runtime&quot;</span>)]
+    <span class="doccomment">/// This builds an [`HttpsConnector`] built on hyper's default [`HttpConnector`]
+    </span><span class="attr">#[cfg(feature = <span class="string">"tokio-runtime"</span>)]
     </span><span class="kw">pub fn </span>build(<span class="self">self</span>) -&gt; HttpsConnector&lt;HttpConnector&gt; {
         <span class="self">self</span>.<span class="number">0</span>.inner.build()
     }
@@ -658,7 +658,7 @@
 </span><span class="kw">mod </span>tests {
     <span class="comment">// Typical usage
     </span><span class="attr">#[test]
-    #[cfg(all(feature = <span class="string">&quot;webpki-roots&quot;</span>, feature = <span class="string">&quot;http1&quot;</span>))]
+    #[cfg(all(feature = <span class="string">"webpki-roots"</span>, feature = <span class="string">"http1"</span>))]
     </span><span class="kw">fn </span>test_builder() {
         <span class="kw">let </span>_connector = <span class="kw">super</span>::ConnectorBuilder::new()
             .with_webpki_roots()
@@ -668,15 +668,15 @@
     }
 
     <span class="attr">#[test]
-    #[cfg(feature = <span class="string">&quot;http1&quot;</span>)]
-    #[should_panic(expected = <span class="string">&quot;ALPN protocols should not be pre-defined&quot;</span>)]
+    #[cfg(feature = <span class="string">"http1"</span>)]
+    #[should_panic(expected = <span class="string">"ALPN protocols should not be pre-defined"</span>)]
     </span><span class="kw">fn </span>test_reject_predefined_alpn() {
         <span class="kw">let </span>roots = rustls::RootCertStore::empty();
         <span class="kw">let </span><span class="kw-2">mut </span>config_with_alpn = rustls::ClientConfig::builder()
             .with_safe_defaults()
             .with_root_certificates(roots)
             .with_no_client_auth();
-        config_with_alpn.alpn_protocols = <span class="macro">vec!</span>[<span class="string">b&quot;fancyprotocol&quot;</span>.to_vec()];
+        config_with_alpn.alpn_protocols = <span class="macro">vec!</span>[<span class="string">b"fancyprotocol"</span>.to_vec()];
         <span class="kw">let </span>_connector = <span class="kw">super</span>::ConnectorBuilder::new()
             .with_tls_config(config_with_alpn)
             .https_only()
@@ -685,7 +685,7 @@
     }
 
     <span class="attr">#[test]
-    #[cfg(all(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>))]
+    #[cfg(all(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>))]
     </span><span class="kw">fn </span>test_alpn() {
         <span class="kw">let </span>roots = rustls::RootCertStore::empty();
         <span class="kw">let </span>tls_config = rustls::ClientConfig::builder()
@@ -706,7 +706,7 @@
             .https_only()
             .enable_http2()
             .build();
-        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>connector.tls_config.alpn_protocols, <span class="kw-2">&amp;</span>[<span class="string">b&quot;h2&quot;</span>.to_vec()]);
+        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>connector.tls_config.alpn_protocols, <span class="kw-2">&amp;</span>[<span class="string">b"h2"</span>.to_vec()]);
         <span class="kw">let </span>connector = <span class="kw">super</span>::ConnectorBuilder::new()
             .with_tls_config(tls_config.clone())
             .https_only()
@@ -715,7 +715,7 @@
             .build();
         <span class="macro">assert_eq!</span>(
             <span class="kw-2">&amp;</span>connector.tls_config.alpn_protocols,
-            <span class="kw-2">&amp;</span>[<span class="string">b&quot;h2&quot;</span>.to_vec(), <span class="string">b&quot;http/1.1&quot;</span>.to_vec()]
+            <span class="kw-2">&amp;</span>[<span class="string">b"h2"</span>.to_vec(), <span class="string">b"http/1.1"</span>.to_vec()]
         );
         <span class="kw">let </span>connector = <span class="kw">super</span>::ConnectorBuilder::new()
             .with_tls_config(tls_config)
@@ -724,12 +724,12 @@
             .build();
         <span class="macro">assert_eq!</span>(
             <span class="kw-2">&amp;</span>connector.tls_config.alpn_protocols,
-            <span class="kw-2">&amp;</span>[<span class="string">b&quot;h2&quot;</span>.to_vec(), <span class="string">b&quot;http/1.1&quot;</span>.to_vec()]
+            <span class="kw-2">&amp;</span>[<span class="string">b"h2"</span>.to_vec(), <span class="string">b"http/1.1"</span>.to_vec()]
         );
     }
 
     <span class="attr">#[test]
-    #[cfg(all(not(feature = <span class="string">&quot;http1&quot;</span>), feature = <span class="string">&quot;http2&quot;</span>))]
+    #[cfg(all(not(feature = <span class="string">"http1"</span>), feature = <span class="string">"http2"</span>))]
     </span><span class="kw">fn </span>test_alpn_http2() {
         <span class="kw">let </span>roots = rustls::RootCertStore::empty();
         <span class="kw">let </span>tls_config = rustls::ClientConfig::builder()
@@ -741,13 +741,13 @@
             .https_only()
             .enable_http2()
             .build();
-        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>connector.tls_config.alpn_protocols, <span class="kw-2">&amp;</span>[<span class="string">b&quot;h2&quot;</span>.to_vec()]);
+        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>connector.tls_config.alpn_protocols, <span class="kw-2">&amp;</span>[<span class="string">b"h2"</span>.to_vec()]);
         <span class="kw">let </span>connector = <span class="kw">super</span>::ConnectorBuilder::new()
             .with_tls_config(tls_config)
             .https_only()
             .enable_all_versions()
             .build();
-        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>connector.tls_config.alpn_protocols, <span class="kw-2">&amp;</span>[<span class="string">b&quot;h2&quot;</span>.to_vec()]);
+        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>connector.tls_config.alpn_protocols, <span class="kw-2">&amp;</span>[<span class="string">b"h2"</span>.to_vec()]);
     }
 }
 </code></pre></div></section></main></body></html>

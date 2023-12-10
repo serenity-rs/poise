@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/parking_lot_core-0.9.9/src/parking_lot.rs`."><title>parking_lot.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="parking_lot_core" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/parking_lot_core-0.9.9/src/parking_lot.rs`."><title>parking_lot.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="parking_lot_core" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1698,7 +1698,7 @@
 <a href="#1698" id="1698">1698</a>
 <a href="#1699" id="1699">1699</a>
 <a href="#1700" id="1700">1700</a>
-</pre></div><pre class="rust"><code><span class="comment">// Copyright 2016 Amanieu d&#39;Antras
+</pre></div><pre class="rust"><code><span class="comment">// Copyright 2016 Amanieu d'Antras
 //
 // Licensed under the Apache License, Version 2.0, &lt;LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0&gt; or the MIT license &lt;LICENSE-MIT or
@@ -1715,12 +1715,12 @@
 <span class="kw">use </span>smallvec::SmallVec;
 <span class="kw">use </span>std::time::{Duration, Instant};
 
-<span class="comment">// Don&#39;t use Instant on wasm32-unknown-unknown, it just panics.
+<span class="comment">// Don't use Instant on wasm32-unknown-unknown, it just panics.
 </span><span class="macro">cfg_if::cfg_if! </span>{
     <span class="kw">if </span><span class="attr">#[cfg(all(
-        target_family = <span class="string">&quot;wasm&quot;</span>,
-        target_os = <span class="string">&quot;unknown&quot;</span>,
-        target_vendor = <span class="string">&quot;unknown&quot;
+        target_family = <span class="string">"wasm"</span>,
+        target_os = <span class="string">"unknown"</span>,
+        target_vendor = <span class="string">"unknown"
     </span>))] </span>{
         <span class="attr">#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
         </span><span class="kw">struct </span>TimeoutInstant;
@@ -1839,7 +1839,7 @@
         </span>}
     }
 
-    <span class="comment">// Pseudorandom number generator from the &quot;Xorshift RNGs&quot; paper by George Marsaglia.
+    <span class="comment">// Pseudorandom number generator from the "Xorshift RNGs" paper by George Marsaglia.
     </span><span class="kw">fn </span>gen_u32(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; u32 {
         <span class="self">self</span>.seed ^= <span class="self">self</span>.seed &lt;&lt; <span class="number">13</span>;
         <span class="self">self</span>.seed ^= <span class="self">self</span>.seed &gt;&gt; <span class="number">17</span>;
@@ -1868,7 +1868,7 @@
     </span>parked_with_timeout: Cell&lt;bool&gt;,
 
     <span class="comment">// Extra data for deadlock detection
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;deadlock_detection&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"deadlock_detection"</span>)]
     </span>deadlock_data: deadlock::DeadlockData,
 }
 
@@ -1886,7 +1886,7 @@
             unpark_token: Cell::new(DEFAULT_UNPARK_TOKEN),
             park_token: Cell::new(DEFAULT_PARK_TOKEN),
             parked_with_timeout: Cell::new(<span class="bool-val">false</span>),
-            <span class="attr">#[cfg(feature = <span class="string">&quot;deadlock_detection&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"deadlock_detection"</span>)]
             </span>deadlock_data: deadlock::DeadlockData::new(),
         }
     }
@@ -1913,11 +1913,11 @@
     }
 }
 
-<span class="doccomment">/// Returns a reference to the latest hash table, creating one if it doesn&#39;t exist yet.
+<span class="doccomment">/// Returns a reference to the latest hash table, creating one if it doesn't exist yet.
 /// The reference is valid forever. However, the `HashTable` it references might become stale
 /// at any point. Meaning it still exists, but it is not the instance in active use.
 </span><span class="attr">#[inline]
-</span><span class="kw">fn </span>get_hashtable() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>HashTable {
+</span><span class="kw">fn </span>get_hashtable() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'static </span>HashTable {
     <span class="kw">let </span>table = HASHTABLE.load(Ordering::Acquire);
 
     <span class="comment">// If there is no table, create one
@@ -1929,11 +1929,11 @@
     }
 }
 
-<span class="doccomment">/// Returns a reference to the latest hash table, creating one if it doesn&#39;t exist yet.
+<span class="doccomment">/// Returns a reference to the latest hash table, creating one if it doesn't exist yet.
 /// The reference is valid forever. However, the `HashTable` it references might become stale
 /// at any point. Meaning it still exists, but it is not the instance in active use.
 </span><span class="attr">#[cold]
-</span><span class="kw">fn </span>create_hashtable() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>HashTable {
+</span><span class="kw">fn </span>create_hashtable() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'static </span>HashTable {
     <span class="kw">let </span>new_table = Box::into_raw(HashTable::new(LOAD_FACTOR, ptr::null()));
 
     <span class="comment">// If this fails then it means some other thread created the hash table first.
@@ -1959,7 +1959,7 @@
 }
 
 <span class="comment">// Grow the hash table so that it is big enough for the given number of threads.
-// This isn&#39;t performance-critical since it is only done when a ThreadData is
+// This isn't performance-critical since it is only done when a ThreadData is
 // created, which only happens once per thread.
 </span><span class="kw">fn </span>grow_hashtable(num_threads: usize) {
     <span class="comment">// Lock all buckets in the existing table and get a reference to it
@@ -2022,7 +2022,7 @@
 /// `ThreadData` instances that must stay valid at least as long as the given `table` is in use.
 ///
 /// The given `table` must only contain buckets with correctly constructed linked lists.
-</span><span class="kw">unsafe fn </span>rehash_bucket_into(bucket: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Bucket, table: <span class="kw-2">&amp;mut </span>HashTable) {
+</span><span class="kw">unsafe fn </span>rehash_bucket_into(bucket: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Bucket, table: <span class="kw-2">&amp;mut </span>HashTable) {
     <span class="kw">let </span><span class="kw-2">mut </span>current: <span class="kw-2">*const </span>ThreadData = bucket.queue_head.get();
     <span class="kw">while </span>!current.is_null() {
         <span class="kw">let </span>next = (<span class="kw-2">*</span>current).next_in_queue.get();
@@ -2041,12 +2041,12 @@
 }
 
 <span class="comment">// Hash function for addresses
-</span><span class="attr">#[cfg(target_pointer_width = <span class="string">&quot;32&quot;</span>)]
+</span><span class="attr">#[cfg(target_pointer_width = <span class="string">"32"</span>)]
 #[inline]
 </span><span class="kw">fn </span>hash(key: usize, bits: u32) -&gt; usize {
     key.wrapping_mul(<span class="number">0x9E3779B9</span>) &gt;&gt; (<span class="number">32 </span>- bits)
 }
-<span class="attr">#[cfg(target_pointer_width = <span class="string">&quot;64&quot;</span>)]
+<span class="attr">#[cfg(target_pointer_width = <span class="string">"64"</span>)]
 #[inline]
 </span><span class="kw">fn </span>hash(key: usize, bits: u32) -&gt; usize {
     key.wrapping_mul(<span class="number">0x9E3779B97F4A7C15</span>) &gt;&gt; (<span class="number">64 </span>- bits)
@@ -2055,7 +2055,7 @@
 <span class="doccomment">/// Locks the bucket for the given key and returns a reference to it.
 /// The returned bucket must be unlocked again in order to not cause deadlocks.
 </span><span class="attr">#[inline]
-</span><span class="kw">fn </span>lock_bucket(key: usize) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Bucket {
+</span><span class="kw">fn </span>lock_bucket(key: usize) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Bucket {
     <span class="kw">loop </span>{
         <span class="kw">let </span>hashtable = get_hashtable();
 
@@ -2078,10 +2078,10 @@
 }
 
 <span class="doccomment">/// Locks the bucket for the given key and returns a reference to it. But checks that the key
-/// hasn&#39;t been changed in the meantime due to a requeue.
+/// hasn't been changed in the meantime due to a requeue.
 /// The returned bucket must be unlocked again in order to not cause deadlocks.
 </span><span class="attr">#[inline]
-</span><span class="kw">fn </span>lock_bucket_checked(key: <span class="kw-2">&amp;</span>AtomicUsize) -&gt; (usize, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Bucket) {
+</span><span class="kw">fn </span>lock_bucket_checked(key: <span class="kw-2">&amp;</span>AtomicUsize) -&gt; (usize, <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Bucket) {
     <span class="kw">loop </span>{
         <span class="kw">let </span>hashtable = get_hashtable();
         <span class="kw">let </span>current_key = key.load(Ordering::Relaxed);
@@ -2093,7 +2093,7 @@
         </span>bucket.mutex.lock();
 
         <span class="comment">// Check that both the hash table and key are correct while the bucket
-        // is locked. Note that the key can&#39;t change once we locked the proper
+        // is locked. Note that the key can't change once we locked the proper
         // bucket for it, so we just keep trying until we have the correct key.
         </span><span class="kw">if </span>HASHTABLE.load(Ordering::Relaxed) == hashtable <span class="kw">as </span><span class="kw-2">*const </span><span class="kw">_ as </span><span class="kw-2">*mut </span><span class="kw">_
             </span>&amp;&amp; key.load(Ordering::Relaxed) == current_key
@@ -2113,7 +2113,7 @@
 /// If both keys hash to the same value, both returned references will be to the same bucket. Be
 /// careful to only unlock it once in this case, always use `unlock_bucket_pair`.
 </span><span class="attr">#[inline]
-</span><span class="kw">fn </span>lock_bucket_pair(key1: usize, key2: usize) -&gt; (<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Bucket, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Bucket) {
+</span><span class="kw">fn </span>lock_bucket_pair(key1: usize, key2: usize) -&gt; (<span class="kw-2">&amp;</span><span class="lifetime">'static </span>Bucket, <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Bucket) {
     <span class="kw">loop </span>{
         <span class="kw">let </span>hashtable = get_hashtable();
 
@@ -2238,10 +2238,10 @@
     <span class="doccomment">/// Unpark the thread and continue scanning the list of parked threads.
     </span>Unpark,
 
-    <span class="doccomment">/// Don&#39;t unpark the thread and continue scanning the list of parked threads.
+    <span class="doccomment">/// Don't unpark the thread and continue scanning the list of parked threads.
     </span>Skip,
 
-    <span class="doccomment">/// Don&#39;t unpark the thread and stop scanning the list of parked threads.
+    <span class="doccomment">/// Don't unpark the thread and stop scanning the list of parked threads.
     </span>Stop,
 }
 
@@ -2327,7 +2327,7 @@
         </span>before_sleep();
 
         <span class="comment">// Park our thread and determine whether we were woken up by an unpark
-        // or by our timeout. Note that this isn&#39;t precise: we can still be
+        // or by our timeout. Note that this isn't precise: we can still be
         // unparked since we are still in the queue.
         </span><span class="kw">let </span>unparked = <span class="kw">match </span>timeout {
             <span class="prelude-val">Some</span>(timeout) =&gt; thread_data.parker.park_until(timeout),
@@ -2471,7 +2471,7 @@
 
             <span class="comment">// This is a bit tricky: we first lock the ThreadParker to prevent
             // the thread from exiting and freeing its ThreadData if its wait
-            // times out. Then we unlock the queue since we don&#39;t want to keep
+            // times out. Then we unlock the queue since we don't want to keep
             // the queue locked while we perform a system call. Finally we wake
             // up the parked thread.
             </span><span class="kw">let </span>handle = (<span class="kw-2">*</span>current).parker.unpark_lock();
@@ -2531,7 +2531,7 @@
             <span class="comment">// Set the token for the target thread
             </span>(<span class="kw-2">*</span>current).unpark_token.set(unpark_token);
 
-            <span class="comment">// Don&#39;t wake up threads while holding the queue lock. See comment
+            <span class="comment">// Don't wake up threads while holding the queue lock. See comment
             // in unpark_one. For now just record which threads we need to wake
             // up.
             </span>threads.push((<span class="kw-2">*</span>current).parker.unpark_lock());
@@ -2733,7 +2733,7 @@
     <span class="kw">let </span><span class="kw-2">mut </span>result = UnparkResult::default();
     <span class="kw">while </span>!current.is_null() {
         <span class="kw">if </span>(<span class="kw-2">*</span>current).key.load(Ordering::Relaxed) == key {
-            <span class="comment">// Call the filter function with the thread&#39;s ParkToken
+            <span class="comment">// Call the filter function with the thread's ParkToken
             </span><span class="kw">let </span>next = (<span class="kw-2">*</span>current).next_in_queue.get();
             <span class="kw">match </span>filter((<span class="kw-2">*</span>current).park_token.get()) {
                 FilterOp::Unpark =&gt; {
@@ -2796,43 +2796,43 @@
 ///
 /// Enabled via the `deadlock_detection` feature flag.
 </span><span class="kw">pub mod </span>deadlock {
-    <span class="attr">#[cfg(feature = <span class="string">&quot;deadlock_detection&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"deadlock_detection"</span>)]
     </span><span class="kw">use </span><span class="kw">super</span>::deadlock_impl;
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;deadlock_detection&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"deadlock_detection"</span>)]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">use </span><span class="kw">super</span>::deadlock_impl::DeadlockData;
 
     <span class="doccomment">/// Acquire a resource identified by key in the deadlock detector
-    /// Noop if deadlock_detection feature isn&#39;t enabled.
+    /// Noop if deadlock_detection feature isn't enabled.
     ///
     /// # Safety
     ///
     /// Call after the resource is acquired
     </span><span class="attr">#[inline]
     </span><span class="kw">pub unsafe fn </span>acquire_resource(_key: usize) {
-        <span class="attr">#[cfg(feature = <span class="string">&quot;deadlock_detection&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"deadlock_detection"</span>)]
         </span>deadlock_impl::acquire_resource(_key);
     }
 
     <span class="doccomment">/// Release a resource identified by key in the deadlock detector.
-    /// Noop if deadlock_detection feature isn&#39;t enabled.
+    /// Noop if deadlock_detection feature isn't enabled.
     ///
     /// # Panics
     ///
-    /// Panics if the resource was already released or wasn&#39;t acquired in this thread.
+    /// Panics if the resource was already released or wasn't acquired in this thread.
     ///
     /// # Safety
     ///
     /// Call before the resource is released
     </span><span class="attr">#[inline]
     </span><span class="kw">pub unsafe fn </span>release_resource(_key: usize) {
-        <span class="attr">#[cfg(feature = <span class="string">&quot;deadlock_detection&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"deadlock_detection"</span>)]
         </span>deadlock_impl::release_resource(_key);
     }
 
     <span class="doccomment">/// Returns all deadlocks detected *since* the last call.
     /// Each cycle consist of a vector of `DeadlockedThread`.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;deadlock_detection&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"deadlock_detection"</span>)]
     #[inline]
     </span><span class="kw">pub fn </span>check_deadlock() -&gt; Vec&lt;Vec&lt;deadlock_impl::DeadlockedThread&gt;&gt; {
         deadlock_impl::check_deadlock()
@@ -2840,12 +2840,12 @@
 
     <span class="attr">#[inline]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">unsafe fn </span>on_unpark(_td: <span class="kw-2">&amp;</span><span class="kw">super</span>::ThreadData) {
-        <span class="attr">#[cfg(feature = <span class="string">&quot;deadlock_detection&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"deadlock_detection"</span>)]
         </span>deadlock_impl::on_unpark(_td);
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;deadlock_detection&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"deadlock_detection"</span>)]
 </span><span class="kw">mod </span>deadlock_impl {
     <span class="kw">use super</span>::{get_hashtable, lock_bucket, with_thread_data, ThreadData, NUM_THREADS};
     <span class="kw">use </span><span class="kw">crate</span>::thread_parker::{ThreadParkerT, UnparkHandleT};
@@ -2881,7 +2881,7 @@
         <span class="comment">// Currently owned resources (keys)
         </span>resources: UnsafeCell&lt;Vec&lt;usize&gt;&gt;,
 
-        <span class="comment">// Set when there&#39;s a pending callstack request
+        <span class="comment">// Set when there's a pending callstack request
         </span>deadlocked: Cell&lt;bool&gt;,
 
         <span class="comment">// Sender used to report the backtrace
@@ -2917,7 +2917,7 @@
             <span class="comment">// park until the end of the time
             </span>td.parker.prepare_park();
             td.parker.park();
-            <span class="macro">unreachable!</span>(<span class="string">&quot;unparked deadlocked thread!&quot;</span>);
+            <span class="macro">unreachable!</span>(<span class="string">"unparked deadlocked thread!"</span>);
         }
     }
 
@@ -2933,7 +2933,7 @@
 
             <span class="comment">// There is only one situation where we can fail to find the
             // resource: we are currently running TLS destructors and our
-            // ThreadData has already been freed. There isn&#39;t much we can do
+            // ThreadData has already been freed. There isn't much we can do
             // about it at this point, so just ignore it.
             </span><span class="kw">if let </span><span class="prelude-val">Some</span>(p) = resources.iter().rposition(|x| <span class="kw-2">*</span>x == key) {
                 resources.swap_remove(p);
@@ -2955,7 +2955,7 @@
 
     <span class="comment">// Simple algorithm that builds a wait graph f the threads and the resources,
     // then checks for the presence of cycles (deadlocks).
-    // This variant isn&#39;t precise as it doesn&#39;t lock the entire table before checking
+    // This variant isn't precise as it doesn't lock the entire table before checking
     </span><span class="kw">unsafe fn </span>check_wait_graph_fast() -&gt; bool {
         <span class="kw">let </span>table = get_hashtable();
         <span class="kw">let </span>thread_count = NUM_THREADS.load(Ordering::Relaxed);
@@ -2994,7 +2994,7 @@
 
     <span class="comment">// Contrary to the _fast variant this locks the entries table before looking for cycles.
     // Returns all detected thread wait cycles.
-    // Note that once a cycle is reported it&#39;s never reported again.
+    // Note that once a cycle is reported it's never reported again.
     </span><span class="kw">unsafe fn </span>check_wait_graph_slow() -&gt; Vec&lt;Vec&lt;DeadlockedThread&gt;&gt; {
         <span class="kw">static </span>DEADLOCK_DETECTION_LOCK: WordLock = WordLock::new();
         DEADLOCK_DETECTION_LOCK.lock();
@@ -3067,7 +3067,7 @@
                 <span class="comment">// SAFETY: We hold the lock here, as required
                 </span>bucket.mutex.unlock();
                 <span class="comment">// unpark the deadlocked thread!
-                // on unpark it&#39;ll notice the deadlocked flag and report back
+                // on unpark it'll notice the deadlocked flag and report back
                 </span>handle.unpark();
             }
             <span class="comment">// make sure to drop our sender before collecting results
@@ -3080,7 +3080,7 @@
         results
     }
 
-    <span class="comment">// normalize a cycle to start with the &quot;smallest&quot; node
+    <span class="comment">// normalize a cycle to start with the "smallest" node
     </span><span class="kw">fn </span>normalize_cycle&lt;T: Ord + Copy + Clone&gt;(input: <span class="kw-2">&amp;</span>[T]) -&gt; Vec&lt;T&gt; {
         <span class="kw">let </span>min_pos = input
             .iter()
@@ -3241,7 +3241,7 @@
         <span class="kw">for </span>(test, threads) <span class="kw">in </span>tests {
             test.finish(num_single_unparks);
             <span class="kw">for </span>thread <span class="kw">in </span>threads {
-                thread.join().expect(<span class="string">&quot;Test thread panic&quot;</span>);
+                thread.join().expect(<span class="string">"Test thread panic"</span>);
             }
         }
     }
@@ -3278,7 +3278,7 @@
 
         <span class="kw">pub fn </span>unpark_one(<span class="kw-2">&amp;</span><span class="self">self</span>, single_unpark_index: usize) {
             <span class="comment">// last_awoken should be null at all times except between self.up() and at the bottom
-            // of this method where it&#39;s reset to null again
+            // of this method where it's reset to null again
             </span><span class="macro">assert!</span>(<span class="self">self</span>.last_awoken.load(Ordering::SeqCst).is_null());
 
             <span class="kw">let </span><span class="kw-2">mut </span>queue: Vec&lt;<span class="kw-2">*mut </span>ThreadData&gt; = Vec::with_capacity(<span class="self">self</span>.num_threads);
@@ -3301,7 +3301,7 @@
             <span class="macro">assert!</span>(!last_awoken.is_null());
             <span class="kw">if </span>!queue.is_empty() &amp;&amp; queue[<span class="number">0</span>] != last_awoken {
                 <span class="macro">panic!</span>(
-                    <span class="string">&quot;Woke up wrong thread:\n\tqueue: {:?}\n\tlast awoken: {:?}&quot;</span>,
+                    <span class="string">"Woke up wrong thread:\n\tqueue: {:?}\n\tlast awoken: {:?}"</span>,
                     queue, last_awoken
                 );
             }
@@ -3387,7 +3387,7 @@
                     } {
                         <span class="number">1 </span>=&gt; <span class="kw">break</span>,
                         <span class="number">0 </span>=&gt; (),
-                        i =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Should not wake up {} threads&quot;</span>, i),
+                        i =&gt; <span class="macro">panic!</span>(<span class="string">"Should not wake up {} threads"</span>, i),
                     }
                 }
             }

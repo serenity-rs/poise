@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tungstenite-0.20.1/src/client.rs`."><title>client.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="tungstenite" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tungstenite-0.20.1/src/client.rs`."><title>client.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="tungstenite" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -298,15 +298,15 @@
 ///
 /// The URL may be either ws:// or wss://.
 /// To support wss:// URLs, you must activate the TLS feature on the crate level. Please refer to the
-/// project&#39;s [README][readme] for more information on available features.
+/// project's [README][readme] for more information on available features.
 ///
-/// This function &quot;just works&quot; for those who wants a simple blocking solution
+/// This function "just works" for those who wants a simple blocking solution
 /// similar to `std::net::TcpStream`. If you want a non-blocking or other
 /// custom stream, call `client` instead.
 ///
 /// This function uses `native_tls` or `rustls` to do TLS depending on the feature flags enabled. If
 /// you want to use other TLS libraries, use `client` instead. There is no need to enable any of
-/// the `*-tls` features if you don&#39;t call `connect` since it&#39;s the only function that uses them.
+/// the `*-tls` features if you don't call `connect` since it's the only function that uses them.
 ///
 /// [readme]: https://github.com/snapview/tungstenite-rs/#features
 </span><span class="kw">pub fn </span>connect_with_config&lt;Req: IntoClientRequest&gt;(
@@ -321,7 +321,7 @@
         <span class="kw">let </span>uri = request.uri();
         <span class="kw">let </span>mode = uri_mode(uri)<span class="question-mark">?</span>;
         <span class="kw">let </span>host = request.uri().host().ok_or(Error::Url(UrlError::NoHostName))<span class="question-mark">?</span>;
-        <span class="kw">let </span>host = <span class="kw">if </span>host.starts_with(<span class="string">&#39;[&#39;</span>) { <span class="kw-2">&amp;</span>host[<span class="number">1</span>..host.len() - <span class="number">1</span>] } <span class="kw">else </span>{ host };
+        <span class="kw">let </span>host = <span class="kw">if </span>host.starts_with(<span class="string">'['</span>) { <span class="kw-2">&amp;</span>host[<span class="number">1</span>..host.len() - <span class="number">1</span>] } <span class="kw">else </span>{ host };
         <span class="kw">let </span>port = uri.port_u16().unwrap_or(<span class="kw">match </span>mode {
             Mode::Plain =&gt; <span class="number">80</span>,
             Mode::Tls =&gt; <span class="number">443</span>,
@@ -330,22 +330,22 @@
         <span class="kw">let </span><span class="kw-2">mut </span>stream = connect_to_some(addrs.as_slice(), request.uri())<span class="question-mark">?</span>;
         NoDelay::set_nodelay(<span class="kw-2">&amp;mut </span>stream, <span class="bool-val">true</span>)<span class="question-mark">?</span>;
 
-        <span class="attr">#[cfg(not(any(feature = <span class="string">&quot;native-tls&quot;</span>, feature = <span class="string">&quot;__rustls-tls&quot;</span>)))]
+        <span class="attr">#[cfg(not(any(feature = <span class="string">"native-tls"</span>, feature = <span class="string">"__rustls-tls"</span>)))]
         </span><span class="kw">let </span>client = client_with_config(request, MaybeTlsStream::Plain(stream), config);
-        <span class="attr">#[cfg(any(feature = <span class="string">&quot;native-tls&quot;</span>, feature = <span class="string">&quot;__rustls-tls&quot;</span>))]
+        <span class="attr">#[cfg(any(feature = <span class="string">"native-tls"</span>, feature = <span class="string">"__rustls-tls"</span>))]
         </span><span class="kw">let </span>client = <span class="kw">crate</span>::tls::client_tls_with_config(request, stream, config, <span class="prelude-val">None</span>);
 
         client.map_err(|e| <span class="kw">match </span>e {
             HandshakeError::Failure(f) =&gt; f,
-            HandshakeError::Interrupted(<span class="kw">_</span>) =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Bug: blocking handshake not blocked&quot;</span>),
+            HandshakeError::Interrupted(<span class="kw">_</span>) =&gt; <span class="macro">panic!</span>(<span class="string">"Bug: blocking handshake not blocked"</span>),
         })
     }
 
     <span class="kw">fn </span>create_request(parts: <span class="kw-2">&amp;</span>Parts, uri: <span class="kw-2">&amp;</span>Uri) -&gt; Request {
         <span class="kw">let </span><span class="kw-2">mut </span>builder =
             Request::builder().uri(uri.clone()).method(parts.method.clone()).version(parts.version);
-        <span class="kw-2">*</span>builder.headers_mut().expect(<span class="string">&quot;Failed to create `Request`&quot;</span>) = parts.headers.clone();
-        builder.body(()).expect(<span class="string">&quot;Failed to create `Request`&quot;</span>)
+        <span class="kw-2">*</span>builder.headers_mut().expect(<span class="string">"Failed to create `Request`"</span>) = parts.headers.clone();
+        builder.body(()).expect(<span class="string">"Failed to create `Request`"</span>)
     }
 
     <span class="kw">let </span>(parts, <span class="kw">_</span>) = request.into_client_request()<span class="question-mark">?</span>.into_parts();
@@ -356,12 +356,12 @@
 
         <span class="kw">match </span>try_client_handshake(request, config) {
             <span class="prelude-val">Err</span>(Error::Http(res)) <span class="kw">if </span>res.status().is_redirection() &amp;&amp; attempt &lt; max_redirects =&gt; {
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(location) = res.headers().get(<span class="string">&quot;Location&quot;</span>) {
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(location) = res.headers().get(<span class="string">"Location"</span>) {
                     uri = location.to_str()<span class="question-mark">?</span>.parse::&lt;Uri&gt;()<span class="question-mark">?</span>;
-                    <span class="macro">debug!</span>(<span class="string">&quot;Redirecting to {:?}&quot;</span>, uri);
+                    <span class="macro">debug!</span>(<span class="string">"Redirecting to {:?}"</span>, uri);
                     <span class="kw">continue</span>;
                 } <span class="kw">else </span>{
-                    <span class="macro">warn!</span>(<span class="string">&quot;No `Location` found in redirect&quot;</span>);
+                    <span class="macro">warn!</span>(<span class="string">"No `Location` found in redirect"</span>);
                     <span class="kw">return </span><span class="prelude-val">Err</span>(Error::Http(res));
                 }
             }
@@ -369,7 +369,7 @@
         }
     }
 
-    <span class="macro">unreachable!</span>(<span class="string">&quot;Bug in a redirect handling logic&quot;</span>)
+    <span class="macro">unreachable!</span>(<span class="string">"Bug in a redirect handling logic"</span>)
 }
 
 <span class="doccomment">/// Connect to the given WebSocket in blocking mode.
@@ -377,13 +377,13 @@
 /// The URL may be either ws:// or wss://.
 /// To support wss:// URLs, feature `native-tls` or `rustls-tls` must be turned on.
 ///
-/// This function &quot;just works&quot; for those who wants a simple blocking solution
+/// This function "just works" for those who wants a simple blocking solution
 /// similar to `std::net::TcpStream`. If you want a non-blocking or other
 /// custom stream, call `client` instead.
 ///
 /// This function uses `native_tls` or `rustls` to do TLS depending on the feature flags enabled. If
 /// you want to use other TLS libraries, use `client` instead. There is no need to enable any of
-/// the `*-tls` features if you don&#39;t call `connect` since it&#39;s the only function that uses them.
+/// the `*-tls` features if you don't call `connect` since it's the only function that uses them.
 </span><span class="kw">pub fn </span>connect&lt;Req: IntoClientRequest&gt;(
     request: Req,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;(WebSocket&lt;MaybeTlsStream&lt;TcpStream&gt;&gt;, Response)&gt; {
@@ -392,7 +392,7 @@
 
 <span class="kw">fn </span>connect_to_some(addrs: <span class="kw-2">&amp;</span>[SocketAddr], uri: <span class="kw-2">&amp;</span>Uri) -&gt; <span class="prelude-ty">Result</span>&lt;TcpStream&gt; {
     <span class="kw">for </span>addr <span class="kw">in </span>addrs {
-        <span class="macro">debug!</span>(<span class="string">&quot;Trying to contact {} at {}...&quot;</span>, uri, addr);
+        <span class="macro">debug!</span>(<span class="string">"Trying to contact {} at {}..."</span>, uri, addr);
         <span class="kw">if let </span><span class="prelude-val">Ok</span>(stream) = TcpStream::connect(addr) {
             <span class="kw">return </span><span class="prelude-val">Ok</span>(stream);
         }
@@ -406,8 +406,8 @@
 /// in non-blocking algorithms or for use with TLS libraries other than `native_tls` or `rustls`.
 </span><span class="kw">pub fn </span>uri_mode(uri: <span class="kw-2">&amp;</span>Uri) -&gt; <span class="prelude-ty">Result</span>&lt;Mode&gt; {
     <span class="kw">match </span>uri.scheme_str() {
-        <span class="prelude-val">Some</span>(<span class="string">&quot;ws&quot;</span>) =&gt; <span class="prelude-val">Ok</span>(Mode::Plain),
-        <span class="prelude-val">Some</span>(<span class="string">&quot;wss&quot;</span>) =&gt; <span class="prelude-val">Ok</span>(Mode::Tls),
+        <span class="prelude-val">Some</span>(<span class="string">"ws"</span>) =&gt; <span class="prelude-val">Ok</span>(Mode::Plain),
+        <span class="prelude-val">Some</span>(<span class="string">"wss"</span>) =&gt; <span class="prelude-val">Ok</span>(Mode::Tls),
         <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(Error::Url(UrlError::UnsupportedUrlScheme)),
     }
 }
@@ -459,13 +459,13 @@
     </span><span class="kw">fn </span>into_client_request(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Request&gt;;
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; IntoClientRequest <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; IntoClientRequest <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>str {
     <span class="kw">fn </span>into_client_request(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Request&gt; {
         <span class="self">self</span>.parse::&lt;Uri&gt;()<span class="question-mark">?</span>.into_client_request()
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; IntoClientRequest <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>String {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; IntoClientRequest <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>String {
     <span class="kw">fn </span>into_client_request(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Request&gt; {
         &lt;<span class="kw-2">&amp;</span>str <span class="kw">as </span>IntoClientRequest&gt;::into_client_request(<span class="self">self</span>)
     }
@@ -477,7 +477,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; IntoClientRequest <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Uri {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; IntoClientRequest <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>Uri {
     <span class="kw">fn </span>into_client_request(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Request&gt; {
         <span class="self">self</span>.clone().into_client_request()
     }
@@ -487,7 +487,7 @@
     <span class="kw">fn </span>into_client_request(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Request&gt; {
         <span class="kw">let </span>authority = <span class="self">self</span>.authority().ok_or(Error::Url(UrlError::NoHostName))<span class="question-mark">?</span>.as_str();
         <span class="kw">let </span>host = authority
-            .find(<span class="string">&#39;@&#39;</span>)
+            .find(<span class="string">'@'</span>)
             .map(|idx| authority.split_at(idx + <span class="number">1</span>).<span class="number">1</span>)
             .unwrap_or_else(|| authority);
 
@@ -496,19 +496,19 @@
         }
 
         <span class="kw">let </span>req = Request::builder()
-            .method(<span class="string">&quot;GET&quot;</span>)
-            .header(<span class="string">&quot;Host&quot;</span>, host)
-            .header(<span class="string">&quot;Connection&quot;</span>, <span class="string">&quot;Upgrade&quot;</span>)
-            .header(<span class="string">&quot;Upgrade&quot;</span>, <span class="string">&quot;websocket&quot;</span>)
-            .header(<span class="string">&quot;Sec-WebSocket-Version&quot;</span>, <span class="string">&quot;13&quot;</span>)
-            .header(<span class="string">&quot;Sec-WebSocket-Key&quot;</span>, generate_key())
+            .method(<span class="string">"GET"</span>)
+            .header(<span class="string">"Host"</span>, host)
+            .header(<span class="string">"Connection"</span>, <span class="string">"Upgrade"</span>)
+            .header(<span class="string">"Upgrade"</span>, <span class="string">"websocket"</span>)
+            .header(<span class="string">"Sec-WebSocket-Version"</span>, <span class="string">"13"</span>)
+            .header(<span class="string">"Sec-WebSocket-Key"</span>, generate_key())
             .uri(<span class="self">self</span>)
             .body(())<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(req)
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; IntoClientRequest <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Url {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; IntoClientRequest <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>Url {
     <span class="kw">fn </span>into_client_request(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Request&gt; {
         <span class="self">self</span>.as_str().into_client_request()
     }
@@ -526,7 +526,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;h</span>, <span class="lifetime">&#39;b</span>&gt; IntoClientRequest <span class="kw">for </span>httparse::Request&lt;<span class="lifetime">&#39;h</span>, <span class="lifetime">&#39;b</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'h</span>, <span class="lifetime">'b</span>&gt; IntoClientRequest <span class="kw">for </span>httparse::Request&lt;<span class="lifetime">'h</span>, <span class="lifetime">'b</span>&gt; {
     <span class="kw">fn </span>into_client_request(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Request&gt; {
         <span class="kw">use </span><span class="kw">crate</span>::handshake::headers::FromHttparse;
         Request::from_httparse(<span class="self">self</span>)

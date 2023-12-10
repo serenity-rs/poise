@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.5/src/rsa/padding.rs`."><title>padding.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="ring" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.5/src/rsa/padding.rs`."><title>padding.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="ring" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -168,7 +168,7 @@
 // purpose with or without fee is hereby granted, provided that the above
 // copyright notice and this permission notice appear in all copies.
 //
-// THE SOFTWARE IS PROVIDED &quot;AS IS&quot; AND THE AUTHORS DISCLAIM ALL WARRANTIES
+// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHORS DISCLAIM ALL WARRANTIES
 // WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
 // MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY
 // SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
@@ -188,16 +188,16 @@
 <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">use </span>pkcs1::RSA_PKCS1_SHA1_FOR_LEGACY_USE_ONLY;
 
 <span class="doccomment">/// Common features of both RSA padding encoding and RSA padding verification.
-</span><span class="kw">pub trait </span>Padding: <span class="lifetime">&#39;static </span>+ Sync + <span class="kw">crate</span>::sealed::Sealed + core::fmt::Debug {
+</span><span class="kw">pub trait </span>Padding: <span class="lifetime">'static </span>+ Sync + <span class="kw">crate</span>::sealed::Sealed + core::fmt::Debug {
     <span class="comment">// The digest algorithm used for digesting the message (and maybe for
     // other things).
-    </span><span class="kw">fn </span>digest_alg(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>digest::Algorithm;
+    </span><span class="kw">fn </span>digest_alg(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'static </span>digest::Algorithm;
 }
 
 <span class="doccomment">/// An RSA signature encoding as described in [RFC 3447 Section 8].
 ///
 /// [RFC 3447 Section 8]: https://tools.ietf.org/html/rfc3447#section-8
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
 </span><span class="kw">pub trait </span>RsaEncoding: Padding {
     <span class="attr">#[doc(hidden)]
     </span><span class="kw">fn </span>encode(
@@ -224,7 +224,7 @@
 
 <span class="comment">// Masks `out` with the output of the mask-generating function MGF1 as
 // described in https://tools.ietf.org/html/rfc3447#appendix-B.2.1.
-</span><span class="kw">fn </span>mgf1(digest_alg: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>digest::Algorithm, seed: <span class="kw-2">&amp;</span>[u8], out: <span class="kw-2">&amp;mut </span>[u8]) {
+</span><span class="kw">fn </span>mgf1(digest_alg: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>digest::Algorithm, seed: <span class="kw-2">&amp;</span>[u8], out: <span class="kw-2">&amp;mut </span>[u8]) {
     <span class="kw">let </span>digest_len = digest_alg.output_len();
 
     <span class="comment">// Maximum counter value is the value of (mask_len / digest_len) rounded up.
@@ -252,30 +252,30 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_pss_padding_verify() {
         test::run(
-            <span class="macro">test_file!</span>(<span class="string">&quot;rsa_pss_padding_tests.txt&quot;</span>),
+            <span class="macro">test_file!</span>(<span class="string">"rsa_pss_padding_tests.txt"</span>),
             |section, test_case| {
-                <span class="macro">assert_eq!</span>(section, <span class="string">&quot;&quot;</span>);
+                <span class="macro">assert_eq!</span>(section, <span class="string">""</span>);
 
-                <span class="kw">let </span>digest_name = test_case.consume_string(<span class="string">&quot;Digest&quot;</span>);
+                <span class="kw">let </span>digest_name = test_case.consume_string(<span class="string">"Digest"</span>);
                 <span class="kw">let </span>alg = <span class="kw">match </span>digest_name.as_ref() {
-                    <span class="string">&quot;SHA256&quot; </span>=&gt; <span class="kw-2">&amp;</span>RSA_PSS_SHA256,
-                    <span class="string">&quot;SHA384&quot; </span>=&gt; <span class="kw-2">&amp;</span>RSA_PSS_SHA384,
-                    <span class="string">&quot;SHA512&quot; </span>=&gt; <span class="kw-2">&amp;</span>RSA_PSS_SHA512,
-                    <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;Unsupported digest: {}&quot;</span>, digest_name),
+                    <span class="string">"SHA256" </span>=&gt; <span class="kw-2">&amp;</span>RSA_PSS_SHA256,
+                    <span class="string">"SHA384" </span>=&gt; <span class="kw-2">&amp;</span>RSA_PSS_SHA384,
+                    <span class="string">"SHA512" </span>=&gt; <span class="kw-2">&amp;</span>RSA_PSS_SHA512,
+                    <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">"Unsupported digest: {}"</span>, digest_name),
                 };
 
-                <span class="kw">let </span>msg = test_case.consume_bytes(<span class="string">&quot;Msg&quot;</span>);
+                <span class="kw">let </span>msg = test_case.consume_bytes(<span class="string">"Msg"</span>);
                 <span class="kw">let </span>msg = untrusted::Input::from(<span class="kw-2">&amp;</span>msg);
                 <span class="kw">let </span>m_hash = digest::digest(alg.digest_alg(), msg.as_slice_less_safe());
 
-                <span class="kw">let </span>encoded = test_case.consume_bytes(<span class="string">&quot;EM&quot;</span>);
+                <span class="kw">let </span>encoded = test_case.consume_bytes(<span class="string">"EM"</span>);
                 <span class="kw">let </span>encoded = untrusted::Input::from(<span class="kw-2">&amp;</span>encoded);
 
                 <span class="comment">// Salt is recomputed in verification algorithm.
-                </span><span class="kw">let _ </span>= test_case.consume_bytes(<span class="string">&quot;Salt&quot;</span>);
+                </span><span class="kw">let _ </span>= test_case.consume_bytes(<span class="string">"Salt"</span>);
 
-                <span class="kw">let </span>bit_len = test_case.consume_usize_bits(<span class="string">&quot;Len&quot;</span>);
-                <span class="kw">let </span>is_valid = test_case.consume_string(<span class="string">&quot;Result&quot;</span>) == <span class="string">&quot;P&quot;</span>;
+                <span class="kw">let </span>bit_len = test_case.consume_usize_bits(<span class="string">"Len"</span>);
+                <span class="kw">let </span>is_valid = test_case.consume_string(<span class="string">"Result"</span>) == <span class="string">"P"</span>;
 
                 <span class="kw">let </span>actual_result =
                     encoded.read_all(error::Unspecified, |m| alg.verify(m_hash, m, bit_len));
@@ -287,30 +287,30 @@
     }
 
     <span class="comment">// Tests PSS encoding for various public modulus lengths.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
     #[test]
     </span><span class="kw">fn </span>test_pss_padding_encode() {
         test::run(
-            <span class="macro">test_file!</span>(<span class="string">&quot;rsa_pss_padding_tests.txt&quot;</span>),
+            <span class="macro">test_file!</span>(<span class="string">"rsa_pss_padding_tests.txt"</span>),
             |section, test_case| {
-                <span class="macro">assert_eq!</span>(section, <span class="string">&quot;&quot;</span>);
+                <span class="macro">assert_eq!</span>(section, <span class="string">""</span>);
 
-                <span class="kw">let </span>digest_name = test_case.consume_string(<span class="string">&quot;Digest&quot;</span>);
+                <span class="kw">let </span>digest_name = test_case.consume_string(<span class="string">"Digest"</span>);
                 <span class="kw">let </span>alg = <span class="kw">match </span>digest_name.as_ref() {
-                    <span class="string">&quot;SHA256&quot; </span>=&gt; <span class="kw-2">&amp;</span>RSA_PSS_SHA256,
-                    <span class="string">&quot;SHA384&quot; </span>=&gt; <span class="kw-2">&amp;</span>RSA_PSS_SHA384,
-                    <span class="string">&quot;SHA512&quot; </span>=&gt; <span class="kw-2">&amp;</span>RSA_PSS_SHA512,
-                    <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;Unsupported digest: {}&quot;</span>, digest_name),
+                    <span class="string">"SHA256" </span>=&gt; <span class="kw-2">&amp;</span>RSA_PSS_SHA256,
+                    <span class="string">"SHA384" </span>=&gt; <span class="kw-2">&amp;</span>RSA_PSS_SHA384,
+                    <span class="string">"SHA512" </span>=&gt; <span class="kw-2">&amp;</span>RSA_PSS_SHA512,
+                    <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">"Unsupported digest: {}"</span>, digest_name),
                 };
 
-                <span class="kw">let </span>msg = test_case.consume_bytes(<span class="string">&quot;Msg&quot;</span>);
-                <span class="kw">let </span>salt = test_case.consume_bytes(<span class="string">&quot;Salt&quot;</span>);
-                <span class="kw">let </span>encoded = test_case.consume_bytes(<span class="string">&quot;EM&quot;</span>);
-                <span class="kw">let </span>bit_len = test_case.consume_usize_bits(<span class="string">&quot;Len&quot;</span>);
-                <span class="kw">let </span>expected_result = test_case.consume_string(<span class="string">&quot;Result&quot;</span>);
+                <span class="kw">let </span>msg = test_case.consume_bytes(<span class="string">"Msg"</span>);
+                <span class="kw">let </span>salt = test_case.consume_bytes(<span class="string">"Salt"</span>);
+                <span class="kw">let </span>encoded = test_case.consume_bytes(<span class="string">"EM"</span>);
+                <span class="kw">let </span>bit_len = test_case.consume_usize_bits(<span class="string">"Len"</span>);
+                <span class="kw">let </span>expected_result = test_case.consume_string(<span class="string">"Result"</span>);
 
                 <span class="comment">// Only test the valid outputs
-                </span><span class="kw">if </span>expected_result != <span class="string">&quot;P&quot; </span>{
+                </span><span class="kw">if </span>expected_result != <span class="string">"P" </span>{
                     <span class="kw">return </span><span class="prelude-val">Ok</span>(());
                 }
 

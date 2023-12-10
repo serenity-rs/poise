@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/h2-0.3.22/src/frame/headers.rs`."><title>headers.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="h2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/h2-0.3.22/src/frame/headers.rs`."><title>headers.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="h2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1053,7 +1053,7 @@
 <span class="kw">use </span>std::fmt;
 <span class="kw">use </span>std::io::Cursor;
 
-<span class="kw">type </span>EncodeBuf&lt;<span class="lifetime">&#39;a</span>&gt; = bytes::buf::Limit&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>BytesMut&gt;;
+<span class="kw">type </span>EncodeBuf&lt;<span class="lifetime">'a</span>&gt; = bytes::buf::Limit&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>BytesMut&gt;;
 <span class="doccomment">/// Header frame
 ///
 /// This could be either a request or a response.
@@ -1101,7 +1101,7 @@
     header_block: EncodingHeaderBlock,
 }
 
-<span class="comment">// TODO: These fields shouldn&#39;t be `pub`
+<span class="comment">// TODO: These fields shouldn't be `pub`
 </span><span class="attr">#[derive(Debug, Default, Eq, PartialEq)]
 </span><span class="kw">pub struct </span>Pseudo {
     <span class="comment">// Request
@@ -1181,14 +1181,14 @@
         }
     }
 
-    <span class="doccomment">/// Loads the header frame but doesn&#39;t actually do HPACK decoding.
+    <span class="doccomment">/// Loads the header frame but doesn't actually do HPACK decoding.
     ///
     /// HPACK decoding is done in the `load_hpack` step.
     </span><span class="kw">pub fn </span>load(head: Head, <span class="kw-2">mut </span>src: BytesMut) -&gt; <span class="prelude-ty">Result</span>&lt;(<span class="self">Self</span>, BytesMut), Error&gt; {
         <span class="kw">let </span>flags = HeadersFlag(head.flag());
         <span class="kw">let </span><span class="kw-2">mut </span>pad = <span class="number">0</span>;
 
-        <span class="macro">tracing::trace!</span>(<span class="string">&quot;loading headers; flags={:?}&quot;</span>, flags);
+        <span class="macro">tracing::trace!</span>(<span class="string">"loading headers; flags={:?}"</span>, flags);
 
         <span class="kw">if </span>head.stream_id().is_zero() {
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidStreamId);
@@ -1284,7 +1284,7 @@
         (<span class="self">self</span>.header_block.pseudo, <span class="self">self</span>.header_block.fields)
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;unstable&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"unstable"</span>)]
     </span><span class="kw">pub fn </span>pseudo_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>Pseudo {
         <span class="kw-2">&amp;mut </span><span class="self">self</span>.header_block.pseudo
     }
@@ -1305,7 +1305,7 @@
     <span class="kw">pub fn </span>encode(
         <span class="self">self</span>,
         encoder: <span class="kw-2">&amp;mut </span>hpack::Encoder,
-        dst: <span class="kw-2">&amp;mut </span>EncodeBuf&lt;<span class="lifetime">&#39;_</span>&gt;,
+        dst: <span class="kw-2">&amp;mut </span>EncodeBuf&lt;<span class="lifetime">'_</span>&gt;,
     ) -&gt; <span class="prelude-ty">Option</span>&lt;Continuation&gt; {
         <span class="comment">// At this point, the `is_end_headers` flag should always be set
         </span><span class="macro">debug_assert!</span>(<span class="self">self</span>.flags.is_end_headers());
@@ -1331,17 +1331,17 @@
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>Headers {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
-        <span class="kw">let </span><span class="kw-2">mut </span>builder = f.debug_struct(<span class="string">&quot;Headers&quot;</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>builder = f.debug_struct(<span class="string">"Headers"</span>);
         builder
-            .field(<span class="string">&quot;stream_id&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.stream_id)
-            .field(<span class="string">&quot;flags&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.flags);
+            .field(<span class="string">"stream_id"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.stream_id)
+            .field(<span class="string">"flags"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.flags);
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref </span>protocol) = <span class="self">self</span>.header_block.pseudo.protocol {
-            builder.field(<span class="string">&quot;protocol&quot;</span>, protocol);
+            builder.field(<span class="string">"protocol"</span>, protocol);
         }
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref </span>dep) = <span class="self">self</span>.stream_dep {
-            builder.field(<span class="string">&quot;stream_dep&quot;</span>, dep);
+            builder.field(<span class="string">"stream_dep"</span>, dep);
         }
 
         <span class="comment">// `fields` and `pseudo` purposefully not included
@@ -1363,12 +1363,12 @@
     <span class="kw">let </span><span class="kw-2">mut </span>ret = <span class="number">0</span>;
 
     <span class="kw">for </span><span class="kw-2">&amp;</span>d <span class="kw">in </span>src {
-        <span class="kw">if </span>d &lt; <span class="string">b&#39;0&#39; </span>|| d &gt; <span class="string">b&#39;9&#39; </span>{
+        <span class="kw">if </span>d &lt; <span class="string">b'0' </span>|| d &gt; <span class="string">b'9' </span>{
             <span class="kw">return </span><span class="prelude-val">Err</span>(ParseU64Error);
         }
 
         ret <span class="kw-2">*</span>= <span class="number">10</span>;
-        ret += (d - <span class="string">b&#39;0&#39;</span>) <span class="kw">as </span>u64;
+        ret += (d - <span class="string">b'0'</span>) <span class="kw">as </span>u64;
     }
 
     <span class="prelude-val">Ok</span>(ret)
@@ -1406,16 +1406,16 @@
         <span class="comment">// The spec has some requirements for promised request headers
         // [https://httpwg.org/specs/rfc7540.html#PushRequests]
 
-        // A promised request &quot;that indicates the presence of a request body
-        // MUST reset the promised stream with a stream error&quot;
+        // A promised request "that indicates the presence of a request body
+        // MUST reset the promised stream with a stream error"
         </span><span class="kw">if let </span><span class="prelude-val">Some</span>(content_length) = req.headers().get(header::CONTENT_LENGTH) {
             <span class="kw">let </span>parsed_length = parse_u64(content_length.as_bytes());
             <span class="kw">if </span>parsed_length != <span class="prelude-val">Ok</span>(<span class="number">0</span>) {
                 <span class="kw">return </span><span class="prelude-val">Err</span>(InvalidContentLength(parsed_length));
             }
         }
-        <span class="comment">// &quot;The server MUST include a method in the :method pseudo-header field
-        // that is safe and cacheable&quot;
+        <span class="comment">// "The server MUST include a method in the :method pseudo-header field
+        // that is safe and cacheable"
         </span><span class="kw">if </span>!<span class="self">Self</span>::safe_and_cacheable(req.method()) {
             <span class="kw">return </span><span class="prelude-val">Err</span>(NotSafeAndCacheable);
         }
@@ -1433,12 +1433,12 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>.header_block.fields
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;unstable&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"unstable"</span>)]
     </span><span class="kw">pub fn </span>into_fields(<span class="self">self</span>) -&gt; HeaderMap {
         <span class="self">self</span>.header_block.fields
     }
 
-    <span class="doccomment">/// Loads the push promise frame but doesn&#39;t actually do HPACK decoding.
+    <span class="doccomment">/// Loads the push promise frame but doesn't actually do HPACK decoding.
     ///
     /// HPACK decoding is done in the `load_hpack` step.
     </span><span class="kw">pub fn </span>load(head: Head, <span class="kw-2">mut </span>src: BytesMut) -&gt; <span class="prelude-ty">Result</span>&lt;(<span class="self">Self</span>, BytesMut), Error&gt; {
@@ -1524,7 +1524,7 @@
     <span class="kw">pub fn </span>encode(
         <span class="self">self</span>,
         encoder: <span class="kw-2">&amp;mut </span>hpack::Encoder,
-        dst: <span class="kw-2">&amp;mut </span>EncodeBuf&lt;<span class="lifetime">&#39;_</span>&gt;,
+        dst: <span class="kw-2">&amp;mut </span>EncodeBuf&lt;<span class="lifetime">'_</span>&gt;,
     ) -&gt; <span class="prelude-ty">Option</span>&lt;Continuation&gt; {
         <span class="comment">// At this point, the `is_end_headers` flag should always be set
         </span><span class="macro">debug_assert!</span>(<span class="self">self</span>.flags.is_end_headers());
@@ -1557,10 +1557,10 @@
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>PushPromise {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
-        f.debug_struct(<span class="string">&quot;PushPromise&quot;</span>)
-            .field(<span class="string">&quot;stream_id&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.stream_id)
-            .field(<span class="string">&quot;promised_id&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.promised_id)
-            .field(<span class="string">&quot;flags&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.flags)
+        f.debug_struct(<span class="string">"PushPromise"</span>)
+            .field(<span class="string">"stream_id"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.stream_id)
+            .field(<span class="string">"promised_id"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.promised_id)
+            .field(<span class="string">"flags"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.flags)
             <span class="comment">// `fields` and `pseudo` purposefully not included
             </span>.finish()
     }
@@ -1573,7 +1573,7 @@
         Head::new(Kind::Continuation, END_HEADERS, <span class="self">self</span>.stream_id)
     }
 
-    <span class="kw">pub fn </span>encode(<span class="self">self</span>, dst: <span class="kw-2">&amp;mut </span>EncodeBuf&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;Continuation&gt; {
+    <span class="kw">pub fn </span>encode(<span class="self">self</span>, dst: <span class="kw-2">&amp;mut </span>EncodeBuf&lt;<span class="lifetime">'_</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;Continuation&gt; {
         <span class="comment">// Get the CONTINUATION frame head
         </span><span class="kw">let </span>head = <span class="self">self</span>.head();
 
@@ -1590,12 +1590,12 @@
         <span class="kw">let </span><span class="kw-2">mut </span>path = parts
             .path_and_query
             .map(|v| BytesStr::from(v.as_str()))
-            .unwrap_or(BytesStr::from_static(<span class="string">&quot;&quot;</span>));
+            .unwrap_or(BytesStr::from_static(<span class="string">""</span>));
 
         <span class="kw">match </span>method {
             Method::OPTIONS | Method::CONNECT =&gt; {}
             <span class="kw">_ if </span>path.is_empty() =&gt; {
-                path = BytesStr::from_static(<span class="string">&quot;/&quot;</span>);
+                path = BytesStr::from_static(<span class="string">"/"</span>);
             }
             <span class="kw">_ </span>=&gt; {}
         }
@@ -1636,21 +1636,21 @@
         }
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;unstable&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"unstable"</span>)]
     </span><span class="kw">pub fn </span>set_status(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: StatusCode) {
         <span class="self">self</span>.status = <span class="prelude-val">Some</span>(value);
     }
 
     <span class="kw">pub fn </span>set_scheme(<span class="kw-2">&amp;mut </span><span class="self">self</span>, scheme: uri::Scheme) {
         <span class="kw">let </span>bytes_str = <span class="kw">match </span>scheme.as_str() {
-            <span class="string">&quot;http&quot; </span>=&gt; BytesStr::from_static(<span class="string">&quot;http&quot;</span>),
-            <span class="string">&quot;https&quot; </span>=&gt; BytesStr::from_static(<span class="string">&quot;https&quot;</span>),
+            <span class="string">"http" </span>=&gt; BytesStr::from_static(<span class="string">"http"</span>),
+            <span class="string">"https" </span>=&gt; BytesStr::from_static(<span class="string">"https"</span>),
             s =&gt; BytesStr::from(s),
         };
         <span class="self">self</span>.scheme = <span class="prelude-val">Some</span>(bytes_str);
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;unstable&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"unstable"</span>)]
     </span><span class="kw">pub fn </span>set_protocol(<span class="kw-2">&amp;mut </span><span class="self">self</span>, protocol: Protocol) {
         <span class="self">self</span>.protocol = <span class="prelude-val">Some</span>(protocol);
     }
@@ -1669,13 +1669,13 @@
 <span class="comment">// ===== impl EncodingHeaderBlock =====
 
 </span><span class="kw">impl </span>EncodingHeaderBlock {
-    <span class="kw">fn </span>encode&lt;F&gt;(<span class="kw-2">mut </span><span class="self">self</span>, head: <span class="kw-2">&amp;</span>Head, dst: <span class="kw-2">&amp;mut </span>EncodeBuf&lt;<span class="lifetime">&#39;_</span>&gt;, f: F) -&gt; <span class="prelude-ty">Option</span>&lt;Continuation&gt;
+    <span class="kw">fn </span>encode&lt;F&gt;(<span class="kw-2">mut </span><span class="self">self</span>, head: <span class="kw-2">&amp;</span>Head, dst: <span class="kw-2">&amp;mut </span>EncodeBuf&lt;<span class="lifetime">'_</span>&gt;, f: F) -&gt; <span class="prelude-ty">Option</span>&lt;Continuation&gt;
     <span class="kw">where
-        </span>F: FnOnce(<span class="kw-2">&amp;mut </span>EncodeBuf&lt;<span class="lifetime">&#39;_</span>&gt;),
+        </span>F: FnOnce(<span class="kw-2">&amp;mut </span>EncodeBuf&lt;<span class="lifetime">'_</span>&gt;),
     {
         <span class="kw">let </span>head_pos = dst.get_ref().len();
 
-        <span class="comment">// At this point, we don&#39;t know how big the h2 frame will be.
+        <span class="comment">// At this point, we don't know how big the h2 frame will be.
         // So, we write the head with length 0, then write the body, and
         // finally write the length once we know the size.
         </span>head.encode(<span class="number">0</span>, dst);
@@ -1812,10 +1812,10 @@
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>HeadersFlag {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
         util::debug_flags(fmt, <span class="self">self</span>.<span class="number">0</span>)
-            .flag_if(<span class="self">self</span>.is_end_headers(), <span class="string">&quot;END_HEADERS&quot;</span>)
-            .flag_if(<span class="self">self</span>.is_end_stream(), <span class="string">&quot;END_STREAM&quot;</span>)
-            .flag_if(<span class="self">self</span>.is_padded(), <span class="string">&quot;PADDED&quot;</span>)
-            .flag_if(<span class="self">self</span>.is_priority(), <span class="string">&quot;PRIORITY&quot;</span>)
+            .flag_if(<span class="self">self</span>.is_end_headers(), <span class="string">"END_HEADERS"</span>)
+            .flag_if(<span class="self">self</span>.is_end_stream(), <span class="string">"END_STREAM"</span>)
+            .flag_if(<span class="self">self</span>.is_padded(), <span class="string">"PADDED"</span>)
+            .flag_if(<span class="self">self</span>.is_priority(), <span class="string">"PRIORITY"</span>)
             .finish()
     }
 }
@@ -1860,8 +1860,8 @@
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>PushPromiseFlag {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
         util::debug_flags(fmt, <span class="self">self</span>.<span class="number">0</span>)
-            .flag_if(<span class="self">self</span>.is_end_headers(), <span class="string">&quot;END_HEADERS&quot;</span>)
-            .flag_if(<span class="self">self</span>.is_padded(), <span class="string">&quot;PADDED&quot;</span>)
+            .flag_if(<span class="self">self</span>.is_end_headers(), <span class="string">"END_HEADERS"</span>)
+            .flag_if(<span class="self">self</span>.is_padded(), <span class="string">"PADDED"</span>)
             .finish()
     }
 }
@@ -1882,10 +1882,10 @@
         <span class="macro">macro_rules! </span>set_pseudo {
             (<span class="macro-nonterminal">$field</span>:ident, <span class="macro-nonterminal">$val</span>:expr) =&gt; {{
                 <span class="kw">if </span>reg {
-                    <span class="macro">tracing::trace!</span>(<span class="string">&quot;load_hpack; header malformed -- pseudo not at head of block&quot;</span>);
+                    <span class="macro">tracing::trace!</span>(<span class="string">"load_hpack; header malformed -- pseudo not at head of block"</span>);
                     malformed = <span class="bool-val">true</span>;
                 } <span class="kw">else if </span><span class="self">self</span>.pseudo.<span class="macro-nonterminal">$field</span>.is_some() {
-                    <span class="macro">tracing::trace!</span>(<span class="string">&quot;load_hpack; header malformed -- repeated pseudo&quot;</span>);
+                    <span class="macro">tracing::trace!</span>(<span class="string">"load_hpack; header malformed -- repeated pseudo"</span>);
                     malformed = <span class="bool-val">true</span>;
                 } <span class="kw">else </span>{
                     <span class="kw">let </span>__val = <span class="macro-nonterminal">$val</span>;
@@ -1894,7 +1894,7 @@
                     <span class="kw">if </span>headers_size &lt; max_header_list_size {
                         <span class="self">self</span>.pseudo.<span class="macro-nonterminal">$field </span>= <span class="prelude-val">Some</span>(__val);
                     } <span class="kw">else if </span>!<span class="self">self</span>.is_over_size {
-                        <span class="macro">tracing::trace!</span>(<span class="string">&quot;load_hpack; header list size over max&quot;</span>);
+                        <span class="macro">tracing::trace!</span>(<span class="string">"load_hpack; header list size over max"</span>);
                         <span class="self">self</span>.is_over_size = <span class="bool-val">true</span>;
                     }
                 }
@@ -1918,14 +1918,14 @@
                     </span><span class="kw">if </span>name == header::CONNECTION
                         || name == header::TRANSFER_ENCODING
                         || name == header::UPGRADE
-                        || name == <span class="string">&quot;keep-alive&quot;
-                        </span>|| name == <span class="string">&quot;proxy-connection&quot;
+                        || name == <span class="string">"keep-alive"
+                        </span>|| name == <span class="string">"proxy-connection"
                     </span>{
-                        <span class="macro">tracing::trace!</span>(<span class="string">&quot;load_hpack; connection level header&quot;</span>);
+                        <span class="macro">tracing::trace!</span>(<span class="string">"load_hpack; connection level header"</span>);
                         malformed = <span class="bool-val">true</span>;
-                    } <span class="kw">else if </span>name == header::TE &amp;&amp; value != <span class="string">&quot;trailers&quot; </span>{
+                    } <span class="kw">else if </span>name == header::TE &amp;&amp; value != <span class="string">"trailers" </span>{
                         <span class="macro">tracing::trace!</span>(
-                            <span class="string">&quot;load_hpack; TE header not set to trailers; val={:?}&quot;</span>,
+                            <span class="string">"load_hpack; TE header not set to trailers; val={:?}"</span>,
                             value
                         );
                         malformed = <span class="bool-val">true</span>;
@@ -1936,7 +1936,7 @@
                         <span class="kw">if </span>headers_size &lt; max_header_list_size {
                             <span class="self">self</span>.fields.append(name, value);
                         } <span class="kw">else if </span>!<span class="self">self</span>.is_over_size {
-                            <span class="macro">tracing::trace!</span>(<span class="string">&quot;load_hpack; header list size over max&quot;</span>);
+                            <span class="macro">tracing::trace!</span>(<span class="string">"load_hpack; header list size over max"</span>);
                             <span class="self">self</span>.is_over_size = <span class="bool-val">true</span>;
                         }
                     }
@@ -1951,12 +1951,12 @@
         });
 
         <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = res {
-            <span class="macro">tracing::trace!</span>(<span class="string">&quot;hpack decoding error; err={:?}&quot;</span>, e);
+            <span class="macro">tracing::trace!</span>(<span class="string">"hpack decoding error; err={:?}"</span>, e);
             <span class="kw">return </span><span class="prelude-val">Err</span>(e.into());
         }
 
         <span class="kw">if </span>malformed {
-            <span class="macro">tracing::trace!</span>(<span class="string">&quot;malformed message&quot;</span>);
+            <span class="macro">tracing::trace!</span>(<span class="string">"malformed message"</span>);
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::MalformedMessage);
         }
 
@@ -2032,16 +2032,16 @@
             Default::default(),
             HeaderMap::from_iter(<span class="macro">vec!</span>[
                 (
-                    HeaderName::from_static(<span class="string">&quot;hello&quot;</span>),
-                    HeaderValue::from_static(<span class="string">&quot;world&quot;</span>),
+                    HeaderName::from_static(<span class="string">"hello"</span>),
+                    HeaderValue::from_static(<span class="string">"world"</span>),
                 ),
                 (
-                    HeaderName::from_static(<span class="string">&quot;hello&quot;</span>),
-                    HeaderValue::from_static(<span class="string">&quot;zomg&quot;</span>),
+                    HeaderName::from_static(<span class="string">"hello"</span>),
+                    HeaderValue::from_static(<span class="string">"zomg"</span>),
                 ),
                 (
-                    HeaderName::from_static(<span class="string">&quot;hello&quot;</span>),
-                    HeaderValue::from_static(<span class="string">&quot;sup&quot;</span>),
+                    HeaderName::from_static(<span class="string">"hello"</span>),
+                    HeaderValue::from_static(<span class="string">"sup"</span>),
                 ),
             ]),
         );
@@ -2053,7 +2053,7 @@
         <span class="macro">assert_eq!</span>(<span class="number">17</span>, dst.len());
         <span class="macro">assert_eq!</span>([<span class="number">0</span>, <span class="number">0</span>, <span class="number">8</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>], <span class="kw-2">&amp;</span>dst[<span class="number">0</span>..<span class="number">9</span>]);
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>[<span class="number">0x40</span>, <span class="number">0x80 </span>| <span class="number">4</span>], <span class="kw-2">&amp;</span>dst[<span class="number">9</span>..<span class="number">11</span>]);
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;hello&quot;</span>, huff_decode(<span class="kw-2">&amp;</span>dst[<span class="number">11</span>..<span class="number">15</span>]));
+        <span class="macro">assert_eq!</span>(<span class="string">"hello"</span>, huff_decode(<span class="kw-2">&amp;</span>dst[<span class="number">11</span>..<span class="number">15</span>]));
         <span class="macro">assert_eq!</span>(<span class="number">0x80 </span>| <span class="number">4</span>, dst[<span class="number">15</span>]);
 
         <span class="kw">let </span><span class="kw-2">mut </span>world = dst[<span class="number">16</span>..<span class="number">17</span>].to_owned();
@@ -2065,16 +2065,16 @@
             .is_none());
 
         world.extend_from_slice(<span class="kw-2">&amp;</span>dst[<span class="number">9</span>..<span class="number">12</span>]);
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;world&quot;</span>, huff_decode(<span class="kw-2">&amp;</span>world));
+        <span class="macro">assert_eq!</span>(<span class="string">"world"</span>, huff_decode(<span class="kw-2">&amp;</span>world));
 
         <span class="macro">assert_eq!</span>(<span class="number">24</span>, dst.len());
         <span class="macro">assert_eq!</span>([<span class="number">0</span>, <span class="number">0</span>, <span class="number">15</span>, <span class="number">9</span>, <span class="number">4</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>], <span class="kw-2">&amp;</span>dst[<span class="number">0</span>..<span class="number">9</span>]);
 
         <span class="comment">// // Next is not indexed
         </span><span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>[<span class="number">15</span>, <span class="number">47</span>, <span class="number">0x80 </span>| <span class="number">3</span>], <span class="kw-2">&amp;</span>dst[<span class="number">12</span>..<span class="number">15</span>]);
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;zomg&quot;</span>, huff_decode(<span class="kw-2">&amp;</span>dst[<span class="number">15</span>..<span class="number">18</span>]));
+        <span class="macro">assert_eq!</span>(<span class="string">"zomg"</span>, huff_decode(<span class="kw-2">&amp;</span>dst[<span class="number">15</span>..<span class="number">18</span>]));
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>[<span class="number">15</span>, <span class="number">47</span>, <span class="number">0x80 </span>| <span class="number">3</span>], <span class="kw-2">&amp;</span>dst[<span class="number">18</span>..<span class="number">21</span>]);
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;sup&quot;</span>, huff_decode(<span class="kw-2">&amp;</span>dst[<span class="number">21</span>..]));
+        <span class="macro">assert_eq!</span>(<span class="string">"sup"</span>, huff_decode(<span class="kw-2">&amp;</span>dst[<span class="number">21</span>..]));
     }
 
     <span class="kw">fn </span>huff_decode(src: <span class="kw-2">&amp;</span>[u8]) -&gt; BytesMut {

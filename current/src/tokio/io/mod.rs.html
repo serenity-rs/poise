@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/io/mod.rs`."><title>mod.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/io/mod.rs`."><title>mod.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -296,9 +296,9 @@
 //!
 //! # AsyncRead and AsyncWrite
 //!
-//! Like the standard library&#39;s [`Read`] and [`Write`] traits, [`AsyncRead`] and
+//! Like the standard library's [`Read`] and [`Write`] traits, [`AsyncRead`] and
 //! [`AsyncWrite`] provide the most general interface for reading and writing
-//! input and output. Unlike the standard library&#39;s traits, however, they are
+//! input and output. Unlike the standard library's traits, however, they are
 //! _asynchronous_ &amp;mdash; meaning that reading from or writing to a `tokio::io`
 //! type will _yield_ to the Tokio scheduler when IO is not ready, rather than
 //! blocking. This allows other tasks to run while waiting on IO.
@@ -315,8 +315,8 @@
 //! extension traits. Library authors are expected to implement `AsyncRead`
 //! and `AsyncWrite` in order to provide types that behave like byte streams.
 //!
-//! Even with these differences, Tokio&#39;s `AsyncRead` and `AsyncWrite` traits
-//! can be used in almost exactly the same manner as the standard library&#39;s
+//! Even with these differences, Tokio's `AsyncRead` and `AsyncWrite` traits
+//! can be used in almost exactly the same manner as the standard library's
 //! `Read` and `Write`. Most types in the standard library that implement `Read`
 //! and `Write` have asynchronous equivalents in `tokio` that implement
 //! `AsyncRead` and `AsyncWrite`, such as [`File`] and [`TcpStream`].
@@ -331,13 +331,13 @@
 //!
 //! #[tokio::main]
 //! async fn main() -&gt; io::Result&lt;()&gt; {
-//!     let mut f = File::open(&quot;foo.txt&quot;).await?;
+//!     let mut f = File::open("foo.txt").await?;
 //!     let mut buffer = [0; 10];
 //!
 //!     // read up to 10 bytes
 //!     let n = f.read(&amp;mut buffer).await?;
 //!
-//!     println!(&quot;The bytes: {:?}&quot;, &amp;buffer[..n]);
+//!     println!("The bytes: {:?}", &amp;buffer[..n]);
 //!     Ok(())
 //! }
 //! ```
@@ -349,7 +349,7 @@
 //!
 //! ## Buffered Readers and Writers
 //!
-//! Byte-based interfaces are unwieldy and can be inefficient, as we&#39;d need to be
+//! Byte-based interfaces are unwieldy and can be inefficient, as we'd need to be
 //! making near-constant calls to the operating system. To help with this,
 //! `std::io` comes with [support for _buffered_ readers and writers][stdbuf],
 //! and therefore, `tokio::io` does as well.
@@ -368,19 +368,19 @@
 //!
 //! #[tokio::main]
 //! async fn main() -&gt; io::Result&lt;()&gt; {
-//!     let f = File::open(&quot;foo.txt&quot;).await?;
+//!     let f = File::open("foo.txt").await?;
 //!     let mut reader = BufReader::new(f);
 //!     let mut buffer = String::new();
 //!
 //!     // read a line into buffer
 //!     reader.read_line(&amp;mut buffer).await?;
 //!
-//!     println!(&quot;{}&quot;, buffer);
+//!     println!("{}", buffer);
 //!     Ok(())
 //! }
 //! ```
 //!
-//! [`BufWriter`] doesn&#39;t add any new ways of writing; it just buffers every call
+//! [`BufWriter`] doesn't add any new ways of writing; it just buffers every call
 //! to [`write`](crate::io::AsyncWriteExt::write). However, you **must** flush
 //! [`BufWriter`] to ensure that any buffered data is written.
 //!
@@ -390,7 +390,7 @@
 //!
 //! #[tokio::main]
 //! async fn main() -&gt; io::Result&lt;()&gt; {
-//!     let f = File::create(&quot;foo.txt&quot;).await?;
+//!     let f = File::create("foo.txt").await?;
 //!     {
 //!         let mut writer = BufWriter::new(f);
 //!
@@ -461,7 +461,7 @@
 //! [`AsyncWrite`]: trait@AsyncWrite
 //! [`AsyncReadExt`]: trait@AsyncReadExt
 //! [`AsyncWriteExt`]: trait@AsyncWriteExt
-//! [&quot;codec&quot;]: https://docs.rs/tokio-util/latest/tokio_util/codec/index.html
+//! ["codec"]: https://docs.rs/tokio-util/latest/tokio_util/codec/index.html
 //! [`Encoder`]: https://docs.rs/tokio-util/latest/tokio_util/codec/trait.Encoder.html
 //! [`Decoder`]: https://docs.rs/tokio-util/latest/tokio_util/codec/trait.Decoder.html
 //! [`ReaderStream`]: https://docs.rs/tokio-util/latest/tokio_util/io/struct.ReaderStream.html
@@ -476,7 +476,7 @@
 //! [`Write`]: std::io::Write
 
 </span><span class="attr">#![cfg_attr(
-    not(all(feature = <span class="string">&quot;rt&quot;</span>, feature = <span class="string">&quot;net&quot;</span>)),
+    not(all(feature = <span class="string">"rt"</span>, feature = <span class="string">"net"</span>)),
     allow(dead_code, unused_imports)
 )]
 
@@ -499,7 +499,7 @@
 <span class="kw">mod </span>read_buf;
 <span class="kw">pub use </span><span class="self">self</span>::read_buf::ReadBuf;
 
-<span class="comment">// Re-export some types from `std::io` so that users don&#39;t have to deal
+<span class="comment">// Re-export some types from `std::io` so that users don't have to deal
 // with conflicts when `use`ing `tokio::io` and `std::io`.
 </span><span class="attr">#[doc(no_inline)]
 </span><span class="kw">pub use </span>std::io::{Error, ErrorKind, <span class="prelude-ty">Result</span>, SeekFrom};
@@ -513,11 +513,11 @@
         <span class="kw">pub use </span>ready::Ready;
     }
 
-    <span class="attr">#[cfg_attr(target_os = <span class="string">&quot;wasi&quot;</span>, allow(unused_imports))]
+    <span class="attr">#[cfg_attr(target_os = <span class="string">"wasi"</span>, allow(unused_imports))]
     </span><span class="kw">mod </span>poll_evented;
 
     <span class="attr">#[cfg(not(loom))]
-    #[cfg_attr(target_os = <span class="string">&quot;wasi&quot;</span>, allow(unused_imports))]
+    #[cfg_attr(target_os = <span class="string">"wasi"</span>, allow(unused_imports))]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>poll_evented::PollEvented;
 }
 
@@ -573,7 +573,7 @@
 <span class="macro">cfg_io_blocking! </span>{
     <span class="doccomment">/// Types in this module can be mocked out in tests.
     </span><span class="kw">mod </span>sys {
-        <span class="comment">// TODO: don&#39;t rename
+        <span class="comment">// TODO: don't rename
         </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span><span class="kw">crate</span>::blocking::spawn_blocking <span class="kw">as </span>run;
         <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span><span class="kw">crate</span>::blocking::JoinHandle <span class="kw">as </span>Blocking;
     }

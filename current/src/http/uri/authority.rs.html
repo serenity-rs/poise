@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/http-0.2.11/src/uri/authority.rs`."><title>authority.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="http" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/http-0.2.11/src/uri/authority.rs`."><title>authority.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="http" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -726,12 +726,12 @@
     ///
     /// ```
     /// # use http::uri::Authority;
-    /// let authority = Authority::from_static(&quot;example.com&quot;);
-    /// assert_eq!(authority.host(), &quot;example.com&quot;);
+    /// let authority = Authority::from_static("example.com");
+    /// assert_eq!(authority.host(), "example.com");
     /// ```
-    </span><span class="kw">pub fn </span>from_static(src: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>from_static(src: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str) -&gt; <span class="self">Self </span>{
         Authority::from_shared(Bytes::from_static(src.as_bytes()))
-            .expect(<span class="string">&quot;static str is not valid authority&quot;</span>)
+            .expect(<span class="string">"static str is not valid authority"</span>)
     }
 
     <span class="doccomment">/// Attempt to convert a `Bytes` buffer to a `Authority`.
@@ -740,7 +740,7 @@
     /// internally, and will copy the data if it is not.
     </span><span class="kw">pub fn </span>from_maybe_shared&lt;T&gt;(src: T) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, InvalidUri&gt;
     <span class="kw">where
-        </span>T: AsRef&lt;[u8]&gt; + <span class="lifetime">&#39;static</span>,
+        </span>T: AsRef&lt;[u8]&gt; + <span class="lifetime">'static</span>,
     {
         <span class="macro">if_downcast_into!</span>(T, Bytes, src, {
             <span class="kw">return </span>Authority::from_shared(src);
@@ -762,29 +762,29 @@
         <span class="kw">const </span>MAX_COLONS: u32 = <span class="number">8</span>; <span class="comment">// e.g., [FEDC:BA98:7654:3210:FEDC:BA98:7654:3210]:80
 
         // Among other things, this loop checks that every byte in s up to the
-        // first &#39;/&#39;, &#39;?&#39;, or &#39;#&#39; is a valid URI character (or in some contexts,
-        // a &#39;%&#39;). This means that each such byte is a valid single-byte UTF-8
+        // first '/', '?', or '#' is a valid URI character (or in some contexts,
+        // a '%'). This means that each such byte is a valid single-byte UTF-8
         // code point.
         </span><span class="kw">for </span>(i, <span class="kw-2">&amp;</span>b) <span class="kw">in </span>s.iter().enumerate() {
             <span class="kw">match </span>URI_CHARS[b <span class="kw">as </span>usize] {
-                <span class="string">b&#39;/&#39; </span>| <span class="string">b&#39;?&#39; </span>| <span class="string">b&#39;#&#39; </span>=&gt; {
+                <span class="string">b'/' </span>| <span class="string">b'?' </span>| <span class="string">b'#' </span>=&gt; {
                     end = i;
                     <span class="kw">break</span>;
                 }
-                <span class="string">b&#39;:&#39; </span>=&gt; {
+                <span class="string">b':' </span>=&gt; {
                     <span class="kw">if </span>colon_cnt &gt;= MAX_COLONS {
                         <span class="kw">return </span><span class="prelude-val">Err</span>(ErrorKind::InvalidAuthority.into());
                     }
                     colon_cnt += <span class="number">1</span>;
                 }
-                <span class="string">b&#39;[&#39; </span>=&gt; {
+                <span class="string">b'[' </span>=&gt; {
                     <span class="kw">if </span>has_percent || start_bracket {
                         <span class="comment">// Something other than the userinfo has a `%`, so reject it.
                         </span><span class="kw">return </span><span class="prelude-val">Err</span>(ErrorKind::InvalidAuthority.into());
                     }
                     start_bracket = <span class="bool-val">true</span>;
                 }
-                <span class="string">b&#39;]&#39; </span>=&gt; {
+                <span class="string">b']' </span>=&gt; {
                     <span class="kw">if </span>(!start_bracket) || end_bracket {
                         <span class="kw">return </span><span class="prelude-val">Err</span>(ErrorKind::InvalidAuthority.into());
                     }
@@ -794,15 +794,15 @@
                     </span>colon_cnt = <span class="number">0</span>;
                     has_percent = <span class="bool-val">false</span>;
                 }
-                <span class="string">b&#39;@&#39; </span>=&gt; {
+                <span class="string">b'@' </span>=&gt; {
                     at_sign_pos = <span class="prelude-val">Some</span>(i);
 
-                    <span class="comment">// Those weren&#39;t a port colon, but part of the
+                    <span class="comment">// Those weren't a port colon, but part of the
                     // userinfo, so it needs to be forgotten.
                     </span>colon_cnt = <span class="number">0</span>;
                     has_percent = <span class="bool-val">false</span>;
                 }
-                <span class="number">0 </span><span class="kw">if </span>b == <span class="string">b&#39;%&#39; </span>=&gt; {
+                <span class="number">0 </span><span class="kw">if </span>b == <span class="string">b'%' </span>=&gt; {
                     <span class="comment">// Per https://tools.ietf.org/html/rfc3986#section-3.2.1 and
                     // https://url.spec.whatwg.org/#authority-state
                     // the userinfo can have a percent-encoded username and password,
@@ -810,7 +810,7 @@
                     // part of the userinfo, this flag will be cleared.
                     // Also per https://tools.ietf.org/html/rfc6874, percent-encoding can
                     // be used to indicate a zone identifier.
-                    // If the flag hasn&#39;t been cleared at the end, that means this
+                    // If the flag hasn't been cleared at the end, that means this
                     // was part of the hostname (and not part of an IPv6 address), and
                     // will fail with an error.
                     </span>has_percent = <span class="bool-val">true</span>;
@@ -827,12 +827,12 @@
         }
 
         <span class="kw">if </span>colon_cnt &gt; <span class="number">1 </span>{
-            <span class="comment">// Things like &#39;localhost:8080:3030&#39; are rejected.
+            <span class="comment">// Things like 'localhost:8080:3030' are rejected.
             </span><span class="kw">return </span><span class="prelude-val">Err</span>(ErrorKind::InvalidAuthority.into());
         }
 
         <span class="kw">if </span>end &gt; <span class="number">0 </span>&amp;&amp; at_sign_pos == <span class="prelude-val">Some</span>(end - <span class="number">1</span>) {
-            <span class="comment">// If there&#39;s nothing after an `@`, this is bonkers.
+            <span class="comment">// If there's nothing after an `@`, this is bonkers.
             </span><span class="kw">return </span><span class="prelude-val">Err</span>(ErrorKind::InvalidAuthority.into());
         }
 
@@ -875,9 +875,9 @@
     ///
     /// ```
     /// # use http::uri::*;
-    /// let authority: Authority = &quot;example.org:80&quot;.parse().unwrap();
+    /// let authority: Authority = "example.org:80".parse().unwrap();
     ///
-    /// assert_eq!(authority.host(), &quot;example.org&quot;);
+    /// assert_eq!(authority.host(), "example.org");
     /// ```
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>host(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
@@ -887,7 +887,7 @@
     <span class="doccomment">/// Get the port part of this `Authority`.
     ///
     /// The port subcomponent of authority is designated by an optional port
-    /// number following the host and delimited from it by a single colon (&quot;:&quot;)
+    /// number following the host and delimited from it by a single colon (":")
     /// character. It can be turned into a decimal port number with the `as_u16`
     /// method or as a `str` with the `as_str` method.
     ///
@@ -904,25 +904,25 @@
     ///
     /// ```
     /// # use http::uri::Authority;
-    /// let authority: Authority = &quot;example.org:80&quot;.parse().unwrap();
+    /// let authority: Authority = "example.org:80".parse().unwrap();
     ///
     /// let port = authority.port().unwrap();
     /// assert_eq!(port.as_u16(), 80);
-    /// assert_eq!(port.as_str(), &quot;80&quot;);
+    /// assert_eq!(port.as_str(), "80");
     /// ```
     ///
     /// Authority without port
     ///
     /// ```
     /// # use http::uri::Authority;
-    /// let authority: Authority = &quot;example.org&quot;.parse().unwrap();
+    /// let authority: Authority = "example.org".parse().unwrap();
     ///
     /// assert!(authority.port().is_none());
     /// ```
     </span><span class="kw">pub fn </span>port(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Port&lt;<span class="kw-2">&amp;</span>str&gt;&gt; {
         <span class="kw">let </span>bytes = <span class="self">self</span>.as_str();
         bytes
-            .rfind(<span class="string">&quot;:&quot;</span>)
+            .rfind(<span class="string">":"</span>)
             .and_then(|i| Port::from_str(<span class="kw-2">&amp;</span>bytes[i + <span class="number">1</span>..]).ok())
     }
 
@@ -932,7 +932,7 @@
     ///
     /// ```
     /// # use http::uri::Authority;
-    /// let authority: Authority = &quot;example.org:80&quot;.parse().unwrap();
+    /// let authority: Authority = "example.org:80".parse().unwrap();
     ///
     /// assert_eq!(authority.port_u16(), Some(80));
     /// ```
@@ -970,9 +970,9 @@
 ///
 /// ```
 /// # use http::uri::Authority;
-/// let authority: Authority = &quot;HELLO.com&quot;.parse().unwrap();
-/// assert_eq!(authority, &quot;hello.coM&quot;);
-/// assert_eq!(&quot;hello.com&quot;, authority);
+/// let authority: Authority = "HELLO.com".parse().unwrap();
+/// assert_eq!(authority, "hello.coM");
+/// assert_eq!("hello.com", authority);
 /// ```
 </span><span class="kw">impl </span>PartialEq&lt;str&gt; <span class="kw">for </span>Authority {
     <span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>str) -&gt; bool {
@@ -986,14 +986,14 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; PartialEq&lt;Authority&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; PartialEq&lt;Authority&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>str {
     <span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>Authority) -&gt; bool {
         <span class="self">self</span>.eq_ignore_ascii_case(other.as_str())
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; PartialEq&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str&gt; <span class="kw">for </span>Authority {
-    <span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: &amp;&amp;<span class="lifetime">&#39;a </span>str) -&gt; bool {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; PartialEq&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>str&gt; <span class="kw">for </span>Authority {
+    <span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: &amp;&amp;<span class="lifetime">'a </span>str) -&gt; bool {
         <span class="self">self</span>.data.eq_ignore_ascii_case(other)
     }
 }
@@ -1016,9 +1016,9 @@
 ///
 /// ```
 /// # use http::uri::Authority;
-/// let authority: Authority = &quot;DEF.com&quot;.parse().unwrap();
-/// assert!(authority &lt; &quot;ghi.com&quot;);
-/// assert!(authority &gt; &quot;abc.com&quot;);
+/// let authority: Authority = "DEF.com".parse().unwrap();
+/// assert!(authority &lt; "ghi.com");
+/// assert!(authority &gt; "abc.com");
 /// ```
 </span><span class="kw">impl </span>PartialOrd <span class="kw">for </span>Authority {
     <span class="kw">fn </span>partial_cmp(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>Authority) -&gt; <span class="prelude-ty">Option</span>&lt;cmp::Ordering&gt; {
@@ -1044,7 +1044,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; PartialOrd&lt;Authority&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; PartialOrd&lt;Authority&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>str {
     <span class="kw">fn </span>partial_cmp(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>Authority) -&gt; <span class="prelude-ty">Option</span>&lt;cmp::Ordering&gt; {
         <span class="kw">let </span>left = <span class="self">self</span>.as_bytes().iter().map(|b| b.to_ascii_lowercase());
         <span class="kw">let </span>right = other.data.as_bytes().iter().map(|b| b.to_ascii_lowercase());
@@ -1052,8 +1052,8 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; PartialOrd&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str&gt; <span class="kw">for </span>Authority {
-    <span class="kw">fn </span>partial_cmp(<span class="kw-2">&amp;</span><span class="self">self</span>, other: &amp;&amp;<span class="lifetime">&#39;a </span>str) -&gt; <span class="prelude-ty">Option</span>&lt;cmp::Ordering&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; PartialOrd&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>str&gt; <span class="kw">for </span>Authority {
+    <span class="kw">fn </span>partial_cmp(<span class="kw-2">&amp;</span><span class="self">self</span>, other: &amp;&amp;<span class="lifetime">'a </span>str) -&gt; <span class="prelude-ty">Option</span>&lt;cmp::Ordering&gt; {
         <span class="kw">let </span>left = <span class="self">self</span>.data.as_bytes().iter().map(|b| b.to_ascii_lowercase());
         <span class="kw">let </span>right = other.as_bytes().iter().map(|b| b.to_ascii_lowercase());
         left.partial_cmp(right)
@@ -1085,8 +1085,8 @@
 /// # use std::hash::{Hash, Hasher};
 /// # use std::collections::hash_map::DefaultHasher;
 ///
-/// let a: Authority = &quot;HELLO.com&quot;.parse().unwrap();
-/// let b: Authority = &quot;hello.coM&quot;.parse().unwrap();
+/// let a: Authority = "HELLO.com".parse().unwrap();
+/// let b: Authority = "hello.coM".parse().unwrap();
 ///
 /// let mut s = DefaultHasher::new();
 /// a.hash(&amp;mut s);
@@ -1110,10 +1110,10 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; TryFrom&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt; <span class="kw">for </span>Authority {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; TryFrom&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt; <span class="kw">for </span>Authority {
     <span class="kw">type </span>Error = InvalidUri;
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>try_from(s: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
+    </span><span class="kw">fn </span>try_from(s: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
         <span class="comment">// parse first, and only turn into Bytes if valid
 
         // Preconditon on create_authority: copy_from_slice() copies all of
@@ -1122,10 +1122,10 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; TryFrom&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str&gt; <span class="kw">for </span>Authority {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; TryFrom&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>str&gt; <span class="kw">for </span>Authority {
     <span class="kw">type </span>Error = InvalidUri;
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>try_from(s: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
+    </span><span class="kw">fn </span>try_from(s: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
         TryFrom::try_from(s.as_bytes())
     }
 }
@@ -1157,34 +1157,34 @@
 }
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>Authority {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         f.write_str(<span class="self">self</span>.as_str())
     }
 }
 
 <span class="kw">impl </span>fmt::Display <span class="kw">for </span>Authority {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         f.write_str(<span class="self">self</span>.as_str())
     }
 }
 
 <span class="kw">fn </span>host(auth: <span class="kw-2">&amp;</span>str) -&gt; <span class="kw-2">&amp;</span>str {
     <span class="kw">let </span>host_port = auth
-        .rsplitn(<span class="number">2</span>, <span class="string">&#39;@&#39;</span>)
+        .rsplitn(<span class="number">2</span>, <span class="string">'@'</span>)
         .next()
-        .expect(<span class="string">&quot;split always has at least 1 item&quot;</span>);
+        .expect(<span class="string">"split always has at least 1 item"</span>);
 
-    <span class="kw">if </span>host_port.as_bytes()[<span class="number">0</span>] == <span class="string">b&#39;[&#39; </span>{
+    <span class="kw">if </span>host_port.as_bytes()[<span class="number">0</span>] == <span class="string">b'[' </span>{
         <span class="kw">let </span>i = host_port
-            .find(<span class="string">&#39;]&#39;</span>)
-            .expect(<span class="string">&quot;parsing should validate brackets&quot;</span>);
-        <span class="comment">// ..= ranges aren&#39;t available in 1.20, our minimum Rust version...
+            .find(<span class="string">']'</span>)
+            .expect(<span class="string">"parsing should validate brackets"</span>);
+        <span class="comment">// ..= ranges aren't available in 1.20, our minimum Rust version...
         </span><span class="kw-2">&amp;</span>host_port[<span class="number">0</span>..i + <span class="number">1</span>]
     } <span class="kw">else </span>{
         host_port
-            .split(<span class="string">&#39;:&#39;</span>)
+            .split(<span class="string">':'</span>)
             .next()
-            .expect(<span class="string">&quot;split always has at least 1 item&quot;</span>)
+            .expect(<span class="string">"split always has at least 1 item"</span>)
     }
 }
 
@@ -1218,132 +1218,132 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>parse_empty_string_is_error() {
-        <span class="kw">let </span>err = Authority::parse_non_empty(<span class="string">b&quot;&quot;</span>).unwrap_err();
+        <span class="kw">let </span>err = Authority::parse_non_empty(<span class="string">b""</span>).unwrap_err();
         <span class="macro">assert_eq!</span>(err.<span class="number">0</span>, ErrorKind::Empty);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>equal_to_self_of_same_authority() {
-        <span class="kw">let </span>authority1: Authority = <span class="string">&quot;example.com&quot;</span>.parse().unwrap();
-        <span class="kw">let </span>authority2: Authority = <span class="string">&quot;EXAMPLE.COM&quot;</span>.parse().unwrap();
+        <span class="kw">let </span>authority1: Authority = <span class="string">"example.com"</span>.parse().unwrap();
+        <span class="kw">let </span>authority2: Authority = <span class="string">"EXAMPLE.COM"</span>.parse().unwrap();
         <span class="macro">assert_eq!</span>(authority1, authority2);
         <span class="macro">assert_eq!</span>(authority2, authority1);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>not_equal_to_self_of_different_authority() {
-        <span class="kw">let </span>authority1: Authority = <span class="string">&quot;example.com&quot;</span>.parse().unwrap();
-        <span class="kw">let </span>authority2: Authority = <span class="string">&quot;test.com&quot;</span>.parse().unwrap();
+        <span class="kw">let </span>authority1: Authority = <span class="string">"example.com"</span>.parse().unwrap();
+        <span class="kw">let </span>authority2: Authority = <span class="string">"test.com"</span>.parse().unwrap();
         <span class="macro">assert_ne!</span>(authority1, authority2);
         <span class="macro">assert_ne!</span>(authority2, authority1);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>equates_with_a_str() {
-        <span class="kw">let </span>authority: Authority = <span class="string">&quot;example.com&quot;</span>.parse().unwrap();
-        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>authority, <span class="string">&quot;EXAMPLE.com&quot;</span>);
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;EXAMPLE.com&quot;</span>, <span class="kw-2">&amp;</span>authority);
-        <span class="macro">assert_eq!</span>(authority, <span class="string">&quot;EXAMPLE.com&quot;</span>);
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;EXAMPLE.com&quot;</span>, authority);
+        <span class="kw">let </span>authority: Authority = <span class="string">"example.com"</span>.parse().unwrap();
+        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>authority, <span class="string">"EXAMPLE.com"</span>);
+        <span class="macro">assert_eq!</span>(<span class="string">"EXAMPLE.com"</span>, <span class="kw-2">&amp;</span>authority);
+        <span class="macro">assert_eq!</span>(authority, <span class="string">"EXAMPLE.com"</span>);
+        <span class="macro">assert_eq!</span>(<span class="string">"EXAMPLE.com"</span>, authority);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>from_static_equates_with_a_str() {
-        <span class="kw">let </span>authority = Authority::from_static(<span class="string">&quot;example.com&quot;</span>);
-        <span class="macro">assert_eq!</span>(authority, <span class="string">&quot;example.com&quot;</span>);
+        <span class="kw">let </span>authority = Authority::from_static(<span class="string">"example.com"</span>);
+        <span class="macro">assert_eq!</span>(authority, <span class="string">"example.com"</span>);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>not_equal_with_a_str_of_a_different_authority() {
-        <span class="kw">let </span>authority: Authority = <span class="string">&quot;example.com&quot;</span>.parse().unwrap();
-        <span class="macro">assert_ne!</span>(<span class="kw-2">&amp;</span>authority, <span class="string">&quot;test.com&quot;</span>);
-        <span class="macro">assert_ne!</span>(<span class="string">&quot;test.com&quot;</span>, <span class="kw-2">&amp;</span>authority);
-        <span class="macro">assert_ne!</span>(authority, <span class="string">&quot;test.com&quot;</span>);
-        <span class="macro">assert_ne!</span>(<span class="string">&quot;test.com&quot;</span>, authority);
+        <span class="kw">let </span>authority: Authority = <span class="string">"example.com"</span>.parse().unwrap();
+        <span class="macro">assert_ne!</span>(<span class="kw-2">&amp;</span>authority, <span class="string">"test.com"</span>);
+        <span class="macro">assert_ne!</span>(<span class="string">"test.com"</span>, <span class="kw-2">&amp;</span>authority);
+        <span class="macro">assert_ne!</span>(authority, <span class="string">"test.com"</span>);
+        <span class="macro">assert_ne!</span>(<span class="string">"test.com"</span>, authority);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>equates_with_a_string() {
-        <span class="kw">let </span>authority: Authority = <span class="string">&quot;example.com&quot;</span>.parse().unwrap();
-        <span class="macro">assert_eq!</span>(authority, <span class="string">&quot;EXAMPLE.com&quot;</span>.to_string());
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;EXAMPLE.com&quot;</span>.to_string(), authority);
+        <span class="kw">let </span>authority: Authority = <span class="string">"example.com"</span>.parse().unwrap();
+        <span class="macro">assert_eq!</span>(authority, <span class="string">"EXAMPLE.com"</span>.to_string());
+        <span class="macro">assert_eq!</span>(<span class="string">"EXAMPLE.com"</span>.to_string(), authority);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>equates_with_a_string_of_a_different_authority() {
-        <span class="kw">let </span>authority: Authority = <span class="string">&quot;example.com&quot;</span>.parse().unwrap();
-        <span class="macro">assert_ne!</span>(authority, <span class="string">&quot;test.com&quot;</span>.to_string());
-        <span class="macro">assert_ne!</span>(<span class="string">&quot;test.com&quot;</span>.to_string(), authority);
+        <span class="kw">let </span>authority: Authority = <span class="string">"example.com"</span>.parse().unwrap();
+        <span class="macro">assert_ne!</span>(authority, <span class="string">"test.com"</span>.to_string());
+        <span class="macro">assert_ne!</span>(<span class="string">"test.com"</span>.to_string(), authority);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>compares_to_self() {
-        <span class="kw">let </span>authority1: Authority = <span class="string">&quot;abc.com&quot;</span>.parse().unwrap();
-        <span class="kw">let </span>authority2: Authority = <span class="string">&quot;def.com&quot;</span>.parse().unwrap();
+        <span class="kw">let </span>authority1: Authority = <span class="string">"abc.com"</span>.parse().unwrap();
+        <span class="kw">let </span>authority2: Authority = <span class="string">"def.com"</span>.parse().unwrap();
         <span class="macro">assert!</span>(authority1 &lt; authority2);
         <span class="macro">assert!</span>(authority2 &gt; authority1);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>compares_with_a_str() {
-        <span class="kw">let </span>authority: Authority = <span class="string">&quot;def.com&quot;</span>.parse().unwrap();
+        <span class="kw">let </span>authority: Authority = <span class="string">"def.com"</span>.parse().unwrap();
         <span class="comment">// with ref
-        </span><span class="macro">assert!</span>(<span class="kw-2">&amp;</span>authority &lt; <span class="string">&quot;ghi.com&quot;</span>);
-        <span class="macro">assert!</span>(<span class="string">&quot;ghi.com&quot; </span>&gt; <span class="kw-2">&amp;</span>authority);
-        <span class="macro">assert!</span>(<span class="kw-2">&amp;</span>authority &gt; <span class="string">&quot;abc.com&quot;</span>);
-        <span class="macro">assert!</span>(<span class="string">&quot;abc.com&quot; </span>&lt; <span class="kw-2">&amp;</span>authority);
+        </span><span class="macro">assert!</span>(<span class="kw-2">&amp;</span>authority &lt; <span class="string">"ghi.com"</span>);
+        <span class="macro">assert!</span>(<span class="string">"ghi.com" </span>&gt; <span class="kw-2">&amp;</span>authority);
+        <span class="macro">assert!</span>(<span class="kw-2">&amp;</span>authority &gt; <span class="string">"abc.com"</span>);
+        <span class="macro">assert!</span>(<span class="string">"abc.com" </span>&lt; <span class="kw-2">&amp;</span>authority);
 
         <span class="comment">// no ref
-        </span><span class="macro">assert!</span>(authority &lt; <span class="string">&quot;ghi.com&quot;</span>);
-        <span class="macro">assert!</span>(<span class="string">&quot;ghi.com&quot; </span>&gt; authority);
-        <span class="macro">assert!</span>(authority &gt; <span class="string">&quot;abc.com&quot;</span>);
-        <span class="macro">assert!</span>(<span class="string">&quot;abc.com&quot; </span>&lt; authority);
+        </span><span class="macro">assert!</span>(authority &lt; <span class="string">"ghi.com"</span>);
+        <span class="macro">assert!</span>(<span class="string">"ghi.com" </span>&gt; authority);
+        <span class="macro">assert!</span>(authority &gt; <span class="string">"abc.com"</span>);
+        <span class="macro">assert!</span>(<span class="string">"abc.com" </span>&lt; authority);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>compares_with_a_string() {
-        <span class="kw">let </span>authority: Authority = <span class="string">&quot;def.com&quot;</span>.parse().unwrap();
-        <span class="macro">assert!</span>(authority &lt; <span class="string">&quot;ghi.com&quot;</span>.to_string());
-        <span class="macro">assert!</span>(<span class="string">&quot;ghi.com&quot;</span>.to_string() &gt; authority);
-        <span class="macro">assert!</span>(authority &gt; <span class="string">&quot;abc.com&quot;</span>.to_string());
-        <span class="macro">assert!</span>(<span class="string">&quot;abc.com&quot;</span>.to_string() &lt; authority);
+        <span class="kw">let </span>authority: Authority = <span class="string">"def.com"</span>.parse().unwrap();
+        <span class="macro">assert!</span>(authority &lt; <span class="string">"ghi.com"</span>.to_string());
+        <span class="macro">assert!</span>(<span class="string">"ghi.com"</span>.to_string() &gt; authority);
+        <span class="macro">assert!</span>(authority &gt; <span class="string">"abc.com"</span>.to_string());
+        <span class="macro">assert!</span>(<span class="string">"abc.com"</span>.to_string() &lt; authority);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>allows_percent_in_userinfo() {
-        <span class="kw">let </span>authority_str = <span class="string">&quot;a%2f:b%2f@example.com&quot;</span>;
+        <span class="kw">let </span>authority_str = <span class="string">"a%2f:b%2f@example.com"</span>;
         <span class="kw">let </span>authority: Authority = authority_str.parse().unwrap();
         <span class="macro">assert_eq!</span>(authority, authority_str);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>rejects_percent_in_hostname() {
-        <span class="kw">let </span>err = Authority::parse_non_empty(<span class="string">b&quot;example%2f.com&quot;</span>).unwrap_err();
+        <span class="kw">let </span>err = Authority::parse_non_empty(<span class="string">b"example%2f.com"</span>).unwrap_err();
         <span class="macro">assert_eq!</span>(err.<span class="number">0</span>, ErrorKind::InvalidAuthority);
 
-        <span class="kw">let </span>err = Authority::parse_non_empty(<span class="string">b&quot;a%2f:b%2f@example%2f.com&quot;</span>).unwrap_err();
+        <span class="kw">let </span>err = Authority::parse_non_empty(<span class="string">b"a%2f:b%2f@example%2f.com"</span>).unwrap_err();
         <span class="macro">assert_eq!</span>(err.<span class="number">0</span>, ErrorKind::InvalidAuthority);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>allows_percent_in_ipv6_address() {
-        <span class="kw">let </span>authority_str = <span class="string">&quot;[fe80::1:2:3:4%25eth0]&quot;</span>;
+        <span class="kw">let </span>authority_str = <span class="string">"[fe80::1:2:3:4%25eth0]"</span>;
         <span class="kw">let </span>result: Authority = authority_str.parse().unwrap();
         <span class="macro">assert_eq!</span>(result, authority_str);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>reject_obviously_invalid_ipv6_address() {
-        <span class="kw">let </span>err = Authority::parse_non_empty(<span class="string">b&quot;[0:1:2:3:4:5:6:7:8:9:10:11:12:13:14]&quot;</span>).unwrap_err();
+        <span class="kw">let </span>err = Authority::parse_non_empty(<span class="string">b"[0:1:2:3:4:5:6:7:8:9:10:11:12:13:14]"</span>).unwrap_err();
         <span class="macro">assert_eq!</span>(err.<span class="number">0</span>, ErrorKind::InvalidAuthority);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>rejects_percent_outside_ipv6_address() {
-        <span class="kw">let </span>err = Authority::parse_non_empty(<span class="string">b&quot;1234%20[fe80::1:2:3:4]&quot;</span>).unwrap_err();
+        <span class="kw">let </span>err = Authority::parse_non_empty(<span class="string">b"1234%20[fe80::1:2:3:4]"</span>).unwrap_err();
         <span class="macro">assert_eq!</span>(err.<span class="number">0</span>, ErrorKind::InvalidAuthority);
 
-        <span class="kw">let </span>err = Authority::parse_non_empty(<span class="string">b&quot;[fe80::1:2:3:4]%20&quot;</span>).unwrap_err();
+        <span class="kw">let </span>err = Authority::parse_non_empty(<span class="string">b"[fe80::1:2:3:4]%20"</span>).unwrap_err();
         <span class="macro">assert_eq!</span>(err.<span class="number">0</span>, ErrorKind::InvalidAuthority);
     }
 
@@ -1358,11 +1358,11 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>rejects_invalid_use_of_brackets() {
-        <span class="kw">let </span>err = Authority::parse_non_empty(<span class="string">b&quot;[]@[&quot;</span>).unwrap_err();
+        <span class="kw">let </span>err = Authority::parse_non_empty(<span class="string">b"[]@["</span>).unwrap_err();
         <span class="macro">assert_eq!</span>(err.<span class="number">0</span>, ErrorKind::InvalidAuthority);
 
         <span class="comment">// reject tie-fighter
-        </span><span class="kw">let </span>err = Authority::parse_non_empty(<span class="string">b&quot;]o[&quot;</span>).unwrap_err();
+        </span><span class="kw">let </span>err = Authority::parse_non_empty(<span class="string">b"]o["</span>).unwrap_err();
         <span class="macro">assert_eq!</span>(err.<span class="number">0</span>, ErrorKind::InvalidAuthority);
     }
 }

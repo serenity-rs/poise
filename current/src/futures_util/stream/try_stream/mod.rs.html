@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/futures-util-0.3.29/src/stream/try_stream/mod.rs`."><title>mod.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="futures_util" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/futures-util-0.3.29/src/stream/try_stream/mod.rs`."><title>mod.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="futures_util" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1254,7 +1254,7 @@
 //! This module contains a number of functions for working with `Streams`s
 //! that return `Result`s, allowing for short-circuiting computations.
 
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;compat&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">"compat"</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::compat::Compat;
 <span class="kw">use </span><span class="kw">crate</span>::fns::{
     inspect_err_fn, inspect_ok_fn, into_fn, map_err_fn, map_ok_fn, InspectErrFn, InspectOkFn,
@@ -1263,7 +1263,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::future::assert_future;
 <span class="kw">use </span><span class="kw">crate</span>::stream::assert_stream;
 <span class="kw">use </span><span class="kw">crate</span>::stream::{Inspect, Map};
-<span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
 </span><span class="kw">use </span>alloc::vec::Vec;
 <span class="kw">use </span>core::pin::Pin;
 
@@ -1341,10 +1341,10 @@
 </span><span class="kw">pub use </span><span class="self">self</span>::try_flatten::TryFlatten;
 
 <span class="attr">#[cfg(not(futures_no_atomic_cas))]
-#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+#[cfg(feature = <span class="string">"alloc"</span>)]
 </span><span class="kw">mod </span>try_flatten_unordered;
 <span class="attr">#[cfg(not(futures_no_atomic_cas))]
-#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+#[cfg(feature = <span class="string">"alloc"</span>)]
 #[allow(unreachable_pub)] </span><span class="comment">// https://github.com/rust-lang/rust/issues/57411
 </span><span class="kw">pub use </span><span class="self">self</span>::try_flatten_unordered::TryFlattenUnordered;
 
@@ -1356,15 +1356,15 @@
 <span class="attr">#[allow(unreachable_pub)] </span><span class="comment">// https://github.com/rust-lang/rust/issues/57411
 </span><span class="kw">pub use </span><span class="self">self</span>::try_concat::TryConcat;
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
 </span><span class="kw">mod </span>try_chunks;
-<span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
 #[allow(unreachable_pub)] </span><span class="comment">// https://github.com/rust-lang/rust/issues/57411
 </span><span class="kw">pub use </span><span class="self">self</span>::try_chunks::{TryChunks, TryChunksError};
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
 </span><span class="kw">mod </span>try_ready_chunks;
-<span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
 #[allow(unreachable_pub)] </span><span class="comment">// https://github.com/rust-lang/rust/issues/57411
 </span><span class="kw">pub use </span><span class="self">self</span>::try_ready_chunks::{TryReadyChunks, TryReadyChunksError};
 
@@ -1385,35 +1385,35 @@
 </span><span class="kw">pub use </span><span class="self">self</span>::try_take_while::TryTakeWhile;
 
 <span class="attr">#[cfg(not(futures_no_atomic_cas))]
-#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+#[cfg(feature = <span class="string">"alloc"</span>)]
 </span><span class="kw">mod </span>try_buffer_unordered;
 <span class="attr">#[cfg(not(futures_no_atomic_cas))]
-#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+#[cfg(feature = <span class="string">"alloc"</span>)]
 #[allow(unreachable_pub)] </span><span class="comment">// https://github.com/rust-lang/rust/issues/57411
 </span><span class="kw">pub use </span><span class="self">self</span>::try_buffer_unordered::TryBufferUnordered;
 
 <span class="attr">#[cfg(not(futures_no_atomic_cas))]
-#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+#[cfg(feature = <span class="string">"alloc"</span>)]
 </span><span class="kw">mod </span>try_buffered;
 <span class="attr">#[cfg(not(futures_no_atomic_cas))]
-#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+#[cfg(feature = <span class="string">"alloc"</span>)]
 #[allow(unreachable_pub)] </span><span class="comment">// https://github.com/rust-lang/rust/issues/57411
 </span><span class="kw">pub use </span><span class="self">self</span>::try_buffered::TryBuffered;
 
 <span class="attr">#[cfg(not(futures_no_atomic_cas))]
-#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+#[cfg(feature = <span class="string">"alloc"</span>)]
 </span><span class="kw">mod </span>try_for_each_concurrent;
 <span class="attr">#[cfg(not(futures_no_atomic_cas))]
-#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+#[cfg(feature = <span class="string">"alloc"</span>)]
 #[allow(unreachable_pub)] </span><span class="comment">// https://github.com/rust-lang/rust/issues/57411
 </span><span class="kw">pub use </span><span class="self">self</span>::try_for_each_concurrent::TryForEachConcurrent;
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;io&quot;</span>)]
-#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"io"</span>)]
+#[cfg(feature = <span class="string">"std"</span>)]
 </span><span class="kw">mod </span>into_async_read;
-<span class="attr">#[cfg(feature = <span class="string">&quot;io&quot;</span>)]
-#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;io&quot;</span>)))]
-#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"io"</span>)]
+#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"io"</span>)))]
+#[cfg(feature = <span class="string">"std"</span>)]
 #[allow(unreachable_pub)] </span><span class="comment">// https://github.com/rust-lang/rust/issues/57411
 </span><span class="kw">pub use </span><span class="self">self</span>::into_async_read::IntoAsyncRead;
 
@@ -1582,7 +1582,7 @@
     ///
     /// This is similar to the `StreamExt::inspect` method where it allows
     /// easily inspecting the success value as it passes through the stream, for
-    /// example to debug what&#39;s going on.
+    /// example to debug what's going on.
     </span><span class="kw">fn </span>inspect_ok&lt;F&gt;(<span class="self">self</span>, f: F) -&gt; InspectOk&lt;<span class="self">Self</span>, F&gt;
     <span class="kw">where
         </span>F: FnMut(<span class="kw-2">&amp;</span><span class="self">Self</span>::Ok),
@@ -1595,7 +1595,7 @@
     ///
     /// This is similar to the `StreamExt::inspect` method where it allows
     /// easily inspecting the error value as it passes through the stream, for
-    /// example to debug what&#39;s going on.
+    /// example to debug what's going on.
     </span><span class="kw">fn </span>inspect_err&lt;F&gt;(<span class="self">self</span>, f: F) -&gt; InspectErr&lt;<span class="self">Self</span>, F&gt;
     <span class="kw">where
         </span>F: FnMut(<span class="kw-2">&amp;</span><span class="self">Self</span>::Error),
@@ -1652,7 +1652,7 @@
     /// assert_eq!(stream.try_next().await, Err(()));
     /// # })
     /// ```
-    </span><span class="kw">fn </span>try_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; TryNext&lt;<span class="lifetime">&#39;_</span>, <span class="self">Self</span>&gt;
+    </span><span class="kw">fn </span>try_next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; TryNext&lt;<span class="lifetime">'_</span>, <span class="self">Self</span>&gt;
     <span class="kw">where
         </span><span class="self">Self</span>: Unpin,
     {
@@ -1803,7 +1803,7 @@
     /// # })
     /// ```
     </span><span class="attr">#[cfg(not(futures_no_atomic_cas))]
-    #[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+    #[cfg(feature = <span class="string">"alloc"</span>)]
     </span><span class="kw">fn </span>try_for_each_concurrent&lt;Fut, F&gt;(
         <span class="self">self</span>,
         limit: <span class="kw">impl </span>Into&lt;<span class="prelude-ty">Option</span>&lt;usize&gt;&gt;,
@@ -1862,11 +1862,11 @@
     ///
     /// This combinator will attempt to pull successful items from this stream and buffer
     /// them into a local vector. At most `capacity` items will get buffered
-    /// before they&#39;re yielded from the returned stream.
+    /// before they're yielded from the returned stream.
     ///
     /// Note that the vectors returned from this iterator may not always have
     /// `capacity` elements. If the underlying stream ended and only a partial
-    /// vector was created, it&#39;ll be returned. Additionally if an error happens
+    /// vector was created, it'll be returned. Additionally if an error happens
     /// from the underlying stream then the currently buffered items will be
     /// yielded.
     ///
@@ -1895,7 +1895,7 @@
     /// # Panics
     ///
     /// This method will panic if `capacity` is zero.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
     </span><span class="kw">fn </span>try_chunks(<span class="self">self</span>, capacity: usize) -&gt; TryChunks&lt;<span class="self">Self</span>&gt;
     <span class="kw">where
         </span><span class="self">Self</span>: Sized,
@@ -1909,13 +1909,13 @@
     ///
     /// This combinator will attempt to pull successful items from this stream and buffer
     /// them into a local vector. At most `capacity` items will get buffered
-    /// before they&#39;re yielded from the returned stream. If the underlying stream
+    /// before they're yielded from the returned stream. If the underlying stream
     /// returns `Poll::Pending`, and the collected chunk is not empty, it will
     /// be immidiatly returned.
     ///
     /// Note that the vectors returned from this iterator may not always have
     /// `capacity` elements. If the underlying stream ended and only a partial
-    /// vector was created, it&#39;ll be returned. Additionally if an error happens
+    /// vector was created, it'll be returned. Additionally if an error happens
     /// from the underlying stream then the currently buffered items will be
     /// yielded.
     ///
@@ -1944,7 +1944,7 @@
     /// # Panics
     ///
     /// This method will panic if `capacity` is zero.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
     </span><span class="kw">fn </span>try_ready_chunks(<span class="self">self</span>, capacity: usize) -&gt; TryReadyChunks&lt;<span class="self">Self</span>&gt;
     <span class="kw">where
         </span><span class="self">Self</span>: Sized,
@@ -1975,13 +1975,13 @@
     /// use futures::future;
     /// use futures::stream::{self, StreamExt, TryStreamExt};
     ///
-    /// let stream = stream::iter(vec![Ok(1i32), Ok(2i32), Ok(3i32), Err(&quot;error&quot;)]);
+    /// let stream = stream::iter(vec![Ok(1i32), Ok(2i32), Ok(3i32), Err("error")]);
     /// let mut evens = stream.try_filter(|x| {
     ///     future::ready(x % 2 == 0)
     /// });
     ///
     /// assert_eq!(evens.next().await, Some(Ok(2)));
-    /// assert_eq!(evens.next().await, Some(Err(&quot;error&quot;)));
+    /// assert_eq!(evens.next().await, Some(Err("error")));
     /// # })
     /// ```
     </span><span class="kw">fn </span>try_filter&lt;Fut, F&gt;(<span class="self">self</span>, f: F) -&gt; TryFilter&lt;<span class="self">Self</span>, Fut, F&gt;
@@ -2014,7 +2014,7 @@
     /// use futures::stream::{self, StreamExt, TryStreamExt};
     /// use futures::pin_mut;
     ///
-    /// let stream = stream::iter(vec![Ok(1i32), Ok(6i32), Err(&quot;error&quot;)]);
+    /// let stream = stream::iter(vec![Ok(1i32), Ok(6i32), Err("error")]);
     /// let halves = stream.try_filter_map(|x| async move {
     ///     let ret = if x % 2 == 0 { Some(x / 2) } else { None };
     ///     Ok(ret)
@@ -2022,7 +2022,7 @@
     ///
     /// pin_mut!(halves);
     /// assert_eq!(halves.next().await, Some(Ok(3)));
-    /// assert_eq!(halves.next().await, Some(Err(&quot;error&quot;)));
+    /// assert_eq!(halves.next().await, Some(Err("error")));
     /// # })
     /// ```
     </span><span class="kw">fn </span>try_filter_map&lt;Fut, F, T&gt;(<span class="self">self</span>, f: F) -&gt; TryFilterMap&lt;<span class="self">Self</span>, Fut, F&gt;
@@ -2079,7 +2079,7 @@
     /// # });
     /// ```
     </span><span class="attr">#[cfg(not(futures_no_atomic_cas))]
-    #[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+    #[cfg(feature = <span class="string">"alloc"</span>)]
     </span><span class="kw">fn </span>try_flatten_unordered(<span class="self">self</span>, limit: <span class="kw">impl </span>Into&lt;<span class="prelude-ty">Option</span>&lt;usize&gt;&gt;) -&gt; TryFlattenUnordered&lt;<span class="self">Self</span>&gt;
     <span class="kw">where
         </span><span class="self">Self</span>::Ok: TryStream + Unpin,
@@ -2093,7 +2093,7 @@
 
     <span class="doccomment">/// Flattens a stream of streams into just one continuous stream.
     ///
-    /// If this stream&#39;s elements are themselves streams then this combinator
+    /// If this stream's elements are themselves streams then this combinator
     /// will flatten out the entire stream to one long chain of elements. Any
     /// errors are passed through without looking at them, but otherwise each
     /// individual stream will get exhausted before moving on to the next.
@@ -2225,15 +2225,15 @@
 
     <span class="doccomment">/// Attempt to execute several futures from a stream concurrently (unordered).
     ///
-    /// This stream&#39;s `Ok` type must be a [`TryFuture`](futures_core::future::TryFuture) with an `Error` type
-    /// that matches the stream&#39;s `Error` type.
+    /// This stream's `Ok` type must be a [`TryFuture`](futures_core::future::TryFuture) with an `Error` type
+    /// that matches the stream's `Error` type.
     ///
     /// This adaptor will buffer up to `n` futures and then return their
     /// outputs in the order in which they complete. If the underlying stream
     /// returns an error, it will be immediately propagated.
     ///
     /// The returned stream will be a stream of results, each containing either
-    /// an error or a future&#39;s output. An error can be produced either by the
+    /// an error or a future's output. An error can be produced either by the
     /// underlying stream itself or by one of the futures it yielded.
     ///
     /// This method is only available when the `std` or `alloc` feature of this
@@ -2276,12 +2276,12 @@
     /// sink.unbounded_send(Ok(async { Ok(7i32) }))?;
     /// assert_eq!(buffered.next().await, Some(Ok(7i32)));
     ///
-    /// sink.unbounded_send(Err(&quot;error in the stream&quot;))?;
-    /// assert_eq!(buffered.next().await, Some(Err(&quot;error in the stream&quot;)));
+    /// sink.unbounded_send(Err("error in the stream"))?;
+    /// assert_eq!(buffered.next().await, Some(Err("error in the stream")));
     /// # Ok::&lt;(), Box&lt;dyn std::error::Error&gt;&gt;(()) }).unwrap();
     /// ```
     </span><span class="attr">#[cfg(not(futures_no_atomic_cas))]
-    #[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+    #[cfg(feature = <span class="string">"alloc"</span>)]
     </span><span class="kw">fn </span>try_buffer_unordered(<span class="self">self</span>, n: usize) -&gt; TryBufferUnordered&lt;<span class="self">Self</span>&gt;
     <span class="kw">where
         </span><span class="self">Self</span>::Ok: TryFuture&lt;Error = <span class="self">Self</span>::Error&gt;,
@@ -2294,15 +2294,15 @@
 
     <span class="doccomment">/// Attempt to execute several futures from a stream concurrently.
     ///
-    /// This stream&#39;s `Ok` type must be a [`TryFuture`](futures_core::future::TryFuture) with an `Error` type
-    /// that matches the stream&#39;s `Error` type.
+    /// This stream's `Ok` type must be a [`TryFuture`](futures_core::future::TryFuture) with an `Error` type
+    /// that matches the stream's `Error` type.
     ///
     /// This adaptor will buffer up to `n` futures and then return their
     /// outputs in the same order as the underlying stream. If the underlying stream returns an error, it will
     /// be immediately propagated.
     ///
     /// The returned stream will be a stream of results, each containing either
-    /// an error or a future&#39;s output. An error can be produced either by the
+    /// an error or a future's output. An error can be produced either by the
     /// underlying stream itself or by one of the futures it yielded.
     ///
     /// This method is only available when the `std` or `alloc` feature of this
@@ -2352,12 +2352,12 @@
     /// sink.unbounded_send(Ok(async { Ok(7i32) }))?;
     /// assert_eq!(buffered.next().await, Some(Ok(7i32)));
     ///
-    /// sink.unbounded_send(Err(&quot;error in the stream&quot;))?;
-    /// assert_eq!(buffered.next().await, Some(Err(&quot;error in the stream&quot;)));
+    /// sink.unbounded_send(Err("error in the stream"))?;
+    /// assert_eq!(buffered.next().await, Some(Err("error in the stream")));
     /// # Ok::&lt;(), Box&lt;dyn std::error::Error&gt;&gt;(()) }).unwrap();
     /// ```
     </span><span class="attr">#[cfg(not(futures_no_atomic_cas))]
-    #[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+    #[cfg(feature = <span class="string">"alloc"</span>)]
     </span><span class="kw">fn </span>try_buffered(<span class="self">self</span>, n: usize) -&gt; TryBuffered&lt;<span class="self">Self</span>&gt;
     <span class="kw">where
         </span><span class="self">Self</span>::Ok: TryFuture&lt;Error = <span class="self">Self</span>::Error&gt;,
@@ -2374,7 +2374,7 @@
     /// stream types.
     </span><span class="kw">fn </span>try_poll_next_unpin(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;,
+        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;,
     ) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Ok, <span class="self">Self</span>::Error&gt;&gt;&gt;
     <span class="kw">where
         </span><span class="self">Self</span>: Unpin,
@@ -2390,7 +2390,7 @@
     /// # let (tx, rx) = futures::channel::oneshot::channel();
     ///
     /// let future03 = async {
-    ///     println!(&quot;Running on the pool&quot;);
+    ///     println!("Running on the pool");
     ///     tx.send(42).unwrap();
     /// };
     ///
@@ -2402,8 +2402,8 @@
     /// tokio::run(future01);
     /// # assert_eq!(42, futures::executor::block_on(rx).unwrap());
     /// ```
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;compat&quot;</span>)]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;compat&quot;</span>)))]
+    </span><span class="attr">#[cfg(feature = <span class="string">"compat"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"compat"</span>)))]
     </span><span class="kw">fn </span>compat(<span class="self">self</span>) -&gt; Compat&lt;<span class="self">Self</span>&gt;
     <span class="kw">where
         </span><span class="self">Self</span>: Sized + Unpin,
@@ -2431,9 +2431,9 @@
     /// assert_eq!(buf, [1, 2, 3, 4, 5]);
     /// # })
     /// ```
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;io&quot;</span>)]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;io&quot;</span>)))]
-    #[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"io"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"io"</span>)))]
+    #[cfg(feature = <span class="string">"std"</span>)]
     </span><span class="kw">fn </span>into_async_read(<span class="self">self</span>) -&gt; IntoAsyncRead&lt;<span class="self">Self</span>&gt;
     <span class="kw">where
         </span><span class="self">Self</span>: Sized + TryStreamExt&lt;Error = std::io::Error&gt;,
@@ -2457,9 +2457,9 @@
     /// let positive = number_stream.try_all(|i| async move { i &gt; 0 });
     /// assert_eq!(positive.await, Ok(true));
     ///
-    /// let stream_with_errors = stream::iter([Ok(1), Err(&quot;err&quot;), Ok(3)]);
+    /// let stream_with_errors = stream::iter([Ok(1), Err("err"), Ok(3)]);
     /// let positive = stream_with_errors.try_all(|i| async move { i &gt; 0 });
-    /// assert_eq!(positive.await, Err(&quot;err&quot;));
+    /// assert_eq!(positive.await, Err("err"));
     /// # });
     /// ```
     </span><span class="kw">fn </span>try_all&lt;Fut, F&gt;(<span class="self">self</span>, f: F) -&gt; TryAll&lt;<span class="self">Self</span>, Fut, F&gt;
@@ -2486,9 +2486,9 @@
     /// let contain_three = number_stream.try_any(|i| async move { i == 3 });
     /// assert_eq!(contain_three.await, Ok(true));
     ///
-    /// let stream_with_errors = stream::iter([Ok(1), Err(&quot;err&quot;), Ok(3)]);
+    /// let stream_with_errors = stream::iter([Ok(1), Err("err"), Ok(3)]);
     /// let contain_three = stream_with_errors.try_any(|i| async move { i == 3 });
-    /// assert_eq!(contain_three.await, Err(&quot;err&quot;));
+    /// assert_eq!(contain_three.await, Err("err"));
     /// # });
     /// ```
     </span><span class="kw">fn </span>try_any&lt;Fut, F&gt;(<span class="self">self</span>, f: F) -&gt; TryAny&lt;<span class="self">Self</span>, Fut, F&gt;

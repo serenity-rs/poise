@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/mio-0.8.9/src/sys/unix/uds/mod.rs`."><title>mod.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../../../" data-static-root-path="../../../../../static.files/" data-current-crate="mio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../../src-files.js"></script><script defer src="../../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/mio-0.8.9/src/sys/unix/uds/mod.rs`."><title>mod.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../../../" data-static-root-path="../../../../../static.files/" data-current-crate="mio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../../src-files.js"></script><script defer src="../../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -202,17 +202,17 @@
         sockaddr.sun_family = libc::AF_UNIX <span class="kw">as </span>libc::sa_family_t;
 
         <span class="kw">match </span>(bytes.first(), bytes.len().cmp(<span class="kw-2">&amp;</span>sockaddr.sun_path.len())) {
-            <span class="comment">// Abstract paths don&#39;t need a null terminator
+            <span class="comment">// Abstract paths don't need a null terminator
             </span>(<span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="number">0</span>), Ordering::Greater) =&gt; {
                 <span class="kw">return </span><span class="prelude-val">Err</span>(io::Error::new(
                     io::ErrorKind::InvalidInput,
-                    <span class="string">&quot;path must be no longer than libc::sockaddr_un.sun_path&quot;</span>,
+                    <span class="string">"path must be no longer than libc::sockaddr_un.sun_path"</span>,
                 ));
             }
             (<span class="kw">_</span>, Ordering::Greater) | (<span class="kw">_</span>, Ordering::Equal) =&gt; {
                 <span class="kw">return </span><span class="prelude-val">Err</span>(io::Error::new(
                     io::ErrorKind::InvalidInput,
-                    <span class="string">&quot;path must be shorter than libc::sockaddr_un.sun_path&quot;</span>,
+                    <span class="string">"path must be shorter than libc::sockaddr_un.sun_path"</span>,
                 ));
             }
             <span class="kw">_ </span>=&gt; {}
@@ -239,13 +239,13 @@
         <span class="kw">where </span>T: FromRawFd,
     {
         <span class="attr">#[cfg(not(any(
-            target_os = <span class="string">&quot;aix&quot;</span>,
-            target_os = <span class="string">&quot;ios&quot;</span>,
-            target_os = <span class="string">&quot;macos&quot;</span>,
-            target_os = <span class="string">&quot;tvos&quot;</span>,
-            target_os = <span class="string">&quot;watchos&quot;</span>,
-            target_os = <span class="string">&quot;espidf&quot;</span>,
-            target_os = <span class="string">&quot;vita&quot;</span>,
+            target_os = <span class="string">"aix"</span>,
+            target_os = <span class="string">"ios"</span>,
+            target_os = <span class="string">"macos"</span>,
+            target_os = <span class="string">"tvos"</span>,
+            target_os = <span class="string">"watchos"</span>,
+            target_os = <span class="string">"espidf"</span>,
+            target_os = <span class="string">"vita"</span>,
         )))]
         </span><span class="kw">let </span>flags = flags | libc::SOCK_NONBLOCK | libc::SOCK_CLOEXEC;
 
@@ -253,34 +253,34 @@
         <span class="macro">syscall!</span>(socketpair(libc::AF_UNIX, flags, <span class="number">0</span>, fds.as_mut_ptr()))<span class="question-mark">?</span>;
         <span class="kw">let </span>pair = <span class="kw">unsafe </span>{ (T::from_raw_fd(fds[<span class="number">0</span>]), T::from_raw_fd(fds[<span class="number">1</span>])) };
 
-        <span class="comment">// Darwin (and others) doesn&#39;t have SOCK_NONBLOCK or SOCK_CLOEXEC.
+        <span class="comment">// Darwin (and others) doesn't have SOCK_NONBLOCK or SOCK_CLOEXEC.
         //
         // In order to set those flags, additional `fcntl` sys calls must be
         // performed. If a `fnctl` fails after the sockets have been created,
         // the file descriptors will leak. Creating `pair` above ensures that if
         // there is an error, the file descriptors are closed.
         </span><span class="attr">#[cfg(any(
-            target_os = <span class="string">&quot;aix&quot;</span>,
-            target_os = <span class="string">&quot;ios&quot;</span>,
-            target_os = <span class="string">&quot;macos&quot;</span>,
-            target_os = <span class="string">&quot;tvos&quot;</span>,
-            target_os = <span class="string">&quot;watchos&quot;</span>,
-            target_os = <span class="string">&quot;espidf&quot;</span>,
-            target_os = <span class="string">&quot;vita&quot;</span>,
+            target_os = <span class="string">"aix"</span>,
+            target_os = <span class="string">"ios"</span>,
+            target_os = <span class="string">"macos"</span>,
+            target_os = <span class="string">"tvos"</span>,
+            target_os = <span class="string">"watchos"</span>,
+            target_os = <span class="string">"espidf"</span>,
+            target_os = <span class="string">"vita"</span>,
         ))]
         </span>{
             <span class="macro">syscall!</span>(fcntl(fds[<span class="number">0</span>], libc::F_SETFL, libc::O_NONBLOCK))<span class="question-mark">?</span>;
-            <span class="attr">#[cfg(not(any(target_os = <span class="string">&quot;espidf&quot;</span>, target_os = <span class="string">&quot;vita&quot;</span>)))]
+            <span class="attr">#[cfg(not(any(target_os = <span class="string">"espidf"</span>, target_os = <span class="string">"vita"</span>)))]
             </span><span class="macro">syscall!</span>(fcntl(fds[<span class="number">0</span>], libc::F_SETFD, libc::FD_CLOEXEC))<span class="question-mark">?</span>;
             <span class="macro">syscall!</span>(fcntl(fds[<span class="number">1</span>], libc::F_SETFL, libc::O_NONBLOCK))<span class="question-mark">?</span>;
-            <span class="attr">#[cfg(not(any(target_os = <span class="string">&quot;espidf&quot;</span>, target_os = <span class="string">&quot;vita&quot;</span>)))]
+            <span class="attr">#[cfg(not(any(target_os = <span class="string">"espidf"</span>, target_os = <span class="string">"vita"</span>)))]
             </span><span class="macro">syscall!</span>(fcntl(fds[<span class="number">1</span>], libc::F_SETFD, libc::FD_CLOEXEC))<span class="question-mark">?</span>;
         }
 
         <span class="prelude-val">Ok</span>(pair)
     }
 
-    <span class="comment">// The following functions can&#39;t simply be replaced with a call to
+    <span class="comment">// The following functions can't simply be replaced with a call to
     // `net::UnixDatagram` because of our `SocketAddr` type.
 
     </span><span class="kw">fn </span>local_addr(socket: RawFd) -&gt; io::Result&lt;SocketAddr&gt; {
@@ -300,7 +300,7 @@
 
         <span class="attr">#[test]
         </span><span class="kw">fn </span>pathname_address() {
-            <span class="kw">const </span>PATH: <span class="kw-2">&amp;</span>str = <span class="string">&quot;./foo/bar.txt&quot;</span>;
+            <span class="kw">const </span>PATH: <span class="kw-2">&amp;</span>str = <span class="string">"./foo/bar.txt"</span>;
             <span class="kw">const </span>PATH_LEN: usize = <span class="number">13</span>;
 
             <span class="comment">// Pathname addresses do have a null terminator, so `socklen` is

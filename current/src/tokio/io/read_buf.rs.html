@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/io/read_buf.rs`."><title>read_buf.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/io/read_buf.rs`."><title>read_buf.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -325,7 +325,7 @@
 
 <span class="doccomment">/// A wrapper around a byte buffer that is incrementally filled and initialized.
 ///
-/// This type is a sort of &quot;double cursor&quot;. It tracks three regions in the
+/// This type is a sort of "double cursor". It tracks three regions in the
 /// buffer: a region at the beginning of the buffer that has been logically
 /// filled with data, a region that has been initialized at some point but not
 /// yet logically filled, and a region at the end that may be uninitialized.
@@ -342,16 +342,16 @@
 /// It is undefined behavior to de-initialize any bytes from the uninitialized
 /// region, since it is merely unknown whether this region is uninitialized or
 /// not, and if part of it turns out to be initialized, it must stay initialized.
-</span><span class="kw">pub struct </span>ReadBuf&lt;<span class="lifetime">&#39;a</span>&gt; {
-    buf: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>[MaybeUninit&lt;u8&gt;],
+</span><span class="kw">pub struct </span>ReadBuf&lt;<span class="lifetime">'a</span>&gt; {
+    buf: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>[MaybeUninit&lt;u8&gt;],
     filled: usize,
     initialized: usize,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; ReadBuf&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; ReadBuf&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Creates a new `ReadBuf` from a fully initialized buffer.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>new(buf: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>[u8]) -&gt; ReadBuf&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>new(buf: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>[u8]) -&gt; ReadBuf&lt;<span class="lifetime">'a</span>&gt; {
         <span class="kw">let </span>initialized = buf.len();
         <span class="kw">let </span>buf = <span class="kw">unsafe </span>{ slice_to_uninit_mut(buf) };
         ReadBuf {
@@ -365,7 +365,7 @@
     ///
     /// Use `assume_init` if part of the buffer is known to be already initialized.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>uninit(buf: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>[MaybeUninit&lt;u8&gt;]) -&gt; ReadBuf&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>uninit(buf: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>[MaybeUninit&lt;u8&gt;]) -&gt; ReadBuf&lt;<span class="lifetime">'a</span>&gt; {
         ReadBuf {
             buf,
             filled: <span class="number">0</span>,
@@ -384,7 +384,7 @@
     </span><span class="kw">pub fn </span>filled(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[u8] {
         <span class="kw">let </span>slice = <span class="kw-2">&amp;</span><span class="self">self</span>.buf[..<span class="self">self</span>.filled];
         <span class="comment">// safety: filled describes how far into the buffer that the
-        // user has filled with bytes, so it&#39;s been initialized.
+        // user has filled with bytes, so it's been initialized.
         </span><span class="kw">unsafe </span>{ slice_assume_init(slice) }
     }
 
@@ -393,15 +393,15 @@
     </span><span class="kw">pub fn </span>filled_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>[u8] {
         <span class="kw">let </span>slice = <span class="kw-2">&amp;mut </span><span class="self">self</span>.buf[..<span class="self">self</span>.filled];
         <span class="comment">// safety: filled describes how far into the buffer that the
-        // user has filled with bytes, so it&#39;s been initialized.
+        // user has filled with bytes, so it's been initialized.
         </span><span class="kw">unsafe </span>{ slice_assume_init_mut(slice) }
     }
 
     <span class="doccomment">/// Returns a new `ReadBuf` comprised of the unfilled section up to `n`.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>take(<span class="kw-2">&amp;mut </span><span class="self">self</span>, n: usize) -&gt; ReadBuf&lt;<span class="lifetime">&#39;_</span>&gt; {
+    </span><span class="kw">pub fn </span>take(<span class="kw-2">&amp;mut </span><span class="self">self</span>, n: usize) -&gt; ReadBuf&lt;<span class="lifetime">'_</span>&gt; {
         <span class="kw">let </span>max = std::cmp::min(<span class="self">self</span>.remaining(), n);
-        <span class="comment">// Safety: We don&#39;t set any of the `unfilled_mut` with `MaybeUninit::uninit`.
+        <span class="comment">// Safety: We don't set any of the `unfilled_mut` with `MaybeUninit::uninit`.
         </span><span class="kw">unsafe </span>{ ReadBuf::uninit(<span class="kw-2">&amp;mut </span><span class="self">self</span>.unfilled_mut()[..max]) }
     }
 
@@ -460,7 +460,7 @@
 
     <span class="doccomment">/// Returns a mutable reference to the unfilled part of the buffer, ensuring it is fully initialized.
     ///
-    /// Since `ReadBuf` tracks the region of the buffer that has been initialized, this is effectively &quot;free&quot; after
+    /// Since `ReadBuf` tracks the region of the buffer that has been initialized, this is effectively "free" after
     /// the first use.
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>initialize_unfilled(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>[u8] {
@@ -476,9 +476,9 @@
     </span><span class="attr">#[inline]
     #[track_caller]
     </span><span class="kw">pub fn </span>initialize_unfilled_to(<span class="kw-2">&amp;mut </span><span class="self">self</span>, n: usize) -&gt; <span class="kw-2">&amp;mut </span>[u8] {
-        <span class="macro">assert!</span>(<span class="self">self</span>.remaining() &gt;= n, <span class="string">&quot;n overflows remaining&quot;</span>);
+        <span class="macro">assert!</span>(<span class="self">self</span>.remaining() &gt;= n, <span class="string">"n overflows remaining"</span>);
 
-        <span class="comment">// This can&#39;t overflow, otherwise the assert above would have failed.
+        <span class="comment">// This can't overflow, otherwise the assert above would have failed.
         </span><span class="kw">let </span>end = <span class="self">self</span>.filled + n;
 
         <span class="kw">if </span><span class="self">self</span>.initialized &lt; end {
@@ -520,7 +520,7 @@
     </span><span class="attr">#[inline]
     #[track_caller]
     </span><span class="kw">pub fn </span>advance(<span class="kw-2">&amp;mut </span><span class="self">self</span>, n: usize) {
-        <span class="kw">let </span>new = <span class="self">self</span>.filled.checked_add(n).expect(<span class="string">&quot;filled overflow&quot;</span>);
+        <span class="kw">let </span>new = <span class="self">self</span>.filled.checked_add(n).expect(<span class="string">"filled overflow"</span>);
         <span class="self">self</span>.set_filled(new);
     }
 
@@ -539,7 +539,7 @@
     </span><span class="kw">pub fn </span>set_filled(<span class="kw-2">&amp;mut </span><span class="self">self</span>, n: usize) {
         <span class="macro">assert!</span>(
             n &lt;= <span class="self">self</span>.initialized,
-            <span class="string">&quot;filled must not become larger than initialized&quot;
+            <span class="string">"filled must not become larger than initialized"
         </span>);
         <span class="self">self</span>.filled = n;
     }
@@ -570,7 +570,7 @@
     </span><span class="kw">pub fn </span>put_slice(<span class="kw-2">&amp;mut </span><span class="self">self</span>, buf: <span class="kw-2">&amp;</span>[u8]) {
         <span class="macro">assert!</span>(
             <span class="self">self</span>.remaining() &gt;= buf.len(),
-            <span class="string">&quot;buf.len() must fit in remaining()&quot;
+            <span class="string">"buf.len() must fit in remaining()"
         </span>);
 
         <span class="kw">let </span>amt = buf.len();
@@ -592,9 +592,9 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;io-util&quot;</span>)]
-#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;io-util&quot;</span>)))]
-</span><span class="kw">unsafe impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; bytes::BufMut <span class="kw">for </span>ReadBuf&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"io-util"</span>)]
+#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"io-util"</span>)))]
+</span><span class="kw">unsafe impl</span>&lt;<span class="lifetime">'a</span>&gt; bytes::BufMut <span class="kw">for </span>ReadBuf&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>remaining_mut(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
         <span class="self">self</span>.remaining()
     }
@@ -619,12 +619,12 @@
     }
 }
 
-<span class="kw">impl </span>fmt::Debug <span class="kw">for </span>ReadBuf&lt;<span class="lifetime">&#39;_</span>&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        f.debug_struct(<span class="string">&quot;ReadBuf&quot;</span>)
-            .field(<span class="string">&quot;filled&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.filled)
-            .field(<span class="string">&quot;initialized&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.initialized)
-            .field(<span class="string">&quot;capacity&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.capacity())
+<span class="kw">impl </span>fmt::Debug <span class="kw">for </span>ReadBuf&lt;<span class="lifetime">'_</span>&gt; {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        f.debug_struct(<span class="string">"ReadBuf"</span>)
+            .field(<span class="string">"filled"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.filled)
+            .field(<span class="string">"initialized"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.initialized)
+            .field(<span class="string">"capacity"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.capacity())
             .finish()
     }
 }

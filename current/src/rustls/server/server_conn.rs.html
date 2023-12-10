@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-0.21.9/src/server/server_conn.rs`."><title>server_conn.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="rustls" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-0.21.9/src/server/server_conn.rs`."><title>server_conn.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="rustls" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -813,7 +813,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::enums::{CipherSuite, ProtocolVersion, SignatureScheme};
 <span class="kw">use </span><span class="kw">crate</span>::error::Error;
 <span class="kw">use </span><span class="kw">crate</span>::kx::SupportedKxGroup;
-<span class="attr">#[cfg(feature = <span class="string">&quot;logging&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"logging"</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::log::trace;
 <span class="kw">use </span><span class="kw">crate</span>::msgs::base::Payload;
 <span class="kw">use </span><span class="kw">crate</span>::msgs::handshake::{ClientHelloPayload, ProtocolName, ServerExtension};
@@ -822,7 +822,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::suites::SupportedCipherSuite;
 <span class="kw">use </span><span class="kw">crate</span>::vecbuf::ChunkVecBuffer;
 <span class="kw">use </span><span class="kw">crate</span>::verify;
-<span class="attr">#[cfg(feature = <span class="string">&quot;secret_extraction&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"secret_extraction"</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::ExtractedSecrets;
 <span class="kw">use </span><span class="kw">crate</span>::KeyLog;
 
@@ -847,7 +847,7 @@
 /// However, note that `take` **must** reliably delete a returned
 /// value.  If it does not, there may be security consequences.
 ///
-/// `put` and `take` are mutating operations; this isn&#39;t expressed
+/// `put` and `take` are mutating operations; this isn't expressed
 /// in the type system to allow implementations freedom in
 /// how to achieve interior mutability.  `Mutex` is a common
 /// choice.
@@ -858,11 +858,11 @@
     </span><span class="kw">fn </span>put(<span class="kw-2">&amp;</span><span class="self">self</span>, key: Vec&lt;u8&gt;, value: Vec&lt;u8&gt;) -&gt; bool;
 
     <span class="doccomment">/// Find a value with the given `key`.  Return it, or None
-    /// if it doesn&#39;t exist.
+    /// if it doesn't exist.
     </span><span class="kw">fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;;
 
     <span class="doccomment">/// Find a value with the given `key`.  Return it and delete it;
-    /// or None if it doesn&#39;t exist.
+    /// or None if it doesn't exist.
     </span><span class="kw">fn </span>take(<span class="kw-2">&amp;</span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;;
 
     <span class="doccomment">/// Whether the store can cache another session. This is used to indicate to clients
@@ -915,25 +915,25 @@
 }
 
 <span class="doccomment">/// A struct representing the received Client Hello
-</span><span class="kw">pub struct </span>ClientHello&lt;<span class="lifetime">&#39;a</span>&gt; {
-    server_name: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="prelude-ty">Option</span>&lt;DnsName&gt;,
-    signature_schemes: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[SignatureScheme],
-    alpn: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Vec&lt;ProtocolName&gt;&gt;,
-    cipher_suites: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[CipherSuite],
+</span><span class="kw">pub struct </span>ClientHello&lt;<span class="lifetime">'a</span>&gt; {
+    server_name: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="prelude-ty">Option</span>&lt;DnsName&gt;,
+    signature_schemes: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[SignatureScheme],
+    alpn: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>Vec&lt;ProtocolName&gt;&gt;,
+    cipher_suites: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[CipherSuite],
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; ClientHello&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; ClientHello&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Creates a new ClientHello
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>new(
-        server_name: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="prelude-ty">Option</span>&lt;DnsName&gt;,
-        signature_schemes: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[SignatureScheme],
-        alpn: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Vec&lt;ProtocolName&gt;&gt;,
-        cipher_suites: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[CipherSuite],
+        server_name: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="prelude-ty">Option</span>&lt;DnsName&gt;,
+        signature_schemes: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[SignatureScheme],
+        alpn: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>Vec&lt;ProtocolName&gt;&gt;,
+        cipher_suites: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[CipherSuite],
     ) -&gt; <span class="self">Self </span>{
-        <span class="macro">trace!</span>(<span class="string">&quot;sni {:?}&quot;</span>, server_name);
-        <span class="macro">trace!</span>(<span class="string">&quot;sig schemes {:?}&quot;</span>, signature_schemes);
-        <span class="macro">trace!</span>(<span class="string">&quot;alpn protocols {:?}&quot;</span>, alpn);
-        <span class="macro">trace!</span>(<span class="string">&quot;cipher suites {:?}&quot;</span>, cipher_suites);
+        <span class="macro">trace!</span>(<span class="string">"sni {:?}"</span>, server_name);
+        <span class="macro">trace!</span>(<span class="string">"sig schemes {:?}"</span>, signature_schemes);
+        <span class="macro">trace!</span>(<span class="string">"alpn protocols {:?}"</span>, alpn);
+        <span class="macro">trace!</span>(<span class="string">"cipher suites {:?}"</span>, cipher_suites);
 
         ClientHello {
             server_name,
@@ -970,13 +970,13 @@
     /// See the official RFC-7301 specifications at &lt;https://datatracker.ietf.org/doc/html/rfc7301&gt;
     /// for more information on ALPN.
     ///
-    /// For example, a HTTP client might specify &quot;http/1.1&quot; and/or &quot;h2&quot;. Other well-known values
+    /// For example, a HTTP client might specify "http/1.1" and/or "h2". Other well-known values
     /// are listed in the at IANA registry at
     /// &lt;https://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml#alpn-protocol-ids&gt;.
     ///
     /// The server can specify supported ALPN protocols by setting [`ServerConfig::alpn_protocols`].
     /// During the handshake, the server will select the first protocol configured that the client supports.
-    </span><span class="kw">pub fn </span>alpn(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt;&gt; {
+    </span><span class="kw">pub fn </span>alpn(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt;&gt; {
         <span class="self">self</span>.alpn.map(|protocols| {
             protocols
                 .iter()
@@ -1016,14 +1016,14 @@
     ///
     /// The first is the highest priority: they will be
     /// offered to the client in this order.
-    </span><span class="kw">pub</span>(<span class="kw">super</span>) kx_groups: Vec&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>SupportedKxGroup&gt;,
+    </span><span class="kw">pub</span>(<span class="kw">super</span>) kx_groups: Vec&lt;<span class="kw-2">&amp;</span><span class="lifetime">'static </span>SupportedKxGroup&gt;,
 
-    <span class="doccomment">/// Ignore the client&#39;s ciphersuite order. Instead,
+    <span class="doccomment">/// Ignore the client's ciphersuite order. Instead,
     /// choose the top ciphersuite in the server list
     /// which is supported by the client.
     </span><span class="kw">pub </span>ignore_client_order: bool,
 
-    <span class="doccomment">/// The maximum size of TLS message we&#39;ll emit.  If None, we don&#39;t limit TLS
+    <span class="doccomment">/// The maximum size of TLS message we'll emit.  If None, we don't limit TLS
     /// message lengths except to the 2**16 limit specified in the standard.
     ///
     /// rustls enforces an arbitrary minimum of 32 bytes for this field.
@@ -1042,7 +1042,7 @@
     </span><span class="kw">pub </span>cert_resolver: Arc&lt;<span class="kw">dyn </span>ResolvesServerCert&gt;,
 
     <span class="doccomment">/// Protocol names we support, most preferred first.
-    /// If empty we don&#39;t do ALPN at all.
+    /// If empty we don't do ALPN at all.
     </span><span class="kw">pub </span>alpn_protocols: Vec&lt;Vec&lt;u8&gt;&gt;,
 
     <span class="doccomment">/// Supported protocol versions, in no particular order.
@@ -1058,8 +1058,8 @@
 
     <span class="doccomment">/// Allows traffic secrets to be extracted after the handshake,
     /// e.g. for kTLS setup.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;secret_extraction&quot;</span>)]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;secret_extraction&quot;</span>)))]
+    </span><span class="attr">#[cfg(feature = <span class="string">"secret_extraction"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"secret_extraction"</span>)))]
     </span><span class="kw">pub </span>enable_secret_extraction: bool,
 
     <span class="doccomment">/// Amount of early data to accept for sessions created by
@@ -1069,18 +1069,18 @@
     /// Read the early data via [`ServerConnection::early_data`].
     ///
     /// The units for this are _both_ plaintext bytes, _and_ ciphertext
-    /// bytes, depending on whether the server accepts a client&#39;s early_data
+    /// bytes, depending on whether the server accepts a client's early_data
     /// or not.  It is therefore recommended to include some slop in
     /// this value to account for the unknown amount of ciphertext
     /// expansion in the latter case.
     </span><span class="kw">pub </span>max_early_data_size: u32,
 
-    <span class="doccomment">/// Whether the server should send &quot;0.5RTT&quot; data.  This means the server
+    <span class="doccomment">/// Whether the server should send "0.5RTT" data.  This means the server
     /// sends data after its first flight of handshake messages, without
     /// waiting for the client to complete the handshake.
     ///
     /// This can improve TTFB latency for either server-speaks-first protocols,
-    /// or client-speaks-first protocols when paired with &quot;0RTT&quot; data.  This
+    /// or client-speaks-first protocols when paired with "0RTT" data.  This
     /// comes at the cost of a subtle weakening of the normal handshake
     /// integrity guarantees that TLS provides.  Note that the initial
     /// `ClientHello` is indirectly authenticated because it is included
@@ -1092,7 +1092,7 @@
     /// authentication.
     ///
     /// This defaults to false.  This means the first application data
-    /// sent by the server comes after receiving and validating the client&#39;s
+    /// sent by the server comes after receiving and validating the client's
     /// handshake up to the `Finished` message.  This is the safest option.
     </span><span class="kw">pub </span>send_half_rtt_data: bool,
 
@@ -1110,14 +1110,14 @@
 }
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>ServerConfig {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        f.debug_struct(<span class="string">&quot;ServerConfig&quot;</span>)
-            .field(<span class="string">&quot;ignore_client_order&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.ignore_client_order)
-            .field(<span class="string">&quot;max_fragment_size&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.max_fragment_size)
-            .field(<span class="string">&quot;alpn_protocols&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.alpn_protocols)
-            .field(<span class="string">&quot;max_early_data_size&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.max_early_data_size)
-            .field(<span class="string">&quot;send_half_rtt_data&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.send_half_rtt_data)
-            .field(<span class="string">&quot;send_tls13_tickets&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.send_tls13_tickets)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        f.debug_struct(<span class="string">"ServerConfig"</span>)
+            .field(<span class="string">"ignore_client_order"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.ignore_client_order)
+            .field(<span class="string">"max_fragment_size"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.max_fragment_size)
+            .field(<span class="string">"alpn_protocols"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.alpn_protocols)
+            .field(<span class="string">"max_early_data_size"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.max_early_data_size)
+            .field(<span class="string">"send_half_rtt_data"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.send_half_rtt_data)
+            .field(<span class="string">"send_tls13_tickets"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.send_tls13_tickets)
             .finish_non_exhaustive()
     }
 }
@@ -1133,7 +1133,7 @@
         }
     }
 
-    <span class="doccomment">/// We support a given TLS version if it&#39;s quoted in the configured
+    <span class="doccomment">/// We support a given TLS version if it's quoted in the configured
     /// versions *and* at least one ciphersuite for this version is
     /// also configured.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>supports_version(<span class="kw-2">&amp;</span><span class="self">self</span>, v: ProtocolVersion) -&gt; bool {
@@ -1147,26 +1147,26 @@
 
 <span class="doccomment">/// Allows reading of early data in resumed TLS1.3 connections.
 ///
-/// &quot;Early data&quot; is also known as &quot;0-RTT data&quot;.
+/// "Early data" is also known as "0-RTT data".
 ///
 /// This structure implements [`std::io::Read`].
-</span><span class="kw">pub struct </span>ReadEarlyData&lt;<span class="lifetime">&#39;a</span>&gt; {
-    early_data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>EarlyDataState,
+</span><span class="kw">pub struct </span>ReadEarlyData&lt;<span class="lifetime">'a</span>&gt; {
+    early_data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>EarlyDataState,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; ReadEarlyData&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>new(early_data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>EarlyDataState) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; ReadEarlyData&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>new(early_data: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>EarlyDataState) -&gt; <span class="self">Self </span>{
         ReadEarlyData { early_data }
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; std::io::Read <span class="kw">for </span>ReadEarlyData&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; std::io::Read <span class="kw">for </span>ReadEarlyData&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, buf: <span class="kw-2">&amp;mut </span>[u8]) -&gt; io::Result&lt;usize&gt; {
         <span class="self">self</span>.early_data.read(buf)
     }
 
     <span class="attr">#[cfg(read_buf)]
-    </span><span class="kw">fn </span>read_buf(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cursor: core::io::BorrowedCursor&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; io::Result&lt;()&gt; {
+    </span><span class="kw">fn </span>read_buf(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cursor: core::io::BorrowedCursor&lt;<span class="lifetime">'_</span>&gt;) -&gt; io::Result&lt;()&gt; {
         <span class="self">self</span>.early_data.read_buf(cursor)
     }
 }
@@ -1191,7 +1191,7 @@
     <span class="doccomment">/// Retrieves the server name, if any, used to select the certificate and
     /// private key.
     ///
-    /// This returns `None` until some time after the client&#39;s server name indication
+    /// This returns `None` until some time after the client's server name indication
     /// (SNI) extension value is processed during the handshake. It will never be
     /// `None` when the connection is ready to send or process application data,
     /// unless the client does not support SNI.
@@ -1209,7 +1209,7 @@
 
     <span class="doccomment">/// Application-controlled portion of the resumption ticket supplied by the client, if any.
     ///
-    /// Recovered from the prior session&#39;s `set_resumption_data`. Integrity is guaranteed by rustls.
+    /// Recovered from the prior session's `set_resumption_data`. Integrity is guaranteed by rustls.
     ///
     /// Returns `Some` iff a valid resumption ticket has been received from the client.
     </span><span class="kw">pub fn </span>received_resumption_data(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>[u8]&gt; {
@@ -1244,15 +1244,15 @@
     }
 
     <span class="doccomment">/// Returns an `io::Read` implementer you can read bytes from that are
-    /// received from a client as TLS1.3 0RTT/&quot;early&quot; data, during the handshake.
+    /// received from a client as TLS1.3 0RTT/"early" data, during the handshake.
     ///
     /// This returns `None` in many circumstances, such as :
     ///
     /// - Early data is disabled if [`ServerConfig::max_early_data_size`] is zero (the default).
     /// - The session negotiated with the client is not TLS1.3.
-    /// - The client just doesn&#39;t support early data.
-    /// - The connection doesn&#39;t resume an existing session.
-    /// - The client hasn&#39;t sent a full ClientHello yet.
+    /// - The client just doesn't support early data.
+    /// - The connection doesn't resume an existing session.
+    /// - The client hasn't sent a full ClientHello yet.
     </span><span class="kw">pub fn </span>early_data(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;ReadEarlyData&gt; {
         <span class="kw">let </span>data = <span class="kw-2">&amp;mut </span><span class="self">self</span>.inner.core.data;
         <span class="kw">if </span>data.early_data.was_accepted() {
@@ -1263,8 +1263,8 @@
     }
 
     <span class="doccomment">/// Extract secrets, so they can be used when configuring kTLS, for example.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;secret_extraction&quot;</span>)]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;secret_extraction&quot;</span>)))]
+    </span><span class="attr">#[cfg(feature = <span class="string">"secret_extraction"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"secret_extraction"</span>)))]
     </span><span class="kw">pub fn </span>extract_secrets(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;ExtractedSecrets, Error&gt; {
         <span class="self">self</span>.inner.extract_secrets()
     }
@@ -1272,7 +1272,7 @@
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>ServerConnection {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
-        f.debug_struct(<span class="string">&quot;ServerConnection&quot;</span>)
+        f.debug_struct(<span class="string">"ServerConnection"</span>)
             .finish()
     }
 }
@@ -1304,7 +1304,7 @@
 /// that choose different certificates or cipher suites based on the
 /// characteristics of the `ClientHello`. In particular it is useful for
 /// servers that need to do some I/O to load a certificate and its private key
-/// and don&#39;t want to use the blocking interface provided by
+/// and don't want to use the blocking interface provided by
 /// [`ResolvesServerCert`].
 ///
 /// Create an Acceptor with [`Acceptor::default()`].
@@ -1320,7 +1320,7 @@
 /// # #[allow(unused_variables)]
 /// # fn main() {
 /// use rustls::server::{Acceptor, ServerConfig};
-/// let listener = std::net::TcpListener::bind(&quot;127.0.0.1:0&quot;).unwrap();
+/// let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
 /// for stream in listener.incoming() {
 ///     let mut stream = stream.unwrap();
 ///     let mut acceptor = Acceptor::default();
@@ -1373,7 +1373,7 @@
             <span class="prelude-val">Some</span>(conn) =&gt; conn.read_tls(rd),
             <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Err</span>(io::Error::new(
                 io::ErrorKind::Other,
-                <span class="string">&quot;acceptor cannot read after successful acceptance&quot;</span>,
+                <span class="string">"acceptor cannot read after successful acceptance"</span>,
             )),
         }
     }
@@ -1391,7 +1391,7 @@
         <span class="kw">let </span><span class="kw-2">mut </span>connection = <span class="kw">match </span><span class="self">self</span>.inner.take() {
             <span class="prelude-val">Some</span>(conn) =&gt; conn,
             <span class="prelude-val">None </span>=&gt; {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::General(<span class="string">&quot;Acceptor polled after completion&quot;</span>.into()));
+                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::General(<span class="string">"Acceptor polled after completion"</span>.into()));
             }
         };
 
@@ -1425,7 +1425,7 @@
 
 <span class="kw">impl </span>Accepted {
     <span class="doccomment">/// Get the [`ClientHello`] for this connection.
-    </span><span class="kw">pub fn </span>client_hello(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ClientHello&lt;<span class="lifetime">&#39;_</span>&gt; {
+    </span><span class="kw">pub fn </span>client_hello(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ClientHello&lt;<span class="lifetime">'_</span>&gt; {
         <span class="kw">let </span>payload = <span class="self">Self</span>::client_hello_payload(<span class="kw-2">&amp;</span><span class="self">self</span>.message);
         ClientHello::new(
             <span class="kw-2">&amp;</span><span class="self">self</span>.connection.core.data.sni,
@@ -1444,7 +1444,7 @@
         <span class="self">self</span>.connection
             .set_max_fragment_size(config.max_fragment_size)<span class="question-mark">?</span>;
 
-        <span class="attr">#[cfg(feature = <span class="string">&quot;secret_extraction&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"secret_extraction"</span>)]
         </span>{
             <span class="self">self</span>.connection.enable_secret_extraction = config.enable_secret_extraction;
         }
@@ -1482,10 +1482,10 @@
 <span class="kw">impl </span>State&lt;ServerConnectionData&gt; <span class="kw">for </span>Accepting {
     <span class="kw">fn </span>handle(
         <span class="self">self</span>: Box&lt;<span class="self">Self</span>&gt;,
-        _cx: <span class="kw-2">&amp;mut </span>hs::ServerContext&lt;<span class="lifetime">&#39;_</span>&gt;,
+        _cx: <span class="kw-2">&amp;mut </span>hs::ServerContext&lt;<span class="lifetime">'_</span>&gt;,
         _m: Message,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Box&lt;<span class="kw">dyn </span>State&lt;ServerConnectionData&gt;&gt;, Error&gt; {
-        <span class="prelude-val">Err</span>(Error::General(<span class="string">&quot;unreachable state&quot;</span>.into()))
+        <span class="prelude-val">Err</span>(Error::General(<span class="string">"unreachable state"</span>.into()))
     }
 }
 
@@ -1526,7 +1526,7 @@
     }
 
     <span class="attr">#[cfg(read_buf)]
-    </span><span class="kw">fn </span>read_buf(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cursor: core::io::BorrowedCursor&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; io::Result&lt;()&gt; {
+    </span><span class="kw">fn </span>read_buf(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cursor: core::io::BorrowedCursor&lt;<span class="lifetime">'_</span>&gt;) -&gt; io::Result&lt;()&gt; {
         <span class="kw">match </span><span class="self">self </span>{
             <span class="self">Self</span>::Accepted(<span class="kw-2">ref mut </span>received) =&gt; received.read_buf(cursor),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(io::Error::from(io::ErrorKind::BrokenPipe)),
@@ -1549,8 +1549,8 @@
 </span><span class="attr">#[test]
 </span><span class="kw">fn </span>test_read_in_new_state() {
     <span class="macro">assert_eq!</span>(
-        <span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, EarlyDataState::default().read(<span class="kw-2">&amp;mut </span>[<span class="number">0u8</span>; <span class="number">5</span>])),
-        <span class="string">&quot;Err(Kind(BrokenPipe))&quot;
+        <span class="macro">format!</span>(<span class="string">"{:?}"</span>, EarlyDataState::default().read(<span class="kw-2">&amp;mut </span>[<span class="number">0u8</span>; <span class="number">5</span>])),
+        <span class="string">"Err(Kind(BrokenPipe))"
     </span>);
 }
 
@@ -1560,10 +1560,10 @@
     <span class="kw">use </span>std::io::BorrowedBuf;
 
     <span class="kw">let </span><span class="kw-2">mut </span>buf = [<span class="number">0u8</span>; <span class="number">5</span>];
-    <span class="kw">let </span><span class="kw-2">mut </span>buf: BorrowedBuf&lt;<span class="lifetime">&#39;_</span>&gt; = buf.as_mut_slice().into();
+    <span class="kw">let </span><span class="kw-2">mut </span>buf: BorrowedBuf&lt;<span class="lifetime">'_</span>&gt; = buf.as_mut_slice().into();
     <span class="macro">assert_eq!</span>(
-        <span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, EarlyDataState::default().read_buf(buf.unfilled())),
-        <span class="string">&quot;Err(Kind(BrokenPipe))&quot;
+        <span class="macro">format!</span>(<span class="string">"{:?}"</span>, EarlyDataState::default().read_buf(buf.unfilled())),
+        <span class="string">"Err(Kind(BrokenPipe))"
     </span>);
 }
 
@@ -1574,7 +1574,7 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, Error&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>common = CommonState::new(Side::Server);
         common.set_max_fragment_size(config.max_fragment_size)<span class="question-mark">?</span>;
-        <span class="attr">#[cfg(feature = <span class="string">&quot;secret_extraction&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"secret_extraction"</span>)]
         </span>{
             common.enable_secret_extraction = config.enable_secret_extraction;
         }
@@ -1588,7 +1588,7 @@
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>reject_early_data(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="macro">assert!</span>(
             <span class="self">self</span>.common_state.is_handshaking(),
-            <span class="string">&quot;cannot retroactively reject early data&quot;
+            <span class="string">"cannot retroactively reject early data"
         </span>);
         <span class="self">self</span>.data.early_data.reject();
     }

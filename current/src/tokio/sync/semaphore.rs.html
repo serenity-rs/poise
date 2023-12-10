@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/sync/semaphore.rs`."><title>semaphore.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/sync/semaphore.rs`."><title>semaphore.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -976,7 +976,7 @@
 <a href="#976" id="976">976</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::batch_semaphore <span class="kw">as </span>ll; <span class="comment">// low level implementation
 </span><span class="kw">use super</span>::{AcquireError, TryAcquireError};
-<span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+<span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
 </span><span class="kw">use </span><span class="kw">crate</span>::util::trace;
 <span class="kw">use </span>std::sync::Arc;
 
@@ -1046,7 +1046,7 @@
 ///
 /// async fn write_to_file(message: &amp;[u8]) -&gt; Result&lt;()&gt; {
 ///     let _permit = PERMITS.acquire().await.unwrap();
-///     let mut buffer = File::create(&quot;example.txt&quot;).await?;
+///     let mut buffer = File::create("example.txt").await?;
 ///     buffer.write_all(message).await?;
 ///     Ok(()) // Permit goes out of scope here, and is available again for acquisition
 /// }
@@ -1074,7 +1074,7 @@
 /// #[tokio::main]
 /// async fn main() -&gt; std::io::Result&lt;()&gt; {
 ///     let semaphore = Arc::new(Semaphore::new(3));
-///     let listener = TcpListener::bind(&quot;127.0.0.1:8080&quot;).await?;
+///     let listener = TcpListener::bind("127.0.0.1:8080").await?;
 ///
 ///     loop {
 ///         // Acquire permit before accepting the next socket.
@@ -1110,11 +1110,11 @@
 ///    the value using the same key to verify the insertion.
 /// 2. `test_update`: Inserts a key, then updates the key to a new value and
 ///    verifies that the value has been accurately updated.
-/// 3. `test_others`: A third test that doesn&#39;t modify the database state. It
+/// 3. `test_others`: A third test that doesn't modify the database state. It
 ///    can run in parallel with the other tests.
 ///
 /// In this example, `test_insert` and `test_update` need to run in sequence to
-/// work, but it doesn&#39;t matter which test runs first. We can leverage a
+/// work, but it doesn't matter which test runs first. We can leverage a
 /// semaphore with a single permit to address this challenge.
 ///
 /// ```
@@ -1163,7 +1163,7 @@
 ///     // Do the actual test stuff with database
 ///
 ///     // Insert a key-value pair to database
-///     let (key, value) = (&quot;name&quot;, 0);
+///     let (key, value) = ("name", 0);
 ///     DB.insert(key, value).await;
 ///
 ///     // Verify that the value has been inserted correctly.
@@ -1184,7 +1184,7 @@
 ///     let permit = PERMIT.acquire().await.unwrap();
 ///
 ///     // Do the same insert.
-///     let (key, value) = (&quot;name&quot;, 0);
+///     let (key, value) = ("name", 0);
 ///     DB.insert(key, value).await;
 ///
 ///     // Update the existing value with a new one.
@@ -1207,7 +1207,7 @@
 ///     // This test can run in parallel with test_insert and test_update,
 ///     // so it does not use PERMIT.
 /// }
-/// # #[tokio::main(flavor = &quot;current_thread&quot;)]
+/// # #[tokio::main(flavor = "current_thread")]
 /// # async fn main() {
 /// #   test_insert().await;
 /// #   test_update().await;
@@ -1224,7 +1224,7 @@
 /// performance or even errors.
 ///
 /// This example implements rate limiting using a [token bucket]. A token bucket is a form of rate
-/// limiting that doesn&#39;t kick in immediately, to allow for short bursts of incoming requests that
+/// limiting that doesn't kick in immediately, to allow for short bursts of incoming requests that
 /// arrive at the same time.
 ///
 /// With a token bucket, each incoming request consumes a token, and the tokens are refilled at a
@@ -1288,14 +1288,14 @@
 /// impl Drop for TokenBucket {
 ///     fn drop(&amp;mut self) {
 ///         // Kill the background task so it stops taking up resources when we
-///         // don&#39;t need it anymore.
+///         // don't need it anymore.
 ///         self.jh.abort();
 ///     }
 /// }
 ///
 /// #[tokio::main]
 /// # async fn _hidden() {}
-/// # #[tokio::main(flavor = &quot;current_thread&quot;, start_paused = true)]
+/// # #[tokio::main(flavor = "current_thread", start_paused = true)]
 /// async fn main() {
 ///     let capacity = 5;
 ///     let update_interval = Duration::from_secs_f32(1.0 / capacity as f32);
@@ -1315,7 +1315,7 @@
 </span><span class="kw">pub struct </span>Semaphore {
     <span class="doccomment">/// The low level semaphore
     </span>ll_sem: ll::Semaphore,
-    <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+    <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
     </span>resource_span: tracing::Span,
 }
 
@@ -1327,8 +1327,8 @@
 </span><span class="attr">#[must_use]
 #[clippy::has_significant_drop]
 #[derive(Debug)]
-</span><span class="kw">pub struct </span>SemaphorePermit&lt;<span class="lifetime">&#39;a</span>&gt; {
-    sem: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Semaphore,
+</span><span class="kw">pub struct </span>SemaphorePermit&lt;<span class="lifetime">'a</span>&gt; {
+    sem: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Semaphore,
     permits: u32,
 }
 
@@ -1349,11 +1349,11 @@
 #[cfg(not(loom))]
 </span><span class="kw">fn </span>bounds() {
     <span class="kw">fn </span>check_unpin&lt;T: Unpin&gt;() {}
-    <span class="comment">// This has to take a value, since the async fn&#39;s return type is unnameable.
+    <span class="comment">// This has to take a value, since the async fn's return type is unnameable.
     </span><span class="kw">fn </span>check_send_sync_val&lt;T: Send + Sync&gt;(_t: T) {}
     <span class="kw">fn </span>check_send_sync&lt;T: Send + Sync&gt;() {}
     check_unpin::&lt;Semaphore&gt;();
-    check_unpin::&lt;SemaphorePermit&lt;<span class="lifetime">&#39;_</span>&gt;&gt;();
+    check_unpin::&lt;SemaphorePermit&lt;<span class="lifetime">'_</span>&gt;&gt;();
     check_send_sync::&lt;Semaphore&gt;();
 
     <span class="kw">let </span>semaphore = Semaphore::new(<span class="number">0</span>);
@@ -1371,14 +1371,14 @@
     /// Panics if `permits` exceeds [`Semaphore::MAX_PERMITS`].
     </span><span class="attr">#[track_caller]
     </span><span class="kw">pub fn </span>new(permits: usize) -&gt; <span class="self">Self </span>{
-        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
         </span><span class="kw">let </span>resource_span = {
             <span class="kw">let </span>location = std::panic::Location::caller();
 
             <span class="macro">tracing::trace_span!</span>(
-                <span class="string">&quot;runtime.resource&quot;</span>,
-                concrete_type = <span class="string">&quot;Semaphore&quot;</span>,
-                kind = <span class="string">&quot;Sync&quot;</span>,
+                <span class="string">"runtime.resource"</span>,
+                concrete_type = <span class="string">"Semaphore"</span>,
+                kind = <span class="string">"Sync"</span>,
                 loc.file = location.file(),
                 loc.line = location.line(),
                 loc.col = location.column(),
@@ -1386,15 +1386,15 @@
             )
         };
 
-        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
         </span><span class="kw">let </span>ll_sem = resource_span.in_scope(|| ll::Semaphore::new(permits));
 
-        <span class="attr">#[cfg(any(not(tokio_unstable), not(feature = <span class="string">&quot;tracing&quot;</span>)))]
+        <span class="attr">#[cfg(any(not(tokio_unstable), not(feature = <span class="string">"tracing"</span>)))]
         </span><span class="kw">let </span>ll_sem = ll::Semaphore::new(permits);
 
         <span class="self">Self </span>{
             ll_sem,
-            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
             </span>resource_span,
         }
     }
@@ -1420,7 +1420,7 @@
     </span><span class="kw">pub const fn </span>const_new(permits: usize) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             ll_sem: ll::Semaphore::const_new(permits),
-            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
             </span>resource_span: tracing::Span::none(),
         }
     }
@@ -1429,7 +1429,7 @@
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new_closed() -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             ll_sem: ll::Semaphore::new_closed(),
-            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
             </span>resource_span: tracing::Span::none(),
         }
     }
@@ -1439,7 +1439,7 @@
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const fn </span>const_new_closed() -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             ll_sem: ll::Semaphore::const_new_closed(),
-            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
             </span>resource_span: tracing::Span::none(),
         }
     }
@@ -1490,16 +1490,16 @@
     ///
     /// [`AcquireError`]: crate::sync::AcquireError
     /// [`SemaphorePermit`]: crate::sync::SemaphorePermit
-    </span><span class="kw">pub async fn </span>acquire(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;SemaphorePermit&lt;<span class="lifetime">&#39;_</span>&gt;, AcquireError&gt; {
-        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+    </span><span class="kw">pub async fn </span>acquire(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;SemaphorePermit&lt;<span class="lifetime">'_</span>&gt;, AcquireError&gt; {
+        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
         </span><span class="kw">let </span>inner = trace::async_op(
             || <span class="self">self</span>.ll_sem.acquire(<span class="number">1</span>),
             <span class="self">self</span>.resource_span.clone(),
-            <span class="string">&quot;Semaphore::acquire&quot;</span>,
-            <span class="string">&quot;poll&quot;</span>,
+            <span class="string">"Semaphore::acquire"</span>,
+            <span class="string">"poll"</span>,
             <span class="bool-val">true</span>,
         );
-        <span class="attr">#[cfg(not(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>)))]
+        <span class="attr">#[cfg(not(all(tokio_unstable, feature = <span class="string">"tracing"</span>)))]
         </span><span class="kw">let </span>inner = <span class="self">self</span>.ll_sem.acquire(<span class="number">1</span>);
 
         inner.<span class="kw">await</span><span class="question-mark">?</span>;
@@ -1537,18 +1537,18 @@
     ///
     /// [`AcquireError`]: crate::sync::AcquireError
     /// [`SemaphorePermit`]: crate::sync::SemaphorePermit
-    </span><span class="kw">pub async fn </span>acquire_many(<span class="kw-2">&amp;</span><span class="self">self</span>, n: u32) -&gt; <span class="prelude-ty">Result</span>&lt;SemaphorePermit&lt;<span class="lifetime">&#39;_</span>&gt;, AcquireError&gt; {
-        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+    </span><span class="kw">pub async fn </span>acquire_many(<span class="kw-2">&amp;</span><span class="self">self</span>, n: u32) -&gt; <span class="prelude-ty">Result</span>&lt;SemaphorePermit&lt;<span class="lifetime">'_</span>&gt;, AcquireError&gt; {
+        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
         </span>trace::async_op(
             || <span class="self">self</span>.ll_sem.acquire(n),
             <span class="self">self</span>.resource_span.clone(),
-            <span class="string">&quot;Semaphore::acquire_many&quot;</span>,
-            <span class="string">&quot;poll&quot;</span>,
+            <span class="string">"Semaphore::acquire_many"</span>,
+            <span class="string">"poll"</span>,
             <span class="bool-val">true</span>,
         )
         .<span class="kw">await</span><span class="question-mark">?</span>;
 
-        <span class="attr">#[cfg(not(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>)))]
+        <span class="attr">#[cfg(not(all(tokio_unstable, feature = <span class="string">"tracing"</span>)))]
         </span><span class="self">self</span>.ll_sem.acquire(n).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(SemaphorePermit {
@@ -1585,7 +1585,7 @@
     /// [`TryAcquireError::Closed`]: crate::sync::TryAcquireError::Closed
     /// [`TryAcquireError::NoPermits`]: crate::sync::TryAcquireError::NoPermits
     /// [`SemaphorePermit`]: crate::sync::SemaphorePermit
-    </span><span class="kw">pub fn </span>try_acquire(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;SemaphorePermit&lt;<span class="lifetime">&#39;_</span>&gt;, TryAcquireError&gt; {
+    </span><span class="kw">pub fn </span>try_acquire(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;SemaphorePermit&lt;<span class="lifetime">'_</span>&gt;, TryAcquireError&gt; {
         <span class="kw">match </span><span class="self">self</span>.ll_sem.try_acquire(<span class="number">1</span>) {
             <span class="prelude-val">Ok</span>(()) =&gt; <span class="prelude-val">Ok</span>(SemaphorePermit {
                 sem: <span class="self">self</span>,
@@ -1620,7 +1620,7 @@
     /// [`TryAcquireError::Closed`]: crate::sync::TryAcquireError::Closed
     /// [`TryAcquireError::NoPermits`]: crate::sync::TryAcquireError::NoPermits
     /// [`SemaphorePermit`]: crate::sync::SemaphorePermit
-    </span><span class="kw">pub fn </span>try_acquire_many(<span class="kw-2">&amp;</span><span class="self">self</span>, n: u32) -&gt; <span class="prelude-ty">Result</span>&lt;SemaphorePermit&lt;<span class="lifetime">&#39;_</span>&gt;, TryAcquireError&gt; {
+    </span><span class="kw">pub fn </span>try_acquire_many(<span class="kw-2">&amp;</span><span class="self">self</span>, n: u32) -&gt; <span class="prelude-ty">Result</span>&lt;SemaphorePermit&lt;<span class="lifetime">'_</span>&gt;, TryAcquireError&gt; {
         <span class="kw">match </span><span class="self">self</span>.ll_sem.try_acquire(n) {
             <span class="prelude-val">Ok</span>(()) =&gt; <span class="prelude-val">Ok</span>(SemaphorePermit {
                 sem: <span class="self">self</span>,
@@ -1673,15 +1673,15 @@
     /// [`AcquireError`]: crate::sync::AcquireError
     /// [`OwnedSemaphorePermit`]: crate::sync::OwnedSemaphorePermit
     </span><span class="kw">pub async fn </span>acquire_owned(<span class="self">self</span>: Arc&lt;<span class="self">Self</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;OwnedSemaphorePermit, AcquireError&gt; {
-        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
         </span><span class="kw">let </span>inner = trace::async_op(
             || <span class="self">self</span>.ll_sem.acquire(<span class="number">1</span>),
             <span class="self">self</span>.resource_span.clone(),
-            <span class="string">&quot;Semaphore::acquire_owned&quot;</span>,
-            <span class="string">&quot;poll&quot;</span>,
+            <span class="string">"Semaphore::acquire_owned"</span>,
+            <span class="string">"poll"</span>,
             <span class="bool-val">true</span>,
         );
-        <span class="attr">#[cfg(not(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>)))]
+        <span class="attr">#[cfg(not(all(tokio_unstable, feature = <span class="string">"tracing"</span>)))]
         </span><span class="kw">let </span>inner = <span class="self">self</span>.ll_sem.acquire(<span class="number">1</span>);
 
         inner.<span class="kw">await</span><span class="question-mark">?</span>;
@@ -1737,15 +1737,15 @@
         <span class="self">self</span>: Arc&lt;<span class="self">Self</span>&gt;,
         n: u32,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;OwnedSemaphorePermit, AcquireError&gt; {
-        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
         </span><span class="kw">let </span>inner = trace::async_op(
             || <span class="self">self</span>.ll_sem.acquire(n),
             <span class="self">self</span>.resource_span.clone(),
-            <span class="string">&quot;Semaphore::acquire_many_owned&quot;</span>,
-            <span class="string">&quot;poll&quot;</span>,
+            <span class="string">"Semaphore::acquire_many_owned"</span>,
+            <span class="string">"poll"</span>,
             <span class="bool-val">true</span>,
         );
-        <span class="attr">#[cfg(not(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>)))]
+        <span class="attr">#[cfg(not(all(tokio_unstable, feature = <span class="string">"tracing"</span>)))]
         </span><span class="kw">let </span>inner = <span class="self">self</span>.ll_sem.acquire(n);
 
         inner.<span class="kw">await</span><span class="question-mark">?</span>;
@@ -1858,10 +1858,10 @@
     ///     tokio::spawn(async move {
     ///         let permit = semaphore.acquire_many(2).await;
     ///         assert!(permit.is_err());
-    ///         println!(&quot;waiter received error&quot;);
+    ///         println!("waiter received error");
     ///     });
     ///
-    ///     println!(&quot;closing semaphore&quot;);
+    ///     println!("closing semaphore");
     ///     semaphore2.close();
     ///
     ///     // Cannot obtain more permits
@@ -1878,7 +1878,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; SemaphorePermit&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; SemaphorePermit&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Forgets the permit **without** releasing it back to the semaphore.
     /// This can be used to reduce the amount of permits available from a
     /// semaphore.
@@ -1899,7 +1899,7 @@
     </span><span class="kw">pub fn </span>merge(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>other: <span class="self">Self</span>) {
         <span class="macro">assert!</span>(
             std::ptr::eq(<span class="self">self</span>.sem, other.sem),
-            <span class="string">&quot;merging permits from different semaphore instances&quot;
+            <span class="string">"merging permits from different semaphore instances"
         </span>);
         <span class="self">self</span>.permits += other.permits;
         other.permits = <span class="number">0</span>;
@@ -1927,7 +1927,7 @@
     </span><span class="kw">pub fn </span>merge(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>other: <span class="self">Self</span>) {
         <span class="macro">assert!</span>(
             Arc::ptr_eq(<span class="kw-2">&amp;</span><span class="self">self</span>.sem, <span class="kw-2">&amp;</span>other.sem),
-            <span class="string">&quot;merging permits from different semaphore instances&quot;
+            <span class="string">"merging permits from different semaphore instances"
         </span>);
         <span class="self">self</span>.permits += other.permits;
         other.permits = <span class="number">0</span>;
@@ -1939,7 +1939,7 @@
     }
 }
 
-<span class="kw">impl </span>Drop <span class="kw">for </span>SemaphorePermit&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>Drop <span class="kw">for </span>SemaphorePermit&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="self">self</span>.sem.add_permits(<span class="self">self</span>.permits <span class="kw">as </span>usize);
     }

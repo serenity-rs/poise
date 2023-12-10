@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/miniz_oxide-0.7.1/src/inflate/stream.rs`."><title>stream.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="miniz_oxide" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/miniz_oxide-0.7.1/src/inflate/stream.rs`."><title>stream.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="miniz_oxide" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -419,7 +419,7 @@
 </pre></div><pre class="rust"><code><span class="doccomment">//! Extra streaming decompression functionality.
 //!
 //! As of now this is mainly intended for use to build a higher-level wrapper.
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;with-alloc&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">"with-alloc"</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::alloc::boxed::Box;
 <span class="kw">use </span>core::{cmp, mem};
 
@@ -534,7 +534,7 @@
     /// # Parameters
     /// `data_format`: Determines whether the compressed data is assumed to wrapped with zlib
     /// metadata.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;with-alloc&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"with-alloc"</span>)]
     </span><span class="kw">pub fn </span>new_boxed(data_format: DataFormat) -&gt; Box&lt;InflateState&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>b: Box&lt;InflateState&gt; = Box::default();
         b.data_format = data_format;
@@ -556,7 +556,7 @@
     /// The decompressor does not support different window sizes. As such,
     /// any positive (&gt;0) value will set the zlib header flag, while a negative one
     /// will not.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;with-alloc&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"with-alloc"</span>)]
     </span><span class="kw">pub fn </span>new_boxed_with_window_bits(window_bits: i32) -&gt; Box&lt;InflateState&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>b: Box&lt;InflateState&gt; = Box::default();
         b.data_format = DataFormat::from_window_bits(window_bits);
@@ -583,15 +583,15 @@
 ///
 /// Generally, the various [`MZFlush`] flags have meaning only on the compression side.  They can be
 /// supplied here, but the only one that has any semantic meaning is [`MZFlush::Finish`], which is a
-/// signal that the stream is expected to finish, and failing to do so is an error.  It isn&#39;t
-/// necessary to specify it when the stream ends; you&#39;ll still get returned a
-/// [`MZStatus::StreamEnd`] anyway.  Other values either have no effect or cause errors.  It&#39;s
-/// likely that you&#39;ll almost always just want to use [`MZFlush::None`].
+/// signal that the stream is expected to finish, and failing to do so is an error.  It isn't
+/// necessary to specify it when the stream ends; you'll still get returned a
+/// [`MZStatus::StreamEnd`] anyway.  Other values either have no effect or cause errors.  It's
+/// likely that you'll almost always just want to use [`MZFlush::None`].
 ///
 /// # Errors
 ///
 /// Returns [`MZError::Buf`] if the size of the `output` slice is empty or no progress was made due
-/// to lack of expected input data, or if called with [`MZFlush::Finish`] and input wasn&#39;t all
+/// to lack of expected input data, or if called with [`MZFlush::Finish`] and input wasn't all
 /// consumed.
 ///
 /// Returns [`MZError::Data`] if this or a a previous call failed with an error return from
@@ -739,7 +739,7 @@
             <span class="kw">return </span><span class="prelude-val">Err</span>(MZError::Data);
         }
 
-        <span class="comment">// The decompressor has flushed all it&#39;s data and is waiting for more input, but
+        <span class="comment">// The decompressor has flushed all it's data and is waiting for more input, but
         // there was no more input provided.
         </span><span class="kw">if </span>(status == TINFLStatus::NeedsMoreInput) &amp;&amp; orig_in_len == <span class="number">0 </span>{
             <span class="kw">return </span><span class="prelude-val">Err</span>(MZError::Buf);
@@ -754,16 +754,16 @@
                 } <span class="kw">else </span>{
                     <span class="prelude-val">Ok</span>(MZStatus::StreamEnd)
                 };
-            <span class="comment">// No more space in the output buffer, but we&#39;re not done.
+            <span class="comment">// No more space in the output buffer, but we're not done.
             </span>} <span class="kw">else if </span>next_out.is_empty() {
                 <span class="kw">return </span><span class="prelude-val">Err</span>(MZError::Buf);
             }
         } <span class="kw">else </span>{
-            <span class="comment">// We&#39;re not expected to finish, so it&#39;s fine if we can&#39;t flush everything yet.
+            <span class="comment">// We're not expected to finish, so it's fine if we can't flush everything yet.
             </span><span class="kw">let </span>empty_buf = next_in.is_empty() || next_out.is_empty();
             <span class="kw">if </span>(status == TINFLStatus::Done) || empty_buf || (state.dict_avail != <span class="number">0</span>) {
                 <span class="kw">return if </span>(status == TINFLStatus::Done) &amp;&amp; (state.dict_avail == <span class="number">0</span>) {
-                    <span class="comment">// No more data left, we&#39;re done.
+                    <span class="comment">// No more data left, we're done.
                     </span><span class="prelude-val">Ok</span>(MZStatus::StreamEnd)
                 } <span class="kw">else </span>{
                     <span class="comment">// Ok for now, still waiting for more input data or output space.
@@ -798,25 +798,25 @@
         <span class="kw">let </span><span class="kw-2">mut </span>out = <span class="macro">vec!</span>[<span class="number">0</span>; <span class="number">50</span>];
         <span class="kw">let </span><span class="kw-2">mut </span>state = InflateState::new_boxed(DataFormat::Zlib);
         <span class="kw">let </span>res = inflate(<span class="kw-2">&amp;mut </span>state, <span class="kw-2">&amp;</span>encoded, <span class="kw-2">&amp;mut </span>out, MZFlush::Finish);
-        <span class="kw">let </span>status = res.status.expect(<span class="string">&quot;Failed to decompress!&quot;</span>);
+        <span class="kw">let </span>status = res.status.expect(<span class="string">"Failed to decompress!"</span>);
         <span class="macro">assert_eq!</span>(status, MZStatus::StreamEnd);
-        <span class="macro">assert_eq!</span>(out[..res.bytes_written <span class="kw">as </span>usize], <span class="string">b&quot;Hello, zlib!&quot;</span>[..]);
+        <span class="macro">assert_eq!</span>(out[..res.bytes_written <span class="kw">as </span>usize], <span class="string">b"Hello, zlib!"</span>[..]);
         <span class="macro">assert_eq!</span>(res.bytes_consumed, encoded.len());
 
         state.reset_as(<span class="kw">super</span>::ZeroReset);
         out.iter_mut().map(|x| <span class="kw-2">*</span>x = <span class="number">0</span>).count();
         <span class="kw">let </span>res = inflate(<span class="kw-2">&amp;mut </span>state, <span class="kw-2">&amp;</span>encoded, <span class="kw-2">&amp;mut </span>out, MZFlush::Finish);
-        <span class="kw">let </span>status = res.status.expect(<span class="string">&quot;Failed to decompress!&quot;</span>);
+        <span class="kw">let </span>status = res.status.expect(<span class="string">"Failed to decompress!"</span>);
         <span class="macro">assert_eq!</span>(status, MZStatus::StreamEnd);
-        <span class="macro">assert_eq!</span>(out[..res.bytes_written <span class="kw">as </span>usize], <span class="string">b&quot;Hello, zlib!&quot;</span>[..]);
+        <span class="macro">assert_eq!</span>(out[..res.bytes_written <span class="kw">as </span>usize], <span class="string">b"Hello, zlib!"</span>[..]);
         <span class="macro">assert_eq!</span>(res.bytes_consumed, encoded.len());
 
         state.reset_as(<span class="kw">super</span>::MinReset);
         out.iter_mut().map(|x| <span class="kw-2">*</span>x = <span class="number">0</span>).count();
         <span class="kw">let </span>res = inflate(<span class="kw-2">&amp;mut </span>state, <span class="kw-2">&amp;</span>encoded, <span class="kw-2">&amp;mut </span>out, MZFlush::Finish);
-        <span class="kw">let </span>status = res.status.expect(<span class="string">&quot;Failed to decompress!&quot;</span>);
+        <span class="kw">let </span>status = res.status.expect(<span class="string">"Failed to decompress!"</span>);
         <span class="macro">assert_eq!</span>(status, MZStatus::StreamEnd);
-        <span class="macro">assert_eq!</span>(out[..res.bytes_written <span class="kw">as </span>usize], <span class="string">b&quot;Hello, zlib!&quot;</span>[..]);
+        <span class="macro">assert_eq!</span>(out[..res.bytes_written <span class="kw">as </span>usize], <span class="string">b"Hello, zlib!"</span>[..]);
         <span class="macro">assert_eq!</span>(res.bytes_consumed, encoded.len());
         <span class="macro">assert_eq!</span>(state.decompressor().adler32(), <span class="prelude-val">Some</span>(<span class="number">459605011</span>));
 
@@ -824,9 +824,9 @@
         </span>state = InflateState::new_boxed(DataFormat::ZLibIgnoreChecksum);
         out.iter_mut().map(|x| <span class="kw-2">*</span>x = <span class="number">0</span>).count();
         <span class="kw">let </span>res = inflate(<span class="kw-2">&amp;mut </span>state, <span class="kw-2">&amp;</span>encoded, <span class="kw-2">&amp;mut </span>out, MZFlush::Finish);
-        <span class="kw">let </span>status = res.status.expect(<span class="string">&quot;Failed to decompress!&quot;</span>);
+        <span class="kw">let </span>status = res.status.expect(<span class="string">"Failed to decompress!"</span>);
         <span class="macro">assert_eq!</span>(status, MZStatus::StreamEnd);
-        <span class="macro">assert_eq!</span>(out[..res.bytes_written <span class="kw">as </span>usize], <span class="string">b&quot;Hello, zlib!&quot;</span>[..]);
+        <span class="macro">assert_eq!</span>(out[..res.bytes_written <span class="kw">as </span>usize], <span class="string">b"Hello, zlib!"</span>[..]);
         <span class="macro">assert_eq!</span>(res.bytes_consumed, encoded.len());
         <span class="comment">// Not computed, so should be Some(1)
         </span><span class="macro">assert_eq!</span>(state.decompressor().adler32(), <span class="prelude-val">Some</span>(<span class="number">1</span>));

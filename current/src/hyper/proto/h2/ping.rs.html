@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hyper-0.14.27/src/proto/h2/ping.rs`."><title>ping.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="hyper" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hyper-0.14.27/src/proto/h2/ping.rs`."><title>ping.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="hyper" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -564,7 +564,7 @@
 ///
 /// # BDP Algorithm
 ///
-/// 1. When receiving a DATA frame, if a BDP ping isn&#39;t outstanding:
+/// 1. When receiving a DATA frame, if a BDP ping isn't outstanding:
 ///   1a. Record current time.
 ///   1b. Send a BDP ping.
 /// 2. Increment the number of received bytes.
@@ -574,20 +574,20 @@
 ///   3c. Calculate bdp as bytes/rtt.
 ///   3d. If bdp is over 2/3 max, set new max to bdp and update windows.
 
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;runtime&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
 </span><span class="kw">use </span>std::fmt;
-<span class="attr">#[cfg(feature = <span class="string">&quot;runtime&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
 </span><span class="kw">use </span>std::future::Future;
-<span class="attr">#[cfg(feature = <span class="string">&quot;runtime&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
 </span><span class="kw">use </span>std::pin::Pin;
 <span class="kw">use </span>std::sync::{Arc, Mutex};
 <span class="kw">use </span>std::task::{<span class="self">self</span>, Poll};
 <span class="kw">use </span>std::time::Duration;
-<span class="attr">#[cfg(not(feature = <span class="string">&quot;runtime&quot;</span>))]
+<span class="attr">#[cfg(not(feature = <span class="string">"runtime"</span>))]
 </span><span class="kw">use </span>std::time::Instant;
 
 <span class="kw">use </span>h2::{Ping, PingPong};
-<span class="attr">#[cfg(feature = <span class="string">&quot;runtime&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
 </span><span class="kw">use </span>tokio::time::{Instant, Sleep};
 <span class="kw">use </span>tracing::{debug, trace};
 
@@ -600,7 +600,7 @@
 <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>channel(ping_pong: PingPong, config: Config) -&gt; (Recorder, Ponger) {
     <span class="macro">debug_assert!</span>(
         config.is_enabled(),
-        <span class="string">&quot;ping channel requires bdp or keep-alive config&quot;</span>,
+        <span class="string">"ping channel requires bdp or keep-alive config"</span>,
     );
 
     <span class="kw">let </span>bdp = config.bdp_initial_window.map(|wnd| Bdp {
@@ -617,7 +617,7 @@
         (<span class="prelude-val">None</span>, <span class="prelude-val">None</span>)
     };
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;runtime&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
     </span><span class="kw">let </span>keep_alive = config.keep_alive_interval.map(|interval| KeepAlive {
         interval,
         timeout: config.keep_alive_timeout,
@@ -626,14 +626,14 @@
         state: KeepAliveState::Init,
     });
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;runtime&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
     </span><span class="kw">let </span>last_read_at = keep_alive.as_ref().map(|<span class="kw">_</span>| Instant::now());
 
     <span class="kw">let </span>shared = Arc::new(Mutex::new(Shared {
         bytes,
-        <span class="attr">#[cfg(feature = <span class="string">&quot;runtime&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
         </span>last_read_at,
-        <span class="attr">#[cfg(feature = <span class="string">&quot;runtime&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
         </span>is_keep_alive_timed_out: <span class="bool-val">false</span>,
         ping_pong,
         ping_sent_at: <span class="prelude-val">None</span>,
@@ -646,7 +646,7 @@
         },
         Ponger {
             bdp,
-            <span class="attr">#[cfg(feature = <span class="string">&quot;runtime&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
             </span>keep_alive,
             shared,
         },
@@ -657,14 +657,14 @@
 </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">struct </span>Config {
     <span class="kw">pub</span>(<span class="kw">super</span>) bdp_initial_window: <span class="prelude-ty">Option</span>&lt;WindowSize&gt;,
     <span class="doccomment">/// If no frames are received in this amount of time, a PING frame is sent.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;runtime&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) keep_alive_interval: <span class="prelude-ty">Option</span>&lt;Duration&gt;,
     <span class="doccomment">/// After sending a keepalive PING, the connection will be closed if
     /// a pong is not received in this amount of time.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;runtime&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) keep_alive_timeout: Duration,
     <span class="doccomment">/// If true, sends pings even when there are no active streams.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;runtime&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) keep_alive_while_idle: bool,
 }
 
@@ -675,7 +675,7 @@
 
 <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">struct </span>Ponger {
     bdp: <span class="prelude-ty">Option</span>&lt;Bdp&gt;,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;runtime&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
     </span>keep_alive: <span class="prelude-ty">Option</span>&lt;KeepAlive&gt;,
     shared: Arc&lt;Mutex&lt;Shared&gt;&gt;,
 }
@@ -695,17 +695,17 @@
     <span class="comment">// keep-alive
     </span><span class="doccomment">/// If `Some`, keep-alive is enabled, and the Instant is how long ago
     /// the connection read the last frame.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;runtime&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
     </span>last_read_at: <span class="prelude-ty">Option</span>&lt;Instant&gt;,
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;runtime&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
     </span>is_keep_alive_timed_out: bool,
 }
 
 <span class="kw">struct </span>Bdp {
     <span class="doccomment">/// Current BDP in bytes
     </span>bdp: u32,
-    <span class="doccomment">/// Largest bandwidth we&#39;ve seen so far.
+    <span class="doccomment">/// Largest bandwidth we've seen so far.
     </span>max_bandwidth: f64,
     <span class="doccomment">/// Round trip time in seconds
     </span>rtt: f64,
@@ -717,7 +717,7 @@
     </span>stable_count: u32,
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;runtime&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
 </span><span class="kw">struct </span>KeepAlive {
     <span class="doccomment">/// If no frames are received in this amount of time, a PING frame is sent.
     </span>interval: Duration,
@@ -731,7 +731,7 @@
     timer: Pin&lt;Box&lt;Sleep&gt;&gt;,
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;runtime&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
 </span><span class="kw">enum </span>KeepAliveState {
     Init,
     Scheduled,
@@ -740,11 +740,11 @@
 
 <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">enum </span>Ponged {
     SizeUpdate(WindowSize),
-    <span class="attr">#[cfg(feature = <span class="string">&quot;runtime&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
     </span>KeepAliveTimedOut,
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;runtime&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
 #[derive(Debug)]
 </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">struct </span>KeepAliveTimedOut;
 
@@ -752,12 +752,12 @@
 
 </span><span class="kw">impl </span>Config {
     <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>is_enabled(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="attr">#[cfg(feature = <span class="string">&quot;runtime&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
         </span>{
             <span class="self">self</span>.bdp_initial_window.is_some() || <span class="self">self</span>.keep_alive_interval.is_some()
         }
 
-        <span class="attr">#[cfg(not(feature = <span class="string">&quot;runtime&quot;</span>))]
+        <span class="attr">#[cfg(not(feature = <span class="string">"runtime"</span>))]
         </span>{
             <span class="self">self</span>.bdp_initial_window.is_some()
         }
@@ -776,11 +776,11 @@
 
         <span class="kw">let </span><span class="kw-2">mut </span>locked = shared.lock().unwrap();
 
-        <span class="attr">#[cfg(feature = <span class="string">&quot;runtime&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
         </span>locked.update_last_read_at();
 
         <span class="comment">// are we ready to send another bdp ping?
-        // if not, we don&#39;t need to record bytes either
+        // if not, we don't need to record bytes either
 
         </span><span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref </span>next_bdp_at) = locked.next_bdp_at {
             <span class="kw">if </span>Instant::now() &lt; <span class="kw-2">*</span>next_bdp_at {
@@ -803,7 +803,7 @@
     }
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>record_non_data(<span class="kw-2">&amp;</span><span class="self">self</span>) {
-        <span class="attr">#[cfg(feature = <span class="string">&quot;runtime&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
         </span>{
             <span class="kw">let </span>shared = <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref </span>shared) = <span class="self">self</span>.shared {
                 shared
@@ -819,7 +819,7 @@
 
     <span class="doccomment">/// If the incoming stream is already closed, convert self into
     /// a disabled reporter.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;client&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"client"</span>)]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>for_stream(<span class="self">self</span>, stream: <span class="kw-2">&amp;</span>h2::RecvStream) -&gt; <span class="self">Self </span>{
         <span class="kw">if </span>stream.is_end_stream() {
             disabled()
@@ -829,7 +829,7 @@
     }
 
     <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>ensure_not_timed_out(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">crate</span>::Result&lt;()&gt; {
-        <span class="attr">#[cfg(feature = <span class="string">&quot;runtime&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
         </span>{
             <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref </span>shared) = <span class="self">self</span>.shared {
                 <span class="kw">let </span>locked = shared.lock().unwrap();
@@ -847,13 +847,13 @@
 <span class="comment">// ===== impl Ponger =====
 
 </span><span class="kw">impl </span>Ponger {
-    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>poll(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;Ponged&gt; {
+    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>poll(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;Ponged&gt; {
         <span class="kw">let </span>now = Instant::now();
         <span class="kw">let </span><span class="kw-2">mut </span>locked = <span class="self">self</span>.shared.lock().unwrap();
-        <span class="attr">#[cfg(feature = <span class="string">&quot;runtime&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
         </span><span class="kw">let </span>is_idle = <span class="self">self</span>.is_idle();
 
-        <span class="attr">#[cfg(feature = <span class="string">&quot;runtime&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
         </span>{
             <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref mut </span>ka) = <span class="self">self</span>.keep_alive {
                 ka.schedule(is_idle, <span class="kw-2">&amp;</span>locked);
@@ -862,7 +862,7 @@
         }
 
         <span class="kw">if </span>!locked.is_ping_sent() {
-            <span class="comment">// XXX: this doesn&#39;t register a waker...?
+            <span class="comment">// XXX: this doesn't register a waker...?
             </span><span class="kw">return </span>Poll::Pending;
         }
 
@@ -870,12 +870,12 @@
             Poll::Ready(<span class="prelude-val">Ok</span>(_pong)) =&gt; {
                 <span class="kw">let </span>start = locked
                     .ping_sent_at
-                    .expect(<span class="string">&quot;pong received implies ping_sent_at&quot;</span>);
+                    .expect(<span class="string">"pong received implies ping_sent_at"</span>);
                 locked.ping_sent_at = <span class="prelude-val">None</span>;
                 <span class="kw">let </span>rtt = now - start;
-                <span class="macro">trace!</span>(<span class="string">&quot;recv pong&quot;</span>);
+                <span class="macro">trace!</span>(<span class="string">"recv pong"</span>);
 
-                <span class="attr">#[cfg(feature = <span class="string">&quot;runtime&quot;</span>)]
+                <span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
                 </span>{
                     <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref mut </span>ka) = <span class="self">self</span>.keep_alive {
                         locked.update_last_read_at();
@@ -884,9 +884,9 @@
                 }
 
                 <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref mut </span>bdp) =  <span class="self">self</span>.bdp {
-                    <span class="kw">let </span>bytes = locked.bytes.expect(<span class="string">&quot;bdp enabled implies bytes&quot;</span>);
+                    <span class="kw">let </span>bytes = locked.bytes.expect(<span class="string">"bdp enabled implies bytes"</span>);
                     locked.bytes = <span class="prelude-val">Some</span>(<span class="number">0</span>); <span class="comment">// reset
-                    </span><span class="macro">trace!</span>(<span class="string">&quot;received BDP ack; bytes = {}, rtt = {:?}&quot;</span>, bytes, rtt);
+                    </span><span class="macro">trace!</span>(<span class="string">"received BDP ack; bytes = {}, rtt = {:?}"</span>, bytes, rtt);
 
                     <span class="kw">let </span>update = bdp.calculate(bytes, rtt);
                     locked.next_bdp_at = <span class="prelude-val">Some</span>(now + bdp.ping_delay);
@@ -896,10 +896,10 @@
                 }
             }
             Poll::Ready(<span class="prelude-val">Err</span>(e)) =&gt; {
-                <span class="macro">debug!</span>(<span class="string">&quot;pong error: {}&quot;</span>, e);
+                <span class="macro">debug!</span>(<span class="string">"pong error: {}"</span>, e);
             }
             Poll::Pending =&gt; {
-                <span class="attr">#[cfg(feature = <span class="string">&quot;runtime&quot;</span>)]
+                <span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
                 </span>{
                     <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref mut </span>ka) = <span class="self">self</span>.keep_alive {
                         <span class="kw">if let </span><span class="prelude-val">Err</span>(KeepAliveTimedOut) = ka.maybe_timeout(cx) {
@@ -912,11 +912,11 @@
             }
         }
 
-        <span class="comment">// XXX: this doesn&#39;t register a waker...?
+        <span class="comment">// XXX: this doesn't register a waker...?
         </span>Poll::Pending
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;runtime&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
     </span><span class="kw">fn </span>is_idle(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         Arc::strong_count(<span class="kw-2">&amp;</span><span class="self">self</span>.shared) &lt;= <span class="number">2
     </span>}
@@ -929,10 +929,10 @@
         <span class="kw">match </span><span class="self">self</span>.ping_pong.send_ping(Ping::opaque()) {
             <span class="prelude-val">Ok</span>(()) =&gt; {
                 <span class="self">self</span>.ping_sent_at = <span class="prelude-val">Some</span>(Instant::now());
-                <span class="macro">trace!</span>(<span class="string">&quot;sent ping&quot;</span>);
+                <span class="macro">trace!</span>(<span class="string">"sent ping"</span>);
             }
             <span class="prelude-val">Err</span>(err) =&gt; {
-                <span class="macro">debug!</span>(<span class="string">&quot;error sending ping: {}&quot;</span>, err);
+                <span class="macro">debug!</span>(<span class="string">"error sending ping: {}"</span>, err);
             }
         }
     }
@@ -941,16 +941,16 @@
         <span class="self">self</span>.ping_sent_at.is_some()
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;runtime&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
     </span><span class="kw">fn </span>update_last_read_at(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="kw">if </span><span class="self">self</span>.last_read_at.is_some() {
             <span class="self">self</span>.last_read_at = <span class="prelude-val">Some</span>(Instant::now());
         }
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;runtime&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
     </span><span class="kw">fn </span>last_read_at(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Instant {
-        <span class="self">self</span>.last_read_at.expect(<span class="string">&quot;keep_alive expects last_read_at&quot;</span>)
+        <span class="self">self</span>.last_read_at.expect(<span class="string">"keep_alive expects last_read_at"</span>)
     }
 }
 
@@ -961,7 +961,7 @@
 
 <span class="kw">impl </span>Bdp {
     <span class="kw">fn </span>calculate(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bytes: usize, rtt: Duration) -&gt; <span class="prelude-ty">Option</span>&lt;WindowSize&gt; {
-        <span class="comment">// No need to do any math if we&#39;re at the limit.
+        <span class="comment">// No need to do any math if we're at the limit.
         </span><span class="kw">if </span><span class="self">self</span>.bdp <span class="kw">as </span>usize == BDP_LIMIT {
             <span class="self">self</span>.stabilize_delay();
             <span class="kw">return </span><span class="prelude-val">None</span>;
@@ -979,10 +979,10 @@
 
         <span class="comment">// calculate the current bandwidth
         </span><span class="kw">let </span>bw = (bytes <span class="kw">as </span>f64) / (<span class="self">self</span>.rtt * <span class="number">1.5</span>);
-        <span class="macro">trace!</span>(<span class="string">&quot;current bandwidth = {:.1}B/s&quot;</span>, bw);
+        <span class="macro">trace!</span>(<span class="string">"current bandwidth = {:.1}B/s"</span>, bw);
 
         <span class="kw">if </span>bw &lt; <span class="self">self</span>.max_bandwidth {
-            <span class="comment">// not a faster bandwidth, so don&#39;t update
+            <span class="comment">// not a faster bandwidth, so don't update
             </span><span class="self">self</span>.stabilize_delay();
             <span class="kw">return </span><span class="prelude-val">None</span>;
         } <span class="kw">else </span>{
@@ -993,7 +993,7 @@
         // bdp, increase to double the current sample.
         </span><span class="kw">if </span>bytes &gt;= <span class="self">self</span>.bdp <span class="kw">as </span>usize * <span class="number">2 </span>/ <span class="number">3 </span>{
             <span class="self">self</span>.bdp = (bytes * <span class="number">2</span>).min(BDP_LIMIT) <span class="kw">as </span>WindowSize;
-            <span class="macro">trace!</span>(<span class="string">&quot;BDP increased to {}&quot;</span>, <span class="self">self</span>.bdp);
+            <span class="macro">trace!</span>(<span class="string">"BDP increased to {}"</span>, <span class="self">self</span>.bdp);
 
             <span class="self">self</span>.stable_count = <span class="number">0</span>;
             <span class="self">self</span>.ping_delay /= <span class="number">2</span>;
@@ -1024,7 +1024,7 @@
 
 <span class="comment">// ===== impl KeepAlive =====
 
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;runtime&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
 </span><span class="kw">impl </span>KeepAlive {
     <span class="kw">fn </span>schedule(<span class="kw-2">&amp;mut </span><span class="self">self</span>, is_idle: bool, shared: <span class="kw-2">&amp;</span>Shared) {
         <span class="kw">match </span><span class="self">self</span>.state {
@@ -1050,19 +1050,19 @@
         }
     }
 
-    <span class="kw">fn </span>maybe_ping(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;, shared: <span class="kw-2">&amp;mut </span>Shared) {
+    <span class="kw">fn </span>maybe_ping(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;, shared: <span class="kw-2">&amp;mut </span>Shared) {
         <span class="kw">match </span><span class="self">self</span>.state {
             KeepAliveState::Scheduled =&gt; {
                 <span class="kw">if </span>Pin::new(<span class="kw-2">&amp;mut </span><span class="self">self</span>.timer).poll(cx).is_pending() {
                     <span class="kw">return</span>;
                 }
-                <span class="comment">// check if we&#39;ve received a frame while we were scheduled
+                <span class="comment">// check if we've received a frame while we were scheduled
                 </span><span class="kw">if </span>shared.last_read_at() + <span class="self">self</span>.interval &gt; <span class="self">self</span>.timer.deadline() {
                     <span class="self">self</span>.state = KeepAliveState::Init;
                     cx.waker().wake_by_ref(); <span class="comment">// schedule us again
                     </span><span class="kw">return</span>;
                 }
-                <span class="macro">trace!</span>(<span class="string">&quot;keep-alive interval ({:?}) reached&quot;</span>, <span class="self">self</span>.interval);
+                <span class="macro">trace!</span>(<span class="string">"keep-alive interval ({:?}) reached"</span>, <span class="self">self</span>.interval);
                 shared.send_ping();
                 <span class="self">self</span>.state = KeepAliveState::PingSent;
                 <span class="kw">let </span>timeout = Instant::now() + <span class="self">self</span>.timeout;
@@ -1072,13 +1072,13 @@
         }
     }
 
-    <span class="kw">fn </span>maybe_timeout(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;(), KeepAliveTimedOut&gt; {
+    <span class="kw">fn </span>maybe_timeout(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;(), KeepAliveTimedOut&gt; {
         <span class="kw">match </span><span class="self">self</span>.state {
             KeepAliveState::PingSent =&gt; {
                 <span class="kw">if </span>Pin::new(<span class="kw-2">&amp;mut </span><span class="self">self</span>.timer).poll(cx).is_pending() {
                     <span class="kw">return </span><span class="prelude-val">Ok</span>(());
                 }
-                <span class="macro">trace!</span>(<span class="string">&quot;keep-alive timeout ({:?}) reached&quot;</span>, <span class="self">self</span>.timeout);
+                <span class="macro">trace!</span>(<span class="string">"keep-alive timeout ({:?}) reached"</span>, <span class="self">self</span>.timeout);
                 <span class="prelude-val">Err</span>(KeepAliveTimedOut)
             }
             KeepAliveState::Init | KeepAliveState::Scheduled =&gt; <span class="prelude-val">Ok</span>(()),
@@ -1088,23 +1088,23 @@
 
 <span class="comment">// ===== impl KeepAliveTimedOut =====
 
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;runtime&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
 </span><span class="kw">impl </span>KeepAliveTimedOut {
     <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>crate_error(<span class="self">self</span>) -&gt; <span class="kw">crate</span>::Error {
         <span class="kw">crate</span>::Error::new(<span class="kw">crate</span>::error::Kind::Http2).with(<span class="self">self</span>)
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;runtime&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
 </span><span class="kw">impl </span>fmt::Display <span class="kw">for </span>KeepAliveTimedOut {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        f.write_str(<span class="string">&quot;keep-alive timed out&quot;</span>)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        f.write_str(<span class="string">"keep-alive timed out"</span>)
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;runtime&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
 </span><span class="kw">impl </span>std::error::Error <span class="kw">for </span>KeepAliveTimedOut {
-    <span class="kw">fn </span>source(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>(<span class="kw">dyn </span>std::error::Error + <span class="lifetime">&#39;static</span>)&gt; {
+    <span class="kw">fn </span>source(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>(<span class="kw">dyn </span>std::error::Error + <span class="lifetime">'static</span>)&gt; {
         <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="kw">crate</span>::error::TimedOut)
     }
 }

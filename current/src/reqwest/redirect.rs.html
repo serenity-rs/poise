@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/reqwest-0.11.22/src/redirect.rs`."><title>redirect.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="reqwest" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/reqwest-0.11.22/src/redirect.rs`."><title>redirect.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="reqwest" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -365,10 +365,10 @@
 <span class="doccomment">/// A type that holds information on the next request and previous requests
 /// in redirect chain.
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>Attempt&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>Attempt&lt;<span class="lifetime">'a</span>&gt; {
     status: StatusCode,
-    next: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Url,
-    previous: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[Url],
+    next: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Url,
+    previous: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[Url],
 }
 
 <span class="doccomment">/// An action to perform when a redirect status code is found.
@@ -416,9 +416,9 @@
     /// # fn run() -&gt; Result&lt;(), Error&gt; {
     /// let custom = redirect::Policy::custom(|attempt| {
     ///     if attempt.previous().len() &gt; 5 {
-    ///         attempt.error(&quot;too many redirects&quot;)
-    ///     } else if attempt.url().host_str() == Some(&quot;example.domain&quot;) {
-    ///         // prevent redirects to &#39;example.domain&#39;
+    ///         attempt.error("too many redirects")
+    ///     } else if attempt.url().host_str() == Some("example.domain") {
+    ///         // prevent redirects to 'example.domain'
     ///         attempt.stop()
     ///     } else {
     ///         attempt.follow()
@@ -434,7 +434,7 @@
     /// [`Attempt`]: struct.Attempt.html
     </span><span class="kw">pub fn </span>custom&lt;T&gt;(policy: T) -&gt; <span class="self">Self
     </span><span class="kw">where
-        </span>T: Fn(Attempt) -&gt; Action + Send + Sync + <span class="lifetime">&#39;static</span>,
+        </span>T: Fn(Attempt) -&gt; Action + Send + Sync + <span class="lifetime">'static</span>,
     {
         <span class="self">Self </span>{
             inner: PolicyKind::Custom(Box::new(policy)),
@@ -455,7 +455,7 @@
     /// #
     /// # fn run() -&gt; Result&lt;(), Error&gt; {
     /// let custom = redirect::Policy::custom(|attempt| {
-    ///     eprintln!(&quot;{}, Location: {:?}&quot;, attempt.status(), attempt.url());
+    ///     eprintln!("{}, Location: {:?}", attempt.status(), attempt.url());
     ///     redirect::Policy::default().redirect(attempt)
     /// });
     /// # Ok(())
@@ -496,7 +496,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Attempt&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Attempt&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Get the type of redirect.
     </span><span class="kw">pub fn </span>status(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; StatusCode {
         <span class="self">self</span>.status
@@ -538,23 +538,23 @@
 }
 
 <span class="kw">enum </span>PolicyKind {
-    Custom(Box&lt;<span class="kw">dyn </span>Fn(Attempt) -&gt; Action + Send + Sync + <span class="lifetime">&#39;static</span>&gt;),
+    Custom(Box&lt;<span class="kw">dyn </span>Fn(Attempt) -&gt; Action + Send + Sync + <span class="lifetime">'static</span>&gt;),
     Limit(usize),
     <span class="prelude-val">None</span>,
 }
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>Policy {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
-        f.debug_tuple(<span class="string">&quot;Policy&quot;</span>).field(<span class="kw-2">&amp;</span><span class="self">self</span>.inner).finish()
+        f.debug_tuple(<span class="string">"Policy"</span>).field(<span class="kw-2">&amp;</span><span class="self">self</span>.inner).finish()
     }
 }
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>PolicyKind {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
         <span class="kw">match </span><span class="kw-2">*</span><span class="self">self </span>{
-            PolicyKind::Custom(..) =&gt; f.pad(<span class="string">&quot;Custom&quot;</span>),
-            PolicyKind::Limit(max) =&gt; f.debug_tuple(<span class="string">&quot;Limit&quot;</span>).field(<span class="kw-2">&amp;</span>max).finish(),
-            PolicyKind::None =&gt; f.pad(<span class="string">&quot;None&quot;</span>),
+            PolicyKind::Custom(..) =&gt; f.pad(<span class="string">"Custom"</span>),
+            PolicyKind::Limit(max) =&gt; f.debug_tuple(<span class="string">"Limit"</span>).field(<span class="kw-2">&amp;</span>max).finish(),
+            PolicyKind::None =&gt; f.pad(<span class="string">"None"</span>),
         }
     }
 }
@@ -575,7 +575,7 @@
         <span class="kw">if </span>cross_host {
             headers.remove(AUTHORIZATION);
             headers.remove(COOKIE);
-            headers.remove(<span class="string">&quot;cookie2&quot;</span>);
+            headers.remove(<span class="string">"cookie2"</span>);
             headers.remove(PROXY_AUTHORIZATION);
             headers.remove(WWW_AUTHENTICATE);
         }
@@ -586,8 +586,8 @@
 </span><span class="kw">struct </span>TooManyRedirects;
 
 <span class="kw">impl </span>fmt::Display <span class="kw">for </span>TooManyRedirects {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        f.write_str(<span class="string">&quot;too many redirects&quot;</span>)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        f.write_str(<span class="string">"too many redirects"</span>)
     }
 }
 
@@ -596,56 +596,56 @@
 <span class="attr">#[test]
 </span><span class="kw">fn </span>test_redirect_policy_limit() {
     <span class="kw">let </span>policy = Policy::default();
-    <span class="kw">let </span>next = Url::parse(<span class="string">&quot;http://x.y/z&quot;</span>).unwrap();
+    <span class="kw">let </span>next = Url::parse(<span class="string">"http://x.y/z"</span>).unwrap();
     <span class="kw">let </span><span class="kw-2">mut </span>previous = (<span class="number">0</span>..<span class="number">9</span>)
-        .map(|i| Url::parse(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;http://a.b/c/{}&quot;</span>, i)).unwrap())
+        .map(|i| Url::parse(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"http://a.b/c/{}"</span>, i)).unwrap())
         .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
 
     <span class="kw">match </span>policy.check(StatusCode::FOUND, <span class="kw-2">&amp;</span>next, <span class="kw-2">&amp;</span>previous) {
         ActionKind::Follow =&gt; (),
-        other =&gt; <span class="macro">panic!</span>(<span class="string">&quot;unexpected {:?}&quot;</span>, other),
+        other =&gt; <span class="macro">panic!</span>(<span class="string">"unexpected {:?}"</span>, other),
     }
 
-    previous.push(Url::parse(<span class="string">&quot;http://a.b.d/e/33&quot;</span>).unwrap());
+    previous.push(Url::parse(<span class="string">"http://a.b.d/e/33"</span>).unwrap());
 
     <span class="kw">match </span>policy.check(StatusCode::FOUND, <span class="kw-2">&amp;</span>next, <span class="kw-2">&amp;</span>previous) {
         ActionKind::Error(err) <span class="kw">if </span>err.is::&lt;TooManyRedirects&gt;() =&gt; (),
-        other =&gt; <span class="macro">panic!</span>(<span class="string">&quot;unexpected {:?}&quot;</span>, other),
+        other =&gt; <span class="macro">panic!</span>(<span class="string">"unexpected {:?}"</span>, other),
     }
 }
 
 <span class="attr">#[test]
 </span><span class="kw">fn </span>test_redirect_policy_limit_to_0() {
     <span class="kw">let </span>policy = Policy::limited(<span class="number">0</span>);
-    <span class="kw">let </span>next = Url::parse(<span class="string">&quot;http://x.y/z&quot;</span>).unwrap();
-    <span class="kw">let </span>previous = <span class="macro">vec!</span>[Url::parse(<span class="string">&quot;http://a.b/c&quot;</span>).unwrap()];
+    <span class="kw">let </span>next = Url::parse(<span class="string">"http://x.y/z"</span>).unwrap();
+    <span class="kw">let </span>previous = <span class="macro">vec!</span>[Url::parse(<span class="string">"http://a.b/c"</span>).unwrap()];
 
     <span class="kw">match </span>policy.check(StatusCode::FOUND, <span class="kw-2">&amp;</span>next, <span class="kw-2">&amp;</span>previous) {
         ActionKind::Error(err) <span class="kw">if </span>err.is::&lt;TooManyRedirects&gt;() =&gt; (),
-        other =&gt; <span class="macro">panic!</span>(<span class="string">&quot;unexpected {:?}&quot;</span>, other),
+        other =&gt; <span class="macro">panic!</span>(<span class="string">"unexpected {:?}"</span>, other),
     }
 }
 
 <span class="attr">#[test]
 </span><span class="kw">fn </span>test_redirect_policy_custom() {
     <span class="kw">let </span>policy = Policy::custom(|attempt| {
-        <span class="kw">if </span>attempt.url().host_str() == <span class="prelude-val">Some</span>(<span class="string">&quot;foo&quot;</span>) {
+        <span class="kw">if </span>attempt.url().host_str() == <span class="prelude-val">Some</span>(<span class="string">"foo"</span>) {
             attempt.stop()
         } <span class="kw">else </span>{
             attempt.follow()
         }
     });
 
-    <span class="kw">let </span>next = Url::parse(<span class="string">&quot;http://bar/baz&quot;</span>).unwrap();
+    <span class="kw">let </span>next = Url::parse(<span class="string">"http://bar/baz"</span>).unwrap();
     <span class="kw">match </span>policy.check(StatusCode::FOUND, <span class="kw-2">&amp;</span>next, <span class="kw-2">&amp;</span>[]) {
         ActionKind::Follow =&gt; (),
-        other =&gt; <span class="macro">panic!</span>(<span class="string">&quot;unexpected {:?}&quot;</span>, other),
+        other =&gt; <span class="macro">panic!</span>(<span class="string">"unexpected {:?}"</span>, other),
     }
 
-    <span class="kw">let </span>next = Url::parse(<span class="string">&quot;http://foo/baz&quot;</span>).unwrap();
+    <span class="kw">let </span>next = Url::parse(<span class="string">"http://foo/baz"</span>).unwrap();
     <span class="kw">match </span>policy.check(StatusCode::FOUND, <span class="kw-2">&amp;</span>next, <span class="kw-2">&amp;</span>[]) {
         ActionKind::Stop =&gt; (),
-        other =&gt; <span class="macro">panic!</span>(<span class="string">&quot;unexpected {:?}&quot;</span>, other),
+        other =&gt; <span class="macro">panic!</span>(<span class="string">"unexpected {:?}"</span>, other),
     }
 }
 
@@ -654,18 +654,18 @@
     <span class="kw">use </span>hyper::header::{HeaderValue, ACCEPT, AUTHORIZATION, COOKIE};
 
     <span class="kw">let </span><span class="kw-2">mut </span>headers = HeaderMap::new();
-    headers.insert(ACCEPT, HeaderValue::from_static(<span class="string">&quot;*/*&quot;</span>));
-    headers.insert(AUTHORIZATION, HeaderValue::from_static(<span class="string">&quot;let me in&quot;</span>));
-    headers.insert(COOKIE, HeaderValue::from_static(<span class="string">&quot;foo=bar&quot;</span>));
+    headers.insert(ACCEPT, HeaderValue::from_static(<span class="string">"*/*"</span>));
+    headers.insert(AUTHORIZATION, HeaderValue::from_static(<span class="string">"let me in"</span>));
+    headers.insert(COOKIE, HeaderValue::from_static(<span class="string">"foo=bar"</span>));
 
-    <span class="kw">let </span>next = Url::parse(<span class="string">&quot;http://initial-domain.com/path&quot;</span>).unwrap();
-    <span class="kw">let </span><span class="kw-2">mut </span>prev = <span class="macro">vec!</span>[Url::parse(<span class="string">&quot;http://initial-domain.com/new_path&quot;</span>).unwrap()];
+    <span class="kw">let </span>next = Url::parse(<span class="string">"http://initial-domain.com/path"</span>).unwrap();
+    <span class="kw">let </span><span class="kw-2">mut </span>prev = <span class="macro">vec!</span>[Url::parse(<span class="string">"http://initial-domain.com/new_path"</span>).unwrap()];
     <span class="kw">let </span><span class="kw-2">mut </span>filtered_headers = headers.clone();
 
     remove_sensitive_headers(<span class="kw-2">&amp;mut </span>headers, <span class="kw-2">&amp;</span>next, <span class="kw-2">&amp;</span>prev);
     <span class="macro">assert_eq!</span>(headers, filtered_headers);
 
-    prev.push(Url::parse(<span class="string">&quot;http://new-domain.com/path&quot;</span>).unwrap());
+    prev.push(Url::parse(<span class="string">"http://new-domain.com/path"</span>).unwrap());
     filtered_headers.remove(AUTHORIZATION);
     filtered_headers.remove(COOKIE);
 

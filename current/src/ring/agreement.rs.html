@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.5/src/agreement.rs`."><title>agreement.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="ring" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.5/src/agreement.rs`."><title>agreement.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="ring" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -305,7 +305,7 @@
 // purpose with or without fee is hereby granted, provided that the above
 // copyright notice and this permission notice appear in all copies.
 //
-// THE SOFTWARE IS PROVIDED &quot;AS IS&quot; AND THE AUTHORS DISCLAIM ALL WARRANTIES
+// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHORS DISCLAIM ALL WARRANTIES
 // WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
 // MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY
 // SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
@@ -349,7 +349,7 @@
 //!     my_private_key,
 //!     &amp;peer_public_key,
 //!     |_key_material| {
-//!         // In a real application, we&#39;d apply a KDF to the key material and the
+//!         // In a real application, we'd apply a KDF to the key material and the
 //!         // public keys (as recommended in RFC 7748) and then derive session
 //!         // keys from the result. We omit all that here.
 //!     },
@@ -358,8 +358,8 @@
 //! # Ok::&lt;(), ring::error::Unspecified&gt;(())
 //! ```
 
-</span><span class="comment">// The &quot;NSA Guide&quot; steps here are from from section 3.1, &quot;Ephemeral Unified
-// Model.&quot;
+</span><span class="comment">// The "NSA Guide" steps here are from from section 3.1, "Ephemeral Unified
+// Model."
 
 </span><span class="kw">use crate</span>::{cpu, debug, ec, error, rand};
 
@@ -370,7 +370,7 @@
 
 <span class="doccomment">/// A key agreement algorithm.
 </span><span class="kw">pub struct </span>Algorithm {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) curve: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>ec::Curve,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) curve: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>ec::Curve,
     <span class="kw">pub</span>(<span class="kw">crate</span>) ecdh: <span class="kw">fn</span>(
         out: <span class="kw-2">&amp;mut </span>[u8],
         private_key: <span class="kw-2">&amp;</span>ec::Seed,
@@ -392,7 +392,7 @@
 /// used for at most one key agreement.
 </span><span class="kw">pub struct </span>EphemeralPrivateKey {
     private_key: ec::Seed,
-    algorithm: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Algorithm,
+    algorithm: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Algorithm,
 }
 
 <span class="macro">derive_debug_via_field!</span>(
@@ -404,7 +404,7 @@
 <span class="kw">impl </span>EphemeralPrivateKey {
     <span class="doccomment">/// Generate a new ephemeral private key for the given algorithm.
     </span><span class="kw">pub fn </span>generate(
-        alg: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Algorithm,
+        alg: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Algorithm,
         rng: <span class="kw-2">&amp;</span><span class="kw">dyn </span>rand::SecureRandom,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, error::Unspecified&gt; {
         <span class="kw">let </span>cpu_features = cpu::features();
@@ -438,7 +438,7 @@
 
     <span class="doccomment">/// The algorithm for the private key.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>algorithm(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Algorithm {
+    </span><span class="kw">pub fn </span>algorithm(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Algorithm {
         <span class="self">self</span>.algorithm
     }
 
@@ -451,7 +451,7 @@
 <span class="doccomment">/// A public key for key agreement.
 </span><span class="attr">#[derive(Clone)]
 </span><span class="kw">pub struct </span>PublicKey {
-    algorithm: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Algorithm,
+    algorithm: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Algorithm,
     bytes: ec::PublicKey,
 }
 
@@ -463,9 +463,9 @@
 
 <span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>PublicKey {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter) -&gt; <span class="prelude-ty">Result</span>&lt;(), core::fmt::Error&gt; {
-        f.debug_struct(<span class="string">&quot;PublicKey&quot;</span>)
-            .field(<span class="string">&quot;algorithm&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.algorithm)
-            .field(<span class="string">&quot;bytes&quot;</span>, <span class="kw-2">&amp;</span>debug::HexStr(<span class="self">self</span>.as_ref()))
+        f.debug_struct(<span class="string">"PublicKey"</span>)
+            .field(<span class="string">"algorithm"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.algorithm)
+            .field(<span class="string">"bytes"</span>, <span class="kw-2">&amp;</span>debug::HexStr(<span class="self">self</span>.as_ref()))
             .finish()
     }
 }
@@ -473,7 +473,7 @@
 <span class="kw">impl </span>PublicKey {
     <span class="doccomment">/// The algorithm for the public key.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>algorithm(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Algorithm {
+    </span><span class="kw">pub fn </span>algorithm(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Algorithm {
         <span class="self">self</span>.algorithm
     }
 }
@@ -481,7 +481,7 @@
 <span class="doccomment">/// An unparsed, possibly malformed, public key for key agreement.
 </span><span class="attr">#[derive(Clone, Copy)]
 </span><span class="kw">pub struct </span>UnparsedPublicKey&lt;B&gt; {
-    algorithm: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Algorithm,
+    algorithm: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Algorithm,
     bytes: B,
 }
 
@@ -499,22 +499,22 @@
     </span>B: AsRef&lt;[u8]&gt;,
 {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter) -&gt; <span class="prelude-ty">Result</span>&lt;(), core::fmt::Error&gt; {
-        f.debug_struct(<span class="string">&quot;UnparsedPublicKey&quot;</span>)
-            .field(<span class="string">&quot;algorithm&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.algorithm)
-            .field(<span class="string">&quot;bytes&quot;</span>, <span class="kw-2">&amp;</span>debug::HexStr(<span class="self">self</span>.bytes.as_ref()))
+        f.debug_struct(<span class="string">"UnparsedPublicKey"</span>)
+            .field(<span class="string">"algorithm"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.algorithm)
+            .field(<span class="string">"bytes"</span>, <span class="kw-2">&amp;</span>debug::HexStr(<span class="self">self</span>.bytes.as_ref()))
             .finish()
     }
 }
 
 <span class="kw">impl</span>&lt;B&gt; UnparsedPublicKey&lt;B&gt; {
     <span class="doccomment">/// Constructs a new `UnparsedPublicKey`.
-    </span><span class="kw">pub fn </span>new(algorithm: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Algorithm, bytes: B) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(algorithm: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Algorithm, bytes: B) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{ algorithm, bytes }
     }
 
     <span class="doccomment">/// The algorithm for the public key.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>algorithm(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Algorithm {
+    </span><span class="kw">pub fn </span>algorithm(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Algorithm {
         <span class="self">self</span>.algorithm
     }
 
@@ -532,10 +532,10 @@
 /// will not be usable after calling `agree_ephemeral`, thus guaranteeing that
 /// the key is used for only one key agreement.
 ///
-/// `peer_public_key` is the peer&#39;s public key. `agree_ephemeral` will return
-/// `Err(error_value)` if it does not match `my_private_key&#39;s` algorithm/curve.
+/// `peer_public_key` is the peer's public key. `agree_ephemeral` will return
+/// `Err(error_value)` if it does not match `my_private_key's` algorithm/curve.
 /// `agree_ephemeral` verifies that it is encoded in the standard form for the
-/// algorithm and that the key is *valid*; see the algorithm&#39;s documentation for
+/// algorithm and that the key is *valid*; see the algorithm's documentation for
 /// details on how keys are to be encoded and what constitutes a valid key for
 /// that algorithm.
 ///
@@ -563,7 +563,7 @@
     <span class="comment">// NSA Guide Prerequisite 1.
     //
     // The domain parameters are hard-coded. This check verifies that the
-    // peer&#39;s public key&#39;s domain parameters match the domain parameters of
+    // peer's public key's domain parameters match the domain parameters of
     // this private key.
     </span><span class="kw">if </span>peer_public_key.algorithm != my_private_key.algorithm {
         <span class="kw">return </span><span class="prelude-val">Err</span>(error::Unspecified);
@@ -574,9 +574,9 @@
     <span class="comment">// NSA Guide Prerequisite 2, regarding which KDFs are allowed, is delegated
     // to the caller.
 
-    // NSA Guide Prerequisite 3, &quot;Prior to or during the key-agreement process,
+    // NSA Guide Prerequisite 3, "Prior to or during the key-agreement process,
     // each party shall obtain the identifier associated with the other party
-    // during the key-agreement scheme,&quot; is delegated to the caller.
+    // during the key-agreement scheme," is delegated to the caller.
 
     // NSA Guide Step 1 is handled by `EphemeralPrivateKey::generate()` and
     // `EphemeralPrivateKey::compute_public_key()`.
@@ -586,8 +586,8 @@
 
     <span class="comment">// NSA Guide Steps 2, 3, and 4.
     //
-    // We have a pretty liberal interpretation of the NIST&#39;s spec&#39;s &quot;Destroy&quot;
-    // that doesn&#39;t meet the NSA requirement to &quot;zeroize.&quot;
+    // We have a pretty liberal interpretation of the NIST's spec's "Destroy"
+    // that doesn't meet the NSA requirement to "zeroize."
     </span>(alg.ecdh)(
         shared_key,
         <span class="kw-2">&amp;</span>my_private_key.private_key,
@@ -596,8 +596,8 @@
 
     <span class="comment">// NSA Guide Steps 5 and 6.
     //
-    // Again, we have a pretty liberal interpretation of the NIST&#39;s spec&#39;s
-    // &quot;Destroy&quot; that doesn&#39;t meet the NSA requirement to &quot;zeroize.&quot;
+    // Again, we have a pretty liberal interpretation of the NIST's spec's
+    // "Destroy" that doesn't meet the NSA requirement to "zeroize."
     </span><span class="prelude-val">Ok</span>(kdf(shared_key))
 }
 </code></pre></div></section></main></body></html>

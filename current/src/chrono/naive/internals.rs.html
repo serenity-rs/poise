@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/chrono-0.4.31/src/naive/internals.rs`."><title>internals.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="chrono" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/chrono-0.4.31/src/naive/internals.rs`."><title>internals.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="chrono" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -904,7 +904,7 @@
 //! but the conversion keeps the valid value valid and the invalid value invalid
 //! so that the user-facing `NaiveDate` can validate the input as late as possible.
 
-</span><span class="attr">#![cfg_attr(feature = <span class="string">&quot;__internal_bench&quot;</span>, allow(missing_docs))]
+</span><span class="attr">#![cfg_attr(feature = <span class="string">"__internal_bench"</span>, allow(missing_docs))]
 
 </span><span class="kw">use </span><span class="kw">crate</span>::Weekday;
 <span class="kw">use </span>core::fmt;
@@ -1042,23 +1042,23 @@
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
         <span class="kw">let </span>YearFlags(flags) = <span class="kw-2">*</span><span class="self">self</span>;
         <span class="kw">match </span>flags {
-            <span class="number">0o15 </span>=&gt; <span class="string">&quot;A&quot;</span>.fmt(f),
-            <span class="number">0o05 </span>=&gt; <span class="string">&quot;AG&quot;</span>.fmt(f),
-            <span class="number">0o14 </span>=&gt; <span class="string">&quot;B&quot;</span>.fmt(f),
-            <span class="number">0o04 </span>=&gt; <span class="string">&quot;BA&quot;</span>.fmt(f),
-            <span class="number">0o13 </span>=&gt; <span class="string">&quot;C&quot;</span>.fmt(f),
-            <span class="number">0o03 </span>=&gt; <span class="string">&quot;CB&quot;</span>.fmt(f),
-            <span class="number">0o12 </span>=&gt; <span class="string">&quot;D&quot;</span>.fmt(f),
-            <span class="number">0o02 </span>=&gt; <span class="string">&quot;DC&quot;</span>.fmt(f),
-            <span class="number">0o11 </span>=&gt; <span class="string">&quot;E&quot;</span>.fmt(f),
-            <span class="number">0o01 </span>=&gt; <span class="string">&quot;ED&quot;</span>.fmt(f),
-            <span class="number">0o10 </span>=&gt; <span class="string">&quot;F?&quot;</span>.fmt(f),
-            <span class="number">0o00 </span>=&gt; <span class="string">&quot;FE?&quot;</span>.fmt(f), <span class="comment">// non-canonical
-            </span><span class="number">0o17 </span>=&gt; <span class="string">&quot;F&quot;</span>.fmt(f),
-            <span class="number">0o07 </span>=&gt; <span class="string">&quot;FE&quot;</span>.fmt(f),
-            <span class="number">0o16 </span>=&gt; <span class="string">&quot;G&quot;</span>.fmt(f),
-            <span class="number">0o06 </span>=&gt; <span class="string">&quot;GF&quot;</span>.fmt(f),
-            <span class="kw">_ </span>=&gt; <span class="macro">write!</span>(f, <span class="string">&quot;YearFlags({})&quot;</span>, flags),
+            <span class="number">0o15 </span>=&gt; <span class="string">"A"</span>.fmt(f),
+            <span class="number">0o05 </span>=&gt; <span class="string">"AG"</span>.fmt(f),
+            <span class="number">0o14 </span>=&gt; <span class="string">"B"</span>.fmt(f),
+            <span class="number">0o04 </span>=&gt; <span class="string">"BA"</span>.fmt(f),
+            <span class="number">0o13 </span>=&gt; <span class="string">"C"</span>.fmt(f),
+            <span class="number">0o03 </span>=&gt; <span class="string">"CB"</span>.fmt(f),
+            <span class="number">0o12 </span>=&gt; <span class="string">"D"</span>.fmt(f),
+            <span class="number">0o02 </span>=&gt; <span class="string">"DC"</span>.fmt(f),
+            <span class="number">0o11 </span>=&gt; <span class="string">"E"</span>.fmt(f),
+            <span class="number">0o01 </span>=&gt; <span class="string">"ED"</span>.fmt(f),
+            <span class="number">0o10 </span>=&gt; <span class="string">"F?"</span>.fmt(f),
+            <span class="number">0o00 </span>=&gt; <span class="string">"FE?"</span>.fmt(f), <span class="comment">// non-canonical
+            </span><span class="number">0o17 </span>=&gt; <span class="string">"F"</span>.fmt(f),
+            <span class="number">0o07 </span>=&gt; <span class="string">"FE"</span>.fmt(f),
+            <span class="number">0o16 </span>=&gt; <span class="string">"G"</span>.fmt(f),
+            <span class="number">0o06 </span>=&gt; <span class="string">"GF"</span>.fmt(f),
+            <span class="kw">_ </span>=&gt; <span class="macro">write!</span>(f, <span class="string">"YearFlags({})"</span>, flags),
         }
     }
 }
@@ -1237,7 +1237,7 @@
         (weekord / <span class="number">7</span>, weekday_from_u32_mod7(weekord))
     }
 
-    <span class="attr">#[cfg_attr(feature = <span class="string">&quot;cargo-clippy&quot;</span>, allow(clippy::wrong_self_convention))]
+    <span class="attr">#[cfg_attr(feature = <span class="string">"cargo-clippy"</span>, allow(clippy::wrong_self_convention))]
     #[inline]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">const fn </span>to_mdf(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Mdf {
         Mdf::from_of(<span class="kw-2">*</span><span class="self">self</span>)
@@ -1265,7 +1265,7 @@
         <span class="kw">let </span>Of(of) = <span class="kw-2">*</span><span class="self">self</span>;
         <span class="macro">write!</span>(
             f,
-            <span class="string">&quot;Of(({} &lt;&lt; 4) | {:#04o} /*{:?}*/)&quot;</span>,
+            <span class="string">"Of(({} &lt;&lt; 4) | {:#04o} /*{:?}*/)"</span>,
             of &gt;&gt; <span class="number">4</span>,
             of &amp; <span class="number">0b1111</span>,
             YearFlags((of &amp; <span class="number">0b1111</span>) <span class="kw">as </span>u8)
@@ -1280,7 +1280,7 @@
 /// which is an index to the `MDL_TO_OL` lookup table.
 ///
 /// The methods implemented on `Mdf` do not always return a valid value.
-/// Dates that can&#39;t exist, like February 30, can still be represented.
+/// Dates that can't exist, like February 30, can still be represented.
 /// Use `Mdl::valid` to check whether the date is valid.
 </span><span class="attr">#[derive(PartialEq, PartialOrd, Copy, Clone)]
 </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">struct </span>Mdf(u32);
@@ -1357,7 +1357,7 @@
         Mdf((mdf &amp; !<span class="number">0b1111</span>) | flags <span class="kw">as </span>u32)
     }
 
-    <span class="attr">#[cfg_attr(feature = <span class="string">&quot;cargo-clippy&quot;</span>, allow(clippy::wrong_self_convention))]
+    <span class="attr">#[cfg_attr(feature = <span class="string">"cargo-clippy"</span>, allow(clippy::wrong_self_convention))]
     #[inline]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">const fn </span>to_of(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Of&gt; {
         Of::from_mdf(<span class="kw-2">*</span><span class="self">self</span>)
@@ -1369,7 +1369,7 @@
         <span class="kw">let </span>Mdf(mdf) = <span class="kw-2">*</span><span class="self">self</span>;
         <span class="macro">write!</span>(
             f,
-            <span class="string">&quot;Mdf(({} &lt;&lt; 9) | ({} &lt;&lt; 4) | {:#04o} /*{:?}*/)&quot;</span>,
+            <span class="string">"Mdf(({} &lt;&lt; 9) | ({} &lt;&lt; 4) | {:#04o} /*{:?}*/)"</span>,
             mdf &gt;&gt; <span class="number">9</span>,
             (mdf &gt;&gt; <span class="number">4</span>) &amp; <span class="number">0b1_1111</span>,
             mdf &amp; <span class="number">0b1111</span>,
@@ -1446,15 +1446,15 @@
                 <span class="kw">let </span>of = <span class="kw">match </span>Of::new(ordinal, flags) {
                     <span class="prelude-val">Some</span>(of) =&gt; of,
                     <span class="prelude-val">None </span><span class="kw">if </span>!expected =&gt; <span class="kw">continue</span>,
-                    <span class="prelude-val">None </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;Of::new({}, {:?}) returned None&quot;</span>, ordinal, flags),
+                    <span class="prelude-val">None </span>=&gt; <span class="macro">panic!</span>(<span class="string">"Of::new({}, {:?}) returned None"</span>, ordinal, flags),
                 };
 
                 <span class="macro">assert!</span>(
                     of.validate().is_some() == expected,
-                    <span class="string">&quot;ordinal {} = {:?} should be {} for dominical year {:?}&quot;</span>,
+                    <span class="string">"ordinal {} = {:?} should be {} for dominical year {:?}"</span>,
                     ordinal,
                     of,
-                    <span class="kw">if </span>expected { <span class="string">&quot;valid&quot; </span>} <span class="kw">else </span>{ <span class="string">&quot;invalid&quot; </span>},
+                    <span class="kw">if </span>expected { <span class="string">"valid" </span>} <span class="kw">else </span>{ <span class="string">"invalid" </span>},
                     flags
                 );
             }
@@ -1483,16 +1483,16 @@
                     <span class="kw">let </span>mdf = <span class="kw">match </span>Mdf::new(month, day, flags) {
                         <span class="prelude-val">Some</span>(mdf) =&gt; mdf,
                         <span class="prelude-val">None </span><span class="kw">if </span>!expected =&gt; <span class="kw">continue</span>,
-                        <span class="prelude-val">None </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;Mdf::new({}, {}, {:?}) returned None&quot;</span>, month, day, flags),
+                        <span class="prelude-val">None </span>=&gt; <span class="macro">panic!</span>(<span class="string">"Mdf::new({}, {}, {:?}) returned None"</span>, month, day, flags),
                     };
 
                     <span class="macro">assert!</span>(
                         mdf.valid() == expected,
-                        <span class="string">&quot;month {} day {} = {:?} should be {} for dominical year {:?}&quot;</span>,
+                        <span class="string">"month {} day {} = {:?} should be {} for dominical year {:?}"</span>,
                         month,
                         day,
                         mdf,
-                        <span class="kw">if </span>expected { <span class="string">&quot;valid&quot; </span>} <span class="kw">else </span>{ <span class="string">&quot;invalid&quot; </span>},
+                        <span class="kw">if </span>expected { <span class="string">"valid" </span>} <span class="kw">else </span>{ <span class="string">"invalid" </span>},
                         flags
                     );
                 }
@@ -1657,7 +1657,7 @@
                 <span class="kw">let </span>mdf = <span class="kw">match </span>mdf.with_month(month) {
                     <span class="prelude-val">Some</span>(mdf) =&gt; mdf,
                     <span class="prelude-val">None </span><span class="kw">if </span>month &gt; <span class="number">12 </span>=&gt; <span class="kw">continue</span>,
-                    <span class="prelude-val">None </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;failed to create Mdf with month {}&quot;</span>, month),
+                    <span class="prelude-val">None </span>=&gt; <span class="macro">panic!</span>(<span class="string">"failed to create Mdf with month {}"</span>, month),
                 };
 
                 <span class="kw">if </span>mdf.valid() {
@@ -1670,7 +1670,7 @@
                 <span class="kw">let </span>mdf = <span class="kw">match </span>mdf.with_day(day) {
                     <span class="prelude-val">Some</span>(mdf) =&gt; mdf,
                     <span class="prelude-val">None </span><span class="kw">if </span>day &gt; <span class="number">31 </span>=&gt; <span class="kw">continue</span>,
-                    <span class="prelude-val">None </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;failed to create Mdf with month {}&quot;</span>, month),
+                    <span class="prelude-val">None </span>=&gt; <span class="macro">panic!</span>(<span class="string">"failed to create Mdf with month {}"</span>, month),
                 };
 
                 <span class="kw">if </span>mdf.valid() {

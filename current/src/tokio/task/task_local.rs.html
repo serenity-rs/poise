@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/task/task_local.rs`."><title>task_local.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/task/task_local.rs`."><title>task_local.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -466,7 +466,7 @@
 ///
 /// [`tokio::task::LocalKey`]: struct@crate::task::LocalKey
 </span><span class="attr">#[macro_export]
-#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;rt&quot;</span>)))]
+#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"rt"</span>)))]
 </span><span class="macro">macro_rules! </span>task_local {
      <span class="comment">// empty (base case for the recursion)
     </span>() =&gt; {};
@@ -529,13 +529,13 @@
 ///
 /// [`std::thread::LocalKey`]: struct@std::thread::LocalKey
 /// [`task_local!`]: ../macro.task_local.html
-</span><span class="attr">#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;rt&quot;</span>)))]
-</span><span class="kw">pub struct </span>LocalKey&lt;T: <span class="lifetime">&#39;static</span>&gt; {
+</span><span class="attr">#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"rt"</span>)))]
+</span><span class="kw">pub struct </span>LocalKey&lt;T: <span class="lifetime">'static</span>&gt; {
     <span class="attr">#[doc(hidden)]
     </span><span class="kw">pub </span>inner: thread::LocalKey&lt;RefCell&lt;<span class="prelude-ty">Option</span>&lt;T&gt;&gt;&gt;,
 }
 
-<span class="kw">impl</span>&lt;T: <span class="lifetime">&#39;static</span>&gt; LocalKey&lt;T&gt; {
+<span class="kw">impl</span>&lt;T: <span class="lifetime">'static</span>&gt; LocalKey&lt;T&gt; {
     <span class="doccomment">/// Sets a value `T` as the task-local value for the future `F`.
     ///
     /// On completion of `scope`, the task-local will be dropped.
@@ -554,14 +554,14 @@
     /// }
     ///
     /// NUMBER.scope(1, async move {
-    ///     println!(&quot;task local value: {}&quot;, NUMBER.get());
+    ///     println!("task local value: {}", NUMBER.get());
     /// }).await;
     /// # }
     /// ```
     ///
     /// [`with`]: fn@Self::with
     /// [`try_with`]: fn@Self::try_with
-    </span><span class="kw">pub fn </span>scope&lt;F&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="self">self</span>, value: T, f: F) -&gt; TaskLocalFuture&lt;T, F&gt;
+    </span><span class="kw">pub fn </span>scope&lt;F&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'static </span><span class="self">self</span>, value: T, f: F) -&gt; TaskLocalFuture&lt;T, F&gt;
     <span class="kw">where
         </span>F: Future,
     {
@@ -591,7 +591,7 @@
     /// }
     ///
     /// NUMBER.sync_scope(1, || {
-    ///     println!(&quot;task local value: {}&quot;, NUMBER.get());
+    ///     println!("task local value: {}", NUMBER.get());
     /// });
     /// # }
     /// ```
@@ -599,7 +599,7 @@
     /// [`with`]: fn@Self::with
     /// [`try_with`]: fn@Self::try_with
     </span><span class="attr">#[track_caller]
-    </span><span class="kw">pub fn </span>sync_scope&lt;F, R&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="self">self</span>, value: T, f: F) -&gt; R
+    </span><span class="kw">pub fn </span>sync_scope&lt;F, R&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'static </span><span class="self">self</span>, value: T, f: F) -&gt; R
     <span class="kw">where
         </span>F: FnOnce() -&gt; R,
     {
@@ -610,16 +610,16 @@
         }
     }
 
-    <span class="kw">fn </span>scope_inner&lt;F, R&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="self">self</span>, slot: <span class="kw-2">&amp;mut </span><span class="prelude-ty">Option</span>&lt;T&gt;, f: F) -&gt; <span class="prelude-ty">Result</span>&lt;R, ScopeInnerErr&gt;
+    <span class="kw">fn </span>scope_inner&lt;F, R&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'static </span><span class="self">self</span>, slot: <span class="kw-2">&amp;mut </span><span class="prelude-ty">Option</span>&lt;T&gt;, f: F) -&gt; <span class="prelude-ty">Result</span>&lt;R, ScopeInnerErr&gt;
     <span class="kw">where
         </span>F: FnOnce() -&gt; R,
     {
-        <span class="kw">struct </span>Guard&lt;<span class="lifetime">&#39;a</span>, T: <span class="lifetime">&#39;static</span>&gt; {
-            local: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>LocalKey&lt;T&gt;,
-            slot: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="prelude-ty">Option</span>&lt;T&gt;,
+        <span class="kw">struct </span>Guard&lt;<span class="lifetime">'a</span>, T: <span class="lifetime">'static</span>&gt; {
+            local: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>LocalKey&lt;T&gt;,
+            slot: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span><span class="prelude-ty">Option</span>&lt;T&gt;,
         }
 
-        <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: <span class="lifetime">&#39;static</span>&gt; Drop <span class="kw">for </span>Guard&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+        <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T: <span class="lifetime">'static</span>&gt; Drop <span class="kw">for </span>Guard&lt;<span class="lifetime">'a</span>, T&gt; {
             <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
                 <span class="comment">// This should not panic.
                 //
@@ -627,11 +627,11 @@
                 // `scope_inner`, so the only way for this to panic is if the
                 // closure has created but not destroyed a RefCell guard.
                 // However, we never give user-code access to the guards, so
-                // there&#39;s no way for user-code to forget to destroy a guard.
+                // there's no way for user-code to forget to destroy a guard.
                 //
                 // The call to `with` also should not panic, since the
-                // thread-local wasn&#39;t destroyed when we first called
-                // `scope_inner`, and it shouldn&#39;t have gotten destroyed since
+                // thread-local wasn't destroyed when we first called
+                // `scope_inner`, and it shouldn't have gotten destroyed since
                 // then.
                 </span><span class="self">self</span>.local.inner.with(|inner| {
                     <span class="kw">let </span><span class="kw-2">mut </span>ref_mut = inner.borrow_mut();
@@ -659,15 +659,15 @@
     ///
     /// # Panics
     ///
-    /// This function will panic if the task local doesn&#39;t have a value set.
+    /// This function will panic if the task local doesn't have a value set.
     </span><span class="attr">#[track_caller]
-    </span><span class="kw">pub fn </span>with&lt;F, R&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="self">self</span>, f: F) -&gt; R
+    </span><span class="kw">pub fn </span>with&lt;F, R&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'static </span><span class="self">self</span>, f: F) -&gt; R
     <span class="kw">where
         </span>F: FnOnce(<span class="kw-2">&amp;</span>T) -&gt; R,
     {
         <span class="kw">match </span><span class="self">self</span>.try_with(f) {
             <span class="prelude-val">Ok</span>(res) =&gt; res,
-            <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="macro">panic!</span>(<span class="string">&quot;cannot access a task-local storage value without setting it first&quot;</span>),
+            <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="macro">panic!</span>(<span class="string">"cannot access a task-local storage value without setting it first"</span>),
         }
     }
 
@@ -676,7 +676,7 @@
     /// If the task-local with the associated key is not present, this
     /// method will return an `AccessError`. For a panicking variant,
     /// see `with`.
-    </span><span class="kw">pub fn </span>try_with&lt;F, R&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="self">self</span>, f: F) -&gt; <span class="prelude-ty">Result</span>&lt;R, AccessError&gt;
+    </span><span class="kw">pub fn </span>try_with&lt;F, R&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'static </span><span class="self">self</span>, f: F) -&gt; <span class="prelude-ty">Result</span>&lt;R, AccessError&gt;
     <span class="kw">where
         </span>F: FnOnce(<span class="kw-2">&amp;</span>T) -&gt; R,
     {
@@ -698,22 +698,22 @@
     }
 }
 
-<span class="kw">impl</span>&lt;T: Copy + <span class="lifetime">&#39;static</span>&gt; LocalKey&lt;T&gt; {
+<span class="kw">impl</span>&lt;T: Copy + <span class="lifetime">'static</span>&gt; LocalKey&lt;T&gt; {
     <span class="doccomment">/// Returns a copy of the task-local value
     /// if the task-local value implements `Copy`.
     ///
     /// # Panics
     ///
-    /// This function will panic if the task local doesn&#39;t have a value set.
+    /// This function will panic if the task local doesn't have a value set.
     </span><span class="attr">#[track_caller]
-    </span><span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="self">self</span>) -&gt; T {
+    </span><span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="lifetime">'static </span><span class="self">self</span>) -&gt; T {
         <span class="self">self</span>.with(|v| <span class="kw-2">*</span>v)
     }
 }
 
-<span class="kw">impl</span>&lt;T: <span class="lifetime">&#39;static</span>&gt; fmt::Debug <span class="kw">for </span>LocalKey&lt;T&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        f.pad(<span class="string">&quot;LocalKey { .. }&quot;</span>)
+<span class="kw">impl</span>&lt;T: <span class="lifetime">'static</span>&gt; fmt::Debug <span class="kw">for </span>LocalKey&lt;T&gt; {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        f.pad(<span class="string">"LocalKey { .. }"</span>)
     }
 }
 
@@ -721,7 +721,7 @@
     <span class="doccomment">/// A future that sets a value `T` of a task local for the future `F` during
     /// its execution.
     ///
-    /// The value of the task-local must be `&#39;static` and will be dropped on the
+    /// The value of the task-local must be `'static` and will be dropped on the
     /// completion of the future.
     ///
     /// Created by the function [`LocalKey::scope`](self::LocalKey::scope).
@@ -735,15 +735,15 @@
     /// }
     ///
     /// NUMBER.scope(1, async move {
-    ///     println!(&quot;task local value: {}&quot;, NUMBER.get());
+    ///     println!("task local value: {}", NUMBER.get());
     /// }).await;
     /// # }
     /// ```
     </span><span class="kw">pub struct </span>TaskLocalFuture&lt;T, F&gt;
     <span class="kw">where
-        </span>T: <span class="lifetime">&#39;static</span>,
+        </span>T: <span class="lifetime">'static</span>,
     {
-        local: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>LocalKey&lt;T&gt;,
+        local: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>LocalKey&lt;T&gt;,
         slot: <span class="prelude-ty">Option</span>&lt;T&gt;,
         <span class="attr">#[pin]
         </span>future: <span class="prelude-ty">Option</span>&lt;F&gt;,
@@ -751,7 +751,7 @@
         </span>_pinned: PhantomPinned,
     }
 
-    <span class="kw">impl</span>&lt;T: <span class="lifetime">&#39;static</span>, F&gt; PinnedDrop <span class="kw">for </span>TaskLocalFuture&lt;T, F&gt; {
+    <span class="kw">impl</span>&lt;T: <span class="lifetime">'static</span>, F&gt; PinnedDrop <span class="kw">for </span>TaskLocalFuture&lt;T, F&gt; {
         <span class="kw">fn </span>drop(this: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;) {
             <span class="kw">let </span>this = this.project();
             <span class="kw">if </span>mem::needs_drop::&lt;F&gt;() &amp;&amp; this.future.is_some() {
@@ -766,11 +766,11 @@
     }
 }
 
-<span class="kw">impl</span>&lt;T: <span class="lifetime">&#39;static</span>, F: Future&gt; Future <span class="kw">for </span>TaskLocalFuture&lt;T, F&gt; {
+<span class="kw">impl</span>&lt;T: <span class="lifetime">'static</span>, F: Future&gt; Future <span class="kw">for </span>TaskLocalFuture&lt;T, F&gt; {
     <span class="kw">type </span>Output = F::Output;
 
     <span class="attr">#[track_caller]
-    </span><span class="kw">fn </span>poll(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
+    </span><span class="kw">fn </span>poll(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
         <span class="kw">let </span>this = <span class="self">self</span>.project();
         <span class="kw">let </span><span class="kw-2">mut </span>future_opt = this.future;
 
@@ -789,33 +789,33 @@
 
         <span class="kw">match </span>res {
             <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(res)) =&gt; res,
-            <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) =&gt; <span class="macro">panic!</span>(<span class="string">&quot;`TaskLocalFuture` polled after completion&quot;</span>),
+            <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) =&gt; <span class="macro">panic!</span>(<span class="string">"`TaskLocalFuture` polled after completion"</span>),
             <span class="prelude-val">Err</span>(err) =&gt; err.panic(),
         }
     }
 }
 
-<span class="kw">impl</span>&lt;T: <span class="lifetime">&#39;static</span>, F&gt; fmt::Debug <span class="kw">for </span>TaskLocalFuture&lt;T, F&gt;
+<span class="kw">impl</span>&lt;T: <span class="lifetime">'static</span>, F&gt; fmt::Debug <span class="kw">for </span>TaskLocalFuture&lt;T, F&gt;
 <span class="kw">where
     </span>T: fmt::Debug,
 {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         <span class="doccomment">/// Format the Option without Some.
-        </span><span class="kw">struct </span>TransparentOption&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-            value: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="prelude-ty">Option</span>&lt;T&gt;,
+        </span><span class="kw">struct </span>TransparentOption&lt;<span class="lifetime">'a</span>, T&gt; {
+            value: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="prelude-ty">Option</span>&lt;T&gt;,
         }
-        <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: fmt::Debug&gt; fmt::Debug <span class="kw">for </span>TransparentOption&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-            <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+        <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T: fmt::Debug&gt; fmt::Debug <span class="kw">for </span>TransparentOption&lt;<span class="lifetime">'a</span>, T&gt; {
+            <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
                 <span class="kw">match </span><span class="self">self</span>.value.as_ref() {
                     <span class="prelude-val">Some</span>(value) =&gt; value.fmt(f),
                     <span class="comment">// Hitting the None branch should not be possible.
-                    </span><span class="prelude-val">None </span>=&gt; f.pad(<span class="string">&quot;&lt;missing&gt;&quot;</span>),
+                    </span><span class="prelude-val">None </span>=&gt; f.pad(<span class="string">"&lt;missing&gt;"</span>),
                 }
             }
         }
 
-        f.debug_struct(<span class="string">&quot;TaskLocalFuture&quot;</span>)
-            .field(<span class="string">&quot;value&quot;</span>, <span class="kw-2">&amp;</span>TransparentOption { value: <span class="kw-2">&amp;</span><span class="self">self</span>.slot })
+        f.debug_struct(<span class="string">"TaskLocalFuture"</span>)
+            .field(<span class="string">"value"</span>, <span class="kw-2">&amp;</span>TransparentOption { value: <span class="kw-2">&amp;</span><span class="self">self</span>.slot })
             .finish()
     }
 }
@@ -827,14 +827,14 @@
 }
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>AccessError {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        f.debug_struct(<span class="string">&quot;AccessError&quot;</span>).finish()
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        f.debug_struct(<span class="string">"AccessError"</span>).finish()
     }
 }
 
 <span class="kw">impl </span>fmt::Display <span class="kw">for </span>AccessError {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        fmt::Display::fmt(<span class="string">&quot;task-local value not set&quot;</span>, f)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        fmt::Display::fmt(<span class="string">"task-local value not set"</span>, f)
     }
 }
 
@@ -849,8 +849,8 @@
     <span class="attr">#[track_caller]
     </span><span class="kw">fn </span>panic(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ! {
         <span class="kw">match </span><span class="self">self </span>{
-            <span class="self">Self</span>::BorrowError =&gt; <span class="macro">panic!</span>(<span class="string">&quot;cannot enter a task-local scope while the task-local storage is borrowed&quot;</span>),
-            <span class="self">Self</span>::AccessError =&gt; <span class="macro">panic!</span>(<span class="string">&quot;cannot enter a task-local scope during or after destruction of the underlying thread-local&quot;</span>),
+            <span class="self">Self</span>::BorrowError =&gt; <span class="macro">panic!</span>(<span class="string">"cannot enter a task-local scope while the task-local storage is borrowed"</span>),
+            <span class="self">Self</span>::AccessError =&gt; <span class="macro">panic!</span>(<span class="string">"cannot enter a task-local scope during or after destruction of the underlying thread-local"</span>),
         }
     }
 }

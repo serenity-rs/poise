@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/chrono-0.4.31/src/offset/local/tz_info/parser.rs`."><title>parser.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../../../" data-static-root-path="../../../../../static.files/" data-current-crate="chrono" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../../src-files.js"></script><script defer src="../../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/chrono-0.4.31/src/offset/local/tz_info/parser.rs`."><title>parser.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../../../" data-static-root-path="../../../../../static.files/" data-current-crate="chrono" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../../src-files.js"></script><script defer src="../../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -347,7 +347,7 @@
         Version::V1 =&gt; <span class="kw">match </span>cursor.is_empty() {
             <span class="bool-val">true </span>=&gt; (state, <span class="prelude-val">None</span>),
             <span class="bool-val">false </span>=&gt; {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidTzFile(<span class="string">&quot;remaining data after end of TZif v1 data block&quot;</span>))
+                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidTzFile(<span class="string">"remaining data after end of TZif v1 data block"</span>))
             }
         },
         Version::V2 | Version::V3 =&gt; {
@@ -373,17 +373,17 @@
         <span class="kw">let </span>is_dst = <span class="kw">match </span>arr[<span class="number">4</span>] {
             <span class="number">0 </span>=&gt; <span class="bool-val">false</span>,
             <span class="number">1 </span>=&gt; <span class="bool-val">true</span>,
-            <span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidTzFile(<span class="string">&quot;invalid DST indicator&quot;</span>)),
+            <span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidTzFile(<span class="string">"invalid DST indicator"</span>)),
         };
 
         <span class="kw">let </span>char_index = arr[<span class="number">5</span>] <span class="kw">as </span>usize;
         <span class="kw">if </span>char_index &gt;= state.header.char_count {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidTzFile(<span class="string">&quot;invalid time zone name char index&quot;</span>));
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidTzFile(<span class="string">"invalid time zone name char index"</span>));
         }
 
-        <span class="kw">let </span>position = <span class="kw">match </span>state.names[char_index..].iter().position(|<span class="kw-2">&amp;</span>c| c == <span class="string">b&#39;\0&#39;</span>) {
+        <span class="kw">let </span>position = <span class="kw">match </span>state.names[char_index..].iter().position(|<span class="kw-2">&amp;</span>c| c == <span class="string">b'\0'</span>) {
             <span class="prelude-val">Some</span>(position) =&gt; position,
-            <span class="prelude-val">None </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidTzFile(<span class="string">&quot;invalid time zone name char index&quot;</span>)),
+            <span class="prelude-val">None </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidTzFile(<span class="string">"invalid time zone name char index"</span>)),
         };
 
         <span class="kw">let </span>name = <span class="kw-2">&amp;</span>state.names[char_index..char_index + position];
@@ -402,20 +402,20 @@
     <span class="kw">let </span>ut_locals_iter = state.ut_locals.iter().copied().chain(iter::repeat(<span class="number">0</span>));
     <span class="kw">if </span>std_walls_iter.zip(ut_locals_iter).take(state.header.type_count).any(|pair| pair == (<span class="number">0</span>, <span class="number">1</span>)) {
         <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidTzFile(
-            <span class="string">&quot;invalid couple of standard/wall and UT/local indicators&quot;</span>,
+            <span class="string">"invalid couple of standard/wall and UT/local indicators"</span>,
         ));
     }
 
     <span class="kw">let </span>extra_rule = <span class="kw">match </span>footer {
         <span class="prelude-val">Some</span>(footer) =&gt; {
             <span class="kw">let </span>footer = str::from_utf8(footer)<span class="question-mark">?</span>;
-            <span class="kw">if </span>!(footer.starts_with(<span class="string">&#39;\n&#39;</span>) &amp;&amp; footer.ends_with(<span class="string">&#39;\n&#39;</span>)) {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidTzFile(<span class="string">&quot;invalid footer&quot;</span>));
+            <span class="kw">if </span>!(footer.starts_with(<span class="string">'\n'</span>) &amp;&amp; footer.ends_with(<span class="string">'\n'</span>)) {
+                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidTzFile(<span class="string">"invalid footer"</span>));
             }
 
             <span class="kw">let </span>tz_string = footer.trim_matches(|c: char| c.is_ascii_whitespace());
-            <span class="kw">if </span>tz_string.starts_with(<span class="string">&#39;:&#39;</span>) || tz_string.contains(<span class="string">&#39;\0&#39;</span>) {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidTzFile(<span class="string">&quot;invalid footer&quot;</span>));
+            <span class="kw">if </span>tz_string.starts_with(<span class="string">':'</span>) || tz_string.contains(<span class="string">'\0'</span>) {
+                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidTzFile(<span class="string">"invalid footer"</span>));
             }
 
             <span class="kw">match </span>tz_string.is_empty() {
@@ -433,29 +433,29 @@
 }
 
 <span class="doccomment">/// TZif data blocks
-</span><span class="kw">struct </span>State&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">struct </span>State&lt;<span class="lifetime">'a</span>&gt; {
     header: Header,
     <span class="doccomment">/// Time size in bytes
     </span>time_size: usize,
     <span class="doccomment">/// Transition times data block
-    </span>transition_times: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+    </span>transition_times: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
     <span class="doccomment">/// Transition types data block
-    </span>transition_types: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+    </span>transition_types: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
     <span class="doccomment">/// Local time types data block
-    </span>local_time_types: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+    </span>local_time_types: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
     <span class="doccomment">/// Time zone names data block
-    </span>names: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+    </span>names: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
     <span class="doccomment">/// Leap seconds data block
-    </span>leap_seconds: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+    </span>leap_seconds: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
     <span class="doccomment">/// UT/local indicators data block
-    </span>std_walls: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+    </span>std_walls: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
     <span class="doccomment">/// Standard/wall indicators data block
-    </span>ut_locals: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+    </span>ut_locals: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; State&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; State&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Read TZif data blocks
-    </span><span class="kw">fn </span>new(cursor: <span class="kw-2">&amp;mut </span>Cursor&lt;<span class="lifetime">&#39;a</span>&gt;, first: bool) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, Error&gt; {
+    </span><span class="kw">fn </span>new(cursor: <span class="kw-2">&amp;mut </span>Cursor&lt;<span class="lifetime">'a</span>&gt;, first: bool) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, Error&gt; {
         <span class="kw">let </span>header = Header::new(cursor)<span class="question-mark">?</span>;
         <span class="kw">let </span>time_size = <span class="kw">match </span>first {
             <span class="bool-val">true </span>=&gt; <span class="number">4</span>, <span class="comment">// We always parse V1 first
@@ -506,15 +506,15 @@
 <span class="kw">impl </span>Header {
     <span class="kw">fn </span>new(cursor: <span class="kw-2">&amp;mut </span>Cursor) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, Error&gt; {
         <span class="kw">let </span>magic = cursor.read_exact(<span class="number">4</span>)<span class="question-mark">?</span>;
-        <span class="kw">if </span>magic != <span class="kw-2">*</span><span class="string">b&quot;TZif&quot; </span>{
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidTzFile(<span class="string">&quot;invalid magic number&quot;</span>));
+        <span class="kw">if </span>magic != <span class="kw-2">*</span><span class="string">b"TZif" </span>{
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidTzFile(<span class="string">"invalid magic number"</span>));
         }
 
         <span class="kw">let </span>version = <span class="kw">match </span>cursor.read_exact(<span class="number">1</span>)<span class="question-mark">? </span>{
             [<span class="number">0x00</span>] =&gt; Version::V1,
             [<span class="number">0x32</span>] =&gt; Version::V2,
             [<span class="number">0x33</span>] =&gt; Version::V3,
-            <span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(Error::UnsupportedTzFile(<span class="string">&quot;unsupported TZif version&quot;</span>)),
+            <span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(Error::UnsupportedTzFile(<span class="string">"unsupported TZif version"</span>)),
         };
 
         cursor.read_exact(<span class="number">15</span>)<span class="question-mark">?</span>;
@@ -530,7 +530,7 @@
             </span>&amp;&amp; (ut_local_count == <span class="number">0 </span>|| ut_local_count == type_count)
             &amp;&amp; (std_wall_count == <span class="number">0 </span>|| std_wall_count == type_count))
         {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidTzFile(<span class="string">&quot;invalid header&quot;</span>));
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidTzFile(<span class="string">"invalid header"</span>));
         }
 
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
@@ -547,16 +547,16 @@
 
 <span class="doccomment">/// A `Cursor` contains a slice of a buffer and a read count.
 </span><span class="attr">#[derive(Debug, Eq, PartialEq)]
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>Cursor&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>Cursor&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Slice representing the remaining data to be read
-    </span>remaining: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+    </span>remaining: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
     <span class="doccomment">/// Number of already read bytes
     </span>read_count: usize,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Cursor&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Cursor&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Construct a new `Cursor` from remaining data
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const fn </span>new(remaining: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const fn </span>new(remaining: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{ remaining, read_count: <span class="number">0 </span>}
     }
 
@@ -565,7 +565,7 @@
     }
 
     <span class="doccomment">/// Returns remaining data
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const fn </span>remaining(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8] {
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const fn </span>remaining(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8] {
         <span class="self">self</span>.remaining
     }
 
@@ -581,7 +581,7 @@
     }
 
     <span class="doccomment">/// Read exactly `count` bytes, reducing remaining data and incrementing read count
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>read_exact(<span class="kw-2">&amp;mut </span><span class="self">self</span>, count: usize) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8], io::Error&gt; {
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>read_exact(<span class="kw-2">&amp;mut </span><span class="self">self</span>, count: usize) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8], io::Error&gt; {
         <span class="kw">match </span>(<span class="self">self</span>.remaining.get(..count), <span class="self">self</span>.remaining.get(count..)) {
             (<span class="prelude-val">Some</span>(result), <span class="prelude-val">Some</span>(remaining)) =&gt; {
                 <span class="self">self</span>.remaining = remaining;
@@ -612,7 +612,7 @@
     }
 
     <span class="doccomment">/// Read bytes as long as the provided predicate is true
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>read_while&lt;F: Fn(<span class="kw-2">&amp;</span>u8) -&gt; bool&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, f: F) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8], io::Error&gt; {
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>read_while&lt;F: Fn(<span class="kw-2">&amp;</span>u8) -&gt; bool&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, f: F) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8], io::Error&gt; {
         <span class="kw">match </span><span class="self">self</span>.remaining.iter().position(|x| !f(x)) {
             <span class="prelude-val">None </span>=&gt; <span class="self">self</span>.read_exact(<span class="self">self</span>.remaining.len()),
             <span class="prelude-val">Some</span>(position) =&gt; <span class="self">self</span>.read_exact(position),
@@ -626,7 +626,7 @@
     }
 
     <span class="doccomment">/// Read bytes until the provided predicate is true
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>read_until&lt;F: Fn(<span class="kw-2">&amp;</span>u8) -&gt; bool&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, f: F) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8], io::Error&gt; {
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>read_until&lt;F: Fn(<span class="kw-2">&amp;</span>u8) -&gt; bool&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, f: F) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8], io::Error&gt; {
         <span class="kw">match </span><span class="self">self</span>.remaining.iter().position(f) {
             <span class="prelude-val">None </span>=&gt; <span class="self">self</span>.read_exact(<span class="self">self</span>.remaining.len()),
             <span class="prelude-val">Some</span>(position) =&gt; <span class="self">self</span>.read_exact(position),
@@ -636,7 +636,7 @@
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>read_be_i32(bytes: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;i32, Error&gt; {
     <span class="kw">if </span>bytes.len() != <span class="number">4 </span>{
-        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidSlice(<span class="string">&quot;too short for i32&quot;</span>));
+        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidSlice(<span class="string">"too short for i32"</span>));
     }
 
     <span class="kw">let </span><span class="kw-2">mut </span>buf = [<span class="number">0</span>; <span class="number">4</span>];
@@ -646,7 +646,7 @@
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>read_be_i64(bytes: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;i64, Error&gt; {
     <span class="kw">if </span>bytes.len() != <span class="number">8 </span>{
-        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidSlice(<span class="string">&quot;too short for i64&quot;</span>));
+        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidSlice(<span class="string">"too short for i64"</span>));
     }
 
     <span class="kw">let </span><span class="kw-2">mut </span>buf = [<span class="number">0</span>; <span class="number">8</span>];

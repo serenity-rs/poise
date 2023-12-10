@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-0.21.9/src/tls13/mod.rs`."><title>mod.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="rustls" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-0.21.9/src/tls13/mod.rs`."><title>mod.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="rustls" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -225,9 +225,9 @@
         aead_algorithm: <span class="kw-2">&amp;</span>ring::aead::CHACHA20_POLY1305,
     },
     hkdf_algorithm: ring::hkdf::HKDF_SHA256,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;quic&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"quic"</span>)]
     </span>confidentiality_limit: u64::MAX,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;quic&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"quic"</span>)]
     </span>integrity_limit: <span class="number">1 </span>&lt;&lt; <span class="number">36</span>,
 };
 
@@ -240,9 +240,9 @@
             aead_algorithm: <span class="kw-2">&amp;</span>ring::aead::AES_256_GCM,
         },
         hkdf_algorithm: ring::hkdf::HKDF_SHA384,
-        <span class="attr">#[cfg(feature = <span class="string">&quot;quic&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"quic"</span>)]
         </span>confidentiality_limit: <span class="number">1 </span>&lt;&lt; <span class="number">23</span>,
-        <span class="attr">#[cfg(feature = <span class="string">&quot;quic&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"quic"</span>)]
         </span>integrity_limit: <span class="number">1 </span>&lt;&lt; <span class="number">52</span>,
     });
 
@@ -257,9 +257,9 @@
         aead_algorithm: <span class="kw-2">&amp;</span>ring::aead::AES_128_GCM,
     },
     hkdf_algorithm: ring::hkdf::HKDF_SHA256,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;quic&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"quic"</span>)]
     </span>confidentiality_limit: <span class="number">1 </span>&lt;&lt; <span class="number">23</span>,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;quic&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"quic"</span>)]
     </span>integrity_limit: <span class="number">1 </span>&lt;&lt; <span class="number">52</span>,
 };
 
@@ -268,28 +268,28 @@
     <span class="doccomment">/// Common cipher suite fields.
     </span><span class="kw">pub </span>common: CipherSuiteCommon,
     <span class="kw">pub</span>(<span class="kw">crate</span>) hkdf_algorithm: ring::hkdf::Algorithm,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;quic&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"quic"</span>)]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) confidentiality_limit: u64,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;quic&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"quic"</span>)]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) integrity_limit: u64,
 }
 
 <span class="kw">impl </span>Tls13CipherSuite {
     <span class="doccomment">/// Which hash function to use with this suite.
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>hash_algorithm(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>ring::digest::Algorithm {
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>hash_algorithm(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'static </span>ring::digest::Algorithm {
         <span class="self">self</span>.hkdf_algorithm
             .hmac_algorithm()
             .digest_algorithm()
     }
 
     <span class="doccomment">/// Can a session using suite self resume from suite prev?
-    </span><span class="kw">pub fn </span>can_resume_from(<span class="kw-2">&amp;</span><span class="self">self</span>, prev: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="self">Self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="self">Self</span>&gt; {
+    </span><span class="kw">pub fn </span>can_resume_from(<span class="kw-2">&amp;</span><span class="self">self</span>, prev: <span class="kw-2">&amp;</span><span class="lifetime">'static </span><span class="self">Self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'static </span><span class="self">Self</span>&gt; {
         (prev.hash_algorithm() == <span class="self">self</span>.hash_algorithm()).then(|| prev)
     }
 }
 
-<span class="kw">impl </span>From&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Tls13CipherSuite&gt; <span class="kw">for </span>SupportedCipherSuite {
-    <span class="kw">fn </span>from(s: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Tls13CipherSuite) -&gt; <span class="self">Self </span>{
+<span class="kw">impl </span>From&lt;<span class="kw-2">&amp;</span><span class="lifetime">'static </span>Tls13CipherSuite&gt; <span class="kw">for </span>SupportedCipherSuite {
+    <span class="kw">fn </span>from(s: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Tls13CipherSuite) -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>::Tls13(s)
     }
 }
@@ -301,10 +301,10 @@
 }
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>Tls13CipherSuite {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        f.debug_struct(<span class="string">&quot;Tls13CipherSuite&quot;</span>)
-            .field(<span class="string">&quot;suite&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.common.suite)
-            .field(<span class="string">&quot;bulk&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.common.bulk)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        f.debug_struct(<span class="string">"Tls13CipherSuite"</span>)
+            .field(<span class="string">"suite"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.common.suite)
+            .field(<span class="string">"bulk"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.common.bulk)
             .finish()
     }
 }
@@ -354,7 +354,7 @@
 
         <span class="self">self</span>.enc_key
             .seal_in_place_append_tag(nonce, aad, <span class="kw-2">&amp;mut </span>payload)
-            .map_err(|<span class="kw">_</span>| Error::General(<span class="string">&quot;encrypt failed&quot;</span>.to_string()))<span class="question-mark">?</span>;
+            .map_err(|<span class="kw">_</span>| Error::General(<span class="string">"encrypt failed"</span>.to_string()))<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(OpaqueMessage {
             typ: ContentType::ApplicationData,

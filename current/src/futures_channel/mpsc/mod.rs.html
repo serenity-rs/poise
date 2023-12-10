@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/futures-channel-0.3.29/src/mpsc/mod.rs`."><title>mod.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="futures_channel" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/futures-channel-0.3.29/src/mpsc/mod.rs`."><title>mod.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="futures_channel" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1399,7 +1399,7 @@
 //!
 //! If the [`Receiver`] is simply dropped, then it is possible for
 //! there to be messages still in the channel that will not be processed. As
-//! such, it is usually desirable to perform a &quot;clean&quot; shutdown. To do this, the
+//! such, it is usually desirable to perform a "clean" shutdown. To do this, the
 //! receiver will first call `close`, which will prevent any further messages to
 //! be sent into the channel. Then, the receiver consumes the channel to
 //! completion, at which point the receiver can be dropped.
@@ -1416,7 +1416,7 @@
 // send parked task handles.
 //
 // The general idea is that the channel is created with a `buffer` size of `n`.
-// The channel capacity is `n + num-senders`. Each sender gets one &quot;guaranteed&quot;
+// The channel capacity is `n + num-senders`. Each sender gets one "guaranteed"
 // slot to hold a message. This allows `Sender` to know for a fact that a send
 // will succeed *before* starting to do the actual work of sending the value.
 // Since most of this work is lock-free, once the work starts, it is impossible
@@ -1444,7 +1444,7 @@
 // 2) Pop a task handle from the wait queue
 // 3) Decrement the channel message count.
 //
-// It&#39;s important for the order of operations on lock-free structures to happen
+// It's important for the order of operations on lock-free structures to happen
 // in reverse order between the sender and receiver. This makes the message
 // queue the primary coordination structure and establishes the necessary
 // happens-before semantics required for the acquire / release semantics used
@@ -1463,7 +1463,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::mpsc::queue::Queue;
 
 <span class="kw">mod </span>queue;
-<span class="attr">#[cfg(feature = <span class="string">&quot;sink&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"sink"</span>)]
 </span><span class="kw">mod </span>sink_impl;
 
 <span class="kw">struct </span>UnboundedSenderInner&lt;T&gt; {
@@ -1544,11 +1544,11 @@
 }
 
 <span class="kw">impl </span>fmt::Display <span class="kw">for </span>SendError {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         <span class="kw">if </span><span class="self">self</span>.is_full() {
-            <span class="macro">write!</span>(f, <span class="string">&quot;send failed because channel is full&quot;</span>)
+            <span class="macro">write!</span>(f, <span class="string">"send failed because channel is full"</span>)
         } <span class="kw">else </span>{
-            <span class="macro">write!</span>(f, <span class="string">&quot;send failed because receiver is gone&quot;</span>)
+            <span class="macro">write!</span>(f, <span class="string">"send failed because receiver is gone"</span>)
         }
     }
 }
@@ -1574,17 +1574,17 @@
 }
 
 <span class="kw">impl</span>&lt;T&gt; fmt::Debug <span class="kw">for </span>TrySendError&lt;T&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        f.debug_struct(<span class="string">&quot;TrySendError&quot;</span>).field(<span class="string">&quot;kind&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.err.kind).finish()
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        f.debug_struct(<span class="string">"TrySendError"</span>).field(<span class="string">"kind"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.err.kind).finish()
     }
 }
 
 <span class="kw">impl</span>&lt;T&gt; fmt::Display <span class="kw">for </span>TrySendError&lt;T&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         <span class="kw">if </span><span class="self">self</span>.is_full() {
-            <span class="macro">write!</span>(f, <span class="string">&quot;send failed because channel is full&quot;</span>)
+            <span class="macro">write!</span>(f, <span class="string">"send failed because channel is full"</span>)
         } <span class="kw">else </span>{
-            <span class="macro">write!</span>(f, <span class="string">&quot;send failed because receiver is gone&quot;</span>)
+            <span class="macro">write!</span>(f, <span class="string">"send failed because receiver is gone"</span>)
         }
     }
 }
@@ -1614,14 +1614,14 @@
 }
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>TryRecvError {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        f.debug_tuple(<span class="string">&quot;TryRecvError&quot;</span>).finish()
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        f.debug_tuple(<span class="string">"TryRecvError"</span>).finish()
     }
 }
 
 <span class="kw">impl </span>fmt::Display <span class="kw">for </span>TryRecvError {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;receiver channel is empty&quot;</span>)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        <span class="macro">write!</span>(f, <span class="string">"receiver channel is empty"</span>)
     }
 }
 
@@ -1638,7 +1638,7 @@
     <span class="comment">// Number of senders in existence
     </span>num_senders: AtomicUsize,
 
-    <span class="comment">// Handle to the receiver&#39;s task.
+    <span class="comment">// Handle to the receiver's task.
     </span>recv_task: AtomicWaker,
 }
 
@@ -1659,7 +1659,7 @@
     <span class="comment">// Number of senders in existence
     </span>num_senders: AtomicUsize,
 
-    <span class="comment">// Handle to the receiver&#39;s task.
+    <span class="comment">// Handle to the receiver's task.
     </span>recv_task: AtomicWaker,
 }
 
@@ -1710,17 +1710,17 @@
 <span class="doccomment">/// Creates a bounded mpsc channel for communicating between asynchronous tasks.
 ///
 /// Being bounded, this channel provides backpressure to ensure that the sender
-/// outpaces the receiver by only a limited amount. The channel&#39;s capacity is
+/// outpaces the receiver by only a limited amount. The channel's capacity is
 /// equal to `buffer + num-senders`. In other words, each sender gets a
 /// guaranteed slot in the channel capacity, and on top of that there are
-/// `buffer` &quot;first come, first serve&quot; slots available to all senders.
+/// `buffer` "first come, first serve" slots available to all senders.
 ///
 /// The [`Receiver`] returned implements the [`Stream`] trait, while [`Sender`]
 /// implements `Sink`.
 </span><span class="kw">pub fn </span>channel&lt;T&gt;(buffer: usize) -&gt; (Sender&lt;T&gt;, Receiver&lt;T&gt;) {
     <span class="comment">// Check that the requested buffer size does not exceed the maximum buffer
     // size permitted by the system.
-    </span><span class="macro">assert!</span>(buffer &lt; MAX_BUFFER, <span class="string">&quot;requested buffer size too large&quot;</span>);
+    </span><span class="macro">assert!</span>(buffer &lt; MAX_BUFFER, <span class="string">"requested buffer size too large"</span>);
 
     <span class="kw">let </span>inner = Arc::new(BoundedInner {
         buffer,
@@ -1810,8 +1810,8 @@
             // case?
             </span><span class="macro">assert!</span>(
                 state.num_messages &lt; MAX_CAPACITY,
-                <span class="string">&quot;buffer space \
-                    exhausted; sending this messages would overflow the state&quot;
+                <span class="string">"buffer space \
+                    exhausted; sending this messages would overflow the state"
             </span>);
 
             state.num_messages += <span class="number">1</span>;
@@ -1848,8 +1848,8 @@
 
     <span class="doccomment">/// Closes this channel from the sender side, preventing any new messages.
     </span><span class="kw">fn </span>close_channel(<span class="kw-2">&amp;</span><span class="self">self</span>) {
-        <span class="comment">// There&#39;s no need to park this sender, its dropping,
-        // and we don&#39;t want to check for capacity, so skip
+        <span class="comment">// There's no need to park this sender, its dropping,
+        // and we don't want to check for capacity, so skip
         // that stuff from `do_send`.
 
         </span><span class="self">self</span>.inner.set_closed();
@@ -1902,7 +1902,7 @@
         // be parked. This will send the task handle on the parked task queue.
         //
         // However, when `do_send` is called while dropping the `Sender`,
-        // `task::current()` can&#39;t be called safely. In this case, in order to
+        // `task::current()` can't be called safely. In this case, in order to
         // maintain internal consistency, a blank message is pushed onto the
         // parked task queue.
         </span><span class="kw">if </span>park_self {
@@ -1941,8 +1941,8 @@
             // case?
             </span><span class="macro">assert!</span>(
                 state.num_messages &lt; MAX_CAPACITY,
-                <span class="string">&quot;buffer space \
-                    exhausted; sending this messages would overflow the state&quot;
+                <span class="string">"buffer space \
+                    exhausted; sending this messages would overflow the state"
             </span>);
 
             state.num_messages += <span class="number">1</span>;
@@ -1966,7 +1966,7 @@
         </span><span class="kw">let </span>t = <span class="self">self</span>.sender_task.clone();
         <span class="self">self</span>.inner.parked_queue.push(t);
 
-        <span class="comment">// Check to make sure we weren&#39;t closed after we sent our task on the
+        <span class="comment">// Check to make sure we weren't closed after we sent our task on the
         // queue
         </span><span class="kw">let </span>state = decode_state(<span class="self">self</span>.inner.state.load(SeqCst));
         <span class="self">self</span>.maybe_parked = state.is_open;
@@ -1984,7 +1984,7 @@
     ///   capacity, in which case the current task is queued to be notified once
     ///   capacity is available;
     /// - `Poll::Ready(Err(SendError))` if the receiver has been dropped.
-    </span><span class="kw">fn </span>poll_ready(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;(), SendError&gt;&gt; {
+    </span><span class="kw">fn </span>poll_ready(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;(), SendError&gt;&gt; {
         <span class="kw">let </span>state = decode_state(<span class="self">self</span>.inner.state.load(SeqCst));
         <span class="kw">if </span>!state.is_open {
             <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Err</span>(SendError { kind: SendErrorKind::Disconnected }));
@@ -2017,15 +2017,15 @@
 
     <span class="doccomment">/// Closes this channel from the sender side, preventing any new messages.
     </span><span class="kw">fn </span>close_channel(<span class="kw-2">&amp;</span><span class="self">self</span>) {
-        <span class="comment">// There&#39;s no need to park this sender, its dropping,
-        // and we don&#39;t want to check for capacity, so skip
+        <span class="comment">// There's no need to park this sender, its dropping,
+        // and we don't want to check for capacity, so skip
         // that stuff from `do_send`.
 
         </span><span class="self">self</span>.inner.set_closed();
         <span class="self">self</span>.inner.recv_task.wake();
     }
 
-    <span class="kw">fn </span>poll_unparked(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;&gt;) -&gt; Poll&lt;()&gt; {
+    <span class="kw">fn </span>poll_unparked(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;&gt;) -&gt; Poll&lt;()&gt; {
         <span class="comment">// First check the `maybe_parked` variable. This avoids acquiring the
         // lock in most cases
         </span><span class="kw">if </span><span class="self">self</span>.maybe_parked {
@@ -2084,7 +2084,7 @@
     ///   capacity, in which case the current task is queued to be notified once
     ///   capacity is available;
     /// - `Poll::Ready(Err(SendError))` if the receiver has been dropped.
-    </span><span class="kw">pub fn </span>poll_ready(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;(), SendError&gt;&gt; {
+    </span><span class="kw">pub fn </span>poll_ready(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;(), SendError&gt;&gt; {
         <span class="kw">let </span>inner = <span class="self">self</span>.<span class="number">0</span>.as_mut().ok_or(SendError { kind: SendErrorKind::Disconnected })<span class="question-mark">?</span>;
         inner.poll_ready(cx)
     }
@@ -2136,7 +2136,7 @@
 
 <span class="kw">impl</span>&lt;T&gt; UnboundedSender&lt;T&gt; {
     <span class="doccomment">/// Check if the channel is ready to receive a message.
-    </span><span class="kw">pub fn </span>poll_ready(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;(), SendError&gt;&gt; {
+    </span><span class="kw">pub fn </span>poll_ready(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;(), SendError&gt;&gt; {
         <span class="kw">let </span>inner = <span class="self">self</span>.<span class="number">0</span>.as_ref().ok_or(SendError { kind: SendErrorKind::Disconnected })<span class="question-mark">?</span>;
         inner.poll_ready_nb()
     }
@@ -2243,7 +2243,7 @@
 
 <span class="kw">impl</span>&lt;T&gt; Clone <span class="kw">for </span>UnboundedSenderInner&lt;T&gt; {
     <span class="kw">fn </span>clone(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
-        <span class="comment">// Since this atomic op isn&#39;t actually guarding any memory and we don&#39;t
+        <span class="comment">// Since this atomic op isn't actually guarding any memory and we don't
         // care about any orderings besides the ordering on the single atomic
         // variable, a relaxed ordering is acceptable.
         </span><span class="kw">let </span><span class="kw-2">mut </span>curr = <span class="self">self</span>.inner.num_senders.load(SeqCst);
@@ -2251,7 +2251,7 @@
         <span class="kw">loop </span>{
             <span class="comment">// If the maximum number of senders has been reached, then fail
             </span><span class="kw">if </span>curr == MAX_BUFFER {
-                <span class="macro">panic!</span>(<span class="string">&quot;cannot clone `Sender` -- too many outstanding senders&quot;</span>);
+                <span class="macro">panic!</span>(<span class="string">"cannot clone `Sender` -- too many outstanding senders"</span>);
             }
 
             <span class="macro">debug_assert!</span>(curr &lt; MAX_BUFFER);
@@ -2259,7 +2259,7 @@
             <span class="kw">let </span>next = curr + <span class="number">1</span>;
             <span class="kw">match </span><span class="self">self</span>.inner.num_senders.compare_exchange(curr, next, SeqCst, SeqCst) {
                 <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; {
-                    <span class="comment">// The ABA problem doesn&#39;t matter here. We only care that the
+                    <span class="comment">// The ABA problem doesn't matter here. We only care that the
                     // number of senders never exceeds the maximum.
                     </span><span class="kw">return </span><span class="self">Self </span>{ inner: <span class="self">self</span>.inner.clone() };
                 }
@@ -2271,7 +2271,7 @@
 
 <span class="kw">impl</span>&lt;T&gt; Clone <span class="kw">for </span>BoundedSenderInner&lt;T&gt; {
     <span class="kw">fn </span>clone(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
-        <span class="comment">// Since this atomic op isn&#39;t actually guarding any memory and we don&#39;t
+        <span class="comment">// Since this atomic op isn't actually guarding any memory and we don't
         // care about any orderings besides the ordering on the single atomic
         // variable, a relaxed ordering is acceptable.
         </span><span class="kw">let </span><span class="kw-2">mut </span>curr = <span class="self">self</span>.inner.num_senders.load(SeqCst);
@@ -2279,7 +2279,7 @@
         <span class="kw">loop </span>{
             <span class="comment">// If the maximum number of senders has been reached, then fail
             </span><span class="kw">if </span>curr == <span class="self">self</span>.inner.max_senders() {
-                <span class="macro">panic!</span>(<span class="string">&quot;cannot clone `Sender` -- too many outstanding senders&quot;</span>);
+                <span class="macro">panic!</span>(<span class="string">"cannot clone `Sender` -- too many outstanding senders"</span>);
             }
 
             <span class="macro">debug_assert!</span>(curr &lt; <span class="self">self</span>.inner.max_senders());
@@ -2287,7 +2287,7 @@
             <span class="kw">let </span>next = curr + <span class="number">1</span>;
             <span class="kw">match </span><span class="self">self</span>.inner.num_senders.compare_exchange(curr, next, SeqCst, SeqCst) {
                 <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; {
-                    <span class="comment">// The ABA problem doesn&#39;t matter here. We only care that the
+                    <span class="comment">// The ABA problem doesn't matter here. We only care that the
                     // number of senders never exceeds the maximum.
                     </span><span class="kw">return </span><span class="self">Self </span>{
                         inner: <span class="self">self</span>.inner.clone(),
@@ -2303,7 +2303,7 @@
 
 <span class="kw">impl</span>&lt;T&gt; Drop <span class="kw">for </span>UnboundedSenderInner&lt;T&gt; {
     <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
-        <span class="comment">// Ordering between variables don&#39;t matter here
+        <span class="comment">// Ordering between variables don't matter here
         </span><span class="kw">let </span>prev = <span class="self">self</span>.inner.num_senders.fetch_sub(<span class="number">1</span>, SeqCst);
 
         <span class="kw">if </span>prev == <span class="number">1 </span>{
@@ -2314,7 +2314,7 @@
 
 <span class="kw">impl</span>&lt;T&gt; Drop <span class="kw">for </span>BoundedSenderInner&lt;T&gt; {
     <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
-        <span class="comment">// Ordering between variables don&#39;t matter here
+        <span class="comment">// Ordering between variables don't matter here
         </span><span class="kw">let </span>prev = <span class="self">self</span>.inner.num_senders.fetch_sub(<span class="number">1</span>, SeqCst);
 
         <span class="kw">if </span>prev == <span class="number">1 </span>{
@@ -2324,14 +2324,14 @@
 }
 
 <span class="kw">impl</span>&lt;T&gt; fmt::Debug <span class="kw">for </span>Sender&lt;T&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        f.debug_struct(<span class="string">&quot;Sender&quot;</span>).field(<span class="string">&quot;closed&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.is_closed()).finish()
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        f.debug_struct(<span class="string">"Sender"</span>).field(<span class="string">"closed"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.is_closed()).finish()
     }
 }
 
 <span class="kw">impl</span>&lt;T&gt; fmt::Debug <span class="kw">for </span>UnboundedSender&lt;T&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        f.debug_struct(<span class="string">&quot;UnboundedSender&quot;</span>).field(<span class="string">&quot;closed&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.is_closed()).finish()
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        f.debug_struct(<span class="string">"UnboundedSender"</span>).field(<span class="string">"closed"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.is_closed()).finish()
     }
 }
 
@@ -2350,7 +2350,7 @@
         <span class="kw">if let </span><span class="prelude-val">Some</span>(inner) = <span class="kw-2">&amp;mut </span><span class="self">self</span>.inner {
             inner.set_closed();
 
-            <span class="comment">// Wake up any threads waiting as they&#39;ll see that we&#39;ve closed the
+            <span class="comment">// Wake up any threads waiting as they'll see that we've closed the
             // channel and will continue on their merry way.
             </span><span class="kw">while let </span><span class="prelude-val">Some</span>(task) = <span class="kw">unsafe </span>{ inner.parked_queue.pop_spin() } {
                 task.lock().unwrap().notify();
@@ -2361,7 +2361,7 @@
     <span class="doccomment">/// Tries to receive the next message without notifying a context if empty.
     ///
     /// It is not recommended to call this function from inside of a future,
-    /// only when you&#39;ve otherwise arranged to be notified when the channel is
+    /// only when you've otherwise arranged to be notified when the channel is
     /// no longer empty.
     ///
     /// This function returns:
@@ -2404,7 +2404,7 @@
                     // to be woken up when new messages arrive.
                     // If queue is closed but num_messages is non-zero,
                     // it means that senders updated the state,
-                    // but didn&#39;t put message to queue yet,
+                    // but didn't put message to queue yet,
                     // so we need to park until sender unparks the task
                     // after queueing the message.
                     </span>Poll::Pending
@@ -2424,8 +2424,8 @@
 
     <span class="kw">fn </span>dec_num_messages(<span class="kw-2">&amp;</span><span class="self">self</span>) {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(inner) = <span class="kw-2">&amp;</span><span class="self">self</span>.inner {
-            <span class="comment">// OPEN_MASK is highest bit, so it&#39;s unaffected by subtraction
-            // unless there&#39;s underflow, and we know there&#39;s no underflow
+            <span class="comment">// OPEN_MASK is highest bit, so it's unaffected by subtraction
+            // unless there's underflow, and we know there's no underflow
             // because number of messages at this point is always &gt; 0.
             </span>inner.state.fetch_sub(<span class="number">1</span>, SeqCst);
         }
@@ -2444,7 +2444,7 @@
 <span class="kw">impl</span>&lt;T&gt; Stream <span class="kw">for </span>Receiver&lt;T&gt; {
     <span class="kw">type </span>Item = T;
 
-    <span class="kw">fn </span>poll_next(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;T&gt;&gt; {
+    <span class="kw">fn </span>poll_next(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;T&gt;&gt; {
         <span class="comment">// Try to read a message off of the message queue.
         </span><span class="kw">match </span><span class="self">self</span>.next_message() {
             Poll::Ready(msg) =&gt; {
@@ -2490,10 +2490,10 @@
                             <span class="kw">break</span>;
                         }
 
-                        <span class="comment">// TODO: Spinning isn&#39;t ideal, it might be worth
+                        <span class="comment">// TODO: Spinning isn't ideal, it might be worth
                         // investigating using a condvar or some other strategy
                         // here. That said, if this case is hit, then another thread
-                        // is about to push the value into the queue and this isn&#39;t
+                        // is about to push the value into the queue and this isn't
                         // the only spinlock in the impl right now.
                         </span>thread::yield_now();
                     }
@@ -2504,14 +2504,14 @@
 }
 
 <span class="kw">impl</span>&lt;T&gt; fmt::Debug <span class="kw">for </span>Receiver&lt;T&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         <span class="kw">let </span>closed = <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref </span>inner) = <span class="self">self</span>.inner {
             decode_state(inner.state.load(SeqCst)).is_closed()
         } <span class="kw">else </span>{
             <span class="bool-val">false
         </span>};
 
-        f.debug_struct(<span class="string">&quot;Receiver&quot;</span>).field(<span class="string">&quot;closed&quot;</span>, <span class="kw-2">&amp;</span>closed).finish()
+        f.debug_struct(<span class="string">"Receiver"</span>).field(<span class="string">"closed"</span>, <span class="kw-2">&amp;</span>closed).finish()
     }
 }
 
@@ -2529,7 +2529,7 @@
     <span class="doccomment">/// Tries to receive the next message without notifying a context if empty.
     ///
     /// It is not recommended to call this function from inside of a future,
-    /// only when you&#39;ve otherwise arranged to be notified when the channel is
+    /// only when you've otherwise arranged to be notified when the channel is
     /// no longer empty.
     ///
     /// This function returns:
@@ -2568,7 +2568,7 @@
                     // to be woken up when new messages arrive.
                     // If queue is closed but num_messages is non-zero,
                     // it means that senders updated the state,
-                    // but didn&#39;t put message to queue yet,
+                    // but didn't put message to queue yet,
                     // so we need to park until sender unparks the task
                     // after queueing the message.
                     </span>Poll::Pending
@@ -2579,8 +2579,8 @@
 
     <span class="kw">fn </span>dec_num_messages(<span class="kw-2">&amp;</span><span class="self">self</span>) {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(inner) = <span class="kw-2">&amp;</span><span class="self">self</span>.inner {
-            <span class="comment">// OPEN_MASK is highest bit, so it&#39;s unaffected by subtraction
-            // unless there&#39;s underflow, and we know there&#39;s no underflow
+            <span class="comment">// OPEN_MASK is highest bit, so it's unaffected by subtraction
+            // unless there's underflow, and we know there's no underflow
             // because number of messages at this point is always &gt; 0.
             </span>inner.state.fetch_sub(<span class="number">1</span>, SeqCst);
         }
@@ -2596,7 +2596,7 @@
 <span class="kw">impl</span>&lt;T&gt; Stream <span class="kw">for </span>UnboundedReceiver&lt;T&gt; {
     <span class="kw">type </span>Item = T;
 
-    <span class="kw">fn </span>poll_next(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;T&gt;&gt; {
+    <span class="kw">fn </span>poll_next(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;T&gt;&gt; {
         <span class="comment">// Try to read a message off of the message queue.
         </span><span class="kw">match </span><span class="self">self</span>.next_message() {
             Poll::Ready(msg) =&gt; {
@@ -2642,10 +2642,10 @@
                             <span class="kw">break</span>;
                         }
 
-                        <span class="comment">// TODO: Spinning isn&#39;t ideal, it might be worth
+                        <span class="comment">// TODO: Spinning isn't ideal, it might be worth
                         // investigating using a condvar or some other strategy
                         // here. That said, if this case is hit, then another thread
-                        // is about to push the value into the queue and this isn&#39;t
+                        // is about to push the value into the queue and this isn't
                         // the only spinlock in the impl right now.
                         </span>thread::yield_now();
                     }
@@ -2656,14 +2656,14 @@
 }
 
 <span class="kw">impl</span>&lt;T&gt; fmt::Debug <span class="kw">for </span>UnboundedReceiver&lt;T&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         <span class="kw">let </span>closed = <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref </span>inner) = <span class="self">self</span>.inner {
             decode_state(inner.state.load(SeqCst)).is_closed()
         } <span class="kw">else </span>{
             <span class="bool-val">false
         </span>};
 
-        f.debug_struct(<span class="string">&quot;Receiver&quot;</span>).field(<span class="string">&quot;closed&quot;</span>, <span class="kw-2">&amp;</span>closed).finish()
+        f.debug_struct(<span class="string">"Receiver"</span>).field(<span class="string">"closed"</span>, <span class="kw-2">&amp;</span>closed).finish()
     }
 }
 

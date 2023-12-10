@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/derivative-2.2.0/src/matcher.rs`."><title>matcher.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="derivative" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/derivative-2.2.0/src/matcher.rs`."><title>matcher.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="derivative" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -388,18 +388,18 @@
 }
 
 <span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>BindingInfo&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>BindingInfo&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">pub </span>expr: TokenStream,
     <span class="kw">pub </span>ident: syn::Ident,
-    <span class="kw">pub </span>field: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ast::Field&lt;<span class="lifetime">&#39;a</span>&gt;,
+    <span class="kw">pub </span>field: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>ast::Field&lt;<span class="lifetime">'a</span>&gt;,
 }
 
 <span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>CommonVariant&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>CommonVariant&lt;<span class="lifetime">'a</span>&gt; {
     path: syn::Path,
-    name: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>syn::Ident,
+    name: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>syn::Ident,
     style: ast::Style,
-    attrs: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>attr::Input,
+    attrs: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>attr::Input,
 }
 
 <span class="kw">pub struct </span>Matcher&lt;T&gt; {
@@ -412,7 +412,7 @@
 <span class="kw">impl </span>Matcher&lt;<span class="kw">fn </span>(<span class="kw-2">&amp;</span>ast::Field) -&gt; bool&gt; {
     <span class="kw">pub fn </span>new(style: BindingStyle, is_packed: bool) -&gt; <span class="self">Self </span>{
         Matcher {
-            binding_name: <span class="string">&quot;__arg&quot;</span>.into(),
+            binding_name: <span class="string">"__arg"</span>.into(),
             binding_style: style.with_packed(is_packed),
             is_packed,
             field_filter: |<span class="kw">_</span>| <span class="bool-val">true</span>,
@@ -523,11 +523,11 @@
     }
 
     <span class="doccomment">/// Generate patterns for matching against all of the variants
-    </span><span class="kw">pub fn </span>build_match_pattern&lt;<span class="lifetime">&#39;a</span>&gt;(
+    </span><span class="kw">pub fn </span>build_match_pattern&lt;<span class="lifetime">'a</span>&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        input: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ast::Input,
+        input: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>ast::Input,
         binding_name: <span class="kw-2">&amp;</span>str,
-    ) -&gt; Vec&lt;(CommonVariant&lt;<span class="lifetime">&#39;a</span>&gt;, (TokenStream, Vec&lt;BindingInfo&lt;<span class="lifetime">&#39;a</span>&gt;&gt;))&gt; {
+    ) -&gt; Vec&lt;(CommonVariant&lt;<span class="lifetime">'a</span>&gt;, (TokenStream, Vec&lt;BindingInfo&lt;<span class="lifetime">'a</span>&gt;&gt;))&gt; {
         <span class="kw">let </span>ident = <span class="kw-2">&amp;</span>input.ident;
 
         <span class="kw">match </span>input.body {
@@ -570,13 +570,13 @@
         }
     }
 
-    <span class="kw">fn </span>build_match_pattern_impl&lt;<span class="lifetime">&#39;a</span>, N&gt;(
+    <span class="kw">fn </span>build_match_pattern_impl&lt;<span class="lifetime">'a</span>, N&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         name: <span class="kw-2">&amp;</span>N,
         style: ast::Style,
-        fields: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[ast::Field&lt;<span class="lifetime">&#39;a</span>&gt;],
+        fields: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[ast::Field&lt;<span class="lifetime">'a</span>&gt;],
         binding_name: <span class="kw-2">&amp;</span>str,
-    ) -&gt; (TokenStream, Vec&lt;BindingInfo&lt;<span class="lifetime">&#39;a</span>&gt;&gt;)
+    ) -&gt; (TokenStream, Vec&lt;BindingInfo&lt;<span class="lifetime">'a</span>&gt;&gt;)
     <span class="kw">where
         </span>N: quote::ToTokens,
     {
@@ -634,17 +634,17 @@
         (all_tokens, matches)
     }
 
-    <span class="kw">fn </span>build_inner_pattern&lt;<span class="lifetime">&#39;a</span>&gt;(
+    <span class="kw">fn </span>build_inner_pattern&lt;<span class="lifetime">'a</span>&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        (<span class="kw-2">mut </span>stream, <span class="kw-2">mut </span>matches): (TokenStream, Vec&lt;BindingInfo&lt;<span class="lifetime">&#39;a</span>&gt;&gt;),
-        (i, field): (usize, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ast::Field),
+        (<span class="kw-2">mut </span>stream, <span class="kw-2">mut </span>matches): (TokenStream, Vec&lt;BindingInfo&lt;<span class="lifetime">'a</span>&gt;&gt;),
+        (i, field): (usize, <span class="kw-2">&amp;</span><span class="lifetime">'a </span>ast::Field),
         binding_name: <span class="kw-2">&amp;</span>str,
         f: <span class="kw">impl </span>FnOnce(<span class="kw-2">&amp;</span>ast::Field, <span class="kw-2">&amp;</span>syn::Ident, BindingStyle) -&gt; TokenStream,
-    ) -&gt; (TokenStream, Vec&lt;BindingInfo&lt;<span class="lifetime">&#39;a</span>&gt;&gt;) {
+    ) -&gt; (TokenStream, Vec&lt;BindingInfo&lt;<span class="lifetime">'a</span>&gt;&gt;) {
         <span class="kw">let </span>binding_style = <span class="self">self</span>.binding_style;
 
         <span class="kw">let </span>ident: syn::Ident = syn::Ident::new(
-            <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;{}_{}&quot;</span>, binding_name, i),
+            <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"{}_{}"</span>, binding_name, i),
             proc_macro2::Span::call_site(),
         );
         <span class="kw">let </span>expr = syn::Expr::Path(syn::ExprPath {

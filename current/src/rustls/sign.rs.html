@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-0.21.9/src/sign.rs`."><title>sign.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="rustls" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-0.21.9/src/sign.rs`."><title>sign.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="rustls" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -553,8 +553,8 @@
 
 <span class="doccomment">/// Parse `der` as any ECDSA key type, returning the first which works.
 ///
-/// Both SEC1 (PEM section starting with &#39;BEGIN EC PRIVATE KEY&#39;) and PKCS8
-/// (PEM section starting with &#39;BEGIN PRIVATE KEY&#39;) encodings are supported.
+/// Both SEC1 (PEM section starting with 'BEGIN EC PRIVATE KEY') and PKCS8
+/// (PEM section starting with 'BEGIN PRIVATE KEY') encodings are supported.
 </span><span class="kw">pub fn </span>any_ecdsa_type(der: <span class="kw-2">&amp;</span>key::PrivateKey) -&gt; <span class="prelude-ty">Result</span>&lt;Arc&lt;<span class="kw">dyn </span>SigningKey&gt;, SignError&gt; {
     <span class="kw">if let </span><span class="prelude-val">Ok</span>(ecdsa_p256) = EcdsaSigningKey::new(
         der,
@@ -588,7 +588,7 @@
 
 <span class="doccomment">/// A `SigningKey` for RSA-PKCS1 or RSA-PSS.
 ///
-/// This is used by the test suite, so it must be `pub`, but it isn&#39;t part of
+/// This is used by the test suite, so it must be `pub`, but it isn't part of
 /// the public, stable, API.
 </span><span class="attr">#[doc(hidden)]
 </span><span class="kw">pub struct </span>RsaSigningKey {
@@ -631,7 +631,7 @@
 <span class="kw">struct </span>RsaSigner {
     key: Arc&lt;RsaKeyPair&gt;,
     scheme: SignatureScheme,
-    encoding: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw">dyn </span>signature::RsaEncoding,
+    encoding: <span class="kw-2">&amp;</span><span class="lifetime">'static </span><span class="kw">dyn </span>signature::RsaEncoding,
 }
 
 <span class="kw">impl </span>RsaSigner {
@@ -662,7 +662,7 @@
         <span class="self">self</span>.key
             .sign(<span class="self">self</span>.encoding, <span class="kw-2">&amp;</span>rng, message, <span class="kw-2">&amp;mut </span>sig)
             .map(|<span class="kw">_</span>| sig)
-            .map_err(|<span class="kw">_</span>| Error::General(<span class="string">&quot;signing failed&quot;</span>.to_string()))
+            .map_err(|<span class="kw">_</span>| Error::General(<span class="string">"signing failed"</span>.to_string()))
     }
 
     <span class="kw">fn </span>scheme(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; SignatureScheme {
@@ -693,7 +693,7 @@
     </span><span class="kw">fn </span>new(
         der: <span class="kw-2">&amp;</span>key::PrivateKey,
         scheme: SignatureScheme,
-        sigalg: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>signature::EcdsaSigningAlgorithm,
+        sigalg: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>signature::EcdsaSigningAlgorithm,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ()&gt; {
         <span class="kw">let </span>rng = SystemRandom::new();
         EcdsaKeyPair::from_pkcs8(sigalg, <span class="kw-2">&amp;</span>der.<span class="number">0</span>, <span class="kw-2">&amp;</span>rng)
@@ -710,7 +710,7 @@
     /// (or equivalent) is landed.
     </span><span class="kw">fn </span>convert_sec1_to_pkcs8(
         scheme: SignatureScheme,
-        sigalg: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>signature::EcdsaSigningAlgorithm,
+        sigalg: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>signature::EcdsaSigningAlgorithm,
         maybe_sec1_der: <span class="kw-2">&amp;</span>[u8],
         rng: <span class="kw-2">&amp;</span><span class="kw">dyn </span>SecureRandom,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;EcdsaKeyPair, ()&gt; {
@@ -740,20 +740,20 @@
 // - SEQUENCE (privateKeyAlgorithm)
 //   - id-ecPublicKey OID
 //   - prime256v1 OID
-</span><span class="kw">const </span>PKCS8_PREFIX_ECDSA_NISTP256: <span class="kw-2">&amp;</span>[u8] = <span class="string">b&quot;\x02\x01\x00\
+</span><span class="kw">const </span>PKCS8_PREFIX_ECDSA_NISTP256: <span class="kw-2">&amp;</span>[u8] = <span class="string">b"\x02\x01\x00\
       \x30\x13\
       \x06\x07\x2a\x86\x48\xce\x3d\x02\x01\
-      \x06\x08\x2a\x86\x48\xce\x3d\x03\x01\x07&quot;</span>;
+      \x06\x08\x2a\x86\x48\xce\x3d\x03\x01\x07"</span>;
 
 <span class="comment">// This is (line-by-line):
 // - INTEGER Version = 0
 // - SEQUENCE (privateKeyAlgorithm)
 //   - id-ecPublicKey OID
 //   - secp384r1 OID
-</span><span class="kw">const </span>PKCS8_PREFIX_ECDSA_NISTP384: <span class="kw-2">&amp;</span>[u8] = <span class="string">b&quot;\x02\x01\x00\
+</span><span class="kw">const </span>PKCS8_PREFIX_ECDSA_NISTP384: <span class="kw-2">&amp;</span>[u8] = <span class="string">b"\x02\x01\x00\
      \x30\x10\
      \x06\x07\x2a\x86\x48\xce\x3d\x02\x01\
-     \x06\x05\x2b\x81\x04\x00\x22&quot;</span>;
+     \x06\x05\x2b\x81\x04\x00\x22"</span>;
 
 <span class="kw">impl </span>SigningKey <span class="kw">for </span>EcdsaSigningKey {
     <span class="kw">fn </span>choose_scheme(<span class="kw-2">&amp;</span><span class="self">self</span>, offered: <span class="kw-2">&amp;</span>[SignatureScheme]) -&gt; <span class="prelude-ty">Option</span>&lt;Box&lt;<span class="kw">dyn </span>Signer&gt;&gt; {
@@ -782,7 +782,7 @@
         <span class="kw">let </span>rng = ring::rand::SystemRandom::new();
         <span class="self">self</span>.key
             .sign(<span class="kw-2">&amp;</span>rng, message)
-            .map_err(|<span class="kw">_</span>| Error::General(<span class="string">&quot;signing failed&quot;</span>.into()))
+            .map_err(|<span class="kw">_</span>| Error::General(<span class="string">"signing failed"</span>.into()))
             .map(|sig| sig.as_ref().into())
     }
 
@@ -854,7 +854,7 @@
 
 <span class="doccomment">/// The set of schemes we support for signatures and
 /// that are allowed for TLS1.3.
-</span><span class="kw">pub fn </span>supported_sign_tls13() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[SignatureScheme] {
+</span><span class="kw">pub fn </span>supported_sign_tls13() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'static </span>[SignatureScheme] {
     <span class="kw-2">&amp;</span>[
         SignatureScheme::ECDSA_NISTP384_SHA384,
         SignatureScheme::ECDSA_NISTP256_SHA256,
@@ -871,7 +871,7 @@
 
 <span class="kw">impl </span>fmt::Display <span class="kw">for </span>SignError {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
-        f.write_str(<span class="string">&quot;sign error&quot;</span>)
+        f.write_str(<span class="string">"sign error"</span>)
     }
 }
 
@@ -879,7 +879,7 @@
 
 <span class="attr">#[test]
 </span><span class="kw">fn </span>can_load_ecdsa_nistp256_pkcs8() {
-    <span class="kw">let </span>key = key::PrivateKey(<span class="macro">include_bytes!</span>(<span class="string">&quot;testdata/nistp256key.pkcs8.der&quot;</span>).to_vec());
+    <span class="kw">let </span>key = key::PrivateKey(<span class="macro">include_bytes!</span>(<span class="string">"testdata/nistp256key.pkcs8.der"</span>).to_vec());
     <span class="macro">assert!</span>(any_supported_type(<span class="kw-2">&amp;</span>key).is_ok());
     <span class="macro">assert!</span>(any_ecdsa_type(<span class="kw-2">&amp;</span>key).is_ok());
     <span class="macro">assert!</span>(any_eddsa_type(<span class="kw-2">&amp;</span>key).is_err());
@@ -887,7 +887,7 @@
 
 <span class="attr">#[test]
 </span><span class="kw">fn </span>can_load_ecdsa_nistp256_sec1() {
-    <span class="kw">let </span>key = key::PrivateKey(<span class="macro">include_bytes!</span>(<span class="string">&quot;testdata/nistp256key.der&quot;</span>).to_vec());
+    <span class="kw">let </span>key = key::PrivateKey(<span class="macro">include_bytes!</span>(<span class="string">"testdata/nistp256key.der"</span>).to_vec());
     <span class="macro">assert!</span>(any_supported_type(<span class="kw-2">&amp;</span>key).is_ok());
     <span class="macro">assert!</span>(any_ecdsa_type(<span class="kw-2">&amp;</span>key).is_ok());
     <span class="macro">assert!</span>(any_eddsa_type(<span class="kw-2">&amp;</span>key).is_err());
@@ -895,7 +895,7 @@
 
 <span class="attr">#[test]
 </span><span class="kw">fn </span>can_load_ecdsa_nistp384_pkcs8() {
-    <span class="kw">let </span>key = key::PrivateKey(<span class="macro">include_bytes!</span>(<span class="string">&quot;testdata/nistp384key.pkcs8.der&quot;</span>).to_vec());
+    <span class="kw">let </span>key = key::PrivateKey(<span class="macro">include_bytes!</span>(<span class="string">"testdata/nistp384key.pkcs8.der"</span>).to_vec());
     <span class="macro">assert!</span>(any_supported_type(<span class="kw-2">&amp;</span>key).is_ok());
     <span class="macro">assert!</span>(any_ecdsa_type(<span class="kw-2">&amp;</span>key).is_ok());
     <span class="macro">assert!</span>(any_eddsa_type(<span class="kw-2">&amp;</span>key).is_err());
@@ -903,7 +903,7 @@
 
 <span class="attr">#[test]
 </span><span class="kw">fn </span>can_load_ecdsa_nistp384_sec1() {
-    <span class="kw">let </span>key = key::PrivateKey(<span class="macro">include_bytes!</span>(<span class="string">&quot;testdata/nistp384key.der&quot;</span>).to_vec());
+    <span class="kw">let </span>key = key::PrivateKey(<span class="macro">include_bytes!</span>(<span class="string">"testdata/nistp384key.der"</span>).to_vec());
     <span class="macro">assert!</span>(any_supported_type(<span class="kw-2">&amp;</span>key).is_ok());
     <span class="macro">assert!</span>(any_ecdsa_type(<span class="kw-2">&amp;</span>key).is_ok());
     <span class="macro">assert!</span>(any_eddsa_type(<span class="kw-2">&amp;</span>key).is_err());
@@ -911,7 +911,7 @@
 
 <span class="attr">#[test]
 </span><span class="kw">fn </span>can_load_eddsa_pkcs8() {
-    <span class="kw">let </span>key = key::PrivateKey(<span class="macro">include_bytes!</span>(<span class="string">&quot;testdata/eddsakey.der&quot;</span>).to_vec());
+    <span class="kw">let </span>key = key::PrivateKey(<span class="macro">include_bytes!</span>(<span class="string">"testdata/eddsakey.der"</span>).to_vec());
     <span class="macro">assert!</span>(any_supported_type(<span class="kw-2">&amp;</span>key).is_ok());
     <span class="macro">assert!</span>(any_eddsa_type(<span class="kw-2">&amp;</span>key).is_ok());
     <span class="macro">assert!</span>(any_ecdsa_type(<span class="kw-2">&amp;</span>key).is_err());
@@ -919,7 +919,7 @@
 
 <span class="attr">#[test]
 </span><span class="kw">fn </span>can_load_rsa2048_pkcs8() {
-    <span class="kw">let </span>key = key::PrivateKey(<span class="macro">include_bytes!</span>(<span class="string">&quot;testdata/rsa2048key.pkcs8.der&quot;</span>).to_vec());
+    <span class="kw">let </span>key = key::PrivateKey(<span class="macro">include_bytes!</span>(<span class="string">"testdata/rsa2048key.pkcs8.der"</span>).to_vec());
     <span class="macro">assert!</span>(any_supported_type(<span class="kw-2">&amp;</span>key).is_ok());
     <span class="macro">assert!</span>(any_eddsa_type(<span class="kw-2">&amp;</span>key).is_err());
     <span class="macro">assert!</span>(any_ecdsa_type(<span class="kw-2">&amp;</span>key).is_err());
@@ -927,7 +927,7 @@
 
 <span class="attr">#[test]
 </span><span class="kw">fn </span>can_load_rsa2048_pkcs1() {
-    <span class="kw">let </span>key = key::PrivateKey(<span class="macro">include_bytes!</span>(<span class="string">&quot;testdata/rsa2048key.pkcs1.der&quot;</span>).to_vec());
+    <span class="kw">let </span>key = key::PrivateKey(<span class="macro">include_bytes!</span>(<span class="string">"testdata/rsa2048key.pkcs1.der"</span>).to_vec());
     <span class="macro">assert!</span>(any_supported_type(<span class="kw-2">&amp;</span>key).is_ok());
     <span class="macro">assert!</span>(any_eddsa_type(<span class="kw-2">&amp;</span>key).is_err());
     <span class="macro">assert!</span>(any_ecdsa_type(<span class="kw-2">&amp;</span>key).is_err());

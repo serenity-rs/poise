@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bytes-1.5.0/src/buf/chain.rs`."><title>chain.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="bytes" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bytes-1.5.0/src/buf/chain.rs`."><title>chain.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="bytes" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -243,7 +243,7 @@
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::buf::{IntoIter, UninitSlice};
 <span class="kw">use crate</span>::{Buf, BufMut, Bytes};
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
 </span><span class="kw">use </span>std::io::IoSlice;
 
 <span class="doccomment">/// A `Chain` sequences two buffers.
@@ -253,18 +253,18 @@
 /// buffers ([`Buf`] values) or mutable buffers ([`BufMut`] values).
 ///
 /// This struct is generally created by calling [`Buf::chain`]. Please see that
-/// function&#39;s documentation for more detail.
+/// function's documentation for more detail.
 ///
 /// # Examples
 ///
 /// ```
 /// use bytes::{Bytes, Buf};
 ///
-/// let mut buf = (&amp;b&quot;hello &quot;[..])
-///     .chain(&amp;b&quot;world&quot;[..]);
+/// let mut buf = (&amp;b"hello "[..])
+///     .chain(&amp;b"world"[..]);
 ///
 /// let full: Bytes = buf.copy_to_bytes(11);
-/// assert_eq!(full[..], b&quot;hello world&quot;[..]);
+/// assert_eq!(full[..], b"hello world"[..]);
 /// ```
 ///
 /// [`Buf::chain`]: trait.Buf.html#method.chain
@@ -289,10 +289,10 @@
     /// ```
     /// use bytes::Buf;
     ///
-    /// let buf = (&amp;b&quot;hello&quot;[..])
-    ///     .chain(&amp;b&quot;world&quot;[..]);
+    /// let buf = (&amp;b"hello"[..])
+    ///     .chain(&amp;b"world"[..]);
     ///
-    /// assert_eq!(buf.first_ref()[..], b&quot;hello&quot;[..]);
+    /// assert_eq!(buf.first_ref()[..], b"hello"[..]);
     /// ```
     </span><span class="kw">pub fn </span>first_ref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>T {
         <span class="kw-2">&amp;</span><span class="self">self</span>.a
@@ -305,13 +305,13 @@
     /// ```
     /// use bytes::Buf;
     ///
-    /// let mut buf = (&amp;b&quot;hello&quot;[..])
-    ///     .chain(&amp;b&quot;world&quot;[..]);
+    /// let mut buf = (&amp;b"hello"[..])
+    ///     .chain(&amp;b"world"[..]);
     ///
     /// buf.first_mut().advance(1);
     ///
     /// let full = buf.copy_to_bytes(9);
-    /// assert_eq!(full, b&quot;elloworld&quot;[..]);
+    /// assert_eq!(full, b"elloworld"[..]);
     /// ```
     </span><span class="kw">pub fn </span>first_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>T {
         <span class="kw-2">&amp;mut </span><span class="self">self</span>.a
@@ -324,10 +324,10 @@
     /// ```
     /// use bytes::Buf;
     ///
-    /// let buf = (&amp;b&quot;hello&quot;[..])
-    ///     .chain(&amp;b&quot;world&quot;[..]);
+    /// let buf = (&amp;b"hello"[..])
+    ///     .chain(&amp;b"world"[..]);
     ///
-    /// assert_eq!(buf.last_ref()[..], b&quot;world&quot;[..]);
+    /// assert_eq!(buf.last_ref()[..], b"world"[..]);
     /// ```
     </span><span class="kw">pub fn </span>last_ref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>U {
         <span class="kw-2">&amp;</span><span class="self">self</span>.b
@@ -340,13 +340,13 @@
     /// ```
     /// use bytes::Buf;
     ///
-    /// let mut buf = (&amp;b&quot;hello &quot;[..])
-    ///     .chain(&amp;b&quot;world&quot;[..]);
+    /// let mut buf = (&amp;b"hello "[..])
+    ///     .chain(&amp;b"world"[..]);
     ///
     /// buf.last_mut().advance(1);
     ///
     /// let full = buf.copy_to_bytes(10);
-    /// assert_eq!(full, b&quot;hello orld&quot;[..]);
+    /// assert_eq!(full, b"hello orld"[..]);
     /// ```
     </span><span class="kw">pub fn </span>last_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>U {
         <span class="kw-2">&amp;mut </span><span class="self">self</span>.b
@@ -359,12 +359,12 @@
     /// ```
     /// use bytes::Buf;
     ///
-    /// let chain = (&amp;b&quot;hello&quot;[..])
-    ///     .chain(&amp;b&quot;world&quot;[..]);
+    /// let chain = (&amp;b"hello"[..])
+    ///     .chain(&amp;b"world"[..]);
     ///
     /// let (first, last) = chain.into_inner();
-    /// assert_eq!(first[..], b&quot;hello&quot;[..]);
-    /// assert_eq!(last[..], b&quot;world&quot;[..]);
+    /// assert_eq!(first[..], b"hello"[..]);
+    /// assert_eq!(last[..], b"world"[..]);
     /// ```
     </span><span class="kw">pub fn </span>into_inner(<span class="self">self</span>) -&gt; (T, U) {
         (<span class="self">self</span>.a, <span class="self">self</span>.b)
@@ -406,8 +406,8 @@
         <span class="self">self</span>.b.advance(cnt);
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
-    </span><span class="kw">fn </span>chunks_vectored&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>, dst: <span class="kw-2">&amp;mut </span>[IoSlice&lt;<span class="lifetime">&#39;a</span>&gt;]) -&gt; usize {
+    <span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
+    </span><span class="kw">fn </span>chunks_vectored&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>, dst: <span class="kw-2">&amp;mut </span>[IoSlice&lt;<span class="lifetime">'a</span>&gt;]) -&gt; usize {
         <span class="kw">let </span><span class="kw-2">mut </span>n = <span class="self">self</span>.a.chunks_vectored(dst);
         n += <span class="self">self</span>.b.chunks_vectored(<span class="kw-2">&amp;mut </span>dst[n..]);
         n
@@ -422,7 +422,7 @@
         } <span class="kw">else </span>{
             <span class="macro">assert!</span>(
                 len - a_rem &lt;= <span class="self">self</span>.b.remaining(),
-                <span class="string">&quot;`len` greater than remaining&quot;
+                <span class="string">"`len` greater than remaining"
             </span>);
             <span class="kw">let </span><span class="kw-2">mut </span>ret = <span class="kw">crate</span>::BytesMut::with_capacity(len);
             ret.put(<span class="kw-2">&amp;mut </span><span class="self">self</span>.a);

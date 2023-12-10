@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hyper-0.14.27/src/upgrade.rs`."><title>upgrade.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="hyper" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hyper-0.14.27/src/upgrade.rs`."><title>upgrade.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="hyper" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -430,7 +430,7 @@
 <span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>tokio::io::{AsyncRead, AsyncWrite, ReadBuf};
 <span class="kw">use </span>tokio::sync::oneshot;
-<span class="attr">#[cfg(any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>))]
+<span class="attr">#[cfg(any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>))]
 </span><span class="kw">use </span>tracing::trace;
 
 <span class="kw">use </span><span class="kw">crate</span>::common::io::Rewind;
@@ -450,7 +450,7 @@
 
 <span class="doccomment">/// A future for a possible HTTP upgrade.
 ///
-/// If no upgrade was available, or it doesn&#39;t succeed, yields an `Error`.
+/// If no upgrade was available, or it doesn't succeed, yields an `Error`.
 </span><span class="kw">pub struct </span>OnUpgrade {
     rx: <span class="prelude-ty">Option</span>&lt;oneshot::Receiver&lt;<span class="kw">crate</span>::Result&lt;Upgraded&gt;&gt;&gt;,
 }
@@ -487,12 +487,12 @@
     msg.on_upgrade()
 }
 
-<span class="attr">#[cfg(any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>))]
+<span class="attr">#[cfg(any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>))]
 </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">struct </span>Pending {
     tx: oneshot::Sender&lt;<span class="kw">crate</span>::Result&lt;Upgraded&gt;&gt;,
 }
 
-<span class="attr">#[cfg(any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>))]
+<span class="attr">#[cfg(any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>))]
 </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>pending() -&gt; (Pending, OnUpgrade) {
     <span class="kw">let </span>(tx, rx) = oneshot::channel();
     (Pending { tx }, OnUpgrade { rx: <span class="prelude-val">Some</span>(rx) })
@@ -501,10 +501,10 @@
 <span class="comment">// ===== impl Upgraded =====
 
 </span><span class="kw">impl </span>Upgraded {
-    <span class="attr">#[cfg(any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>, test))]
+    <span class="attr">#[cfg(any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>, test))]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>new&lt;T&gt;(io: T, read_buf: Bytes) -&gt; <span class="self">Self
     </span><span class="kw">where
-        </span>T: AsyncRead + AsyncWrite + Unpin + Send + <span class="lifetime">&#39;static</span>,
+        </span>T: AsyncRead + AsyncWrite + Unpin + Send + <span class="lifetime">'static</span>,
     {
         Upgraded {
             io: Rewind::new_buffered(Box::new(io), read_buf),
@@ -515,7 +515,7 @@
     ///
     /// On success, returns the downcasted parts. On error, returns the
     /// `Upgraded` back.
-    </span><span class="kw">pub fn </span>downcast&lt;T: AsyncRead + AsyncWrite + Unpin + <span class="lifetime">&#39;static</span>&gt;(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Parts&lt;T&gt;, <span class="self">Self</span>&gt; {
+    </span><span class="kw">pub fn </span>downcast&lt;T: AsyncRead + AsyncWrite + Unpin + <span class="lifetime">'static</span>&gt;(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Parts&lt;T&gt;, <span class="self">Self</span>&gt; {
         <span class="kw">let </span>(io, buf) = <span class="self">self</span>.io.into_inner();
         <span class="kw">match </span>io.__hyper_downcast() {
             <span class="prelude-val">Ok</span>(t) =&gt; <span class="prelude-val">Ok</span>(Parts {
@@ -533,8 +533,8 @@
 <span class="kw">impl </span>AsyncRead <span class="kw">for </span>Upgraded {
     <span class="kw">fn </span>poll_read(
         <span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;,
-        cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;,
-        buf: <span class="kw-2">&amp;mut </span>ReadBuf&lt;<span class="lifetime">&#39;_</span>&gt;,
+        cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;,
+        buf: <span class="kw-2">&amp;mut </span>ReadBuf&lt;<span class="lifetime">'_</span>&gt;,
     ) -&gt; Poll&lt;io::Result&lt;()&gt;&gt; {
         Pin::new(<span class="kw-2">&amp;mut </span><span class="self">self</span>.io).poll_read(cx, buf)
     }
@@ -543,7 +543,7 @@
 <span class="kw">impl </span>AsyncWrite <span class="kw">for </span>Upgraded {
     <span class="kw">fn </span>poll_write(
         <span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;,
-        cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;,
+        cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;,
         buf: <span class="kw-2">&amp;</span>[u8],
     ) -&gt; Poll&lt;io::Result&lt;usize&gt;&gt; {
         Pin::new(<span class="kw-2">&amp;mut </span><span class="self">self</span>.io).poll_write(cx, buf)
@@ -551,17 +551,17 @@
 
     <span class="kw">fn </span>poll_write_vectored(
         <span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;,
-        cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;,
-        bufs: <span class="kw-2">&amp;</span>[io::IoSlice&lt;<span class="lifetime">&#39;_</span>&gt;],
+        cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;,
+        bufs: <span class="kw-2">&amp;</span>[io::IoSlice&lt;<span class="lifetime">'_</span>&gt;],
     ) -&gt; Poll&lt;io::Result&lt;usize&gt;&gt; {
         Pin::new(<span class="kw-2">&amp;mut </span><span class="self">self</span>.io).poll_write_vectored(cx, bufs)
     }
 
-    <span class="kw">fn </span>poll_flush(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;io::Result&lt;()&gt;&gt; {
+    <span class="kw">fn </span>poll_flush(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;io::Result&lt;()&gt;&gt; {
         Pin::new(<span class="kw-2">&amp;mut </span><span class="self">self</span>.io).poll_flush(cx)
     }
 
-    <span class="kw">fn </span>poll_shutdown(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;io::Result&lt;()&gt;&gt; {
+    <span class="kw">fn </span>poll_shutdown(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;io::Result&lt;()&gt;&gt; {
         Pin::new(<span class="kw-2">&amp;mut </span><span class="self">self</span>.io).poll_shutdown(cx)
     }
 
@@ -571,8 +571,8 @@
 }
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>Upgraded {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        f.debug_struct(<span class="string">&quot;Upgraded&quot;</span>).finish()
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        f.debug_struct(<span class="string">"Upgraded"</span>).finish()
     }
 }
 
@@ -583,7 +583,7 @@
         OnUpgrade { rx: <span class="prelude-val">None </span>}
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;http1&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"http1"</span>)]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>is_none(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         <span class="self">self</span>.rx.is_none()
     }
@@ -592,7 +592,7 @@
 <span class="kw">impl </span>Future <span class="kw">for </span>OnUpgrade {
     <span class="kw">type </span>Output = <span class="prelude-ty">Result</span>&lt;Upgraded, <span class="kw">crate</span>::Error&gt;;
 
-    <span class="kw">fn </span>poll(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
+    <span class="kw">fn </span>poll(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
         <span class="kw">match </span><span class="self">self</span>.rx {
             <span class="prelude-val">Some</span>(<span class="kw-2">ref mut </span>rx) =&gt; Pin::new(rx).poll(cx).map(|res| <span class="kw">match </span>res {
                 <span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(upgraded)) =&gt; <span class="prelude-val">Ok</span>(upgraded),
@@ -605,25 +605,25 @@
 }
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>OnUpgrade {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        f.debug_struct(<span class="string">&quot;OnUpgrade&quot;</span>).finish()
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        f.debug_struct(<span class="string">"OnUpgrade"</span>).finish()
     }
 }
 
 <span class="comment">// ===== impl Pending =====
 
-</span><span class="attr">#[cfg(any(feature = <span class="string">&quot;http1&quot;</span>, feature = <span class="string">&quot;http2&quot;</span>))]
+</span><span class="attr">#[cfg(any(feature = <span class="string">"http1"</span>, feature = <span class="string">"http2"</span>))]
 </span><span class="kw">impl </span>Pending {
     <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>fulfill(<span class="self">self</span>, upgraded: Upgraded) {
-        <span class="macro">trace!</span>(<span class="string">&quot;pending upgrade fulfill&quot;</span>);
+        <span class="macro">trace!</span>(<span class="string">"pending upgrade fulfill"</span>);
         <span class="kw">let _ </span>= <span class="self">self</span>.tx.send(<span class="prelude-val">Ok</span>(upgraded));
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;http1&quot;</span>)]
-    </span><span class="doccomment">/// Don&#39;t fulfill the pending Upgrade, but instead signal that
+    <span class="attr">#[cfg(feature = <span class="string">"http1"</span>)]
+    </span><span class="doccomment">/// Don't fulfill the pending Upgrade, but instead signal that
     /// upgrades are handled manually.
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>manual(<span class="self">self</span>) {
-        <span class="macro">trace!</span>(<span class="string">&quot;pending upgrade handled manually&quot;</span>);
+        <span class="macro">trace!</span>(<span class="string">"pending upgrade handled manually"</span>);
         <span class="kw">let _ </span>= <span class="self">self</span>.tx.send(<span class="prelude-val">Err</span>(<span class="kw">crate</span>::Error::new_user_manual_upgrade()));
     }
 }
@@ -633,13 +633,13 @@
 </span><span class="doccomment">/// Error cause returned when an upgrade was expected but canceled
 /// for whatever reason.
 ///
-/// This likely means the actual `Conn` future wasn&#39;t polled and upgraded.
+/// This likely means the actual `Conn` future wasn't polled and upgraded.
 </span><span class="attr">#[derive(Debug)]
 </span><span class="kw">struct </span>UpgradeExpected;
 
 <span class="kw">impl </span>fmt::Display <span class="kw">for </span>UpgradeExpected {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        f.write_str(<span class="string">&quot;upgrade expected but not completed&quot;</span>)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        f.write_str(<span class="string">"upgrade expected but not completed"</span>)
     }
 }
 
@@ -647,13 +647,13 @@
 
 <span class="comment">// ===== impl Io =====
 
-</span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">trait </span>Io: AsyncRead + AsyncWrite + Unpin + <span class="lifetime">&#39;static </span>{
+</span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">trait </span>Io: AsyncRead + AsyncWrite + Unpin + <span class="lifetime">'static </span>{
     <span class="kw">fn </span>__hyper_type_id(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; TypeId {
         TypeId::of::&lt;<span class="self">Self</span>&gt;()
     }
 }
 
-<span class="kw">impl</span>&lt;T: AsyncRead + AsyncWrite + Unpin + <span class="lifetime">&#39;static</span>&gt; Io <span class="kw">for </span>T {}
+<span class="kw">impl</span>&lt;T: AsyncRead + AsyncWrite + Unpin + <span class="lifetime">'static</span>&gt; Io <span class="kw">for </span>T {}
 
 <span class="kw">impl dyn </span>Io + Send {
     <span class="kw">fn </span>__hyper_is&lt;T: Io&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
@@ -689,7 +689,7 @@
         }
     }
 
-    <span class="kw">impl</span>&lt;B&gt; CanUpgrade <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;_ </span><span class="kw-2">mut </span>http::Request&lt;B&gt; {
+    <span class="kw">impl</span>&lt;B&gt; CanUpgrade <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'_ </span><span class="kw-2">mut </span>http::Request&lt;B&gt; {
         <span class="kw">fn </span>on_upgrade(<span class="self">self</span>) -&gt; OnUpgrade {
             <span class="self">self</span>.extensions_mut()
                 .remove::&lt;OnUpgrade&gt;()
@@ -705,7 +705,7 @@
         }
     }
 
-    <span class="kw">impl</span>&lt;B&gt; CanUpgrade <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;_ </span><span class="kw-2">mut </span>http::Response&lt;B&gt; {
+    <span class="kw">impl</span>&lt;B&gt; CanUpgrade <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'_ </span><span class="kw-2">mut </span>http::Response&lt;B&gt; {
         <span class="kw">fn </span>on_upgrade(<span class="self">self</span>) -&gt; OnUpgrade {
             <span class="self">self</span>.extensions_mut()
                 .remove::&lt;OnUpgrade&gt;()
@@ -733,32 +733,32 @@
     <span class="kw">impl </span>AsyncRead <span class="kw">for </span>Mock {
         <span class="kw">fn </span>poll_read(
             <span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;,
-            _cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;,
-            _buf: <span class="kw-2">&amp;mut </span>ReadBuf&lt;<span class="lifetime">&#39;_</span>&gt;,
+            _cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;,
+            _buf: <span class="kw-2">&amp;mut </span>ReadBuf&lt;<span class="lifetime">'_</span>&gt;,
         ) -&gt; Poll&lt;io::Result&lt;()&gt;&gt; {
-            <span class="macro">unreachable!</span>(<span class="string">&quot;Mock::poll_read&quot;</span>)
+            <span class="macro">unreachable!</span>(<span class="string">"Mock::poll_read"</span>)
         }
     }
 
     <span class="kw">impl </span>AsyncWrite <span class="kw">for </span>Mock {
         <span class="kw">fn </span>poll_write(
             <span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;,
-            <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;,
+            <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;,
             buf: <span class="kw-2">&amp;</span>[u8],
         ) -&gt; Poll&lt;io::Result&lt;usize&gt;&gt; {
-            <span class="comment">// panic!(&quot;poll_write shouldn&#39;t be called&quot;);
+            <span class="comment">// panic!("poll_write shouldn't be called");
             </span>Poll::Ready(<span class="prelude-val">Ok</span>(buf.len()))
         }
 
-        <span class="kw">fn </span>poll_flush(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, _cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;io::Result&lt;()&gt;&gt; {
-            <span class="macro">unreachable!</span>(<span class="string">&quot;Mock::poll_flush&quot;</span>)
+        <span class="kw">fn </span>poll_flush(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, _cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;io::Result&lt;()&gt;&gt; {
+            <span class="macro">unreachable!</span>(<span class="string">"Mock::poll_flush"</span>)
         }
 
         <span class="kw">fn </span>poll_shutdown(
             <span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;,
-            _cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;,
+            _cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;,
         ) -&gt; Poll&lt;io::Result&lt;()&gt;&gt; {
-            <span class="macro">unreachable!</span>(<span class="string">&quot;Mock::poll_shutdown&quot;</span>)
+            <span class="macro">unreachable!</span>(<span class="string">"Mock::poll_shutdown"</span>)
         }
     }
 }

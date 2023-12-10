@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tracing-core-0.1.32/src/subscriber.rs`."><title>subscriber.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="tracing_core" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../tracing_core/index.html"><img src="https://raw.githubusercontent.com/tokio-rs/tracing/master/assets/logo-type.png" alt="tracing_core"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tracing-core-0.1.32/src/subscriber.rs`."><title>subscriber.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="tracing_core" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../tracing_core/index.html"><img src="https://raw.githubusercontent.com/tokio-rs/tracing/master/assets/logo-type.png" alt="tracing_core"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -929,7 +929,7 @@
 ///   not the subscriber wishes to see events or spans from that callsite. By
 ///   default, it calls [`enabled`], and returns `Interest::always()` if
 ///   `enabled` returns true, or `Interest::never()` if enabled returns false.
-///   However, if the subscriber&#39;s interest can change dynamically at runtime,
+///   However, if the subscriber's interest can change dynamically at runtime,
 ///   it may want to override this function to return `Interest::sometimes()`.
 ///   Additionally, subscribers which wish to perform a behaviour once for each
 ///   callsite, such as allocating storage for data related to that callsite,
@@ -958,7 +958,7 @@
 /// [cs-reg]: crate::callsite#registering-callsites
 /// [`event`]: Subscriber::event
 /// [`event_enabled`]: Subscriber::event_enabled
-</span><span class="kw">pub trait </span>Subscriber: <span class="lifetime">&#39;static </span>{
+</span><span class="kw">pub trait </span>Subscriber: <span class="lifetime">'static </span>{
     <span class="doccomment">/// Invoked when this subscriber becomes a [`Dispatch`].
     ///
     /// ## Avoiding Memory Leaks
@@ -985,7 +985,7 @@
     <span class="doccomment">/// Registers a new [callsite] with this subscriber, returning whether or not
     /// the subscriber is interested in being notified about the callsite.
     ///
-    /// By default, this function assumes that the subscriber&#39;s [filter]
+    /// By default, this function assumes that the subscriber's [filter]
     /// represents an unchanging view of its interest in the callsite. However,
     /// if this is not the case, subscribers may override this function to
     /// indicate different interests, or to implement behaviour that should run
@@ -1053,7 +1053,7 @@
     /// [`enabled`]: Subscriber::enabled()
     /// [`rebuild_interest_cache`]: super::callsite::rebuild_interest_cache
     /// [cs-reg]: crate::callsite#registering-callsites
-    </span><span class="kw">fn </span>register_callsite(<span class="kw-2">&amp;</span><span class="self">self</span>, metadata: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Metadata&lt;<span class="lifetime">&#39;static</span>&gt;) -&gt; Interest {
+    </span><span class="kw">fn </span>register_callsite(<span class="kw-2">&amp;</span><span class="self">self</span>, metadata: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Metadata&lt;<span class="lifetime">'static</span>&gt;) -&gt; Interest {
         <span class="kw">if </span><span class="self">self</span>.enabled(metadata) {
             Interest::always()
         } <span class="kw">else </span>{
@@ -1071,7 +1071,7 @@
     /// primarily as an optimization, so that expensive filters (such as those
     /// involving string search, et cetera) need not be re-evaluated.
     ///
-    /// However, if the subscriber&#39;s interest in a particular span or event may
+    /// However, if the subscriber's interest in a particular span or event may
     /// change, or depends on contexts only determined dynamically at runtime,
     /// then the `register_callsite` method should be overridden to return
     /// [`Interest::sometimes`]. In that case, this function will be called every
@@ -1081,7 +1081,7 @@
     /// [interested]: Interest
     /// [`Interest::sometimes`]: Interest::sometimes
     /// [`register_callsite`]: Subscriber::register_callsite()
-    </span><span class="kw">fn </span>enabled(<span class="kw-2">&amp;</span><span class="self">self</span>, metadata: <span class="kw-2">&amp;</span>Metadata&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; bool;
+    </span><span class="kw">fn </span>enabled(<span class="kw-2">&amp;</span><span class="self">self</span>, metadata: <span class="kw-2">&amp;</span>Metadata&lt;<span class="lifetime">'_</span>&gt;) -&gt; bool;
 
     <span class="doccomment">/// Returns the highest [verbosity level][level] that this `Subscriber` will
     /// enable, or `None`, if the subscriber does not implement level-based
@@ -1114,7 +1114,7 @@
     ///
     /// The provided [`Attributes`] contains any field values that were provided
     /// when the span was created. The subscriber may pass a [visitor] to the
-    /// `Attributes`&#39; [`record` method] to record these values.
+    /// `Attributes`' [`record` method] to record these values.
     ///
     /// IDs are used to uniquely identify spans and events within the context of a
     /// subscriber, so span equality will be based on the returned ID. Thus, if
@@ -1133,7 +1133,7 @@
     /// [`Attributes`]: super::span::Attributes
     /// [visitor]: super::field::Visit
     /// [`record` method]: super::span::Attributes::record
-    </span><span class="kw">fn </span>new_span(<span class="kw-2">&amp;</span><span class="self">self</span>, span: <span class="kw-2">&amp;</span>span::Attributes&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; span::Id;
+    </span><span class="kw">fn </span>new_span(<span class="kw-2">&amp;</span><span class="self">self</span>, span: <span class="kw-2">&amp;</span>span::Attributes&lt;<span class="lifetime">'_</span>&gt;) -&gt; span::Id;
 
     <span class="comment">// === Notification methods ===============================================
 
@@ -1146,34 +1146,34 @@
     /// Keep in mind that a span might not provide a value
     /// for each field it declares.
     ///
-    /// The subscriber is expected to provide a [visitor] to the `Record`&#39;s
+    /// The subscriber is expected to provide a [visitor] to the `Record`'s
     /// [`record` method] in order to record the added values.
     ///
     /// # Example
-    ///  &quot;foo = 3&quot; will be recorded when [`record`] is called on the
+    ///  "foo = 3" will be recorded when [`record`] is called on the
     /// `Attributes` passed to `new_span`.
     /// Since values are not provided for the `bar` and `baz` fields,
-    /// the span&#39;s `Metadata` will indicate that it _has_ those fields,
-    /// but values for them won&#39;t be recorded at this time.
+    /// the span's `Metadata` will indicate that it _has_ those fields,
+    /// but values for them won't be recorded at this time.
     ///
     /// ```rust,ignore
     /// # use tracing::span;
     ///
-    /// let mut span = span!(&quot;my_span&quot;, foo = 3, bar, baz);
+    /// let mut span = span!("my_span", foo = 3, bar, baz);
     ///
     /// // `Subscriber::record` will be called with a `Record`
-    /// // containing &quot;bar = false&quot;
-    /// span.record(&quot;bar&quot;, &amp;false);
+    /// // containing "bar = false"
+    /// span.record("bar", &amp;false);
     ///
     /// // `Subscriber::record` will be called with a `Record`
-    /// // containing &quot;baz = &quot;a string&quot;&quot;
-    /// span.record(&quot;baz&quot;, &amp;&quot;a string&quot;);
+    /// // containing "baz = "a string""
+    /// span.record("baz", &amp;"a string");
     /// ```
     ///
     /// [visitor]: super::field::Visit
     /// [`record`]: super::span::Attributes::record
     /// [`record` method]: super::span::Record::record
-    </span><span class="kw">fn </span>record(<span class="kw-2">&amp;</span><span class="self">self</span>, span: <span class="kw-2">&amp;</span>span::Id, values: <span class="kw-2">&amp;</span>span::Record&lt;<span class="lifetime">&#39;_</span>&gt;);
+    </span><span class="kw">fn </span>record(<span class="kw-2">&amp;</span><span class="self">self</span>, span: <span class="kw-2">&amp;</span>span::Id, values: <span class="kw-2">&amp;</span>span::Record&lt;<span class="lifetime">'_</span>&gt;);
 
     <span class="doccomment">/// Adds an indication that `span` follows from the span with the id
     /// `follows`.
@@ -1201,7 +1201,7 @@
     /// [`event`][Self::event] without any penalty. However, when `event` is
     /// more complicated, this can be used to determine if `event` should be
     /// called at all, separating out the decision from the processing.
-    </span><span class="kw">fn </span>event_enabled(<span class="kw-2">&amp;</span><span class="self">self</span>, event: <span class="kw-2">&amp;</span>Event&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; bool {
+    </span><span class="kw">fn </span>event_enabled(<span class="kw-2">&amp;</span><span class="self">self</span>, event: <span class="kw-2">&amp;</span>Event&lt;<span class="lifetime">'_</span>&gt;) -&gt; bool {
         <span class="kw">let _ </span>= event;
         <span class="bool-val">true
     </span>}
@@ -1209,7 +1209,7 @@
     <span class="doccomment">/// Records that an [`Event`] has occurred.
     ///
     /// This method will be invoked when an Event is constructed by
-    /// the `Event`&#39;s [`dispatch` method]. For example, this happens internally
+    /// the `Event`'s [`dispatch` method]. For example, this happens internally
     /// when an event macro from `tracing` is called.
     ///
     /// The key difference between this method and `record` is that `record` is
@@ -1217,14 +1217,14 @@
     /// while `event` is called when a new event occurs.
     ///
     /// The provided `Event` struct contains any field values attached to the
-    /// event. The subscriber may pass a [visitor] to the `Event`&#39;s
+    /// event. The subscriber may pass a [visitor] to the `Event`'s
     /// [`record` method] to record these values.
     ///
     /// [`Event`]: super::event::Event
     /// [visitor]: super::field::Visit
     /// [`record` method]: super::event::Event::record
     /// [`dispatch` method]: super::event::Event::dispatch
-    </span><span class="kw">fn </span>event(<span class="kw-2">&amp;</span><span class="self">self</span>, event: <span class="kw-2">&amp;</span>Event&lt;<span class="lifetime">&#39;_</span>&gt;);
+    </span><span class="kw">fn </span>event(<span class="kw-2">&amp;</span><span class="self">self</span>, event: <span class="kw-2">&amp;</span>Event&lt;<span class="lifetime">'_</span>&gt;);
 
     <span class="doccomment">/// Records that a span has been entered.
     ///
@@ -1251,7 +1251,7 @@
     <span class="doccomment">/// Notifies the subscriber that a [span ID] has been cloned.
     ///
     /// This function is guaranteed to only be called with span IDs that were
-    /// returned by this subscriber&#39;s `new_span` function.
+    /// returned by this subscriber's `new_span` function.
     ///
     /// Note that the default implementation of this function this is just the
     /// identity function, passing through the identifier. However, it can be
@@ -1263,7 +1263,7 @@
     /// that span, write data from that span to IO, and so on.
     ///
     /// For more unsafe situations, however, if `id` is itself a pointer of some
-    /// kind this can be used as a hook to &quot;clone&quot; the pointer, depending on
+    /// kind this can be used as a hook to "clone" the pointer, depending on
     /// what that means for the specified pointer.
     ///
     /// [span ID]: super::span::Id
@@ -1275,13 +1275,13 @@
     <span class="doccomment">/// **This method is deprecated.**
     ///
     /// Using `drop_span` may result in subscribers composed using
-    /// `tracing-subscriber` crate&#39;s `Layer` trait from observing close events.
+    /// `tracing-subscriber` crate's `Layer` trait from observing close events.
     /// Use [`try_close`] instead.
     ///
     /// The default implementation of this function does nothing.
     ///
     /// [`try_close`]: Subscriber::try_close
-    </span><span class="attr">#[deprecated(since = <span class="string">&quot;0.1.2&quot;</span>, note = <span class="string">&quot;use `Subscriber::try_close` instead&quot;</span>)]
+    </span><span class="attr">#[deprecated(since = <span class="string">"0.1.2"</span>, note = <span class="string">"use `Subscriber::try_close` instead"</span>)]
     </span><span class="kw">fn </span>drop_span(<span class="kw-2">&amp;</span><span class="self">self</span>, _id: span::Id) {}
 
     <span class="doccomment">/// Notifies the subscriber that a [span ID] has been dropped, and returns
@@ -1289,9 +1289,9 @@
     ///
     /// Higher-level libraries providing functionality for composing multiple
     /// subscriber implementations may use this return value to notify any
-    /// &quot;layered&quot; subscribers that this subscriber considers the span closed.
+    /// "layered" subscribers that this subscriber considers the span closed.
     ///
-    /// The default implementation of this method calls the subscriber&#39;s
+    /// The default implementation of this method calls the subscriber's
     /// [`drop_span`] method and returns `false`. This means that, unless the
     /// subscriber overrides the default implementation, close notifications
     /// will never be sent to any layered subscribers. In general, if the
@@ -1299,9 +1299,9 @@
     /// rather than `drop_span`.
     ///
     /// This function is guaranteed to only be called with span IDs that were
-    /// returned by this subscriber&#39;s `new_span` function.
+    /// returned by this subscriber's `new_span` function.
     ///
-    /// It&#39;s guaranteed that if this function has been called once more than the
+    /// It's guaranteed that if this function has been called once more than the
     /// number of times `clone_span` was called with the same `id`, then no more
     /// handles that can enter the span with that `id` exist. This means that it
     /// can be used in conjunction with [`clone_span`] to track the number of
@@ -1326,7 +1326,7 @@
         <span class="bool-val">false
     </span>}
 
-    <span class="doccomment">/// Returns a type representing this subscriber&#39;s view of the current span.
+    <span class="doccomment">/// Returns a type representing this subscriber's view of the current span.
     ///
     /// If subscribers track a current span, they should override this function
     /// to return [`Current::new`] if the thread from which this method is
@@ -1357,7 +1357,7 @@
     /// means that if we only exposed `downcast_ref`, `Subscriber`
     /// implementations could not override the downcasting behavior
     ///
-    /// This method may be overridden by &quot;fan out&quot; or &quot;chained&quot; subscriber
+    /// This method may be overridden by "fan out" or "chained" subscriber
     /// implementations which consist of multiple composed types. Such
     /// subscribers might allow `downcast_raw` by returning references to those
     /// component if they contain components with the given `TypeId`.
@@ -1386,7 +1386,7 @@
     }
 
     <span class="doccomment">/// Returns some reference to this `Subscriber` value if it is of type `T`,
-    /// or `None` if it isn&#39;t.
+    /// or `None` if it isn't.
     </span><span class="kw">pub fn </span>downcast_ref&lt;T: Any&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>T&gt; {
         <span class="kw">unsafe </span>{
             <span class="kw">let </span>raw = <span class="self">self</span>.downcast_raw(TypeId::of::&lt;T&gt;())<span class="question-mark">?</span>;
@@ -1406,7 +1406,7 @@
     }
 
     <span class="doccomment">/// Returns some reference to this [`Subscriber`] value if it is of type `T`,
-    /// or `None` if it isn&#39;t.
+    /// or `None` if it isn't.
     </span><span class="kw">pub fn </span>downcast_ref&lt;T: Any&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>T&gt; {
         <span class="kw">unsafe </span>{
             <span class="kw">let </span>raw = <span class="self">self</span>.downcast_raw(TypeId::of::&lt;T&gt;())<span class="question-mark">?</span>;
@@ -1426,7 +1426,7 @@
     }
 
     <span class="doccomment">/// Returns some reference to this `[`Subscriber`] value if it is of type `T`,
-    /// or `None` if it isn&#39;t.
+    /// or `None` if it isn't.
     </span><span class="kw">pub fn </span>downcast_ref&lt;T: Any&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>T&gt; {
         <span class="kw">unsafe </span>{
             <span class="kw">let </span>raw = <span class="self">self</span>.downcast_raw(TypeId::of::&lt;T&gt;())<span class="question-mark">?</span>;
@@ -1446,7 +1446,7 @@
     }
 
     <span class="doccomment">/// Returns some reference to this [`Subscriber`] value if it is of type `T`,
-    /// or `None` if it isn&#39;t.
+    /// or `None` if it isn't.
     </span><span class="kw">pub fn </span>downcast_ref&lt;T: Any&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>T&gt; {
         <span class="kw">unsafe </span>{
             <span class="kw">let </span>raw = <span class="self">self</span>.downcast_raw(TypeId::of::&lt;T&gt;())<span class="question-mark">?</span>;
@@ -1459,7 +1459,7 @@
     }
 }
 
-<span class="doccomment">/// Indicates a [`Subscriber`]&#39;s interest in a particular callsite.
+<span class="doccomment">/// Indicates a [`Subscriber`]'s interest in a particular callsite.
 ///
 /// `Subscriber`s return an `Interest` from their [`register_callsite`] methods
 /// in order to determine whether that span should be enabled or disabled.
@@ -1554,22 +1554,22 @@
 
 <span class="kw">impl </span>Subscriber <span class="kw">for </span>NoSubscriber {
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>register_callsite(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Metadata&lt;<span class="lifetime">&#39;static</span>&gt;) -&gt; Interest {
+    </span><span class="kw">fn </span>register_callsite(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Metadata&lt;<span class="lifetime">'static</span>&gt;) -&gt; Interest {
         Interest::never()
     }
 
-    <span class="kw">fn </span>new_span(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span>span::Attributes&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; span::Id {
+    <span class="kw">fn </span>new_span(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span>span::Attributes&lt;<span class="lifetime">'_</span>&gt;) -&gt; span::Id {
         span::Id::from_u64(<span class="number">0xDEAD</span>)
     }
 
-    <span class="kw">fn </span>event(<span class="kw-2">&amp;</span><span class="self">self</span>, _event: <span class="kw-2">&amp;</span>Event&lt;<span class="lifetime">&#39;_</span>&gt;) {}
+    <span class="kw">fn </span>event(<span class="kw-2">&amp;</span><span class="self">self</span>, _event: <span class="kw-2">&amp;</span>Event&lt;<span class="lifetime">'_</span>&gt;) {}
 
-    <span class="kw">fn </span>record(<span class="kw-2">&amp;</span><span class="self">self</span>, _span: <span class="kw-2">&amp;</span>span::Id, _values: <span class="kw-2">&amp;</span>span::Record&lt;<span class="lifetime">&#39;_</span>&gt;) {}
+    <span class="kw">fn </span>record(<span class="kw-2">&amp;</span><span class="self">self</span>, _span: <span class="kw-2">&amp;</span>span::Id, _values: <span class="kw-2">&amp;</span>span::Record&lt;<span class="lifetime">'_</span>&gt;) {}
 
     <span class="kw">fn </span>record_follows_from(<span class="kw-2">&amp;</span><span class="self">self</span>, _span: <span class="kw-2">&amp;</span>span::Id, _follows: <span class="kw-2">&amp;</span>span::Id) {}
 
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>enabled(<span class="kw-2">&amp;</span><span class="self">self</span>, _metadata: <span class="kw-2">&amp;</span>Metadata&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; bool {
+    </span><span class="kw">fn </span>enabled(<span class="kw-2">&amp;</span><span class="self">self</span>, _metadata: <span class="kw-2">&amp;</span>Metadata&lt;<span class="lifetime">'_</span>&gt;) -&gt; bool {
         <span class="bool-val">false
     </span>}
 
@@ -1590,12 +1590,12 @@
     </span>S: Subscriber + <span class="question-mark">?</span>Sized,
 {
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>register_callsite(<span class="kw-2">&amp;</span><span class="self">self</span>, metadata: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Metadata&lt;<span class="lifetime">&#39;static</span>&gt;) -&gt; Interest {
+    </span><span class="kw">fn </span>register_callsite(<span class="kw-2">&amp;</span><span class="self">self</span>, metadata: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Metadata&lt;<span class="lifetime">'static</span>&gt;) -&gt; Interest {
         <span class="self">self</span>.as_ref().register_callsite(metadata)
     }
 
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>enabled(<span class="kw-2">&amp;</span><span class="self">self</span>, metadata: <span class="kw-2">&amp;</span>Metadata&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; bool {
+    </span><span class="kw">fn </span>enabled(<span class="kw-2">&amp;</span><span class="self">self</span>, metadata: <span class="kw-2">&amp;</span>Metadata&lt;<span class="lifetime">'_</span>&gt;) -&gt; bool {
         <span class="self">self</span>.as_ref().enabled(metadata)
     }
 
@@ -1605,12 +1605,12 @@
     }
 
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>new_span(<span class="kw-2">&amp;</span><span class="self">self</span>, span: <span class="kw-2">&amp;</span>span::Attributes&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; span::Id {
+    </span><span class="kw">fn </span>new_span(<span class="kw-2">&amp;</span><span class="self">self</span>, span: <span class="kw-2">&amp;</span>span::Attributes&lt;<span class="lifetime">'_</span>&gt;) -&gt; span::Id {
         <span class="self">self</span>.as_ref().new_span(span)
     }
 
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>record(<span class="kw-2">&amp;</span><span class="self">self</span>, span: <span class="kw-2">&amp;</span>span::Id, values: <span class="kw-2">&amp;</span>span::Record&lt;<span class="lifetime">&#39;_</span>&gt;) {
+    </span><span class="kw">fn </span>record(<span class="kw-2">&amp;</span><span class="self">self</span>, span: <span class="kw-2">&amp;</span>span::Id, values: <span class="kw-2">&amp;</span>span::Record&lt;<span class="lifetime">'_</span>&gt;) {
         <span class="self">self</span>.as_ref().record(span, values)
     }
 
@@ -1620,12 +1620,12 @@
     }
 
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>event_enabled(<span class="kw-2">&amp;</span><span class="self">self</span>, event: <span class="kw-2">&amp;</span>Event&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; bool {
+    </span><span class="kw">fn </span>event_enabled(<span class="kw-2">&amp;</span><span class="self">self</span>, event: <span class="kw-2">&amp;</span>Event&lt;<span class="lifetime">'_</span>&gt;) -&gt; bool {
         <span class="self">self</span>.as_ref().event_enabled(event)
     }
 
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>event(<span class="kw-2">&amp;</span><span class="self">self</span>, event: <span class="kw-2">&amp;</span>Event&lt;<span class="lifetime">&#39;_</span>&gt;) {
+    </span><span class="kw">fn </span>event(<span class="kw-2">&amp;</span><span class="self">self</span>, event: <span class="kw-2">&amp;</span>Event&lt;<span class="lifetime">'_</span>&gt;) {
         <span class="self">self</span>.as_ref().event(event)
     }
 
@@ -1675,12 +1675,12 @@
     </span>S: Subscriber + <span class="question-mark">?</span>Sized,
 {
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>register_callsite(<span class="kw-2">&amp;</span><span class="self">self</span>, metadata: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Metadata&lt;<span class="lifetime">&#39;static</span>&gt;) -&gt; Interest {
+    </span><span class="kw">fn </span>register_callsite(<span class="kw-2">&amp;</span><span class="self">self</span>, metadata: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Metadata&lt;<span class="lifetime">'static</span>&gt;) -&gt; Interest {
         <span class="self">self</span>.as_ref().register_callsite(metadata)
     }
 
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>enabled(<span class="kw-2">&amp;</span><span class="self">self</span>, metadata: <span class="kw-2">&amp;</span>Metadata&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; bool {
+    </span><span class="kw">fn </span>enabled(<span class="kw-2">&amp;</span><span class="self">self</span>, metadata: <span class="kw-2">&amp;</span>Metadata&lt;<span class="lifetime">'_</span>&gt;) -&gt; bool {
         <span class="self">self</span>.as_ref().enabled(metadata)
     }
 
@@ -1690,12 +1690,12 @@
     }
 
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>new_span(<span class="kw-2">&amp;</span><span class="self">self</span>, span: <span class="kw-2">&amp;</span>span::Attributes&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; span::Id {
+    </span><span class="kw">fn </span>new_span(<span class="kw-2">&amp;</span><span class="self">self</span>, span: <span class="kw-2">&amp;</span>span::Attributes&lt;<span class="lifetime">'_</span>&gt;) -&gt; span::Id {
         <span class="self">self</span>.as_ref().new_span(span)
     }
 
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>record(<span class="kw-2">&amp;</span><span class="self">self</span>, span: <span class="kw-2">&amp;</span>span::Id, values: <span class="kw-2">&amp;</span>span::Record&lt;<span class="lifetime">&#39;_</span>&gt;) {
+    </span><span class="kw">fn </span>record(<span class="kw-2">&amp;</span><span class="self">self</span>, span: <span class="kw-2">&amp;</span>span::Id, values: <span class="kw-2">&amp;</span>span::Record&lt;<span class="lifetime">'_</span>&gt;) {
         <span class="self">self</span>.as_ref().record(span, values)
     }
 
@@ -1705,12 +1705,12 @@
     }
 
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>event_enabled(<span class="kw-2">&amp;</span><span class="self">self</span>, event: <span class="kw-2">&amp;</span>Event&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; bool {
+    </span><span class="kw">fn </span>event_enabled(<span class="kw-2">&amp;</span><span class="self">self</span>, event: <span class="kw-2">&amp;</span>Event&lt;<span class="lifetime">'_</span>&gt;) -&gt; bool {
         <span class="self">self</span>.as_ref().event_enabled(event)
     }
 
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>event(<span class="kw-2">&amp;</span><span class="self">self</span>, event: <span class="kw-2">&amp;</span>Event&lt;<span class="lifetime">&#39;_</span>&gt;) {
+    </span><span class="kw">fn </span>event(<span class="kw-2">&amp;</span><span class="self">self</span>, event: <span class="kw-2">&amp;</span>Event&lt;<span class="lifetime">'_</span>&gt;) {
         <span class="self">self</span>.as_ref().event(event)
     }
 

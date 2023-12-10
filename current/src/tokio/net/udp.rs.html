@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/net/udp.rs`."><title>udp.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/net/udp.rs`."><title>udp.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -2059,7 +2059,7 @@
 <span class="macro">cfg_net! </span>{
     <span class="doccomment">/// A UDP socket.
     ///
-    /// UDP is &quot;connectionless&quot;, unlike TCP. Meaning, regardless of what address you&#39;ve bound to, a `UdpSocket`
+    /// UDP is "connectionless", unlike TCP. Meaning, regardless of what address you've bound to, a `UdpSocket`
     /// is free to communicate with many different remotes. In tokio there are basically two main ways to use `UdpSocket`:
     ///
     /// * one to many: [`bind`](`UdpSocket::bind`) and use [`send_to`](`UdpSocket::send_to`)
@@ -2087,21 +2087,21 @@
     ///
     /// # Example: one to many (bind)
     ///
-    /// Using `bind` we can create a simple echo server that sends and recv&#39;s with many different clients:
+    /// Using `bind` we can create a simple echo server that sends and recv's with many different clients:
     /// ```no_run
     /// use tokio::net::UdpSocket;
     /// use std::io;
     ///
     /// #[tokio::main]
     /// async fn main() -&gt; io::Result&lt;()&gt; {
-    ///     let sock = UdpSocket::bind(&quot;0.0.0.0:8080&quot;).await?;
+    ///     let sock = UdpSocket::bind("0.0.0.0:8080").await?;
     ///     let mut buf = [0; 1024];
     ///     loop {
     ///         let (len, addr) = sock.recv_from(&amp;mut buf).await?;
-    ///         println!(&quot;{:?} bytes received from {:?}&quot;, len, addr);
+    ///         println!("{:?} bytes received from {:?}", len, addr);
     ///
     ///         let len = sock.send_to(&amp;buf[..len], addr).await?;
-    ///         println!(&quot;{:?} bytes sent&quot;, len);
+    ///         println!("{:?} bytes sent", len);
     ///     }
     /// }
     /// ```
@@ -2115,26 +2115,26 @@
     ///
     /// #[tokio::main]
     /// async fn main() -&gt; io::Result&lt;()&gt; {
-    ///     let sock = UdpSocket::bind(&quot;0.0.0.0:8080&quot;).await?;
+    ///     let sock = UdpSocket::bind("0.0.0.0:8080").await?;
     ///
-    ///     let remote_addr = &quot;127.0.0.1:59611&quot;;
+    ///     let remote_addr = "127.0.0.1:59611";
     ///     sock.connect(remote_addr).await?;
     ///     let mut buf = [0; 1024];
     ///     loop {
     ///         let len = sock.recv(&amp;mut buf).await?;
-    ///         println!(&quot;{:?} bytes received from {:?}&quot;, len, remote_addr);
+    ///         println!("{:?} bytes received from {:?}", len, remote_addr);
     ///
     ///         let len = sock.send(&amp;buf[..len]).await?;
-    ///         println!(&quot;{:?} bytes sent&quot;, len);
+    ///         println!("{:?} bytes sent", len);
     ///     }
     /// }
     /// ```
     ///
     /// # Example: Splitting with `Arc`
     ///
-    /// Because `send_to` and `recv_from` take `&amp;self`. It&#39;s perfectly alright
+    /// Because `send_to` and `recv_from` take `&amp;self`. It's perfectly alright
     /// to use an `Arc&lt;UdpSocket&gt;` and share the references to multiple tasks.
-    /// Here is a similar &quot;echo&quot; example that supports concurrent
+    /// Here is a similar "echo" example that supports concurrent
     /// sending/receiving:
     ///
     /// ```no_run
@@ -2143,7 +2143,7 @@
     ///
     /// #[tokio::main]
     /// async fn main() -&gt; io::Result&lt;()&gt; {
-    ///     let sock = UdpSocket::bind(&quot;0.0.0.0:8080&quot;.parse::&lt;SocketAddr&gt;().unwrap()).await?;
+    ///     let sock = UdpSocket::bind("0.0.0.0:8080".parse::&lt;SocketAddr&gt;().unwrap()).await?;
     ///     let r = Arc::new(sock);
     ///     let s = r.clone();
     ///     let (tx, mut rx) = mpsc::channel::&lt;(Vec&lt;u8&gt;, SocketAddr)&gt;(1_000);
@@ -2151,14 +2151,14 @@
     ///     tokio::spawn(async move {
     ///         while let Some((bytes, addr)) = rx.recv().await {
     ///             let len = s.send_to(&amp;bytes, &amp;addr).await.unwrap();
-    ///             println!(&quot;{:?} bytes sent&quot;, len);
+    ///             println!("{:?} bytes sent", len);
     ///         }
     ///     });
     ///
     ///     let mut buf = [0; 1024];
     ///     loop {
     ///         let (len, addr) = r.recv_from(&amp;mut buf).await?;
-    ///         println!(&quot;{:?} bytes received from {:?}&quot;, len, addr);
+    ///         println!("{:?} bytes received from {:?}", len, addr);
     ///         tx.send((buf[..len].to_vec(), addr)).await.unwrap();
     ///     }
     /// }
@@ -2185,7 +2185,7 @@
     ///
     /// #[tokio::main]
     /// async fn main() -&gt; io::Result&lt;()&gt; {
-    ///     let sock = UdpSocket::bind(&quot;0.0.0.0:8080&quot;).await?;
+    ///     let sock = UdpSocket::bind("0.0.0.0:8080").await?;
     ///     // use `sock`
     /// #   let _ = sock;
     ///     Ok(())
@@ -2205,7 +2205,7 @@
         <span class="prelude-val">Err</span>(last_err.unwrap_or_else(|| {
             io::Error::new(
                 io::ErrorKind::InvalidInput,
-                <span class="string">&quot;could not resolve to any address&quot;</span>,
+                <span class="string">"could not resolve to any address"</span>,
             )
         }))
     }
@@ -2226,8 +2226,8 @@
     /// This function is intended to be used to wrap a UDP socket from the
     /// standard library in the Tokio equivalent.
     ///
-    /// This can be used in conjunction with socket2&#39;s `Socket` interface to
-    /// configure a socket before it&#39;s handed off, such as setting options like
+    /// This can be used in conjunction with socket2's `Socket` interface to
+    /// configure a socket before it's handed off, such as setting options like
     /// `reuse_address` or binding to multiple addresses.
     ///
     /// # Notes
@@ -2255,7 +2255,7 @@
     ///
     /// # #[tokio::main]
     /// # async fn main() -&gt; io::Result&lt;()&gt; {
-    /// let addr = &quot;0.0.0.0:8080&quot;.parse::&lt;SocketAddr&gt;().unwrap();
+    /// let addr = "0.0.0.0:8080".parse::&lt;SocketAddr&gt;().unwrap();
     /// let std_sock = std::net::UdpSocket::bind(addr)?;
     /// std_sock.set_nonblocking(true)?;
     /// let sock = UdpSocket::from_std(std_sock)?;
@@ -2281,7 +2281,7 @@
     ///
     /// #[tokio::main]
     /// async fn main() -&gt; Result&lt;(), Box&lt;dyn Error&gt;&gt; {
-    ///     let tokio_socket = tokio::net::UdpSocket::bind(&quot;127.0.0.1:0&quot;).await?;
+    ///     let tokio_socket = tokio::net::UdpSocket::bind("127.0.0.1:0").await?;
     ///     let std_socket = tokio_socket.into_std()?;
     ///     std_socket.set_nonblocking(false)?;
     ///     Ok(())
@@ -2311,7 +2311,7 @@
         }
     }
 
-    <span class="kw">fn </span>as_socket(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; socket2::SockRef&lt;<span class="lifetime">&#39;_</span>&gt; {
+    <span class="kw">fn </span>as_socket(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; socket2::SockRef&lt;<span class="lifetime">'_</span>&gt; {
         socket2::SockRef::from(<span class="self">self</span>)
     }
 
@@ -2325,7 +2325,7 @@
     ///
     /// # #[tokio::main]
     /// # async fn main() -&gt; io::Result&lt;()&gt; {
-    /// let addr = &quot;0.0.0.0:8080&quot;.parse::&lt;SocketAddr&gt;().unwrap();
+    /// let addr = "0.0.0.0:8080".parse::&lt;SocketAddr&gt;().unwrap();
     /// let sock = UdpSocket::bind(addr).await?;
     /// // the address the socket is bound to
     /// let local_addr = sock.local_addr()?;
@@ -2346,8 +2346,8 @@
     /// # use std::{io, net::SocketAddr};
     /// # #[tokio::main]
     /// # async fn main() -&gt; io::Result&lt;()&gt; {
-    /// let addr = &quot;0.0.0.0:8080&quot;.parse::&lt;SocketAddr&gt;().unwrap();
-    /// let peer = &quot;127.0.0.1:11100&quot;.parse::&lt;SocketAddr&gt;().unwrap();
+    /// let addr = "0.0.0.0:8080".parse::&lt;SocketAddr&gt;().unwrap();
+    /// let peer = "127.0.0.1:11100".parse::&lt;SocketAddr&gt;().unwrap();
     /// let sock = UdpSocket::bind(addr).await?;
     /// sock.connect(peer).await?;
     /// assert_eq!(peer, sock.peer_addr()?);
@@ -2370,9 +2370,9 @@
     ///
     /// # #[tokio::main]
     /// # async fn main() -&gt; io::Result&lt;()&gt; {
-    /// let sock = UdpSocket::bind(&quot;0.0.0.0:8080&quot;.parse::&lt;SocketAddr&gt;().unwrap()).await?;
+    /// let sock = UdpSocket::bind("0.0.0.0:8080".parse::&lt;SocketAddr&gt;().unwrap()).await?;
     ///
-    /// let remote_addr = &quot;127.0.0.1:59600&quot;.parse::&lt;SocketAddr&gt;().unwrap();
+    /// let remote_addr = "127.0.0.1:59600".parse::&lt;SocketAddr&gt;().unwrap();
     /// sock.connect(remote_addr).await?;
     /// let mut buf = [0u8; 32];
     /// // recv from remote_addr
@@ -2396,7 +2396,7 @@
         <span class="prelude-val">Err</span>(last_err.unwrap_or_else(|| {
             io::Error::new(
                 io::ErrorKind::InvalidInput,
-                <span class="string">&quot;could not resolve to any address&quot;</span>,
+                <span class="string">"could not resolve to any address"</span>,
             )
         }))
     }
@@ -2431,8 +2431,8 @@
     ///
     /// #[tokio::main]
     /// async fn main() -&gt; io::Result&lt;()&gt; {
-    ///     let socket = UdpSocket::bind(&quot;127.0.0.1:8080&quot;).await?;
-    ///     socket.connect(&quot;127.0.0.1:8081&quot;).await?;
+    ///     let socket = UdpSocket::bind("127.0.0.1:8080").await?;
+    ///     socket.connect("127.0.0.1:8081").await?;
     ///
     ///     loop {
     ///         let ready = socket.ready(Interest::READABLE | Interest::WRITABLE).await?;
@@ -2443,7 +2443,7 @@
     ///             let mut data = [0; 1024];
     ///             match socket.try_recv(&amp;mut data[..]) {
     ///                 Ok(n) =&gt; {
-    ///                     println!(&quot;received {:?}&quot;, &amp;data[..n]);
+    ///                     println!("received {:?}", &amp;data[..n]);
     ///                 }
     ///                 // False-positive, continue
     ///                 Err(ref e) if e.kind() == io::ErrorKind::WouldBlock =&gt; {}
@@ -2455,9 +2455,9 @@
     ///
     ///         if ready.is_writable() {
     ///             // Write some data
-    ///             match socket.try_send(b&quot;hello world&quot;) {
+    ///             match socket.try_send(b"hello world") {
     ///                 Ok(n) =&gt; {
-    ///                     println!(&quot;sent {} bytes&quot;, n);
+    ///                     println!("sent {} bytes", n);
     ///                 }
     ///                 // False-positive, continue
     ///                 Err(ref e) if e.kind() == io::ErrorKind::WouldBlock =&gt; {}
@@ -2499,8 +2499,8 @@
     /// #[tokio::main]
     /// async fn main() -&gt; io::Result&lt;()&gt; {
     ///     // Bind socket
-    ///     let socket = UdpSocket::bind(&quot;127.0.0.1:8080&quot;).await?;
-    ///     socket.connect(&quot;127.0.0.1:8081&quot;).await?;
+    ///     let socket = UdpSocket::bind("127.0.0.1:8080").await?;
+    ///     socket.connect("127.0.0.1:8081").await?;
     ///
     ///     loop {
     ///         // Wait for the socket to be writable
@@ -2508,7 +2508,7 @@
     ///
     ///         // Try to send data, this may still fail with `WouldBlock`
     ///         // if the readiness event is a false positive.
-    ///         match socket.try_send(b&quot;hello world&quot;) {
+    ///         match socket.try_send(b"hello world") {
     ///             Ok(n) =&gt; {
     ///                 break;
     ///             }
@@ -2558,7 +2558,7 @@
     /// This function may encounter any standard I/O error except `WouldBlock`.
     ///
     /// [`writable`]: method@Self::writable
-    </span><span class="kw">pub fn </span>poll_send_ready(<span class="kw-2">&amp;</span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;io::Result&lt;()&gt;&gt; {
+    </span><span class="kw">pub fn </span>poll_send_ready(<span class="kw-2">&amp;</span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;io::Result&lt;()&gt;&gt; {
         <span class="self">self</span>.io.registration().poll_write_ready(cx).map_ok(|<span class="kw">_</span>| ())
     }
 
@@ -2590,11 +2590,11 @@
     /// #[tokio::main]
     /// async fn main() -&gt; io::Result&lt;()&gt; {
     ///     // Bind socket
-    ///     let socket = UdpSocket::bind(&quot;127.0.0.1:8080&quot;).await?;
-    ///     socket.connect(&quot;127.0.0.1:8081&quot;).await?;
+    ///     let socket = UdpSocket::bind("127.0.0.1:8080").await?;
+    ///     socket.connect("127.0.0.1:8081").await?;
     ///
     ///     // Send a message
-    ///     socket.send(b&quot;hello world&quot;).await?;
+    ///     socket.send(b"hello world").await?;
     ///
     ///     Ok(())
     /// }
@@ -2629,7 +2629,7 @@
     /// This function may encounter any standard I/O error except `WouldBlock`.
     ///
     /// [`connect`]: method@Self::connect
-    </span><span class="kw">pub fn </span>poll_send(<span class="kw-2">&amp;</span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;, buf: <span class="kw-2">&amp;</span>[u8]) -&gt; Poll&lt;io::Result&lt;usize&gt;&gt; {
+    </span><span class="kw">pub fn </span>poll_send(<span class="kw-2">&amp;</span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, buf: <span class="kw-2">&amp;</span>[u8]) -&gt; Poll&lt;io::Result&lt;usize&gt;&gt; {
         <span class="self">self</span>.io
             .registration()
             .poll_write_io(cx, || <span class="self">self</span>.io.send(buf))
@@ -2656,10 +2656,10 @@
     /// #[tokio::main]
     /// async fn main() -&gt; io::Result&lt;()&gt; {
     ///     // Bind a UDP socket
-    ///     let socket = UdpSocket::bind(&quot;127.0.0.1:8080&quot;).await?;
+    ///     let socket = UdpSocket::bind("127.0.0.1:8080").await?;
     ///
     ///     // Connect to a peer
-    ///     socket.connect(&quot;127.0.0.1:8081&quot;).await?;
+    ///     socket.connect("127.0.0.1:8081").await?;
     ///
     ///     loop {
     ///         // Wait for the socket to be writable
@@ -2667,7 +2667,7 @@
     ///
     ///         // Try to send data, this may still fail with `WouldBlock`
     ///         // if the readiness event is a false positive.
-    ///         match socket.try_send(b&quot;hello world&quot;) {
+    ///         match socket.try_send(b"hello world") {
     ///             Ok(n) =&gt; {
     ///                 break;
     ///             }
@@ -2714,8 +2714,8 @@
     /// #[tokio::main]
     /// async fn main() -&gt; io::Result&lt;()&gt; {
     ///     // Connect to a peer
-    ///     let socket = UdpSocket::bind(&quot;127.0.0.1:8080&quot;).await?;
-    ///     socket.connect(&quot;127.0.0.1:8081&quot;).await?;
+    ///     let socket = UdpSocket::bind("127.0.0.1:8080").await?;
+    ///     socket.connect("127.0.0.1:8081").await?;
     ///
     ///     loop {
     ///         // Wait for the socket to be readable
@@ -2729,7 +2729,7 @@
     ///         // if the readiness event is a false positive.
     ///         match socket.try_recv(&amp;mut buf) {
     ///             Ok(n) =&gt; {
-    ///                 println!(&quot;GOT {:?}&quot;, &amp;buf[..n]);
+    ///                 println!("GOT {:?}", &amp;buf[..n]);
     ///                 break;
     ///             }
     ///             Err(ref e) if e.kind() == io::ErrorKind::WouldBlock =&gt; {
@@ -2778,7 +2778,7 @@
     /// This function may encounter any standard I/O error except `WouldBlock`.
     ///
     /// [`readable`]: method@Self::readable
-    </span><span class="kw">pub fn </span>poll_recv_ready(<span class="kw-2">&amp;</span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;io::Result&lt;()&gt;&gt; {
+    </span><span class="kw">pub fn </span>poll_recv_ready(<span class="kw-2">&amp;</span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;io::Result&lt;()&gt;&gt; {
         <span class="self">self</span>.io.registration().poll_read_ready(cx).map_ok(|<span class="kw">_</span>| ())
     }
 
@@ -2808,13 +2808,13 @@
     /// #[tokio::main]
     /// async fn main() -&gt; io::Result&lt;()&gt; {
     ///     // Bind socket
-    ///     let socket = UdpSocket::bind(&quot;127.0.0.1:8080&quot;).await?;
-    ///     socket.connect(&quot;127.0.0.1:8081&quot;).await?;
+    ///     let socket = UdpSocket::bind("127.0.0.1:8080").await?;
+    ///     socket.connect("127.0.0.1:8081").await?;
     ///
     ///     let mut buf = vec![0; 10];
     ///     let n = socket.recv(&amp;mut buf).await?;
     ///
-    ///     println!(&quot;received {} bytes {:?}&quot;, n, &amp;buf[..n]);
+    ///     println!("received {} bytes {:?}", n, &amp;buf[..n]);
     ///
     ///     Ok(())
     /// }
@@ -2849,7 +2849,7 @@
     /// This function may encounter any standard I/O error except `WouldBlock`.
     ///
     /// [`connect`]: method@Self::connect
-    </span><span class="kw">pub fn </span>poll_recv(<span class="kw-2">&amp;</span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;, buf: <span class="kw-2">&amp;mut </span>ReadBuf&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;io::Result&lt;()&gt;&gt; {
+    </span><span class="kw">pub fn </span>poll_recv(<span class="kw-2">&amp;</span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, buf: <span class="kw-2">&amp;mut </span>ReadBuf&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;io::Result&lt;()&gt;&gt; {
         <span class="kw">let </span>n = <span class="macro">ready!</span>(<span class="self">self</span>.io.registration().poll_read_io(cx, || {
             <span class="comment">// Safety: will not read the maybe uninitialized bytes.
             </span><span class="kw">let </span>b = <span class="kw">unsafe </span>{
@@ -2887,8 +2887,8 @@
     /// #[tokio::main]
     /// async fn main() -&gt; io::Result&lt;()&gt; {
     ///     // Connect to a peer
-    ///     let socket = UdpSocket::bind(&quot;127.0.0.1:8080&quot;).await?;
-    ///     socket.connect(&quot;127.0.0.1:8081&quot;).await?;
+    ///     let socket = UdpSocket::bind("127.0.0.1:8080").await?;
+    ///     socket.connect("127.0.0.1:8081").await?;
     ///
     ///     loop {
     ///         // Wait for the socket to be readable
@@ -2902,7 +2902,7 @@
     ///         // if the readiness event is a false positive.
     ///         match socket.try_recv(&amp;mut buf) {
     ///             Ok(n) =&gt; {
-    ///                 println!(&quot;GOT {:?}&quot;, &amp;buf[..n]);
+    ///                 println!("GOT {:?}", &amp;buf[..n]);
     ///                 break;
     ///             }
     ///             Err(ref e) if e.kind() == io::ErrorKind::WouldBlock =&gt; {
@@ -2925,7 +2925,7 @@
 
     <span class="macro">cfg_io_util! </span>{
         <span class="doccomment">/// Tries to receive data from the stream into the provided buffer, advancing the
-        /// buffer&#39;s internal cursor, returning how many bytes were read.
+        /// buffer's internal cursor, returning how many bytes were read.
         ///
         /// This method must be called with valid byte array buf of sufficient size
         /// to hold the message bytes. If a message is too long to fit in the
@@ -2945,8 +2945,8 @@
         /// #[tokio::main]
         /// async fn main() -&gt; io::Result&lt;()&gt; {
         ///     // Connect to a peer
-        ///     let socket = UdpSocket::bind(&quot;127.0.0.1:8080&quot;).await?;
-        ///     socket.connect(&quot;127.0.0.1:8081&quot;).await?;
+        ///     let socket = UdpSocket::bind("127.0.0.1:8080").await?;
+        ///     socket.connect("127.0.0.1:8081").await?;
         ///
         ///     loop {
         ///         // Wait for the socket to be readable
@@ -2958,7 +2958,7 @@
         ///         // if the readiness event is a false positive.
         ///         match socket.try_recv_buf(&amp;mut buf) {
         ///             Ok(n) =&gt; {
-        ///                 println!(&quot;GOT {:?}&quot;, &amp;buf[..n]);
+        ///                 println!("GOT {:?}", &amp;buf[..n]);
         ///                 break;
         ///             }
         ///             Err(ref e) if e.kind() == io::ErrorKind::WouldBlock =&gt; {
@@ -2992,7 +2992,7 @@
         }
 
         <span class="doccomment">/// Receives a single datagram message on the socket from the remote address
-        /// to which it is connected, advancing the buffer&#39;s internal cursor,
+        /// to which it is connected, advancing the buffer's internal cursor,
         /// returning how many bytes were read.
         ///
         /// This method must be called with valid byte array buf of sufficient size
@@ -3010,13 +3010,13 @@
         /// #[tokio::main]
         /// async fn main() -&gt; io::Result&lt;()&gt; {
         ///     // Connect to a peer
-        ///     let socket = UdpSocket::bind(&quot;127.0.0.1:8080&quot;).await?;
-        ///     socket.connect(&quot;127.0.0.1:8081&quot;).await?;
+        ///     let socket = UdpSocket::bind("127.0.0.1:8080").await?;
+        ///     socket.connect("127.0.0.1:8081").await?;
         ///
         ///     let mut buf = Vec::with_capacity(512);
         ///     let len = socket.recv_buf(&amp;mut buf).await?;
         ///
-        ///     println!(&quot;received {} bytes {:?}&quot;, len, &amp;buf[..len]);
+        ///     println!("received {} bytes {:?}", len, &amp;buf[..len]);
         ///
         ///     Ok(())
         /// }
@@ -3069,7 +3069,7 @@
         /// #[tokio::main]
         /// async fn main() -&gt; io::Result&lt;()&gt; {
         ///     // Connect to a peer
-        ///     let socket = UdpSocket::bind(&quot;127.0.0.1:8080&quot;).await?;
+        ///     let socket = UdpSocket::bind("127.0.0.1:8080").await?;
         ///
         ///     loop {
         ///         // Wait for the socket to be readable
@@ -3081,7 +3081,7 @@
         ///         // if the readiness event is a false positive.
         ///         match socket.try_recv_buf_from(&amp;mut buf) {
         ///             Ok((n, _addr)) =&gt; {
-        ///                 println!(&quot;GOT {:?}&quot;, &amp;buf[..n]);
+        ///                 println!("GOT {:?}", &amp;buf[..n]);
         ///                 break;
         ///             }
         ///             Err(ref e) if e.kind() == io::ErrorKind::WouldBlock =&gt; {
@@ -3115,7 +3115,7 @@
         }
 
         <span class="doccomment">/// Receives a single datagram message on the socket, advancing the
-        /// buffer&#39;s internal cursor, returning how many bytes were read and the origin.
+        /// buffer's internal cursor, returning how many bytes were read and the origin.
         ///
         /// This method must be called with valid byte array buf of sufficient size
         /// to hold the message bytes. If a message is too long to fit in the
@@ -3141,13 +3141,13 @@
         /// #[tokio::main]
         /// async fn main() -&gt; io::Result&lt;()&gt; {
         ///     // Connect to a peer
-        ///     let socket = UdpSocket::bind(&quot;127.0.0.1:8080&quot;).await?;
-        ///     socket.connect(&quot;127.0.0.1:8081&quot;).await?;
+        ///     let socket = UdpSocket::bind("127.0.0.1:8080").await?;
+        ///     socket.connect("127.0.0.1:8081").await?;
         ///
         ///     let mut buf = Vec::with_capacity(512);
         ///     let (len, addr) = socket.recv_buf_from(&amp;mut buf).await?;
         ///
-        ///     println!(&quot;received {:?} bytes from {:?}&quot;, len, addr);
+        ///     println!("received {:?} bytes from {:?}", len, addr);
         ///
         ///     Ok(())
         /// }
@@ -3199,10 +3199,10 @@
     ///
     /// #[tokio::main]
     /// async fn main() -&gt; io::Result&lt;()&gt; {
-    ///     let socket = UdpSocket::bind(&quot;127.0.0.1:8080&quot;).await?;
-    ///     let len = socket.send_to(b&quot;hello world&quot;, &quot;127.0.0.1:8081&quot;).await?;
+    ///     let socket = UdpSocket::bind("127.0.0.1:8080").await?;
+    ///     let len = socket.send_to(b"hello world", "127.0.0.1:8081").await?;
     ///
-    ///     println!(&quot;Sent {} bytes&quot;, len);
+    ///     println!("Sent {} bytes", len);
     ///
     ///     Ok(())
     /// }
@@ -3214,7 +3214,7 @@
             <span class="prelude-val">Some</span>(target) =&gt; <span class="self">self</span>.send_to_addr(buf, target).<span class="kw">await</span>,
             <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Err</span>(io::Error::new(
                 io::ErrorKind::InvalidInput,
-                <span class="string">&quot;no addresses to send data to&quot;</span>,
+                <span class="string">"no addresses to send data to"</span>,
             )),
         }
     }
@@ -3238,7 +3238,7 @@
     /// This function may encounter any standard I/O error except `WouldBlock`.
     </span><span class="kw">pub fn </span>poll_send_to(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;,
+        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;,
         buf: <span class="kw-2">&amp;</span>[u8],
         target: SocketAddr,
     ) -&gt; Poll&lt;io::Result&lt;usize&gt;&gt; {
@@ -3271,16 +3271,16 @@
     ///
     /// #[tokio::main]
     /// async fn main() -&gt; Result&lt;(), Box&lt;dyn Error&gt;&gt; {
-    ///     let socket = UdpSocket::bind(&quot;127.0.0.1:8080&quot;).await?;
+    ///     let socket = UdpSocket::bind("127.0.0.1:8080").await?;
     ///
-    ///     let dst = &quot;127.0.0.1:8081&quot;.parse()?;
+    ///     let dst = "127.0.0.1:8081".parse()?;
     ///
     ///     loop {
     ///         socket.writable().await?;
     ///
-    ///         match socket.try_send_to(&amp;b&quot;hello world&quot;[..], dst) {
+    ///         match socket.try_send_to(&amp;b"hello world"[..], dst) {
     ///             Ok(sent) =&gt; {
-    ///                 println!(&quot;sent {} bytes&quot;, sent);
+    ///                 println!("sent {} bytes", sent);
     ///                 break;
     ///             }
     ///             Err(ref e) if e.kind() == io::ErrorKind::WouldBlock =&gt; {
@@ -3329,12 +3329,12 @@
     ///
     /// #[tokio::main]
     /// async fn main() -&gt; io::Result&lt;()&gt; {
-    ///     let socket = UdpSocket::bind(&quot;127.0.0.1:8080&quot;).await?;
+    ///     let socket = UdpSocket::bind("127.0.0.1:8080").await?;
     ///
     ///     let mut buf = vec![0u8; 32];
     ///     let (len, addr) = socket.recv_from(&amp;mut buf).await?;
     ///
-    ///     println!(&quot;received {:?} bytes from {:?}&quot;, len, addr);
+    ///     println!("received {:?} bytes from {:?}", len, addr);
     ///
     ///     Ok(())
     /// }
@@ -3383,8 +3383,8 @@
     /// [packet injection attack]: https://en.wikipedia.org/wiki/Packet_injection
     </span><span class="kw">pub fn </span>poll_recv_from(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;,
-        buf: <span class="kw-2">&amp;mut </span>ReadBuf&lt;<span class="lifetime">&#39;_</span>&gt;,
+        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;,
+        buf: <span class="kw-2">&amp;mut </span>ReadBuf&lt;<span class="lifetime">'_</span>&gt;,
     ) -&gt; Poll&lt;io::Result&lt;SocketAddr&gt;&gt; {
         <span class="kw">let </span>(n, addr) = <span class="macro">ready!</span>(<span class="self">self</span>.io.registration().poll_read_io(cx, || {
             <span class="comment">// Safety: will not read the maybe uninitialized bytes.
@@ -3432,7 +3432,7 @@
     /// #[tokio::main]
     /// async fn main() -&gt; io::Result&lt;()&gt; {
     ///     // Connect to a peer
-    ///     let socket = UdpSocket::bind(&quot;127.0.0.1:8080&quot;).await?;
+    ///     let socket = UdpSocket::bind("127.0.0.1:8080").await?;
     ///
     ///     loop {
     ///         // Wait for the socket to be readable
@@ -3446,7 +3446,7 @@
     ///         // if the readiness event is a false positive.
     ///         match socket.try_recv_from(&amp;mut buf) {
     ///             Ok((n, _addr)) =&gt; {
-    ///                 println!(&quot;GOT {:?}&quot;, &amp;buf[..n]);
+    ///                 println!("GOT {:?}", &amp;buf[..n]);
     ///                 break;
     ///             }
     ///             Err(ref e) if e.kind() == io::ErrorKind::WouldBlock =&gt; {
@@ -3559,7 +3559,7 @@
     ///
     /// MacOS will return an error if you pass a zero-sized buffer.
     ///
-    /// If you&#39;re merely interested in learning the sender of the data at the head of the queue,
+    /// If you're merely interested in learning the sender of the data at the head of the queue,
     /// try [`peek_sender`].
     ///
     /// Note that the socket address **cannot** be implicitly trusted, because it is relatively
@@ -3576,12 +3576,12 @@
     ///
     /// #[tokio::main]
     /// async fn main() -&gt; io::Result&lt;()&gt; {
-    ///     let socket = UdpSocket::bind(&quot;127.0.0.1:8080&quot;).await?;
+    ///     let socket = UdpSocket::bind("127.0.0.1:8080").await?;
     ///
     ///     let mut buf = vec![0u8; 32];
     ///     let (len, addr) = socket.peek_from(&amp;mut buf).await?;
     ///
-    ///     println!(&quot;peeked {:?} bytes from {:?}&quot;, len, addr);
+    ///     println!("peeked {:?} bytes from {:?}", len, addr);
     ///
     ///     Ok(())
     /// }
@@ -3613,7 +3613,7 @@
     ///
     /// MacOS will return an error if you pass a zero-sized buffer.
     ///
-    /// If you&#39;re merely interested in learning the sender of the data at the head of the queue,
+    /// If you're merely interested in learning the sender of the data at the head of the queue,
     /// try [`poll_peek_sender`].
     ///
     /// Note that the socket address **cannot** be implicitly trusted, because it is relatively
@@ -3638,8 +3638,8 @@
     /// [packet injection attack]: https://en.wikipedia.org/wiki/Packet_injection
     </span><span class="kw">pub fn </span>poll_peek_from(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;,
-        buf: <span class="kw-2">&amp;mut </span>ReadBuf&lt;<span class="lifetime">&#39;_</span>&gt;,
+        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;,
+        buf: <span class="kw-2">&amp;mut </span>ReadBuf&lt;<span class="lifetime">'_</span>&gt;,
     ) -&gt; Poll&lt;io::Result&lt;SocketAddr&gt;&gt; {
         <span class="kw">let </span>(n, addr) = <span class="macro">ready!</span>(<span class="self">self</span>.io.registration().poll_read_io(cx, || {
             <span class="comment">// Safety: will not read the maybe uninitialized bytes.
@@ -3675,7 +3675,7 @@
     ///
     /// MacOS will return an error if you pass a zero-sized buffer.
     ///
-    /// If you&#39;re merely interested in learning the sender of the data at the head of the queue,
+    /// If you're merely interested in learning the sender of the data at the head of the queue,
     /// try [`try_peek_sender`].
     ///
     /// Note that the socket address **cannot** be implicitly trusted, because it is relatively
@@ -3695,7 +3695,7 @@
     <span class="doccomment">/// Retrieve the sender of the data at the head of the input queue, waiting if empty.
     ///
     /// This is equivalent to calling [`peek_from`] with a zero-sized buffer,
-    /// but suppresses the `WSAEMSGSIZE` error on Windows and the &quot;invalid argument&quot; error on macOS.
+    /// but suppresses the `WSAEMSGSIZE` error on Windows and the "invalid argument" error on macOS.
     ///
     /// Note that the socket address **cannot** be implicitly trusted, because it is relatively
     /// trivial to send a UDP datagram with a spoofed origin in a [packet injection attack].
@@ -3716,7 +3716,7 @@
     /// scheduling a wakeup if empty.
     ///
     /// This is equivalent to calling [`poll_peek_from`] with a zero-sized buffer,
-    /// but suppresses the `WSAEMSGSIZE` error on Windows and the &quot;invalid argument&quot; error on macOS.
+    /// but suppresses the `WSAEMSGSIZE` error on Windows and the "invalid argument" error on macOS.
     ///
     /// # Notes
     ///
@@ -3732,7 +3732,7 @@
     ///
     /// [`poll_peek_from`]: method@Self::poll_peek_from
     /// [packet injection attack]: https://en.wikipedia.org/wiki/Packet_injection
-    </span><span class="kw">pub fn </span>poll_peek_sender(<span class="kw-2">&amp;</span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;io::Result&lt;SocketAddr&gt;&gt; {
+    </span><span class="kw">pub fn </span>poll_peek_sender(<span class="kw-2">&amp;</span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;io::Result&lt;SocketAddr&gt;&gt; {
         <span class="self">self</span>.io
             .registration()
             .poll_read_io(cx, || <span class="self">self</span>.peek_sender_inner())
@@ -3761,11 +3761,11 @@
         <span class="self">self</span>.io.try_io(|| {
             <span class="self">self</span>.as_socket()
                 .peek_sender()<span class="question-mark">?
-                </span><span class="comment">// May be `None` if the platform doesn&#39;t populate the sender for some reason.
+                </span><span class="comment">// May be `None` if the platform doesn't populate the sender for some reason.
                 // In testing, that only occurred on macOS if you pass a zero-sized buffer,
                 // but the implementation of `Socket::peek_sender()` covers that.
                 </span>.as_socket()
-                .ok_or_else(|| io::Error::new(io::ErrorKind::Other, <span class="string">&quot;sender not available&quot;</span>))
+                .ok_or_else(|| io::Error::new(io::ErrorKind::Other, <span class="string">"sender not available"</span>))
         })
     }
 
@@ -3819,7 +3819,7 @@
     ///
     /// Indicates the time-to-live value of outgoing multicast packets for
     /// this socket. The default value is 1 which means that multicast packets
-    /// don&#39;t leave the local network unless explicitly requested.
+    /// don't leave the local network unless explicitly requested.
     ///
     /// # Note
     ///
@@ -3861,9 +3861,9 @@
     /// # use std::io;
     ///
     /// # async fn dox() -&gt; io::Result&lt;()&gt; {
-    /// let sock = UdpSocket::bind(&quot;127.0.0.1:8080&quot;).await?;
+    /// let sock = UdpSocket::bind("127.0.0.1:8080").await?;
     ///
-    /// println!(&quot;{:?}&quot;, sock.ttl()?);
+    /// println!("{:?}", sock.ttl()?);
     /// # Ok(())
     /// # }
     /// ```
@@ -3883,7 +3883,7 @@
     /// # use std::io;
     ///
     /// # async fn dox() -&gt; io::Result&lt;()&gt; {
-    /// let sock = UdpSocket::bind(&quot;127.0.0.1:8080&quot;).await?;
+    /// let sock = UdpSocket::bind("127.0.0.1:8080").await?;
     /// sock.set_ttl(60)?;
     ///
     /// # Ok(())
@@ -3903,18 +3903,18 @@
     /// [`set_tos`]: Self::set_tos
     </span><span class="comment">// https://docs.rs/socket2/0.5.3/src/socket2/socket.rs.html#1464
     </span><span class="attr">#[cfg(not(any(
-        target_os = <span class="string">&quot;fuchsia&quot;</span>,
-        target_os = <span class="string">&quot;redox&quot;</span>,
-        target_os = <span class="string">&quot;solaris&quot;</span>,
-        target_os = <span class="string">&quot;illumos&quot;</span>,
+        target_os = <span class="string">"fuchsia"</span>,
+        target_os = <span class="string">"redox"</span>,
+        target_os = <span class="string">"solaris"</span>,
+        target_os = <span class="string">"illumos"</span>,
     )))]
     #[cfg_attr(
         docsrs,
         doc(cfg(not(any(
-            target_os = <span class="string">&quot;fuchsia&quot;</span>,
-            target_os = <span class="string">&quot;redox&quot;</span>,
-            target_os = <span class="string">&quot;solaris&quot;</span>,
-            target_os = <span class="string">&quot;illumos&quot;</span>,
+            target_os = <span class="string">"fuchsia"</span>,
+            target_os = <span class="string">"redox"</span>,
+            target_os = <span class="string">"solaris"</span>,
+            target_os = <span class="string">"illumos"</span>,
         ))))
     )]
     </span><span class="kw">pub fn </span>tos(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; io::Result&lt;u32&gt; {
@@ -3930,18 +3930,18 @@
     /// Windows Server 2012+.](https://docs.microsoft.com/en-us/windows/win32/winsock/ipproto-ip-socket-options)
     </span><span class="comment">// https://docs.rs/socket2/0.5.3/src/socket2/socket.rs.html#1446
     </span><span class="attr">#[cfg(not(any(
-        target_os = <span class="string">&quot;fuchsia&quot;</span>,
-        target_os = <span class="string">&quot;redox&quot;</span>,
-        target_os = <span class="string">&quot;solaris&quot;</span>,
-        target_os = <span class="string">&quot;illumos&quot;</span>,
+        target_os = <span class="string">"fuchsia"</span>,
+        target_os = <span class="string">"redox"</span>,
+        target_os = <span class="string">"solaris"</span>,
+        target_os = <span class="string">"illumos"</span>,
     )))]
     #[cfg_attr(
         docsrs,
         doc(cfg(not(any(
-            target_os = <span class="string">&quot;fuchsia&quot;</span>,
-            target_os = <span class="string">&quot;redox&quot;</span>,
-            target_os = <span class="string">&quot;solaris&quot;</span>,
-            target_os = <span class="string">&quot;illumos&quot;</span>,
+            target_os = <span class="string">"fuchsia"</span>,
+            target_os = <span class="string">"redox"</span>,
+            target_os = <span class="string">"solaris"</span>,
+            target_os = <span class="string">"illumos"</span>,
         ))))
     )]
     </span><span class="kw">pub fn </span>set_tos(<span class="kw-2">&amp;</span><span class="self">self</span>, tos: u32) -&gt; io::Result&lt;()&gt; {
@@ -3950,11 +3950,11 @@
 
     <span class="doccomment">/// Gets the value for the `SO_BINDTODEVICE` option on this socket
     ///
-    /// This value gets the socket-bound device&#39;s interface name.
-    </span><span class="attr">#[cfg(any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;fuchsia&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>,))]
+    /// This value gets the socket-bound device's interface name.
+    </span><span class="attr">#[cfg(any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"fuchsia"</span>, target_os = <span class="string">"linux"</span>,))]
     #[cfg_attr(
         docsrs,
-        doc(cfg(any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;fuchsia&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>,)))
+        doc(cfg(any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"fuchsia"</span>, target_os = <span class="string">"linux"</span>,)))
     )]
     </span><span class="kw">pub fn </span>device(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; io::Result&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;&gt; {
         <span class="self">self</span>.as_socket().device()
@@ -3967,10 +3967,10 @@
     /// works for some socket types, particularly `AF_INET` sockets.
     ///
     /// If `interface` is `None` or an empty string it removes the binding.
-    </span><span class="attr">#[cfg(any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;fuchsia&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))]
+    </span><span class="attr">#[cfg(any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"fuchsia"</span>, target_os = <span class="string">"linux"</span>))]
     #[cfg_attr(
         docsrs,
-        doc(cfg(all(any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;fuchsia&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))))
+        doc(cfg(all(any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"fuchsia"</span>, target_os = <span class="string">"linux"</span>))))
     )]
     </span><span class="kw">pub fn </span>bind_device(<span class="kw-2">&amp;</span><span class="self">self</span>, interface: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>[u8]&gt;) -&gt; io::Result&lt;()&gt; {
         <span class="self">self</span>.as_socket().bind_device(interface)
@@ -3981,7 +3981,7 @@
     /// This function specifies a new multicast group for this socket to join.
     /// The address must be a valid multicast address, and `interface` is the
     /// address of the local interface with which the system should join the
-    /// multicast group. If it&#39;s equal to `INADDR_ANY` then an appropriate
+    /// multicast group. If it's equal to `INADDR_ANY` then an appropriate
     /// interface is chosen by the system.
     </span><span class="kw">pub fn </span>join_multicast_v4(<span class="kw-2">&amp;</span><span class="self">self</span>, multiaddr: Ipv4Addr, interface: Ipv4Addr) -&gt; io::Result&lt;()&gt; {
         <span class="self">self</span>.io.join_multicast_v4(<span class="kw-2">&amp;</span>multiaddr, <span class="kw-2">&amp;</span>interface)
@@ -4024,10 +4024,10 @@
     /// #[tokio::main]
     /// async fn main() -&gt; io::Result&lt;()&gt; {
     ///     // Create a socket
-    ///     let socket = UdpSocket::bind(&quot;0.0.0.0:8080&quot;).await?;
+    ///     let socket = UdpSocket::bind("0.0.0.0:8080").await?;
     ///
     ///     if let Ok(Some(err)) = socket.take_error() {
-    ///         println!(&quot;Got error: {:?}&quot;, err);
+    ///         println!("Got error: {:?}", err);
     ///     }
     ///
     ///     Ok(())
@@ -4051,7 +4051,7 @@
 }
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>UdpSocket {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         <span class="self">self</span>.io.fmt(f)
     }
 }
@@ -4068,7 +4068,7 @@
     }
 
     <span class="kw">impl </span>AsFd <span class="kw">for </span>UdpSocket {
-        <span class="kw">fn </span>as_fd(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; BorrowedFd&lt;<span class="lifetime">&#39;_</span>&gt; {
+        <span class="kw">fn </span>as_fd(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; BorrowedFd&lt;<span class="lifetime">'_</span>&gt; {
             <span class="kw">unsafe </span>{ BorrowedFd::borrow_raw(<span class="self">self</span>.as_raw_fd()) }
         }
     }
@@ -4085,7 +4085,7 @@
     }
 
     <span class="kw">impl </span>AsSocket <span class="kw">for </span>UdpSocket {
-        <span class="kw">fn </span>as_socket(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; BorrowedSocket&lt;<span class="lifetime">&#39;_</span>&gt; {
+        <span class="kw">fn </span>as_socket(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; BorrowedSocket&lt;<span class="lifetime">'_</span>&gt; {
             <span class="kw">unsafe </span>{ BorrowedSocket::borrow_raw(<span class="self">self</span>.as_raw_socket()) }
         }
     }

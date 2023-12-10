@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/reqwest-0.11.22/src/async_impl/response.rs`."><title>response.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="reqwest" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/reqwest-0.11.22/src/async_impl/response.rs`."><title>response.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="reqwest" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -452,23 +452,23 @@
 <span class="kw">use </span>hyper::client::connect::HttpInfo;
 <span class="kw">use </span>hyper::{HeaderMap, StatusCode, Version};
 <span class="kw">use </span>mime::Mime;
-<span class="attr">#[cfg(feature = <span class="string">&quot;json&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"json"</span>)]
 </span><span class="kw">use </span>serde::de::DeserializeOwned;
-<span class="attr">#[cfg(feature = <span class="string">&quot;json&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"json"</span>)]
 </span><span class="kw">use </span>serde_json;
 <span class="kw">use </span>tokio::time::Sleep;
 <span class="kw">use </span>url::Url;
 
 <span class="kw">use </span><span class="kw">super</span>::body::Body;
 <span class="kw">use </span><span class="kw">super</span>::decoder::{Accepts, Decoder};
-<span class="attr">#[cfg(feature = <span class="string">&quot;cookies&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"cookies"</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::cookie;
 <span class="kw">use </span><span class="kw">crate</span>::response::ResponseUrl;
 
 <span class="doccomment">/// A Response to a submitted `Request`.
 </span><span class="kw">pub struct </span>Response {
     <span class="kw">pub</span>(<span class="kw">super</span>) res: hyper::Response&lt;Decoder&gt;,
-    <span class="comment">// Boxed to save space (11 words to 1 word), and it&#39;s not accessed
+    <span class="comment">// Boxed to save space (11 words to 1 word), and it's not accessed
     // frequently internally.
     </span>url: Box&lt;Url&gt;,
 }
@@ -518,7 +518,7 @@
     ///
     /// Reasons it may not be known:
     ///
-    /// - The server didn&#39;t send a `content-length` header.
+    /// - The server didn't send a `content-length` header.
     /// - The response is compressed and automatically decoded (thus changing
     ///   the actual decoded length).
     </span><span class="kw">pub fn </span>content_length(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt; {
@@ -529,14 +529,14 @@
 
     <span class="doccomment">/// Retrieve the cookies contained in the response.
     ///
-    /// Note that invalid &#39;Set-Cookie&#39; headers will be ignored.
+    /// Note that invalid 'Set-Cookie' headers will be ignored.
     ///
     /// # Optional
     ///
     /// This requires the optional `cookies` feature to be enabled.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;cookies&quot;</span>)]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;cookies&quot;</span>)))]
-    </span><span class="kw">pub fn </span>cookies&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = cookie::Cookie&lt;<span class="lifetime">&#39;a</span>&gt;&gt; + <span class="lifetime">&#39;a </span>{
+    </span><span class="attr">#[cfg(feature = <span class="string">"cookies"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"cookies"</span>)))]
+    </span><span class="kw">pub fn </span>cookies&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = cookie::Cookie&lt;<span class="lifetime">'a</span>&gt;&gt; + <span class="lifetime">'a </span>{
         cookie::extract_response_cookies(<span class="self">self</span>.res.headers()).filter_map(Result::ok)
     }
 
@@ -579,17 +579,17 @@
     ///
     /// ```
     /// # async fn run() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
-    /// let content = reqwest::get(&quot;http://httpbin.org/range/26&quot;)
+    /// let content = reqwest::get("http://httpbin.org/range/26")
     ///     .await?
     ///     .text()
     ///     .await?;
     ///
-    /// println!(&quot;text: {:?}&quot;, content);
+    /// println!("text: {:?}", content);
     /// # Ok(())
     /// # }
     /// ```
     </span><span class="kw">pub async fn </span>text(<span class="self">self</span>) -&gt; <span class="kw">crate</span>::Result&lt;String&gt; {
-        <span class="self">self</span>.text_with_charset(<span class="string">&quot;utf-8&quot;</span>).<span class="kw">await
+        <span class="self">self</span>.text_with_charset(<span class="string">"utf-8"</span>).<span class="kw">await
     </span>}
 
     <span class="doccomment">/// Get the full response text given a specific encoding.
@@ -608,12 +608,12 @@
     ///
     /// ```
     /// # async fn run() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
-    /// let content = reqwest::get(&quot;http://httpbin.org/range/26&quot;)
+    /// let content = reqwest::get("http://httpbin.org/range/26")
     ///     .await?
-    ///     .text_with_charset(&quot;utf-8&quot;)
+    ///     .text_with_charset("utf-8")
     ///     .await?;
     ///
-    /// println!(&quot;text: {:?}&quot;, content);
+    /// println!("text: {:?}", content);
     /// # Ok(())
     /// # }
     /// ```
@@ -625,7 +625,7 @@
             .and_then(|value| value.parse::&lt;Mime&gt;().ok());
         <span class="kw">let </span>encoding_name = content_type
             .as_ref()
-            .and_then(|mime| mime.get_param(<span class="string">&quot;charset&quot;</span>).map(|charset| charset.as_str()))
+            .and_then(|mime| mime.get_param(<span class="string">"charset"</span>).map(|charset| charset.as_str()))
             .unwrap_or(default_encoding);
         <span class="kw">let </span>encoding = Encoding::for_label(encoding_name.as_bytes()).unwrap_or(UTF_8);
 
@@ -657,12 +657,12 @@
     /// }
     ///
     /// # async fn run() -&gt; Result&lt;(), Error&gt; {
-    /// let ip = reqwest::get(&quot;http://httpbin.org/ip&quot;)
+    /// let ip = reqwest::get("http://httpbin.org/ip")
     ///     .await?
     ///     .json::&lt;Ip&gt;()
     ///     .await?;
     ///
-    /// println!(&quot;ip: {}&quot;, ip.origin);
+    /// println!("ip: {}", ip.origin);
     /// # Ok(())
     /// # }
     /// #
@@ -676,8 +676,8 @@
     /// details please see [`serde_json::from_reader`].
     ///
     /// [`serde_json::from_reader`]: https://docs.serde.rs/serde_json/fn.from_reader.html
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;json&quot;</span>)]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;json&quot;</span>)))]
+    </span><span class="attr">#[cfg(feature = <span class="string">"json"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"json"</span>)))]
     </span><span class="kw">pub async fn </span>json&lt;T: DeserializeOwned&gt;(<span class="self">self</span>) -&gt; <span class="kw">crate</span>::Result&lt;T&gt; {
         <span class="kw">let </span>full = <span class="self">self</span>.bytes().<span class="kw">await</span><span class="question-mark">?</span>;
 
@@ -690,12 +690,12 @@
     ///
     /// ```
     /// # async fn run() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
-    /// let bytes = reqwest::get(&quot;http://httpbin.org/ip&quot;)
+    /// let bytes = reqwest::get("http://httpbin.org/ip")
     ///     .await?
     ///     .bytes()
     ///     .await?;
     ///
-    /// println!(&quot;bytes: {:?}&quot;, bytes);
+    /// println!("bytes: {:?}", bytes);
     /// # Ok(())
     /// # }
     /// ```
@@ -711,10 +711,10 @@
     ///
     /// ```
     /// # async fn run() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
-    /// let mut res = reqwest::get(&quot;https://hyper.rs&quot;).await?;
+    /// let mut res = reqwest::get("https://hyper.rs").await?;
     ///
     /// while let Some(chunk) = res.chunk().await? {
-    ///     println!(&quot;Chunk: {:?}&quot;, chunk);
+    ///     println!("Chunk: {:?}", chunk);
     /// }
     /// # Ok(())
     /// # }
@@ -735,12 +735,12 @@
     /// use futures_util::StreamExt;
     ///
     /// # async fn run() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
-    /// let mut stream = reqwest::get(&quot;http://httpbin.org/ip&quot;)
+    /// let mut stream = reqwest::get("http://httpbin.org/ip")
     ///     .await?
     ///     .bytes_stream();
     ///
     /// while let Some(item) = stream.next().await {
-    ///     println!(&quot;Chunk: {:?}&quot;, item?);
+    ///     println!("Chunk: {:?}", item?);
     /// }
     /// # Ok(())
     /// # }
@@ -749,8 +749,8 @@
     /// # Optional
     ///
     /// This requires the optional `stream` feature to be enabled.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;stream&quot;</span>)]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;stream&quot;</span>)))]
+    </span><span class="attr">#[cfg(feature = <span class="string">"stream"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"stream"</span>)))]
     </span><span class="kw">pub fn </span>bytes_stream(<span class="self">self</span>) -&gt; <span class="kw">impl </span>futures_core::Stream&lt;Item = <span class="kw">crate</span>::Result&lt;Bytes&gt;&gt; {
         <span class="self">self</span>.res.into_body()
     }
@@ -819,12 +819,12 @@
 
     <span class="comment">// private
 
-    // The Response&#39;s body is an implementation detail.
+    // The Response's body is an implementation detail.
     // You no longer need to get a reference to it, there are async methods
     // on the `Response` itself.
     //
     // This method is just used by the blocking API.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;blocking&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"blocking"</span>)]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>body_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>Decoder {
         <span class="self">self</span>.res.body_mut()
     }
@@ -832,10 +832,10 @@
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>Response {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
-        f.debug_struct(<span class="string">&quot;Response&quot;</span>)
-            .field(<span class="string">&quot;url&quot;</span>, <span class="self">self</span>.url())
-            .field(<span class="string">&quot;status&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.status())
-            .field(<span class="string">&quot;headers&quot;</span>, <span class="self">self</span>.headers())
+        f.debug_struct(<span class="string">"Response"</span>)
+            .field(<span class="string">"url"</span>, <span class="self">self</span>.url())
+            .field(<span class="string">"status"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.status())
+            .field(<span class="string">"headers"</span>, <span class="self">self</span>.headers())
             .finish()
     }
 }
@@ -848,7 +848,7 @@
         <span class="kw">let </span>url = parts
             .extensions
             .remove::&lt;ResponseUrl&gt;()
-            .unwrap_or_else(|| ResponseUrl(Url::parse(<span class="string">&quot;http://no.url.provided.local&quot;</span>).unwrap()));
+            .unwrap_or_else(|| ResponseUrl(Url::parse(<span class="string">"http://no.url.provided.local"</span>).unwrap()));
         <span class="kw">let </span>url = url.<span class="number">0</span>;
         <span class="kw">let </span>res = hyper::Response::from_parts(parts, decoder);
         Response {
@@ -874,11 +874,11 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_from_http_response() {
-        <span class="kw">let </span>url = Url::parse(<span class="string">&quot;http://example.com&quot;</span>).unwrap();
+        <span class="kw">let </span>url = Url::parse(<span class="string">"http://example.com"</span>).unwrap();
         <span class="kw">let </span>response = Builder::new()
             .status(<span class="number">200</span>)
             .url(url.clone())
-            .body(<span class="string">&quot;foo&quot;</span>)
+            .body(<span class="string">"foo"</span>)
             .unwrap();
         <span class="kw">let </span>response = Response::from(response);
 

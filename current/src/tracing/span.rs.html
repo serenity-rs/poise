@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tracing-0.1.40/src/span.rs`."><title>span.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="tracing" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../tracing/index.html"><img src="https://raw.githubusercontent.com/tokio-rs/tracing/master/assets/logo-type.png" alt="tracing"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tracing-0.1.40/src/span.rs`."><title>span.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="tracing" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../tracing/index.html"><img src="https://raw.githubusercontent.com/tokio-rs/tracing/master/assets/logo-type.png" alt="tracing"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1631,7 +1631,7 @@
 //!
 //! - An [`Id`] assigned by the subscriber that uniquely identifies it in relation
 //!   to other spans.
-//! - The span&#39;s [parent] in the trace tree.
+//! - The span's [parent] in the trace tree.
 //! - [Metadata] that describes static characteristics of all spans
 //!   originating from that callsite, such as its name, source code location,
 //!   [verbosity level], and the names of its fields.
@@ -1643,8 +1643,8 @@
 //!
 //! - The [`target`] and/or [`parent`][parent] attributes, if the user wishes to
 //!   override their default values.
-//! - The span&#39;s [verbosity level]
-//! - A string literal providing the span&#39;s name.
+//! - The span's [verbosity level]
+//! - A string literal providing the span's name.
 //! - Finally, zero or more arbitrary key/value fields.
 //!
 //! [`target`]: super::Metadata::target
@@ -1653,9 +1653,9 @@
 //! ```rust
 //! use tracing::{span, Level};
 //!
-//! /// Construct a new span at the `INFO` level named &quot;my_span&quot;, with a single
+//! /// Construct a new span at the `INFO` level named "my_span", with a single
 //! /// field named answer , with the value `42`.
-//! let my_span = span!(Level::INFO, &quot;my_span&quot;, answer = 42);
+//! let my_span = span!(Level::INFO, "my_span", answer = 42);
 //! ```
 //!
 //! The documentation for the [`span!`] macro provides additional examples of
@@ -1669,7 +1669,7 @@
 //!
 //! The [`Attributes`] type contains data associated with a span, and is
 //! provided to the [`Subscriber`] when a new span is created. It contains
-//! the span&#39;s metadata, the ID of [the span&#39;s parent][parent] if one was
+//! the span's metadata, the ID of [the span's parent][parent] if one was
 //! explicitly set, and any fields whose values were recorded when the span was
 //! constructed. The subscriber, which is responsible for recording `tracing`
 //! data, can then store or record these values.
@@ -1687,7 +1687,7 @@
 //! ```
 //! # use tracing::{span, Level};
 //! let my_var: u64 = 5;
-//! let my_span = span!(Level::TRACE, &quot;my_span&quot;, my_var);
+//! let my_span = span!(Level::TRACE, "my_span", my_var);
 //!
 //! // `my_span` exists but has not been entered.
 //!
@@ -1698,11 +1698,11 @@
 //! // Dropping the `_enter` guard will exit the span.
 //!```
 //!
-//! &lt;div class=&quot;example-wrap&quot; style=&quot;display:inline-block&quot;&gt;&lt;pre class=&quot;compile_fail&quot; style=&quot;white-space:normal;font:inherit;&quot;&gt;
+//! &lt;div class="example-wrap" style="display:inline-block"&gt;&lt;pre class="compile_fail" style="white-space:normal;font:inherit;"&gt;
 //!     &lt;strong&gt;Warning&lt;/strong&gt;: In asynchronous code that uses async/await syntax,
 //!     &lt;code&gt;Span::enter&lt;/code&gt; may produce incorrect traces if the returned drop
 //!     guard is held across an await point. See
-//!     &lt;a href=&quot;struct.Span.html#in-asynchronous-code&quot;&gt;the method documentation&lt;/a&gt;
+//!     &lt;a href="struct.Span.html#in-asynchronous-code"&gt;the method documentation&lt;/a&gt;
 //!     for details.
 //! &lt;/pre&gt;&lt;/div&gt;
 //!
@@ -1713,7 +1713,7 @@
 //! ```
 //! # use tracing::{span, Level};
 //! // Create a span and enter it, returning a guard:
-//! let span = span!(Level::INFO, &quot;my_span&quot;).entered();
+//! let span = span!(Level::INFO, "my_span").entered();
 //!
 //! // We are now inside the span! Like `enter()`, the guard returned by
 //! // `entered()` will exit the span when it is dropped...
@@ -1729,7 +1729,7 @@
 //! ```
 //! # use tracing::{span, Level};
 //! let my_var: u64 = 5;
-//! let my_span = span!(Level::TRACE, &quot;my_span&quot;, my_var = &amp;my_var);
+//! let my_span = span!(Level::TRACE, "my_span", my_var = &amp;my_var);
 //!
 //! my_span.in_scope(|| {
 //!     // perform some work in the context of `my_span`...
@@ -1742,7 +1742,7 @@
 //! });
 //! ```
 //!
-//! &lt;pre class=&quot;ignore&quot; style=&quot;white-space:normal;font:inherit;&quot;&gt;
+//! &lt;pre class="ignore" style="white-space:normal;font:inherit;"&gt;
 //!     &lt;strong&gt;Note&lt;/strong&gt;: Since entering a span takes &lt;code&gt;&amp;self&lt;/code&gt;, and
 //!     &lt;code&gt;Span&lt;/code&gt;s are &lt;code&gt;Clone&lt;/code&gt;, &lt;code&gt;Send&lt;/code&gt;, and
 //!     &lt;code&gt;Sync&lt;/code&gt;, it is entirely valid for multiple threads to enter the
@@ -1753,25 +1753,25 @@
 //!
 //! Spans form a tree structure — unless it is a root span, all spans have a
 //! _parent_, and may have one or more _children_. When a new span is created,
-//! the current span becomes the new span&#39;s parent. The total execution time of
+//! the current span becomes the new span's parent. The total execution time of
 //! a span consists of the time spent in that span and in the entire subtree
 //! represented by its children. Thus, a parent span always lasts for at least
 //! as long as the longest-executing span in its subtree.
 //!
 //! ```
 //! # use tracing::{Level, span};
-//! // this span is considered the &quot;root&quot; of a new trace tree:
-//! span!(Level::INFO, &quot;root&quot;).in_scope(|| {
-//!     // since we are now inside &quot;root&quot;, this span is considered a child
-//!     // of &quot;root&quot;:
-//!     span!(Level::DEBUG, &quot;outer_child&quot;).in_scope(|| {
-//!         // this span is a child of &quot;outer_child&quot;, which is in turn a
-//!         // child of &quot;root&quot;:
-//!         span!(Level::TRACE, &quot;inner_child&quot;).in_scope(|| {
+//! // this span is considered the "root" of a new trace tree:
+//! span!(Level::INFO, "root").in_scope(|| {
+//!     // since we are now inside "root", this span is considered a child
+//!     // of "root":
+//!     span!(Level::DEBUG, "outer_child").in_scope(|| {
+//!         // this span is a child of "outer_child", which is in turn a
+//!         // child of "root":
+//!         span!(Level::TRACE, "inner_child").in_scope(|| {
 //!             // and so on...
 //!         });
 //!     });
-//!     // another span created here would also be a child of &quot;root&quot;.
+//!     // another span created here would also be a child of "root".
 //! });
 //!```
 //!
@@ -1780,22 +1780,22 @@
 //!
 //! ```rust
 //! # use tracing::{Level, span};
-//! // Create, but do not enter, a span called &quot;foo&quot;.
-//! let foo = span!(Level::INFO, &quot;foo&quot;);
+//! // Create, but do not enter, a span called "foo".
+//! let foo = span!(Level::INFO, "foo");
 //!
-//! // Create and enter a span called &quot;bar&quot;.
-//! let bar = span!(Level::INFO, &quot;bar&quot;);
+//! // Create and enter a span called "bar".
+//! let bar = span!(Level::INFO, "bar");
 //! let _enter = bar.enter();
 //!
-//! // Although we have currently entered &quot;bar&quot;, &quot;baz&quot;&#39;s parent span
-//! // will be &quot;foo&quot;.
-//! let baz = span!(parent: &amp;foo, Level::INFO, &quot;baz&quot;);
+//! // Although we have currently entered "bar", "baz"'s parent span
+//! // will be "foo".
+//! let baz = span!(parent: &amp;foo, Level::INFO, "baz");
 //! ```
 //!
 //! A child span should typically be considered _part_ of its parent. For
 //! example, if a subscriber is recording the length of time spent in various
-//! spans, it should generally include the time spent in a span&#39;s children as
-//! part of that span&#39;s duration.
+//! spans, it should generally include the time spent in a span's children as
+//! part of that span's duration.
 //!
 //! In addition to having zero or one parent, a span may also _follow from_ any
 //! number of other spans. This indicates a causal relationship between the span
@@ -1832,7 +1832,7 @@
 //! impl Future for MyFuture {
 //!     type Output = ();
 //!
-//!     fn poll(self: Pin&lt;&amp;mut Self&gt;, _cx: &amp;mut Context&lt;&#39;_&gt;) -&gt; Poll&lt;Self::Output&gt; {
+//!     fn poll(self: Pin&lt;&amp;mut Self&gt;, _cx: &amp;mut Context&lt;'_&gt;) -&gt; Poll&lt;Self::Output&gt; {
 //!         let _enter = self.span.enter();
 //!         // Do actual future work...
 //! # Poll::Ready(())
@@ -1852,18 +1852,18 @@
 //! Because spans may be entered and exited multiple times before they close,
 //! [`Subscriber`]s have separate trait methods which are called to notify them
 //! of span exits and when span handles are dropped. When execution exits a
-//! span, [`exit`] will always be called with that span&#39;s ID to notify the
+//! span, [`exit`] will always be called with that span's ID to notify the
 //! subscriber that the span has been exited. When span handles are dropped, the
-//! [`drop_span`] method is called with that span&#39;s ID. The subscriber may use
+//! [`drop_span`] method is called with that span's ID. The subscriber may use
 //! this to determine whether or not the span will be entered again.
 //!
 //! If there is only a single handle with the capacity to exit a span, dropping
-//! that handle &quot;closes&quot; the span, since the capacity to enter it no longer
+//! that handle "closes" the span, since the capacity to enter it no longer
 //! exists. For example:
 //! ```
 //! # use tracing::{Level, span};
 //! {
-//!     span!(Level::TRACE, &quot;my_span&quot;).in_scope(|| {
+//!     span!(Level::TRACE, "my_span").in_scope(|| {
 //!         // perform some work in the context of `my_span`...
 //!     }); // --&gt; Subscriber::exit(my_span)
 //!
@@ -1885,7 +1885,7 @@
 //! # When to use spans
 //!
 //! As a rule of thumb, spans should be used to represent discrete units of work
-//! (e.g., a given request&#39;s lifetime in a server) or periods of time spent in a
+//! (e.g., a given request's lifetime in a server) or periods of time spent in a
 //! given context (e.g., time spent interacting with an instance of an external
 //! system, such as a database).
 //!
@@ -1896,7 +1896,7 @@
 //! ```rust
 //! # use tracing::{Level, span};
 //! # let n = 1;
-//! let span = span!(Level::TRACE, &quot;my_loop&quot;);
+//! let span = span!(Level::TRACE, "my_loop");
 //! let _enter = span.enter();
 //! for i in 0..n {
 //!     # let _ = i;
@@ -1908,7 +1908,7 @@
 //! # use tracing::{Level, span};
 //! # let n = 1u64;
 //! for i in 0..n {
-//!     let span = span!(Level::TRACE, &quot;my_loop&quot;, iteration = i);
+//!     let span = span!(Level::TRACE, "my_loop", iteration = i);
 //!     let _enter = span.enter();
 //!     // ...
 //! }
@@ -1964,7 +1964,7 @@
 <span class="doccomment">/// A handle representing a span, with the capability to enter the span if it
 /// exists.
 ///
-/// If the span was rejected by the current `Subscriber`&#39;s filter, entering the
+/// If the span was rejected by the current `Subscriber`'s filter, entering the
 /// span will silently do nothing. Thus, the handle can be used in the same
 /// manner regardless of whether or not the trace is currently being collected.
 </span><span class="attr">#[derive(Clone)]
@@ -1977,7 +1977,7 @@
     ///
     /// This might be `Some` even if `inner` is `None`, in the case that the
     /// span is disabled but the metadata is needed for `log` support.
-    </span>meta: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Metadata&lt;<span class="lifetime">&#39;static</span>&gt;&gt;,
+    </span>meta: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'static </span>Metadata&lt;<span class="lifetime">'static</span>&gt;&gt;,
 }
 
 <span class="doccomment">/// A handle representing the capacity to enter a span which is known to exist.
@@ -1987,7 +1987,7 @@
 /// span handles; users should typically not need to interact with it directly.
 </span><span class="attr">#[derive(Debug)]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>Inner {
-    <span class="doccomment">/// The span&#39;s ID, as provided by `subscriber`.
+    <span class="doccomment">/// The span's ID, as provided by `subscriber`.
     </span>id: Id,
 
     <span class="doccomment">/// The subscriber that will receive events relating to this span.
@@ -2006,9 +2006,9 @@
 ///
 /// [`Span::enter`]: super::Span::enter
 </span><span class="attr">#[derive(Debug)]
-#[must_use = <span class="string">&quot;once a span has been entered, it should be exited&quot;</span>]
-</span><span class="kw">pub struct </span>Entered&lt;<span class="lifetime">&#39;a</span>&gt; {
-    span: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Span,
+#[must_use = <span class="string">"once a span has been entered, it should be exited"</span>]
+</span><span class="kw">pub struct </span>Entered&lt;<span class="lifetime">'a</span>&gt; {
+    span: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Span,
 }
 
 <span class="doccomment">/// An owned version of [`Entered`], a guard representing a span which has been
@@ -2020,7 +2020,7 @@
 ///
 /// [`Span::entered`]: super::Span::entered()
 </span><span class="attr">#[derive(Debug)]
-#[must_use = <span class="string">&quot;once a span has been entered, it should be exited&quot;</span>]
+#[must_use = <span class="string">"once a span has been entered, it should be exited"</span>]
 </span><span class="kw">pub struct </span>EnteredSpan {
     span: Span,
 
@@ -2034,11 +2034,11 @@
 }
 
 <span class="doccomment">/// `log` target for all span lifecycle (creation/enter/exit/close) records.
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;log&quot;</span>)]
-</span><span class="kw">const </span>LIFECYCLE_LOG_TARGET: <span class="kw-2">&amp;</span>str = <span class="string">&quot;tracing::span&quot;</span>;
+</span><span class="attr">#[cfg(feature = <span class="string">"log"</span>)]
+</span><span class="kw">const </span>LIFECYCLE_LOG_TARGET: <span class="kw-2">&amp;</span>str = <span class="string">"tracing::span"</span>;
 <span class="doccomment">/// `log` target for span activity (enter/exit) records.
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;log&quot;</span>)]
-</span><span class="kw">const </span>ACTIVITY_LOG_TARGET: <span class="kw-2">&amp;</span>str = <span class="string">&quot;tracing::span::active&quot;</span>;
+</span><span class="attr">#[cfg(feature = <span class="string">"log"</span>)]
+</span><span class="kw">const </span>ACTIVITY_LOG_TARGET: <span class="kw-2">&amp;</span>str = <span class="string">"tracing::span::active"</span>;
 
 <span class="comment">// ===== impl Span =====
 
@@ -2056,15 +2056,15 @@
     /// [`Subscriber`]: super::subscriber::Subscriber
     /// [field values]: super::field::ValueSet
     /// [`follows_from`]: super::Span::follows_from
-    </span><span class="kw">pub fn </span>new(meta: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Metadata&lt;<span class="lifetime">&#39;static</span>&gt;, values: <span class="kw-2">&amp;</span>field::ValueSet&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Span {
+    </span><span class="kw">pub fn </span>new(meta: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Metadata&lt;<span class="lifetime">'static</span>&gt;, values: <span class="kw-2">&amp;</span>field::ValueSet&lt;<span class="lifetime">'_</span>&gt;) -&gt; Span {
         dispatcher::get_default(|dispatch| <span class="self">Self</span>::new_with(meta, values, dispatch))
     }
 
     <span class="attr">#[inline]
     #[doc(hidden)]
     </span><span class="kw">pub fn </span>new_with(
-        meta: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Metadata&lt;<span class="lifetime">&#39;static</span>&gt;,
-        values: <span class="kw-2">&amp;</span>field::ValueSet&lt;<span class="lifetime">&#39;_</span>&gt;,
+        meta: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Metadata&lt;<span class="lifetime">'static</span>&gt;,
+        values: <span class="kw-2">&amp;</span>field::ValueSet&lt;<span class="lifetime">'_</span>&gt;,
         dispatch: <span class="kw-2">&amp;</span>Dispatch,
     ) -&gt; Span {
         <span class="kw">let </span>new_span = Attributes::new(meta, values);
@@ -2080,15 +2080,15 @@
     /// [metadata]: super::Metadata
     /// [field values]: super::field::ValueSet
     /// [`follows_from`]: super::Span::follows_from
-    </span><span class="kw">pub fn </span>new_root(meta: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Metadata&lt;<span class="lifetime">&#39;static</span>&gt;, values: <span class="kw-2">&amp;</span>field::ValueSet&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Span {
+    </span><span class="kw">pub fn </span>new_root(meta: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Metadata&lt;<span class="lifetime">'static</span>&gt;, values: <span class="kw-2">&amp;</span>field::ValueSet&lt;<span class="lifetime">'_</span>&gt;) -&gt; Span {
         dispatcher::get_default(|dispatch| <span class="self">Self</span>::new_root_with(meta, values, dispatch))
     }
 
     <span class="attr">#[inline]
     #[doc(hidden)]
     </span><span class="kw">pub fn </span>new_root_with(
-        meta: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Metadata&lt;<span class="lifetime">&#39;static</span>&gt;,
-        values: <span class="kw-2">&amp;</span>field::ValueSet&lt;<span class="lifetime">&#39;_</span>&gt;,
+        meta: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Metadata&lt;<span class="lifetime">'static</span>&gt;,
+        values: <span class="kw-2">&amp;</span>field::ValueSet&lt;<span class="lifetime">'_</span>&gt;,
         dispatch: <span class="kw-2">&amp;</span>Dispatch,
     ) -&gt; Span {
         <span class="kw">let </span>new_span = Attributes::new_root(meta, values);
@@ -2106,8 +2106,8 @@
     /// [`follows_from`]: super::Span::follows_from
     </span><span class="kw">pub fn </span>child_of(
         parent: <span class="kw">impl </span>Into&lt;<span class="prelude-ty">Option</span>&lt;Id&gt;&gt;,
-        meta: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Metadata&lt;<span class="lifetime">&#39;static</span>&gt;,
-        values: <span class="kw-2">&amp;</span>field::ValueSet&lt;<span class="lifetime">&#39;_</span>&gt;,
+        meta: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Metadata&lt;<span class="lifetime">'static</span>&gt;,
+        values: <span class="kw-2">&amp;</span>field::ValueSet&lt;<span class="lifetime">'_</span>&gt;,
     ) -&gt; Span {
         <span class="kw">let </span><span class="kw-2">mut </span>parent = parent.into();
         dispatcher::get_default(<span class="kw">move </span>|dispatch| {
@@ -2119,8 +2119,8 @@
     #[doc(hidden)]
     </span><span class="kw">pub fn </span>child_of_with(
         parent: <span class="kw">impl </span>Into&lt;<span class="prelude-ty">Option</span>&lt;Id&gt;&gt;,
-        meta: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Metadata&lt;<span class="lifetime">&#39;static</span>&gt;,
-        values: <span class="kw-2">&amp;</span>field::ValueSet&lt;<span class="lifetime">&#39;_</span>&gt;,
+        meta: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Metadata&lt;<span class="lifetime">'static</span>&gt;,
+        values: <span class="kw-2">&amp;</span>field::ValueSet&lt;<span class="lifetime">'_</span>&gt;,
         dispatch: <span class="kw-2">&amp;</span>Dispatch,
     ) -&gt; Span {
         <span class="kw">let </span>new_span = <span class="kw">match </span>parent.into() {
@@ -2139,7 +2139,7 @@
     /// `Subscriber` but _may_ record log messages if the `log` feature flag is
     /// enabled.
     </span><span class="attr">#[inline(always)]
-    </span><span class="kw">pub fn </span>new_disabled(meta: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Metadata&lt;<span class="lifetime">&#39;static</span>&gt;) -&gt; Span {
+    </span><span class="kw">pub fn </span>new_disabled(meta: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Metadata&lt;<span class="lifetime">'static</span>&gt;) -&gt; Span {
         <span class="self">Self </span>{
             inner: <span class="prelude-val">None</span>,
             meta: <span class="prelude-val">Some</span>(meta),
@@ -2184,8 +2184,8 @@
     }
 
     <span class="kw">fn </span>make_with(
-        meta: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Metadata&lt;<span class="lifetime">&#39;static</span>&gt;,
-        new_span: Attributes&lt;<span class="lifetime">&#39;_</span>&gt;,
+        meta: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Metadata&lt;<span class="lifetime">'static</span>&gt;,
+        new_span: Attributes&lt;<span class="lifetime">'_</span>&gt;,
         dispatch: <span class="kw-2">&amp;</span>Dispatch,
     ) -&gt; Span {
         <span class="kw">let </span>attrs = <span class="kw-2">&amp;</span>new_span;
@@ -2207,7 +2207,7 @@
             span.log(
                 target,
                 <span class="macro">level_to_log!</span>(<span class="kw-2">*</span>meta.level()),
-                <span class="macro">format_args!</span>(<span class="string">&quot;++ {};{}&quot;</span>, meta.name(), <span class="kw">crate</span>::log::LogValueSet { values, is_first: <span class="bool-val">false </span>}),
+                <span class="macro">format_args!</span>(<span class="string">"++ {};{}"</span>, meta.name(), <span class="kw">crate</span>::log::LogValueSet { values, is_first: <span class="bool-val">false </span>}),
             );
         }}
 
@@ -2217,7 +2217,7 @@
     <span class="doccomment">/// Enters this span, returning a guard that will exit the span when dropped.
     ///
     /// If this span is enabled by the current subscriber, then this function will
-    /// call [`Subscriber::enter`] with the span&#39;s [`Id`], and dropping the guard
+    /// call [`Subscriber::enter`] with the span's [`Id`], and dropping the guard
     /// will call [`Subscriber::exit`]. If the span is disabled, this does
     /// nothing.
     ///
@@ -2232,7 +2232,7 @@
     /// # use tracing::info_span;
     /// # async fn some_other_async_function() {}
     /// async fn my_async_function() {
-    ///     let span = info_span!(&quot;my_async_function&quot;);
+    ///     let span = info_span!("my_async_function");
     ///
     ///     // WARNING: This span will remain entered until this
     ///     // guard is dropped...
@@ -2265,7 +2265,7 @@
     ///   # use tracing::info_span;
     ///   # async fn some_other_async_function(_: ()) {}
     ///   async fn my_async_function() {
-    ///       let span = info_span!(&quot;my_async_function&quot;);
+    ///       let span = info_span!("my_async_function");
     ///
     ///       let some_value = span.in_scope(|| {
     ///           // run some synchronous code inside the span...
@@ -2291,7 +2291,7 @@
     ///
     ///   # async fn some_other_async_function() {}
     ///   async fn my_async_function() {
-    ///       let span = info_span!(&quot;my_async_function&quot;);
+    ///       let span = info_span!("my_async_function");
     ///       async move {
     ///          // This is correct! If we yield here, the span will be exited,
     ///          // and re-entered when we resume.
@@ -2316,7 +2316,7 @@
     ///   # async fn some_other_async_function() {}
     ///   async fn my_async_function() {
     ///       let some_value = some_other_async_function()
-    ///          .instrument(debug_span!(&quot;some_other_async_function&quot;))
+    ///          .instrument(debug_span!("some_other_async_function"))
     ///          .await;
     ///
     ///       // ...
@@ -2328,7 +2328,7 @@
     ///
     ///   ```ignore
     ///   # async fn some_other_async_function() {}
-    ///   #[tracing::instrument(level = &quot;info&quot;)]
+    ///   #[tracing::instrument(level = "info")]
     ///   async fn my_async_function() {
     ///
     ///       // This is correct! If we yield here, the span will be exited,
@@ -2349,7 +2349,7 @@
     ///
     /// ```
     /// # use tracing::{span, Level};
-    /// let span = span!(Level::INFO, &quot;my_span&quot;);
+    /// let span = span!(Level::INFO, "my_span");
     /// let guard = span.enter();
     ///
     /// // code here is within the span
@@ -2366,14 +2366,14 @@
     /// # use tracing::trace_span;
     /// fn my_function() -&gt; String {
     ///     // enter a span for the duration of this function.
-    ///     let span = trace_span!(&quot;my_function&quot;);
+    ///     let span = trace_span!("my_function");
     ///     let _enter = span.enter();
     ///
     ///     // anything happening in functions we call is still inside the span...
     ///     my_other_function();
     ///
     ///     // returning from the function drops the guard, exiting the span.
-    ///     return &quot;Hello world&quot;.to_owned();
+    ///     return "Hello world".to_owned();
     /// }
     ///
     /// fn my_other_function() {
@@ -2386,26 +2386,26 @@
     ///
     /// ```
     /// # use tracing::{info, info_span};
-    /// let span = info_span!(&quot;my_great_span&quot;);
+    /// let span = info_span!("my_great_span");
     ///
     /// {
     ///     let _enter = span.enter();
     ///
     ///     // this event occurs inside the span.
-    ///     info!(&quot;i&#39;m in the span!&quot;);
+    ///     info!("i'm in the span!");
     ///
     ///     // exiting the scope drops the guard, exiting the span.
     /// }
     ///
     /// // this event is not inside the span.
-    /// info!(&quot;i&#39;m outside the span!&quot;)
+    /// info!("i'm outside the span!")
     /// ```
     ///
     /// [`Subscriber::enter`]: super::subscriber::Subscriber::enter()
     /// [`Subscriber::exit`]: super::subscriber::Subscriber::exit()
     /// [`Id`]: super::Id
     </span><span class="attr">#[inline(always)]
-    </span><span class="kw">pub fn </span>enter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Entered&lt;<span class="lifetime">&#39;_</span>&gt; {
+    </span><span class="kw">pub fn </span>enter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Entered&lt;<span class="lifetime">'_</span>&gt; {
         <span class="self">self</span>.do_enter();
         Entered { span: <span class="self">self </span>}
     }
@@ -2413,16 +2413,16 @@
     <span class="doccomment">/// Enters this span, consuming it and returning a [guard][`EnteredSpan`]
     /// that will exit the span when dropped.
     ///
-    /// &lt;pre class=&quot;compile_fail&quot; style=&quot;white-space:normal;font:inherit;&quot;&gt;
+    /// &lt;pre class="compile_fail" style="white-space:normal;font:inherit;"&gt;
     ///     &lt;strong&gt;Warning&lt;/strong&gt;: In asynchronous code that uses async/await syntax,
     ///     &lt;code&gt;Span::entered&lt;/code&gt; may produce incorrect traces if the returned drop
-    ///     guard is held across an await point. See &lt;a href=&quot;#in-asynchronous-code&quot;&gt;the
+    ///     guard is held across an await point. See &lt;a href="#in-asynchronous-code"&gt;the
     ///     &lt;code&gt;Span::enter&lt;/code&gt; documentation&lt;/a&gt; for details.
     /// &lt;/pre&gt;
     ///
     ///
     /// If this span is enabled by the current subscriber, then this function will
-    /// call [`Subscriber::enter`] with the span&#39;s [`Id`], and dropping the guard
+    /// call [`Subscriber::enter`] with the span's [`Id`], and dropping the guard
     /// will call [`Subscriber::exit`]. If the span is disabled, this does
     /// nothing.
     ///
@@ -2433,20 +2433,20 @@
     ///
     /// ```
     /// # use tracing::info_span;
-    /// let _span = info_span!(&quot;something_interesting&quot;).entered();
+    /// let _span = info_span!("something_interesting").entered();
     /// ```
     /// rather than:
     /// ```
     /// # use tracing::info_span;
-    /// let span = info_span!(&quot;something_interesting&quot;);
+    /// let span = info_span!("something_interesting");
     /// let _e = span.enter();
     /// ```
     ///
     /// Furthermore, `entered` may be used when the span must be stored in some
     /// other struct or be passed to a function while remaining entered.
     ///
-    /// &lt;pre class=&quot;ignore&quot; style=&quot;white-space:normal;font:inherit;&quot;&gt;
-    ///     &lt;strong&gt;Note&lt;/strong&gt;: The returned &lt;a href=&quot;../struct.EnteredSpan.html&quot;&gt;
+    /// &lt;pre class="ignore" style="white-space:normal;font:inherit;"&gt;
+    ///     &lt;strong&gt;Note&lt;/strong&gt;: The returned &lt;a href="../struct.EnteredSpan.html"&gt;
     ///     &lt;code&gt;EnteredSpan&lt;/code&gt;&lt;/a&gt; guard does not implement &lt;code&gt;Send&lt;/code&gt;.
     ///     Dropping the guard will exit &lt;em&gt;this&lt;/em&gt; span, and if the guard is sent
     ///     to another thread and dropped there, that thread may never have entered
@@ -2462,7 +2462,7 @@
     ///
     /// ```
     /// # use tracing::{Level, span};
-    /// let span = span!(Level::INFO, &quot;doing_something&quot;).entered();
+    /// let span = span!(Level::INFO, "doing_something").entered();
     ///
     /// // code here is within the span
     ///
@@ -2483,13 +2483,13 @@
     /// # use tracing::trace_span;
     /// fn my_function() -&gt; String {
     ///     // enter a span for the duration of this function.
-    ///     let span = trace_span!(&quot;my_function&quot;).entered();
+    ///     let span = trace_span!("my_function").entered();
     ///
     ///     // anything happening in functions we call is still inside the span...
     ///     my_other_function();
     ///
     ///     // returning from the function drops the guard, exiting the span.
-    ///     return &quot;Hello world&quot;.to_owned();
+    ///     return "Hello world".to_owned();
     /// }
     ///
     /// fn my_other_function() {
@@ -2505,10 +2505,10 @@
     /// use tracing::field;
     ///
     /// // create the span with an empty field, and enter it.
-    /// let span = info_span!(&quot;my_span&quot;, some_field = field::Empty).entered();
+    /// let span = info_span!("my_span", some_field = field::Empty).entered();
     ///
     /// // we can still record a value for the field while the span is entered.
-    /// span.record(&quot;some_field&quot;, &amp;&quot;hello world!&quot;);
+    /// span.record("some_field", &amp;"hello world!");
     /// ```
     ///
 
@@ -2532,52 +2532,52 @@
     /// [async tasks]. Consider the following:
     ///
     /// ```
-    /// let _parent_span = tracing::info_span!(&quot;parent&quot;).entered();
+    /// let _parent_span = tracing::info_span!("parent").entered();
     ///
     /// // ...
     ///
-    /// let child_span = tracing::debug_span!(&quot;child&quot;);
+    /// let child_span = tracing::debug_span!("child");
     ///
     /// std::thread::spawn(move || {
     ///     let _entered = child_span.entered();
     ///
-    ///     tracing::info!(&quot;spawned a thread!&quot;);
+    ///     tracing::info!("spawned a thread!");
     ///
     ///     // ...
     /// });
     /// ```
     ///
     /// If the current [`Subscriber`] enables the [`DEBUG`] level, then both
-    /// the &quot;parent&quot; and &quot;child&quot; spans will be enabled. Thus, when the &quot;spawaned
-    /// a thread!&quot; event occurs, it will be inside of the &quot;child&quot; span. Because
-    /// &quot;parent&quot; is the parent of &quot;child&quot;, the event will _also_ be inside of
-    /// &quot;parent&quot;.
+    /// the "parent" and "child" spans will be enabled. Thus, when the "spawaned
+    /// a thread!" event occurs, it will be inside of the "child" span. Because
+    /// "parent" is the parent of "child", the event will _also_ be inside of
+    /// "parent".
     ///
-    /// However, if the [`Subscriber`] only enables the [`INFO`] level, the &quot;child&quot;
+    /// However, if the [`Subscriber`] only enables the [`INFO`] level, the "child"
     /// span will be disabled. When the thread is spawned, the
-    /// `child_span.entered()` call will do nothing, since &quot;child&quot; is not
-    /// enabled. In this case, the &quot;spawned a thread!&quot; event occurs outside of
-    /// *any* span, since the &quot;child&quot; span was responsible for propagating its
+    /// `child_span.entered()` call will do nothing, since "child" is not
+    /// enabled. In this case, the "spawned a thread!" event occurs outside of
+    /// *any* span, since the "child" span was responsible for propagating its
     /// parent to the spawned thread.
     ///
     /// If this is not the desired behavior, `Span::or_current` can be used to
-    /// ensure that the &quot;parent&quot; span is propagated in both cases, either as a
-    /// parent of &quot;child&quot; _or_ directly. For example:
+    /// ensure that the "parent" span is propagated in both cases, either as a
+    /// parent of "child" _or_ directly. For example:
     ///
     /// ```
-    /// let _parent_span = tracing::info_span!(&quot;parent&quot;).entered();
+    /// let _parent_span = tracing::info_span!("parent").entered();
     ///
     /// // ...
     ///
-    /// // If DEBUG is enabled, then &quot;child&quot; will be enabled, and `or_current`
-    /// // returns &quot;child&quot;. Otherwise, if DEBUG is not enabled, &quot;child&quot; will be
-    /// // disabled, and `or_current` returns &quot;parent&quot;.
-    /// let child_span = tracing::debug_span!(&quot;child&quot;).or_current();
+    /// // If DEBUG is enabled, then "child" will be enabled, and `or_current`
+    /// // returns "child". Otherwise, if DEBUG is not enabled, "child" will be
+    /// // disabled, and `or_current` returns "parent".
+    /// let child_span = tracing::debug_span!("child").or_current();
     ///
     /// std::thread::spawn(move || {
     ///     let _entered = child_span.entered();
     ///
-    ///     tracing::info!(&quot;spawned a thread!&quot;);
+    ///     tracing::info!("spawned a thread!");
     ///
     ///     // ...
     /// });
@@ -2593,15 +2593,15 @@
     /// #     pub(super) fn spawn(_: impl std::future::Future) {}
     /// # }
     ///
-    /// let _parent_span = tracing::info_span!(&quot;parent&quot;).entered();
+    /// let _parent_span = tracing::info_span!("parent").entered();
     ///
     /// // ...
     ///
-    /// let child_span = tracing::debug_span!(&quot;child&quot;);
+    /// let child_span = tracing::debug_span!("child");
     ///
     /// tokio::spawn(
     ///     async {
-    ///         tracing::info!(&quot;spawned a task!&quot;);
+    ///         tracing::info!("spawned a task!");
     ///
     ///         // ...
     ///
@@ -2623,17 +2623,17 @@
     ///     // ...
     /// }
     ///
-    /// let _parent_span = tracing::info_span!(&quot;parent&quot;).entered();
+    /// let _parent_span = tracing::info_span!("parent").entered();
     ///
     /// // Do this:
     /// tokio::spawn(
-    ///     my_async_fn().instrument(tracing::debug_span!(&quot;child&quot;).or_current())
+    ///     my_async_fn().instrument(tracing::debug_span!("child").or_current())
     /// );
     ///
     /// // ...rather than this:
     /// tokio::spawn(
     ///     my_async_fn()
-    ///         .instrument(tracing::debug_span!(&quot;child&quot;))
+    ///         .instrument(tracing::debug_span!("child"))
     ///         .in_current_span()
     /// );
     /// ```
@@ -2662,7 +2662,7 @@
 
         <span class="macro">if_log_enabled! </span>{ <span class="kw">crate</span>::Level::TRACE, {
             <span class="kw">if let </span><span class="prelude-val">Some</span>(_meta) = <span class="self">self</span>.meta {
-                <span class="self">self</span>.log(ACTIVITY_LOG_TARGET, log::Level::Trace, <span class="macro">format_args!</span>(<span class="string">&quot;-&gt; {};&quot;</span>, _meta.name()));
+                <span class="self">self</span>.log(ACTIVITY_LOG_TARGET, log::Level::Trace, <span class="macro">format_args!</span>(<span class="string">"-&gt; {};"</span>, _meta.name()));
             }
         }}
     }
@@ -2679,7 +2679,7 @@
 
         <span class="macro">if_log_enabled! </span>{ <span class="kw">crate</span>::Level::TRACE, {
             <span class="kw">if let </span><span class="prelude-val">Some</span>(_meta) = <span class="self">self</span>.meta {
-                <span class="self">self</span>.log(ACTIVITY_LOG_TARGET, log::Level::Trace, <span class="macro">format_args!</span>(<span class="string">&quot;&lt;- {};&quot;</span>, _meta.name()));
+                <span class="self">self</span>.log(ACTIVITY_LOG_TARGET, log::Level::Trace, <span class="macro">format_args!</span>(<span class="string">"&lt;- {};"</span>, _meta.name()));
             }
         }}
     }
@@ -2697,25 +2697,25 @@
     ///
     /// ```
     /// # use tracing::{trace, span, Level};
-    /// let my_span = span!(Level::TRACE, &quot;my_span&quot;);
+    /// let my_span = span!(Level::TRACE, "my_span");
     ///
     /// my_span.in_scope(|| {
     ///     // this event occurs within the span.
-    ///     trace!(&quot;i&#39;m in the span!&quot;);
+    ///     trace!("i'm in the span!");
     /// });
     ///
     /// // this event occurs outside the span.
-    /// trace!(&quot;i&#39;m not in the span!&quot;);
+    /// trace!("i'm not in the span!");
     /// ```
     ///
     /// Calling a function and returning the result:
     /// ```
     /// # use tracing::{info_span, Level};
     /// fn hello_world() -&gt; String {
-    ///     &quot;Hello world!&quot;.to_owned()
+    ///     "Hello world!".to_owned()
     /// }
     ///
-    /// let span = info_span!(&quot;hello_world&quot;);
+    /// let span = info_span!("hello_world");
     /// // the span will be entered for the duration of the call to
     /// // `hello_world`.
     /// let a_string = span.in_scope(hello_world);
@@ -2751,15 +2751,15 @@
     /// ```
     /// use tracing::{trace_span, field};
     ///
-    /// // Create a span with two fields: `greeting`, with the value &quot;hello world&quot;, and
+    /// // Create a span with two fields: `greeting`, with the value "hello world", and
     /// // `parting`, without a value.
-    /// let span = trace_span!(&quot;my_span&quot;, greeting = &quot;hello world&quot;, parting = field::Empty);
+    /// let span = trace_span!("my_span", greeting = "hello world", parting = field::Empty);
     ///
     /// // ...
     ///
     /// // Now, record a value for parting as well.
     /// // (note that the field name is passed as a string slice)
-    /// span.record(&quot;parting&quot;, &quot;goodbye world!&quot;);
+    /// span.record("parting", "goodbye world!");
     /// ```
     /// However, it may also be used to record a _new_ value for a field whose
     /// value was already recorded:
@@ -2767,8 +2767,8 @@
     /// use tracing::info_span;
     /// # fn do_something() -&gt; Result&lt;(), ()&gt; { Err(()) }
     ///
-    /// // Initially, let&#39;s assume that our attempt to do something is going okay...
-    /// let span = info_span!(&quot;doing_something&quot;, is_okay = true);
+    /// // Initially, let's assume that our attempt to do something is going okay...
+    /// let span = info_span!("doing_something", is_okay = true);
     /// let _e = span.enter();
     ///
     /// match do_something() {
@@ -2777,15 +2777,15 @@
     ///     }
     ///     Err(_) =&gt; {
     ///         // Things are no longer okay!
-    ///         span.record(&quot;is_okay&quot;, false);
+    ///         span.record("is_okay", false);
     ///     }
     /// }
     /// ```
     ///
-    /// &lt;pre class=&quot;ignore&quot; style=&quot;white-space:normal;font:inherit;&quot;&gt;
+    /// &lt;pre class="ignore" style="white-space:normal;font:inherit;"&gt;
     ///     &lt;strong&gt;Note&lt;/strong&gt;: The fields associated with a span are part
-    ///     of its &lt;a href=&quot;../struct.Metadata.html&quot;&gt;&lt;code&gt;Metadata&lt;/code&gt;&lt;/a&gt;.
-    ///     The &lt;a href=&quot;../struct.Metadata.html&quot;&gt;&lt;code&gt;Metadata&lt;/code&gt;&lt;/a&gt;
+    ///     of its &lt;a href="../struct.Metadata.html"&gt;&lt;code&gt;Metadata&lt;/code&gt;&lt;/a&gt;.
+    ///     The &lt;a href="../struct.Metadata.html"&gt;&lt;code&gt;Metadata&lt;/code&gt;&lt;/a&gt;
     ///     describing a particular span is constructed statically when the span
     ///     is created and cannot be extended later to add new fields. Therefore,
     ///     you cannot record a value for a field that was not specified when the
@@ -2795,21 +2795,21 @@
     /// ```
     /// use tracing::{trace_span, field};
     ///
-    /// // Create a span with two fields: `greeting`, with the value &quot;hello world&quot;, and
+    /// // Create a span with two fields: `greeting`, with the value "hello world", and
     /// // `parting`, without a value.
-    /// let span = trace_span!(&quot;my_span&quot;, greeting = &quot;hello world&quot;, parting = field::Empty);
+    /// let span = trace_span!("my_span", greeting = "hello world", parting = field::Empty);
     ///
     /// // ...
     ///
     /// // Now, you try to record a value for a new field, `new_field`, which was not
     /// // declared as `Empty` or populated when you created `span`.
-    /// // You won&#39;t get any error, but the assignment will have no effect!
-    /// span.record(&quot;new_field&quot;, &quot;interesting_value_you_really_need&quot;);
+    /// // You won't get any error, but the assignment will have no effect!
+    /// span.record("new_field", "interesting_value_you_really_need");
     ///
     /// // Instead, all fields that may be recorded after span creation should be declared up front,
     /// // using field::Empty when a value is not known, as we did for `parting`.
-    /// // This `record` call will indeed replace field::Empty with &quot;you will be remembered&quot;.
-    /// span.record(&quot;parting&quot;, &quot;you will be remembered&quot;);
+    /// // This `record` call will indeed replace field::Empty with "you will be remembered".
+    /// span.record("parting", "you will be remembered");
     /// ```
     ///
     /// [`field::Empty`]: super::field::Empty
@@ -2833,7 +2833,7 @@
     </span>}
 
     <span class="doccomment">/// Records all the fields in the provided `ValueSet`.
-    </span><span class="kw">pub fn </span>record_all(<span class="kw-2">&amp;</span><span class="self">self</span>, values: <span class="kw-2">&amp;</span>field::ValueSet&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="kw-2">&amp;</span><span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>record_all(<span class="kw-2">&amp;</span><span class="self">self</span>, values: <span class="kw-2">&amp;</span>field::ValueSet&lt;<span class="lifetime">'_</span>&gt;) -&gt; <span class="kw-2">&amp;</span><span class="self">Self </span>{
         <span class="kw">let </span>record = Record::new(values);
         <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref </span>inner) = <span class="self">self</span>.inner {
             inner.record(<span class="kw-2">&amp;</span>record);
@@ -2849,7 +2849,7 @@
                 <span class="self">self</span>.log(
                     target,
                     <span class="macro">level_to_log!</span>(<span class="kw-2">*</span>_meta.level()),
-                    <span class="macro">format_args!</span>(<span class="string">&quot;{};{}&quot;</span>, _meta.name(), <span class="kw">crate</span>::log::LogValueSet { values, is_first: <span class="bool-val">false </span>}),
+                    <span class="macro">format_args!</span>(<span class="string">"{};{}"</span>, _meta.name(), <span class="kw">crate</span>::log::LogValueSet { values, is_first: <span class="bool-val">false </span>}),
                 );
             }}
         }
@@ -2903,22 +2903,22 @@
     /// Setting a `follows_from` relationship with a `Span`:
     /// ```
     /// # use tracing::{span, Id, Level, Span};
-    /// let span1 = span!(Level::INFO, &quot;span_1&quot;);
-    /// let span2 = span!(Level::DEBUG, &quot;span_2&quot;);
+    /// let span1 = span!(Level::INFO, "span_1");
+    /// let span2 = span!(Level::DEBUG, "span_2");
     /// span2.follows_from(span1);
     /// ```
     ///
     /// Setting a `follows_from` relationship with the current span:
     /// ```
     /// # use tracing::{span, Id, Level, Span};
-    /// let span = span!(Level::INFO, &quot;hello!&quot;);
+    /// let span = span!(Level::INFO, "hello!");
     /// span.follows_from(Span::current());
     /// ```
     ///
     /// Setting a `follows_from` relationship with a `Span` reference:
     /// ```
     /// # use tracing::{span, Id, Level, Span};
-    /// let span = span!(Level::INFO, &quot;hello!&quot;);
+    /// let span = span!(Level::INFO, "hello!");
     /// let curr = Span::current();
     /// span.follows_from(&amp;curr);
     /// ```
@@ -2926,7 +2926,7 @@
     /// Setting a `follows_from` relationship with an `Id`:
     /// ```
     /// # use tracing::{span, Id, Level, Span};
-    /// let span = span!(Level::INFO, &quot;hello!&quot;);
+    /// let span = span!(Level::INFO, "hello!");
     /// let id = span.id();
     /// span.follows_from(id);
     /// ```
@@ -2939,19 +2939,19 @@
         <span class="self">self
     </span>}
 
-    <span class="doccomment">/// Returns this span&#39;s `Id`, if it is enabled.
+    <span class="doccomment">/// Returns this span's `Id`, if it is enabled.
     </span><span class="kw">pub fn </span>id(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Id&gt; {
         <span class="self">self</span>.inner.as_ref().map(Inner::id)
     }
 
-    <span class="doccomment">/// Returns this span&#39;s `Metadata`, if it is enabled.
-    </span><span class="kw">pub fn </span>metadata(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Metadata&lt;<span class="lifetime">&#39;static</span>&gt;&gt; {
+    <span class="doccomment">/// Returns this span's `Metadata`, if it is enabled.
+    </span><span class="kw">pub fn </span>metadata(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'static </span>Metadata&lt;<span class="lifetime">'static</span>&gt;&gt; {
         <span class="self">self</span>.meta
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;log&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"log"</span>)]
     #[inline]
-    </span><span class="kw">fn </span>log(<span class="kw-2">&amp;</span><span class="self">self</span>, target: <span class="kw-2">&amp;</span>str, level: log::Level, message: fmt::Arguments&lt;<span class="lifetime">&#39;_</span>&gt;) {
+    </span><span class="kw">fn </span>log(<span class="kw-2">&amp;</span><span class="self">self</span>, target: <span class="kw-2">&amp;</span>str, level: log::Level, message: fmt::Arguments&lt;<span class="lifetime">'_</span>&gt;) {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(meta) = <span class="self">self</span>.meta {
             <span class="kw">if </span><span class="macro">level_to_log!</span>(<span class="kw-2">*</span>meta.level()) &lt;= log::max_level() {
                 <span class="kw">let </span>logger = log::logger();
@@ -2964,7 +2964,7 @@
                                 .module_path(meta.module_path())
                                 .file(meta.file())
                                 .line(meta.line())
-                                .args(<span class="macro">format_args!</span>(<span class="string">&quot;{} span={}&quot;</span>, message, inner.id.into_u64()))
+                                .args(<span class="macro">format_args!</span>(<span class="string">"{} span={}"</span>, message, inner.id.into_u64()))
                                 .build(),
                         );
                     } <span class="kw">else </span>{
@@ -2983,7 +2983,7 @@
         }
     }
 
-    <span class="doccomment">/// Invokes a function with a reference to this span&#39;s ID and subscriber.
+    <span class="doccomment">/// Invokes a function with a reference to this span's ID and subscriber.
     ///
     /// if this span is enabled, the provided function is called, and the result is returned.
     /// If the span is disabled, the function is not called, and this method returns `None`
@@ -3013,46 +3013,46 @@
 }
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>Span {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        <span class="kw">let </span><span class="kw-2">mut </span>span = f.debug_struct(<span class="string">&quot;Span&quot;</span>);
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        <span class="kw">let </span><span class="kw-2">mut </span>span = f.debug_struct(<span class="string">"Span"</span>);
         <span class="kw">if let </span><span class="prelude-val">Some</span>(meta) = <span class="self">self</span>.meta {
-            span.field(<span class="string">&quot;name&quot;</span>, <span class="kw-2">&amp;</span>meta.name())
-                .field(<span class="string">&quot;level&quot;</span>, <span class="kw-2">&amp;</span>meta.level())
-                .field(<span class="string">&quot;target&quot;</span>, <span class="kw-2">&amp;</span>meta.target());
+            span.field(<span class="string">"name"</span>, <span class="kw-2">&amp;</span>meta.name())
+                .field(<span class="string">"level"</span>, <span class="kw-2">&amp;</span>meta.level())
+                .field(<span class="string">"target"</span>, <span class="kw-2">&amp;</span>meta.target());
 
             <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref </span>inner) = <span class="self">self</span>.inner {
-                span.field(<span class="string">&quot;id&quot;</span>, <span class="kw-2">&amp;</span>inner.id());
+                span.field(<span class="string">"id"</span>, <span class="kw-2">&amp;</span>inner.id());
             } <span class="kw">else </span>{
-                span.field(<span class="string">&quot;disabled&quot;</span>, <span class="kw-2">&amp;</span><span class="bool-val">true</span>);
+                span.field(<span class="string">"disabled"</span>, <span class="kw-2">&amp;</span><span class="bool-val">true</span>);
             }
 
             <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref </span>path) = meta.module_path() {
-                span.field(<span class="string">&quot;module_path&quot;</span>, <span class="kw-2">&amp;</span>path);
+                span.field(<span class="string">"module_path"</span>, <span class="kw-2">&amp;</span>path);
             }
 
             <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref </span>line) = meta.line() {
-                span.field(<span class="string">&quot;line&quot;</span>, <span class="kw-2">&amp;</span>line);
+                span.field(<span class="string">"line"</span>, <span class="kw-2">&amp;</span>line);
             }
 
             <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref </span>file) = meta.file() {
-                span.field(<span class="string">&quot;file&quot;</span>, <span class="kw-2">&amp;</span>file);
+                span.field(<span class="string">"file"</span>, <span class="kw-2">&amp;</span>file);
             }
         } <span class="kw">else </span>{
-            span.field(<span class="string">&quot;none&quot;</span>, <span class="kw-2">&amp;</span><span class="bool-val">true</span>);
+            span.field(<span class="string">"none"</span>, <span class="kw-2">&amp;</span><span class="bool-val">true</span>);
         }
 
         span.finish()
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Span&gt; <span class="kw">for </span><span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Id&gt; {
-    <span class="kw">fn </span>from(span: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Span) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>Span&gt; <span class="kw">for </span><span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>Id&gt; {
+    <span class="kw">fn </span>from(span: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Span) -&gt; <span class="self">Self </span>{
         span.inner.as_ref().map(|inner| <span class="kw-2">&amp;</span>inner.id)
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Span&gt; <span class="kw">for </span><span class="prelude-ty">Option</span>&lt;Id&gt; {
-    <span class="kw">fn </span>from(span: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Span) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>Span&gt; <span class="kw">for </span><span class="prelude-ty">Option</span>&lt;Id&gt; {
+    <span class="kw">fn </span>from(span: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Span) -&gt; <span class="self">Self </span>{
         span.inner.as_ref().map(Inner::id)
     }
 }
@@ -3063,14 +3063,14 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>EnteredSpan&gt; <span class="kw">for </span><span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Id&gt; {
-    <span class="kw">fn </span>from(span: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>EnteredSpan) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>EnteredSpan&gt; <span class="kw">for </span><span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>Id&gt; {
+    <span class="kw">fn </span>from(span: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>EnteredSpan) -&gt; <span class="self">Self </span>{
         span.inner.as_ref().map(|inner| <span class="kw-2">&amp;</span>inner.id)
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>EnteredSpan&gt; <span class="kw">for </span><span class="prelude-ty">Option</span>&lt;Id&gt; {
-    <span class="kw">fn </span>from(span: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>EnteredSpan) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>EnteredSpan&gt; <span class="kw">for </span><span class="prelude-ty">Option</span>&lt;Id&gt; {
+    <span class="kw">fn </span>from(span: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>EnteredSpan) -&gt; <span class="self">Self </span>{
         span.inner.as_ref().map(Inner::id)
     }
 }
@@ -3091,7 +3091,7 @@
                 <span class="self">self</span>.log(
                     LIFECYCLE_LOG_TARGET,
                     log::Level::Trace,
-                    <span class="macro">format_args!</span>(<span class="string">&quot;-- {};&quot;</span>, meta.name()),
+                    <span class="macro">format_args!</span>(<span class="string">"-- {};"</span>, meta.name()),
                 );
             }
         }}
@@ -3120,12 +3120,12 @@
         <span class="self">self</span>.subscriber.record_follows_from(<span class="kw-2">&amp;</span><span class="self">self</span>.id, from)
     }
 
-    <span class="doccomment">/// Returns the span&#39;s ID.
+    <span class="doccomment">/// Returns the span's ID.
     </span><span class="kw">fn </span>id(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Id {
         <span class="self">self</span>.id.clone()
     }
 
-    <span class="kw">fn </span>record(<span class="kw-2">&amp;</span><span class="self">self</span>, values: <span class="kw-2">&amp;</span>Record&lt;<span class="lifetime">&#39;_</span>&gt;) {
+    <span class="kw">fn </span>record(<span class="kw-2">&amp;</span><span class="self">self</span>, values: <span class="kw-2">&amp;</span>Record&lt;<span class="lifetime">'_</span>&gt;) {
         <span class="self">self</span>.subscriber.record(<span class="kw-2">&amp;</span><span class="self">self</span>.id, values)
     }
 
@@ -3161,7 +3161,7 @@
 <span class="comment">// ===== impl Entered =====
 
 </span><span class="kw">impl </span>EnteredSpan {
-    <span class="doccomment">/// Returns this span&#39;s `Id`, if it is enabled.
+    <span class="doccomment">/// Returns this span's `Id`, if it is enabled.
     </span><span class="kw">pub fn </span>id(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Id&gt; {
         <span class="self">self</span>.inner.as_ref().map(Inner::id)
     }
@@ -3185,7 +3185,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Drop <span class="kw">for </span>Entered&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Drop <span class="kw">for </span>Entered&lt;<span class="lifetime">'a</span>&gt; {
     <span class="attr">#[inline(always)]
     </span><span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="self">self</span>.span.do_exit()
@@ -3200,7 +3200,7 @@
 }
 
 <span class="doccomment">/// Technically, `EnteredSpan` _can_ implement both `Send` *and*
-/// `Sync` safely. It doesn&#39;t, because it has a `PhantomNotSend` field,
+/// `Sync` safely. It doesn't, because it has a `PhantomNotSend` field,
 /// specifically added in order to make it `!Send`.
 ///
 /// Sending an `EnteredSpan` guard between threads cannot cause memory unsafety.
@@ -3223,7 +3223,7 @@
 
 <span class="doccomment">/// # Safety
 ///
-/// Trivially safe, as `PhantomNotSend` doesn&#39;t have any API.
+/// Trivially safe, as `PhantomNotSend` doesn't have any API.
 </span><span class="kw">unsafe impl </span>Sync <span class="kw">for </span>PhantomNotSend {}
 
 <span class="attr">#[cfg(test)]
@@ -3235,13 +3235,13 @@
 
     <span class="kw">trait </span>AssertSync: Sync {}
     <span class="kw">impl </span>AssertSync <span class="kw">for </span>Span {}
-    <span class="kw">impl </span>AssertSync <span class="kw">for </span>Entered&lt;<span class="lifetime">&#39;_</span>&gt; {}
+    <span class="kw">impl </span>AssertSync <span class="kw">for </span>Entered&lt;<span class="lifetime">'_</span>&gt; {}
     <span class="kw">impl </span>AssertSync <span class="kw">for </span>EnteredSpan {}
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_record_backwards_compat() {
-        Span::current().record(<span class="string">&quot;some-key&quot;</span>, <span class="string">&quot;some text&quot;</span>);
-        Span::current().record(<span class="string">&quot;some-key&quot;</span>, <span class="bool-val">false</span>);
+        Span::current().record(<span class="string">"some-key"</span>, <span class="string">"some text"</span>);
+        Span::current().record(<span class="string">"some-key"</span>, <span class="bool-val">false</span>);
     }
 }
 </code></pre></div></section></main></body></html>

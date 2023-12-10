@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hyper-0.14.27/src/client/connect/http.rs`."><title>http.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="hyper" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hyper-0.14.27/src/client/connect/http.rs`."><title>http.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="hyper" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1025,7 +1025,7 @@
 
 <span class="kw">use </span><span class="kw">super</span>::dns::{<span class="self">self</span>, resolve, GaiResolver, Resolve};
 <span class="kw">use super</span>::{Connected, Connection};
-<span class="comment">//#[cfg(feature = &quot;runtime&quot;)] use super::dns::TokioThreadpoolGaiResolver;
+<span class="comment">//#[cfg(feature = "runtime")] use super::dns::TokioThreadpoolGaiResolver;
 
 </span><span class="doccomment">/// A connector for the `http` scheme.
 ///
@@ -1035,7 +1035,7 @@
 ///
 /// Sets the [`HttpInfo`](HttpInfo) value on responses, which includes
 /// transport information such as the remote socket address used.
-</span><span class="attr">#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;tcp&quot;</span>)))]
+</span><span class="attr">#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"tcp"</span>)))]
 #[derive(Clone)]
 </span><span class="kw">pub struct </span>HttpConnector&lt;R = GaiResolver&gt; {
     config: Arc&lt;Config&gt;,
@@ -1052,14 +1052,14 @@
 /// use hyper::client::{Client, connect::HttpInfo};
 ///
 /// let client = Client::new();
-/// let uri = Uri::from_static(&quot;http://example.com&quot;);
+/// let uri = Uri::from_static("http://example.com");
 ///
 /// let res = client.get(uri).await?;
 /// res
 ///     .extensions()
 ///     .get::&lt;HttpInfo&gt;()
 ///     .map(|info| {
-///         println!(&quot;remote addr = {}&quot;, info.remote_addr());
+///         println!("remote addr = {}", info.remote_addr());
 ///     });
 /// # Ok(())
 /// # }
@@ -1069,7 +1069,7 @@
 ///
 /// If a different connector is used besides [`HttpConnector`](HttpConnector),
 /// this value will not exist in the extensions. Consult that specific
-/// connector to see what &quot;extra&quot; information it might provide to responses.
+/// connector to see what "extra" information it might provide to responses.
 </span><span class="attr">#[derive(Clone, Debug)]
 </span><span class="kw">pub struct </span>HttpInfo {
     remote_addr: SocketAddr,
@@ -1100,7 +1100,7 @@
 }
 
 <span class="comment">/*
-#[cfg(feature = &quot;runtime&quot;)]
+#[cfg(feature = "runtime")]
 impl HttpConnector&lt;TokioThreadpoolGaiResolver&gt; {
     /// Construct a new HttpConnector using the `TokioThreadpoolGaiResolver`.
     ///
@@ -1190,7 +1190,7 @@ impl HttpConnector&lt;TokioThreadpoolGaiResolver&gt; {
         cfg.local_address_ipv6 = v6;
     }
 
-    <span class="doccomment">/// Set that all sockets are bound to the configured IPv4 or IPv6 address (depending on host&#39;s
+    <span class="doccomment">/// Set that all sockets are bound to the configured IPv4 or IPv6 address (depending on host's
     /// preferences) before connection.
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>set_local_addresses(<span class="kw-2">&amp;mut </span><span class="self">self</span>, addr_ipv4: Ipv4Addr, addr_ipv6: Ipv6Addr) {
@@ -1241,33 +1241,33 @@ impl HttpConnector&lt;TokioThreadpoolGaiResolver&gt; {
 
     </span><span class="kw">fn </span>config_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>Config {
         <span class="comment">// If the are HttpConnector clones, this will clone the inner
-        // config. So mutating the config won&#39;t ever affect previous
+        // config. So mutating the config won't ever affect previous
         // clones.
         </span>Arc::make_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>.config)
     }
 }
 
-<span class="kw">static </span>INVALID_NOT_HTTP: <span class="kw-2">&amp;</span>str = <span class="string">&quot;invalid URL, scheme is not http&quot;</span>;
-<span class="kw">static </span>INVALID_MISSING_SCHEME: <span class="kw-2">&amp;</span>str = <span class="string">&quot;invalid URL, scheme is missing&quot;</span>;
-<span class="kw">static </span>INVALID_MISSING_HOST: <span class="kw-2">&amp;</span>str = <span class="string">&quot;invalid URL, host is missing&quot;</span>;
+<span class="kw">static </span>INVALID_NOT_HTTP: <span class="kw-2">&amp;</span>str = <span class="string">"invalid URL, scheme is not http"</span>;
+<span class="kw">static </span>INVALID_MISSING_SCHEME: <span class="kw-2">&amp;</span>str = <span class="string">"invalid URL, scheme is missing"</span>;
+<span class="kw">static </span>INVALID_MISSING_HOST: <span class="kw-2">&amp;</span>str = <span class="string">"invalid URL, host is missing"</span>;
 
 <span class="comment">// R: Debug required for now to allow adding it to debug output later...
 </span><span class="kw">impl</span>&lt;R: fmt::Debug&gt; fmt::Debug <span class="kw">for </span>HttpConnector&lt;R&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        f.debug_struct(<span class="string">&quot;HttpConnector&quot;</span>).finish()
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        f.debug_struct(<span class="string">"HttpConnector"</span>).finish()
     }
 }
 
 <span class="kw">impl</span>&lt;R&gt; tower_service::Service&lt;Uri&gt; <span class="kw">for </span>HttpConnector&lt;R&gt;
 <span class="kw">where
-    </span>R: Resolve + Clone + Send + Sync + <span class="lifetime">&#39;static</span>,
+    </span>R: Resolve + Clone + Send + Sync + <span class="lifetime">'static</span>,
     R::Future: Send,
 {
     <span class="kw">type </span>Response = TcpStream;
     <span class="kw">type </span>Error = ConnectError;
     <span class="kw">type </span>Future = HttpConnecting&lt;R&gt;;
 
-    <span class="kw">fn </span>poll_ready(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt;&gt; {
+    <span class="kw">fn </span>poll_ready(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt;&gt; {
         <span class="macro">ready!</span>(<span class="self">self</span>.resolver.poll_ready(cx)).map_err(ConnectError::dns)<span class="question-mark">?</span>;
         Poll::Ready(<span class="prelude-val">Ok</span>(()))
     }
@@ -1281,9 +1281,9 @@ impl HttpConnector&lt;TokioThreadpoolGaiResolver&gt; {
     }
 }
 
-<span class="kw">fn </span>get_host_port&lt;<span class="lifetime">&#39;u</span>&gt;(config: <span class="kw-2">&amp;</span>Config, dst: <span class="kw-2">&amp;</span><span class="lifetime">&#39;u </span>Uri) -&gt; <span class="prelude-ty">Result</span>&lt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;u </span>str, u16), ConnectError&gt; {
+<span class="kw">fn </span>get_host_port&lt;<span class="lifetime">'u</span>&gt;(config: <span class="kw-2">&amp;</span>Config, dst: <span class="kw-2">&amp;</span><span class="lifetime">'u </span>Uri) -&gt; <span class="prelude-ty">Result</span>&lt;(<span class="kw-2">&amp;</span><span class="lifetime">'u </span>str, u16), ConnectError&gt; {
     <span class="macro">trace!</span>(
-        <span class="string">&quot;Http::connect; scheme={:?}, host={:?}, port={:?}&quot;</span>,
+        <span class="string">"Http::connect; scheme={:?}, host={:?}, port={:?}"</span>,
         dst.scheme(),
         dst.host(),
         dst.port(),
@@ -1334,7 +1334,7 @@ impl HttpConnector&lt;TokioThreadpoolGaiResolver&gt; {
         <span class="kw">let </span>config = <span class="kw-2">&amp;</span><span class="self">self</span>.config;
 
         <span class="kw">let </span>(host, port) = get_host_port(config, <span class="kw-2">&amp;</span>dst)<span class="question-mark">?</span>;
-        <span class="kw">let </span>host = host.trim_start_matches(<span class="string">&#39;[&#39;</span>).trim_end_matches(<span class="string">&#39;]&#39;</span>);
+        <span class="kw">let </span>host = host.trim_start_matches(<span class="string">'['</span>).trim_end_matches(<span class="string">']'</span>);
 
         <span class="comment">// If the host is already an IP addr (v4 or v6),
         // skip resolving the dns and start connecting right away.
@@ -1358,7 +1358,7 @@ impl HttpConnector&lt;TokioThreadpoolGaiResolver&gt; {
         <span class="kw">let </span>sock = c.connect().<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = sock.set_nodelay(config.nodelay) {
-            <span class="macro">warn!</span>(<span class="string">&quot;tcp set_nodelay error: {}&quot;</span>, e);
+            <span class="macro">warn!</span>(<span class="string">"tcp set_nodelay error: {}"</span>, e);
         }
 
         <span class="prelude-val">Ok</span>(sock)
@@ -1389,12 +1389,12 @@ impl HttpConnector&lt;TokioThreadpoolGaiResolver&gt; {
 }
 
 <span class="macro">pin_project! </span>{
-    <span class="comment">// Not publicly exported (so missing_docs doesn&#39;t trigger).
+    <span class="comment">// Not publicly exported (so missing_docs doesn't trigger).
     //
     // We return this `Future` instead of the `Pin&lt;Box&lt;dyn Future&gt;&gt;` directly
-    // so that users don&#39;t rely on it fitting in a `Pin&lt;Box&lt;dyn Future&gt;&gt;` slot
+    // so that users don't rely on it fitting in a `Pin&lt;Box&lt;dyn Future&gt;&gt;` slot
     // (and thus we can change the type in the future).
-    </span><span class="attr">#[must_use = <span class="string">&quot;futures do nothing unless polled&quot;</span>]
+    </span><span class="attr">#[must_use = <span class="string">"futures do nothing unless polled"</span>]
     #[allow(missing_debug_implementations)]
     </span><span class="kw">pub struct </span>HttpConnecting&lt;R&gt; {
         <span class="attr">#[pin]
@@ -1409,12 +1409,12 @@ impl HttpConnector&lt;TokioThreadpoolGaiResolver&gt; {
 <span class="kw">impl</span>&lt;R: Resolve&gt; Future <span class="kw">for </span>HttpConnecting&lt;R&gt; {
     <span class="kw">type </span>Output = ConnectResult;
 
-    <span class="kw">fn </span>poll(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
+    <span class="kw">fn </span>poll(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
         <span class="self">self</span>.project().fut.poll(cx)
     }
 }
 
-<span class="comment">// Not publicly exported (so missing_docs doesn&#39;t trigger).
+<span class="comment">// Not publicly exported (so missing_docs doesn't trigger).
 </span><span class="kw">pub struct </span>ConnectError {
     msg: Box&lt;str&gt;,
     cause: <span class="prelude-ty">Option</span>&lt;Box&lt;<span class="kw">dyn </span>StdError + Send + Sync&gt;&gt;,
@@ -1436,7 +1436,7 @@ impl HttpConnector&lt;TokioThreadpoolGaiResolver&gt; {
     <span class="kw">where
         </span>E: Into&lt;Box&lt;<span class="kw">dyn </span>StdError + Send + Sync&gt;&gt;,
     {
-        ConnectError::new(<span class="string">&quot;dns error&quot;</span>, cause)
+        ConnectError::new(<span class="string">"dns error"</span>, cause)
     }
 
     <span class="kw">fn </span>m&lt;S, E&gt;(msg: S) -&gt; <span class="kw">impl </span>FnOnce(E) -&gt; ConnectError
@@ -1449,9 +1449,9 @@ impl HttpConnector&lt;TokioThreadpoolGaiResolver&gt; {
 }
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>ConnectError {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref </span>cause) = <span class="self">self</span>.cause {
-            f.debug_tuple(<span class="string">&quot;ConnectError&quot;</span>)
+            f.debug_tuple(<span class="string">"ConnectError"</span>)
                 .field(<span class="kw-2">&amp;</span><span class="self">self</span>.msg)
                 .field(cause)
                 .finish()
@@ -1462,11 +1462,11 @@ impl HttpConnector&lt;TokioThreadpoolGaiResolver&gt; {
 }
 
 <span class="kw">impl </span>fmt::Display <span class="kw">for </span>ConnectError {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         f.write_str(<span class="kw-2">&amp;</span><span class="self">self</span>.msg)<span class="question-mark">?</span>;
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref </span>cause) = <span class="self">self</span>.cause {
-            <span class="macro">write!</span>(f, <span class="string">&quot;: {}&quot;</span>, cause)<span class="question-mark">?</span>;
+            <span class="macro">write!</span>(f, <span class="string">": {}"</span>, cause)<span class="question-mark">?</span>;
         }
 
         <span class="prelude-val">Ok</span>(())
@@ -1474,19 +1474,19 @@ impl HttpConnector&lt;TokioThreadpoolGaiResolver&gt; {
 }
 
 <span class="kw">impl </span>StdError <span class="kw">for </span>ConnectError {
-    <span class="kw">fn </span>source(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>(<span class="kw">dyn </span>StdError + <span class="lifetime">&#39;static</span>)&gt; {
+    <span class="kw">fn </span>source(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>(<span class="kw">dyn </span>StdError + <span class="lifetime">'static</span>)&gt; {
         <span class="self">self</span>.cause.as_ref().map(|e| <span class="kw-2">&amp;**</span>e <span class="kw">as _</span>)
     }
 }
 
-<span class="kw">struct </span>ConnectingTcp&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">struct </span>ConnectingTcp&lt;<span class="lifetime">'a</span>&gt; {
     preferred: ConnectingTcpRemote,
     fallback: <span class="prelude-ty">Option</span>&lt;ConnectingTcpFallback&gt;,
-    config: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Config,
+    config: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Config,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; ConnectingTcp&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>new(remote_addrs: dns::SocketAddrs, config: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Config) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; ConnectingTcp&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>new(remote_addrs: dns::SocketAddrs, config: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Config) -&gt; <span class="self">Self </span>{
         <span class="kw">if let </span><span class="prelude-val">Some</span>(fallback_timeout) = config.happy_eyeballs_timeout {
             <span class="kw">let </span>(preferred_addrs, fallback_addrs) = remote_addrs
                 .split_by_preference(config.local_address_ipv4, config.local_address_ipv6);
@@ -1541,14 +1541,14 @@ impl HttpConnector&lt;TokioThreadpoolGaiResolver&gt; {
     <span class="kw">async fn </span>connect(<span class="kw-2">&amp;mut </span><span class="self">self</span>, config: <span class="kw-2">&amp;</span>Config) -&gt; <span class="prelude-ty">Result</span>&lt;TcpStream, ConnectError&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>err = <span class="prelude-val">None</span>;
         <span class="kw">for </span>addr <span class="kw">in </span><span class="kw-2">&amp;mut </span><span class="self">self</span>.addrs {
-            <span class="macro">debug!</span>(<span class="string">&quot;connecting to {}&quot;</span>, addr);
+            <span class="macro">debug!</span>(<span class="string">"connecting to {}"</span>, addr);
             <span class="kw">match </span>connect(<span class="kw-2">&amp;</span>addr, config, <span class="self">self</span>.connect_timeout)<span class="question-mark">?</span>.<span class="kw">await </span>{
                 <span class="prelude-val">Ok</span>(tcp) =&gt; {
-                    <span class="macro">debug!</span>(<span class="string">&quot;connected to {}&quot;</span>, addr);
+                    <span class="macro">debug!</span>(<span class="string">"connected to {}"</span>, addr);
                     <span class="kw">return </span><span class="prelude-val">Ok</span>(tcp);
                 }
                 <span class="prelude-val">Err</span>(e) =&gt; {
-                    <span class="macro">trace!</span>(<span class="string">&quot;connect error for {}: {:?}&quot;</span>, addr, e);
+                    <span class="macro">trace!</span>(<span class="string">"connect error for {}: {:?}"</span>, addr, e);
                     err = <span class="prelude-val">Some</span>(e);
                 }
             }
@@ -1557,8 +1557,8 @@ impl HttpConnector&lt;TokioThreadpoolGaiResolver&gt; {
         <span class="kw">match </span>err {
             <span class="prelude-val">Some</span>(e) =&gt; <span class="prelude-val">Err</span>(e),
             <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Err</span>(ConnectError::new(
-                <span class="string">&quot;tcp connect error&quot;</span>,
-                std::io::Error::new(std::io::ErrorKind::NotConnected, <span class="string">&quot;Network unreachable&quot;</span>),
+                <span class="string">"tcp connect error"</span>,
+                std::io::Error::new(std::io::ErrorKind::NotConnected, <span class="string">"Network unreachable"</span>),
             )),
         }
     }
@@ -1597,7 +1597,7 @@ impl HttpConnector&lt;TokioThreadpoolGaiResolver&gt; {
     config: <span class="kw-2">&amp;</span>Config,
     connect_timeout: <span class="prelude-ty">Option</span>&lt;Duration&gt;,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw">impl </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;TcpStream, ConnectError&gt;&gt;, ConnectError&gt; {
-    <span class="comment">// TODO(eliza): if Tokio&#39;s `TcpSocket` gains support for setting the
+    <span class="comment">// TODO(eliza): if Tokio's `TcpSocket` gains support for setting the
     // keepalive timeout, it would be nice to use that instead of socket2,
     // and avoid the unsafe `into_raw_fd`/`from_raw_fd` dance...
     </span><span class="kw">use </span>socket2::{Domain, Protocol, Socket, TcpKeepalive, Type};
@@ -1605,18 +1605,18 @@ impl HttpConnector&lt;TokioThreadpoolGaiResolver&gt; {
 
     <span class="kw">let </span>domain = Domain::for_address(<span class="kw-2">*</span>addr);
     <span class="kw">let </span>socket = Socket::new(domain, Type::STREAM, <span class="prelude-val">Some</span>(Protocol::TCP))
-        .map_err(ConnectError::m(<span class="string">&quot;tcp open error&quot;</span>))<span class="question-mark">?</span>;
+        .map_err(ConnectError::m(<span class="string">"tcp open error"</span>))<span class="question-mark">?</span>;
 
     <span class="comment">// When constructing a Tokio `TcpSocket` from a raw fd/socket, the user is
     // responsible for ensuring O_NONBLOCK is set.
     </span>socket
         .set_nonblocking(<span class="bool-val">true</span>)
-        .map_err(ConnectError::m(<span class="string">&quot;tcp set_nonblocking error&quot;</span>))<span class="question-mark">?</span>;
+        .map_err(ConnectError::m(<span class="string">"tcp set_nonblocking error"</span>))<span class="question-mark">?</span>;
 
     <span class="kw">if let </span><span class="prelude-val">Some</span>(dur) = config.keep_alive_timeout {
         <span class="kw">let </span>conf = TcpKeepalive::new().with_time(dur);
         <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = socket.set_tcp_keepalive(<span class="kw-2">&amp;</span>conf) {
-            <span class="macro">warn!</span>(<span class="string">&quot;tcp set_keepalive error: {}&quot;</span>, e);
+            <span class="macro">warn!</span>(<span class="string">"tcp set_keepalive error: {}"</span>, e);
         }
     }
 
@@ -1626,7 +1626,7 @@ impl HttpConnector&lt;TokioThreadpoolGaiResolver&gt; {
         <span class="kw-2">&amp;</span>config.local_address_ipv4,
         <span class="kw-2">&amp;</span>config.local_address_ipv6,
     )
-    .map_err(ConnectError::m(<span class="string">&quot;tcp bind local error&quot;</span>))<span class="question-mark">?</span>;
+    .map_err(ConnectError::m(<span class="string">"tcp bind local error"</span>))<span class="question-mark">?</span>;
 
     <span class="attr">#[cfg(unix)]
     </span><span class="kw">let </span>socket = <span class="kw">unsafe </span>{
@@ -1649,19 +1649,19 @@ impl HttpConnector&lt;TokioThreadpoolGaiResolver&gt; {
 
     <span class="kw">if </span>config.reuse_address {
         <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = socket.set_reuseaddr(<span class="bool-val">true</span>) {
-            <span class="macro">warn!</span>(<span class="string">&quot;tcp set_reuse_address error: {}&quot;</span>, e);
+            <span class="macro">warn!</span>(<span class="string">"tcp set_reuse_address error: {}"</span>, e);
         }
     }
 
     <span class="kw">if let </span><span class="prelude-val">Some</span>(size) = config.send_buffer_size {
         <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = socket.set_send_buffer_size(size.try_into().unwrap_or(std::u32::MAX)) {
-            <span class="macro">warn!</span>(<span class="string">&quot;tcp set_buffer_size error: {}&quot;</span>, e);
+            <span class="macro">warn!</span>(<span class="string">"tcp set_buffer_size error: {}"</span>, e);
         }
     }
 
     <span class="kw">if let </span><span class="prelude-val">Some</span>(size) = config.recv_buffer_size {
         <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = socket.set_recv_buffer_size(size.try_into().unwrap_or(std::u32::MAX)) {
-            <span class="macro">warn!</span>(<span class="string">&quot;tcp set_recv_buffer_size error: {}&quot;</span>, e);
+            <span class="macro">warn!</span>(<span class="string">"tcp set_recv_buffer_size error: {}"</span>, e);
         }
     }
 
@@ -1675,11 +1675,11 @@ impl HttpConnector&lt;TokioThreadpoolGaiResolver&gt; {
             },
             <span class="prelude-val">None </span>=&gt; connect.<span class="kw">await</span>,
         }
-        .map_err(ConnectError::m(<span class="string">&quot;tcp connect error&quot;</span>))
+        .map_err(ConnectError::m(<span class="string">"tcp connect error"</span>))
     })
 }
 
-<span class="kw">impl </span>ConnectingTcp&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>ConnectingTcp&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">async fn </span>connect(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;TcpStream, ConnectError&gt; {
         <span class="kw">match </span><span class="self">self</span>.fallback {
             <span class="prelude-val">None </span>=&gt; <span class="self">self</span>.preferred.connect(<span class="self">self</span>.config).<span class="kw">await</span>,
@@ -1739,14 +1739,14 @@ impl HttpConnector&lt;TokioThreadpoolGaiResolver&gt; {
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_errors_enforce_http() {
-        <span class="kw">let </span>dst = <span class="string">&quot;https://example.domain/foo/bar?baz&quot;</span>.parse().unwrap();
+        <span class="kw">let </span>dst = <span class="string">"https://example.domain/foo/bar?baz"</span>.parse().unwrap();
         <span class="kw">let </span>connector = HttpConnector::new();
 
         <span class="kw">let </span>err = connect(connector, dst).<span class="kw">await</span>.unwrap_err();
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;*</span>err.msg, <span class="kw">super</span>::INVALID_NOT_HTTP);
     }
 
-    <span class="attr">#[cfg(any(target_os = <span class="string">&quot;linux&quot;</span>, target_os = <span class="string">&quot;macos&quot;</span>))]
+    <span class="attr">#[cfg(any(target_os = <span class="string">"linux"</span>, target_os = <span class="string">"macos"</span>))]
     </span><span class="kw">fn </span>get_local_ips() -&gt; (<span class="prelude-ty">Option</span>&lt;std::net::Ipv4Addr&gt;, <span class="prelude-ty">Option</span>&lt;std::net::Ipv6Addr&gt;) {
         <span class="kw">use </span>std::net::{IpAddr, TcpListener};
 
@@ -1774,7 +1774,7 @@ impl HttpConnector&lt;TokioThreadpoolGaiResolver&gt; {
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_errors_missing_scheme() {
-        <span class="kw">let </span>dst = <span class="string">&quot;example.domain&quot;</span>.parse().unwrap();
+        <span class="kw">let </span>dst = <span class="string">"example.domain"</span>.parse().unwrap();
         <span class="kw">let </span><span class="kw-2">mut </span>connector = HttpConnector::new();
         connector.enforce_http(<span class="bool-val">false</span>);
 
@@ -1782,17 +1782,17 @@ impl HttpConnector&lt;TokioThreadpoolGaiResolver&gt; {
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;*</span>err.msg, <span class="kw">super</span>::INVALID_MISSING_SCHEME);
     }
 
-    <span class="comment">// NOTE: pnet crate that we use in this test doesn&#39;t compile on Windows
-    </span><span class="attr">#[cfg(any(target_os = <span class="string">&quot;linux&quot;</span>, target_os = <span class="string">&quot;macos&quot;</span>))]
+    <span class="comment">// NOTE: pnet crate that we use in this test doesn't compile on Windows
+    </span><span class="attr">#[cfg(any(target_os = <span class="string">"linux"</span>, target_os = <span class="string">"macos"</span>))]
     #[tokio::test]
     </span><span class="kw">async fn </span>local_address() {
         <span class="kw">use </span>std::net::{IpAddr, TcpListener};
         <span class="kw">let _ </span>= pretty_env_logger::try_init();
 
         <span class="kw">let </span>(bind_ip_v4, bind_ip_v6) = get_local_ips();
-        <span class="kw">let </span>server4 = TcpListener::bind(<span class="string">&quot;127.0.0.1:0&quot;</span>).unwrap();
+        <span class="kw">let </span>server4 = TcpListener::bind(<span class="string">"127.0.0.1:0"</span>).unwrap();
         <span class="kw">let </span>port = server4.local_addr().unwrap().port();
-        <span class="kw">let </span>server6 = TcpListener::bind(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;[::1]:{}&quot;</span>, port)).unwrap();
+        <span class="kw">let </span>server6 = TcpListener::bind(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"[::1]:{}"</span>, port)).unwrap();
 
         <span class="kw">let </span>assert_client_ip = |dst: String, server: TcpListener, expected_ip: IpAddr| <span class="kw">async move </span>{
             <span class="kw">let </span><span class="kw-2">mut </span>connector = HttpConnector::new();
@@ -1812,16 +1812,16 @@ impl HttpConnector&lt;TokioThreadpoolGaiResolver&gt; {
         };
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(ip) = bind_ip_v4 {
-            assert_client_ip(<span class="macro">format!</span>(<span class="string">&quot;http://127.0.0.1:{}&quot;</span>, port), server4, ip.into()).<span class="kw">await</span>;
+            assert_client_ip(<span class="macro">format!</span>(<span class="string">"http://127.0.0.1:{}"</span>, port), server4, ip.into()).<span class="kw">await</span>;
         }
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(ip) = bind_ip_v6 {
-            assert_client_ip(<span class="macro">format!</span>(<span class="string">&quot;http://[::1]:{}&quot;</span>, port), server6, ip.into()).<span class="kw">await</span>;
+            assert_client_ip(<span class="macro">format!</span>(<span class="string">"http://[::1]:{}"</span>, port), server6, ip.into()).<span class="kw">await</span>;
         }
     }
 
     <span class="attr">#[test]
-    #[cfg_attr(not(feature = <span class="string">&quot;__internal_happy_eyeballs_tests&quot;</span>), ignore)]
+    #[cfg_attr(not(feature = <span class="string">"__internal_happy_eyeballs_tests"</span>), ignore)]
     </span><span class="kw">fn </span>client_happy_eyeballs() {
         <span class="kw">use </span>std::net::{IpAddr, Ipv4Addr, Ipv6Addr, TcpListener};
         <span class="kw">use </span>std::time::{Duration, Instant};
@@ -1830,9 +1830,9 @@ impl HttpConnector&lt;TokioThreadpoolGaiResolver&gt; {
         <span class="kw">use </span><span class="kw">super</span>::ConnectingTcp;
 
         <span class="kw">let _ </span>= pretty_env_logger::try_init();
-        <span class="kw">let </span>server4 = TcpListener::bind(<span class="string">&quot;127.0.0.1:0&quot;</span>).unwrap();
+        <span class="kw">let </span>server4 = TcpListener::bind(<span class="string">"127.0.0.1:0"</span>).unwrap();
         <span class="kw">let </span>addr = server4.local_addr().unwrap();
-        <span class="kw">let </span>_server6 = TcpListener::bind(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;[::1]:{}&quot;</span>, addr.port())).unwrap();
+        <span class="kw">let </span>_server6 = TcpListener::bind(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"[::1]:{}"</span>, addr.port())).unwrap();
         <span class="kw">let </span>rt = tokio::runtime::Builder::new_current_thread()
             .enable_all()
             .build()
@@ -1924,7 +1924,7 @@ impl HttpConnector&lt;TokioThreadpoolGaiResolver&gt; {
         ];
 
         <span class="comment">// Scenarios for IPv6 -&gt; IPv4 fallback require that host can access IPv6 network.
-        // Otherwise, connection to &quot;slow&quot; IPv6 address will error-out immediately.
+        // Otherwise, connection to "slow" IPv6 address will error-out immediately.
         </span><span class="kw">let </span>ipv6_accessible = measure_connect(slow_ipv6_addr()).<span class="number">0</span>;
 
         <span class="kw">for </span><span class="kw-2">&amp;</span>(hosts, family, timeout, needs_ipv6_access) <span class="kw">in </span>scenarios {

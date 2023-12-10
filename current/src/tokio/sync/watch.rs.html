@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/sync/watch.rs`."><title>watch.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/sync/watch.rs`."><title>watch.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1386,7 +1386,7 @@
 <a href="#1386" id="1386">1386</a>
 <a href="#1387" id="1387">1387</a>
 <a href="#1388" id="1388">1388</a>
-</pre></div><pre class="rust"><code><span class="attr">#![cfg_attr(not(feature = <span class="string">&quot;sync&quot;</span>), allow(dead_code, unreachable_pub))]
+</pre></div><pre class="rust"><code><span class="attr">#![cfg_attr(not(feature = <span class="string">"sync"</span>), allow(dead_code, unreachable_pub))]
 
 </span><span class="doccomment">//! A single-producer, multi-consumer channel that only retains the *last* sent
 //! value.
@@ -1440,7 +1440,7 @@
 //!
 //! If the receiver is only interested in the current value, and does not intend
 //! to wait for changes, then [`Receiver::borrow()`] can be used. It may be more
-//! convenient to use [`borrow`](Receiver::borrow) since it&#39;s an `&amp;self`
+//! convenient to use [`borrow`](Receiver::borrow) since it's an `&amp;self`
 //! method---[`borrow_and_update`](Receiver::borrow_and_update) requires `&amp;mut
 //! self`.
 //!
@@ -1453,13 +1453,13 @@
 //! use tokio::time::{Duration, sleep};
 //!
 //! # async fn dox() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
-//! let (tx, mut rx) = watch::channel(&quot;hello&quot;);
+//! let (tx, mut rx) = watch::channel("hello");
 //!
 //! tokio::spawn(async move {
-//!     // Use the equivalent of a &quot;do-while&quot; loop so the initial value is
+//!     // Use the equivalent of a "do-while" loop so the initial value is
 //!     // processed before awaiting the `changed()` future.
 //!     loop {
-//!         println!(&quot;{}! &quot;, *rx.borrow_and_update());
+//!         println!("{}! ", *rx.borrow_and_update());
 //!         if rx.changed().await.is_err() {
 //!             break;
 //!         }
@@ -1467,7 +1467,7 @@
 //! });
 //!
 //! sleep(Duration::from_millis(100)).await;
-//! tx.send(&quot;world&quot;)?;
+//! tx.send("world")?;
 //! # Ok(())
 //! # }
 //! ```
@@ -1560,12 +1560,12 @@
 /// ```
 /// &lt;/details&gt;
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>Ref&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    inner: RwLockReadGuard&lt;<span class="lifetime">&#39;a</span>, T&gt;,
+</span><span class="kw">pub struct </span>Ref&lt;<span class="lifetime">'a</span>, T&gt; {
+    inner: RwLockReadGuard&lt;<span class="lifetime">'a</span>, T&gt;,
     has_changed: bool,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; Ref&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; Ref&lt;<span class="lifetime">'a</span>, T&gt; {
     <span class="doccomment">/// Indicates if the borrowed value is considered as _changed_ since the last
     /// time it has been marked as seen.
     ///
@@ -1580,9 +1580,9 @@
     ///
     /// #[tokio::main]
     /// async fn main() {
-    ///     let (tx, mut rx) = watch::channel(&quot;hello&quot;);
+    ///     let (tx, mut rx) = watch::channel("hello");
     ///
-    ///     tx.send(&quot;goodbye&quot;).unwrap();
+    ///     tx.send("goodbye").unwrap();
     ///     // The sender does never consider the value as changed.
     ///     assert!(!tx.borrow().has_changed());
     ///
@@ -1592,13 +1592,13 @@
     ///     // Even if the sender has already been dropped...
     ///     assert!(rx.has_changed().is_err());
     ///     // ...the modified value is still readable and detected as changed.
-    ///     assert_eq!(*rx.borrow(), &quot;goodbye&quot;);
+    ///     assert_eq!(*rx.borrow(), "goodbye");
     ///     assert!(rx.borrow().has_changed());
     ///
     ///     // Read the changed value and mark it as seen.
     ///     {
     ///         let received = rx.borrow_and_update();
-    ///         assert_eq!(*received, &quot;goodbye&quot;);
+    ///         assert_eq!(*received, "goodbye");
     ///         assert!(received.has_changed());
     ///         // Release the read lock when leaving this scope.
     ///     }
@@ -1619,7 +1619,7 @@
 
     <span class="doccomment">/// The current version.
     ///
-    /// The lowest bit represents a &quot;closed&quot; state. The rest of the bits
+    /// The lowest bit represents a "closed" state. The rest of the bits
     /// represent the current version.
     </span>state: AtomicState,
 
@@ -1634,13 +1634,13 @@
 }
 
 <span class="kw">impl</span>&lt;T: fmt::Debug&gt; fmt::Debug <span class="kw">for </span>Shared&lt;T&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         <span class="kw">let </span>state = <span class="self">self</span>.state.load();
-        f.debug_struct(<span class="string">&quot;Shared&quot;</span>)
-            .field(<span class="string">&quot;value&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.value)
-            .field(<span class="string">&quot;version&quot;</span>, <span class="kw-2">&amp;</span>state.version())
-            .field(<span class="string">&quot;is_closed&quot;</span>, <span class="kw-2">&amp;</span>state.is_closed())
-            .field(<span class="string">&quot;ref_count_rx&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.ref_count_rx)
+        f.debug_struct(<span class="string">"Shared"</span>)
+            .field(<span class="string">"value"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.value)
+            .field(<span class="string">"version"</span>, <span class="kw-2">&amp;</span>state.version())
+            .field(<span class="string">"is_closed"</span>, <span class="kw-2">&amp;</span>state.is_closed())
+            .field(<span class="string">"ref_count_rx"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.ref_count_rx)
             .finish()
     }
 }
@@ -1658,14 +1658,14 @@
     <span class="comment">// ===== impl SendError =====
 
     </span><span class="kw">impl</span>&lt;T&gt; fmt::Debug <span class="kw">for </span>SendError&lt;T&gt; {
-        <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-            f.debug_struct(<span class="string">&quot;SendError&quot;</span>).finish_non_exhaustive()
+        <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+            f.debug_struct(<span class="string">"SendError"</span>).finish_non_exhaustive()
         }
     }
 
     <span class="kw">impl</span>&lt;T&gt; fmt::Display <span class="kw">for </span>SendError&lt;T&gt; {
-        <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-            <span class="macro">write!</span>(fmt, <span class="string">&quot;channel closed&quot;</span>)
+        <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+            <span class="macro">write!</span>(fmt, <span class="string">"channel closed"</span>)
         }
     }
 
@@ -1678,8 +1678,8 @@
     <span class="comment">// ===== impl RecvError =====
 
     </span><span class="kw">impl </span>fmt::Display <span class="kw">for </span>RecvError {
-        <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-            <span class="macro">write!</span>(fmt, <span class="string">&quot;channel closed&quot;</span>)
+        <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+            <span class="macro">write!</span>(fmt, <span class="string">"channel closed"</span>)
         }
     }
 
@@ -1702,7 +1702,7 @@
     // circular access.
 
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">struct </span>BigNotify {
-        <span class="attr">#[cfg(not(all(not(loom), feature = <span class="string">&quot;sync&quot;</span>, any(feature = <span class="string">&quot;rt&quot;</span>, feature = <span class="string">&quot;macros&quot;</span>))))]
+        <span class="attr">#[cfg(not(all(not(loom), feature = <span class="string">"sync"</span>, any(feature = <span class="string">"rt"</span>, feature = <span class="string">"macros"</span>))))]
         </span>next: std::sync::atomic::AtomicUsize,
         inner: [Notify; <span class="number">8</span>],
     }
@@ -1712,8 +1712,8 @@
             <span class="self">Self </span>{
                 <span class="attr">#[cfg(not(all(
                     not(loom),
-                    feature = <span class="string">&quot;sync&quot;</span>,
-                    any(feature = <span class="string">&quot;rt&quot;</span>, feature = <span class="string">&quot;macros&quot;</span>)
+                    feature = <span class="string">"sync"</span>,
+                    any(feature = <span class="string">"rt"</span>, feature = <span class="string">"macros"</span>)
                 )))]
                 </span>next: std::sync::atomic::AtomicUsize::new(<span class="number">0</span>),
                 inner: Default::default(),
@@ -1727,15 +1727,15 @@
         }
 
         <span class="doccomment">/// This function implements the case where randomness is not available.
-        </span><span class="attr">#[cfg(not(all(not(loom), feature = <span class="string">&quot;sync&quot;</span>, any(feature = <span class="string">&quot;rt&quot;</span>, feature = <span class="string">&quot;macros&quot;</span>))))]
-        </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>notified(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Notified&lt;<span class="lifetime">&#39;_</span>&gt; {
+        </span><span class="attr">#[cfg(not(all(not(loom), feature = <span class="string">"sync"</span>, any(feature = <span class="string">"rt"</span>, feature = <span class="string">"macros"</span>))))]
+        </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>notified(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Notified&lt;<span class="lifetime">'_</span>&gt; {
             <span class="kw">let </span>i = <span class="self">self</span>.next.fetch_add(<span class="number">1</span>, std::sync::atomic::Ordering::Relaxed) % <span class="number">8</span>;
             <span class="self">self</span>.inner[i].notified()
         }
 
         <span class="doccomment">/// This function implements the case where randomness is available.
-        </span><span class="attr">#[cfg(all(not(loom), feature = <span class="string">&quot;sync&quot;</span>, any(feature = <span class="string">&quot;rt&quot;</span>, feature = <span class="string">&quot;macros&quot;</span>)))]
-        </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>notified(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Notified&lt;<span class="lifetime">&#39;_</span>&gt; {
+        </span><span class="attr">#[cfg(all(not(loom), feature = <span class="string">"sync"</span>, any(feature = <span class="string">"rt"</span>, feature = <span class="string">"macros"</span>)))]
+        </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>notified(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Notified&lt;<span class="lifetime">'_</span>&gt; {
             <span class="kw">let </span>i = <span class="kw">crate</span>::runtime::context::thread_rng_n(<span class="number">8</span>) <span class="kw">as </span>usize;
             <span class="self">self</span>.inner[i].notified()
         }
@@ -1832,7 +1832,7 @@
     }
 }
 
-<span class="doccomment">/// Creates a new watch channel, returning the &quot;send&quot; and &quot;receive&quot; handles.
+<span class="doccomment">/// Creates a new watch channel, returning the "send" and "receive" handles.
 ///
 /// All values sent by [`Sender`] will become visible to the [`Receiver`] handles.
 /// Only the last value sent is made available to the [`Receiver`] half. All
@@ -1847,13 +1847,13 @@
 /// use tokio::time::{Duration, sleep};
 ///
 /// # async fn dox() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
-/// let (tx, mut rx) = watch::channel(&quot;hello&quot;);
+/// let (tx, mut rx) = watch::channel("hello");
 ///
 /// tokio::spawn(async move {
-///     // Use the equivalent of a &quot;do-while&quot; loop so the initial value is
+///     // Use the equivalent of a "do-while" loop so the initial value is
 ///     // processed before awaiting the `changed()` future.
 ///     loop {
-///         println!(&quot;{}! &quot;, *rx.borrow_and_update());
+///         println!("{}! ", *rx.borrow_and_update());
 ///         if rx.changed().await.is_err() {
 ///             break;
 ///         }
@@ -1861,7 +1861,7 @@
 /// });
 ///
 /// sleep(Duration::from_millis(100)).await;
-/// tx.send(&quot;world&quot;)?;
+/// tx.send("world")?;
 /// # Ok(())
 /// # }
 /// ```
@@ -1939,10 +1939,10 @@
     /// ```
     /// use tokio::sync::watch;
     ///
-    /// let (_, rx) = watch::channel(&quot;hello&quot;);
-    /// assert_eq!(*rx.borrow(), &quot;hello&quot;);
+    /// let (_, rx) = watch::channel("hello");
+    /// assert_eq!(*rx.borrow(), "hello");
     /// ```
-    </span><span class="kw">pub fn </span>borrow(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Ref&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+    </span><span class="kw">pub fn </span>borrow(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Ref&lt;<span class="lifetime">'_</span>, T&gt; {
         <span class="kw">let </span>inner = <span class="self">self</span>.shared.value.read().unwrap();
 
         <span class="comment">// After obtaining a read-lock no concurrent writes could occur
@@ -1989,7 +1989,7 @@
     ///
     /// [`changed`]: Receiver::changed
     /// [`borrow`]: Receiver::borrow
-    </span><span class="kw">pub fn </span>borrow_and_update(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; Ref&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+    </span><span class="kw">pub fn </span>borrow_and_update(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; Ref&lt;<span class="lifetime">'_</span>, T&gt; {
         <span class="kw">let </span>inner = <span class="self">self</span>.shared.value.read().unwrap();
 
         <span class="comment">// After obtaining a read-lock no concurrent writes could occur
@@ -2018,12 +2018,12 @@
     ///
     /// #[tokio::main]
     /// async fn main() {
-    ///     let (tx, mut rx) = watch::channel(&quot;hello&quot;);
+    ///     let (tx, mut rx) = watch::channel("hello");
     ///
-    ///     tx.send(&quot;goodbye&quot;).unwrap();
+    ///     tx.send("goodbye").unwrap();
     ///
     ///     assert!(rx.has_changed().unwrap());
-    ///     assert_eq!(*rx.borrow_and_update(), &quot;goodbye&quot;);
+    ///     assert_eq!(*rx.borrow_and_update(), "goodbye");
     ///
     ///     // The value has been marked as seen
     ///     assert!(!rx.has_changed().unwrap());
@@ -2086,14 +2086,14 @@
     ///
     /// #[tokio::main]
     /// async fn main() {
-    ///     let (tx, mut rx) = watch::channel(&quot;hello&quot;);
+    ///     let (tx, mut rx) = watch::channel("hello");
     ///
     ///     tokio::spawn(async move {
-    ///         tx.send(&quot;goodbye&quot;).unwrap();
+    ///         tx.send("goodbye").unwrap();
     ///     });
     ///
     ///     assert!(rx.changed().await.is_ok());
-    ///     assert_eq!(*rx.borrow_and_update(), &quot;goodbye&quot;);
+    ///     assert_eq!(*rx.borrow_and_update(), "goodbye");
     ///
     ///     // The `tx` handle has been dropped
     ///     assert!(rx.changed().await.is_err());
@@ -2146,9 +2146,9 @@
     /// #[tokio::main]
     ///
     /// async fn main() {
-    ///     let (tx, _rx) = watch::channel(&quot;hello&quot;);
+    ///     let (tx, _rx) = watch::channel("hello");
     ///
-    ///     tx.send(&quot;goodbye&quot;).unwrap();
+    ///     tx.send("goodbye").unwrap();
     ///
     ///     // here we subscribe to a second receiver
     ///     // now in case of using `changed` we would have
@@ -2159,14 +2159,14 @@
     ///     // in place of changed we have use `wait_for`
     ///     // which would automatically check the current value
     ///     // and wait for changes until the closure returns true.
-    ///     assert!(rx2.wait_for(|val| *val == &quot;goodbye&quot;).await.is_ok());
-    ///     assert_eq!(*rx2.borrow(), &quot;goodbye&quot;);
+    ///     assert!(rx2.wait_for(|val| *val == "goodbye").await.is_ok());
+    ///     assert_eq!(*rx2.borrow(), "goodbye");
     /// }
     /// ```
     </span><span class="kw">pub async fn </span>wait_for(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         <span class="kw-2">mut </span>f: <span class="kw">impl </span>FnMut(<span class="kw-2">&amp;</span>T) -&gt; bool,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Ref&lt;<span class="lifetime">&#39;_</span>, T&gt;, error::RecvError&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Ref&lt;<span class="lifetime">'_</span>, T&gt;, error::RecvError&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>closed = <span class="bool-val">false</span>;
         <span class="kw">loop </span>{
             {
@@ -2258,7 +2258,7 @@
 
     <span class="kw">loop </span>{
         <span class="comment">// In order to avoid a race condition, we first request a notification,
-        // **then** check the current value&#39;s version. If a new version exists,
+        // **then** check the current value's version. If a new version exists,
         // the notification request is dropped.
         </span><span class="kw">let </span>notified = shared.notify_rx.notified();
 
@@ -2318,7 +2318,7 @@
     /// This method fails if the channel is closed, which is the case when
     /// every receiver has been dropped. It is possible to reopen the channel
     /// using the [`subscribe`] method. However, when `send` fails, the value
-    /// isn&#39;t made available for future receivers (but returned with the
+    /// isn't made available for future receivers (but returned with the
     /// [`SendError`]).
     ///
     /// To always make a new value available for future receivers, even if no
@@ -2332,7 +2332,7 @@
     /// [`send_modify`]: Sender::send_modify
     /// [`send_replace`]: Sender::send_replace
     </span><span class="kw">pub fn </span>send(<span class="kw-2">&amp;</span><span class="self">self</span>, value: T) -&gt; <span class="prelude-ty">Result</span>&lt;(), error::SendError&lt;T&gt;&gt; {
-        <span class="comment">// This is pretty much only useful as a hint anyway, so synchronization isn&#39;t critical.
+        <span class="comment">// This is pretty much only useful as a hint anyway, so synchronization isn't critical.
         </span><span class="kw">if </span><span class="number">0 </span>== <span class="self">self</span>.receiver_count() {
             <span class="kw">return </span><span class="prelude-val">Err</span>(error::SendError(value));
         }
@@ -2451,7 +2451,7 @@
             <span class="kw">match </span>result {
                 <span class="prelude-val">Ok</span>(modified) =&gt; {
                     <span class="kw">if </span>!modified {
-                        <span class="comment">// Abort, i.e. don&#39;t notify receivers if unmodified
+                        <span class="comment">// Abort, i.e. don't notify receivers if unmodified
                         </span><span class="kw">return </span><span class="bool-val">false</span>;
                     }
                     <span class="comment">// Continue if modified
@@ -2517,10 +2517,10 @@
     /// ```
     /// use tokio::sync::watch;
     ///
-    /// let (tx, _) = watch::channel(&quot;hello&quot;);
-    /// assert_eq!(*tx.borrow(), &quot;hello&quot;);
+    /// let (tx, _) = watch::channel("hello");
+    /// assert_eq!(*tx.borrow(), "hello");
     /// ```
-    </span><span class="kw">pub fn </span>borrow(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Ref&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+    </span><span class="kw">pub fn </span>borrow(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Ref&lt;<span class="lifetime">'_</span>, T&gt; {
         <span class="kw">let </span>inner = <span class="self">self</span>.shared.value.read().unwrap();
 
         <span class="comment">// The sender/producer always sees the current version
@@ -2562,7 +2562,7 @@
     ///
     /// #[tokio::main]
     /// async fn main() {
-    ///     let (tx, rx) = watch::channel(&quot;hello&quot;);
+    ///     let (tx, rx) = watch::channel("hello");
     ///
     ///     tokio::spawn(async move {
     ///         // use `rx`
@@ -2571,7 +2571,7 @@
     ///
     ///     // Waits for `rx` to drop
     ///     tx.closed().await;
-    ///     println!(&quot;the `rx` handles dropped&quot;)
+    ///     println!("the `rx` handles dropped")
     /// }
     /// ```
     </span><span class="kw">pub async fn </span>closed(<span class="kw-2">&amp;</span><span class="self">self</span>) {
@@ -2663,7 +2663,7 @@
     ///
     /// #[tokio::main]
     /// async fn main() {
-    ///     let (tx, rx1) = watch::channel(&quot;hello&quot;);
+    ///     let (tx, rx1) = watch::channel("hello");
     ///
     ///     assert_eq!(1, tx.receiver_count());
     ///
@@ -2686,7 +2686,7 @@
 
 <span class="comment">// ===== impl Ref =====
 
-</span><span class="kw">impl</span>&lt;T&gt; ops::Deref <span class="kw">for </span>Ref&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+</span><span class="kw">impl</span>&lt;T&gt; ops::Deref <span class="kw">for </span>Ref&lt;<span class="lifetime">'_</span>, T&gt; {
     <span class="kw">type </span>Target = T;
 
     <span class="kw">fn </span>deref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>T {

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/io/poll_evented.rs`."><title>poll_evented.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/io/poll_evented.rs`."><title>poll_evented.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -275,7 +275,7 @@
     /// [`std::io::Write`] and associate it with a reactor that will drive it.
     ///
     /// Once the [`mio::event::Source`] type is wrapped by `PollEvented`, it can be
-    /// used from within the future&#39;s execution model. As such, the
+    /// used from within the future's execution model. As such, the
     /// `PollEvented` type provides [`AsyncRead`] and [`AsyncWrite`]
     /// implementations using the underlying I/O resource as well as readiness
     /// events provided by the reactor.
@@ -283,7 +283,7 @@
     /// **Note**: While `PollEvented` is `Sync` (if the underlying I/O type is
     /// `Sync`), the caller must ensure that there are at most two tasks that
     /// use a `PollEvented` instance concurrently. One for reading and one for
-    /// writing. While violating this requirement is &quot;safe&quot; from a Rust memory
+    /// writing. While violating this requirement is "safe" from a Rust memory
     /// model point of view, it will result in unexpected behavior in the form
     /// of lost notifications and tasks hanging.
     ///
@@ -342,7 +342,7 @@
     /// from a future driven by a tokio runtime, otherwise runtime can be set
     /// explicitly with [`Runtime::enter`](crate::runtime::Runtime::enter) function.
     </span><span class="attr">#[track_caller]
-    #[cfg_attr(feature = <span class="string">&quot;signal&quot;</span>, allow(unused))]
+    #[cfg_attr(feature = <span class="string">"signal"</span>, allow(unused))]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(io: E) -&gt; io::Result&lt;<span class="self">Self</span>&gt; {
         PollEvented::new_with_interest(io, Interest::READABLE | Interest::WRITABLE)
     }
@@ -363,7 +363,7 @@
     /// explicitly with [`Runtime::enter`](crate::runtime::Runtime::enter)
     /// function.
     </span><span class="attr">#[track_caller]
-    #[cfg_attr(feature = <span class="string">&quot;signal&quot;</span>, allow(unused))]
+    #[cfg_attr(feature = <span class="string">"signal"</span>, allow(unused))]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new_with_interest(io: E, interest: Interest) -&gt; io::Result&lt;<span class="self">Self</span>&gt; {
         <span class="self">Self</span>::new_with_interest_and_handle(io, interest, scheduler::Handle::current())
     }
@@ -382,35 +382,35 @@
     }
 
     <span class="doccomment">/// Returns a reference to the registration.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;net&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"net"</span>)]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>registration(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Registration {
         <span class="kw-2">&amp;</span><span class="self">self</span>.registration
     }
 
     <span class="doccomment">/// Deregisters the inner io from the registration and returns a Result containing the inner io.
-    </span><span class="attr">#[cfg(any(feature = <span class="string">&quot;net&quot;</span>, feature = <span class="string">&quot;process&quot;</span>))]
+    </span><span class="attr">#[cfg(any(feature = <span class="string">"net"</span>, feature = <span class="string">"process"</span>))]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>into_inner(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; io::Result&lt;E&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>inner = <span class="self">self</span>.io.take().unwrap(); <span class="comment">// As io shouldn&#39;t ever be None, just unwrap here.
+        <span class="kw">let </span><span class="kw-2">mut </span>inner = <span class="self">self</span>.io.take().unwrap(); <span class="comment">// As io shouldn't ever be None, just unwrap here.
         </span><span class="self">self</span>.registration.deregister(<span class="kw-2">&amp;mut </span>inner)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(inner)
     }
 }
 
 <span class="macro">feature! </span>{
-    <span class="attr">#![any(feature = <span class="string">&quot;net&quot;</span>, all(unix, feature = <span class="string">&quot;process&quot;</span>))]
+    <span class="attr">#![any(feature = <span class="string">"net"</span>, all(unix, feature = <span class="string">"process"</span>))]
 
     </span><span class="kw">use </span><span class="kw">crate</span>::io::ReadBuf;
     <span class="kw">use </span>std::task::{Context, Poll};
 
     <span class="kw">impl</span>&lt;E: Source&gt; PollEvented&lt;E&gt; {
         <span class="comment">// Safety: The caller must ensure that `E` can read into uninitialized memory
-        </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">unsafe fn </span>poll_read&lt;<span class="lifetime">&#39;a</span>&gt;(
-            <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>,
-            cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;,
-            buf: <span class="kw-2">&amp;mut </span>ReadBuf&lt;<span class="lifetime">&#39;_</span>&gt;,
+        </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">unsafe fn </span>poll_read&lt;<span class="lifetime">'a</span>&gt;(
+            <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>,
+            cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;,
+            buf: <span class="kw-2">&amp;mut </span>ReadBuf&lt;<span class="lifetime">'_</span>&gt;,
         ) -&gt; Poll&lt;io::Result&lt;()&gt;&gt;
         <span class="kw">where
-            </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>E: io::Read + <span class="lifetime">&#39;a</span>,
+            </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>E: io::Read + <span class="lifetime">'a</span>,
         {
             <span class="kw">use </span>std::io::Read;
 
@@ -444,9 +444,9 @@
             }
         }
 
-        <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>poll_write&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;, buf: <span class="kw-2">&amp;</span>[u8]) -&gt; Poll&lt;io::Result&lt;usize&gt;&gt;
+        <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>poll_write&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, buf: <span class="kw-2">&amp;</span>[u8]) -&gt; Poll&lt;io::Result&lt;usize&gt;&gt;
         <span class="kw">where
-            </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>E: io::Write + <span class="lifetime">&#39;a</span>,
+            </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>E: io::Write + <span class="lifetime">'a</span>,
         {
             <span class="kw">use </span>std::io::Write;
 
@@ -473,14 +473,14 @@
             }
         }
 
-        <span class="attr">#[cfg(any(feature = <span class="string">&quot;net&quot;</span>, feature = <span class="string">&quot;process&quot;</span>))]
-        </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>poll_write_vectored&lt;<span class="lifetime">&#39;a</span>&gt;(
-            <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>,
-            cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;,
-            bufs: <span class="kw-2">&amp;</span>[io::IoSlice&lt;<span class="lifetime">&#39;_</span>&gt;],
+        <span class="attr">#[cfg(any(feature = <span class="string">"net"</span>, feature = <span class="string">"process"</span>))]
+        </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>poll_write_vectored&lt;<span class="lifetime">'a</span>&gt;(
+            <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>,
+            cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;,
+            bufs: <span class="kw-2">&amp;</span>[io::IoSlice&lt;<span class="lifetime">'_</span>&gt;],
         ) -&gt; Poll&lt;io::Result&lt;usize&gt;&gt;
         <span class="kw">where
-            </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>E: io::Write + <span class="lifetime">&#39;a</span>,
+            </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>E: io::Write + <span class="lifetime">'a</span>,
         {
             <span class="kw">use </span>std::io::Write;
             <span class="self">self</span>.registration.poll_write_io(cx, || <span class="self">self</span>.io.as_ref().unwrap().write_vectored(bufs))
@@ -501,8 +501,8 @@
 }
 
 <span class="kw">impl</span>&lt;E: Source + fmt::Debug&gt; fmt::Debug <span class="kw">for </span>PollEvented&lt;E&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        f.debug_struct(<span class="string">&quot;PollEvented&quot;</span>).field(<span class="string">&quot;io&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.io).finish()
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        f.debug_struct(<span class="string">"PollEvented"</span>).field(<span class="string">"io"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.io).finish()
     }
 }
 

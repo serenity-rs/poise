@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/runtime/coop.rs`."><title>coop.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/runtime/coop.rs`."><title>coop.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -321,7 +321,7 @@
 <a href="#321" id="321">321</a>
 <a href="#322" id="322">322</a>
 <a href="#323" id="323">323</a>
-</pre></div><pre class="rust"><code><span class="attr">#![cfg_attr(not(feature = <span class="string">&quot;full&quot;</span>), allow(dead_code))]
+</pre></div><pre class="rust"><code><span class="attr">#![cfg_attr(not(feature = <span class="string">"full"</span>), allow(dead_code))]
 
 </span><span class="doccomment">//! Yield points for improved cooperative scheduling.
 //!
@@ -348,13 +348,13 @@
 // done. If they are not, a future sufficiently deep in the task hierarchy may
 // end up _never_ getting to run because of the number of yield points that
 // inevitably appear before it is reached. In general, you will want yield
-// points to only appear in &quot;leaf&quot; futures -- those that do not themselves poll
+// points to only appear in "leaf" futures -- those that do not themselves poll
 // other futures. By doing this, you avoid double-counting each iteration of
 // the outer future against the cooperating budget.
 
 </span><span class="kw">use </span><span class="kw">crate</span>::runtime::context;
 
-<span class="doccomment">/// Opaque type tracking the amount of &quot;work&quot; a task may still do before
+<span class="doccomment">/// Opaque type tracking the amount of "work" a task may still do before
 /// yielding back to the scheduler.
 </span><span class="attr">#[derive(Debug, Copy, Clone)]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>Budget(<span class="prelude-ty">Option</span>&lt;u8&gt;);
@@ -438,7 +438,7 @@
 }
 
 <span class="macro">cfg_rt_multi_thread! </span>{
-    <span class="doccomment">/// Sets the current task&#39;s budget.
+    <span class="doccomment">/// Sets the current task's budget.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>set(budget: Budget) {
         <span class="kw">let _ </span>= context::budget(|cell| cell.set(budget));
     }
@@ -472,7 +472,7 @@
 
     <span class="kw">impl </span>Drop <span class="kw">for </span>RestoreOnPending {
         <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
-            <span class="comment">// Don&#39;t reset if budget was unconstrained or if we made progress.
+            <span class="comment">// Don't reset if budget was unconstrained or if we made progress.
             // They are both represented as the remembered budget being unconstrained.
             </span><span class="kw">let </span>budget = <span class="self">self</span>.<span class="number">0</span>.get();
             <span class="kw">if </span>!budget.is_unconstrained() {
@@ -487,7 +487,7 @@
     ///
     /// When you call this method, the current budget is decremented. However, to ensure that
     /// progress is made every time a task is polled, the budget is automatically restored to its
-    /// former value if the returned `RestoreOnPending` is dropped. It is the caller&#39;s
+    /// former value if the returned `RestoreOnPending` is dropped. It is the caller's
     /// responsibility to call `RestoreOnPending::made_progress` if it made progress, to ensure
     /// that the budget empties appropriately.
     ///
@@ -496,7 +496,7 @@
     /// `RestRestoreOnPending` is dropped, those adjustments are erased unless the caller indicates
     /// that progress was made.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>poll_proceed(cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;RestoreOnPending&gt; {
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>poll_proceed(cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;RestoreOnPending&gt; {
         context::budget(|cell| {
             <span class="kw">let </span><span class="kw-2">mut </span>budget = cell.get();
 
@@ -569,7 +569,7 @@
 </span><span class="kw">mod </span>test {
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
 
-    <span class="attr">#[cfg(all(target_family = <span class="string">&quot;wasm&quot;</span>, not(target_os = <span class="string">&quot;wasi&quot;</span>)))]
+    <span class="attr">#[cfg(all(target_family = <span class="string">"wasm"</span>, not(target_os = <span class="string">"wasi"</span>)))]
     </span><span class="kw">use </span>wasm_bindgen_test::wasm_bindgen_test <span class="kw">as </span>test;
 
     <span class="kw">fn </span>get() -&gt; Budget {
@@ -595,7 +595,7 @@
             <span class="kw">let </span>coop = <span class="macro">assert_ready!</span>(task::spawn(()).enter(|cx, <span class="kw">_</span>| poll_proceed(cx)));
             <span class="macro">assert_eq!</span>(get().<span class="number">0</span>.unwrap(), Budget::initial().<span class="number">0</span>.unwrap() - <span class="number">1</span>);
             drop(coop);
-            <span class="comment">// we didn&#39;t make progress
+            <span class="comment">// we didn't make progress
             </span><span class="macro">assert_eq!</span>(get().<span class="number">0</span>, Budget::initial().<span class="number">0</span>);
 
             <span class="kw">let </span>coop = <span class="macro">assert_ready!</span>(task::spawn(()).enter(|cx, <span class="kw">_</span>| poll_proceed(cx)));

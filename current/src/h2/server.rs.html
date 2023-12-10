@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/h2-0.3.22/src/server.rs`."><title>server.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="h2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/h2-0.3.22/src/server.rs`."><title>server.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="h2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1620,7 +1620,7 @@
 //! begin the HTTP/2 handshake. See [here](../index.html#handshake) for more
 //! details.
 //!
-//! This could be as basic as using Tokio&#39;s [`TcpListener`] to accept
+//! This could be as basic as using Tokio's [`TcpListener`] to accept
 //! connections, but usually it means using either ALPN or HTTP/1.1 protocol
 //! upgrades.
 //!
@@ -1683,7 +1683,7 @@
 //!
 //! #[tokio::main]
 //! pub async fn main() {
-//!     let mut listener = TcpListener::bind(&quot;127.0.0.1:5928&quot;).await.unwrap();
+//!     let mut listener = TcpListener::bind("127.0.0.1:5928").await.unwrap();
 //!
 //!     // Accept all incoming TCP connections.
 //!     loop {
@@ -1696,7 +1696,7 @@
 //!                 // connection.
 //!                 while let Some(request) = h2.accept().await {
 //!                     let (request, mut respond) = request.unwrap();
-//!                     println!(&quot;Received request: {:?}&quot;, request);
+//!                     println!("Received request: {:?}", request);
 //!
 //!                     // Build a response with no body
 //!                     let response = Response::builder()
@@ -1757,7 +1757,7 @@
 /// See [module] level docs for more details.
 ///
 /// [module]: index.html
-</span><span class="attr">#[must_use = <span class="string">&quot;futures do nothing unless polled&quot;</span>]
+</span><span class="attr">#[must_use = <span class="string">"futures do nothing unless polled"</span>]
 </span><span class="kw">pub struct </span>Handshake&lt;T, B: Buf = Bytes&gt; {
     <span class="doccomment">/// The config to pass to Connection::new after handshake succeeds.
     </span>builder: Builder,
@@ -1805,7 +1805,7 @@
 /// #
 /// # pub fn main() {}
 /// ```
-</span><span class="attr">#[must_use = <span class="string">&quot;streams do nothing unless polled&quot;</span>]
+</span><span class="attr">#[must_use = <span class="string">"streams do nothing unless polled"</span>]
 </span><span class="kw">pub struct </span>Connection&lt;T, B: Buf&gt; {
     connection: proto::Connection&lt;T, Peer, B&gt;,
 }
@@ -1863,7 +1863,7 @@
     <span class="doccomment">/// Initial target window size for new connections.
     </span>initial_target_connection_window_size: <span class="prelude-ty">Option</span>&lt;u32&gt;,
 
-    <span class="doccomment">/// Maximum amount of bytes to &quot;buffer&quot; for writing per stream.
+    <span class="doccomment">/// Maximum amount of bytes to "buffer" for writing per stream.
     </span>max_send_buffer_size: usize,
 }
 
@@ -1908,7 +1908,7 @@
 <span class="comment">// Manual implementation necessary because of rust-lang/rust#26925
 </span><span class="kw">impl</span>&lt;B: Buf + fmt::Debug&gt; fmt::Debug <span class="kw">for </span>SendPushedResponse&lt;B&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;SendPushedResponse {{ {:?} }}&quot;</span>, <span class="self">self</span>.inner)
+        <span class="macro">write!</span>(f, <span class="string">"SendPushedResponse {{ {:?} }}"</span>, <span class="self">self</span>.inner)
     }
 }
 
@@ -1936,7 +1936,7 @@
 <span class="attr">#[derive(Debug)]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>Peer;
 
-<span class="kw">const </span>PREFACE: [u8; <span class="number">24</span>] = <span class="kw-2">*</span><span class="string">b&quot;PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n&quot;</span>;
+<span class="kw">const </span>PREFACE: [u8; <span class="number">24</span>] = <span class="kw-2">*</span><span class="string">b"PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n"</span>;
 
 <span class="doccomment">/// Creates a new configured HTTP/2 server with default configuration
 /// values backed by `io`.
@@ -1984,7 +1984,7 @@
     B: Buf,
 {
     <span class="kw">fn </span>handshake2(io: T, builder: Builder) -&gt; Handshake&lt;T, B&gt; {
-        <span class="kw">let </span>span = <span class="macro">tracing::trace_span!</span>(<span class="string">&quot;server_handshake&quot;</span>);
+        <span class="kw">let </span>span = <span class="macro">tracing::trace_span!</span>(<span class="string">"server_handshake"</span>);
         <span class="kw">let </span>entered = span.enter();
 
         <span class="comment">// Create the codec.
@@ -2001,11 +2001,11 @@
         <span class="comment">// Send initial settings frame.
         </span>codec
             .buffer(builder.settings.clone().into())
-            .expect(<span class="string">&quot;invalid SETTINGS frame&quot;</span>);
+            .expect(<span class="string">"invalid SETTINGS frame"</span>);
 
         <span class="comment">// Create the handshake future.
         </span><span class="kw">let </span>state =
-            Handshaking::Flushing(Flush::new(codec).instrument(<span class="macro">tracing::trace_span!</span>(<span class="string">&quot;flush&quot;</span>)));
+            Handshaking::Flushing(Flush::new(codec).instrument(<span class="macro">tracing::trace_span!</span>(<span class="string">"flush"</span>)));
 
         drop(entered);
 
@@ -2026,18 +2026,18 @@
     <span class="attr">#[doc(hidden)]
     </span><span class="kw">pub fn </span>poll_accept(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;,
+        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;,
     ) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;(Request&lt;RecvStream&gt;, SendResponse&lt;B&gt;), <span class="kw">crate</span>::Error&gt;&gt;&gt; {
         <span class="comment">// Always try to advance the internal state. Getting Pending also is
         // needed to allow this function to return Pending.
         </span><span class="kw">if </span><span class="self">self</span>.poll_closed(cx)<span class="question-mark">?</span>.is_ready() {
-            <span class="comment">// If the socket is closed, don&#39;t return anything
+            <span class="comment">// If the socket is closed, don't return anything
             // TODO: drop any pending streams
             </span><span class="kw">return </span>Poll::Ready(<span class="prelude-val">None</span>);
         }
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(inner) = <span class="self">self</span>.connection.next_incoming() {
-            <span class="macro">tracing::trace!</span>(<span class="string">&quot;received incoming&quot;</span>);
+            <span class="macro">tracing::trace!</span>(<span class="string">"received incoming"</span>);
             <span class="kw">let </span>(head, <span class="kw">_</span>) = inner.take_request().into_parts();
             <span class="kw">let </span>body = RecvStream::new(FlowControl::new(inner.clone_to_opaque()));
 
@@ -2059,7 +2059,7 @@
     /// If `size` is less than the current value, nothing will happen
     /// immediately. However, as window capacity is released by
     /// [`FlowControl`] instances, no `WINDOW_UPDATE` frames will be sent
-    /// out until the number of &quot;in flight&quot; bytes drops below `size`.
+    /// out until the number of "in flight" bytes drops below `size`.
     ///
     /// The default value is 65,535.
     ///
@@ -2122,7 +2122,7 @@
     }
 
     <span class="attr">#[doc(hidden)]
-    #[deprecated(note = <span class="string">&quot;renamed to poll_closed&quot;</span>)]
+    #[deprecated(note = <span class="string">"renamed to poll_closed"</span>)]
     </span><span class="kw">pub fn </span>poll_close(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;(), <span class="kw">crate</span>::Error&gt;&gt; {
         <span class="self">self</span>.poll_closed(cx)
     }
@@ -2147,7 +2147,7 @@
     ///
     /// Must continue being polled to close connection.
     ///
-    /// It&#39;s possible to receive more requests after calling this method, since
+    /// It's possible to receive more requests after calling this method, since
     /// they might have been in-flight from the client already. After about
     /// 1 RTT, no new requests should be accepted. Once all active streams
     /// have completed, the connection is closed.
@@ -2196,13 +2196,13 @@
 
     <span class="comment">// Could disappear at anytime.
     </span><span class="attr">#[doc(hidden)]
-    #[cfg(feature = <span class="string">&quot;unstable&quot;</span>)]
+    #[cfg(feature = <span class="string">"unstable"</span>)]
     </span><span class="kw">pub fn </span>num_wired_streams(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
         <span class="self">self</span>.connection.num_wired_streams()
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;stream&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"stream"</span>)]
 </span><span class="kw">impl</span>&lt;T, B&gt; futures_core::Stream <span class="kw">for </span>Connection&lt;T, B&gt;
 <span class="kw">where
     </span>T: AsyncRead + AsyncWrite + Unpin,
@@ -2210,7 +2210,7 @@
 {
     <span class="kw">type </span>Item = <span class="prelude-ty">Result</span>&lt;(Request&lt;RecvStream&gt;, SendResponse&lt;B&gt;), <span class="kw">crate</span>::Error&gt;;
 
-    <span class="kw">fn </span>poll_next(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt;&gt; {
+    <span class="kw">fn </span>poll_next(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt;&gt; {
         <span class="self">self</span>.poll_accept(cx)
     }
 }
@@ -2221,8 +2221,8 @@
     B: fmt::Debug + Buf,
 {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
-        fmt.debug_struct(<span class="string">&quot;Connection&quot;</span>)
-            .field(<span class="string">&quot;connection&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.connection)
+        fmt.debug_struct(<span class="string">"Connection"</span>)
+            .field(<span class="string">"connection"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.connection)
             .finish()
     }
 }
@@ -2459,8 +2459,8 @@
     /// When a stream is explicitly reset by either calling
     /// [`SendResponse::send_reset`] or by dropping a [`SendResponse`] instance
     /// before completing the stream, the HTTP/2 specification requires that
-    /// any further frames received for that stream must be ignored for &quot;some
-    /// time&quot;.
+    /// any further frames received for that stream must be ignored for "some
+    /// time".
     ///
     /// In order to satisfy the specification, internal state must be maintained
     /// to implement the behavior. This state grows linearly with the number of
@@ -2507,7 +2507,7 @@
     /// could send a request and then shortly after, realize it is not needed,
     /// sending a CANCEL.
     ///
-    /// However, since those streams are now &quot;closed&quot;, they don&#39;t count towards
+    /// However, since those streams are now "closed", they don't count towards
     /// the max concurrent streams. So, they will sit in the accept queue,
     /// using memory.
     ///
@@ -2545,8 +2545,8 @@
 
     <span class="doccomment">/// Sets the maximum send buffer size per stream.
     ///
-    /// Once a stream has buffered up to (or over) the maximum, the stream&#39;s
-    /// flow control will not &quot;poll&quot; additional capacity. Once bytes for the
+    /// Once a stream has buffered up to (or over) the maximum, the stream's
+    /// flow control will not "poll" additional capacity. Once bytes for the
     /// stream have been written to the connection, the send buffer capacity
     /// will be freed up again.
     ///
@@ -2566,8 +2566,8 @@
     /// When a stream is explicitly reset by either calling
     /// [`SendResponse::send_reset`] or by dropping a [`SendResponse`] instance
     /// before completing the stream, the HTTP/2 specification requires that
-    /// any further frames received for that stream must be ignored for &quot;some
-    /// time&quot;.
+    /// any further frames received for that stream must be ignored for "some
+    /// time".
     ///
     /// In order to satisfy the specification, internal state must be maintained
     /// to implement the behavior. This state grows linearly with the number of
@@ -2654,18 +2654,18 @@
     /// ```
     ///
     /// Configures the send-payload data type. In this case, the outbound data
-    /// type will be `&amp;&#39;static [u8]`.
+    /// type will be `&amp;'static [u8]`.
     ///
     /// ```
     /// # use tokio::io::{AsyncRead, AsyncWrite};
     /// # use h2::server::*;
     /// #
     /// # fn doc&lt;T: AsyncRead + AsyncWrite + Unpin&gt;(my_io: T)
-    /// # -&gt; Handshake&lt;T, &amp;&#39;static [u8]&gt;
+    /// # -&gt; Handshake&lt;T, &amp;'static [u8]&gt;
     /// # {
     /// // `server_fut` is a future representing the completion of the HTTP/2
     /// // handshake.
-    /// let server_fut: Handshake&lt;_, &amp;&#39;static [u8]&gt; = Builder::new()
+    /// let server_fut: Handshake&lt;_, &amp;'static [u8]&gt; = Builder::new()
     ///     .handshake(my_io);
     /// # server_fut
     /// # }
@@ -2866,7 +2866,7 @@
 {
     <span class="kw">type </span>Output = <span class="prelude-ty">Result</span>&lt;Codec&lt;T, B&gt;, <span class="kw">crate</span>::Error&gt;;
 
-    <span class="kw">fn </span>poll(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
+    <span class="kw">fn </span>poll(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
         <span class="comment">// Flush the codec
         </span><span class="macro">ready!</span>(<span class="self">self</span>.codec.as_mut().unwrap().flush(cx)).map_err(<span class="kw">crate</span>::Error::from_io)<span class="question-mark">?</span>;
 
@@ -2895,7 +2895,7 @@
 {
     <span class="kw">type </span>Output = <span class="prelude-ty">Result</span>&lt;Codec&lt;T, B&gt;, <span class="kw">crate</span>::Error&gt;;
 
-    <span class="kw">fn </span>poll(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
+    <span class="kw">fn </span>poll(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>buf = [<span class="number">0</span>; <span class="number">24</span>];
         <span class="kw">let </span><span class="kw-2">mut </span>rem = PREFACE.len() - <span class="self">self</span>.pos;
 
@@ -2907,12 +2907,12 @@
             <span class="kw">if </span>n == <span class="number">0 </span>{
                 <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Err</span>(<span class="kw">crate</span>::Error::from_io(io::Error::new(
                     io::ErrorKind::UnexpectedEof,
-                    <span class="string">&quot;connection closed before reading preface&quot;</span>,
+                    <span class="string">"connection closed before reading preface"</span>,
                 ))));
             }
 
             <span class="kw">if </span><span class="kw-2">&amp;</span>PREFACE[<span class="self">self</span>.pos..<span class="self">self</span>.pos + n] != buf.filled() {
-                <span class="macro">proto_err!</span>(conn: <span class="string">&quot;read_preface: invalid preface&quot;</span>);
+                <span class="macro">proto_err!</span>(conn: <span class="string">"read_preface: invalid preface"</span>);
                 <span class="comment">// TODO: Should this just write the GO_AWAY frame directly?
                 </span><span class="kw">return </span>Poll::Ready(<span class="prelude-val">Err</span>(Error::library_go_away(Reason::PROTOCOL_ERROR).into()));
             }
@@ -2934,7 +2934,7 @@
 {
     <span class="kw">type </span>Output = <span class="prelude-ty">Result</span>&lt;Connection&lt;T, B&gt;, <span class="kw">crate</span>::Error&gt;;
 
-    <span class="kw">fn </span>poll(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
+    <span class="kw">fn </span>poll(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
         <span class="kw">let </span>span = <span class="self">self</span>.span.clone(); <span class="comment">// XXX(eliza): T_T
         </span><span class="kw">let </span>_e = span.enter();
         <span class="macro">tracing::trace!</span>(state = <span class="question-mark">?</span><span class="self">self</span>.state);
@@ -2942,21 +2942,21 @@
         <span class="kw">loop </span>{
             <span class="kw">match </span><span class="kw-2">&amp;mut </span><span class="self">self</span>.state {
                 Handshaking::Flushing(flush) =&gt; {
-                    <span class="comment">// We&#39;re currently flushing a pending SETTINGS frame. Poll the
-                    // flush future, and, if it&#39;s completed, advance our state to wait
+                    <span class="comment">// We're currently flushing a pending SETTINGS frame. Poll the
+                    // flush future, and, if it's completed, advance our state to wait
                     // for the client preface.
                     </span><span class="kw">let </span>codec = <span class="kw">match </span>Pin::new(flush).poll(cx)<span class="question-mark">? </span>{
                         Poll::Pending =&gt; {
-                            <span class="macro">tracing::trace!</span>(flush.poll = %<span class="string">&quot;Pending&quot;</span>);
+                            <span class="macro">tracing::trace!</span>(flush.poll = %<span class="string">"Pending"</span>);
                             <span class="kw">return </span>Poll::Pending;
                         }
                         Poll::Ready(flushed) =&gt; {
-                            <span class="macro">tracing::trace!</span>(flush.poll = %<span class="string">&quot;Ready&quot;</span>);
+                            <span class="macro">tracing::trace!</span>(flush.poll = %<span class="string">"Ready"</span>);
                             flushed
                         }
                     };
                     <span class="self">self</span>.state = Handshaking::ReadingPreface(
-                        ReadPreface::new(codec).instrument(<span class="macro">tracing::trace_span!</span>(<span class="string">&quot;read_preface&quot;</span>)),
+                        ReadPreface::new(codec).instrument(<span class="macro">tracing::trace_span!</span>(<span class="string">"read_preface"</span>)),
                     );
                 }
                 Handshaking::ReadingPreface(read) =&gt; {
@@ -2978,7 +2978,7 @@
                         },
                     );
 
-                    <span class="macro">tracing::trace!</span>(<span class="string">&quot;connection established!&quot;</span>);
+                    <span class="macro">tracing::trace!</span>(<span class="string">"connection established!"</span>);
                     <span class="kw">let </span><span class="kw-2">mut </span>c = Connection { connection };
                     <span class="kw">if let </span><span class="prelude-val">Some</span>(sz) = <span class="self">self</span>.builder.initial_target_connection_window_size {
                         c.set_target_window_size(sz);
@@ -2987,7 +2987,7 @@
                     <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Ok</span>(c));
                 }
                 Handshaking::Done =&gt; {
-                    <span class="macro">panic!</span>(<span class="string">&quot;Handshaking::poll() called again after handshaking was complete&quot;</span>)
+                    <span class="macro">panic!</span>(<span class="string">"Handshaking::poll() called again after handshaking was complete"</span>)
                 }
             }
         }
@@ -3000,7 +3000,7 @@
     B: fmt::Debug + Buf,
 {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
-        <span class="macro">write!</span>(fmt, <span class="string">&quot;server::Handshake&quot;</span>)
+        <span class="macro">write!</span>(fmt, <span class="string">"server::Handshake"</span>)
     }
 }
 
@@ -3046,12 +3046,12 @@
             <span class="kw">match </span>e {
                 NotSafeAndCacheable =&gt; <span class="macro">tracing::debug!</span>(
                     <span class="question-mark">?</span>promised_id,
-                    <span class="string">&quot;convert_push_message: method {} is not safe and cacheable&quot;</span>,
+                    <span class="string">"convert_push_message: method {} is not safe and cacheable"</span>,
                     request.method(),
                 ),
                 InvalidContentLength(e) =&gt; <span class="macro">tracing::debug!</span>(
                     <span class="question-mark">?</span>promised_id,
-                    <span class="string">&quot;convert_push_message; promised request has invalid content-length {:?}&quot;</span>,
+                    <span class="string">"convert_push_message; promised request has invalid content-length {:?}"</span>,
                     e,
                 ),
             }
@@ -3083,7 +3083,7 @@
 <span class="kw">impl </span>proto::Peer <span class="kw">for </span>Peer {
     <span class="kw">type </span>Poll = Request&lt;()&gt;;
 
-    <span class="kw">const </span>NAME: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str = <span class="string">&quot;Server&quot;</span>;
+    <span class="kw">const </span>NAME: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str = <span class="string">"Server"</span>;
 
     <span class="kw">fn </span>is_server() -&gt; bool {
         <span class="bool-val">true
@@ -3116,7 +3116,7 @@
             is_connect = method == Method::CONNECT;
             b = b.method(method);
         } <span class="kw">else </span>{
-            <span class="macro">malformed!</span>(<span class="string">&quot;malformed headers: missing method&quot;</span>);
+            <span class="macro">malformed!</span>(<span class="string">"malformed headers: missing method"</span>);
         }
 
         <span class="kw">let </span>has_protocol = pseudo.protocol.is_some();
@@ -3125,12 +3125,12 @@
                 <span class="comment">// Assert that we have the right type.
                 </span>b = b.extension::&lt;<span class="kw">crate</span>::ext::Protocol&gt;(pseudo.protocol.unwrap());
             } <span class="kw">else </span>{
-                <span class="macro">malformed!</span>(<span class="string">&quot;malformed headers: :protocol on non-CONNECT request&quot;</span>);
+                <span class="macro">malformed!</span>(<span class="string">"malformed headers: :protocol on non-CONNECT request"</span>);
             }
         }
 
         <span class="kw">if </span>pseudo.status.is_some() {
-            <span class="macro">malformed!</span>(<span class="string">&quot;malformed headers: :status field on request&quot;</span>);
+            <span class="macro">malformed!</span>(<span class="string">"malformed headers: :status field on request"</span>);
         }
 
         <span class="comment">// Convert the URI
@@ -3142,7 +3142,7 @@
             <span class="kw">let </span>maybe_authority = uri::Authority::from_maybe_shared(authority.clone().into_inner());
             parts.authority = <span class="prelude-val">Some</span>(maybe_authority.or_else(|why| {
                 <span class="macro">malformed!</span>(
-                    <span class="string">&quot;malformed headers: malformed authority ({:?}): {}&quot;</span>,
+                    <span class="string">"malformed headers: malformed authority ({:?}): {}"</span>,
                     authority,
                     why,
                 )
@@ -3152,43 +3152,43 @@
         <span class="comment">// A :scheme is required, except CONNECT.
         </span><span class="kw">if let </span><span class="prelude-val">Some</span>(scheme) = pseudo.scheme {
             <span class="kw">if </span>is_connect &amp;&amp; !has_protocol {
-                <span class="macro">malformed!</span>(<span class="string">&quot;malformed headers: :scheme in CONNECT&quot;</span>);
+                <span class="macro">malformed!</span>(<span class="string">"malformed headers: :scheme in CONNECT"</span>);
             }
             <span class="kw">let </span>maybe_scheme = scheme.parse();
             <span class="kw">let </span>scheme = maybe_scheme.or_else(|why| {
                 <span class="macro">malformed!</span>(
-                    <span class="string">&quot;malformed headers: malformed scheme ({:?}): {}&quot;</span>,
+                    <span class="string">"malformed headers: malformed scheme ({:?}): {}"</span>,
                     scheme,
                     why,
                 )
             })<span class="question-mark">?</span>;
 
-            <span class="comment">// It&#39;s not possible to build an `Uri` from a scheme and path. So,
+            <span class="comment">// It's not possible to build an `Uri` from a scheme and path. So,
             // after validating is was a valid scheme, we just have to drop it
-            // if there isn&#39;t an :authority.
+            // if there isn't an :authority.
             </span><span class="kw">if </span>parts.authority.is_some() {
                 parts.scheme = <span class="prelude-val">Some</span>(scheme);
             }
         } <span class="kw">else if </span>!is_connect || has_protocol {
-            <span class="macro">malformed!</span>(<span class="string">&quot;malformed headers: missing scheme&quot;</span>);
+            <span class="macro">malformed!</span>(<span class="string">"malformed headers: missing scheme"</span>);
         }
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(path) = pseudo.path {
             <span class="kw">if </span>is_connect &amp;&amp; !has_protocol {
-                <span class="macro">malformed!</span>(<span class="string">&quot;malformed headers: :path in CONNECT&quot;</span>);
+                <span class="macro">malformed!</span>(<span class="string">"malformed headers: :path in CONNECT"</span>);
             }
 
             <span class="comment">// This cannot be empty
             </span><span class="kw">if </span>path.is_empty() {
-                <span class="macro">malformed!</span>(<span class="string">&quot;malformed headers: missing path&quot;</span>);
+                <span class="macro">malformed!</span>(<span class="string">"malformed headers: missing path"</span>);
             }
 
             <span class="kw">let </span>maybe_path = uri::PathAndQuery::from_maybe_shared(path.clone().into_inner());
             parts.path_and_query = <span class="prelude-val">Some</span>(maybe_path.or_else(|why| {
-                <span class="macro">malformed!</span>(<span class="string">&quot;malformed headers: malformed path ({:?}): {}&quot;</span>, path, why,)
+                <span class="macro">malformed!</span>(<span class="string">"malformed headers: malformed path ({:?}): {}"</span>, path, why,)
             })<span class="question-mark">?</span>);
         } <span class="kw">else if </span>is_connect &amp;&amp; has_protocol {
-            <span class="macro">malformed!</span>(<span class="string">&quot;malformed headers: missing path in extended CONNECT&quot;</span>);
+            <span class="macro">malformed!</span>(<span class="string">"malformed headers: missing path in extended CONNECT"</span>);
         }
 
         b = b.uri(parts);
@@ -3198,7 +3198,7 @@
             <span class="prelude-val">Err</span>(e) =&gt; {
                 <span class="comment">// TODO: Should there be more specialized handling for different
                 // kinds of errors
-                </span><span class="macro">proto_err!</span>(stream: <span class="string">&quot;error building request: {}; stream={:?}&quot;</span>, e, stream_id);
+                </span><span class="macro">proto_err!</span>(stream: <span class="string">"error building request: {}; stream={:?}"</span>, e, stream_id);
                 <span class="kw">return </span><span class="prelude-val">Err</span>(Error::library_reset(stream_id, Reason::PROTOCOL_ERROR));
             }
         };
@@ -3218,9 +3218,9 @@
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; <span class="prelude-ty">Result</span>&lt;(), fmt::Error&gt; {
         <span class="kw">match </span><span class="kw-2">*</span><span class="self">self </span>{
-            Handshaking::Flushing(<span class="kw">_</span>) =&gt; f.write_str(<span class="string">&quot;Flushing(_)&quot;</span>),
-            Handshaking::ReadingPreface(<span class="kw">_</span>) =&gt; f.write_str(<span class="string">&quot;ReadingPreface(_)&quot;</span>),
-            Handshaking::Done =&gt; f.write_str(<span class="string">&quot;Done&quot;</span>),
+            Handshaking::Flushing(<span class="kw">_</span>) =&gt; f.write_str(<span class="string">"Flushing(_)"</span>),
+            Handshaking::ReadingPreface(<span class="kw">_</span>) =&gt; f.write_str(<span class="string">"ReadingPreface(_)"</span>),
+            Handshaking::Done =&gt; f.write_str(<span class="string">"Done"</span>),
         }
     }
 }

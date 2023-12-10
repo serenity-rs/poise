@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/miniz_oxide-0.7.1/src/deflate/core.rs`."><title>core.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="miniz_oxide" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/miniz_oxide-0.7.1/src/deflate/core.rs`."><title>core.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="miniz_oxide" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -2635,7 +2635,7 @@
     <span class="doccomment">/// Should we use greedy parsing (as opposed to lazy parsing where look ahead one or more
     /// bytes to check for better matches.)
     </span><span class="kw">pub const </span>TDEFL_GREEDY_PARSING_FLAG: u32 = <span class="number">0x0000_4000</span>;
-    <span class="doccomment">/// Used in miniz to skip zero-initializing hash and dict. We don&#39;t do this here, so
+    <span class="doccomment">/// Used in miniz to skip zero-initializing hash and dict. We don't do this here, so
     /// this flag is ignored.
     </span><span class="kw">pub const </span>TDEFL_NONDETERMINISTIC_PARSING_FLAG: u32 = <span class="number">0x0000_8000</span>;
     <span class="doccomment">/// Only look for matches with a distance of 0.
@@ -2655,11 +2655,11 @@
 </span><span class="attr">#[repr(i32)]
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 </span><span class="kw">pub enum </span>CompressionStrategy {
-    <span class="doccomment">/// Don&#39;t use any of the special strategies.
+    <span class="doccomment">/// Don't use any of the special strategies.
     </span>Default = <span class="number">0</span>,
     <span class="doccomment">/// Only use matches that are at least 5 bytes long.
     </span>Filtered = <span class="number">1</span>,
-    <span class="doccomment">/// Don&#39;t look for matches, only huffman encode the literals.
+    <span class="doccomment">/// Don't look for matches, only huffman encode the literals.
     </span>HuffmanOnly = <span class="number">2</span>,
     <span class="doccomment">/// Only look for matches with a distance of 1, i.e do run-length encoding only.
     </span>RLE = <span class="number">3</span>,
@@ -2720,7 +2720,7 @@
     <span class="doccomment">/// Usage error.
     ///
     /// This indicates that either the [`CompressorOxide`] experienced a previous error, or the
-    /// stream has already been [`TDEFLFlush::Finish`]&#39;d.
+    /// stream has already been [`TDEFLFlush::Finish`]'d.
     </span>BadParam = -<span class="number">2</span>,
 
     <span class="doccomment">/// Error putting data into output buffer.
@@ -2777,7 +2777,7 @@
         <span class="comment">// Clear existing FCHECK if any
         </span><span class="kw">let </span>flg = flg &amp; <span class="number">0b11100000</span>;
 
-        <span class="comment">// Casting is safe as rem can&#39;t overflow since it is a value mod 31
+        <span class="comment">// Casting is safe as rem can't overflow since it is a value mod 31
         // We can simply add the value to flg as (31 - rem) will never be above 2^5
         </span>flg + (FCHECK_DIVISOR - rem <span class="kw">as </span>u8)
     }
@@ -2992,18 +2992,18 @@
 }
 
 <span class="doccomment">/// Callback function and user used in `compress_to_output`.
-</span><span class="kw">pub struct </span>CallbackFunc&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">pub </span>put_buf_func: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="kw">dyn </span>FnMut(<span class="kw-2">&amp;</span>[u8]) -&gt; bool,
+</span><span class="kw">pub struct </span>CallbackFunc&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">pub </span>put_buf_func: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span><span class="kw">dyn </span>FnMut(<span class="kw-2">&amp;</span>[u8]) -&gt; bool,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; CallbackFunc&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; CallbackFunc&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>flush_output(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         saved_output: SavedOutputBufferOxide,
         params: <span class="kw-2">&amp;mut </span>ParamsOxide,
     ) -&gt; i32 {
         <span class="comment">// TODO: As this could be unsafe since
-        // we can&#39;t verify the function pointer
+        // we can't verify the function pointer
         // this whole function should maybe be unsafe as well.
         </span><span class="kw">let </span>call_success = (<span class="self">self</span>.put_buf_func)(<span class="kw-2">&amp;</span>params.local_buf.b[<span class="number">0</span>..saved_output.pos <span class="kw">as </span>usize]);
 
@@ -3016,11 +3016,11 @@
     }
 }
 
-<span class="kw">struct </span>CallbackBuf&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">pub </span>out_buf: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>[u8],
+<span class="kw">struct </span>CallbackBuf&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">pub </span>out_buf: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>[u8],
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; CallbackBuf&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; CallbackBuf&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>flush_output(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         saved_output: SavedOutputBufferOxide,
@@ -3047,17 +3047,17 @@
     }
 }
 
-<span class="kw">enum </span>CallbackOut&lt;<span class="lifetime">&#39;a</span>&gt; {
-    Func(CallbackFunc&lt;<span class="lifetime">&#39;a</span>&gt;),
-    Buf(CallbackBuf&lt;<span class="lifetime">&#39;a</span>&gt;),
+<span class="kw">enum </span>CallbackOut&lt;<span class="lifetime">'a</span>&gt; {
+    Func(CallbackFunc&lt;<span class="lifetime">'a</span>&gt;),
+    Buf(CallbackBuf&lt;<span class="lifetime">'a</span>&gt;),
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; CallbackOut&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>new_output_buffer&lt;<span class="lifetime">&#39;b</span>&gt;(
-        <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span><span class="kw-2">mut </span><span class="self">self</span>,
-        local_buf: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span><span class="kw-2">mut </span>[u8],
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; CallbackOut&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>new_output_buffer&lt;<span class="lifetime">'b</span>&gt;(
+        <span class="kw-2">&amp;</span><span class="lifetime">'b </span><span class="kw-2">mut </span><span class="self">self</span>,
+        local_buf: <span class="kw-2">&amp;</span><span class="lifetime">'b </span><span class="kw-2">mut </span>[u8],
         out_buf_ofs: usize,
-    ) -&gt; OutputBufferOxide&lt;<span class="lifetime">&#39;b</span>&gt; {
+    ) -&gt; OutputBufferOxide&lt;<span class="lifetime">'b</span>&gt; {
         <span class="kw">let </span>is_local;
         <span class="kw">let </span>buf_len = OUT_BUF_SIZE - <span class="number">16</span>;
         <span class="kw">let </span>chosen_buffer = <span class="kw">match </span><span class="kw-2">*</span><span class="self">self </span>{
@@ -3081,15 +3081,15 @@
     }
 }
 
-<span class="kw">struct </span>CallbackOxide&lt;<span class="lifetime">&#39;a</span>&gt; {
-    in_buf: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt;,
-    in_buf_size: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>usize&gt;,
-    out_buf_size: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>usize&gt;,
-    out: CallbackOut&lt;<span class="lifetime">&#39;a</span>&gt;,
+<span class="kw">struct </span>CallbackOxide&lt;<span class="lifetime">'a</span>&gt; {
+    in_buf: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt;,
+    in_buf_size: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>usize&gt;,
+    out_buf_size: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>usize&gt;,
+    out: CallbackOut&lt;<span class="lifetime">'a</span>&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; CallbackOxide&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>new_callback_buf(in_buf: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8], out_buf: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>[u8]) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; CallbackOxide&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>new_callback_buf(in_buf: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8], out_buf: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>[u8]) -&gt; <span class="self">Self </span>{
         CallbackOxide {
             in_buf: <span class="prelude-val">Some</span>(in_buf),
             in_buf_size: <span class="prelude-val">None</span>,
@@ -3098,7 +3098,7 @@
         }
     }
 
-    <span class="kw">fn </span>new_callback_func(in_buf: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8], callback_func: CallbackFunc&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="self">Self </span>{
+    <span class="kw">fn </span>new_callback_func(in_buf: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8], callback_func: CallbackFunc&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="self">Self </span>{
         CallbackOxide {
             in_buf: <span class="prelude-val">Some</span>(in_buf),
             in_buf_size: <span class="prelude-val">None</span>,
@@ -3134,8 +3134,8 @@
     }
 }
 
-<span class="kw">struct </span>OutputBufferOxide&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">pub </span>inner: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>[u8],
+<span class="kw">struct </span>OutputBufferOxide&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">pub </span>inner: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>[u8],
     <span class="kw">pub </span>inner_pos: usize,
     <span class="kw">pub </span>local: bool,
 
@@ -3143,7 +3143,7 @@
     <span class="kw">pub </span>bits_in: u32,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; OutputBufferOxide&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; OutputBufferOxide&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>put_bits(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bits: u32, len: u32) {
         <span class="macro">assert!</span>(bits &lt;= ((<span class="number">1u32 </span>&lt;&lt; len) - <span class="number">1u32</span>));
         <span class="self">self</span>.bit_buffer |= bits &lt;&lt; <span class="self">self</span>.bits_in;
@@ -3219,7 +3219,7 @@
 <span class="doccomment">/// A struct containing data about huffman codes and symbol frequencies.
 ///
 /// NOTE: Only the literal/lengths have enough symbols to actually use
-/// the full array. It&#39;s unclear why it&#39;s defined like this in miniz,
+/// the full array. It's unclear why it's defined like this in miniz,
 /// it could be for cache/alignment reasons.
 </span><span class="kw">struct </span>HuffmanOxide {
     <span class="doccomment">/// Number of occurrences of each symbol.
@@ -3315,10 +3315,10 @@
 }
 
 <span class="kw">impl </span>HuffmanOxide {
-    <span class="kw">fn </span>radix_sort_symbols&lt;<span class="lifetime">&#39;a</span>&gt;(
-        symbols0: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>[SymFreq],
-        symbols1: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>[SymFreq],
-    ) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>[SymFreq] {
+    <span class="kw">fn </span>radix_sort_symbols&lt;<span class="lifetime">'a</span>&gt;(
+        symbols0: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>[SymFreq],
+        symbols1: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>[SymFreq],
+    ) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>[SymFreq] {
         <span class="kw">let </span><span class="kw-2">mut </span>hist = [[<span class="number">0</span>; <span class="number">256</span>]; <span class="number">2</span>];
 
         <span class="kw">for </span>freq <span class="kw">in </span>symbols0.iter() {
@@ -3746,8 +3746,8 @@
         <span class="comment">// Clamp the match len and max_match_len to be valid. (It should be when this is called, but
         // do it for now just in case for safety reasons.)
         // This should normally end up as at worst conditional moves,
-        // so it shouldn&#39;t slow us down much.
-        // TODO: Statically verify these so we don&#39;t need to do this.
+        // so it shouldn't slow us down much.
+        // TODO: Statically verify these so we don't need to do this.
         </span><span class="kw">let </span>max_match_len = cmp::min(MAX_MATCH_LEN <span class="kw">as </span>u32, max_match_len);
         match_len = cmp::max(match_len, <span class="number">1</span>);
 
@@ -3756,7 +3756,7 @@
         <span class="comment">// Number of probes into the hash chains.
         </span><span class="kw">let </span><span class="kw-2">mut </span>num_probes_left = <span class="self">self</span>.max_probes[(match_len &gt;= <span class="number">32</span>) <span class="kw">as </span>usize];
 
-        <span class="comment">// If we already have a match of the full length don&#39;t bother searching for another one.
+        <span class="comment">// If we already have a match of the full length don't bother searching for another one.
         </span><span class="kw">if </span>max_match_len &lt;= match_len {
             <span class="kw">return </span>(match_dist, match_len);
         }
@@ -3766,9 +3766,9 @@
         <span class="comment">// Read the two bytes at the end position of the current match.
         </span><span class="kw">let </span>s01: u16 = <span class="self">self</span>.read_as_u16(pos <span class="kw">as </span>usize);
 
-        <span class="lifetime">&#39;outer</span>: <span class="kw">loop </span>{
+        <span class="lifetime">'outer</span>: <span class="kw">loop </span>{
             <span class="kw">let </span><span class="kw-2">mut </span>dist;
-            <span class="lifetime">&#39;found</span>: <span class="kw">loop </span>{
+            <span class="lifetime">'found</span>: <span class="kw">loop </span>{
                 num_probes_left -= <span class="number">1</span>;
                 <span class="kw">if </span>num_probes_left == <span class="number">0 </span>{
                     <span class="comment">// We have done as many probes in the hash chain as the current compression
@@ -3792,13 +3792,13 @@
                     </span>probe_pos = next_probe_pos &amp; LZ_DICT_SIZE_MASK;
 
                     <span class="kw">if </span><span class="self">self</span>.read_as_u16((probe_pos + match_len <span class="kw">as </span>usize - <span class="number">1</span>) <span class="kw">as </span>usize) == c01 {
-                        <span class="kw">break </span><span class="lifetime">&#39;found</span>;
+                        <span class="kw">break </span><span class="lifetime">'found</span>;
                     }
                 }
             }
 
             <span class="kw">if </span>dist == <span class="number">0 </span>{
-                <span class="comment">// We&#39;ve looked through the whole match range, so return the best match we
+                <span class="comment">// We've looked through the whole match range, so return the best match we
                 // found.
                 </span><span class="kw">return </span>(match_dist, match_len);
             }
@@ -3836,7 +3836,7 @@
                         // comparisons.
                         </span>c01 = <span class="self">self</span>.read_as_u16(pos + match_len <span class="kw">as </span>usize - <span class="number">1</span>)
                     }
-                    <span class="kw">continue </span><span class="lifetime">&#39;outer</span>;
+                    <span class="kw">continue </span><span class="lifetime">'outer</span>;
                 }
             }
 
@@ -3926,7 +3926,7 @@
     <span class="kw">pub </span>flag_position: usize,
 
     <span class="comment">// The total number of bytes in the current block.
-    // (Could maybe use usize, but it&#39;s not possible to exceed a block size of )
+    // (Could maybe use usize, but it's not possible to exceed a block size of )
     </span><span class="kw">pub </span>total_bytes: u32,
     <span class="kw">pub </span>num_flags_left: u32,
 }
@@ -4495,7 +4495,7 @@
                 <span class="kw">let </span>trigram = d.dict.read_unaligned_u32(probe_pos) &amp; <span class="number">0xFF_FFFF</span>;
 
                 <span class="kw">if </span>first_trigram == trigram {
-                    <span class="comment">// Trigram was tested, so we can start with &quot;+ 3&quot; displacement.
+                    <span class="comment">// Trigram was tested, so we can start with "+ 3" displacement.
                     </span><span class="kw">let </span><span class="kw-2">mut </span>p = cur_pos + <span class="number">3</span>;
                     <span class="kw">let </span><span class="kw-2">mut </span>q = probe_pos + <span class="number">3</span>;
                     cur_match_len = (|| {
@@ -4528,7 +4528,7 @@
                         <span class="kw-2">*</span>d.lz.get_flag() &gt;&gt;= <span class="number">1</span>;
                         d.huff.count[<span class="number">0</span>][lit <span class="kw">as </span>usize] += <span class="number">1</span>;
                     } <span class="kw">else </span>{
-                        <span class="comment">// Limit the match to the length of the lookahead so we don&#39;t create a match
+                        <span class="comment">// Limit the match to the length of the lookahead so we don't create a match
                         // that ends after the end of the input data.
                         </span>cur_match_len = cmp::min(cur_match_len, lookahead_size <span class="kw">as </span>u32);
                         <span class="macro">debug_assert!</span>(cur_match_len &gt;= MIN_MATCH_LEN.into());

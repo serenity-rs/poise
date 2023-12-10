@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/chrono-0.4.31/src/offset/local/tz_info/rule.rs`."><title>rule.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../../../" data-static-root-path="../../../../../static.files/" data-current-crate="chrono" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../../src-files.js"></script><script defer src="../../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/chrono-0.4.31/src/offset/local/tz_info/rule.rs`."><title>rule.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../../../" data-static-root-path="../../../../../static.files/" data-current-crate="chrono" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../../src-files.js"></script><script defer src="../../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1082,25 +1082,25 @@
         <span class="kw">let </span>dst_time_zone = <span class="prelude-val">Some</span>(parse_name(<span class="kw-2">&amp;mut </span>cursor)<span class="question-mark">?</span>);
 
         <span class="kw">let </span>dst_offset = <span class="kw">match </span>cursor.peek() {
-            <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="string">b&#39;,&#39;</span>) =&gt; std_offset - <span class="number">3600</span>,
+            <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="string">b','</span>) =&gt; std_offset - <span class="number">3600</span>,
             <span class="prelude-val">Some</span>(<span class="kw">_</span>) =&gt; parse_offset(<span class="kw-2">&amp;mut </span>cursor)<span class="question-mark">?</span>,
             <span class="prelude-val">None </span>=&gt; {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::UnsupportedTzString(<span class="string">&quot;DST start and end rules must be provided&quot;</span>))
+                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::UnsupportedTzString(<span class="string">"DST start and end rules must be provided"</span>))
             }
         };
 
         <span class="kw">if </span>cursor.is_empty() {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::UnsupportedTzString(<span class="string">&quot;DST start and end rules must be provided&quot;</span>));
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::UnsupportedTzString(<span class="string">"DST start and end rules must be provided"</span>));
         }
 
-        cursor.read_tag(<span class="string">b&quot;,&quot;</span>)<span class="question-mark">?</span>;
+        cursor.read_tag(<span class="string">b","</span>)<span class="question-mark">?</span>;
         <span class="kw">let </span>(dst_start, dst_start_time) = RuleDay::parse(<span class="kw-2">&amp;mut </span>cursor, use_string_extensions)<span class="question-mark">?</span>;
 
-        cursor.read_tag(<span class="string">b&quot;,&quot;</span>)<span class="question-mark">?</span>;
+        cursor.read_tag(<span class="string">b","</span>)<span class="question-mark">?</span>;
         <span class="kw">let </span>(dst_end, dst_end_time) = RuleDay::parse(<span class="kw-2">&amp;mut </span>cursor, use_string_extensions)<span class="question-mark">?</span>;
 
         <span class="kw">if </span>!cursor.is_empty() {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidTzString(<span class="string">&quot;remaining data after parsing TZ string&quot;</span>));
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidTzString(<span class="string">"remaining data after parsing TZ string"</span>));
         }
 
         <span class="prelude-val">Ok</span>(AlternateTime::new(
@@ -1184,7 +1184,7 @@
         </span><span class="kw">if </span>!((dst_start_time <span class="kw">as </span>i64).abs() &lt; SECONDS_PER_WEEK
             &amp;&amp; (dst_end_time <span class="kw">as </span>i64).abs() &lt; SECONDS_PER_WEEK)
         {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::TransitionRule(<span class="string">&quot;invalid DST start or end time&quot;</span>));
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::TransitionRule(<span class="string">"invalid DST start or end time"</span>));
         }
 
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{ std, dst, dst_start, dst_start_time, dst_end, dst_end_time })
@@ -1203,7 +1203,7 @@
 
         <span class="comment">// Check if the current year is valid for the following computations
         </span><span class="kw">if </span>!(i32::min_value() + <span class="number">2 </span>&lt;= current_year &amp;&amp; current_year &lt;= i32::max_value() - <span class="number">2</span>) {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::OutOfRange(<span class="string">&quot;out of range date time&quot;</span>));
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::OutOfRange(<span class="string">"out of range date time"</span>));
         }
 
         <span class="kw">let </span>current_year_dst_start_unix_time =
@@ -1280,7 +1280,7 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw">crate</span>::LocalResult&lt;LocalTimeType&gt;, Error&gt; {
         <span class="comment">// Check if the current year is valid for the following computations
         </span><span class="kw">if </span>!(i32::min_value() + <span class="number">2 </span>&lt;= current_year &amp;&amp; current_year &lt;= i32::max_value() - <span class="number">2</span>) {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::OutOfRange(<span class="string">&quot;out of range date time&quot;</span>));
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::OutOfRange(<span class="string">"out of range date time"</span>));
         }
 
         <span class="kw">let </span>dst_start_transition_start =
@@ -1394,14 +1394,14 @@
 }
 
 <span class="doccomment">/// Parse time zone name
-</span><span class="kw">fn </span>parse_name&lt;<span class="lifetime">&#39;a</span>&gt;(cursor: <span class="kw-2">&amp;mut </span>Cursor&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8], Error&gt; {
+</span><span class="kw">fn </span>parse_name&lt;<span class="lifetime">'a</span>&gt;(cursor: <span class="kw-2">&amp;mut </span>Cursor&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8], Error&gt; {
     <span class="kw">match </span>cursor.peek() {
-        <span class="prelude-val">Some</span>(<span class="string">b&#39;&lt;&#39;</span>) =&gt; {}
+        <span class="prelude-val">Some</span>(<span class="string">b'&lt;'</span>) =&gt; {}
         <span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(cursor.read_while(u8::is_ascii_alphabetic)<span class="question-mark">?</span>),
     }
 
     cursor.read_exact(<span class="number">1</span>)<span class="question-mark">?</span>;
-    <span class="kw">let </span>unquoted = cursor.read_until(|<span class="kw-2">&amp;</span>x| x == <span class="string">b&#39;&gt;&#39;</span>)<span class="question-mark">?</span>;
+    <span class="kw">let </span>unquoted = cursor.read_until(|<span class="kw-2">&amp;</span>x| x == <span class="string">b'&gt;'</span>)<span class="question-mark">?</span>;
     cursor.read_exact(<span class="number">1</span>)<span class="question-mark">?</span>;
     <span class="prelude-val">Ok</span>(unquoted)
 }
@@ -1411,13 +1411,13 @@
     <span class="kw">let </span>(sign, hour, minute, second) = parse_signed_hhmmss(cursor)<span class="question-mark">?</span>;
 
     <span class="kw">if </span>!(<span class="number">0</span>..=<span class="number">24</span>).contains(<span class="kw-2">&amp;</span>hour) {
-        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidTzString(<span class="string">&quot;invalid offset hour&quot;</span>));
+        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidTzString(<span class="string">"invalid offset hour"</span>));
     }
     <span class="kw">if </span>!(<span class="number">0</span>..=<span class="number">59</span>).contains(<span class="kw-2">&amp;</span>minute) {
-        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidTzString(<span class="string">&quot;invalid offset minute&quot;</span>));
+        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidTzString(<span class="string">"invalid offset minute"</span>));
     }
     <span class="kw">if </span>!(<span class="number">0</span>..=<span class="number">59</span>).contains(<span class="kw-2">&amp;</span>second) {
-        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidTzString(<span class="string">&quot;invalid offset second&quot;</span>));
+        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidTzString(<span class="string">"invalid offset second"</span>));
     }
 
     <span class="prelude-val">Ok</span>(sign * (hour * <span class="number">3600 </span>+ minute * <span class="number">60 </span>+ second))
@@ -1428,13 +1428,13 @@
     <span class="kw">let </span>(hour, minute, second) = parse_hhmmss(cursor)<span class="question-mark">?</span>;
 
     <span class="kw">if </span>!(<span class="number">0</span>..=<span class="number">24</span>).contains(<span class="kw-2">&amp;</span>hour) {
-        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidTzString(<span class="string">&quot;invalid day time hour&quot;</span>));
+        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidTzString(<span class="string">"invalid day time hour"</span>));
     }
     <span class="kw">if </span>!(<span class="number">0</span>..=<span class="number">59</span>).contains(<span class="kw-2">&amp;</span>minute) {
-        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidTzString(<span class="string">&quot;invalid day time minute&quot;</span>));
+        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidTzString(<span class="string">"invalid day time minute"</span>));
     }
     <span class="kw">if </span>!(<span class="number">0</span>..=<span class="number">59</span>).contains(<span class="kw-2">&amp;</span>second) {
-        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidTzString(<span class="string">&quot;invalid day time second&quot;</span>));
+        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidTzString(<span class="string">"invalid day time second"</span>));
     }
 
     <span class="prelude-val">Ok</span>(hour * <span class="number">3600 </span>+ minute * <span class="number">60 </span>+ second)
@@ -1445,13 +1445,13 @@
     <span class="kw">let </span>(sign, hour, minute, second) = parse_signed_hhmmss(cursor)<span class="question-mark">?</span>;
 
     <span class="kw">if </span>!(-<span class="number">167</span>..=<span class="number">167</span>).contains(<span class="kw-2">&amp;</span>hour) {
-        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidTzString(<span class="string">&quot;invalid day time hour&quot;</span>));
+        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidTzString(<span class="string">"invalid day time hour"</span>));
     }
     <span class="kw">if </span>!(<span class="number">0</span>..=<span class="number">59</span>).contains(<span class="kw-2">&amp;</span>minute) {
-        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidTzString(<span class="string">&quot;invalid day time minute&quot;</span>));
+        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidTzString(<span class="string">"invalid day time minute"</span>));
     }
     <span class="kw">if </span>!(<span class="number">0</span>..=<span class="number">59</span>).contains(<span class="kw-2">&amp;</span>second) {
-        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidTzString(<span class="string">&quot;invalid day time second&quot;</span>));
+        <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidTzString(<span class="string">"invalid day time second"</span>));
     }
 
     <span class="prelude-val">Ok</span>(sign * (hour * <span class="number">3600 </span>+ minute * <span class="number">60 </span>+ second))
@@ -1464,10 +1464,10 @@
     <span class="kw">let </span><span class="kw-2">mut </span>minute = <span class="number">0</span>;
     <span class="kw">let </span><span class="kw-2">mut </span>second = <span class="number">0</span>;
 
-    <span class="kw">if </span>cursor.read_optional_tag(<span class="string">b&quot;:&quot;</span>)<span class="question-mark">? </span>{
+    <span class="kw">if </span>cursor.read_optional_tag(<span class="string">b":"</span>)<span class="question-mark">? </span>{
         minute = cursor.read_int()<span class="question-mark">?</span>;
 
-        <span class="kw">if </span>cursor.read_optional_tag(<span class="string">b&quot;:&quot;</span>)<span class="question-mark">? </span>{
+        <span class="kw">if </span>cursor.read_optional_tag(<span class="string">b":"</span>)<span class="question-mark">? </span>{
             second = cursor.read_int()<span class="question-mark">?</span>;
         }
     }
@@ -1479,9 +1479,9 @@
 </span><span class="kw">fn </span>parse_signed_hhmmss(cursor: <span class="kw-2">&amp;mut </span>Cursor) -&gt; <span class="prelude-ty">Result</span>&lt;(i32, i32, i32, i32), Error&gt; {
     <span class="kw">let </span><span class="kw-2">mut </span>sign = <span class="number">1</span>;
     <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>c) = cursor.peek() {
-        <span class="kw">if </span>c == <span class="string">b&#39;+&#39; </span>|| c == <span class="string">b&#39;-&#39; </span>{
+        <span class="kw">if </span>c == <span class="string">b'+' </span>|| c == <span class="string">b'-' </span>{
             cursor.read_exact(<span class="number">1</span>)<span class="question-mark">?</span>;
-            <span class="kw">if </span>c == <span class="string">b&#39;-&#39; </span>{
+            <span class="kw">if </span>c == <span class="string">b'-' </span>{
                 sign = -<span class="number">1</span>;
             }
         }
@@ -1513,16 +1513,16 @@
     <span class="doccomment">/// Parse transition rule
     </span><span class="kw">fn </span>parse(cursor: <span class="kw-2">&amp;mut </span>Cursor, use_string_extensions: bool) -&gt; <span class="prelude-ty">Result</span>&lt;(<span class="self">Self</span>, i32), Error&gt; {
         <span class="kw">let </span>date = <span class="kw">match </span>cursor.peek() {
-            <span class="prelude-val">Some</span>(<span class="string">b&#39;M&#39;</span>) =&gt; {
+            <span class="prelude-val">Some</span>(<span class="string">b'M'</span>) =&gt; {
                 cursor.read_exact(<span class="number">1</span>)<span class="question-mark">?</span>;
                 <span class="kw">let </span>month = cursor.read_int()<span class="question-mark">?</span>;
-                cursor.read_tag(<span class="string">b&quot;.&quot;</span>)<span class="question-mark">?</span>;
+                cursor.read_tag(<span class="string">b"."</span>)<span class="question-mark">?</span>;
                 <span class="kw">let </span>week = cursor.read_int()<span class="question-mark">?</span>;
-                cursor.read_tag(<span class="string">b&quot;.&quot;</span>)<span class="question-mark">?</span>;
+                cursor.read_tag(<span class="string">b"."</span>)<span class="question-mark">?</span>;
                 <span class="kw">let </span>week_day = cursor.read_int()<span class="question-mark">?</span>;
                 RuleDay::month_weekday(month, week, week_day)<span class="question-mark">?
             </span>}
-            <span class="prelude-val">Some</span>(<span class="string">b&#39;J&#39;</span>) =&gt; {
+            <span class="prelude-val">Some</span>(<span class="string">b'J'</span>) =&gt; {
                 cursor.read_exact(<span class="number">1</span>)<span class="question-mark">?</span>;
                 RuleDay::julian_1(cursor.read_int()<span class="question-mark">?</span>)<span class="question-mark">?
             </span>}
@@ -1531,7 +1531,7 @@
 
         <span class="prelude-val">Ok</span>((
             date,
-            <span class="kw">match </span>(cursor.read_optional_tag(<span class="string">b&quot;/&quot;</span>)<span class="question-mark">?</span>, use_string_extensions) {
+            <span class="kw">match </span>(cursor.read_optional_tag(<span class="string">b"/"</span>)<span class="question-mark">?</span>, use_string_extensions) {
                 (<span class="bool-val">false</span>, <span class="kw">_</span>) =&gt; <span class="number">2 </span>* <span class="number">3600</span>,
                 (<span class="bool-val">true</span>, <span class="bool-val">true</span>) =&gt; parse_rule_time_extended(cursor)<span class="question-mark">?</span>,
                 (<span class="bool-val">true</span>, <span class="bool-val">false</span>) =&gt; parse_rule_time(cursor)<span class="question-mark">?</span>,
@@ -1542,7 +1542,7 @@
     <span class="doccomment">/// Construct a transition rule day represented by a Julian day in `[1, 365]`, without taking occasional Feb 29 into account, which is not referenceable
     </span><span class="kw">fn </span>julian_1(julian_day_1: u16) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, Error&gt; {
         <span class="kw">if </span>!(<span class="number">1</span>..=<span class="number">365</span>).contains(<span class="kw-2">&amp;</span>julian_day_1) {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::TransitionRule(<span class="string">&quot;invalid rule day julian day&quot;</span>));
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::TransitionRule(<span class="string">"invalid rule day julian day"</span>));
         }
 
         <span class="prelude-val">Ok</span>(RuleDay::Julian1WithoutLeap(julian_day_1))
@@ -1551,7 +1551,7 @@
     <span class="doccomment">/// Construct a transition rule day represented by a zero-based Julian day in `[0, 365]`, taking occasional Feb 29 into account
     </span><span class="kw">const fn </span>julian_0(julian_day_0: u16) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, Error&gt; {
         <span class="kw">if </span>julian_day_0 &gt; <span class="number">365 </span>{
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::TransitionRule(<span class="string">&quot;invalid rule day julian day&quot;</span>));
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::TransitionRule(<span class="string">"invalid rule day julian day"</span>));
         }
 
         <span class="prelude-val">Ok</span>(RuleDay::Julian0WithLeap(julian_day_0))
@@ -1560,15 +1560,15 @@
     <span class="doccomment">/// Construct a transition rule day represented by a month, a month week and a week day
     </span><span class="kw">fn </span>month_weekday(month: u8, week: u8, week_day: u8) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, Error&gt; {
         <span class="kw">if </span>!(<span class="number">1</span>..=<span class="number">12</span>).contains(<span class="kw-2">&amp;</span>month) {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::TransitionRule(<span class="string">&quot;invalid rule day month&quot;</span>));
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::TransitionRule(<span class="string">"invalid rule day month"</span>));
         }
 
         <span class="kw">if </span>!(<span class="number">1</span>..=<span class="number">5</span>).contains(<span class="kw-2">&amp;</span>week) {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::TransitionRule(<span class="string">&quot;invalid rule day week&quot;</span>));
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::TransitionRule(<span class="string">"invalid rule day week"</span>));
         }
 
         <span class="kw">if </span>week_day &gt; <span class="number">6 </span>{
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::TransitionRule(<span class="string">&quot;invalid rule day week day&quot;</span>));
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::TransitionRule(<span class="string">"invalid rule day week day"</span>));
         }
 
         <span class="prelude-val">Ok</span>(RuleDay::MonthWeekday { month, week, week_day })
@@ -1678,7 +1678,7 @@
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>from_timespec(unix_time: i64) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, Error&gt; {
         <span class="kw">let </span>seconds = <span class="kw">match </span>unix_time.checked_sub(UNIX_OFFSET_SECS) {
             <span class="prelude-val">Some</span>(seconds) =&gt; seconds,
-            <span class="prelude-val">None </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(Error::OutOfRange(<span class="string">&quot;out of range operation&quot;</span>)),
+            <span class="prelude-val">None </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(Error::OutOfRange(<span class="string">"out of range operation"</span>)),
         };
 
         <span class="kw">let </span><span class="kw-2">mut </span>remaining_days = seconds / SECONDS_PER_DAY;
@@ -1735,7 +1735,7 @@
 
         <span class="kw">let </span>year = <span class="kw">match </span>year &gt;= i32::min_value() <span class="kw">as </span>i64 &amp;&amp; year &lt;= i32::max_value() <span class="kw">as </span>i64 {
             <span class="bool-val">true </span>=&gt; year <span class="kw">as </span>i32,
-            <span class="bool-val">false </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(Error::OutOfRange(<span class="string">&quot;i64 is out of range for i32&quot;</span>)),
+            <span class="bool-val">false </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(Error::OutOfRange(<span class="string">"i64 is out of range for i32"</span>)),
         };
 
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
@@ -1825,12 +1825,12 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_quoted() -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
-        <span class="kw">let </span>transition_rule = TransitionRule::from_tz_string(<span class="string">b&quot;&lt;-03&gt;+3&lt;+03&gt;-3,J1,J365&quot;</span>, <span class="bool-val">false</span>)<span class="question-mark">?</span>;
+        <span class="kw">let </span>transition_rule = TransitionRule::from_tz_string(<span class="string">b"&lt;-03&gt;+3&lt;+03&gt;-3,J1,J365"</span>, <span class="bool-val">false</span>)<span class="question-mark">?</span>;
         <span class="macro">assert_eq!</span>(
             transition_rule,
             AlternateTime::new(
-                LocalTimeType::new(-<span class="number">10800</span>, <span class="bool-val">false</span>, <span class="prelude-val">Some</span>(<span class="string">b&quot;-03&quot;</span>))<span class="question-mark">?</span>,
-                LocalTimeType::new(<span class="number">10800</span>, <span class="bool-val">true</span>, <span class="prelude-val">Some</span>(<span class="string">b&quot;+03&quot;</span>))<span class="question-mark">?</span>,
+                LocalTimeType::new(-<span class="number">10800</span>, <span class="bool-val">false</span>, <span class="prelude-val">Some</span>(<span class="string">b"-03"</span>))<span class="question-mark">?</span>,
+                LocalTimeType::new(<span class="number">10800</span>, <span class="bool-val">true</span>, <span class="prelude-val">Some</span>(<span class="string">b"+03"</span>))<span class="question-mark">?</span>,
                 RuleDay::julian_1(<span class="number">1</span>)<span class="question-mark">?</span>,
                 <span class="number">7200</span>,
                 RuleDay::julian_1(<span class="number">365</span>)<span class="question-mark">?</span>,
@@ -1843,13 +1843,13 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_full() -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
-        <span class="kw">let </span>tz_string = <span class="string">b&quot;NZST-12:00:00NZDT-13:00:00,M10.1.0/02:00:00,M3.3.0/02:00:00&quot;</span>;
+        <span class="kw">let </span>tz_string = <span class="string">b"NZST-12:00:00NZDT-13:00:00,M10.1.0/02:00:00,M3.3.0/02:00:00"</span>;
         <span class="kw">let </span>transition_rule = TransitionRule::from_tz_string(tz_string, <span class="bool-val">false</span>)<span class="question-mark">?</span>;
         <span class="macro">assert_eq!</span>(
             transition_rule,
             AlternateTime::new(
-                LocalTimeType::new(<span class="number">43200</span>, <span class="bool-val">false</span>, <span class="prelude-val">Some</span>(<span class="string">b&quot;NZST&quot;</span>))<span class="question-mark">?</span>,
-                LocalTimeType::new(<span class="number">46800</span>, <span class="bool-val">true</span>, <span class="prelude-val">Some</span>(<span class="string">b&quot;NZDT&quot;</span>))<span class="question-mark">?</span>,
+                LocalTimeType::new(<span class="number">43200</span>, <span class="bool-val">false</span>, <span class="prelude-val">Some</span>(<span class="string">b"NZST"</span>))<span class="question-mark">?</span>,
+                LocalTimeType::new(<span class="number">46800</span>, <span class="bool-val">true</span>, <span class="prelude-val">Some</span>(<span class="string">b"NZDT"</span>))<span class="question-mark">?</span>,
                 RuleDay::month_weekday(<span class="number">10</span>, <span class="number">1</span>, <span class="number">0</span>)<span class="question-mark">?</span>,
                 <span class="number">7200</span>,
                 RuleDay::month_weekday(<span class="number">3</span>, <span class="number">3</span>, <span class="number">0</span>)<span class="question-mark">?</span>,
@@ -1862,13 +1862,13 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_negative_dst() -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
-        <span class="kw">let </span>tz_string = <span class="string">b&quot;IST-1GMT0,M10.5.0,M3.5.0/1&quot;</span>;
+        <span class="kw">let </span>tz_string = <span class="string">b"IST-1GMT0,M10.5.0,M3.5.0/1"</span>;
         <span class="kw">let </span>transition_rule = TransitionRule::from_tz_string(tz_string, <span class="bool-val">false</span>)<span class="question-mark">?</span>;
         <span class="macro">assert_eq!</span>(
             transition_rule,
             AlternateTime::new(
-                LocalTimeType::new(<span class="number">3600</span>, <span class="bool-val">false</span>, <span class="prelude-val">Some</span>(<span class="string">b&quot;IST&quot;</span>))<span class="question-mark">?</span>,
-                LocalTimeType::new(<span class="number">0</span>, <span class="bool-val">true</span>, <span class="prelude-val">Some</span>(<span class="string">b&quot;GMT&quot;</span>))<span class="question-mark">?</span>,
+                LocalTimeType::new(<span class="number">3600</span>, <span class="bool-val">false</span>, <span class="prelude-val">Some</span>(<span class="string">b"IST"</span>))<span class="question-mark">?</span>,
+                LocalTimeType::new(<span class="number">0</span>, <span class="bool-val">true</span>, <span class="prelude-val">Some</span>(<span class="string">b"GMT"</span>))<span class="question-mark">?</span>,
                 RuleDay::month_weekday(<span class="number">10</span>, <span class="number">5</span>, <span class="number">0</span>)<span class="question-mark">?</span>,
                 <span class="number">7200</span>,
                 RuleDay::month_weekday(<span class="number">3</span>, <span class="number">5</span>, <span class="number">0</span>)<span class="question-mark">?</span>,
@@ -1881,14 +1881,14 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_negative_hour() -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
-        <span class="kw">let </span>tz_string = <span class="string">b&quot;&lt;-03&gt;3&lt;-02&gt;,M3.5.0/-2,M10.5.0/-1&quot;</span>;
+        <span class="kw">let </span>tz_string = <span class="string">b"&lt;-03&gt;3&lt;-02&gt;,M3.5.0/-2,M10.5.0/-1"</span>;
         <span class="macro">assert!</span>(TransitionRule::from_tz_string(tz_string, <span class="bool-val">false</span>).is_err());
 
         <span class="macro">assert_eq!</span>(
             TransitionRule::from_tz_string(tz_string, <span class="bool-val">true</span>)<span class="question-mark">?</span>,
             AlternateTime::new(
-                LocalTimeType::new(-<span class="number">10800</span>, <span class="bool-val">false</span>, <span class="prelude-val">Some</span>(<span class="string">b&quot;-03&quot;</span>))<span class="question-mark">?</span>,
-                LocalTimeType::new(-<span class="number">7200</span>, <span class="bool-val">true</span>, <span class="prelude-val">Some</span>(<span class="string">b&quot;-02&quot;</span>))<span class="question-mark">?</span>,
+                LocalTimeType::new(-<span class="number">10800</span>, <span class="bool-val">false</span>, <span class="prelude-val">Some</span>(<span class="string">b"-03"</span>))<span class="question-mark">?</span>,
+                LocalTimeType::new(-<span class="number">7200</span>, <span class="bool-val">true</span>, <span class="prelude-val">Some</span>(<span class="string">b"-02"</span>))<span class="question-mark">?</span>,
                 RuleDay::month_weekday(<span class="number">3</span>, <span class="number">5</span>, <span class="number">0</span>)<span class="question-mark">?</span>,
                 -<span class="number">7200</span>,
                 RuleDay::month_weekday(<span class="number">10</span>, <span class="number">5</span>, <span class="number">0</span>)<span class="question-mark">?</span>,
@@ -1901,14 +1901,14 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_all_year_dst() -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
-        <span class="kw">let </span>tz_string = <span class="string">b&quot;EST5EDT,0/0,J365/25&quot;</span>;
+        <span class="kw">let </span>tz_string = <span class="string">b"EST5EDT,0/0,J365/25"</span>;
         <span class="macro">assert!</span>(TransitionRule::from_tz_string(tz_string, <span class="bool-val">false</span>).is_err());
 
         <span class="macro">assert_eq!</span>(
             TransitionRule::from_tz_string(tz_string, <span class="bool-val">true</span>)<span class="question-mark">?</span>,
             AlternateTime::new(
-                LocalTimeType::new(-<span class="number">18000</span>, <span class="bool-val">false</span>, <span class="prelude-val">Some</span>(<span class="string">b&quot;EST&quot;</span>))<span class="question-mark">?</span>,
-                LocalTimeType::new(-<span class="number">14400</span>, <span class="bool-val">true</span>, <span class="prelude-val">Some</span>(<span class="string">b&quot;EDT&quot;</span>))<span class="question-mark">?</span>,
+                LocalTimeType::new(-<span class="number">18000</span>, <span class="bool-val">false</span>, <span class="prelude-val">Some</span>(<span class="string">b"EST"</span>))<span class="question-mark">?</span>,
+                LocalTimeType::new(-<span class="number">14400</span>, <span class="bool-val">true</span>, <span class="prelude-val">Some</span>(<span class="string">b"EDT"</span>))<span class="question-mark">?</span>,
                 RuleDay::julian_0(<span class="number">0</span>)<span class="question-mark">?</span>,
                 <span class="number">0</span>,
                 RuleDay::julian_1(<span class="number">365</span>)<span class="question-mark">?</span>,
@@ -1921,17 +1921,17 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_v3_file() -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
-        <span class="kw">let </span>bytes = <span class="string">b&quot;TZif3\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x01\0\0\0\x04\0\0\x1c\x20\0\0IST\0TZif3\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x01\0\0\0\x01\0\0\0\0\0\0\0\x01\0\0\0\x01\0\0\0\x04\0\0\0\0\x7f\xe8\x17\x80\0\0\0\x1c\x20\0\0IST\0\x01\x01\x0aIST-2IDT,M3.4.4/26,M10.5.0\x0a&quot;</span>;
+        <span class="kw">let </span>bytes = <span class="string">b"TZif3\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x01\0\0\0\x04\0\0\x1c\x20\0\0IST\0TZif3\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x01\0\0\0\x01\0\0\0\0\0\0\0\x01\0\0\0\x01\0\0\0\x04\0\0\0\0\x7f\xe8\x17\x80\0\0\0\x1c\x20\0\0IST\0\x01\x01\x0aIST-2IDT,M3.4.4/26,M10.5.0\x0a"</span>;
 
         <span class="kw">let </span>time_zone = TimeZone::from_tz_data(bytes)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>time_zone_result = TimeZone::new(
             <span class="macro">vec!</span>[Transition::new(<span class="number">2145916800</span>, <span class="number">0</span>)],
-            <span class="macro">vec!</span>[LocalTimeType::new(<span class="number">7200</span>, <span class="bool-val">false</span>, <span class="prelude-val">Some</span>(<span class="string">b&quot;IST&quot;</span>))<span class="question-mark">?</span>],
+            <span class="macro">vec!</span>[LocalTimeType::new(<span class="number">7200</span>, <span class="bool-val">false</span>, <span class="prelude-val">Some</span>(<span class="string">b"IST"</span>))<span class="question-mark">?</span>],
             Vec::new(),
             <span class="prelude-val">Some</span>(TransitionRule::from(AlternateTime::new(
-                LocalTimeType::new(<span class="number">7200</span>, <span class="bool-val">false</span>, <span class="prelude-val">Some</span>(<span class="string">b&quot;IST&quot;</span>))<span class="question-mark">?</span>,
-                LocalTimeType::new(<span class="number">10800</span>, <span class="bool-val">true</span>, <span class="prelude-val">Some</span>(<span class="string">b&quot;IDT&quot;</span>))<span class="question-mark">?</span>,
+                LocalTimeType::new(<span class="number">7200</span>, <span class="bool-val">false</span>, <span class="prelude-val">Some</span>(<span class="string">b"IST"</span>))<span class="question-mark">?</span>,
+                LocalTimeType::new(<span class="number">10800</span>, <span class="bool-val">true</span>, <span class="prelude-val">Some</span>(<span class="string">b"IDT"</span>))<span class="question-mark">?</span>,
                 RuleDay::month_weekday(<span class="number">3</span>, <span class="number">4</span>, <span class="number">4</span>)<span class="question-mark">?</span>,
                 <span class="number">93600</span>,
                 RuleDay::month_weekday(<span class="number">10</span>, <span class="number">5</span>, <span class="number">0</span>)<span class="question-mark">?</span>,
@@ -1971,8 +1971,8 @@
         <span class="macro">assert_eq!</span>(transition_rule_fixed.find_local_time_type(<span class="number">0</span>)<span class="question-mark">?</span>.offset(), -<span class="number">36000</span>);
 
         <span class="kw">let </span>transition_rule_dst = TransitionRule::from(AlternateTime::new(
-            LocalTimeType::new(<span class="number">43200</span>, <span class="bool-val">false</span>, <span class="prelude-val">Some</span>(<span class="string">b&quot;NZST&quot;</span>))<span class="question-mark">?</span>,
-            LocalTimeType::new(<span class="number">46800</span>, <span class="bool-val">true</span>, <span class="prelude-val">Some</span>(<span class="string">b&quot;NZDT&quot;</span>))<span class="question-mark">?</span>,
+            LocalTimeType::new(<span class="number">43200</span>, <span class="bool-val">false</span>, <span class="prelude-val">Some</span>(<span class="string">b"NZST"</span>))<span class="question-mark">?</span>,
+            LocalTimeType::new(<span class="number">46800</span>, <span class="bool-val">true</span>, <span class="prelude-val">Some</span>(<span class="string">b"NZDT"</span>))<span class="question-mark">?</span>,
             RuleDay::month_weekday(<span class="number">10</span>, <span class="number">1</span>, <span class="number">0</span>)<span class="question-mark">?</span>,
             <span class="number">7200</span>,
             RuleDay::month_weekday(<span class="number">3</span>, <span class="number">3</span>, <span class="number">0</span>)<span class="question-mark">?</span>,
@@ -1985,8 +1985,8 @@
         <span class="macro">assert_eq!</span>(transition_rule_dst.find_local_time_type(<span class="number">970322400</span>)<span class="question-mark">?</span>.offset(), <span class="number">46800</span>);
 
         <span class="kw">let </span>transition_rule_negative_dst = TransitionRule::from(AlternateTime::new(
-            LocalTimeType::new(<span class="number">3600</span>, <span class="bool-val">false</span>, <span class="prelude-val">Some</span>(<span class="string">b&quot;IST&quot;</span>))<span class="question-mark">?</span>,
-            LocalTimeType::new(<span class="number">0</span>, <span class="bool-val">true</span>, <span class="prelude-val">Some</span>(<span class="string">b&quot;GMT&quot;</span>))<span class="question-mark">?</span>,
+            LocalTimeType::new(<span class="number">3600</span>, <span class="bool-val">false</span>, <span class="prelude-val">Some</span>(<span class="string">b"IST"</span>))<span class="question-mark">?</span>,
+            LocalTimeType::new(<span class="number">0</span>, <span class="bool-val">true</span>, <span class="prelude-val">Some</span>(<span class="string">b"GMT"</span>))<span class="question-mark">?</span>,
             RuleDay::month_weekday(<span class="number">10</span>, <span class="number">5</span>, <span class="number">0</span>)<span class="question-mark">?</span>,
             <span class="number">7200</span>,
             RuleDay::month_weekday(<span class="number">3</span>, <span class="number">5</span>, <span class="number">0</span>)<span class="question-mark">?</span>,
@@ -2013,8 +2013,8 @@
         <span class="macro">assert!</span>(transition_rule_negative_time_1.find_local_time_type(<span class="number">8640000</span>)<span class="question-mark">?</span>.is_dst());
 
         <span class="kw">let </span>transition_rule_negative_time_2 = TransitionRule::from(AlternateTime::new(
-            LocalTimeType::new(-<span class="number">10800</span>, <span class="bool-val">false</span>, <span class="prelude-val">Some</span>(<span class="string">b&quot;-03&quot;</span>))<span class="question-mark">?</span>,
-            LocalTimeType::new(-<span class="number">7200</span>, <span class="bool-val">true</span>, <span class="prelude-val">Some</span>(<span class="string">b&quot;-02&quot;</span>))<span class="question-mark">?</span>,
+            LocalTimeType::new(-<span class="number">10800</span>, <span class="bool-val">false</span>, <span class="prelude-val">Some</span>(<span class="string">b"-03"</span>))<span class="question-mark">?</span>,
+            LocalTimeType::new(-<span class="number">7200</span>, <span class="bool-val">true</span>, <span class="prelude-val">Some</span>(<span class="string">b"-02"</span>))<span class="question-mark">?</span>,
             RuleDay::month_weekday(<span class="number">3</span>, <span class="number">5</span>, <span class="number">0</span>)<span class="question-mark">?</span>,
             -<span class="number">7200</span>,
             RuleDay::month_weekday(<span class="number">10</span>, <span class="number">5</span>, <span class="number">0</span>)<span class="question-mark">?</span>,
@@ -2039,8 +2039,8 @@
         </span>);
 
         <span class="kw">let </span>transition_rule_all_year_dst = TransitionRule::from(AlternateTime::new(
-            LocalTimeType::new(-<span class="number">18000</span>, <span class="bool-val">false</span>, <span class="prelude-val">Some</span>(<span class="string">b&quot;EST&quot;</span>))<span class="question-mark">?</span>,
-            LocalTimeType::new(-<span class="number">14400</span>, <span class="bool-val">true</span>, <span class="prelude-val">Some</span>(<span class="string">b&quot;EDT&quot;</span>))<span class="question-mark">?</span>,
+            LocalTimeType::new(-<span class="number">18000</span>, <span class="bool-val">false</span>, <span class="prelude-val">Some</span>(<span class="string">b"EST"</span>))<span class="question-mark">?</span>,
+            LocalTimeType::new(-<span class="number">14400</span>, <span class="bool-val">true</span>, <span class="prelude-val">Some</span>(<span class="string">b"EDT"</span>))<span class="question-mark">?</span>,
             RuleDay::julian_0(<span class="number">0</span>)<span class="question-mark">?</span>,
             <span class="number">0</span>,
             RuleDay::julian_1(<span class="number">365</span>)<span class="question-mark">?</span>,

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/iana-time-zone-0.1.58/src/tz_linux.rs`."><title>tz_linux.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="iana_time_zone" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/iana-time-zone-0.1.58/src/tz_linux.rs`."><title>tz_linux.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="iana_time_zone" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -192,7 +192,7 @@
 
 <span class="kw">fn </span>etc_timezone() -&gt; <span class="prelude-ty">Result</span>&lt;String, <span class="kw">crate</span>::GetTimezoneError&gt; {
     <span class="comment">// see https://stackoverflow.com/a/12523283
-    </span><span class="kw">let </span><span class="kw-2">mut </span>contents = read_to_string(<span class="string">&quot;/etc/timezone&quot;</span>)<span class="question-mark">?</span>;
+    </span><span class="kw">let </span><span class="kw-2">mut </span>contents = read_to_string(<span class="string">"/etc/timezone"</span>)<span class="question-mark">?</span>;
     <span class="comment">// Trim to the correct length without allocating.
     </span>contents.truncate(contents.trim_end().len());
     <span class="prelude-val">Ok</span>(contents)
@@ -203,27 +203,27 @@
     // “ The /etc/localtime file configures the system-wide timezone of the local system that is
     //   used by applications for presentation to the user. It should be an absolute or relative
     //   symbolic link pointing to /usr/share/zoneinfo/, followed by a timezone identifier such as
-    //   &quot;Europe/Berlin&quot; or &quot;Etc/UTC&quot;. The resulting link should lead to the corresponding binary
+    //   "Europe/Berlin" or "Etc/UTC". The resulting link should lead to the corresponding binary
     //   tzfile(5) timezone data for the configured timezone. ”
 
     // Systemd does not canonicalize the link, but only checks if it is prefixed by
-    // &quot;/usr/share/zoneinfo/&quot; or &quot;../usr/share/zoneinfo/&quot;. So we do the same.
+    // "/usr/share/zoneinfo/" or "../usr/share/zoneinfo/". So we do the same.
     // &lt;https://github.com/systemd/systemd/blob/9102c625a673a3246d7e73d8737f3494446bad4e/src/basic/time-util.c#L1493&gt;
 
     </span><span class="kw">const </span>PREFIXES: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>str] = <span class="kw-2">&amp;</span>[
-        <span class="string">&quot;/usr/share/zoneinfo/&quot;</span>,   <span class="comment">// absolute path
-        </span><span class="string">&quot;../usr/share/zoneinfo/&quot;</span>, <span class="comment">// relative path
-        </span><span class="string">&quot;/etc/zoneinfo/&quot;</span>,         <span class="comment">// absolute path for NixOS
-        </span><span class="string">&quot;../etc/zoneinfo/&quot;</span>,       <span class="comment">// relative path for NixOS
+        <span class="string">"/usr/share/zoneinfo/"</span>,   <span class="comment">// absolute path
+        </span><span class="string">"../usr/share/zoneinfo/"</span>, <span class="comment">// relative path
+        </span><span class="string">"/etc/zoneinfo/"</span>,         <span class="comment">// absolute path for NixOS
+        </span><span class="string">"../etc/zoneinfo/"</span>,       <span class="comment">// relative path for NixOS
     </span>];
-    <span class="kw">let </span><span class="kw-2">mut </span>s = read_link(<span class="string">&quot;/etc/localtime&quot;</span>)<span class="question-mark">?
+    <span class="kw">let </span><span class="kw-2">mut </span>s = read_link(<span class="string">"/etc/localtime"</span>)<span class="question-mark">?
         </span>.into_os_string()
         .into_string()
         .map_err(|<span class="kw">_</span>| <span class="kw">crate</span>::GetTimezoneError::FailedParsingString)<span class="question-mark">?</span>;
     <span class="kw">for </span><span class="kw-2">&amp;</span>prefix <span class="kw">in </span>PREFIXES {
         <span class="kw">if </span>s.starts_with(prefix) {
             <span class="comment">// Trim to the correct length without allocating.
-            </span>s.replace_range(..prefix.len(), <span class="string">&quot;&quot;</span>);
+            </span>s.replace_range(..prefix.len(), <span class="string">""</span>);
             <span class="kw">return </span><span class="prelude-val">Ok</span>(s);
         }
     }
@@ -237,12 +237,12 @@
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>etc_config_system() -&gt; <span class="prelude-ty">Result</span>&lt;String, <span class="kw">crate</span>::GetTimezoneError&gt; {
         <span class="kw">let </span>f = fs::OpenOptions::new()
             .read(<span class="bool-val">true</span>)
-            .open(<span class="string">&quot;/etc/config/system&quot;</span>)<span class="question-mark">?</span>;
+            .open(<span class="string">"/etc/config/system"</span>)<span class="question-mark">?</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>f = io::BufReader::new(f);
         <span class="kw">let </span><span class="kw-2">mut </span>in_system_section = <span class="bool-val">false</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>line = String::with_capacity(<span class="number">80</span>);
 
-        <span class="comment">// prefer option &quot;zonename&quot; (IANA time zone) over option &quot;timezone&quot; (POSIX time zone)
+        <span class="comment">// prefer option "zonename" (IANA time zone) over option "timezone" (POSIX time zone)
         </span><span class="kw">let </span><span class="kw-2">mut </span>timezone = <span class="prelude-val">None</span>;
         <span class="kw">loop </span>{
             line.clear();
@@ -255,15 +255,15 @@
             <span class="kw">let </span><span class="kw-2">mut </span>next = || iter.next().transpose();
 
             <span class="kw">if let </span><span class="prelude-val">Some</span>(keyword) = next()<span class="question-mark">? </span>{
-                <span class="kw">if </span>keyword == <span class="string">&quot;config&quot; </span>{
-                    in_system_section = next()<span class="question-mark">? </span>== <span class="prelude-val">Some</span>(<span class="string">&quot;system&quot;</span>) &amp;&amp; next()<span class="question-mark">?</span>.is_none();
-                } <span class="kw">else if </span>in_system_section &amp;&amp; keyword == <span class="string">&quot;option&quot; </span>{
+                <span class="kw">if </span>keyword == <span class="string">"config" </span>{
+                    in_system_section = next()<span class="question-mark">? </span>== <span class="prelude-val">Some</span>(<span class="string">"system"</span>) &amp;&amp; next()<span class="question-mark">?</span>.is_none();
+                } <span class="kw">else if </span>in_system_section &amp;&amp; keyword == <span class="string">"option" </span>{
                     <span class="kw">if let </span><span class="prelude-val">Some</span>(key) = next()<span class="question-mark">? </span>{
-                        <span class="kw">if </span>key == <span class="string">&quot;zonename&quot; </span>{
+                        <span class="kw">if </span>key == <span class="string">"zonename" </span>{
                             <span class="kw">if let </span>(<span class="prelude-val">Some</span>(zonename), <span class="prelude-val">None</span>) = (next()<span class="question-mark">?</span>, next()<span class="question-mark">?</span>) {
                                 <span class="kw">return </span><span class="prelude-val">Ok</span>(zonename.to_owned());
                             }
-                        } <span class="kw">else if </span>key == <span class="string">&quot;timezone&quot; </span>{
+                        } <span class="kw">else if </span>key == <span class="string">"timezone" </span>{
                             <span class="kw">if let </span>(<span class="prelude-val">Some</span>(value), <span class="prelude-val">None</span>) = (next()<span class="question-mark">?</span>, next()<span class="question-mark">?</span>) {
                                 timezone = <span class="prelude-val">Some</span>(value.to_owned());
                             }
@@ -286,10 +286,10 @@
     }
 
     <span class="doccomment">/// Iterated over all words in a OpenWRT config line.
-    </span><span class="kw">struct </span>IterWords&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str);
+    </span><span class="kw">struct </span>IterWords&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span>str);
 
-    <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>IterWords&lt;<span class="lifetime">&#39;a</span>&gt; {
-        <span class="kw">type </span>Item = <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str, BrokenQuote&gt;;
+    <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Iterator <span class="kw">for </span>IterWords&lt;<span class="lifetime">'a</span>&gt; {
+        <span class="kw">type </span>Item = <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>str, BrokenQuote&gt;;
 
         <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
             <span class="kw">match </span>read_word(<span class="self">self</span>.<span class="number">0</span>) {
@@ -298,18 +298,18 @@
                     <span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(item))
                 }
                 <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) =&gt; {
-                    <span class="self">self</span>.<span class="number">0 </span>= <span class="string">&quot;&quot;</span>;
+                    <span class="self">self</span>.<span class="number">0 </span>= <span class="string">""</span>;
                     <span class="prelude-val">None
                 </span>}
                 <span class="prelude-val">Err</span>(err) =&gt; {
-                    <span class="self">self</span>.<span class="number">0 </span>= <span class="string">&quot;&quot;</span>;
+                    <span class="self">self</span>.<span class="number">0 </span>= <span class="string">""</span>;
                     <span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(err))
                 }
             }
         }
     }
 
-    <span class="kw">impl </span>iter::FusedIterator <span class="kw">for </span>IterWords&lt;<span class="lifetime">&#39;_</span>&gt; {}
+    <span class="kw">impl </span>iter::FusedIterator <span class="kw">for </span>IterWords&lt;<span class="lifetime">'_</span>&gt; {}
 
     <span class="doccomment">/// Read the next word in a OpenWRT config line. Strip any surrounding quotation marks.
     ///
@@ -321,16 +321,16 @@
     </span><span class="attr">#[allow(clippy::manual_strip)] </span><span class="comment">// needs to be compatile to 1.36
     </span><span class="kw">fn </span>read_word(s: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;(<span class="kw-2">&amp;</span>str, <span class="kw-2">&amp;</span>str)&gt;, BrokenQuote&gt; {
         <span class="kw">let </span>s = s.trim_start();
-        <span class="kw">if </span>s.is_empty() || s.starts_with(<span class="string">&#39;#&#39;</span>) {
+        <span class="kw">if </span>s.is_empty() || s.starts_with(<span class="string">'#'</span>) {
             <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)
-        } <span class="kw">else if </span>s.starts_with(<span class="string">&#39;\&#39;&#39;</span>) {
-            <span class="kw">let </span><span class="kw-2">mut </span>iter = s[<span class="number">1</span>..].splitn(<span class="number">2</span>, <span class="string">&#39;\&#39;&#39;</span>);
+        } <span class="kw">else if </span>s.starts_with(<span class="string">'\''</span>) {
+            <span class="kw">let </span><span class="kw-2">mut </span>iter = s[<span class="number">1</span>..].splitn(<span class="number">2</span>, <span class="string">'\''</span>);
             <span class="kw">match </span>(iter.next(), iter.next()) {
                 (<span class="prelude-val">Some</span>(item), <span class="prelude-val">Some</span>(tail)) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>((item, tail))),
                 <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(BrokenQuote),
             }
-        } <span class="kw">else if </span>s.starts_with(<span class="string">&#39;&quot;&#39;</span>) {
-            <span class="kw">let </span><span class="kw-2">mut </span>iter = s[<span class="number">1</span>..].splitn(<span class="number">2</span>, <span class="string">&#39;&quot;&#39;</span>);
+        } <span class="kw">else if </span>s.starts_with(<span class="string">'"'</span>) {
+            <span class="kw">let </span><span class="kw-2">mut </span>iter = s[<span class="number">1</span>..].splitn(<span class="number">2</span>, <span class="string">'"'</span>);
             <span class="kw">match </span>(iter.next(), iter.next()) {
                 (<span class="prelude-val">Some</span>(item), <span class="prelude-val">Some</span>(tail)) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>((item, tail))),
                 <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(BrokenQuote),
@@ -339,7 +339,7 @@
             <span class="kw">let </span><span class="kw-2">mut </span>iter = s.splitn(<span class="number">2</span>, |c: char| c.is_whitespace());
             <span class="kw">match </span>(iter.next(), iter.next()) {
                 (<span class="prelude-val">Some</span>(item), <span class="prelude-val">Some</span>(tail)) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>((item, tail))),
-                <span class="kw">_ </span>=&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>((s, <span class="string">&quot;&quot;</span>))),
+                <span class="kw">_ </span>=&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>((s, <span class="string">""</span>))),
             }
         }
     }
@@ -348,22 +348,22 @@
     #[test]
     </span><span class="kw">fn </span>test_read_word() {
         <span class="macro">assert_eq!</span>(
-            read_word(<span class="string">&quot;       option timezone &#39;CST-8&#39;\n&quot;</span>).unwrap(),
-            <span class="prelude-val">Some</span>((<span class="string">&quot;option&quot;</span>, <span class="string">&quot;timezone &#39;CST-8&#39;\n&quot;</span>)),
+            read_word(<span class="string">"       option timezone 'CST-8'\n"</span>).unwrap(),
+            <span class="prelude-val">Some</span>((<span class="string">"option"</span>, <span class="string">"timezone 'CST-8'\n"</span>)),
         );
         <span class="macro">assert_eq!</span>(
-            read_word(<span class="string">&quot;timezone &#39;CST-8&#39;\n&quot;</span>).unwrap(),
-            <span class="prelude-val">Some</span>((<span class="string">&quot;timezone&quot;</span>, <span class="string">&quot;&#39;CST-8&#39;\n&quot;</span>)),
+            read_word(<span class="string">"timezone 'CST-8'\n"</span>).unwrap(),
+            <span class="prelude-val">Some</span>((<span class="string">"timezone"</span>, <span class="string">"'CST-8'\n"</span>)),
         );
-        <span class="macro">assert_eq!</span>(read_word(<span class="string">&quot;&#39;CST-8&#39;\n&quot;</span>).unwrap(), <span class="prelude-val">Some</span>((<span class="string">&quot;CST-8&quot;</span>, <span class="string">&quot;\n&quot;</span>)));
-        <span class="macro">assert_eq!</span>(read_word(<span class="string">&quot;\n&quot;</span>).unwrap(), <span class="prelude-val">None</span>);
+        <span class="macro">assert_eq!</span>(read_word(<span class="string">"'CST-8'\n"</span>).unwrap(), <span class="prelude-val">Some</span>((<span class="string">"CST-8"</span>, <span class="string">"\n"</span>)));
+        <span class="macro">assert_eq!</span>(read_word(<span class="string">"\n"</span>).unwrap(), <span class="prelude-val">None</span>);
 
         <span class="macro">assert_eq!</span>(
-            read_word(<span class="string">r#&quot;&quot;time &#39;Zone&#39;&quot;&quot;#</span>).unwrap(),
-            <span class="prelude-val">Some</span>((<span class="string">&quot;time &#39;Zone&#39;&quot;</span>, <span class="string">&quot;&quot;</span>)),
+            read_word(<span class="string">r#""time 'Zone'""#</span>).unwrap(),
+            <span class="prelude-val">Some</span>((<span class="string">"time 'Zone'"</span>, <span class="string">""</span>)),
         );
 
-        <span class="macro">assert_eq!</span>(read_word(<span class="string">&quot;&#39;CST-8&quot;</span>).unwrap_err(), BrokenQuote);
+        <span class="macro">assert_eq!</span>(read_word(<span class="string">"'CST-8"</span>).unwrap_err(), BrokenQuote);
     }
 }
 </code></pre></div></section></main></body></html>

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/socket2-0.5.5/src/sys/unix.rs`."><title>unix.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="socket2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/socket2-0.5.5/src/sys/unix.rs`."><title>unix.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="socket2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -3124,53 +3124,53 @@
 
 </span><span class="kw">use </span>std::cmp::min;
 <span class="kw">use </span>std::ffi::OsStr;
-<span class="attr">#[cfg(not(target_os = <span class="string">&quot;redox&quot;</span>))]
+<span class="attr">#[cfg(not(target_os = <span class="string">"redox"</span>))]
 </span><span class="kw">use </span>std::io::IoSlice;
 <span class="kw">use </span>std::marker::PhantomData;
 <span class="kw">use </span>std::mem::{<span class="self">self</span>, size_of, MaybeUninit};
 <span class="kw">use </span>std::net::Shutdown;
 <span class="kw">use </span>std::net::{Ipv4Addr, Ipv6Addr};
 <span class="attr">#[cfg(all(
-    feature = <span class="string">&quot;all&quot;</span>,
+    feature = <span class="string">"all"</span>,
     any(
-        target_os = <span class="string">&quot;ios&quot;</span>,
-        target_os = <span class="string">&quot;macos&quot;</span>,
-        target_os = <span class="string">&quot;tvos&quot;</span>,
-        target_os = <span class="string">&quot;watchos&quot;</span>,
+        target_os = <span class="string">"ios"</span>,
+        target_os = <span class="string">"macos"</span>,
+        target_os = <span class="string">"tvos"</span>,
+        target_os = <span class="string">"watchos"</span>,
     )
 ))]
 </span><span class="kw">use </span>std::num::NonZeroU32;
 <span class="attr">#[cfg(all(
-    feature = <span class="string">&quot;all&quot;</span>,
+    feature = <span class="string">"all"</span>,
     any(
-        target_os = <span class="string">&quot;aix&quot;</span>,
-        target_os = <span class="string">&quot;android&quot;</span>,
-        target_os = <span class="string">&quot;freebsd&quot;</span>,
-        target_os = <span class="string">&quot;ios&quot;</span>,
-        target_os = <span class="string">&quot;linux&quot;</span>,
-        target_os = <span class="string">&quot;macos&quot;</span>,
-        target_os = <span class="string">&quot;tvos&quot;</span>,
-        target_os = <span class="string">&quot;watchos&quot;</span>,
+        target_os = <span class="string">"aix"</span>,
+        target_os = <span class="string">"android"</span>,
+        target_os = <span class="string">"freebsd"</span>,
+        target_os = <span class="string">"ios"</span>,
+        target_os = <span class="string">"linux"</span>,
+        target_os = <span class="string">"macos"</span>,
+        target_os = <span class="string">"tvos"</span>,
+        target_os = <span class="string">"watchos"</span>,
     )
 ))]
 </span><span class="kw">use </span>std::num::NonZeroUsize;
 <span class="kw">use </span>std::os::unix::ffi::OsStrExt;
 <span class="attr">#[cfg(all(
-    feature = <span class="string">&quot;all&quot;</span>,
+    feature = <span class="string">"all"</span>,
     any(
-        target_os = <span class="string">&quot;aix&quot;</span>,
-        target_os = <span class="string">&quot;android&quot;</span>,
-        target_os = <span class="string">&quot;freebsd&quot;</span>,
-        target_os = <span class="string">&quot;ios&quot;</span>,
-        target_os = <span class="string">&quot;linux&quot;</span>,
-        target_os = <span class="string">&quot;macos&quot;</span>,
-        target_os = <span class="string">&quot;tvos&quot;</span>,
-        target_os = <span class="string">&quot;watchos&quot;</span>,
+        target_os = <span class="string">"aix"</span>,
+        target_os = <span class="string">"android"</span>,
+        target_os = <span class="string">"freebsd"</span>,
+        target_os = <span class="string">"ios"</span>,
+        target_os = <span class="string">"linux"</span>,
+        target_os = <span class="string">"macos"</span>,
+        target_os = <span class="string">"tvos"</span>,
+        target_os = <span class="string">"watchos"</span>,
     )
 ))]
 </span><span class="kw">use </span>std::os::unix::io::RawFd;
 <span class="kw">use </span>std::os::unix::io::{AsFd, AsRawFd, BorrowedFd, FromRawFd, IntoRawFd, OwnedFd};
-<span class="attr">#[cfg(feature = <span class="string">&quot;all&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"all"</span>)]
 </span><span class="kw">use </span>std::os::unix::net::{UnixDatagram, UnixListener, UnixStream};
 <span class="kw">use </span>std::path::Path;
 <span class="kw">use </span>std::ptr;
@@ -3178,16 +3178,16 @@
 <span class="kw">use </span>std::{io, slice};
 
 <span class="attr">#[cfg(not(any(
-    target_os = <span class="string">&quot;ios&quot;</span>,
-    target_os = <span class="string">&quot;macos&quot;</span>,
-    target_os = <span class="string">&quot;tvos&quot;</span>,
-    target_os = <span class="string">&quot;watchos&quot;</span>,
+    target_os = <span class="string">"ios"</span>,
+    target_os = <span class="string">"macos"</span>,
+    target_os = <span class="string">"tvos"</span>,
+    target_os = <span class="string">"watchos"</span>,
 )))]
 </span><span class="kw">use </span>libc::ssize_t;
 <span class="kw">use </span>libc::{in6_addr, in_addr};
 
 <span class="kw">use crate</span>::{Domain, Protocol, SockAddr, TcpKeepalive, Type};
-<span class="attr">#[cfg(not(target_os = <span class="string">&quot;redox&quot;</span>))]
+<span class="attr">#[cfg(not(target_os = <span class="string">"redox"</span>))]
 </span><span class="kw">use crate</span>::{MsgHdr, MsgHdrMut, RecvFlags};
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>libc::c_int;
@@ -3195,94 +3195,94 @@
 <span class="comment">// Used in `Domain`.
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>libc::{AF_INET, AF_INET6, AF_UNIX};
 <span class="comment">// Used in `Type`.
-</span><span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))]
+</span><span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"linux"</span>))]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>libc::SOCK_DCCP;
-<span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, not(any(target_os = <span class="string">&quot;redox&quot;</span>, target_os = <span class="string">&quot;espidf&quot;</span>))))]
+<span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, not(any(target_os = <span class="string">"redox"</span>, target_os = <span class="string">"espidf"</span>))))]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>libc::SOCK_RAW;
-<span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, not(target_os = <span class="string">&quot;espidf&quot;</span>)))]
+<span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, not(target_os = <span class="string">"espidf"</span>)))]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>libc::SOCK_SEQPACKET;
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>libc::{SOCK_DGRAM, SOCK_STREAM};
 <span class="comment">// Used in `Protocol`.
-</span><span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))]
+</span><span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"linux"</span>))]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>libc::IPPROTO_DCCP;
-<span class="attr">#[cfg(target_os = <span class="string">&quot;linux&quot;</span>)]
+<span class="attr">#[cfg(target_os = <span class="string">"linux"</span>)]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>libc::IPPROTO_MPTCP;
-<span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, any(target_os = <span class="string">&quot;freebsd&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>)))]
+<span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, any(target_os = <span class="string">"freebsd"</span>, target_os = <span class="string">"linux"</span>)))]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>libc::IPPROTO_SCTP;
 <span class="attr">#[cfg(all(
-    feature = <span class="string">&quot;all&quot;</span>,
+    feature = <span class="string">"all"</span>,
     any(
-        target_os = <span class="string">&quot;android&quot;</span>,
-        target_os = <span class="string">&quot;freebsd&quot;</span>,
-        target_os = <span class="string">&quot;fuchsia&quot;</span>,
-        target_os = <span class="string">&quot;linux&quot;</span>,
+        target_os = <span class="string">"android"</span>,
+        target_os = <span class="string">"freebsd"</span>,
+        target_os = <span class="string">"fuchsia"</span>,
+        target_os = <span class="string">"linux"</span>,
     )
 ))]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>libc::IPPROTO_UDPLITE;
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>libc::{IPPROTO_ICMP, IPPROTO_ICMPV6, IPPROTO_TCP, IPPROTO_UDP};
 <span class="comment">// Used in `SockAddr`.
-</span><span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, any(target_os = <span class="string">&quot;freebsd&quot;</span>, target_os = <span class="string">&quot;openbsd&quot;</span>)))]
+</span><span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, any(target_os = <span class="string">"freebsd"</span>, target_os = <span class="string">"openbsd"</span>)))]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>libc::IPPROTO_DIVERT;
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>libc::{
     sa_family_t, sockaddr, sockaddr_in, sockaddr_in6, sockaddr_storage, socklen_t,
 };
 <span class="comment">// Used in `RecvFlags`.
-</span><span class="attr">#[cfg(not(any(target_os = <span class="string">&quot;redox&quot;</span>, target_os = <span class="string">&quot;espidf&quot;</span>)))]
+</span><span class="attr">#[cfg(not(any(target_os = <span class="string">"redox"</span>, target_os = <span class="string">"espidf"</span>)))]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>libc::MSG_TRUNC;
-<span class="attr">#[cfg(not(target_os = <span class="string">&quot;redox&quot;</span>))]
+<span class="attr">#[cfg(not(target_os = <span class="string">"redox"</span>))]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>libc::SO_OOBINLINE;
 <span class="comment">// Used in `Socket`.
-</span><span class="attr">#[cfg(not(target_os = <span class="string">&quot;nto&quot;</span>))]
+</span><span class="attr">#[cfg(not(target_os = <span class="string">"nto"</span>))]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>libc::ipv6_mreq <span class="kw">as </span>Ipv6Mreq;
 <span class="attr">#[cfg(not(any(
-    target_os = <span class="string">&quot;dragonfly&quot;</span>,
-    target_os = <span class="string">&quot;fuchsia&quot;</span>,
-    target_os = <span class="string">&quot;illumos&quot;</span>,
-    target_os = <span class="string">&quot;netbsd&quot;</span>,
-    target_os = <span class="string">&quot;openbsd&quot;</span>,
-    target_os = <span class="string">&quot;redox&quot;</span>,
-    target_os = <span class="string">&quot;solaris&quot;</span>,
-    target_os = <span class="string">&quot;haiku&quot;</span>,
-    target_os = <span class="string">&quot;espidf&quot;</span>,
-    target_os = <span class="string">&quot;vita&quot;</span>,
+    target_os = <span class="string">"dragonfly"</span>,
+    target_os = <span class="string">"fuchsia"</span>,
+    target_os = <span class="string">"illumos"</span>,
+    target_os = <span class="string">"netbsd"</span>,
+    target_os = <span class="string">"openbsd"</span>,
+    target_os = <span class="string">"redox"</span>,
+    target_os = <span class="string">"solaris"</span>,
+    target_os = <span class="string">"haiku"</span>,
+    target_os = <span class="string">"espidf"</span>,
+    target_os = <span class="string">"vita"</span>,
 )))]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>libc::IPV6_RECVTCLASS;
-<span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, not(any(target_os = <span class="string">&quot;redox&quot;</span>, target_os = <span class="string">&quot;espidf&quot;</span>))))]
+<span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, not(any(target_os = <span class="string">"redox"</span>, target_os = <span class="string">"espidf"</span>))))]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>libc::IP_HDRINCL;
 <span class="attr">#[cfg(not(any(
-    target_os = <span class="string">&quot;aix&quot;</span>,
-    target_os = <span class="string">&quot;dragonfly&quot;</span>,
-    target_os = <span class="string">&quot;fuchsia&quot;</span>,
-    target_os = <span class="string">&quot;illumos&quot;</span>,
-    target_os = <span class="string">&quot;netbsd&quot;</span>,
-    target_os = <span class="string">&quot;openbsd&quot;</span>,
-    target_os = <span class="string">&quot;redox&quot;</span>,
-    target_os = <span class="string">&quot;solaris&quot;</span>,
-    target_os = <span class="string">&quot;haiku&quot;</span>,
-    target_os = <span class="string">&quot;nto&quot;</span>,
-    target_os = <span class="string">&quot;espidf&quot;</span>,
-    target_os = <span class="string">&quot;vita&quot;</span>,
+    target_os = <span class="string">"aix"</span>,
+    target_os = <span class="string">"dragonfly"</span>,
+    target_os = <span class="string">"fuchsia"</span>,
+    target_os = <span class="string">"illumos"</span>,
+    target_os = <span class="string">"netbsd"</span>,
+    target_os = <span class="string">"openbsd"</span>,
+    target_os = <span class="string">"redox"</span>,
+    target_os = <span class="string">"solaris"</span>,
+    target_os = <span class="string">"haiku"</span>,
+    target_os = <span class="string">"nto"</span>,
+    target_os = <span class="string">"espidf"</span>,
+    target_os = <span class="string">"vita"</span>,
 )))]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>libc::IP_RECVTOS;
 <span class="attr">#[cfg(not(any(
-    target_os = <span class="string">&quot;fuchsia&quot;</span>,
-    target_os = <span class="string">&quot;redox&quot;</span>,
-    target_os = <span class="string">&quot;solaris&quot;</span>,
-    target_os = <span class="string">&quot;illumos&quot;</span>,
+    target_os = <span class="string">"fuchsia"</span>,
+    target_os = <span class="string">"redox"</span>,
+    target_os = <span class="string">"solaris"</span>,
+    target_os = <span class="string">"illumos"</span>,
 )))]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>libc::IP_TOS;
 <span class="attr">#[cfg(not(any(
-    target_os = <span class="string">&quot;ios&quot;</span>,
-    target_os = <span class="string">&quot;macos&quot;</span>,
-    target_os = <span class="string">&quot;tvos&quot;</span>,
-    target_os = <span class="string">&quot;watchos&quot;</span>,
+    target_os = <span class="string">"ios"</span>,
+    target_os = <span class="string">"macos"</span>,
+    target_os = <span class="string">"tvos"</span>,
+    target_os = <span class="string">"watchos"</span>,
 )))]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>libc::SO_LINGER;
 <span class="attr">#[cfg(any(
-    target_os = <span class="string">&quot;ios&quot;</span>,
-    target_os = <span class="string">&quot;macos&quot;</span>,
-    target_os = <span class="string">&quot;tvos&quot;</span>,
-    target_os = <span class="string">&quot;watchos&quot;</span>,
+    target_os = <span class="string">"ios"</span>,
+    target_os = <span class="string">"macos"</span>,
+    target_os = <span class="string">"tvos"</span>,
+    target_os = <span class="string">"watchos"</span>,
 ))]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>libc::SO_LINGER_SEC <span class="kw">as </span>SO_LINGER;
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>libc::{
@@ -3293,64 +3293,64 @@
     SO_SNDTIMEO, SO_TYPE, TCP_NODELAY,
 };
 <span class="attr">#[cfg(not(any(
-    target_os = <span class="string">&quot;dragonfly&quot;</span>,
-    target_os = <span class="string">&quot;haiku&quot;</span>,
-    target_os = <span class="string">&quot;netbsd&quot;</span>,
-    target_os = <span class="string">&quot;openbsd&quot;</span>,
-    target_os = <span class="string">&quot;redox&quot;</span>,
-    target_os = <span class="string">&quot;fuchsia&quot;</span>,
-    target_os = <span class="string">&quot;nto&quot;</span>,
-    target_os = <span class="string">&quot;espidf&quot;</span>,
-    target_os = <span class="string">&quot;vita&quot;</span>,
+    target_os = <span class="string">"dragonfly"</span>,
+    target_os = <span class="string">"haiku"</span>,
+    target_os = <span class="string">"netbsd"</span>,
+    target_os = <span class="string">"openbsd"</span>,
+    target_os = <span class="string">"redox"</span>,
+    target_os = <span class="string">"fuchsia"</span>,
+    target_os = <span class="string">"nto"</span>,
+    target_os = <span class="string">"espidf"</span>,
+    target_os = <span class="string">"vita"</span>,
 )))]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>libc::{
     ip_mreq_source <span class="kw">as </span>IpMreqSource, IP_ADD_SOURCE_MEMBERSHIP, IP_DROP_SOURCE_MEMBERSHIP,
 };
 <span class="attr">#[cfg(not(any(
-    target_os = <span class="string">&quot;dragonfly&quot;</span>,
-    target_os = <span class="string">&quot;freebsd&quot;</span>,
-    target_os = <span class="string">&quot;haiku&quot;</span>,
-    target_os = <span class="string">&quot;illumos&quot;</span>,
-    target_os = <span class="string">&quot;ios&quot;</span>,
-    target_os = <span class="string">&quot;macos&quot;</span>,
-    target_os = <span class="string">&quot;netbsd&quot;</span>,
-    target_os = <span class="string">&quot;nto&quot;</span>,
-    target_os = <span class="string">&quot;openbsd&quot;</span>,
-    target_os = <span class="string">&quot;solaris&quot;</span>,
-    target_os = <span class="string">&quot;tvos&quot;</span>,
-    target_os = <span class="string">&quot;watchos&quot;</span>,
+    target_os = <span class="string">"dragonfly"</span>,
+    target_os = <span class="string">"freebsd"</span>,
+    target_os = <span class="string">"haiku"</span>,
+    target_os = <span class="string">"illumos"</span>,
+    target_os = <span class="string">"ios"</span>,
+    target_os = <span class="string">"macos"</span>,
+    target_os = <span class="string">"netbsd"</span>,
+    target_os = <span class="string">"nto"</span>,
+    target_os = <span class="string">"openbsd"</span>,
+    target_os = <span class="string">"solaris"</span>,
+    target_os = <span class="string">"tvos"</span>,
+    target_os = <span class="string">"watchos"</span>,
 )))]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>libc::{IPV6_ADD_MEMBERSHIP, IPV6_DROP_MEMBERSHIP};
 <span class="attr">#[cfg(any(
-    target_os = <span class="string">&quot;dragonfly&quot;</span>,
-    target_os = <span class="string">&quot;freebsd&quot;</span>,
-    target_os = <span class="string">&quot;haiku&quot;</span>,
-    target_os = <span class="string">&quot;illumos&quot;</span>,
-    target_os = <span class="string">&quot;ios&quot;</span>,
-    target_os = <span class="string">&quot;macos&quot;</span>,
-    target_os = <span class="string">&quot;netbsd&quot;</span>,
-    target_os = <span class="string">&quot;openbsd&quot;</span>,
-    target_os = <span class="string">&quot;solaris&quot;</span>,
-    target_os = <span class="string">&quot;tvos&quot;</span>,
-    target_os = <span class="string">&quot;watchos&quot;</span>,
+    target_os = <span class="string">"dragonfly"</span>,
+    target_os = <span class="string">"freebsd"</span>,
+    target_os = <span class="string">"haiku"</span>,
+    target_os = <span class="string">"illumos"</span>,
+    target_os = <span class="string">"ios"</span>,
+    target_os = <span class="string">"macos"</span>,
+    target_os = <span class="string">"netbsd"</span>,
+    target_os = <span class="string">"openbsd"</span>,
+    target_os = <span class="string">"solaris"</span>,
+    target_os = <span class="string">"tvos"</span>,
+    target_os = <span class="string">"watchos"</span>,
 ))]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>libc::{
     IPV6_JOIN_GROUP <span class="kw">as </span>IPV6_ADD_MEMBERSHIP, IPV6_LEAVE_GROUP <span class="kw">as </span>IPV6_DROP_MEMBERSHIP,
 };
 <span class="attr">#[cfg(all(
-    feature = <span class="string">&quot;all&quot;</span>,
+    feature = <span class="string">"all"</span>,
     any(
-        target_os = <span class="string">&quot;android&quot;</span>,
-        target_os = <span class="string">&quot;dragonfly&quot;</span>,
-        target_os = <span class="string">&quot;freebsd&quot;</span>,
-        target_os = <span class="string">&quot;fuchsia&quot;</span>,
-        target_os = <span class="string">&quot;illumos&quot;</span>,
-        target_os = <span class="string">&quot;ios&quot;</span>,
-        target_os = <span class="string">&quot;linux&quot;</span>,
-        target_os = <span class="string">&quot;macos&quot;</span>,
-        target_os = <span class="string">&quot;netbsd&quot;</span>,
-        target_os = <span class="string">&quot;tvos&quot;</span>,
-        target_os = <span class="string">&quot;watchos&quot;</span>,
+        target_os = <span class="string">"android"</span>,
+        target_os = <span class="string">"dragonfly"</span>,
+        target_os = <span class="string">"freebsd"</span>,
+        target_os = <span class="string">"fuchsia"</span>,
+        target_os = <span class="string">"illumos"</span>,
+        target_os = <span class="string">"ios"</span>,
+        target_os = <span class="string">"linux"</span>,
+        target_os = <span class="string">"macos"</span>,
+        target_os = <span class="string">"netbsd"</span>,
+        target_os = <span class="string">"tvos"</span>,
+        target_os = <span class="string">"watchos"</span>,
     )
 ))]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>libc::{TCP_KEEPCNT, TCP_KEEPINTVL};
@@ -3359,22 +3359,22 @@
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">type </span>Bool = c_int;
 
 <span class="attr">#[cfg(any(
-    target_os = <span class="string">&quot;ios&quot;</span>,
-    target_os = <span class="string">&quot;macos&quot;</span>,
-    target_os = <span class="string">&quot;nto&quot;</span>,
-    target_os = <span class="string">&quot;tvos&quot;</span>,
-    target_os = <span class="string">&quot;watchos&quot;</span>,
+    target_os = <span class="string">"ios"</span>,
+    target_os = <span class="string">"macos"</span>,
+    target_os = <span class="string">"nto"</span>,
+    target_os = <span class="string">"tvos"</span>,
+    target_os = <span class="string">"watchos"</span>,
 ))]
 </span><span class="kw">use </span>libc::TCP_KEEPALIVE <span class="kw">as </span>KEEPALIVE_TIME;
 <span class="attr">#[cfg(not(any(
-    target_os = <span class="string">&quot;haiku&quot;</span>,
-    target_os = <span class="string">&quot;ios&quot;</span>,
-    target_os = <span class="string">&quot;macos&quot;</span>,
-    target_os = <span class="string">&quot;nto&quot;</span>,
-    target_os = <span class="string">&quot;openbsd&quot;</span>,
-    target_os = <span class="string">&quot;tvos&quot;</span>,
-    target_os = <span class="string">&quot;watchos&quot;</span>,
-    target_os = <span class="string">&quot;vita&quot;</span>,
+    target_os = <span class="string">"haiku"</span>,
+    target_os = <span class="string">"ios"</span>,
+    target_os = <span class="string">"macos"</span>,
+    target_os = <span class="string">"nto"</span>,
+    target_os = <span class="string">"openbsd"</span>,
+    target_os = <span class="string">"tvos"</span>,
+    target_os = <span class="string">"watchos"</span>,
+    target_os = <span class="string">"vita"</span>,
 )))]
 </span><span class="kw">use </span>libc::TCP_KEEPIDLE <span class="kw">as </span>KEEPALIVE_TIME;
 
@@ -3393,69 +3393,69 @@
 
 <span class="doccomment">/// Maximum size of a buffer passed to system call like `recv` and `send`.
 </span><span class="attr">#[cfg(not(any(
-    target_os = <span class="string">&quot;ios&quot;</span>,
-    target_os = <span class="string">&quot;macos&quot;</span>,
-    target_os = <span class="string">&quot;tvos&quot;</span>,
-    target_os = <span class="string">&quot;watchos&quot;</span>,
+    target_os = <span class="string">"ios"</span>,
+    target_os = <span class="string">"macos"</span>,
+    target_os = <span class="string">"tvos"</span>,
+    target_os = <span class="string">"watchos"</span>,
 )))]
 </span><span class="kw">const </span>MAX_BUF_LEN: usize = ssize_t::MAX <span class="kw">as </span>usize;
 
 <span class="comment">// The maximum read limit on most posix-like systems is `SSIZE_MAX`, with the
 // man page quoting that if the count of bytes to read is greater than
-// `SSIZE_MAX` the result is &quot;unspecified&quot;.
+// `SSIZE_MAX` the result is "unspecified".
 //
 // On macOS, however, apparently the 64-bit libc is either buggy or
 // intentionally showing odd behavior by rejecting any read with a size larger
 // than or equal to INT_MAX. To handle both of these the read size is capped on
 // both platforms.
 </span><span class="attr">#[cfg(any(
-    target_os = <span class="string">&quot;ios&quot;</span>,
-    target_os = <span class="string">&quot;macos&quot;</span>,
-    target_os = <span class="string">&quot;tvos&quot;</span>,
-    target_os = <span class="string">&quot;watchos&quot;</span>,
+    target_os = <span class="string">"ios"</span>,
+    target_os = <span class="string">"macos"</span>,
+    target_os = <span class="string">"tvos"</span>,
+    target_os = <span class="string">"watchos"</span>,
 ))]
 </span><span class="kw">const </span>MAX_BUF_LEN: usize = c_int::MAX <span class="kw">as </span>usize - <span class="number">1</span>;
 
-<span class="comment">// TCP_CA_NAME_MAX isn&#39;t defined in user space include files(not in libc)
-</span><span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, any(target_os = <span class="string">&quot;freebsd&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>)))]
+<span class="comment">// TCP_CA_NAME_MAX isn't defined in user space include files(not in libc)
+</span><span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, any(target_os = <span class="string">"freebsd"</span>, target_os = <span class="string">"linux"</span>)))]
 </span><span class="kw">const </span>TCP_CA_NAME_MAX: usize = <span class="number">16</span>;
 
 <span class="attr">#[cfg(any(
     all(
-        target_os = <span class="string">&quot;linux&quot;</span>,
+        target_os = <span class="string">"linux"</span>,
         any(
-            target_env = <span class="string">&quot;gnu&quot;</span>,
-            all(target_env = <span class="string">&quot;uclibc&quot;</span>, target_pointer_width = <span class="string">&quot;64&quot;</span>)
+            target_env = <span class="string">"gnu"</span>,
+            all(target_env = <span class="string">"uclibc"</span>, target_pointer_width = <span class="string">"64"</span>)
         )
     ),
-    target_os = <span class="string">&quot;android&quot;</span>,
+    target_os = <span class="string">"android"</span>,
 ))]
 </span><span class="kw">type </span>IovLen = usize;
 
 <span class="attr">#[cfg(any(
     all(
-        target_os = <span class="string">&quot;linux&quot;</span>,
+        target_os = <span class="string">"linux"</span>,
         any(
-            target_env = <span class="string">&quot;musl&quot;</span>,
-            all(target_env = <span class="string">&quot;uclibc&quot;</span>, target_pointer_width = <span class="string">&quot;32&quot;</span>)
+            target_env = <span class="string">"musl"</span>,
+            all(target_env = <span class="string">"uclibc"</span>, target_pointer_width = <span class="string">"32"</span>)
         )
     ),
-    target_os = <span class="string">&quot;aix&quot;</span>,
-    target_os = <span class="string">&quot;dragonfly&quot;</span>,
-    target_os = <span class="string">&quot;freebsd&quot;</span>,
-    target_os = <span class="string">&quot;fuchsia&quot;</span>,
-    target_os = <span class="string">&quot;haiku&quot;</span>,
-    target_os = <span class="string">&quot;illumos&quot;</span>,
-    target_os = <span class="string">&quot;ios&quot;</span>,
-    target_os = <span class="string">&quot;macos&quot;</span>,
-    target_os = <span class="string">&quot;netbsd&quot;</span>,
-    target_os = <span class="string">&quot;nto&quot;</span>,
-    target_os = <span class="string">&quot;openbsd&quot;</span>,
-    target_os = <span class="string">&quot;solaris&quot;</span>,
-    target_os = <span class="string">&quot;tvos&quot;</span>,
-    target_os = <span class="string">&quot;watchos&quot;</span>,
-    target_os = <span class="string">&quot;espidf&quot;</span>,
-    target_os = <span class="string">&quot;vita&quot;</span>,
+    target_os = <span class="string">"aix"</span>,
+    target_os = <span class="string">"dragonfly"</span>,
+    target_os = <span class="string">"freebsd"</span>,
+    target_os = <span class="string">"fuchsia"</span>,
+    target_os = <span class="string">"haiku"</span>,
+    target_os = <span class="string">"illumos"</span>,
+    target_os = <span class="string">"ios"</span>,
+    target_os = <span class="string">"macos"</span>,
+    target_os = <span class="string">"netbsd"</span>,
+    target_os = <span class="string">"nto"</span>,
+    target_os = <span class="string">"openbsd"</span>,
+    target_os = <span class="string">"solaris"</span>,
+    target_os = <span class="string">"tvos"</span>,
+    target_os = <span class="string">"watchos"</span>,
+    target_os = <span class="string">"espidf"</span>,
+    target_os = <span class="string">"vita"</span>,
 ))]
 </span><span class="kw">type </span>IovLen = c_int;
 
@@ -3463,23 +3463,23 @@
 </span><span class="kw">impl </span>Domain {
     <span class="doccomment">/// Domain for low-level packet interface, corresponding to `AF_PACKET`.
     </span><span class="attr">#[cfg(all(
-        feature = <span class="string">&quot;all&quot;</span>,
-        any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;fuchsia&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>)
+        feature = <span class="string">"all"</span>,
+        any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"fuchsia"</span>, target_os = <span class="string">"linux"</span>)
     ))]
     #[cfg_attr(
         docsrs,
         doc(cfg(all(
-            feature = <span class="string">&quot;all&quot;</span>,
-            any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;fuchsia&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>)
+            feature = <span class="string">"all"</span>,
+            any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"fuchsia"</span>, target_os = <span class="string">"linux"</span>)
         )))
     )]
     </span><span class="kw">pub const </span>PACKET: Domain = Domain(libc::AF_PACKET);
 
     <span class="doccomment">/// Domain for low-level VSOCK interface, corresponding to `AF_VSOCK`.
-    </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>)))]
+    </span><span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"linux"</span>)))]
     #[cfg_attr(
         docsrs,
-        doc(cfg(all(feature = <span class="string">&quot;all&quot;</span>, any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))))
+        doc(cfg(all(feature = <span class="string">"all"</span>, any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"linux"</span>))))
     )]
     </span><span class="kw">pub const </span>VSOCK: Domain = Domain(libc::AF_VSOCK);
 }
@@ -3489,14 +3489,14 @@
     libc::AF_INET,
     libc::AF_INET6,
     libc::AF_UNIX,
-    <span class="attr">#[cfg(any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;fuchsia&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))]
+    <span class="attr">#[cfg(any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"fuchsia"</span>, target_os = <span class="string">"linux"</span>))]
     #[cfg_attr(
         docsrs,
-        doc(cfg(any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;fuchsia&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>)))
+        doc(cfg(any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"fuchsia"</span>, target_os = <span class="string">"linux"</span>)))
     )]
     </span>libc::AF_PACKET,
-    <span class="attr">#[cfg(any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))]
-    #[cfg_attr(docsrs, doc(cfg(any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))))]
+    <span class="attr">#[cfg(any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"linux"</span>))]
+    #[cfg_attr(docsrs, doc(cfg(any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"linux"</span>))))]
     </span>libc::AF_VSOCK,
     libc::AF_UNSPEC, <span class="comment">// = 0.
 </span>);
@@ -3505,31 +3505,31 @@
 </span><span class="kw">impl </span>Type {
     <span class="doccomment">/// Set `SOCK_NONBLOCK` on the `Type`.
     </span><span class="attr">#[cfg(all(
-        feature = <span class="string">&quot;all&quot;</span>,
+        feature = <span class="string">"all"</span>,
         any(
-            target_os = <span class="string">&quot;android&quot;</span>,
-            target_os = <span class="string">&quot;dragonfly&quot;</span>,
-            target_os = <span class="string">&quot;freebsd&quot;</span>,
-            target_os = <span class="string">&quot;fuchsia&quot;</span>,
-            target_os = <span class="string">&quot;illumos&quot;</span>,
-            target_os = <span class="string">&quot;linux&quot;</span>,
-            target_os = <span class="string">&quot;netbsd&quot;</span>,
-            target_os = <span class="string">&quot;openbsd&quot;
+            target_os = <span class="string">"android"</span>,
+            target_os = <span class="string">"dragonfly"</span>,
+            target_os = <span class="string">"freebsd"</span>,
+            target_os = <span class="string">"fuchsia"</span>,
+            target_os = <span class="string">"illumos"</span>,
+            target_os = <span class="string">"linux"</span>,
+            target_os = <span class="string">"netbsd"</span>,
+            target_os = <span class="string">"openbsd"
         </span>)
     ))]
     #[cfg_attr(
         docsrs,
         doc(cfg(all(
-            feature = <span class="string">&quot;all&quot;</span>,
+            feature = <span class="string">"all"</span>,
             any(
-                target_os = <span class="string">&quot;android&quot;</span>,
-                target_os = <span class="string">&quot;dragonfly&quot;</span>,
-                target_os = <span class="string">&quot;freebsd&quot;</span>,
-                target_os = <span class="string">&quot;fuchsia&quot;</span>,
-                target_os = <span class="string">&quot;illumos&quot;</span>,
-                target_os = <span class="string">&quot;linux&quot;</span>,
-                target_os = <span class="string">&quot;netbsd&quot;</span>,
-                target_os = <span class="string">&quot;openbsd&quot;
+                target_os = <span class="string">"android"</span>,
+                target_os = <span class="string">"dragonfly"</span>,
+                target_os = <span class="string">"freebsd"</span>,
+                target_os = <span class="string">"fuchsia"</span>,
+                target_os = <span class="string">"illumos"</span>,
+                target_os = <span class="string">"linux"</span>,
+                target_os = <span class="string">"netbsd"</span>,
+                target_os = <span class="string">"openbsd"
             </span>)
         )))
     )]
@@ -3539,35 +3539,35 @@
 
     <span class="doccomment">/// Set `SOCK_CLOEXEC` on the `Type`.
     </span><span class="attr">#[cfg(all(
-        feature = <span class="string">&quot;all&quot;</span>,
+        feature = <span class="string">"all"</span>,
         any(
-            target_os = <span class="string">&quot;android&quot;</span>,
-            target_os = <span class="string">&quot;dragonfly&quot;</span>,
-            target_os = <span class="string">&quot;freebsd&quot;</span>,
-            target_os = <span class="string">&quot;fuchsia&quot;</span>,
-            target_os = <span class="string">&quot;illumos&quot;</span>,
-            target_os = <span class="string">&quot;linux&quot;</span>,
-            target_os = <span class="string">&quot;netbsd&quot;</span>,
-            target_os = <span class="string">&quot;openbsd&quot;</span>,
-            target_os = <span class="string">&quot;redox&quot;</span>,
-            target_os = <span class="string">&quot;solaris&quot;</span>,
+            target_os = <span class="string">"android"</span>,
+            target_os = <span class="string">"dragonfly"</span>,
+            target_os = <span class="string">"freebsd"</span>,
+            target_os = <span class="string">"fuchsia"</span>,
+            target_os = <span class="string">"illumos"</span>,
+            target_os = <span class="string">"linux"</span>,
+            target_os = <span class="string">"netbsd"</span>,
+            target_os = <span class="string">"openbsd"</span>,
+            target_os = <span class="string">"redox"</span>,
+            target_os = <span class="string">"solaris"</span>,
         )
     ))]
     #[cfg_attr(
         docsrs,
         doc(cfg(all(
-            feature = <span class="string">&quot;all&quot;</span>,
+            feature = <span class="string">"all"</span>,
             any(
-                target_os = <span class="string">&quot;android&quot;</span>,
-                target_os = <span class="string">&quot;dragonfly&quot;</span>,
-                target_os = <span class="string">&quot;freebsd&quot;</span>,
-                target_os = <span class="string">&quot;fuchsia&quot;</span>,
-                target_os = <span class="string">&quot;illumos&quot;</span>,
-                target_os = <span class="string">&quot;linux&quot;</span>,
-                target_os = <span class="string">&quot;netbsd&quot;</span>,
-                target_os = <span class="string">&quot;openbsd&quot;</span>,
-                target_os = <span class="string">&quot;redox&quot;</span>,
-                target_os = <span class="string">&quot;solaris&quot;</span>,
+                target_os = <span class="string">"android"</span>,
+                target_os = <span class="string">"dragonfly"</span>,
+                target_os = <span class="string">"freebsd"</span>,
+                target_os = <span class="string">"fuchsia"</span>,
+                target_os = <span class="string">"illumos"</span>,
+                target_os = <span class="string">"linux"</span>,
+                target_os = <span class="string">"netbsd"</span>,
+                target_os = <span class="string">"openbsd"</span>,
+                target_os = <span class="string">"redox"</span>,
+                target_os = <span class="string">"solaris"</span>,
             )
         )))
     )]
@@ -3576,16 +3576,16 @@
     }
 
     <span class="attr">#[cfg(any(
-        target_os = <span class="string">&quot;android&quot;</span>,
-        target_os = <span class="string">&quot;dragonfly&quot;</span>,
-        target_os = <span class="string">&quot;freebsd&quot;</span>,
-        target_os = <span class="string">&quot;fuchsia&quot;</span>,
-        target_os = <span class="string">&quot;illumos&quot;</span>,
-        target_os = <span class="string">&quot;linux&quot;</span>,
-        target_os = <span class="string">&quot;netbsd&quot;</span>,
-        target_os = <span class="string">&quot;openbsd&quot;</span>,
-        target_os = <span class="string">&quot;redox&quot;</span>,
-        target_os = <span class="string">&quot;solaris&quot;</span>,
+        target_os = <span class="string">"android"</span>,
+        target_os = <span class="string">"dragonfly"</span>,
+        target_os = <span class="string">"freebsd"</span>,
+        target_os = <span class="string">"fuchsia"</span>,
+        target_os = <span class="string">"illumos"</span>,
+        target_os = <span class="string">"linux"</span>,
+        target_os = <span class="string">"netbsd"</span>,
+        target_os = <span class="string">"openbsd"</span>,
+        target_os = <span class="string">"redox"</span>,
+        target_os = <span class="string">"solaris"</span>,
     ))]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const fn </span>_cloexec(<span class="self">self</span>) -&gt; Type {
         Type(<span class="self">self</span>.<span class="number">0 </span>| libc::SOCK_CLOEXEC)
@@ -3596,33 +3596,33 @@
     Type,
     libc::SOCK_STREAM,
     libc::SOCK_DGRAM,
-    <span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))]
+    <span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"linux"</span>))]
     </span>libc::SOCK_DCCP,
-    <span class="attr">#[cfg(not(any(target_os = <span class="string">&quot;redox&quot;</span>, target_os = <span class="string">&quot;espidf&quot;</span>)))]
+    <span class="attr">#[cfg(not(any(target_os = <span class="string">"redox"</span>, target_os = <span class="string">"espidf"</span>)))]
     </span>libc::SOCK_RAW,
-    <span class="attr">#[cfg(not(any(target_os = <span class="string">&quot;redox&quot;</span>, target_os = <span class="string">&quot;haiku&quot;</span>, target_os = <span class="string">&quot;espidf&quot;</span>)))]
+    <span class="attr">#[cfg(not(any(target_os = <span class="string">"redox"</span>, target_os = <span class="string">"haiku"</span>, target_os = <span class="string">"espidf"</span>)))]
     </span>libc::SOCK_RDM,
-    <span class="attr">#[cfg(not(target_os = <span class="string">&quot;espidf&quot;</span>))]
+    <span class="attr">#[cfg(not(target_os = <span class="string">"espidf"</span>))]
     </span>libc::SOCK_SEQPACKET,
     <span class="comment">/* TODO: add these optional bit OR-ed flags:
     #[cfg(any(
-        target_os = &quot;android&quot;,
-        target_os = &quot;dragonfly&quot;,
-        target_os = &quot;freebsd&quot;,
-        target_os = &quot;fuchsia&quot;,
-        target_os = &quot;linux&quot;,
-        target_os = &quot;netbsd&quot;,
-        target_os = &quot;openbsd&quot;
+        target_os = "android",
+        target_os = "dragonfly",
+        target_os = "freebsd",
+        target_os = "fuchsia",
+        target_os = "linux",
+        target_os = "netbsd",
+        target_os = "openbsd"
     ))]
     libc::SOCK_NONBLOCK,
     #[cfg(any(
-        target_os = &quot;android&quot;,
-        target_os = &quot;dragonfly&quot;,
-        target_os = &quot;freebsd&quot;,
-        target_os = &quot;fuchsia&quot;,
-        target_os = &quot;linux&quot;,
-        target_os = &quot;netbsd&quot;,
-        target_os = &quot;openbsd&quot;
+        target_os = "android",
+        target_os = "dragonfly",
+        target_os = "freebsd",
+        target_os = "fuchsia",
+        target_os = "linux",
+        target_os = "netbsd",
+        target_os = "openbsd"
     ))]
     libc::SOCK_CLOEXEC,
     */
@@ -3634,28 +3634,28 @@
     libc::IPPROTO_ICMPV6,
     libc::IPPROTO_TCP,
     libc::IPPROTO_UDP,
-    <span class="attr">#[cfg(target_os = <span class="string">&quot;linux&quot;</span>)]
+    <span class="attr">#[cfg(target_os = <span class="string">"linux"</span>)]
     </span>libc::IPPROTO_MPTCP,
-    <span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))]
+    <span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"linux"</span>))]
     </span>libc::IPPROTO_DCCP,
-    <span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, any(target_os = <span class="string">&quot;freebsd&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>)))]
+    <span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, any(target_os = <span class="string">"freebsd"</span>, target_os = <span class="string">"linux"</span>)))]
     </span>libc::IPPROTO_SCTP,
     <span class="attr">#[cfg(all(
-        feature = <span class="string">&quot;all&quot;</span>,
+        feature = <span class="string">"all"</span>,
         any(
-            target_os = <span class="string">&quot;android&quot;</span>,
-            target_os = <span class="string">&quot;freebsd&quot;</span>,
-            target_os = <span class="string">&quot;fuchsia&quot;</span>,
-            target_os = <span class="string">&quot;linux&quot;</span>,
+            target_os = <span class="string">"android"</span>,
+            target_os = <span class="string">"freebsd"</span>,
+            target_os = <span class="string">"fuchsia"</span>,
+            target_os = <span class="string">"linux"</span>,
         )
     ))]
     </span>libc::IPPROTO_UDPLITE,
-    <span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, any(target_os = <span class="string">&quot;freebsd&quot;</span>, target_os = <span class="string">&quot;openbsd&quot;</span>)))]
+    <span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, any(target_os = <span class="string">"freebsd"</span>, target_os = <span class="string">"openbsd"</span>)))]
     </span>libc::IPPROTO_DIVERT,
 );
 
 <span class="doccomment">/// Unix-only API.
-</span><span class="attr">#[cfg(not(target_os = <span class="string">&quot;redox&quot;</span>))]
+</span><span class="attr">#[cfg(not(target_os = <span class="string">"redox"</span>))]
 </span><span class="kw">impl </span>RecvFlags {
     <span class="doccomment">/// Check if the message terminates a record.
     ///
@@ -3666,7 +3666,7 @@
     /// On Unix this corresponds to the `MSG_EOR` flag.
     ///
     /// [`SEQPACKET`]: Type::SEQPACKET
-    </span><span class="attr">#[cfg(not(target_os = <span class="string">&quot;espidf&quot;</span>))]
+    </span><span class="attr">#[cfg(not(target_os = <span class="string">"espidf"</span>))]
     </span><span class="kw">pub const fn </span>is_end_of_record(<span class="self">self</span>) -&gt; bool {
         <span class="self">self</span>.<span class="number">0 </span>&amp; libc::MSG_EOR != <span class="number">0
     </span>}
@@ -3682,31 +3682,31 @@
     </span>}
 }
 
-<span class="attr">#[cfg(not(target_os = <span class="string">&quot;redox&quot;</span>))]
+<span class="attr">#[cfg(not(target_os = <span class="string">"redox"</span>))]
 </span><span class="kw">impl </span>std::fmt::Debug <span class="kw">for </span>RecvFlags {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
-        <span class="kw">let </span><span class="kw-2">mut </span>s = f.debug_struct(<span class="string">&quot;RecvFlags&quot;</span>);
-        <span class="attr">#[cfg(not(target_os = <span class="string">&quot;espidf&quot;</span>))]
-        </span>s.field(<span class="string">&quot;is_end_of_record&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.is_end_of_record());
-        s.field(<span class="string">&quot;is_out_of_band&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.is_out_of_band());
-        <span class="attr">#[cfg(not(target_os = <span class="string">&quot;espidf&quot;</span>))]
-        </span>s.field(<span class="string">&quot;is_truncated&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.is_truncated());
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
+        <span class="kw">let </span><span class="kw-2">mut </span>s = f.debug_struct(<span class="string">"RecvFlags"</span>);
+        <span class="attr">#[cfg(not(target_os = <span class="string">"espidf"</span>))]
+        </span>s.field(<span class="string">"is_end_of_record"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.is_end_of_record());
+        s.field(<span class="string">"is_out_of_band"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.is_out_of_band());
+        <span class="attr">#[cfg(not(target_os = <span class="string">"espidf"</span>))]
+        </span>s.field(<span class="string">"is_truncated"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.is_truncated());
         s.finish()
     }
 }
 
 <span class="attr">#[repr(transparent)]
-</span><span class="kw">pub struct </span>MaybeUninitSlice&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>MaybeUninitSlice&lt;<span class="lifetime">'a</span>&gt; {
     vec: libc::iovec,
-    _lifetime: PhantomData&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>[MaybeUninit&lt;u8&gt;]&gt;,
+    _lifetime: PhantomData&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>[MaybeUninit&lt;u8&gt;]&gt;,
 }
 
-<span class="kw">unsafe impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Send <span class="kw">for </span>MaybeUninitSlice&lt;<span class="lifetime">&#39;a</span>&gt; {}
+<span class="kw">unsafe impl</span>&lt;<span class="lifetime">'a</span>&gt; Send <span class="kw">for </span>MaybeUninitSlice&lt;<span class="lifetime">'a</span>&gt; {}
 
-<span class="kw">unsafe impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Sync <span class="kw">for </span>MaybeUninitSlice&lt;<span class="lifetime">&#39;a</span>&gt; {}
+<span class="kw">unsafe impl</span>&lt;<span class="lifetime">'a</span>&gt; Sync <span class="kw">for </span>MaybeUninitSlice&lt;<span class="lifetime">'a</span>&gt; {}
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; MaybeUninitSlice&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(buf: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>[MaybeUninit&lt;u8&gt;]) -&gt; MaybeUninitSlice&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; MaybeUninitSlice&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(buf: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>[MaybeUninit&lt;u8&gt;]) -&gt; MaybeUninitSlice&lt;<span class="lifetime">'a</span>&gt; {
         MaybeUninitSlice {
             vec: libc::iovec {
                 iov_base: buf.as_mut_ptr().cast(),
@@ -3742,14 +3742,14 @@
         <span class="kw">let </span>bytes = path.as_os_str().as_bytes();
         <span class="kw">let </span>too_long = <span class="kw">match </span>bytes.first() {
             <span class="prelude-val">None </span>=&gt; <span class="bool-val">false</span>,
-            <span class="comment">// linux abstract namespaces aren&#39;t null-terminated
+            <span class="comment">// linux abstract namespaces aren't null-terminated
             </span><span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="number">0</span>) =&gt; bytes.len() &gt; storage.sun_path.len(),
             <span class="prelude-val">Some</span>(<span class="kw">_</span>) =&gt; bytes.len() &gt;= storage.sun_path.len(),
         };
         <span class="kw">if </span>too_long {
             <span class="kw">return </span><span class="prelude-val">Err</span>(io::Error::new(
                 io::ErrorKind::InvalidInput,
-                <span class="string">&quot;path must be shorter than SUN_LEN&quot;</span>,
+                <span class="string">"path must be shorter than SUN_LEN"</span>,
             ));
         }
 
@@ -3778,34 +3778,34 @@
 }
 
 <span class="comment">// Used in `MsgHdr`.
-</span><span class="attr">#[cfg(not(target_os = <span class="string">&quot;redox&quot;</span>))]
+</span><span class="attr">#[cfg(not(target_os = <span class="string">"redox"</span>))]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>libc::msghdr;
 
-<span class="attr">#[cfg(not(target_os = <span class="string">&quot;redox&quot;</span>))]
+<span class="attr">#[cfg(not(target_os = <span class="string">"redox"</span>))]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>set_msghdr_name(msg: <span class="kw-2">&amp;mut </span>msghdr, name: <span class="kw-2">&amp;</span>SockAddr) {
     msg.msg_name = name.as_ptr() <span class="kw">as </span><span class="kw-2">*mut </span><span class="kw">_</span>;
     msg.msg_namelen = name.len();
 }
 
-<span class="attr">#[cfg(not(target_os = <span class="string">&quot;redox&quot;</span>))]
+<span class="attr">#[cfg(not(target_os = <span class="string">"redox"</span>))]
 #[allow(clippy::unnecessary_cast)] </span><span class="comment">// IovLen type can be `usize`.
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>set_msghdr_iov(msg: <span class="kw-2">&amp;mut </span>msghdr, ptr: <span class="kw-2">*mut </span>libc::iovec, len: usize) {
     msg.msg_iov = ptr;
     msg.msg_iovlen = min(len, IovLen::MAX <span class="kw">as </span>usize) <span class="kw">as </span>IovLen;
 }
 
-<span class="attr">#[cfg(not(target_os = <span class="string">&quot;redox&quot;</span>))]
+<span class="attr">#[cfg(not(target_os = <span class="string">"redox"</span>))]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>set_msghdr_control(msg: <span class="kw-2">&amp;mut </span>msghdr, ptr: <span class="kw-2">*mut </span>libc::c_void, len: usize) {
     msg.msg_control = ptr;
     msg.msg_controllen = len <span class="kw">as _</span>;
 }
 
-<span class="attr">#[cfg(not(target_os = <span class="string">&quot;redox&quot;</span>))]
+<span class="attr">#[cfg(not(target_os = <span class="string">"redox"</span>))]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>set_msghdr_flags(msg: <span class="kw-2">&amp;mut </span>msghdr, flags: libc::c_int) {
     msg.msg_flags = flags;
 }
 
-<span class="attr">#[cfg(not(target_os = <span class="string">&quot;redox&quot;</span>))]
+<span class="attr">#[cfg(not(target_os = <span class="string">"redox"</span>))]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>msghdr_flags(msg: <span class="kw-2">&amp;</span>msghdr) -&gt; RecvFlags {
     RecvFlags(msg.msg_flags)
 }
@@ -3819,10 +3819,10 @@
     /// This function can never fail. In a future version of this library it will be made
     /// infallible.
     </span><span class="attr">#[allow(unsafe_op_in_unsafe_fn)]
-    #[cfg(all(feature = <span class="string">&quot;all&quot;</span>, any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>)))]
+    #[cfg(all(feature = <span class="string">"all"</span>, any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"linux"</span>)))]
     #[cfg_attr(
         docsrs,
-        doc(cfg(all(feature = <span class="string">&quot;all&quot;</span>, any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))))
+        doc(cfg(all(feature = <span class="string">"all"</span>, any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"linux"</span>))))
     )]
     </span><span class="kw">pub fn </span>vsock(cid: u32, port: u32) -&gt; SockAddr {
         <span class="comment">// SAFETY: a `sockaddr_storage` of all zeros is valid.
@@ -3839,10 +3839,10 @@
 
     <span class="doccomment">/// Returns this address VSOCK CID/port if it is in the `AF_VSOCK` family,
     /// otherwise return `None`.
-    </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>)))]
+    </span><span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"linux"</span>)))]
     #[cfg_attr(
         docsrs,
-        doc(cfg(all(feature = <span class="string">&quot;all&quot;</span>, any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))))
+        doc(cfg(all(feature = <span class="string">"all"</span>, any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"linux"</span>))))
     )]
     </span><span class="kw">pub fn </span>as_vsock_address(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;(u32, u32)&gt; {
         <span class="kw">if </span><span class="self">self</span>.family() == libc::AF_VSOCK <span class="kw">as </span>sa_family_t {
@@ -3862,9 +3862,9 @@
                 <span class="self">self</span>.len() == offset_of_path(storage) <span class="kw">as _
                     </span><span class="comment">// On some non-linux platforms a zeroed path is returned for unnamed.
                     // Abstract addresses only exist on Linux.
-                    // NOTE: although Fuchsia does define `AF_UNIX` it&#39;s not actually implemented.
+                    // NOTE: although Fuchsia does define `AF_UNIX` it's not actually implemented.
                     // See https://github.com/rust-lang/socket2/pull/403#discussion_r1123557978
-                    </span>|| (<span class="macro">cfg!</span>(not(any(target_os = <span class="string">&quot;linux&quot;</span>, target_os = <span class="string">&quot;android&quot;</span>)))
+                    </span>|| (<span class="macro">cfg!</span>(not(any(target_os = <span class="string">"linux"</span>, target_os = <span class="string">"android"</span>)))
                     &amp;&amp; storage.sun_path[<span class="number">0</span>] == <span class="number">0</span>)
             })
             .unwrap_or_default()
@@ -3898,7 +3898,7 @@
         // the last field in the storage and so its length is equal to
         //          TOTAL_LENGTH - OFFSET_OF_PATH -1
         // Where the 1 is either a terminating null if we have a pathname address, or the initial
-        // null byte, if it&#39;s an abstract name address. In the latter case, the path bytes start
+        // null byte, if it's an abstract name address. In the latter case, the path bytes start
         // after the initial null byte, hence the `offset`.
         // There is no safe way to convert a `&amp;[i8]` to `&amp;[u8]`
         </span><span class="kw">unsafe </span>{
@@ -3935,16 +3935,16 @@
     /// Abstract addresses are a Linux extension, so this method returns `None` on all non-Linux
     /// platforms.
     </span><span class="kw">pub fn </span>as_abstract_namespace(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>[u8]&gt; {
-        <span class="comment">// NOTE: although Fuchsia does define `AF_UNIX` it&#39;s not actually implemented.
+        <span class="comment">// NOTE: although Fuchsia does define `AF_UNIX` it's not actually implemented.
         // See https://github.com/rust-lang/socket2/pull/403#discussion_r1123557978
-        </span><span class="attr">#[cfg(any(target_os = <span class="string">&quot;linux&quot;</span>, target_os = <span class="string">&quot;android&quot;</span>))]
+        </span><span class="attr">#[cfg(any(target_os = <span class="string">"linux"</span>, target_os = <span class="string">"android"</span>))]
         </span>{
             <span class="self">self</span>.as_sockaddr_un().and_then(|storage| {
                 (<span class="self">self</span>.len() &gt; offset_of_path(storage) <span class="kw">as _ </span>&amp;&amp; storage.sun_path[<span class="number">0</span>] == <span class="number">0</span>)
                     .then(|| <span class="self">self</span>.path_bytes(storage, <span class="bool-val">true</span>))
             })
         }
-        <span class="attr">#[cfg(not(any(target_os = <span class="string">&quot;linux&quot;</span>, target_os = <span class="string">&quot;android&quot;</span>)))]
+        <span class="attr">#[cfg(not(any(target_os = <span class="string">"linux"</span>, target_os = <span class="string">"android"</span>)))]
         </span><span class="prelude-val">None
     </span>}
 }
@@ -3967,8 +3967,8 @@
     <span class="macro">syscall!</span>(socket(family, ty, protocol))
 }
 
-<span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, unix))]
-#[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">&quot;all&quot;</span>, unix))))]
+<span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, unix))]
+#[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">"all"</span>, unix))))]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>socketpair(family: c_int, ty: c_int, protocol: c_int) -&gt; io::Result&lt;[Socket; <span class="number">2</span>]&gt; {
     <span class="kw">let </span><span class="kw-2">mut </span>fds = [<span class="number">0</span>, <span class="number">0</span>];
     <span class="macro">syscall!</span>(socketpair(family, ty, protocol, fds.as_mut_ptr())).map(|<span class="kw">_</span>| fds)
@@ -4010,7 +4010,7 @@
                         <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) =&gt; {
                             <span class="kw">return </span><span class="prelude-val">Err</span>(io::Error::new(
                                 io::ErrorKind::Other,
-                                <span class="string">&quot;no error set after POLLHUP&quot;</span>,
+                                <span class="string">"no error set after POLLHUP"</span>,
                             ))
                         }
                     }
@@ -4049,20 +4049,20 @@
     <span class="macro">syscall!</span>(fcntl(fd, libc::F_DUPFD_CLOEXEC, <span class="number">0</span>))
 }
 
-<span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, unix, not(target_os = <span class="string">&quot;vita&quot;</span>)))]
+<span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, unix, not(target_os = <span class="string">"vita"</span>)))]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>nonblocking(fd: Socket) -&gt; io::Result&lt;bool&gt; {
     <span class="kw">let </span>file_status_flags = fcntl_get(fd, libc::F_GETFL)<span class="question-mark">?</span>;
     <span class="prelude-val">Ok</span>((file_status_flags &amp; libc::O_NONBLOCK) != <span class="number">0</span>)
 }
 
-<span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;vita&quot;</span>))]
+<span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"vita"</span>))]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>nonblocking(fd: Socket) -&gt; io::Result&lt;bool&gt; {
     <span class="kw">unsafe </span>{
         getsockopt::&lt;Bool&gt;(fd, libc::SOL_SOCKET, libc::SO_NONBLOCK).map(|non_block| non_block != <span class="number">0</span>)
     }
 }
 
-<span class="attr">#[cfg(not(target_os = <span class="string">&quot;vita&quot;</span>))]
+<span class="attr">#[cfg(not(target_os = <span class="string">"vita"</span>))]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>set_nonblocking(fd: Socket, nonblocking: bool) -&gt; io::Result&lt;()&gt; {
     <span class="kw">if </span>nonblocking {
         fcntl_add(fd, libc::F_GETFL, libc::F_SETFL, libc::O_NONBLOCK)
@@ -4071,7 +4071,7 @@
     }
 }
 
-<span class="attr">#[cfg(target_os = <span class="string">&quot;vita&quot;</span>)]
+<span class="attr">#[cfg(target_os = <span class="string">"vita"</span>)]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>set_nonblocking(fd: Socket, nonblocking: bool) -&gt; io::Result&lt;()&gt; {
     <span class="kw">unsafe </span>{
         setsockopt(
@@ -4132,10 +4132,10 @@
     <span class="prelude-val">Ok</span>(sender)
 }
 
-<span class="attr">#[cfg(not(target_os = <span class="string">&quot;redox&quot;</span>))]
+<span class="attr">#[cfg(not(target_os = <span class="string">"redox"</span>))]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>recv_vectored(
     fd: Socket,
-    bufs: <span class="kw-2">&amp;mut </span>[<span class="kw">crate</span>::MaybeUninitSlice&lt;<span class="lifetime">&#39;_</span>&gt;],
+    bufs: <span class="kw-2">&amp;mut </span>[<span class="kw">crate</span>::MaybeUninitSlice&lt;<span class="lifetime">'_</span>&gt;],
     flags: c_int,
 ) -&gt; io::Result&lt;(usize, RecvFlags)&gt; {
     <span class="kw">let </span><span class="kw-2">mut </span>msg = MsgHdrMut::new().with_buffers(bufs);
@@ -4143,10 +4143,10 @@
     <span class="prelude-val">Ok</span>((n, msg.flags()))
 }
 
-<span class="attr">#[cfg(not(target_os = <span class="string">&quot;redox&quot;</span>))]
+<span class="attr">#[cfg(not(target_os = <span class="string">"redox"</span>))]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>recv_from_vectored(
     fd: Socket,
-    bufs: <span class="kw-2">&amp;mut </span>[<span class="kw">crate</span>::MaybeUninitSlice&lt;<span class="lifetime">&#39;_</span>&gt;],
+    bufs: <span class="kw-2">&amp;mut </span>[<span class="kw">crate</span>::MaybeUninitSlice&lt;<span class="lifetime">'_</span>&gt;],
     flags: c_int,
 ) -&gt; io::Result&lt;(usize, RecvFlags, SockAddr)&gt; {
     <span class="kw">let </span><span class="kw-2">mut </span>msg = MsgHdrMut::new().with_buffers(bufs);
@@ -4165,10 +4165,10 @@
     <span class="prelude-val">Ok</span>((n, msg.flags(), addr))
 }
 
-<span class="attr">#[cfg(not(target_os = <span class="string">&quot;redox&quot;</span>))]
+<span class="attr">#[cfg(not(target_os = <span class="string">"redox"</span>))]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>recvmsg(
     fd: Socket,
-    msg: <span class="kw-2">&amp;mut </span>MsgHdrMut&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;,
+    msg: <span class="kw-2">&amp;mut </span>MsgHdrMut&lt;<span class="lifetime">'_</span>, <span class="lifetime">'_</span>, <span class="lifetime">'_</span>&gt;,
     flags: c_int,
 ) -&gt; io::Result&lt;usize&gt; {
     <span class="macro">syscall!</span>(recvmsg(fd, <span class="kw-2">&amp;mut </span>msg.inner, flags)).map(|n| n <span class="kw">as </span>usize)
@@ -4184,8 +4184,8 @@
     .map(|n| n <span class="kw">as </span>usize)
 }
 
-<span class="attr">#[cfg(not(target_os = <span class="string">&quot;redox&quot;</span>))]
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>send_vectored(fd: Socket, bufs: <span class="kw-2">&amp;</span>[IoSlice&lt;<span class="lifetime">&#39;_</span>&gt;], flags: c_int) -&gt; io::Result&lt;usize&gt; {
+<span class="attr">#[cfg(not(target_os = <span class="string">"redox"</span>))]
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>send_vectored(fd: Socket, bufs: <span class="kw-2">&amp;</span>[IoSlice&lt;<span class="lifetime">'_</span>&gt;], flags: c_int) -&gt; io::Result&lt;usize&gt; {
     <span class="kw">let </span>msg = MsgHdr::new().with_buffers(bufs);
     sendmsg(fd, <span class="kw-2">&amp;</span>msg, flags)
 }
@@ -4202,10 +4202,10 @@
     .map(|n| n <span class="kw">as </span>usize)
 }
 
-<span class="attr">#[cfg(not(target_os = <span class="string">&quot;redox&quot;</span>))]
+<span class="attr">#[cfg(not(target_os = <span class="string">"redox"</span>))]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>send_to_vectored(
     fd: Socket,
-    bufs: <span class="kw-2">&amp;</span>[IoSlice&lt;<span class="lifetime">&#39;_</span>&gt;],
+    bufs: <span class="kw-2">&amp;</span>[IoSlice&lt;<span class="lifetime">'_</span>&gt;],
     addr: <span class="kw-2">&amp;</span>SockAddr,
     flags: c_int,
 ) -&gt; io::Result&lt;usize&gt; {
@@ -4213,8 +4213,8 @@
     sendmsg(fd, <span class="kw-2">&amp;</span>msg, flags)
 }
 
-<span class="attr">#[cfg(not(target_os = <span class="string">&quot;redox&quot;</span>))]
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>sendmsg(fd: Socket, msg: <span class="kw-2">&amp;</span>MsgHdr&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;, flags: c_int) -&gt; io::Result&lt;usize&gt; {
+<span class="attr">#[cfg(not(target_os = <span class="string">"redox"</span>))]
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>sendmsg(fd: Socket, msg: <span class="kw-2">&amp;</span>MsgHdr&lt;<span class="lifetime">'_</span>, <span class="lifetime">'_</span>, <span class="lifetime">'_</span>&gt;, flags: c_int) -&gt; io::Result&lt;usize&gt; {
     <span class="macro">syscall!</span>(sendmsg(fd, <span class="kw-2">&amp;</span>msg.inner, flags)).map(|n| n <span class="kw">as </span>usize)
 }
 
@@ -4247,7 +4247,7 @@
 <span class="kw">fn </span>into_timeval(duration: <span class="prelude-ty">Option</span>&lt;Duration&gt;) -&gt; libc::timeval {
     <span class="kw">match </span>duration {
         <span class="comment">// https://github.com/rust-lang/libc/issues/1848
-        </span><span class="attr">#[cfg_attr(target_env = <span class="string">&quot;musl&quot;</span>, allow(deprecated))]
+        </span><span class="attr">#[cfg_attr(target_env = <span class="string">"musl"</span>, allow(deprecated))]
         </span><span class="prelude-val">Some</span>(duration) =&gt; libc::timeval {
             tv_sec: min(duration.as_secs(), libc::time_t::MAX <span class="kw">as </span>u64) <span class="kw">as </span>libc::time_t,
             tv_usec: duration.subsec_micros() <span class="kw">as </span>libc::suseconds_t,
@@ -4260,14 +4260,14 @@
 }
 
 <span class="attr">#[cfg(all(
-    feature = <span class="string">&quot;all&quot;</span>,
-    not(any(target_os = <span class="string">&quot;haiku&quot;</span>, target_os = <span class="string">&quot;openbsd&quot;</span>, target_os = <span class="string">&quot;vita&quot;</span>))
+    feature = <span class="string">"all"</span>,
+    not(any(target_os = <span class="string">"haiku"</span>, target_os = <span class="string">"openbsd"</span>, target_os = <span class="string">"vita"</span>))
 ))]
 #[cfg_attr(
     docsrs,
     doc(cfg(all(
-        feature = <span class="string">&quot;all&quot;</span>,
-        not(any(target_os = <span class="string">&quot;haiku&quot;</span>, target_os = <span class="string">&quot;openbsd&quot;</span>, target_os = <span class="string">&quot;vita&quot;</span>))
+        feature = <span class="string">"all"</span>,
+        not(any(target_os = <span class="string">"haiku"</span>, target_os = <span class="string">"openbsd"</span>, target_os = <span class="string">"vita"</span>))
     )))
 )]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>keepalive_time(fd: Socket) -&gt; io::Result&lt;Duration&gt; {
@@ -4280,10 +4280,10 @@
 <span class="attr">#[allow(unused_variables)]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>set_tcp_keepalive(fd: Socket, keepalive: <span class="kw-2">&amp;</span>TcpKeepalive) -&gt; io::Result&lt;()&gt; {
     <span class="attr">#[cfg(not(any(
-        target_os = <span class="string">&quot;haiku&quot;</span>,
-        target_os = <span class="string">&quot;openbsd&quot;</span>,
-        target_os = <span class="string">&quot;nto&quot;</span>,
-        target_os = <span class="string">&quot;vita&quot;
+        target_os = <span class="string">"haiku"</span>,
+        target_os = <span class="string">"openbsd"</span>,
+        target_os = <span class="string">"nto"</span>,
+        target_os = <span class="string">"vita"
     </span>)))]
     </span><span class="kw">if let </span><span class="prelude-val">Some</span>(time) = keepalive.time {
         <span class="kw">let </span>secs = into_secs(time);
@@ -4291,18 +4291,18 @@
     }
 
     <span class="attr">#[cfg(any(
-        target_os = <span class="string">&quot;aix&quot;</span>,
-        target_os = <span class="string">&quot;android&quot;</span>,
-        target_os = <span class="string">&quot;dragonfly&quot;</span>,
-        target_os = <span class="string">&quot;freebsd&quot;</span>,
-        target_os = <span class="string">&quot;fuchsia&quot;</span>,
-        target_os = <span class="string">&quot;illumos&quot;</span>,
-        target_os = <span class="string">&quot;ios&quot;</span>,
-        target_os = <span class="string">&quot;linux&quot;</span>,
-        target_os = <span class="string">&quot;macos&quot;</span>,
-        target_os = <span class="string">&quot;netbsd&quot;</span>,
-        target_os = <span class="string">&quot;tvos&quot;</span>,
-        target_os = <span class="string">&quot;watchos&quot;</span>,
+        target_os = <span class="string">"aix"</span>,
+        target_os = <span class="string">"android"</span>,
+        target_os = <span class="string">"dragonfly"</span>,
+        target_os = <span class="string">"freebsd"</span>,
+        target_os = <span class="string">"fuchsia"</span>,
+        target_os = <span class="string">"illumos"</span>,
+        target_os = <span class="string">"ios"</span>,
+        target_os = <span class="string">"linux"</span>,
+        target_os = <span class="string">"macos"</span>,
+        target_os = <span class="string">"netbsd"</span>,
+        target_os = <span class="string">"tvos"</span>,
+        target_os = <span class="string">"watchos"</span>,
     ))]
     </span>{
         <span class="kw">if let </span><span class="prelude-val">Some</span>(interval) = keepalive.interval {
@@ -4315,7 +4315,7 @@
         }
     }
 
-    <span class="attr">#[cfg(target_os = <span class="string">&quot;nto&quot;</span>)]
+    <span class="attr">#[cfg(target_os = <span class="string">"nto"</span>)]
     </span><span class="kw">if let </span><span class="prelude-val">Some</span>(time) = keepalive.time {
         <span class="kw">let </span>secs = into_timeval(<span class="prelude-val">Some</span>(time));
         <span class="kw">unsafe </span>{ setsockopt(fd, libc::IPPROTO_TCP, KEEPALIVE_TIME, secs)<span class="question-mark">? </span>}
@@ -4325,23 +4325,23 @@
 }
 
 <span class="attr">#[cfg(not(any(
-    target_os = <span class="string">&quot;haiku&quot;</span>,
-    target_os = <span class="string">&quot;openbsd&quot;</span>,
-    target_os = <span class="string">&quot;nto&quot;</span>,
-    target_os = <span class="string">&quot;vita&quot;
+    target_os = <span class="string">"haiku"</span>,
+    target_os = <span class="string">"openbsd"</span>,
+    target_os = <span class="string">"nto"</span>,
+    target_os = <span class="string">"vita"
 </span>)))]
 </span><span class="kw">fn </span>into_secs(duration: Duration) -&gt; c_int {
     min(duration.as_secs(), c_int::MAX <span class="kw">as </span>u64) <span class="kw">as </span>c_int
 }
 
 <span class="doccomment">/// Get the flags using `cmd`.
-</span><span class="attr">#[cfg(not(target_os = <span class="string">&quot;vita&quot;</span>))]
+</span><span class="attr">#[cfg(not(target_os = <span class="string">"vita"</span>))]
 </span><span class="kw">fn </span>fcntl_get(fd: Socket, cmd: c_int) -&gt; io::Result&lt;c_int&gt; {
     <span class="macro">syscall!</span>(fcntl(fd, cmd))
 }
 
 <span class="doccomment">/// Add `flag` to the current set flags of `F_GETFD`.
-</span><span class="attr">#[cfg(not(target_os = <span class="string">&quot;vita&quot;</span>))]
+</span><span class="attr">#[cfg(not(target_os = <span class="string">"vita"</span>))]
 </span><span class="kw">fn </span>fcntl_add(fd: Socket, get_cmd: c_int, set_cmd: c_int, flag: c_int) -&gt; io::Result&lt;()&gt; {
     <span class="kw">let </span>previous = fcntl_get(fd, get_cmd)<span class="question-mark">?</span>;
     <span class="kw">let </span>new = previous | flag;
@@ -4354,7 +4354,7 @@
 }
 
 <span class="doccomment">/// Remove `flag` to the current set flags of `F_GETFD`.
-</span><span class="attr">#[cfg(not(target_os = <span class="string">&quot;vita&quot;</span>))]
+</span><span class="attr">#[cfg(not(target_os = <span class="string">"vita"</span>))]
 </span><span class="kw">fn </span>fcntl_remove(fd: Socket, get_cmd: c_int, set_cmd: c_int, flag: c_int) -&gt; io::Result&lt;()&gt; {
     <span class="kw">let </span>previous = fcntl_get(fd, get_cmd)<span class="question-mark">?</span>;
     <span class="kw">let </span>new = previous &amp; !flag;
@@ -4404,7 +4404,7 @@
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const fn </span>to_in_addr(addr: <span class="kw-2">&amp;</span>Ipv4Addr) -&gt; in_addr {
     <span class="comment">// `s_addr` is stored as BE on all machines, and the array is in BE order.
-    // So the native endian conversion method is used so that it&#39;s never
+    // So the native endian conversion method is used so that it's never
     // swapped.
     </span>in_addr {
         s_addr: u32::from_ne_bytes(addr.octets()),
@@ -4426,16 +4426,16 @@
 }
 
 <span class="attr">#[cfg(not(any(
-    target_os = <span class="string">&quot;aix&quot;</span>,
-    target_os = <span class="string">&quot;haiku&quot;</span>,
-    target_os = <span class="string">&quot;illumos&quot;</span>,
-    target_os = <span class="string">&quot;netbsd&quot;</span>,
-    target_os = <span class="string">&quot;openbsd&quot;</span>,
-    target_os = <span class="string">&quot;redox&quot;</span>,
-    target_os = <span class="string">&quot;solaris&quot;</span>,
-    target_os = <span class="string">&quot;nto&quot;</span>,
-    target_os = <span class="string">&quot;espidf&quot;</span>,
-    target_os = <span class="string">&quot;vita&quot;</span>,
+    target_os = <span class="string">"aix"</span>,
+    target_os = <span class="string">"haiku"</span>,
+    target_os = <span class="string">"illumos"</span>,
+    target_os = <span class="string">"netbsd"</span>,
+    target_os = <span class="string">"openbsd"</span>,
+    target_os = <span class="string">"redox"</span>,
+    target_os = <span class="string">"solaris"</span>,
+    target_os = <span class="string">"nto"</span>,
+    target_os = <span class="string">"espidf"</span>,
+    target_os = <span class="string">"vita"</span>,
 )))]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const fn </span>to_mreqn(
     multiaddr: <span class="kw-2">&amp;</span>Ipv4Addr,
@@ -4463,34 +4463,34 @@
     ///
     /// This function will block the calling thread until a new connection is
     /// established. When established, the corresponding `Socket` and the remote
-    /// peer&#39;s address will be returned.
+    /// peer's address will be returned.
     </span><span class="attr">#[doc = <span class="macro">man_links!</span>(unix: accept4(<span class="number">2</span>))]
     #[cfg(all(
-        feature = <span class="string">&quot;all&quot;</span>,
+        feature = <span class="string">"all"</span>,
         any(
-            target_os = <span class="string">&quot;android&quot;</span>,
-            target_os = <span class="string">&quot;dragonfly&quot;</span>,
-            target_os = <span class="string">&quot;freebsd&quot;</span>,
-            target_os = <span class="string">&quot;fuchsia&quot;</span>,
-            target_os = <span class="string">&quot;illumos&quot;</span>,
-            target_os = <span class="string">&quot;linux&quot;</span>,
-            target_os = <span class="string">&quot;netbsd&quot;</span>,
-            target_os = <span class="string">&quot;openbsd&quot;</span>,
+            target_os = <span class="string">"android"</span>,
+            target_os = <span class="string">"dragonfly"</span>,
+            target_os = <span class="string">"freebsd"</span>,
+            target_os = <span class="string">"fuchsia"</span>,
+            target_os = <span class="string">"illumos"</span>,
+            target_os = <span class="string">"linux"</span>,
+            target_os = <span class="string">"netbsd"</span>,
+            target_os = <span class="string">"openbsd"</span>,
         )
     ))]
     #[cfg_attr(
         docsrs,
         doc(cfg(all(
-            feature = <span class="string">&quot;all&quot;</span>,
+            feature = <span class="string">"all"</span>,
             any(
-                target_os = <span class="string">&quot;android&quot;</span>,
-                target_os = <span class="string">&quot;dragonfly&quot;</span>,
-                target_os = <span class="string">&quot;freebsd&quot;</span>,
-                target_os = <span class="string">&quot;fuchsia&quot;</span>,
-                target_os = <span class="string">&quot;illumos&quot;</span>,
-                target_os = <span class="string">&quot;linux&quot;</span>,
-                target_os = <span class="string">&quot;netbsd&quot;</span>,
-                target_os = <span class="string">&quot;openbsd&quot;</span>,
+                target_os = <span class="string">"android"</span>,
+                target_os = <span class="string">"dragonfly"</span>,
+                target_os = <span class="string">"freebsd"</span>,
+                target_os = <span class="string">"fuchsia"</span>,
+                target_os = <span class="string">"illumos"</span>,
+                target_os = <span class="string">"linux"</span>,
+                target_os = <span class="string">"netbsd"</span>,
+                target_os = <span class="string">"openbsd"</span>,
             )
         )))
     )]
@@ -4499,14 +4499,14 @@
     }
 
     <span class="attr">#[cfg(any(
-        target_os = <span class="string">&quot;android&quot;</span>,
-        target_os = <span class="string">&quot;dragonfly&quot;</span>,
-        target_os = <span class="string">&quot;freebsd&quot;</span>,
-        target_os = <span class="string">&quot;fuchsia&quot;</span>,
-        target_os = <span class="string">&quot;illumos&quot;</span>,
-        target_os = <span class="string">&quot;linux&quot;</span>,
-        target_os = <span class="string">&quot;netbsd&quot;</span>,
-        target_os = <span class="string">&quot;openbsd&quot;</span>,
+        target_os = <span class="string">"android"</span>,
+        target_os = <span class="string">"dragonfly"</span>,
+        target_os = <span class="string">"freebsd"</span>,
+        target_os = <span class="string">"fuchsia"</span>,
+        target_os = <span class="string">"illumos"</span>,
+        target_os = <span class="string">"linux"</span>,
+        target_os = <span class="string">"netbsd"</span>,
+        target_os = <span class="string">"openbsd"</span>,
     ))]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>_accept4(<span class="kw-2">&amp;</span><span class="self">self</span>, flags: c_int) -&gt; io::Result&lt;(<span class="kw">crate</span>::Socket, SockAddr)&gt; {
         <span class="comment">// Safety: `accept4` initialises the `SockAddr` for us.
@@ -4525,20 +4525,20 @@
     /// On supported platforms you can use [`Type::cloexec`].
     </span><span class="attr">#[cfg_attr(
         any(
-            target_os = <span class="string">&quot;ios&quot;</span>,
-            target_os = <span class="string">&quot;macos&quot;</span>,
-            target_os = <span class="string">&quot;tvos&quot;</span>,
-            target_os = <span class="string">&quot;watchos&quot;
+            target_os = <span class="string">"ios"</span>,
+            target_os = <span class="string">"macos"</span>,
+            target_os = <span class="string">"tvos"</span>,
+            target_os = <span class="string">"watchos"
         </span>),
         allow(rustdoc::broken_intra_doc_links)
     )]
-    #[cfg(all(feature = <span class="string">&quot;all&quot;</span>, not(target_os = <span class="string">&quot;vita&quot;</span>)))]
-    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">&quot;all&quot;</span>, unix))))]
+    #[cfg(all(feature = <span class="string">"all"</span>, not(target_os = <span class="string">"vita"</span>)))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">"all"</span>, unix))))]
     </span><span class="kw">pub fn </span>set_cloexec(<span class="kw-2">&amp;</span><span class="self">self</span>, close_on_exec: bool) -&gt; io::Result&lt;()&gt; {
         <span class="self">self</span>._set_cloexec(close_on_exec)
     }
 
-    <span class="attr">#[cfg(not(target_os = <span class="string">&quot;vita&quot;</span>))]
+    <span class="attr">#[cfg(not(target_os = <span class="string">"vita"</span>))]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>_set_cloexec(<span class="kw-2">&amp;</span><span class="self">self</span>, close_on_exec: bool) -&gt; io::Result&lt;()&gt; {
         <span class="kw">if </span>close_on_exec {
             fcntl_add(
@@ -4559,23 +4559,23 @@
 
     <span class="doccomment">/// Sets `SO_NOSIGPIPE` on the socket.
     </span><span class="attr">#[cfg(all(
-        feature = <span class="string">&quot;all&quot;</span>,
+        feature = <span class="string">"all"</span>,
         any(
-            target_os = <span class="string">&quot;ios&quot;</span>,
-            target_os = <span class="string">&quot;macos&quot;</span>,
-            target_os = <span class="string">&quot;tvos&quot;</span>,
-            target_os = <span class="string">&quot;watchos&quot;</span>,
+            target_os = <span class="string">"ios"</span>,
+            target_os = <span class="string">"macos"</span>,
+            target_os = <span class="string">"tvos"</span>,
+            target_os = <span class="string">"watchos"</span>,
         )
     ))]
     #[cfg_attr(
         docsrs,
         doc(cfg(all(
-            feature = <span class="string">&quot;all&quot;</span>,
+            feature = <span class="string">"all"</span>,
             any(
-                target_os = <span class="string">&quot;ios&quot;</span>,
-                target_os = <span class="string">&quot;macos&quot;</span>,
-                target_os = <span class="string">&quot;tvos&quot;</span>,
-                target_os = <span class="string">&quot;watchos&quot;</span>,
+                target_os = <span class="string">"ios"</span>,
+                target_os = <span class="string">"macos"</span>,
+                target_os = <span class="string">"tvos"</span>,
+                target_os = <span class="string">"watchos"</span>,
             )
         )))
     )]
@@ -4584,10 +4584,10 @@
     }
 
     <span class="attr">#[cfg(any(
-        target_os = <span class="string">&quot;ios&quot;</span>,
-        target_os = <span class="string">&quot;macos&quot;</span>,
-        target_os = <span class="string">&quot;tvos&quot;</span>,
-        target_os = <span class="string">&quot;watchos&quot;</span>,
+        target_os = <span class="string">"ios"</span>,
+        target_os = <span class="string">"macos"</span>,
+        target_os = <span class="string">"tvos"</span>,
+        target_os = <span class="string">"watchos"</span>,
     ))]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>_set_nosigpipe(<span class="kw-2">&amp;</span><span class="self">self</span>, nosigpipe: bool) -&gt; io::Result&lt;()&gt; {
         <span class="kw">unsafe </span>{
@@ -4605,8 +4605,8 @@
     /// For more information about this option, see [`set_mss`].
     ///
     /// [`set_mss`]: crate::Socket::set_mss
-    </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, not(target_os = <span class="string">&quot;redox&quot;</span>)))]
-    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">&quot;all&quot;</span>, unix, not(target_os = <span class="string">&quot;redox&quot;</span>)))))]
+    </span><span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, not(target_os = <span class="string">"redox"</span>)))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">"all"</span>, unix, not(target_os = <span class="string">"redox"</span>)))))]
     </span><span class="kw">pub fn </span>mss(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; io::Result&lt;u32&gt; {
         <span class="kw">unsafe </span>{
             getsockopt::&lt;c_int&gt;(<span class="self">self</span>.as_raw(), libc::IPPROTO_TCP, libc::TCP_MAXSEG)
@@ -4618,8 +4618,8 @@
     ///
     /// The `TCP_MAXSEG` option denotes the TCP Maximum Segment Size and is only
     /// available on TCP sockets.
-    </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, not(target_os = <span class="string">&quot;redox&quot;</span>)))]
-    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">&quot;all&quot;</span>, unix, not(target_os = <span class="string">&quot;redox&quot;</span>)))))]
+    </span><span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, not(target_os = <span class="string">"redox"</span>)))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">"all"</span>, unix, not(target_os = <span class="string">"redox"</span>)))))]
     </span><span class="kw">pub fn </span>set_mss(<span class="kw-2">&amp;</span><span class="self">self</span>, mss: u32) -&gt; io::Result&lt;()&gt; {
         <span class="kw">unsafe </span>{
             setsockopt(
@@ -4634,25 +4634,25 @@
     <span class="doccomment">/// Returns `true` if `listen(2)` was called on this socket by checking the
     /// `SO_ACCEPTCONN` option on this socket.
     </span><span class="attr">#[cfg(all(
-        feature = <span class="string">&quot;all&quot;</span>,
+        feature = <span class="string">"all"</span>,
         any(
-            target_os = <span class="string">&quot;aix&quot;</span>,
-            target_os = <span class="string">&quot;android&quot;</span>,
-            target_os = <span class="string">&quot;freebsd&quot;</span>,
-            target_os = <span class="string">&quot;fuchsia&quot;</span>,
-            target_os = <span class="string">&quot;linux&quot;</span>,
+            target_os = <span class="string">"aix"</span>,
+            target_os = <span class="string">"android"</span>,
+            target_os = <span class="string">"freebsd"</span>,
+            target_os = <span class="string">"fuchsia"</span>,
+            target_os = <span class="string">"linux"</span>,
         )
     ))]
     #[cfg_attr(
         docsrs,
         doc(cfg(all(
-            feature = <span class="string">&quot;all&quot;</span>,
+            feature = <span class="string">"all"</span>,
             any(
-                target_os = <span class="string">&quot;aix&quot;</span>,
-                target_os = <span class="string">&quot;android&quot;</span>,
-                target_os = <span class="string">&quot;freebsd&quot;</span>,
-                target_os = <span class="string">&quot;fuchsia&quot;</span>,
-                target_os = <span class="string">&quot;linux&quot;</span>,
+                target_os = <span class="string">"aix"</span>,
+                target_os = <span class="string">"android"</span>,
+                target_os = <span class="string">"freebsd"</span>,
+                target_os = <span class="string">"fuchsia"</span>,
+                target_os = <span class="string">"linux"</span>,
             )
         )))
     )]
@@ -4666,23 +4666,23 @@
     <span class="doccomment">/// Returns the [`Domain`] of this socket by checking the `SO_DOMAIN` option
     /// on this socket.
     </span><span class="attr">#[cfg(all(
-        feature = <span class="string">&quot;all&quot;</span>,
+        feature = <span class="string">"all"</span>,
         any(
-            target_os = <span class="string">&quot;android&quot;</span>,
+            target_os = <span class="string">"android"</span>,
             <span class="comment">// TODO: add FreeBSD.
-            // target_os = &quot;freebsd&quot;,
-            </span>target_os = <span class="string">&quot;fuchsia&quot;</span>,
-            target_os = <span class="string">&quot;linux&quot;</span>,
+            // target_os = "freebsd",
+            </span>target_os = <span class="string">"fuchsia"</span>,
+            target_os = <span class="string">"linux"</span>,
         )
     ))]
     #[cfg_attr(docsrs, doc(cfg(all(
-        feature = <span class="string">&quot;all&quot;</span>,
+        feature = <span class="string">"all"</span>,
         any(
-            target_os = <span class="string">&quot;android&quot;</span>,
+            target_os = <span class="string">"android"</span>,
             <span class="comment">// TODO: add FreeBSD.
-            // target_os = &quot;freebsd&quot;,
-            </span>target_os = <span class="string">&quot;fuchsia&quot;</span>,
-            target_os = <span class="string">&quot;linux&quot;</span>,
+            // target_os = "freebsd",
+            </span>target_os = <span class="string">"fuchsia"</span>,
+            target_os = <span class="string">"linux"</span>,
         )
     ))))]
     </span><span class="kw">pub fn </span>domain(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; io::Result&lt;Domain&gt; {
@@ -4692,23 +4692,23 @@
     <span class="doccomment">/// Returns the [`Protocol`] of this socket by checking the `SO_PROTOCOL`
     /// option on this socket.
     </span><span class="attr">#[cfg(all(
-        feature = <span class="string">&quot;all&quot;</span>,
+        feature = <span class="string">"all"</span>,
         any(
-            target_os = <span class="string">&quot;android&quot;</span>,
-            target_os = <span class="string">&quot;freebsd&quot;</span>,
-            target_os = <span class="string">&quot;fuchsia&quot;</span>,
-            target_os = <span class="string">&quot;linux&quot;</span>,
+            target_os = <span class="string">"android"</span>,
+            target_os = <span class="string">"freebsd"</span>,
+            target_os = <span class="string">"fuchsia"</span>,
+            target_os = <span class="string">"linux"</span>,
         )
     ))]
     #[cfg_attr(
         docsrs,
         doc(cfg(all(
-            feature = <span class="string">&quot;all&quot;</span>,
+            feature = <span class="string">"all"</span>,
             any(
-                target_os = <span class="string">&quot;android&quot;</span>,
-                target_os = <span class="string">&quot;freebsd&quot;</span>,
-                target_os = <span class="string">&quot;fuchsia&quot;</span>,
-                target_os = <span class="string">&quot;linux&quot;</span>,
+                target_os = <span class="string">"android"</span>,
+                target_os = <span class="string">"freebsd"</span>,
+                target_os = <span class="string">"fuchsia"</span>,
+                target_os = <span class="string">"linux"</span>,
             )
         )))
     )]
@@ -4729,14 +4729,14 @@
     ///
     /// On Linux this function requires the `CAP_NET_ADMIN` capability.
     </span><span class="attr">#[cfg(all(
-        feature = <span class="string">&quot;all&quot;</span>,
-        any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;fuchsia&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>)
+        feature = <span class="string">"all"</span>,
+        any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"fuchsia"</span>, target_os = <span class="string">"linux"</span>)
     ))]
     #[cfg_attr(
         docsrs,
         doc(cfg(all(
-            feature = <span class="string">&quot;all&quot;</span>,
-            any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;fuchsia&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>)
+            feature = <span class="string">"all"</span>,
+            any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"fuchsia"</span>, target_os = <span class="string">"linux"</span>)
         )))
     )]
     </span><span class="kw">pub fn </span>mark(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; io::Result&lt;u32&gt; {
@@ -4754,14 +4754,14 @@
     ///
     /// On Linux this function requires the `CAP_NET_ADMIN` capability.
     </span><span class="attr">#[cfg(all(
-        feature = <span class="string">&quot;all&quot;</span>,
-        any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;fuchsia&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>)
+        feature = <span class="string">"all"</span>,
+        any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"fuchsia"</span>, target_os = <span class="string">"linux"</span>)
     ))]
     #[cfg_attr(
         docsrs,
         doc(cfg(all(
-            feature = <span class="string">&quot;all&quot;</span>,
-            any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;fuchsia&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>)
+            feature = <span class="string">"all"</span>,
+            any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"fuchsia"</span>, target_os = <span class="string">"linux"</span>)
         )))
     )]
     </span><span class="kw">pub fn </span>set_mark(<span class="kw-2">&amp;</span><span class="self">self</span>, mark: u32) -&gt; io::Result&lt;()&gt; {
@@ -4781,14 +4781,14 @@
     ///
     /// [`set_cork`]: crate::Socket::set_cork
     </span><span class="attr">#[cfg(all(
-        feature = <span class="string">&quot;all&quot;</span>,
-        any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;fuchsia&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>)
+        feature = <span class="string">"all"</span>,
+        any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"fuchsia"</span>, target_os = <span class="string">"linux"</span>)
     ))]
     #[cfg_attr(
         docsrs,
         doc(cfg(all(
-            feature = <span class="string">&quot;all&quot;</span>,
-            any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;fuchsia&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>)
+            feature = <span class="string">"all"</span>,
+            any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"fuchsia"</span>, target_os = <span class="string">"linux"</span>)
         )))
     )]
     </span><span class="kw">pub fn </span>cork(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; io::Result&lt;bool&gt; {
@@ -4800,19 +4800,19 @@
 
     <span class="doccomment">/// Set the value of the `TCP_CORK` option on this socket.
     ///
-    /// If set, don&#39;t send out partial frames. All queued partial frames are
+    /// If set, don't send out partial frames. All queued partial frames are
     /// sent when the option is cleared again. There is a 200 millisecond ceiling on
     /// the time for which output is corked by `TCP_CORK`. If this ceiling is reached,
     /// then queued data is automatically transmitted.
     </span><span class="attr">#[cfg(all(
-        feature = <span class="string">&quot;all&quot;</span>,
-        any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;fuchsia&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>)
+        feature = <span class="string">"all"</span>,
+        any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"fuchsia"</span>, target_os = <span class="string">"linux"</span>)
     ))]
     #[cfg_attr(
         docsrs,
         doc(cfg(all(
-            feature = <span class="string">&quot;all&quot;</span>,
-            any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;fuchsia&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>)
+            feature = <span class="string">"all"</span>,
+            any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"fuchsia"</span>, target_os = <span class="string">"linux"</span>)
         )))
     )]
     </span><span class="kw">pub fn </span>set_cork(<span class="kw-2">&amp;</span><span class="self">self</span>, cork: bool) -&gt; io::Result&lt;()&gt; {
@@ -4832,14 +4832,14 @@
     ///
     /// [`set_quickack`]: crate::Socket::set_quickack
     </span><span class="attr">#[cfg(all(
-        feature = <span class="string">&quot;all&quot;</span>,
-        any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;fuchsia&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>)
+        feature = <span class="string">"all"</span>,
+        any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"fuchsia"</span>, target_os = <span class="string">"linux"</span>)
     ))]
     #[cfg_attr(
         docsrs,
         doc(cfg(all(
-            feature = <span class="string">&quot;all&quot;</span>,
-            any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;fuchsia&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>)
+            feature = <span class="string">"all"</span>,
+            any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"fuchsia"</span>, target_os = <span class="string">"linux"</span>)
         )))
     )]
     </span><span class="kw">pub fn </span>quickack(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; io::Result&lt;bool&gt; {
@@ -4856,14 +4856,14 @@
     /// Subsequent operation of the TCP protocol will once again enter/leave quickack mode depending on
     /// internal protocol processing and factors such as delayed ack timeouts occurring and data transfer.
     </span><span class="attr">#[cfg(all(
-        feature = <span class="string">&quot;all&quot;</span>,
-        any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;fuchsia&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>)
+        feature = <span class="string">"all"</span>,
+        any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"fuchsia"</span>, target_os = <span class="string">"linux"</span>)
     ))]
     #[cfg_attr(
         docsrs,
         doc(cfg(all(
-            feature = <span class="string">&quot;all&quot;</span>,
-            any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;fuchsia&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>)
+            feature = <span class="string">"all"</span>,
+            any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"fuchsia"</span>, target_os = <span class="string">"linux"</span>)
         )))
     )]
     </span><span class="kw">pub fn </span>set_quickack(<span class="kw-2">&amp;</span><span class="self">self</span>, quickack: bool) -&gt; io::Result&lt;()&gt; {
@@ -4883,14 +4883,14 @@
     ///
     /// [`set_thin_linear_timeouts`]: crate::Socket::set_thin_linear_timeouts
     </span><span class="attr">#[cfg(all(
-        feature = <span class="string">&quot;all&quot;</span>,
-        any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;fuchsia&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>)
+        feature = <span class="string">"all"</span>,
+        any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"fuchsia"</span>, target_os = <span class="string">"linux"</span>)
     ))]
     #[cfg_attr(
         docsrs,
         doc(cfg(all(
-            feature = <span class="string">&quot;all&quot;</span>,
-            any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;fuchsia&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>)
+            feature = <span class="string">"all"</span>,
+            any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"fuchsia"</span>, target_os = <span class="string">"linux"</span>)
         )))
     )]
     </span><span class="kw">pub fn </span>thin_linear_timeouts(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; io::Result&lt;bool&gt; {
@@ -4910,14 +4910,14 @@
     /// With less than four packets in flight the normal TCP fast retransmission will not be effective.
     /// The kernel will modify the retransmission to avoid the very high latencies that thin stream suffer because of exponential backoff.
     </span><span class="attr">#[cfg(all(
-        feature = <span class="string">&quot;all&quot;</span>,
-        any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;fuchsia&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>)
+        feature = <span class="string">"all"</span>,
+        any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"fuchsia"</span>, target_os = <span class="string">"linux"</span>)
     ))]
     #[cfg_attr(
         docsrs,
         doc(cfg(all(
-            feature = <span class="string">&quot;all&quot;</span>,
-            any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;fuchsia&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>)
+            feature = <span class="string">"all"</span>,
+            any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"fuchsia"</span>, target_os = <span class="string">"linux"</span>)
         )))
     )]
     </span><span class="kw">pub fn </span>set_thin_linear_timeouts(<span class="kw-2">&amp;</span><span class="self">self</span>, timeouts: bool) -&gt; io::Result&lt;()&gt; {
@@ -4933,16 +4933,16 @@
 
     <span class="doccomment">/// Gets the value for the `SO_BINDTODEVICE` option on this socket.
     ///
-    /// This value gets the socket binded device&#39;s interface name.
+    /// This value gets the socket binded device's interface name.
     </span><span class="attr">#[cfg(all(
-        feature = <span class="string">&quot;all&quot;</span>,
-        any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;fuchsia&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>)
+        feature = <span class="string">"all"</span>,
+        any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"fuchsia"</span>, target_os = <span class="string">"linux"</span>)
     ))]
     #[cfg_attr(
         docsrs,
         doc(cfg(all(
-            feature = <span class="string">&quot;all&quot;</span>,
-            any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;fuchsia&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>)
+            feature = <span class="string">"all"</span>,
+            any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"fuchsia"</span>, target_os = <span class="string">"linux"</span>)
         )))
     )]
     </span><span class="kw">pub fn </span>device(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; io::Result&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;&gt; {
@@ -4974,14 +4974,14 @@
     ///
     /// If `interface` is `None` or an empty string it removes the binding.
     </span><span class="attr">#[cfg(all(
-        feature = <span class="string">&quot;all&quot;</span>,
-        any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;fuchsia&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>)
+        feature = <span class="string">"all"</span>,
+        any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"fuchsia"</span>, target_os = <span class="string">"linux"</span>)
     ))]
     #[cfg_attr(
         docsrs,
         doc(cfg(all(
-            feature = <span class="string">&quot;all&quot;</span>,
-            any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;fuchsia&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>)
+            feature = <span class="string">"all"</span>,
+            any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"fuchsia"</span>, target_os = <span class="string">"linux"</span>)
         )))
     )]
     </span><span class="kw">pub fn </span>bind_device(<span class="kw-2">&amp;</span><span class="self">self</span>, interface: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>[u8]&gt;) -&gt; io::Result&lt;()&gt; {
@@ -5003,8 +5003,8 @@
     <span class="doccomment">/// Sets the value for the `SO_SETFIB` option on this socket.
     ///
     /// Bind socket to the specified forwarding table (VRF) on a FreeBSD.
-    </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;freebsd&quot;</span>))]
-    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;freebsd&quot;</span>))))]
+    </span><span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"freebsd"</span>))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"freebsd"</span>))))]
     </span><span class="kw">pub fn </span>set_fib(<span class="kw-2">&amp;</span><span class="self">self</span>, fib: u32) -&gt; io::Result&lt;()&gt; {
         <span class="macro">syscall!</span>(setsockopt(
             <span class="self">self</span>.as_raw(),
@@ -5018,27 +5018,27 @@
 
     <span class="doccomment">/// This method is deprecated, use [`crate::Socket::bind_device_by_index_v4`].
     </span><span class="attr">#[cfg(all(
-        feature = <span class="string">&quot;all&quot;</span>,
+        feature = <span class="string">"all"</span>,
         any(
-            target_os = <span class="string">&quot;ios&quot;</span>,
-            target_os = <span class="string">&quot;macos&quot;</span>,
-            target_os = <span class="string">&quot;tvos&quot;</span>,
-            target_os = <span class="string">&quot;watchos&quot;</span>,
+            target_os = <span class="string">"ios"</span>,
+            target_os = <span class="string">"macos"</span>,
+            target_os = <span class="string">"tvos"</span>,
+            target_os = <span class="string">"watchos"</span>,
         )
     ))]
     #[cfg_attr(
         docsrs,
         doc(cfg(all(
-            feature = <span class="string">&quot;all&quot;</span>,
+            feature = <span class="string">"all"</span>,
             any(
-                target_os = <span class="string">&quot;ios&quot;</span>,
-                target_os = <span class="string">&quot;macos&quot;</span>,
-                target_os = <span class="string">&quot;tvos&quot;</span>,
-                target_os = <span class="string">&quot;watchos&quot;</span>,
+                target_os = <span class="string">"ios"</span>,
+                target_os = <span class="string">"macos"</span>,
+                target_os = <span class="string">"tvos"</span>,
+                target_os = <span class="string">"watchos"</span>,
             )
         )))
     )]
-    #[deprecated = <span class="string">&quot;Use `Socket::bind_device_by_index_v4` instead&quot;</span>]
+    #[deprecated = <span class="string">"Use `Socket::bind_device_by_index_v4` instead"</span>]
     </span><span class="kw">pub fn </span>bind_device_by_index(<span class="kw-2">&amp;</span><span class="self">self</span>, interface: <span class="prelude-ty">Option</span>&lt;NonZeroU32&gt;) -&gt; io::Result&lt;()&gt; {
         <span class="self">self</span>.bind_device_by_index_v4(interface)
     }
@@ -5054,23 +5054,23 @@
     /// One can use [`libc::if_nametoindex`] to convert an interface alias to an
     /// index.
     </span><span class="attr">#[cfg(all(
-        feature = <span class="string">&quot;all&quot;</span>,
+        feature = <span class="string">"all"</span>,
         any(
-            target_os = <span class="string">&quot;ios&quot;</span>,
-            target_os = <span class="string">&quot;macos&quot;</span>,
-            target_os = <span class="string">&quot;tvos&quot;</span>,
-            target_os = <span class="string">&quot;watchos&quot;</span>,
+            target_os = <span class="string">"ios"</span>,
+            target_os = <span class="string">"macos"</span>,
+            target_os = <span class="string">"tvos"</span>,
+            target_os = <span class="string">"watchos"</span>,
         )
     ))]
     #[cfg_attr(
         docsrs,
         doc(cfg(all(
-            feature = <span class="string">&quot;all&quot;</span>,
+            feature = <span class="string">"all"</span>,
             any(
-                target_os = <span class="string">&quot;ios&quot;</span>,
-                target_os = <span class="string">&quot;macos&quot;</span>,
-                target_os = <span class="string">&quot;tvos&quot;</span>,
-                target_os = <span class="string">&quot;watchos&quot;</span>,
+                target_os = <span class="string">"ios"</span>,
+                target_os = <span class="string">"macos"</span>,
+                target_os = <span class="string">"tvos"</span>,
+                target_os = <span class="string">"watchos"</span>,
             )
         )))
     )]
@@ -5090,23 +5090,23 @@
     /// One can use [`libc::if_nametoindex`] to convert an interface alias to an
     /// index.
     </span><span class="attr">#[cfg(all(
-        feature = <span class="string">&quot;all&quot;</span>,
+        feature = <span class="string">"all"</span>,
         any(
-            target_os = <span class="string">&quot;ios&quot;</span>,
-            target_os = <span class="string">&quot;macos&quot;</span>,
-            target_os = <span class="string">&quot;tvos&quot;</span>,
-            target_os = <span class="string">&quot;watchos&quot;</span>,
+            target_os = <span class="string">"ios"</span>,
+            target_os = <span class="string">"macos"</span>,
+            target_os = <span class="string">"tvos"</span>,
+            target_os = <span class="string">"watchos"</span>,
         )
     ))]
     #[cfg_attr(
         docsrs,
         doc(cfg(all(
-            feature = <span class="string">&quot;all&quot;</span>,
+            feature = <span class="string">"all"</span>,
             any(
-                target_os = <span class="string">&quot;ios&quot;</span>,
-                target_os = <span class="string">&quot;macos&quot;</span>,
-                target_os = <span class="string">&quot;tvos&quot;</span>,
-                target_os = <span class="string">&quot;watchos&quot;</span>,
+                target_os = <span class="string">"ios"</span>,
+                target_os = <span class="string">"macos"</span>,
+                target_os = <span class="string">"tvos"</span>,
+                target_os = <span class="string">"watchos"</span>,
             )
         )))
     )]
@@ -5121,23 +5121,23 @@
     /// Returns `None` if the socket is not bound to any interface, otherwise
     /// returns an interface index.
     </span><span class="attr">#[cfg(all(
-        feature = <span class="string">&quot;all&quot;</span>,
+        feature = <span class="string">"all"</span>,
         any(
-            target_os = <span class="string">&quot;ios&quot;</span>,
-            target_os = <span class="string">&quot;macos&quot;</span>,
-            target_os = <span class="string">&quot;tvos&quot;</span>,
-            target_os = <span class="string">&quot;watchos&quot;</span>,
+            target_os = <span class="string">"ios"</span>,
+            target_os = <span class="string">"macos"</span>,
+            target_os = <span class="string">"tvos"</span>,
+            target_os = <span class="string">"watchos"</span>,
         )
     ))]
     #[cfg_attr(
         docsrs,
         doc(cfg(all(
-            feature = <span class="string">&quot;all&quot;</span>,
+            feature = <span class="string">"all"</span>,
             any(
-                target_os = <span class="string">&quot;ios&quot;</span>,
-                target_os = <span class="string">&quot;macos&quot;</span>,
-                target_os = <span class="string">&quot;tvos&quot;</span>,
-                target_os = <span class="string">&quot;watchos&quot;</span>,
+                target_os = <span class="string">"ios"</span>,
+                target_os = <span class="string">"macos"</span>,
+                target_os = <span class="string">"tvos"</span>,
+                target_os = <span class="string">"watchos"</span>,
             )
         )))
     )]
@@ -5149,27 +5149,27 @@
 
     <span class="doccomment">/// This method is deprecated, use [`crate::Socket::device_index_v4`].
     </span><span class="attr">#[cfg(all(
-        feature = <span class="string">&quot;all&quot;</span>,
+        feature = <span class="string">"all"</span>,
         any(
-            target_os = <span class="string">&quot;ios&quot;</span>,
-            target_os = <span class="string">&quot;macos&quot;</span>,
-            target_os = <span class="string">&quot;tvos&quot;</span>,
-            target_os = <span class="string">&quot;watchos&quot;</span>,
+            target_os = <span class="string">"ios"</span>,
+            target_os = <span class="string">"macos"</span>,
+            target_os = <span class="string">"tvos"</span>,
+            target_os = <span class="string">"watchos"</span>,
         )
     ))]
     #[cfg_attr(
         docsrs,
         doc(cfg(all(
-            feature = <span class="string">&quot;all&quot;</span>,
+            feature = <span class="string">"all"</span>,
             any(
-                target_os = <span class="string">&quot;ios&quot;</span>,
-                target_os = <span class="string">&quot;macos&quot;</span>,
-                target_os = <span class="string">&quot;tvos&quot;</span>,
-                target_os = <span class="string">&quot;watchos&quot;</span>,
+                target_os = <span class="string">"ios"</span>,
+                target_os = <span class="string">"macos"</span>,
+                target_os = <span class="string">"tvos"</span>,
+                target_os = <span class="string">"watchos"</span>,
             )
         )))
     )]
-    #[deprecated = <span class="string">&quot;Use `Socket::device_index_v4` instead&quot;</span>]
+    #[deprecated = <span class="string">"Use `Socket::device_index_v4` instead"</span>]
     </span><span class="kw">pub fn </span>device_index(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; io::Result&lt;<span class="prelude-ty">Option</span>&lt;NonZeroU32&gt;&gt; {
         <span class="self">self</span>.device_index_v4()
     }
@@ -5180,23 +5180,23 @@
     /// Returns `None` if the socket is not bound to any interface, otherwise
     /// returns an interface index.
     </span><span class="attr">#[cfg(all(
-        feature = <span class="string">&quot;all&quot;</span>,
+        feature = <span class="string">"all"</span>,
         any(
-            target_os = <span class="string">&quot;ios&quot;</span>,
-            target_os = <span class="string">&quot;macos&quot;</span>,
-            target_os = <span class="string">&quot;tvos&quot;</span>,
-            target_os = <span class="string">&quot;watchos&quot;</span>,
+            target_os = <span class="string">"ios"</span>,
+            target_os = <span class="string">"macos"</span>,
+            target_os = <span class="string">"tvos"</span>,
+            target_os = <span class="string">"watchos"</span>,
         )
     ))]
     #[cfg_attr(
         docsrs,
         doc(cfg(all(
-            feature = <span class="string">&quot;all&quot;</span>,
+            feature = <span class="string">"all"</span>,
             any(
-                target_os = <span class="string">&quot;ios&quot;</span>,
-                target_os = <span class="string">&quot;macos&quot;</span>,
-                target_os = <span class="string">&quot;tvos&quot;</span>,
-                target_os = <span class="string">&quot;watchos&quot;</span>,
+                target_os = <span class="string">"ios"</span>,
+                target_os = <span class="string">"macos"</span>,
+                target_os = <span class="string">"tvos"</span>,
+                target_os = <span class="string">"watchos"</span>,
             )
         )))
     )]
@@ -5212,8 +5212,8 @@
     /// For more information about this option, see [`set_cpu_affinity`].
     ///
     /// [`set_cpu_affinity`]: crate::Socket::set_cpu_affinity
-    </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))]
-    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))))]
+    </span><span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"linux"</span>))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"linux"</span>))))]
     </span><span class="kw">pub fn </span>cpu_affinity(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; io::Result&lt;usize&gt; {
         <span class="kw">unsafe </span>{
             getsockopt::&lt;c_int&gt;(<span class="self">self</span>.as_raw(), libc::SOL_SOCKET, libc::SO_INCOMING_CPU)
@@ -5224,8 +5224,8 @@
     <span class="doccomment">/// Set value for the `SO_INCOMING_CPU` option on this socket.
     ///
     /// Sets the CPU affinity of the socket.
-    </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))]
-    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))))]
+    </span><span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"linux"</span>))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"linux"</span>))))]
     </span><span class="kw">pub fn </span>set_cpu_affinity(<span class="kw-2">&amp;</span><span class="self">self</span>, cpu: usize) -&gt; io::Result&lt;()&gt; {
         <span class="kw">unsafe </span>{
             setsockopt(
@@ -5243,15 +5243,15 @@
     ///
     /// [`set_reuse_port`]: crate::Socket::set_reuse_port
     </span><span class="attr">#[cfg(all(
-        feature = <span class="string">&quot;all&quot;</span>,
-        not(any(target_os = <span class="string">&quot;solaris&quot;</span>, target_os = <span class="string">&quot;illumos&quot;</span>))
+        feature = <span class="string">"all"</span>,
+        not(any(target_os = <span class="string">"solaris"</span>, target_os = <span class="string">"illumos"</span>))
     ))]
     #[cfg_attr(
         docsrs,
         doc(cfg(all(
-            feature = <span class="string">&quot;all&quot;</span>,
+            feature = <span class="string">"all"</span>,
             unix,
-            not(any(target_os = <span class="string">&quot;solaris&quot;</span>, target_os = <span class="string">&quot;illumos&quot;</span>))
+            not(any(target_os = <span class="string">"solaris"</span>, target_os = <span class="string">"illumos"</span>))
         )))
     )]
     </span><span class="kw">pub fn </span>reuse_port(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; io::Result&lt;bool&gt; {
@@ -5265,17 +5265,17 @@
     ///
     /// This indicates that further calls to `bind` may allow reuse of local
     /// addresses. For IPv4 sockets this means that a socket may bind even when
-    /// there&#39;s a socket already listening on this port.
+    /// there's a socket already listening on this port.
     </span><span class="attr">#[cfg(all(
-        feature = <span class="string">&quot;all&quot;</span>,
-        not(any(target_os = <span class="string">&quot;solaris&quot;</span>, target_os = <span class="string">&quot;illumos&quot;</span>))
+        feature = <span class="string">"all"</span>,
+        not(any(target_os = <span class="string">"solaris"</span>, target_os = <span class="string">"illumos"</span>))
     ))]
     #[cfg_attr(
         docsrs,
         doc(cfg(all(
-            feature = <span class="string">&quot;all&quot;</span>,
+            feature = <span class="string">"all"</span>,
             unix,
-            not(any(target_os = <span class="string">&quot;solaris&quot;</span>, target_os = <span class="string">&quot;illumos&quot;</span>))
+            not(any(target_os = <span class="string">"solaris"</span>, target_os = <span class="string">"illumos"</span>))
         )))
     )]
     </span><span class="kw">pub fn </span>set_reuse_port(<span class="kw-2">&amp;</span><span class="self">self</span>, reuse: bool) -&gt; io::Result&lt;()&gt; {
@@ -5294,7 +5294,7 @@
     /// For more information about this option, see [`set_reuse_port_lb`].
     ///
     /// [`set_reuse_port_lb`]: crate::Socket::set_reuse_port_lb
-    </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;freebsd&quot;</span>))]
+    </span><span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"freebsd"</span>))]
     </span><span class="kw">pub fn </span>reuse_port_lb(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; io::Result&lt;bool&gt; {
         <span class="kw">unsafe </span>{
             getsockopt::&lt;c_int&gt;(<span class="self">self</span>.as_raw(), libc::SOL_SOCKET, libc::SO_REUSEPORT_LB)
@@ -5306,7 +5306,7 @@
     ///
     /// This allows multiple programs or threads to bind to the same port and
     /// incoming connections will be load balanced using a hash function.
-    </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;freebsd&quot;</span>))]
+    </span><span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"freebsd"</span>))]
     </span><span class="kw">pub fn </span>set_reuse_port_lb(<span class="kw-2">&amp;</span><span class="self">self</span>, reuse: bool) -&gt; io::Result&lt;()&gt; {
         <span class="kw">unsafe </span>{
             setsockopt(
@@ -5324,14 +5324,14 @@
     ///
     /// [`set_freebind`]: crate::Socket::set_freebind
     </span><span class="attr">#[cfg(all(
-        feature = <span class="string">&quot;all&quot;</span>,
-        any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;fuchsia&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>)
+        feature = <span class="string">"all"</span>,
+        any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"fuchsia"</span>, target_os = <span class="string">"linux"</span>)
     ))]
     #[cfg_attr(
         docsrs,
         doc(cfg(all(
-            feature = <span class="string">&quot;all&quot;</span>,
-            any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;fuchsia&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>)
+            feature = <span class="string">"all"</span>,
+            any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"fuchsia"</span>, target_os = <span class="string">"linux"</span>)
         )))
     )]
     </span><span class="kw">pub fn </span>freebind(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; io::Result&lt;bool&gt; {
@@ -5349,14 +5349,14 @@
     /// dynamic IP address to be up at the time that the application is trying
     /// to bind to it.
     </span><span class="attr">#[cfg(all(
-        feature = <span class="string">&quot;all&quot;</span>,
-        any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;fuchsia&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>)
+        feature = <span class="string">"all"</span>,
+        any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"fuchsia"</span>, target_os = <span class="string">"linux"</span>)
     ))]
     #[cfg_attr(
         docsrs,
         doc(cfg(all(
-            feature = <span class="string">&quot;all&quot;</span>,
-            any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;fuchsia&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>)
+            feature = <span class="string">"all"</span>,
+            any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"fuchsia"</span>, target_os = <span class="string">"linux"</span>)
         )))
     )]
     </span><span class="kw">pub fn </span>set_freebind(<span class="kw-2">&amp;</span><span class="self">self</span>, freebind: bool) -&gt; io::Result&lt;()&gt; {
@@ -5377,10 +5377,10 @@
     /// [`set_freebind`].
     ///
     /// [`set_freebind`]: crate::Socket::set_freebind
-    </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>)))]
+    </span><span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"linux"</span>)))]
     #[cfg_attr(
         docsrs,
-        doc(cfg(all(feature = <span class="string">&quot;all&quot;</span>, any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))))
+        doc(cfg(all(feature = <span class="string">"all"</span>, any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"linux"</span>))))
     )]
     </span><span class="kw">pub fn </span>freebind_ipv6(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; io::Result&lt;bool&gt; {
         <span class="kw">unsafe </span>{
@@ -5409,7 +5409,7 @@
     ///     match socket.domain()? {
     ///         Domain::IPV4 =&gt; socket.set_freebind(true)?,
     ///         Domain::IPV6 =&gt; socket.set_freebind_ipv6(true)?,
-    ///         _ =&gt; return Err(Error::new(ErrorKind::Other, &quot;unsupported domain&quot;)),
+    ///         _ =&gt; return Err(Error::new(ErrorKind::Other, "unsupported domain")),
     ///     };
     ///     Ok(())
     /// }
@@ -5419,10 +5419,10 @@
     /// #     enable_freebind(&amp;socket)
     /// # }
     /// ```
-    </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>)))]
+    </span><span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"linux"</span>)))]
     #[cfg_attr(
         docsrs,
-        doc(cfg(all(feature = <span class="string">&quot;all&quot;</span>, any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))))
+        doc(cfg(all(feature = <span class="string">"all"</span>, any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"linux"</span>))))
     )]
     </span><span class="kw">pub fn </span>set_freebind_ipv6(<span class="kw-2">&amp;</span><span class="self">self</span>, freebind: bool) -&gt; io::Result&lt;()&gt; {
         <span class="kw">unsafe </span>{
@@ -5440,14 +5440,14 @@
     /// This value contains the original destination IPv4 address of the connection
     /// redirected using `iptables` `REDIRECT` or `TPROXY`.
     </span><span class="attr">#[cfg(all(
-        feature = <span class="string">&quot;all&quot;</span>,
-        any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;fuchsia&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>)
+        feature = <span class="string">"all"</span>,
+        any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"fuchsia"</span>, target_os = <span class="string">"linux"</span>)
     ))]
     #[cfg_attr(
         docsrs,
         doc(cfg(all(
-            feature = <span class="string">&quot;all&quot;</span>,
-            any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;fuchsia&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>)
+            feature = <span class="string">"all"</span>,
+            any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"fuchsia"</span>, target_os = <span class="string">"linux"</span>)
         )))
     )]
     </span><span class="kw">pub fn </span>original_dst(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; io::Result&lt;SockAddr&gt; {
@@ -5470,10 +5470,10 @@
     ///
     /// This value contains the original destination IPv6 address of the connection
     /// redirected using `ip6tables` `REDIRECT` or `TPROXY`.
-    </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>)))]
+    </span><span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"linux"</span>)))]
     #[cfg_attr(
         docsrs,
-        doc(cfg(all(feature = <span class="string">&quot;all&quot;</span>, any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))))
+        doc(cfg(all(feature = <span class="string">"all"</span>, any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"linux"</span>))))
     )]
     </span><span class="kw">pub fn </span>original_dst_ipv6(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; io::Result&lt;SockAddr&gt; {
         <span class="comment">// Safety: `getsockopt` initialises the `SockAddr` for us.
@@ -5511,31 +5511,31 @@
     /// The `length` determines how many bytes to send, where a length of `None`
     /// means it will try to send all bytes.
     </span><span class="attr">#[cfg(all(
-        feature = <span class="string">&quot;all&quot;</span>,
+        feature = <span class="string">"all"</span>,
         any(
-            target_os = <span class="string">&quot;aix&quot;</span>,
-            target_os = <span class="string">&quot;android&quot;</span>,
-            target_os = <span class="string">&quot;freebsd&quot;</span>,
-            target_os = <span class="string">&quot;ios&quot;</span>,
-            target_os = <span class="string">&quot;linux&quot;</span>,
-            target_os = <span class="string">&quot;macos&quot;</span>,
-            target_os = <span class="string">&quot;tvos&quot;</span>,
-            target_os = <span class="string">&quot;watchos&quot;</span>,
+            target_os = <span class="string">"aix"</span>,
+            target_os = <span class="string">"android"</span>,
+            target_os = <span class="string">"freebsd"</span>,
+            target_os = <span class="string">"ios"</span>,
+            target_os = <span class="string">"linux"</span>,
+            target_os = <span class="string">"macos"</span>,
+            target_os = <span class="string">"tvos"</span>,
+            target_os = <span class="string">"watchos"</span>,
         )
     ))]
     #[cfg_attr(
         docsrs,
         doc(cfg(all(
-            feature = <span class="string">&quot;all&quot;</span>,
+            feature = <span class="string">"all"</span>,
             any(
-                target_os = <span class="string">&quot;aix&quot;</span>,
-                target_os = <span class="string">&quot;android&quot;</span>,
-                target_os = <span class="string">&quot;freebsd&quot;</span>,
-                target_os = <span class="string">&quot;ios&quot;</span>,
-                target_os = <span class="string">&quot;linux&quot;</span>,
-                target_os = <span class="string">&quot;macos&quot;</span>,
-                target_os = <span class="string">&quot;tvos&quot;</span>,
-                target_os = <span class="string">&quot;watchos&quot;</span>,
+                target_os = <span class="string">"aix"</span>,
+                target_os = <span class="string">"android"</span>,
+                target_os = <span class="string">"freebsd"</span>,
+                target_os = <span class="string">"ios"</span>,
+                target_os = <span class="string">"linux"</span>,
+                target_os = <span class="string">"macos"</span>,
+                target_os = <span class="string">"tvos"</span>,
+                target_os = <span class="string">"watchos"</span>,
             )
         )))
     )]
@@ -5552,12 +5552,12 @@
     }
 
     <span class="attr">#[cfg(all(
-        feature = <span class="string">&quot;all&quot;</span>,
+        feature = <span class="string">"all"</span>,
         any(
-            target_os = <span class="string">&quot;ios&quot;</span>,
-            target_os = <span class="string">&quot;macos&quot;</span>,
-            target_os = <span class="string">&quot;tvos&quot;</span>,
-            target_os = <span class="string">&quot;watchos&quot;</span>,
+            target_os = <span class="string">"ios"</span>,
+            target_os = <span class="string">"macos"</span>,
+            target_os = <span class="string">"tvos"</span>,
+            target_os = <span class="string">"watchos"</span>,
         )
     ))]
     </span><span class="kw">fn </span>_sendfile(
@@ -5584,7 +5584,7 @@
         .map(|<span class="kw">_</span>| length <span class="kw">as </span>usize)
     }
 
-    <span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>)))]
+    <span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"linux"</span>)))]
     </span><span class="kw">fn </span>_sendfile(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         file: RawFd,
@@ -5600,7 +5600,7 @@
         <span class="macro">syscall!</span>(sendfile(<span class="self">self</span>.as_raw(), file, <span class="kw-2">&amp;mut </span>offset, count)).map(|n| n <span class="kw">as </span>usize)
     }
 
-    <span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;freebsd&quot;</span>))]
+    <span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"freebsd"</span>))]
     </span><span class="kw">fn </span>_sendfile(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         file: RawFd,
@@ -5625,7 +5625,7 @@
         .map(|<span class="kw">_</span>| sbytes <span class="kw">as </span>usize)
     }
 
-    <span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;aix&quot;</span>))]
+    <span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"aix"</span>))]
     </span><span class="kw">fn </span>_sendfile(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         file: RawFd,
@@ -5647,7 +5647,7 @@
             trailer_length: <span class="number">0</span>,
             bytes_sent: <span class="number">0</span>,
         };
-        <span class="comment">// AIX doesn&#39;t support SF_REUSE, socket will be closed after successful transmission.
+        <span class="comment">// AIX doesn't support SF_REUSE, socket will be closed after successful transmission.
         </span><span class="macro">syscall!</span>(send_file(
             <span class="kw-2">&amp;mut </span><span class="self">self</span>.as_raw() <span class="kw">as </span><span class="kw-2">*mut </span><span class="kw">_</span>,
             <span class="kw-2">&amp;mut </span>params <span class="kw">as </span><span class="kw-2">*mut </span><span class="kw">_</span>,
@@ -5667,14 +5667,14 @@
     /// to `c_uint::MAX`. For example, when `c_uint` is a 32-bit value, this limits the timeout to
     /// approximately 49.71 days.
     </span><span class="attr">#[cfg(all(
-        feature = <span class="string">&quot;all&quot;</span>,
-        any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;fuchsia&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>)
+        feature = <span class="string">"all"</span>,
+        any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"fuchsia"</span>, target_os = <span class="string">"linux"</span>)
     ))]
     #[cfg_attr(
         docsrs,
         doc(cfg(all(
-            feature = <span class="string">&quot;all&quot;</span>,
-            any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;fuchsia&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>)
+            feature = <span class="string">"all"</span>,
+            any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"fuchsia"</span>, target_os = <span class="string">"linux"</span>)
         )))
     )]
     </span><span class="kw">pub fn </span>set_tcp_user_timeout(<span class="kw-2">&amp;</span><span class="self">self</span>, timeout: <span class="prelude-ty">Option</span>&lt;Duration&gt;) -&gt; io::Result&lt;()&gt; {
@@ -5697,14 +5697,14 @@
     ///
     /// [`set_tcp_user_timeout`]: crate::Socket::set_tcp_user_timeout
     </span><span class="attr">#[cfg(all(
-        feature = <span class="string">&quot;all&quot;</span>,
-        any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;fuchsia&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>)
+        feature = <span class="string">"all"</span>,
+        any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"fuchsia"</span>, target_os = <span class="string">"linux"</span>)
     ))]
     #[cfg_attr(
         docsrs,
         doc(cfg(all(
-            feature = <span class="string">&quot;all&quot;</span>,
-            any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;fuchsia&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>)
+            feature = <span class="string">"all"</span>,
+            any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"fuchsia"</span>, target_os = <span class="string">"linux"</span>)
         )))
     )]
     </span><span class="kw">pub fn </span>tcp_user_timeout(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; io::Result&lt;<span class="prelude-ty">Option</span>&lt;Duration&gt;&gt; {
@@ -5726,7 +5726,7 @@
     /// and allow or disallow certain types of data to come through the socket.
     ///
     /// For more information about this option, see [filter](https://www.kernel.org/doc/html/v5.12/networking/filter.html)
-    </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, any(target_os = <span class="string">&quot;linux&quot;</span>, target_os = <span class="string">&quot;android&quot;</span>)))]
+    </span><span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, any(target_os = <span class="string">"linux"</span>, target_os = <span class="string">"android"</span>)))]
     </span><span class="kw">pub fn </span>attach_filter(<span class="kw-2">&amp;</span><span class="self">self</span>, filters: <span class="kw-2">&amp;</span>[libc::sock_filter]) -&gt; io::Result&lt;()&gt; {
         <span class="kw">let </span>prog = libc::sock_fprog {
             len: filters.len() <span class="kw">as </span>u16,
@@ -5748,7 +5748,7 @@
     /// For more information about this option, see [`attach_filter`]
     ///
     /// [`attach_filter`]: crate::Socket::attach_filter
-    </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, any(target_os = <span class="string">&quot;linux&quot;</span>, target_os = <span class="string">&quot;android&quot;</span>)))]
+    </span><span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, any(target_os = <span class="string">"linux"</span>, target_os = <span class="string">"android"</span>)))]
     </span><span class="kw">pub fn </span>detach_filter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; io::Result&lt;()&gt; {
         <span class="kw">unsafe </span>{ setsockopt(<span class="self">self</span>.as_raw(), libc::SOL_SOCKET, libc::SO_DETACH_FILTER, <span class="number">0</span>) }
     }
@@ -5759,8 +5759,8 @@
     /// Therefore, there is no corresponding `set` helper.
     ///
     /// For more information about this option, see [Linux patch](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=5daab9db7b65df87da26fd8cfa695fb9546a1ddb)
-    </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))]
-    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))))]
+    </span><span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"linux"</span>))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"linux"</span>))))]
     </span><span class="kw">pub fn </span>cookie(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; io::Result&lt;u64&gt; {
         <span class="kw">unsafe </span>{ getsockopt::&lt;libc::c_ulonglong&gt;(<span class="self">self</span>.as_raw(), libc::SOL_SOCKET, libc::SO_COOKIE) }
     }
@@ -5771,31 +5771,31 @@
     ///
     /// [`set_tclass_v6`]: crate::Socket::set_tclass_v6
     </span><span class="attr">#[cfg(all(
-        feature = <span class="string">&quot;all&quot;</span>,
+        feature = <span class="string">"all"</span>,
         any(
-            target_os = <span class="string">&quot;android&quot;</span>,
-            target_os = <span class="string">&quot;dragonfly&quot;</span>,
-            target_os = <span class="string">&quot;freebsd&quot;</span>,
-            target_os = <span class="string">&quot;fuchsia&quot;</span>,
-            target_os = <span class="string">&quot;linux&quot;</span>,
-            target_os = <span class="string">&quot;macos&quot;</span>,
-            target_os = <span class="string">&quot;netbsd&quot;</span>,
-            target_os = <span class="string">&quot;openbsd&quot;
+            target_os = <span class="string">"android"</span>,
+            target_os = <span class="string">"dragonfly"</span>,
+            target_os = <span class="string">"freebsd"</span>,
+            target_os = <span class="string">"fuchsia"</span>,
+            target_os = <span class="string">"linux"</span>,
+            target_os = <span class="string">"macos"</span>,
+            target_os = <span class="string">"netbsd"</span>,
+            target_os = <span class="string">"openbsd"
         </span>)
     ))]
     #[cfg_attr(
         docsrs,
         doc(cfg(all(
-            feature = <span class="string">&quot;all&quot;</span>,
+            feature = <span class="string">"all"</span>,
             any(
-                target_os = <span class="string">&quot;android&quot;</span>,
-                target_os = <span class="string">&quot;dragonfly&quot;</span>,
-                target_os = <span class="string">&quot;freebsd&quot;</span>,
-                target_os = <span class="string">&quot;fuchsia&quot;</span>,
-                target_os = <span class="string">&quot;linux&quot;</span>,
-                target_os = <span class="string">&quot;macos&quot;</span>,
-                target_os = <span class="string">&quot;netbsd&quot;</span>,
-                target_os = <span class="string">&quot;openbsd&quot;
+                target_os = <span class="string">"android"</span>,
+                target_os = <span class="string">"dragonfly"</span>,
+                target_os = <span class="string">"freebsd"</span>,
+                target_os = <span class="string">"fuchsia"</span>,
+                target_os = <span class="string">"linux"</span>,
+                target_os = <span class="string">"macos"</span>,
+                target_os = <span class="string">"netbsd"</span>,
+                target_os = <span class="string">"openbsd"
             </span>)
         )))
     )]
@@ -5811,31 +5811,31 @@
     /// Specifies the traffic class field that is used in every packets
     /// sent from this socket.
     </span><span class="attr">#[cfg(all(
-        feature = <span class="string">&quot;all&quot;</span>,
+        feature = <span class="string">"all"</span>,
         any(
-            target_os = <span class="string">&quot;android&quot;</span>,
-            target_os = <span class="string">&quot;dragonfly&quot;</span>,
-            target_os = <span class="string">&quot;freebsd&quot;</span>,
-            target_os = <span class="string">&quot;fuchsia&quot;</span>,
-            target_os = <span class="string">&quot;linux&quot;</span>,
-            target_os = <span class="string">&quot;macos&quot;</span>,
-            target_os = <span class="string">&quot;netbsd&quot;</span>,
-            target_os = <span class="string">&quot;openbsd&quot;
+            target_os = <span class="string">"android"</span>,
+            target_os = <span class="string">"dragonfly"</span>,
+            target_os = <span class="string">"freebsd"</span>,
+            target_os = <span class="string">"fuchsia"</span>,
+            target_os = <span class="string">"linux"</span>,
+            target_os = <span class="string">"macos"</span>,
+            target_os = <span class="string">"netbsd"</span>,
+            target_os = <span class="string">"openbsd"
         </span>)
     ))]
     #[cfg_attr(
         docsrs,
         doc(cfg(all(
-            feature = <span class="string">&quot;all&quot;</span>,
+            feature = <span class="string">"all"</span>,
             any(
-                target_os = <span class="string">&quot;android&quot;</span>,
-                target_os = <span class="string">&quot;dragonfly&quot;</span>,
-                target_os = <span class="string">&quot;freebsd&quot;</span>,
-                target_os = <span class="string">&quot;fuchsia&quot;</span>,
-                target_os = <span class="string">&quot;linux&quot;</span>,
-                target_os = <span class="string">&quot;macos&quot;</span>,
-                target_os = <span class="string">&quot;netbsd&quot;</span>,
-                target_os = <span class="string">&quot;openbsd&quot;
+                target_os = <span class="string">"android"</span>,
+                target_os = <span class="string">"dragonfly"</span>,
+                target_os = <span class="string">"freebsd"</span>,
+                target_os = <span class="string">"fuchsia"</span>,
+                target_os = <span class="string">"linux"</span>,
+                target_os = <span class="string">"macos"</span>,
+                target_os = <span class="string">"netbsd"</span>,
+                target_os = <span class="string">"openbsd"
             </span>)
         )))
     )]
@@ -5855,10 +5855,10 @@
     /// For more information about this option, see [`set_tcp_congestion`].
     ///
     /// [`set_tcp_congestion`]: crate::Socket::set_tcp_congestion
-    </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, any(target_os = <span class="string">&quot;freebsd&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>)))]
+    </span><span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, any(target_os = <span class="string">"freebsd"</span>, target_os = <span class="string">"linux"</span>)))]
     #[cfg_attr(
         docsrs,
-        doc(cfg(all(feature = <span class="string">&quot;all&quot;</span>, any(target_os = <span class="string">&quot;freebsd&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))))
+        doc(cfg(all(feature = <span class="string">"all"</span>, any(target_os = <span class="string">"freebsd"</span>, target_os = <span class="string">"linux"</span>))))
     )]
     </span><span class="kw">pub fn </span>tcp_congestion(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; io::Result&lt;Vec&lt;u8&gt;&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>payload: [u8; TCP_CA_NAME_MAX] = [<span class="number">0</span>; TCP_CA_NAME_MAX];
@@ -5878,11 +5878,11 @@
     /// Specifies the TCP congestion control algorithm to use for this socket.
     ///
     /// The value must be a valid TCP congestion control algorithm name of the
-    /// platform. For example, Linux may supports &quot;reno&quot;, &quot;cubic&quot;.
-    </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, any(target_os = <span class="string">&quot;freebsd&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>)))]
+    /// platform. For example, Linux may supports "reno", "cubic".
+    </span><span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, any(target_os = <span class="string">"freebsd"</span>, target_os = <span class="string">"linux"</span>)))]
     #[cfg_attr(
         docsrs,
-        doc(cfg(all(feature = <span class="string">&quot;all&quot;</span>, any(target_os = <span class="string">&quot;freebsd&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))))
+        doc(cfg(all(feature = <span class="string">"all"</span>, any(target_os = <span class="string">"freebsd"</span>, target_os = <span class="string">"linux"</span>))))
     )]
     </span><span class="kw">pub fn </span>set_tcp_congestion(<span class="kw-2">&amp;</span><span class="self">self</span>, tcp_ca_name: <span class="kw-2">&amp;</span>[u8]) -&gt; io::Result&lt;()&gt; {
         <span class="macro">syscall!</span>(setsockopt(
@@ -5905,8 +5905,8 @@
     ///
     /// [`connect`]: crate::Socket::connect
     /// [`bind`]: crate::Socket::bind
-    </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))]
-    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))))]
+    </span><span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"linux"</span>))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"linux"</span>))))]
     </span><span class="kw">pub fn </span>set_dccp_service(<span class="kw-2">&amp;</span><span class="self">self</span>, code: u32) -&gt; io::Result&lt;()&gt; {
         <span class="kw">unsafe </span>{
             setsockopt(
@@ -5923,8 +5923,8 @@
     /// For more information about this option see [`set_dccp_service`]
     ///
     /// [`set_dccp_service`]: crate::Socket::set_dccp_service
-    </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))]
-    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))))]
+    </span><span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"linux"</span>))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"linux"</span>))))]
     </span><span class="kw">pub fn </span>dccp_service(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; io::Result&lt;u32&gt; {
         <span class="kw">unsafe </span>{ getsockopt(<span class="self">self</span>.as_raw(), libc::SOL_DCCP, libc::DCCP_SOCKOPT_SERVICE) }
     }
@@ -5932,8 +5932,8 @@
     <span class="doccomment">/// Set value for the `DCCP_SOCKOPT_CCID` option on this socket.
     ///
     /// This option sets both the TX and RX CCIDs at the same time.
-    </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))]
-    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))))]
+    </span><span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"linux"</span>))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"linux"</span>))))]
     </span><span class="kw">pub fn </span>set_dccp_ccid(<span class="kw-2">&amp;</span><span class="self">self</span>, ccid: u8) -&gt; io::Result&lt;()&gt; {
         <span class="kw">unsafe </span>{ setsockopt(<span class="self">self</span>.as_raw(), libc::SOL_DCCP, libc::DCCP_SOCKOPT_CCID, ccid) }
     }
@@ -5943,8 +5943,8 @@
     /// For more information about this option see [`set_dccp_ccid`].
     ///
     /// [`set_dccp_ccid`]: crate::Socket::set_dccp_ccid
-    </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))]
-    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))))]
+    </span><span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"linux"</span>))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"linux"</span>))))]
     </span><span class="kw">pub fn </span>dccp_tx_ccid(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; io::Result&lt;u32&gt; {
         <span class="kw">unsafe </span>{ getsockopt(<span class="self">self</span>.as_raw(), libc::SOL_DCCP, libc::DCCP_SOCKOPT_TX_CCID) }
     }
@@ -5954,8 +5954,8 @@
     /// For more information about this option see [`set_dccp_ccid`].
     ///
     /// [`set_dccp_ccid`]: crate::Socket::set_dccp_ccid
-    </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))]
-    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))))]
+    </span><span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"linux"</span>))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"linux"</span>))))]
     </span><span class="kw">pub fn </span>dccp_xx_ccid(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; io::Result&lt;u32&gt; {
         <span class="kw">unsafe </span>{ getsockopt(<span class="self">self</span>.as_raw(), libc::SOL_DCCP, libc::DCCP_SOCKOPT_RX_CCID) }
     }
@@ -5964,8 +5964,8 @@
     ///
     /// Enables a listening socket to hold timewait state when closing the
     /// connection. This option must be set after `accept` returns.
-    </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))]
-    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))))]
+    </span><span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"linux"</span>))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"linux"</span>))))]
     </span><span class="kw">pub fn </span>set_dccp_server_timewait(<span class="kw-2">&amp;</span><span class="self">self</span>, hold_timewait: bool) -&gt; io::Result&lt;()&gt; {
         <span class="kw">unsafe </span>{
             setsockopt(
@@ -5982,8 +5982,8 @@
     /// For more information see [`set_dccp_server_timewait`]
     ///
     /// [`set_dccp_server_timewait`]: crate::Socket::set_dccp_server_timewait
-    </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))]
-    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))))]
+    </span><span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"linux"</span>))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"linux"</span>))))]
     </span><span class="kw">pub fn </span>dccp_server_timewait(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; io::Result&lt;bool&gt; {
         <span class="kw">unsafe </span>{
             getsockopt(
@@ -6001,8 +6001,8 @@
     /// the entire packet and that only fully covered application data is
     /// accepted by the receiver. Hence, when using this feature on the sender,
     /// it must be enabled at the receiver too, with suitable choice of CsCov.
-    </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))]
-    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))))]
+    </span><span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"linux"</span>))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"linux"</span>))))]
     </span><span class="kw">pub fn </span>set_dccp_send_cscov(<span class="kw-2">&amp;</span><span class="self">self</span>, level: u32) -&gt; io::Result&lt;()&gt; {
         <span class="kw">unsafe </span>{
             setsockopt(
@@ -6019,8 +6019,8 @@
     /// For more information on this option see [`set_dccp_send_cscov`].
     ///
     /// [`set_dccp_send_cscov`]: crate::Socket::set_dccp_send_cscov
-    </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))]
-    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))))]
+    </span><span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"linux"</span>))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"linux"</span>))))]
     </span><span class="kw">pub fn </span>dccp_send_cscov(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; io::Result&lt;u32&gt; {
         <span class="kw">unsafe </span>{ getsockopt(<span class="self">self</span>.as_raw(), libc::SOL_DCCP, libc::DCCP_SOCKOPT_SEND_CSCOV) }
     }
@@ -6030,8 +6030,8 @@
     /// This option is only useful when combined with [`set_dccp_send_cscov`].
     ///
     /// [`set_dccp_send_cscov`]: crate::Socket::set_dccp_send_cscov
-    </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))]
-    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))))]
+    </span><span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"linux"</span>))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"linux"</span>))))]
     </span><span class="kw">pub fn </span>set_dccp_recv_cscov(<span class="kw-2">&amp;</span><span class="self">self</span>, level: u32) -&gt; io::Result&lt;()&gt; {
         <span class="kw">unsafe </span>{
             setsockopt(
@@ -6048,8 +6048,8 @@
     /// For more information on this option see [`set_dccp_recv_cscov`].
     ///
     /// [`set_dccp_recv_cscov`]: crate::Socket::set_dccp_recv_cscov
-    </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))]
-    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))))]
+    </span><span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"linux"</span>))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"linux"</span>))))]
     </span><span class="kw">pub fn </span>dccp_recv_cscov(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; io::Result&lt;u32&gt; {
         <span class="kw">unsafe </span>{ getsockopt(<span class="self">self</span>.as_raw(), libc::SOL_DCCP, libc::DCCP_SOCKOPT_RECV_CSCOV) }
     }
@@ -6058,8 +6058,8 @@
     ///
     /// This option sets the maximum length of the output queue. A zero value is
     /// interpreted as unbounded queue length.
-    </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))]
-    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))))]
+    </span><span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"linux"</span>))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"linux"</span>))))]
     </span><span class="kw">pub fn </span>set_dccp_qpolicy_txqlen(<span class="kw-2">&amp;</span><span class="self">self</span>, length: u32) -&gt; io::Result&lt;()&gt; {
         <span class="kw">unsafe </span>{
             setsockopt(
@@ -6076,8 +6076,8 @@
     /// For more information on this option see [`set_dccp_qpolicy_txqlen`].
     ///
     /// [`set_dccp_qpolicy_txqlen`]: crate::Socket::set_dccp_qpolicy_txqlen
-    </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))]
-    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))))]
+    </span><span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"linux"</span>))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"linux"</span>))))]
     </span><span class="kw">pub fn </span>dccp_qpolicy_txqlen(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; io::Result&lt;u32&gt; {
         <span class="kw">unsafe </span>{
             getsockopt(
@@ -6097,8 +6097,8 @@
     /// of writing.
     ///
     /// [documentation]: https://www.kernel.org/doc/html/latest/networking/dccp.html
-    </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))]
-    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))))]
+    </span><span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"linux"</span>))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"linux"</span>))))]
     </span><span class="kw">pub fn </span>dccp_available_ccids&lt;<span class="kw">const </span>N: usize&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; io::Result&lt;CcidEndpoints&lt;N&gt;&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>endpoints = [<span class="number">0</span>; N];
         <span class="kw">let </span><span class="kw-2">mut </span>length = endpoints.len() <span class="kw">as </span>libc::socklen_t;
@@ -6116,8 +6116,8 @@
     ///
     /// This option retrieves the current maximum packet size (application
     /// payload size) in bytes.
-    </span><span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))]
-    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))))]
+    </span><span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"linux"</span>))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"linux"</span>))))]
     </span><span class="kw">pub fn </span>dccp_cur_mps(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; io::Result&lt;u32&gt; {
         <span class="kw">unsafe </span>{
             getsockopt(
@@ -6130,16 +6130,16 @@
 }
 
 <span class="doccomment">/// See [`Socket::dccp_available_ccids`].
-</span><span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))]
-#[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))))]
+</span><span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"linux"</span>))]
+#[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"linux"</span>))))]
 #[derive(Debug)]
 </span><span class="kw">pub struct </span>CcidEndpoints&lt;<span class="kw">const </span>N: usize&gt; {
     endpoints: [u8; N],
     length: u32,
 }
 
-<span class="attr">#[cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))]
-#[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">&quot;all&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))))]
+<span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"linux"</span>))]
+#[cfg_attr(docsrs, doc(cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"linux"</span>))))]
 </span><span class="kw">impl</span>&lt;<span class="kw">const </span>N: usize&gt; std::ops::Deref <span class="kw">for </span>CcidEndpoints&lt;N&gt; {
     <span class="kw">type </span>Target = [u8];
 
@@ -6150,7 +6150,7 @@
 
 <span class="attr">#[cfg_attr(docsrs, doc(cfg(unix)))]
 </span><span class="kw">impl </span>AsFd <span class="kw">for </span><span class="kw">crate</span>::Socket {
-    <span class="kw">fn </span>as_fd(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; BorrowedFd&lt;<span class="lifetime">&#39;_</span>&gt; {
+    <span class="kw">fn </span>as_fd(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; BorrowedFd&lt;<span class="lifetime">'_</span>&gt; {
         <span class="comment">// SAFETY: lifetime is bound by self.
         </span><span class="kw">unsafe </span>{ BorrowedFd::borrow_raw(<span class="self">self</span>.as_raw()) }
     }
@@ -6193,24 +6193,24 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;all&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"all"</span>)]
 </span><span class="macro">from!</span>(UnixStream, <span class="kw">crate</span>::Socket);
-<span class="attr">#[cfg(feature = <span class="string">&quot;all&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"all"</span>)]
 </span><span class="macro">from!</span>(UnixListener, <span class="kw">crate</span>::Socket);
-<span class="attr">#[cfg(feature = <span class="string">&quot;all&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"all"</span>)]
 </span><span class="macro">from!</span>(UnixDatagram, <span class="kw">crate</span>::Socket);
-<span class="attr">#[cfg(feature = <span class="string">&quot;all&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"all"</span>)]
 </span><span class="macro">from!</span>(<span class="kw">crate</span>::Socket, UnixStream);
-<span class="attr">#[cfg(feature = <span class="string">&quot;all&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"all"</span>)]
 </span><span class="macro">from!</span>(<span class="kw">crate</span>::Socket, UnixListener);
-<span class="attr">#[cfg(feature = <span class="string">&quot;all&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"all"</span>)]
 </span><span class="macro">from!</span>(<span class="kw">crate</span>::Socket, UnixDatagram);
 
 <span class="attr">#[test]
 </span><span class="kw">fn </span>in_addr_convertion() {
     <span class="kw">let </span>ip = Ipv4Addr::new(<span class="number">127</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>);
     <span class="kw">let </span>raw = to_in_addr(<span class="kw-2">&amp;</span>ip);
-    <span class="comment">// NOTE: `in_addr` is packed on NetBSD and it&#39;s unsafe to borrow.
+    <span class="comment">// NOTE: `in_addr` is packed on NetBSD and it's unsafe to borrow.
     </span><span class="kw">let </span>a = raw.s_addr;
     <span class="macro">assert_eq!</span>(a, u32::from_ne_bytes([<span class="number">127</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>]));
     <span class="macro">assert_eq!</span>(from_in_addr(raw), ip);

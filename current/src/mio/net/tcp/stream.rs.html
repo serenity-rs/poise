@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/mio-0.8.9/src/net/tcp/stream.rs`."><title>stream.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="mio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/mio-0.8.9/src/net/tcp/stream.rs`."><title>stream.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="mio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -430,13 +430,13 @@
 <span class="kw">use </span>std::net::{<span class="self">self</span>, Shutdown, SocketAddr};
 <span class="attr">#[cfg(unix)]
 </span><span class="kw">use </span>std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
-<span class="attr">#[cfg(target_os = <span class="string">&quot;wasi&quot;</span>)]
+<span class="attr">#[cfg(target_os = <span class="string">"wasi"</span>)]
 </span><span class="kw">use </span>std::os::wasi::io::{AsRawFd, FromRawFd, IntoRawFd, RawFd};
 <span class="attr">#[cfg(windows)]
 </span><span class="kw">use </span>std::os::windows::io::{AsRawSocket, FromRawSocket, IntoRawSocket, RawSocket};
 
 <span class="kw">use </span><span class="kw">crate</span>::io_source::IoSource;
-<span class="attr">#[cfg(not(target_os = <span class="string">&quot;wasi&quot;</span>))]
+<span class="attr">#[cfg(not(target_os = <span class="string">"wasi"</span>))]
 </span><span class="kw">use </span><span class="kw">crate</span>::sys::tcp::{connect, new_for_addr};
 <span class="kw">use crate</span>::{event, Interest, Registry, Token};
 
@@ -446,13 +446,13 @@
 ///
 /// # Examples
 ///
-</span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;os-poll&quot;</span>, doc = <span class="string">&quot;```&quot;</span>)]
-#[cfg_attr(not(feature = <span class="string">&quot;os-poll&quot;</span>), doc = <span class="string">&quot;```ignore&quot;</span>)]
+</span><span class="attr">#[cfg_attr(feature = <span class="string">"os-poll"</span>, doc = <span class="string">"```"</span>)]
+#[cfg_attr(not(feature = <span class="string">"os-poll"</span>), doc = <span class="string">"```ignore"</span>)]
 </span><span class="doccomment">/// # use std::net::{TcpListener, SocketAddr};
 /// # use std::error::Error;
 /// #
 /// # fn main() -&gt; Result&lt;(), Box&lt;dyn Error&gt;&gt; {
-/// let address: SocketAddr = &quot;127.0.0.1:0&quot;.parse()?;
+/// let address: SocketAddr = "127.0.0.1:0".parse()?;
 /// let listener = TcpListener::bind(address)?;
 /// use mio::{Events, Interest, Poll, Token};
 /// use mio::net::TcpStream;
@@ -507,7 +507,7 @@
     /// entries in the routing cache.
     ///
     /// [write interest]: Interest::WRITABLE
-    </span><span class="attr">#[cfg(not(target_os = <span class="string">&quot;wasi&quot;</span>))]
+    </span><span class="attr">#[cfg(not(target_os = <span class="string">"wasi"</span>))]
     </span><span class="kw">pub fn </span>connect(addr: SocketAddr) -&gt; io::Result&lt;TcpStream&gt; {
         <span class="kw">let </span>socket = new_for_addr(addr)<span class="question-mark">?</span>;
         <span class="attr">#[cfg(unix)]
@@ -648,8 +648,8 @@
     ///
     /// # Examples
     ///
-    </span><span class="attr">#[cfg_attr(unix, doc = <span class="string">&quot;```no_run&quot;</span>)]
-    #[cfg_attr(windows, doc = <span class="string">&quot;```ignore&quot;</span>)]
+    </span><span class="attr">#[cfg_attr(unix, doc = <span class="string">"```no_run"</span>)]
+    #[cfg_attr(windows, doc = <span class="string">"```ignore"</span>)]
     </span><span class="doccomment">/// # use std::error::Error;
     /// #
     /// # fn main() -&gt; Result&lt;(), Box&lt;dyn Error&gt;&gt; {
@@ -660,7 +660,7 @@
     /// use std::os::windows::io::AsRawSocket;
     /// use mio::net::TcpStream;
     ///
-    /// let address = &quot;127.0.0.1:8080&quot;.parse().unwrap();
+    /// let address = "127.0.0.1:8080".parse().unwrap();
     /// let stream = TcpStream::connect(address)?;
     ///
     /// // Wait until the stream is readable...
@@ -682,7 +682,7 @@
     ///         Err(io::Error::last_os_error())
     ///     }
     /// })?;
-    /// eprintln!(&quot;read {} bytes&quot;, n);
+    /// eprintln!("read {} bytes", n);
     /// # Ok(())
     /// # }
     /// ```
@@ -699,17 +699,17 @@
         <span class="self">self</span>.inner.do_io(|<span class="kw-2">mut </span>inner| inner.read(buf))
     }
 
-    <span class="kw">fn </span>read_vectored(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bufs: <span class="kw-2">&amp;mut </span>[IoSliceMut&lt;<span class="lifetime">&#39;_</span>&gt;]) -&gt; io::Result&lt;usize&gt; {
+    <span class="kw">fn </span>read_vectored(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bufs: <span class="kw-2">&amp;mut </span>[IoSliceMut&lt;<span class="lifetime">'_</span>&gt;]) -&gt; io::Result&lt;usize&gt; {
         <span class="self">self</span>.inner.do_io(|<span class="kw-2">mut </span>inner| inner.read_vectored(bufs))
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Read <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>TcpStream {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Read <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>TcpStream {
     <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, buf: <span class="kw-2">&amp;mut </span>[u8]) -&gt; io::Result&lt;usize&gt; {
         <span class="self">self</span>.inner.do_io(|<span class="kw-2">mut </span>inner| inner.read(buf))
     }
 
-    <span class="kw">fn </span>read_vectored(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bufs: <span class="kw-2">&amp;mut </span>[IoSliceMut&lt;<span class="lifetime">&#39;_</span>&gt;]) -&gt; io::Result&lt;usize&gt; {
+    <span class="kw">fn </span>read_vectored(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bufs: <span class="kw-2">&amp;mut </span>[IoSliceMut&lt;<span class="lifetime">'_</span>&gt;]) -&gt; io::Result&lt;usize&gt; {
         <span class="self">self</span>.inner.do_io(|<span class="kw-2">mut </span>inner| inner.read_vectored(bufs))
     }
 }
@@ -719,7 +719,7 @@
         <span class="self">self</span>.inner.do_io(|<span class="kw-2">mut </span>inner| inner.write(buf))
     }
 
-    <span class="kw">fn </span>write_vectored(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bufs: <span class="kw-2">&amp;</span>[IoSlice&lt;<span class="lifetime">&#39;_</span>&gt;]) -&gt; io::Result&lt;usize&gt; {
+    <span class="kw">fn </span>write_vectored(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bufs: <span class="kw-2">&amp;</span>[IoSlice&lt;<span class="lifetime">'_</span>&gt;]) -&gt; io::Result&lt;usize&gt; {
         <span class="self">self</span>.inner.do_io(|<span class="kw-2">mut </span>inner| inner.write_vectored(bufs))
     }
 
@@ -728,12 +728,12 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Write <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>TcpStream {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Write <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>TcpStream {
     <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, buf: <span class="kw-2">&amp;</span>[u8]) -&gt; io::Result&lt;usize&gt; {
         <span class="self">self</span>.inner.do_io(|<span class="kw-2">mut </span>inner| inner.write(buf))
     }
 
-    <span class="kw">fn </span>write_vectored(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bufs: <span class="kw-2">&amp;</span>[IoSlice&lt;<span class="lifetime">&#39;_</span>&gt;]) -&gt; io::Result&lt;usize&gt; {
+    <span class="kw">fn </span>write_vectored(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bufs: <span class="kw-2">&amp;</span>[IoSlice&lt;<span class="lifetime">'_</span>&gt;]) -&gt; io::Result&lt;usize&gt; {
         <span class="self">self</span>.inner.do_io(|<span class="kw-2">mut </span>inner| inner.write_vectored(bufs))
     }
 
@@ -767,7 +767,7 @@
 }
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>TcpStream {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         <span class="self">self</span>.inner.fmt(f)
     }
 }
@@ -826,21 +826,21 @@
     }
 }
 
-<span class="attr">#[cfg(target_os = <span class="string">&quot;wasi&quot;</span>)]
+<span class="attr">#[cfg(target_os = <span class="string">"wasi"</span>)]
 </span><span class="kw">impl </span>IntoRawFd <span class="kw">for </span>TcpStream {
     <span class="kw">fn </span>into_raw_fd(<span class="self">self</span>) -&gt; RawFd {
         <span class="self">self</span>.inner.into_inner().into_raw_fd()
     }
 }
 
-<span class="attr">#[cfg(target_os = <span class="string">&quot;wasi&quot;</span>)]
+<span class="attr">#[cfg(target_os = <span class="string">"wasi"</span>)]
 </span><span class="kw">impl </span>AsRawFd <span class="kw">for </span>TcpStream {
     <span class="kw">fn </span>as_raw_fd(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; RawFd {
         <span class="self">self</span>.inner.as_raw_fd()
     }
 }
 
-<span class="attr">#[cfg(target_os = <span class="string">&quot;wasi&quot;</span>)]
+<span class="attr">#[cfg(target_os = <span class="string">"wasi"</span>)]
 </span><span class="kw">impl </span>FromRawFd <span class="kw">for </span>TcpStream {
     <span class="doccomment">/// Converts a `RawFd` to a `TcpStream`.
     ///

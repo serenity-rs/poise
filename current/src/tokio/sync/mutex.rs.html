@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/sync/mutex.rs`."><title>mutex.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/sync/mutex.rs`."><title>mutex.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1380,10 +1380,10 @@
 <a href="#1380" id="1380">1380</a>
 <a href="#1381" id="1381">1381</a>
 <a href="#1382" id="1382">1382</a>
-</pre></div><pre class="rust"><code><span class="attr">#![cfg_attr(not(feature = <span class="string">&quot;sync&quot;</span>), allow(unreachable_pub, dead_code))]
+</pre></div><pre class="rust"><code><span class="attr">#![cfg_attr(not(feature = <span class="string">"sync"</span>), allow(unreachable_pub, dead_code))]
 
 </span><span class="kw">use </span><span class="kw">crate</span>::sync::batch_semaphore <span class="kw">as </span>semaphore;
-<span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+<span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
 </span><span class="kw">use </span><span class="kw">crate</span>::util::trace;
 
 <span class="kw">use </span>std::cell::UnsafeCell;
@@ -1409,7 +1409,7 @@
 /// mutex more expensive than the blocking mutex, so the blocking mutex should
 /// be preferred in the cases where it can be used. The primary use case for the
 /// async mutex is to provide shared mutable access to IO resources such as a
-/// database connection. If the value behind the mutex is just data, it&#39;s
+/// database connection. If the value behind the mutex is just data, it's
 /// usually appropriate to use a blocking mutex such as the one in the standard
 /// library or [`parking_lot`].
 ///
@@ -1467,7 +1467,7 @@
 ///             for j in 0..10 {
 ///                 let mut lock = my_count.lock().await;
 ///                 *lock += 1;
-///                 println!(&quot;{} {} {}&quot;, i, j, lock);
+///                 println!("{} {} {}", i, j, lock);
 ///             }
 ///         });
 ///     }
@@ -1477,7 +1477,7 @@
 ///             break;
 ///         }
 ///     }
-///     println!(&quot;Count hit 50.&quot;);
+///     println!("Count hit 50.");
 /// }
 /// ```
 /// There are a few things of note here to pay attention to in this example.
@@ -1487,12 +1487,12 @@
 /// 3. Mutation of the data protected by the Mutex is done by de-referencing
 ///    the obtained lock as seen on lines 13 and 20.
 ///
-/// Tokio&#39;s Mutex works in a simple FIFO (first in, first out) style where all
+/// Tokio's Mutex works in a simple FIFO (first in, first out) style where all
 /// calls to [`lock`] complete in the order they were performed. In that way the
-/// Mutex is &quot;fair&quot; and predictable in how it distributes the locks to inner
+/// Mutex is "fair" and predictable in how it distributes the locks to inner
 /// data. Locks are released and reacquired after every iteration, so basically,
 /// each thread goes to the back of the line after it increments the value once.
-/// Note that there&#39;s some unpredictability to the timing between when the
+/// Note that there's some unpredictability to the timing between when the
 /// threads are started, but once they are going they alternate predictably.
 /// Finally, since there is only a single valid lock at any given time, there is
 /// no possibility of a race condition when mutating the inner value.
@@ -1509,7 +1509,7 @@
 /// [`Send`]: trait@std::marker::Send
 /// [`lock`]: method@Mutex::lock
 </span><span class="kw">pub struct </span>Mutex&lt;T: <span class="question-mark">?</span>Sized&gt; {
-    <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+    <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
     </span>resource_span: tracing::Span,
     s: semaphore::Semaphore,
     c: UnsafeCell&lt;T&gt;,
@@ -1525,13 +1525,13 @@
 /// The lock is automatically released whenever the guard is dropped, at which
 /// point `lock` will succeed yet again.
 </span><span class="attr">#[clippy::has_significant_drop]
-#[must_use = <span class="string">&quot;if unused the Mutex will immediately unlock&quot;</span>]
-</span><span class="kw">pub struct </span>MutexGuard&lt;<span class="lifetime">&#39;a</span>, T: <span class="question-mark">?</span>Sized&gt; {
+#[must_use = <span class="string">"if unused the Mutex will immediately unlock"</span>]
+</span><span class="kw">pub struct </span>MutexGuard&lt;<span class="lifetime">'a</span>, T: <span class="question-mark">?</span>Sized&gt; {
     <span class="comment">// When changing the fields in this struct, make sure to update the
     // `skip_drop` method.
-    </span><span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+    </span><span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
     </span>resource_span: tracing::Span,
-    lock: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Mutex&lt;T&gt;,
+    lock: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Mutex&lt;T&gt;,
 }
 
 <span class="doccomment">/// An owned handle to a held `Mutex`.
@@ -1539,7 +1539,7 @@
 /// This guard is only available from a `Mutex` that is wrapped in an [`Arc`]. It
 /// is identical to `MutexGuard`, except that rather than borrowing the `Mutex`,
 /// it clones the `Arc`, incrementing the reference count. This means that
-/// unlike `MutexGuard`, it will have the `&#39;static` lifetime.
+/// unlike `MutexGuard`, it will have the `'static` lifetime.
 ///
 /// As long as you have this guard, you have exclusive access to the underlying
 /// `T`. The guard internally keeps a reference-counted pointer to the original
@@ -1553,7 +1553,7 @@
 </span><span class="kw">pub struct </span>OwnedMutexGuard&lt;T: <span class="question-mark">?</span>Sized&gt; {
     <span class="comment">// When changing the fields in this struct, make sure to update the
     // `skip_drop` method.
-    </span><span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+    </span><span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
     </span>resource_span: tracing::Span,
     lock: Arc&lt;Mutex&lt;T&gt;&gt;,
 }
@@ -1564,16 +1564,16 @@
 ///
 /// [`MutexGuard::map`]: method@MutexGuard::map
 </span><span class="attr">#[clippy::has_significant_drop]
-#[must_use = <span class="string">&quot;if unused the Mutex will immediately unlock&quot;</span>]
-</span><span class="kw">pub struct </span>MappedMutexGuard&lt;<span class="lifetime">&#39;a</span>, T: <span class="question-mark">?</span>Sized&gt; {
+#[must_use = <span class="string">"if unused the Mutex will immediately unlock"</span>]
+</span><span class="kw">pub struct </span>MappedMutexGuard&lt;<span class="lifetime">'a</span>, T: <span class="question-mark">?</span>Sized&gt; {
     <span class="comment">// When changing the fields in this struct, make sure to update the
     // `skip_drop` method.
-    </span><span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+    </span><span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
     </span>resource_span: tracing::Span,
-    s: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>semaphore::Semaphore,
+    s: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>semaphore::Semaphore,
     data: <span class="kw-2">*mut </span>T,
     <span class="comment">// Needed to tell the borrow checker that we are holding a `&amp;mut T`
-    </span>marker: PhantomData&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>T&gt;,
+    </span>marker: PhantomData&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>T&gt;,
 }
 
 <span class="doccomment">/// A owned handle to a held `Mutex` that has had a function applied to it via
@@ -1583,11 +1583,11 @@
 ///
 /// [`OwnedMutexGuard::map`]: method@OwnedMutexGuard::map
 </span><span class="attr">#[clippy::has_significant_drop]
-#[must_use = <span class="string">&quot;if unused the Mutex will immediately unlock&quot;</span>]
+#[must_use = <span class="string">"if unused the Mutex will immediately unlock"</span>]
 </span><span class="kw">pub struct </span>OwnedMappedMutexGuard&lt;T: <span class="question-mark">?</span>Sized, U: <span class="question-mark">?</span>Sized = T&gt; {
     <span class="comment">// When changing the fields in this struct, make sure to update the
     // `skip_drop` method.
-    </span><span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+    </span><span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
     </span>resource_span: tracing::Span,
     data: <span class="kw-2">*mut </span>U,
     lock: Arc&lt;Mutex&lt;T&gt;&gt;,
@@ -1596,16 +1596,16 @@
 <span class="doccomment">/// A helper type used when taking apart a `MutexGuard` without running its
 /// Drop implementation.
 </span><span class="attr">#[allow(dead_code)] </span><span class="comment">// Unused fields are still used in Drop.
-</span><span class="kw">struct </span>MutexGuardInner&lt;<span class="lifetime">&#39;a</span>, T: <span class="question-mark">?</span>Sized&gt; {
-    <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+</span><span class="kw">struct </span>MutexGuardInner&lt;<span class="lifetime">'a</span>, T: <span class="question-mark">?</span>Sized&gt; {
+    <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
     </span>resource_span: tracing::Span,
-    lock: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Mutex&lt;T&gt;,
+    lock: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Mutex&lt;T&gt;,
 }
 
 <span class="doccomment">/// A helper type used when taking apart a `OwnedMutexGuard` without running
 /// its Drop implementation.
 </span><span class="kw">struct </span>OwnedMutexGuardInner&lt;T: <span class="question-mark">?</span>Sized&gt; {
-    <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+    <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
     </span>resource_span: tracing::Span,
     lock: Arc&lt;Mutex&lt;T&gt;&gt;,
 }
@@ -1613,10 +1613,10 @@
 <span class="doccomment">/// A helper type used when taking apart a `MappedMutexGuard` without running
 /// its Drop implementation.
 </span><span class="attr">#[allow(dead_code)] </span><span class="comment">// Unused fields are still used in Drop.
-</span><span class="kw">struct </span>MappedMutexGuardInner&lt;<span class="lifetime">&#39;a</span>, T: <span class="question-mark">?</span>Sized&gt; {
-    <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+</span><span class="kw">struct </span>MappedMutexGuardInner&lt;<span class="lifetime">'a</span>, T: <span class="question-mark">?</span>Sized&gt; {
+    <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
     </span>resource_span: tracing::Span,
-    s: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>semaphore::Semaphore,
+    s: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>semaphore::Semaphore,
     data: <span class="kw-2">*mut </span>T,
 }
 
@@ -1624,21 +1624,21 @@
 /// its Drop implementation.
 </span><span class="attr">#[allow(dead_code)] </span><span class="comment">// Unused fields are still used in Drop.
 </span><span class="kw">struct </span>OwnedMappedMutexGuardInner&lt;T: <span class="question-mark">?</span>Sized, U: <span class="question-mark">?</span>Sized&gt; {
-    <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+    <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
     </span>resource_span: tracing::Span,
     data: <span class="kw-2">*mut </span>U,
     lock: Arc&lt;Mutex&lt;T&gt;&gt;,
 }
 
-<span class="comment">// As long as T: Send, it&#39;s fine to send and share Mutex&lt;T&gt; between threads.
+<span class="comment">// As long as T: Send, it's fine to send and share Mutex&lt;T&gt; between threads.
 // If T was not Send, sending and sharing a Mutex&lt;T&gt; would be bad, since you can
 // access T through Mutex&lt;T&gt;.
 </span><span class="kw">unsafe impl</span>&lt;T&gt; Send <span class="kw">for </span>Mutex&lt;T&gt; <span class="kw">where </span>T: <span class="question-mark">?</span>Sized + Send {}
 <span class="kw">unsafe impl</span>&lt;T&gt; Sync <span class="kw">for </span>Mutex&lt;T&gt; <span class="kw">where </span>T: <span class="question-mark">?</span>Sized + Send {}
-<span class="kw">unsafe impl</span>&lt;T&gt; Sync <span class="kw">for </span>MutexGuard&lt;<span class="lifetime">&#39;_</span>, T&gt; <span class="kw">where </span>T: <span class="question-mark">?</span>Sized + Send + Sync {}
+<span class="kw">unsafe impl</span>&lt;T&gt; Sync <span class="kw">for </span>MutexGuard&lt;<span class="lifetime">'_</span>, T&gt; <span class="kw">where </span>T: <span class="question-mark">?</span>Sized + Send + Sync {}
 <span class="kw">unsafe impl</span>&lt;T&gt; Sync <span class="kw">for </span>OwnedMutexGuard&lt;T&gt; <span class="kw">where </span>T: <span class="question-mark">?</span>Sized + Send + Sync {}
-<span class="kw">unsafe impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; Sync <span class="kw">for </span>MappedMutexGuard&lt;<span class="lifetime">&#39;a</span>, T&gt; <span class="kw">where </span>T: <span class="question-mark">?</span>Sized + Sync + <span class="lifetime">&#39;a </span>{}
-<span class="kw">unsafe impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; Send <span class="kw">for </span>MappedMutexGuard&lt;<span class="lifetime">&#39;a</span>, T&gt; <span class="kw">where </span>T: <span class="question-mark">?</span>Sized + Send + <span class="lifetime">&#39;a </span>{}
+<span class="kw">unsafe impl</span>&lt;<span class="lifetime">'a</span>, T&gt; Sync <span class="kw">for </span>MappedMutexGuard&lt;<span class="lifetime">'a</span>, T&gt; <span class="kw">where </span>T: <span class="question-mark">?</span>Sized + Sync + <span class="lifetime">'a </span>{}
+<span class="kw">unsafe impl</span>&lt;<span class="lifetime">'a</span>, T&gt; Send <span class="kw">for </span>MappedMutexGuard&lt;<span class="lifetime">'a</span>, T&gt; <span class="kw">where </span>T: <span class="question-mark">?</span>Sized + Send + <span class="lifetime">'a </span>{}
 
 <span class="kw">unsafe impl</span>&lt;T, U&gt; Sync <span class="kw">for </span>OwnedMappedMutexGuard&lt;T, U&gt;
 <span class="kw">where
@@ -1671,8 +1671,8 @@
 </span><span class="kw">pub struct </span>TryLockError(<span class="kw">pub</span>(<span class="kw">super</span>) ());
 
 <span class="kw">impl </span>fmt::Display <span class="kw">for </span>TryLockError {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        <span class="macro">write!</span>(fmt, <span class="string">&quot;operation would block&quot;</span>)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        <span class="macro">write!</span>(fmt, <span class="string">"operation would block"</span>)
     }
 }
 
@@ -1683,13 +1683,13 @@
 </span><span class="kw">fn </span>bounds() {
     <span class="kw">fn </span>check_send&lt;T: Send&gt;() {}
     <span class="kw">fn </span>check_unpin&lt;T: Unpin&gt;() {}
-    <span class="comment">// This has to take a value, since the async fn&#39;s return type is unnameable.
+    <span class="comment">// This has to take a value, since the async fn's return type is unnameable.
     </span><span class="kw">fn </span>check_send_sync_val&lt;T: Send + Sync&gt;(_t: T) {}
     <span class="kw">fn </span>check_send_sync&lt;T: Send + Sync&gt;() {}
-    <span class="kw">fn </span>check_static&lt;T: <span class="lifetime">&#39;static</span>&gt;() {}
-    <span class="kw">fn </span>check_static_val&lt;T: <span class="lifetime">&#39;static</span>&gt;(_t: T) {}
+    <span class="kw">fn </span>check_static&lt;T: <span class="lifetime">'static</span>&gt;() {}
+    <span class="kw">fn </span>check_static_val&lt;T: <span class="lifetime">'static</span>&gt;(_t: T) {}
 
-    check_send::&lt;MutexGuard&lt;<span class="lifetime">&#39;_</span>, u32&gt;&gt;();
+    check_send::&lt;MutexGuard&lt;<span class="lifetime">'_</span>, u32&gt;&gt;();
     check_send::&lt;OwnedMutexGuard&lt;u32&gt;&gt;();
     check_unpin::&lt;Mutex&lt;u32&gt;&gt;();
     check_send_sync::&lt;Mutex&lt;u32&gt;&gt;();
@@ -1717,36 +1717,36 @@
     </span><span class="kw">where
         </span>T: Sized,
     {
-        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
         </span><span class="kw">let </span>resource_span = {
             <span class="kw">let </span>location = std::panic::Location::caller();
 
             <span class="macro">tracing::trace_span!</span>(
-                <span class="string">&quot;runtime.resource&quot;</span>,
-                concrete_type = <span class="string">&quot;Mutex&quot;</span>,
-                kind = <span class="string">&quot;Sync&quot;</span>,
+                <span class="string">"runtime.resource"</span>,
+                concrete_type = <span class="string">"Mutex"</span>,
+                kind = <span class="string">"Sync"</span>,
                 loc.file = location.file(),
                 loc.line = location.line(),
                 loc.col = location.column(),
             )
         };
 
-        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
         </span><span class="kw">let </span>s = resource_span.in_scope(|| {
             <span class="macro">tracing::trace!</span>(
-                target: <span class="string">&quot;runtime::resource::state_update&quot;</span>,
+                target: <span class="string">"runtime::resource::state_update"</span>,
                 locked = <span class="bool-val">false</span>,
             );
             semaphore::Semaphore::new(<span class="number">1</span>)
         });
 
-        <span class="attr">#[cfg(any(not(tokio_unstable), not(feature = <span class="string">&quot;tracing&quot;</span>)))]
+        <span class="attr">#[cfg(any(not(tokio_unstable), not(feature = <span class="string">"tracing"</span>)))]
         </span><span class="kw">let </span>s = semaphore::Semaphore::new(<span class="number">1</span>);
 
         <span class="self">Self </span>{
             c: UnsafeCell::new(t),
             s,
-            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
             </span>resource_span,
         }
     }
@@ -1776,7 +1776,7 @@
         <span class="self">Self </span>{
             c: UnsafeCell::new(t),
             s: semaphore::Semaphore::const_new(<span class="number">1</span>),
-            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
             </span>resource_span: tracing::Span::none(),
         }
     }
@@ -1804,33 +1804,33 @@
     ///     *n = 2;
     /// }
     /// ```
-    </span><span class="kw">pub async fn </span>lock(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MutexGuard&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+    </span><span class="kw">pub async fn </span>lock(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MutexGuard&lt;<span class="lifetime">'_</span>, T&gt; {
         <span class="kw">let </span>acquire_fut = <span class="kw">async </span>{
             <span class="self">self</span>.acquire().<span class="kw">await</span>;
 
             MutexGuard {
                 lock: <span class="self">self</span>,
-                <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+                <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
                 </span>resource_span: <span class="self">self</span>.resource_span.clone(),
             }
         };
 
-        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
         </span><span class="kw">let </span>acquire_fut = trace::async_op(
             <span class="kw">move </span>|| acquire_fut,
             <span class="self">self</span>.resource_span.clone(),
-            <span class="string">&quot;Mutex::lock&quot;</span>,
-            <span class="string">&quot;poll&quot;</span>,
+            <span class="string">"Mutex::lock"</span>,
+            <span class="string">"poll"</span>,
             <span class="bool-val">false</span>,
         );
 
         <span class="attr">#[allow(clippy::let_and_return)] </span><span class="comment">// this lint triggers when disabling tracing
         </span><span class="kw">let </span>guard = acquire_fut.<span class="kw">await</span>;
 
-        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
         </span><span class="self">self</span>.resource_span.in_scope(|| {
             <span class="macro">tracing::trace!</span>(
-                target: <span class="string">&quot;runtime::resource::state_update&quot;</span>,
+                target: <span class="string">"runtime::resource::state_update"</span>,
                 locked = <span class="bool-val">true</span>,
             );
         });
@@ -1886,9 +1886,9 @@
     ///
     /// ```
     </span><span class="attr">#[track_caller]
-    #[cfg(feature = <span class="string">&quot;sync&quot;</span>)]
-    #[cfg_attr(docsrs, doc(alias = <span class="string">&quot;lock_blocking&quot;</span>))]
-    </span><span class="kw">pub fn </span>blocking_lock(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MutexGuard&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+    #[cfg(feature = <span class="string">"sync"</span>)]
+    #[cfg_attr(docsrs, doc(alias = <span class="string">"lock_blocking"</span>))]
+    </span><span class="kw">pub fn </span>blocking_lock(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; MutexGuard&lt;<span class="lifetime">'_</span>, T&gt; {
         <span class="kw">crate</span>::future::block_on(<span class="self">self</span>.lock())
     }
 
@@ -1898,7 +1898,7 @@
     /// This method is identical to [`Mutex::blocking_lock`], except that the returned
     /// guard references the `Mutex` with an [`Arc`] rather than by borrowing
     /// it. Therefore, the `Mutex` must be wrapped in an `Arc` to call this
-    /// method, and the guard will live for the `&#39;static` lifetime, as it keeps
+    /// method, and the guard will live for the `'static` lifetime, as it keeps
     /// the `Mutex` alive by holding an `Arc`.
     ///
     /// # Panics
@@ -1943,7 +1943,7 @@
     ///
     /// ```
     </span><span class="attr">#[track_caller]
-    #[cfg(feature = <span class="string">&quot;sync&quot;</span>)]
+    #[cfg(feature = <span class="string">"sync"</span>)]
     </span><span class="kw">pub fn </span>blocking_lock_owned(<span class="self">self</span>: Arc&lt;<span class="self">Self</span>&gt;) -&gt; OwnedMutexGuard&lt;T&gt; {
         <span class="kw">crate</span>::future::block_on(<span class="self">self</span>.lock_owned())
     }
@@ -1955,7 +1955,7 @@
     /// This method is identical to [`Mutex::lock`], except that the returned
     /// guard references the `Mutex` with an [`Arc`] rather than by borrowing
     /// it. Therefore, the `Mutex` must be wrapped in an `Arc` to call this
-    /// method, and the guard will live for the `&#39;static` lifetime, as it keeps
+    /// method, and the guard will live for the `'static` lifetime, as it keeps
     /// the `Mutex` alive by holding an `Arc`.
     ///
     /// # Cancel safety
@@ -1981,35 +1981,35 @@
     ///
     /// [`Arc`]: std::sync::Arc
     </span><span class="kw">pub async fn </span>lock_owned(<span class="self">self</span>: Arc&lt;<span class="self">Self</span>&gt;) -&gt; OwnedMutexGuard&lt;T&gt; {
-        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
         </span><span class="kw">let </span>resource_span = <span class="self">self</span>.resource_span.clone();
 
         <span class="kw">let </span>acquire_fut = <span class="kw">async </span>{
             <span class="self">self</span>.acquire().<span class="kw">await</span>;
 
             OwnedMutexGuard {
-                <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+                <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
                 </span>resource_span: <span class="self">self</span>.resource_span.clone(),
                 lock: <span class="self">self</span>,
             }
         };
 
-        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
         </span><span class="kw">let </span>acquire_fut = trace::async_op(
             <span class="kw">move </span>|| acquire_fut,
             resource_span,
-            <span class="string">&quot;Mutex::lock_owned&quot;</span>,
-            <span class="string">&quot;poll&quot;</span>,
+            <span class="string">"Mutex::lock_owned"</span>,
+            <span class="string">"poll"</span>,
             <span class="bool-val">false</span>,
         );
 
         <span class="attr">#[allow(clippy::let_and_return)] </span><span class="comment">// this lint triggers when disabling tracing
         </span><span class="kw">let </span>guard = acquire_fut.<span class="kw">await</span>;
 
-        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
         </span>guard.resource_span.in_scope(|| {
             <span class="macro">tracing::trace!</span>(
-                target: <span class="string">&quot;runtime::resource::state_update&quot;</span>,
+                target: <span class="string">"runtime::resource::state_update"</span>,
                 locked = <span class="bool-val">true</span>,
             );
         });
@@ -2044,19 +2044,19 @@
     /// # Ok(())
     /// # }
     /// ```
-    </span><span class="kw">pub fn </span>try_lock(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;MutexGuard&lt;<span class="lifetime">&#39;_</span>, T&gt;, TryLockError&gt; {
+    </span><span class="kw">pub fn </span>try_lock(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;MutexGuard&lt;<span class="lifetime">'_</span>, T&gt;, TryLockError&gt; {
         <span class="kw">match </span><span class="self">self</span>.s.try_acquire(<span class="number">1</span>) {
             <span class="prelude-val">Ok</span>(()) =&gt; {
                 <span class="kw">let </span>guard = MutexGuard {
                     lock: <span class="self">self</span>,
-                    <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+                    <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
                     </span>resource_span: <span class="self">self</span>.resource_span.clone(),
                 };
 
-                <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+                <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
                 </span><span class="self">self</span>.resource_span.in_scope(|| {
                     <span class="macro">tracing::trace!</span>(
-                        target: <span class="string">&quot;runtime::resource::state_update&quot;</span>,
+                        target: <span class="string">"runtime::resource::state_update"</span>,
                         locked = <span class="bool-val">true</span>,
                     );
                 });
@@ -2097,7 +2097,7 @@
     /// This method is identical to [`Mutex::try_lock`], except that the
     /// returned  guard references the `Mutex` with an [`Arc`] rather than by
     /// borrowing it. Therefore, the `Mutex` must be wrapped in an `Arc` to call
-    /// this method, and the guard will live for the `&#39;static` lifetime, as it
+    /// this method, and the guard will live for the `'static` lifetime, as it
     /// keeps the `Mutex` alive by holding an `Arc`.
     ///
     /// [`TryLockError`]: TryLockError
@@ -2119,15 +2119,15 @@
         <span class="kw">match </span><span class="self">self</span>.s.try_acquire(<span class="number">1</span>) {
             <span class="prelude-val">Ok</span>(()) =&gt; {
                 <span class="kw">let </span>guard = OwnedMutexGuard {
-                    <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+                    <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
                     </span>resource_span: <span class="self">self</span>.resource_span.clone(),
                     lock: <span class="self">self</span>,
                 };
 
-                <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+                <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
                 </span>guard.resource_span.in_scope(|| {
                     <span class="macro">tracing::trace!</span>(
-                        target: <span class="string">&quot;runtime::resource::state_update&quot;</span>,
+                        target: <span class="string">"runtime::resource::state_update"</span>,
                         locked = <span class="bool-val">true</span>,
                     );
                 });
@@ -2179,11 +2179,11 @@
 <span class="kw">where
     </span>T: std::fmt::Debug,
 {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
-        <span class="kw">let </span><span class="kw-2">mut </span>d = f.debug_struct(<span class="string">&quot;Mutex&quot;</span>);
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
+        <span class="kw">let </span><span class="kw-2">mut </span>d = f.debug_struct(<span class="string">"Mutex"</span>);
         <span class="kw">match </span><span class="self">self</span>.try_lock() {
-            <span class="prelude-val">Ok</span>(inner) =&gt; d.field(<span class="string">&quot;data&quot;</span>, &amp;&amp;<span class="kw-2">*</span>inner),
-            <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; d.field(<span class="string">&quot;data&quot;</span>, <span class="kw-2">&amp;</span><span class="macro">format_args!</span>(<span class="string">&quot;&lt;locked&gt;&quot;</span>)),
+            <span class="prelude-val">Ok</span>(inner) =&gt; d.field(<span class="string">"data"</span>, &amp;&amp;<span class="kw-2">*</span>inner),
+            <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; d.field(<span class="string">"data"</span>, <span class="kw-2">&amp;</span><span class="macro">format_args!</span>(<span class="string">"&lt;locked&gt;"</span>)),
         };
         d.finish()
     }
@@ -2191,13 +2191,13 @@
 
 <span class="comment">// === impl MutexGuard ===
 
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: <span class="question-mark">?</span>Sized&gt; MutexGuard&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    <span class="kw">fn </span>skip_drop(<span class="self">self</span>) -&gt; MutexGuardInner&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T: <span class="question-mark">?</span>Sized&gt; MutexGuard&lt;<span class="lifetime">'a</span>, T&gt; {
+    <span class="kw">fn </span>skip_drop(<span class="self">self</span>) -&gt; MutexGuardInner&lt;<span class="lifetime">'a</span>, T&gt; {
         <span class="kw">let </span>me = mem::ManuallyDrop::new(<span class="self">self</span>);
         <span class="comment">// SAFETY: This duplicates the `resource_span` and then forgets the
         // original. In the end, we have not duplicated or forgotten any values.
         </span>MutexGuardInner {
-            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
             </span>resource_span: <span class="kw">unsafe </span>{ std::ptr::read(<span class="kw-2">&amp;</span>me.resource_span) },
             lock: me.lock,
         }
@@ -2234,7 +2234,7 @@
     /// [`MutexGuard`]: struct@MutexGuard
     /// [`MappedMutexGuard`]: struct@MappedMutexGuard
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>map&lt;U, F&gt;(<span class="kw-2">mut </span>this: <span class="self">Self</span>, f: F) -&gt; MappedMutexGuard&lt;<span class="lifetime">&#39;a</span>, U&gt;
+    </span><span class="kw">pub fn </span>map&lt;U, F&gt;(<span class="kw-2">mut </span>this: <span class="self">Self</span>, f: F) -&gt; MappedMutexGuard&lt;<span class="lifetime">'a</span>, U&gt;
     <span class="kw">where
         </span>U: <span class="question-mark">?</span>Sized,
         F: FnOnce(<span class="kw-2">&amp;mut </span>T) -&gt; <span class="kw-2">&amp;mut </span>U,
@@ -2245,7 +2245,7 @@
             s: <span class="kw-2">&amp;</span>inner.lock.s,
             data,
             marker: PhantomData,
-            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
             </span>resource_span: inner.resource_span,
         }
     }
@@ -2272,7 +2272,7 @@
     ///
     /// {
     ///     let mut mapped = MutexGuard::try_map(foo.lock().await, |f| Some(&amp;mut f.0))
-    ///         .expect(&quot;should not fail&quot;);
+    ///         .expect("should not fail");
     ///     *mapped = 2;
     /// }
     ///
@@ -2283,7 +2283,7 @@
     /// [`MutexGuard`]: struct@MutexGuard
     /// [`MappedMutexGuard`]: struct@MappedMutexGuard
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>try_map&lt;U, F&gt;(<span class="kw-2">mut </span>this: <span class="self">Self</span>, f: F) -&gt; <span class="prelude-ty">Result</span>&lt;MappedMutexGuard&lt;<span class="lifetime">&#39;a</span>, U&gt;, <span class="self">Self</span>&gt;
+    </span><span class="kw">pub fn </span>try_map&lt;U, F&gt;(<span class="kw-2">mut </span>this: <span class="self">Self</span>, f: F) -&gt; <span class="prelude-ty">Result</span>&lt;MappedMutexGuard&lt;<span class="lifetime">'a</span>, U&gt;, <span class="self">Self</span>&gt;
     <span class="kw">where
         </span>U: <span class="question-mark">?</span>Sized,
         F: FnOnce(<span class="kw-2">&amp;mut </span>T) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>U&gt;,
@@ -2297,7 +2297,7 @@
             s: <span class="kw-2">&amp;</span>inner.lock.s,
             data,
             marker: PhantomData,
-            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
             </span>resource_span: inner.resource_span,
         })
     }
@@ -2307,12 +2307,12 @@
     /// ```
     /// use tokio::sync::{Mutex, MutexGuard};
     ///
-    /// async fn unlock_and_relock&lt;&#39;l&gt;(guard: MutexGuard&lt;&#39;l, u32&gt;) -&gt; MutexGuard&lt;&#39;l, u32&gt; {
-    ///     println!(&quot;1. contains: {:?}&quot;, *guard);
+    /// async fn unlock_and_relock&lt;'l&gt;(guard: MutexGuard&lt;'l, u32&gt;) -&gt; MutexGuard&lt;'l, u32&gt; {
+    ///     println!("1. contains: {:?}", *guard);
     ///     let mutex = MutexGuard::mutex(&amp;guard);
     ///     drop(guard);
     ///     let guard = mutex.lock().await;
-    ///     println!(&quot;2. contains: {:?}&quot;, *guard);
+    ///     println!("2. contains: {:?}", *guard);
     ///     guard
     /// }
     /// #
@@ -2324,46 +2324,46 @@
     /// # }
     /// ```
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>mutex(this: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Mutex&lt;T&gt; {
+    </span><span class="kw">pub fn </span>mutex(this: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Mutex&lt;T&gt; {
         this.lock
     }
 }
 
-<span class="kw">impl</span>&lt;T: <span class="question-mark">?</span>Sized&gt; Drop <span class="kw">for </span>MutexGuard&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+<span class="kw">impl</span>&lt;T: <span class="question-mark">?</span>Sized&gt; Drop <span class="kw">for </span>MutexGuard&lt;<span class="lifetime">'_</span>, T&gt; {
     <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="self">self</span>.lock.s.release(<span class="number">1</span>);
 
-        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
         </span><span class="self">self</span>.resource_span.in_scope(|| {
             <span class="macro">tracing::trace!</span>(
-                target: <span class="string">&quot;runtime::resource::state_update&quot;</span>,
+                target: <span class="string">"runtime::resource::state_update"</span>,
                 locked = <span class="bool-val">false</span>,
             );
         });
     }
 }
 
-<span class="kw">impl</span>&lt;T: <span class="question-mark">?</span>Sized&gt; Deref <span class="kw">for </span>MutexGuard&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+<span class="kw">impl</span>&lt;T: <span class="question-mark">?</span>Sized&gt; Deref <span class="kw">for </span>MutexGuard&lt;<span class="lifetime">'_</span>, T&gt; {
     <span class="kw">type </span>Target = T;
     <span class="kw">fn </span>deref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="self">Self</span>::Target {
         <span class="kw">unsafe </span>{ <span class="kw-2">&amp;*</span><span class="self">self</span>.lock.c.get() }
     }
 }
 
-<span class="kw">impl</span>&lt;T: <span class="question-mark">?</span>Sized&gt; DerefMut <span class="kw">for </span>MutexGuard&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+<span class="kw">impl</span>&lt;T: <span class="question-mark">?</span>Sized&gt; DerefMut <span class="kw">for </span>MutexGuard&lt;<span class="lifetime">'_</span>, T&gt; {
     <span class="kw">fn </span>deref_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self</span>::Target {
         <span class="kw">unsafe </span>{ <span class="kw-2">&amp;mut *</span><span class="self">self</span>.lock.c.get() }
     }
 }
 
-<span class="kw">impl</span>&lt;T: <span class="question-mark">?</span>Sized + fmt::Debug&gt; fmt::Debug <span class="kw">for </span>MutexGuard&lt;<span class="lifetime">&#39;_</span>, T&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+<span class="kw">impl</span>&lt;T: <span class="question-mark">?</span>Sized + fmt::Debug&gt; fmt::Debug <span class="kw">for </span>MutexGuard&lt;<span class="lifetime">'_</span>, T&gt; {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         fmt::Debug::fmt(<span class="kw-2">&amp;**</span><span class="self">self</span>, f)
     }
 }
 
-<span class="kw">impl</span>&lt;T: <span class="question-mark">?</span>Sized + fmt::Display&gt; fmt::Display <span class="kw">for </span>MutexGuard&lt;<span class="lifetime">&#39;_</span>, T&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+<span class="kw">impl</span>&lt;T: <span class="question-mark">?</span>Sized + fmt::Display&gt; fmt::Display <span class="kw">for </span>MutexGuard&lt;<span class="lifetime">'_</span>, T&gt; {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         fmt::Display::fmt(<span class="kw-2">&amp;**</span><span class="self">self</span>, f)
     }
 }
@@ -2378,7 +2378,7 @@
         </span><span class="kw">unsafe </span>{
             OwnedMutexGuardInner {
                 lock: ptr::read(<span class="kw-2">&amp;</span>me.lock),
-                <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+                <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
                 </span>resource_span: ptr::read(<span class="kw-2">&amp;</span>me.resource_span),
             }
         }
@@ -2426,7 +2426,7 @@
         OwnedMappedMutexGuard {
             data,
             lock: inner.lock,
-            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
             </span>resource_span: inner.resource_span,
         }
     }
@@ -2454,7 +2454,7 @@
     ///
     /// {
     ///     let mut mapped = OwnedMutexGuard::try_map(foo.clone().lock_owned().await, |f| Some(&amp;mut f.0))
-    ///         .expect(&quot;should not fail&quot;);
+    ///         .expect("should not fail");
     ///     *mapped = 2;
     /// }
     ///
@@ -2478,7 +2478,7 @@
         <span class="prelude-val">Ok</span>(OwnedMappedMutexGuard {
             data,
             lock: inner.lock,
-            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
             </span>resource_span: inner.resource_span,
         })
     }
@@ -2490,11 +2490,11 @@
     /// use tokio::sync::{Mutex, OwnedMutexGuard};
     ///
     /// async fn unlock_and_relock(guard: OwnedMutexGuard&lt;u32&gt;) -&gt; OwnedMutexGuard&lt;u32&gt; {
-    ///     println!(&quot;1. contains: {:?}&quot;, *guard);
+    ///     println!("1. contains: {:?}", *guard);
     ///     let mutex: Arc&lt;Mutex&lt;u32&gt;&gt; = OwnedMutexGuard::mutex(&amp;guard).clone();
     ///     drop(guard);
     ///     let guard = mutex.lock_owned().await;
-    ///     println!(&quot;2. contains: {:?}&quot;, *guard);
+    ///     println!("2. contains: {:?}", *guard);
     ///     guard
     /// }
     /// #
@@ -2515,10 +2515,10 @@
     <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="self">self</span>.lock.s.release(<span class="number">1</span>);
 
-        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
         </span><span class="self">self</span>.resource_span.in_scope(|| {
             <span class="macro">tracing::trace!</span>(
-                target: <span class="string">&quot;runtime::resource::state_update&quot;</span>,
+                target: <span class="string">"runtime::resource::state_update"</span>,
                 locked = <span class="bool-val">false</span>,
             );
         });
@@ -2539,26 +2539,26 @@
 }
 
 <span class="kw">impl</span>&lt;T: <span class="question-mark">?</span>Sized + fmt::Debug&gt; fmt::Debug <span class="kw">for </span>OwnedMutexGuard&lt;T&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         fmt::Debug::fmt(<span class="kw-2">&amp;**</span><span class="self">self</span>, f)
     }
 }
 
 <span class="kw">impl</span>&lt;T: <span class="question-mark">?</span>Sized + fmt::Display&gt; fmt::Display <span class="kw">for </span>OwnedMutexGuard&lt;T&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         fmt::Display::fmt(<span class="kw-2">&amp;**</span><span class="self">self</span>, f)
     }
 }
 
 <span class="comment">// === impl MappedMutexGuard ===
 
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: <span class="question-mark">?</span>Sized&gt; MappedMutexGuard&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    <span class="kw">fn </span>skip_drop(<span class="self">self</span>) -&gt; MappedMutexGuardInner&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T: <span class="question-mark">?</span>Sized&gt; MappedMutexGuard&lt;<span class="lifetime">'a</span>, T&gt; {
+    <span class="kw">fn </span>skip_drop(<span class="self">self</span>) -&gt; MappedMutexGuardInner&lt;<span class="lifetime">'a</span>, T&gt; {
         <span class="kw">let </span>me = mem::ManuallyDrop::new(<span class="self">self</span>);
         MappedMutexGuardInner {
             s: me.s,
             data: me.data,
-            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
             </span>resource_span: <span class="kw">unsafe </span>{ std::ptr::read(<span class="kw-2">&amp;</span>me.resource_span) },
         }
     }
@@ -2572,7 +2572,7 @@
     ///
     /// [`MappedMutexGuard`]: struct@MappedMutexGuard
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>map&lt;U, F&gt;(<span class="kw-2">mut </span>this: <span class="self">Self</span>, f: F) -&gt; MappedMutexGuard&lt;<span class="lifetime">&#39;a</span>, U&gt;
+    </span><span class="kw">pub fn </span>map&lt;U, F&gt;(<span class="kw-2">mut </span>this: <span class="self">Self</span>, f: F) -&gt; MappedMutexGuard&lt;<span class="lifetime">'a</span>, U&gt;
     <span class="kw">where
         </span>F: FnOnce(<span class="kw-2">&amp;mut </span>T) -&gt; <span class="kw-2">&amp;mut </span>U,
     {
@@ -2582,7 +2582,7 @@
             s: inner.s,
             data,
             marker: PhantomData,
-            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
             </span>resource_span: inner.resource_span,
         }
     }
@@ -2597,7 +2597,7 @@
     ///
     /// [`MappedMutexGuard`]: struct@MappedMutexGuard
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>try_map&lt;U, F&gt;(<span class="kw-2">mut </span>this: <span class="self">Self</span>, f: F) -&gt; <span class="prelude-ty">Result</span>&lt;MappedMutexGuard&lt;<span class="lifetime">&#39;a</span>, U&gt;, <span class="self">Self</span>&gt;
+    </span><span class="kw">pub fn </span>try_map&lt;U, F&gt;(<span class="kw-2">mut </span>this: <span class="self">Self</span>, f: F) -&gt; <span class="prelude-ty">Result</span>&lt;MappedMutexGuard&lt;<span class="lifetime">'a</span>, U&gt;, <span class="self">Self</span>&gt;
     <span class="kw">where
         </span>F: FnOnce(<span class="kw-2">&amp;mut </span>T) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>U&gt;,
     {
@@ -2610,47 +2610,47 @@
             s: inner.s,
             data,
             marker: PhantomData,
-            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
             </span>resource_span: inner.resource_span,
         })
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: <span class="question-mark">?</span>Sized&gt; Drop <span class="kw">for </span>MappedMutexGuard&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T: <span class="question-mark">?</span>Sized&gt; Drop <span class="kw">for </span>MappedMutexGuard&lt;<span class="lifetime">'a</span>, T&gt; {
     <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="self">self</span>.s.release(<span class="number">1</span>);
 
-        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
         </span><span class="self">self</span>.resource_span.in_scope(|| {
             <span class="macro">tracing::trace!</span>(
-                target: <span class="string">&quot;runtime::resource::state_update&quot;</span>,
+                target: <span class="string">"runtime::resource::state_update"</span>,
                 locked = <span class="bool-val">false</span>,
             );
         });
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: <span class="question-mark">?</span>Sized&gt; Deref <span class="kw">for </span>MappedMutexGuard&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T: <span class="question-mark">?</span>Sized&gt; Deref <span class="kw">for </span>MappedMutexGuard&lt;<span class="lifetime">'a</span>, T&gt; {
     <span class="kw">type </span>Target = T;
     <span class="kw">fn </span>deref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="self">Self</span>::Target {
         <span class="kw">unsafe </span>{ <span class="kw-2">&amp;*</span><span class="self">self</span>.data }
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: <span class="question-mark">?</span>Sized&gt; DerefMut <span class="kw">for </span>MappedMutexGuard&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T: <span class="question-mark">?</span>Sized&gt; DerefMut <span class="kw">for </span>MappedMutexGuard&lt;<span class="lifetime">'a</span>, T&gt; {
     <span class="kw">fn </span>deref_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self</span>::Target {
         <span class="kw">unsafe </span>{ <span class="kw-2">&amp;mut *</span><span class="self">self</span>.data }
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: <span class="question-mark">?</span>Sized + fmt::Debug&gt; fmt::Debug <span class="kw">for </span>MappedMutexGuard&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T: <span class="question-mark">?</span>Sized + fmt::Debug&gt; fmt::Debug <span class="kw">for </span>MappedMutexGuard&lt;<span class="lifetime">'a</span>, T&gt; {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         fmt::Debug::fmt(<span class="kw-2">&amp;**</span><span class="self">self</span>, f)
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: <span class="question-mark">?</span>Sized + fmt::Display&gt; fmt::Display <span class="kw">for </span>MappedMutexGuard&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T: <span class="question-mark">?</span>Sized + fmt::Display&gt; fmt::Display <span class="kw">for </span>MappedMutexGuard&lt;<span class="lifetime">'a</span>, T&gt; {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         fmt::Display::fmt(<span class="kw-2">&amp;**</span><span class="self">self</span>, f)
     }
 }
@@ -2666,7 +2666,7 @@
             OwnedMappedMutexGuardInner {
                 data: me.data,
                 lock: ptr::read(<span class="kw-2">&amp;</span>me.lock),
-                <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+                <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
                 </span>resource_span: ptr::read(<span class="kw-2">&amp;</span>me.resource_span),
             }
         }
@@ -2690,7 +2690,7 @@
         OwnedMappedMutexGuard {
             data,
             lock: inner.lock,
-            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
             </span>resource_span: inner.resource_span,
         }
     }
@@ -2718,7 +2718,7 @@
         <span class="prelude-val">Ok</span>(OwnedMappedMutexGuard {
             data,
             lock: inner.lock,
-            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
             </span>resource_span: inner.resource_span,
         })
     }
@@ -2728,10 +2728,10 @@
     <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="self">self</span>.lock.s.release(<span class="number">1</span>);
 
-        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
         </span><span class="self">self</span>.resource_span.in_scope(|| {
             <span class="macro">tracing::trace!</span>(
-                target: <span class="string">&quot;runtime::resource::state_update&quot;</span>,
+                target: <span class="string">"runtime::resource::state_update"</span>,
                 locked = <span class="bool-val">false</span>,
             );
         });
@@ -2752,13 +2752,13 @@
 }
 
 <span class="kw">impl</span>&lt;T: <span class="question-mark">?</span>Sized, U: <span class="question-mark">?</span>Sized + fmt::Debug&gt; fmt::Debug <span class="kw">for </span>OwnedMappedMutexGuard&lt;T, U&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         fmt::Debug::fmt(<span class="kw-2">&amp;**</span><span class="self">self</span>, f)
     }
 }
 
 <span class="kw">impl</span>&lt;T: <span class="question-mark">?</span>Sized, U: <span class="question-mark">?</span>Sized + fmt::Display&gt; fmt::Display <span class="kw">for </span>OwnedMappedMutexGuard&lt;T, U&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         fmt::Display::fmt(<span class="kw-2">&amp;**</span><span class="self">self</span>, f)
     }
 }

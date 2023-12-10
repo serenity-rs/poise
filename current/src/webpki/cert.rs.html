@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-webpki-0.101.7/src/cert.rs`."><title>cert.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="webpki" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-webpki-0.101.7/src/cert.rs`."><title>cert.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="webpki" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -253,7 +253,7 @@
 // purpose with or without fee is hereby granted, provided that the above
 // copyright notice and this permission notice appear in all copies.
 //
-// THE SOFTWARE IS PROVIDED &quot;AS IS&quot; AND THE AUTHORS DISCLAIM ALL WARRANTIES
+// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHORS DISCLAIM ALL WARRANTIES
 // WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
 // MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR
 // ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
@@ -268,40 +268,40 @@
 
 <span class="doccomment">/// An enumeration indicating whether a [`Cert`] is a leaf end-entity cert, or a linked
 /// list node from the CA `Cert` to a child `Cert` it issued.
-</span><span class="kw">pub enum </span>EndEntityOrCa&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub enum </span>EndEntityOrCa&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// The [`Cert`] is a leaf end-entity certificate.
     </span>EndEntity,
 
     <span class="doccomment">/// The [`Cert`] is an issuer certificate, and issued the referenced child `Cert`.
-    </span>Ca(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Cert&lt;<span class="lifetime">&#39;a</span>&gt;),
+    </span>Ca(<span class="kw-2">&amp;</span><span class="lifetime">'a </span>Cert&lt;<span class="lifetime">'a</span>&gt;),
 }
 
 <span class="doccomment">/// A parsed X509 certificate.
-</span><span class="kw">pub struct </span>Cert&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) ee_or_ca: EndEntityOrCa&lt;<span class="lifetime">&#39;a</span>&gt;,
+</span><span class="kw">pub struct </span>Cert&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) ee_or_ca: EndEntityOrCa&lt;<span class="lifetime">'a</span>&gt;,
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) serial: untrusted::Input&lt;<span class="lifetime">&#39;a</span>&gt;,
-    <span class="kw">pub</span>(<span class="kw">crate</span>) signed_data: SignedData&lt;<span class="lifetime">&#39;a</span>&gt;,
-    <span class="kw">pub</span>(<span class="kw">crate</span>) issuer: untrusted::Input&lt;<span class="lifetime">&#39;a</span>&gt;,
-    <span class="kw">pub</span>(<span class="kw">crate</span>) validity: untrusted::Input&lt;<span class="lifetime">&#39;a</span>&gt;,
-    <span class="kw">pub</span>(<span class="kw">crate</span>) subject: untrusted::Input&lt;<span class="lifetime">&#39;a</span>&gt;,
-    <span class="kw">pub</span>(<span class="kw">crate</span>) spki: der::Value&lt;<span class="lifetime">&#39;a</span>&gt;,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) serial: untrusted::Input&lt;<span class="lifetime">'a</span>&gt;,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) signed_data: SignedData&lt;<span class="lifetime">'a</span>&gt;,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) issuer: untrusted::Input&lt;<span class="lifetime">'a</span>&gt;,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) validity: untrusted::Input&lt;<span class="lifetime">'a</span>&gt;,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) subject: untrusted::Input&lt;<span class="lifetime">'a</span>&gt;,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) spki: der::Value&lt;<span class="lifetime">'a</span>&gt;,
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) basic_constraints: <span class="prelude-ty">Option</span>&lt;untrusted::Input&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) basic_constraints: <span class="prelude-ty">Option</span>&lt;untrusted::Input&lt;<span class="lifetime">'a</span>&gt;&gt;,
     <span class="comment">// key usage (KU) extension (if any). When validating certificate revocation lists (CRLs) this
     // field will be consulted to determine if the cert is allowed to sign CRLs. For cert validation
     // this field is ignored (for more detail see in `verify_cert.rs` and
     // `check_issuer_independent_properties`).
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) key_usage: <span class="prelude-ty">Option</span>&lt;untrusted::Input&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
-    <span class="kw">pub</span>(<span class="kw">crate</span>) eku: <span class="prelude-ty">Option</span>&lt;untrusted::Input&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
-    <span class="kw">pub</span>(<span class="kw">crate</span>) name_constraints: <span class="prelude-ty">Option</span>&lt;untrusted::Input&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
-    <span class="kw">pub</span>(<span class="kw">crate</span>) subject_alt_name: <span class="prelude-ty">Option</span>&lt;untrusted::Input&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) key_usage: <span class="prelude-ty">Option</span>&lt;untrusted::Input&lt;<span class="lifetime">'a</span>&gt;&gt;,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) eku: <span class="prelude-ty">Option</span>&lt;untrusted::Input&lt;<span class="lifetime">'a</span>&gt;&gt;,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) name_constraints: <span class="prelude-ty">Option</span>&lt;untrusted::Input&lt;<span class="lifetime">'a</span>&gt;&gt;,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) subject_alt_name: <span class="prelude-ty">Option</span>&lt;untrusted::Input&lt;<span class="lifetime">'a</span>&gt;&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Cert&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Cert&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>from_der(
-        cert_der: untrusted::Input&lt;<span class="lifetime">&#39;a</span>&gt;,
-        ee_or_ca: EndEntityOrCa&lt;<span class="lifetime">&#39;a</span>&gt;,
+        cert_der: untrusted::Input&lt;<span class="lifetime">'a</span>&gt;,
+        ee_or_ca: EndEntityOrCa&lt;<span class="lifetime">'a</span>&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, Error&gt; {
         <span class="kw">let </span>(tbs, signed_data) = cert_der.read_all(Error::BadDer, |cert_der| {
             der::nested(cert_der, der::Tag::Sequence, Error::BadDer, |der| {
@@ -330,7 +330,7 @@
 
             <span class="comment">// In theory there could be fields [1] issuerUniqueID and [2]
             // subjectUniqueID, but in practice there never are, and to keep the
-            // code small and simple we don&#39;t accept any certificates that do
+            // code small and simple we don't accept any certificates that do
             // contain them.
 
             </span><span class="kw">let </span><span class="kw-2">mut </span>cert = Cert {
@@ -413,14 +413,14 @@
     )
 }
 
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>lenient_certificate_serial_number&lt;<span class="lifetime">&#39;a</span>&gt;(
-    input: <span class="kw-2">&amp;mut </span>untrusted::Reader&lt;<span class="lifetime">&#39;a</span>&gt;,
-) -&gt; <span class="prelude-ty">Result</span>&lt;untrusted::Input&lt;<span class="lifetime">&#39;a</span>&gt;, Error&gt; {
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>lenient_certificate_serial_number&lt;<span class="lifetime">'a</span>&gt;(
+    input: <span class="kw-2">&amp;mut </span>untrusted::Reader&lt;<span class="lifetime">'a</span>&gt;,
+) -&gt; <span class="prelude-ty">Result</span>&lt;untrusted::Input&lt;<span class="lifetime">'a</span>&gt;, Error&gt; {
     <span class="comment">// https://tools.ietf.org/html/rfc5280#section-4.1.2.2:
-    // * Conforming CAs MUST NOT use serialNumber values longer than 20 octets.&quot;
-    // * &quot;The serial number MUST be a positive integer [...]&quot;
+    // * Conforming CAs MUST NOT use serialNumber values longer than 20 octets."
+    // * "The serial number MUST be a positive integer [...]"
     //
-    // However, we don&#39;t enforce these constraints, as there are widely-deployed trust anchors
+    // However, we don't enforce these constraints, as there are widely-deployed trust anchors
     // and many X.509 implementations in common use that violate these constraints. This is called
     // out by the same section of RFC 5280 as cited above:
     //   Note: Non-conforming CAs may issue certificates with serial numbers
@@ -429,11 +429,11 @@
     </span>der::expect_tag_and_get_value(input, Tag::Integer)
 }
 
-<span class="kw">fn </span>remember_cert_extension&lt;<span class="lifetime">&#39;a</span>&gt;(
-    cert: <span class="kw-2">&amp;mut </span>Cert&lt;<span class="lifetime">&#39;a</span>&gt;,
-    extension: <span class="kw-2">&amp;</span>Extension&lt;<span class="lifetime">&#39;a</span>&gt;,
+<span class="kw">fn </span>remember_cert_extension&lt;<span class="lifetime">'a</span>&gt;(
+    cert: <span class="kw-2">&amp;mut </span>Cert&lt;<span class="lifetime">'a</span>&gt;,
+    extension: <span class="kw-2">&amp;</span>Extension&lt;<span class="lifetime">'a</span>&gt;,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
-    <span class="comment">// We don&#39;t do anything with certificate policies so we can safely ignore
+    <span class="comment">// We don't do anything with certificate policies so we can safely ignore
     // all policy-related stuff. We assume that the policy-related extensions
     // are not marked critical.
 
@@ -475,18 +475,18 @@
     <span class="kw">use </span><span class="kw">crate</span>::cert::{Cert, EndEntityOrCa};
 
     <span class="attr">#[test]
-    </span><span class="comment">// Note: cert::parse_cert is crate-local visibility, and EndEntityCert doesn&#39;t expose the
+    </span><span class="comment">// Note: cert::parse_cert is crate-local visibility, and EndEntityCert doesn't expose the
     //       inner Cert, or the serial number. As a result we test that the raw serial value
     //       is read correctly here instead of in tests/integration.rs.
     </span><span class="kw">fn </span>test_serial_read() {
-        <span class="kw">let </span>ee = <span class="macro">include_bytes!</span>(<span class="string">&quot;../tests/misc/serial_neg_ee.der&quot;</span>);
+        <span class="kw">let </span>ee = <span class="macro">include_bytes!</span>(<span class="string">"../tests/misc/serial_neg_ee.der"</span>);
         <span class="kw">let </span>cert = Cert::from_der(untrusted::Input::from(ee), EndEntityOrCa::EndEntity)
-            .expect(<span class="string">&quot;failed to parse certificate&quot;</span>);
+            .expect(<span class="string">"failed to parse certificate"</span>);
         <span class="macro">assert_eq!</span>(cert.serial.as_slice_less_safe(), <span class="kw-2">&amp;</span>[<span class="number">255</span>, <span class="number">33</span>, <span class="number">82</span>, <span class="number">65</span>, <span class="number">17</span>]);
 
-        <span class="kw">let </span>ee = <span class="macro">include_bytes!</span>(<span class="string">&quot;../tests/misc/serial_large_positive.der&quot;</span>);
+        <span class="kw">let </span>ee = <span class="macro">include_bytes!</span>(<span class="string">"../tests/misc/serial_large_positive.der"</span>);
         <span class="kw">let </span>cert = Cert::from_der(untrusted::Input::from(ee), EndEntityOrCa::EndEntity)
-            .expect(<span class="string">&quot;failed to parse certificate&quot;</span>);
+            .expect(<span class="string">"failed to parse certificate"</span>);
         <span class="macro">assert_eq!</span>(
             cert.serial.as_slice_less_safe(),
             <span class="kw-2">&amp;</span>[

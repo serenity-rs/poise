@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/http-0.2.11/src/header/value.rs`."><title>value.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="http" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/http-0.2.11/src/header/value.rs`."><title>value.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="http" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -862,7 +862,7 @@
     ///    |
     ///   ::: src/main.rs:73:1
     ///    |
-    /// 73 | const INVALID_HEADER: HeaderValue = HeaderValue::from_static(&quot;жsome value&quot;);
+    /// 73 | const INVALID_HEADER: HeaderValue = HeaderValue::from_static("жsome value");
     ///    | ----------------------------------------------------------------------------
     /// ```
     ///
@@ -870,12 +870,12 @@
     ///
     /// ```
     /// # use http::header::HeaderValue;
-    /// let val = HeaderValue::from_static(&quot;hello&quot;);
-    /// assert_eq!(val, &quot;hello&quot;);
+    /// let val = HeaderValue::from_static("hello");
+    /// assert_eq!(val, "hello");
     /// ```
     </span><span class="attr">#[inline]
     #[allow(unconditional_panic)] </span><span class="comment">// required for the panic circumvention
-    </span><span class="kw">pub const fn </span>from_static(src: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str) -&gt; HeaderValue {
+    </span><span class="kw">pub const fn </span>from_static(src: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str) -&gt; HeaderValue {
         <span class="kw">let </span>bytes = src.as_bytes();
         <span class="kw">let </span><span class="kw-2">mut </span>i = <span class="number">0</span>;
         <span class="kw">while </span>i &lt; bytes.len() {
@@ -905,15 +905,15 @@
     ///
     /// ```
     /// # use http::header::HeaderValue;
-    /// let val = HeaderValue::from_str(&quot;hello&quot;).unwrap();
-    /// assert_eq!(val, &quot;hello&quot;);
+    /// let val = HeaderValue::from_str("hello").unwrap();
+    /// assert_eq!(val, "hello");
     /// ```
     ///
     /// An invalid value
     ///
     /// ```
     /// # use http::header::HeaderValue;
-    /// let val = HeaderValue::from_str(&quot;\n&quot;);
+    /// let val = HeaderValue::from_str("\n");
     /// assert!(val.is_err());
     /// ```
     </span><span class="attr">#[inline]
@@ -931,7 +931,7 @@
     /// # use http::header::{HeaderValue, HeaderName};
     /// # use http::header::ACCEPT;
     /// let val = HeaderValue::from_name(ACCEPT);
-    /// assert_eq!(val, HeaderValue::from_bytes(b&quot;accept&quot;).unwrap());
+    /// assert_eq!(val, HeaderValue::from_bytes(b"accept").unwrap());
     /// ```
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>from_name(name: HeaderName) -&gt; HeaderValue {
@@ -951,15 +951,15 @@
     ///
     /// ```
     /// # use http::header::HeaderValue;
-    /// let val = HeaderValue::from_bytes(b&quot;hello\xfa&quot;).unwrap();
-    /// assert_eq!(val, &amp;b&quot;hello\xfa&quot;[..]);
+    /// let val = HeaderValue::from_bytes(b"hello\xfa").unwrap();
+    /// assert_eq!(val, &amp;b"hello\xfa"[..]);
     /// ```
     ///
     /// An invalid value
     ///
     /// ```
     /// # use http::header::HeaderValue;
-    /// let val = HeaderValue::from_bytes(b&quot;\n&quot;);
+    /// let val = HeaderValue::from_bytes(b"\n");
     /// assert!(val.is_err());
     /// ```
     </span><span class="attr">#[inline]
@@ -973,7 +973,7 @@
     /// internally, and will copy the data if it is not.
     </span><span class="kw">pub fn </span>from_maybe_shared&lt;T&gt;(src: T) -&gt; <span class="prelude-ty">Result</span>&lt;HeaderValue, InvalidHeaderValue&gt;
     <span class="kw">where
-        </span>T: AsRef&lt;[u8]&gt; + <span class="lifetime">&#39;static</span>,
+        </span>T: AsRef&lt;[u8]&gt; + <span class="lifetime">'static</span>,
     {
         <span class="macro">if_downcast_into!</span>(T, Bytes, src, {
             <span class="kw">return </span>HeaderValue::from_shared(src);
@@ -988,13 +988,13 @@
     /// within the buffer.
     </span><span class="kw">pub unsafe fn </span>from_maybe_shared_unchecked&lt;T&gt;(src: T) -&gt; HeaderValue
     <span class="kw">where
-        </span>T: AsRef&lt;[u8]&gt; + <span class="lifetime">&#39;static</span>,
+        </span>T: AsRef&lt;[u8]&gt; + <span class="lifetime">'static</span>,
     {
         <span class="kw">if </span><span class="macro">cfg!</span>(debug_assertions) {
             <span class="kw">match </span>HeaderValue::from_maybe_shared(src) {
                 <span class="prelude-val">Ok</span>(val) =&gt; val,
                 <span class="prelude-val">Err</span>(_err) =&gt; {
-                    <span class="macro">panic!</span>(<span class="string">&quot;HeaderValue::from_maybe_shared_unchecked() with invalid bytes&quot;</span>);
+                    <span class="macro">panic!</span>(<span class="string">"HeaderValue::from_maybe_shared_unchecked() with invalid bytes"</span>);
                 }
             }
         } <span class="kw">else </span>{
@@ -1040,8 +1040,8 @@
     ///
     /// ```
     /// # use http::header::HeaderValue;
-    /// let val = HeaderValue::from_static(&quot;hello&quot;);
-    /// assert_eq!(val.to_str().unwrap(), &quot;hello&quot;);
+    /// let val = HeaderValue::from_static("hello");
+    /// assert_eq!(val.to_str().unwrap(), "hello");
     /// ```
     </span><span class="kw">pub fn </span>to_str(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span>str, ToStrError&gt; {
         <span class="kw">let </span>bytes = <span class="self">self</span>.as_ref();
@@ -1063,7 +1063,7 @@
     ///
     /// ```
     /// # use http::header::HeaderValue;
-    /// let val = HeaderValue::from_static(&quot;hello&quot;);
+    /// let val = HeaderValue::from_static("hello");
     /// assert_eq!(val.len(), 5);
     /// ```
     </span><span class="attr">#[inline]
@@ -1077,10 +1077,10 @@
     ///
     /// ```
     /// # use http::header::HeaderValue;
-    /// let val = HeaderValue::from_static(&quot;&quot;);
+    /// let val = HeaderValue::from_static("");
     /// assert!(val.is_empty());
     ///
-    /// let val = HeaderValue::from_static(&quot;hello&quot;);
+    /// let val = HeaderValue::from_static("hello");
     /// assert!(!val.is_empty());
     /// ```
     </span><span class="attr">#[inline]
@@ -1094,8 +1094,8 @@
     ///
     /// ```
     /// # use http::header::HeaderValue;
-    /// let val = HeaderValue::from_static(&quot;hello&quot;);
-    /// assert_eq!(val.as_bytes(), b&quot;hello&quot;);
+    /// let val = HeaderValue::from_static("hello");
+    /// assert_eq!(val.as_bytes(), b"hello");
     /// ```
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>as_bytes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[u8] {
@@ -1108,7 +1108,7 @@
     ///
     /// ```
     /// # use http::header::HeaderValue;
-    /// let mut val = HeaderValue::from_static(&quot;my secret&quot;);
+    /// let mut val = HeaderValue::from_static("my secret");
     ///
     /// val.set_sensitive(true);
     /// assert!(val.is_sensitive());
@@ -1139,7 +1139,7 @@
     ///
     /// ```
     /// # use http::header::HeaderValue;
-    /// let mut val = HeaderValue::from_static(&quot;my secret&quot;);
+    /// let mut val = HeaderValue::from_static("my secret");
     ///
     /// val.set_sensitive(true);
     /// assert!(val.is_sensitive());
@@ -1161,29 +1161,29 @@
 }
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>HeaderValue {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         <span class="kw">if </span><span class="self">self</span>.is_sensitive {
-            f.write_str(<span class="string">&quot;Sensitive&quot;</span>)
+            f.write_str(<span class="string">"Sensitive"</span>)
         } <span class="kw">else </span>{
-            f.write_str(<span class="string">&quot;\&quot;&quot;</span>)<span class="question-mark">?</span>;
+            f.write_str(<span class="string">"\""</span>)<span class="question-mark">?</span>;
             <span class="kw">let </span><span class="kw-2">mut </span>from = <span class="number">0</span>;
             <span class="kw">let </span>bytes = <span class="self">self</span>.as_bytes();
             <span class="kw">for </span>(i, <span class="kw-2">&amp;</span>b) <span class="kw">in </span>bytes.iter().enumerate() {
-                <span class="kw">if </span>!is_visible_ascii(b) || b == <span class="string">b&#39;&quot;&#39; </span>{
+                <span class="kw">if </span>!is_visible_ascii(b) || b == <span class="string">b'"' </span>{
                     <span class="kw">if </span>from != i {
                         f.write_str(<span class="kw">unsafe </span>{ str::from_utf8_unchecked(<span class="kw-2">&amp;</span>bytes[from..i]) })<span class="question-mark">?</span>;
                     }
-                    <span class="kw">if </span>b == <span class="string">b&#39;&quot;&#39; </span>{
-                        f.write_str(<span class="string">&quot;\\\&quot;&quot;</span>)<span class="question-mark">?</span>;
+                    <span class="kw">if </span>b == <span class="string">b'"' </span>{
+                        f.write_str(<span class="string">"\\\""</span>)<span class="question-mark">?</span>;
                     } <span class="kw">else </span>{
-                        <span class="macro">write!</span>(f, <span class="string">&quot;\\x{:x}&quot;</span>, b)<span class="question-mark">?</span>;
+                        <span class="macro">write!</span>(f, <span class="string">"\\x{:x}"</span>, b)<span class="question-mark">?</span>;
                     }
                     from = i + <span class="number">1</span>;
                 }
             }
 
             f.write_str(<span class="kw">unsafe </span>{ str::from_utf8_unchecked(<span class="kw-2">&amp;</span>bytes[from..]) })<span class="question-mark">?</span>;
-            f.write_str(<span class="string">&quot;\&quot;&quot;</span>)
+            f.write_str(<span class="string">"\""</span>)
         }
     }
 }
@@ -1220,7 +1220,7 @@
                         </span>BytesMut::new()
                     }
                 } <span class="kw">else </span>{
-                    <span class="comment">// full value fits inline, so don&#39;t allocate!
+                    <span class="comment">// full value fits inline, so don't allocate!
                     </span>BytesMut::new()
                 };
                 <span class="kw">let _ </span>= buf.write_str(::itoa::Buffer::new().format(num));
@@ -1247,7 +1247,7 @@
 <span class="macro">from_integers! </span>{
     <span class="comment">// integer type =&gt; maximum decimal length
 
-    // u8 purposely left off... HeaderValue::from(b&#39;3&#39;) could be confusing
+    // u8 purposely left off... HeaderValue::from(b'3') could be confusing
     </span>from_u16: u16 =&gt; <span class="number">5</span>,
     from_i16: i16 =&gt; <span class="number">6</span>,
     from_u32: u32 =&gt; <span class="number">10</span>,
@@ -1256,19 +1256,19 @@
     from_i64: i64 =&gt; <span class="number">20
 </span>}
 
-<span class="attr">#[cfg(target_pointer_width = <span class="string">&quot;16&quot;</span>)]
+<span class="attr">#[cfg(target_pointer_width = <span class="string">"16"</span>)]
 </span><span class="macro">from_integers! </span>{
     from_usize: usize =&gt; <span class="number">5</span>,
     from_isize: isize =&gt; <span class="number">6
 </span>}
 
-<span class="attr">#[cfg(target_pointer_width = <span class="string">&quot;32&quot;</span>)]
+<span class="attr">#[cfg(target_pointer_width = <span class="string">"32"</span>)]
 </span><span class="macro">from_integers! </span>{
     from_usize: usize =&gt; <span class="number">10</span>,
     from_isize: isize =&gt; <span class="number">11
 </span>}
 
-<span class="attr">#[cfg(target_pointer_width = <span class="string">&quot;64&quot;</span>)]
+<span class="attr">#[cfg(target_pointer_width = <span class="string">"64"</span>)]
 </span><span class="macro">from_integers! </span>{
     from_usize: usize =&gt; <span class="number">20</span>,
     from_isize: isize =&gt; <span class="number">20
@@ -1286,17 +1286,17 @@
         map.insert(name::UPGRADE, name::SEC_WEBSOCKET_PROTOCOL.into());
         map.insert(
             name::ACCEPT,
-            name::HeaderName::from_bytes(<span class="string">b&quot;hello-world&quot;</span>).unwrap().into(),
+            name::HeaderName::from_bytes(<span class="string">b"hello-world"</span>).unwrap().into(),
         );
 
         <span class="macro">assert_eq!</span>(
             map.get(name::UPGRADE).unwrap(),
-            HeaderValue::from_bytes(<span class="string">b&quot;sec-websocket-protocol&quot;</span>).unwrap()
+            HeaderValue::from_bytes(<span class="string">b"sec-websocket-protocol"</span>).unwrap()
         );
 
         <span class="macro">assert_eq!</span>(
             map.get(name::ACCEPT).unwrap(),
-            HeaderValue::from_bytes(<span class="string">b&quot;hello-world&quot;</span>).unwrap()
+            HeaderValue::from_bytes(<span class="string">b"hello-world"</span>).unwrap()
         );
     }
 }
@@ -1310,35 +1310,35 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>HeaderValue&gt; <span class="kw">for </span>HeaderValue {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>HeaderValue&gt; <span class="kw">for </span>HeaderValue {
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>from(t: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>HeaderValue) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">fn </span>from(t: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>HeaderValue) -&gt; <span class="self">Self </span>{
         t.clone()
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; TryFrom&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str&gt; <span class="kw">for </span>HeaderValue {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; TryFrom&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>str&gt; <span class="kw">for </span>HeaderValue {
     <span class="kw">type </span>Error = InvalidHeaderValue;
 
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>try_from(t: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
+    </span><span class="kw">fn </span>try_from(t: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
         t.parse()
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; TryFrom&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>String&gt; <span class="kw">for </span>HeaderValue {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; TryFrom&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>String&gt; <span class="kw">for </span>HeaderValue {
     <span class="kw">type </span>Error = InvalidHeaderValue;
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>try_from(s: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>String) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
+    </span><span class="kw">fn </span>try_from(s: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>String) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
         <span class="self">Self</span>::from_bytes(s.as_bytes())
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; TryFrom&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt; <span class="kw">for </span>HeaderValue {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; TryFrom&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt; <span class="kw">for </span>HeaderValue {
     <span class="kw">type </span>Error = InvalidHeaderValue;
 
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>try_from(t: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
+    </span><span class="kw">fn </span>try_from(t: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
         HeaderValue::from_bytes(t)
     }
 }
@@ -1370,39 +1370,39 @@
     </span><span class="kw">fn </span>it_converts_using_try_from() {
         <span class="macro">assert_eq!</span>(
             HeaderValue::try_from(name::UPGRADE).unwrap(),
-            HeaderValue::from_bytes(<span class="string">b&quot;upgrade&quot;</span>).unwrap()
+            HeaderValue::from_bytes(<span class="string">b"upgrade"</span>).unwrap()
         );
     }
 }
 
 <span class="kw">const fn </span>is_visible_ascii(b: u8) -&gt; bool {
-    b &gt;= <span class="number">32 </span>&amp;&amp; b &lt; <span class="number">127 </span>|| b == <span class="string">b&#39;\t&#39;
+    b &gt;= <span class="number">32 </span>&amp;&amp; b &lt; <span class="number">127 </span>|| b == <span class="string">b'\t'
 </span>}
 
 <span class="attr">#[inline]
 </span><span class="kw">fn </span>is_valid(b: u8) -&gt; bool {
-    b &gt;= <span class="number">32 </span>&amp;&amp; b != <span class="number">127 </span>|| b == <span class="string">b&#39;\t&#39;
+    b &gt;= <span class="number">32 </span>&amp;&amp; b != <span class="number">127 </span>|| b == <span class="string">b'\t'
 </span>}
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>InvalidHeaderValue {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
-        f.debug_struct(<span class="string">&quot;InvalidHeaderValue&quot;</span>)
+        f.debug_struct(<span class="string">"InvalidHeaderValue"</span>)
             <span class="comment">// skip _priv noise
             </span>.finish()
     }
 }
 
 <span class="kw">impl </span>fmt::Display <span class="kw">for </span>InvalidHeaderValue {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        f.write_str(<span class="string">&quot;failed to parse header value&quot;</span>)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        f.write_str(<span class="string">"failed to parse header value"</span>)
     }
 }
 
 <span class="kw">impl </span>Error <span class="kw">for </span>InvalidHeaderValue {}
 
 <span class="kw">impl </span>fmt::Display <span class="kw">for </span>ToStrError {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        f.write_str(<span class="string">&quot;failed to convert header to a str&quot;</span>)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        f.write_str(<span class="string">"failed to convert header to a str"</span>)
     }
 }
 
@@ -1517,48 +1517,48 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; PartialEq&lt;HeaderValue&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>HeaderValue {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; PartialEq&lt;HeaderValue&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>HeaderValue {
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>HeaderValue) -&gt; bool {
         <span class="kw-2">**</span><span class="self">self </span>== <span class="kw-2">*</span>other
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; PartialOrd&lt;HeaderValue&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>HeaderValue {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; PartialOrd&lt;HeaderValue&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>HeaderValue {
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>partial_cmp(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>HeaderValue) -&gt; <span class="prelude-ty">Option</span>&lt;cmp::Ordering&gt; {
         (<span class="kw-2">**</span><span class="self">self</span>).partial_cmp(other)
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: <span class="question-mark">?</span>Sized&gt; PartialEq&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>T&gt; <span class="kw">for </span>HeaderValue
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T: <span class="question-mark">?</span>Sized&gt; PartialEq&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>T&gt; <span class="kw">for </span>HeaderValue
 <span class="kw">where
     </span>HeaderValue: PartialEq&lt;T&gt;,
 {
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: &amp;&amp;<span class="lifetime">&#39;a </span>T) -&gt; bool {
+    </span><span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: &amp;&amp;<span class="lifetime">'a </span>T) -&gt; bool {
         <span class="kw-2">*</span><span class="self">self </span>== <span class="kw-2">**</span>other
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: <span class="question-mark">?</span>Sized&gt; PartialOrd&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>T&gt; <span class="kw">for </span>HeaderValue
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T: <span class="question-mark">?</span>Sized&gt; PartialOrd&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>T&gt; <span class="kw">for </span>HeaderValue
 <span class="kw">where
     </span>HeaderValue: PartialOrd&lt;T&gt;,
 {
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>partial_cmp(<span class="kw-2">&amp;</span><span class="self">self</span>, other: &amp;&amp;<span class="lifetime">&#39;a </span>T) -&gt; <span class="prelude-ty">Option</span>&lt;cmp::Ordering&gt; {
+    </span><span class="kw">fn </span>partial_cmp(<span class="kw-2">&amp;</span><span class="self">self</span>, other: &amp;&amp;<span class="lifetime">'a </span>T) -&gt; <span class="prelude-ty">Option</span>&lt;cmp::Ordering&gt; {
         <span class="self">self</span>.partial_cmp(<span class="kw-2">*</span>other)
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; PartialEq&lt;HeaderValue&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; PartialEq&lt;HeaderValue&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>str {
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>HeaderValue) -&gt; bool {
         <span class="kw-2">*</span>other == <span class="kw-2">*</span><span class="self">self
     </span>}
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; PartialOrd&lt;HeaderValue&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; PartialOrd&lt;HeaderValue&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>str {
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>partial_cmp(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>HeaderValue) -&gt; <span class="prelude-ty">Option</span>&lt;cmp::Ordering&gt; {
         <span class="self">self</span>.as_bytes().partial_cmp(other.as_bytes())
@@ -1573,19 +1573,19 @@
 <span class="attr">#[test]
 </span><span class="kw">fn </span>test_debug() {
     <span class="kw">let </span>cases = <span class="kw-2">&amp;</span>[
-        (<span class="string">&quot;hello&quot;</span>, <span class="string">&quot;\&quot;hello\&quot;&quot;</span>),
-        (<span class="string">&quot;hello \&quot;world\&quot;&quot;</span>, <span class="string">&quot;\&quot;hello \\\&quot;world\\\&quot;\&quot;&quot;</span>),
-        (<span class="string">&quot;\u{7FFF}hello&quot;</span>, <span class="string">&quot;\&quot;\\xe7\\xbf\\xbfhello\&quot;&quot;</span>),
+        (<span class="string">"hello"</span>, <span class="string">"\"hello\""</span>),
+        (<span class="string">"hello \"world\""</span>, <span class="string">"\"hello \\\"world\\\"\""</span>),
+        (<span class="string">"\u{7FFF}hello"</span>, <span class="string">"\"\\xe7\\xbf\\xbfhello\""</span>),
     ];
 
     <span class="kw">for </span><span class="kw-2">&amp;</span>(value, expected) <span class="kw">in </span>cases {
         <span class="kw">let </span>val = HeaderValue::from_bytes(value.as_bytes()).unwrap();
-        <span class="kw">let </span>actual = <span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, val);
+        <span class="kw">let </span>actual = <span class="macro">format!</span>(<span class="string">"{:?}"</span>, val);
         <span class="macro">assert_eq!</span>(expected, actual);
     }
 
-    <span class="kw">let </span><span class="kw-2">mut </span>sensitive = HeaderValue::from_static(<span class="string">&quot;password&quot;</span>);
+    <span class="kw">let </span><span class="kw-2">mut </span>sensitive = HeaderValue::from_static(<span class="string">"password"</span>);
     sensitive.set_sensitive(<span class="bool-val">true</span>);
-    <span class="macro">assert_eq!</span>(<span class="string">&quot;Sensitive&quot;</span>, <span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, sensitive));
+    <span class="macro">assert_eq!</span>(<span class="string">"Sensitive"</span>, <span class="macro">format!</span>(<span class="string">"{:?}"</span>, sensitive));
 }
 </code></pre></div></section></main></body></html>

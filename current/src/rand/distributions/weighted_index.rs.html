@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rand-0.8.5/src/distributions/weighted_index.rs`."><title>weighted_index.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="rand" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="icon" href="https://www.rust-lang.org/favicon.ico"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../rand/index.html"><img src="https://www.rust-lang.org/logos/rust-logo-128x128-blk.png" alt="rand"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rand-0.8.5/src/distributions/weighted_index.rs`."><title>weighted_index.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="rand" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="icon" href="https://www.rust-lang.org/favicon.ico"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../rand/index.html"><img src="https://www.rust-lang.org/logos/rust-logo-128x128-blk.png" alt="rand"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -472,10 +472,10 @@
 <span class="kw">use </span>core::cmp::PartialOrd;
 <span class="kw">use </span>core::fmt;
 
-<span class="comment">// Note that this whole module is only imported if feature=&quot;alloc&quot; is enabled.
+<span class="comment">// Note that this whole module is only imported if feature="alloc" is enabled.
 </span><span class="kw">use </span>alloc::vec::Vec;
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;serde1&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"serde1"</span>)]
 </span><span class="kw">use </span>serde::{Serialize, Deserialize};
 
 <span class="doccomment">/// A distribution using weighted sampling of discrete items
@@ -498,10 +498,10 @@
 ///
 /// Creating a `WeightedIndex&lt;X&gt;` will allocate enough space to hold `N - 1`
 /// weights of type `X`, where `N` is the number of weights. However, since
-/// `Vec` doesn&#39;t guarantee a particular growth strategy, additional memory
+/// `Vec` doesn't guarantee a particular growth strategy, additional memory
 /// might be allocated but not used. Since the `WeightedIndex` object also
 /// contains, this might cause additional allocations, though for primitive
-/// types, [`Uniform&lt;X&gt;`] doesn&#39;t allocate any memory.
+/// types, [`Uniform&lt;X&gt;`] doesn't allocate any memory.
 ///
 /// Sampling from `WeightedIndex` will result in a single call to
 /// `Uniform&lt;X&gt;::sample` (method of the [`Distribution`] trait), which typically
@@ -514,28 +514,28 @@
 /// use rand::prelude::*;
 /// use rand::distributions::WeightedIndex;
 ///
-/// let choices = [&#39;a&#39;, &#39;b&#39;, &#39;c&#39;];
+/// let choices = ['a', 'b', 'c'];
 /// let weights = [2,   1,   1];
 /// let dist = WeightedIndex::new(&amp;weights).unwrap();
 /// let mut rng = thread_rng();
 /// for _ in 0..100 {
-///     // 50% chance to print &#39;a&#39;, 25% chance to print &#39;b&#39;, 25% chance to print &#39;c&#39;
-///     println!(&quot;{}&quot;, choices[dist.sample(&amp;mut rng)]);
+///     // 50% chance to print 'a', 25% chance to print 'b', 25% chance to print 'c'
+///     println!("{}", choices[dist.sample(&amp;mut rng)]);
 /// }
 ///
-/// let items = [(&#39;a&#39;, 0), (&#39;b&#39;, 3), (&#39;c&#39;, 7)];
+/// let items = [('a', 0), ('b', 3), ('c', 7)];
 /// let dist2 = WeightedIndex::new(items.iter().map(|item| item.1)).unwrap();
 /// for _ in 0..100 {
-///     // 0% chance to print &#39;a&#39;, 30% chance to print &#39;b&#39;, 70% chance to print &#39;c&#39;
-///     println!(&quot;{}&quot;, items[dist2.sample(&amp;mut rng)].0);
+///     // 0% chance to print 'a', 30% chance to print 'b', 70% chance to print 'c'
+///     println!("{}", items[dist2.sample(&amp;mut rng)].0);
 /// }
 /// ```
 ///
 /// [`Uniform&lt;X&gt;`]: crate::distributions::Uniform
 /// [`RngCore`]: crate::RngCore
 </span><span class="attr">#[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = <span class="string">&quot;serde1&quot;</span>, derive(Serialize, Deserialize))]
-#[cfg_attr(doc_cfg, doc(cfg(feature = <span class="string">&quot;alloc&quot;</span>)))]
+#[cfg_attr(feature = <span class="string">"serde1"</span>, derive(Serialize, Deserialize))]
+#[cfg_attr(doc_cfg, doc(cfg(feature = <span class="string">"alloc"</span>)))]
 </span><span class="kw">pub struct </span>WeightedIndex&lt;X: SampleUniform + PartialOrd&gt; {
     cumulative_weights: Vec&lt;X&gt;,
     total_weight: X,
@@ -555,7 +555,7 @@
     <span class="kw">where
         </span>I: IntoIterator,
         I::Item: SampleBorrow&lt;X&gt;,
-        X: <span class="kw">for</span>&lt;<span class="lifetime">&#39;a</span>&gt; ::core::ops::AddAssign&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>X&gt; + Clone + Default,
+        X: <span class="kw">for</span>&lt;<span class="lifetime">'a</span>&gt; ::core::ops::AddAssign&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>X&gt; + Clone + Default,
     {
         <span class="kw">let </span><span class="kw-2">mut </span>iter = weights.into_iter();
         <span class="kw">let </span><span class="kw-2">mut </span>total_weight: X = iter.next().ok_or(WeightedError::NoItem)<span class="question-mark">?</span>.borrow().clone();
@@ -598,8 +598,8 @@
     ///
     /// In case of error, `self` is not modified.
     </span><span class="kw">pub fn </span>update_weights(<span class="kw-2">&amp;mut </span><span class="self">self</span>, new_weights: <span class="kw-2">&amp;</span>[(usize, <span class="kw-2">&amp;</span>X)]) -&gt; <span class="prelude-ty">Result</span>&lt;(), WeightedError&gt;
-    <span class="kw">where </span>X: <span class="kw">for</span>&lt;<span class="lifetime">&#39;a</span>&gt; ::core::ops::AddAssign&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>X&gt;
-            + <span class="kw">for</span>&lt;<span class="lifetime">&#39;a</span>&gt; ::core::ops::SubAssign&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>X&gt;
+    <span class="kw">where </span>X: <span class="kw">for</span>&lt;<span class="lifetime">'a</span>&gt; ::core::ops::AddAssign&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>X&gt;
+            + <span class="kw">for</span>&lt;<span class="lifetime">'a</span>&gt; ::core::ops::SubAssign&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>X&gt;
             + Clone
             + Default {
         <span class="kw">if </span>new_weights.is_empty() {
@@ -610,7 +610,7 @@
 
         <span class="kw">let </span><span class="kw-2">mut </span>total_weight = <span class="self">self</span>.total_weight.clone();
 
-        <span class="comment">// Check for errors first, so we don&#39;t modify `self` in case something
+        <span class="comment">// Check for errors first, so we don't modify `self` in case something
         // goes wrong.
         </span><span class="kw">let </span><span class="kw-2">mut </span>prev_i = <span class="prelude-val">None</span>;
         <span class="kw">for </span><span class="kw-2">&amp;</span>(i, w) <span class="kw">in </span>new_weights {
@@ -701,7 +701,7 @@
 </span><span class="kw">mod </span>test {
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;serde1&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"serde1"</span>)]
     #[test]
     </span><span class="kw">fn </span>test_weightedindex_serde1() {
         <span class="kw">let </span>weighted_index = WeightedIndex::new(<span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>]).unwrap();
@@ -854,7 +854,7 @@
         ) <span class="kw">where
             </span>I: IntoIterator,
             I::Item: SampleBorrow&lt;X&gt;,
-            X: <span class="kw">for</span>&lt;<span class="lifetime">&#39;a</span>&gt; ::core::ops::AddAssign&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>X&gt; + Clone + Default,
+            X: <span class="kw">for</span>&lt;<span class="lifetime">'a</span>&gt; ::core::ops::AddAssign&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>X&gt; + Clone + Default,
         {
             <span class="macro">assert_eq!</span>(buf.len(), expected.len());
             <span class="kw">let </span>distr = WeightedIndex::new(weights).unwrap();
@@ -884,7 +884,7 @@
 }
 
 <span class="doccomment">/// Error type returned from `WeightedIndex::new`.
-</span><span class="attr">#[cfg_attr(doc_cfg, doc(cfg(feature = <span class="string">&quot;alloc&quot;</span>)))]
+</span><span class="attr">#[cfg_attr(doc_cfg, doc(cfg(feature = <span class="string">"alloc"</span>)))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 </span><span class="kw">pub enum </span>WeightedError {
     <span class="doccomment">/// The provided weight collection contains no items.
@@ -901,16 +901,16 @@
     </span>TooMany,
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
 </span><span class="kw">impl </span>std::error::Error <span class="kw">for </span>WeightedError {}
 
 <span class="kw">impl </span>fmt::Display <span class="kw">for </span>WeightedError {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
         f.write_str(<span class="kw">match </span><span class="kw-2">*</span><span class="self">self </span>{
-            WeightedError::NoItem =&gt; <span class="string">&quot;No weights provided in distribution&quot;</span>,
-            WeightedError::InvalidWeight =&gt; <span class="string">&quot;A weight is invalid in distribution&quot;</span>,
-            WeightedError::AllWeightsZero =&gt; <span class="string">&quot;All weights are zero in distribution&quot;</span>,
-            WeightedError::TooMany =&gt; <span class="string">&quot;Too many weights (hit u32::MAX) in distribution&quot;</span>,
+            WeightedError::NoItem =&gt; <span class="string">"No weights provided in distribution"</span>,
+            WeightedError::InvalidWeight =&gt; <span class="string">"A weight is invalid in distribution"</span>,
+            WeightedError::AllWeightsZero =&gt; <span class="string">"All weights are zero in distribution"</span>,
+            WeightedError::TooMany =&gt; <span class="string">"Too many weights (hit u32::MAX) in distribution"</span>,
         })
     }
 }

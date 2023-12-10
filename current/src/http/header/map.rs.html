@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/http-0.2.11/src/header/map.rs`."><title>map.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="http" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/http-0.2.11/src/header/map.rs`."><title>map.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="http" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -3574,13 +3574,13 @@
 /// # use http::header::{CONTENT_LENGTH, HOST, LOCATION};
 /// let mut headers = HeaderMap::new();
 ///
-/// headers.insert(HOST, &quot;example.com&quot;.parse().unwrap());
-/// headers.insert(CONTENT_LENGTH, &quot;123&quot;.parse().unwrap());
+/// headers.insert(HOST, "example.com".parse().unwrap());
+/// headers.insert(CONTENT_LENGTH, "123".parse().unwrap());
 ///
 /// assert!(headers.contains_key(HOST));
 /// assert!(!headers.contains_key(LOCATION));
 ///
-/// assert_eq!(headers[HOST], &quot;example.com&quot;);
+/// assert_eq!(headers[HOST], "example.com");
 ///
 /// headers.remove(HOST);
 ///
@@ -3601,7 +3601,7 @@
 // Below, you will find a fairly large amount of code. Most of this is to
 // provide the necessary functions to efficiently manipulate the header
 // multimap. The core hashing table is based on robin hood hashing [1]. While
-// this is the same hashing algorithm used as part of Rust&#39;s `HashMap` in
+// this is the same hashing algorithm used as part of Rust's `HashMap` in
 // stdlib, many implementation details are different. The two primary reasons
 // for this divergence are that `HeaderMap` is a multimap and the structure has
 // been optimized to take advantage of the characteristics of HTTP headers.
@@ -3626,8 +3626,8 @@
 /// Yields `(&amp;HeaderName, &amp;value)` tuples. The same header name may be yielded
 /// more than once if it has more than one associated value.
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>Iter&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    map: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>HeaderMap&lt;T&gt;,
+</span><span class="kw">pub struct </span>Iter&lt;<span class="lifetime">'a</span>, T&gt; {
+    map: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>HeaderMap&lt;T&gt;,
     entry: usize,
     cursor: <span class="prelude-ty">Option</span>&lt;Cursor&gt;,
 }
@@ -3637,11 +3637,11 @@
 /// Yields `(&amp;HeaderName, &amp;mut value)` tuples. The same header name may be
 /// yielded more than once if it has more than one associated value.
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>IterMut&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+</span><span class="kw">pub struct </span>IterMut&lt;<span class="lifetime">'a</span>, T&gt; {
     map: <span class="kw-2">*mut </span>HeaderMap&lt;T&gt;,
     entry: usize,
     cursor: <span class="prelude-ty">Option</span>&lt;Cursor&gt;,
-    lt: PhantomData&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>HeaderMap&lt;T&gt;&gt;,
+    lt: PhantomData&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>HeaderMap&lt;T&gt;&gt;,
 }
 
 <span class="doccomment">/// An owning iterator over the entries of a `HeaderMap`.
@@ -3660,61 +3660,61 @@
 /// Each header name is yielded only once, even if it has more than one
 /// associated value.
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>Keys&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    inner: ::std::slice::Iter&lt;<span class="lifetime">&#39;a</span>, Bucket&lt;T&gt;&gt;,
+</span><span class="kw">pub struct </span>Keys&lt;<span class="lifetime">'a</span>, T&gt; {
+    inner: ::std::slice::Iter&lt;<span class="lifetime">'a</span>, Bucket&lt;T&gt;&gt;,
 }
 
 <span class="doccomment">/// `HeaderMap` value iterator.
 ///
 /// Each value contained in the `HeaderMap` will be yielded.
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>Values&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    inner: Iter&lt;<span class="lifetime">&#39;a</span>, T&gt;,
+</span><span class="kw">pub struct </span>Values&lt;<span class="lifetime">'a</span>, T&gt; {
+    inner: Iter&lt;<span class="lifetime">'a</span>, T&gt;,
 }
 
 <span class="doccomment">/// `HeaderMap` mutable value iterator
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>ValuesMut&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    inner: IterMut&lt;<span class="lifetime">&#39;a</span>, T&gt;,
+</span><span class="kw">pub struct </span>ValuesMut&lt;<span class="lifetime">'a</span>, T&gt; {
+    inner: IterMut&lt;<span class="lifetime">'a</span>, T&gt;,
 }
 
 <span class="doccomment">/// A drain iterator for `HeaderMap`.
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>Drain&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+</span><span class="kw">pub struct </span>Drain&lt;<span class="lifetime">'a</span>, T&gt; {
     idx: usize,
     len: usize,
     entries: <span class="kw-2">*mut </span>[Bucket&lt;T&gt;],
     <span class="comment">// If None, pull from `entries`
     </span>next: <span class="prelude-ty">Option</span>&lt;usize&gt;,
     extra_values: <span class="kw-2">*mut </span>Vec&lt;ExtraValue&lt;T&gt;&gt;,
-    lt: PhantomData&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>HeaderMap&lt;T&gt;&gt;,
+    lt: PhantomData&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>HeaderMap&lt;T&gt;&gt;,
 }
 
 <span class="doccomment">/// A view to all values stored in a single entry.
 ///
 /// This struct is returned by `HeaderMap::get_all`.
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>GetAll&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    map: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>HeaderMap&lt;T&gt;,
+</span><span class="kw">pub struct </span>GetAll&lt;<span class="lifetime">'a</span>, T&gt; {
+    map: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>HeaderMap&lt;T&gt;,
     index: <span class="prelude-ty">Option</span>&lt;usize&gt;,
 }
 
 <span class="doccomment">/// A view into a single location in a `HeaderMap`, which may be vacant or occupied.
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub enum </span>Entry&lt;<span class="lifetime">&#39;a</span>, T: <span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub enum </span>Entry&lt;<span class="lifetime">'a</span>, T: <span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// An occupied entry
-    </span>Occupied(OccupiedEntry&lt;<span class="lifetime">&#39;a</span>, T&gt;),
+    </span>Occupied(OccupiedEntry&lt;<span class="lifetime">'a</span>, T&gt;),
 
     <span class="doccomment">/// A vacant entry
-    </span>Vacant(VacantEntry&lt;<span class="lifetime">&#39;a</span>, T&gt;),
+    </span>Vacant(VacantEntry&lt;<span class="lifetime">'a</span>, T&gt;),
 }
 
 <span class="doccomment">/// A view into a single empty location in a `HeaderMap`.
 ///
 /// This struct is returned as part of the `Entry` enum.
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>VacantEntry&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    map: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>HeaderMap&lt;T&gt;,
+</span><span class="kw">pub struct </span>VacantEntry&lt;<span class="lifetime">'a</span>, T&gt; {
+    map: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>HeaderMap&lt;T&gt;,
     key: HeaderName,
     hash: HashValue,
     probe: usize,
@@ -3725,16 +3725,16 @@
 ///
 /// This struct is returned as part of the `Entry` enum.
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>OccupiedEntry&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    map: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>HeaderMap&lt;T&gt;,
+</span><span class="kw">pub struct </span>OccupiedEntry&lt;<span class="lifetime">'a</span>, T&gt; {
+    map: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>HeaderMap&lt;T&gt;,
     probe: usize,
     index: usize,
 }
 
 <span class="doccomment">/// An iterator of all values associated with a single header name.
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>ValueIter&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    map: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>HeaderMap&lt;T&gt;,
+</span><span class="kw">pub struct </span>ValueIter&lt;<span class="lifetime">'a</span>, T&gt; {
+    map: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>HeaderMap&lt;T&gt;,
     index: usize,
     front: <span class="prelude-ty">Option</span>&lt;Cursor&gt;,
     back: <span class="prelude-ty">Option</span>&lt;Cursor&gt;,
@@ -3742,20 +3742,20 @@
 
 <span class="doccomment">/// A mutable iterator of all values associated with a single header name.
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>ValueIterMut&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+</span><span class="kw">pub struct </span>ValueIterMut&lt;<span class="lifetime">'a</span>, T&gt; {
     map: <span class="kw-2">*mut </span>HeaderMap&lt;T&gt;,
     index: usize,
     front: <span class="prelude-ty">Option</span>&lt;Cursor&gt;,
     back: <span class="prelude-ty">Option</span>&lt;Cursor&gt;,
-    lt: PhantomData&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>HeaderMap&lt;T&gt;&gt;,
+    lt: PhantomData&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>HeaderMap&lt;T&gt;&gt;,
 }
 
 <span class="doccomment">/// An drain iterator of all values associated with a single header name.
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>ValueDrain&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+</span><span class="kw">pub struct </span>ValueDrain&lt;<span class="lifetime">'a</span>, T&gt; {
     first: <span class="prelude-ty">Option</span>&lt;T&gt;,
     next: <span class="prelude-ty">Option</span>&lt;::std::vec::IntoIter&lt;T&gt;&gt;,
-    lt: PhantomData&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>HeaderMap&lt;T&gt;&gt;,
+    lt: PhantomData&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>HeaderMap&lt;T&gt;&gt;,
 }
 
 <span class="doccomment">/// Tracks the value iterator state
@@ -3822,7 +3822,7 @@
 
 <span class="doccomment">/// Access to the `links` value in a slice of buckets.
 ///
-/// It&#39;s important that no other field is accessed, since it may have been
+/// It's important that no other field is accessed, since it may have been
 /// freed in a `Drain` iterator.
 </span><span class="attr">#[derive(Debug)]
 </span><span class="kw">struct </span>RawLinks&lt;T&gt;(<span class="kw-2">*mut </span>[Bucket&lt;T&gt;]);
@@ -3845,7 +3845,7 @@
 }
 
 <span class="doccomment">/// Tracks the header map danger level! This relates to the adaptive hashing
-/// algorithm. A HeaderMap starts in the &quot;green&quot; state, when a large number of
+/// algorithm. A HeaderMap starts in the "green" state, when a large number of
 /// collisions are detected, it transitions to the yellow state. At this point,
 /// the header map will either grow and switch back to the green state OR it
 /// will transition to the red state.
@@ -3906,13 +3906,13 @@
 }
 
 <span class="comment">// First part of the robinhood algorithm. Given a key, find the slot in which it
-// will be inserted. This is done by starting at the &quot;ideal&quot; spot. Then scanning
+// will be inserted. This is done by starting at the "ideal" spot. Then scanning
 // until the destination slot is found. A destination slot is either the next
 // empty slot or the next slot that is occupied by an entry that has a lower
 // displacement (displacement is the distance from the ideal spot).
 //
 // This is implemented as a macro instead of a function that takes a closure in
-// order to guarantee that it is &quot;inlined&quot;. There is no way to annotate closures
+// order to guarantee that it is "inlined". There is no way to annotate closures
 // to guarantee inlining.
 </span><span class="macro">macro_rules! </span>insert_phase_one {
     (<span class="macro-nonterminal">$map</span>:ident,
@@ -3931,14 +3931,14 @@
         <span class="kw">let </span>ret;
 
         <span class="comment">// Start at the ideal position, checking all slots
-        </span><span class="macro">probe_loop!</span>(<span class="lifetime">&#39;probe</span>: <span class="macro-nonterminal">$probe </span>&lt; <span class="macro-nonterminal">$map</span>.indices.len(), {
+        </span><span class="macro">probe_loop!</span>(<span class="lifetime">'probe</span>: <span class="macro-nonterminal">$probe </span>&lt; <span class="macro-nonterminal">$map</span>.indices.len(), {
             <span class="kw">if let </span><span class="prelude-val">Some</span>((<span class="macro-nonterminal">$pos</span>, entry_hash)) = <span class="macro-nonterminal">$map</span>.indices[<span class="macro-nonterminal">$probe</span>].resolve() {
                 <span class="comment">// The slot is already occupied, but check if it has a lower
                 // displacement.
                 </span><span class="kw">let </span>their_dist = probe_distance(<span class="macro-nonterminal">$map</span>.mask, entry_hash, <span class="macro-nonterminal">$probe</span>);
 
                 <span class="kw">if </span>their_dist &lt; dist {
-                    <span class="comment">// The new key&#39;s distance is larger, so claim this spot and
+                    <span class="comment">// The new key's distance is larger, so claim this spot and
                     // displace the current entry.
                     //
                     // Check if this insertion is above the danger threshold.
@@ -3946,11 +3946,11 @@
                         dist &gt;= FORWARD_SHIFT_THRESHOLD &amp;&amp; !<span class="macro-nonterminal">$map</span>.danger.is_red();
 
                     ret = <span class="macro-nonterminal">$robinhood</span>;
-                    <span class="kw">break </span><span class="lifetime">&#39;probe</span>;
+                    <span class="kw">break </span><span class="lifetime">'probe</span>;
                 } <span class="kw">else if </span>entry_hash == <span class="macro-nonterminal">$hash </span>&amp;&amp; <span class="macro-nonterminal">$map</span>.entries[<span class="macro-nonterminal">$pos</span>].key == <span class="macro-nonterminal">$key </span>{
                     <span class="comment">// There already is an entry with the same key.
                     </span>ret = <span class="macro-nonterminal">$occupied</span>;
-                    <span class="kw">break </span><span class="lifetime">&#39;probe</span>;
+                    <span class="kw">break </span><span class="lifetime">'probe</span>;
                 }
             } <span class="kw">else </span>{
                 <span class="comment">// The entry is vacant, use it for this key.
@@ -3958,7 +3958,7 @@
                     dist &gt;= FORWARD_SHIFT_THRESHOLD &amp;&amp; !<span class="macro-nonterminal">$map</span>.danger.is_red();
 
                 ret = <span class="macro-nonterminal">$vacant</span>;
-                <span class="kw">break </span><span class="lifetime">&#39;probe</span>;
+                <span class="kw">break </span><span class="lifetime">'probe</span>;
             }
 
             dist += <span class="number">1</span>;
@@ -3994,8 +3994,8 @@
     <span class="doccomment">/// Create an empty `HeaderMap` with the specified capacity.
     ///
     /// The returned map will allocate internal storage in order to hold about
-    /// `capacity` elements without reallocating. However, this is a &quot;best
-    /// effort&quot; as there are usage patterns that could cause additional
+    /// `capacity` elements without reallocating. However, this is a "best
+    /// effort" as there are usage patterns that could cause additional
     /// allocations before `capacity` headers are stored in the map.
     ///
     /// More capacity than requested may be allocated.
@@ -4017,7 +4017,7 @@
         <span class="kw">if </span>capacity == <span class="number">0 </span>{
             HeaderMap {
                 mask: <span class="number">0</span>,
-                indices: Box::new([]), <span class="comment">// as a ZST, this doesn&#39;t actually allocate anything
+                indices: Box::new([]), <span class="comment">// as a ZST, this doesn't actually allocate anything
                 </span>entries: Vec::new(),
                 extra_values: Vec::new(),
                 danger: Danger::Green,
@@ -4026,11 +4026,11 @@
             <span class="kw">let </span>raw_cap = <span class="kw">match </span>to_raw_capacity(capacity).checked_next_power_of_two() {
                 <span class="prelude-val">Some</span>(c) =&gt; c,
                 <span class="prelude-val">None </span>=&gt; <span class="macro">panic!</span>(
-                    <span class="string">&quot;requested capacity {} too large: next power of two would overflow `usize`&quot;</span>,
+                    <span class="string">"requested capacity {} too large: next power of two would overflow `usize`"</span>,
                     capacity
                 ),
             };
-            <span class="macro">assert!</span>(raw_cap &lt;= MAX_SIZE, <span class="string">&quot;requested capacity too large&quot;</span>);
+            <span class="macro">assert!</span>(raw_cap &lt;= MAX_SIZE, <span class="string">"requested capacity too large"</span>);
             <span class="macro">debug_assert!</span>(raw_cap &gt; <span class="number">0</span>);
 
             HeaderMap {
@@ -4058,12 +4058,12 @@
     ///
     /// assert_eq!(0, map.len());
     ///
-    /// map.insert(ACCEPT, &quot;text/plain&quot;.parse().unwrap());
-    /// map.insert(HOST, &quot;localhost&quot;.parse().unwrap());
+    /// map.insert(ACCEPT, "text/plain".parse().unwrap());
+    /// map.insert(HOST, "localhost".parse().unwrap());
     ///
     /// assert_eq!(2, map.len());
     ///
-    /// map.append(ACCEPT, &quot;text/html&quot;.parse().unwrap());
+    /// map.append(ACCEPT, "text/html".parse().unwrap());
     ///
     /// assert_eq!(3, map.len());
     /// ```
@@ -4085,12 +4085,12 @@
     ///
     /// assert_eq!(0, map.keys_len());
     ///
-    /// map.insert(ACCEPT, &quot;text/plain&quot;.parse().unwrap());
-    /// map.insert(HOST, &quot;localhost&quot;.parse().unwrap());
+    /// map.insert(ACCEPT, "text/plain".parse().unwrap());
+    /// map.insert(HOST, "localhost".parse().unwrap());
     ///
     /// assert_eq!(2, map.keys_len());
     ///
-    /// map.insert(ACCEPT, &quot;text/html&quot;.parse().unwrap());
+    /// map.insert(ACCEPT, "text/html".parse().unwrap());
     ///
     /// assert_eq!(2, map.keys_len());
     /// ```
@@ -4109,7 +4109,7 @@
     ///
     /// assert!(map.is_empty());
     ///
-    /// map.insert(HOST, &quot;hello.world&quot;.parse().unwrap());
+    /// map.insert(HOST, "hello.world".parse().unwrap());
     ///
     /// assert!(!map.is_empty());
     /// ```
@@ -4126,7 +4126,7 @@
     /// # use http::HeaderMap;
     /// # use http::header::HOST;
     /// let mut map = HeaderMap::new();
-    /// map.insert(HOST, &quot;hello.world&quot;.parse().unwrap());
+    /// map.insert(HOST, "hello.world".parse().unwrap());
     ///
     /// map.clear();
     /// assert!(map.is_empty());
@@ -4156,7 +4156,7 @@
     ///
     /// assert_eq!(0, map.capacity());
     ///
-    /// map.insert(HOST, &quot;hello.world&quot;.parse().unwrap());
+    /// map.insert(HOST, "hello.world".parse().unwrap());
     /// assert_eq!(6, map.capacity());
     /// ```
     </span><span class="kw">pub fn </span>capacity(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
@@ -4167,7 +4167,7 @@
     /// into the `HeaderMap`.
     ///
     /// The header map may reserve more space to avoid frequent reallocations.
-    /// Like with `with_capacity`, this will be a &quot;best effort&quot; to avoid
+    /// Like with `with_capacity`, this will be a "best effort" to avoid
     /// allocations until `additional` more headers are inserted. Certain usage
     /// patterns could cause additional allocations before the number is
     /// reached.
@@ -4183,21 +4183,21 @@
     /// # use http::header::HOST;
     /// let mut map = HeaderMap::new();
     /// map.reserve(10);
-    /// # map.insert(HOST, &quot;bar&quot;.parse().unwrap());
+    /// # map.insert(HOST, "bar".parse().unwrap());
     /// ```
     </span><span class="kw">pub fn </span>reserve(<span class="kw-2">&amp;mut </span><span class="self">self</span>, additional: usize) {
-        <span class="comment">// TODO: This can&#39;t overflow if done properly... since the max # of
+        <span class="comment">// TODO: This can't overflow if done properly... since the max # of
         // elements is u16::MAX.
         </span><span class="kw">let </span>cap = <span class="self">self
             </span>.entries
             .len()
             .checked_add(additional)
-            .expect(<span class="string">&quot;reserve overflow&quot;</span>);
+            .expect(<span class="string">"reserve overflow"</span>);
 
         <span class="kw">if </span>cap &gt; <span class="self">self</span>.indices.len() {
             <span class="kw">let </span>cap = cap.next_power_of_two();
-            <span class="macro">assert!</span>(cap &lt;= MAX_SIZE, <span class="string">&quot;header map reserve over max capacity&quot;</span>);
-            <span class="macro">assert!</span>(cap != <span class="number">0</span>, <span class="string">&quot;header map reserve overflowed&quot;</span>);
+            <span class="macro">assert!</span>(cap &lt;= MAX_SIZE, <span class="string">"header map reserve over max capacity"</span>);
+            <span class="macro">assert!</span>(cap != <span class="number">0</span>, <span class="string">"header map reserve overflowed"</span>);
 
             <span class="kw">if </span><span class="self">self</span>.entries.len() == <span class="number">0 </span>{
                 <span class="self">self</span>.mask = cap <span class="kw">as </span>Size - <span class="number">1</span>;
@@ -4221,14 +4221,14 @@
     /// # use http::HeaderMap;
     /// # use http::header::HOST;
     /// let mut map = HeaderMap::new();
-    /// assert!(map.get(&quot;host&quot;).is_none());
+    /// assert!(map.get("host").is_none());
     ///
-    /// map.insert(HOST, &quot;hello&quot;.parse().unwrap());
-    /// assert_eq!(map.get(HOST).unwrap(), &amp;&quot;hello&quot;);
-    /// assert_eq!(map.get(&quot;host&quot;).unwrap(), &amp;&quot;hello&quot;);
+    /// map.insert(HOST, "hello".parse().unwrap());
+    /// assert_eq!(map.get(HOST).unwrap(), &amp;"hello");
+    /// assert_eq!(map.get("host").unwrap(), &amp;"hello");
     ///
-    /// map.append(HOST, &quot;world&quot;.parse().unwrap());
-    /// assert_eq!(map.get(&quot;host&quot;).unwrap(), &amp;&quot;hello&quot;);
+    /// map.append(HOST, "world".parse().unwrap());
+    /// assert_eq!(map.get("host").unwrap(), &amp;"hello");
     /// ```
     </span><span class="kw">pub fn </span>get&lt;K&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, key: K) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>T&gt;
     <span class="kw">where
@@ -4262,10 +4262,10 @@
     /// # use http::HeaderMap;
     /// # use http::header::HOST;
     /// let mut map = HeaderMap::default();
-    /// map.insert(HOST, &quot;hello&quot;.to_string());
-    /// map.get_mut(&quot;host&quot;).unwrap().push_str(&quot;-world&quot;);
+    /// map.insert(HOST, "hello".to_string());
+    /// map.get_mut("host").unwrap().push_str("-world");
     ///
-    /// assert_eq!(map.get(HOST).unwrap(), &amp;&quot;hello-world&quot;);
+    /// assert_eq!(map.get(HOST).unwrap(), &amp;"hello-world");
     /// ```
     </span><span class="kw">pub fn </span>get_mut&lt;K&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: K) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>T&gt;
     <span class="kw">where
@@ -4295,17 +4295,17 @@
     /// # use http::header::HOST;
     /// let mut map = HeaderMap::new();
     ///
-    /// map.insert(HOST, &quot;hello&quot;.parse().unwrap());
-    /// map.append(HOST, &quot;goodbye&quot;.parse().unwrap());
+    /// map.insert(HOST, "hello".parse().unwrap());
+    /// map.append(HOST, "goodbye".parse().unwrap());
     ///
-    /// let view = map.get_all(&quot;host&quot;);
+    /// let view = map.get_all("host");
     ///
     /// let mut iter = view.iter();
-    /// assert_eq!(&amp;&quot;hello&quot;, iter.next().unwrap());
-    /// assert_eq!(&amp;&quot;goodbye&quot;, iter.next().unwrap());
+    /// assert_eq!(&amp;"hello", iter.next().unwrap());
+    /// assert_eq!(&amp;"goodbye", iter.next().unwrap());
     /// assert!(iter.next().is_none());
     /// ```
-    </span><span class="kw">pub fn </span>get_all&lt;K&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, key: K) -&gt; GetAll&lt;<span class="lifetime">&#39;_</span>, T&gt;
+    </span><span class="kw">pub fn </span>get_all&lt;K&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, key: K) -&gt; GetAll&lt;<span class="lifetime">'_</span>, T&gt;
     <span class="kw">where
         </span>K: AsHeaderName,
     {
@@ -4325,8 +4325,8 @@
     /// let mut map = HeaderMap::new();
     /// assert!(!map.contains_key(HOST));
     ///
-    /// map.insert(HOST, &quot;world&quot;.parse().unwrap());
-    /// assert!(map.contains_key(&quot;host&quot;));
+    /// map.insert(HOST, "world".parse().unwrap());
+    /// assert!(map.contains_key("host"));
     /// ```
     </span><span class="kw">pub fn </span>contains_key&lt;K&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, key: K) -&gt; bool
     <span class="kw">where
@@ -4348,15 +4348,15 @@
     /// # use http::header::{CONTENT_LENGTH, HOST};
     /// let mut map = HeaderMap::new();
     ///
-    /// map.insert(HOST, &quot;hello&quot;.parse().unwrap());
-    /// map.append(HOST, &quot;goodbye&quot;.parse().unwrap());
-    /// map.insert(CONTENT_LENGTH, &quot;123&quot;.parse().unwrap());
+    /// map.insert(HOST, "hello".parse().unwrap());
+    /// map.append(HOST, "goodbye".parse().unwrap());
+    /// map.insert(CONTENT_LENGTH, "123".parse().unwrap());
     ///
     /// for (key, value) in map.iter() {
-    ///     println!(&quot;{:?}: {:?}&quot;, key, value);
+    ///     println!("{:?}: {:?}", key, value);
     /// }
     /// ```
-    </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Iter&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+    </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Iter&lt;<span class="lifetime">'_</span>, T&gt; {
         Iter {
             map: <span class="self">self</span>,
             entry: <span class="number">0</span>,
@@ -4377,15 +4377,15 @@
     /// # use http::header::{CONTENT_LENGTH, HOST};
     /// let mut map = HeaderMap::default();
     ///
-    /// map.insert(HOST, &quot;hello&quot;.to_string());
-    /// map.append(HOST, &quot;goodbye&quot;.to_string());
-    /// map.insert(CONTENT_LENGTH, &quot;123&quot;.to_string());
+    /// map.insert(HOST, "hello".to_string());
+    /// map.append(HOST, "goodbye".to_string());
+    /// map.insert(CONTENT_LENGTH, "123".to_string());
     ///
     /// for (key, value) in map.iter_mut() {
-    ///     value.push_str(&quot;-boop&quot;);
+    ///     value.push_str("-boop");
     /// }
     /// ```
-    </span><span class="kw">pub fn </span>iter_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; IterMut&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+    </span><span class="kw">pub fn </span>iter_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; IterMut&lt;<span class="lifetime">'_</span>, T&gt; {
         IterMut {
             map: <span class="self">self </span><span class="kw">as </span><span class="kw-2">*mut </span><span class="kw">_</span>,
             entry: <span class="number">0</span>,
@@ -4407,15 +4407,15 @@
     /// # use http::header::{CONTENT_LENGTH, HOST};
     /// let mut map = HeaderMap::new();
     ///
-    /// map.insert(HOST, &quot;hello&quot;.parse().unwrap());
-    /// map.append(HOST, &quot;goodbye&quot;.parse().unwrap());
-    /// map.insert(CONTENT_LENGTH, &quot;123&quot;.parse().unwrap());
+    /// map.insert(HOST, "hello".parse().unwrap());
+    /// map.append(HOST, "goodbye".parse().unwrap());
+    /// map.insert(CONTENT_LENGTH, "123".parse().unwrap());
     ///
     /// for key in map.keys() {
-    ///     println!(&quot;{:?}&quot;, key);
+    ///     println!("{:?}", key);
     /// }
     /// ```
-    </span><span class="kw">pub fn </span>keys(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Keys&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+    </span><span class="kw">pub fn </span>keys(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Keys&lt;<span class="lifetime">'_</span>, T&gt; {
         Keys {
             inner: <span class="self">self</span>.entries.iter(),
         }
@@ -4433,15 +4433,15 @@
     /// # use http::header::{CONTENT_LENGTH, HOST};
     /// let mut map = HeaderMap::new();
     ///
-    /// map.insert(HOST, &quot;hello&quot;.parse().unwrap());
-    /// map.append(HOST, &quot;goodbye&quot;.parse().unwrap());
-    /// map.insert(CONTENT_LENGTH, &quot;123&quot;.parse().unwrap());
+    /// map.insert(HOST, "hello".parse().unwrap());
+    /// map.append(HOST, "goodbye".parse().unwrap());
+    /// map.insert(CONTENT_LENGTH, "123".parse().unwrap());
     ///
     /// for value in map.values() {
-    ///     println!(&quot;{:?}&quot;, value);
+    ///     println!("{:?}", value);
     /// }
     /// ```
-    </span><span class="kw">pub fn </span>values(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Values&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+    </span><span class="kw">pub fn </span>values(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Values&lt;<span class="lifetime">'_</span>, T&gt; {
         Values { inner: <span class="self">self</span>.iter() }
     }
 
@@ -4457,15 +4457,15 @@
     /// # use http::header::{CONTENT_LENGTH, HOST};
     /// let mut map = HeaderMap::default();
     ///
-    /// map.insert(HOST, &quot;hello&quot;.to_string());
-    /// map.append(HOST, &quot;goodbye&quot;.to_string());
-    /// map.insert(CONTENT_LENGTH, &quot;123&quot;.to_string());
+    /// map.insert(HOST, "hello".to_string());
+    /// map.append(HOST, "goodbye".to_string());
+    /// map.insert(CONTENT_LENGTH, "123".to_string());
     ///
     /// for value in map.values_mut() {
-    ///     value.push_str(&quot;-boop&quot;);
+    ///     value.push_str("-boop");
     /// }
     /// ```
-    </span><span class="kw">pub fn </span>values_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; ValuesMut&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+    </span><span class="kw">pub fn </span>values_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; ValuesMut&lt;<span class="lifetime">'_</span>, T&gt; {
         ValuesMut {
             inner: <span class="self">self</span>.iter_mut(),
         }
@@ -4486,21 +4486,21 @@
     /// # use http::header::{CONTENT_LENGTH, HOST};
     /// let mut map = HeaderMap::new();
     ///
-    /// map.insert(HOST, &quot;hello&quot;.parse().unwrap());
-    /// map.append(HOST, &quot;goodbye&quot;.parse().unwrap());
-    /// map.insert(CONTENT_LENGTH, &quot;123&quot;.parse().unwrap());
+    /// map.insert(HOST, "hello".parse().unwrap());
+    /// map.append(HOST, "goodbye".parse().unwrap());
+    /// map.insert(CONTENT_LENGTH, "123".parse().unwrap());
     ///
     /// let mut drain = map.drain();
     ///
     ///
-    /// assert_eq!(drain.next(), Some((Some(HOST), &quot;hello&quot;.parse().unwrap())));
-    /// assert_eq!(drain.next(), Some((None, &quot;goodbye&quot;.parse().unwrap())));
+    /// assert_eq!(drain.next(), Some((Some(HOST), "hello".parse().unwrap())));
+    /// assert_eq!(drain.next(), Some((None, "goodbye".parse().unwrap())));
     ///
-    /// assert_eq!(drain.next(), Some((Some(CONTENT_LENGTH), &quot;123&quot;.parse().unwrap())));
+    /// assert_eq!(drain.next(), Some((Some(CONTENT_LENGTH), "123".parse().unwrap())));
     ///
     /// assert_eq!(drain.next(), None);
     /// ```
-    </span><span class="kw">pub fn </span>drain(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; Drain&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+    </span><span class="kw">pub fn </span>drain(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; Drain&lt;<span class="lifetime">'_</span>, T&gt; {
         <span class="kw">for </span>i <span class="kw">in </span><span class="self">self</span>.indices.iter_mut() {
             <span class="kw-2">*</span>i = Pos::none();
         }
@@ -4509,7 +4509,7 @@
         //
         // When the Drain is first created, it shortens the length of
         // the source vector to make sure no uninitialized or moved-from
-        // elements are accessible at all if the Drain&#39;s destructor never
+        // elements are accessible at all if the Drain's destructor never
         // gets to run.
 
         </span><span class="kw">let </span>entries = <span class="kw-2">&amp;mut </span><span class="self">self</span>.entries[..] <span class="kw">as </span><span class="kw-2">*mut </span><span class="kw">_</span>;
@@ -4527,7 +4527,7 @@
         }
     }
 
-    <span class="kw">fn </span>value_iter(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: <span class="prelude-ty">Option</span>&lt;usize&gt;) -&gt; ValueIter&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+    <span class="kw">fn </span>value_iter(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: <span class="prelude-ty">Option</span>&lt;usize&gt;) -&gt; ValueIter&lt;<span class="lifetime">'_</span>, T&gt; {
         <span class="kw">use </span><span class="self">self</span>::Cursor::<span class="kw-2">*</span>;
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(idx) = idx {
@@ -4553,7 +4553,7 @@
         }
     }
 
-    <span class="kw">fn </span>value_iter_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>, idx: usize) -&gt; ValueIterMut&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+    <span class="kw">fn </span>value_iter_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>, idx: usize) -&gt; ValueIterMut&lt;<span class="lifetime">'_</span>, T&gt; {
         <span class="kw">use </span><span class="self">self</span>::Cursor::<span class="kw-2">*</span>;
 
         <span class="kw">let </span>back = {
@@ -4571,7 +4571,7 @@
         }
     }
 
-    <span class="doccomment">/// Gets the given key&#39;s corresponding entry in the map for in-place
+    <span class="doccomment">/// Gets the given key's corresponding entry in the map for in-place
     /// manipulation.
     ///
     /// # Examples
@@ -4581,10 +4581,10 @@
     /// let mut map: HeaderMap&lt;u32&gt; = HeaderMap::default();
     ///
     /// let headers = &amp;[
-    ///     &quot;content-length&quot;,
-    ///     &quot;x-hello&quot;,
-    ///     &quot;Content-Length&quot;,
-    ///     &quot;x-world&quot;,
+    ///     "content-length",
+    ///     "x-hello",
+    ///     "Content-Length",
+    ///     "x-world",
     /// ];
     ///
     /// for &amp;header in headers {
@@ -4592,17 +4592,17 @@
     ///     *counter += 1;
     /// }
     ///
-    /// assert_eq!(map[&quot;content-length&quot;], 2);
-    /// assert_eq!(map[&quot;x-hello&quot;], 1);
+    /// assert_eq!(map["content-length"], 2);
+    /// assert_eq!(map["x-hello"], 1);
     /// ```
-    </span><span class="kw">pub fn </span>entry&lt;K&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: K) -&gt; Entry&lt;<span class="lifetime">&#39;_</span>, T&gt;
+    </span><span class="kw">pub fn </span>entry&lt;K&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: K) -&gt; Entry&lt;<span class="lifetime">'_</span>, T&gt;
     <span class="kw">where
         </span>K: IntoHeaderName,
     {
         key.entry(<span class="self">self</span>)
     }
 
-    <span class="doccomment">/// Gets the given key&#39;s corresponding entry in the map for in-place
+    <span class="doccomment">/// Gets the given key's corresponding entry in the map for in-place
     /// manipulation.
     ///
     /// # Errors
@@ -4611,14 +4611,14 @@
     /// valid `HeaderName`s to passed as the key (such as `String`). If they
     /// do not parse as a valid `HeaderName`, this returns an
     /// `InvalidHeaderName` error.
-    </span><span class="kw">pub fn </span>try_entry&lt;K&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: K) -&gt; <span class="prelude-ty">Result</span>&lt;Entry&lt;<span class="lifetime">&#39;_</span>, T&gt;, InvalidHeaderName&gt;
+    </span><span class="kw">pub fn </span>try_entry&lt;K&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: K) -&gt; <span class="prelude-ty">Result</span>&lt;Entry&lt;<span class="lifetime">'_</span>, T&gt;, InvalidHeaderName&gt;
     <span class="kw">where
         </span>K: AsHeaderName,
     {
         key.try_entry(<span class="self">self</span>)
     }
 
-    <span class="kw">fn </span>entry2&lt;K&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: K) -&gt; Entry&lt;<span class="lifetime">&#39;_</span>, T&gt;
+    <span class="kw">fn </span>entry2&lt;K&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: K) -&gt; Entry&lt;<span class="lifetime">'_</span>, T&gt;
     <span class="kw">where
         </span>K: Hash + Into&lt;HeaderName&gt;,
         HeaderName: PartialEq&lt;K&gt;,
@@ -4676,11 +4676,11 @@
     /// # use http::HeaderMap;
     /// # use http::header::HOST;
     /// let mut map = HeaderMap::new();
-    /// assert!(map.insert(HOST, &quot;world&quot;.parse().unwrap()).is_none());
+    /// assert!(map.insert(HOST, "world".parse().unwrap()).is_none());
     /// assert!(!map.is_empty());
     ///
-    /// let mut prev = map.insert(HOST, &quot;earth&quot;.parse().unwrap()).unwrap();
-    /// assert_eq!(&quot;world&quot;, prev);
+    /// let mut prev = map.insert(HOST, "earth".parse().unwrap()).unwrap();
+    /// assert_eq!("world", prev);
     /// ```
     </span><span class="kw">pub fn </span>insert&lt;K&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: K, val: T) -&gt; <span class="prelude-ty">Option</span>&lt;T&gt;
     <span class="kw">where
@@ -4733,7 +4733,7 @@
         mem::replace(<span class="kw-2">&amp;mut </span>entry.value, value)
     }
 
-    <span class="kw">fn </span>insert_occupied_mult(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: usize, value: T) -&gt; ValueDrain&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+    <span class="kw">fn </span>insert_occupied_mult(<span class="kw-2">&amp;mut </span><span class="self">self</span>, index: usize, value: T) -&gt; ValueDrain&lt;<span class="lifetime">'_</span>, T&gt; {
         <span class="kw">let </span>old;
         <span class="kw">let </span>links;
 
@@ -4775,15 +4775,15 @@
     /// # use http::HeaderMap;
     /// # use http::header::HOST;
     /// let mut map = HeaderMap::new();
-    /// assert!(map.insert(HOST, &quot;world&quot;.parse().unwrap()).is_none());
+    /// assert!(map.insert(HOST, "world".parse().unwrap()).is_none());
     /// assert!(!map.is_empty());
     ///
-    /// map.append(HOST, &quot;earth&quot;.parse().unwrap());
+    /// map.append(HOST, "earth".parse().unwrap());
     ///
-    /// let values = map.get_all(&quot;host&quot;);
+    /// let values = map.get_all("host");
     /// let mut i = values.iter();
-    /// assert_eq!(&quot;world&quot;, *i.next().unwrap());
-    /// assert_eq!(&quot;earth&quot;, *i.next().unwrap());
+    /// assert_eq!("world", *i.next().unwrap());
+    /// assert_eq!("earth", *i.next().unwrap());
     /// ```
     </span><span class="kw">pub fn </span>append&lt;K&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: K, value: T) -&gt; bool
     <span class="kw">where
@@ -4897,10 +4897,10 @@
     /// # use http::HeaderMap;
     /// # use http::header::HOST;
     /// let mut map = HeaderMap::new();
-    /// map.insert(HOST, &quot;hello.world&quot;.parse().unwrap());
+    /// map.insert(HOST, "hello.world".parse().unwrap());
     ///
     /// let prev = map.remove(HOST).unwrap();
-    /// assert_eq!(&quot;hello.world&quot;, prev);
+    /// assert_eq!("hello.world", prev);
     ///
     /// assert!(map.remove(HOST).is_none());
     /// ```
@@ -5004,7 +5004,7 @@
 
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>insert_entry(<span class="kw-2">&amp;mut </span><span class="self">self</span>, hash: HashValue, key: HeaderName, value: T) {
-        <span class="macro">assert!</span>(<span class="self">self</span>.entries.len() &lt; MAX_SIZE, <span class="string">&quot;header map at capacity&quot;</span>);
+        <span class="macro">assert!</span>(<span class="self">self</span>.entries.len() &lt; MAX_SIZE, <span class="string">"header map at capacity"</span>);
 
         <span class="self">self</span>.entries.push(Bucket {
             hash: hash,
@@ -5016,12 +5016,12 @@
 
     <span class="kw">fn </span>rebuild(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="comment">// Loop over all entries and re-insert them into the map
-        </span><span class="lifetime">&#39;outer</span>: <span class="kw">for </span>(index, entry) <span class="kw">in </span><span class="self">self</span>.entries.iter_mut().enumerate() {
+        </span><span class="lifetime">'outer</span>: <span class="kw">for </span>(index, entry) <span class="kw">in </span><span class="self">self</span>.entries.iter_mut().enumerate() {
             <span class="kw">let </span>hash = hash_elem_using(<span class="kw-2">&amp;</span><span class="self">self</span>.danger, <span class="kw-2">&amp;</span>entry.key);
             <span class="kw">let </span><span class="kw-2">mut </span>probe = desired_pos(<span class="self">self</span>.mask, hash);
             <span class="kw">let </span><span class="kw-2">mut </span>dist = <span class="number">0</span>;
 
-            <span class="comment">// Update the entry&#39;s hash code
+            <span class="comment">// Update the entry's hash code
             </span>entry.hash = hash;
 
             <span class="macro">probe_loop!</span>(probe &lt; <span class="self">self</span>.indices.len(), {
@@ -5036,7 +5036,7 @@
                 } <span class="kw">else </span>{
                     <span class="comment">// Vacant slot
                     </span><span class="self">self</span>.indices[probe] = Pos::new(index, hash);
-                    <span class="kw">continue </span><span class="lifetime">&#39;outer</span>;
+                    <span class="kw">continue </span><span class="lifetime">'outer</span>;
                 }
 
                 dist += <span class="number">1</span>;
@@ -5101,7 +5101,7 @@
 
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>grow(<span class="kw-2">&amp;mut </span><span class="self">self</span>, new_raw_cap: usize) {
-        <span class="macro">assert!</span>(new_raw_cap &lt;= MAX_SIZE, <span class="string">&quot;requested capacity too large&quot;</span>);
+        <span class="macro">assert!</span>(new_raw_cap &lt;= MAX_SIZE, <span class="string">"requested capacity too large"</span>);
         <span class="comment">// This path can never be reached when handling the first allocation in
         // the map.
 
@@ -5229,7 +5229,7 @@
             Link::Entry(entry_idx) =&gt; {
                 <span class="comment">// It is critical that we do not attempt to read the
                 // header name or value as that memory may have been
-                // &quot;released&quot; already.
+                // "released" already.
                 </span><span class="macro">debug_assert!</span>(raw_links[entry_idx].is_some());
 
                 <span class="kw">let </span>links = raw_links[entry_idx].as_mut().unwrap();
@@ -5287,20 +5287,20 @@
     vec
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>HeaderMap&lt;T&gt; {
-    <span class="kw">type </span>Item = (<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>HeaderName, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>T);
-    <span class="kw">type </span>IntoIter = Iter&lt;<span class="lifetime">&#39;a</span>, T&gt;;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>HeaderMap&lt;T&gt; {
+    <span class="kw">type </span>Item = (<span class="kw-2">&amp;</span><span class="lifetime">'a </span>HeaderName, <span class="kw-2">&amp;</span><span class="lifetime">'a </span>T);
+    <span class="kw">type </span>IntoIter = Iter&lt;<span class="lifetime">'a</span>, T&gt;;
 
-    <span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; Iter&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+    <span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; Iter&lt;<span class="lifetime">'a</span>, T&gt; {
         <span class="self">self</span>.iter()
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>HeaderMap&lt;T&gt; {
-    <span class="kw">type </span>Item = (<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>HeaderName, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>T);
-    <span class="kw">type </span>IntoIter = IterMut&lt;<span class="lifetime">&#39;a</span>, T&gt;;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>HeaderMap&lt;T&gt; {
+    <span class="kw">type </span>Item = (<span class="kw-2">&amp;</span><span class="lifetime">'a </span>HeaderName, <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>T);
+    <span class="kw">type </span>IntoIter = IterMut&lt;<span class="lifetime">'a</span>, T&gt;;
 
-    <span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; IterMut&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+    <span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; IterMut&lt;<span class="lifetime">'a</span>, T&gt; {
         <span class="self">self</span>.iter_mut()
     }
 }
@@ -5325,12 +5325,12 @@
     /// # use http::header;
     /// # use http::header::*;
     /// let mut map = HeaderMap::new();
-    /// map.insert(header::CONTENT_LENGTH, &quot;123&quot;.parse().unwrap());
-    /// map.insert(header::CONTENT_TYPE, &quot;json&quot;.parse().unwrap());
+    /// map.insert(header::CONTENT_LENGTH, "123".parse().unwrap());
+    /// map.insert(header::CONTENT_TYPE, "json".parse().unwrap());
     ///
     /// let mut iter = map.into_iter();
-    /// assert_eq!(iter.next(), Some((Some(header::CONTENT_LENGTH), &quot;123&quot;.parse().unwrap())));
-    /// assert_eq!(iter.next(), Some((Some(header::CONTENT_TYPE), &quot;json&quot;.parse().unwrap())));
+    /// assert_eq!(iter.next(), Some((Some(header::CONTENT_LENGTH), "123".parse().unwrap())));
+    /// assert_eq!(iter.next(), Some((Some(header::CONTENT_TYPE), "json".parse().unwrap())));
     /// assert!(iter.next().is_none());
     /// ```
     ///
@@ -5341,21 +5341,21 @@
     /// # use http::header::*;
     /// let mut map = HeaderMap::new();
     ///
-    /// map.append(header::CONTENT_LENGTH, &quot;123&quot;.parse().unwrap());
-    /// map.append(header::CONTENT_LENGTH, &quot;456&quot;.parse().unwrap());
+    /// map.append(header::CONTENT_LENGTH, "123".parse().unwrap());
+    /// map.append(header::CONTENT_LENGTH, "456".parse().unwrap());
     ///
-    /// map.append(header::CONTENT_TYPE, &quot;json&quot;.parse().unwrap());
-    /// map.append(header::CONTENT_TYPE, &quot;html&quot;.parse().unwrap());
-    /// map.append(header::CONTENT_TYPE, &quot;xml&quot;.parse().unwrap());
+    /// map.append(header::CONTENT_TYPE, "json".parse().unwrap());
+    /// map.append(header::CONTENT_TYPE, "html".parse().unwrap());
+    /// map.append(header::CONTENT_TYPE, "xml".parse().unwrap());
     ///
     /// let mut iter = map.into_iter();
     ///
-    /// assert_eq!(iter.next(), Some((Some(header::CONTENT_LENGTH), &quot;123&quot;.parse().unwrap())));
-    /// assert_eq!(iter.next(), Some((None, &quot;456&quot;.parse().unwrap())));
+    /// assert_eq!(iter.next(), Some((Some(header::CONTENT_LENGTH), "123".parse().unwrap())));
+    /// assert_eq!(iter.next(), Some((None, "456".parse().unwrap())));
     ///
-    /// assert_eq!(iter.next(), Some((Some(header::CONTENT_TYPE), &quot;json&quot;.parse().unwrap())));
-    /// assert_eq!(iter.next(), Some((None, &quot;html&quot;.parse().unwrap())));
-    /// assert_eq!(iter.next(), Some((None, &quot;xml&quot;.parse().unwrap())));
+    /// assert_eq!(iter.next(), Some((Some(header::CONTENT_TYPE), "json".parse().unwrap())));
+    /// assert_eq!(iter.next(), Some((None, "html".parse().unwrap())));
+    /// assert_eq!(iter.next(), Some((None, "xml".parse().unwrap())));
     /// assert!(iter.next().is_none());
     /// ```
     </span><span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; IntoIter&lt;T&gt; {
@@ -5388,22 +5388,22 @@
 /// use http::HeaderMap;
 ///
 /// let mut map = HashMap::new();
-/// map.insert(&quot;X-Custom-Header&quot;.to_string(), &quot;my value&quot;.to_string());
+/// map.insert("X-Custom-Header".to_string(), "my value".to_string());
 ///
-/// let headers: HeaderMap = (&amp;map).try_into().expect(&quot;valid headers&quot;);
-/// assert_eq!(headers[&quot;X-Custom-Header&quot;], &quot;my value&quot;);
+/// let headers: HeaderMap = (&amp;map).try_into().expect("valid headers");
+/// assert_eq!(headers["X-Custom-Header"], "my value");
 /// ```
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K, V, T&gt; TryFrom&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>HashMap&lt;K, V&gt;&gt; <span class="kw">for </span>HeaderMap&lt;T&gt;
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K, V, T&gt; TryFrom&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>HashMap&lt;K, V&gt;&gt; <span class="kw">for </span>HeaderMap&lt;T&gt;
     <span class="kw">where
         </span>K: Eq + Hash,
-        HeaderName: TryFrom&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>K&gt;,
-        &lt;HeaderName <span class="kw">as </span>TryFrom&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>K&gt;&gt;::Error: Into&lt;<span class="kw">crate</span>::Error&gt;,
-        T: TryFrom&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>V&gt;,
+        HeaderName: TryFrom&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>K&gt;,
+        &lt;HeaderName <span class="kw">as </span>TryFrom&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>K&gt;&gt;::Error: Into&lt;<span class="kw">crate</span>::Error&gt;,
+        T: TryFrom&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>V&gt;,
         T::Error: Into&lt;<span class="kw">crate</span>::Error&gt;,
 {
     <span class="kw">type </span>Error = Error;
 
-    <span class="kw">fn </span>try_from(c: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>HashMap&lt;K, V&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
+    <span class="kw">fn </span>try_from(c: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>HashMap&lt;K, V&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
         c.into_iter()
             .map(|(k, v)| -&gt; <span class="kw">crate</span>::Result&lt;(HeaderName, T)&gt; {
                 <span class="kw">let </span>name = TryFrom::try_from(k).map_err(Into::into)<span class="question-mark">?</span>;
@@ -5430,25 +5430,25 @@
     /// # use http::header::*;
     /// let mut map = HeaderMap::new();
     ///
-    /// map.insert(ACCEPT, &quot;text/plain&quot;.parse().unwrap());
-    /// map.insert(HOST, &quot;hello.world&quot;.parse().unwrap());
+    /// map.insert(ACCEPT, "text/plain".parse().unwrap());
+    /// map.insert(HOST, "hello.world".parse().unwrap());
     ///
     /// let mut extra = HeaderMap::new();
     ///
-    /// extra.insert(HOST, &quot;foo.bar&quot;.parse().unwrap());
-    /// extra.insert(COOKIE, &quot;hello&quot;.parse().unwrap());
-    /// extra.append(COOKIE, &quot;world&quot;.parse().unwrap());
+    /// extra.insert(HOST, "foo.bar".parse().unwrap());
+    /// extra.insert(COOKIE, "hello".parse().unwrap());
+    /// extra.append(COOKIE, "world".parse().unwrap());
     ///
     /// map.extend(extra);
     ///
-    /// assert_eq!(map[&quot;host&quot;], &quot;foo.bar&quot;);
-    /// assert_eq!(map[&quot;accept&quot;], &quot;text/plain&quot;);
-    /// assert_eq!(map[&quot;cookie&quot;], &quot;hello&quot;);
+    /// assert_eq!(map["host"], "foo.bar");
+    /// assert_eq!(map["accept"], "text/plain");
+    /// assert_eq!(map["cookie"], "hello");
     ///
-    /// let v = map.get_all(&quot;host&quot;);
+    /// let v = map.get_all("host");
     /// assert_eq!(1, v.iter().count());
     ///
-    /// let v = map.get_all(&quot;cookie&quot;);
+    /// let v = map.get_all("cookie");
     /// assert_eq!(2, v.iter().count());
     /// ```
     </span><span class="kw">fn </span>extend&lt;I: IntoIterator&lt;Item = (<span class="prelude-ty">Option</span>&lt;HeaderName&gt;, T)&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, iter: I) {
@@ -5458,11 +5458,11 @@
         // borrow checker happy.
         </span><span class="kw">let </span>(<span class="kw-2">mut </span>key, <span class="kw-2">mut </span>val) = <span class="kw">match </span>iter.next() {
             <span class="prelude-val">Some</span>((<span class="prelude-val">Some</span>(key), val)) =&gt; (key, val),
-            <span class="prelude-val">Some</span>((<span class="prelude-val">None</span>, <span class="kw">_</span>)) =&gt; <span class="macro">panic!</span>(<span class="string">&quot;expected a header name, but got None&quot;</span>),
+            <span class="prelude-val">Some</span>((<span class="prelude-val">None</span>, <span class="kw">_</span>)) =&gt; <span class="macro">panic!</span>(<span class="string">"expected a header name, but got None"</span>),
             <span class="prelude-val">None </span>=&gt; <span class="kw">return</span>,
         };
 
-        <span class="lifetime">&#39;outer</span>: <span class="kw">loop </span>{
+        <span class="lifetime">'outer</span>: <span class="kw">loop </span>{
             <span class="kw">let </span><span class="kw-2">mut </span>entry = <span class="kw">match </span><span class="self">self</span>.entry2(key) {
                 Entry::Occupied(<span class="kw-2">mut </span>e) =&gt; {
                     <span class="comment">// Replace all previous values while maintaining a handle to
@@ -5480,7 +5480,7 @@
                     <span class="prelude-val">Some</span>((<span class="prelude-val">Some</span>(k), v)) =&gt; {
                         key = k;
                         val = v;
-                        <span class="kw">continue </span><span class="lifetime">&#39;outer</span>;
+                        <span class="kw">continue </span><span class="lifetime">'outer</span>;
                     }
                     <span class="prelude-val">Some</span>((<span class="prelude-val">None</span>, v)) =&gt; {
                         entry.append(v);
@@ -5530,7 +5530,7 @@
 <span class="kw">impl</span>&lt;T: Eq&gt; Eq <span class="kw">for </span>HeaderMap&lt;T&gt; {}
 
 <span class="kw">impl</span>&lt;T: fmt::Debug&gt; fmt::Debug <span class="kw">for </span>HeaderMap&lt;T&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         f.debug_map().entries(<span class="self">self</span>.iter()).finish()
     }
 }
@@ -5541,19 +5541,19 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K, T&gt; ops::Index&lt;K&gt; <span class="kw">for </span>HeaderMap&lt;T&gt;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K, T&gt; ops::Index&lt;K&gt; <span class="kw">for </span>HeaderMap&lt;T&gt;
 <span class="kw">where
     </span>K: AsHeaderName,
 {
     <span class="kw">type </span>Output = T;
 
     <span class="doccomment">/// # Panics
-    /// Using the index operator will cause a panic if the header you&#39;re querying isn&#39;t set.
+    /// Using the index operator will cause a panic if the header you're querying isn't set.
     </span><span class="attr">#[inline]
     </span><span class="kw">fn </span>index(<span class="kw-2">&amp;</span><span class="self">self</span>, index: K) -&gt; <span class="kw-2">&amp;</span>T {
         <span class="kw">match </span><span class="self">self</span>.get2(<span class="kw-2">&amp;</span>index) {
             <span class="prelude-val">Some</span>(val) =&gt; val,
-            <span class="prelude-val">None </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;no entry found for key {:?}&quot;</span>, index.as_str()),
+            <span class="prelude-val">None </span>=&gt; <span class="macro">panic!</span>(<span class="string">"no entry found for key {:?}"</span>, index.as_str()),
         }
     }
 }
@@ -5618,8 +5618,8 @@
 
 <span class="comment">// ===== impl Iter =====
 
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; Iterator <span class="kw">for </span>Iter&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    <span class="kw">type </span>Item = (<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>HeaderName, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>T);
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; Iterator <span class="kw">for </span>Iter&lt;<span class="lifetime">'a</span>, T&gt; {
+    <span class="kw">type </span>Item = (<span class="kw-2">&amp;</span><span class="lifetime">'a </span>HeaderName, <span class="kw-2">&amp;</span><span class="lifetime">'a </span>T);
 
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
         <span class="kw">use </span><span class="self">self</span>::Cursor::<span class="kw-2">*</span>;
@@ -5660,21 +5660,21 @@
         <span class="kw">let </span>lower = map.entries.len() - <span class="self">self</span>.entry;
         <span class="comment">// We could pessimistically guess at the upper bound, saying
         // that its lower + map.extra_values.len(). That could be
-        // way over though, such as if we&#39;re near the end, and have
+        // way over though, such as if we're near the end, and have
         // already gone through several extra values...
         </span>(lower, <span class="prelude-val">None</span>)
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; FusedIterator <span class="kw">for </span>Iter&lt;<span class="lifetime">&#39;a</span>, T&gt; {}
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; FusedIterator <span class="kw">for </span>Iter&lt;<span class="lifetime">'a</span>, T&gt; {}
 
-<span class="kw">unsafe impl</span>&lt;<span class="lifetime">&#39;a</span>, T: Sync&gt; Sync <span class="kw">for </span>Iter&lt;<span class="lifetime">&#39;a</span>, T&gt; {}
-<span class="kw">unsafe impl</span>&lt;<span class="lifetime">&#39;a</span>, T: Sync&gt; Send <span class="kw">for </span>Iter&lt;<span class="lifetime">&#39;a</span>, T&gt; {}
+<span class="kw">unsafe impl</span>&lt;<span class="lifetime">'a</span>, T: Sync&gt; Sync <span class="kw">for </span>Iter&lt;<span class="lifetime">'a</span>, T&gt; {}
+<span class="kw">unsafe impl</span>&lt;<span class="lifetime">'a</span>, T: Sync&gt; Send <span class="kw">for </span>Iter&lt;<span class="lifetime">'a</span>, T&gt; {}
 
 <span class="comment">// ===== impl IterMut =====
 
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; IterMut&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    <span class="kw">fn </span>next_unsafe(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>HeaderName, <span class="kw-2">*mut </span>T)&gt; {
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; IterMut&lt;<span class="lifetime">'a</span>, T&gt; {
+    <span class="kw">fn </span>next_unsafe(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span>HeaderName, <span class="kw-2">*mut </span>T)&gt; {
         <span class="kw">use </span><span class="self">self</span>::Cursor::<span class="kw-2">*</span>;
 
         <span class="kw">if </span><span class="self">self</span>.cursor.is_none() {
@@ -5707,8 +5707,8 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; Iterator <span class="kw">for </span>IterMut&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    <span class="kw">type </span>Item = (<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>HeaderName, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>T);
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; Iterator <span class="kw">for </span>IterMut&lt;<span class="lifetime">'a</span>, T&gt; {
+    <span class="kw">type </span>Item = (<span class="kw-2">&amp;</span><span class="lifetime">'a </span>HeaderName, <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>T);
 
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
         <span class="self">self</span>.next_unsafe()
@@ -5722,21 +5722,21 @@
         <span class="kw">let </span>lower = map.entries.len() - <span class="self">self</span>.entry;
         <span class="comment">// We could pessimistically guess at the upper bound, saying
         // that its lower + map.extra_values.len(). That could be
-        // way over though, such as if we&#39;re near the end, and have
+        // way over though, such as if we're near the end, and have
         // already gone through several extra values...
         </span>(lower, <span class="prelude-val">None</span>)
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; FusedIterator <span class="kw">for </span>IterMut&lt;<span class="lifetime">&#39;a</span>, T&gt; {}
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; FusedIterator <span class="kw">for </span>IterMut&lt;<span class="lifetime">'a</span>, T&gt; {}
 
-<span class="kw">unsafe impl</span>&lt;<span class="lifetime">&#39;a</span>, T: Sync&gt; Sync <span class="kw">for </span>IterMut&lt;<span class="lifetime">&#39;a</span>, T&gt; {}
-<span class="kw">unsafe impl</span>&lt;<span class="lifetime">&#39;a</span>, T: Send&gt; Send <span class="kw">for </span>IterMut&lt;<span class="lifetime">&#39;a</span>, T&gt; {}
+<span class="kw">unsafe impl</span>&lt;<span class="lifetime">'a</span>, T: Sync&gt; Sync <span class="kw">for </span>IterMut&lt;<span class="lifetime">'a</span>, T&gt; {}
+<span class="kw">unsafe impl</span>&lt;<span class="lifetime">'a</span>, T: Send&gt; Send <span class="kw">for </span>IterMut&lt;<span class="lifetime">'a</span>, T&gt; {}
 
 <span class="comment">// ===== impl Keys =====
 
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; Iterator <span class="kw">for </span>Keys&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>HeaderName;
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; Iterator <span class="kw">for </span>Keys&lt;<span class="lifetime">'a</span>, T&gt; {
+    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">'a </span>HeaderName;
 
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
         <span class="self">self</span>.inner.next().map(|b| <span class="kw-2">&amp;</span>b.key)
@@ -5747,13 +5747,13 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; ExactSizeIterator <span class="kw">for </span>Keys&lt;<span class="lifetime">&#39;a</span>, T&gt; {}
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; FusedIterator <span class="kw">for </span>Keys&lt;<span class="lifetime">&#39;a</span>, T&gt; {}
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; ExactSizeIterator <span class="kw">for </span>Keys&lt;<span class="lifetime">'a</span>, T&gt; {}
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; FusedIterator <span class="kw">for </span>Keys&lt;<span class="lifetime">'a</span>, T&gt; {}
 
 <span class="comment">// ===== impl Values ====
 
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; Iterator <span class="kw">for </span>Values&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>T;
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; Iterator <span class="kw">for </span>Values&lt;<span class="lifetime">'a</span>, T&gt; {
+    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">'a </span>T;
 
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
         <span class="self">self</span>.inner.next().map(|(<span class="kw">_</span>, v)| v)
@@ -5764,12 +5764,12 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; FusedIterator <span class="kw">for </span>Values&lt;<span class="lifetime">&#39;a</span>, T&gt; {}
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; FusedIterator <span class="kw">for </span>Values&lt;<span class="lifetime">'a</span>, T&gt; {}
 
 <span class="comment">// ===== impl ValuesMut ====
 
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; Iterator <span class="kw">for </span>ValuesMut&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>T;
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; Iterator <span class="kw">for </span>ValuesMut&lt;<span class="lifetime">'a</span>, T&gt; {
+    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>T;
 
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
         <span class="self">self</span>.inner.next().map(|(<span class="kw">_</span>, v)| v)
@@ -5780,11 +5780,11 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; FusedIterator <span class="kw">for </span>ValuesMut&lt;<span class="lifetime">&#39;a</span>, T&gt; {}
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; FusedIterator <span class="kw">for </span>ValuesMut&lt;<span class="lifetime">'a</span>, T&gt; {}
 
 <span class="comment">// ===== impl Drain =====
 
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; Iterator <span class="kw">for </span>Drain&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; Iterator <span class="kw">for </span>Drain&lt;<span class="lifetime">'a</span>, T&gt; {
     <span class="kw">type </span>Item = (<span class="prelude-ty">Option</span>&lt;HeaderName&gt;, T);
 
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
@@ -5825,10 +5825,10 @@
     }
 
     <span class="kw">fn </span>size_hint(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; (usize, <span class="prelude-ty">Option</span>&lt;usize&gt;) {
-        <span class="comment">// At least this many names... It&#39;s unknown if the user wants
+        <span class="comment">// At least this many names... It's unknown if the user wants
         // to count the extra_values on top.
         //
-        // For instance, extending a new `HeaderMap` wouldn&#39;t need to
+        // For instance, extending a new `HeaderMap` wouldn't need to
         // reserve the upper-bound in `entries`, only the lower-bound.
         </span><span class="kw">let </span>lower = <span class="self">self</span>.len - <span class="self">self</span>.idx;
         <span class="kw">let </span>upper = <span class="kw">unsafe </span>{ (<span class="kw-2">*</span><span class="self">self</span>.extra_values).len() } + lower;
@@ -5836,20 +5836,20 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; FusedIterator <span class="kw">for </span>Drain&lt;<span class="lifetime">&#39;a</span>, T&gt; {}
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; FusedIterator <span class="kw">for </span>Drain&lt;<span class="lifetime">'a</span>, T&gt; {}
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; Drop <span class="kw">for </span>Drain&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; Drop <span class="kw">for </span>Drain&lt;<span class="lifetime">'a</span>, T&gt; {
     <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="kw">for _ in </span><span class="self">self </span>{}
     }
 }
 
-<span class="kw">unsafe impl</span>&lt;<span class="lifetime">&#39;a</span>, T: Sync&gt; Sync <span class="kw">for </span>Drain&lt;<span class="lifetime">&#39;a</span>, T&gt; {}
-<span class="kw">unsafe impl</span>&lt;<span class="lifetime">&#39;a</span>, T: Send&gt; Send <span class="kw">for </span>Drain&lt;<span class="lifetime">&#39;a</span>, T&gt; {}
+<span class="kw">unsafe impl</span>&lt;<span class="lifetime">'a</span>, T: Sync&gt; Sync <span class="kw">for </span>Drain&lt;<span class="lifetime">'a</span>, T&gt; {}
+<span class="kw">unsafe impl</span>&lt;<span class="lifetime">'a</span>, T: Send&gt; Send <span class="kw">for </span>Drain&lt;<span class="lifetime">'a</span>, T&gt; {}
 
 <span class="comment">// ===== impl Entry =====
 
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; Entry&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; Entry&lt;<span class="lifetime">'a</span>, T&gt; {
     <span class="doccomment">/// Ensures a value is in the entry by inserting the default if empty.
     ///
     /// Returns a mutable reference to the **first** value in the entry.
@@ -5861,10 +5861,10 @@
     /// let mut map: HeaderMap&lt;u32&gt; = HeaderMap::default();
     ///
     /// let headers = &amp;[
-    ///     &quot;content-length&quot;,
-    ///     &quot;x-hello&quot;,
-    ///     &quot;Content-Length&quot;,
-    ///     &quot;x-world&quot;,
+    ///     "content-length",
+    ///     "x-hello",
+    ///     "Content-Length",
+    ///     "x-world",
     /// ];
     ///
     /// for &amp;header in headers {
@@ -5873,10 +5873,10 @@
     ///     *counter += 1;
     /// }
     ///
-    /// assert_eq!(map[&quot;content-length&quot;], 2);
-    /// assert_eq!(map[&quot;x-hello&quot;], 1);
+    /// assert_eq!(map["content-length"], 2);
+    /// assert_eq!(map["x-hello"], 1);
     /// ```
-    </span><span class="kw">pub fn </span>or_insert(<span class="self">self</span>, default: T) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>T {
+    </span><span class="kw">pub fn </span>or_insert(<span class="self">self</span>, default: T) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>T {
         <span class="kw">use </span><span class="self">self</span>::Entry::<span class="kw-2">*</span>;
 
         <span class="kw">match </span><span class="self">self </span>{
@@ -5899,10 +5899,10 @@
     /// # use http::HeaderMap;
     /// let mut map = HeaderMap::new();
     ///
-    /// let res = map.entry(&quot;x-hello&quot;)
-    ///     .or_insert_with(|| &quot;world&quot;.parse().unwrap());
+    /// let res = map.entry("x-hello")
+    ///     .or_insert_with(|| "world".parse().unwrap());
     ///
-    /// assert_eq!(res, &quot;world&quot;);
+    /// assert_eq!(res, "world");
     /// ```
     ///
     /// The default function is not called if the entry exists in the map.
@@ -5911,15 +5911,15 @@
     /// # use http::HeaderMap;
     /// # use http::header::HOST;
     /// let mut map = HeaderMap::new();
-    /// map.insert(HOST, &quot;world&quot;.parse().unwrap());
+    /// map.insert(HOST, "world".parse().unwrap());
     ///
-    /// let res = map.entry(&quot;host&quot;)
+    /// let res = map.entry("host")
     ///     .or_insert_with(|| unreachable!());
     ///
     ///
-    /// assert_eq!(res, &quot;world&quot;);
+    /// assert_eq!(res, "world");
     /// ```
-    </span><span class="kw">pub fn </span>or_insert_with&lt;F: FnOnce() -&gt; T&gt;(<span class="self">self</span>, default: F) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>T {
+    </span><span class="kw">pub fn </span>or_insert_with&lt;F: FnOnce() -&gt; T&gt;(<span class="self">self</span>, default: F) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>T {
         <span class="kw">use </span><span class="self">self</span>::Entry::<span class="kw-2">*</span>;
 
         <span class="kw">match </span><span class="self">self </span>{
@@ -5928,7 +5928,7 @@
         }
     }
 
-    <span class="doccomment">/// Returns a reference to the entry&#39;s key
+    <span class="doccomment">/// Returns a reference to the entry's key
     ///
     /// # Examples
     ///
@@ -5936,7 +5936,7 @@
     /// # use http::HeaderMap;
     /// let mut map = HeaderMap::new();
     ///
-    /// assert_eq!(map.entry(&quot;x-hello&quot;).key(), &quot;x-hello&quot;);
+    /// assert_eq!(map.entry("x-hello").key(), "x-hello");
     /// ```
     </span><span class="kw">pub fn </span>key(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>HeaderName {
         <span class="kw">use </span><span class="self">self</span>::Entry::<span class="kw-2">*</span>;
@@ -5950,8 +5950,8 @@
 
 <span class="comment">// ===== impl VacantEntry =====
 
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; VacantEntry&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    <span class="doccomment">/// Returns a reference to the entry&#39;s key
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; VacantEntry&lt;<span class="lifetime">'a</span>, T&gt; {
+    <span class="doccomment">/// Returns a reference to the entry's key
     ///
     /// # Examples
     ///
@@ -5959,7 +5959,7 @@
     /// # use http::HeaderMap;
     /// let mut map = HeaderMap::new();
     ///
-    /// assert_eq!(map.entry(&quot;x-hello&quot;).key().as_str(), &quot;x-hello&quot;);
+    /// assert_eq!(map.entry("x-hello").key().as_str(), "x-hello");
     /// ```
     </span><span class="kw">pub fn </span>key(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>HeaderName {
         <span class="kw-2">&amp;</span><span class="self">self</span>.key
@@ -5973,8 +5973,8 @@
     /// # use http::header::{HeaderMap, Entry};
     /// let mut map = HeaderMap::new();
     ///
-    /// if let Entry::Vacant(v) = map.entry(&quot;x-hello&quot;) {
-    ///     assert_eq!(v.into_key().as_str(), &quot;x-hello&quot;);
+    /// if let Entry::Vacant(v) = map.entry("x-hello") {
+    ///     assert_eq!(v.into_key().as_str(), "x-hello");
     /// }
     /// ```
     </span><span class="kw">pub fn </span>into_key(<span class="self">self</span>) -&gt; HeaderName {
@@ -5983,7 +5983,7 @@
 
     <span class="doccomment">/// Insert the value into the entry.
     ///
-    /// The value will be associated with this entry&#39;s key. A mutable reference
+    /// The value will be associated with this entry's key. A mutable reference
     /// to the inserted value will be returned.
     ///
     /// # Examples
@@ -5992,13 +5992,13 @@
     /// # use http::header::{HeaderMap, Entry};
     /// let mut map = HeaderMap::new();
     ///
-    /// if let Entry::Vacant(v) = map.entry(&quot;x-hello&quot;) {
-    ///     v.insert(&quot;world&quot;.parse().unwrap());
+    /// if let Entry::Vacant(v) = map.entry("x-hello") {
+    ///     v.insert("world".parse().unwrap());
     /// }
     ///
-    /// assert_eq!(map[&quot;x-hello&quot;], &quot;world&quot;);
+    /// assert_eq!(map["x-hello"], "world");
     /// ```
-    </span><span class="kw">pub fn </span>insert(<span class="self">self</span>, value: T) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>T {
+    </span><span class="kw">pub fn </span>insert(<span class="self">self</span>, value: T) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>T {
         <span class="comment">// Ensure that there is space in the map
         </span><span class="kw">let </span>index =
             <span class="self">self</span>.map
@@ -6009,7 +6009,7 @@
 
     <span class="doccomment">/// Insert the value into the entry.
     ///
-    /// The value will be associated with this entry&#39;s key. The new
+    /// The value will be associated with this entry's key. The new
     /// `OccupiedEntry` is returned, allowing for further manipulation.
     ///
     /// # Examples
@@ -6018,14 +6018,14 @@
     /// # use http::header::*;
     /// let mut map = HeaderMap::new();
     ///
-    /// if let Entry::Vacant(v) = map.entry(&quot;x-hello&quot;) {
-    ///     let mut e = v.insert_entry(&quot;world&quot;.parse().unwrap());
-    ///     e.insert(&quot;world2&quot;.parse().unwrap());
+    /// if let Entry::Vacant(v) = map.entry("x-hello") {
+    ///     let mut e = v.insert_entry("world".parse().unwrap());
+    ///     e.insert("world2".parse().unwrap());
     /// }
     ///
-    /// assert_eq!(map[&quot;x-hello&quot;], &quot;world2&quot;);
+    /// assert_eq!(map["x-hello"], "world2");
     /// ```
-    </span><span class="kw">pub fn </span>insert_entry(<span class="self">self</span>, value: T) -&gt; OccupiedEntry&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+    </span><span class="kw">pub fn </span>insert_entry(<span class="self">self</span>, value: T) -&gt; OccupiedEntry&lt;<span class="lifetime">'a</span>, T&gt; {
         <span class="comment">// Ensure that there is space in the map
         </span><span class="kw">let </span>index =
             <span class="self">self</span>.map
@@ -6041,7 +6041,7 @@
 
 <span class="comment">// ===== impl GetAll =====
 
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: <span class="lifetime">&#39;a</span>&gt; GetAll&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T: <span class="lifetime">'a</span>&gt; GetAll&lt;<span class="lifetime">'a</span>, T&gt; {
     <span class="doccomment">/// Returns an iterator visiting all values associated with the entry.
     ///
     /// Values are iterated in insertion order.
@@ -6052,18 +6052,18 @@
     /// # use http::HeaderMap;
     /// # use http::header::HOST;
     /// let mut map = HeaderMap::new();
-    /// map.insert(HOST, &quot;hello.world&quot;.parse().unwrap());
-    /// map.append(HOST, &quot;hello.earth&quot;.parse().unwrap());
+    /// map.insert(HOST, "hello.world".parse().unwrap());
+    /// map.append(HOST, "hello.earth".parse().unwrap());
     ///
-    /// let values = map.get_all(&quot;host&quot;);
+    /// let values = map.get_all("host");
     /// let mut iter = values.iter();
-    /// assert_eq!(&amp;&quot;hello.world&quot;, iter.next().unwrap());
-    /// assert_eq!(&amp;&quot;hello.earth&quot;, iter.next().unwrap());
+    /// assert_eq!(&amp;"hello.world", iter.next().unwrap());
+    /// assert_eq!(&amp;"hello.earth", iter.next().unwrap());
     /// assert!(iter.next().is_none());
     /// ```
-    </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ValueIter&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+    </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ValueIter&lt;<span class="lifetime">'a</span>, T&gt; {
         <span class="comment">// This creates a new GetAll struct so that the lifetime
-        // isn&#39;t bound to &amp;self.
+        // isn't bound to &amp;self.
         </span>GetAll {
             map: <span class="self">self</span>.map,
             index: <span class="self">self</span>.index,
@@ -6072,34 +6072,34 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: PartialEq&gt; PartialEq <span class="kw">for </span>GetAll&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T: PartialEq&gt; PartialEq <span class="kw">for </span>GetAll&lt;<span class="lifetime">'a</span>, T&gt; {
     <span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; bool {
         <span class="self">self</span>.iter().eq(other.iter())
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; IntoIterator <span class="kw">for </span>GetAll&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>T;
-    <span class="kw">type </span>IntoIter = ValueIter&lt;<span class="lifetime">&#39;a</span>, T&gt;;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; IntoIterator <span class="kw">for </span>GetAll&lt;<span class="lifetime">'a</span>, T&gt; {
+    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">'a </span>T;
+    <span class="kw">type </span>IntoIter = ValueIter&lt;<span class="lifetime">'a</span>, T&gt;;
 
-    <span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; ValueIter&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+    <span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; ValueIter&lt;<span class="lifetime">'a</span>, T&gt; {
         <span class="self">self</span>.map.value_iter(<span class="self">self</span>.index)
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>: <span class="lifetime">&#39;a</span>, T&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span>GetAll&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>T;
-    <span class="kw">type </span>IntoIter = ValueIter&lt;<span class="lifetime">&#39;a</span>, T&gt;;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, <span class="lifetime">'b</span>: <span class="lifetime">'a</span>, T&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'b </span>GetAll&lt;<span class="lifetime">'a</span>, T&gt; {
+    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">'a </span>T;
+    <span class="kw">type </span>IntoIter = ValueIter&lt;<span class="lifetime">'a</span>, T&gt;;
 
-    <span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; ValueIter&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+    <span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; ValueIter&lt;<span class="lifetime">'a</span>, T&gt; {
         <span class="self">self</span>.map.value_iter(<span class="self">self</span>.index)
     }
 }
 
 <span class="comment">// ===== impl ValueIter =====
 
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: <span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>ValueIter&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>T;
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T: <span class="lifetime">'a</span>&gt; Iterator <span class="kw">for </span>ValueIter&lt;<span class="lifetime">'a</span>, T&gt; {
+    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">'a </span>T;
 
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
         <span class="kw">use </span><span class="self">self</span>::Cursor::<span class="kw-2">*</span>;
@@ -6154,7 +6154,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: <span class="lifetime">&#39;a</span>&gt; DoubleEndedIterator <span class="kw">for </span>ValueIter&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T: <span class="lifetime">'a</span>&gt; DoubleEndedIterator <span class="kw">for </span>ValueIter&lt;<span class="lifetime">'a</span>, T&gt; {
     <span class="kw">fn </span>next_back(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
         <span class="kw">use </span><span class="self">self</span>::Cursor::<span class="kw-2">*</span>;
 
@@ -6184,12 +6184,12 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; FusedIterator <span class="kw">for </span>ValueIter&lt;<span class="lifetime">&#39;a</span>, T&gt; {}
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; FusedIterator <span class="kw">for </span>ValueIter&lt;<span class="lifetime">'a</span>, T&gt; {}
 
 <span class="comment">// ===== impl ValueIterMut =====
 
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: <span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>ValueIterMut&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>T;
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T: <span class="lifetime">'a</span>&gt; Iterator <span class="kw">for </span>ValueIterMut&lt;<span class="lifetime">'a</span>, T&gt; {
+    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>T;
 
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
         <span class="kw">use </span><span class="self">self</span>::Cursor::<span class="kw-2">*</span>;
@@ -6233,7 +6233,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: <span class="lifetime">&#39;a</span>&gt; DoubleEndedIterator <span class="kw">for </span>ValueIterMut&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T: <span class="lifetime">'a</span>&gt; DoubleEndedIterator <span class="kw">for </span>ValueIterMut&lt;<span class="lifetime">'a</span>, T&gt; {
     <span class="kw">fn </span>next_back(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
         <span class="kw">use </span><span class="self">self</span>::Cursor::<span class="kw-2">*</span>;
 
@@ -6265,10 +6265,10 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; FusedIterator <span class="kw">for </span>ValueIterMut&lt;<span class="lifetime">&#39;a</span>, T&gt; {}
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; FusedIterator <span class="kw">for </span>ValueIterMut&lt;<span class="lifetime">'a</span>, T&gt; {}
 
-<span class="kw">unsafe impl</span>&lt;<span class="lifetime">&#39;a</span>, T: Sync&gt; Sync <span class="kw">for </span>ValueIterMut&lt;<span class="lifetime">&#39;a</span>, T&gt; {}
-<span class="kw">unsafe impl</span>&lt;<span class="lifetime">&#39;a</span>, T: Send&gt; Send <span class="kw">for </span>ValueIterMut&lt;<span class="lifetime">&#39;a</span>, T&gt; {}
+<span class="kw">unsafe impl</span>&lt;<span class="lifetime">'a</span>, T: Sync&gt; Sync <span class="kw">for </span>ValueIterMut&lt;<span class="lifetime">'a</span>, T&gt; {}
+<span class="kw">unsafe impl</span>&lt;<span class="lifetime">'a</span>, T: Send&gt; Send <span class="kw">for </span>ValueIterMut&lt;<span class="lifetime">'a</span>, T&gt; {}
 
 <span class="comment">// ===== impl IntoIter =====
 
@@ -6323,18 +6323,18 @@
 
 <span class="comment">// ===== impl OccupiedEntry =====
 
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; OccupiedEntry&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    <span class="doccomment">/// Returns a reference to the entry&#39;s key.
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; OccupiedEntry&lt;<span class="lifetime">'a</span>, T&gt; {
+    <span class="doccomment">/// Returns a reference to the entry's key.
     ///
     /// # Examples
     ///
     /// ```
     /// # use http::header::{HeaderMap, Entry, HOST};
     /// let mut map = HeaderMap::new();
-    /// map.insert(HOST, &quot;world&quot;.parse().unwrap());
+    /// map.insert(HOST, "world".parse().unwrap());
     ///
-    /// if let Entry::Occupied(e) = map.entry(&quot;host&quot;) {
-    ///     assert_eq!(&quot;host&quot;, e.key());
+    /// if let Entry::Occupied(e) = map.entry("host") {
+    ///     assert_eq!("host", e.key());
     /// }
     /// ```
     </span><span class="kw">pub fn </span>key(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>HeaderName {
@@ -6354,14 +6354,14 @@
     /// ```
     /// # use http::header::{HeaderMap, Entry, HOST};
     /// let mut map = HeaderMap::new();
-    /// map.insert(HOST, &quot;hello.world&quot;.parse().unwrap());
+    /// map.insert(HOST, "hello.world".parse().unwrap());
     ///
-    /// if let Entry::Occupied(mut e) = map.entry(&quot;host&quot;) {
-    ///     assert_eq!(e.get(), &amp;&quot;hello.world&quot;);
+    /// if let Entry::Occupied(mut e) = map.entry("host") {
+    ///     assert_eq!(e.get(), &amp;"hello.world");
     ///
-    ///     e.append(&quot;hello.earth&quot;.parse().unwrap());
+    ///     e.append("hello.earth".parse().unwrap());
     ///
-    ///     assert_eq!(e.get(), &amp;&quot;hello.world&quot;);
+    ///     assert_eq!(e.get(), &amp;"hello.world");
     /// }
     /// ```
     </span><span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>T {
@@ -6381,11 +6381,11 @@
     /// ```
     /// # use http::header::{HeaderMap, Entry, HOST};
     /// let mut map = HeaderMap::default();
-    /// map.insert(HOST, &quot;hello.world&quot;.to_string());
+    /// map.insert(HOST, "hello.world".to_string());
     ///
-    /// if let Entry::Occupied(mut e) = map.entry(&quot;host&quot;) {
-    ///     e.get_mut().push_str(&quot;-2&quot;);
-    ///     assert_eq!(e.get(), &amp;&quot;hello.world-2&quot;);
+    /// if let Entry::Occupied(mut e) = map.entry("host") {
+    ///     e.get_mut().push_str("-2");
+    ///     assert_eq!(e.get(), &amp;"hello.world-2");
     /// }
     /// ```
     </span><span class="kw">pub fn </span>get_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>T {
@@ -6406,16 +6406,16 @@
     /// ```
     /// # use http::header::{HeaderMap, Entry, HOST};
     /// let mut map = HeaderMap::default();
-    /// map.insert(HOST, &quot;hello.world&quot;.to_string());
-    /// map.append(HOST, &quot;hello.earth&quot;.to_string());
+    /// map.insert(HOST, "hello.world".to_string());
+    /// map.append(HOST, "hello.earth".to_string());
     ///
-    /// if let Entry::Occupied(e) = map.entry(&quot;host&quot;) {
-    ///     e.into_mut().push_str(&quot;-2&quot;);
+    /// if let Entry::Occupied(e) = map.entry("host") {
+    ///     e.into_mut().push_str("-2");
     /// }
     ///
-    /// assert_eq!(&quot;hello.world-2&quot;, map[&quot;host&quot;]);
+    /// assert_eq!("hello.world-2", map["host"]);
     /// ```
-    </span><span class="kw">pub fn </span>into_mut(<span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>T {
+    </span><span class="kw">pub fn </span>into_mut(<span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>T {
         <span class="kw-2">&amp;mut </span><span class="self">self</span>.map.entries[<span class="self">self</span>.index].value
     }
 
@@ -6429,14 +6429,14 @@
     /// ```
     /// # use http::header::{HeaderMap, Entry, HOST};
     /// let mut map = HeaderMap::new();
-    /// map.insert(HOST, &quot;hello.world&quot;.parse().unwrap());
+    /// map.insert(HOST, "hello.world".parse().unwrap());
     ///
-    /// if let Entry::Occupied(mut e) = map.entry(&quot;host&quot;) {
-    ///     let mut prev = e.insert(&quot;earth&quot;.parse().unwrap());
-    ///     assert_eq!(&quot;hello.world&quot;, prev);
+    /// if let Entry::Occupied(mut e) = map.entry("host") {
+    ///     let mut prev = e.insert("earth".parse().unwrap());
+    ///     assert_eq!("hello.world", prev);
     /// }
     ///
-    /// assert_eq!(&quot;earth&quot;, map[&quot;host&quot;]);
+    /// assert_eq!("earth", map["host"]);
     /// ```
     </span><span class="kw">pub fn </span>insert(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: T) -&gt; T {
         <span class="self">self</span>.map.insert_occupied(<span class="self">self</span>.index, value.into())
@@ -6452,25 +6452,25 @@
     /// ```
     /// # use http::header::{HeaderMap, Entry, HOST};
     /// let mut map = HeaderMap::new();
-    /// map.insert(HOST, &quot;world&quot;.parse().unwrap());
-    /// map.append(HOST, &quot;world2&quot;.parse().unwrap());
+    /// map.insert(HOST, "world".parse().unwrap());
+    /// map.append(HOST, "world2".parse().unwrap());
     ///
-    /// if let Entry::Occupied(mut e) = map.entry(&quot;host&quot;) {
-    ///     let mut prev = e.insert_mult(&quot;earth&quot;.parse().unwrap());
-    ///     assert_eq!(&quot;world&quot;, prev.next().unwrap());
-    ///     assert_eq!(&quot;world2&quot;, prev.next().unwrap());
+    /// if let Entry::Occupied(mut e) = map.entry("host") {
+    ///     let mut prev = e.insert_mult("earth".parse().unwrap());
+    ///     assert_eq!("world", prev.next().unwrap());
+    ///     assert_eq!("world2", prev.next().unwrap());
     ///     assert!(prev.next().is_none());
     /// }
     ///
-    /// assert_eq!(&quot;earth&quot;, map[&quot;host&quot;]);
+    /// assert_eq!("earth", map["host"]);
     /// ```
-    </span><span class="kw">pub fn </span>insert_mult(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: T) -&gt; ValueDrain&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+    </span><span class="kw">pub fn </span>insert_mult(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: T) -&gt; ValueDrain&lt;<span class="lifetime">'_</span>, T&gt; {
         <span class="self">self</span>.map.insert_occupied_mult(<span class="self">self</span>.index, value.into())
     }
 
     <span class="doccomment">/// Insert the value into the entry.
     ///
-    /// The new value is appended to the end of the entry&#39;s value list. All
+    /// The new value is appended to the end of the entry's value list. All
     /// previous values associated with the entry are retained.
     ///
     /// # Examples
@@ -6478,16 +6478,16 @@
     /// ```
     /// # use http::header::{HeaderMap, Entry, HOST};
     /// let mut map = HeaderMap::new();
-    /// map.insert(HOST, &quot;world&quot;.parse().unwrap());
+    /// map.insert(HOST, "world".parse().unwrap());
     ///
-    /// if let Entry::Occupied(mut e) = map.entry(&quot;host&quot;) {
-    ///     e.append(&quot;earth&quot;.parse().unwrap());
+    /// if let Entry::Occupied(mut e) = map.entry("host") {
+    ///     e.append("earth".parse().unwrap());
     /// }
     ///
-    /// let values = map.get_all(&quot;host&quot;);
+    /// let values = map.get_all("host");
     /// let mut i = values.iter();
-    /// assert_eq!(&quot;world&quot;, *i.next().unwrap());
-    /// assert_eq!(&quot;earth&quot;, *i.next().unwrap());
+    /// assert_eq!("world", *i.next().unwrap());
+    /// assert_eq!("earth", *i.next().unwrap());
     /// ```
     </span><span class="kw">pub fn </span>append(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: T) {
         <span class="kw">let </span>idx = <span class="self">self</span>.index;
@@ -6505,14 +6505,14 @@
     /// ```
     /// # use http::header::{HeaderMap, Entry, HOST};
     /// let mut map = HeaderMap::new();
-    /// map.insert(HOST, &quot;world&quot;.parse().unwrap());
+    /// map.insert(HOST, "world".parse().unwrap());
     ///
-    /// if let Entry::Occupied(e) = map.entry(&quot;host&quot;) {
+    /// if let Entry::Occupied(e) = map.entry("host") {
     ///     let mut prev = e.remove();
-    ///     assert_eq!(&quot;world&quot;, prev);
+    ///     assert_eq!("world", prev);
     /// }
     ///
-    /// assert!(!map.contains_key(&quot;host&quot;));
+    /// assert!(!map.contains_key("host"));
     /// ```
     </span><span class="kw">pub fn </span>remove(<span class="self">self</span>) -&gt; T {
         <span class="self">self</span>.remove_entry().<span class="number">1
@@ -6529,15 +6529,15 @@
     /// ```
     /// # use http::header::{HeaderMap, Entry, HOST};
     /// let mut map = HeaderMap::new();
-    /// map.insert(HOST, &quot;world&quot;.parse().unwrap());
+    /// map.insert(HOST, "world".parse().unwrap());
     ///
-    /// if let Entry::Occupied(e) = map.entry(&quot;host&quot;) {
+    /// if let Entry::Occupied(e) = map.entry("host") {
     ///     let (key, mut prev) = e.remove_entry();
-    ///     assert_eq!(&quot;host&quot;, key.as_str());
-    ///     assert_eq!(&quot;world&quot;, prev);
+    ///     assert_eq!("host", key.as_str());
+    ///     assert_eq!("world", prev);
     /// }
     ///
-    /// assert!(!map.contains_key(&quot;host&quot;));
+    /// assert!(!map.contains_key("host"));
     /// ```
     </span><span class="kw">pub fn </span>remove_entry(<span class="self">self</span>) -&gt; (HeaderName, T) {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(links) = <span class="self">self</span>.map.entries[<span class="self">self</span>.index].links {
@@ -6553,7 +6553,7 @@
     ///
     /// The key and all values associated with the entry are removed and
     /// returned.
-    </span><span class="kw">pub fn </span>remove_entry_mult(<span class="self">self</span>) -&gt; (HeaderName, ValueDrain&lt;<span class="lifetime">&#39;a</span>, T&gt;) {
+    </span><span class="kw">pub fn </span>remove_entry_mult(<span class="self">self</span>) -&gt; (HeaderName, ValueDrain&lt;<span class="lifetime">'a</span>, T&gt;) {
         <span class="kw">let </span>raw_links = <span class="self">self</span>.map.raw_links();
         <span class="kw">let </span>extra_values = <span class="kw-2">&amp;mut </span><span class="self">self</span>.map.extra_values;
 
@@ -6581,17 +6581,17 @@
     /// ```
     /// # use http::header::{HeaderMap, Entry, HOST};
     /// let mut map = HeaderMap::new();
-    /// map.insert(HOST, &quot;world&quot;.parse().unwrap());
-    /// map.append(HOST, &quot;earth&quot;.parse().unwrap());
+    /// map.insert(HOST, "world".parse().unwrap());
+    /// map.append(HOST, "earth".parse().unwrap());
     ///
-    /// if let Entry::Occupied(e) = map.entry(&quot;host&quot;) {
+    /// if let Entry::Occupied(e) = map.entry("host") {
     ///     let mut iter = e.iter();
-    ///     assert_eq!(&amp;&quot;world&quot;, iter.next().unwrap());
-    ///     assert_eq!(&amp;&quot;earth&quot;, iter.next().unwrap());
+    ///     assert_eq!(&amp;"world", iter.next().unwrap());
+    ///     assert_eq!(&amp;"earth", iter.next().unwrap());
     ///     assert!(iter.next().is_none());
     /// }
     /// ```
-    </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ValueIter&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+    </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ValueIter&lt;<span class="lifetime">'_</span>, T&gt; {
         <span class="self">self</span>.map.value_iter(<span class="prelude-val">Some</span>(<span class="self">self</span>.index))
     }
 
@@ -6605,55 +6605,55 @@
     /// ```
     /// # use http::header::{HeaderMap, Entry, HOST};
     /// let mut map = HeaderMap::default();
-    /// map.insert(HOST, &quot;world&quot;.to_string());
-    /// map.append(HOST, &quot;earth&quot;.to_string());
+    /// map.insert(HOST, "world".to_string());
+    /// map.append(HOST, "earth".to_string());
     ///
-    /// if let Entry::Occupied(mut e) = map.entry(&quot;host&quot;) {
+    /// if let Entry::Occupied(mut e) = map.entry("host") {
     ///     for e in e.iter_mut() {
-    ///         e.push_str(&quot;-boop&quot;);
+    ///         e.push_str("-boop");
     ///     }
     /// }
     ///
-    /// let mut values = map.get_all(&quot;host&quot;);
+    /// let mut values = map.get_all("host");
     /// let mut i = values.iter();
-    /// assert_eq!(&amp;&quot;world-boop&quot;, i.next().unwrap());
-    /// assert_eq!(&amp;&quot;earth-boop&quot;, i.next().unwrap());
+    /// assert_eq!(&amp;"world-boop", i.next().unwrap());
+    /// assert_eq!(&amp;"earth-boop", i.next().unwrap());
     /// ```
-    </span><span class="kw">pub fn </span>iter_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; ValueIterMut&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+    </span><span class="kw">pub fn </span>iter_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; ValueIterMut&lt;<span class="lifetime">'_</span>, T&gt; {
         <span class="self">self</span>.map.value_iter_mut(<span class="self">self</span>.index)
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; IntoIterator <span class="kw">for </span>OccupiedEntry&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>T;
-    <span class="kw">type </span>IntoIter = ValueIterMut&lt;<span class="lifetime">&#39;a</span>, T&gt;;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; IntoIterator <span class="kw">for </span>OccupiedEntry&lt;<span class="lifetime">'a</span>, T&gt; {
+    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>T;
+    <span class="kw">type </span>IntoIter = ValueIterMut&lt;<span class="lifetime">'a</span>, T&gt;;
 
-    <span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; ValueIterMut&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+    <span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; ValueIterMut&lt;<span class="lifetime">'a</span>, T&gt; {
         <span class="self">self</span>.map.value_iter_mut(<span class="self">self</span>.index)
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>: <span class="lifetime">&#39;a</span>, T&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span>OccupiedEntry&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>T;
-    <span class="kw">type </span>IntoIter = ValueIter&lt;<span class="lifetime">&#39;a</span>, T&gt;;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, <span class="lifetime">'b</span>: <span class="lifetime">'a</span>, T&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'b </span>OccupiedEntry&lt;<span class="lifetime">'a</span>, T&gt; {
+    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">'a </span>T;
+    <span class="kw">type </span>IntoIter = ValueIter&lt;<span class="lifetime">'a</span>, T&gt;;
 
-    <span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; ValueIter&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+    <span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; ValueIter&lt;<span class="lifetime">'a</span>, T&gt; {
         <span class="self">self</span>.iter()
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>: <span class="lifetime">&#39;a</span>, T&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span><span class="kw-2">mut </span>OccupiedEntry&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>T;
-    <span class="kw">type </span>IntoIter = ValueIterMut&lt;<span class="lifetime">&#39;a</span>, T&gt;;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, <span class="lifetime">'b</span>: <span class="lifetime">'a</span>, T&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'b </span><span class="kw-2">mut </span>OccupiedEntry&lt;<span class="lifetime">'a</span>, T&gt; {
+    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>T;
+    <span class="kw">type </span>IntoIter = ValueIterMut&lt;<span class="lifetime">'a</span>, T&gt;;
 
-    <span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; ValueIterMut&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+    <span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; ValueIterMut&lt;<span class="lifetime">'a</span>, T&gt; {
         <span class="self">self</span>.iter_mut()
     }
 }
 
 <span class="comment">// ===== impl ValueDrain =====
 
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; Iterator <span class="kw">for </span>ValueDrain&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; Iterator <span class="kw">for </span>ValueDrain&lt;<span class="lifetime">'a</span>, T&gt; {
     <span class="kw">type </span>Item = T;
 
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;T&gt; {
@@ -6683,16 +6683,16 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; FusedIterator <span class="kw">for </span>ValueDrain&lt;<span class="lifetime">&#39;a</span>, T&gt; {}
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; FusedIterator <span class="kw">for </span>ValueDrain&lt;<span class="lifetime">'a</span>, T&gt; {}
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; Drop <span class="kw">for </span>ValueDrain&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; Drop <span class="kw">for </span>ValueDrain&lt;<span class="lifetime">'a</span>, T&gt; {
     <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="kw">while let </span><span class="prelude-val">Some</span>(<span class="kw">_</span>) = <span class="self">self</span>.next() {}
     }
 }
 
-<span class="kw">unsafe impl</span>&lt;<span class="lifetime">&#39;a</span>, T: Sync&gt; Sync <span class="kw">for </span>ValueDrain&lt;<span class="lifetime">&#39;a</span>, T&gt; {}
-<span class="kw">unsafe impl</span>&lt;<span class="lifetime">&#39;a</span>, T: Send&gt; Send <span class="kw">for </span>ValueDrain&lt;<span class="lifetime">&#39;a</span>, T&gt; {}
+<span class="kw">unsafe impl</span>&lt;<span class="lifetime">'a</span>, T: Sync&gt; Sync <span class="kw">for </span>ValueDrain&lt;<span class="lifetime">'a</span>, T&gt; {}
+<span class="kw">unsafe impl</span>&lt;<span class="lifetime">'a</span>, T: Send&gt; Send <span class="kw">for </span>ValueDrain&lt;<span class="lifetime">'a</span>, T&gt; {}
 
 <span class="comment">// ===== impl RawLinks =====
 
@@ -6809,7 +6809,7 @@
     <span class="kw">match </span>n.checked_add(n / <span class="number">3</span>) {
         <span class="prelude-val">Some</span>(n) =&gt; n,
         <span class="prelude-val">None </span>=&gt; <span class="macro">panic!</span>(
-            <span class="string">&quot;requested capacity {} too large: overflow while converting to raw capacity&quot;</span>,
+            <span class="string">"requested capacity {} too large: overflow while converting to raw capacity"</span>,
             n
         ),
     }
@@ -6866,10 +6866,10 @@
     </span><span class="kw">pub trait </span>IntoHeaderName: Sealed {}
 
     <span class="comment">// All methods are on this pub(super) trait, instead of `IntoHeaderName`,
-    // so that they aren&#39;t publicly exposed to the world.
+    // so that they aren't publicly exposed to the world.
     //
     // Being on the `IntoHeaderName` trait would mean users could call
-    // `&quot;host&quot;.insert(&amp;mut map, &quot;localhost&quot;)`.
+    // `"host".insert(&amp;mut map, "localhost")`.
     //
     // Ultimately, this allows us to adjust the signatures of these methods
     // without breaking any external crate.
@@ -6881,7 +6881,7 @@
         </span><span class="kw">fn </span>append&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;, val: T) -&gt; bool;
 
         <span class="attr">#[doc(hidden)]
-        </span><span class="kw">fn </span>entry&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;) -&gt; Entry&lt;<span class="lifetime">&#39;_</span>, T&gt;;
+        </span><span class="kw">fn </span>entry&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;) -&gt; Entry&lt;<span class="lifetime">'_</span>, T&gt;;
     }
 
     <span class="comment">// ==== impls ====
@@ -6898,14 +6898,14 @@
         }
 
         <span class="attr">#[inline]
-        </span><span class="kw">fn </span>entry&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;) -&gt; Entry&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+        </span><span class="kw">fn </span>entry&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;) -&gt; Entry&lt;<span class="lifetime">'_</span>, T&gt; {
             map.entry2(<span class="self">self</span>)
         }
     }
 
     <span class="kw">impl </span>IntoHeaderName <span class="kw">for </span>HeaderName {}
 
-    <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Sealed <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>HeaderName {
+    <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Sealed <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>HeaderName {
         <span class="attr">#[inline]
         </span><span class="kw">fn </span>insert&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;, val: T) -&gt; <span class="prelude-ty">Option</span>&lt;T&gt; {
             map.insert2(<span class="self">self</span>, val)
@@ -6916,14 +6916,14 @@
         }
 
         <span class="attr">#[inline]
-        </span><span class="kw">fn </span>entry&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;) -&gt; Entry&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+        </span><span class="kw">fn </span>entry&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;) -&gt; Entry&lt;<span class="lifetime">'_</span>, T&gt; {
             map.entry2(<span class="self">self</span>)
         }
     }
 
-    <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; IntoHeaderName <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>HeaderName {}
+    <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; IntoHeaderName <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>HeaderName {}
 
-    <span class="kw">impl </span>Sealed <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str {
+    <span class="kw">impl </span>Sealed <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'static </span>str {
         <span class="attr">#[inline]
         </span><span class="kw">fn </span>insert&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;, val: T) -&gt; <span class="prelude-ty">Option</span>&lt;T&gt; {
             HdrName::from_static(<span class="self">self</span>, <span class="kw">move </span>|hdr| map.insert2(hdr, val))
@@ -6934,12 +6934,12 @@
         }
 
         <span class="attr">#[inline]
-        </span><span class="kw">fn </span>entry&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;) -&gt; Entry&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+        </span><span class="kw">fn </span>entry&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;) -&gt; Entry&lt;<span class="lifetime">'_</span>, T&gt; {
             HdrName::from_static(<span class="self">self</span>, <span class="kw">move </span>|hdr| map.entry2(hdr))
         }
     }
 
-    <span class="kw">impl </span>IntoHeaderName <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str {}
+    <span class="kw">impl </span>IntoHeaderName <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'static </span>str {}
 }
 
 <span class="kw">mod </span>as_header_name {
@@ -6950,16 +6950,16 @@
     </span><span class="kw">pub trait </span>AsHeaderName: Sealed {}
 
     <span class="comment">// All methods are on this pub(super) trait, instead of `AsHeaderName`,
-    // so that they aren&#39;t publicly exposed to the world.
+    // so that they aren't publicly exposed to the world.
     //
     // Being on the `AsHeaderName` trait would mean users could call
-    // `&quot;host&quot;.find(&amp;map)`.
+    // `"host".find(&amp;map)`.
     //
     // Ultimately, this allows us to adjust the signatures of these methods
     // without breaking any external crate.
     </span><span class="kw">pub trait </span>Sealed {
         <span class="attr">#[doc(hidden)]
-        </span><span class="kw">fn </span>try_entry&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Entry&lt;<span class="lifetime">&#39;_</span>, T&gt;, InvalidHeaderName&gt;;
+        </span><span class="kw">fn </span>try_entry&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Entry&lt;<span class="lifetime">'_</span>, T&gt;, InvalidHeaderName&gt;;
 
         <span class="attr">#[doc(hidden)]
         </span><span class="kw">fn </span>find&lt;T&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, map: <span class="kw-2">&amp;</span>HeaderMap&lt;T&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;(usize, usize)&gt;;
@@ -6972,7 +6972,7 @@
 
     </span><span class="kw">impl </span>Sealed <span class="kw">for </span>HeaderName {
         <span class="attr">#[inline]
-        </span><span class="kw">fn </span>try_entry&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Entry&lt;<span class="lifetime">&#39;_</span>, T&gt;, InvalidHeaderName&gt; {
+        </span><span class="kw">fn </span>try_entry&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Entry&lt;<span class="lifetime">'_</span>, T&gt;, InvalidHeaderName&gt; {
             <span class="prelude-val">Ok</span>(map.entry2(<span class="self">self</span>))
         }
 
@@ -6988,9 +6988,9 @@
 
     <span class="kw">impl </span>AsHeaderName <span class="kw">for </span>HeaderName {}
 
-    <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Sealed <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>HeaderName {
+    <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Sealed <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>HeaderName {
         <span class="attr">#[inline]
-        </span><span class="kw">fn </span>try_entry&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Entry&lt;<span class="lifetime">&#39;_</span>, T&gt;, InvalidHeaderName&gt; {
+        </span><span class="kw">fn </span>try_entry&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Entry&lt;<span class="lifetime">'_</span>, T&gt;, InvalidHeaderName&gt; {
             <span class="prelude-val">Ok</span>(map.entry2(<span class="self">self</span>))
         }
 
@@ -7004,11 +7004,11 @@
         }
     }
 
-    <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; AsHeaderName <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>HeaderName {}
+    <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; AsHeaderName <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>HeaderName {}
 
-    <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Sealed <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str {
+    <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Sealed <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>str {
         <span class="attr">#[inline]
-        </span><span class="kw">fn </span>try_entry&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Entry&lt;<span class="lifetime">&#39;_</span>, T&gt;, InvalidHeaderName&gt; {
+        </span><span class="kw">fn </span>try_entry&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Entry&lt;<span class="lifetime">'_</span>, T&gt;, InvalidHeaderName&gt; {
             HdrName::from_bytes(<span class="self">self</span>.as_bytes(), <span class="kw">move </span>|hdr| map.entry2(hdr))
         }
 
@@ -7022,11 +7022,11 @@
         </span>}
     }
 
-    <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; AsHeaderName <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str {}
+    <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; AsHeaderName <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>str {}
 
     <span class="kw">impl </span>Sealed <span class="kw">for </span>String {
         <span class="attr">#[inline]
-        </span><span class="kw">fn </span>try_entry&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Entry&lt;<span class="lifetime">&#39;_</span>, T&gt;, InvalidHeaderName&gt; {
+        </span><span class="kw">fn </span>try_entry&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Entry&lt;<span class="lifetime">'_</span>, T&gt;, InvalidHeaderName&gt; {
             <span class="self">self</span>.as_str().try_entry(map)
         }
 
@@ -7042,9 +7042,9 @@
 
     <span class="kw">impl </span>AsHeaderName <span class="kw">for </span>String {}
 
-    <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Sealed <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>String {
+    <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Sealed <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>String {
         <span class="attr">#[inline]
-        </span><span class="kw">fn </span>try_entry&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Entry&lt;<span class="lifetime">&#39;_</span>, T&gt;, InvalidHeaderName&gt; {
+        </span><span class="kw">fn </span>try_entry&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Entry&lt;<span class="lifetime">'_</span>, T&gt;, InvalidHeaderName&gt; {
             <span class="self">self</span>.as_str().try_entry(map)
         }
 
@@ -7058,7 +7058,7 @@
         </span>}
     }
 
-    <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; AsHeaderName <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>String {}
+    <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; AsHeaderName <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>String {}
 }
 
 <span class="attr">#[test]
@@ -7066,26 +7066,26 @@
     <span class="kw">fn </span>check_bounds&lt;T: Send + Send&gt;() {}
 
     check_bounds::&lt;HeaderMap&lt;()&gt;&gt;();
-    check_bounds::&lt;Iter&lt;<span class="lifetime">&#39;static</span>, ()&gt;&gt;();
-    check_bounds::&lt;IterMut&lt;<span class="lifetime">&#39;static</span>, ()&gt;&gt;();
-    check_bounds::&lt;Keys&lt;<span class="lifetime">&#39;static</span>, ()&gt;&gt;();
-    check_bounds::&lt;Values&lt;<span class="lifetime">&#39;static</span>, ()&gt;&gt;();
-    check_bounds::&lt;ValuesMut&lt;<span class="lifetime">&#39;static</span>, ()&gt;&gt;();
-    check_bounds::&lt;Drain&lt;<span class="lifetime">&#39;static</span>, ()&gt;&gt;();
-    check_bounds::&lt;GetAll&lt;<span class="lifetime">&#39;static</span>, ()&gt;&gt;();
-    check_bounds::&lt;Entry&lt;<span class="lifetime">&#39;static</span>, ()&gt;&gt;();
-    check_bounds::&lt;VacantEntry&lt;<span class="lifetime">&#39;static</span>, ()&gt;&gt;();
-    check_bounds::&lt;OccupiedEntry&lt;<span class="lifetime">&#39;static</span>, ()&gt;&gt;();
-    check_bounds::&lt;ValueIter&lt;<span class="lifetime">&#39;static</span>, ()&gt;&gt;();
-    check_bounds::&lt;ValueIterMut&lt;<span class="lifetime">&#39;static</span>, ()&gt;&gt;();
-    check_bounds::&lt;ValueDrain&lt;<span class="lifetime">&#39;static</span>, ()&gt;&gt;();
+    check_bounds::&lt;Iter&lt;<span class="lifetime">'static</span>, ()&gt;&gt;();
+    check_bounds::&lt;IterMut&lt;<span class="lifetime">'static</span>, ()&gt;&gt;();
+    check_bounds::&lt;Keys&lt;<span class="lifetime">'static</span>, ()&gt;&gt;();
+    check_bounds::&lt;Values&lt;<span class="lifetime">'static</span>, ()&gt;&gt;();
+    check_bounds::&lt;ValuesMut&lt;<span class="lifetime">'static</span>, ()&gt;&gt;();
+    check_bounds::&lt;Drain&lt;<span class="lifetime">'static</span>, ()&gt;&gt;();
+    check_bounds::&lt;GetAll&lt;<span class="lifetime">'static</span>, ()&gt;&gt;();
+    check_bounds::&lt;Entry&lt;<span class="lifetime">'static</span>, ()&gt;&gt;();
+    check_bounds::&lt;VacantEntry&lt;<span class="lifetime">'static</span>, ()&gt;&gt;();
+    check_bounds::&lt;OccupiedEntry&lt;<span class="lifetime">'static</span>, ()&gt;&gt;();
+    check_bounds::&lt;ValueIter&lt;<span class="lifetime">'static</span>, ()&gt;&gt;();
+    check_bounds::&lt;ValueIterMut&lt;<span class="lifetime">'static</span>, ()&gt;&gt;();
+    check_bounds::&lt;ValueDrain&lt;<span class="lifetime">'static</span>, ()&gt;&gt;();
 }
 
 <span class="attr">#[test]
 </span><span class="kw">fn </span>skip_duplicates_during_key_iteration() {
     <span class="kw">let </span><span class="kw-2">mut </span>map = HeaderMap::new();
-    map.append(<span class="string">&quot;a&quot;</span>, HeaderValue::from_static(<span class="string">&quot;a&quot;</span>));
-    map.append(<span class="string">&quot;a&quot;</span>, HeaderValue::from_static(<span class="string">&quot;b&quot;</span>));
+    map.append(<span class="string">"a"</span>, HeaderValue::from_static(<span class="string">"a"</span>));
+    map.append(<span class="string">"a"</span>, HeaderValue::from_static(<span class="string">"b"</span>));
     <span class="macro">assert_eq!</span>(map.keys().count(), map.keys_len());
 }
 </code></pre></div></section></main></body></html>

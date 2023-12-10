@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-pemfile-1.0.4/src/pemfile.rs`."><title>pemfile.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="rustls_pemfile" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-pemfile-1.0.4/src/pemfile.rs`."><title>pemfile.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="rustls_pemfile" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -210,11 +210,11 @@
 <span class="kw">impl </span>Item {
     <span class="kw">fn </span>from_start_line(start_line: <span class="kw-2">&amp;</span>[u8], der: Vec&lt;u8&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;Item&gt; {
         <span class="kw">match </span>start_line {
-            <span class="string">b&quot;CERTIFICATE&quot; </span>=&gt; <span class="prelude-val">Some</span>(Item::X509Certificate(der)),
-            <span class="string">b&quot;RSA PRIVATE KEY&quot; </span>=&gt; <span class="prelude-val">Some</span>(Item::RSAKey(der)),
-            <span class="string">b&quot;PRIVATE KEY&quot; </span>=&gt; <span class="prelude-val">Some</span>(Item::PKCS8Key(der)),
-            <span class="string">b&quot;EC PRIVATE KEY&quot; </span>=&gt; <span class="prelude-val">Some</span>(Item::ECKey(der)),
-            <span class="string">b&quot;X509 CRL&quot; </span>=&gt; <span class="prelude-val">Some</span>(Item::Crl(der)),
+            <span class="string">b"CERTIFICATE" </span>=&gt; <span class="prelude-val">Some</span>(Item::X509Certificate(der)),
+            <span class="string">b"RSA PRIVATE KEY" </span>=&gt; <span class="prelude-val">Some</span>(Item::RSAKey(der)),
+            <span class="string">b"PRIVATE KEY" </span>=&gt; <span class="prelude-val">Some</span>(Item::PKCS8Key(der)),
+            <span class="string">b"EC PRIVATE KEY" </span>=&gt; <span class="prelude-val">Some</span>(Item::ECKey(der)),
+            <span class="string">b"X509 CRL" </span>=&gt; <span class="prelude-val">Some</span>(Item::Crl(der)),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
         }
     }
@@ -243,7 +243,7 @@
                 <span class="prelude-val">Some</span>((<span class="kw">_</span>, end_marker)) =&gt; <span class="prelude-val">Err</span>(io::Error::new(
                     ErrorKind::InvalidData,
                     <span class="macro">format!</span>(
-                        <span class="string">&quot;section end {:?} missing&quot;</span>,
+                        <span class="string">"section end {:?} missing"</span>,
                         String::from_utf8_lossy(<span class="kw-2">&amp;</span>end_marker)
                     ),
                 )),
@@ -251,15 +251,15 @@
             };
         }
 
-        <span class="kw">if </span>line.starts_with(<span class="string">b&quot;-----BEGIN &quot;</span>) {
+        <span class="kw">if </span>line.starts_with(<span class="string">b"-----BEGIN "</span>) {
             <span class="kw">let </span>(<span class="kw-2">mut </span>trailer, <span class="kw-2">mut </span>pos) = (<span class="number">0</span>, line.len());
             <span class="kw">for </span>(i, <span class="kw-2">&amp;</span>b) <span class="kw">in </span>line.iter().enumerate().rev() {
                 <span class="kw">match </span>b {
-                    <span class="string">b&#39;-&#39; </span>=&gt; {
+                    <span class="string">b'-' </span>=&gt; {
                         trailer += <span class="number">1</span>;
                         pos = i;
                     }
-                    <span class="string">b&#39;\n&#39; </span>| <span class="string">b&#39;\r&#39; </span>| <span class="string">b&#39; &#39; </span>=&gt; <span class="kw">continue</span>,
+                    <span class="string">b'\n' </span>| <span class="string">b'\r' </span>| <span class="string">b' ' </span>=&gt; <span class="kw">continue</span>,
                     <span class="kw">_ </span>=&gt; <span class="kw">break</span>,
                 }
             }
@@ -268,7 +268,7 @@
                 <span class="kw">return </span><span class="prelude-val">Err</span>(io::Error::new(
                     ErrorKind::InvalidData,
                     <span class="macro">format!</span>(
-                        <span class="string">&quot;illegal section start: {:?}&quot;</span>,
+                        <span class="string">"illegal section start: {:?}"</span>,
                         String::from_utf8_lossy(<span class="kw-2">&amp;</span>line)
                     ),
                 ));
@@ -276,9 +276,9 @@
 
             <span class="kw">let </span>ty = <span class="kw-2">&amp;</span>line[<span class="number">11</span>..pos];
             <span class="kw">let </span><span class="kw-2">mut </span>end = Vec::with_capacity(<span class="number">10 </span>+ <span class="number">4 </span>+ ty.len());
-            end.extend_from_slice(<span class="string">b&quot;-----END &quot;</span>);
+            end.extend_from_slice(<span class="string">b"-----END "</span>);
             end.extend_from_slice(ty);
-            end.extend_from_slice(<span class="string">b&quot;-----&quot;</span>);
+            end.extend_from_slice(<span class="string">b"-----"</span>);
             section = <span class="prelude-val">Some</span>((ty.to_owned(), end));
             <span class="kw">continue</span>;
         }
@@ -302,7 +302,7 @@
             <span class="kw">let </span><span class="kw-2">mut </span>trim = <span class="number">0</span>;
             <span class="kw">for </span><span class="kw-2">&amp;</span>b <span class="kw">in </span>line.iter().rev() {
                 <span class="kw">match </span>b {
-                    <span class="string">b&#39;\n&#39; </span>| <span class="string">b&#39;\r&#39; </span>| <span class="string">b&#39; &#39; </span>=&gt; trim += <span class="number">1</span>,
+                    <span class="string">b'\n' </span>| <span class="string">b'\r' </span>| <span class="string">b' ' </span>=&gt; trim += <span class="number">1</span>,
                     <span class="kw">_ </span>=&gt; <span class="kw">break</span>,
                 }
             }
@@ -328,7 +328,7 @@
             <span class="kw">match </span>available
                 .iter()
                 .copied()
-                .position(|b| b == <span class="string">b&#39;\n&#39; </span>|| b == <span class="string">b&#39;\r&#39;</span>)
+                .position(|b| b == <span class="string">b'\n' </span>|| b == <span class="string">b'\r'</span>)
             {
                 <span class="prelude-val">Some</span>(i) =&gt; {
                     buf.extend_from_slice(<span class="kw-2">&amp;</span>available[..=i]);

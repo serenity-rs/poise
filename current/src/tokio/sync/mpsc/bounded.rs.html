@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/sync/mpsc/bounded.rs`."><title>bounded.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/sync/mpsc/bounded.rs`."><title>bounded.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1463,8 +1463,8 @@
 ///
 /// [`Sender::reserve()`]: Sender::reserve
 /// [`Sender::try_reserve()`]: Sender::try_reserve
-</span><span class="kw">pub struct </span>Permit&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    chan: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>chan::Tx&lt;T, Semaphore&gt;,
+</span><span class="kw">pub struct </span>Permit&lt;<span class="lifetime">'a</span>, T&gt; {
+    chan: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>chan::Tx&lt;T, Semaphore&gt;,
 }
 
 <span class="doccomment">/// Owned permit to send one value into the channel.
@@ -1528,20 +1528,20 @@
 ///     tokio::spawn(async move {
 ///         for i in 0..10 {
 ///             if let Err(_) = tx.send(i).await {
-///                 println!(&quot;receiver dropped&quot;);
+///                 println!("receiver dropped");
 ///                 return;
 ///             }
 ///         }
 ///     });
 ///
 ///     while let Some(i) = rx.recv().await {
-///         println!(&quot;got = {}&quot;, i);
+///         println!("got = {}", i);
 ///     }
 /// }
 /// ```
 </span><span class="attr">#[track_caller]
 </span><span class="kw">pub fn </span>channel&lt;T&gt;(buffer: usize) -&gt; (Sender&lt;T&gt;, Receiver&lt;T&gt;) {
-    <span class="macro">assert!</span>(buffer &gt; <span class="number">0</span>, <span class="string">&quot;mpsc bounded channel requires buffer &gt; 0&quot;</span>);
+    <span class="macro">assert!</span>(buffer &gt; <span class="number">0</span>, <span class="string">"mpsc bounded channel requires buffer &gt; 0"</span>);
     <span class="kw">let </span>semaphore = Semaphore {
         semaphore: semaphore::Semaphore::new(buffer),
         bound: buffer,
@@ -1570,11 +1570,11 @@
     <span class="doccomment">/// Receives the next value for this receiver.
     ///
     /// This method returns `None` if the channel has been closed and there are
-    /// no remaining messages in the channel&#39;s buffer. This indicates that no
+    /// no remaining messages in the channel's buffer. This indicates that no
     /// further values can ever be received from this `Receiver`. The channel is
     /// closed when all senders have been dropped, or when [`close`] is called.
     ///
-    /// If there are no messages in the channel&#39;s buffer, but the channel has
+    /// If there are no messages in the channel's buffer, but the channel has
     /// not yet been closed, this method will sleep until a message is sent or
     /// the channel is closed.  Note that if [`close`] is called, but there are
     /// still outstanding [`Permits`] from before it was closed, the channel is
@@ -1600,10 +1600,10 @@
     ///     let (tx, mut rx) = mpsc::channel(100);
     ///
     ///     tokio::spawn(async move {
-    ///         tx.send(&quot;hello&quot;).await.unwrap();
+    ///         tx.send("hello").await.unwrap();
     ///     });
     ///
-    ///     assert_eq!(Some(&quot;hello&quot;), rx.recv().await);
+    ///     assert_eq!(Some("hello"), rx.recv().await);
     ///     assert_eq!(None, rx.recv().await);
     /// }
     /// ```
@@ -1617,11 +1617,11 @@
     /// async fn main() {
     ///     let (tx, mut rx) = mpsc::channel(100);
     ///
-    ///     tx.send(&quot;hello&quot;).await.unwrap();
-    ///     tx.send(&quot;world&quot;).await.unwrap();
+    ///     tx.send("hello").await.unwrap();
+    ///     tx.send("world").await.unwrap();
     ///
-    ///     assert_eq!(Some(&quot;hello&quot;), rx.recv().await);
-    ///     assert_eq!(Some(&quot;world&quot;), rx.recv().await);
+    ///     assert_eq!(Some("hello"), rx.recv().await);
+    ///     assert_eq!(Some("world"), rx.recv().await);
     /// }
     /// ```
     </span><span class="kw">pub async fn </span>recv(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;T&gt; {
@@ -1635,7 +1635,7 @@
     /// as specified by `limit`. If `limit` is zero, the function immediately
     /// returns `0`. The return value is the number of values added to `buffer`.
     ///
-    /// For `limit &gt; 0`, if there are no messages in the channel&#39;s queue, but
+    /// For `limit &gt; 0`, if there are no messages in the channel's queue, but
     /// the channel has not yet been closed, this method will sleep until a
     /// message is sent or the channel is closed. Note that if [`close`] is
     /// called, but there are still outstanding [`Permits`] from before it was
@@ -1644,7 +1644,7 @@
     ///
     /// For non-zero values of `limit`, this method will never return `0` unless
     /// the channel has been closed and there are no remaining messages in the
-    /// channel&#39;s queue. This indicates that no further values can ever be
+    /// channel's queue. This indicates that no further values can ever be
     /// received from this `Receiver`. The channel is closed when all senders
     /// have been dropped, or when [`close`] is called.
     ///
@@ -1671,33 +1671,33 @@
     ///     let limit = 2;
     ///     let (tx, mut rx) = mpsc::channel(100);
     ///     let tx2 = tx.clone();
-    ///     tx2.send(&quot;first&quot;).await.unwrap();
-    ///     tx2.send(&quot;second&quot;).await.unwrap();
-    ///     tx2.send(&quot;third&quot;).await.unwrap();
+    ///     tx2.send("first").await.unwrap();
+    ///     tx2.send("second").await.unwrap();
+    ///     tx2.send("third").await.unwrap();
     ///
     ///     // Call `recv_many` to receive up to `limit` (2) values.
     ///     assert_eq!(2, rx.recv_many(&amp;mut buffer, limit).await);
-    ///     assert_eq!(vec![&quot;first&quot;, &quot;second&quot;], buffer);
+    ///     assert_eq!(vec!["first", "second"], buffer);
     ///
     ///     // If the buffer is full, the next call to `recv_many`
     ///     // reserves additional capacity.
     ///     assert_eq!(1, rx.recv_many(&amp;mut buffer, 1).await);
     ///
     ///     tokio::spawn(async move {
-    ///         tx.send(&quot;fourth&quot;).await.unwrap();
+    ///         tx.send("fourth").await.unwrap();
     ///     });
     ///
-    ///     // &#39;tx&#39; is dropped, but `recv_many`
+    ///     // 'tx' is dropped, but `recv_many`
     ///     // is guaranteed not to return 0 as the channel
     ///     // is not yet closed.
     ///     assert_eq!(1, rx.recv_many(&amp;mut buffer, 1).await);
-    ///     assert_eq!(vec![&quot;first&quot;, &quot;second&quot;, &quot;third&quot;, &quot;fourth&quot;], buffer);
+    ///     assert_eq!(vec!["first", "second", "third", "fourth"], buffer);
     ///
     ///     // Once the last sender is dropped, the channel is
     ///     // closed and `recv_many` returns 0, capacity unchanged.
     ///     drop(tx2);
     ///     assert_eq!(0, rx.recv_many(&amp;mut buffer, limit).await);
-    ///     assert_eq!(vec![&quot;first&quot;, &quot;second&quot;, &quot;third&quot;, &quot;fourth&quot;], buffer);
+    ///     assert_eq!(vec!["first", "second", "third", "fourth"], buffer);
     /// }
     /// ```
     </span><span class="kw">pub async fn </span>recv_many(<span class="kw-2">&amp;mut </span><span class="self">self</span>, buffer: <span class="kw-2">&amp;mut </span>Vec&lt;T&gt;, limit: usize) -&gt; usize {
@@ -1732,16 +1732,16 @@
     /// async fn main() {
     ///     let (tx, mut rx) = mpsc::channel(100);
     ///
-    ///     tx.send(&quot;hello&quot;).await.unwrap();
+    ///     tx.send("hello").await.unwrap();
     ///
-    ///     assert_eq!(Ok(&quot;hello&quot;), rx.try_recv());
+    ///     assert_eq!(Ok("hello"), rx.try_recv());
     ///     assert_eq!(Err(TryRecvError::Empty), rx.try_recv());
     ///
-    ///     tx.send(&quot;hello&quot;).await.unwrap();
+    ///     tx.send("hello").await.unwrap();
     ///     // Drop the last sender, closing the channel.
     ///     drop(tx);
     ///
-    ///     assert_eq!(Ok(&quot;hello&quot;), rx.try_recv());
+    ///     assert_eq!(Ok("hello"), rx.try_recv());
     ///     assert_eq!(Err(TryRecvError::Disconnected), rx.try_recv());
     /// }
     /// ```
@@ -1752,11 +1752,11 @@
     <span class="doccomment">/// Blocking receive to call outside of asynchronous contexts.
     ///
     /// This method returns `None` if the channel has been closed and there are
-    /// no remaining messages in the channel&#39;s buffer. This indicates that no
+    /// no remaining messages in the channel's buffer. This indicates that no
     /// further values can ever be received from this `Receiver`. The channel is
     /// closed when all senders have been dropped, or when [`close`] is called.
     ///
-    /// If there are no messages in the channel&#39;s buffer, but the channel has
+    /// If there are no messages in the channel's buffer, but the channel has
     /// not yet been closed, this method will block until a message is sent or
     /// the channel is closed.
     ///
@@ -1800,8 +1800,8 @@
     /// }
     /// ```
     </span><span class="attr">#[track_caller]
-    #[cfg(feature = <span class="string">&quot;sync&quot;</span>)]
-    #[cfg_attr(docsrs, doc(alias = <span class="string">&quot;recv_blocking&quot;</span>))]
+    #[cfg(feature = <span class="string">"sync"</span>)]
+    #[cfg_attr(docsrs, doc(alias = <span class="string">"recv_blocking"</span>))]
     </span><span class="kw">pub fn </span>blocking_recv(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;T&gt; {
         <span class="kw">crate</span>::future::block_on(<span class="self">self</span>.recv())
     }
@@ -1840,7 +1840,7 @@
     ///     rx.close();
     ///
     ///     while let Some(msg) = rx.recv().await {
-    ///         println!(&quot;got {}&quot;, msg);
+    ///         println!("got {}", msg);
     ///     }
     ///
     ///     // Channel closed and no messages are lost.
@@ -1871,15 +1871,15 @@
     /// failure has been resolved. Note that receiving such a wakeup does not
     /// guarantee that the next call will succeed — it could fail with another
     /// spurious failure.
-    </span><span class="kw">pub fn </span>poll_recv(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;T&gt;&gt; {
+    </span><span class="kw">pub fn </span>poll_recv(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;T&gt;&gt; {
         <span class="self">self</span>.chan.recv(cx)
     }
 }
 
 <span class="kw">impl</span>&lt;T&gt; fmt::Debug <span class="kw">for </span>Receiver&lt;T&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        fmt.debug_struct(<span class="string">&quot;Receiver&quot;</span>)
-            .field(<span class="string">&quot;chan&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.chan)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        fmt.debug_struct(<span class="string">"Receiver"</span>)
+            .field(<span class="string">"chan"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.chan)
             .finish()
     }
 }
@@ -1939,14 +1939,14 @@
     ///     tokio::spawn(async move {
     ///         for i in 0..10 {
     ///             if let Err(_) = tx.send(i).await {
-    ///                 println!(&quot;receiver dropped&quot;);
+    ///                 println!("receiver dropped");
     ///                 return;
     ///             }
     ///         }
     ///     });
     ///
     ///     while let Some(i) = rx.recv().await {
-    ///         println!(&quot;got = {}&quot;, i);
+    ///         println!("got = {}", i);
     ///     }
     /// }
     /// ```
@@ -1993,7 +1993,7 @@
     ///         tx4.closed(),
     ///         tx5.closed()
     ///     );
-    ///     println!(&quot;Receiver dropped&quot;);
+    ///     println!("Receiver dropped");
     /// }
     /// ```
     </span><span class="kw">pub async fn </span>closed(<span class="kw-2">&amp;</span><span class="self">self</span>) {
@@ -2002,7 +2002,7 @@
 
     <span class="doccomment">/// Attempts to immediately send a message on this `Sender`
     ///
-    /// This method differs from [`send`] by returning immediately if the channel&#39;s
+    /// This method differs from [`send`] by returning immediately if the channel's
     /// buffer is full or no receiver is waiting to acquire some data. Compared
     /// with [`send`], this function has two failure cases instead of one (one for
     /// disconnection, one for a full buffer).
@@ -2046,15 +2046,15 @@
     ///
     ///     let mut msg;
     ///     msg = rx.recv().await.unwrap();
-    ///     println!(&quot;message {} received&quot;, msg);
+    ///     println!("message {} received", msg);
     ///
     ///     msg = rx.recv().await.unwrap();
-    ///     println!(&quot;message {} received&quot;, msg);
+    ///     println!("message {} received", msg);
     ///
     ///     // Third message may have never been sent
     ///     match rx.recv().await {
-    ///         Some(msg) =&gt; println!(&quot;message {} received&quot;, msg),
-    ///         None =&gt; println!(&quot;the third message was never sent&quot;),
+    ///         Some(msg) =&gt; println!("message {} received", msg),
+    ///         None =&gt; println!("the third message was never sent"),
     ///     }
     /// }
     /// ```
@@ -2108,20 +2108,20 @@
     ///     tokio::spawn(async move {
     ///         for i in 0..10 {
     ///             if let Err(e) = tx.send_timeout(i, Duration::from_millis(100)).await {
-    ///                 println!(&quot;send error: #{:?}&quot;, e);
+    ///                 println!("send error: #{:?}", e);
     ///                 return;
     ///             }
     ///         }
     ///     });
     ///
     ///     while let Some(i) = rx.recv().await {
-    ///         println!(&quot;got = {}&quot;, i);
+    ///         println!("got = {}", i);
     ///         sleep(Duration::from_millis(200)).await;
     ///     }
     /// }
     /// ```
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;time&quot;</span>)]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;time&quot;</span>)))]
+    </span><span class="attr">#[cfg(feature = <span class="string">"time"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"time"</span>)))]
     </span><span class="kw">pub async fn </span>send_timeout(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         value: T,
@@ -2175,8 +2175,8 @@
     /// }
     /// ```
     </span><span class="attr">#[track_caller]
-    #[cfg(feature = <span class="string">&quot;sync&quot;</span>)]
-    #[cfg_attr(docsrs, doc(alias = <span class="string">&quot;send_blocking&quot;</span>))]
+    #[cfg(feature = <span class="string">"sync"</span>)]
+    #[cfg_attr(docsrs, doc(alias = <span class="string">"send_blocking"</span>))]
     </span><span class="kw">pub fn </span>blocking_send(<span class="kw-2">&amp;</span><span class="self">self</span>, value: T) -&gt; <span class="prelude-ty">Result</span>&lt;(), SendError&lt;T&gt;&gt; {
         <span class="kw">crate</span>::future::block_on(<span class="self">self</span>.send(value))
     }
@@ -2247,7 +2247,7 @@
     ///     assert_eq!(rx.recv().await.unwrap(), 456);
     /// }
     /// ```
-    </span><span class="kw">pub async fn </span>reserve(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Permit&lt;<span class="lifetime">&#39;_</span>, T&gt;, SendError&lt;()&gt;&gt; {
+    </span><span class="kw">pub async fn </span>reserve(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Permit&lt;<span class="lifetime">'_</span>, T&gt;, SendError&lt;()&gt;&gt; {
         <span class="self">self</span>.reserve_inner().<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(Permit { chan: <span class="kw-2">&amp;</span><span class="self">self</span>.chan })
     }
@@ -2259,7 +2259,7 @@
     /// This moves the sender _by value_, and returns an owned permit that can
     /// be used to send a message into the channel. Unlike [`Sender::reserve`],
     /// this method may be used in cases where the permit must be valid for the
-    /// `&#39;static` lifetime. `Sender`s may be cloned cheaply (`Sender::clone` is
+    /// `'static` lifetime. `Sender`s may be cloned cheaply (`Sender::clone` is
     /// essentially a reference count increment, comparable to [`Arc::clone`]),
     /// so when multiple [`OwnedPermit`]s are needed or the `Sender` cannot be
     /// moved, it can be cloned prior to calling `reserve_owned`.
@@ -2391,7 +2391,7 @@
     ///
     /// }
     /// ```
-    </span><span class="kw">pub fn </span>try_reserve(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Permit&lt;<span class="lifetime">&#39;_</span>, T&gt;, TrySendError&lt;()&gt;&gt; {
+    </span><span class="kw">pub fn </span>try_reserve(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Permit&lt;<span class="lifetime">'_</span>, T&gt;, TrySendError&lt;()&gt;&gt; {
         <span class="kw">match </span><span class="self">self</span>.chan.semaphore().semaphore.try_acquire(<span class="number">1</span>) {
             <span class="prelude-val">Ok</span>(()) =&gt; {}
             <span class="prelude-val">Err</span>(TryAcquireError::Closed) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(TrySendError::Closed(())),
@@ -2407,7 +2407,7 @@
     /// This moves the sender _by value_, and returns an owned permit that can
     /// be used to send a message into the channel. Unlike [`Sender::try_reserve`],
     /// this method may be used in cases where the permit must be valid for the
-    /// `&#39;static` lifetime.  `Sender`s may be cloned cheaply (`Sender::clone` is
+    /// `'static` lifetime.  `Sender`s may be cloned cheaply (`Sender::clone` is
     /// essentially a reference count increment, comparable to [`Arc::clone`]),
     /// so when multiple [`OwnedPermit`]s are needed or the `Sender` cannot be
     /// moved, it can be cloned prior to calling `try_reserve_owned`.
@@ -2552,7 +2552,7 @@
     ///     assert_eq!(tx.max_capacity(), 5);
     ///     assert_eq!(tx.capacity(), 5);
     ///
-    ///     // Making a reservation doesn&#39;t change the max capacity.
+    ///     // Making a reservation doesn't change the max capacity.
     ///     let permit = tx.reserve().await.unwrap();
     ///     assert_eq!(tx.max_capacity(), 5);
     ///     // but drops the capacity by one
@@ -2577,9 +2577,9 @@
 }
 
 <span class="kw">impl</span>&lt;T&gt; fmt::Debug <span class="kw">for </span>Sender&lt;T&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        fmt.debug_struct(<span class="string">&quot;Sender&quot;</span>)
-            .field(<span class="string">&quot;chan&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.chan)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        fmt.debug_struct(<span class="string">"Sender"</span>)
+            .field(<span class="string">"chan"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.chan)
             .finish()
     }
 }
@@ -2594,7 +2594,7 @@
 
 <span class="kw">impl</span>&lt;T&gt; WeakSender&lt;T&gt; {
     <span class="doccomment">/// Tries to convert a `WeakSender` into a [`Sender`]. This will return `Some`
-    /// if there are other `Sender` instances alive and the channel wasn&#39;t
+    /// if there are other `Sender` instances alive and the channel wasn't
     /// previously dropped, otherwise `None` is returned.
     </span><span class="kw">pub fn </span>upgrade(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Sender&lt;T&gt;&gt; {
         chan::Tx::upgrade(<span class="self">self</span>.chan.clone()).map(Sender::new)
@@ -2602,14 +2602,14 @@
 }
 
 <span class="kw">impl</span>&lt;T&gt; fmt::Debug <span class="kw">for </span>WeakSender&lt;T&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        fmt.debug_struct(<span class="string">&quot;WeakSender&quot;</span>).finish()
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        fmt.debug_struct(<span class="string">"WeakSender"</span>).finish()
     }
 }
 
 <span class="comment">// ===== impl Permit =====
 
-</span><span class="kw">impl</span>&lt;T&gt; Permit&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+</span><span class="kw">impl</span>&lt;T&gt; Permit&lt;<span class="lifetime">'_</span>, T&gt; {
     <span class="doccomment">/// Sends a value using the reserved capacity.
     ///
     /// Capacity for the message has already been reserved. The message is sent
@@ -2652,7 +2652,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;T&gt; Drop <span class="kw">for </span>Permit&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+<span class="kw">impl</span>&lt;T&gt; Drop <span class="kw">for </span>Permit&lt;<span class="lifetime">'_</span>, T&gt; {
     <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="kw">use </span>chan::Semaphore;
 
@@ -2669,10 +2669,10 @@
     }
 }
 
-<span class="kw">impl</span>&lt;T&gt; fmt::Debug <span class="kw">for </span>Permit&lt;<span class="lifetime">&#39;_</span>, T&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        fmt.debug_struct(<span class="string">&quot;Permit&quot;</span>)
-            .field(<span class="string">&quot;chan&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.chan)
+<span class="kw">impl</span>&lt;T&gt; fmt::Debug <span class="kw">for </span>Permit&lt;<span class="lifetime">'_</span>, T&gt; {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        fmt.debug_struct(<span class="string">"Permit"</span>)
+            .field(<span class="string">"chan"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.chan)
             .finish()
     }
 }
@@ -2716,7 +2716,7 @@
     /// ```
     </span><span class="kw">pub fn </span>send(<span class="kw-2">mut </span><span class="self">self</span>, value: T) -&gt; Sender&lt;T&gt; {
         <span class="kw">let </span>chan = <span class="self">self</span>.chan.take().unwrap_or_else(|| {
-            <span class="macro">unreachable!</span>(<span class="string">&quot;OwnedPermit channel is only taken when the permit is moved&quot;</span>)
+            <span class="macro">unreachable!</span>(<span class="string">"OwnedPermit channel is only taken when the permit is moved"</span>)
         });
         chan.send(value);
 
@@ -2757,7 +2757,7 @@
         <span class="kw">use </span>chan::Semaphore;
 
         <span class="kw">let </span>chan = <span class="self">self</span>.chan.take().unwrap_or_else(|| {
-            <span class="macro">unreachable!</span>(<span class="string">&quot;OwnedPermit channel is only taken when the permit is moved&quot;</span>)
+            <span class="macro">unreachable!</span>(<span class="string">"OwnedPermit channel is only taken when the permit is moved"</span>)
         });
 
         <span class="comment">// Add the permit back to the semaphore
@@ -2790,9 +2790,9 @@
 }
 
 <span class="kw">impl</span>&lt;T&gt; fmt::Debug <span class="kw">for </span>OwnedPermit&lt;T&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        fmt.debug_struct(<span class="string">&quot;OwnedPermit&quot;</span>)
-            .field(<span class="string">&quot;chan&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.chan)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        fmt.debug_struct(<span class="string">"OwnedPermit"</span>)
+            .field(<span class="string">"chan"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.chan)
             .finish()
     }
 }

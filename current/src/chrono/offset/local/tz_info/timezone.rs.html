@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/chrono-0.4.31/src/offset/local/tz_info/timezone.rs`."><title>timezone.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../../../" data-static-root-path="../../../../../static.files/" data-current-crate="chrono" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../../src-files.js"></script><script defer src="../../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/chrono-0.4.31/src/offset/local/tz_info/timezone.rs`."><title>timezone.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../../../" data-static-root-path="../../../../../static.files/" data-current-crate="chrono" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../../src-files.js"></script><script defer src="../../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -979,22 +979,22 @@
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>local(env_tz: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, Error&gt; {
         <span class="kw">match </span>env_tz {
             <span class="prelude-val">Some</span>(tz) =&gt; <span class="self">Self</span>::from_posix_tz(tz),
-            <span class="prelude-val">None </span>=&gt; <span class="self">Self</span>::from_posix_tz(<span class="string">&quot;localtime&quot;</span>),
+            <span class="prelude-val">None </span>=&gt; <span class="self">Self</span>::from_posix_tz(<span class="string">"localtime"</span>),
         }
     }
 
     <span class="doccomment">/// Construct a time zone from a POSIX TZ string, as described in [the POSIX documentation of the `TZ` environment variable](https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap08.html).
     </span><span class="kw">fn </span>from_posix_tz(tz_string: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, Error&gt; {
         <span class="kw">if </span>tz_string.is_empty() {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidTzString(<span class="string">&quot;empty TZ string&quot;</span>));
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::InvalidTzString(<span class="string">"empty TZ string"</span>));
         }
 
-        <span class="kw">if </span>tz_string == <span class="string">&quot;localtime&quot; </span>{
-            <span class="kw">return </span><span class="self">Self</span>::from_tz_data(<span class="kw-2">&amp;</span>fs::read(<span class="string">&quot;/etc/localtime&quot;</span>)<span class="question-mark">?</span>);
+        <span class="kw">if </span>tz_string == <span class="string">"localtime" </span>{
+            <span class="kw">return </span><span class="self">Self</span>::from_tz_data(<span class="kw-2">&amp;</span>fs::read(<span class="string">"/etc/localtime"</span>)<span class="question-mark">?</span>);
         }
 
         <span class="comment">// attributes are not allowed on if blocks in Rust 1.38
-        </span><span class="attr">#[cfg(target_os = <span class="string">&quot;android&quot;</span>)]
+        </span><span class="attr">#[cfg(target_os = <span class="string">"android"</span>)]
         </span>{
             <span class="kw">if let </span><span class="prelude-val">Ok</span>(bytes) = android_tzdata::find_tz_data(tz_string) {
                 <span class="kw">return </span><span class="self">Self</span>::from_tz_data(<span class="kw-2">&amp;</span>bytes);
@@ -1002,7 +1002,7 @@
         }
 
         <span class="kw">let </span><span class="kw-2">mut </span>chars = tz_string.chars();
-        <span class="kw">if </span>chars.next() == <span class="prelude-val">Some</span>(<span class="string">&#39;:&#39;</span>) {
+        <span class="kw">if </span>chars.next() == <span class="prelude-val">Some</span>(<span class="string">':'</span>) {
             <span class="kw">return </span><span class="self">Self</span>::from_file(<span class="kw-2">&amp;mut </span>find_tz_file(chars.as_str())<span class="question-mark">?</span>);
         }
 
@@ -1097,20 +1097,20 @@
 
 <span class="doccomment">/// Reference to a time zone
 </span><span class="attr">#[derive(Debug, Copy, Clone, Eq, PartialEq)]
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>TimeZoneRef&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>TimeZoneRef&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// List of transitions
-    </span>transitions: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[Transition],
+    </span>transitions: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[Transition],
     <span class="doccomment">/// List of local time types (cannot be empty)
-    </span>local_time_types: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[LocalTimeType],
+    </span>local_time_types: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[LocalTimeType],
     <span class="doccomment">/// List of leap seconds
-    </span>leap_seconds: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[LeapSecond],
+    </span>leap_seconds: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[LeapSecond],
     <span class="doccomment">/// Extra transition rule applicable after the last transition
-    </span>extra_rule: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="prelude-ty">Option</span>&lt;TransitionRule&gt;,
+    </span>extra_rule: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="prelude-ty">Option</span>&lt;TransitionRule&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; TimeZoneRef&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; TimeZoneRef&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Find the local time type associated to the time zone at the specified Unix time in seconds
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>find_local_time_type(<span class="kw-2">&amp;</span><span class="self">self</span>, unix_time: i64) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>LocalTimeType, Error&gt; {
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>find_local_time_type(<span class="kw-2">&amp;</span><span class="self">self</span>, unix_time: i64) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>LocalTimeType, Error&gt; {
         <span class="kw">let </span>extra_rule = <span class="kw">match </span><span class="self">self</span>.transitions.last() {
             <span class="prelude-val">None </span>=&gt; <span class="kw">match </span><span class="self">self</span>.extra_rule {
                 <span class="prelude-val">Some</span>(extra_rule) =&gt; extra_rule,
@@ -1128,9 +1128,9 @@
                         <span class="prelude-val">Some</span>(extra_rule) =&gt; extra_rule,
                         <span class="prelude-val">None </span>=&gt; {
                             <span class="comment">// RFC 8536 3.2:
-                            // &quot;Local time for timestamps on or after the last transition is
+                            // "Local time for timestamps on or after the last transition is
                             // specified by the TZ string in the footer (Section 3.3) if present
-                            // and nonempty; otherwise, it is unspecified.&quot;
+                            // and nonempty; otherwise, it is unspecified."
                             //
                             // Older versions of macOS (1.12 and before?) have TZif file with a
                             // missing TZ string, and use the offset given by the last transition.
@@ -1170,7 +1170,7 @@
         local_time: i64,
         year: i32,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw">crate</span>::LocalResult&lt;LocalTimeType&gt;, Error&gt; {
-        <span class="comment">// #TODO: this is wrong as we need &#39;local_time_to_local_leap_time ?
+        <span class="comment">// #TODO: this is wrong as we need 'local_time_to_local_leap_time ?
         // but ... does the local time even include leap seconds ??
         // let unix_leap_time = match self.unix_time_to_unix_leap_time(local_time) {
         //     Ok(unix_leap_time) =&gt; unix_leap_time,
@@ -1258,21 +1258,21 @@
         <span class="comment">// Check local time types
         </span><span class="kw">let </span>local_time_types_size = <span class="self">self</span>.local_time_types.len();
         <span class="kw">if </span>local_time_types_size == <span class="number">0 </span>{
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::TimeZone(<span class="string">&quot;list of local time types must not be empty&quot;</span>));
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::TimeZone(<span class="string">"list of local time types must not be empty"</span>));
         }
 
         <span class="comment">// Check transitions
         </span><span class="kw">let </span><span class="kw-2">mut </span>i_transition = <span class="number">0</span>;
         <span class="kw">while </span>i_transition &lt; <span class="self">self</span>.transitions.len() {
             <span class="kw">if </span><span class="self">self</span>.transitions[i_transition].local_time_type_index &gt;= local_time_types_size {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::TimeZone(<span class="string">&quot;invalid local time type index&quot;</span>));
+                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::TimeZone(<span class="string">"invalid local time type index"</span>));
             }
 
             <span class="kw">if </span>i_transition + <span class="number">1 </span>&lt; <span class="self">self</span>.transitions.len()
                 &amp;&amp; <span class="self">self</span>.transitions[i_transition].unix_leap_time
                     &gt;= <span class="self">self</span>.transitions[i_transition + <span class="number">1</span>].unix_leap_time
             {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::TimeZone(<span class="string">&quot;invalid transition&quot;</span>));
+                <span class="kw">return </span><span class="prelude-val">Err</span>(Error::TimeZone(<span class="string">"invalid transition"</span>));
             }
 
             i_transition += <span class="number">1</span>;
@@ -1283,7 +1283,7 @@
             || <span class="self">self</span>.leap_seconds[<span class="number">0</span>].unix_leap_time &gt;= <span class="number">0
                 </span>&amp;&amp; <span class="self">self</span>.leap_seconds[<span class="number">0</span>].correction.saturating_abs() == <span class="number">1</span>)
         {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::TimeZone(<span class="string">&quot;invalid leap second&quot;</span>));
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::TimeZone(<span class="string">"invalid leap second"</span>));
         }
 
         <span class="kw">let </span>min_interval = SECONDS_PER_28_DAYS - <span class="number">1</span>;
@@ -1299,7 +1299,7 @@
                     x1.correction.saturating_sub(x0.correction).saturating_abs();
 
                 <span class="kw">if </span>!(diff_unix_leap_time &gt;= min_interval &amp;&amp; abs_diff_correction == <span class="number">1</span>) {
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::TimeZone(<span class="string">&quot;invalid leap second&quot;</span>));
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(Error::TimeZone(<span class="string">"invalid leap second"</span>));
                 }
             }
             i_leap_second += <span class="number">1</span>;
@@ -1334,7 +1334,7 @@
 
         <span class="kw">if </span>!check {
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::TimeZone(
-                <span class="string">&quot;extra transition rule is inconsistent with the last transition&quot;</span>,
+                <span class="string">"extra transition rule is inconsistent with the last transition"</span>,
             ));
         }
 
@@ -1355,7 +1355,7 @@
 
             unix_leap_time = <span class="kw">match </span>unix_time.checked_add(leap_second.correction <span class="kw">as </span>i64) {
                 <span class="prelude-val">Some</span>(unix_leap_time) =&gt; unix_leap_time,
-                <span class="prelude-val">None </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(Error::OutOfRange(<span class="string">&quot;out of range operation&quot;</span>)),
+                <span class="prelude-val">None </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(Error::OutOfRange(<span class="string">"out of range operation"</span>)),
             };
 
             i += <span class="number">1</span>;
@@ -1367,7 +1367,7 @@
     <span class="doccomment">/// Convert Unix leap time to Unix time, from the list of leap seconds in a time zone
     </span><span class="kw">fn </span>unix_leap_time_to_unix_time(<span class="kw-2">&amp;</span><span class="self">self</span>, unix_leap_time: i64) -&gt; <span class="prelude-ty">Result</span>&lt;i64, Error&gt; {
         <span class="kw">if </span>unix_leap_time == i64::min_value() {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::OutOfRange(<span class="string">&quot;out of range operation&quot;</span>));
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::OutOfRange(<span class="string">"out of range operation"</span>));
         }
 
         <span class="kw">let </span>index = <span class="kw">match </span><span class="self">self
@@ -1382,12 +1382,12 @@
 
         <span class="kw">match </span>unix_leap_time.checked_sub(correction <span class="kw">as </span>i64) {
             <span class="prelude-val">Some</span>(unix_time) =&gt; <span class="prelude-val">Ok</span>(unix_time),
-            <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Err</span>(Error::OutOfRange(<span class="string">&quot;out of range operation&quot;</span>)),
+            <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Err</span>(Error::OutOfRange(<span class="string">"out of range operation"</span>)),
         }
     }
 
     <span class="doccomment">/// The UTC time zone
-    </span><span class="kw">const </span>UTC: TimeZoneRef&lt;<span class="lifetime">&#39;static</span>&gt; = TimeZoneRef {
+    </span><span class="kw">const </span>UTC: TimeZoneRef&lt;<span class="lifetime">'static</span>&gt; = TimeZoneRef {
         transitions: <span class="kw-2">&amp;</span>[],
         local_time_types: <span class="kw-2">&amp;</span>[LocalTimeType::UTC],
         leap_seconds: <span class="kw-2">&amp;</span>[],
@@ -1456,7 +1456,7 @@
 
         <span class="kw">if </span>!(<span class="number">3</span>..=<span class="number">7</span>).contains(<span class="kw-2">&amp;</span>len) {
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::LocalTimeType(
-                <span class="string">&quot;time zone name must have between 3 and 7 characters&quot;</span>,
+                <span class="string">"time zone name must have between 3 and 7 characters"</span>,
             ));
         }
 
@@ -1467,8 +1467,8 @@
         <span class="kw">while </span>i &lt; len {
             <span class="kw">let </span>b = input[i];
             <span class="kw">match </span>b {
-                <span class="string">b&#39;0&#39;</span>..=<span class="string">b&#39;9&#39; </span>| <span class="string">b&#39;A&#39;</span>..=<span class="string">b&#39;Z&#39; </span>| <span class="string">b&#39;a&#39;</span>..=<span class="string">b&#39;z&#39; </span>| <span class="string">b&#39;+&#39; </span>| <span class="string">b&#39;-&#39; </span>=&gt; {}
-                <span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(Error::LocalTimeType(<span class="string">&quot;invalid characters in time zone name&quot;</span>)),
+                <span class="string">b'0'</span>..=<span class="string">b'9' </span>| <span class="string">b'A'</span>..=<span class="string">b'Z' </span>| <span class="string">b'a'</span>..=<span class="string">b'z' </span>| <span class="string">b'+' </span>| <span class="string">b'-' </span>=&gt; {}
+                <span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(Error::LocalTimeType(<span class="string">"invalid characters in time zone name"</span>)),
             }
 
             bytes[i + <span class="number">1</span>] = b;
@@ -1524,7 +1524,7 @@
     <span class="doccomment">/// Construct a local time type
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>new(ut_offset: i32, is_dst: bool, name: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>[u8]&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, Error&gt; {
         <span class="kw">if </span>ut_offset == i32::min_value() {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::LocalTimeType(<span class="string">&quot;invalid UTC offset&quot;</span>));
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::LocalTimeType(<span class="string">"invalid UTC offset"</span>));
         }
 
         <span class="kw">let </span>name = <span class="kw">match </span>name {
@@ -1538,7 +1538,7 @@
     <span class="doccomment">/// Construct a local time type with the specified UTC offset in seconds
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">const fn </span>with_offset(ut_offset: i32) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, Error&gt; {
         <span class="kw">if </span>ut_offset == i32::min_value() {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::LocalTimeType(<span class="string">&quot;invalid UTC offset&quot;</span>));
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::LocalTimeType(<span class="string">"invalid UTC offset"</span>));
         }
 
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{ ut_offset, is_dst: <span class="bool-val">false</span>, name: <span class="prelude-val">None </span>})
@@ -1559,7 +1559,7 @@
 
 <span class="doccomment">/// Open the TZif file corresponding to a TZ string
 </span><span class="kw">fn </span>find_tz_file(path: <span class="kw">impl </span>AsRef&lt;Path&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;File, Error&gt; {
-    <span class="comment">// Don&#39;t check system timezone directories on non-UNIX platforms
+    <span class="comment">// Don't check system timezone directories on non-UNIX platforms
     </span><span class="attr">#[cfg(not(unix))]
     </span><span class="kw">return </span><span class="prelude-val">Ok</span>(File::open(path)<span class="question-mark">?</span>);
 
@@ -1583,7 +1583,7 @@
 <span class="comment">// Possible system timezone directories
 </span><span class="attr">#[cfg(unix)]
 </span><span class="kw">const </span>ZONE_INFO_DIRECTORIES: [<span class="kw-2">&amp;</span>str; <span class="number">4</span>] =
-    [<span class="string">&quot;/usr/share/zoneinfo&quot;</span>, <span class="string">&quot;/share/zoneinfo&quot;</span>, <span class="string">&quot;/etc/zoneinfo&quot;</span>, <span class="string">&quot;/usr/share/lib/zoneinfo&quot;</span>];
+    [<span class="string">"/usr/share/zoneinfo"</span>, <span class="string">"/share/zoneinfo"</span>, <span class="string">"/etc/zoneinfo"</span>, <span class="string">"/usr/share/lib/zoneinfo"</span>];
 
 <span class="doccomment">/// Number of seconds in one week
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>SECONDS_PER_WEEK: i64 = SECONDS_PER_DAY * DAYS_PER_WEEK;
@@ -1597,20 +1597,20 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_no_dst() -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
-        <span class="kw">let </span>tz_string = <span class="string">b&quot;HST10&quot;</span>;
+        <span class="kw">let </span>tz_string = <span class="string">b"HST10"</span>;
         <span class="kw">let </span>transition_rule = TransitionRule::from_tz_string(tz_string, <span class="bool-val">false</span>)<span class="question-mark">?</span>;
-        <span class="macro">assert_eq!</span>(transition_rule, LocalTimeType::new(-<span class="number">36000</span>, <span class="bool-val">false</span>, <span class="prelude-val">Some</span>(<span class="string">b&quot;HST&quot;</span>))<span class="question-mark">?</span>.into());
+        <span class="macro">assert_eq!</span>(transition_rule, LocalTimeType::new(-<span class="number">36000</span>, <span class="bool-val">false</span>, <span class="prelude-val">Some</span>(<span class="string">b"HST"</span>))<span class="question-mark">?</span>.into());
         <span class="prelude-val">Ok</span>(())
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_error() -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
         <span class="macro">assert!</span>(<span class="macro">matches!</span>(
-            TransitionRule::from_tz_string(<span class="string">b&quot;IST-1GMT0&quot;</span>, <span class="bool-val">false</span>),
+            TransitionRule::from_tz_string(<span class="string">b"IST-1GMT0"</span>, <span class="bool-val">false</span>),
             <span class="prelude-val">Err</span>(Error::UnsupportedTzString(<span class="kw">_</span>))
         ));
         <span class="macro">assert!</span>(<span class="macro">matches!</span>(
-            TransitionRule::from_tz_string(<span class="string">b&quot;EET-2EEST&quot;</span>, <span class="bool-val">false</span>),
+            TransitionRule::from_tz_string(<span class="string">b"EET-2EEST"</span>, <span class="bool-val">false</span>),
             <span class="prelude-val">Err</span>(Error::UnsupportedTzString(<span class="kw">_</span>))
         ));
 
@@ -1619,13 +1619,13 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_v1_file_with_leap_seconds() -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
-        <span class="kw">let </span>bytes = <span class="string">b&quot;TZif\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x01\0\0\0\x01\0\0\0\x1b\0\0\0\0\0\0\0\x01\0\0\0\x04\0\0\0\0\0\0UTC\0\x04\xb2\x58\0\0\0\0\x01\x05\xa4\xec\x01\0\0\0\x02\x07\x86\x1f\x82\0\0\0\x03\x09\x67\x53\x03\0\0\0\x04\x0b\x48\x86\x84\0\0\0\x05\x0d\x2b\x0b\x85\0\0\0\x06\x0f\x0c\x3f\x06\0\0\0\x07\x10\xed\x72\x87\0\0\0\x08\x12\xce\xa6\x08\0\0\0\x09\x15\x9f\xca\x89\0\0\0\x0a\x17\x80\xfe\x0a\0\0\0\x0b\x19\x62\x31\x8b\0\0\0\x0c\x1d\x25\xea\x0c\0\0\0\x0d\x21\xda\xe5\x0d\0\0\0\x0e\x25\x9e\x9d\x8e\0\0\0\x0f\x27\x7f\xd1\x0f\0\0\0\x10\x2a\x50\xf5\x90\0\0\0\x11\x2c\x32\x29\x11\0\0\0\x12\x2e\x13\x5c\x92\0\0\0\x13\x30\xe7\x24\x13\0\0\0\x14\x33\xb8\x48\x94\0\0\0\x15\x36\x8c\x10\x15\0\0\0\x16\x43\xb7\x1b\x96\0\0\0\x17\x49\x5c\x07\x97\0\0\0\x18\x4f\xef\x93\x18\0\0\0\x19\x55\x93\x2d\x99\0\0\0\x1a\x58\x68\x46\x9a\0\0\0\x1b\0\0&quot;</span>;
+        <span class="kw">let </span>bytes = <span class="string">b"TZif\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x01\0\0\0\x01\0\0\0\x1b\0\0\0\0\0\0\0\x01\0\0\0\x04\0\0\0\0\0\0UTC\0\x04\xb2\x58\0\0\0\0\x01\x05\xa4\xec\x01\0\0\0\x02\x07\x86\x1f\x82\0\0\0\x03\x09\x67\x53\x03\0\0\0\x04\x0b\x48\x86\x84\0\0\0\x05\x0d\x2b\x0b\x85\0\0\0\x06\x0f\x0c\x3f\x06\0\0\0\x07\x10\xed\x72\x87\0\0\0\x08\x12\xce\xa6\x08\0\0\0\x09\x15\x9f\xca\x89\0\0\0\x0a\x17\x80\xfe\x0a\0\0\0\x0b\x19\x62\x31\x8b\0\0\0\x0c\x1d\x25\xea\x0c\0\0\0\x0d\x21\xda\xe5\x0d\0\0\0\x0e\x25\x9e\x9d\x8e\0\0\0\x0f\x27\x7f\xd1\x0f\0\0\0\x10\x2a\x50\xf5\x90\0\0\0\x11\x2c\x32\x29\x11\0\0\0\x12\x2e\x13\x5c\x92\0\0\0\x13\x30\xe7\x24\x13\0\0\0\x14\x33\xb8\x48\x94\0\0\0\x15\x36\x8c\x10\x15\0\0\0\x16\x43\xb7\x1b\x96\0\0\0\x17\x49\x5c\x07\x97\0\0\0\x18\x4f\xef\x93\x18\0\0\0\x19\x55\x93\x2d\x99\0\0\0\x1a\x58\x68\x46\x9a\0\0\0\x1b\0\0"</span>;
 
         <span class="kw">let </span>time_zone = TimeZone::from_tz_data(bytes)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>time_zone_result = TimeZone::new(
             Vec::new(),
-            <span class="macro">vec!</span>[LocalTimeType::new(<span class="number">0</span>, <span class="bool-val">false</span>, <span class="prelude-val">Some</span>(<span class="string">b&quot;UTC&quot;</span>))<span class="question-mark">?</span>],
+            <span class="macro">vec!</span>[LocalTimeType::new(<span class="number">0</span>, <span class="bool-val">false</span>, <span class="prelude-val">Some</span>(<span class="string">b"UTC"</span>))<span class="question-mark">?</span>],
             <span class="macro">vec!</span>[
                 LeapSecond::new(<span class="number">78796800</span>, <span class="number">1</span>),
                 LeapSecond::new(<span class="number">94694401</span>, <span class="number">2</span>),
@@ -1665,7 +1665,7 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_v2_file() -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
-        <span class="kw">let </span>bytes = <span class="string">b&quot;TZif2\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x06\0\0\0\x06\0\0\0\0\0\0\0\x07\0\0\0\x06\0\0\0\x14\x80\0\0\0\xbb\x05\x43\x48\xbb\x21\x71\x58\xcb\x89\x3d\xc8\xd2\x23\xf4\x70\xd2\x61\x49\x38\xd5\x8d\x73\x48\x01\x02\x01\x03\x04\x01\x05\xff\xff\x6c\x02\0\0\xff\xff\x6c\x58\0\x04\xff\xff\x7a\x68\x01\x08\xff\xff\x7a\x68\x01\x0c\xff\xff\x7a\x68\x01\x10\xff\xff\x73\x60\0\x04LMT\0HST\0HDT\0HWT\0HPT\0\0\0\0\0\x01\0\0\0\0\0\x01\0TZif2\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x06\0\0\0\x06\0\0\0\0\0\0\0\x07\0\0\0\x06\0\0\0\x14\xff\xff\xff\xff\x74\xe0\x70\xbe\xff\xff\xff\xff\xbb\x05\x43\x48\xff\xff\xff\xff\xbb\x21\x71\x58\xff\xff\xff\xff\xcb\x89\x3d\xc8\xff\xff\xff\xff\xd2\x23\xf4\x70\xff\xff\xff\xff\xd2\x61\x49\x38\xff\xff\xff\xff\xd5\x8d\x73\x48\x01\x02\x01\x03\x04\x01\x05\xff\xff\x6c\x02\0\0\xff\xff\x6c\x58\0\x04\xff\xff\x7a\x68\x01\x08\xff\xff\x7a\x68\x01\x0c\xff\xff\x7a\x68\x01\x10\xff\xff\x73\x60\0\x04LMT\0HST\0HDT\0HWT\0HPT\0\0\0\0\0\x01\0\0\0\0\0\x01\0\x0aHST10\x0a&quot;</span>;
+        <span class="kw">let </span>bytes = <span class="string">b"TZif2\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x06\0\0\0\x06\0\0\0\0\0\0\0\x07\0\0\0\x06\0\0\0\x14\x80\0\0\0\xbb\x05\x43\x48\xbb\x21\x71\x58\xcb\x89\x3d\xc8\xd2\x23\xf4\x70\xd2\x61\x49\x38\xd5\x8d\x73\x48\x01\x02\x01\x03\x04\x01\x05\xff\xff\x6c\x02\0\0\xff\xff\x6c\x58\0\x04\xff\xff\x7a\x68\x01\x08\xff\xff\x7a\x68\x01\x0c\xff\xff\x7a\x68\x01\x10\xff\xff\x73\x60\0\x04LMT\0HST\0HDT\0HWT\0HPT\0\0\0\0\0\x01\0\0\0\0\0\x01\0TZif2\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x06\0\0\0\x06\0\0\0\0\0\0\0\x07\0\0\0\x06\0\0\0\x14\xff\xff\xff\xff\x74\xe0\x70\xbe\xff\xff\xff\xff\xbb\x05\x43\x48\xff\xff\xff\xff\xbb\x21\x71\x58\xff\xff\xff\xff\xcb\x89\x3d\xc8\xff\xff\xff\xff\xd2\x23\xf4\x70\xff\xff\xff\xff\xd2\x61\x49\x38\xff\xff\xff\xff\xd5\x8d\x73\x48\x01\x02\x01\x03\x04\x01\x05\xff\xff\x6c\x02\0\0\xff\xff\x6c\x58\0\x04\xff\xff\x7a\x68\x01\x08\xff\xff\x7a\x68\x01\x0c\xff\xff\x7a\x68\x01\x10\xff\xff\x73\x60\0\x04LMT\0HST\0HDT\0HWT\0HPT\0\0\0\0\0\x01\0\0\0\0\0\x01\0\x0aHST10\x0a"</span>;
 
         <span class="kw">let </span>time_zone = TimeZone::from_tz_data(bytes)<span class="question-mark">?</span>;
 
@@ -1680,26 +1680,26 @@
                 Transition::new(-<span class="number">712150200</span>, <span class="number">5</span>),
             ],
             <span class="macro">vec!</span>[
-                LocalTimeType::new(-<span class="number">37886</span>, <span class="bool-val">false</span>, <span class="prelude-val">Some</span>(<span class="string">b&quot;LMT&quot;</span>))<span class="question-mark">?</span>,
-                LocalTimeType::new(-<span class="number">37800</span>, <span class="bool-val">false</span>, <span class="prelude-val">Some</span>(<span class="string">b&quot;HST&quot;</span>))<span class="question-mark">?</span>,
-                LocalTimeType::new(-<span class="number">34200</span>, <span class="bool-val">true</span>, <span class="prelude-val">Some</span>(<span class="string">b&quot;HDT&quot;</span>))<span class="question-mark">?</span>,
-                LocalTimeType::new(-<span class="number">34200</span>, <span class="bool-val">true</span>, <span class="prelude-val">Some</span>(<span class="string">b&quot;HWT&quot;</span>))<span class="question-mark">?</span>,
-                LocalTimeType::new(-<span class="number">34200</span>, <span class="bool-val">true</span>, <span class="prelude-val">Some</span>(<span class="string">b&quot;HPT&quot;</span>))<span class="question-mark">?</span>,
-                LocalTimeType::new(-<span class="number">36000</span>, <span class="bool-val">false</span>, <span class="prelude-val">Some</span>(<span class="string">b&quot;HST&quot;</span>))<span class="question-mark">?</span>,
+                LocalTimeType::new(-<span class="number">37886</span>, <span class="bool-val">false</span>, <span class="prelude-val">Some</span>(<span class="string">b"LMT"</span>))<span class="question-mark">?</span>,
+                LocalTimeType::new(-<span class="number">37800</span>, <span class="bool-val">false</span>, <span class="prelude-val">Some</span>(<span class="string">b"HST"</span>))<span class="question-mark">?</span>,
+                LocalTimeType::new(-<span class="number">34200</span>, <span class="bool-val">true</span>, <span class="prelude-val">Some</span>(<span class="string">b"HDT"</span>))<span class="question-mark">?</span>,
+                LocalTimeType::new(-<span class="number">34200</span>, <span class="bool-val">true</span>, <span class="prelude-val">Some</span>(<span class="string">b"HWT"</span>))<span class="question-mark">?</span>,
+                LocalTimeType::new(-<span class="number">34200</span>, <span class="bool-val">true</span>, <span class="prelude-val">Some</span>(<span class="string">b"HPT"</span>))<span class="question-mark">?</span>,
+                LocalTimeType::new(-<span class="number">36000</span>, <span class="bool-val">false</span>, <span class="prelude-val">Some</span>(<span class="string">b"HST"</span>))<span class="question-mark">?</span>,
             ],
             Vec::new(),
-            <span class="prelude-val">Some</span>(TransitionRule::from(LocalTimeType::new(-<span class="number">36000</span>, <span class="bool-val">false</span>, <span class="prelude-val">Some</span>(<span class="string">b&quot;HST&quot;</span>))<span class="question-mark">?</span>)),
+            <span class="prelude-val">Some</span>(TransitionRule::from(LocalTimeType::new(-<span class="number">36000</span>, <span class="bool-val">false</span>, <span class="prelude-val">Some</span>(<span class="string">b"HST"</span>))<span class="question-mark">?</span>)),
         )<span class="question-mark">?</span>;
 
         <span class="macro">assert_eq!</span>(time_zone, time_zone_result);
 
         <span class="macro">assert_eq!</span>(
             <span class="kw-2">*</span>time_zone.find_local_time_type(-<span class="number">1156939200</span>)<span class="question-mark">?</span>,
-            LocalTimeType::new(-<span class="number">34200</span>, <span class="bool-val">true</span>, <span class="prelude-val">Some</span>(<span class="string">b&quot;HDT&quot;</span>))<span class="question-mark">?
+            LocalTimeType::new(-<span class="number">34200</span>, <span class="bool-val">true</span>, <span class="prelude-val">Some</span>(<span class="string">b"HDT"</span>))<span class="question-mark">?
         </span>);
         <span class="macro">assert_eq!</span>(
             <span class="kw-2">*</span>time_zone.find_local_time_type(<span class="number">1546300800</span>)<span class="question-mark">?</span>,
-            LocalTimeType::new(-<span class="number">36000</span>, <span class="bool-val">false</span>, <span class="prelude-val">Some</span>(<span class="string">b&quot;HST&quot;</span>))<span class="question-mark">?
+            LocalTimeType::new(-<span class="number">36000</span>, <span class="bool-val">false</span>, <span class="prelude-val">Some</span>(<span class="string">b"HST"</span>))<span class="question-mark">?
         </span>);
 
         <span class="prelude-val">Ok</span>(())
@@ -1708,7 +1708,7 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_no_tz_string() -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
         <span class="comment">// Guayaquil from macOS 10.11
-        </span><span class="kw">let </span>bytes = <span class="string">b&quot;TZif\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x02\0\0\0\x02\0\0\0\0\0\0\0\x01\0\0\0\x02\0\0\0\x08\xb6\xa4B\x18\x01\xff\xff\xb6h\0\0\xff\xff\xb9\xb0\0\x04QMT\0ECT\0\0\0\0\0&quot;</span>;
+        </span><span class="kw">let </span>bytes = <span class="string">b"TZif\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x02\0\0\0\x02\0\0\0\0\0\0\0\x01\0\0\0\x02\0\0\0\x08\xb6\xa4B\x18\x01\xff\xff\xb6h\0\0\xff\xff\xb9\xb0\0\x04QMT\0ECT\0\0\0\0\0"</span>;
 
         <span class="kw">let </span>time_zone = TimeZone::from_tz_data(bytes)<span class="question-mark">?</span>;
         <span class="macro">dbg!</span>(<span class="kw-2">&amp;</span>time_zone);
@@ -1716,8 +1716,8 @@
         <span class="kw">let </span>time_zone_result = TimeZone::new(
             <span class="macro">vec!</span>[Transition::new(-<span class="number">1230749160</span>, <span class="number">1</span>)],
             <span class="macro">vec!</span>[
-                LocalTimeType::new(-<span class="number">18840</span>, <span class="bool-val">false</span>, <span class="prelude-val">Some</span>(<span class="string">b&quot;QMT&quot;</span>))<span class="question-mark">?</span>,
-                LocalTimeType::new(-<span class="number">18000</span>, <span class="bool-val">false</span>, <span class="prelude-val">Some</span>(<span class="string">b&quot;ECT&quot;</span>))<span class="question-mark">?</span>,
+                LocalTimeType::new(-<span class="number">18840</span>, <span class="bool-val">false</span>, <span class="prelude-val">Some</span>(<span class="string">b"QMT"</span>))<span class="question-mark">?</span>,
+                LocalTimeType::new(-<span class="number">18000</span>, <span class="bool-val">false</span>, <span class="prelude-val">Some</span>(<span class="string">b"ECT"</span>))<span class="question-mark">?</span>,
             ],
             Vec::new(),
             <span class="prelude-val">None</span>,
@@ -1727,11 +1727,11 @@
 
         <span class="macro">assert_eq!</span>(
             <span class="kw-2">*</span>time_zone.find_local_time_type(-<span class="number">1500000000</span>)<span class="question-mark">?</span>,
-            LocalTimeType::new(-<span class="number">18840</span>, <span class="bool-val">false</span>, <span class="prelude-val">Some</span>(<span class="string">b&quot;QMT&quot;</span>))<span class="question-mark">?
+            LocalTimeType::new(-<span class="number">18840</span>, <span class="bool-val">false</span>, <span class="prelude-val">Some</span>(<span class="string">b"QMT"</span>))<span class="question-mark">?
         </span>);
         <span class="macro">assert_eq!</span>(
             <span class="kw-2">*</span>time_zone.find_local_time_type(<span class="number">0</span>)<span class="question-mark">?</span>,
-            LocalTimeType::new(-<span class="number">18000</span>, <span class="bool-val">false</span>, <span class="prelude-val">Some</span>(<span class="string">b&quot;ECT&quot;</span>))<span class="question-mark">?
+            LocalTimeType::new(-<span class="number">18000</span>, <span class="bool-val">false</span>, <span class="prelude-val">Some</span>(<span class="string">b"ECT"</span>))<span class="question-mark">?
         </span>);
 
         <span class="prelude-val">Ok</span>(())
@@ -1739,18 +1739,18 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_tz_ascii_str() -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
-        <span class="macro">assert!</span>(<span class="macro">matches!</span>(TimeZoneName::new(<span class="string">b&quot;&quot;</span>), <span class="prelude-val">Err</span>(Error::LocalTimeType(<span class="kw">_</span>))));
-        <span class="macro">assert!</span>(<span class="macro">matches!</span>(TimeZoneName::new(<span class="string">b&quot;A&quot;</span>), <span class="prelude-val">Err</span>(Error::LocalTimeType(<span class="kw">_</span>))));
-        <span class="macro">assert!</span>(<span class="macro">matches!</span>(TimeZoneName::new(<span class="string">b&quot;AB&quot;</span>), <span class="prelude-val">Err</span>(Error::LocalTimeType(<span class="kw">_</span>))));
-        <span class="macro">assert_eq!</span>(TimeZoneName::new(<span class="string">b&quot;CET&quot;</span>)<span class="question-mark">?</span>.as_bytes(), <span class="string">b&quot;CET&quot;</span>);
-        <span class="macro">assert_eq!</span>(TimeZoneName::new(<span class="string">b&quot;CHADT&quot;</span>)<span class="question-mark">?</span>.as_bytes(), <span class="string">b&quot;CHADT&quot;</span>);
-        <span class="macro">assert_eq!</span>(TimeZoneName::new(<span class="string">b&quot;abcdefg&quot;</span>)<span class="question-mark">?</span>.as_bytes(), <span class="string">b&quot;abcdefg&quot;</span>);
-        <span class="macro">assert_eq!</span>(TimeZoneName::new(<span class="string">b&quot;UTC+02&quot;</span>)<span class="question-mark">?</span>.as_bytes(), <span class="string">b&quot;UTC+02&quot;</span>);
-        <span class="macro">assert_eq!</span>(TimeZoneName::new(<span class="string">b&quot;-1230&quot;</span>)<span class="question-mark">?</span>.as_bytes(), <span class="string">b&quot;-1230&quot;</span>);
-        <span class="macro">assert!</span>(<span class="macro">matches!</span>(TimeZoneName::new(<span class="string">&quot;−0330&quot;</span>.as_bytes()), <span class="prelude-val">Err</span>(Error::LocalTimeType(<span class="kw">_</span>)))); <span class="comment">// MINUS SIGN (U+2212)
-        </span><span class="macro">assert!</span>(<span class="macro">matches!</span>(TimeZoneName::new(<span class="string">b&quot;\x00123&quot;</span>), <span class="prelude-val">Err</span>(Error::LocalTimeType(<span class="kw">_</span>))));
-        <span class="macro">assert!</span>(<span class="macro">matches!</span>(TimeZoneName::new(<span class="string">b&quot;12345678&quot;</span>), <span class="prelude-val">Err</span>(Error::LocalTimeType(<span class="kw">_</span>))));
-        <span class="macro">assert!</span>(<span class="macro">matches!</span>(TimeZoneName::new(<span class="string">b&quot;GMT\0\0\0&quot;</span>), <span class="prelude-val">Err</span>(Error::LocalTimeType(<span class="kw">_</span>))));
+        <span class="macro">assert!</span>(<span class="macro">matches!</span>(TimeZoneName::new(<span class="string">b""</span>), <span class="prelude-val">Err</span>(Error::LocalTimeType(<span class="kw">_</span>))));
+        <span class="macro">assert!</span>(<span class="macro">matches!</span>(TimeZoneName::new(<span class="string">b"A"</span>), <span class="prelude-val">Err</span>(Error::LocalTimeType(<span class="kw">_</span>))));
+        <span class="macro">assert!</span>(<span class="macro">matches!</span>(TimeZoneName::new(<span class="string">b"AB"</span>), <span class="prelude-val">Err</span>(Error::LocalTimeType(<span class="kw">_</span>))));
+        <span class="macro">assert_eq!</span>(TimeZoneName::new(<span class="string">b"CET"</span>)<span class="question-mark">?</span>.as_bytes(), <span class="string">b"CET"</span>);
+        <span class="macro">assert_eq!</span>(TimeZoneName::new(<span class="string">b"CHADT"</span>)<span class="question-mark">?</span>.as_bytes(), <span class="string">b"CHADT"</span>);
+        <span class="macro">assert_eq!</span>(TimeZoneName::new(<span class="string">b"abcdefg"</span>)<span class="question-mark">?</span>.as_bytes(), <span class="string">b"abcdefg"</span>);
+        <span class="macro">assert_eq!</span>(TimeZoneName::new(<span class="string">b"UTC+02"</span>)<span class="question-mark">?</span>.as_bytes(), <span class="string">b"UTC+02"</span>);
+        <span class="macro">assert_eq!</span>(TimeZoneName::new(<span class="string">b"-1230"</span>)<span class="question-mark">?</span>.as_bytes(), <span class="string">b"-1230"</span>);
+        <span class="macro">assert!</span>(<span class="macro">matches!</span>(TimeZoneName::new(<span class="string">"−0330"</span>.as_bytes()), <span class="prelude-val">Err</span>(Error::LocalTimeType(<span class="kw">_</span>)))); <span class="comment">// MINUS SIGN (U+2212)
+        </span><span class="macro">assert!</span>(<span class="macro">matches!</span>(TimeZoneName::new(<span class="string">b"\x00123"</span>), <span class="prelude-val">Err</span>(Error::LocalTimeType(<span class="kw">_</span>))));
+        <span class="macro">assert!</span>(<span class="macro">matches!</span>(TimeZoneName::new(<span class="string">b"12345678"</span>), <span class="prelude-val">Err</span>(Error::LocalTimeType(<span class="kw">_</span>))));
+        <span class="macro">assert!</span>(<span class="macro">matches!</span>(TimeZoneName::new(<span class="string">b"GMT\0\0\0"</span>), <span class="prelude-val">Err</span>(Error::LocalTimeType(<span class="kw">_</span>))));
 
         <span class="prelude-val">Ok</span>(())
     }
@@ -1803,22 +1803,22 @@
             // time set by the localtime symlink
             // so just ensure that ::local() acts as expected
             // in this case
-            </span><span class="kw">if let </span><span class="prelude-val">Ok</span>(tz) = std::env::var(<span class="string">&quot;TZ&quot;</span>) {
+            </span><span class="kw">if let </span><span class="prelude-val">Ok</span>(tz) = std::env::var(<span class="string">"TZ"</span>) {
                 <span class="kw">let </span>time_zone_local = TimeZone::local(<span class="prelude-val">Some</span>(tz.as_str()))<span class="question-mark">?</span>;
                 <span class="kw">let </span>time_zone_local_1 = TimeZone::from_posix_tz(<span class="kw-2">&amp;</span>tz)<span class="question-mark">?</span>;
                 <span class="macro">assert_eq!</span>(time_zone_local, time_zone_local_1);
             }
 
-            <span class="comment">// `TimeZone::from_posix_tz(&quot;UTC&quot;)` will return `Error` if the environment does not have
+            <span class="comment">// `TimeZone::from_posix_tz("UTC")` will return `Error` if the environment does not have
             // a time zone database, like for example some docker containers.
             // In that case skip the test.
-            </span><span class="kw">if let </span><span class="prelude-val">Ok</span>(time_zone_utc) = TimeZone::from_posix_tz(<span class="string">&quot;UTC&quot;</span>) {
+            </span><span class="kw">if let </span><span class="prelude-val">Ok</span>(time_zone_utc) = TimeZone::from_posix_tz(<span class="string">"UTC"</span>) {
                 <span class="macro">assert_eq!</span>(time_zone_utc.find_local_time_type(<span class="number">0</span>)<span class="question-mark">?</span>.offset(), <span class="number">0</span>);
             }
         }
 
-        <span class="macro">assert!</span>(TimeZone::from_posix_tz(<span class="string">&quot;EST5EDT,0/0,J365/25&quot;</span>).is_err());
-        <span class="macro">assert!</span>(TimeZone::from_posix_tz(<span class="string">&quot;&quot;</span>).is_err());
+        <span class="macro">assert!</span>(TimeZone::from_posix_tz(<span class="string">"EST5EDT,0/0,J365/25"</span>).is_err());
+        <span class="macro">assert!</span>(TimeZone::from_posix_tz(<span class="string">""</span>).is_err());
 
         <span class="prelude-val">Ok</span>(())
     }
@@ -1827,7 +1827,7 @@
     </span><span class="kw">fn </span>test_leap_seconds() -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
         <span class="kw">let </span>time_zone = TimeZone::new(
             Vec::new(),
-            <span class="macro">vec!</span>[LocalTimeType::new(<span class="number">0</span>, <span class="bool-val">false</span>, <span class="prelude-val">Some</span>(<span class="string">b&quot;UTC&quot;</span>))<span class="question-mark">?</span>],
+            <span class="macro">vec!</span>[LocalTimeType::new(<span class="number">0</span>, <span class="bool-val">false</span>, <span class="prelude-val">Some</span>(<span class="string">b"UTC"</span>))<span class="question-mark">?</span>],
             <span class="macro">vec!</span>[
                 LeapSecond::new(<span class="number">78796800</span>, <span class="number">1</span>),
                 LeapSecond::new(<span class="number">94694401</span>, <span class="number">2</span>),

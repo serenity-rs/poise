@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tungstenite-0.20.1/src/error.rs`."><title>error.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="tungstenite" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tungstenite-0.20.1/src/error.rs`."><title>error.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="tungstenite" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -284,7 +284,7 @@
 </span><span class="kw">use </span>std::{io, result, str, string};
 
 <span class="kw">use </span><span class="kw">crate</span>::protocol::{frame::coding::Data, Message};
-<span class="attr">#[cfg(feature = <span class="string">&quot;handshake&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"handshake"</span>)]
 </span><span class="kw">use </span>http::{header::HeaderName, Response};
 <span class="kw">use </span>thiserror::Error;
 
@@ -295,7 +295,7 @@
 </span><span class="attr">#[derive(Error, Debug)]
 </span><span class="kw">pub enum </span>Error {
     <span class="doccomment">/// WebSocket connection closed normally. This informs you of the close.
-    /// It&#39;s not an error as such and nothing wrong happened.
+    /// It's not an error as such and nothing wrong happened.
     ///
     /// This is returned as soon as the close handshake is finished (we have both sent and
     /// received a close frame) on the server end and as soon as the server has closed the
@@ -305,54 +305,54 @@
     ///
     /// Receiving this error means that the WebSocket object is not usable anymore and the
     /// only meaningful action with it is dropping it.
-    </span><span class="attr">#[error(<span class="string">&quot;Connection closed normally&quot;</span>)]
+    </span><span class="attr">#[error(<span class="string">"Connection closed normally"</span>)]
     </span>ConnectionClosed,
     <span class="doccomment">/// Trying to work with already closed connection.
     ///
     /// Trying to read or write after receiving `ConnectionClosed` causes this.
     ///
     /// As opposed to `ConnectionClosed`, this indicates your code tries to operate on the
-    /// connection when it really shouldn&#39;t anymore, so this really indicates a programmer
+    /// connection when it really shouldn't anymore, so this really indicates a programmer
     /// error on your part.
-    </span><span class="attr">#[error(<span class="string">&quot;Trying to work with closed connection&quot;</span>)]
+    </span><span class="attr">#[error(<span class="string">"Trying to work with closed connection"</span>)]
     </span>AlreadyClosed,
     <span class="doccomment">/// Input-output error. Apart from WouldBlock, these are generally errors with the
     /// underlying connection and you should probably consider them fatal.
-    </span><span class="attr">#[error(<span class="string">&quot;IO error: {0}&quot;</span>)]
+    </span><span class="attr">#[error(<span class="string">"IO error: {0}"</span>)]
     </span>Io(<span class="attr">#[from] </span>io::Error),
     <span class="doccomment">/// TLS error.
     ///
     /// Note that this error variant is enabled unconditionally even if no TLS feature is enabled,
     /// to provide a feature-agnostic API surface.
-    </span><span class="attr">#[error(<span class="string">&quot;TLS error: {0}&quot;</span>)]
+    </span><span class="attr">#[error(<span class="string">"TLS error: {0}"</span>)]
     </span>Tls(<span class="attr">#[from] </span>TlsError),
     <span class="doccomment">/// - When reading: buffer capacity exhausted.
     /// - When writing: your message is bigger than the configured max message size
     ///   (64MB by default).
-    </span><span class="attr">#[error(<span class="string">&quot;Space limit exceeded: {0}&quot;</span>)]
+    </span><span class="attr">#[error(<span class="string">"Space limit exceeded: {0}"</span>)]
     </span>Capacity(<span class="attr">#[from] </span>CapacityError),
     <span class="doccomment">/// Protocol violation.
-    </span><span class="attr">#[error(<span class="string">&quot;WebSocket protocol error: {0}&quot;</span>)]
+    </span><span class="attr">#[error(<span class="string">"WebSocket protocol error: {0}"</span>)]
     </span>Protocol(<span class="attr">#[from] </span>ProtocolError),
     <span class="doccomment">/// Message write buffer is full.
-    </span><span class="attr">#[error(<span class="string">&quot;Write buffer is full&quot;</span>)]
+    </span><span class="attr">#[error(<span class="string">"Write buffer is full"</span>)]
     </span>WriteBufferFull(Message),
     <span class="doccomment">/// UTF coding error.
-    </span><span class="attr">#[error(<span class="string">&quot;UTF-8 encoding error&quot;</span>)]
+    </span><span class="attr">#[error(<span class="string">"UTF-8 encoding error"</span>)]
     </span>Utf8,
     <span class="doccomment">/// Attack attempt detected.
-    </span><span class="attr">#[error(<span class="string">&quot;Attack attempt detected&quot;</span>)]
+    </span><span class="attr">#[error(<span class="string">"Attack attempt detected"</span>)]
     </span>AttackAttempt,
     <span class="doccomment">/// Invalid URL.
-    </span><span class="attr">#[error(<span class="string">&quot;URL error: {0}&quot;</span>)]
+    </span><span class="attr">#[error(<span class="string">"URL error: {0}"</span>)]
     </span>Url(<span class="attr">#[from] </span>UrlError),
     <span class="doccomment">/// HTTP error.
-    </span><span class="attr">#[error(<span class="string">&quot;HTTP error: {}&quot;</span>, .<span class="number">0</span>.status())]
-    #[cfg(feature = <span class="string">&quot;handshake&quot;</span>)]
+    </span><span class="attr">#[error(<span class="string">"HTTP error: {}"</span>, .<span class="number">0</span>.status())]
+    #[cfg(feature = <span class="string">"handshake"</span>)]
     </span>Http(Response&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;&gt;),
     <span class="doccomment">/// HTTP format error.
-    </span><span class="attr">#[error(<span class="string">&quot;HTTP format error: {0}&quot;</span>)]
-    #[cfg(feature = <span class="string">&quot;handshake&quot;</span>)]
+    </span><span class="attr">#[error(<span class="string">"HTTP format error: {0}"</span>)]
+    #[cfg(feature = <span class="string">"handshake"</span>)]
     </span>HttpFormat(<span class="attr">#[from] </span>http::Error),
 }
 
@@ -368,42 +368,42 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;handshake&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"handshake"</span>)]
 </span><span class="kw">impl </span>From&lt;http::header::InvalidHeaderValue&gt; <span class="kw">for </span>Error {
     <span class="kw">fn </span>from(err: http::header::InvalidHeaderValue) -&gt; <span class="self">Self </span>{
         Error::HttpFormat(err.into())
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;handshake&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"handshake"</span>)]
 </span><span class="kw">impl </span>From&lt;http::header::InvalidHeaderName&gt; <span class="kw">for </span>Error {
     <span class="kw">fn </span>from(err: http::header::InvalidHeaderName) -&gt; <span class="self">Self </span>{
         Error::HttpFormat(err.into())
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;handshake&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"handshake"</span>)]
 </span><span class="kw">impl </span>From&lt;http::header::ToStrError&gt; <span class="kw">for </span>Error {
     <span class="kw">fn </span>from(<span class="kw">_</span>: http::header::ToStrError) -&gt; <span class="self">Self </span>{
         Error::Utf8
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;handshake&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"handshake"</span>)]
 </span><span class="kw">impl </span>From&lt;http::uri::InvalidUri&gt; <span class="kw">for </span>Error {
     <span class="kw">fn </span>from(err: http::uri::InvalidUri) -&gt; <span class="self">Self </span>{
         Error::HttpFormat(err.into())
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;handshake&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"handshake"</span>)]
 </span><span class="kw">impl </span>From&lt;http::status::InvalidStatusCode&gt; <span class="kw">for </span>Error {
     <span class="kw">fn </span>from(err: http::status::InvalidStatusCode) -&gt; <span class="self">Self </span>{
         Error::HttpFormat(err.into())
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;handshake&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"handshake"</span>)]
 </span><span class="kw">impl </span>From&lt;httparse::Error&gt; <span class="kw">for </span>Error {
     <span class="kw">fn </span>from(err: httparse::Error) -&gt; <span class="self">Self </span>{
         <span class="kw">match </span>err {
@@ -417,11 +417,11 @@
 </span><span class="attr">#[derive(Error, Debug, PartialEq, Eq, Clone, Copy)]
 </span><span class="kw">pub enum </span>CapacityError {
     <span class="doccomment">/// Too many headers provided (see [`httparse::Error::TooManyHeaders`]).
-    </span><span class="attr">#[error(<span class="string">&quot;Too many headers&quot;</span>)]
+    </span><span class="attr">#[error(<span class="string">"Too many headers"</span>)]
     </span>TooManyHeaders,
     <span class="doccomment">/// Received header is too long.
     /// Message is bigger than the maximum allowed size.
-    </span><span class="attr">#[error(<span class="string">&quot;Message too long: {size} &gt; {max_size}&quot;</span>)]
+    </span><span class="attr">#[error(<span class="string">"Message too long: {size} &gt; {max_size}"</span>)]
     </span>MessageTooLong {
         <span class="doccomment">/// The size of the message.
         </span>size: usize,
@@ -435,84 +435,84 @@
 #[derive(Error, Debug, PartialEq, Eq, Clone)]
 </span><span class="kw">pub enum </span>ProtocolError {
     <span class="doccomment">/// Use of the wrong HTTP method (the WebSocket protocol requires the GET method be used).
-    </span><span class="attr">#[error(<span class="string">&quot;Unsupported HTTP method used - only GET is allowed&quot;</span>)]
+    </span><span class="attr">#[error(<span class="string">"Unsupported HTTP method used - only GET is allowed"</span>)]
     </span>WrongHttpMethod,
     <span class="doccomment">/// Wrong HTTP version used (the WebSocket protocol requires version 1.1 or higher).
-    </span><span class="attr">#[error(<span class="string">&quot;HTTP version must be 1.1 or higher&quot;</span>)]
+    </span><span class="attr">#[error(<span class="string">"HTTP version must be 1.1 or higher"</span>)]
     </span>WrongHttpVersion,
     <span class="doccomment">/// Missing `Connection: upgrade` HTTP header.
-    </span><span class="attr">#[error(<span class="string">&quot;No \&quot;Connection: upgrade\&quot; header&quot;</span>)]
+    </span><span class="attr">#[error(<span class="string">"No \"Connection: upgrade\" header"</span>)]
     </span>MissingConnectionUpgradeHeader,
     <span class="doccomment">/// Missing `Upgrade: websocket` HTTP header.
-    </span><span class="attr">#[error(<span class="string">&quot;No \&quot;Upgrade: websocket\&quot; header&quot;</span>)]
+    </span><span class="attr">#[error(<span class="string">"No \"Upgrade: websocket\" header"</span>)]
     </span>MissingUpgradeWebSocketHeader,
     <span class="doccomment">/// Missing `Sec-WebSocket-Version: 13` HTTP header.
-    </span><span class="attr">#[error(<span class="string">&quot;No \&quot;Sec-WebSocket-Version: 13\&quot; header&quot;</span>)]
+    </span><span class="attr">#[error(<span class="string">"No \"Sec-WebSocket-Version: 13\" header"</span>)]
     </span>MissingSecWebSocketVersionHeader,
     <span class="doccomment">/// Missing `Sec-WebSocket-Key` HTTP header.
-    </span><span class="attr">#[error(<span class="string">&quot;No \&quot;Sec-WebSocket-Key\&quot; header&quot;</span>)]
+    </span><span class="attr">#[error(<span class="string">"No \"Sec-WebSocket-Key\" header"</span>)]
     </span>MissingSecWebSocketKey,
     <span class="doccomment">/// The `Sec-WebSocket-Accept` header is either not present or does not specify the correct key value.
-    </span><span class="attr">#[error(<span class="string">&quot;Key mismatch in \&quot;Sec-WebSocket-Accept\&quot; header&quot;</span>)]
+    </span><span class="attr">#[error(<span class="string">"Key mismatch in \"Sec-WebSocket-Accept\" header"</span>)]
     </span>SecWebSocketAcceptKeyMismatch,
     <span class="doccomment">/// Garbage data encountered after client request.
-    </span><span class="attr">#[error(<span class="string">&quot;Junk after client request&quot;</span>)]
+    </span><span class="attr">#[error(<span class="string">"Junk after client request"</span>)]
     </span>JunkAfterRequest,
     <span class="doccomment">/// Custom responses must be unsuccessful.
-    </span><span class="attr">#[error(<span class="string">&quot;Custom response must not be successful&quot;</span>)]
+    </span><span class="attr">#[error(<span class="string">"Custom response must not be successful"</span>)]
     </span>CustomResponseSuccessful,
     <span class="doccomment">/// Invalid header is passed. Or the header is missing in the request. Or not present at all. Check the request that you pass.
-    </span><span class="attr">#[error(<span class="string">&quot;Missing, duplicated or incorrect header {0}&quot;</span>)]
-    #[cfg(feature = <span class="string">&quot;handshake&quot;</span>)]
+    </span><span class="attr">#[error(<span class="string">"Missing, duplicated or incorrect header {0}"</span>)]
+    #[cfg(feature = <span class="string">"handshake"</span>)]
     </span>InvalidHeader(HeaderName),
     <span class="doccomment">/// No more data while still performing handshake.
-    </span><span class="attr">#[error(<span class="string">&quot;Handshake not finished&quot;</span>)]
+    </span><span class="attr">#[error(<span class="string">"Handshake not finished"</span>)]
     </span>HandshakeIncomplete,
     <span class="doccomment">/// Wrapper around a [`httparse::Error`] value.
-    </span><span class="attr">#[error(<span class="string">&quot;httparse error: {0}&quot;</span>)]
-    #[cfg(feature = <span class="string">&quot;handshake&quot;</span>)]
+    </span><span class="attr">#[error(<span class="string">"httparse error: {0}"</span>)]
+    #[cfg(feature = <span class="string">"handshake"</span>)]
     </span>HttparseError(<span class="attr">#[from] </span>httparse::Error),
     <span class="doccomment">/// Not allowed to send after having sent a closing frame.
-    </span><span class="attr">#[error(<span class="string">&quot;Sending after closing is not allowed&quot;</span>)]
+    </span><span class="attr">#[error(<span class="string">"Sending after closing is not allowed"</span>)]
     </span>SendAfterClosing,
     <span class="doccomment">/// Remote sent data after sending a closing frame.
-    </span><span class="attr">#[error(<span class="string">&quot;Remote sent after having closed&quot;</span>)]
+    </span><span class="attr">#[error(<span class="string">"Remote sent after having closed"</span>)]
     </span>ReceivedAfterClosing,
     <span class="doccomment">/// Reserved bits in frame header are non-zero.
-    </span><span class="attr">#[error(<span class="string">&quot;Reserved bits are non-zero&quot;</span>)]
+    </span><span class="attr">#[error(<span class="string">"Reserved bits are non-zero"</span>)]
     </span>NonZeroReservedBits,
     <span class="doccomment">/// The server must close the connection when an unmasked frame is received.
-    </span><span class="attr">#[error(<span class="string">&quot;Received an unmasked frame from client&quot;</span>)]
+    </span><span class="attr">#[error(<span class="string">"Received an unmasked frame from client"</span>)]
     </span>UnmaskedFrameFromClient,
     <span class="doccomment">/// The client must close the connection when a masked frame is received.
-    </span><span class="attr">#[error(<span class="string">&quot;Received a masked frame from server&quot;</span>)]
+    </span><span class="attr">#[error(<span class="string">"Received a masked frame from server"</span>)]
     </span>MaskedFrameFromServer,
     <span class="doccomment">/// Control frames must not be fragmented.
-    </span><span class="attr">#[error(<span class="string">&quot;Fragmented control frame&quot;</span>)]
+    </span><span class="attr">#[error(<span class="string">"Fragmented control frame"</span>)]
     </span>FragmentedControlFrame,
     <span class="doccomment">/// Control frames must have a payload of 125 bytes or less.
-    </span><span class="attr">#[error(<span class="string">&quot;Control frame too big (payload must be 125 bytes or less)&quot;</span>)]
+    </span><span class="attr">#[error(<span class="string">"Control frame too big (payload must be 125 bytes or less)"</span>)]
     </span>ControlFrameTooBig,
     <span class="doccomment">/// Type of control frame not recognised.
-    </span><span class="attr">#[error(<span class="string">&quot;Unknown control frame type: {0}&quot;</span>)]
+    </span><span class="attr">#[error(<span class="string">"Unknown control frame type: {0}"</span>)]
     </span>UnknownControlFrameType(u8),
     <span class="doccomment">/// Type of data frame not recognised.
-    </span><span class="attr">#[error(<span class="string">&quot;Unknown data frame type: {0}&quot;</span>)]
+    </span><span class="attr">#[error(<span class="string">"Unknown data frame type: {0}"</span>)]
     </span>UnknownDataFrameType(u8),
     <span class="doccomment">/// Received a continue frame despite there being nothing to continue.
-    </span><span class="attr">#[error(<span class="string">&quot;Continue frame but nothing to continue&quot;</span>)]
+    </span><span class="attr">#[error(<span class="string">"Continue frame but nothing to continue"</span>)]
     </span>UnexpectedContinueFrame,
     <span class="doccomment">/// Received data while waiting for more fragments.
-    </span><span class="attr">#[error(<span class="string">&quot;While waiting for more fragments received: {0}&quot;</span>)]
+    </span><span class="attr">#[error(<span class="string">"While waiting for more fragments received: {0}"</span>)]
     </span>ExpectedFragment(Data),
     <span class="doccomment">/// Connection closed without performing the closing handshake.
-    </span><span class="attr">#[error(<span class="string">&quot;Connection reset without closing handshake&quot;</span>)]
+    </span><span class="attr">#[error(<span class="string">"Connection reset without closing handshake"</span>)]
     </span>ResetWithoutClosingHandshake,
     <span class="doccomment">/// Encountered an invalid opcode.
-    </span><span class="attr">#[error(<span class="string">&quot;Encountered invalid opcode: {0}&quot;</span>)]
+    </span><span class="attr">#[error(<span class="string">"Encountered invalid opcode: {0}"</span>)]
     </span>InvalidOpcode(u8),
     <span class="doccomment">/// The payload for the closing frame is invalid.
-    </span><span class="attr">#[error(<span class="string">&quot;Invalid close sequence&quot;</span>)]
+    </span><span class="attr">#[error(<span class="string">"Invalid close sequence"</span>)]
     </span>InvalidCloseSequence,
 }
 
@@ -520,22 +520,22 @@
 </span><span class="attr">#[derive(Error, Debug, PartialEq, Eq)]
 </span><span class="kw">pub enum </span>UrlError {
     <span class="doccomment">/// TLS is used despite not being compiled with the TLS feature enabled.
-    </span><span class="attr">#[error(<span class="string">&quot;TLS support not compiled in&quot;</span>)]
+    </span><span class="attr">#[error(<span class="string">"TLS support not compiled in"</span>)]
     </span>TlsFeatureNotEnabled,
     <span class="doccomment">/// The URL does not include a host name.
-    </span><span class="attr">#[error(<span class="string">&quot;No host name in the URL&quot;</span>)]
+    </span><span class="attr">#[error(<span class="string">"No host name in the URL"</span>)]
     </span>NoHostName,
     <span class="doccomment">/// Failed to connect with this URL.
-    </span><span class="attr">#[error(<span class="string">&quot;Unable to connect to {0}&quot;</span>)]
+    </span><span class="attr">#[error(<span class="string">"Unable to connect to {0}"</span>)]
     </span>UnableToConnect(String),
     <span class="doccomment">/// Unsupported URL scheme used (only `ws://` or `wss://` may be used).
-    </span><span class="attr">#[error(<span class="string">&quot;URL scheme not supported&quot;</span>)]
+    </span><span class="attr">#[error(<span class="string">"URL scheme not supported"</span>)]
     </span>UnsupportedUrlScheme,
     <span class="doccomment">/// The URL host name, though included, is empty.
-    </span><span class="attr">#[error(<span class="string">&quot;URL contains empty host name&quot;</span>)]
+    </span><span class="attr">#[error(<span class="string">"URL contains empty host name"</span>)]
     </span>EmptyHostName,
     <span class="doccomment">/// The URL does not include a path/query.
-    </span><span class="attr">#[error(<span class="string">&quot;No path/query in URL&quot;</span>)]
+    </span><span class="attr">#[error(<span class="string">"No path/query in URL"</span>)]
     </span>NoPathOrQuery,
 }
 
@@ -548,16 +548,16 @@
 #[non_exhaustive]
 </span><span class="kw">pub enum </span>TlsError {
     <span class="doccomment">/// Native TLS error.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;native-tls&quot;</span>)]
-    #[error(<span class="string">&quot;native-tls error: {0}&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"native-tls"</span>)]
+    #[error(<span class="string">"native-tls error: {0}"</span>)]
     </span>Native(<span class="attr">#[from] </span>native_tls_crate::Error),
     <span class="doccomment">/// Rustls error.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;__rustls-tls&quot;</span>)]
-    #[error(<span class="string">&quot;rustls error: {0}&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"__rustls-tls"</span>)]
+    #[error(<span class="string">"rustls error: {0}"</span>)]
     </span>Rustls(<span class="attr">#[from] </span>rustls::Error),
     <span class="doccomment">/// DNS name resolution error.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;__rustls-tls&quot;</span>)]
-    #[error(<span class="string">&quot;Invalid DNS name&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"__rustls-tls"</span>)]
+    #[error(<span class="string">"Invalid DNS name"</span>)]
     </span>InvalidDnsName,
 }
 </code></pre></div></section></main></body></html>

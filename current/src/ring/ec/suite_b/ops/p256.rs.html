@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.5/src/ec/suite_b/ops/p256.rs`."><title>p256.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../../../" data-static-root-path="../../../../../static.files/" data-current-crate="ring" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../../src-files.js"></script><script defer src="../../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.5/src/ec/suite_b/ops/p256.rs`."><title>p256.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../../../" data-static-root-path="../../../../../static.files/" data-current-crate="ring" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../../src-files.js"></script><script defer src="../../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -331,7 +331,7 @@
 // purpose with or without fee is hereby granted, provided that the above
 // copyright notice and this permission notice appear in all copies.
 //
-// THE SOFTWARE IS PROVIDED &quot;AS IS&quot; AND THE AUTHORS DISCLAIM ALL WARRANTIES
+// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHORS DISCLAIM ALL WARRANTIES
 // WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
 // MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY
 // SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
@@ -348,12 +348,12 @@
     num_limbs: <span class="number">256 </span>/ LIMB_BITS,
 
     q: Modulus {
-        p: limbs_from_hex(<span class="string">&quot;ffffffff00000001000000000000000000000000ffffffffffffffffffffffff&quot;</span>),
-        rr: limbs_from_hex(<span class="string">&quot;4fffffffdfffffffffffffffefffffffbffffffff0000000000000003&quot;</span>),
+        p: limbs_from_hex(<span class="string">"ffffffff00000001000000000000000000000000ffffffffffffffffffffffff"</span>),
+        rr: limbs_from_hex(<span class="string">"4fffffffdfffffffffffffffefffffffbffffffff0000000000000003"</span>),
     },
-    n: Elem::from_hex(<span class="string">&quot;ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551&quot;</span>),
-    a: Elem::from_hex(<span class="string">&quot;fffffffc00000004000000000000000000000003fffffffffffffffffffffffc&quot;</span>),
-    b: Elem::from_hex(<span class="string">&quot;dc30061d04874834e5a220abf7212ed6acf005cd78843090d89cdf6229c4bddf&quot;</span>),
+    n: Elem::from_hex(<span class="string">"ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551"</span>),
+    a: Elem::from_hex(<span class="string">"fffffffc00000004000000000000000000000003fffffffffffffffffffffffc"</span>),
+    b: Elem::from_hex(<span class="string">"dc30061d04874834e5a220abf7212ed6acf005cd78843090d89cdf6229c4bddf"</span>),
 
     elem_mul_mont: p256_mul_mont,
     elem_sqr_mont: p256_sqr_mont,
@@ -442,25 +442,25 @@
     scalar_ops: <span class="kw-2">&amp;</span>SCALAR_OPS,
     public_key_ops: <span class="kw-2">&amp;</span>PUBLIC_KEY_OPS,
 
-    <span class="attr">#[cfg(any(target_arch = <span class="string">&quot;aarch64&quot;</span>, target_arch = <span class="string">&quot;x86_64&quot;</span>))]
+    <span class="attr">#[cfg(any(target_arch = <span class="string">"aarch64"</span>, target_arch = <span class="string">"x86_64"</span>))]
     </span>twin_mul: twin_mul_nistz256,
 
-    <span class="attr">#[cfg(not(any(target_arch = <span class="string">&quot;aarch64&quot;</span>, target_arch = <span class="string">&quot;x86_64&quot;</span>)))]
+    <span class="attr">#[cfg(not(any(target_arch = <span class="string">"aarch64"</span>, target_arch = <span class="string">"x86_64"</span>)))]
     </span>twin_mul: |g_scalar, p_scalar, p_xy| {
         twin_mul_inefficient(<span class="kw-2">&amp;</span>PRIVATE_KEY_OPS, g_scalar, p_scalar, p_xy)
     },
 
-    q_minus_n: Elem::from_hex(<span class="string">&quot;4319055358e8617b0c46353d039cdaae&quot;</span>),
+    q_minus_n: Elem::from_hex(<span class="string">"4319055358e8617b0c46353d039cdaae"</span>),
 };
 
-<span class="attr">#[cfg(any(target_arch = <span class="string">&quot;aarch64&quot;</span>, target_arch = <span class="string">&quot;x86_64&quot;</span>))]
+<span class="attr">#[cfg(any(target_arch = <span class="string">"aarch64"</span>, target_arch = <span class="string">"x86_64"</span>))]
 </span><span class="kw">fn </span>twin_mul_nistz256(g_scalar: <span class="kw-2">&amp;</span>Scalar, p_scalar: <span class="kw-2">&amp;</span>Scalar, p_xy: <span class="kw-2">&amp;</span>(Elem&lt;R&gt;, Elem&lt;R&gt;)) -&gt; Point {
     <span class="kw">let </span>scaled_g = point_mul_base_vartime(g_scalar);
     <span class="kw">let </span>scaled_p = PRIVATE_KEY_OPS.point_mul(p_scalar, p_xy);
     PRIVATE_KEY_OPS.common.point_sum(<span class="kw-2">&amp;</span>scaled_g, <span class="kw-2">&amp;</span>scaled_p)
 }
 
-<span class="attr">#[cfg(any(target_arch = <span class="string">&quot;aarch64&quot;</span>, target_arch = <span class="string">&quot;x86_64&quot;</span>))]
+<span class="attr">#[cfg(any(target_arch = <span class="string">"aarch64"</span>, target_arch = <span class="string">"x86_64"</span>))]
 </span><span class="kw">fn </span>point_mul_base_vartime(g_scalar: <span class="kw-2">&amp;</span>Scalar) -&gt; Point {
     <span class="macro">prefixed_extern! </span>{
         <span class="kw">fn </span>p256_point_mul_base_vartime(r: <span class="kw-2">*mut </span>Limb,          <span class="comment">// [3][COMMON_OPS.num_limbs]
@@ -478,12 +478,12 @@
     scalar_ops: <span class="kw-2">&amp;</span>SCALAR_OPS,
 
     oneRR_mod_n: Scalar::from_hex(
-        <span class="string">&quot;66e12d94f3d956202845b2392b6bec594699799c49bd6fa683244c95be79eea2&quot;</span>,
+        <span class="string">"66e12d94f3d956202845b2392b6bec594699799c49bd6fa683244c95be79eea2"</span>,
     ),
 };
 
 <span class="kw">fn </span>p256_scalar_inv_to_mont(a: <span class="kw-2">&amp;</span>Scalar&lt;Unencoded&gt;) -&gt; Scalar&lt;R&gt; {
-    <span class="comment">// Calculate the modular inverse of scalar |a| using Fermat&#39;s Little
+    <span class="comment">// Calculate the modular inverse of scalar |a| using Fermat's Little
     // Theorem:
     //
     //    a**-1 (mod n) == a**(n - 2) (mod n)
@@ -641,14 +641,14 @@
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
-    <span class="attr">#[cfg(any(target_arch = <span class="string">&quot;aarch64&quot;</span>, target_arch = <span class="string">&quot;x86_64&quot;</span>))]
+    <span class="attr">#[cfg(any(target_arch = <span class="string">"aarch64"</span>, target_arch = <span class="string">"x86_64"</span>))]
     #[test]
     </span><span class="kw">fn </span>p256_point_mul_base_vartime_test() {
         <span class="kw">use super</span>::{<span class="kw">super</span>::tests::point_mul_base_tests, <span class="kw-2">*</span>};
         point_mul_base_tests(
             <span class="kw-2">&amp;</span>PRIVATE_KEY_OPS,
             point_mul_base_vartime,
-            <span class="macro">test_file!</span>(<span class="string">&quot;p256_point_mul_base_tests.txt&quot;</span>),
+            <span class="macro">test_file!</span>(<span class="string">"p256_point_mul_base_tests.txt"</span>),
         );
     }
 }

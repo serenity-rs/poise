@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-0.21.9/src/msgs/handshake.rs`."><title>handshake.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="rustls" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-0.21.9/src/msgs/handshake.rs`."><title>handshake.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="rustls" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -2302,7 +2302,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::enums::{CipherSuite, HandshakeType, ProtocolVersion, SignatureScheme};
 <span class="kw">use </span><span class="kw">crate</span>::error::InvalidMessage;
 <span class="kw">use </span><span class="kw">crate</span>::key;
-<span class="attr">#[cfg(feature = <span class="string">&quot;logging&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"logging"</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::log::warn;
 <span class="kw">use </span><span class="kw">crate</span>::msgs::base::{Payload, PayloadU16, PayloadU24, PayloadU8};
 <span class="kw">use </span><span class="kw">crate</span>::msgs::codec::{<span class="self">self</span>, Codec, ListLength, Reader, TlsListElement};
@@ -2319,7 +2319,7 @@
 <span class="doccomment">/// Create a newtype wrapper around a given type.
 ///
 /// This is used to create newtypes for the various TLS message types which is used to wrap
-/// the `PayloadU8` or `PayloadU16` types. This is typically used for types where we don&#39;t need
+/// the `PayloadU8` or `PayloadU16` types. This is typically used for types where we don't need
 /// anything other than access to the underlying bytes.
 </span><span class="macro">macro_rules! </span>wrapped_payload(
   ($(<span class="attr">#[<span class="macro-nonterminal">$comment</span>:meta]</span>)* <span class="macro-nonterminal">$name</span>:ident, <span class="macro-nonterminal">$inner</span>:ident,) =&gt; {
@@ -2355,7 +2355,7 @@
 </span><span class="kw">pub struct </span>Random(<span class="kw">pub </span>[u8; <span class="number">32</span>]);
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>Random {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         <span class="kw">super</span>::base::hex(f, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>)
     }
 }
@@ -2375,7 +2375,7 @@
     <span class="kw">fn </span>read(r: <span class="kw-2">&amp;mut </span>Reader) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, InvalidMessage&gt; {
         <span class="kw">let </span>bytes = <span class="kw">match </span>r.take(<span class="number">32</span>) {
             <span class="prelude-val">Some</span>(bytes) =&gt; bytes,
-            <span class="prelude-val">None </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(InvalidMessage::MissingData(<span class="string">&quot;Random&quot;</span>)),
+            <span class="prelude-val">None </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(InvalidMessage::MissingData(<span class="string">"Random"</span>)),
         };
 
         <span class="kw">let </span><span class="kw-2">mut </span>opaque = [<span class="number">0</span>; <span class="number">32</span>];
@@ -2411,7 +2411,7 @@
 }
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>SessionId {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         <span class="kw">super</span>::base::hex(f, <span class="kw-2">&amp;</span><span class="self">self</span>.data[..<span class="self">self</span>.len])
     }
 }
@@ -2441,12 +2441,12 @@
     <span class="kw">fn </span>read(r: <span class="kw-2">&amp;mut </span>Reader) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, InvalidMessage&gt; {
         <span class="kw">let </span>len = u8::read(r)<span class="question-mark">? </span><span class="kw">as </span>usize;
         <span class="kw">if </span>len &gt; <span class="number">32 </span>{
-            <span class="kw">return </span><span class="prelude-val">Err</span>(InvalidMessage::TrailingData(<span class="string">&quot;SessionID&quot;</span>));
+            <span class="kw">return </span><span class="prelude-val">Err</span>(InvalidMessage::TrailingData(<span class="string">"SessionID"</span>));
         }
 
         <span class="kw">let </span>bytes = <span class="kw">match </span>r.take(len) {
             <span class="prelude-val">Some</span>(bytes) =&gt; bytes,
-            <span class="prelude-val">None </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(InvalidMessage::MissingData(<span class="string">&quot;SessionID&quot;</span>)),
+            <span class="prelude-val">None </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(InvalidMessage::MissingData(<span class="string">"SessionID"</span>)),
         };
 
         <span class="kw">let </span><span class="kw-2">mut </span>out = [<span class="number">0u8</span>; <span class="number">32</span>];
@@ -2525,7 +2525,7 @@
             <span class="prelude-val">Ok</span>(dns_name) =&gt; <span class="prelude-val">Ok</span>(<span class="self">Self</span>::HostName(dns_name)),
             <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; {
                 <span class="macro">warn!</span>(
-                    <span class="string">&quot;Illegal SNI hostname received {:?}&quot;</span>,
+                    <span class="string">"Illegal SNI hostname received {:?}"</span>,
                     String::from_utf8_lossy(<span class="kw-2">&amp;</span>raw.<span class="number">0</span>)
                 );
                 <span class="prelude-val">Err</span>(InvalidMessage::InvalidServerName)
@@ -2578,7 +2578,7 @@
 }
 
 <span class="kw">impl </span>ConvertServerNameList <span class="kw">for </span>[ServerName] {
-    <span class="doccomment">/// RFC6066: &quot;The ServerNameList MUST NOT contain more than one name of the same name_type.&quot;
+    <span class="doccomment">/// RFC6066: "The ServerNameList MUST NOT contain more than one name of the same name_type."
     </span><span class="kw">fn </span>has_duplicate_names_for_type(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         <span class="kw">let </span><span class="kw-2">mut </span>seen = collections::HashSet::new();
 
@@ -2957,7 +2957,7 @@
             <span class="kw">_ </span>=&gt; <span class="self">Self</span>::Unknown(UnknownExtension::read(typ, <span class="kw-2">&amp;mut </span>sub)),
         };
 
-        sub.expect_empty(<span class="string">&quot;ClientExtension&quot;</span>)
+        sub.expect_empty(<span class="string">"ClientExtension"</span>)
             .map(|<span class="kw">_</span>| ext)
     }
 }
@@ -2965,9 +2965,9 @@
 <span class="kw">fn </span>trim_hostname_trailing_dot_for_sni(dns_name: DnsNameRef) -&gt; DnsName {
     <span class="kw">let </span>dns_name_str: <span class="kw-2">&amp;</span>str = dns_name.as_ref();
 
-    <span class="comment">// RFC6066: &quot;The hostname is represented as a byte string using
-    // ASCII encoding without a trailing dot&quot;
-    </span><span class="kw">if </span>dns_name_str.ends_with(<span class="string">&#39;.&#39;</span>) {
+    <span class="comment">// RFC6066: "The hostname is represented as a byte string using
+    // ASCII encoding without a trailing dot"
+    </span><span class="kw">if </span>dns_name_str.ends_with(<span class="string">'.'</span>) {
         <span class="kw">let </span>trimmed = <span class="kw-2">&amp;</span>dns_name_str[<span class="number">0</span>..dns_name_str.len() - <span class="number">1</span>];
         DnsNameRef::try_from(trimmed)
             .unwrap()
@@ -3091,7 +3091,7 @@
             <span class="kw">_ </span>=&gt; <span class="self">Self</span>::Unknown(UnknownExtension::read(typ, <span class="kw-2">&amp;mut </span>sub)),
         };
 
-        sub.expect_empty(<span class="string">&quot;ServerExtension&quot;</span>)
+        sub.expect_empty(<span class="string">"ServerExtension"</span>)
             .map(|<span class="kw">_</span>| ext)
     }
 }
@@ -3107,7 +3107,7 @@
     }
 
     <span class="kw">pub fn </span>make_sct(sctl: Vec&lt;u8&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>scts = Vec::read_bytes(<span class="kw-2">&amp;</span>sctl).expect(<span class="string">&quot;invalid SCT list&quot;</span>);
+        <span class="kw">let </span>scts = Vec::read_bytes(<span class="kw-2">&amp;</span>sctl).expect(<span class="string">"invalid SCT list"</span>);
         <span class="self">Self</span>::SignedCertificateTimestamp(scts)
     }
 }
@@ -3150,8 +3150,8 @@
         }
 
         <span class="kw">match </span>(r.any_left(), ret.extensions.is_empty()) {
-            (<span class="bool-val">true</span>, <span class="kw">_</span>) =&gt; <span class="prelude-val">Err</span>(InvalidMessage::TrailingData(<span class="string">&quot;ClientHelloPayload&quot;</span>)),
-            (<span class="kw">_</span>, <span class="bool-val">true</span>) =&gt; <span class="prelude-val">Err</span>(InvalidMessage::MissingData(<span class="string">&quot;ClientHelloPayload&quot;</span>)),
+            (<span class="bool-val">true</span>, <span class="kw">_</span>) =&gt; <span class="prelude-val">Err</span>(InvalidMessage::TrailingData(<span class="string">"ClientHelloPayload"</span>)),
+            (<span class="kw">_</span>, <span class="bool-val">true</span>) =&gt; <span class="prelude-val">Err</span>(InvalidMessage::MissingData(<span class="string">"ClientHelloPayload"</span>)),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">Ok</span>(ret),
         }
     }
@@ -3375,7 +3375,7 @@
             <span class="kw">_ </span>=&gt; <span class="self">Self</span>::Unknown(UnknownExtension::read(typ, <span class="kw-2">&amp;mut </span>sub)),
         };
 
-        sub.expect_empty(<span class="string">&quot;HelloRetryExtension&quot;</span>)
+        sub.expect_empty(<span class="string">"HelloRetryExtension"</span>)
             .map(|<span class="kw">_</span>| ext)
     }
 }
@@ -3508,9 +3508,9 @@
         <span class="kw">let </span>compression = Compression::read(r)<span class="question-mark">?</span>;
 
         <span class="comment">// RFC5246:
-        // &quot;The presence of extensions can be detected by determining whether
+        // "The presence of extensions can be detected by determining whether
         //  there are bytes following the compression_method field at the end of
-        //  the ServerHello.&quot;
+        //  the ServerHello."
         </span><span class="kw">let </span>extensions = <span class="kw">if </span>r.any_left() { Vec::read(r)<span class="question-mark">? </span>} <span class="kw">else </span>{ <span class="macro">vec!</span>[] };
 
         <span class="kw">let </span>ret = <span class="self">Self </span>{
@@ -3522,7 +3522,7 @@
             extensions,
         };
 
-        r.expect_empty(<span class="string">&quot;ServerHelloPayload&quot;</span>)
+        r.expect_empty(<span class="string">"ServerHelloPayload"</span>)
             .map(|<span class="kw">_</span>| ret)
     }
 }
@@ -3587,7 +3587,7 @@
 }
 
 <span class="comment">// TLS1.3 changes the Certificate payload encoding.
-// That&#39;s annoying. It means the parsing is not
+// That's annoying. It means the parsing is not
 // context-free any more.
 
 </span><span class="attr">#[derive(Debug)]
@@ -3607,7 +3607,7 @@
     }
 
     <span class="kw">pub fn </span>make_sct(sct_list: Vec&lt;u8&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>sctl = Vec::read_bytes(<span class="kw-2">&amp;</span>sct_list).expect(<span class="string">&quot;invalid SCT list&quot;</span>);
+        <span class="kw">let </span>sctl = Vec::read_bytes(<span class="kw-2">&amp;</span>sct_list).expect(<span class="string">"invalid SCT list"</span>);
         <span class="self">Self</span>::SignedCertificateTimestamp(sctl)
     }
 
@@ -3655,7 +3655,7 @@
             <span class="kw">_ </span>=&gt; <span class="self">Self</span>::Unknown(UnknownExtension::read(typ, <span class="kw-2">&amp;mut </span>sub)),
         };
 
-        sub.expect_empty(<span class="string">&quot;CertificateExtension&quot;</span>)
+        sub.expect_empty(<span class="string">"CertificateExtension"</span>)
             .map(|<span class="kw">_</span>| ext)
     }
 }
@@ -3823,7 +3823,7 @@
     ECDHE,
 }
 
-<span class="comment">// We don&#39;t support arbitrary curves.  It&#39;s a terrible
+<span class="comment">// We don't support arbitrary curves.  It's a terrible
 // idea and unnecessary attack surface.  Please,
 // get a grip.
 </span><span class="attr">#[derive(Debug)]
@@ -4036,12 +4036,12 @@
     ///
     /// It contains the DER or BER encoded [`Subject` field from RFC 5280](https://datatracker.ietf.org/doc/html/rfc5280#section-4.1.2.6)
     /// for a single certificate. The Subject field is [encoded as an RFC 5280 `Name`](https://datatracker.ietf.org/doc/html/rfc5280#page-116).
-    /// It can be decoded using [x509-parser&#39;s FromDer trait](https://docs.rs/x509-parser/latest/x509_parser/prelude/trait.FromDer.html).
+    /// It can be decoded using [x509-parser's FromDer trait](https://docs.rs/x509-parser/latest/x509_parser/prelude/trait.FromDer.html).
     ///
     /// ```ignore
     /// for name in distinguished_names {
     ///     use x509_parser::prelude::FromDer;
-    ///     println!(&quot;{}&quot;, x509_parser::x509::X509Name::from_der(&amp;name.0)?.1);
+    ///     println!("{}", x509_parser::x509::X509Name::from_der(&amp;name.0)?.1);
     /// }
     /// ```
     </span>DistinguishedName,
@@ -4072,7 +4072,7 @@
         <span class="kw">let </span>canames = Vec::read(r)<span class="question-mark">?</span>;
 
         <span class="kw">if </span>sigschemes.is_empty() {
-            <span class="macro">warn!</span>(<span class="string">&quot;meaningless CertificateRequest message&quot;</span>);
+            <span class="macro">warn!</span>(<span class="string">"meaningless CertificateRequest message"</span>);
             <span class="prelude-val">Err</span>(InvalidMessage::NoSignatureSchemes)
         } <span class="kw">else </span>{
             <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
@@ -4136,7 +4136,7 @@
             <span class="kw">_ </span>=&gt; <span class="self">Self</span>::Unknown(UnknownExtension::read(typ, <span class="kw-2">&amp;mut </span>sub)),
         };
 
-        sub.expect_empty(<span class="string">&quot;CertReqExtension&quot;</span>)
+        sub.expect_empty(<span class="string">"CertReqExtension"</span>)
             .map(|<span class="kw">_</span>| ext)
     }
 }
@@ -4265,7 +4265,7 @@
             <span class="kw">_ </span>=&gt; <span class="self">Self</span>::Unknown(UnknownExtension::read(typ, <span class="kw-2">&amp;mut </span>sub)),
         };
 
-        sub.expect_empty(<span class="string">&quot;NewSessionTicketExtension&quot;</span>)
+        sub.expect_empty(<span class="string">"NewSessionTicketExtension"</span>)
             .map(|<span class="kw">_</span>| ext)
     }
 }
@@ -4506,7 +4506,7 @@
                 HandshakePayload::ServerKeyExchange(p)
             }
             HandshakeType::ServerHelloDone =&gt; {
-                sub.expect_empty(<span class="string">&quot;ServerHelloDone&quot;</span>)<span class="question-mark">?</span>;
+                sub.expect_empty(<span class="string">"ServerHelloDone"</span>)<span class="question-mark">?</span>;
                 HandshakePayload::ServerHelloDone
             }
             HandshakeType::ClientKeyExchange =&gt; {
@@ -4538,7 +4538,7 @@
                 HandshakePayload::KeyUpdate(KeyUpdateRequest::read(<span class="kw-2">&amp;mut </span>sub)<span class="question-mark">?</span>)
             }
             HandshakeType::EndOfEarlyData =&gt; {
-                sub.expect_empty(<span class="string">&quot;EndOfEarlyData&quot;</span>)<span class="question-mark">?</span>;
+                sub.expect_empty(<span class="string">"EndOfEarlyData"</span>)<span class="question-mark">?</span>;
                 HandshakePayload::EndOfEarlyData
             }
             HandshakeType::Finished =&gt; HandshakePayload::Finished(Payload::read(<span class="kw-2">&amp;mut </span>sub)),
@@ -4547,16 +4547,16 @@
             }
             HandshakeType::MessageHash =&gt; {
                 <span class="comment">// does not appear on the wire
-                </span><span class="kw">return </span><span class="prelude-val">Err</span>(InvalidMessage::UnexpectedMessage(<span class="string">&quot;MessageHash&quot;</span>));
+                </span><span class="kw">return </span><span class="prelude-val">Err</span>(InvalidMessage::UnexpectedMessage(<span class="string">"MessageHash"</span>));
             }
             HandshakeType::HelloRetryRequest =&gt; {
                 <span class="comment">// not legal on wire
-                </span><span class="kw">return </span><span class="prelude-val">Err</span>(InvalidMessage::UnexpectedMessage(<span class="string">&quot;HelloRetryRequest&quot;</span>));
+                </span><span class="kw">return </span><span class="prelude-val">Err</span>(InvalidMessage::UnexpectedMessage(<span class="string">"HelloRetryRequest"</span>));
             }
             <span class="kw">_ </span>=&gt; HandshakePayload::Unknown(Payload::read(<span class="kw-2">&amp;mut </span>sub)),
         };
 
-        sub.expect_empty(<span class="string">&quot;HandshakeMessagePayload&quot;</span>)
+        sub.expect_empty(<span class="string">"HandshakeMessagePayload"</span>)
             .map(|<span class="kw">_</span>| <span class="self">Self </span>{ typ, payload })
     }
 

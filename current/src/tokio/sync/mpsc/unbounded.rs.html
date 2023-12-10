@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/sync/mpsc/unbounded.rs`."><title>unbounded.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/sync/mpsc/unbounded.rs`."><title>unbounded.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -581,9 +581,9 @@
 }
 
 <span class="kw">impl</span>&lt;T&gt; fmt::Debug <span class="kw">for </span>UnboundedSender&lt;T&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        fmt.debug_struct(<span class="string">&quot;UnboundedSender&quot;</span>)
-            .field(<span class="string">&quot;chan&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.chan)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        fmt.debug_struct(<span class="string">"UnboundedSender"</span>)
+            .field(<span class="string">"chan"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.chan)
             .finish()
     }
 }
@@ -601,9 +601,9 @@
 }
 
 <span class="kw">impl</span>&lt;T&gt; fmt::Debug <span class="kw">for </span>UnboundedReceiver&lt;T&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        fmt.debug_struct(<span class="string">&quot;UnboundedReceiver&quot;</span>)
-            .field(<span class="string">&quot;chan&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.chan)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        fmt.debug_struct(<span class="string">"UnboundedReceiver"</span>)
+            .field(<span class="string">"chan"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.chan)
             .finish()
     }
 }
@@ -639,11 +639,11 @@
     <span class="doccomment">/// Receives the next value for this receiver.
     ///
     /// This method returns `None` if the channel has been closed and there are
-    /// no remaining messages in the channel&#39;s buffer. This indicates that no
+    /// no remaining messages in the channel's buffer. This indicates that no
     /// further values can ever be received from this `Receiver`. The channel is
     /// closed when all senders have been dropped, or when [`close`] is called.
     ///
-    /// If there are no messages in the channel&#39;s buffer, but the channel has
+    /// If there are no messages in the channel's buffer, but the channel has
     /// not yet been closed, this method will sleep until a message is sent or
     /// the channel is closed.
     ///
@@ -666,10 +666,10 @@
     ///     let (tx, mut rx) = mpsc::unbounded_channel();
     ///
     ///     tokio::spawn(async move {
-    ///         tx.send(&quot;hello&quot;).unwrap();
+    ///         tx.send("hello").unwrap();
     ///     });
     ///
-    ///     assert_eq!(Some(&quot;hello&quot;), rx.recv().await);
+    ///     assert_eq!(Some("hello"), rx.recv().await);
     ///     assert_eq!(None, rx.recv().await);
     /// }
     /// ```
@@ -683,11 +683,11 @@
     /// async fn main() {
     ///     let (tx, mut rx) = mpsc::unbounded_channel();
     ///
-    ///     tx.send(&quot;hello&quot;).unwrap();
-    ///     tx.send(&quot;world&quot;).unwrap();
+    ///     tx.send("hello").unwrap();
+    ///     tx.send("world").unwrap();
     ///
-    ///     assert_eq!(Some(&quot;hello&quot;), rx.recv().await);
-    ///     assert_eq!(Some(&quot;world&quot;), rx.recv().await);
+    ///     assert_eq!(Some("hello"), rx.recv().await);
+    ///     assert_eq!(Some("world"), rx.recv().await);
     /// }
     /// ```
     </span><span class="kw">pub async fn </span>recv(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;T&gt; {
@@ -703,13 +703,13 @@
     /// immediately with `0`. The return value is the number of values added to
     /// `buffer`.
     ///
-    /// For `limit &gt; 0`, if there are no messages in the channel&#39;s queue,
+    /// For `limit &gt; 0`, if there are no messages in the channel's queue,
     /// but the channel has not yet been closed, this method will sleep
     /// until a message is sent or the channel is closed.
     ///
     /// For non-zero values of `limit`, this method will never return `0` unless
     /// the channel has been closed and there are no remaining messages in the
-    /// channel&#39;s queue. This indicates that no further values can ever be
+    /// channel's queue. This indicates that no further values can ever be
     /// received from this `Receiver`. The channel is closed when all senders
     /// have been dropped, or when [`close`] is called.
     ///
@@ -735,33 +735,33 @@
     ///     let limit = 2;
     ///     let (tx, mut rx) = mpsc::unbounded_channel();
     ///     let tx2 = tx.clone();
-    ///     tx2.send(&quot;first&quot;).unwrap();
-    ///     tx2.send(&quot;second&quot;).unwrap();
-    ///     tx2.send(&quot;third&quot;).unwrap();
+    ///     tx2.send("first").unwrap();
+    ///     tx2.send("second").unwrap();
+    ///     tx2.send("third").unwrap();
     ///
     ///     // Call `recv_many` to receive up to `limit` (2) values.
     ///     assert_eq!(2, rx.recv_many(&amp;mut buffer, limit).await);
-    ///     assert_eq!(vec![&quot;first&quot;, &quot;second&quot;], buffer);
+    ///     assert_eq!(vec!["first", "second"], buffer);
     ///
     ///     // If the buffer is full, the next call to `recv_many`
     ///     // reserves additional capacity.
     ///     assert_eq!(1, rx.recv_many(&amp;mut buffer, limit).await);
     ///
     ///     tokio::spawn(async move {
-    ///         tx.send(&quot;fourth&quot;).unwrap();
+    ///         tx.send("fourth").unwrap();
     ///     });
     ///
-    ///     // &#39;tx&#39; is dropped, but `recv_many`
+    ///     // 'tx' is dropped, but `recv_many`
     ///     // is guaranteed not to return 0 as the channel
     ///     // is not yet closed.
     ///     assert_eq!(1, rx.recv_many(&amp;mut buffer, limit).await);
-    ///     assert_eq!(vec![&quot;first&quot;, &quot;second&quot;, &quot;third&quot;, &quot;fourth&quot;], buffer);
+    ///     assert_eq!(vec!["first", "second", "third", "fourth"], buffer);
     ///
     ///     // Once the last sender is dropped, the channel is
     ///     // closed and `recv_many` returns 0, capacity unchanged.
     ///     drop(tx2);
     ///     assert_eq!(0, rx.recv_many(&amp;mut buffer, limit).await);
-    ///     assert_eq!(vec![&quot;first&quot;, &quot;second&quot;, &quot;third&quot;, &quot;fourth&quot;], buffer);
+    ///     assert_eq!(vec!["first", "second", "third", "fourth"], buffer);
     /// }
     /// ```
     </span><span class="kw">pub async fn </span>recv_many(<span class="kw-2">&amp;mut </span><span class="self">self</span>, buffer: <span class="kw-2">&amp;mut </span>Vec&lt;T&gt;, limit: usize) -&gt; usize {
@@ -796,16 +796,16 @@
     /// async fn main() {
     ///     let (tx, mut rx) = mpsc::unbounded_channel();
     ///
-    ///     tx.send(&quot;hello&quot;).unwrap();
+    ///     tx.send("hello").unwrap();
     ///
-    ///     assert_eq!(Ok(&quot;hello&quot;), rx.try_recv());
+    ///     assert_eq!(Ok("hello"), rx.try_recv());
     ///     assert_eq!(Err(TryRecvError::Empty), rx.try_recv());
     ///
-    ///     tx.send(&quot;hello&quot;).unwrap();
+    ///     tx.send("hello").unwrap();
     ///     // Drop the last sender, closing the channel.
     ///     drop(tx);
     ///
-    ///     assert_eq!(Ok(&quot;hello&quot;), rx.try_recv());
+    ///     assert_eq!(Ok("hello"), rx.try_recv());
     ///     assert_eq!(Err(TryRecvError::Disconnected), rx.try_recv());
     /// }
     /// ```
@@ -839,8 +839,8 @@
     /// }
     /// ```
     </span><span class="attr">#[track_caller]
-    #[cfg(feature = <span class="string">&quot;sync&quot;</span>)]
-    #[cfg_attr(docsrs, doc(alias = <span class="string">&quot;recv_blocking&quot;</span>))]
+    #[cfg(feature = <span class="string">"sync"</span>)]
+    #[cfg_attr(docsrs, doc(alias = <span class="string">"recv_blocking"</span>))]
     </span><span class="kw">pub fn </span>blocking_recv(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;T&gt; {
         <span class="kw">crate</span>::future::block_on(<span class="self">self</span>.recv())
     }
@@ -877,7 +877,7 @@
     /// failure has been resolved. Note that receiving such a wakeup does not
     /// guarantee that the next call will succeed — it could fail with another
     /// spurious failure.
-    </span><span class="kw">pub fn </span>poll_recv(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;T&gt;&gt; {
+    </span><span class="kw">pub fn </span>poll_recv(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;T&gt;&gt; {
         <span class="self">self</span>.chan.recv(cx)
     }
 }
@@ -972,7 +972,7 @@
     ///         tx4.closed(),
     ///         tx5.closed()
     ///     );
-    </span><span class="comment">////     println!(&quot;Receiver dropped&quot;);
+    </span><span class="comment">////     println!("Receiver dropped");
     </span><span class="doccomment">/// }
     /// ```
     </span><span class="kw">pub async fn </span>closed(<span class="kw-2">&amp;</span><span class="self">self</span>) {
@@ -1039,15 +1039,15 @@
 <span class="kw">impl</span>&lt;T&gt; WeakUnboundedSender&lt;T&gt; {
     <span class="doccomment">/// Tries to convert a `WeakUnboundedSender` into an [`UnboundedSender`].
     /// This will return `Some` if there are other `Sender` instances alive and
-    /// the channel wasn&#39;t previously dropped, otherwise `None` is returned.
+    /// the channel wasn't previously dropped, otherwise `None` is returned.
     </span><span class="kw">pub fn </span>upgrade(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;UnboundedSender&lt;T&gt;&gt; {
         chan::Tx::upgrade(<span class="self">self</span>.chan.clone()).map(UnboundedSender::new)
     }
 }
 
 <span class="kw">impl</span>&lt;T&gt; fmt::Debug <span class="kw">for </span>WeakUnboundedSender&lt;T&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        fmt.debug_struct(<span class="string">&quot;WeakUnboundedSender&quot;</span>).finish()
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        fmt.debug_struct(<span class="string">"WeakUnboundedSender"</span>).finish()
     }
 }
 </code></pre></div></section></main></body></html>

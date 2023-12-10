@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-tungstenite-0.20.1/src/compat.rs`."><title>compat.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="tokio_tungstenite" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-tungstenite-0.20.1/src/compat.rs`."><title>compat.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="tokio_tungstenite" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -226,7 +226,7 @@
     //
     // Doing otherwise would cause only the latest waker to be remembered, so
     // in our case either the Stream or the Sink impl would potentially wait
-    // forever to be woken up because only the other one would&#39;ve been woken
+    // forever to be woken up because only the other one would've been woken
     // up.
     //
     // To solve this we implement a waker proxy that has two slots (one for
@@ -244,10 +244,10 @@
 }
 
 <span class="comment">// Internal trait used only in the Handshake module for registering
-// the waker for the context used during handshaking. We&#39;re using the
+// the waker for the context used during handshaking. We're using the
 // read waker slot for this, but any would do.
 //
-// Don&#39;t ever use this from multiple tasks at the same time!
+// Don't ever use this from multiple tasks at the same time!
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">trait </span>SetWaker {
     <span class="kw">fn </span>set_waker(<span class="kw-2">&amp;</span><span class="self">self</span>, waker: <span class="kw-2">&amp;</span>task::Waker);
 }
@@ -319,9 +319,9 @@
 {
     <span class="kw">fn </span>with_context&lt;F, R&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, kind: ContextWaker, f: F) -&gt; Poll&lt;std::io::Result&lt;R&gt;&gt;
     <span class="kw">where
-        </span>F: FnOnce(<span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;, Pin&lt;<span class="kw-2">&amp;mut </span>S&gt;) -&gt; Poll&lt;std::io::Result&lt;R&gt;&gt;,
+        </span>F: FnOnce(<span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, Pin&lt;<span class="kw-2">&amp;mut </span>S&gt;) -&gt; Poll&lt;std::io::Result&lt;R&gt;&gt;,
     {
-        <span class="macro">trace!</span>(<span class="string">&quot;{}:{} AllowStd.with_context&quot;</span>, <span class="macro">file!</span>(), <span class="macro">line!</span>());
+        <span class="macro">trace!</span>(<span class="string">"{}:{} AllowStd.with_context"</span>, <span class="macro">file!</span>(), <span class="macro">line!</span>());
         <span class="kw">let </span>waker = <span class="kw">match </span>kind {
             ContextWaker::Read =&gt; task::waker_ref(<span class="kw-2">&amp;</span><span class="self">self</span>.read_waker_proxy),
             ContextWaker::Write =&gt; task::waker_ref(<span class="kw-2">&amp;</span><span class="self">self</span>.write_waker_proxy),
@@ -344,10 +344,10 @@
     </span>S: AsyncRead + Unpin,
 {
     <span class="kw">fn </span>read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, buf: <span class="kw-2">&amp;mut </span>[u8]) -&gt; std::io::Result&lt;usize&gt; {
-        <span class="macro">trace!</span>(<span class="string">&quot;{}:{} Read.read&quot;</span>, <span class="macro">file!</span>(), <span class="macro">line!</span>());
+        <span class="macro">trace!</span>(<span class="string">"{}:{} Read.read"</span>, <span class="macro">file!</span>(), <span class="macro">line!</span>());
         <span class="kw">let </span><span class="kw-2">mut </span>buf = ReadBuf::new(buf);
         <span class="kw">match </span><span class="self">self</span>.with_context(ContextWaker::Read, |ctx, stream| {
-            <span class="macro">trace!</span>(<span class="string">&quot;{}:{} Read.with_context read -&gt; poll_read&quot;</span>, <span class="macro">file!</span>(), <span class="macro">line!</span>());
+            <span class="macro">trace!</span>(<span class="string">"{}:{} Read.with_context read -&gt; poll_read"</span>, <span class="macro">file!</span>(), <span class="macro">line!</span>());
             stream.poll_read(ctx, <span class="kw-2">&amp;mut </span>buf)
         }) {
             Poll::Ready(<span class="prelude-val">Ok</span>(<span class="kw">_</span>)) =&gt; <span class="prelude-val">Ok</span>(buf.filled().len()),
@@ -362,9 +362,9 @@
     </span>S: AsyncWrite + Unpin,
 {
     <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, buf: <span class="kw-2">&amp;</span>[u8]) -&gt; std::io::Result&lt;usize&gt; {
-        <span class="macro">trace!</span>(<span class="string">&quot;{}:{} Write.write&quot;</span>, <span class="macro">file!</span>(), <span class="macro">line!</span>());
+        <span class="macro">trace!</span>(<span class="string">"{}:{} Write.write"</span>, <span class="macro">file!</span>(), <span class="macro">line!</span>());
         <span class="kw">match </span><span class="self">self</span>.with_context(ContextWaker::Write, |ctx, stream| {
-            <span class="macro">trace!</span>(<span class="string">&quot;{}:{} Write.with_context write -&gt; poll_write&quot;</span>, <span class="macro">file!</span>(), <span class="macro">line!</span>());
+            <span class="macro">trace!</span>(<span class="string">"{}:{} Write.with_context write -&gt; poll_write"</span>, <span class="macro">file!</span>(), <span class="macro">line!</span>());
             stream.poll_write(ctx, buf)
         }) {
             Poll::Ready(r) =&gt; r,
@@ -373,9 +373,9 @@
     }
 
     <span class="kw">fn </span>flush(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; std::io::Result&lt;()&gt; {
-        <span class="macro">trace!</span>(<span class="string">&quot;{}:{} Write.flush&quot;</span>, <span class="macro">file!</span>(), <span class="macro">line!</span>());
+        <span class="macro">trace!</span>(<span class="string">"{}:{} Write.flush"</span>, <span class="macro">file!</span>(), <span class="macro">line!</span>());
         <span class="kw">match </span><span class="self">self</span>.with_context(ContextWaker::Write, |ctx, stream| {
-            <span class="macro">trace!</span>(<span class="string">&quot;{}:{} Write.with_context flush -&gt; poll_flush&quot;</span>, <span class="macro">file!</span>(), <span class="macro">line!</span>());
+            <span class="macro">trace!</span>(<span class="string">"{}:{} Write.with_context flush -&gt; poll_flush"</span>, <span class="macro">file!</span>(), <span class="macro">line!</span>());
             stream.poll_flush(ctx)
         }) {
             Poll::Ready(r) =&gt; r,
@@ -388,7 +388,7 @@
     <span class="kw">match </span>r {
         <span class="prelude-val">Ok</span>(v) =&gt; Poll::Ready(<span class="prelude-val">Ok</span>(v)),
         <span class="prelude-val">Err</span>(WsError::Io(<span class="kw-2">ref </span>e)) <span class="kw">if </span>e.kind() == std::io::ErrorKind::WouldBlock =&gt; {
-            <span class="macro">trace!</span>(<span class="string">&quot;WouldBlock&quot;</span>);
+            <span class="macro">trace!</span>(<span class="string">"WouldBlock"</span>);
             Poll::Pending
         }
         <span class="prelude-val">Err</span>(e) =&gt; Poll::Ready(<span class="prelude-val">Err</span>(e)),

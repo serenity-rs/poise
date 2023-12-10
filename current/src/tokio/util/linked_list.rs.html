@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/util/linked_list.rs`."><title>linked_list.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/util/linked_list.rs`."><title>linked_list.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -876,12 +876,12 @@
 <a href="#876" id="876">876</a>
 <a href="#877" id="877">877</a>
 <a href="#878" id="878">878</a>
-</pre></div><pre class="rust"><code><span class="attr">#![cfg_attr(not(feature = <span class="string">&quot;full&quot;</span>), allow(dead_code))]
+</pre></div><pre class="rust"><code><span class="attr">#![cfg_attr(not(feature = <span class="string">"full"</span>), allow(dead_code))]
 
 </span><span class="doccomment">//! An intrusive double linked list of data.
 //!
 //! The data structure supports tracking pinned nodes. Most of the data
-//! structure&#39;s APIs are `unsafe` as they require the caller to ensure the
+//! structure's APIs are `unsafe` as they require the caller to ensure the
 //! specified node is actually contained by the list.
 
 </span><span class="kw">use </span>core::cell::UnsafeCell;
@@ -892,7 +892,7 @@
 
 <span class="doccomment">/// An intrusive linked list.
 ///
-/// Currently, the list is not emptied on drop. It is the caller&#39;s
+/// Currently, the list is not emptied on drop. It is the caller's
 /// responsibility to ensure the list is empty before dropping it.
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>LinkedList&lt;L, T&gt; {
     <span class="doccomment">/// Linked list head
@@ -1098,10 +1098,10 @@
 }
 
 <span class="kw">impl</span>&lt;L: Link&gt; fmt::Debug <span class="kw">for </span>LinkedList&lt;L, L::Target&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        f.debug_struct(<span class="string">&quot;LinkedList&quot;</span>)
-            .field(<span class="string">&quot;head&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.head)
-            .field(<span class="string">&quot;tail&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.tail)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        f.debug_struct(<span class="string">"LinkedList"</span>)
+            .field(<span class="string">"head"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.head)
+            .field(<span class="string">"tail"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.tail)
             .finish()
     }
 }
@@ -1154,11 +1154,11 @@
 }
 
 <span class="attr">#[cfg(any(
-    feature = <span class="string">&quot;fs&quot;</span>,
-    feature = <span class="string">&quot;rt&quot;</span>,
-    all(unix, feature = <span class="string">&quot;process&quot;</span>),
-    feature = <span class="string">&quot;signal&quot;</span>,
-    feature = <span class="string">&quot;sync&quot;</span>,
+    feature = <span class="string">"fs"</span>,
+    feature = <span class="string">"rt"</span>,
+    all(unix, feature = <span class="string">"process"</span>),
+    feature = <span class="string">"signal"</span>,
+    feature = <span class="string">"sync"</span>,
 ))]
 </span><span class="kw">impl</span>&lt;L: Link&gt; LinkedList&lt;L, L::Target&gt; {
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>last(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>L::Target&gt; {
@@ -1176,14 +1176,14 @@
 <span class="comment">// ===== impl DrainFilter =====
 
 </span><span class="macro">cfg_io_driver_impl! </span>{
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>DrainFilter&lt;<span class="lifetime">&#39;a</span>, T: Link, F&gt; {
-        list: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>LinkedList&lt;T, T::Target&gt;,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>DrainFilter&lt;<span class="lifetime">'a</span>, T: Link, F&gt; {
+        list: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>LinkedList&lt;T, T::Target&gt;,
         filter: F,
         curr: <span class="prelude-ty">Option</span>&lt;NonNull&lt;T::Target&gt;&gt;,
     }
 
     <span class="kw">impl</span>&lt;T: Link&gt; LinkedList&lt;T, T::Target&gt; {
-        <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>drain_filter&lt;F&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, filter: F) -&gt; DrainFilter&lt;<span class="lifetime">&#39;_</span>, T, F&gt;
+        <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>drain_filter&lt;F&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, filter: F) -&gt; DrainFilter&lt;<span class="lifetime">'_</span>, T, F&gt;
         <span class="kw">where
             </span>F: FnMut(<span class="kw-2">&amp;</span>T::Target) -&gt; bool,
         {
@@ -1196,7 +1196,7 @@
         }
     }
 
-    <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T, F&gt; Iterator <span class="kw">for </span>DrainFilter&lt;<span class="lifetime">&#39;a</span>, T, F&gt;
+    <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T, F&gt; Iterator <span class="kw">for </span>DrainFilter&lt;<span class="lifetime">'a</span>, T, F&gt;
     <span class="kw">where
         </span>T: Link,
         F: FnMut(<span class="kw-2">&amp;</span>T::Target) -&gt; bool,
@@ -1253,10 +1253,10 @@
 
 </span><span class="macro">feature! </span>{
     <span class="attr">#![any(
-        feature = <span class="string">&quot;process&quot;</span>,
-        feature = <span class="string">&quot;sync&quot;</span>,
-        feature = <span class="string">&quot;rt&quot;</span>,
-        feature = <span class="string">&quot;signal&quot;</span>,
+        feature = <span class="string">"process"</span>,
+        feature = <span class="string">"sync"</span>,
+        feature = <span class="string">"rt"</span>,
+        feature = <span class="string">"signal"</span>,
     )]
 
     </span><span class="doccomment">/// An intrusive linked list, but instead of keeping pointers to the head
@@ -1279,7 +1279,7 @@
         /// with the head and tail nodes. Like with other nodes, you should guarantee
         /// that the guard node is pinned in memory.
         </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>into_guarded(<span class="self">self</span>, guard_handle: L::Handle) -&gt; GuardedLinkedList&lt;L, L::Target&gt; {
-            <span class="comment">// `guard_handle` is a NonNull pointer, we don&#39;t have to care about dropping it.
+            <span class="comment">// `guard_handle` is a NonNull pointer, we don't have to care about dropping it.
             </span><span class="kw">let </span>guard = L::as_raw(<span class="kw-2">&amp;</span>guard_handle);
 
             <span class="kw">unsafe </span>{
@@ -1391,12 +1391,12 @@
 }
 
 <span class="kw">impl</span>&lt;T&gt; fmt::Debug <span class="kw">for </span>Pointers&lt;T&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         <span class="kw">let </span>prev = <span class="self">self</span>.get_prev();
         <span class="kw">let </span>next = <span class="self">self</span>.get_next();
-        f.debug_struct(<span class="string">&quot;Pointers&quot;</span>)
-            .field(<span class="string">&quot;prev&quot;</span>, <span class="kw-2">&amp;</span>prev)
-            .field(<span class="string">&quot;next&quot;</span>, <span class="kw-2">&amp;</span>next)
+        f.debug_struct(<span class="string">"Pointers"</span>)
+            .field(<span class="string">"prev"</span>, <span class="kw-2">&amp;</span>prev)
+            .field(<span class="string">"next"</span>, <span class="kw-2">&amp;</span>next)
             .finish()
     }
 }
@@ -1415,15 +1415,15 @@
         val: i32,
     }
 
-    <span class="kw">unsafe impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Link <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Entry {
-        <span class="kw">type </span>Handle = Pin&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Entry&gt;;
+    <span class="kw">unsafe impl</span>&lt;<span class="lifetime">'a</span>&gt; Link <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>Entry {
+        <span class="kw">type </span>Handle = Pin&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>Entry&gt;;
         <span class="kw">type </span>Target = Entry;
 
-        <span class="kw">fn </span>as_raw(handle: <span class="kw-2">&amp;</span>Pin&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;_ </span>Entry&gt;) -&gt; NonNull&lt;Entry&gt; {
+        <span class="kw">fn </span>as_raw(handle: <span class="kw-2">&amp;</span>Pin&lt;<span class="kw-2">&amp;</span><span class="lifetime">'_ </span>Entry&gt;) -&gt; NonNull&lt;Entry&gt; {
             NonNull::from(handle.get_ref())
         }
 
-        <span class="kw">unsafe fn </span>from_raw(ptr: NonNull&lt;Entry&gt;) -&gt; Pin&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Entry&gt; {
+        <span class="kw">unsafe fn </span>from_raw(ptr: NonNull&lt;Entry&gt;) -&gt; Pin&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>Entry&gt; {
             Pin::new_unchecked(<span class="kw-2">&amp;*</span>ptr.as_ptr())
         }
 
@@ -1443,7 +1443,7 @@
         r.as_ref().get_ref().into()
     }
 
-    <span class="kw">fn </span>collect_list(list: <span class="kw-2">&amp;mut </span>LinkedList&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;_ </span>Entry, &lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;_ </span>Entry <span class="kw">as </span>Link&gt;::Target&gt;) -&gt; Vec&lt;i32&gt; {
+    <span class="kw">fn </span>collect_list(list: <span class="kw-2">&amp;mut </span>LinkedList&lt;<span class="kw-2">&amp;</span><span class="lifetime">'_ </span>Entry, &lt;<span class="kw-2">&amp;</span><span class="lifetime">'_ </span>Entry <span class="kw">as </span>Link&gt;::Target&gt;) -&gt; Vec&lt;i32&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>ret = <span class="macro">vec!</span>[];
 
         <span class="kw">while let </span><span class="prelude-val">Some</span>(entry) = list.pop_back() {
@@ -1453,9 +1453,9 @@
         ret
     }
 
-    <span class="kw">fn </span>push_all&lt;<span class="lifetime">&#39;a</span>&gt;(
-        list: <span class="kw-2">&amp;mut </span>LinkedList&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Entry, &lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;_ </span>Entry <span class="kw">as </span>Link&gt;::Target&gt;,
-        entries: <span class="kw-2">&amp;</span>[Pin&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Entry&gt;],
+    <span class="kw">fn </span>push_all&lt;<span class="lifetime">'a</span>&gt;(
+        list: <span class="kw-2">&amp;mut </span>LinkedList&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>Entry, &lt;<span class="kw-2">&amp;</span><span class="lifetime">'_ </span>Entry <span class="kw">as </span>Link&gt;::Target&gt;,
+        entries: <span class="kw-2">&amp;</span>[Pin&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>Entry&gt;],
     ) {
         <span class="kw">for </span>entry <span class="kw">in </span>entries.iter() {
             list.push_front(<span class="kw-2">*</span>entry);
@@ -1538,19 +1538,19 @@
             push_all(<span class="kw-2">&amp;mut </span>list, <span class="kw-2">&amp;</span>[c.as_ref(), b.as_ref(), a.as_ref()]);
             <span class="macro">assert!</span>(list.remove(ptr(<span class="kw-2">&amp;</span>a)).is_some());
             <span class="macro">assert_clean!</span>(a);
-            <span class="comment">// `a` should be no longer there and can&#39;t be removed twice
+            <span class="comment">// `a` should be no longer there and can't be removed twice
             </span><span class="macro">assert!</span>(list.remove(ptr(<span class="kw-2">&amp;</span>a)).is_none());
             <span class="macro">assert!</span>(!list.is_empty());
 
             <span class="macro">assert!</span>(list.remove(ptr(<span class="kw-2">&amp;</span>b)).is_some());
             <span class="macro">assert_clean!</span>(b);
-            <span class="comment">// `b` should be no longer there and can&#39;t be removed twice
+            <span class="comment">// `b` should be no longer there and can't be removed twice
             </span><span class="macro">assert!</span>(list.remove(ptr(<span class="kw-2">&amp;</span>b)).is_none());
             <span class="macro">assert!</span>(!list.is_empty());
 
             <span class="macro">assert!</span>(list.remove(ptr(<span class="kw-2">&amp;</span>c)).is_some());
             <span class="macro">assert_clean!</span>(c);
-            <span class="comment">// `b` should be no longer there and can&#39;t be removed twice
+            <span class="comment">// `b` should be no longer there and can't be removed twice
             </span><span class="macro">assert!</span>(list.remove(ptr(<span class="kw-2">&amp;</span>c)).is_none());
             <span class="macro">assert!</span>(list.is_empty());
         }
@@ -1615,7 +1615,7 @@
 
             <span class="macro">assert_clean!</span>(a);
 
-            <span class="comment">// a should be no longer there and can&#39;t be removed twice
+            <span class="comment">// a should be no longer there and can't be removed twice
             </span><span class="macro">assert!</span>(list.remove(ptr(<span class="kw-2">&amp;</span>a)).is_none());
 
             <span class="macro">assert_ptr_eq!</span>(b, list.head);

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/parking_lot_core-0.9.9/src/word_lock.rs`."><title>word_lock.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="parking_lot_core" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/parking_lot_core-0.9.9/src/word_lock.rs`."><title>word_lock.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="parking_lot_core" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -325,7 +325,7 @@
 <a href="#325" id="325">325</a>
 <a href="#326" id="326">326</a>
 <a href="#327" id="327">327</a>
-</pre></div><pre class="rust"><code><span class="comment">// Copyright 2016 Amanieu d&#39;Antras
+</pre></div><pre class="rust"><code><span class="comment">// Copyright 2016 Amanieu d'Antras
 //
 // Licensed under the Apache License, Version 2.0, &lt;LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0&gt; or the MIT license &lt;LICENSE-MIT or
@@ -354,7 +354,7 @@
     // This setup allows nodes to be added to the queue without a lock, while
     // still allowing O(1) removal of nodes from the processed part of the list.
     // The only cost is the O(n) processing, but this only needs to be done
-    // once for each node, and therefore isn&#39;t too expensive.
+    // once for each node, and therefore isn't too expensive.
     </span>queue_tail: Cell&lt;<span class="kw-2">*const </span>ThreadData&gt;,
     prev: Cell&lt;<span class="kw-2">*const </span>ThreadData&gt;,
     next: Cell&lt;<span class="kw-2">*const </span>ThreadData&gt;,
@@ -399,7 +399,7 @@
 <span class="kw">const </span>QUEUE_MASK: usize = !<span class="number">3</span>;
 
 <span class="comment">// Word-sized lock that is used to implement the parking_lot API. Since this
-// can&#39;t use parking_lot, it instead manages its own queue of waiting threads.
+// can't use parking_lot, it instead manages its own queue of waiting threads.
 </span><span class="kw">pub struct </span>WordLock {
     state: AtomicUsize,
 }
@@ -439,7 +439,7 @@
         <span class="kw">let </span><span class="kw-2">mut </span>spinwait = SpinWait::new();
         <span class="kw">let </span><span class="kw-2">mut </span>state = <span class="self">self</span>.state.load(Ordering::Relaxed);
         <span class="kw">loop </span>{
-            <span class="comment">// Grab the lock if it isn&#39;t locked, even if there is a queue on it
+            <span class="comment">// Grab the lock if it isn't locked, even if there is a queue on it
             </span><span class="kw">if </span>!state.is_locked() {
                 <span class="kw">match </span><span class="self">self</span>.state.compare_exchange_weak(
                     state,
@@ -488,7 +488,7 @@
                 }
 
                 <span class="comment">// Sleep until we are woken up by an unlock
-                // Ignoring unused unsafe, since it&#39;s only a few platforms where this is unsafe.
+                // Ignoring unused unsafe, since it's only a few platforms where this is unsafe.
                 </span><span class="attr">#[allow(unused_unsafe)]
                 </span><span class="kw">unsafe </span>{
                     thread_data.parker.park();
@@ -525,7 +525,7 @@
         }
 
         <span class="comment">// Now we have the queue lock and the queue is non-empty
-        </span><span class="lifetime">&#39;outer</span>: <span class="kw">loop </span>{
+        </span><span class="lifetime">'outer</span>: <span class="kw">loop </span>{
             <span class="comment">// First, we need to fill in the prev pointers for any newly added
             // threads. We do this until we reach a node that we previously
             // processed, which has a non-null queue_tail pointer.
@@ -591,7 +591,7 @@
                     } <span class="kw">else </span>{
                         <span class="comment">// Need an acquire fence before reading the new queue
                         </span>fence_acquire(<span class="kw-2">&amp;</span><span class="self">self</span>.state);
-                        <span class="kw">continue </span><span class="lifetime">&#39;outer</span>;
+                        <span class="kw">continue </span><span class="lifetime">'outer</span>;
                     }
                 }
             } <span class="kw">else </span>{
@@ -602,7 +602,7 @@
             }
 
             <span class="comment">// Finally, wake up the thread we removed from the queue. Note that
-            // we don&#39;t need to worry about any races here since the thread is
+            // we don't need to worry about any races here since the thread is
             // guaranteed to be sleeping right now and we are the only one who
             // can wake it up.
             </span><span class="kw">unsafe </span>{

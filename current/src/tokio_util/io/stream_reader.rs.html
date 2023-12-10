@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-util-0.7.10/src/io/stream_reader.rs`."><title>stream_reader.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio_util" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-util-0.7.10/src/io/stream_reader.rs`."><title>stream_reader.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio_util" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -365,7 +365,7 @@
 /// use bytes::Bytes;
 /// use tokio::io::{AsyncReadExt, Result};
 /// use tokio_util::io::StreamReader;
-/// # #[tokio::main(flavor = &quot;current_thread&quot;)]
+/// # #[tokio::main(flavor = "current_thread")]
 /// # async fn main() -&gt; std::io::Result&lt;()&gt; {
 ///
 /// // Create a stream from an iterator.
@@ -407,14 +407,14 @@
 /// use tokio::io::AsyncReadExt;
 /// use tokio_util::io::StreamReader;
 /// use tokio_stream::StreamExt;
-/// # #[tokio::main(flavor = &quot;current_thread&quot;)]
+/// # #[tokio::main(flavor = "current_thread")]
 /// # async fn main() -&gt; std::io::Result&lt;()&gt; {
 ///
 /// // Create a stream from an iterator, including an error.
 /// let stream = tokio_stream::iter(vec![
 ///     Result::Ok(Bytes::from_static(&amp;[0, 1, 2, 3])),
 ///     Result::Ok(Bytes::from_static(&amp;[4, 5, 6, 7])),
-///     Result::Err(&quot;Something bad happened!&quot;)
+///     Result::Err("Something bad happened!")
 /// ]);
 ///
 /// // Use StreamExt to map the stream and error to a std::io::Error
@@ -437,7 +437,7 @@
 /// // Reading the next chunk will produce an error
 /// let error = read.read(&amp;mut buf).await.unwrap_err();
 /// assert_eq!(error.kind(), std::io::ErrorKind::Other);
-/// assert_eq!(error.into_inner().unwrap().to_string(), &quot;Something bad happened!&quot;);
+/// assert_eq!(error.into_inner().unwrap().to_string(), "Something bad happened!");
 ///
 /// // We have now reached the end.
 /// assert_eq!(read.read(&amp;mut buf).await?, 0);
@@ -454,15 +454,15 @@
 /// ```
 /// use tokio::io::{Result, AsyncBufReadExt};
 /// use tokio_util::io::StreamReader;
-/// # #[tokio::main(flavor = &quot;current_thread&quot;)]
+/// # #[tokio::main(flavor = "current_thread")]
 /// # async fn main() -&gt; std::io::Result&lt;()&gt; {
 ///
 /// // Create a stream of byte chunks.
 /// let stream = tokio_stream::iter(vec![
-///     Result::Ok(b&quot;The first line.\n&quot;.as_slice()),
-///     Result::Ok(b&quot;The second line.&quot;.as_slice()),
-///     Result::Ok(b&quot;\nThe third&quot;.as_slice()),
-///     Result::Ok(b&quot; line.\nThe fourth line.\nThe fifth line.\n&quot;.as_slice()),
+///     Result::Ok(b"The first line.\n".as_slice()),
+///     Result::Ok(b"The second line.".as_slice()),
+///     Result::Ok(b"\nThe third".as_slice()),
+///     Result::Ok(b" line.\nThe fourth line.\nThe fifth line.\n".as_slice()),
 /// ]);
 ///
 /// // Convert it to an AsyncRead.
@@ -482,11 +482,11 @@
 /// assert_eq!(
 ///     lines,
 ///     vec![
-///         &quot;The first line.\n&quot;,
-///         &quot;The second line.\n&quot;,
-///         &quot;The third line.\n&quot;,
-///         &quot;The fourth line.\n&quot;,
-///         &quot;The fifth line.\n&quot;,
+///         "The first line.\n",
+///         "The second line.\n",
+///         "The third line.\n",
+///         "The fourth line.\n",
+///         "The fifth line.\n",
 ///     ]
 /// );
 /// # Ok(())
@@ -591,8 +591,8 @@
 {
     <span class="kw">fn </span>poll_read(
         <span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;,
-        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;,
-        buf: <span class="kw-2">&amp;mut </span>ReadBuf&lt;<span class="lifetime">&#39;_</span>&gt;,
+        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;,
+        buf: <span class="kw-2">&amp;mut </span>ReadBuf&lt;<span class="lifetime">'_</span>&gt;,
     ) -&gt; Poll&lt;io::Result&lt;()&gt;&gt; {
         <span class="kw">if </span>buf.remaining() == <span class="number">0 </span>{
             <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Ok</span>(()));
@@ -617,10 +617,10 @@
     B: Buf,
     E: Into&lt;std::io::Error&gt;,
 {
-    <span class="kw">fn </span>poll_fill_buf(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;io::Result&lt;<span class="kw-2">&amp;</span>[u8]&gt;&gt; {
+    <span class="kw">fn </span>poll_fill_buf(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;io::Result&lt;<span class="kw-2">&amp;</span>[u8]&gt;&gt; {
         <span class="kw">loop </span>{
             <span class="kw">if </span><span class="self">self</span>.as_mut().has_chunk() {
-                <span class="comment">// This unwrap is very sad, but it can&#39;t be avoided.
+                <span class="comment">// This unwrap is very sad, but it can't be avoided.
                 </span><span class="kw">let </span>buf = <span class="self">self</span>.project().chunk.as_ref().unwrap().chunk();
                 <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Ok</span>(buf));
             } <span class="kw">else </span>{
@@ -641,7 +641,7 @@
             <span class="self">self</span>.project()
                 .chunk
                 .as_mut()
-                .expect(<span class="string">&quot;No chunk present&quot;</span>)
+                .expect(<span class="string">"No chunk present"</span>)
                 .advance(amt);
         }
     }
@@ -654,14 +654,14 @@
 
 </span><span class="kw">impl</span>&lt;S: Unpin, B&gt; Unpin <span class="kw">for </span>StreamReader&lt;S, B&gt; {}
 
-<span class="kw">struct </span>StreamReaderProject&lt;<span class="lifetime">&#39;a</span>, S, B&gt; {
-    inner: Pin&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>S&gt;,
-    chunk: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="prelude-ty">Option</span>&lt;B&gt;,
+<span class="kw">struct </span>StreamReaderProject&lt;<span class="lifetime">'a</span>, S, B&gt; {
+    inner: Pin&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>S&gt;,
+    chunk: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span><span class="prelude-ty">Option</span>&lt;B&gt;,
 }
 
 <span class="kw">impl</span>&lt;S, B&gt; StreamReader&lt;S, B&gt; {
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>project(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;) -&gt; StreamReaderProject&lt;<span class="lifetime">&#39;_</span>, S, B&gt; {
+    </span><span class="kw">fn </span>project(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;) -&gt; StreamReaderProject&lt;<span class="lifetime">'_</span>, S, B&gt; {
         <span class="comment">// SAFETY: We define that only `inner` should be pinned when `Self` is
         // and have an appropriate `impl Unpin` for this.
         </span><span class="kw">let </span>me = <span class="kw">unsafe </span>{ Pin::into_inner_unchecked(<span class="self">self</span>) };
@@ -674,7 +674,7 @@
 
 <span class="kw">impl</span>&lt;S: Sink&lt;T, Error = E&gt;, E, T&gt; Sink&lt;T&gt; <span class="kw">for </span>StreamReader&lt;S, E&gt; {
     <span class="kw">type </span>Error = E;
-    <span class="kw">fn </span>poll_ready(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt;&gt; {
+    <span class="kw">fn </span>poll_ready(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt;&gt; {
         <span class="self">self</span>.project().inner.poll_ready(cx)
     }
 
@@ -682,11 +682,11 @@
         <span class="self">self</span>.project().inner.start_send(item)
     }
 
-    <span class="kw">fn </span>poll_flush(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt;&gt; {
+    <span class="kw">fn </span>poll_flush(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt;&gt; {
         <span class="self">self</span>.project().inner.poll_flush(cx)
     }
 
-    <span class="kw">fn </span>poll_close(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt;&gt; {
+    <span class="kw">fn </span>poll_close(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt;&gt; {
         <span class="self">self</span>.project().inner.poll_close(cx)
     }
 }

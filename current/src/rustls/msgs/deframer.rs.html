@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-0.21.9/src/msgs/deframer.rs`."><title>deframer.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="rustls" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-0.21.9/src/msgs/deframer.rs`."><title>deframer.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="rustls" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -761,7 +761,7 @@
     /// For buffer size management, checkout out the `read()` method.
     </span>buf: Vec&lt;u8&gt;,
 
-    <span class="doccomment">/// If we&#39;re in the middle of joining a handshake payload, this is the metadata.
+    <span class="doccomment">/// If we're in the middle of joining a handshake payload, this is the metadata.
     </span>joining_hs: <span class="prelude-ty">Option</span>&lt;HandshakePayloadMeta&gt;,
 
     <span class="doccomment">/// What size prefix of `buf` is used.
@@ -781,16 +781,16 @@
             <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>);
         }
 
-        <span class="comment">// We loop over records we&#39;ve received but not processed yet.
+        <span class="comment">// We loop over records we've received but not processed yet.
         // For records that decrypt as `Handshake`, we keep the current state of the joined
         // handshake message payload in `self.joining_hs`, appending to it as we see records.
         </span><span class="kw">let </span>expected_len = <span class="kw">loop </span>{
             <span class="kw">let </span>start = <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.joining_hs {
                 <span class="prelude-val">Some</span>(meta) =&gt; {
                     <span class="kw">match </span>meta.expected_len {
-                        <span class="comment">// We&#39;re joining a handshake payload, and we&#39;ve seen the full payload.
+                        <span class="comment">// We're joining a handshake payload, and we've seen the full payload.
                         </span><span class="prelude-val">Some</span>(len) <span class="kw">if </span>len &lt;= meta.payload.len() =&gt; <span class="kw">break </span>len,
-                        <span class="comment">// Not enough data, and we can&#39;t parse any more out of the buffer (QUIC).
+                        <span class="comment">// Not enough data, and we can't parse any more out of the buffer (QUIC).
                         </span><span class="kw">_ if </span>meta.quic =&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
                         <span class="comment">// Try parsing some more of the encrypted buffered data.
                         </span><span class="kw">_ </span>=&gt; meta.message.end,
@@ -822,7 +822,7 @@
                 }
             };
 
-            <span class="comment">// If we&#39;re in the middle of joining a handshake payload and the next message is not of
+            <span class="comment">// If we're in the middle of joining a handshake payload and the next message is not of
             // type handshake, yield an error. Return CCS messages immediately without decrypting.
             </span><span class="kw">let </span>end = start + rd.used();
             <span class="kw">if </span>m.typ == ContentType::ChangeCipherSpec &amp;&amp; <span class="self">self</span>.joining_hs.is_none() {
@@ -861,14 +861,14 @@
             };
 
             <span class="kw">if </span><span class="self">self</span>.joining_hs.is_some() &amp;&amp; msg.typ != ContentType::Handshake {
-                <span class="comment">// &quot;Handshake messages MUST NOT be interleaved with other record
+                <span class="comment">// "Handshake messages MUST NOT be interleaved with other record
                 // types.  That is, if a handshake message is split over two or more
-                // records, there MUST NOT be any other records between them.&quot;
+                // records, there MUST NOT be any other records between them."
                 // https://www.rfc-editor.org/rfc/rfc8446#section-5.1
                 </span><span class="kw">return </span><span class="prelude-val">Err</span>(<span class="self">self</span>.set_err(PeerMisbehaved::MessageInterleavedWithHandshakeMessage));
             }
 
-            <span class="comment">// If it&#39;s not a handshake message, just return it -- no joining necessary.
+            <span class="comment">// If it's not a handshake message, just return it -- no joining necessary.
             </span><span class="kw">if </span>msg.typ != ContentType::Handshake {
                 <span class="kw">let </span>end = start + rd.used();
                 <span class="self">self</span>.discard(end);
@@ -880,7 +880,7 @@
                 }));
             }
 
-            <span class="comment">// If we don&#39;t know the payload size yet or if the payload size is larger
+            <span class="comment">// If we don't know the payload size yet or if the payload size is larger
             // than the currently buffered payload, we need to wait for more data.
             </span><span class="kw">match </span><span class="self">self</span>.append_hs(msg.version, <span class="kw-2">&amp;</span>msg.payload.<span class="number">0</span>, end, <span class="bool-val">false</span>)<span class="question-mark">? </span>{
                 HandshakePayloadState::Blocked =&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
@@ -901,13 +901,13 @@
         <span class="comment">// But before we return, update the `joining_hs` state to skip past this payload.
         </span><span class="kw">if </span>meta.payload.len() &gt; expected_len {
             <span class="comment">// If we have another (beginning of) a handshake payload left in the buffer, update
-            // the payload start to point past the payload we&#39;re about to yield, and update the
+            // the payload start to point past the payload we're about to yield, and update the
             // `expected_len` to match the state of that remaining payload.
             </span>meta.payload.start += expected_len;
             meta.expected_len = payload_size(<span class="kw-2">&amp;</span><span class="self">self</span>.buf[meta.payload.start..meta.payload.end])<span class="question-mark">?</span>;
         } <span class="kw">else </span>{
-            <span class="comment">// Otherwise, we&#39;ve yielded the last handshake payload in the buffer, so we can
-            // discard all of the bytes that we&#39;re previously buffered as handshake data.
+            <span class="comment">// Otherwise, we've yielded the last handshake payload in the buffer, so we can
+            // discard all of the bytes that we're previously buffered as handshake data.
             </span><span class="kw">let </span>end = meta.message.end;
             <span class="self">self</span>.joining_hs = <span class="prelude-val">None</span>;
             <span class="self">self</span>.discard(end);
@@ -921,7 +921,7 @@
         }))
     }
 
-    <span class="doccomment">/// Fuses this deframer&#39;s error and returns the set value.
+    <span class="doccomment">/// Fuses this deframer's error and returns the set value.
     ///
     /// Any future calls to `pop` will return `err` again.
     </span><span class="kw">fn </span>set_err(<span class="kw-2">&amp;mut </span><span class="self">self</span>, err: <span class="kw">impl </span>Into&lt;Error&gt;) -&gt; Error {
@@ -931,11 +931,11 @@
     }
 
     <span class="doccomment">/// Allow pushing handshake messages directly into the buffer.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;quic&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"quic"</span>)]
     </span><span class="kw">pub fn </span>push(<span class="kw-2">&amp;mut </span><span class="self">self</span>, version: ProtocolVersion, payload: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
         <span class="kw">if </span><span class="self">self</span>.used &gt; <span class="number">0 </span>&amp;&amp; <span class="self">self</span>.joining_hs.is_none() {
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::General(
-                <span class="string">&quot;cannot push QUIC messages into unrelated connection&quot;</span>.into(),
+                <span class="string">"cannot push QUIC messages into unrelated connection"</span>.into(),
             ));
         } <span class="kw">else if let </span><span class="prelude-val">Err</span>(err) = <span class="self">self</span>.prepare_read() {
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::General(err.into()));
@@ -961,7 +961,7 @@
             <span class="prelude-val">Some</span>(meta) =&gt; {
                 <span class="macro">debug_assert_eq!</span>(meta.quic, quic);
 
-                <span class="comment">// We&#39;re joining a handshake message to the previous one here.
+                <span class="comment">// We're joining a handshake message to the previous one here.
                 // Write it into the buffer and update the metadata.
 
                 </span><span class="kw">let </span>dst = <span class="kw-2">&amp;mut </span><span class="self">self</span>.buf[meta.payload.end..meta.payload.end + payload.len()];
@@ -969,7 +969,7 @@
                 meta.message.end = end;
                 meta.payload.end += payload.len();
 
-                <span class="comment">// If we haven&#39;t parsed the payload size yet, try to do so now.
+                <span class="comment">// If we haven't parsed the payload size yet, try to do so now.
                 </span><span class="kw">if </span>meta.expected_len.is_none() {
                     meta.expected_len =
                         payload_size(<span class="kw-2">&amp;</span><span class="self">self</span>.buf[meta.payload.start..meta.payload.end])<span class="question-mark">?</span>;
@@ -978,7 +978,7 @@
                 meta
             }
             <span class="prelude-val">None </span>=&gt; {
-                <span class="comment">// We&#39;ve found a new handshake message here.
+                <span class="comment">// We've found a new handshake message here.
                 // Write it into the buffer and create the metadata.
 
                 </span><span class="kw">let </span>expected_len = payload_size(payload)<span class="question-mark">?</span>;
@@ -1024,7 +1024,7 @@
     }
 
     <span class="doccomment">/// Resize the internal `buf` if necessary for reading more bytes.
-    </span><span class="kw">fn </span>prepare_read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str&gt; {
+    </span><span class="kw">fn </span>prepare_read(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str&gt; {
         <span class="comment">// We allow a maximum of 64k of buffered data for handshake messages only. Enforce this
         // by varying the maximum allowed buffer size here based on whether a prefix of a
         // handshake payload is currently being buffered. Given that the first read of such a
@@ -1038,7 +1038,7 @@
         };
 
         <span class="kw">if </span><span class="self">self</span>.used &gt;= allow_max {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="string">&quot;message buffer full&quot;</span>);
+            <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="string">"message buffer full"</span>);
         }
 
         <span class="comment">// If we can and need to increase the buffer size to allow a 4k read, do so. After
@@ -1116,7 +1116,7 @@
     <span class="doccomment">/// True if this is a QUIC handshake message.
     ///
     /// In the case of QUIC, we get a plaintext handshake data directly from the CRYPTO stream,
-    /// so there&#39;s no need to unwrap and decrypt the outer TLS record. This is implemented
+    /// so there's no need to unwrap and decrypt the outer TLS record. This is implemented
     /// by directly calling `MessageDeframer::push()` from the connection.
     </span>quic: bool,
 }
@@ -1172,18 +1172,18 @@
 
     <span class="kw">use </span>std::io;
 
-    <span class="kw">const </span>FIRST_MESSAGE: <span class="kw-2">&amp;</span>[u8] = <span class="macro">include_bytes!</span>(<span class="string">&quot;../testdata/deframer-test.1.bin&quot;</span>);
-    <span class="kw">const </span>SECOND_MESSAGE: <span class="kw-2">&amp;</span>[u8] = <span class="macro">include_bytes!</span>(<span class="string">&quot;../testdata/deframer-test.2.bin&quot;</span>);
+    <span class="kw">const </span>FIRST_MESSAGE: <span class="kw-2">&amp;</span>[u8] = <span class="macro">include_bytes!</span>(<span class="string">"../testdata/deframer-test.1.bin"</span>);
+    <span class="kw">const </span>SECOND_MESSAGE: <span class="kw-2">&amp;</span>[u8] = <span class="macro">include_bytes!</span>(<span class="string">"../testdata/deframer-test.2.bin"</span>);
 
     <span class="kw">const </span>EMPTY_APPLICATIONDATA_MESSAGE: <span class="kw-2">&amp;</span>[u8] =
-        <span class="macro">include_bytes!</span>(<span class="string">&quot;../testdata/deframer-empty-applicationdata.bin&quot;</span>);
+        <span class="macro">include_bytes!</span>(<span class="string">"../testdata/deframer-empty-applicationdata.bin"</span>);
 
-    <span class="kw">const </span>INVALID_EMPTY_MESSAGE: <span class="kw-2">&amp;</span>[u8] = <span class="macro">include_bytes!</span>(<span class="string">&quot;../testdata/deframer-invalid-empty.bin&quot;</span>);
+    <span class="kw">const </span>INVALID_EMPTY_MESSAGE: <span class="kw-2">&amp;</span>[u8] = <span class="macro">include_bytes!</span>(<span class="string">"../testdata/deframer-invalid-empty.bin"</span>);
     <span class="kw">const </span>INVALID_CONTENTTYPE_MESSAGE: <span class="kw-2">&amp;</span>[u8] =
-        <span class="macro">include_bytes!</span>(<span class="string">&quot;../testdata/deframer-invalid-contenttype.bin&quot;</span>);
+        <span class="macro">include_bytes!</span>(<span class="string">"../testdata/deframer-invalid-contenttype.bin"</span>);
     <span class="kw">const </span>INVALID_VERSION_MESSAGE: <span class="kw-2">&amp;</span>[u8] =
-        <span class="macro">include_bytes!</span>(<span class="string">&quot;../testdata/deframer-invalid-version.bin&quot;</span>);
-    <span class="kw">const </span>INVALID_LENGTH_MESSAGE: <span class="kw-2">&amp;</span>[u8] = <span class="macro">include_bytes!</span>(<span class="string">&quot;../testdata/deframer-invalid-length.bin&quot;</span>);
+        <span class="macro">include_bytes!</span>(<span class="string">"../testdata/deframer-invalid-version.bin"</span>);
+    <span class="kw">const </span>INVALID_LENGTH_MESSAGE: <span class="kw-2">&amp;</span>[u8] = <span class="macro">include_bytes!</span>(<span class="string">"../testdata/deframer-invalid-length.bin"</span>);
 
     <span class="kw">fn </span>input_bytes(d: <span class="kw-2">&amp;mut </span>MessageDeframer, bytes: <span class="kw-2">&amp;</span>[u8]) -&gt; io::Result&lt;usize&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>rd = io::Cursor::new(bytes);
@@ -1227,7 +1227,7 @@
         <span class="kw">let </span>error = io::Error::from(io::ErrorKind::TimedOut);
         <span class="kw">let </span><span class="kw-2">mut </span>rd = ErrorRead::new(error);
         d.read(<span class="kw-2">&amp;mut </span>rd)
-            .expect_err(<span class="string">&quot;error not propagated&quot;</span>);
+            .expect_err(<span class="string">"error not propagated"</span>);
     }
 
     <span class="kw">fn </span>input_whole_incremental(d: <span class="kw-2">&amp;mut </span>MessageDeframer, bytes: <span class="kw-2">&amp;</span>[u8]) {
@@ -1245,7 +1245,7 @@
         <span class="kw">if let </span><span class="prelude-val">Ok</span>(gotval) = got {
             <span class="macro">assert_eq!</span>(gotval, want);
         } <span class="kw">else </span>{
-            <span class="macro">panic!</span>(<span class="string">&quot;read failed, expected {:?} bytes&quot;</span>, want);
+            <span class="macro">panic!</span>(<span class="string">"read failed, expected {:?} bytes"</span>, want);
         }
     }
 

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/miniz_oxide-0.7.1/src/inflate/core.rs`."><title>core.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="miniz_oxide" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/miniz_oxide-0.7.1/src/inflate/core.rs`."><title>core.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="miniz_oxide" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -2028,7 +2028,7 @@
 
     <span class="doccomment">/// Look for a symbol in the fast lookup table.
     /// The symbol is stored in the lower 9 bits, the length in the next 6.
-    /// If the returned value is negative, the code wasn&#39;t found in the
+    /// If the returned value is negative, the code wasn't found in the
     /// fast lookup table and the full tree has to be traversed to find the code.
     </span><span class="attr">#[inline]
     </span><span class="kw">fn </span>fast_lookup(<span class="kw-2">&amp;</span><span class="self">self</span>, bit_buf: BitBuffer) -&gt; i16 {
@@ -2059,7 +2059,7 @@
     /// Returns Some(symbol, length) on success,
     /// None if the length is 0.
     ///
-    /// It&#39;s possible we could avoid checking for 0 if we can guarantee a sane table.
+    /// It's possible we could avoid checking for 0 if we can guarantee a sane table.
     /// TODO: Check if a smaller type for code_len helps performance.
     </span><span class="kw">fn </span>lookup(<span class="kw-2">&amp;</span><span class="self">self</span>, bit_buf: BitBuffer) -&gt; <span class="prelude-ty">Option</span>&lt;(i32, u32)&gt; {
         <span class="kw">let </span>symbol = <span class="self">self</span>.fast_lookup(bit_buf).into();
@@ -2071,7 +2071,7 @@
                 </span><span class="prelude-val">None
             </span>}
         } <span class="kw">else </span>{
-            <span class="comment">// We didn&#39;t get a symbol from the fast lookup table, so check the tree instead.
+            <span class="comment">// We didn't get a symbol from the fast lookup table, so check the tree instead.
             </span><span class="prelude-val">Some</span>(<span class="self">self</span>.tree_lookup(symbol, bit_buf, FAST_LOOKUP_BITS.into()))
         }
     }
@@ -2104,10 +2104,10 @@
     /// RFC1950 zlib wrapper around the deflate stream.
     </span><span class="kw">pub const </span>TINFL_FLAG_PARSE_ZLIB_HEADER: u32 = <span class="number">1</span>;
 
-    <span class="doccomment">/// There will be more input that hasn&#39;t been given to the decompressor yet.
+    <span class="doccomment">/// There will be more input that hasn't been given to the decompressor yet.
     ///
     /// This is useful when you want to decompress what you have so far,
-    /// even if you know there is probably more input that hasn&#39;t gotten here yet (_e.g._, over a
+    /// even if you know there is probably more input that hasn't gotten here yet (_e.g._, over a
     /// network connection).  When [`decompress()`][super::decompress] reaches the end of the input
     /// without finding the end of the compressed stream, it will return
     /// [`TINFLStatus::NeedsMoreInput`][super::TINFLStatus::NeedsMoreInput] if this is set,
@@ -2119,7 +2119,7 @@
     <span class="doccomment">/// The output buffer should not wrap around.
     </span><span class="kw">pub const </span>TINFL_FLAG_USING_NON_WRAPPING_OUTPUT_BUF: u32 = <span class="number">4</span>;
 
-    <span class="doccomment">/// Calculate the adler32 checksum of the output data even if we&#39;re not inflating a zlib stream.
+    <span class="doccomment">/// Calculate the adler32 checksum of the output data even if we're not inflating a zlib stream.
     ///
     /// If [`TINFL_FLAG_IGNORE_ADLER32`] is specified, it will override this.
     ///
@@ -2144,10 +2144,10 @@
 
 <span class="kw">const </span>MIN_TABLE_SIZES: [u16; <span class="number">3</span>] = [<span class="number">257</span>, <span class="number">1</span>, <span class="number">4</span>];
 
-<span class="attr">#[cfg(target_pointer_width = <span class="string">&quot;64&quot;</span>)]
+<span class="attr">#[cfg(target_pointer_width = <span class="string">"64"</span>)]
 </span><span class="kw">type </span>BitBuffer = u64;
 
-<span class="attr">#[cfg(not(target_pointer_width = <span class="string">&quot;64&quot;</span>))]
+<span class="attr">#[cfg(not(target_pointer_width = <span class="string">"64"</span>))]
 </span><span class="kw">type </span>BitBuffer = u32;
 
 <span class="doccomment">/// Main decompression struct.
@@ -2389,7 +2389,7 @@
 /// # Panics
 /// Panics if there are less than four bytes left.
 </span><span class="attr">#[inline(always)]
-#[cfg(target_pointer_width = <span class="string">&quot;64&quot;</span>)]
+#[cfg(target_pointer_width = <span class="string">"64"</span>)]
 </span><span class="kw">fn </span>read_u32_le(iter: <span class="kw-2">&amp;mut </span>slice::Iter&lt;u8&gt;) -&gt; u32 {
     <span class="kw">let </span>ret = {
         <span class="kw">let </span>four_bytes: [u8; <span class="number">4</span>] = iter.as_ref()[..<span class="number">4</span>].try_into().unwrap();
@@ -2405,7 +2405,7 @@
 /// result in there being at least 32 bits in the bit buffer.
 /// This function assumes that there is at least 4 bytes left in the input buffer.
 </span><span class="attr">#[inline(always)]
-#[cfg(target_pointer_width = <span class="string">&quot;64&quot;</span>)]
+#[cfg(target_pointer_width = <span class="string">"64"</span>)]
 </span><span class="kw">fn </span>fill_bit_buffer(l: <span class="kw-2">&amp;mut </span>LocalVars, in_iter: <span class="kw-2">&amp;mut </span>slice::Iter&lt;u8&gt;) {
     <span class="comment">// Read four bytes into the buffer at once.
     </span><span class="kw">if </span>l.num_bits &lt; <span class="number">30 </span>{
@@ -2417,7 +2417,7 @@
 <span class="doccomment">/// Same as previous, but for non-64-bit platforms.
 /// Ensures at least 16 bits are present, requires at least 2 bytes in the in buffer.
 </span><span class="attr">#[inline(always)]
-#[cfg(not(target_pointer_width = <span class="string">&quot;64&quot;</span>))]
+#[cfg(not(target_pointer_width = <span class="string">"64"</span>))]
 </span><span class="kw">fn </span>fill_bit_buffer(l: <span class="kw-2">&amp;mut </span>LocalVars, in_iter: <span class="kw-2">&amp;mut </span>slice::Iter&lt;u8&gt;) {
     <span class="comment">// If the buffer is 32-bit wide, read 2 bytes instead.
     </span><span class="kw">if </span>l.num_bits &lt; <span class="number">15 </span>{
@@ -2447,7 +2447,7 @@
         </span>failed |= (mask + <span class="number">1</span>) &lt; window_size;
     }
 
-    <span class="comment">// Zlib doesn&#39;t allow window sizes above 32 * 1024.
+    <span class="comment">// Zlib doesn't allow window sizes above 32 * 1024.
     </span>failed |= window_size &gt; <span class="number">32_768</span>;
 
     <span class="kw">if </span>failed {
@@ -2486,7 +2486,7 @@
         <span class="comment">// First, make sure there is enough data in the bit buffer to decode a huffman code.
         </span><span class="kw">if </span>in_iter.len() &lt; <span class="number">2 </span>{
             <span class="comment">// If there is less than 2 bytes left in the input buffer, we try to look up
-            // the huffman code with what&#39;s available, and return if that doesn&#39;t succeed.
+            // the huffman code with what's available, and return if that doesn't succeed.
             // Original explanation in miniz:
             // /* TINFL_HUFF_BITBUF_FILL() is only used rarely, when the number of bytes
             //  * remaining in the input buffer falls below 2. */
@@ -2496,7 +2496,7 @@
             // /* Huffman code by using whatever bits are currently present in the bit buffer.
             //  * If this fails, it reads another byte, and tries again until it succeeds or
             //  * until the */
-            // /* bit buffer contains &gt;=15 bits (deflate&#39;s max. Huffman code size). */
+            // /* bit buffer contains &gt;=15 bits (deflate's max. Huffman code size). */
             </span><span class="kw">loop </span>{
                 <span class="kw">let </span><span class="kw-2">mut </span>temp = i32::from(r.tables[table].fast_lookup(l.bit_buf));
 
@@ -2559,7 +2559,7 @@
     </span><span class="kw">if </span>symbol &gt;= <span class="number">0 </span>{
         <span class="comment">// Get the length value from the top bits.
         // As we shift down the sign bit, converting to an unsigned value
-        // shouldn&#39;t overflow.
+        // shouldn't overflow.
         </span>code_len = (symbol &gt;&gt; <span class="number">9</span>) <span class="kw">as </span>u32;
         <span class="comment">// Mask out the length value.
         </span>symbol &amp;= <span class="number">511</span>;
@@ -2776,8 +2776,8 @@
 
 <span class="comment">// A helper macro for generating the state machine.
 //
-// As Rust doesn&#39;t have fallthrough on matches, we have to return to the match statement
-// and jump for each state change. (Which would ideally be optimized away, but often isn&#39;t.)
+// As Rust doesn't have fallthrough on matches, we have to return to the match statement
+// and jump for each state change. (Which would ideally be optimized away, but often isn't.)
 </span><span class="macro">macro_rules! </span>generate_state {
     (<span class="macro-nonterminal">$state</span>: ident, <span class="macro-nonterminal">$state_machine</span>: tt, <span class="macro-nonterminal">$f</span>: expr) =&gt; {
         <span class="kw">loop </span>{
@@ -2881,7 +2881,7 @@
         <span class="kw">return</span>;
     }
 
-    <span class="kw">if </span><span class="macro">cfg!</span>(not(any(target_arch = <span class="string">&quot;x86&quot;</span>, target_arch = <span class="string">&quot;x86_64&quot;</span>))) {
+    <span class="kw">if </span><span class="macro">cfg!</span>(not(any(target_arch = <span class="string">"x86"</span>, target_arch = <span class="string">"x86_64"</span>))) {
         <span class="comment">// We are not on x86 so copy manually.
         </span>transfer(out_slice, source_pos, out_pos, match_len, out_buf_size_mask);
         <span class="kw">return</span>;
@@ -2909,7 +2909,7 @@
 ///
 /// This was inspired by a similar optimization in zlib, which uses this info to do
 /// faster unchecked copies of multiple bytes at a time.
-/// Currently we don&#39;t do this here, but this function does avoid having to jump through the
+/// Currently we don't do this here, but this function does avoid having to jump through the
 /// big match loop on each state change(as rust does not have fallthrough or gotos at the moment),
 /// and already improves decompression speed a fair bit.
 </span><span class="kw">fn </span>decompress_fast(
@@ -2925,7 +2925,7 @@
     </span><span class="kw">let </span><span class="kw-2">mut </span>l = <span class="kw-2">*</span>local_vars;
     <span class="kw">let </span><span class="kw-2">mut </span>state;
 
-    <span class="kw">let </span>status: TINFLStatus = <span class="lifetime">&#39;o</span>: <span class="kw">loop </span>{
+    <span class="kw">let </span>status: TINFLStatus = <span class="lifetime">'o</span>: <span class="kw">loop </span>{
         state = State::DecodeLitlen;
         <span class="kw">loop </span>{
             <span class="comment">// This function assumes that there is at least 259 bytes left in the output buffer,
@@ -2936,7 +2936,7 @@
             // before checking again.
             </span><span class="kw">if </span>out_buf.bytes_left() &lt; <span class="number">259 </span>|| in_iter.len() &lt; <span class="number">14 </span>{
                 state = State::DecodeLitlen;
-                <span class="kw">break </span><span class="lifetime">&#39;o </span>TINFLStatus::Done;
+                <span class="kw">break </span><span class="lifetime">'o </span>TINFLStatus::Done;
             }
 
             fill_bit_buffer(<span class="kw-2">&amp;mut </span>l, in_iter);
@@ -2952,7 +2952,7 @@
                 } <span class="kw">else </span>{
                     <span class="comment">// If we have a 32-bit buffer we need to read another two bytes now
                     // to have enough bits to keep going.
-                    </span><span class="kw">if </span><span class="macro">cfg!</span>(not(target_pointer_width = <span class="string">&quot;64&quot;</span>)) {
+                    </span><span class="kw">if </span><span class="macro">cfg!</span>(not(target_pointer_width = <span class="string">"64"</span>)) {
                         fill_bit_buffer(<span class="kw-2">&amp;mut </span>l, in_iter);
                     }
 
@@ -2972,12 +2972,12 @@
                         }
                     } <span class="kw">else </span>{
                         state.begin(InvalidCodeLen);
-                        <span class="kw">break </span><span class="lifetime">&#39;o </span>TINFLStatus::Failed;
+                        <span class="kw">break </span><span class="lifetime">'o </span>TINFLStatus::Failed;
                     }
                 }
             } <span class="kw">else </span>{
                 state.begin(InvalidCodeLen);
-                <span class="kw">break </span><span class="lifetime">&#39;o </span>TINFLStatus::Failed;
+                <span class="kw">break </span><span class="lifetime">'o </span>TINFLStatus::Failed;
             }
         }
 
@@ -2986,12 +2986,12 @@
         <span class="kw">if </span>l.counter == <span class="number">256 </span>{
             <span class="comment">// We hit the end of block symbol.
             </span>state.begin(BlockDone);
-            <span class="kw">break </span><span class="lifetime">&#39;o </span>TINFLStatus::Done;
+            <span class="kw">break </span><span class="lifetime">'o </span>TINFLStatus::Done;
         } <span class="kw">else if </span>l.counter &gt; <span class="number">285 </span>{
             <span class="comment">// Invalid code.
             // We already verified earlier that the code is &gt; 256.
             </span>state.begin(InvalidLitlen);
-            <span class="kw">break </span><span class="lifetime">&#39;o </span>TINFLStatus::Failed;
+            <span class="kw">break </span><span class="lifetime">'o </span>TINFLStatus::Failed;
         } <span class="kw">else </span>{
             <span class="comment">// The symbol was a length code.
             // # Optimization
@@ -3013,7 +3013,7 @@
 
             <span class="comment">// We found a length code, so a distance code should follow.
 
-            </span><span class="kw">if </span><span class="macro">cfg!</span>(not(target_pointer_width = <span class="string">&quot;64&quot;</span>)) {
+            </span><span class="kw">if </span><span class="macro">cfg!</span>(not(target_pointer_width = <span class="string">"64"</span>)) {
                 fill_bit_buffer(<span class="kw-2">&amp;mut </span>l, in_iter);
             }
 
@@ -3023,14 +3023,14 @@
                 l.num_bits -= code_len;
                 <span class="kw">if </span>symbol &gt; <span class="number">29 </span>{
                     state.begin(InvalidDist);
-                    <span class="kw">break </span><span class="lifetime">&#39;o </span>TINFLStatus::Failed;
+                    <span class="kw">break </span><span class="lifetime">'o </span>TINFLStatus::Failed;
                 }
 
                 l.num_extra = u32::from(DIST_EXTRA[symbol <span class="kw">as </span>usize]);
                 l.dist = u32::from(DIST_BASE[symbol <span class="kw">as </span>usize]);
             } <span class="kw">else </span>{
                 state.begin(InvalidCodeLen);
-                <span class="kw">break </span><span class="lifetime">&#39;o </span>TINFLStatus::Failed;
+                <span class="kw">break </span><span class="lifetime">'o </span>TINFLStatus::Failed;
             }
 
             <span class="kw">if </span>l.num_extra != <span class="number">0 </span>{
@@ -3046,7 +3046,7 @@
                 &amp;&amp; (flags &amp; TINFL_FLAG_USING_NON_WRAPPING_OUTPUT_BUF != <span class="number">0</span>)
             {
                 <span class="comment">// We encountered a distance that refers a position before
-                // the start of the decoded data, so we can&#39;t continue.
+                // the start of the decoded data, so we can't continue.
                 </span>state.begin(DistanceOutOfBounds);
                 <span class="kw">break </span>TINFLStatus::Failed;
             }
@@ -3083,7 +3083,7 @@
 ///
 /// * The offset given by `out_pos` indicates where in the output buffer slice writing should start.
 /// * If [`TINFL_FLAG_USING_NON_WRAPPING_OUTPUT_BUF`] is not set, the output buffer is used in a
-/// wrapping manner, and it&#39;s size is required to be a power of 2.
+/// wrapping manner, and it's size is required to be a power of 2.
 /// * The decompression function normally needs access to 32KiB of the previously decompressed data
 ///(or to the beginning of the decompressed data if less than 32KiB has been decompressed.)
 ///     - If this data is not available, decompression may fail.
@@ -3102,7 +3102,7 @@
 /// Returns a tuple containing the status of the compressor, the number of input bytes read, and the
 /// number of bytes output to `out`.
 ///
-/// This function shouldn&#39;t panic pending any bugs.
+/// This function shouldn't panic pending any bugs.
 </span><span class="kw">pub fn </span>decompress(
     r: <span class="kw-2">&amp;mut </span>DecompressorOxide,
     in_buf: <span class="kw-2">&amp;</span>[u8],
@@ -3119,8 +3119,8 @@
         </span>out.len().saturating_sub(<span class="number">1</span>)
     };
 
-    <span class="comment">// Ensure the output buffer&#39;s size is a power of 2, unless the output buffer
-    // is large enough to hold the entire output file (in which case it doesn&#39;t
+    <span class="comment">// Ensure the output buffer's size is a power of 2, unless the output buffer
+    // is large enough to hold the entire output file (in which case it doesn't
     // matter).
     // Also make sure that the output buffer position is not past the end of the output buffer.
     </span><span class="kw">if </span>(out_buf_size_mask.wrapping_add(<span class="number">1</span>) &amp; out_buf_size_mask) != <span class="number">0 </span>|| out_pos &gt; out.len() {
@@ -3142,9 +3142,9 @@
         num_extra: r.num_extra,
     };
 
-    <span class="kw">let </span><span class="kw-2">mut </span>status = <span class="lifetime">&#39;state_machine</span>: <span class="kw">loop </span>{
+    <span class="kw">let </span><span class="kw-2">mut </span>status = <span class="lifetime">'state_machine</span>: <span class="kw">loop </span>{
         <span class="kw">match </span>state {
-            Start =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">&#39;state_machine</span>, {
+            Start =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">'state_machine</span>, {
                 l.bit_buf = <span class="number">0</span>;
                 l.num_bits = <span class="number">0</span>;
                 l.dist = <span class="number">0</span>;
@@ -3161,14 +3161,14 @@
                 }
             }),
 
-            ReadZlibCmf =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">&#39;state_machine</span>, {
+            ReadZlibCmf =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">'state_machine</span>, {
                 read_byte(<span class="kw-2">&amp;mut </span>in_iter, flags, |cmf| {
                     r.z_header0 = u32::from(cmf);
                     Action::Jump(State::ReadZlibFlg)
                 })
             }),
 
-            ReadZlibFlg =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">&#39;state_machine</span>, {
+            ReadZlibFlg =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">'state_machine</span>, {
                 read_byte(<span class="kw-2">&amp;mut </span>in_iter, flags, |flg| {
                     r.z_header1 = u32::from(flg);
                     validate_zlib_header(r.z_header0, r.z_header1, flags, out_buf_size_mask)
@@ -3176,7 +3176,7 @@
             }),
 
             <span class="comment">// Read the block header and jump to the relevant section depending on the block type.
-            </span>ReadBlockHeader =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">&#39;state_machine</span>, {
+            </span>ReadBlockHeader =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">'state_machine</span>, {
                 read_bits(<span class="kw-2">&amp;mut </span>l, <span class="number">3</span>, <span class="kw-2">&amp;mut </span>in_iter, flags, |l, bits| {
                     r.finish = (bits &amp; <span class="number">1</span>) <span class="kw">as </span>u32;
                     r.block_type = (bits &gt;&gt; <span class="number">1</span>) <span class="kw">as </span>u32 &amp; <span class="number">3</span>;
@@ -3197,7 +3197,7 @@
             }),
 
             <span class="comment">// Raw/Stored/uncompressed block.
-            </span>BlockTypeNoCompression =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">&#39;state_machine</span>, {
+            </span>BlockTypeNoCompression =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">'state_machine</span>, {
                 pad_to_bytes(<span class="kw-2">&amp;mut </span>l, <span class="kw-2">&amp;mut </span>in_iter, flags, |l| {
                     l.counter = <span class="number">0</span>;
                     Action::Jump(RawHeader)
@@ -3205,7 +3205,7 @@
             }),
 
             <span class="comment">// Check that the raw block header is correct.
-            </span>RawHeader =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">&#39;state_machine</span>, {
+            </span>RawHeader =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">'state_machine</span>, {
                 <span class="kw">if </span>l.counter &lt; <span class="number">4 </span>{
                     <span class="comment">// Read block length and block length check.
                     </span><span class="kw">if </span>l.num_bits != <span class="number">0 </span>{
@@ -3247,7 +3247,7 @@
             }),
 
             <span class="comment">// Read the byte from the bit buffer.
-            </span>RawReadFirstByte =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">&#39;state_machine</span>, {
+            </span>RawReadFirstByte =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">'state_machine</span>, {
                 read_bits(<span class="kw-2">&amp;mut </span>l, <span class="number">8</span>, <span class="kw-2">&amp;mut </span>in_iter, flags, |l, bits| {
                     l.dist = bits <span class="kw">as </span>u32;
                     Action::Jump(RawStoreFirstByte)
@@ -3255,7 +3255,7 @@
             }),
 
             <span class="comment">// Write the byte we just read to the output buffer.
-            </span>RawStoreFirstByte =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">&#39;state_machine</span>, {
+            </span>RawStoreFirstByte =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">'state_machine</span>, {
                 <span class="kw">if </span>out_buf.bytes_left() == <span class="number">0 </span>{
                     Action::End(TINFLStatus::HasMoreOutput)
                 } <span class="kw">else </span>{
@@ -3273,7 +3273,7 @@
                 }
             }),
 
-            RawMemcpy1 =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">&#39;state_machine</span>, {
+            RawMemcpy1 =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">'state_machine</span>, {
                 <span class="kw">if </span>l.counter == <span class="number">0 </span>{
                     Action::Jump(BlockDone)
                 } <span class="kw">else if </span>out_buf.bytes_left() == <span class="number">0 </span>{
@@ -3283,7 +3283,7 @@
                 }
             }),
 
-            RawMemcpy2 =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">&#39;state_machine</span>, {
+            RawMemcpy2 =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">'state_machine</span>, {
                 <span class="kw">if </span>in_iter.len() &gt; <span class="number">0 </span>{
                     <span class="comment">// Copy as many raw bytes as possible from the input to the output using memcpy.
                     // Raw block lengths are limited to 64 * 1024, so casting through usize and u32
@@ -3306,7 +3306,7 @@
             }),
 
             <span class="comment">// Read how many huffman codes/symbols are used for each table.
-            </span>ReadTableSizes =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">&#39;state_machine</span>, {
+            </span>ReadTableSizes =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">'state_machine</span>, {
                 <span class="kw">if </span>l.counter &lt; <span class="number">3 </span>{
                     <span class="kw">let </span>num_bits = [<span class="number">5</span>, <span class="number">5</span>, <span class="number">4</span>][l.counter <span class="kw">as </span>usize];
                     read_bits(<span class="kw-2">&amp;mut </span>l, num_bits, <span class="kw-2">&amp;mut </span>in_iter, flags, |l, bits| {
@@ -3335,7 +3335,7 @@
 
             <span class="comment">// Read the 3-bit lengths of the huffman codes describing the huffman code lengths used
             // to decode the lengths of the main tables.
-            </span>ReadHufflenTableCodeSize =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">&#39;state_machine</span>, {
+            </span>ReadHufflenTableCodeSize =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">'state_machine</span>, {
                 <span class="kw">if </span>l.counter &lt; r.table_sizes[HUFFLEN_TABLE] {
                     read_bits(<span class="kw-2">&amp;mut </span>l, <span class="number">3</span>, <span class="kw-2">&amp;mut </span>in_iter, flags, |l, bits| {
                         <span class="comment">// These lengths are not stored in a normal ascending order, but rather one
@@ -3353,7 +3353,7 @@
                 }
             }),
 
-            ReadLitlenDistTablesCodeSize =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">&#39;state_machine</span>, {
+            ReadLitlenDistTablesCodeSize =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">'state_machine</span>, {
                 <span class="kw">if </span>l.counter &lt; r.table_sizes[LITLEN_TABLE] + r.table_sizes[DIST_TABLE] {
                     decode_huffman_code(
                         r, <span class="kw-2">&amp;mut </span>l, HUFFLEN_TABLE,
@@ -3388,7 +3388,7 @@
                 }
             }),
 
-            ReadExtraBitsCodeSize =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">&#39;state_machine</span>, {
+            ReadExtraBitsCodeSize =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">'state_machine</span>, {
                 <span class="kw">let </span>num_extra = l.num_extra;
                 read_bits(<span class="kw-2">&amp;mut </span>l, num_extra, <span class="kw-2">&amp;mut </span>in_iter, flags, |l, <span class="kw-2">mut </span>extra_bits| {
                     <span class="comment">// Mask to avoid a bounds check.
@@ -3410,7 +3410,7 @@
                 })
             }),
 
-            DecodeLitlen =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">&#39;state_machine</span>, {
+            DecodeLitlen =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">'state_machine</span>, {
                 <span class="kw">if </span>in_iter.len() &lt; <span class="number">4 </span>|| out_buf.bytes_left() &lt; <span class="number">2 </span>{
                     <span class="comment">// See if we can decode a literal with the data we have left.
                     // Jumps to next state (WriteSymbol) if successful.
@@ -3461,7 +3461,7 @@
                     } <span class="kw">else </span>{
                         <span class="comment">// If we have a 32-bit buffer we need to read another two bytes now
                         // to have enough bits to keep going.
-                        </span><span class="kw">if </span><span class="macro">cfg!</span>(not(target_pointer_width = <span class="string">&quot;64&quot;</span>)) {
+                        </span><span class="kw">if </span><span class="macro">cfg!</span>(not(target_pointer_width = <span class="string">"64"</span>)) {
                             fill_bit_buffer(<span class="kw-2">&amp;mut </span>l, <span class="kw-2">&amp;mut </span>in_iter);
                         }
 
@@ -3491,7 +3491,7 @@
                 }
             }),
 
-            WriteSymbol =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">&#39;state_machine</span>, {
+            WriteSymbol =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">'state_machine</span>, {
                 <span class="kw">if </span>l.counter &gt;= <span class="number">256 </span>{
                     Action::Jump(HuffDecodeOuterLoop1)
                 } <span class="kw">else if </span>out_buf.bytes_left() &gt; <span class="number">0 </span>{
@@ -3502,7 +3502,7 @@
                 }
             }),
 
-            HuffDecodeOuterLoop1 =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">&#39;state_machine</span>, {
+            HuffDecodeOuterLoop1 =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">'state_machine</span>, {
                 <span class="comment">// Mask the top bits since they may contain length info.
                 </span>l.counter &amp;= <span class="number">511</span>;
 
@@ -3532,7 +3532,7 @@
                 }
             }),
 
-            ReadExtraBitsLitlen =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">&#39;state_machine</span>, {
+            ReadExtraBitsLitlen =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">'state_machine</span>, {
                 <span class="kw">let </span>num_extra = l.num_extra;
                 read_bits(<span class="kw-2">&amp;mut </span>l, num_extra, <span class="kw-2">&amp;mut </span>in_iter, flags, |l, extra_bits| {
                     l.counter += extra_bits <span class="kw">as </span>u32;
@@ -3540,7 +3540,7 @@
                 })
             }),
 
-            DecodeDistance =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">&#39;state_machine</span>, {
+            DecodeDistance =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">'state_machine</span>, {
                 <span class="comment">// Try to read a huffman code from the input buffer and look up what
                 // length code the decoded symbol refers to.
                 </span>decode_huffman_code(r, <span class="kw-2">&amp;mut </span>l, DIST_TABLE, flags, <span class="kw-2">&amp;mut </span>in_iter, |_r, l, symbol| {
@@ -3563,7 +3563,7 @@
                 })
             }),
 
-            ReadExtraBitsDistance =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">&#39;state_machine</span>, {
+            ReadExtraBitsDistance =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">'state_machine</span>, {
                 <span class="kw">let </span>num_extra = l.num_extra;
                 read_bits(<span class="kw-2">&amp;mut </span>l, num_extra, <span class="kw-2">&amp;mut </span>in_iter, flags, |l, extra_bits| {
                     l.dist += extra_bits <span class="kw">as </span>u32;
@@ -3571,12 +3571,12 @@
                 })
             }),
 
-            HuffDecodeOuterLoop2 =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">&#39;state_machine</span>, {
+            HuffDecodeOuterLoop2 =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">'state_machine</span>, {
                 <span class="kw">if </span>l.dist <span class="kw">as </span>usize &gt; out_buf.position() &amp;&amp;
                     (flags &amp; TINFL_FLAG_USING_NON_WRAPPING_OUTPUT_BUF != <span class="number">0</span>)
                 {
                     <span class="comment">// We encountered a distance that refers a position before
-                    // the start of the decoded data, so we can&#39;t continue.
+                    // the start of the decoded data, so we can't continue.
                     </span>Action::Jump(DistanceOutOfBounds)
                 } <span class="kw">else </span>{
                     <span class="kw">let </span>out_pos = out_buf.position();
@@ -3587,8 +3587,8 @@
                     <span class="kw">let </span>match_end_pos = out_buf.position() + l.counter <span class="kw">as </span>usize;
 
                     <span class="kw">if </span>match_end_pos &gt; out_len ||
-                        <span class="comment">// miniz doesn&#39;t do this check here. Not sure how it makes sure
-                        // that this case doesn&#39;t happen.
+                        <span class="comment">// miniz doesn't do this check here. Not sure how it makes sure
+                        // that this case doesn't happen.
                         </span>(source_pos &gt;= out_pos &amp;&amp; (source_pos - out_pos) &lt; l.counter <span class="kw">as </span>usize)
                     {
                         <span class="comment">// Not enough space for all of the data in the output buffer,
@@ -3612,7 +3612,7 @@
                 }
             }),
 
-            WriteLenBytesToEnd =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">&#39;state_machine</span>, {
+            WriteLenBytesToEnd =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">'state_machine</span>, {
                 <span class="kw">if </span>out_buf.bytes_left() &gt; <span class="number">0 </span>{
                     <span class="kw">let </span>out_pos = out_buf.position();
                     <span class="kw">let </span>source_pos = out_buf.position()
@@ -3635,8 +3635,8 @@
                 }
             }),
 
-            BlockDone =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">&#39;state_machine</span>, {
-                <span class="comment">// End once we&#39;ve read the last block.
+            BlockDone =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">'state_machine</span>, {
+                <span class="comment">// End once we've read the last block.
                 </span><span class="kw">if </span>r.finish != <span class="number">0 </span>{
                     pad_to_bytes(<span class="kw-2">&amp;mut </span>l, <span class="kw-2">&amp;mut </span>in_iter, flags, |<span class="kw">_</span>| Action::None);
 
@@ -3658,7 +3658,7 @@
                 }
             }),
 
-            ReadAdler32 =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">&#39;state_machine</span>, {
+            ReadAdler32 =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">'state_machine</span>, {
                 <span class="kw">if </span>l.counter &lt; <span class="number">4 </span>{
                     <span class="kw">if </span>l.num_bits != <span class="number">0 </span>{
                         read_bits(<span class="kw-2">&amp;mut </span>l, <span class="number">8</span>, <span class="kw-2">&amp;mut </span>in_iter, flags, |l, bits| {
@@ -3701,7 +3701,7 @@
     </span>};
 
     <span class="comment">// Make sure HasMoreOutput overrides NeedsMoreInput if the output buffer is full.
-    // (Unless the missing input is the adler32 value in which case we don&#39;t need to write anything.)
+    // (Unless the missing input is the adler32 value in which case we don't need to write anything.)
     // TODO: May want to see if we can do this in a better way.
     </span><span class="kw">if </span>status == TINFLStatus::NeedsMoreInput
         &amp;&amp; out_buf.bytes_left() == <span class="number">0
@@ -3757,12 +3757,12 @@
 
     <span class="comment">//TODO: Fix these.
 
-    </span><span class="kw">fn </span>tinfl_decompress_oxide&lt;<span class="lifetime">&#39;i</span>&gt;(
+    </span><span class="kw">fn </span>tinfl_decompress_oxide&lt;<span class="lifetime">'i</span>&gt;(
         r: <span class="kw-2">&amp;mut </span>DecompressorOxide,
-        input_buffer: <span class="kw-2">&amp;</span><span class="lifetime">&#39;i </span>[u8],
+        input_buffer: <span class="kw-2">&amp;</span><span class="lifetime">'i </span>[u8],
         output_buffer: <span class="kw-2">&amp;mut </span>[u8],
         flags: u32,
-    ) -&gt; (TINFLStatus, <span class="kw-2">&amp;</span><span class="lifetime">&#39;i </span>[u8], usize) {
+    ) -&gt; (TINFLStatus, <span class="kw-2">&amp;</span><span class="lifetime">'i </span>[u8], usize) {
         <span class="kw">let </span>(status, in_pos, out_pos) = decompress(r, input_buffer, output_buffer, <span class="number">0</span>, flags);
         (status, <span class="kw-2">&amp;</span>input_buffer[in_pos..], out_pos)
     }
@@ -3790,7 +3790,7 @@
         <span class="comment">// With TINFL_FLAG_USING_NON_WRAPPING_OUTPUT_BUF set this should no longer fail.
         </span><span class="kw">let </span>b_status = tinfl_decompress_oxide(<span class="kw-2">&amp;mut </span>b, <span class="kw-2">&amp;</span>encoded[..], b_buf.as_mut_slice(), flags);
 
-        <span class="macro">assert_eq!</span>(b_buf[..b_status.<span class="number">2</span>], <span class="string">b&quot;Hello, zlib!&quot;</span>[..]);
+        <span class="macro">assert_eq!</span>(b_buf[..b_status.<span class="number">2</span>], <span class="string">b"Hello, zlib!"</span>[..]);
         <span class="macro">assert_eq!</span>(b_status.<span class="number">0</span>, TINFLStatus::Done);
     }
 
@@ -3798,7 +3798,7 @@
     </span><span class="kw">fn </span>raw_block() {
         <span class="kw">const </span>LEN: usize = <span class="number">64</span>;
 
-        <span class="kw">let </span>text = <span class="string">b&quot;Hello, zlib!&quot;</span>;
+        <span class="kw">let </span>text = <span class="string">b"Hello, zlib!"</span>;
         <span class="kw">let </span>encoded = {
             <span class="kw">let </span>len = text.len();
             <span class="kw">let </span>notlen = !len;
@@ -3889,7 +3889,7 @@
 
         <span class="comment">// Too many code lengths. (From inflate library issues)
         </span>cr(
-            <span class="string">b&quot;M\xff\xffM*\xad\xad\xad\xad\xad\xad\xad\xcd\xcd\xcdM&quot;</span>,
+            <span class="string">b"M\xff\xffM*\xad\xad\xad\xad\xad\xad\xad\xcd\xcd\xcdM"</span>,
             F,
             State::BadDistOrLiteralTableLength,
             <span class="bool-val">false</span>,
@@ -3897,7 +3897,7 @@
 
         <span class="comment">// Bad CLEN (also from inflate library issues)
         </span>cr(
-            <span class="string">b&quot;\xdd\xff\xff*M\x94ffffffffff&quot;</span>,
+            <span class="string">b"\xdd\xff\xff*M\x94ffffffffff"</span>,
             F,
             State::BadDistOrLiteralTableLength,
             <span class="bool-val">false</span>,
@@ -3915,7 +3915,7 @@
         </span>c(<span class="kw-2">&amp;</span>[<span class="number">6</span>], F, State::BlockTypeUnexpected);
         <span class="comment">// Ok uncompressed block.
         </span>c(<span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0xfe</span>, <span class="number">0xff</span>, <span class="number">0</span>], OK, State::DoneForever);
-        <span class="comment">// Too many litlens, we handle this later than zlib, so this test won&#39;t
+        <span class="comment">// Too many litlens, we handle this later than zlib, so this test won't
         // give the same result.
         //        c(&amp;[0xfc, 0, 0], F, State::BadTotalSymbols);
         // Invalid set of code lengths - TODO Check if this is the correct error for this.

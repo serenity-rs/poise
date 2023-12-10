@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tungstenite-0.20.1/src/handshake/server.rs`."><title>server.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tungstenite" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tungstenite-0.20.1/src/handshake/server.rs`."><title>server.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tungstenite" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -367,9 +367,9 @@
 
     <span class="kw">if </span>!request
         .headers()
-        .get(<span class="string">&quot;Connection&quot;</span>)
+        .get(<span class="string">"Connection"</span>)
         .and_then(|h| h.to_str().ok())
-        .map(|h| h.split(|c| c == <span class="string">&#39; &#39; </span>|| c == <span class="string">&#39;,&#39;</span>).any(|p| p.eq_ignore_ascii_case(<span class="string">&quot;Upgrade&quot;</span>)))
+        .map(|h| h.split(|c| c == <span class="string">' ' </span>|| c == <span class="string">','</span>).any(|p| p.eq_ignore_ascii_case(<span class="string">"Upgrade"</span>)))
         .unwrap_or(<span class="bool-val">false</span>)
     {
         <span class="kw">return </span><span class="prelude-val">Err</span>(Error::Protocol(ProtocolError::MissingConnectionUpgradeHeader));
@@ -377,29 +377,29 @@
 
     <span class="kw">if </span>!request
         .headers()
-        .get(<span class="string">&quot;Upgrade&quot;</span>)
+        .get(<span class="string">"Upgrade"</span>)
         .and_then(|h| h.to_str().ok())
-        .map(|h| h.eq_ignore_ascii_case(<span class="string">&quot;websocket&quot;</span>))
+        .map(|h| h.eq_ignore_ascii_case(<span class="string">"websocket"</span>))
         .unwrap_or(<span class="bool-val">false</span>)
     {
         <span class="kw">return </span><span class="prelude-val">Err</span>(Error::Protocol(ProtocolError::MissingUpgradeWebSocketHeader));
     }
 
-    <span class="kw">if </span>!request.headers().get(<span class="string">&quot;Sec-WebSocket-Version&quot;</span>).map(|h| h == <span class="string">&quot;13&quot;</span>).unwrap_or(<span class="bool-val">false</span>) {
+    <span class="kw">if </span>!request.headers().get(<span class="string">"Sec-WebSocket-Version"</span>).map(|h| h == <span class="string">"13"</span>).unwrap_or(<span class="bool-val">false</span>) {
         <span class="kw">return </span><span class="prelude-val">Err</span>(Error::Protocol(ProtocolError::MissingSecWebSocketVersionHeader));
     }
 
     <span class="kw">let </span>key = request
         .headers()
-        .get(<span class="string">&quot;Sec-WebSocket-Key&quot;</span>)
+        .get(<span class="string">"Sec-WebSocket-Key"</span>)
         .ok_or(Error::Protocol(ProtocolError::MissingSecWebSocketKey))<span class="question-mark">?</span>;
 
     <span class="kw">let </span>builder = Response::builder()
         .status(StatusCode::SWITCHING_PROTOCOLS)
         .version(request.version())
-        .header(<span class="string">&quot;Connection&quot;</span>, <span class="string">&quot;Upgrade&quot;</span>)
-        .header(<span class="string">&quot;Upgrade&quot;</span>, <span class="string">&quot;websocket&quot;</span>)
-        .header(<span class="string">&quot;Sec-WebSocket-Accept&quot;</span>, derive_accept_key(key.as_bytes()));
+        .header(<span class="string">"Connection"</span>, <span class="string">"Upgrade"</span>)
+        .header(<span class="string">"Upgrade"</span>, <span class="string">"websocket"</span>)
+        .header(<span class="string">"Sec-WebSocket-Accept"</span>, derive_accept_key(key.as_bytes()));
 
     <span class="prelude-val">Ok</span>(builder)
 }
@@ -421,16 +421,16 @@
 </span><span class="kw">pub fn </span>write_response&lt;T&gt;(<span class="kw-2">mut </span>w: <span class="kw">impl </span>io::Write, response: <span class="kw-2">&amp;</span>HttpResponse&lt;T&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
     <span class="macro">writeln!</span>(
         w,
-        <span class="string">&quot;{version:?} {status}\r&quot;</span>,
+        <span class="string">"{version:?} {status}\r"</span>,
         version = response.version(),
         status = response.status()
     )<span class="question-mark">?</span>;
 
     <span class="kw">for </span>(k, v) <span class="kw">in </span>response.headers() {
-        <span class="macro">writeln!</span>(w, <span class="string">&quot;{}: {}\r&quot;</span>, k, v.to_str()<span class="question-mark">?</span>)<span class="question-mark">?</span>;
+        <span class="macro">writeln!</span>(w, <span class="string">"{}: {}\r"</span>, k, v.to_str()<span class="question-mark">?</span>)<span class="question-mark">?</span>;
     }
 
-    <span class="macro">writeln!</span>(w, <span class="string">&quot;\r&quot;</span>)<span class="question-mark">?</span>;
+    <span class="macro">writeln!</span>(w, <span class="string">"\r"</span>)<span class="question-mark">?</span>;
 
     <span class="prelude-val">Ok</span>(())
 }
@@ -446,13 +446,13 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;h</span>, <span class="lifetime">&#39;b</span>: <span class="lifetime">&#39;h</span>&gt; FromHttparse&lt;httparse::Request&lt;<span class="lifetime">&#39;h</span>, <span class="lifetime">&#39;b</span>&gt;&gt; <span class="kw">for </span>Request {
-    <span class="kw">fn </span>from_httparse(raw: httparse::Request&lt;<span class="lifetime">&#39;h</span>, <span class="lifetime">&#39;b</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
-        <span class="kw">if </span>raw.method.expect(<span class="string">&quot;Bug: no method in header&quot;</span>) != <span class="string">&quot;GET&quot; </span>{
+<span class="kw">impl</span>&lt;<span class="lifetime">'h</span>, <span class="lifetime">'b</span>: <span class="lifetime">'h</span>&gt; FromHttparse&lt;httparse::Request&lt;<span class="lifetime">'h</span>, <span class="lifetime">'b</span>&gt;&gt; <span class="kw">for </span>Request {
+    <span class="kw">fn </span>from_httparse(raw: httparse::Request&lt;<span class="lifetime">'h</span>, <span class="lifetime">'b</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
+        <span class="kw">if </span>raw.method.expect(<span class="string">"Bug: no method in header"</span>) != <span class="string">"GET" </span>{
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::Protocol(ProtocolError::WrongHttpMethod));
         }
 
-        <span class="kw">if </span>raw.version.expect(<span class="string">&quot;Bug: no HTTP version&quot;</span>) &lt; <span class="comment">/*1.*/</span><span class="number">1 </span>{
+        <span class="kw">if </span>raw.version.expect(<span class="string">"Bug: no HTTP version"</span>) &lt; <span class="comment">/*1.*/</span><span class="number">1 </span>{
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::Protocol(ProtocolError::WrongHttpVersion));
         }
 
@@ -461,7 +461,7 @@
         <span class="kw">let </span><span class="kw-2">mut </span>request = Request::new(());
         <span class="kw-2">*</span>request.method_mut() = http::Method::GET;
         <span class="kw-2">*</span>request.headers_mut() = headers;
-        <span class="kw-2">*</span>request.uri_mut() = raw.path.expect(<span class="string">&quot;Bug: no path in header&quot;</span>).parse()<span class="question-mark">?</span>;
+        <span class="kw-2">*</span>request.uri_mut() = raw.path.expect(<span class="string">"Bug: no path in header"</span>).parse()<span class="question-mark">?</span>;
         <span class="comment">// TODO: httparse only supports HTTP 0.9/1.0/1.1 but not HTTP 2.0
         // so the only valid value we could get in the response would be 1.1.
         </span><span class="kw-2">*</span>request.version_mut() = http::Version::HTTP_11;
@@ -536,7 +536,7 @@
     /// server, you can specify the callback if you want to add additional header to the client
     /// upon join based on the incoming headers.
     </span><span class="kw">pub fn </span>start(stream: S, callback: C, config: <span class="prelude-ty">Option</span>&lt;WebSocketConfig&gt;) -&gt; MidHandshake&lt;<span class="self">Self</span>&gt; {
-        <span class="macro">trace!</span>(<span class="string">&quot;Server handshake initiated.&quot;</span>);
+        <span class="macro">trace!</span>(<span class="string">"Server handshake initiated."</span>);
         MidHandshake {
             machine: HandshakeMachine::start_read(stream),
             role: ServerHandshake {
@@ -600,13 +600,13 @@
 
             StageResult::DoneWriting(stream) =&gt; {
                 <span class="kw">if let </span><span class="prelude-val">Some</span>(err) = <span class="self">self</span>.error_response.take() {
-                    <span class="macro">debug!</span>(<span class="string">&quot;Server handshake failed.&quot;</span>);
+                    <span class="macro">debug!</span>(<span class="string">"Server handshake failed."</span>);
 
                     <span class="kw">let </span>(parts, body) = err.into_parts();
                     <span class="kw">let </span>body = body.map(|b| b.as_bytes().to_vec());
                     <span class="kw">return </span><span class="prelude-val">Err</span>(Error::Http(http::Response::from_parts(parts, body)));
                 } <span class="kw">else </span>{
-                    <span class="macro">debug!</span>(<span class="string">&quot;Server handshake done.&quot;</span>);
+                    <span class="macro">debug!</span>(<span class="string">"Server handshake done."</span>);
                     <span class="kw">let </span>websocket = WebSocket::from_raw_socket(stream, Role::Server, <span class="self">self</span>.config);
                     ProcessingResult::Done(websocket)
                 }
@@ -621,28 +621,28 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>request_parsing() {
-        <span class="kw">const </span>DATA: <span class="kw-2">&amp;</span>[u8] = <span class="string">b&quot;GET /script.ws HTTP/1.1\r\nHost: foo.com\r\n\r\n&quot;</span>;
+        <span class="kw">const </span>DATA: <span class="kw-2">&amp;</span>[u8] = <span class="string">b"GET /script.ws HTTP/1.1\r\nHost: foo.com\r\n\r\n"</span>;
         <span class="kw">let </span>(<span class="kw">_</span>, req) = Request::try_parse(DATA).unwrap().unwrap();
-        <span class="macro">assert_eq!</span>(req.uri().path(), <span class="string">&quot;/script.ws&quot;</span>);
-        <span class="macro">assert_eq!</span>(req.headers().get(<span class="string">&quot;Host&quot;</span>).unwrap(), <span class="kw-2">&amp;</span><span class="string">b&quot;foo.com&quot;</span>[..]);
+        <span class="macro">assert_eq!</span>(req.uri().path(), <span class="string">"/script.ws"</span>);
+        <span class="macro">assert_eq!</span>(req.headers().get(<span class="string">"Host"</span>).unwrap(), <span class="kw-2">&amp;</span><span class="string">b"foo.com"</span>[..]);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>request_replying() {
-        <span class="kw">const </span>DATA: <span class="kw-2">&amp;</span>[u8] = <span class="string">b&quot;\
+        <span class="kw">const </span>DATA: <span class="kw-2">&amp;</span>[u8] = <span class="string">b"\
             GET /script.ws HTTP/1.1\r\n\
             Host: foo.com\r\n\
             Connection: upgrade\r\n\
             Upgrade: websocket\r\n\
             Sec-WebSocket-Version: 13\r\n\
             Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r\n\
-            \r\n&quot;</span>;
+            \r\n"</span>;
         <span class="kw">let </span>(<span class="kw">_</span>, req) = Request::try_parse(DATA).unwrap().unwrap();
         <span class="kw">let </span>response = create_response(<span class="kw-2">&amp;</span>req).unwrap();
 
         <span class="macro">assert_eq!</span>(
-            response.headers().get(<span class="string">&quot;Sec-WebSocket-Accept&quot;</span>).unwrap(),
-            <span class="string">b&quot;s3pPLMBiTxaQ9kYGzzhZRbK+xOo=&quot;</span>.as_ref()
+            response.headers().get(<span class="string">"Sec-WebSocket-Accept"</span>).unwrap(),
+            <span class="string">b"s3pPLMBiTxaQ9kYGzzhZRbK+xOo="</span>.as_ref()
         );
     }
 }

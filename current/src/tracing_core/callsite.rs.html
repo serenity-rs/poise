@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tracing-core-0.1.32/src/callsite.rs`."><title>callsite.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="tracing_core" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../tracing_core/index.html"><img src="https://raw.githubusercontent.com/tokio-rs/tracing/master/assets/logo-type.png" alt="tracing_core"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tracing-core-0.1.32/src/callsite.rs`."><title>callsite.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="tracing_core" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../tracing_core/index.html"><img src="https://raw.githubusercontent.com/tokio-rs/tracing/master/assets/logo-type.png" alt="tracing_core"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -625,9 +625,9 @@
 //! Every span or event in `tracing` is associated with a [`Callsite`]. A
 //! callsite is a small `static` value that is responsible for the following:
 //!
-//! * Storing the span or event&#39;s [`Metadata`],
+//! * Storing the span or event's [`Metadata`],
 //! * Uniquely [identifying](Identifier) the span or event definition,
-//! * Caching the subscriber&#39;s [`Interest`][^1] in that span or event, to avoid
+//! * Caching the subscriber's [`Interest`][^1] in that span or event, to avoid
 //!   re-evaluating filters.
 //!
 //! # Registering Callsites
@@ -635,9 +635,9 @@
 //! When a span or event is recorded for the first time, its callsite
 //! [`register`]s itself with the global callsite registry. Registering a
 //! callsite calls the [`Subscriber::register_callsite`][`register_callsite`]
-//! method with that callsite&#39;s [`Metadata`] on every currently active
+//! method with that callsite's [`Metadata`] on every currently active
 //! subscriber. This serves two primary purposes: informing subscribers of the
-//! callsite&#39;s existence, and performing static filtering.
+//! callsite's existence, and performing static filtering.
 //!
 //! ## Callsite Existence
 //!
@@ -673,12 +673,12 @@
 //!
 //! In addition, the [`rebuild_interest_cache`] function in this module can be
 //! used to manually invalidate all cached interest and re-register those
-//! callsites. This function is useful in situations where a subscriber&#39;s
+//! callsites. This function is useful in situations where a subscriber's
 //! interest can change, but it does so relatively infrequently. The subscriber
 //! may wish for its interest to be cached most of the time, and return
 //! [`Interest::always`][always] or [`Interest::never`][never] in its
 //! [`register_callsite`] method, so that its [`Subscriber::enabled`] method
-//! doesn&#39;t need to be evaluated every time a span or event is recorded.
+//! doesn't need to be evaluated every time a span or event is recorded.
 //! However, when the configuration changes, the subscriber can call
 //! [`rebuild_interest_cache`] to re-evaluate the entire interest cache with its
 //! new configuration. This is a relatively costly operation, but if the
@@ -689,7 +689,7 @@
 //!
 //! In most cases, instrumenting code using `tracing` should *not* require
 //! implementing the [`Callsite`] trait directly. When using the [`tracing`
-//! crate&#39;s macros][macros] or the [`#[instrument]` attribute][instrument], a
+//! crate's macros][macros] or the [`#[instrument]` attribute][instrument], a
 //! `Callsite` is automatically generated.
 //!
 //! However, code which provides alternative forms of `tracing` instrumentation
@@ -754,8 +754,8 @@
 
     <span class="doccomment">/// Returns the [metadata] associated with the callsite.
     ///
-    /// &lt;div class=&quot;example-wrap&quot; style=&quot;display:inline-block&quot;&gt;
-    /// &lt;pre class=&quot;ignore&quot; style=&quot;white-space:normal;font:inherit;&quot;&gt;
+    /// &lt;div class="example-wrap" style="display:inline-block"&gt;
+    /// &lt;pre class="ignore" style="white-space:normal;font:inherit;"&gt;
     ///
     /// **Note:** Implementations of this method should not produce [`Metadata`]
     /// that share the same callsite [`Identifier`] but otherwise differ in any
@@ -764,7 +764,7 @@
     /// &lt;/pre&gt;&lt;/div&gt;
     ///
     /// [metadata]: super::metadata::Metadata
-    </span><span class="kw">fn </span>metadata(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Metadata&lt;<span class="lifetime">&#39;_</span>&gt;;
+    </span><span class="kw">fn </span>metadata(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Metadata&lt;<span class="lifetime">'_</span>&gt;;
 
     <span class="doccomment">/// This method is an *internal implementation detail* of `tracing-core`. It
     /// is *not* intended to be called or overridden from downstream code.
@@ -783,7 +783,7 @@
     #[inline]
     </span><span class="kw">fn </span>private_type_id(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: private::Private&lt;()&gt;) -&gt; private::Private&lt;TypeId&gt;
     <span class="kw">where
-        </span><span class="self">Self</span>: <span class="lifetime">&#39;static</span>,
+        </span><span class="self">Self</span>: <span class="lifetime">'static</span>,
     {
         private::Private(TypeId::of::&lt;<span class="self">Self</span>&gt;())
     }
@@ -804,7 +804,7 @@
     /// constructing new `Identifier`s, use the `identify_callsite!` macro
     /// instead.
     </span><span class="attr">#[doc(hidden)]
-    </span><span class="kw">pub </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw">dyn </span>Callsite,
+    </span><span class="kw">pub </span><span class="kw-2">&amp;</span><span class="lifetime">'static </span><span class="kw">dyn </span>Callsite,
 );
 
 <span class="doccomment">/// A default [`Callsite`] implementation.
@@ -812,7 +812,7 @@
 </span><span class="kw">pub struct </span>DefaultCallsite {
     interest: AtomicU8,
     registration: AtomicU8,
-    meta: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Metadata&lt;<span class="lifetime">&#39;static</span>&gt;,
+    meta: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Metadata&lt;<span class="lifetime">'static</span>&gt;,
     next: AtomicPtr&lt;<span class="self">Self</span>&gt;,
 }
 
@@ -831,7 +831,7 @@
 /// value changes, in order for the change to be reflected.
 ///
 /// See the [documentation on callsite interest caching][cache-docs] for
-/// additional information on this function&#39;s usage.
+/// additional information on this function's usage.
 ///
 /// [`max_level_hint`]: super::subscriber::Subscriber::max_level_hint
 /// [`Callsite`]: super::callsite::Callsite
@@ -853,7 +853,7 @@
 ///
 /// [`Callsite`]: crate::callsite::Callsite
 /// [reg-docs]: crate::callsite#registering-callsites
-</span><span class="kw">pub fn </span>register(callsite: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw">dyn </span>Callsite) {
+</span><span class="kw">pub fn </span>register(callsite: <span class="kw-2">&amp;</span><span class="lifetime">'static </span><span class="kw">dyn </span>Callsite) {
     rebuild_callsite_interest(callsite, <span class="kw-2">&amp;</span>DISPATCHERS.rebuilder());
 
     <span class="comment">// Is this a `DefaultCallsite`? If so, use the fancy linked list!
@@ -880,7 +880,7 @@
 
 <span class="kw">static </span>DISPATCHERS: Dispatchers = Dispatchers::new();
 
-<span class="kw">static </span>LOCKED_CALLSITES: Lazy&lt;Mutex&lt;Vec&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw">dyn </span>Callsite&gt;&gt;&gt; = Lazy::new(Default::default);
+<span class="kw">static </span>LOCKED_CALLSITES: Lazy&lt;Mutex&lt;Vec&lt;<span class="kw-2">&amp;</span><span class="lifetime">'static </span><span class="kw">dyn </span>Callsite&gt;&gt;&gt; = Lazy::new(Default::default);
 
 <span class="kw">struct </span>Callsites {
     list_head: AtomicPtr&lt;DefaultCallsite&gt;,
@@ -899,7 +899,7 @@
     <span class="kw">const </span>INTEREST_ALWAYS: u8 = <span class="number">2</span>;
 
     <span class="doccomment">/// Returns a new `DefaultCallsite` with the specified `Metadata`.
-    </span><span class="kw">pub const fn </span>new(meta: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Metadata&lt;<span class="lifetime">&#39;static</span>&gt;) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub const fn </span>new(meta: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Metadata&lt;<span class="lifetime">'static</span>&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             interest: AtomicU8::new(<span class="number">0xFF</span>),
             meta,
@@ -926,7 +926,7 @@
     </span><span class="attr">#[inline(never)]
     </span><span class="comment">// This only happens once (or if the cached interest value was corrupted).
     </span><span class="attr">#[cold]
-    </span><span class="kw">pub fn </span>register(<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="self">self</span>) -&gt; Interest {
+    </span><span class="kw">pub fn </span>register(<span class="kw-2">&amp;</span><span class="lifetime">'static </span><span class="self">self</span>) -&gt; Interest {
         <span class="comment">// Attempt to advance the registration state to `REGISTERING`...
         </span><span class="kw">match </span><span class="self">self</span>.registration.compare_exchange(
             <span class="self">Self</span>::UNREGISTERED,
@@ -948,7 +948,7 @@
                 <span class="macro">debug_assert_eq!</span>(
                     _state,
                     <span class="self">Self</span>::REGISTERING,
-                    <span class="string">&quot;weird callsite registration state&quot;
+                    <span class="string">"weird callsite registration state"
                 </span>);
                 <span class="comment">// Just hit `enabled` this time.
                 </span><span class="kw">return </span>Interest::sometimes();
@@ -962,10 +962,10 @@
         }
     }
 
-    <span class="doccomment">/// Returns the callsite&#39;s cached `Interest`, or registers it for the
+    <span class="doccomment">/// Returns the callsite's cached `Interest`, or registers it for the
     /// first time if it has not yet been registered.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>interest(<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="self">self</span>) -&gt; Interest {
+    </span><span class="kw">pub fn </span>interest(<span class="kw-2">&amp;</span><span class="lifetime">'static </span><span class="self">self</span>) -&gt; Interest {
         <span class="kw">match </span><span class="self">self</span>.interest.load(Ordering::Relaxed) {
             <span class="self">Self</span>::INTEREST_NEVER =&gt; Interest::never(),
             <span class="self">Self</span>::INTEREST_SOMETIMES =&gt; Interest::sometimes(),
@@ -986,7 +986,7 @@
     }
 
     <span class="attr">#[inline(always)]
-    </span><span class="kw">fn </span>metadata(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Metadata&lt;<span class="lifetime">&#39;static</span>&gt; {
+    </span><span class="kw">fn </span>metadata(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Metadata&lt;<span class="lifetime">'static</span>&gt; {
         <span class="self">self</span>.meta
     }
 }
@@ -1005,8 +1005,8 @@
 <span class="kw">impl </span>Eq <span class="kw">for </span>Identifier {}
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>Identifier {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;Identifier({:p})&quot;</span>, <span class="self">self</span>.<span class="number">0</span>)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        <span class="macro">write!</span>(f, <span class="string">"Identifier({:p})"</span>, <span class="self">self</span>.<span class="number">0</span>)
     }
 }
 
@@ -1025,7 +1025,7 @@
     <span class="doccomment">/// Rebuild `Interest`s for all callsites in the registry.
     ///
     /// This also re-computes the max level hint.
-    </span><span class="kw">fn </span>rebuild_interest(<span class="kw-2">&amp;</span><span class="self">self</span>, dispatchers: dispatchers::Rebuilder&lt;<span class="lifetime">&#39;_</span>&gt;) {
+    </span><span class="kw">fn </span>rebuild_interest(<span class="kw-2">&amp;</span><span class="self">self</span>, dispatchers: dispatchers::Rebuilder&lt;<span class="lifetime">'_</span>&gt;) {
         <span class="kw">let </span><span class="kw-2">mut </span>max_level = LevelFilter::OFF;
         dispatchers.for_each(|dispatch| {
             <span class="comment">// If the subscriber did not provide a max level hint, assume
@@ -1045,7 +1045,7 @@
     <span class="doccomment">/// Push a `dyn Callsite` trait object to the callsite registry.
     ///
     /// This will attempt to lock the callsites vector.
-    </span><span class="kw">fn </span>push_dyn(<span class="kw-2">&amp;</span><span class="self">self</span>, callsite: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw">dyn </span>Callsite) {
+    </span><span class="kw">fn </span>push_dyn(<span class="kw-2">&amp;</span><span class="self">self</span>, callsite: <span class="kw-2">&amp;</span><span class="lifetime">'static </span><span class="kw">dyn </span>Callsite) {
         <span class="kw">let </span><span class="kw-2">mut </span>lock = LOCKED_CALLSITES.lock().unwrap();
         <span class="self">self</span>.has_locked_callsites.store(<span class="bool-val">true</span>, Ordering::Release);
         lock.push(callsite);
@@ -1055,7 +1055,7 @@
     ///
     /// If we know the callsite being pushed is a `DefaultCallsite`, we can push
     /// it to the linked list without having to acquire a lock.
-    </span><span class="kw">fn </span>push_default(<span class="kw-2">&amp;</span><span class="self">self</span>, callsite: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>DefaultCallsite) {
+    </span><span class="kw">fn </span>push_default(<span class="kw-2">&amp;</span><span class="self">self</span>, callsite: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>DefaultCallsite) {
         <span class="kw">let </span><span class="kw-2">mut </span>head = <span class="self">self</span>.list_head.load(Ordering::Acquire);
 
         <span class="kw">loop </span>{
@@ -1063,10 +1063,10 @@
 
             <span class="macro">assert_ne!</span>(
                 callsite <span class="kw">as </span><span class="kw-2">*const </span><span class="kw">_</span>, head,
-                <span class="string">&quot;Attempted to register a `DefaultCallsite` that already exists! \
+                <span class="string">"Attempted to register a `DefaultCallsite` that already exists! \
                 This will cause an infinite loop when attempting to read from the \
                 callsite cache. This is likely a bug! You should only need to call \
-                `DefaultCallsite::register` once per `DefaultCallsite`.&quot;
+                `DefaultCallsite::register` once per `DefaultCallsite`."
             </span>);
 
             <span class="kw">match </span><span class="self">self</span>.list_head.compare_exchange(
@@ -1084,7 +1084,7 @@
     }
 
     <span class="doccomment">/// Invokes the provided closure `f` with each callsite in the registry.
-    </span><span class="kw">fn </span>for_each(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut </span>f: <span class="kw">impl </span>FnMut(<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw">dyn </span>Callsite)) {
+    </span><span class="kw">fn </span>for_each(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut </span>f: <span class="kw">impl </span>FnMut(<span class="kw-2">&amp;</span><span class="lifetime">'static </span><span class="kw">dyn </span>Callsite)) {
         <span class="kw">let </span><span class="kw-2">mut </span>head = <span class="self">self</span>.list_head.load(Ordering::Acquire);
 
         <span class="kw">while let </span><span class="prelude-val">Some</span>(cs) = <span class="kw">unsafe </span>{ head.as_ref() } {
@@ -1109,8 +1109,8 @@
 }
 
 <span class="kw">fn </span>rebuild_callsite_interest(
-    callsite: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw">dyn </span>Callsite,
-    dispatchers: <span class="kw-2">&amp;</span>dispatchers::Rebuilder&lt;<span class="lifetime">&#39;_</span>&gt;,
+    callsite: <span class="kw-2">&amp;</span><span class="lifetime">'static </span><span class="kw">dyn </span>Callsite,
+    dispatchers: <span class="kw-2">&amp;</span>dispatchers::Rebuilder&lt;<span class="lifetime">'_</span>&gt;,
 ) {
     <span class="kw">let </span>meta = callsite.metadata();
 
@@ -1128,12 +1128,12 @@
 }
 
 <span class="kw">mod </span>private {
-    <span class="doccomment">/// Don&#39;t call this function, it&#39;s private.
+    <span class="doccomment">/// Don't call this function, it's private.
     </span><span class="attr">#[allow(missing_debug_implementations)]
     </span><span class="kw">pub struct </span>Private&lt;T&gt;(<span class="kw">pub</span>(<span class="kw">crate</span>) T);
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
 </span><span class="kw">mod </span>dispatchers {
     <span class="kw">use crate</span>::{dispatcher, lazy::Lazy};
     <span class="kw">use </span>std::sync::{
@@ -1148,10 +1148,10 @@
     <span class="kw">static </span>LOCKED_DISPATCHERS: Lazy&lt;RwLock&lt;Vec&lt;dispatcher::Registrar&gt;&gt;&gt; =
         Lazy::new(Default::default);
 
-    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">enum </span>Rebuilder&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">enum </span>Rebuilder&lt;<span class="lifetime">'a</span>&gt; {
         JustOne,
-        Read(RwLockReadGuard&lt;<span class="lifetime">&#39;a</span>, Vec&lt;dispatcher::Registrar&gt;&gt;),
-        Write(RwLockWriteGuard&lt;<span class="lifetime">&#39;a</span>, Vec&lt;dispatcher::Registrar&gt;&gt;),
+        Read(RwLockReadGuard&lt;<span class="lifetime">'a</span>, Vec&lt;dispatcher::Registrar&gt;&gt;),
+        Write(RwLockWriteGuard&lt;<span class="lifetime">'a</span>, Vec&lt;dispatcher::Registrar&gt;&gt;),
     }
 
     <span class="kw">impl </span>Dispatchers {
@@ -1161,14 +1161,14 @@
             }
         }
 
-        <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>rebuilder(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Rebuilder&lt;<span class="lifetime">&#39;_</span>&gt; {
+        <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>rebuilder(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Rebuilder&lt;<span class="lifetime">'_</span>&gt; {
             <span class="kw">if </span><span class="self">self</span>.has_just_one.load(Ordering::SeqCst) {
                 <span class="kw">return </span>Rebuilder::JustOne;
             }
             Rebuilder::Read(LOCKED_DISPATCHERS.read().unwrap())
         }
 
-        <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>register_dispatch(<span class="kw-2">&amp;</span><span class="self">self</span>, dispatch: <span class="kw-2">&amp;</span>dispatcher::Dispatch) -&gt; Rebuilder&lt;<span class="lifetime">&#39;_</span>&gt; {
+        <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>register_dispatch(<span class="kw-2">&amp;</span><span class="self">self</span>, dispatch: <span class="kw-2">&amp;</span>dispatcher::Dispatch) -&gt; Rebuilder&lt;<span class="lifetime">'_</span>&gt; {
             <span class="kw">let </span><span class="kw-2">mut </span>dispatchers = LOCKED_DISPATCHERS.write().unwrap();
             dispatchers.retain(|d| d.upgrade().is_some());
             dispatchers.push(dispatch.registrar());
@@ -1178,7 +1178,7 @@
         }
     }
 
-    <span class="kw">impl </span>Rebuilder&lt;<span class="lifetime">&#39;_</span>&gt; {
+    <span class="kw">impl </span>Rebuilder&lt;<span class="lifetime">'_</span>&gt; {
         <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>for_each(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut </span>f: <span class="kw">impl </span>FnMut(<span class="kw-2">&amp;</span>dispatcher::Dispatch)) {
             <span class="kw">let </span>iter = <span class="kw">match </span><span class="self">self </span>{
                 Rebuilder::JustOne =&gt; {
@@ -1194,32 +1194,32 @@
     }
 }
 
-<span class="attr">#[cfg(not(feature = <span class="string">&quot;std&quot;</span>))]
+<span class="attr">#[cfg(not(feature = <span class="string">"std"</span>))]
 </span><span class="kw">mod </span>dispatchers {
     <span class="kw">use </span><span class="kw">crate</span>::dispatcher;
 
     <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">struct </span>Dispatchers(());
-    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">struct </span>Rebuilder&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>dispatcher::Dispatch&gt;);
+    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">struct </span>Rebuilder&lt;<span class="lifetime">'a</span>&gt;(<span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>dispatcher::Dispatch&gt;);
 
     <span class="kw">impl </span>Dispatchers {
         <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">const fn </span>new() -&gt; <span class="self">Self </span>{
             <span class="self">Self</span>(())
         }
 
-        <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>rebuilder(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Rebuilder&lt;<span class="lifetime">&#39;_</span>&gt; {
+        <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>rebuilder(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Rebuilder&lt;<span class="lifetime">'_</span>&gt; {
             Rebuilder(<span class="prelude-val">None</span>)
         }
 
-        <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>register_dispatch&lt;<span class="lifetime">&#39;dispatch</span>&gt;(
+        <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>register_dispatch&lt;<span class="lifetime">'dispatch</span>&gt;(
             <span class="kw-2">&amp;</span><span class="self">self</span>,
-            dispatch: <span class="kw-2">&amp;</span><span class="lifetime">&#39;dispatch </span>dispatcher::Dispatch,
-        ) -&gt; Rebuilder&lt;<span class="lifetime">&#39;dispatch</span>&gt; {
+            dispatch: <span class="kw-2">&amp;</span><span class="lifetime">'dispatch </span>dispatcher::Dispatch,
+        ) -&gt; Rebuilder&lt;<span class="lifetime">'dispatch</span>&gt; {
             <span class="comment">// nop; on no_std, there can only ever be one dispatcher
             </span>Rebuilder(<span class="prelude-val">Some</span>(dispatch))
         }
     }
 
-    <span class="kw">impl </span>Rebuilder&lt;<span class="lifetime">&#39;_</span>&gt; {
+    <span class="kw">impl </span>Rebuilder&lt;<span class="lifetime">'_</span>&gt; {
         <span class="attr">#[inline]
         </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>for_each(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut </span>f: <span class="kw">impl </span>FnMut(<span class="kw-2">&amp;</span>dispatcher::Dispatch)) {
             <span class="kw">if let </span><span class="prelude-val">Some</span>(dispatch) = <span class="self">self</span>.<span class="number">0 </span>{

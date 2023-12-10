@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/reqwest-0.11.22/src/async_impl/client.rs`."><title>client.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="reqwest" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/reqwest-0.11.22/src/async_impl/client.rs`."><title>client.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="reqwest" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -2490,7 +2490,7 @@
 <a href="#2490" id="2490">2490</a>
 <a href="#2491" id="2491">2491</a>
 <a href="#2492" id="2492">2492</a>
-</pre></div><pre class="rust"><code><span class="attr">#[cfg(any(feature = <span class="string">&quot;native-tls&quot;</span>, feature = <span class="string">&quot;__rustls&quot;</span>,))]
+</pre></div><pre class="rust"><code><span class="attr">#[cfg(any(feature = <span class="string">"native-tls"</span>, feature = <span class="string">"__rustls"</span>,))]
 </span><span class="kw">use </span>std::any::Any;
 <span class="kw">use </span>std::net::IpAddr;
 <span class="kw">use </span>std::sync::Arc;
@@ -2506,7 +2506,7 @@
 <span class="kw">use </span>http::uri::Scheme;
 <span class="kw">use </span>http::Uri;
 <span class="kw">use </span>hyper::client::{HttpConnector, ResponseFuture <span class="kw">as </span>HyperResponseFuture};
-<span class="attr">#[cfg(feature = <span class="string">&quot;native-tls-crate&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"native-tls-crate"</span>)]
 </span><span class="kw">use </span>native_tls_crate::TlsConnector;
 <span class="kw">use </span>pin_project_lite::pin_project;
 <span class="kw">use </span>std::future::Future;
@@ -2518,30 +2518,30 @@
 <span class="kw">use </span><span class="kw">super</span>::request::{Request, RequestBuilder};
 <span class="kw">use </span><span class="kw">super</span>::response::Response;
 <span class="kw">use </span><span class="kw">super</span>::Body;
-<span class="attr">#[cfg(feature = <span class="string">&quot;http3&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"http3"</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::async_impl::h3_client::connect::H3Connector;
-<span class="attr">#[cfg(feature = <span class="string">&quot;http3&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"http3"</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::async_impl::h3_client::{H3Client, H3ResponseFuture};
 <span class="kw">use </span><span class="kw">crate</span>::connect::Connector;
-<span class="attr">#[cfg(feature = <span class="string">&quot;cookies&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"cookies"</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::cookie;
-<span class="attr">#[cfg(feature = <span class="string">&quot;trust-dns&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"trust-dns"</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::dns::trust_dns::TrustDnsResolver;
 <span class="kw">use </span><span class="kw">crate</span>::dns::{gai::GaiResolver, DnsResolverWithOverrides, DynResolver, Resolve};
 <span class="kw">use </span><span class="kw">crate</span>::error;
 <span class="kw">use </span><span class="kw">crate</span>::into_url::{expect_uri, try_uri};
 <span class="kw">use </span><span class="kw">crate</span>::redirect::{<span class="self">self</span>, remove_sensitive_headers};
-<span class="attr">#[cfg(feature = <span class="string">&quot;__tls&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"__tls"</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::tls::{<span class="self">self</span>, TlsBackend};
-<span class="attr">#[cfg(feature = <span class="string">&quot;__tls&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"__tls"</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::Certificate;
-<span class="attr">#[cfg(any(feature = <span class="string">&quot;native-tls&quot;</span>, feature = <span class="string">&quot;__rustls&quot;</span>))]
+<span class="attr">#[cfg(any(feature = <span class="string">"native-tls"</span>, feature = <span class="string">"__rustls"</span>))]
 </span><span class="kw">use </span><span class="kw">crate</span>::Identity;
 <span class="kw">use crate</span>::{IntoUrl, Method, Proxy, StatusCode, Url};
 <span class="kw">use </span>log::{debug, trace};
-<span class="attr">#[cfg(feature = <span class="string">&quot;http3&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"http3"</span>)]
 </span><span class="kw">use </span>quinn::TransportConfig;
-<span class="attr">#[cfg(feature = <span class="string">&quot;http3&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"http3"</span>)]
 </span><span class="kw">use </span>quinn::VarInt;
 
 <span class="doccomment">/// An asynchronous `Client` to make Requests with.
@@ -2571,7 +2571,7 @@
 <span class="kw">enum </span>HttpVersionPref {
     Http1,
     Http2,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;http3&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"http3"</span>)]
     </span>Http3,
     All,
 }
@@ -2580,35 +2580,35 @@
     <span class="comment">// NOTE: When adding a new field, update `fmt::Debug for ClientBuilder`
     </span>accepts: Accepts,
     headers: HeaderMap,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;native-tls&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"native-tls"</span>)]
     </span>hostname_verification: bool,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;__tls&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"__tls"</span>)]
     </span>certs_verification: bool,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;__tls&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"__tls"</span>)]
     </span>tls_sni: bool,
     connect_timeout: <span class="prelude-ty">Option</span>&lt;Duration&gt;,
     connection_verbose: bool,
     pool_idle_timeout: <span class="prelude-ty">Option</span>&lt;Duration&gt;,
     pool_max_idle_per_host: usize,
     tcp_keepalive: <span class="prelude-ty">Option</span>&lt;Duration&gt;,
-    <span class="attr">#[cfg(any(feature = <span class="string">&quot;native-tls&quot;</span>, feature = <span class="string">&quot;__rustls&quot;</span>))]
+    <span class="attr">#[cfg(any(feature = <span class="string">"native-tls"</span>, feature = <span class="string">"__rustls"</span>))]
     </span>identity: <span class="prelude-ty">Option</span>&lt;Identity&gt;,
     proxies: Vec&lt;Proxy&gt;,
     auto_sys_proxy: bool,
     redirect_policy: redirect::Policy,
     referer: bool,
     timeout: <span class="prelude-ty">Option</span>&lt;Duration&gt;,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;__tls&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"__tls"</span>)]
     </span>root_certs: Vec&lt;Certificate&gt;,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;__tls&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"__tls"</span>)]
     </span>tls_built_in_root_certs: bool,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;__tls&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"__tls"</span>)]
     </span>min_tls_version: <span class="prelude-ty">Option</span>&lt;tls::Version&gt;,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;__tls&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"__tls"</span>)]
     </span>max_tls_version: <span class="prelude-ty">Option</span>&lt;tls::Version&gt;,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;__tls&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"__tls"</span>)]
     </span>tls_info: bool,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;__tls&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"__tls"</span>)]
     </span>tls: TlsBackend,
     http_version_pref: HttpVersionPref,
     http09_responses: bool,
@@ -2625,20 +2625,20 @@
     http2_keep_alive_while_idle: bool,
     local_address: <span class="prelude-ty">Option</span>&lt;IpAddr&gt;,
     nodelay: bool,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;cookies&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"cookies"</span>)]
     </span>cookie_store: <span class="prelude-ty">Option</span>&lt;Arc&lt;<span class="kw">dyn </span>cookie::CookieStore&gt;&gt;,
     trust_dns: bool,
     error: <span class="prelude-ty">Option</span>&lt;<span class="kw">crate</span>::Error&gt;,
     https_only: bool,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;http3&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"http3"</span>)]
     </span>tls_enable_early_data: bool,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;http3&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"http3"</span>)]
     </span>quic_max_idle_timeout: <span class="prelude-ty">Option</span>&lt;Duration&gt;,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;http3&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"http3"</span>)]
     </span>quic_stream_receive_window: <span class="prelude-ty">Option</span>&lt;VarInt&gt;,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;http3&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"http3"</span>)]
     </span>quic_receive_window: <span class="prelude-ty">Option</span>&lt;VarInt&gt;,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;http3&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"http3"</span>)]
     </span>quic_send_window: <span class="prelude-ty">Option</span>&lt;u64&gt;,
     dns_overrides: HashMap&lt;String, Vec&lt;SocketAddr&gt;&gt;,
     dns_resolver: <span class="prelude-ty">Option</span>&lt;Arc&lt;<span class="kw">dyn </span>Resolve&gt;&gt;,
@@ -2656,24 +2656,24 @@
     /// This is the same as `Client::builder()`.
     </span><span class="kw">pub fn </span>new() -&gt; ClientBuilder {
         <span class="kw">let </span><span class="kw-2">mut </span>headers: HeaderMap&lt;HeaderValue&gt; = HeaderMap::with_capacity(<span class="number">2</span>);
-        headers.insert(ACCEPT, HeaderValue::from_static(<span class="string">&quot;*/*&quot;</span>));
+        headers.insert(ACCEPT, HeaderValue::from_static(<span class="string">"*/*"</span>));
 
         ClientBuilder {
             config: Config {
                 error: <span class="prelude-val">None</span>,
                 accepts: Accepts::default(),
                 headers,
-                <span class="attr">#[cfg(feature = <span class="string">&quot;native-tls&quot;</span>)]
+                <span class="attr">#[cfg(feature = <span class="string">"native-tls"</span>)]
                 </span>hostname_verification: <span class="bool-val">true</span>,
-                <span class="attr">#[cfg(feature = <span class="string">&quot;__tls&quot;</span>)]
+                <span class="attr">#[cfg(feature = <span class="string">"__tls"</span>)]
                 </span>certs_verification: <span class="bool-val">true</span>,
-                <span class="attr">#[cfg(feature = <span class="string">&quot;__tls&quot;</span>)]
+                <span class="attr">#[cfg(feature = <span class="string">"__tls"</span>)]
                 </span>tls_sni: <span class="bool-val">true</span>,
                 connect_timeout: <span class="prelude-val">None</span>,
                 connection_verbose: <span class="bool-val">false</span>,
                 pool_idle_timeout: <span class="prelude-val">Some</span>(Duration::from_secs(<span class="number">90</span>)),
                 pool_max_idle_per_host: std::usize::MAX,
-                <span class="comment">// TODO: Re-enable default duration once hyper&#39;s HttpConnector is fixed
+                <span class="comment">// TODO: Re-enable default duration once hyper's HttpConnector is fixed
                 // to no longer error when an option fails.
                 </span>tcp_keepalive: <span class="prelude-val">None</span>, <span class="comment">//Some(Duration::from_secs(60)),
                 </span>proxies: Vec::new(),
@@ -2681,19 +2681,19 @@
                 redirect_policy: redirect::Policy::default(),
                 referer: <span class="bool-val">true</span>,
                 timeout: <span class="prelude-val">None</span>,
-                <span class="attr">#[cfg(feature = <span class="string">&quot;__tls&quot;</span>)]
+                <span class="attr">#[cfg(feature = <span class="string">"__tls"</span>)]
                 </span>root_certs: Vec::new(),
-                <span class="attr">#[cfg(feature = <span class="string">&quot;__tls&quot;</span>)]
+                <span class="attr">#[cfg(feature = <span class="string">"__tls"</span>)]
                 </span>tls_built_in_root_certs: <span class="bool-val">true</span>,
-                <span class="attr">#[cfg(any(feature = <span class="string">&quot;native-tls&quot;</span>, feature = <span class="string">&quot;__rustls&quot;</span>))]
+                <span class="attr">#[cfg(any(feature = <span class="string">"native-tls"</span>, feature = <span class="string">"__rustls"</span>))]
                 </span>identity: <span class="prelude-val">None</span>,
-                <span class="attr">#[cfg(feature = <span class="string">&quot;__tls&quot;</span>)]
+                <span class="attr">#[cfg(feature = <span class="string">"__tls"</span>)]
                 </span>min_tls_version: <span class="prelude-val">None</span>,
-                <span class="attr">#[cfg(feature = <span class="string">&quot;__tls&quot;</span>)]
+                <span class="attr">#[cfg(feature = <span class="string">"__tls"</span>)]
                 </span>max_tls_version: <span class="prelude-val">None</span>,
-                <span class="attr">#[cfg(feature = <span class="string">&quot;__tls&quot;</span>)]
+                <span class="attr">#[cfg(feature = <span class="string">"__tls"</span>)]
                 </span>tls_info: <span class="bool-val">false</span>,
-                <span class="attr">#[cfg(feature = <span class="string">&quot;__tls&quot;</span>)]
+                <span class="attr">#[cfg(feature = <span class="string">"__tls"</span>)]
                 </span>tls: TlsBackend::default(),
                 http_version_pref: HttpVersionPref::All,
                 http09_responses: <span class="bool-val">false</span>,
@@ -2710,20 +2710,20 @@
                 http2_keep_alive_while_idle: <span class="bool-val">false</span>,
                 local_address: <span class="prelude-val">None</span>,
                 nodelay: <span class="bool-val">true</span>,
-                trust_dns: <span class="macro">cfg!</span>(feature = <span class="string">&quot;trust-dns&quot;</span>),
-                <span class="attr">#[cfg(feature = <span class="string">&quot;cookies&quot;</span>)]
+                trust_dns: <span class="macro">cfg!</span>(feature = <span class="string">"trust-dns"</span>),
+                <span class="attr">#[cfg(feature = <span class="string">"cookies"</span>)]
                 </span>cookie_store: <span class="prelude-val">None</span>,
                 https_only: <span class="bool-val">false</span>,
                 dns_overrides: HashMap::new(),
-                <span class="attr">#[cfg(feature = <span class="string">&quot;http3&quot;</span>)]
+                <span class="attr">#[cfg(feature = <span class="string">"http3"</span>)]
                 </span>tls_enable_early_data: <span class="bool-val">false</span>,
-                <span class="attr">#[cfg(feature = <span class="string">&quot;http3&quot;</span>)]
+                <span class="attr">#[cfg(feature = <span class="string">"http3"</span>)]
                 </span>quic_max_idle_timeout: <span class="prelude-val">None</span>,
-                <span class="attr">#[cfg(feature = <span class="string">&quot;http3&quot;</span>)]
+                <span class="attr">#[cfg(feature = <span class="string">"http3"</span>)]
                 </span>quic_stream_receive_window: <span class="prelude-val">None</span>,
-                <span class="attr">#[cfg(feature = <span class="string">&quot;http3&quot;</span>)]
+                <span class="attr">#[cfg(feature = <span class="string">"http3"</span>)]
                 </span>quic_receive_window: <span class="prelude-val">None</span>,
-                <span class="attr">#[cfg(feature = <span class="string">&quot;http3&quot;</span>)]
+                <span class="attr">#[cfg(feature = <span class="string">"http3"</span>)]
                 </span>quic_send_window: <span class="prelude-val">None</span>,
                 dns_resolver: <span class="prelude-val">None</span>,
             },
@@ -2750,21 +2750,21 @@
         <span class="kw">let </span>proxies = Arc::new(proxies);
 
         <span class="attr">#[allow(unused)]
-        #[cfg(feature = <span class="string">&quot;http3&quot;</span>)]
+        #[cfg(feature = <span class="string">"http3"</span>)]
         </span><span class="kw">let </span><span class="kw-2">mut </span>h3_connector = <span class="prelude-val">None</span>;
 
         <span class="kw">let </span><span class="kw-2">mut </span>connector = {
-            <span class="attr">#[cfg(feature = <span class="string">&quot;__tls&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"__tls"</span>)]
             </span><span class="kw">fn </span>user_agent(headers: <span class="kw-2">&amp;</span>HeaderMap) -&gt; <span class="prelude-ty">Option</span>&lt;HeaderValue&gt; {
                 headers.get(USER_AGENT).cloned()
             }
 
             <span class="kw">let </span><span class="kw-2">mut </span>resolver: Arc&lt;<span class="kw">dyn </span>Resolve&gt; = <span class="kw">match </span>config.trust_dns {
                 <span class="bool-val">false </span>=&gt; Arc::new(GaiResolver::new()),
-                <span class="attr">#[cfg(feature = <span class="string">&quot;trust-dns&quot;</span>)]
+                <span class="attr">#[cfg(feature = <span class="string">"trust-dns"</span>)]
                 </span><span class="bool-val">true </span>=&gt; Arc::new(TrustDnsResolver::default()),
-                <span class="attr">#[cfg(not(feature = <span class="string">&quot;trust-dns&quot;</span>))]
-                </span><span class="bool-val">true </span>=&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;trust-dns shouldn&#39;t be enabled unless the feature is&quot;</span>),
+                <span class="attr">#[cfg(not(feature = <span class="string">"trust-dns"</span>))]
+                </span><span class="bool-val">true </span>=&gt; <span class="macro">unreachable!</span>(<span class="string">"trust-dns shouldn't be enabled unless the feature is"</span>),
             };
             <span class="kw">if let </span><span class="prelude-val">Some</span>(dns_resolver) = config.dns_resolver {
                 resolver = dns_resolver;
@@ -2778,7 +2778,7 @@
             <span class="kw">let </span><span class="kw-2">mut </span>http = HttpConnector::new_with_resolver(DynResolver::new(resolver.clone()));
             http.set_connect_timeout(config.connect_timeout);
 
-            <span class="attr">#[cfg(all(feature = <span class="string">&quot;http3&quot;</span>, feature = <span class="string">&quot;__rustls&quot;</span>))]
+            <span class="attr">#[cfg(all(feature = <span class="string">"http3"</span>, feature = <span class="string">"__rustls"</span>))]
             </span><span class="kw">let </span>build_h3_connector =
                 |resolver,
                  tls,
@@ -2827,28 +2827,28 @@
                     }
                 };
 
-            <span class="attr">#[cfg(feature = <span class="string">&quot;__tls&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"__tls"</span>)]
             </span><span class="kw">match </span>config.tls {
-                <span class="attr">#[cfg(feature = <span class="string">&quot;default-tls&quot;</span>)]
+                <span class="attr">#[cfg(feature = <span class="string">"default-tls"</span>)]
                 </span>TlsBackend::Default =&gt; {
                     <span class="kw">let </span><span class="kw-2">mut </span>tls = TlsConnector::builder();
 
-                    <span class="attr">#[cfg(all(feature = <span class="string">&quot;native-tls-alpn&quot;</span>, not(feature = <span class="string">&quot;http3&quot;</span>)))]
+                    <span class="attr">#[cfg(all(feature = <span class="string">"native-tls-alpn"</span>, not(feature = <span class="string">"http3"</span>)))]
                     </span>{
                         <span class="kw">match </span>config.http_version_pref {
                             HttpVersionPref::Http1 =&gt; {
-                                tls.request_alpns(<span class="kw-2">&amp;</span>[<span class="string">&quot;http/1.1&quot;</span>]);
+                                tls.request_alpns(<span class="kw-2">&amp;</span>[<span class="string">"http/1.1"</span>]);
                             }
                             HttpVersionPref::Http2 =&gt; {
-                                tls.request_alpns(<span class="kw-2">&amp;</span>[<span class="string">&quot;h2&quot;</span>]);
+                                tls.request_alpns(<span class="kw-2">&amp;</span>[<span class="string">"h2"</span>]);
                             }
                             HttpVersionPref::All =&gt; {
-                                tls.request_alpns(<span class="kw-2">&amp;</span>[<span class="string">&quot;h2&quot;</span>, <span class="string">&quot;http/1.1&quot;</span>]);
+                                tls.request_alpns(<span class="kw-2">&amp;</span>[<span class="string">"h2"</span>, <span class="string">"http/1.1"</span>]);
                             }
                         }
                     }
 
-                    <span class="attr">#[cfg(feature = <span class="string">&quot;native-tls&quot;</span>)]
+                    <span class="attr">#[cfg(feature = <span class="string">"native-tls"</span>)]
                     </span>{
                         tls.danger_accept_invalid_hostnames(!config.hostname_verification);
                     }
@@ -2863,26 +2863,26 @@
                         cert.add_to_native_tls(<span class="kw-2">&amp;mut </span>tls);
                     }
 
-                    <span class="attr">#[cfg(feature = <span class="string">&quot;native-tls&quot;</span>)]
+                    <span class="attr">#[cfg(feature = <span class="string">"native-tls"</span>)]
                     </span>{
                         <span class="kw">if let </span><span class="prelude-val">Some</span>(id) = config.identity {
                             id.add_to_native_tls(<span class="kw-2">&amp;mut </span>tls)<span class="question-mark">?</span>;
                         }
                     }
-                    <span class="attr">#[cfg(all(feature = <span class="string">&quot;__rustls&quot;</span>, not(feature = <span class="string">&quot;native-tls&quot;</span>)))]
+                    <span class="attr">#[cfg(all(feature = <span class="string">"__rustls"</span>, not(feature = <span class="string">"native-tls"</span>)))]
                     </span>{
-                        <span class="comment">// Default backend + rustls Identity doesn&#39;t work.
+                        <span class="comment">// Default backend + rustls Identity doesn't work.
                         </span><span class="kw">if let </span><span class="prelude-val">Some</span>(_id) = config.identity {
-                            <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="kw">crate</span>::error::builder(<span class="string">&quot;incompatible TLS identity type&quot;</span>));
+                            <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="kw">crate</span>::error::builder(<span class="string">"incompatible TLS identity type"</span>));
                         }
                     }
 
                     <span class="kw">if let </span><span class="prelude-val">Some</span>(min_tls_version) = config.min_tls_version {
                         <span class="kw">let </span>protocol = min_tls_version.to_native_tls().ok_or_else(|| {
                             <span class="comment">// TLS v1.3. This would be entirely reasonable,
-                            // native-tls just doesn&#39;t support it.
+                            // native-tls just doesn't support it.
                             // https://github.com/sfackler/rust-native-tls/issues/140
-                            </span><span class="kw">crate</span>::error::builder(<span class="string">&quot;invalid minimum TLS version for backend&quot;</span>)
+                            </span><span class="kw">crate</span>::error::builder(<span class="string">"invalid minimum TLS version for backend"</span>)
                         })<span class="question-mark">?</span>;
                         tls.min_protocol_version(<span class="prelude-val">Some</span>(protocol));
                     }
@@ -2891,9 +2891,9 @@
                         <span class="kw">let </span>protocol = max_tls_version.to_native_tls().ok_or_else(|| {
                             <span class="comment">// TLS v1.3.
                             // We could arguably do max_protocol_version(None), given
-                            // that 1.4 does not exist yet, but that&#39;d get messy in the
+                            // that 1.4 does not exist yet, but that'd get messy in the
                             // future.
-                            </span><span class="kw">crate</span>::error::builder(<span class="string">&quot;invalid maximum TLS version for backend&quot;</span>)
+                            </span><span class="kw">crate</span>::error::builder(<span class="string">"invalid maximum TLS version for backend"</span>)
                         })<span class="question-mark">?</span>;
                         tls.max_protocol_version(<span class="prelude-val">Some</span>(protocol));
                     }
@@ -2908,7 +2908,7 @@
                         config.tls_info,
                     )<span class="question-mark">?
                 </span>}
-                <span class="attr">#[cfg(feature = <span class="string">&quot;native-tls&quot;</span>)]
+                <span class="attr">#[cfg(feature = <span class="string">"native-tls"</span>)]
                 </span>TlsBackend::BuiltNativeTls(conn) =&gt; Connector::from_built_default_tls(
                     http,
                     conn,
@@ -2918,9 +2918,9 @@
                     config.nodelay,
                     config.tls_info,
                 ),
-                <span class="attr">#[cfg(feature = <span class="string">&quot;__rustls&quot;</span>)]
+                <span class="attr">#[cfg(feature = <span class="string">"__rustls"</span>)]
                 </span>TlsBackend::BuiltRustls(conn) =&gt; {
-                    <span class="attr">#[cfg(feature = <span class="string">&quot;http3&quot;</span>)]
+                    <span class="attr">#[cfg(feature = <span class="string">"http3"</span>)]
                     </span>{
                         h3_connector = build_h3_connector(
                             resolver,
@@ -2944,7 +2944,7 @@
                         config.tls_info,
                     )
                 }
-                <span class="attr">#[cfg(feature = <span class="string">&quot;__rustls&quot;</span>)]
+                <span class="attr">#[cfg(feature = <span class="string">"__rustls"</span>)]
                 </span>TlsBackend::Rustls =&gt; {
                     <span class="kw">use </span><span class="kw">crate</span>::tls::NoVerifier;
 
@@ -2954,7 +2954,7 @@
                         cert.add_to_rustls(<span class="kw-2">&amp;mut </span>root_cert_store)<span class="question-mark">?</span>;
                     }
 
-                    <span class="attr">#[cfg(feature = <span class="string">&quot;rustls-tls-webpki-roots&quot;</span>)]
+                    <span class="attr">#[cfg(feature = <span class="string">"rustls-tls-webpki-roots"</span>)]
                     </span><span class="kw">if </span>config.tls_built_in_root_certs {
                         <span class="kw">use </span>rustls::OwnedTrustAnchor;
 
@@ -2970,7 +2970,7 @@
                         root_cert_store.add_trust_anchors(trust_anchors);
                     }
 
-                    <span class="attr">#[cfg(feature = <span class="string">&quot;rustls-tls-native-roots&quot;</span>)]
+                    <span class="attr">#[cfg(feature = <span class="string">"rustls-tls-native-roots"</span>)]
                     </span><span class="kw">if </span>config.tls_built_in_root_certs {
                         <span class="kw">let </span><span class="kw-2">mut </span>valid_count = <span class="number">0</span>;
                         <span class="kw">let </span><span class="kw-2">mut </span>invalid_count = <span class="number">0</span>;
@@ -2986,7 +2986,7 @@
                                 <span class="prelude-val">Err</span>(err) =&gt; {
                                     invalid_count += <span class="number">1</span>;
                                     <span class="macro">log::warn!</span>(
-                                        <span class="string">&quot;rustls failed to parse DER certificate {:?} {:?}&quot;</span>,
+                                        <span class="string">"rustls failed to parse DER certificate {:?} {:?}"</span>,
                                         <span class="kw-2">&amp;</span>err,
                                         <span class="kw-2">&amp;</span>cert
                                     );
@@ -2995,7 +2995,7 @@
                         }
                         <span class="kw">if </span>valid_count == <span class="number">0 </span>&amp;&amp; invalid_count &gt; <span class="number">0 </span>{
                             <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="kw">crate</span>::error::builder(
-                                <span class="string">&quot;zero valid certificates found in native root store&quot;</span>,
+                                <span class="string">"zero valid certificates found in native root store"</span>,
                             ));
                         }
                     }
@@ -3007,7 +3007,7 @@
                         versions.retain(|<span class="kw-2">&amp;</span>supported_version| {
                             <span class="kw">match </span>tls::Version::from_rustls(supported_version.version) {
                                 <span class="prelude-val">Some</span>(version) =&gt; version &gt;= min_tls_version,
-                                <span class="comment">// Assume it&#39;s so new we don&#39;t know about it, allow it
+                                <span class="comment">// Assume it's so new we don't know about it, allow it
                                 // (as of writing this is unreachable)
                                 </span><span class="prelude-val">None </span>=&gt; <span class="bool-val">true</span>,
                             }
@@ -3049,21 +3049,21 @@
                     <span class="comment">// ALPN protocol
                     </span><span class="kw">match </span>config.http_version_pref {
                         HttpVersionPref::Http1 =&gt; {
-                            tls.alpn_protocols = <span class="macro">vec!</span>[<span class="string">&quot;http/1.1&quot;</span>.into()];
+                            tls.alpn_protocols = <span class="macro">vec!</span>[<span class="string">"http/1.1"</span>.into()];
                         }
                         HttpVersionPref::Http2 =&gt; {
-                            tls.alpn_protocols = <span class="macro">vec!</span>[<span class="string">&quot;h2&quot;</span>.into()];
+                            tls.alpn_protocols = <span class="macro">vec!</span>[<span class="string">"h2"</span>.into()];
                         }
-                        <span class="attr">#[cfg(feature = <span class="string">&quot;http3&quot;</span>)]
+                        <span class="attr">#[cfg(feature = <span class="string">"http3"</span>)]
                         </span>HttpVersionPref::Http3 =&gt; {
-                            tls.alpn_protocols = <span class="macro">vec!</span>[<span class="string">&quot;h3&quot;</span>.into()];
+                            tls.alpn_protocols = <span class="macro">vec!</span>[<span class="string">"h3"</span>.into()];
                         }
                         HttpVersionPref::All =&gt; {
-                            tls.alpn_protocols = <span class="macro">vec!</span>[<span class="string">&quot;h2&quot;</span>.into(), <span class="string">&quot;http/1.1&quot;</span>.into()];
+                            tls.alpn_protocols = <span class="macro">vec!</span>[<span class="string">"h2"</span>.into(), <span class="string">"http/1.1"</span>.into()];
                         }
                     }
 
-                    <span class="attr">#[cfg(feature = <span class="string">&quot;http3&quot;</span>)]
+                    <span class="attr">#[cfg(feature = <span class="string">"http3"</span>)]
                     </span>{
                         tls.enable_early_data = config.tls_enable_early_data;
 
@@ -3089,15 +3089,15 @@
                         config.tls_info,
                     )
                 }
-                <span class="attr">#[cfg(any(feature = <span class="string">&quot;native-tls&quot;</span>, feature = <span class="string">&quot;__rustls&quot;</span>,))]
+                <span class="attr">#[cfg(any(feature = <span class="string">"native-tls"</span>, feature = <span class="string">"__rustls"</span>,))]
                 </span>TlsBackend::UnknownPreconfigured =&gt; {
                     <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="kw">crate</span>::error::builder(
-                        <span class="string">&quot;Unknown TLS backend passed to `use_preconfigured_tls`&quot;</span>,
+                        <span class="string">"Unknown TLS backend passed to `use_preconfigured_tls`"</span>,
                     ));
                 }
             }
 
-            <span class="attr">#[cfg(not(feature = <span class="string">&quot;__tls&quot;</span>))]
+            <span class="attr">#[cfg(not(feature = <span class="string">"__tls"</span>))]
             </span>Connector::new(http, proxies.clone(), config.local_address, config.nodelay)
         };
 
@@ -3162,11 +3162,11 @@
         <span class="prelude-val">Ok</span>(Client {
             inner: Arc::new(ClientRef {
                 accepts: config.accepts,
-                <span class="attr">#[cfg(feature = <span class="string">&quot;cookies&quot;</span>)]
+                <span class="attr">#[cfg(feature = <span class="string">"cookies"</span>)]
                 </span>cookie_store: config.cookie_store,
                 <span class="comment">// Use match instead of map since config is partially moved
                 // and it cannot be used in closure
-                </span><span class="attr">#[cfg(feature = <span class="string">&quot;http3&quot;</span>)]
+                </span><span class="attr">#[cfg(feature = <span class="string">"http3"</span>)]
                 </span>h3_client: <span class="kw">match </span>h3_connector {
                     <span class="prelude-val">Some</span>(h3_connector) =&gt; {
                         <span class="prelude-val">Some</span>(H3Client::new(h3_connector, config.pool_idle_timeout))
@@ -3195,15 +3195,15 @@
     /// # async fn doc() -&gt; Result&lt;(), reqwest::Error&gt; {
     /// // Name your user agent after your app?
     /// static APP_USER_AGENT: &amp;str = concat!(
-    ///     env!(&quot;CARGO_PKG_NAME&quot;),
-    ///     &quot;/&quot;,
-    ///     env!(&quot;CARGO_PKG_VERSION&quot;),
+    ///     env!("CARGO_PKG_NAME"),
+    ///     "/",
+    ///     env!("CARGO_PKG_VERSION"),
     /// );
     ///
     /// let client = reqwest::Client::builder()
     ///     .user_agent(APP_USER_AGENT)
     ///     .build()?;
-    /// let res = client.get(&quot;https://www.rust-lang.org&quot;).send().await?;
+    /// let res = client.get("https://www.rust-lang.org").send().await?;
     /// # Ok(())
     /// # }
     /// ```
@@ -3230,10 +3230,10 @@
     /// use reqwest::header;
     /// # async fn doc() -&gt; Result&lt;(), reqwest::Error&gt; {
     /// let mut headers = header::HeaderMap::new();
-    /// headers.insert(&quot;X-MY-HEADER&quot;, header::HeaderValue::from_static(&quot;value&quot;));
+    /// headers.insert("X-MY-HEADER", header::HeaderValue::from_static("value"));
     ///
     /// // Consider marking security-sensitive headers with `set_sensitive`.
-    /// let mut auth_value = header::HeaderValue::from_static(&quot;secret&quot;);
+    /// let mut auth_value = header::HeaderValue::from_static("secret");
     /// auth_value.set_sensitive(true);
     /// headers.insert(header::AUTHORIZATION, auth_value);
     ///
@@ -3241,7 +3241,7 @@
     /// let client = reqwest::Client::builder()
     ///     .default_headers(headers)
     ///     .build()?;
-    /// let res = client.get(&quot;https://www.rust-lang.org&quot;).send().await?;
+    /// let res = client.get("https://www.rust-lang.org").send().await?;
     /// # Ok(())
     /// # }
     /// ```
@@ -3252,15 +3252,15 @@
     /// use reqwest::header;
     /// # async fn doc() -&gt; Result&lt;(), reqwest::Error&gt; {
     /// let mut headers = header::HeaderMap::new();
-    /// headers.insert(&quot;X-MY-HEADER&quot;, header::HeaderValue::from_static(&quot;value&quot;));
+    /// headers.insert("X-MY-HEADER", header::HeaderValue::from_static("value"));
     ///
     /// // get a client builder
     /// let client = reqwest::Client::builder()
     ///     .default_headers(headers)
     ///     .build()?;
     /// let res = client
-    ///     .get(&quot;https://www.rust-lang.org&quot;)
-    ///     .header(&quot;X-MY-HEADER&quot;, &quot;new_value&quot;)
+    ///     .get("https://www.rust-lang.org")
+    ///     .header("X-MY-HEADER", "new_value")
     ///     .send()
     ///     .await?;
     /// # Ok(())
@@ -3283,8 +3283,8 @@
     /// # Optional
     ///
     /// This requires the optional `cookies` feature to be enabled.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;cookies&quot;</span>)]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;cookies&quot;</span>)))]
+    </span><span class="attr">#[cfg(feature = <span class="string">"cookies"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"cookies"</span>)))]
     </span><span class="kw">pub fn </span>cookie_store(<span class="kw-2">mut </span><span class="self">self</span>, enable: bool) -&gt; ClientBuilder {
         <span class="kw">if </span>enable {
             <span class="self">self</span>.cookie_provider(Arc::new(cookie::Jar::default()))
@@ -3304,9 +3304,9 @@
     /// # Optional
     ///
     /// This requires the optional `cookies` feature to be enabled.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;cookies&quot;</span>)]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;cookies&quot;</span>)))]
-    </span><span class="kw">pub fn </span>cookie_provider&lt;C: cookie::CookieStore + <span class="lifetime">&#39;static</span>&gt;(
+    </span><span class="attr">#[cfg(feature = <span class="string">"cookies"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"cookies"</span>)))]
+    </span><span class="kw">pub fn </span>cookie_provider&lt;C: cookie::CookieStore + <span class="lifetime">'static</span>&gt;(
         <span class="kw-2">mut </span><span class="self">self</span>,
         cookie_store: Arc&lt;C&gt;,
     ) -&gt; ClientBuilder {
@@ -3318,20 +3318,20 @@
     ///
     /// If auto gzip decompression is turned on:
     ///
-    /// - When sending a request and if the request&#39;s headers do not already contain
+    /// - When sending a request and if the request's headers do not already contain
     ///   an `Accept-Encoding` **and** `Range` values, the `Accept-Encoding` header is set to `gzip`.
     ///   The request body is **not** automatically compressed.
     /// - When receiving a response, if its headers contain a `Content-Encoding` value of
     ///   `gzip`, both `Content-Encoding` and `Content-Length` are removed from the
-    ///   headers&#39; set. The response body is automatically decompressed.
+    ///   headers' set. The response body is automatically decompressed.
     ///
     /// If the `gzip` feature is turned on, the default option is enabled.
     ///
     /// # Optional
     ///
     /// This requires the optional `gzip` feature to be enabled
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;gzip&quot;</span>)]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;gzip&quot;</span>)))]
+    </span><span class="attr">#[cfg(feature = <span class="string">"gzip"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"gzip"</span>)))]
     </span><span class="kw">pub fn </span>gzip(<span class="kw-2">mut </span><span class="self">self</span>, enable: bool) -&gt; ClientBuilder {
         <span class="self">self</span>.config.accepts.gzip = enable;
         <span class="self">self
@@ -3341,20 +3341,20 @@
     ///
     /// If auto brotli decompression is turned on:
     ///
-    /// - When sending a request and if the request&#39;s headers do not already contain
+    /// - When sending a request and if the request's headers do not already contain
     ///   an `Accept-Encoding` **and** `Range` values, the `Accept-Encoding` header is set to `br`.
     ///   The request body is **not** automatically compressed.
     /// - When receiving a response, if its headers contain a `Content-Encoding` value of
     ///   `br`, both `Content-Encoding` and `Content-Length` are removed from the
-    ///   headers&#39; set. The response body is automatically decompressed.
+    ///   headers' set. The response body is automatically decompressed.
     ///
     /// If the `brotli` feature is turned on, the default option is enabled.
     ///
     /// # Optional
     ///
     /// This requires the optional `brotli` feature to be enabled
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;brotli&quot;</span>)]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;brotli&quot;</span>)))]
+    </span><span class="attr">#[cfg(feature = <span class="string">"brotli"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"brotli"</span>)))]
     </span><span class="kw">pub fn </span>brotli(<span class="kw-2">mut </span><span class="self">self</span>, enable: bool) -&gt; ClientBuilder {
         <span class="self">self</span>.config.accepts.brotli = enable;
         <span class="self">self
@@ -3364,20 +3364,20 @@
     ///
     /// If auto deflate decompression is turned on:
     ///
-    /// - When sending a request and if the request&#39;s headers do not already contain
+    /// - When sending a request and if the request's headers do not already contain
     ///   an `Accept-Encoding` **and** `Range` values, the `Accept-Encoding` header is set to `deflate`.
     ///   The request body is **not** automatically compressed.
-    /// - When receiving a response, if it&#39;s headers contain a `Content-Encoding` value that
+    /// - When receiving a response, if it's headers contain a `Content-Encoding` value that
     ///   equals to `deflate`, both values `Content-Encoding` and `Content-Length` are removed from the
-    ///   headers&#39; set. The response body is automatically decompressed.
+    ///   headers' set. The response body is automatically decompressed.
     ///
     /// If the `deflate` feature is turned on, the default option is enabled.
     ///
     /// # Optional
     ///
     /// This requires the optional `deflate` feature to be enabled
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;deflate&quot;</span>)]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;deflate&quot;</span>)))]
+    </span><span class="attr">#[cfg(feature = <span class="string">"deflate"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"deflate"</span>)))]
     </span><span class="kw">pub fn </span>deflate(<span class="kw-2">mut </span><span class="self">self</span>, enable: bool) -&gt; ClientBuilder {
         <span class="self">self</span>.config.accepts.deflate = enable;
         <span class="self">self
@@ -3386,15 +3386,15 @@
     <span class="doccomment">/// Disable auto response body gzip decompression.
     ///
     /// This method exists even if the optional `gzip` feature is not enabled.
-    /// This can be used to ensure a `Client` doesn&#39;t use gzip decompression
+    /// This can be used to ensure a `Client` doesn't use gzip decompression
     /// even if another dependency were to enable the optional `gzip` feature.
     </span><span class="kw">pub fn </span>no_gzip(<span class="self">self</span>) -&gt; ClientBuilder {
-        <span class="attr">#[cfg(feature = <span class="string">&quot;gzip&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"gzip"</span>)]
         </span>{
             <span class="self">self</span>.gzip(<span class="bool-val">false</span>)
         }
 
-        <span class="attr">#[cfg(not(feature = <span class="string">&quot;gzip&quot;</span>))]
+        <span class="attr">#[cfg(not(feature = <span class="string">"gzip"</span>))]
         </span>{
             <span class="self">self
         </span>}
@@ -3403,15 +3403,15 @@
     <span class="doccomment">/// Disable auto response body brotli decompression.
     ///
     /// This method exists even if the optional `brotli` feature is not enabled.
-    /// This can be used to ensure a `Client` doesn&#39;t use brotli decompression
+    /// This can be used to ensure a `Client` doesn't use brotli decompression
     /// even if another dependency were to enable the optional `brotli` feature.
     </span><span class="kw">pub fn </span>no_brotli(<span class="self">self</span>) -&gt; ClientBuilder {
-        <span class="attr">#[cfg(feature = <span class="string">&quot;brotli&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"brotli"</span>)]
         </span>{
             <span class="self">self</span>.brotli(<span class="bool-val">false</span>)
         }
 
-        <span class="attr">#[cfg(not(feature = <span class="string">&quot;brotli&quot;</span>))]
+        <span class="attr">#[cfg(not(feature = <span class="string">"brotli"</span>))]
         </span>{
             <span class="self">self
         </span>}
@@ -3420,15 +3420,15 @@
     <span class="doccomment">/// Disable auto response body deflate decompression.
     ///
     /// This method exists even if the optional `deflate` feature is not enabled.
-    /// This can be used to ensure a `Client` doesn&#39;t use deflate decompression
+    /// This can be used to ensure a `Client` doesn't use deflate decompression
     /// even if another dependency were to enable the optional `deflate` feature.
     </span><span class="kw">pub fn </span>no_deflate(<span class="self">self</span>) -&gt; ClientBuilder {
-        <span class="attr">#[cfg(feature = <span class="string">&quot;deflate&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"deflate"</span>)]
         </span>{
             <span class="self">self</span>.deflate(<span class="bool-val">false</span>)
         }
 
-        <span class="attr">#[cfg(not(feature = <span class="string">&quot;deflate&quot;</span>))]
+        <span class="attr">#[cfg(not(feature = <span class="string">"deflate"</span>))]
         </span>{
             <span class="self">self
         </span>}
@@ -3458,7 +3458,7 @@
     ///
     /// # Note
     ///
-    /// Adding a proxy will disable the automatic usage of the &quot;system&quot; proxy.
+    /// Adding a proxy will disable the automatic usage of the "system" proxy.
     </span><span class="kw">pub fn </span>proxy(<span class="kw-2">mut </span><span class="self">self</span>, proxy: Proxy) -&gt; ClientBuilder {
         <span class="self">self</span>.config.proxies.push(proxy);
         <span class="self">self</span>.config.auto_sys_proxy = <span class="bool-val">false</span>;
@@ -3471,7 +3471,7 @@
     /// To add a proxy exclusion list, use [crate::proxy::Proxy::no_proxy()]
     /// on all desired proxies instead.
     ///
-    /// This also disables the automatic usage of the &quot;system&quot; proxy.
+    /// This also disables the automatic usage of the "system" proxy.
     </span><span class="kw">pub fn </span>no_proxy(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; ClientBuilder {
         <span class="self">self</span>.config.proxies.clear();
         <span class="self">self</span>.config.auto_sys_proxy = <span class="bool-val">false</span>;
@@ -3595,7 +3595,7 @@
     </span>}
 
     <span class="doccomment">/// Only use HTTP/3.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;http3&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"http3"</span>)]
     </span><span class="kw">pub fn </span>http3_prior_knowledge(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; ClientBuilder {
         <span class="self">self</span>.config.http_version_pref = HttpVersionPref::Http3;
         <span class="self">self
@@ -3721,13 +3721,13 @@
     ///
     /// This requires the optional `default-tls`, `native-tls`, or `rustls-tls(-...)`
     /// feature to be enabled.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;__tls&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"__tls"</span>)]
     #[cfg_attr(
         docsrs,
         doc(cfg(any(
-            feature = <span class="string">&quot;default-tls&quot;</span>,
-            feature = <span class="string">&quot;native-tls&quot;</span>,
-            feature = <span class="string">&quot;rustls-tls&quot;
+            feature = <span class="string">"default-tls"</span>,
+            feature = <span class="string">"native-tls"</span>,
+            feature = <span class="string">"rustls-tls"
         </span>)))
     )]
     </span><span class="kw">pub fn </span>add_root_certificate(<span class="kw-2">mut </span><span class="self">self</span>, cert: Certificate) -&gt; ClientBuilder {
@@ -3743,13 +3743,13 @@
     ///
     /// This requires the optional `default-tls`, `native-tls`, or `rustls-tls(-...)`
     /// feature to be enabled.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;__tls&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"__tls"</span>)]
     #[cfg_attr(
         docsrs,
         doc(cfg(any(
-            feature = <span class="string">&quot;default-tls&quot;</span>,
-            feature = <span class="string">&quot;native-tls&quot;</span>,
-            feature = <span class="string">&quot;rustls-tls&quot;
+            feature = <span class="string">"default-tls"</span>,
+            feature = <span class="string">"native-tls"</span>,
+            feature = <span class="string">"rustls-tls"
         </span>)))
     )]
     </span><span class="kw">pub fn </span>tls_built_in_root_certs(<span class="kw-2">mut </span><span class="self">self</span>, tls_built_in_root_certs: bool) -&gt; ClientBuilder {
@@ -3763,8 +3763,8 @@
     ///
     /// This requires the optional `native-tls` or `rustls-tls(-...)` feature to be
     /// enabled.
-    </span><span class="attr">#[cfg(any(feature = <span class="string">&quot;native-tls&quot;</span>, feature = <span class="string">&quot;__rustls&quot;</span>))]
-    #[cfg_attr(docsrs, doc(cfg(any(feature = <span class="string">&quot;native-tls&quot;</span>, feature = <span class="string">&quot;rustls-tls&quot;</span>))))]
+    </span><span class="attr">#[cfg(any(feature = <span class="string">"native-tls"</span>, feature = <span class="string">"__rustls"</span>))]
+    #[cfg_attr(docsrs, doc(cfg(any(feature = <span class="string">"native-tls"</span>, feature = <span class="string">"rustls-tls"</span>))))]
     </span><span class="kw">pub fn </span>identity(<span class="kw-2">mut </span><span class="self">self</span>, identity: Identity) -&gt; ClientBuilder {
         <span class="self">self</span>.config.identity = <span class="prelude-val">Some</span>(identity);
         <span class="self">self
@@ -3784,8 +3784,8 @@
     /// # Optional
     ///
     /// This requires the optional `native-tls` feature to be enabled.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;native-tls&quot;</span>)]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;native-tls&quot;</span>)))]
+    </span><span class="attr">#[cfg(feature = <span class="string">"native-tls"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"native-tls"</span>)))]
     </span><span class="kw">pub fn </span>danger_accept_invalid_hostnames(
         <span class="kw-2">mut </span><span class="self">self</span>,
         accept_invalid_hostname: bool,
@@ -3810,13 +3810,13 @@
     ///
     /// This requires the optional `default-tls`, `native-tls`, or `rustls-tls(-...)`
     /// feature to be enabled.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;__tls&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"__tls"</span>)]
     #[cfg_attr(
         docsrs,
         doc(cfg(any(
-            feature = <span class="string">&quot;default-tls&quot;</span>,
-            feature = <span class="string">&quot;native-tls&quot;</span>,
-            feature = <span class="string">&quot;rustls-tls&quot;
+            feature = <span class="string">"default-tls"</span>,
+            feature = <span class="string">"native-tls"</span>,
+            feature = <span class="string">"rustls-tls"
         </span>)))
     )]
     </span><span class="kw">pub fn </span>danger_accept_invalid_certs(<span class="kw-2">mut </span><span class="self">self</span>, accept_invalid_certs: bool) -&gt; ClientBuilder {
@@ -3832,13 +3832,13 @@
     ///
     /// This requires the optional `default-tls`, `native-tls`, or `rustls-tls(-...)`
     /// feature to be enabled.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;__tls&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"__tls"</span>)]
     #[cfg_attr(
         docsrs,
         doc(cfg(any(
-            feature = <span class="string">&quot;default-tls&quot;</span>,
-            feature = <span class="string">&quot;native-tls&quot;</span>,
-            feature = <span class="string">&quot;rustls-tls&quot;
+            feature = <span class="string">"default-tls"</span>,
+            feature = <span class="string">"native-tls"</span>,
+            feature = <span class="string">"rustls-tls"
         </span>)))
     )]
     </span><span class="kw">pub fn </span>tls_sni(<span class="kw-2">mut </span><span class="self">self</span>, tls_sni: bool) -&gt; ClientBuilder {
@@ -3848,26 +3848,26 @@
 
     <span class="doccomment">/// Set the minimum required TLS version for connections.
     ///
-    /// By default the TLS backend&#39;s own default is used.
+    /// By default the TLS backend's own default is used.
     ///
     /// # Errors
     ///
     /// A value of `tls::Version::TLS_1_3` will cause an error with the
     /// `native-tls`/`default-tls` backend. This does not mean the version
-    /// isn&#39;t supported, just that it can&#39;t be set as a minimum due to
+    /// isn't supported, just that it can't be set as a minimum due to
     /// technical limitations.
     ///
     /// # Optional
     ///
     /// This requires the optional `default-tls`, `native-tls`, or `rustls-tls(-...)`
     /// feature to be enabled.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;__tls&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"__tls"</span>)]
     #[cfg_attr(
         docsrs,
         doc(cfg(any(
-            feature = <span class="string">&quot;default-tls&quot;</span>,
-            feature = <span class="string">&quot;native-tls&quot;</span>,
-            feature = <span class="string">&quot;rustls-tls&quot;
+            feature = <span class="string">"default-tls"</span>,
+            feature = <span class="string">"native-tls"</span>,
+            feature = <span class="string">"rustls-tls"
         </span>)))
     )]
     </span><span class="kw">pub fn </span>min_tls_version(<span class="kw-2">mut </span><span class="self">self</span>, version: tls::Version) -&gt; ClientBuilder {
@@ -3877,26 +3877,26 @@
 
     <span class="doccomment">/// Set the maximum allowed TLS version for connections.
     ///
-    /// By default there&#39;s no maximum.
+    /// By default there's no maximum.
     ///
     /// # Errors
     ///
     /// A value of `tls::Version::TLS_1_3` will cause an error with the
     /// `native-tls`/`default-tls` backend. This does not mean the version
-    /// isn&#39;t supported, just that it can&#39;t be set as a maximum due to
+    /// isn't supported, just that it can't be set as a maximum due to
     /// technical limitations.
     ///
     /// # Optional
     ///
     /// This requires the optional `default-tls`, `native-tls`, or `rustls-tls(-...)`
     /// feature to be enabled.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;__tls&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"__tls"</span>)]
     #[cfg_attr(
         docsrs,
         doc(cfg(any(
-            feature = <span class="string">&quot;default-tls&quot;</span>,
-            feature = <span class="string">&quot;native-tls&quot;</span>,
-            feature = <span class="string">&quot;rustls-tls&quot;
+            feature = <span class="string">"default-tls"</span>,
+            feature = <span class="string">"native-tls"</span>,
+            feature = <span class="string">"rustls-tls"
         </span>)))
     )]
     </span><span class="kw">pub fn </span>max_tls_version(<span class="kw-2">mut </span><span class="self">self</span>, version: tls::Version) -&gt; ClientBuilder {
@@ -3912,8 +3912,8 @@
     /// # Optional
     ///
     /// This requires the optional `native-tls` feature to be enabled.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;native-tls&quot;</span>)]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;native-tls&quot;</span>)))]
+    </span><span class="attr">#[cfg(feature = <span class="string">"native-tls"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"native-tls"</span>)))]
     </span><span class="kw">pub fn </span>use_native_tls(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; ClientBuilder {
         <span class="self">self</span>.config.tls = TlsBackend::Default;
         <span class="self">self
@@ -3927,8 +3927,8 @@
     /// # Optional
     ///
     /// This requires the optional `rustls-tls(-...)` feature to be enabled.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;__rustls&quot;</span>)]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;rustls-tls&quot;</span>)))]
+    </span><span class="attr">#[cfg(feature = <span class="string">"__rustls"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"rustls-tls"</span>)))]
     </span><span class="kw">pub fn </span>use_rustls_tls(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; ClientBuilder {
         <span class="self">self</span>.config.tls = TlsBackend::Rustls;
         <span class="self">self
@@ -3943,43 +3943,43 @@
     ///
     /// This is an advanced option, and can be somewhat brittle. Usage requires
     /// keeping the preconfigured TLS argument version in sync with reqwest,
-    /// since version mismatches will result in an &quot;unknown&quot; TLS backend.
+    /// since version mismatches will result in an "unknown" TLS backend.
     ///
-    /// If possible, it&#39;s preferable to use the methods on `ClientBuilder`
-    /// to configure reqwest&#39;s TLS.
+    /// If possible, it's preferable to use the methods on `ClientBuilder`
+    /// to configure reqwest's TLS.
     ///
     /// # Optional
     ///
     /// This requires one of the optional features `native-tls` or
     /// `rustls-tls(-...)` to be enabled.
-    </span><span class="attr">#[cfg(any(feature = <span class="string">&quot;native-tls&quot;</span>, feature = <span class="string">&quot;__rustls&quot;</span>,))]
-    #[cfg_attr(docsrs, doc(cfg(any(feature = <span class="string">&quot;native-tls&quot;</span>, feature = <span class="string">&quot;rustls-tls&quot;</span>))))]
+    </span><span class="attr">#[cfg(any(feature = <span class="string">"native-tls"</span>, feature = <span class="string">"__rustls"</span>,))]
+    #[cfg_attr(docsrs, doc(cfg(any(feature = <span class="string">"native-tls"</span>, feature = <span class="string">"rustls-tls"</span>))))]
     </span><span class="kw">pub fn </span>use_preconfigured_tls(<span class="kw-2">mut </span><span class="self">self</span>, tls: <span class="kw">impl </span>Any) -&gt; ClientBuilder {
         <span class="kw">let </span><span class="kw-2">mut </span>tls = <span class="prelude-val">Some</span>(tls);
-        <span class="attr">#[cfg(feature = <span class="string">&quot;native-tls&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"native-tls"</span>)]
         </span>{
             <span class="kw">if let </span><span class="prelude-val">Some</span>(conn) =
                 (<span class="kw-2">&amp;mut </span>tls <span class="kw">as </span><span class="kw-2">&amp;mut </span><span class="kw">dyn </span>Any).downcast_mut::&lt;<span class="prelude-ty">Option</span>&lt;native_tls_crate::TlsConnector&gt;&gt;()
             {
-                <span class="kw">let </span>tls = conn.take().expect(<span class="string">&quot;is definitely Some&quot;</span>);
+                <span class="kw">let </span>tls = conn.take().expect(<span class="string">"is definitely Some"</span>);
                 <span class="kw">let </span>tls = <span class="kw">crate</span>::tls::TlsBackend::BuiltNativeTls(tls);
                 <span class="self">self</span>.config.tls = tls;
                 <span class="kw">return </span><span class="self">self</span>;
             }
         }
-        <span class="attr">#[cfg(feature = <span class="string">&quot;__rustls&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"__rustls"</span>)]
         </span>{
             <span class="kw">if let </span><span class="prelude-val">Some</span>(conn) =
                 (<span class="kw-2">&amp;mut </span>tls <span class="kw">as </span><span class="kw-2">&amp;mut </span><span class="kw">dyn </span>Any).downcast_mut::&lt;<span class="prelude-ty">Option</span>&lt;rustls::ClientConfig&gt;&gt;()
             {
-                <span class="kw">let </span>tls = conn.take().expect(<span class="string">&quot;is definitely Some&quot;</span>);
+                <span class="kw">let </span>tls = conn.take().expect(<span class="string">"is definitely Some"</span>);
                 <span class="kw">let </span>tls = <span class="kw">crate</span>::tls::TlsBackend::BuiltRustls(tls);
                 <span class="self">self</span>.config.tls = tls;
                 <span class="kw">return </span><span class="self">self</span>;
             }
         }
 
-        <span class="comment">// Otherwise, we don&#39;t recognize the TLS backend!
+        <span class="comment">// Otherwise, we don't recognize the TLS backend!
         </span><span class="self">self</span>.config.tls = <span class="kw">crate</span>::tls::TlsBackend::UnknownPreconfigured;
         <span class="self">self
     </span>}
@@ -3990,13 +3990,13 @@
     ///
     /// This requires the optional `default-tls`, `native-tls`, or `rustls-tls(-...)`
     /// feature to be enabled.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;__tls&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"__tls"</span>)]
     #[cfg_attr(
         docsrs,
         doc(cfg(any(
-            feature = <span class="string">&quot;default-tls&quot;</span>,
-            feature = <span class="string">&quot;native-tls&quot;</span>,
-            feature = <span class="string">&quot;rustls-tls&quot;
+            feature = <span class="string">"default-tls"</span>,
+            feature = <span class="string">"native-tls"</span>,
+            feature = <span class="string">"rustls-tls"
         </span>)))
     )]
     </span><span class="kw">pub fn </span>tls_info(<span class="kw-2">mut </span><span class="self">self</span>, tls_info: bool) -&gt; ClientBuilder {
@@ -4011,8 +4011,8 @@
     /// # Optional
     ///
     /// This requires the optional `trust-dns` feature to be enabled
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;trust-dns&quot;</span>)]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;trust-dns&quot;</span>)))]
+    </span><span class="attr">#[cfg(feature = <span class="string">"trust-dns"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"trust-dns"</span>)))]
     </span><span class="kw">pub fn </span>trust_dns(<span class="kw-2">mut </span><span class="self">self</span>, enable: bool) -&gt; ClientBuilder {
         <span class="self">self</span>.config.trust_dns = enable;
         <span class="self">self
@@ -4021,15 +4021,15 @@
     <span class="doccomment">/// Disables the trust-dns async resolver.
     ///
     /// This method exists even if the optional `trust-dns` feature is not enabled.
-    /// This can be used to ensure a `Client` doesn&#39;t use the trust-dns async resolver
+    /// This can be used to ensure a `Client` doesn't use the trust-dns async resolver
     /// even if another dependency were to enable the optional `trust-dns` feature.
     </span><span class="kw">pub fn </span>no_trust_dns(<span class="self">self</span>) -&gt; ClientBuilder {
-        <span class="attr">#[cfg(feature = <span class="string">&quot;trust-dns&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"trust-dns"</span>)]
         </span>{
             <span class="self">self</span>.trust_dns(<span class="bool-val">false</span>)
         }
 
-        <span class="attr">#[cfg(not(feature = <span class="string">&quot;trust-dns&quot;</span>))]
+        <span class="attr">#[cfg(not(feature = <span class="string">"trust-dns"</span>))]
         </span>{
             <span class="self">self
         </span>}
@@ -4075,16 +4075,16 @@
     /// Pass an `Arc` wrapping a trait object implementing `Resolve`.
     /// Overrides for specific names passed to `resolve` and `resolve_to_addrs` will
     /// still be applied on top of this resolver.
-    </span><span class="kw">pub fn </span>dns_resolver&lt;R: Resolve + <span class="lifetime">&#39;static</span>&gt;(<span class="kw-2">mut </span><span class="self">self</span>, resolver: Arc&lt;R&gt;) -&gt; ClientBuilder {
+    </span><span class="kw">pub fn </span>dns_resolver&lt;R: Resolve + <span class="lifetime">'static</span>&gt;(<span class="kw-2">mut </span><span class="self">self</span>, resolver: Arc&lt;R&gt;) -&gt; ClientBuilder {
         <span class="self">self</span>.config.dns_resolver = <span class="prelude-val">Some</span>(resolver <span class="kw">as _</span>);
         <span class="self">self
     </span>}
 
-    <span class="doccomment">/// Whether to send data on the first flight (&quot;early data&quot;) in TLS 1.3 handshakes
+    <span class="doccomment">/// Whether to send data on the first flight ("early data") in TLS 1.3 handshakes
     /// for HTTP/3 connections.
     ///
     /// The default is false.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;http3&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"http3"</span>)]
     </span><span class="kw">pub fn </span>set_tls_enable_early_data(<span class="kw-2">mut </span><span class="self">self</span>, enabled: bool) -&gt; ClientBuilder {
         <span class="self">self</span>.config.tls_enable_early_data = enabled;
         <span class="self">self
@@ -4095,7 +4095,7 @@
     /// Please see docs in [`TransportConfig`] in [`quinn`].
     ///
     /// [`TransportConfig`]: https://docs.rs/quinn/latest/quinn/struct.TransportConfig.html
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;http3&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"http3"</span>)]
     </span><span class="kw">pub fn </span>set_quic_max_idle_timeout(<span class="kw-2">mut </span><span class="self">self</span>, value: Duration) -&gt; ClientBuilder {
         <span class="self">self</span>.config.quic_max_idle_timeout = <span class="prelude-val">Some</span>(value);
         <span class="self">self
@@ -4107,7 +4107,7 @@
     /// Please see docs in [`TransportConfig`] in [`quinn`].
     ///
     /// [`TransportConfig`]: https://docs.rs/quinn/latest/quinn/struct.TransportConfig.html
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;http3&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"http3"</span>)]
     </span><span class="kw">pub fn </span>set_quic_stream_receive_window(<span class="kw-2">mut </span><span class="self">self</span>, value: VarInt) -&gt; ClientBuilder {
         <span class="self">self</span>.config.quic_stream_receive_window = <span class="prelude-val">Some</span>(value);
         <span class="self">self
@@ -4119,7 +4119,7 @@
     /// Please see docs in [`TransportConfig`] in [`quinn`].
     ///
     /// [`TransportConfig`]: https://docs.rs/quinn/latest/quinn/struct.TransportConfig.html
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;http3&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"http3"</span>)]
     </span><span class="kw">pub fn </span>set_quic_receive_window(<span class="kw-2">mut </span><span class="self">self</span>, value: VarInt) -&gt; ClientBuilder {
         <span class="self">self</span>.config.quic_receive_window = <span class="prelude-val">Some</span>(value);
         <span class="self">self
@@ -4130,7 +4130,7 @@
     /// Please see docs in [`TransportConfig`] in [`quinn`].
     ///
     /// [`TransportConfig`]: https://docs.rs/quinn/latest/quinn/struct.TransportConfig.html
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;http3&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"http3"</span>)]
     </span><span class="kw">pub fn </span>set_quic_send_window(<span class="kw-2">mut </span><span class="self">self</span>, value: u64) -&gt; ClientBuilder {
         <span class="self">self</span>.config.quic_send_window = <span class="prelude-val">Some</span>(value);
         <span class="self">self
@@ -4156,7 +4156,7 @@
     /// Use `Client::builder()` if you wish to handle the failure as an `Error`
     /// instead of panicking.
     </span><span class="kw">pub fn </span>new() -&gt; Client {
-        ClientBuilder::new().build().expect(<span class="string">&quot;Client::new()&quot;</span>)
+        ClientBuilder::new().build().expect(<span class="string">"Client::new()"</span>)
     }
 
     <span class="doccomment">/// Creates a `ClientBuilder` to configure a `Client`.
@@ -4254,12 +4254,12 @@
 
     <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>execute_request(<span class="kw-2">&amp;</span><span class="self">self</span>, req: Request) -&gt; Pending {
         <span class="kw">let </span>(method, url, <span class="kw-2">mut </span>headers, body, timeout, version) = req.pieces();
-        <span class="kw">if </span>url.scheme() != <span class="string">&quot;http&quot; </span>&amp;&amp; url.scheme() != <span class="string">&quot;https&quot; </span>{
+        <span class="kw">if </span>url.scheme() != <span class="string">"http" </span>&amp;&amp; url.scheme() != <span class="string">"https" </span>{
             <span class="kw">return </span>Pending::new_err(error::url_bad_scheme(url));
         }
 
-        <span class="comment">// check if we&#39;re in https_only mode and check the scheme of the current URL
-        </span><span class="kw">if </span><span class="self">self</span>.inner.https_only &amp;&amp; url.scheme() != <span class="string">&quot;https&quot; </span>{
+        <span class="comment">// check if we're in https_only mode and check the scheme of the current URL
+        </span><span class="kw">if </span><span class="self">self</span>.inner.https_only &amp;&amp; url.scheme() != <span class="string">"https" </span>{
             <span class="kw">return </span>Pending::new_err(error::url_bad_scheme(url));
         }
 
@@ -4272,7 +4272,7 @@
         }
 
         <span class="comment">// Add cookies from the cookie store.
-        </span><span class="attr">#[cfg(feature = <span class="string">&quot;cookies&quot;</span>)]
+        </span><span class="attr">#[cfg(feature = <span class="string">"cookies"</span>)]
         </span>{
             <span class="kw">if let </span><span class="prelude-val">Some</span>(cookie_store) = <span class="self">self</span>.inner.cookie_store.as_ref() {
                 <span class="kw">if </span>headers.get(<span class="kw">crate</span>::header::COOKIE).is_none() {
@@ -4307,16 +4307,16 @@
             .version(version);
 
         <span class="kw">let </span>in_flight = <span class="kw">match </span>version {
-            <span class="attr">#[cfg(feature = <span class="string">&quot;http3&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"http3"</span>)]
             </span>http::Version::HTTP_3 <span class="kw">if </span><span class="self">self</span>.inner.h3_client.is_some() =&gt; {
-                <span class="kw">let </span><span class="kw-2">mut </span>req = builder.body(body).expect(<span class="string">&quot;valid request parts&quot;</span>);
+                <span class="kw">let </span><span class="kw-2">mut </span>req = builder.body(body).expect(<span class="string">"valid request parts"</span>);
                 <span class="kw-2">*</span>req.headers_mut() = headers.clone();
                 ResponseFuture::H3(<span class="self">self</span>.inner.h3_client.as_ref().unwrap().request(req))
             }
             <span class="kw">_ </span>=&gt; {
                 <span class="kw">let </span><span class="kw-2">mut </span>req = builder
                     .body(body.into_stream())
-                    .expect(<span class="string">&quot;valid request parts&quot;</span>);
+                    .expect(<span class="string">"valid request parts"</span>);
                 <span class="kw-2">*</span>req.headers_mut() = headers.clone();
                 ResponseFuture::Default(<span class="self">self</span>.inner.hyper.request(req))
             }
@@ -4351,7 +4351,7 @@
             <span class="kw">return</span>;
         }
 
-        <span class="comment">// Only set the header here if the destination scheme is &#39;http&#39;,
+        <span class="comment">// Only set the header here if the destination scheme is 'http',
         // since otherwise, the header will be included in the CONNECT tunnel
         // request instead.
         </span><span class="kw">if </span>dst.scheme() != <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>Scheme::HTTP) {
@@ -4376,7 +4376,7 @@
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>Client {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
-        <span class="kw">let </span><span class="kw-2">mut </span>builder = f.debug_struct(<span class="string">&quot;Client&quot;</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>builder = f.debug_struct(<span class="string">"Client"</span>);
         <span class="self">self</span>.inner.fmt_fields(<span class="kw-2">&amp;mut </span>builder);
         builder.finish()
     }
@@ -4387,7 +4387,7 @@
     <span class="kw">type </span>Error = <span class="kw">crate</span>::Error;
     <span class="kw">type </span>Future = Pending;
 
-    <span class="kw">fn </span>poll_ready(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt;&gt; {
+    <span class="kw">fn </span>poll_ready(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt;&gt; {
         Poll::Ready(<span class="prelude-val">Ok</span>(()))
     }
 
@@ -4396,12 +4396,12 @@
     }
 }
 
-<span class="kw">impl </span>tower_service::Service&lt;Request&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;_ </span>Client {
+<span class="kw">impl </span>tower_service::Service&lt;Request&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'_ </span>Client {
     <span class="kw">type </span>Response = Response;
     <span class="kw">type </span>Error = <span class="kw">crate</span>::Error;
     <span class="kw">type </span>Future = Pending;
 
-    <span class="kw">fn </span>poll_ready(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt;&gt; {
+    <span class="kw">fn </span>poll_ready(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt;&gt; {
         Poll::Ready(<span class="prelude-val">Ok</span>(()))
     }
 
@@ -4412,119 +4412,119 @@
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>ClientBuilder {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
-        <span class="kw">let </span><span class="kw-2">mut </span>builder = f.debug_struct(<span class="string">&quot;ClientBuilder&quot;</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>builder = f.debug_struct(<span class="string">"ClientBuilder"</span>);
         <span class="self">self</span>.config.fmt_fields(<span class="kw-2">&amp;mut </span>builder);
         builder.finish()
     }
 }
 
 <span class="kw">impl </span>Config {
-    <span class="kw">fn </span>fmt_fields(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::DebugStruct&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
+    <span class="kw">fn </span>fmt_fields(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::DebugStruct&lt;<span class="lifetime">'_</span>, <span class="lifetime">'_</span>&gt;) {
         <span class="comment">// Instead of deriving Debug, only print fields when their output
         // would provide relevant or interesting data.
 
-        </span><span class="attr">#[cfg(feature = <span class="string">&quot;cookies&quot;</span>)]
+        </span><span class="attr">#[cfg(feature = <span class="string">"cookies"</span>)]
         </span>{
             <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw">_</span>) = <span class="self">self</span>.cookie_store {
-                f.field(<span class="string">&quot;cookie_store&quot;</span>, <span class="kw-2">&amp;</span><span class="bool-val">true</span>);
+                f.field(<span class="string">"cookie_store"</span>, <span class="kw-2">&amp;</span><span class="bool-val">true</span>);
             }
         }
 
-        f.field(<span class="string">&quot;accepts&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.accepts);
+        f.field(<span class="string">"accepts"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.accepts);
 
         <span class="kw">if </span>!<span class="self">self</span>.proxies.is_empty() {
-            f.field(<span class="string">&quot;proxies&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.proxies);
+            f.field(<span class="string">"proxies"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.proxies);
         }
 
         <span class="kw">if </span>!<span class="self">self</span>.redirect_policy.is_default() {
-            f.field(<span class="string">&quot;redirect_policy&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.redirect_policy);
+            f.field(<span class="string">"redirect_policy"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.redirect_policy);
         }
 
         <span class="kw">if </span><span class="self">self</span>.referer {
-            f.field(<span class="string">&quot;referer&quot;</span>, <span class="kw-2">&amp;</span><span class="bool-val">true</span>);
+            f.field(<span class="string">"referer"</span>, <span class="kw-2">&amp;</span><span class="bool-val">true</span>);
         }
 
-        f.field(<span class="string">&quot;default_headers&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.headers);
+        f.field(<span class="string">"default_headers"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.headers);
 
         <span class="kw">if </span><span class="self">self</span>.http1_title_case_headers {
-            f.field(<span class="string">&quot;http1_title_case_headers&quot;</span>, <span class="kw-2">&amp;</span><span class="bool-val">true</span>);
+            f.field(<span class="string">"http1_title_case_headers"</span>, <span class="kw-2">&amp;</span><span class="bool-val">true</span>);
         }
 
         <span class="kw">if </span><span class="self">self</span>.http1_allow_obsolete_multiline_headers_in_responses {
-            f.field(<span class="string">&quot;http1_allow_obsolete_multiline_headers_in_responses&quot;</span>, <span class="kw-2">&amp;</span><span class="bool-val">true</span>);
+            f.field(<span class="string">"http1_allow_obsolete_multiline_headers_in_responses"</span>, <span class="kw-2">&amp;</span><span class="bool-val">true</span>);
         }
 
         <span class="kw">if </span><span class="self">self</span>.http1_ignore_invalid_headers_in_responses {
-            f.field(<span class="string">&quot;http1_ignore_invalid_headers_in_responses&quot;</span>, <span class="kw-2">&amp;</span><span class="bool-val">true</span>);
+            f.field(<span class="string">"http1_ignore_invalid_headers_in_responses"</span>, <span class="kw-2">&amp;</span><span class="bool-val">true</span>);
         }
 
         <span class="kw">if </span><span class="self">self</span>.http1_allow_spaces_after_header_name_in_responses {
-            f.field(<span class="string">&quot;http1_allow_spaces_after_header_name_in_responses&quot;</span>, <span class="kw-2">&amp;</span><span class="bool-val">true</span>);
+            f.field(<span class="string">"http1_allow_spaces_after_header_name_in_responses"</span>, <span class="kw-2">&amp;</span><span class="bool-val">true</span>);
         }
 
         <span class="kw">if </span><span class="macro">matches!</span>(<span class="self">self</span>.http_version_pref, HttpVersionPref::Http1) {
-            f.field(<span class="string">&quot;http1_only&quot;</span>, <span class="kw-2">&amp;</span><span class="bool-val">true</span>);
+            f.field(<span class="string">"http1_only"</span>, <span class="kw-2">&amp;</span><span class="bool-val">true</span>);
         }
 
         <span class="kw">if </span><span class="macro">matches!</span>(<span class="self">self</span>.http_version_pref, HttpVersionPref::Http2) {
-            f.field(<span class="string">&quot;http2_prior_knowledge&quot;</span>, <span class="kw-2">&amp;</span><span class="bool-val">true</span>);
+            f.field(<span class="string">"http2_prior_knowledge"</span>, <span class="kw-2">&amp;</span><span class="bool-val">true</span>);
         }
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref </span>d) = <span class="self">self</span>.connect_timeout {
-            f.field(<span class="string">&quot;connect_timeout&quot;</span>, d);
+            f.field(<span class="string">"connect_timeout"</span>, d);
         }
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref </span>d) = <span class="self">self</span>.timeout {
-            f.field(<span class="string">&quot;timeout&quot;</span>, d);
+            f.field(<span class="string">"timeout"</span>, d);
         }
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref </span>v) = <span class="self">self</span>.local_address {
-            f.field(<span class="string">&quot;local_address&quot;</span>, v);
+            f.field(<span class="string">"local_address"</span>, v);
         }
 
         <span class="kw">if </span><span class="self">self</span>.nodelay {
-            f.field(<span class="string">&quot;tcp_nodelay&quot;</span>, <span class="kw-2">&amp;</span><span class="bool-val">true</span>);
+            f.field(<span class="string">"tcp_nodelay"</span>, <span class="kw-2">&amp;</span><span class="bool-val">true</span>);
         }
 
-        <span class="attr">#[cfg(feature = <span class="string">&quot;native-tls&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"native-tls"</span>)]
         </span>{
             <span class="kw">if </span>!<span class="self">self</span>.hostname_verification {
-                f.field(<span class="string">&quot;danger_accept_invalid_hostnames&quot;</span>, <span class="kw-2">&amp;</span><span class="bool-val">true</span>);
+                f.field(<span class="string">"danger_accept_invalid_hostnames"</span>, <span class="kw-2">&amp;</span><span class="bool-val">true</span>);
             }
         }
 
-        <span class="attr">#[cfg(feature = <span class="string">&quot;__tls&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"__tls"</span>)]
         </span>{
             <span class="kw">if </span>!<span class="self">self</span>.certs_verification {
-                f.field(<span class="string">&quot;danger_accept_invalid_certs&quot;</span>, <span class="kw-2">&amp;</span><span class="bool-val">true</span>);
+                f.field(<span class="string">"danger_accept_invalid_certs"</span>, <span class="kw-2">&amp;</span><span class="bool-val">true</span>);
             }
 
             <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref </span>min_tls_version) = <span class="self">self</span>.min_tls_version {
-                f.field(<span class="string">&quot;min_tls_version&quot;</span>, min_tls_version);
+                f.field(<span class="string">"min_tls_version"</span>, min_tls_version);
             }
 
             <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref </span>max_tls_version) = <span class="self">self</span>.max_tls_version {
-                f.field(<span class="string">&quot;max_tls_version&quot;</span>, max_tls_version);
+                f.field(<span class="string">"max_tls_version"</span>, max_tls_version);
             }
 
-            f.field(<span class="string">&quot;tls_sni&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.tls_sni);
+            f.field(<span class="string">"tls_sni"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.tls_sni);
 
-            f.field(<span class="string">&quot;tls_info&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.tls_info);
+            f.field(<span class="string">"tls_info"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.tls_info);
         }
 
-        <span class="attr">#[cfg(all(feature = <span class="string">&quot;native-tls-crate&quot;</span>, feature = <span class="string">&quot;__rustls&quot;</span>))]
+        <span class="attr">#[cfg(all(feature = <span class="string">"native-tls-crate"</span>, feature = <span class="string">"__rustls"</span>))]
         </span>{
-            f.field(<span class="string">&quot;tls_backend&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.tls);
+            f.field(<span class="string">"tls_backend"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.tls);
         }
 
         <span class="kw">if </span>!<span class="self">self</span>.dns_overrides.is_empty() {
-            f.field(<span class="string">&quot;dns_overrides&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.dns_overrides);
+            f.field(<span class="string">"dns_overrides"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.dns_overrides);
         }
 
-        <span class="attr">#[cfg(feature = <span class="string">&quot;http3&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"http3"</span>)]
         </span>{
             <span class="kw">if </span><span class="self">self</span>.tls_enable_early_data {
-                f.field(<span class="string">&quot;tls_enable_early_data&quot;</span>, <span class="kw-2">&amp;</span><span class="bool-val">true</span>);
+                f.field(<span class="string">"tls_enable_early_data"</span>, <span class="kw-2">&amp;</span><span class="bool-val">true</span>);
             }
         }
     }
@@ -4532,11 +4532,11 @@
 
 <span class="kw">struct </span>ClientRef {
     accepts: Accepts,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;cookies&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"cookies"</span>)]
     </span>cookie_store: <span class="prelude-ty">Option</span>&lt;Arc&lt;<span class="kw">dyn </span>cookie::CookieStore&gt;&gt;,
     headers: HeaderMap,
     hyper: HyperClient,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;http3&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"http3"</span>)]
     </span>h3_client: <span class="prelude-ty">Option</span>&lt;H3Client&gt;,
     redirect_policy: redirect::Policy,
     referer: bool,
@@ -4547,35 +4547,35 @@
 }
 
 <span class="kw">impl </span>ClientRef {
-    <span class="kw">fn </span>fmt_fields(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::DebugStruct&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt;) {
+    <span class="kw">fn </span>fmt_fields(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::DebugStruct&lt;<span class="lifetime">'_</span>, <span class="lifetime">'_</span>&gt;) {
         <span class="comment">// Instead of deriving Debug, only print fields when their output
         // would provide relevant or interesting data.
 
-        </span><span class="attr">#[cfg(feature = <span class="string">&quot;cookies&quot;</span>)]
+        </span><span class="attr">#[cfg(feature = <span class="string">"cookies"</span>)]
         </span>{
             <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw">_</span>) = <span class="self">self</span>.cookie_store {
-                f.field(<span class="string">&quot;cookie_store&quot;</span>, <span class="kw-2">&amp;</span><span class="bool-val">true</span>);
+                f.field(<span class="string">"cookie_store"</span>, <span class="kw-2">&amp;</span><span class="bool-val">true</span>);
             }
         }
 
-        f.field(<span class="string">&quot;accepts&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.accepts);
+        f.field(<span class="string">"accepts"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.accepts);
 
         <span class="kw">if </span>!<span class="self">self</span>.proxies.is_empty() {
-            f.field(<span class="string">&quot;proxies&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.proxies);
+            f.field(<span class="string">"proxies"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.proxies);
         }
 
         <span class="kw">if </span>!<span class="self">self</span>.redirect_policy.is_default() {
-            f.field(<span class="string">&quot;redirect_policy&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.redirect_policy);
+            f.field(<span class="string">"redirect_policy"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.redirect_policy);
         }
 
         <span class="kw">if </span><span class="self">self</span>.referer {
-            f.field(<span class="string">&quot;referer&quot;</span>, <span class="kw-2">&amp;</span><span class="bool-val">true</span>);
+            f.field(<span class="string">"referer"</span>, <span class="kw-2">&amp;</span><span class="bool-val">true</span>);
         }
 
-        f.field(<span class="string">&quot;default_headers&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.headers);
+        f.field(<span class="string">"default_headers"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.headers);
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref </span>d) = <span class="self">self</span>.request_timeout {
-            f.field(<span class="string">&quot;timeout&quot;</span>, d);
+            f.field(<span class="string">"timeout"</span>, d);
         }
     }
 }
@@ -4614,7 +4614,7 @@
 
 <span class="kw">enum </span>ResponseFuture {
     Default(HyperResponseFuture),
-    <span class="attr">#[cfg(feature = <span class="string">&quot;http3&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"http3"</span>)]
     </span>H3(H3ResponseFuture),
 }
 
@@ -4635,24 +4635,24 @@
         <span class="self">self</span>.project().headers
     }
 
-    <span class="kw">fn </span>retry_error(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, err: <span class="kw-2">&amp;</span>(<span class="kw">dyn </span>std::error::Error + <span class="lifetime">&#39;static</span>)) -&gt; bool {
+    <span class="kw">fn </span>retry_error(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, err: <span class="kw-2">&amp;</span>(<span class="kw">dyn </span>std::error::Error + <span class="lifetime">'static</span>)) -&gt; bool {
         <span class="kw">if </span>!is_retryable_error(err) {
             <span class="kw">return </span><span class="bool-val">false</span>;
         }
 
-        <span class="macro">trace!</span>(<span class="string">&quot;can retry {:?}&quot;</span>, err);
+        <span class="macro">trace!</span>(<span class="string">"can retry {:?}"</span>, err);
 
         <span class="kw">let </span>body = <span class="kw">match </span><span class="self">self</span>.body {
             <span class="prelude-val">Some</span>(<span class="prelude-val">Some</span>(<span class="kw-2">ref </span>body)) =&gt; Body::reusable(body.clone()),
             <span class="prelude-val">Some</span>(<span class="prelude-val">None</span>) =&gt; {
-                <span class="macro">debug!</span>(<span class="string">&quot;error was retryable, but body not reusable&quot;</span>);
+                <span class="macro">debug!</span>(<span class="string">"error was retryable, but body not reusable"</span>);
                 <span class="kw">return </span><span class="bool-val">false</span>;
             }
             <span class="prelude-val">None </span>=&gt; Body::empty(),
         };
 
         <span class="kw">if </span><span class="self">self</span>.retry_count &gt;= <span class="number">2 </span>{
-            <span class="macro">trace!</span>(<span class="string">&quot;retry count too high&quot;</span>);
+            <span class="macro">trace!</span>(<span class="string">"retry count too high"</span>);
             <span class="kw">return </span><span class="bool-val">false</span>;
         }
         <span class="self">self</span>.retry_count += <span class="number">1</span>;
@@ -4660,19 +4660,19 @@
         <span class="kw">let </span>uri = expect_uri(<span class="kw-2">&amp;</span><span class="self">self</span>.url);
 
         <span class="kw-2">*</span><span class="self">self</span>.as_mut().in_flight().get_mut() = <span class="kw">match </span><span class="kw-2">*</span><span class="self">self</span>.as_mut().in_flight().as_ref() {
-            <span class="attr">#[cfg(feature = <span class="string">&quot;http3&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"http3"</span>)]
             </span>ResponseFuture::H3(<span class="kw">_</span>) =&gt; {
                 <span class="kw">let </span><span class="kw-2">mut </span>req = hyper::Request::builder()
                     .method(<span class="self">self</span>.method.clone())
                     .uri(uri)
                     .body(body)
-                    .expect(<span class="string">&quot;valid request parts&quot;</span>);
+                    .expect(<span class="string">"valid request parts"</span>);
                 <span class="kw-2">*</span>req.headers_mut() = <span class="self">self</span>.headers.clone();
                 ResponseFuture::H3(
                     <span class="self">self</span>.client
                         .h3_client
                         .as_ref()
-                        .expect(<span class="string">&quot;H3 client must exists, otherwise we can&#39;t have a h3 request here&quot;</span>)
+                        .expect(<span class="string">"H3 client must exists, otherwise we can't have a h3 request here"</span>)
                         .request(req),
                 )
             }
@@ -4681,7 +4681,7 @@
                     .method(<span class="self">self</span>.method.clone())
                     .uri(uri)
                     .body(body.into_stream())
-                    .expect(<span class="string">&quot;valid request parts&quot;</span>);
+                    .expect(<span class="string">"valid request parts"</span>);
                 <span class="kw-2">*</span>req.headers_mut() = <span class="self">self</span>.headers.clone();
                 ResponseFuture::Default(<span class="self">self</span>.client.hyper.request(req))
             }
@@ -4691,13 +4691,13 @@
     </span>}
 }
 
-<span class="kw">fn </span>is_retryable_error(err: <span class="kw-2">&amp;</span>(<span class="kw">dyn </span>std::error::Error + <span class="lifetime">&#39;static</span>)) -&gt; bool {
-    <span class="attr">#[cfg(feature = <span class="string">&quot;http3&quot;</span>)]
+<span class="kw">fn </span>is_retryable_error(err: <span class="kw-2">&amp;</span>(<span class="kw">dyn </span>std::error::Error + <span class="lifetime">'static</span>)) -&gt; bool {
+    <span class="attr">#[cfg(feature = <span class="string">"http3"</span>)]
     </span><span class="kw">if let </span><span class="prelude-val">Some</span>(cause) = err.source() {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(err) = cause.downcast_ref::&lt;h3::Error&gt;() {
-            <span class="macro">debug!</span>(<span class="string">&quot;determining if HTTP/3 error {} can be retried&quot;</span>, err);
+            <span class="macro">debug!</span>(<span class="string">"determining if HTTP/3 error {} can be retried"</span>, err);
             <span class="comment">// TODO: Does h3 provide an API for checking the error?
-            </span><span class="kw">return </span>err.to_string().as_str() == <span class="string">&quot;timeout&quot;</span>;
+            </span><span class="kw">return </span>err.to_string().as_str() == <span class="string">"timeout"</span>;
         }
     }
 
@@ -4727,13 +4727,13 @@
 <span class="kw">impl </span>Future <span class="kw">for </span>Pending {
     <span class="kw">type </span>Output = <span class="prelude-ty">Result</span>&lt;Response, <span class="kw">crate</span>::Error&gt;;
 
-    <span class="kw">fn </span>poll(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
+    <span class="kw">fn </span>poll(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
         <span class="kw">let </span>inner = <span class="self">self</span>.inner();
         <span class="kw">match </span>inner.get_mut() {
             PendingInner::Request(<span class="kw-2">ref mut </span>req) =&gt; Pin::new(req).poll(cx),
             PendingInner::Error(<span class="kw-2">ref mut </span>err) =&gt; Poll::Ready(<span class="prelude-val">Err</span>(err
                 .take()
-                .expect(<span class="string">&quot;Pending error polled more than once&quot;</span>))),
+                .expect(<span class="string">"Pending error polled more than once"</span>))),
         }
     }
 }
@@ -4741,7 +4741,7 @@
 <span class="kw">impl </span>Future <span class="kw">for </span>PendingRequest {
     <span class="kw">type </span>Output = <span class="prelude-ty">Result</span>&lt;Response, <span class="kw">crate</span>::Error&gt;;
 
-    <span class="kw">fn </span>poll(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
+    <span class="kw">fn </span>poll(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(delay) = <span class="self">self</span>.as_mut().timeout().as_mut().as_pin_mut() {
             <span class="kw">if let </span>Poll::Ready(()) = delay.poll(cx) {
                 <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Err</span>(
@@ -4764,7 +4764,7 @@
                     Poll::Ready(<span class="prelude-val">Ok</span>(res)) =&gt; res,
                     Poll::Pending =&gt; <span class="kw">return </span>Poll::Pending,
                 },
-                <span class="attr">#[cfg(feature = <span class="string">&quot;http3&quot;</span>)]
+                <span class="attr">#[cfg(feature = <span class="string">"http3"</span>)]
                 </span>ResponseFuture::H3(r) =&gt; <span class="kw">match </span>Pin::new(r).poll(cx) {
                     Poll::Ready(<span class="prelude-val">Err</span>(e)) =&gt; {
                         <span class="kw">if </span><span class="self">self</span>.as_mut().retry_error(<span class="kw-2">&amp;</span>e) {
@@ -4779,7 +4779,7 @@
                 },
             };
 
-            <span class="attr">#[cfg(feature = <span class="string">&quot;cookies&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"cookies"</span>)]
             </span>{
                 <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref </span>cookie_store) = <span class="self">self</span>.client.cookie_store {
                     <span class="kw">let </span><span class="kw-2">mut </span>cookies =
@@ -4821,8 +4821,8 @@
                 <span class="kw">let </span>loc = res.headers().get(LOCATION).and_then(|val| {
                     <span class="kw">let </span>loc = (|| -&gt; <span class="prelude-ty">Option</span>&lt;Url&gt; {
                         <span class="comment">// Some sites may send a utf-8 Location header,
-                        // even though we&#39;re supposed to treat those bytes
-                        // as opaque, we&#39;ll check specifically for utf8.
+                        // even though we're supposed to treat those bytes
+                        // as opaque, we'll check specifically for utf8.
                         </span><span class="self">self</span>.url.join(str::from_utf8(val.as_bytes()).ok()<span class="question-mark">?</span>).ok()
                     })();
 
@@ -4838,7 +4838,7 @@
                     });
 
                     <span class="kw">if </span>loc.is_none() {
-                        <span class="macro">debug!</span>(<span class="string">&quot;Location header had invalid URI: {:?}&quot;</span>, val);
+                        <span class="macro">debug!</span>(<span class="string">"Location header had invalid URI: {:?}"</span>, val);
                     }
                     loc
                 });
@@ -4857,9 +4857,9 @@
 
                     <span class="kw">match </span>action {
                         redirect::ActionKind::Follow =&gt; {
-                            <span class="macro">debug!</span>(<span class="string">&quot;redirecting &#39;{}&#39; to &#39;{}&#39;&quot;</span>, <span class="self">self</span>.url, loc);
+                            <span class="macro">debug!</span>(<span class="string">"redirecting '{}' to '{}'"</span>, <span class="self">self</span>.url, loc);
 
-                            <span class="kw">if </span><span class="self">self</span>.client.https_only &amp;&amp; loc.scheme() != <span class="string">&quot;https&quot; </span>{
+                            <span class="kw">if </span><span class="self">self</span>.client.https_only &amp;&amp; loc.scheme() != <span class="string">"https" </span>{
                                 <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Err</span>(error::redirect(
                                     error::url_bad_scheme(loc.clone()),
                                     loc,
@@ -4878,7 +4878,7 @@
                             };
 
                             <span class="comment">// Add cookies from the cookie store.
-                            </span><span class="attr">#[cfg(feature = <span class="string">&quot;cookies&quot;</span>)]
+                            </span><span class="attr">#[cfg(feature = <span class="string">"cookies"</span>)]
                             </span>{
                                 <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref </span>cookie_store) = <span class="self">self</span>.client.cookie_store {
                                     add_cookie_header(<span class="kw-2">&amp;mut </span>headers, <span class="kw-2">&amp;**</span>cookie_store, <span class="kw-2">&amp;</span><span class="self">self</span>.url);
@@ -4887,18 +4887,18 @@
 
                             <span class="kw-2">*</span><span class="self">self</span>.as_mut().in_flight().get_mut() =
                                 <span class="kw">match </span><span class="kw-2">*</span><span class="self">self</span>.as_mut().in_flight().as_ref() {
-                                    <span class="attr">#[cfg(feature = <span class="string">&quot;http3&quot;</span>)]
+                                    <span class="attr">#[cfg(feature = <span class="string">"http3"</span>)]
                                     </span>ResponseFuture::H3(<span class="kw">_</span>) =&gt; {
                                         <span class="kw">let </span><span class="kw-2">mut </span>req = hyper::Request::builder()
                                             .method(<span class="self">self</span>.method.clone())
                                             .uri(uri.clone())
                                             .body(body)
-                                            .expect(<span class="string">&quot;valid request parts&quot;</span>);
+                                            .expect(<span class="string">"valid request parts"</span>);
                                         <span class="kw-2">*</span>req.headers_mut() = headers.clone();
                                         std::mem::swap(<span class="self">self</span>.as_mut().headers(), <span class="kw-2">&amp;mut </span>headers);
                                         ResponseFuture::H3(<span class="self">self</span>.client.h3_client
                         .as_ref()
-                        .expect(<span class="string">&quot;H3 client must exists, otherwise we can&#39;t have a h3 request here&quot;</span>)
+                        .expect(<span class="string">"H3 client must exists, otherwise we can't have a h3 request here"</span>)
                                             .request(req))
                                     }
                                     <span class="kw">_ </span>=&gt; {
@@ -4906,7 +4906,7 @@
                                             .method(<span class="self">self</span>.method.clone())
                                             .uri(uri.clone())
                                             .body(body.into_stream())
-                                            .expect(<span class="string">&quot;valid request parts&quot;</span>);
+                                            .expect(<span class="string">"valid request parts"</span>);
                                         <span class="kw-2">*</span>req.headers_mut() = headers.clone();
                                         std::mem::swap(<span class="self">self</span>.as_mut().headers(), <span class="kw-2">&amp;mut </span>headers);
                                         ResponseFuture::Default(<span class="self">self</span>.client.hyper.request(req))
@@ -4916,7 +4916,7 @@
                             <span class="kw">continue</span>;
                         }
                         redirect::ActionKind::Stop =&gt; {
-                            <span class="macro">debug!</span>(<span class="string">&quot;redirect policy disallowed redirection to &#39;{}&#39;&quot;</span>, loc);
+                            <span class="macro">debug!</span>(<span class="string">"redirect policy disallowed redirection to '{}'"</span>, loc);
                         }
                         redirect::ActionKind::Error(err) =&gt; {
                             <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Err</span>(<span class="kw">crate</span>::error::redirect(err, <span class="self">self</span>.url.clone())));
@@ -4940,28 +4940,28 @@
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
         <span class="kw">match </span><span class="self">self</span>.inner {
             PendingInner::Request(<span class="kw-2">ref </span>req) =&gt; f
-                .debug_struct(<span class="string">&quot;Pending&quot;</span>)
-                .field(<span class="string">&quot;method&quot;</span>, <span class="kw-2">&amp;</span>req.method)
-                .field(<span class="string">&quot;url&quot;</span>, <span class="kw-2">&amp;</span>req.url)
+                .debug_struct(<span class="string">"Pending"</span>)
+                .field(<span class="string">"method"</span>, <span class="kw-2">&amp;</span>req.method)
+                .field(<span class="string">"url"</span>, <span class="kw-2">&amp;</span>req.url)
                 .finish(),
-            PendingInner::Error(<span class="kw-2">ref </span>err) =&gt; f.debug_struct(<span class="string">&quot;Pending&quot;</span>).field(<span class="string">&quot;error&quot;</span>, err).finish(),
+            PendingInner::Error(<span class="kw-2">ref </span>err) =&gt; f.debug_struct(<span class="string">"Pending"</span>).field(<span class="string">"error"</span>, err).finish(),
         }
     }
 }
 
 <span class="kw">fn </span>make_referer(next: <span class="kw-2">&amp;</span>Url, previous: <span class="kw-2">&amp;</span>Url) -&gt; <span class="prelude-ty">Option</span>&lt;HeaderValue&gt; {
-    <span class="kw">if </span>next.scheme() == <span class="string">&quot;http&quot; </span>&amp;&amp; previous.scheme() == <span class="string">&quot;https&quot; </span>{
+    <span class="kw">if </span>next.scheme() == <span class="string">"http" </span>&amp;&amp; previous.scheme() == <span class="string">"https" </span>{
         <span class="kw">return </span><span class="prelude-val">None</span>;
     }
 
     <span class="kw">let </span><span class="kw-2">mut </span>referer = previous.clone();
-    <span class="kw">let _ </span>= referer.set_username(<span class="string">&quot;&quot;</span>);
+    <span class="kw">let _ </span>= referer.set_username(<span class="string">""</span>);
     <span class="kw">let _ </span>= referer.set_password(<span class="prelude-val">None</span>);
     referer.set_fragment(<span class="prelude-val">None</span>);
     referer.as_str().parse().ok()
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;cookies&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"cookies"</span>)]
 </span><span class="kw">fn </span>add_cookie_header(headers: <span class="kw-2">&amp;mut </span>HeaderMap, cookie_store: <span class="kw-2">&amp;</span><span class="kw">dyn </span>cookie::CookieStore, url: <span class="kw-2">&amp;</span>Url) {
     <span class="kw">if let </span><span class="prelude-val">Some</span>(header) = cookie_store.cookies(url) {
         headers.insert(<span class="kw">crate</span>::header::COOKIE, header);
@@ -4972,7 +4972,7 @@
 </span><span class="kw">mod </span>tests {
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>execute_request_rejects_invald_urls() {
-        <span class="kw">let </span>url_str = <span class="string">&quot;hxxps://www.rust-lang.org/&quot;</span>;
+        <span class="kw">let </span>url_str = <span class="string">"hxxps://www.rust-lang.org/"</span>;
         <span class="kw">let </span>url = url::Url::parse(url_str).unwrap();
         <span class="kw">let </span>result = <span class="kw">crate</span>::get(url.clone()).<span class="kw">await</span>;
 

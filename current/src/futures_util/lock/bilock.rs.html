@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/futures-util-0.3.29/src/lock/bilock.rs`."><title>bilock.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="futures_util" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/futures-util-0.3.29/src/lock/bilock.rs`."><title>bilock.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="futures_util" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -301,7 +301,7 @@
 <span class="kw">use </span>core::sync::atomic::AtomicPtr;
 <span class="kw">use </span>core::sync::atomic::Ordering::SeqCst;
 <span class="kw">use </span>core::{fmt, ptr};
-<span class="attr">#[cfg(feature = <span class="string">&quot;bilock&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"bilock"</span>)]
 </span><span class="kw">use </span>futures_core::future::Future;
 <span class="kw">use </span>futures_core::task::{Context, Poll, Waker};
 
@@ -313,12 +313,12 @@
 /// implementation of `BiLock` can be more optimized for just the two possible
 /// owners.
 ///
-/// Note that it&#39;s possible to use this lock through a poll-style interface with
+/// Note that it's possible to use this lock through a poll-style interface with
 /// the `poll_lock` method but you can also use it as a future with the `lock`
 /// method that consumes a `BiLock` and returns a future that will resolve when
-/// it&#39;s locked.
+/// it's locked.
 ///
-/// A `BiLock` is typically used for &quot;split&quot; operations where data which serves
+/// A `BiLock` is typically used for "split" operations where data which serves
 /// two purposes wants to be split into two to be worked with separately. For
 /// example a TCP stream could be both a reader and a writer or a framing layer
 /// could be both a stream and a sink for messages. A `BiLock` enables splitting
@@ -327,7 +327,7 @@
 /// This type is only available when the `bilock` feature of this
 /// library is activated.
 </span><span class="attr">#[derive(Debug)]
-#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;bilock&quot;</span>)))]
+#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"bilock"</span>)))]
 </span><span class="kw">pub struct </span>BiLock&lt;T&gt; {
     arc: Arc&lt;Inner&lt;T&gt;&gt;,
 }
@@ -362,7 +362,7 @@
         (<span class="self">Self </span>{ arc: arc.clone() }, <span class="self">Self </span>{ arc })
     }
 
-    <span class="doccomment">/// Attempt to acquire this lock, returning `Pending` if it can&#39;t be
+    <span class="doccomment">/// Attempt to acquire this lock, returning `Pending` if it can't be
     /// acquired.
     ///
     /// This function will acquire the lock in a nonblocking fashion, returning
@@ -378,9 +378,9 @@
     ///
     /// # Panics
     ///
-    /// This function will panic if called outside the context of a future&#39;s
+    /// This function will panic if called outside the context of a future's
     /// task.
-    </span><span class="kw">pub fn </span>poll_lock(<span class="kw-2">&amp;</span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;BiLockGuard&lt;<span class="lifetime">&#39;_</span>, T&gt;&gt; {
+    </span><span class="kw">pub fn </span>poll_lock(<span class="kw-2">&amp;</span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;BiLockGuard&lt;<span class="lifetime">'_</span>, T&gt;&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>waker = <span class="prelude-val">None</span>;
         <span class="kw">loop </span>{
             <span class="kw">let </span>n = <span class="self">self</span>.arc.state.swap(invalid_ptr(<span class="number">1</span>), SeqCst);
@@ -400,13 +400,13 @@
                 },
             }
 
-            <span class="comment">// type ascription for safety&#39;s sake!
+            <span class="comment">// type ascription for safety's sake!
             </span><span class="kw">let </span>me: Box&lt;Waker&gt; = waker.take().unwrap_or_else(|| Box::new(cx.waker().clone()));
             <span class="kw">let </span>me = Box::into_raw(me);
 
             <span class="kw">match </span><span class="self">self</span>.arc.state.compare_exchange(invalid_ptr(<span class="number">1</span>), me, SeqCst, SeqCst) {
-                <span class="comment">// The lock is still locked, but we&#39;ve now parked ourselves, so
-                // just report that we&#39;re scheduled to receive a notification.
+                <span class="comment">// The lock is still locked, but we've now parked ourselves, so
+                // just report that we're scheduled to receive a notification.
                 </span><span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="kw">return </span>Poll::Pending,
 
                 <span class="comment">// Oops, looks like the lock was unlocked after our swap above
@@ -417,17 +417,17 @@
                 },
 
                 <span class="comment">// The top of this loop set the previous state to 1, so if we
-                // failed the CAS above then it&#39;s because the previous value was
+                // failed the CAS above then it's because the previous value was
                 // *not* zero or one. This indicates that a task was blocked,
-                // but we&#39;re trying to acquire the lock and there&#39;s only one
+                // but we're trying to acquire the lock and there's only one
                 // other reference of the lock, so it should be impossible for
                 // that task to ever block itself.
-                </span><span class="prelude-val">Err</span>(n) =&gt; <span class="macro">panic!</span>(<span class="string">&quot;invalid state: {}&quot;</span>, n <span class="kw">as </span>usize),
+                </span><span class="prelude-val">Err</span>(n) =&gt; <span class="macro">panic!</span>(<span class="string">"invalid state: {}"</span>, n <span class="kw">as </span>usize),
             }
         }
     }
 
-    <span class="doccomment">/// Perform a &quot;blocking lock&quot; of this lock, consuming this lock handle and
+    <span class="doccomment">/// Perform a "blocking lock" of this lock, consuming this lock handle and
     /// returning a future to the acquired lock.
     ///
     /// This function consumes the `BiLock&lt;T&gt;` and returns a sentinel future,
@@ -436,13 +436,13 @@
     /// `BiLockGuard&lt;T&gt;`.
     ///
     /// Note that the returned future will never resolve to an error.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;bilock&quot;</span>)]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;bilock&quot;</span>)))]
-    </span><span class="kw">pub fn </span>lock(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; BiLockAcquire&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+    </span><span class="attr">#[cfg(feature = <span class="string">"bilock"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"bilock"</span>)))]
+    </span><span class="kw">pub fn </span>lock(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; BiLockAcquire&lt;<span class="lifetime">'_</span>, T&gt; {
         BiLockAcquire { bilock: <span class="self">self </span>}
     }
 
-    <span class="doccomment">/// Attempts to put the two &quot;halves&quot; of a `BiLock&lt;T&gt;` back together and
+    <span class="doccomment">/// Attempts to put the two "halves" of a `BiLock&lt;T&gt;` back together and
     /// recover the original value. Succeeds only if the two `BiLock&lt;T&gt;`s
     /// originated from the same call to `BiLock::new`.
     </span><span class="kw">pub fn </span>reunite(<span class="self">self</span>, other: <span class="self">Self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;T, ReuniteError&lt;T&gt;&gt;
@@ -453,7 +453,7 @@
             drop(other);
             <span class="kw">let </span>inner = Arc::try_unwrap(<span class="self">self</span>.arc)
                 .ok()
-                .expect(<span class="string">&quot;futures: try_unwrap failed in BiLock&lt;T&gt;::reunite&quot;</span>);
+                .expect(<span class="string">"futures: try_unwrap failed in BiLock&lt;T&gt;::reunite"</span>);
             <span class="prelude-val">Ok</span>(<span class="kw">unsafe </span>{ inner.into_value() })
         } <span class="kw">else </span>{
             <span class="prelude-val">Err</span>(ReuniteError(<span class="self">self</span>, other))
@@ -463,14 +463,14 @@
     <span class="kw">fn </span>unlock(<span class="kw-2">&amp;</span><span class="self">self</span>) {
         <span class="kw">let </span>n = <span class="self">self</span>.arc.state.swap(ptr::null_mut(), SeqCst);
         <span class="kw">match </span>n <span class="kw">as </span>usize {
-            <span class="comment">// we&#39;ve locked the lock, shouldn&#39;t be possible for us to see an
+            <span class="comment">// we've locked the lock, shouldn't be possible for us to see an
             // unlocked lock.
-            </span><span class="number">0 </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;invalid unlocked state&quot;</span>),
+            </span><span class="number">0 </span>=&gt; <span class="macro">panic!</span>(<span class="string">"invalid unlocked state"</span>),
 
-            <span class="comment">// Ok, no one else tried to get the lock, we&#39;re done.
+            <span class="comment">// Ok, no one else tried to get the lock, we're done.
             </span><span class="number">1 </span>=&gt; {}
 
-            <span class="comment">// Another task has parked themselves on this lock, let&#39;s wake them
+            <span class="comment">// Another task has parked themselves on this lock, let's wake them
             // up as its now their turn.
             </span><span class="kw">_ </span>=&gt; <span class="kw">unsafe </span>{
                 Box::from_raw(n).wake();
@@ -493,22 +493,22 @@
 
 <span class="doccomment">/// Error indicating two `BiLock&lt;T&gt;`s were not two halves of a whole, and
 /// thus could not be `reunite`d.
-</span><span class="attr">#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;bilock&quot;</span>)))]
+</span><span class="attr">#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"bilock"</span>)))]
 </span><span class="kw">pub struct </span>ReuniteError&lt;T&gt;(<span class="kw">pub </span>BiLock&lt;T&gt;, <span class="kw">pub </span>BiLock&lt;T&gt;);
 
 <span class="kw">impl</span>&lt;T&gt; fmt::Debug <span class="kw">for </span>ReuniteError&lt;T&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        f.debug_tuple(<span class="string">&quot;ReuniteError&quot;</span>).field(<span class="kw-2">&amp;</span><span class="string">&quot;...&quot;</span>).finish()
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        f.debug_tuple(<span class="string">"ReuniteError"</span>).field(<span class="kw-2">&amp;</span><span class="string">"..."</span>).finish()
     }
 }
 
 <span class="kw">impl</span>&lt;T&gt; fmt::Display <span class="kw">for </span>ReuniteError&lt;T&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;tried to reunite two BiLocks that don&#39;t form a pair&quot;</span>)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        <span class="macro">write!</span>(f, <span class="string">"tried to reunite two BiLocks that don't form a pair"</span>)
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
 </span><span class="kw">impl</span>&lt;T: core::any::Any&gt; std::error::Error <span class="kw">for </span>ReuniteError&lt;T&gt; {}
 
 <span class="doccomment">/// Returned RAII guard from the `poll_lock` method.
@@ -517,28 +517,28 @@
 /// implementing `Deref` and `DerefMut` to `T`. When dropped, the lock will be
 /// unlocked.
 </span><span class="attr">#[derive(Debug)]
-#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;bilock&quot;</span>)))]
-</span><span class="kw">pub struct </span>BiLockGuard&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    bilock: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>BiLock&lt;T&gt;,
+#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"bilock"</span>)))]
+</span><span class="kw">pub struct </span>BiLockGuard&lt;<span class="lifetime">'a</span>, T&gt; {
+    bilock: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>BiLock&lt;T&gt;,
 }
 
 <span class="comment">// We allow parallel access to T via Deref, so Sync bound is also needed here.
-</span><span class="kw">unsafe impl</span>&lt;T: Send + Sync&gt; Sync <span class="kw">for </span>BiLockGuard&lt;<span class="lifetime">&#39;_</span>, T&gt; {}
+</span><span class="kw">unsafe impl</span>&lt;T: Send + Sync&gt; Sync <span class="kw">for </span>BiLockGuard&lt;<span class="lifetime">'_</span>, T&gt; {}
 
-<span class="kw">impl</span>&lt;T&gt; Deref <span class="kw">for </span>BiLockGuard&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+<span class="kw">impl</span>&lt;T&gt; Deref <span class="kw">for </span>BiLockGuard&lt;<span class="lifetime">'_</span>, T&gt; {
     <span class="kw">type </span>Target = T;
     <span class="kw">fn </span>deref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>T {
         <span class="kw">unsafe </span>{ <span class="kw-2">&amp;*</span><span class="self">self</span>.bilock.arc.value.as_ref().unwrap().get() }
     }
 }
 
-<span class="kw">impl</span>&lt;T: Unpin&gt; DerefMut <span class="kw">for </span>BiLockGuard&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+<span class="kw">impl</span>&lt;T: Unpin&gt; DerefMut <span class="kw">for </span>BiLockGuard&lt;<span class="lifetime">'_</span>, T&gt; {
     <span class="kw">fn </span>deref_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>T {
         <span class="kw">unsafe </span>{ <span class="kw-2">&amp;mut *</span><span class="self">self</span>.bilock.arc.value.as_ref().unwrap().get() }
     }
 }
 
-<span class="kw">impl</span>&lt;T&gt; BiLockGuard&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+<span class="kw">impl</span>&lt;T&gt; BiLockGuard&lt;<span class="lifetime">'_</span>, T&gt; {
     <span class="doccomment">/// Get a mutable pinned reference to the locked value.
     </span><span class="kw">pub fn </span>as_pin_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; Pin&lt;<span class="kw-2">&amp;mut </span>T&gt; {
         <span class="comment">// Safety: we never allow moving a !Unpin value out of a bilock, nor
@@ -547,7 +547,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;T&gt; Drop <span class="kw">for </span>BiLockGuard&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+<span class="kw">impl</span>&lt;T&gt; Drop <span class="kw">for </span>BiLockGuard&lt;<span class="lifetime">'_</span>, T&gt; {
     <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="self">self</span>.bilock.unlock();
     }
@@ -555,23 +555,23 @@
 
 <span class="doccomment">/// Future returned by `BiLock::lock` which will resolve when the lock is
 /// acquired.
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;bilock&quot;</span>)]
-#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;bilock&quot;</span>)))]
-#[must_use = <span class="string">&quot;futures do nothing unless you `.await` or poll them&quot;</span>]
+</span><span class="attr">#[cfg(feature = <span class="string">"bilock"</span>)]
+#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"bilock"</span>)))]
+#[must_use = <span class="string">"futures do nothing unless you `.await` or poll them"</span>]
 #[derive(Debug)]
-</span><span class="kw">pub struct </span>BiLockAcquire&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    bilock: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>BiLock&lt;T&gt;,
+</span><span class="kw">pub struct </span>BiLockAcquire&lt;<span class="lifetime">'a</span>, T&gt; {
+    bilock: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>BiLock&lt;T&gt;,
 }
 
 <span class="comment">// Pinning is never projected to fields
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;bilock&quot;</span>)]
-</span><span class="kw">impl</span>&lt;T&gt; Unpin <span class="kw">for </span>BiLockAcquire&lt;<span class="lifetime">&#39;_</span>, T&gt; {}
+</span><span class="attr">#[cfg(feature = <span class="string">"bilock"</span>)]
+</span><span class="kw">impl</span>&lt;T&gt; Unpin <span class="kw">for </span>BiLockAcquire&lt;<span class="lifetime">'_</span>, T&gt; {}
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;bilock&quot;</span>)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; Future <span class="kw">for </span>BiLockAcquire&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    <span class="kw">type </span>Output = BiLockGuard&lt;<span class="lifetime">&#39;a</span>, T&gt;;
+<span class="attr">#[cfg(feature = <span class="string">"bilock"</span>)]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; Future <span class="kw">for </span>BiLockAcquire&lt;<span class="lifetime">'a</span>, T&gt; {
+    <span class="kw">type </span>Output = BiLockGuard&lt;<span class="lifetime">'a</span>, T&gt;;
 
-    <span class="kw">fn </span>poll(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
+    <span class="kw">fn </span>poll(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
         <span class="self">self</span>.bilock.poll_lock(cx)
     }
 }
@@ -580,7 +580,7 @@
 </span><span class="attr">#[allow(clippy::useless_transmute)]
 #[inline]
 </span><span class="kw">fn </span>invalid_ptr&lt;T&gt;(addr: usize) -&gt; <span class="kw-2">*mut </span>T {
-    <span class="comment">// SAFETY: every valid integer is also a valid pointer (as long as you don&#39;t dereference that
+    <span class="comment">// SAFETY: every valid integer is also a valid pointer (as long as you don't dereference that
     // pointer).
     </span><span class="kw">unsafe </span>{ core::mem::transmute(addr) }
 }

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/futures-macro-0.3.29/src/join.rs`."><title>join.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="futures_macro" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/futures-macro-0.3.29/src/join.rs`."><title>join.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="futures_macro" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -156,7 +156,7 @@
 }
 
 <span class="kw">impl </span>Parse <span class="kw">for </span>Join {
-    <span class="kw">fn </span>parse(input: ParseStream&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; syn::Result&lt;<span class="self">Self</span>&gt; {
+    <span class="kw">fn </span>parse(input: ParseStream&lt;<span class="lifetime">'_</span>&gt;) -&gt; syn::Result&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>join = <span class="self">Self</span>::default();
 
         <span class="kw">while </span>!input.is_empty() {
@@ -177,7 +177,7 @@
         .into_iter()
         .enumerate()
         .map(|(i, expr)| {
-            <span class="kw">let </span>name = <span class="macro">format_ident!</span>(<span class="string">&quot;_fut{}&quot;</span>, i, span = span);
+            <span class="kw">let </span>name = <span class="macro">format_ident!</span>(<span class="string">"_fut{}"</span>, i, span = span);
             future_let_bindings.push(<span class="macro">quote! </span>{
                 <span class="comment">// Move future into a local so that it is pinned in one place and
                 // is no longer accessible by the end user.
@@ -195,7 +195,7 @@
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>join(input: TokenStream) -&gt; TokenStream {
     <span class="kw">let </span>parsed = <span class="macro">syn::parse_macro_input!</span>(input <span class="kw">as </span>Join);
 
-    <span class="comment">// should be def_site, but that&#39;s unstable
+    <span class="comment">// should be def_site, but that's unstable
     </span><span class="kw">let </span>span = Span::call_site();
 
     <span class="kw">let </span>(future_let_bindings, future_names) = bind_futures(parsed.fut_exprs, span);
@@ -215,7 +215,7 @@
     TokenStream::from(<span class="macro">quote! </span>{ {
         #( #future_let_bindings )*
 
-        __futures_crate::future::poll_fn(<span class="kw">move </span>|__cx: <span class="kw-2">&amp;mut </span>__futures_crate::task::Context&lt;<span class="lifetime">&#39;_</span>&gt;| {
+        __futures_crate::future::poll_fn(<span class="kw">move </span>|__cx: <span class="kw-2">&amp;mut </span>__futures_crate::task::Context&lt;<span class="lifetime">'_</span>&gt;| {
             <span class="kw">let </span><span class="kw-2">mut </span>__all_done = <span class="bool-val">true</span>;
             #( #poll_futures )*
             <span class="kw">if </span>__all_done {
@@ -233,7 +233,7 @@
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>try_join(input: TokenStream) -&gt; TokenStream {
     <span class="kw">let </span>parsed = <span class="macro">syn::parse_macro_input!</span>(input <span class="kw">as </span>Join);
 
-    <span class="comment">// should be def_site, but that&#39;s unstable
+    <span class="comment">// should be def_site, but that's unstable
     </span><span class="kw">let </span>span = Span::call_site();
 
     <span class="kw">let </span>(future_let_bindings, future_names) = bind_futures(parsed.fut_exprs, span);
@@ -245,7 +245,7 @@
             {
                 __all_done = <span class="bool-val">false</span>;
             } <span class="kw">else if </span>#fut.as_mut().output_mut().unwrap().is_err() {
-                <span class="comment">// `.err().unwrap()` rather than `.unwrap_err()` so that we don&#39;t introduce
+                <span class="comment">// `.err().unwrap()` rather than `.unwrap_err()` so that we don't introduce
                 // a `T: Debug` bound.
                 // Also, for an error type of ! any code after `err().unwrap()` is unreachable.
                 </span><span class="attr">#[allow(unreachable_code)]
@@ -259,7 +259,7 @@
     });
     <span class="kw">let </span>take_outputs = future_names.iter().map(|fut| {
         <span class="macro">quote! </span>{
-            <span class="comment">// `.ok().unwrap()` rather than `.unwrap()` so that we don&#39;t introduce
+            <span class="comment">// `.ok().unwrap()` rather than `.unwrap()` so that we don't introduce
             // an `E: Debug` bound.
             // Also, for an ok type of ! any code after `ok().unwrap()` is unreachable.
             </span><span class="attr">#[allow(unreachable_code)]
@@ -271,7 +271,7 @@
         #( #future_let_bindings )*
 
         <span class="attr">#[allow(clippy::diverging_sub_expression)]
-        </span>__futures_crate::future::poll_fn(<span class="kw">move </span>|__cx: <span class="kw-2">&amp;mut </span>__futures_crate::task::Context&lt;<span class="lifetime">&#39;_</span>&gt;| {
+        </span>__futures_crate::future::poll_fn(<span class="kw">move </span>|__cx: <span class="kw-2">&amp;mut </span>__futures_crate::task::Context&lt;<span class="lifetime">'_</span>&gt;| {
             <span class="kw">let </span><span class="kw-2">mut </span>__all_done = <span class="bool-val">true</span>;
             #( #poll_futures )*
             <span class="kw">if </span>__all_done {

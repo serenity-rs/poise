@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/runtime/scheduler/multi_thread/worker.rs`."><title>worker.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../../../" data-static-root-path="../../../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../../src-files.js"></script><script defer src="../../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/runtime/scheduler/multi_thread/worker.rs`."><title>worker.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../../../" data-static-root-path="../../../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../../src-files.js"></script><script defer src="../../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1226,9 +1226,9 @@
 <a href="#1226" id="1226">1226</a>
 <a href="#1227" id="1227">1227</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A scheduler is initialized with a fixed number of workers. Each worker is
-//! driven by a thread. Each worker has a &quot;core&quot; which contains data such as the
-//! run queue and other state. When `block_in_place` is called, the worker&#39;s
-//! &quot;core&quot; is handed off to a new thread allowing the scheduler to continue to
+//! driven by a thread. Each worker has a "core" which contains data such as the
+//! run queue and other state. When `block_in_place` is called, the worker's
+//! "core" is handed off to a new thread allowing the scheduler to continue to
 //! make progress while the originating thread blocks.
 //!
 //! # Shutdown
@@ -1264,7 +1264,7 @@
 //!
 //!  * The spawner observes the OwnedTasks being open, and the inject queue is
 //!    closed.
-//!  * The spawner observes the OwnedTasks being closed and doesn&#39;t check the
+//!  * The spawner observes the OwnedTasks being closed and doesn't check the
 //!    inject queue.
 //!
 //! The first case can only happen if the OwnedTasks::bind call happens before
@@ -1315,13 +1315,13 @@
 
 <span class="doccomment">/// A scheduler worker
 </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">struct </span>Worker {
-    <span class="doccomment">/// Reference to scheduler&#39;s handle
+    <span class="doccomment">/// Reference to scheduler's handle
     </span>handle: Arc&lt;Handle&gt;,
 
-    <span class="doccomment">/// Index holding this worker&#39;s remote state
+    <span class="doccomment">/// Index holding this worker's remote state
     </span>index: usize,
 
-    <span class="doccomment">/// Used to hand-off a worker&#39;s core to another thread.
+    <span class="doccomment">/// Used to hand-off a worker's core to another thread.
     </span>core: AtomicCell&lt;Core&gt;,
 }
 
@@ -1394,7 +1394,7 @@
     ///
     /// The core is **not** placed back in the worker to avoid it from being
     /// stolen by a thread that was spawned as part of `block_in_place`.
-    </span><span class="attr">#[allow(clippy::vec_box)] </span><span class="comment">// we&#39;re moving an already-boxed value
+    </span><span class="attr">#[allow(clippy::vec_box)] </span><span class="comment">// we're moving an already-boxed value
     </span>shutdown_cores: Mutex&lt;Vec&lt;Box&lt;Core&gt;&gt;&gt;,
 
     <span class="doccomment">/// The number of cores that have observed the trace signal.
@@ -1594,7 +1594,7 @@
                 <span class="bool-val">false</span>,
             ) =&gt; {
                 <span class="comment">// We are on an executor, but _not_ on the thread pool.  That is
-                // _only_ okay if we are in a thread pool runtime&#39;s block_on
+                // _only_ okay if we are in a thread pool runtime's block_on
                 // method:
                 </span><span class="kw">if </span>allow_block_in_place {
                     had_entered = <span class="bool-val">true</span>;
@@ -1603,7 +1603,7 @@
                     <span class="comment">// This probably means we are on the current_thread runtime or in a
                     // LocalSet, where it is _not_ okay to block.
                     </span><span class="kw">return </span><span class="prelude-val">Err</span>(
-                        <span class="string">&quot;can call blocking only when running on the multi-threaded runtime&quot;</span>,
+                        <span class="string">"can call blocking only when running on the multi-threaded runtime"</span>,
                     );
                 }
             }
@@ -1619,7 +1619,7 @@
             }
         }
 
-        <span class="kw">let </span>cx = maybe_cx.expect(<span class="string">&quot;no .is_some() == false cases above should lead here&quot;</span>);
+        <span class="kw">let </span>cx = maybe_cx.expect(<span class="string">"no .is_some() == false cases above should lead here"</span>);
 
         <span class="comment">// Get the worker core. If none is set, then blocking is fine!
         </span><span class="kw">let </span>core = <span class="kw">match </span>cx.core.borrow_mut().take() {
@@ -1637,7 +1637,7 @@
         <span class="comment">// In order to block, the core must be sent to another thread for
         // execution.
         //
-        // First, move the core back into the worker&#39;s shared core slot.
+        // First, move the core back into the worker's shared core slot.
         </span>cx.worker.core.set(core);
 
         <span class="comment">// Next, clone the worker handle and send it to a new thread for
@@ -1651,11 +1651,11 @@
     });
 
     <span class="kw">if let </span><span class="prelude-val">Err</span>(panic_message) = setup_result {
-        <span class="macro">panic!</span>(<span class="string">&quot;{}&quot;</span>, panic_message);
+        <span class="macro">panic!</span>(<span class="string">"{}"</span>, panic_message);
     }
 
     <span class="kw">if </span>had_entered {
-        <span class="comment">// Unset the current task&#39;s budget. Blocking sections are not
+        <span class="comment">// Unset the current task's budget. Blocking sections are not
         // constrained by task budgets.
         </span><span class="kw">let </span>_reset = Reset {
             take_core,
@@ -1682,7 +1682,7 @@
     <span class="kw">impl </span>Drop <span class="kw">for </span>AbortOnPanic {
         <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
             <span class="kw">if </span>std::thread::panicking() {
-                <span class="macro">eprintln!</span>(<span class="string">&quot;worker thread panicking; aborting process&quot;</span>);
+                <span class="macro">eprintln!</span>(<span class="string">"worker thread panicking; aborting process"</span>);
                 std::process::abort();
             }
         }
@@ -1731,7 +1731,7 @@
         // a task that had the LIFO slot disabled.
         </span><span class="self">self</span>.reset_lifo_enabled(<span class="kw-2">&amp;mut </span>core);
 
-        <span class="comment">// Start as &quot;processing&quot; tasks as polling tasks from the local queue
+        <span class="comment">// Start as "processing" tasks as polling tasks from the local queue
         // will be one of the first things we do.
         </span>core.stats.start_processing_scheduled_tasks();
 
@@ -1793,7 +1793,7 @@
         <span class="comment">// Measure the poll start time. Note that we may end up polling other
         // tasks under this measurement. In this case, the tasks came from the
         // LIFO slot and are considered part of the current task for scheduling
-        // purposes. These tasks inherent the &quot;parent&quot;&#39;s limits.
+        // purposes. These tasks inherent the "parent"'s limits.
         </span>core.stats.start_poll();
 
         <span class="comment">// Make the core available to the runtime context
@@ -1901,7 +1901,7 @@
 
     <span class="doccomment">/// Parks the worker thread while waiting for tasks to execute.
     ///
-    /// This function checks if indeed there&#39;s no more work left to be done before parking.
+    /// This function checks if indeed there's no more work left to be done before parking.
     /// Also important to notice that, before parking, the worker thread will try to take
     /// ownership of the Driver (IO/Time) and dispatch any events that might have fired.
     /// Whenever a worker thread executes the Driver loop, all waken tasks are scheduled
@@ -1939,7 +1939,7 @@
         <span class="self">self</span>.assert_lifo_enabled_is_correct(<span class="kw-2">&amp;</span>core);
 
         <span class="comment">// Take the parker out of core
-        </span><span class="kw">let </span><span class="kw-2">mut </span>park = core.park.take().expect(<span class="string">&quot;park missing&quot;</span>);
+        </span><span class="kw">let </span><span class="kw-2">mut </span>park = core.park.take().expect(<span class="string">"park missing"</span>);
 
         <span class="comment">// Store `core` in context
         </span><span class="kw-2">*</span><span class="self">self</span>.core.borrow_mut() = <span class="prelude-val">Some</span>(core);
@@ -1954,7 +1954,7 @@
         <span class="self">self</span>.defer.wake();
 
         <span class="comment">// Remove `core` from context
-        </span>core = <span class="self">self</span>.core.borrow_mut().take().expect(<span class="string">&quot;core missing&quot;</span>);
+        </span>core = <span class="self">self</span>.core.borrow_mut().take().expect(<span class="string">"core missing"</span>);
 
         <span class="comment">// Place `park` back in `core`
         </span>core.park = <span class="prelude-val">Some</span>(park);
@@ -1998,7 +1998,7 @@
                 <span class="kw">return </span><span class="prelude-val">None</span>;
             }
 
-            <span class="comment">// Other threads can only **remove** tasks from the current worker&#39;s
+            <span class="comment">// Other threads can only **remove** tasks from the current worker's
             // `run_queue`. So, we can be confident that by the time we call
             // `run_queue.push_back` below, there will be *at least* `cap`
             // available slots in the queue.
@@ -2008,7 +2008,7 @@
             );
 
             <span class="comment">// The worker is currently idle, pull a batch of work from the
-            // injection queue. We don&#39;t want to pull *all* the work so other
+            // injection queue. We don't want to pull *all* the work so other
             // workers can also get some.
             </span><span class="kw">let </span>n = usize::min(
                 worker.inject().len() / worker.handle.shared.remotes.len() + <span class="number">1</span>,
@@ -2054,7 +2054,7 @@
         <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..num {
             <span class="kw">let </span>i = (start + i) % num;
 
-            <span class="comment">// Don&#39;t steal from ourself! We know we don&#39;t have work.
+            <span class="comment">// Don't steal from ourself! We know we don't have work.
             </span><span class="kw">if </span>i == worker.index {
                 <span class="kw">continue</span>;
             }
@@ -2136,9 +2136,9 @@
         <span class="comment">// If a task is in the lifo slot/run queue, then we must unpark regardless of
         // being notified
         </span><span class="kw">if </span><span class="self">self</span>.has_tasks() {
-            <span class="comment">// When a worker wakes, it should only transition to the &quot;searching&quot;
+            <span class="comment">// When a worker wakes, it should only transition to the "searching"
             // state when the wake originates from another worker *or* a new task
-            // is pushed. We do *not* want the worker to transition to &quot;searching&quot;
+            // is pushed. We do *not* want the worker to transition to "searching"
             // when it wakes when the I/O driver receives new events.
             </span><span class="self">self</span>.is_searching = !worker
                 .handle
@@ -2162,7 +2162,7 @@
         <span class="bool-val">true
     </span>}
 
-    <span class="doccomment">/// Runs maintenance work such as checking the pool&#39;s state.
+    <span class="doccomment">/// Runs maintenance work such as checking the pool's state.
     </span><span class="kw">fn </span>maintenance(<span class="kw-2">&amp;mut </span><span class="self">self</span>, worker: <span class="kw-2">&amp;</span>Worker) {
         <span class="self">self</span>.stats
             .submit(<span class="kw-2">&amp;</span>worker.handle.shared.worker_metrics[worker.index]);
@@ -2192,7 +2192,7 @@
     <span class="doccomment">/// Shuts down the core.
     </span><span class="kw">fn </span>shutdown(<span class="kw-2">&amp;mut </span><span class="self">self</span>, handle: <span class="kw-2">&amp;</span>Handle) {
         <span class="comment">// Take the core
-        </span><span class="kw">let </span><span class="kw-2">mut </span>park = <span class="self">self</span>.park.take().expect(<span class="string">&quot;park missing&quot;</span>);
+        </span><span class="kw">let </span><span class="kw-2">mut </span>park = <span class="self">self</span>.park.take().expect(<span class="string">"park missing"</span>);
 
         <span class="comment">// Drain the queue
         </span><span class="kw">while </span><span class="self">self</span>.next_local_task().is_some() {}
@@ -2215,7 +2215,7 @@
 }
 
 <span class="kw">impl </span>Worker {
-    <span class="doccomment">/// Returns a reference to the scheduler&#39;s injection queue.
+    <span class="doccomment">/// Returns a reference to the scheduler's injection queue.
     </span><span class="kw">fn </span>inject(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>inject::Shared&lt;Arc&lt;Handle&gt;&gt; {
         <span class="kw-2">&amp;</span><span class="self">self</span>.handle.shared.inject
     }
@@ -2265,7 +2265,7 @@
     <span class="kw">fn </span>schedule_local(<span class="kw-2">&amp;</span><span class="self">self</span>, core: <span class="kw-2">&amp;mut </span>Core, task: Notified, is_yield: bool) {
         core.stats.inc_local_schedule_count();
 
-        <span class="comment">// Spawning from the worker thread. If scheduling a &quot;yield&quot; then the
+        <span class="comment">// Spawning from the worker thread. If scheduling a "yield" then the
         // task must always be pushed to the back of the queue, enabling other
         // tasks to be executed. If **not** a yield, then there is more
         // flexibility and the task may go to the front of the queue.
@@ -2414,18 +2414,18 @@
     }
 }
 
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>InjectGuard&lt;<span class="lifetime">&#39;a</span>&gt; {
-    lock: <span class="kw">crate</span>::loom::sync::MutexGuard&lt;<span class="lifetime">&#39;a</span>, Synced&gt;,
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>InjectGuard&lt;<span class="lifetime">'a</span>&gt; {
+    lock: <span class="kw">crate</span>::loom::sync::MutexGuard&lt;<span class="lifetime">'a</span>, Synced&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; AsMut&lt;inject::Synced&gt; <span class="kw">for </span>InjectGuard&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; AsMut&lt;inject::Synced&gt; <span class="kw">for </span>InjectGuard&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>as_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>inject::Synced {
         <span class="kw-2">&amp;mut </span><span class="self">self</span>.lock.inject
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Lock&lt;inject::Synced&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Handle {
-    <span class="kw">type </span>Handle = InjectGuard&lt;<span class="lifetime">&#39;a</span>&gt;;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Lock&lt;inject::Synced&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>Handle {
+    <span class="kw">type </span>Handle = InjectGuard&lt;<span class="lifetime">'a</span>&gt;;
 
     <span class="kw">fn </span>lock(<span class="self">self</span>) -&gt; <span class="self">Self</span>::Handle {
         InjectGuard {
@@ -2444,7 +2444,7 @@
     })
 }
 
-<span class="comment">// `u32::abs_diff` is not available on Tokio&#39;s MSRV.
+<span class="comment">// `u32::abs_diff` is not available on Tokio's MSRV.
 </span><span class="kw">fn </span>abs_diff(a: u32, b: u32) -&gt; u32 {
     <span class="kw">if </span>a &gt; b {
         a - b

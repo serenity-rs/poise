@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tracing-0.1.40/src/field.rs`."><title>field.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="tracing" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../tracing/index.html"><img src="https://raw.githubusercontent.com/tokio-rs/tracing/master/assets/logo-type.png" alt="tracing"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tracing-0.1.40/src/field.rs`."><title>field.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="tracing" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../tracing/index.html"><img src="https://raw.githubusercontent.com/tokio-rs/tracing/master/assets/logo-type.png" alt="tracing"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -178,11 +178,11 @@
 //!
 //! `Subscriber`s consume `Value`s as fields attached to [span]s or [`Event`]s.
 //! The set of field keys on a given span or event is defined on its [`Metadata`].
-//! When a span is created, it provides [`Attributes`] to the `Subscriber`&#39;s
+//! When a span is created, it provides [`Attributes`] to the `Subscriber`'s
 //! [`new_span`] method, containing any fields whose values were provided when
-//! the span was created; and may call the `Subscriber`&#39;s [`record`] method
+//! the span was created; and may call the `Subscriber`'s [`record`] method
 //! with additional [`Record`]s if values are added for more of its fields.
-//! Similarly, the [`Event`] type passed to the subscriber&#39;s [`event`] method
+//! Similarly, the [`Event`] type passed to the subscriber's [`event`] method
 //! will contain any fields attached to each event.
 //!
 //! `tracing` represents values as either one of a set of Rust primitives
@@ -200,7 +200,7 @@
 //!
 //! # Using `valuable`
 //!
-//! `tracing`&#39;s [`Value`] trait is intentionally minimalist: it supports only a small
+//! `tracing`'s [`Value`] trait is intentionally minimalist: it supports only a small
 //! number of Rust primitives as typed values, and only permits recording
 //! user-defined types with their [`fmt::Debug`] or [`fmt::Display`]
 //! implementations. However, there are some cases where it may be useful to record
@@ -208,16 +208,16 @@
 //! user-defined `struct` and `enum` types without having to format them as
 //! unstructured text.
 //!
-//! To address `Value`&#39;s limitations, `tracing` offers experimental support for
+//! To address `Value`'s limitations, `tracing` offers experimental support for
 //! the [`valuable`] crate, which provides object-safe inspection of structured
 //! values. User-defined types can implement the [`valuable::Valuable`] trait,
 //! and be recorded as a `tracing` field by calling their [`as_value`] method.
 //! If the [`Subscriber`] also supports the `valuable` crate, it can
 //! then visit those types fields as structured values using `valuable`.
 //!
-//! &lt;pre class=&quot;ignore&quot; style=&quot;white-space:normal;font:inherit;&quot;&gt;
+//! &lt;pre class="ignore" style="white-space:normal;font:inherit;"&gt;
 //!     &lt;strong&gt;Note&lt;/strong&gt;: &lt;code&gt;valuable&lt;/code&gt; support is an
-//!     &lt;a href = &quot;../index.html#unstable-features&quot;&gt;unstable feature&lt;/a&gt;. See
+//!     &lt;a href = "../index.html#unstable-features"&gt;unstable feature&lt;/a&gt;. See
 //!     the documentation on unstable features for details on how to enable it.
 //! &lt;/pre&gt;
 //!
@@ -241,12 +241,12 @@
 //! }
 //!
 //! let user = User {
-//!     name: &quot;Arwen Undomiel&quot;.to_string(),
+//!     name: "Arwen Undomiel".to_string(),
 //!     age: 3000,
 //!     address: Address {
-//!         country: &quot;Middle Earth&quot;.to_string(),
-//!         city: &quot;Rivendell&quot;.to_string(),
-//!         street: &quot;leafy lane&quot;.to_string(),
+//!         country: "Middle Earth".to_string(),
+//!         city: "Rivendell".to_string(),
+//!         street: "leafy lane".to_string(),
 //!     },
 //! };
 //!
@@ -262,7 +262,7 @@
 //! optional [`record_value`] method. `Visit` implementations that wish to
 //! record `valuable` values can implement this method with custom behavior.
 //! If a visitor does not implement `record_value`, the [`valuable::Value`] will
-//! be forwarded to the visitor&#39;s [`record_debug`] method.
+//! be forwarded to the visitor's [`record_debug`] method.
 //!
 //! [`fmt::Debug`]: std::fmt::Debug
 //! [`fmt::Display`]: std::fmt::Debug
@@ -287,9 +287,9 @@
 
 <span class="doccomment">/// Trait implemented to allow a type to be used as a field key.
 ///
-/// &lt;pre class=&quot;ignore&quot; style=&quot;white-space:normal;font:inherit;&quot;&gt;
+/// &lt;pre class="ignore" style="white-space:normal;font:inherit;"&gt;
 /// &lt;strong&gt;Note&lt;/strong&gt;: Although this is implemented for both the
-/// &lt;a href=&quot;./struct.Field.html&quot;&gt;&lt;code&gt;Field&lt;/code&gt;&lt;/a&gt; type &lt;em&gt;and&lt;/em&gt; any
+/// &lt;a href="./struct.Field.html"&gt;&lt;code&gt;Field&lt;/code&gt;&lt;/a&gt; type &lt;em&gt;and&lt;/em&gt; any
 /// type that can be borrowed as an &lt;code&gt;&amp;str&lt;/code&gt;, only &lt;code&gt;Field&lt;/code&gt;
 /// allows &lt;em&gt;O&lt;/em&gt;(1) access.
 /// Indexing a field with a string results in an iterative search that performs
@@ -301,14 +301,14 @@
     ///
     /// If `metadata` defines this field, then the field is returned. Otherwise,
     /// this returns `None`.
-    </span><span class="kw">fn </span>as_field(<span class="kw-2">&amp;</span><span class="self">self</span>, metadata: <span class="kw-2">&amp;</span>Metadata&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;Field&gt;;
+    </span><span class="kw">fn </span>as_field(<span class="kw-2">&amp;</span><span class="self">self</span>, metadata: <span class="kw-2">&amp;</span>Metadata&lt;<span class="lifetime">'_</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;Field&gt;;
 }
 
 <span class="comment">// ===== impl AsField =====
 
 </span><span class="kw">impl </span>AsField <span class="kw">for </span>Field {
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>as_field(<span class="kw-2">&amp;</span><span class="self">self</span>, metadata: <span class="kw-2">&amp;</span>Metadata&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;Field&gt; {
+    </span><span class="kw">fn </span>as_field(<span class="kw-2">&amp;</span><span class="self">self</span>, metadata: <span class="kw-2">&amp;</span>Metadata&lt;<span class="lifetime">'_</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;Field&gt; {
         <span class="kw">if </span><span class="self">self</span>.callsite() == metadata.callsite() {
             <span class="prelude-val">Some</span>(<span class="self">self</span>.clone())
         } <span class="kw">else </span>{
@@ -317,9 +317,9 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; AsField <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Field {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; AsField <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>Field {
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>as_field(<span class="kw-2">&amp;</span><span class="self">self</span>, metadata: <span class="kw-2">&amp;</span>Metadata&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;Field&gt; {
+    </span><span class="kw">fn </span>as_field(<span class="kw-2">&amp;</span><span class="self">self</span>, metadata: <span class="kw-2">&amp;</span>Metadata&lt;<span class="lifetime">'_</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;Field&gt; {
         <span class="kw">if </span><span class="self">self</span>.callsite() == metadata.callsite() {
             <span class="prelude-val">Some</span>((<span class="kw-2">*</span><span class="self">self</span>).clone())
         } <span class="kw">else </span>{
@@ -330,12 +330,12 @@
 
 <span class="kw">impl </span>AsField <span class="kw">for </span>str {
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>as_field(<span class="kw-2">&amp;</span><span class="self">self</span>, metadata: <span class="kw-2">&amp;</span>Metadata&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;Field&gt; {
+    </span><span class="kw">fn </span>as_field(<span class="kw-2">&amp;</span><span class="self">self</span>, metadata: <span class="kw-2">&amp;</span>Metadata&lt;<span class="lifetime">'_</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;Field&gt; {
         metadata.fields().field(<span class="kw-2">&amp;</span><span class="self">self</span>)
     }
 }
 
 <span class="kw">impl </span><span class="kw">crate</span>::sealed::Sealed <span class="kw">for </span>Field {}
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">crate</span>::sealed::Sealed <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Field {}
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; <span class="kw">crate</span>::sealed::Sealed <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>Field {}
 <span class="kw">impl </span><span class="kw">crate</span>::sealed::Sealed <span class="kw">for </span>str {}
 </code></pre></div></section></main></body></html>

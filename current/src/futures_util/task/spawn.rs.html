@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/futures-util-0.3.29/src/task/spawn.rs`."><title>spawn.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="futures_util" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/futures-util-0.3.29/src/task/spawn.rs`."><title>spawn.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="futures_util" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -169,17 +169,17 @@
 <a href="#169" id="169">169</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>futures_task::{LocalSpawn, Spawn};
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;compat&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"compat"</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::compat::Compat;
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;channel&quot;</span>)]
-#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"channel"</span>)]
+#[cfg(feature = <span class="string">"std"</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::future::{FutureExt, RemoteHandle};
-<span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
 </span><span class="kw">use </span>alloc::boxed::Box;
-<span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
 </span><span class="kw">use </span>futures_core::future::Future;
-<span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
 </span><span class="kw">use </span>futures_task::{FutureObj, LocalFutureObj, SpawnError};
 
 <span class="kw">impl</span>&lt;Sp: <span class="question-mark">?</span>Sized&gt; SpawnExt <span class="kw">for </span>Sp <span class="kw">where </span>Sp: Spawn {}
@@ -214,16 +214,16 @@
     /// # }
     /// # std::thread::sleep(std::time::Duration::from_millis(500)); // wait for background threads closed: https://github.com/rust-lang/miri/issues/1371
     /// ```
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
     </span><span class="kw">fn </span>spawn&lt;Fut&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, future: Fut) -&gt; <span class="prelude-ty">Result</span>&lt;(), SpawnError&gt;
     <span class="kw">where
-        </span>Fut: Future&lt;Output = ()&gt; + Send + <span class="lifetime">&#39;static</span>,
+        </span>Fut: Future&lt;Output = ()&gt; + Send + <span class="lifetime">'static</span>,
     {
         <span class="self">self</span>.spawn_obj(FutureObj::new(Box::new(future)))
     }
 
     <span class="doccomment">/// Spawns a task that polls the given future to completion and returns a
-    /// future that resolves to the spawned future&#39;s output.
+    /// future that resolves to the spawned future's output.
     ///
     /// This method returns a [`Result`] that contains a [`RemoteHandle`](crate::future::RemoteHandle), or, if
     /// spawning fails, a [`SpawnError`]. [`RemoteHandle`](crate::future::RemoteHandle) is a future that
@@ -243,12 +243,12 @@
     /// # }
     /// # std::thread::sleep(std::time::Duration::from_millis(500)); // wait for background threads closed: https://github.com/rust-lang/miri/issues/1371
     /// ```
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;channel&quot;</span>)]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;channel&quot;</span>)))]
-    #[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"channel"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"channel"</span>)))]
+    #[cfg(feature = <span class="string">"std"</span>)]
     </span><span class="kw">fn </span>spawn_with_handle&lt;Fut&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, future: Fut) -&gt; <span class="prelude-ty">Result</span>&lt;RemoteHandle&lt;Fut::Output&gt;, SpawnError&gt;
     <span class="kw">where
-        </span>Fut: Future + Send + <span class="lifetime">&#39;static</span>,
+        </span>Fut: Future + Send + <span class="lifetime">'static</span>,
         Fut::Output: Send,
     {
         <span class="kw">let </span>(future, handle) = future.remote_handle();
@@ -258,8 +258,8 @@
 
     <span class="doccomment">/// Wraps a [`Spawn`] and makes it usable as a futures 0.1 `Executor`.
     /// Requires the `compat` feature to enable.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;compat&quot;</span>)]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;compat&quot;</span>)))]
+    </span><span class="attr">#[cfg(feature = <span class="string">"compat"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"compat"</span>)))]
     </span><span class="kw">fn </span>compat(<span class="self">self</span>) -&gt; Compat&lt;<span class="self">Self</span>&gt;
     <span class="kw">where
         </span><span class="self">Self</span>: Sized,
@@ -295,16 +295,16 @@
     /// let future = async { /* ... */ };
     /// spawner.spawn_local(future).unwrap();
     /// ```
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
     </span><span class="kw">fn </span>spawn_local&lt;Fut&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, future: Fut) -&gt; <span class="prelude-ty">Result</span>&lt;(), SpawnError&gt;
     <span class="kw">where
-        </span>Fut: Future&lt;Output = ()&gt; + <span class="lifetime">&#39;static</span>,
+        </span>Fut: Future&lt;Output = ()&gt; + <span class="lifetime">'static</span>,
     {
         <span class="self">self</span>.spawn_local_obj(LocalFutureObj::new(Box::new(future)))
     }
 
     <span class="doccomment">/// Spawns a task that polls the given future to completion and returns a
-    /// future that resolves to the spawned future&#39;s output.
+    /// future that resolves to the spawned future's output.
     ///
     /// This method returns a [`Result`] that contains a [`RemoteHandle`](crate::future::RemoteHandle), or, if
     /// spawning fails, a [`SpawnError`]. [`RemoteHandle`](crate::future::RemoteHandle) is a future that
@@ -321,15 +321,15 @@
     /// let join_handle_fut = spawner.spawn_local_with_handle(future).unwrap();
     /// assert_eq!(executor.run_until(join_handle_fut), 1);
     /// ```
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;channel&quot;</span>)]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;channel&quot;</span>)))]
-    #[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"channel"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"channel"</span>)))]
+    #[cfg(feature = <span class="string">"std"</span>)]
     </span><span class="kw">fn </span>spawn_local_with_handle&lt;Fut&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         future: Fut,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;RemoteHandle&lt;Fut::Output&gt;, SpawnError&gt;
     <span class="kw">where
-        </span>Fut: Future + <span class="lifetime">&#39;static</span>,
+        </span>Fut: Future + <span class="lifetime">'static</span>,
     {
         <span class="kw">let </span>(future, handle) = future.remote_handle();
         <span class="self">self</span>.spawn_local(future)<span class="question-mark">?</span>;

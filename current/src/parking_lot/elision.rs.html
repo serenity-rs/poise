@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/parking_lot-0.12.1/src/elision.rs`."><title>elision.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="parking_lot" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/parking_lot-0.12.1/src/elision.rs`."><title>elision.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="parking_lot" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -110,14 +110,14 @@
 <a href="#110" id="110">110</a>
 <a href="#111" id="111">111</a>
 <a href="#112" id="112">112</a>
-</pre></div><pre class="rust"><code><span class="comment">// Copyright 2016 Amanieu d&#39;Antras
+</pre></div><pre class="rust"><code><span class="comment">// Copyright 2016 Amanieu d'Antras
 //
 // Licensed under the Apache License, Version 2.0, &lt;LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0&gt; or the MIT license &lt;LICENSE-MIT or
 // http://opensource.org/licenses/MIT&gt;, at your option. This file may not be
 // copied, modified, or distributed except according to those terms.
 
-</span><span class="attr">#[cfg(all(feature = <span class="string">&quot;hardware-lock-elision&quot;</span>, any(target_arch = <span class="string">&quot;x86&quot;</span>, target_arch = <span class="string">&quot;x86_64&quot;</span>)))]
+</span><span class="attr">#[cfg(all(feature = <span class="string">"hardware-lock-elision"</span>, any(target_arch = <span class="string">"x86"</span>, target_arch = <span class="string">"x86_64"</span>)))]
 </span><span class="kw">use </span>std::arch::asm;
 <span class="kw">use </span>std::sync::atomic::AtomicUsize;
 
@@ -140,14 +140,14 @@
 </span><span class="attr">#[inline]
 </span><span class="kw">pub fn </span>have_elision() -&gt; bool {
     <span class="macro">cfg!</span>(all(
-        feature = <span class="string">&quot;hardware-lock-elision&quot;</span>,
-        any(target_arch = <span class="string">&quot;x86&quot;</span>, target_arch = <span class="string">&quot;x86_64&quot;</span>),
+        feature = <span class="string">"hardware-lock-elision"</span>,
+        any(target_arch = <span class="string">"x86"</span>, target_arch = <span class="string">"x86_64"</span>),
     ))
 }
 
 <span class="comment">// This implementation is never actually called because it is guarded by
 // have_elision().
-</span><span class="attr">#[cfg(not(all(feature = <span class="string">&quot;hardware-lock-elision&quot;</span>, any(target_arch = <span class="string">&quot;x86&quot;</span>, target_arch = <span class="string">&quot;x86_64&quot;</span>))))]
+</span><span class="attr">#[cfg(not(all(feature = <span class="string">"hardware-lock-elision"</span>, any(target_arch = <span class="string">"x86"</span>, target_arch = <span class="string">"x86_64"</span>))))]
 </span><span class="kw">impl </span>AtomicElisionExt <span class="kw">for </span>AtomicUsize {
     <span class="kw">type </span>IntType = usize;
 
@@ -162,7 +162,7 @@
     }
 }
 
-<span class="attr">#[cfg(all(feature = <span class="string">&quot;hardware-lock-elision&quot;</span>, any(target_arch = <span class="string">&quot;x86&quot;</span>, target_arch = <span class="string">&quot;x86_64&quot;</span>)))]
+<span class="attr">#[cfg(all(feature = <span class="string">"hardware-lock-elision"</span>, any(target_arch = <span class="string">"x86"</span>, target_arch = <span class="string">"x86_64"</span>)))]
 </span><span class="kw">impl </span>AtomicElisionExt <span class="kw">for </span>AtomicUsize {
     <span class="kw">type </span>IntType = usize;
 
@@ -171,23 +171,23 @@
         <span class="kw">unsafe </span>{
             <span class="kw">use </span>core::arch::asm;
             <span class="kw">let </span>prev: usize;
-            <span class="attr">#[cfg(target_pointer_width = <span class="string">&quot;32&quot;</span>)]
+            <span class="attr">#[cfg(target_pointer_width = <span class="string">"32"</span>)]
             </span><span class="macro">asm!</span>(
-                <span class="string">&quot;xacquire&quot;</span>,
-                <span class="string">&quot;lock&quot;</span>,
-                <span class="string">&quot;cmpxchg [{:e}], {:e}&quot;</span>,
+                <span class="string">"xacquire"</span>,
+                <span class="string">"lock"</span>,
+                <span class="string">"cmpxchg [{:e}], {:e}"</span>,
                 <span class="kw">in</span>(reg) <span class="self">self</span>,
                 <span class="kw">in</span>(reg) new,
-                inout(<span class="string">&quot;eax&quot;</span>) current =&gt; prev,
+                inout(<span class="string">"eax"</span>) current =&gt; prev,
             );
-            <span class="attr">#[cfg(target_pointer_width = <span class="string">&quot;64&quot;</span>)]
+            <span class="attr">#[cfg(target_pointer_width = <span class="string">"64"</span>)]
             </span><span class="macro">asm!</span>(
-                <span class="string">&quot;xacquire&quot;</span>,
-                <span class="string">&quot;lock&quot;</span>,
-                <span class="string">&quot;cmpxchg [{}], {}&quot;</span>,
+                <span class="string">"xacquire"</span>,
+                <span class="string">"lock"</span>,
+                <span class="string">"cmpxchg [{}], {}"</span>,
                 <span class="kw">in</span>(reg) <span class="self">self</span>,
                 <span class="kw">in</span>(reg) new,
-                inout(<span class="string">&quot;rax&quot;</span>) current =&gt; prev,
+                inout(<span class="string">"rax"</span>) current =&gt; prev,
             );
             <span class="kw">if </span>prev == current {
                 <span class="prelude-val">Ok</span>(prev)
@@ -202,19 +202,19 @@
         <span class="kw">unsafe </span>{
             <span class="kw">use </span>core::arch::asm;
             <span class="kw">let </span>prev: usize;
-            <span class="attr">#[cfg(target_pointer_width = <span class="string">&quot;32&quot;</span>)]
+            <span class="attr">#[cfg(target_pointer_width = <span class="string">"32"</span>)]
             </span><span class="macro">asm!</span>(
-                <span class="string">&quot;xrelease&quot;</span>,
-                <span class="string">&quot;lock&quot;</span>,
-                <span class="string">&quot;xadd [{:e}], {:e}&quot;</span>,
+                <span class="string">"xrelease"</span>,
+                <span class="string">"lock"</span>,
+                <span class="string">"xadd [{:e}], {:e}"</span>,
                 <span class="kw">in</span>(reg) <span class="self">self</span>,
                 inout(reg) val.wrapping_neg() =&gt; prev,
             );
-            <span class="attr">#[cfg(target_pointer_width = <span class="string">&quot;64&quot;</span>)]
+            <span class="attr">#[cfg(target_pointer_width = <span class="string">"64"</span>)]
             </span><span class="macro">asm!</span>(
-                <span class="string">&quot;xrelease&quot;</span>,
-                <span class="string">&quot;lock&quot;</span>,
-                <span class="string">&quot;xadd [{}], {}&quot;</span>,
+                <span class="string">"xrelease"</span>,
+                <span class="string">"lock"</span>,
+                <span class="string">"xadd [{}], {}"</span>,
                 <span class="kw">in</span>(reg) <span class="self">self</span>,
                 inout(reg) val.wrapping_neg() =&gt; prev,
             );

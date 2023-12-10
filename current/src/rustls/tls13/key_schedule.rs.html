@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-0.21.9/src/tls13/key_schedule.rs`."><title>key_schedule.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="rustls" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-0.21.9/src/tls13/key_schedule.rs`."><title>key_schedule.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="rustls" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1044,9 +1044,9 @@
 <span class="kw">use </span><span class="kw">crate</span>::common_state::{CommonState, Side};
 <span class="kw">use </span><span class="kw">crate</span>::error::Error;
 <span class="kw">use </span><span class="kw">crate</span>::msgs::base::PayloadU8;
-<span class="attr">#[cfg(feature = <span class="string">&quot;quic&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"quic"</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::quic;
-<span class="attr">#[cfg(feature = <span class="string">&quot;secret_extraction&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"secret_extraction"</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::suites::{ConnectionTrafficSecrets, PartiallyExtractedSecrets};
 <span class="kw">use crate</span>::{KeyLog, Tls13CipherSuite};
 
@@ -1075,30 +1075,30 @@
 }
 
 <span class="kw">impl </span>SecretKind {
-    <span class="kw">fn </span>to_bytes(<span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[u8] {
+    <span class="kw">fn </span>to_bytes(<span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'static </span>[u8] {
         <span class="kw">use </span><span class="self">self</span>::SecretKind::<span class="kw-2">*</span>;
         <span class="kw">match </span><span class="self">self </span>{
-            ResumptionPskBinderKey =&gt; <span class="string">b&quot;res binder&quot;</span>,
-            ClientEarlyTrafficSecret =&gt; <span class="string">b&quot;c e traffic&quot;</span>,
-            ClientHandshakeTrafficSecret =&gt; <span class="string">b&quot;c hs traffic&quot;</span>,
-            ServerHandshakeTrafficSecret =&gt; <span class="string">b&quot;s hs traffic&quot;</span>,
-            ClientApplicationTrafficSecret =&gt; <span class="string">b&quot;c ap traffic&quot;</span>,
-            ServerApplicationTrafficSecret =&gt; <span class="string">b&quot;s ap traffic&quot;</span>,
-            ExporterMasterSecret =&gt; <span class="string">b&quot;exp master&quot;</span>,
-            ResumptionMasterSecret =&gt; <span class="string">b&quot;res master&quot;</span>,
-            DerivedSecret =&gt; <span class="string">b&quot;derived&quot;</span>,
+            ResumptionPskBinderKey =&gt; <span class="string">b"res binder"</span>,
+            ClientEarlyTrafficSecret =&gt; <span class="string">b"c e traffic"</span>,
+            ClientHandshakeTrafficSecret =&gt; <span class="string">b"c hs traffic"</span>,
+            ServerHandshakeTrafficSecret =&gt; <span class="string">b"s hs traffic"</span>,
+            ClientApplicationTrafficSecret =&gt; <span class="string">b"c ap traffic"</span>,
+            ServerApplicationTrafficSecret =&gt; <span class="string">b"s ap traffic"</span>,
+            ExporterMasterSecret =&gt; <span class="string">b"exp master"</span>,
+            ResumptionMasterSecret =&gt; <span class="string">b"res master"</span>,
+            DerivedSecret =&gt; <span class="string">b"derived"</span>,
         }
     }
 
-    <span class="kw">fn </span>log_label(<span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str&gt; {
+    <span class="kw">fn </span>log_label(<span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'static </span>str&gt; {
         <span class="kw">use </span><span class="self">self</span>::SecretKind::<span class="kw-2">*</span>;
         <span class="prelude-val">Some</span>(<span class="kw">match </span><span class="self">self </span>{
-            ClientEarlyTrafficSecret =&gt; <span class="string">&quot;CLIENT_EARLY_TRAFFIC_SECRET&quot;</span>,
-            ClientHandshakeTrafficSecret =&gt; <span class="string">&quot;CLIENT_HANDSHAKE_TRAFFIC_SECRET&quot;</span>,
-            ServerHandshakeTrafficSecret =&gt; <span class="string">&quot;SERVER_HANDSHAKE_TRAFFIC_SECRET&quot;</span>,
-            ClientApplicationTrafficSecret =&gt; <span class="string">&quot;CLIENT_TRAFFIC_SECRET_0&quot;</span>,
-            ServerApplicationTrafficSecret =&gt; <span class="string">&quot;SERVER_TRAFFIC_SECRET_0&quot;</span>,
-            ExporterMasterSecret =&gt; <span class="string">&quot;EXPORTER_SECRET&quot;</span>,
+            ClientEarlyTrafficSecret =&gt; <span class="string">"CLIENT_EARLY_TRAFFIC_SECRET"</span>,
+            ClientHandshakeTrafficSecret =&gt; <span class="string">"CLIENT_HANDSHAKE_TRAFFIC_SECRET"</span>,
+            ServerHandshakeTrafficSecret =&gt; <span class="string">"SERVER_HANDSHAKE_TRAFFIC_SECRET"</span>,
+            ClientApplicationTrafficSecret =&gt; <span class="string">"CLIENT_TRAFFIC_SECRET_0"</span>,
+            ServerApplicationTrafficSecret =&gt; <span class="string">"SERVER_TRAFFIC_SECRET_0"</span>,
+            ExporterMasterSecret =&gt; <span class="string">"EXPORTER_SECRET"</span>,
             <span class="kw">_ </span>=&gt; {
                 <span class="kw">return </span><span class="prelude-val">None</span>;
             }
@@ -1107,11 +1107,11 @@
 }
 
 <span class="doccomment">/// This is the TLS1.3 key schedule.  It stores the current secret and
-/// the type of hash.  This isn&#39;t used directly; but only through the
+/// the type of hash.  This isn't used directly; but only through the
 /// typestates.
 </span><span class="kw">struct </span>KeySchedule {
     current: hkdf::Prk,
-    suite: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Tls13CipherSuite,
+    suite: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Tls13CipherSuite,
 }
 
 <span class="comment">// We express the state of a contained KeySchedule using these
@@ -1126,7 +1126,7 @@
 }
 
 <span class="kw">impl </span>KeyScheduleEarly {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(suite: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Tls13CipherSuite, secret: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(suite: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Tls13CipherSuite, secret: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             ks: KeySchedule::new(suite, secret),
         }
@@ -1155,7 +1155,7 @@
                 .set_decrypter(<span class="kw-2">&amp;</span>client_early_traffic_secret, common),
         }
 
-        <span class="attr">#[cfg(feature = <span class="string">&quot;quic&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"quic"</span>)]
         </span><span class="kw">if </span>common.is_quic() {
             <span class="comment">// If 0-RTT should be rejected, this will be clobbered by ExtensionProcessing
             // before the application can see.
@@ -1184,7 +1184,7 @@
 }
 
 <span class="kw">impl </span>KeySchedulePreHandshake {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(suite: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Tls13CipherSuite) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(suite: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Tls13CipherSuite) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             ks: KeySchedule::new_with_empty_secret(suite),
         }
@@ -1212,7 +1212,7 @@
         <span class="kw-2">mut </span><span class="self">self</span>,
         early_data_enabled: bool,
         hs_hash: Digest,
-        suite: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Tls13CipherSuite,
+        suite: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Tls13CipherSuite,
         key_log: <span class="kw-2">&amp;</span><span class="kw">dyn </span>KeyLog,
         client_random: <span class="kw-2">&amp;</span>[u8; <span class="number">32</span>],
         common: <span class="kw-2">&amp;mut </span>CommonState,
@@ -1222,7 +1222,7 @@
         </span><span class="self">self</span>.ks.suite = suite;
         <span class="kw">let </span>new = <span class="self">self</span>.into_handshake(hs_hash, key_log, client_random, common);
 
-        <span class="comment">// Decrypt with the peer&#39;s key, encrypt with our own key
+        <span class="comment">// Decrypt with the peer's key, encrypt with our own key
         </span>new.ks
             .set_decrypter(<span class="kw-2">&amp;</span>new.server_handshake_traffic_secret, common);
 
@@ -1275,7 +1275,7 @@
             client_random,
         );
 
-        <span class="attr">#[cfg(feature = <span class="string">&quot;quic&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"quic"</span>)]
         </span><span class="kw">if </span>_common.is_quic() {
             _common.quic.hs_secrets = <span class="prelude-val">Some</span>(quic::Secrets::new(
                 client_secret.clone(),
@@ -1350,7 +1350,7 @@
             .ks
             .set_encrypter(server_secret, common);
 
-        <span class="attr">#[cfg(feature = <span class="string">&quot;quic&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"quic"</span>)]
         </span><span class="kw">if </span>common.is_quic() {
             common.quic.traffic_secrets = <span class="prelude-val">Some</span>(quic::Secrets::new(
                 _client_secret.clone(),
@@ -1405,7 +1405,7 @@
             .ks
             .set_encrypter(client_secret, common);
 
-        <span class="attr">#[cfg(feature = <span class="string">&quot;quic&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"quic"</span>)]
         </span><span class="kw">if </span>common.is_quic() {
             common.quic.traffic_secrets = <span class="prelude-val">Some</span>(quic::Secrets::new(
                 client_secret.clone(),
@@ -1420,7 +1420,7 @@
     }
 }
 
-<span class="doccomment">/// KeySchedule during traffic stage, retaining the ability to calculate the client&#39;s
+<span class="doccomment">/// KeySchedule during traffic stage, retaining the ability to calculate the client's
 /// finished verify_data. The traffic stage key schedule can be extracted from it
 /// through signing the client finished hash.
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>KeyScheduleTrafficWithClientFinishedPending {
@@ -1552,7 +1552,7 @@
             .export_keying_material(<span class="kw-2">&amp;</span><span class="self">self</span>.current_exporter_secret, out, label, context)
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;secret_extraction&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"secret_extraction"</span>)]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>extract_secrets(<span class="kw-2">&amp;</span><span class="self">self</span>, side: Side) -&gt; <span class="prelude-ty">Result</span>&lt;PartiallyExtractedSecrets, Error&gt; {
         <span class="kw">fn </span>expand&lt;<span class="kw">const </span>KEY_LEN: usize, <span class="kw">const </span>IV_LEN: usize&gt;(
             secret: <span class="kw-2">&amp;</span>hkdf::Prk,
@@ -1560,15 +1560,15 @@
             <span class="kw">let </span><span class="kw-2">mut </span>key = [<span class="number">0u8</span>; KEY_LEN];
             <span class="kw">let </span><span class="kw-2">mut </span>iv = [<span class="number">0u8</span>; IV_LEN];
 
-            hkdf_expand_info(secret, PayloadU8Len(key.len()), <span class="string">b&quot;key&quot;</span>, <span class="kw-2">&amp;</span>[], |okm| {
+            hkdf_expand_info(secret, PayloadU8Len(key.len()), <span class="string">b"key"</span>, <span class="kw-2">&amp;</span>[], |okm| {
                 okm.fill(<span class="kw-2">&amp;mut </span>key)
             })
-            .map_err(|<span class="kw">_</span>| Error::General(<span class="string">&quot;hkdf_expand_info failed&quot;</span>.to_string()))<span class="question-mark">?</span>;
+            .map_err(|<span class="kw">_</span>| Error::General(<span class="string">"hkdf_expand_info failed"</span>.to_string()))<span class="question-mark">?</span>;
 
-            hkdf_expand_info(secret, PayloadU8Len(iv.len()), <span class="string">b&quot;iv&quot;</span>, <span class="kw-2">&amp;</span>[], |okm| {
+            hkdf_expand_info(secret, PayloadU8Len(iv.len()), <span class="string">b"iv"</span>, <span class="kw-2">&amp;</span>[], |okm| {
                 okm.fill(<span class="kw-2">&amp;mut </span>iv)
             })
-            .map_err(|<span class="kw">_</span>| Error::General(<span class="string">&quot;hkdf_expand_info failed&quot;</span>.to_string()))<span class="question-mark">?</span>;
+            .map_err(|<span class="kw">_</span>| Error::General(<span class="string">"hkdf_expand_info failed"</span>.to_string()))<span class="question-mark">?</span>;
 
             <span class="prelude-val">Ok</span>((key, iv))
         }
@@ -1617,7 +1617,7 @@
             server_secrets = extract(<span class="kw-2">&amp;</span><span class="self">self</span>.current_server_traffic_secret)<span class="question-mark">?</span>;
         } <span class="kw">else </span>{
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::General(<span class="macro">format!</span>(
-                <span class="string">&quot;exporting secrets for {:?}: unimplemented&quot;</span>,
+                <span class="string">"exporting secrets for {:?}: unimplemented"</span>,
                 algo
             )));
         }
@@ -1631,7 +1631,7 @@
 }
 
 <span class="kw">impl </span>KeySchedule {
-    <span class="kw">fn </span>new(suite: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Tls13CipherSuite, secret: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="self">Self </span>{
+    <span class="kw">fn </span>new(suite: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Tls13CipherSuite, secret: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>zeroes = [<span class="number">0u8</span>; digest::MAX_OUTPUT_LEN];
         <span class="kw">let </span>salt = hkdf::Salt::new(suite.hkdf_algorithm, <span class="kw-2">&amp;</span>zeroes[..suite.hkdf_algorithm.len()]);
         <span class="self">Self </span>{
@@ -1672,7 +1672,7 @@
         <span class="self">self</span>.suite.hkdf_algorithm
     }
 
-    <span class="kw">fn </span>new_with_empty_secret(suite: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Tls13CipherSuite) -&gt; <span class="self">Self </span>{
+    <span class="kw">fn </span>new_with_empty_secret(suite: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Tls13CipherSuite) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>zeroes = [<span class="number">0u8</span>; digest::MAX_OUTPUT_LEN];
         <span class="self">Self</span>::new(suite, <span class="kw-2">&amp;</span>zeroes[..suite.hkdf_algorithm.len()])
     }
@@ -1692,7 +1692,7 @@
     <span class="doccomment">/// Derive a secret of given `kind`, using current handshake hash `hs_hash`.
     </span><span class="kw">fn </span>derive&lt;T, L&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, key_type: L, kind: SecretKind, hs_hash: <span class="kw-2">&amp;</span>[u8]) -&gt; T
     <span class="kw">where
-        </span>T: <span class="kw">for</span>&lt;<span class="lifetime">&#39;a</span>&gt; From&lt;hkdf::Okm&lt;<span class="lifetime">&#39;a</span>, L&gt;&gt;,
+        </span>T: <span class="kw">for</span>&lt;<span class="lifetime">'a</span>&gt; From&lt;hkdf::Okm&lt;<span class="lifetime">'a</span>, L&gt;&gt;,
         L: hkdf::KeyType,
     {
         hkdf_expand(<span class="kw-2">&amp;</span><span class="self">self</span>.current, key_type, kind.to_bytes(), hs_hash)
@@ -1707,7 +1707,7 @@
     ) -&gt; hkdf::Prk {
         <span class="kw">let </span>log_label = kind
             .log_label()
-            .expect(<span class="string">&quot;not a loggable secret&quot;</span>);
+            .expect(<span class="string">"not a loggable secret"</span>);
         <span class="kw">if </span>key_log.will_log(log_label) {
             <span class="kw">let </span>secret = <span class="self">self
                 </span>.derive::&lt;PayloadU8, <span class="kw">_</span>&gt;(
@@ -1727,7 +1727,7 @@
     /// `SecretKind::DerivedSecret`.
     </span><span class="kw">fn </span>derive_for_empty_hash&lt;T&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, kind: SecretKind) -&gt; T
     <span class="kw">where
-        </span>T: <span class="kw">for</span>&lt;<span class="lifetime">&#39;a</span>&gt; From&lt;hkdf::Okm&lt;<span class="lifetime">&#39;a</span>, hkdf::Algorithm&gt;&gt;,
+        </span>T: <span class="kw">for</span>&lt;<span class="lifetime">'a</span>&gt; From&lt;hkdf::Okm&lt;<span class="lifetime">'a</span>, hkdf::Algorithm&gt;&gt;,
     {
         <span class="kw">let </span>digest_alg = <span class="self">self
             </span>.suite
@@ -1751,13 +1751,13 @@
             </span>.suite
             .hkdf_algorithm
             .hmac_algorithm();
-        <span class="kw">let </span>hmac_key = hkdf_expand(base_key, hmac_alg, <span class="string">b&quot;finished&quot;</span>, <span class="kw-2">&amp;</span>[]);
+        <span class="kw">let </span>hmac_key = hkdf_expand(base_key, hmac_alg, <span class="string">b"finished"</span>, <span class="kw-2">&amp;</span>[]);
         hmac::sign(<span class="kw-2">&amp;</span>hmac_key, hs_hash.as_ref())
     }
 
     <span class="doccomment">/// Derive the next application traffic secret, returning it.
     </span><span class="kw">fn </span>derive_next(<span class="kw-2">&amp;</span><span class="self">self</span>, base_key: <span class="kw-2">&amp;</span>hkdf::Prk) -&gt; hkdf::Prk {
-        hkdf_expand(base_key, <span class="self">self</span>.suite.hkdf_algorithm, <span class="string">b&quot;traffic upd&quot;</span>, <span class="kw-2">&amp;</span>[])
+        hkdf_expand(base_key, <span class="self">self</span>.suite.hkdf_algorithm, <span class="string">b"traffic upd"</span>, <span class="kw-2">&amp;</span>[])
     }
 
     <span class="doccomment">/// Derive the PSK to use given a resumption_master_secret and
@@ -1766,7 +1766,7 @@
         <span class="kw">let </span>payload: PayloadU8 = hkdf_expand(
             rms,
             PayloadU8Len(<span class="self">self</span>.suite.hkdf_algorithm.len()),
-            <span class="string">b&quot;resumption&quot;</span>,
+            <span class="string">b"resumption"</span>,
             nonce,
         );
         payload.into_inner()
@@ -1799,17 +1799,17 @@
         </span>hkdf_expand_info(
             <span class="kw-2">&amp;</span>secret,
             PayloadU8Len(out.len()),
-            <span class="string">b&quot;exporter&quot;</span>,
+            <span class="string">b"exporter"</span>,
             h_context.as_ref(),
             |okm| okm.fill(out),
         )
-        .map_err(|<span class="kw">_</span>| Error::General(<span class="string">&quot;exporting too much&quot;</span>.to_string()))
+        .map_err(|<span class="kw">_</span>| Error::General(<span class="string">"exporting too much"</span>.to_string()))
     }
 }
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>hkdf_expand&lt;T, L&gt;(secret: <span class="kw-2">&amp;</span>hkdf::Prk, key_type: L, label: <span class="kw-2">&amp;</span>[u8], context: <span class="kw-2">&amp;</span>[u8]) -&gt; T
 <span class="kw">where
-    </span>T: <span class="kw">for</span>&lt;<span class="lifetime">&#39;a</span>&gt; From&lt;hkdf::Okm&lt;<span class="lifetime">&#39;a</span>, L&gt;&gt;,
+    </span>T: <span class="kw">for</span>&lt;<span class="lifetime">'a</span>&gt; From&lt;hkdf::Okm&lt;<span class="lifetime">'a</span>, L&gt;&gt;,
     L: hkdf::KeyType,
 {
     hkdf_expand_info(secret, key_type, label, context, |okm| okm.into())
@@ -1823,10 +1823,10 @@
     f: F,
 ) -&gt; T
 <span class="kw">where
-    </span>F: <span class="kw">for</span>&lt;<span class="lifetime">&#39;b</span>&gt; FnOnce(hkdf::Okm&lt;<span class="lifetime">&#39;b</span>, L&gt;) -&gt; T,
+    </span>F: <span class="kw">for</span>&lt;<span class="lifetime">'b</span>&gt; FnOnce(hkdf::Okm&lt;<span class="lifetime">'b</span>, L&gt;) -&gt; T,
     L: hkdf::KeyType,
 {
-    <span class="kw">const </span>LABEL_PREFIX: <span class="kw-2">&amp;</span>[u8] = <span class="string">b&quot;tls13 &quot;</span>;
+    <span class="kw">const </span>LABEL_PREFIX: <span class="kw-2">&amp;</span>[u8] = <span class="string">b"tls13 "</span>;
 
     <span class="kw">let </span>output_len = u16::to_be_bytes(key_type.len() <span class="kw">as </span>u16);
     <span class="kw">let </span>label_len = u8::to_be_bytes((LABEL_PREFIX.len() + label.len()) <span class="kw">as </span>u8);
@@ -1852,7 +1852,7 @@
     </span>}
 }
 
-<span class="kw">impl </span>From&lt;hkdf::Okm&lt;<span class="lifetime">&#39;_</span>, PayloadU8Len&gt;&gt; <span class="kw">for </span>PayloadU8 {
+<span class="kw">impl </span>From&lt;hkdf::Okm&lt;<span class="lifetime">'_</span>, PayloadU8Len&gt;&gt; <span class="kw">for </span>PayloadU8 {
     <span class="kw">fn </span>from(okm: hkdf::Okm&lt;PayloadU8Len&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span><span class="kw-2">mut </span>r = <span class="macro">vec!</span>[<span class="number">0u8</span>; okm.len().<span class="number">0</span>];
         okm.fill(<span class="kw-2">&amp;mut </span>r[..]).unwrap();
@@ -1862,13 +1862,13 @@
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>derive_traffic_key(
     secret: <span class="kw-2">&amp;</span>hkdf::Prk,
-    aead_algorithm: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>aead::Algorithm,
+    aead_algorithm: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>aead::Algorithm,
 ) -&gt; aead::UnboundKey {
-    hkdf_expand(secret, aead_algorithm, <span class="string">b&quot;key&quot;</span>, <span class="kw-2">&amp;</span>[])
+    hkdf_expand(secret, aead_algorithm, <span class="string">b"key"</span>, <span class="kw-2">&amp;</span>[])
 }
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>derive_traffic_iv(secret: <span class="kw-2">&amp;</span>hkdf::Prk) -&gt; Iv {
-    hkdf_expand(secret, IvLen, <span class="string">b&quot;iv&quot;</span>, <span class="kw-2">&amp;</span>[])
+    hkdf_expand(secret, IvLen, <span class="string">b"iv"</span>, <span class="kw-2">&amp;</span>[])
 }
 
 <span class="attr">#[cfg(test)]
@@ -2009,8 +2009,8 @@
         expected_key: <span class="kw-2">&amp;</span>[u8],
         expected_iv: <span class="kw-2">&amp;</span>[u8],
     ) {
-        <span class="kw">struct </span>Log&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]);
-        <span class="kw">impl </span>KeyLog <span class="kw">for </span>Log&lt;<span class="lifetime">&#39;_</span>&gt; {
+        <span class="kw">struct </span>Log&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]);
+        <span class="kw">impl </span>KeyLog <span class="kw">for </span>Log&lt;<span class="lifetime">'_</span>&gt; {
             <span class="kw">fn </span>log(<span class="kw-2">&amp;</span><span class="self">self</span>, _label: <span class="kw-2">&amp;</span>str, _client_random: <span class="kw-2">&amp;</span>[u8], secret: <span class="kw-2">&amp;</span>[u8]) {
                 <span class="macro">assert_eq!</span>(<span class="self">self</span>.<span class="number">0</span>, secret);
             }
@@ -2018,7 +2018,7 @@
         <span class="kw">let </span>log = Log(expected_traffic_secret);
         <span class="kw">let </span>traffic_secret = ks.derive_logged_secret(kind, hash, <span class="kw-2">&amp;</span>log, <span class="kw-2">&amp;</span>[<span class="number">0</span>; <span class="number">32</span>]);
 
-        <span class="comment">// Since we can&#39;t test key equality, we test the output of sealing with the key instead.
+        <span class="comment">// Since we can't test key equality, we test the output of sealing with the key instead.
         </span><span class="kw">let </span>aead_alg = <span class="kw-2">&amp;</span>aead::AES_128_GCM;
         <span class="kw">let </span>key = derive_traffic_key(<span class="kw-2">&amp;</span>traffic_secret, aead_alg);
         <span class="kw">let </span>seal_output = seal_zeroes(key);

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.5/src/arithmetic/bigint/modulus.rs`."><title>modulus.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="ring" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.5/src/arithmetic/bigint/modulus.rs`."><title>modulus.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="ring" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -302,7 +302,7 @@
 // purpose with or without fee is hereby granted, provided that the above
 // copyright notice and this permission notice appear in all copies.
 //
-// THE SOFTWARE IS PROVIDED &quot;AS IS&quot; AND THE AUTHORS DISCLAIM ALL WARRANTIES
+// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHORS DISCLAIM ALL WARRANTIES
 // WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
 // MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY
 // SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
@@ -349,12 +349,12 @@
     // just looking at the lowest `N0::LIMBS_USED` limbs. This is what makes
     // Montgomery multiplication efficient.
     //
-    // As shown in Algorithm 1 of &quot;Fast Prime Field Elliptic Curve Cryptography
-    // with 256 Bit Primes&quot; by Shay Gueron and Vlad Krasnov, in the loop of a
+    // As shown in Algorithm 1 of "Fast Prime Field Elliptic Curve Cryptography
+    // with 256 Bit Primes" by Shay Gueron and Vlad Krasnov, in the loop of a
     // multi-limb Montgomery multiplication of a * b (mod n), given the
     // unreduced product t == a * b, we repeatedly calculate:
     //
-    //    t1 := t % r         |t1| is |t|&#39;s lowest limb (see previous paragraph).
+    //    t1 := t % r         |t1| is |t|'s lowest limb (see previous paragraph).
     //    t2 := t1*n0*n
     //    t3 := t + t2
     //    t := t3 / r         copy all limbs of |t3| except the lowest to |t|.
@@ -374,7 +374,7 @@
     // n0, the negative inverse of n (mod r).
     //
     // TODO(perf): Not all 32-bit platforms actually make use of n0[1]. For the
-    // ones that don&#39;t, we could use a shorter `R` value and use faster `Limb`
+    // ones that don't, we could use a shorter `R` value and use faster `Limb`
     // calculations instead of double-precision `u64` calculations.
     </span>n0: N0,
 
@@ -396,7 +396,7 @@
 
 <span class="kw">impl</span>&lt;M: PublicModulus&gt; core::fmt::Debug <span class="kw">for </span>Modulus&lt;M&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>::core::fmt::Formatter) -&gt; <span class="prelude-ty">Result</span>&lt;(), ::core::fmt::Error&gt; {
-        fmt.debug_struct(<span class="string">&quot;Modulus&quot;</span>)
+        fmt.debug_struct(<span class="string">"Modulus"</span>)
             <span class="comment">// TODO: Print modulus value.
             </span>.finish()
     }
@@ -458,7 +458,7 @@
                 <span class="kw">fn </span>bn_neg_inv_mod_r_u64(n: u64) -&gt; u64;
             }
 
-            <span class="comment">// XXX: u64::from isn&#39;t guaranteed to be constant time.
+            <span class="comment">// XXX: u64::from isn't guaranteed to be constant time.
             </span><span class="kw">let </span><span class="kw-2">mut </span>n_mod_r: u64 = u64::from(n[<span class="number">0</span>]);
 
             <span class="kw">if </span>N0::LIMBS_USED == <span class="number">2 </span>{
@@ -554,19 +554,19 @@
 }
 
 <span class="kw">impl</span>&lt;M: PublicModulus&gt; Modulus&lt;M&gt; {
-    <span class="kw">pub fn </span>be_bytes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; LeadingZerosStripped&lt;<span class="kw">impl </span>ExactSizeIterator&lt;Item = u8&gt; + Clone + <span class="lifetime">&#39;_</span>&gt; {
+    <span class="kw">pub fn </span>be_bytes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; LeadingZerosStripped&lt;<span class="kw">impl </span>ExactSizeIterator&lt;Item = u8&gt; + Clone + <span class="lifetime">'_</span>&gt; {
         LeadingZerosStripped::new(limb::unstripped_be_bytes(<span class="kw-2">&amp;</span><span class="self">self</span>.limbs))
     }
 }
 
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>PartialModulus&lt;<span class="lifetime">&#39;a</span>, M&gt; {
-    limbs: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[Limb],
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>PartialModulus&lt;<span class="lifetime">'a</span>, M&gt; {
+    limbs: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[Limb],
     n0: N0,
     m: PhantomData&lt;M&gt;,
     cpu_features: cpu::Features,
 }
 
-<span class="kw">impl</span>&lt;M&gt; PartialModulus&lt;<span class="lifetime">&#39;_</span>, M&gt; {
+<span class="kw">impl</span>&lt;M&gt; PartialModulus&lt;<span class="lifetime">'_</span>, M&gt; {
     <span class="comment">// TODO: XXX Avoid duplication with `Modulus`.
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>zero(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Elem&lt;M, R&gt; {
         <span class="kw">let </span>width = Width {

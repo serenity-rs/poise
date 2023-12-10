@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-util-0.7.10/src/codec/decoder.rs`."><title>decoder.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio_util" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-util-0.7.10/src/codec/decoder.rs`."><title>decoder.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio_util" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -201,7 +201,7 @@
 /// will simply be a unit struct (e.g. `struct HttpDecoder`).
 ///
 /// For some underlying data-sources, namely files and FIFOs,
-/// it&#39;s possible to temporarily read 0 bytes by reaching EOF.
+/// it's possible to temporarily read 0 bytes by reaching EOF.
 ///
 /// In these cases `decode_eof` will be called until it signals
 /// fulfillment of all closing frames by returning `Ok(None)`.
@@ -240,17 +240,17 @@
     <span class="doccomment">/// Attempts to decode a frame from the provided buffer of bytes.
     ///
     /// This method is called by [`FramedRead`] whenever bytes are ready to be
-    /// parsed. The provided buffer of bytes is what&#39;s been read so far, and
+    /// parsed. The provided buffer of bytes is what's been read so far, and
     /// this instance of `Decode` can determine whether an entire frame is in
     /// the buffer and is ready to be returned.
     ///
     /// If an entire frame is available, then this instance will remove those
     /// bytes from the buffer provided and return them as a decoded
-    /// frame. Note that removing bytes from the provided buffer doesn&#39;t always
+    /// frame. Note that removing bytes from the provided buffer doesn't always
     /// necessarily copy the bytes, so this should be an efficient operation in
     /// most circumstances.
     ///
-    /// If the bytes look valid, but a frame isn&#39;t fully available yet, then
+    /// If the bytes look valid, but a frame isn't fully available yet, then
     /// `Ok(None)` is returned. This indicates to the [`Framed`] instance that
     /// it needs to read some more bytes before calling this method again.
     ///
@@ -312,7 +312,7 @@
     ///
     /// This method defaults to calling `decode` and returns an error if
     /// `Ok(None)` is returned while there is unconsumed data in `buf`.
-    /// Typically this doesn&#39;t need to be implemented unless the framing
+    /// Typically this doesn't need to be implemented unless the framing
     /// protocol differs near the end of the stream, or if you need to construct
     /// frames _across_ eof boundaries on sources that can be resumed.
     ///
@@ -322,7 +322,7 @@
     /// frames to yield. This behavior enables returning finalization frames
     /// that may not be based on inbound data.
     ///
-    /// Once `None` has been returned, `decode_eof` won&#39;t be called again until
+    /// Once `None` has been returned, `decode_eof` won't be called again until
     /// an attempt to resume the stream has been made, where the underlying stream
     /// actually returned more data.
     </span><span class="kw">fn </span>decode_eof(<span class="kw-2">&amp;mut </span><span class="self">self</span>, buf: <span class="kw-2">&amp;mut </span>BytesMut) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt;, <span class="self">Self</span>::Error&gt; {
@@ -332,7 +332,7 @@
                 <span class="kw">if </span>buf.is_empty() {
                     <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)
                 } <span class="kw">else </span>{
-                    <span class="prelude-val">Err</span>(io::Error::new(io::ErrorKind::Other, <span class="string">&quot;bytes remaining on stream&quot;</span>).into())
+                    <span class="prelude-val">Err</span>(io::Error::new(io::ErrorKind::Other, <span class="string">"bytes remaining on stream"</span>).into())
                 }
             }
         }
@@ -342,7 +342,7 @@
     /// `Io` object, using `Decode` and `Encode` to read and write the raw data.
     ///
     /// Raw I/O objects work with byte sequences, but higher-level code usually
-    /// wants to batch these into meaningful chunks, called &quot;frames&quot;. This
+    /// wants to batch these into meaningful chunks, called "frames". This
     /// method layers framing on top of an I/O object, by using the `Codec`
     /// traits to handle encoding and decoding of messages frames. Note that
     /// the incoming and outgoing frame types may be distinct.

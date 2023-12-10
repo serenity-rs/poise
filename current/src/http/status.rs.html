@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/http-0.2.11/src/status.rs`."><title>status.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="http" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/http-0.2.11/src/status.rs`."><title>status.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="http" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -674,9 +674,9 @@
             <span class="kw">return </span><span class="prelude-val">Err</span>(InvalidStatusCode::new());
         }
 
-        <span class="kw">let </span>a = src[<span class="number">0</span>].wrapping_sub(<span class="string">b&#39;0&#39;</span>) <span class="kw">as </span>u16;
-        <span class="kw">let </span>b = src[<span class="number">1</span>].wrapping_sub(<span class="string">b&#39;0&#39;</span>) <span class="kw">as </span>u16;
-        <span class="kw">let </span>c = src[<span class="number">2</span>].wrapping_sub(<span class="string">b&#39;0&#39;</span>) <span class="kw">as </span>u16;
+        <span class="kw">let </span>a = src[<span class="number">0</span>].wrapping_sub(<span class="string">b'0'</span>) <span class="kw">as </span>u16;
+        <span class="kw">let </span>b = src[<span class="number">1</span>].wrapping_sub(<span class="string">b'0'</span>) <span class="kw">as </span>u16;
+        <span class="kw">let </span>c = src[<span class="number">2</span>].wrapping_sub(<span class="string">b'0'</span>) <span class="kw">as </span>u16;
 
         <span class="kw">if </span>a == <span class="number">0 </span>|| a &gt; <span class="number">9 </span>|| b &gt; <span class="number">9 </span>|| c &gt; <span class="number">9 </span>{
             <span class="kw">return </span><span class="prelude-val">Err</span>(InvalidStatusCode::new());
@@ -693,7 +693,7 @@
     /// # Note
     ///
     /// This is the same as the `From&lt;StatusCode&gt;` implementation, but
-    /// included as an inherent method because that implementation doesn&#39;t
+    /// included as an inherent method because that implementation doesn't
     /// appear in rustdocs, as well as a way to force the type instead of
     /// relying on inference.
     ///
@@ -717,7 +717,7 @@
     ///
     /// ```
     /// let status = http::StatusCode::OK;
-    /// assert_eq!(status.as_str(), &quot;200&quot;);
+    /// assert_eq!(status.as_str(), "200");
     /// ```
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>as_str(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
@@ -750,9 +750,9 @@
     ///
     /// ```
     /// let status = http::StatusCode::OK;
-    /// assert_eq!(status.canonical_reason(), Some(&quot;OK&quot;));
+    /// assert_eq!(status.canonical_reason(), Some("OK"));
     /// ```
-    </span><span class="kw">pub fn </span>canonical_reason(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str&gt; {
+    </span><span class="kw">pub fn </span>canonical_reason(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'static </span>str&gt; {
         canonical_reason(<span class="self">self</span>.<span class="number">0</span>.get())
     }
 
@@ -788,7 +788,7 @@
 }
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>StatusCode {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         fmt::Debug::fmt(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>, f)
     }
 }
@@ -799,15 +799,15 @@
 ///
 /// ```
 /// # use http::StatusCode;
-/// assert_eq!(format!(&quot;{}&quot;, StatusCode::OK), &quot;200 OK&quot;);
+/// assert_eq!(format!("{}", StatusCode::OK), "200 OK");
 /// ```
 </span><span class="kw">impl </span>fmt::Display <span class="kw">for </span>StatusCode {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         <span class="macro">write!</span>(
             f,
-            <span class="string">&quot;{} {}&quot;</span>,
+            <span class="string">"{} {}"</span>,
             u16::from(<span class="kw-2">*</span><span class="self">self</span>),
-            <span class="self">self</span>.canonical_reason().unwrap_or(<span class="string">&quot;&lt;unknown status code&gt;&quot;</span>)
+            <span class="self">self</span>.canonical_reason().unwrap_or(<span class="string">"&lt;unknown status code&gt;"</span>)
         )
     }
 }
@@ -848,27 +848,27 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>StatusCode&gt; <span class="kw">for </span>StatusCode {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>StatusCode&gt; <span class="kw">for </span>StatusCode {
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>from(t: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>StatusCode) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">fn </span>from(t: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>StatusCode) -&gt; <span class="self">Self </span>{
         t.clone()
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; TryFrom&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt; <span class="kw">for </span>StatusCode {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; TryFrom&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt; <span class="kw">for </span>StatusCode {
     <span class="kw">type </span>Error = InvalidStatusCode;
 
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>try_from(t: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
+    </span><span class="kw">fn </span>try_from(t: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
         StatusCode::from_bytes(t)
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; TryFrom&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str&gt; <span class="kw">for </span>StatusCode {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; TryFrom&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>str&gt; <span class="kw">for </span>StatusCode {
     <span class="kw">type </span>Error = InvalidStatusCode;
 
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>try_from(t: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
+    </span><span class="kw">fn </span>try_from(t: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
         t.parse()
     }
 }
@@ -897,7 +897,7 @@
 
         }
 
-        <span class="kw">fn </span>canonical_reason(num: u16) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str&gt; {
+        <span class="kw">fn </span>canonical_reason(num: u16) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'static </span>str&gt; {
             <span class="kw">match </span>num {
                 $(
                 <span class="macro-nonterminal">$num </span>=&gt; <span class="prelude-val">Some</span>(<span class="macro-nonterminal">$phrase</span>),
@@ -911,195 +911,195 @@
 <span class="macro">status_codes! </span>{
     <span class="doccomment">/// 100 Continue
     /// [[RFC7231, Section 6.2.1](https://tools.ietf.org/html/rfc7231#section-6.2.1)]
-    </span>(<span class="number">100</span>, CONTINUE, <span class="string">&quot;Continue&quot;</span>);
+    </span>(<span class="number">100</span>, CONTINUE, <span class="string">"Continue"</span>);
     <span class="doccomment">/// 101 Switching Protocols
     /// [[RFC7231, Section 6.2.2](https://tools.ietf.org/html/rfc7231#section-6.2.2)]
-    </span>(<span class="number">101</span>, SWITCHING_PROTOCOLS, <span class="string">&quot;Switching Protocols&quot;</span>);
+    </span>(<span class="number">101</span>, SWITCHING_PROTOCOLS, <span class="string">"Switching Protocols"</span>);
     <span class="doccomment">/// 102 Processing
     /// [[RFC2518](https://tools.ietf.org/html/rfc2518)]
-    </span>(<span class="number">102</span>, PROCESSING, <span class="string">&quot;Processing&quot;</span>);
+    </span>(<span class="number">102</span>, PROCESSING, <span class="string">"Processing"</span>);
 
     <span class="doccomment">/// 200 OK
     /// [[RFC7231, Section 6.3.1](https://tools.ietf.org/html/rfc7231#section-6.3.1)]
-    </span>(<span class="number">200</span>, OK, <span class="string">&quot;OK&quot;</span>);
+    </span>(<span class="number">200</span>, OK, <span class="string">"OK"</span>);
     <span class="doccomment">/// 201 Created
     /// [[RFC7231, Section 6.3.2](https://tools.ietf.org/html/rfc7231#section-6.3.2)]
-    </span>(<span class="number">201</span>, CREATED, <span class="string">&quot;Created&quot;</span>);
+    </span>(<span class="number">201</span>, CREATED, <span class="string">"Created"</span>);
     <span class="doccomment">/// 202 Accepted
     /// [[RFC7231, Section 6.3.3](https://tools.ietf.org/html/rfc7231#section-6.3.3)]
-    </span>(<span class="number">202</span>, ACCEPTED, <span class="string">&quot;Accepted&quot;</span>);
+    </span>(<span class="number">202</span>, ACCEPTED, <span class="string">"Accepted"</span>);
     <span class="doccomment">/// 203 Non-Authoritative Information
     /// [[RFC7231, Section 6.3.4](https://tools.ietf.org/html/rfc7231#section-6.3.4)]
-    </span>(<span class="number">203</span>, NON_AUTHORITATIVE_INFORMATION, <span class="string">&quot;Non Authoritative Information&quot;</span>);
+    </span>(<span class="number">203</span>, NON_AUTHORITATIVE_INFORMATION, <span class="string">"Non Authoritative Information"</span>);
     <span class="doccomment">/// 204 No Content
     /// [[RFC7231, Section 6.3.5](https://tools.ietf.org/html/rfc7231#section-6.3.5)]
-    </span>(<span class="number">204</span>, NO_CONTENT, <span class="string">&quot;No Content&quot;</span>);
+    </span>(<span class="number">204</span>, NO_CONTENT, <span class="string">"No Content"</span>);
     <span class="doccomment">/// 205 Reset Content
     /// [[RFC7231, Section 6.3.6](https://tools.ietf.org/html/rfc7231#section-6.3.6)]
-    </span>(<span class="number">205</span>, RESET_CONTENT, <span class="string">&quot;Reset Content&quot;</span>);
+    </span>(<span class="number">205</span>, RESET_CONTENT, <span class="string">"Reset Content"</span>);
     <span class="doccomment">/// 206 Partial Content
     /// [[RFC7233, Section 4.1](https://tools.ietf.org/html/rfc7233#section-4.1)]
-    </span>(<span class="number">206</span>, PARTIAL_CONTENT, <span class="string">&quot;Partial Content&quot;</span>);
+    </span>(<span class="number">206</span>, PARTIAL_CONTENT, <span class="string">"Partial Content"</span>);
     <span class="doccomment">/// 207 Multi-Status
     /// [[RFC4918](https://tools.ietf.org/html/rfc4918)]
-    </span>(<span class="number">207</span>, MULTI_STATUS, <span class="string">&quot;Multi-Status&quot;</span>);
+    </span>(<span class="number">207</span>, MULTI_STATUS, <span class="string">"Multi-Status"</span>);
     <span class="doccomment">/// 208 Already Reported
     /// [[RFC5842](https://tools.ietf.org/html/rfc5842)]
-    </span>(<span class="number">208</span>, ALREADY_REPORTED, <span class="string">&quot;Already Reported&quot;</span>);
+    </span>(<span class="number">208</span>, ALREADY_REPORTED, <span class="string">"Already Reported"</span>);
 
     <span class="doccomment">/// 226 IM Used
     /// [[RFC3229](https://tools.ietf.org/html/rfc3229)]
-    </span>(<span class="number">226</span>, IM_USED, <span class="string">&quot;IM Used&quot;</span>);
+    </span>(<span class="number">226</span>, IM_USED, <span class="string">"IM Used"</span>);
 
     <span class="doccomment">/// 300 Multiple Choices
     /// [[RFC7231, Section 6.4.1](https://tools.ietf.org/html/rfc7231#section-6.4.1)]
-    </span>(<span class="number">300</span>, MULTIPLE_CHOICES, <span class="string">&quot;Multiple Choices&quot;</span>);
+    </span>(<span class="number">300</span>, MULTIPLE_CHOICES, <span class="string">"Multiple Choices"</span>);
     <span class="doccomment">/// 301 Moved Permanently
     /// [[RFC7231, Section 6.4.2](https://tools.ietf.org/html/rfc7231#section-6.4.2)]
-    </span>(<span class="number">301</span>, MOVED_PERMANENTLY, <span class="string">&quot;Moved Permanently&quot;</span>);
+    </span>(<span class="number">301</span>, MOVED_PERMANENTLY, <span class="string">"Moved Permanently"</span>);
     <span class="doccomment">/// 302 Found
     /// [[RFC7231, Section 6.4.3](https://tools.ietf.org/html/rfc7231#section-6.4.3)]
-    </span>(<span class="number">302</span>, FOUND, <span class="string">&quot;Found&quot;</span>);
+    </span>(<span class="number">302</span>, FOUND, <span class="string">"Found"</span>);
     <span class="doccomment">/// 303 See Other
     /// [[RFC7231, Section 6.4.4](https://tools.ietf.org/html/rfc7231#section-6.4.4)]
-    </span>(<span class="number">303</span>, SEE_OTHER, <span class="string">&quot;See Other&quot;</span>);
+    </span>(<span class="number">303</span>, SEE_OTHER, <span class="string">"See Other"</span>);
     <span class="doccomment">/// 304 Not Modified
     /// [[RFC7232, Section 4.1](https://tools.ietf.org/html/rfc7232#section-4.1)]
-    </span>(<span class="number">304</span>, NOT_MODIFIED, <span class="string">&quot;Not Modified&quot;</span>);
+    </span>(<span class="number">304</span>, NOT_MODIFIED, <span class="string">"Not Modified"</span>);
     <span class="doccomment">/// 305 Use Proxy
     /// [[RFC7231, Section 6.4.5](https://tools.ietf.org/html/rfc7231#section-6.4.5)]
-    </span>(<span class="number">305</span>, USE_PROXY, <span class="string">&quot;Use Proxy&quot;</span>);
+    </span>(<span class="number">305</span>, USE_PROXY, <span class="string">"Use Proxy"</span>);
     <span class="doccomment">/// 307 Temporary Redirect
     /// [[RFC7231, Section 6.4.7](https://tools.ietf.org/html/rfc7231#section-6.4.7)]
-    </span>(<span class="number">307</span>, TEMPORARY_REDIRECT, <span class="string">&quot;Temporary Redirect&quot;</span>);
+    </span>(<span class="number">307</span>, TEMPORARY_REDIRECT, <span class="string">"Temporary Redirect"</span>);
     <span class="doccomment">/// 308 Permanent Redirect
     /// [[RFC7238](https://tools.ietf.org/html/rfc7238)]
-    </span>(<span class="number">308</span>, PERMANENT_REDIRECT, <span class="string">&quot;Permanent Redirect&quot;</span>);
+    </span>(<span class="number">308</span>, PERMANENT_REDIRECT, <span class="string">"Permanent Redirect"</span>);
 
     <span class="doccomment">/// 400 Bad Request
     /// [[RFC7231, Section 6.5.1](https://tools.ietf.org/html/rfc7231#section-6.5.1)]
-    </span>(<span class="number">400</span>, BAD_REQUEST, <span class="string">&quot;Bad Request&quot;</span>);
+    </span>(<span class="number">400</span>, BAD_REQUEST, <span class="string">"Bad Request"</span>);
     <span class="doccomment">/// 401 Unauthorized
     /// [[RFC7235, Section 3.1](https://tools.ietf.org/html/rfc7235#section-3.1)]
-    </span>(<span class="number">401</span>, UNAUTHORIZED, <span class="string">&quot;Unauthorized&quot;</span>);
+    </span>(<span class="number">401</span>, UNAUTHORIZED, <span class="string">"Unauthorized"</span>);
     <span class="doccomment">/// 402 Payment Required
     /// [[RFC7231, Section 6.5.2](https://tools.ietf.org/html/rfc7231#section-6.5.2)]
-    </span>(<span class="number">402</span>, PAYMENT_REQUIRED, <span class="string">&quot;Payment Required&quot;</span>);
+    </span>(<span class="number">402</span>, PAYMENT_REQUIRED, <span class="string">"Payment Required"</span>);
     <span class="doccomment">/// 403 Forbidden
     /// [[RFC7231, Section 6.5.3](https://tools.ietf.org/html/rfc7231#section-6.5.3)]
-    </span>(<span class="number">403</span>, FORBIDDEN, <span class="string">&quot;Forbidden&quot;</span>);
+    </span>(<span class="number">403</span>, FORBIDDEN, <span class="string">"Forbidden"</span>);
     <span class="doccomment">/// 404 Not Found
     /// [[RFC7231, Section 6.5.4](https://tools.ietf.org/html/rfc7231#section-6.5.4)]
-    </span>(<span class="number">404</span>, NOT_FOUND, <span class="string">&quot;Not Found&quot;</span>);
+    </span>(<span class="number">404</span>, NOT_FOUND, <span class="string">"Not Found"</span>);
     <span class="doccomment">/// 405 Method Not Allowed
     /// [[RFC7231, Section 6.5.5](https://tools.ietf.org/html/rfc7231#section-6.5.5)]
-    </span>(<span class="number">405</span>, METHOD_NOT_ALLOWED, <span class="string">&quot;Method Not Allowed&quot;</span>);
+    </span>(<span class="number">405</span>, METHOD_NOT_ALLOWED, <span class="string">"Method Not Allowed"</span>);
     <span class="doccomment">/// 406 Not Acceptable
     /// [[RFC7231, Section 6.5.6](https://tools.ietf.org/html/rfc7231#section-6.5.6)]
-    </span>(<span class="number">406</span>, NOT_ACCEPTABLE, <span class="string">&quot;Not Acceptable&quot;</span>);
+    </span>(<span class="number">406</span>, NOT_ACCEPTABLE, <span class="string">"Not Acceptable"</span>);
     <span class="doccomment">/// 407 Proxy Authentication Required
     /// [[RFC7235, Section 3.2](https://tools.ietf.org/html/rfc7235#section-3.2)]
-    </span>(<span class="number">407</span>, PROXY_AUTHENTICATION_REQUIRED, <span class="string">&quot;Proxy Authentication Required&quot;</span>);
+    </span>(<span class="number">407</span>, PROXY_AUTHENTICATION_REQUIRED, <span class="string">"Proxy Authentication Required"</span>);
     <span class="doccomment">/// 408 Request Timeout
     /// [[RFC7231, Section 6.5.7](https://tools.ietf.org/html/rfc7231#section-6.5.7)]
-    </span>(<span class="number">408</span>, REQUEST_TIMEOUT, <span class="string">&quot;Request Timeout&quot;</span>);
+    </span>(<span class="number">408</span>, REQUEST_TIMEOUT, <span class="string">"Request Timeout"</span>);
     <span class="doccomment">/// 409 Conflict
     /// [[RFC7231, Section 6.5.8](https://tools.ietf.org/html/rfc7231#section-6.5.8)]
-    </span>(<span class="number">409</span>, CONFLICT, <span class="string">&quot;Conflict&quot;</span>);
+    </span>(<span class="number">409</span>, CONFLICT, <span class="string">"Conflict"</span>);
     <span class="doccomment">/// 410 Gone
     /// [[RFC7231, Section 6.5.9](https://tools.ietf.org/html/rfc7231#section-6.5.9)]
-    </span>(<span class="number">410</span>, GONE, <span class="string">&quot;Gone&quot;</span>);
+    </span>(<span class="number">410</span>, GONE, <span class="string">"Gone"</span>);
     <span class="doccomment">/// 411 Length Required
     /// [[RFC7231, Section 6.5.10](https://tools.ietf.org/html/rfc7231#section-6.5.10)]
-    </span>(<span class="number">411</span>, LENGTH_REQUIRED, <span class="string">&quot;Length Required&quot;</span>);
+    </span>(<span class="number">411</span>, LENGTH_REQUIRED, <span class="string">"Length Required"</span>);
     <span class="doccomment">/// 412 Precondition Failed
     /// [[RFC7232, Section 4.2](https://tools.ietf.org/html/rfc7232#section-4.2)]
-    </span>(<span class="number">412</span>, PRECONDITION_FAILED, <span class="string">&quot;Precondition Failed&quot;</span>);
+    </span>(<span class="number">412</span>, PRECONDITION_FAILED, <span class="string">"Precondition Failed"</span>);
     <span class="doccomment">/// 413 Payload Too Large
     /// [[RFC7231, Section 6.5.11](https://tools.ietf.org/html/rfc7231#section-6.5.11)]
-    </span>(<span class="number">413</span>, PAYLOAD_TOO_LARGE, <span class="string">&quot;Payload Too Large&quot;</span>);
+    </span>(<span class="number">413</span>, PAYLOAD_TOO_LARGE, <span class="string">"Payload Too Large"</span>);
     <span class="doccomment">/// 414 URI Too Long
     /// [[RFC7231, Section 6.5.12](https://tools.ietf.org/html/rfc7231#section-6.5.12)]
-    </span>(<span class="number">414</span>, URI_TOO_LONG, <span class="string">&quot;URI Too Long&quot;</span>);
+    </span>(<span class="number">414</span>, URI_TOO_LONG, <span class="string">"URI Too Long"</span>);
     <span class="doccomment">/// 415 Unsupported Media Type
     /// [[RFC7231, Section 6.5.13](https://tools.ietf.org/html/rfc7231#section-6.5.13)]
-    </span>(<span class="number">415</span>, UNSUPPORTED_MEDIA_TYPE, <span class="string">&quot;Unsupported Media Type&quot;</span>);
+    </span>(<span class="number">415</span>, UNSUPPORTED_MEDIA_TYPE, <span class="string">"Unsupported Media Type"</span>);
     <span class="doccomment">/// 416 Range Not Satisfiable
     /// [[RFC7233, Section 4.4](https://tools.ietf.org/html/rfc7233#section-4.4)]
-    </span>(<span class="number">416</span>, RANGE_NOT_SATISFIABLE, <span class="string">&quot;Range Not Satisfiable&quot;</span>);
+    </span>(<span class="number">416</span>, RANGE_NOT_SATISFIABLE, <span class="string">"Range Not Satisfiable"</span>);
     <span class="doccomment">/// 417 Expectation Failed
     /// [[RFC7231, Section 6.5.14](https://tools.ietf.org/html/rfc7231#section-6.5.14)]
-    </span>(<span class="number">417</span>, EXPECTATION_FAILED, <span class="string">&quot;Expectation Failed&quot;</span>);
-    <span class="doccomment">/// 418 I&#39;m a teapot
+    </span>(<span class="number">417</span>, EXPECTATION_FAILED, <span class="string">"Expectation Failed"</span>);
+    <span class="doccomment">/// 418 I'm a teapot
     /// [curiously not registered by IANA but [RFC2324](https://tools.ietf.org/html/rfc2324)]
-    </span>(<span class="number">418</span>, IM_A_TEAPOT, <span class="string">&quot;I&#39;m a teapot&quot;</span>);
+    </span>(<span class="number">418</span>, IM_A_TEAPOT, <span class="string">"I'm a teapot"</span>);
 
     <span class="doccomment">/// 421 Misdirected Request
     /// [RFC7540, Section 9.1.2](http://tools.ietf.org/html/rfc7540#section-9.1.2)
-    </span>(<span class="number">421</span>, MISDIRECTED_REQUEST, <span class="string">&quot;Misdirected Request&quot;</span>);
+    </span>(<span class="number">421</span>, MISDIRECTED_REQUEST, <span class="string">"Misdirected Request"</span>);
     <span class="doccomment">/// 422 Unprocessable Entity
     /// [[RFC4918](https://tools.ietf.org/html/rfc4918)]
-    </span>(<span class="number">422</span>, UNPROCESSABLE_ENTITY, <span class="string">&quot;Unprocessable Entity&quot;</span>);
+    </span>(<span class="number">422</span>, UNPROCESSABLE_ENTITY, <span class="string">"Unprocessable Entity"</span>);
     <span class="doccomment">/// 423 Locked
     /// [[RFC4918](https://tools.ietf.org/html/rfc4918)]
-    </span>(<span class="number">423</span>, LOCKED, <span class="string">&quot;Locked&quot;</span>);
+    </span>(<span class="number">423</span>, LOCKED, <span class="string">"Locked"</span>);
     <span class="doccomment">/// 424 Failed Dependency
     /// [[RFC4918](https://tools.ietf.org/html/rfc4918)]
-    </span>(<span class="number">424</span>, FAILED_DEPENDENCY, <span class="string">&quot;Failed Dependency&quot;</span>);
+    </span>(<span class="number">424</span>, FAILED_DEPENDENCY, <span class="string">"Failed Dependency"</span>);
 
     <span class="doccomment">/// 426 Upgrade Required
     /// [[RFC7231, Section 6.5.15](https://tools.ietf.org/html/rfc7231#section-6.5.15)]
-    </span>(<span class="number">426</span>, UPGRADE_REQUIRED, <span class="string">&quot;Upgrade Required&quot;</span>);
+    </span>(<span class="number">426</span>, UPGRADE_REQUIRED, <span class="string">"Upgrade Required"</span>);
 
     <span class="doccomment">/// 428 Precondition Required
     /// [[RFC6585](https://tools.ietf.org/html/rfc6585)]
-    </span>(<span class="number">428</span>, PRECONDITION_REQUIRED, <span class="string">&quot;Precondition Required&quot;</span>);
+    </span>(<span class="number">428</span>, PRECONDITION_REQUIRED, <span class="string">"Precondition Required"</span>);
     <span class="doccomment">/// 429 Too Many Requests
     /// [[RFC6585](https://tools.ietf.org/html/rfc6585)]
-    </span>(<span class="number">429</span>, TOO_MANY_REQUESTS, <span class="string">&quot;Too Many Requests&quot;</span>);
+    </span>(<span class="number">429</span>, TOO_MANY_REQUESTS, <span class="string">"Too Many Requests"</span>);
 
     <span class="doccomment">/// 431 Request Header Fields Too Large
     /// [[RFC6585](https://tools.ietf.org/html/rfc6585)]
-    </span>(<span class="number">431</span>, REQUEST_HEADER_FIELDS_TOO_LARGE, <span class="string">&quot;Request Header Fields Too Large&quot;</span>);
+    </span>(<span class="number">431</span>, REQUEST_HEADER_FIELDS_TOO_LARGE, <span class="string">"Request Header Fields Too Large"</span>);
 
     <span class="doccomment">/// 451 Unavailable For Legal Reasons
     /// [[RFC7725](http://tools.ietf.org/html/rfc7725)]
-    </span>(<span class="number">451</span>, UNAVAILABLE_FOR_LEGAL_REASONS, <span class="string">&quot;Unavailable For Legal Reasons&quot;</span>);
+    </span>(<span class="number">451</span>, UNAVAILABLE_FOR_LEGAL_REASONS, <span class="string">"Unavailable For Legal Reasons"</span>);
 
     <span class="doccomment">/// 500 Internal Server Error
     /// [[RFC7231, Section 6.6.1](https://tools.ietf.org/html/rfc7231#section-6.6.1)]
-    </span>(<span class="number">500</span>, INTERNAL_SERVER_ERROR, <span class="string">&quot;Internal Server Error&quot;</span>);
+    </span>(<span class="number">500</span>, INTERNAL_SERVER_ERROR, <span class="string">"Internal Server Error"</span>);
     <span class="doccomment">/// 501 Not Implemented
     /// [[RFC7231, Section 6.6.2](https://tools.ietf.org/html/rfc7231#section-6.6.2)]
-    </span>(<span class="number">501</span>, NOT_IMPLEMENTED, <span class="string">&quot;Not Implemented&quot;</span>);
+    </span>(<span class="number">501</span>, NOT_IMPLEMENTED, <span class="string">"Not Implemented"</span>);
     <span class="doccomment">/// 502 Bad Gateway
     /// [[RFC7231, Section 6.6.3](https://tools.ietf.org/html/rfc7231#section-6.6.3)]
-    </span>(<span class="number">502</span>, BAD_GATEWAY, <span class="string">&quot;Bad Gateway&quot;</span>);
+    </span>(<span class="number">502</span>, BAD_GATEWAY, <span class="string">"Bad Gateway"</span>);
     <span class="doccomment">/// 503 Service Unavailable
     /// [[RFC7231, Section 6.6.4](https://tools.ietf.org/html/rfc7231#section-6.6.4)]
-    </span>(<span class="number">503</span>, SERVICE_UNAVAILABLE, <span class="string">&quot;Service Unavailable&quot;</span>);
+    </span>(<span class="number">503</span>, SERVICE_UNAVAILABLE, <span class="string">"Service Unavailable"</span>);
     <span class="doccomment">/// 504 Gateway Timeout
     /// [[RFC7231, Section 6.6.5](https://tools.ietf.org/html/rfc7231#section-6.6.5)]
-    </span>(<span class="number">504</span>, GATEWAY_TIMEOUT, <span class="string">&quot;Gateway Timeout&quot;</span>);
+    </span>(<span class="number">504</span>, GATEWAY_TIMEOUT, <span class="string">"Gateway Timeout"</span>);
     <span class="doccomment">/// 505 HTTP Version Not Supported
     /// [[RFC7231, Section 6.6.6](https://tools.ietf.org/html/rfc7231#section-6.6.6)]
-    </span>(<span class="number">505</span>, HTTP_VERSION_NOT_SUPPORTED, <span class="string">&quot;HTTP Version Not Supported&quot;</span>);
+    </span>(<span class="number">505</span>, HTTP_VERSION_NOT_SUPPORTED, <span class="string">"HTTP Version Not Supported"</span>);
     <span class="doccomment">/// 506 Variant Also Negotiates
     /// [[RFC2295](https://tools.ietf.org/html/rfc2295)]
-    </span>(<span class="number">506</span>, VARIANT_ALSO_NEGOTIATES, <span class="string">&quot;Variant Also Negotiates&quot;</span>);
+    </span>(<span class="number">506</span>, VARIANT_ALSO_NEGOTIATES, <span class="string">"Variant Also Negotiates"</span>);
     <span class="doccomment">/// 507 Insufficient Storage
     /// [[RFC4918](https://tools.ietf.org/html/rfc4918)]
-    </span>(<span class="number">507</span>, INSUFFICIENT_STORAGE, <span class="string">&quot;Insufficient Storage&quot;</span>);
+    </span>(<span class="number">507</span>, INSUFFICIENT_STORAGE, <span class="string">"Insufficient Storage"</span>);
     <span class="doccomment">/// 508 Loop Detected
     /// [[RFC5842](https://tools.ietf.org/html/rfc5842)]
-    </span>(<span class="number">508</span>, LOOP_DETECTED, <span class="string">&quot;Loop Detected&quot;</span>);
+    </span>(<span class="number">508</span>, LOOP_DETECTED, <span class="string">"Loop Detected"</span>);
 
     <span class="doccomment">/// 510 Not Extended
     /// [[RFC2774](https://tools.ietf.org/html/rfc2774)]
-    </span>(<span class="number">510</span>, NOT_EXTENDED, <span class="string">&quot;Not Extended&quot;</span>);
+    </span>(<span class="number">510</span>, NOT_EXTENDED, <span class="string">"Not Extended"</span>);
     <span class="doccomment">/// 511 Network Authentication Required
     /// [[RFC6585](https://tools.ietf.org/html/rfc6585)]
-    </span>(<span class="number">511</span>, NETWORK_AUTHENTICATION_REQUIRED, <span class="string">&quot;Network Authentication Required&quot;</span>);
+    </span>(<span class="number">511</span>, NETWORK_AUTHENTICATION_REQUIRED, <span class="string">"Network Authentication Required"</span>);
 }
 
 <span class="kw">impl </span>InvalidStatusCode {
@@ -1112,15 +1112,15 @@
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>InvalidStatusCode {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
-        f.debug_struct(<span class="string">&quot;InvalidStatusCode&quot;</span>)
+        f.debug_struct(<span class="string">"InvalidStatusCode"</span>)
             <span class="comment">// skip _priv noise
             </span>.finish()
     }
 }
 
 <span class="kw">impl </span>fmt::Display <span class="kw">for </span>InvalidStatusCode {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        f.write_str(<span class="string">&quot;invalid status code&quot;</span>)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        f.write_str(<span class="string">"invalid status code"</span>)
     }
 }
 
@@ -1128,7 +1128,7 @@
 
 <span class="comment">// A string of packed 3-ASCII-digit status code values for the supported range
 // of [100, 999] (900 codes, 2700 bytes).
-</span><span class="kw">const </span>CODE_DIGITS: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str = <span class="string">&quot;\
+</span><span class="kw">const </span>CODE_DIGITS: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str = <span class="string">"\
 100101102103104105106107108109110111112113114115116117118119\
 120121122123124125126127128129130131132133134135136137138139\
 140141142143144145146147148149150151152153154155156157158159\
@@ -1173,5 +1173,5 @@
 920921922923924925926927928929930931932933934935936937938939\
 940941942943944945946947948949950951952953954955956957958959\
 960961962963964965966967968969970971972973974975976977978979\
-980981982983984985986987988989990991992993994995996997998999&quot;</span>;
+980981982983984985986987988989990991992993994995996997998999"</span>;
 </code></pre></div></section></main></body></html>

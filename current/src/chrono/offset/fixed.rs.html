@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/chrono-0.4.31/src/offset/fixed.rs`."><title>fixed.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="chrono" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/chrono-0.4.31/src/offset/fixed.rs`."><title>fixed.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="chrono" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -303,7 +303,7 @@
 <span class="kw">use </span>core::ops::{Add, Sub};
 <span class="kw">use </span>core::str::FromStr;
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;rkyv&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"rkyv"</span>)]
 </span><span class="kw">use </span>rkyv::{Archive, Deserialize, Serialize};
 
 <span class="kw">use super</span>::{LocalResult, Offset, TimeZone};
@@ -319,7 +319,7 @@
 /// `DateTime&lt;FixedOffset&gt;` instances. See the [`east_opt`](#method.east_opt) and
 /// [`west_opt`](#method.west_opt) methods for examples.
 </span><span class="attr">#[derive(PartialEq, Eq, Hash, Copy, Clone)]
-#[cfg_attr(feature = <span class="string">&quot;rkyv&quot;</span>, derive(Archive, Deserialize, Serialize))]
+#[cfg_attr(feature = <span class="string">"rkyv"</span>, derive(Archive, Deserialize, Serialize))]
 </span><span class="kw">pub struct </span>FixedOffset {
     local_minus_utc: i32,
 }
@@ -329,10 +329,10 @@
     /// The negative `secs` means the Western Hemisphere.
     ///
     /// Panics on the out-of-bound `secs`.
-    </span><span class="attr">#[deprecated(since = <span class="string">&quot;0.4.23&quot;</span>, note = <span class="string">&quot;use `east_opt()` instead&quot;</span>)]
+    </span><span class="attr">#[deprecated(since = <span class="string">"0.4.23"</span>, note = <span class="string">"use `east_opt()` instead"</span>)]
     #[must_use]
     </span><span class="kw">pub fn </span>east(secs: i32) -&gt; FixedOffset {
-        FixedOffset::east_opt(secs).expect(<span class="string">&quot;FixedOffset::east out of bounds&quot;</span>)
+        FixedOffset::east_opt(secs).expect(<span class="string">"FixedOffset::east out of bounds"</span>)
     }
 
     <span class="doccomment">/// Makes a new `FixedOffset` for the Eastern Hemisphere with given timezone difference.
@@ -342,15 +342,15 @@
     ///
     /// # Example
     ///
-    </span><span class="attr">#[cfg_attr(not(feature = <span class="string">&quot;std&quot;</span>), doc = <span class="string">&quot;```ignore&quot;</span>)]
-    #[cfg_attr(feature = <span class="string">&quot;std&quot;</span>, doc = <span class="string">&quot;```&quot;</span>)]
+    </span><span class="attr">#[cfg_attr(not(feature = <span class="string">"std"</span>), doc = <span class="string">"```ignore"</span>)]
+    #[cfg_attr(feature = <span class="string">"std"</span>, doc = <span class="string">"```"</span>)]
     </span><span class="doccomment">/// use chrono::{FixedOffset, TimeZone};
     /// let hour = 3600;
     /// let datetime = FixedOffset::east_opt(5 * hour)
     ///     .unwrap()
     ///     .with_ymd_and_hms(2016, 11, 08, 0, 0, 0)
     ///     .unwrap();
-    /// assert_eq!(&amp;datetime.to_rfc3339(), &quot;2016-11-08T00:00:00+05:00&quot;)
+    /// assert_eq!(&amp;datetime.to_rfc3339(), "2016-11-08T00:00:00+05:00")
     /// ```
     </span><span class="attr">#[must_use]
     </span><span class="kw">pub const fn </span>east_opt(secs: i32) -&gt; <span class="prelude-ty">Option</span>&lt;FixedOffset&gt; {
@@ -365,10 +365,10 @@
     /// The negative `secs` means the Eastern Hemisphere.
     ///
     /// Panics on the out-of-bound `secs`.
-    </span><span class="attr">#[deprecated(since = <span class="string">&quot;0.4.23&quot;</span>, note = <span class="string">&quot;use `west_opt()` instead&quot;</span>)]
+    </span><span class="attr">#[deprecated(since = <span class="string">"0.4.23"</span>, note = <span class="string">"use `west_opt()` instead"</span>)]
     #[must_use]
     </span><span class="kw">pub fn </span>west(secs: i32) -&gt; FixedOffset {
-        FixedOffset::west_opt(secs).expect(<span class="string">&quot;FixedOffset::west out of bounds&quot;</span>)
+        FixedOffset::west_opt(secs).expect(<span class="string">"FixedOffset::west out of bounds"</span>)
     }
 
     <span class="doccomment">/// Makes a new `FixedOffset` for the Western Hemisphere with given timezone difference.
@@ -378,15 +378,15 @@
     ///
     /// # Example
     ///
-    </span><span class="attr">#[cfg_attr(not(feature = <span class="string">&quot;std&quot;</span>), doc = <span class="string">&quot;```ignore&quot;</span>)]
-    #[cfg_attr(feature = <span class="string">&quot;std&quot;</span>, doc = <span class="string">&quot;```&quot;</span>)]
+    </span><span class="attr">#[cfg_attr(not(feature = <span class="string">"std"</span>), doc = <span class="string">"```ignore"</span>)]
+    #[cfg_attr(feature = <span class="string">"std"</span>, doc = <span class="string">"```"</span>)]
     </span><span class="doccomment">/// use chrono::{FixedOffset, TimeZone};
     /// let hour = 3600;
     /// let datetime = FixedOffset::west_opt(5 * hour)
     ///     .unwrap()
     ///     .with_ymd_and_hms(2016, 11, 08, 0, 0, 0)
     ///     .unwrap();
-    /// assert_eq!(&amp;datetime.to_rfc3339(), &quot;2016-11-08T00:00:00-05:00&quot;)
+    /// assert_eq!(&amp;datetime.to_rfc3339(), "2016-11-08T00:00:00-05:00")
     /// ```
     </span><span class="attr">#[must_use]
     </span><span class="kw">pub const fn </span>west_opt(secs: i32) -&gt; <span class="prelude-ty">Option</span>&lt;FixedOffset&gt; {
@@ -450,15 +450,15 @@
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>FixedOffset {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
         <span class="kw">let </span>offset = <span class="self">self</span>.local_minus_utc;
-        <span class="kw">let </span>(sign, offset) = <span class="kw">if </span>offset &lt; <span class="number">0 </span>{ (<span class="string">&#39;-&#39;</span>, -offset) } <span class="kw">else </span>{ (<span class="string">&#39;+&#39;</span>, offset) };
+        <span class="kw">let </span>(sign, offset) = <span class="kw">if </span>offset &lt; <span class="number">0 </span>{ (<span class="string">'-'</span>, -offset) } <span class="kw">else </span>{ (<span class="string">'+'</span>, offset) };
         <span class="kw">let </span>sec = offset.rem_euclid(<span class="number">60</span>);
         <span class="kw">let </span>mins = offset.div_euclid(<span class="number">60</span>);
         <span class="kw">let </span>min = mins.rem_euclid(<span class="number">60</span>);
         <span class="kw">let </span>hour = mins.div_euclid(<span class="number">60</span>);
         <span class="kw">if </span>sec == <span class="number">0 </span>{
-            <span class="macro">write!</span>(f, <span class="string">&quot;{}{:02}:{:02}&quot;</span>, sign, hour, min)
+            <span class="macro">write!</span>(f, <span class="string">"{}{:02}:{:02}"</span>, sign, hour, min)
         } <span class="kw">else </span>{
-            <span class="macro">write!</span>(f, <span class="string">&quot;{}{:02}:{:02}:{:02}&quot;</span>, sign, hour, min, sec)
+            <span class="macro">write!</span>(f, <span class="string">"{}{:02}:{:02}:{:02}"</span>, sign, hour, min, sec)
         }
     }
 }
@@ -469,18 +469,18 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;arbitrary&quot;</span>)]
-</span><span class="kw">impl </span>arbitrary::Arbitrary&lt;<span class="lifetime">&#39;_</span>&gt; <span class="kw">for </span>FixedOffset {
+<span class="attr">#[cfg(feature = <span class="string">"arbitrary"</span>)]
+</span><span class="kw">impl </span>arbitrary::Arbitrary&lt;<span class="lifetime">'_</span>&gt; <span class="kw">for </span>FixedOffset {
     <span class="kw">fn </span>arbitrary(u: <span class="kw-2">&amp;mut </span>arbitrary::Unstructured) -&gt; arbitrary::Result&lt;FixedOffset&gt; {
         <span class="kw">let </span>secs = u.int_in_range(-<span class="number">86_399</span>..=<span class="number">86_399</span>)<span class="question-mark">?</span>;
         <span class="kw">let </span>fixed_offset = FixedOffset::east_opt(secs)
-            .expect(<span class="string">&quot;Could not generate a valid chrono::FixedOffset. It looks like implementation of Arbitrary for FixedOffset is erroneous.&quot;</span>);
+            .expect(<span class="string">"Could not generate a valid chrono::FixedOffset. It looks like implementation of Arbitrary for FixedOffset is erroneous."</span>);
         <span class="prelude-val">Ok</span>(fixed_offset)
     }
 }
 
 <span class="comment">// addition or subtraction of FixedOffset to/from Timelike values is the same as
-// adding or subtracting the offset&#39;s local_minus_utc value
+// adding or subtracting the offset's local_minus_utc value
 // but keep keeps the leap second information.
 // this should be implemented more efficiently, but for the time being, this is generic right now.
 
@@ -556,37 +556,37 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_date_extreme_offset() {
-        <span class="comment">// starting from 0.3 we don&#39;t have an offset exceeding one day.
+        <span class="comment">// starting from 0.3 we don't have an offset exceeding one day.
         // this makes everything easier!
         </span><span class="kw">let </span>offset = FixedOffset::east_opt(<span class="number">86399</span>).unwrap();
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, offset.with_ymd_and_hms(<span class="number">2012</span>, <span class="number">2</span>, <span class="number">29</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>).unwrap()),
-            <span class="string">&quot;2012-02-29T05:06:07+23:59:59&quot;
+            <span class="macro">format!</span>(<span class="string">"{:?}"</span>, offset.with_ymd_and_hms(<span class="number">2012</span>, <span class="number">2</span>, <span class="number">29</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>).unwrap()),
+            <span class="string">"2012-02-29T05:06:07+23:59:59"
         </span>);
         <span class="kw">let </span>offset = FixedOffset::east_opt(-<span class="number">86399</span>).unwrap();
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, offset.with_ymd_and_hms(<span class="number">2012</span>, <span class="number">2</span>, <span class="number">29</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>).unwrap()),
-            <span class="string">&quot;2012-02-29T05:06:07-23:59:59&quot;
+            <span class="macro">format!</span>(<span class="string">"{:?}"</span>, offset.with_ymd_and_hms(<span class="number">2012</span>, <span class="number">2</span>, <span class="number">29</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>).unwrap()),
+            <span class="string">"2012-02-29T05:06:07-23:59:59"
         </span>);
         <span class="kw">let </span>offset = FixedOffset::west_opt(<span class="number">86399</span>).unwrap();
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, offset.with_ymd_and_hms(<span class="number">2012</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>).unwrap()),
-            <span class="string">&quot;2012-03-04T05:06:07-23:59:59&quot;
+            <span class="macro">format!</span>(<span class="string">"{:?}"</span>, offset.with_ymd_and_hms(<span class="number">2012</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>).unwrap()),
+            <span class="string">"2012-03-04T05:06:07-23:59:59"
         </span>);
         <span class="kw">let </span>offset = FixedOffset::west_opt(-<span class="number">86399</span>).unwrap();
         <span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, offset.with_ymd_and_hms(<span class="number">2012</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>).unwrap()),
-            <span class="string">&quot;2012-03-04T05:06:07+23:59:59&quot;
+            <span class="macro">format!</span>(<span class="string">"{:?}"</span>, offset.with_ymd_and_hms(<span class="number">2012</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>).unwrap()),
+            <span class="string">"2012-03-04T05:06:07+23:59:59"
         </span>);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_parse_offset() {
-        <span class="kw">let </span>offset = FixedOffset::from_str(<span class="string">&quot;-0500&quot;</span>).unwrap();
+        <span class="kw">let </span>offset = FixedOffset::from_str(<span class="string">"-0500"</span>).unwrap();
         <span class="macro">assert_eq!</span>(offset.local_minus_utc, -<span class="number">5 </span>* <span class="number">3600</span>);
-        <span class="kw">let </span>offset = FixedOffset::from_str(<span class="string">&quot;-08:00&quot;</span>).unwrap();
+        <span class="kw">let </span>offset = FixedOffset::from_str(<span class="string">"-08:00"</span>).unwrap();
         <span class="macro">assert_eq!</span>(offset.local_minus_utc, -<span class="number">8 </span>* <span class="number">3600</span>);
-        <span class="kw">let </span>offset = FixedOffset::from_str(<span class="string">&quot;+06:30&quot;</span>).unwrap();
+        <span class="kw">let </span>offset = FixedOffset::from_str(<span class="string">"+06:30"</span>).unwrap();
         <span class="macro">assert_eq!</span>(offset.local_minus_utc, (<span class="number">6 </span>* <span class="number">3600</span>) + <span class="number">1800</span>);
     }
 }

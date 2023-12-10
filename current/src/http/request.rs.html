@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/http-0.2.11/src/request.rs`."><title>request.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="http" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/http-0.2.11/src/request.rs`."><title>request.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="http" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1089,7 +1089,7 @@
 //!
 //! This module contains structs related to HTTP requests, notably the
 //! `Request` type itself as well as a builder to create requests. Typically
-//! you&#39;ll import the `http::Request` type rather than reaching into this
+//! you'll import the `http::Request` type rather than reaching into this
 //! module itself.
 //!
 //! # Examples
@@ -1100,11 +1100,11 @@
 //! use http::{Request, Response};
 //!
 //! let mut request = Request::builder()
-//!     .uri(&quot;https://www.rust-lang.org/&quot;)
-//!     .header(&quot;User-Agent&quot;, &quot;my-awesome-agent/1.0&quot;);
+//!     .uri("https://www.rust-lang.org/")
+//!     .header("User-Agent", "my-awesome-agent/1.0");
 //!
 //! if needs_awesome_header() {
-//!     request = request.header(&quot;Awesome&quot;, &quot;yes&quot;);
+//!     request = request.header("Awesome", "yes");
 //! }
 //!
 //! let response = send(request.body(()).unwrap());
@@ -1125,13 +1125,13 @@
 //! use http::{Request, Response, StatusCode};
 //!
 //! fn respond_to(req: Request&lt;()&gt;) -&gt; http::Result&lt;Response&lt;()&gt;&gt; {
-//!     if req.uri() != &quot;/awesome-url&quot; {
+//!     if req.uri() != "/awesome-url" {
 //!         return Response::builder()
 //!             .status(StatusCode::NOT_FOUND)
 //!             .body(())
 //!     }
 //!
-//!     let has_awesome_header = req.headers().contains_key(&quot;Awesome&quot;);
+//!     let has_awesome_header = req.headers().contains_key("Awesome");
 //!     let body = req.body();
 //!
 //!     // ...
@@ -1163,11 +1163,11 @@
 /// use http::{Request, Response};
 ///
 /// let mut request = Request::builder()
-///     .uri(&quot;https://www.rust-lang.org/&quot;)
-///     .header(&quot;User-Agent&quot;, &quot;my-awesome-agent/1.0&quot;);
+///     .uri("https://www.rust-lang.org/")
+///     .header("User-Agent", "my-awesome-agent/1.0");
 ///
 /// if needs_awesome_header() {
-///     request = request.header(&quot;Awesome&quot;, &quot;yes&quot;);
+///     request = request.header("Awesome", "yes");
 /// }
 ///
 /// let response = send(request.body(()).unwrap());
@@ -1188,13 +1188,13 @@
 /// use http::{Request, Response, StatusCode};
 ///
 /// fn respond_to(req: Request&lt;()&gt;) -&gt; http::Result&lt;Response&lt;()&gt;&gt; {
-///     if req.uri() != &quot;/awesome-url&quot; {
+///     if req.uri() != "/awesome-url" {
 ///         return Response::builder()
 ///             .status(StatusCode::NOT_FOUND)
 ///             .body(())
 ///     }
 ///
-///     let has_awesome_header = req.headers().contains_key(&quot;Awesome&quot;);
+///     let has_awesome_header = req.headers().contains_key("Awesome");
 ///     let body = req.body();
 ///
 ///     // ...
@@ -1212,7 +1212,7 @@
 /// use serde::de;
 ///
 /// fn deserialize&lt;T&gt;(req: Request&lt;Vec&lt;u8&gt;&gt;) -&gt; serde_json::Result&lt;Request&lt;T&gt;&gt;
-///     where for&lt;&#39;de&gt; T: de::Deserialize&lt;&#39;de&gt;,
+///     where for&lt;'de&gt; T: de::Deserialize&lt;'de&gt;,
 /// {
 ///     let (parts, body) = req.into_parts();
 ///     let body = serde_json::from_slice(&amp;body)?;
@@ -1251,19 +1251,19 @@
 /// The HTTP request head consists of a method, uri, version, and a set of
 /// header fields.
 </span><span class="kw">pub struct </span>Parts {
-    <span class="doccomment">/// The request&#39;s method
+    <span class="doccomment">/// The request's method
     </span><span class="kw">pub </span>method: Method,
 
-    <span class="doccomment">/// The request&#39;s URI
+    <span class="doccomment">/// The request's URI
     </span><span class="kw">pub </span>uri: Uri,
 
-    <span class="doccomment">/// The request&#39;s version
+    <span class="doccomment">/// The request's version
     </span><span class="kw">pub </span>version: Version,
 
-    <span class="doccomment">/// The request&#39;s headers
+    <span class="doccomment">/// The request's headers
     </span><span class="kw">pub </span>headers: HeaderMap&lt;HeaderValue&gt;,
 
-    <span class="doccomment">/// The request&#39;s extensions
+    <span class="doccomment">/// The request's extensions
     </span><span class="kw">pub </span>extensions: Extensions,
 
     _priv: (),
@@ -1289,9 +1289,9 @@
     /// ```
     /// # use http::*;
     /// let request = Request::builder()
-    ///     .method(&quot;GET&quot;)
-    ///     .uri(&quot;https://www.rust-lang.org/&quot;)
-    ///     .header(&quot;X-Custom-Foo&quot;, &quot;Bar&quot;)
+    ///     .method("GET")
+    ///     .uri("https://www.rust-lang.org/")
+    ///     .header("X-Custom-Foo", "Bar")
     ///     .body(())
     ///     .unwrap();
     /// ```
@@ -1310,7 +1310,7 @@
     /// ```
     /// # use http::*;
     ///
-    /// let request = Request::get(&quot;https://www.rust-lang.org/&quot;)
+    /// let request = Request::get("https://www.rust-lang.org/")
     ///     .body(())
     ///     .unwrap();
     /// ```
@@ -1333,7 +1333,7 @@
     /// ```
     /// # use http::*;
     ///
-    /// let request = Request::put(&quot;https://www.rust-lang.org/&quot;)
+    /// let request = Request::put("https://www.rust-lang.org/")
     ///     .body(())
     ///     .unwrap();
     /// ```
@@ -1356,7 +1356,7 @@
     /// ```
     /// # use http::*;
     ///
-    /// let request = Request::post(&quot;https://www.rust-lang.org/&quot;)
+    /// let request = Request::post("https://www.rust-lang.org/")
     ///     .body(())
     ///     .unwrap();
     /// ```
@@ -1379,7 +1379,7 @@
     /// ```
     /// # use http::*;
     ///
-    /// let request = Request::delete(&quot;https://www.rust-lang.org/&quot;)
+    /// let request = Request::delete("https://www.rust-lang.org/")
     ///     .body(())
     ///     .unwrap();
     /// ```
@@ -1402,7 +1402,7 @@
     /// ```
     /// # use http::*;
     ///
-    /// let request = Request::options(&quot;https://www.rust-lang.org/&quot;)
+    /// let request = Request::options("https://www.rust-lang.org/")
     ///     .body(())
     ///     .unwrap();
     /// # assert_eq!(*request.method(), Method::OPTIONS);
@@ -1426,7 +1426,7 @@
     /// ```
     /// # use http::*;
     ///
-    /// let request = Request::head(&quot;https://www.rust-lang.org/&quot;)
+    /// let request = Request::head("https://www.rust-lang.org/")
     ///     .body(())
     ///     .unwrap();
     /// ```
@@ -1449,7 +1449,7 @@
     /// ```
     /// # use http::*;
     ///
-    /// let request = Request::connect(&quot;https://www.rust-lang.org/&quot;)
+    /// let request = Request::connect("https://www.rust-lang.org/")
     ///     .body(())
     ///     .unwrap();
     /// ```
@@ -1472,7 +1472,7 @@
     /// ```
     /// # use http::*;
     ///
-    /// let request = Request::patch(&quot;https://www.rust-lang.org/&quot;)
+    /// let request = Request::patch("https://www.rust-lang.org/")
     ///     .body(())
     ///     .unwrap();
     /// ```
@@ -1494,7 +1494,7 @@
     /// ```
     /// # use http::*;
     ///
-    /// let request = Request::trace(&quot;https://www.rust-lang.org/&quot;)
+    /// let request = Request::trace("https://www.rust-lang.org/")
     ///     .body(())
     ///     .unwrap();
     /// ```
@@ -1517,10 +1517,10 @@
     ///
     /// ```
     /// # use http::*;
-    /// let request = Request::new(&quot;hello world&quot;);
+    /// let request = Request::new("hello world");
     ///
     /// assert_eq!(*request.method(), Method::GET);
-    /// assert_eq!(*request.body(), &quot;hello world&quot;);
+    /// assert_eq!(*request.body(), "hello world");
     /// ```
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>new(body: T) -&gt; Request&lt;T&gt; {
@@ -1536,7 +1536,7 @@
     ///
     /// ```
     /// # use http::*;
-    /// let request = Request::new(&quot;hello world&quot;);
+    /// let request = Request::new("hello world");
     /// let (mut parts, body) = request.into_parts();
     /// parts.method = Method::POST;
     ///
@@ -1586,7 +1586,7 @@
     /// ```
     /// # use http::*;
     /// let request: Request&lt;()&gt; = Request::default();
-    /// assert_eq!(*request.uri(), *&quot;/&quot;);
+    /// assert_eq!(*request.uri(), *"/");
     /// ```
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>uri(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Uri {
@@ -1600,8 +1600,8 @@
     /// ```
     /// # use http::*;
     /// let mut request: Request&lt;()&gt; = Request::default();
-    /// *request.uri_mut() = &quot;/hello&quot;.parse().unwrap();
-    /// assert_eq!(*request.uri(), *&quot;/hello&quot;);
+    /// *request.uri_mut() = "/hello".parse().unwrap();
+    /// assert_eq!(*request.uri(), *"/hello");
     /// ```
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>uri_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>Uri {
@@ -1659,7 +1659,7 @@
     /// # use http::*;
     /// # use http::header::*;
     /// let mut request: Request&lt;()&gt; = Request::default();
-    /// request.headers_mut().insert(HOST, HeaderValue::from_static(&quot;world&quot;));
+    /// request.headers_mut().insert(HOST, HeaderValue::from_static("world"));
     /// assert!(!request.headers().is_empty());
     /// ```
     </span><span class="attr">#[inline]
@@ -1689,8 +1689,8 @@
     /// # use http::*;
     /// # use http::header::*;
     /// let mut request: Request&lt;()&gt; = Request::default();
-    /// request.extensions_mut().insert(&quot;hello&quot;);
-    /// assert_eq!(request.extensions().get(), Some(&amp;&quot;hello&quot;));
+    /// request.extensions_mut().insert("hello");
+    /// assert_eq!(request.extensions().get(), Some(&amp;"hello"));
     /// ```
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>extensions_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>Extensions {
@@ -1718,7 +1718,7 @@
     /// ```
     /// # use http::*;
     /// let mut request: Request&lt;String&gt; = Request::default();
-    /// request.body_mut().push_str(&quot;hello world&quot;);
+    /// request.body_mut().push_str("hello world");
     /// assert!(!request.body().is_empty());
     /// ```
     </span><span class="attr">#[inline]
@@ -1763,12 +1763,12 @@
     ///
     /// ```
     /// # use http::*;
-    /// let request = Request::builder().body(&quot;some string&quot;).unwrap();
+    /// let request = Request::builder().body("some string").unwrap();
     /// let mapped_request: Request&lt;&amp;[u8]&gt; = request.map(|b| {
-    ///   assert_eq!(b, &quot;some string&quot;);
+    ///   assert_eq!(b, "some string");
     ///   b.as_bytes()
     /// });
-    /// assert_eq!(mapped_request.body(), &amp;&quot;some string&quot;.as_bytes());
+    /// assert_eq!(mapped_request.body(), &amp;"some string".as_bytes());
     /// ```
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>map&lt;F, U&gt;(<span class="self">self</span>, f: F) -&gt; Request&lt;U&gt;
@@ -1789,14 +1789,14 @@
 }
 
 <span class="kw">impl</span>&lt;T: fmt::Debug&gt; fmt::Debug <span class="kw">for </span>Request&lt;T&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        f.debug_struct(<span class="string">&quot;Request&quot;</span>)
-            .field(<span class="string">&quot;method&quot;</span>, <span class="self">self</span>.method())
-            .field(<span class="string">&quot;uri&quot;</span>, <span class="self">self</span>.uri())
-            .field(<span class="string">&quot;version&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.version())
-            .field(<span class="string">&quot;headers&quot;</span>, <span class="self">self</span>.headers())
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        f.debug_struct(<span class="string">"Request"</span>)
+            .field(<span class="string">"method"</span>, <span class="self">self</span>.method())
+            .field(<span class="string">"uri"</span>, <span class="self">self</span>.uri())
+            .field(<span class="string">"version"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.version())
+            .field(<span class="string">"headers"</span>, <span class="self">self</span>.headers())
             <span class="comment">// omits Extensions because not useful
-            </span>.field(<span class="string">&quot;body&quot;</span>, <span class="self">self</span>.body())
+            </span>.field(<span class="string">"body"</span>, <span class="self">self</span>.body())
             .finish()
     }
 }
@@ -1816,12 +1816,12 @@
 }
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>Parts {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        f.debug_struct(<span class="string">&quot;Parts&quot;</span>)
-            .field(<span class="string">&quot;method&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.method)
-            .field(<span class="string">&quot;uri&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.uri)
-            .field(<span class="string">&quot;version&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.version)
-            .field(<span class="string">&quot;headers&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.headers)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        f.debug_struct(<span class="string">"Parts"</span>)
+            .field(<span class="string">"method"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.method)
+            .field(<span class="string">"uri"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.uri)
+            .field(<span class="string">"version"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.version)
+            .field(<span class="string">"headers"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.headers)
             <span class="comment">// omits Extensions because not useful
             // omits _priv because not useful
             </span>.finish()
@@ -1837,7 +1837,7 @@
     /// # use http::*;
     ///
     /// let req = request::Builder::new()
-    ///     .method(&quot;POST&quot;)
+    ///     .method("POST")
     ///     .body(())
     ///     .unwrap();
     /// ```
@@ -1856,7 +1856,7 @@
     /// # use http::*;
     ///
     /// let req = Request::builder()
-    ///     .method(&quot;POST&quot;)
+    ///     .method("POST")
     ///     .body(())
     ///     .unwrap();
     /// ```
@@ -1884,7 +1884,7 @@
     /// let mut req = Request::builder();
     /// assert_eq!(req.method_ref(),Some(&amp;Method::GET));
     ///
-    /// req = req.method(&quot;POST&quot;);
+    /// req = req.method("POST");
     /// assert_eq!(req.method_ref(),Some(&amp;Method::POST));
     /// ```
     </span><span class="kw">pub fn </span>method_ref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>Method&gt; {
@@ -1901,7 +1901,7 @@
     /// # use http::*;
     ///
     /// let req = Request::builder()
-    ///     .uri(&quot;https://www.rust-lang.org/&quot;)
+    ///     .uri("https://www.rust-lang.org/")
     ///     .body(())
     ///     .unwrap();
     /// ```
@@ -1926,10 +1926,10 @@
     /// # use http::*;
     ///
     /// let mut req = Request::builder();
-    /// assert_eq!(req.uri_ref().unwrap(), &quot;/&quot; );
+    /// assert_eq!(req.uri_ref().unwrap(), "/" );
     ///
-    /// req = req.uri(&quot;https://www.rust-lang.org/&quot;);
-    /// assert_eq!(req.uri_ref().unwrap(), &quot;https://www.rust-lang.org/&quot; );
+    /// req = req.uri("https://www.rust-lang.org/");
+    /// assert_eq!(req.uri_ref().unwrap(), "https://www.rust-lang.org/" );
     /// ```
     </span><span class="kw">pub fn </span>uri_ref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>Uri&gt; {
         <span class="self">self</span>.inner.as_ref().ok().map(|h| <span class="kw-2">&amp;</span>h.uri)
@@ -1988,8 +1988,8 @@
     /// # use http::header::HeaderValue;
     ///
     /// let req = Request::builder()
-    ///     .header(&quot;Accept&quot;, &quot;text/html&quot;)
-    ///     .header(&quot;X-Custom-Foo&quot;, &quot;bar&quot;)
+    ///     .header("Accept", "text/html")
+    ///     .header("X-Custom-Foo", "bar")
     ///     .body(())
     ///     .unwrap();
     /// ```
@@ -2016,11 +2016,11 @@
     /// ```
     /// # use http::Request;
     /// let req = Request::builder()
-    ///     .header(&quot;Accept&quot;, &quot;text/html&quot;)
-    ///     .header(&quot;X-Custom-Foo&quot;, &quot;bar&quot;);
+    ///     .header("Accept", "text/html")
+    ///     .header("X-Custom-Foo", "bar");
     /// let headers = req.headers_ref().unwrap();
-    /// assert_eq!( headers[&quot;Accept&quot;], &quot;text/html&quot; );
-    /// assert_eq!( headers[&quot;X-Custom-Foo&quot;], &quot;bar&quot; );
+    /// assert_eq!( headers["Accept"], "text/html" );
+    /// assert_eq!( headers["X-Custom-Foo"], "bar" );
     /// ```
     </span><span class="kw">pub fn </span>headers_ref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>HeaderMap&lt;HeaderValue&gt;&gt; {
         <span class="self">self</span>.inner.as_ref().ok().map(|h| <span class="kw-2">&amp;</span>h.headers)
@@ -2037,12 +2037,12 @@
     /// let mut req = Request::builder();
     /// {
     ///   let headers = req.headers_mut().unwrap();
-    ///   headers.insert(&quot;Accept&quot;, HeaderValue::from_static(&quot;text/html&quot;));
-    ///   headers.insert(&quot;X-Custom-Foo&quot;, HeaderValue::from_static(&quot;bar&quot;));
+    ///   headers.insert("Accept", HeaderValue::from_static("text/html"));
+    ///   headers.insert("X-Custom-Foo", HeaderValue::from_static("bar"));
     /// }
     /// let headers = req.headers_ref().unwrap();
-    /// assert_eq!( headers[&quot;Accept&quot;], &quot;text/html&quot; );
-    /// assert_eq!( headers[&quot;X-Custom-Foo&quot;], &quot;bar&quot; );
+    /// assert_eq!( headers["Accept"], "text/html" );
+    /// assert_eq!( headers["X-Custom-Foo"], "bar" );
     /// ```
     </span><span class="kw">pub fn </span>headers_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>HeaderMap&lt;HeaderValue&gt;&gt; {
         <span class="self">self</span>.inner.as_mut().ok().map(|h| <span class="kw-2">&amp;mut </span>h.headers)
@@ -2056,16 +2056,16 @@
     /// # use http::*;
     ///
     /// let req = Request::builder()
-    ///     .extension(&quot;My Extension&quot;)
+    ///     .extension("My Extension")
     ///     .body(())
     ///     .unwrap();
     ///
-    /// assert_eq!(req.extensions().get::&lt;&amp;&#39;static str&gt;(),
-    ///            Some(&amp;&quot;My Extension&quot;));
+    /// assert_eq!(req.extensions().get::&lt;&amp;'static str&gt;(),
+    ///            Some(&amp;"My Extension"));
     /// ```
     </span><span class="kw">pub fn </span>extension&lt;T&gt;(<span class="self">self</span>, extension: T) -&gt; Builder
     <span class="kw">where
-        </span>T: Any + Send + Sync + <span class="lifetime">&#39;static</span>,
+        </span>T: Any + Send + Sync + <span class="lifetime">'static</span>,
     {
         <span class="self">self</span>.and_then(<span class="kw">move </span>|<span class="kw-2">mut </span>head| {
             head.extensions.insert(extension);
@@ -2081,9 +2081,9 @@
     ///
     /// ```
     /// # use http::Request;
-    /// let req = Request::builder().extension(&quot;My Extension&quot;).extension(5u32);
+    /// let req = Request::builder().extension("My Extension").extension(5u32);
     /// let extensions = req.extensions_ref().unwrap();
-    /// assert_eq!(extensions.get::&lt;&amp;&#39;static str&gt;(), Some(&amp;&quot;My Extension&quot;));
+    /// assert_eq!(extensions.get::&lt;&amp;'static str&gt;(), Some(&amp;"My Extension"));
     /// assert_eq!(extensions.get::&lt;u32&gt;(), Some(&amp;5u32));
     /// ```
     </span><span class="kw">pub fn </span>extensions_ref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>Extensions&gt; {
@@ -2098,9 +2098,9 @@
     ///
     /// ```
     /// # use http::Request;
-    /// let mut req = Request::builder().extension(&quot;My Extension&quot;);
+    /// let mut req = Request::builder().extension("My Extension");
     /// let mut extensions = req.extensions_mut().unwrap();
-    /// assert_eq!(extensions.get::&lt;&amp;&#39;static str&gt;(), Some(&amp;&quot;My Extension&quot;));
+    /// assert_eq!(extensions.get::&lt;&amp;'static str&gt;(), Some(&amp;"My Extension"));
     /// extensions.insert(5u32);
     /// assert_eq!(extensions.get::&lt;u32&gt;(), Some(&amp;5u32));
     /// ```
@@ -2108,15 +2108,15 @@
         <span class="self">self</span>.inner.as_mut().ok().map(|h| <span class="kw-2">&amp;mut </span>h.extensions)
     }
 
-    <span class="doccomment">/// &quot;Consumes&quot; this builder, using the provided `body` to return a
+    <span class="doccomment">/// "Consumes" this builder, using the provided `body` to return a
     /// constructed `Request`.
     ///
     /// # Errors
     ///
     /// This function may return an error if any previously configured argument
     /// failed to parse or get converted to the internal representation. For
-    /// example if an invalid `head` was specified via `header(&quot;Foo&quot;,
-    /// &quot;Bar\r\n&quot;)` the error will be returned when this function is called
+    /// example if an invalid `head` was specified via `header("Foo",
+    /// "Bar\r\n")` the error will be returned when this function is called
     /// rather than when `header` was called.
     ///
     /// # Examples
@@ -2164,9 +2164,9 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>it_can_map_a_body_from_one_type_to_another() {
-        <span class="kw">let </span>request = Request::builder().body(<span class="string">&quot;some string&quot;</span>).unwrap();
+        <span class="kw">let </span>request = Request::builder().body(<span class="string">"some string"</span>).unwrap();
         <span class="kw">let </span>mapped_request = request.map(|s| {
-            <span class="macro">assert_eq!</span>(s, <span class="string">&quot;some string&quot;</span>);
+            <span class="macro">assert_eq!</span>(s, <span class="string">"some string"</span>);
             <span class="number">123u32
         </span>});
         <span class="macro">assert_eq!</span>(mapped_request.body(), <span class="kw-2">&amp;</span><span class="number">123u32</span>);

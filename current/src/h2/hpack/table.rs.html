@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/h2-0.3.22/src/hpack/table.rs`."><title>table.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="h2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/h2-0.3.22/src/hpack/table.rs`."><title>table.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="h2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -872,7 +872,7 @@
     }
 
     <span class="doccomment">/// Gets the header stored in the table
-    </span><span class="kw">pub fn </span>resolve&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>, index: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Index) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Header {
+    </span><span class="kw">pub fn </span>resolve&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>, index: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Index) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Header {
         <span class="kw">use </span><span class="self">self</span>::Index::<span class="kw-2">*</span>;
 
         <span class="kw">match </span><span class="kw-2">*</span>index {
@@ -892,7 +892,7 @@
             Name(idx, ..) =&gt; idx,
             Inserted(idx) =&gt; idx + DYN_OFFSET,
             InsertedValue(_name_idx, slot_idx) =&gt; slot_idx + DYN_OFFSET,
-            NotIndexed(<span class="kw">_</span>) =&gt; <span class="macro">panic!</span>(<span class="string">&quot;cannot resolve index&quot;</span>),
+            NotIndexed(<span class="kw">_</span>) =&gt; <span class="macro">panic!</span>(<span class="string">"cannot resolve index"</span>),
         }
     }
 
@@ -901,12 +901,12 @@
         <span class="comment">// Check the static table
         </span><span class="kw">let </span>statik = index_static(<span class="kw-2">&amp;</span>header);
 
-        <span class="comment">// Don&#39;t index certain headers. This logic is borrowed from nghttp2.
+        <span class="comment">// Don't index certain headers. This logic is borrowed from nghttp2.
         </span><span class="kw">if </span>header.skip_value_index() {
             <span class="comment">// Right now, if this is true, the header name is always in the
             // static table. At some point in the future, this might not be true
             // and this logic will need to be updated.
-            </span><span class="macro">debug_assert!</span>(statik.is_some(), <span class="string">&quot;skip_value_index requires a static name&quot;</span>,);
+            </span><span class="macro">debug_assert!</span>(statik.is_some(), <span class="string">"skip_value_index requires a static name"</span>,);
             <span class="kw">return </span>Index::new(statik, header);
         }
 
@@ -915,7 +915,7 @@
             <span class="kw">return </span>Index::Indexed(n, header);
         }
 
-        <span class="comment">// Don&#39;t index large headers
+        <span class="comment">// Don't index large headers
         </span><span class="kw">if </span>header.len() * <span class="number">4 </span>&gt; <span class="self">self</span>.max_size * <span class="number">3 </span>{
             <span class="kw">return </span>Index::new(statik, header);
         }
@@ -924,7 +924,7 @@
     }
 
     <span class="kw">fn </span>index_dynamic(<span class="kw-2">&amp;mut </span><span class="self">self</span>, header: Header, statik: <span class="prelude-ty">Option</span>&lt;(usize, bool)&gt;) -&gt; Index {
-        <span class="macro">debug_assert!</span>(<span class="self">self</span>.assert_valid_state(<span class="string">&quot;one&quot;</span>));
+        <span class="macro">debug_assert!</span>(<span class="self">self</span>.assert_valid_state(<span class="string">"one"</span>));
 
         <span class="kw">if </span>header.len() + <span class="self">self</span>.size &lt; <span class="self">self</span>.max_size || !header.is_sensitive() {
             <span class="comment">// Only grow internal storage if needed
@@ -975,7 +975,7 @@
         <span class="kw-2">mut </span>index: usize,
         statik: <span class="prelude-ty">Option</span>&lt;usize&gt;,
     ) -&gt; Index {
-        <span class="macro">debug_assert!</span>(<span class="self">self</span>.assert_valid_state(<span class="string">&quot;top&quot;</span>));
+        <span class="macro">debug_assert!</span>(<span class="self">self</span>.assert_valid_state(<span class="string">"top"</span>));
 
         <span class="comment">// There already is a match for the given header name. Check if a value
         // matches. The header will also only be inserted if the table is not at
@@ -1016,7 +1016,7 @@
                 <span class="self">self</span>.slots[new_real_idx].next = <span class="prelude-val">Some</span>(idx);
             }
 
-            <span class="macro">debug_assert!</span>(<span class="self">self</span>.assert_valid_state(<span class="string">&quot;bottom&quot;</span>));
+            <span class="macro">debug_assert!</span>(<span class="self">self</span>.assert_valid_state(<span class="string">"bottom"</span>));
 
             <span class="comment">// Even if the previous header was evicted, we can still reference
             // it when inserting the new one...
@@ -1041,7 +1041,7 @@
             <span class="kw">return </span>Index::new(statik, header);
         }
 
-        <span class="macro">debug_assert!</span>(<span class="self">self</span>.assert_valid_state(<span class="string">&quot;top&quot;</span>));
+        <span class="macro">debug_assert!</span>(<span class="self">self</span>.assert_valid_state(<span class="string">"top"</span>));
         <span class="macro">debug_assert!</span>(dist == <span class="number">0 </span>|| <span class="self">self</span>.indices[probe.wrapping_sub(<span class="number">1</span>) &amp; <span class="self">self</span>.mask].is_some());
 
         <span class="comment">// Passing in `usize::MAX` for prev_idx since there is no previous
@@ -1066,7 +1066,7 @@
             }
         }
 
-        <span class="macro">debug_assert!</span>(<span class="self">self</span>.assert_valid_state(<span class="string">&quot;after update&quot;</span>));
+        <span class="macro">debug_assert!</span>(<span class="self">self</span>.assert_valid_state(<span class="string">"after update"</span>));
 
         <span class="self">self</span>.insert(header, hash);
 
@@ -1094,7 +1094,7 @@
             });
         }
 
-        <span class="macro">debug_assert!</span>(<span class="self">self</span>.assert_valid_state(<span class="string">&quot;bottom&quot;</span>));
+        <span class="macro">debug_assert!</span>(<span class="self">self</span>.assert_valid_state(<span class="string">"bottom"</span>));
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>((n, <span class="kw">_</span>)) = statik {
             Index::InsertedValue(n, <span class="number">0</span>)
@@ -1150,7 +1150,7 @@
         <span class="kw">let </span>pos_idx = (<span class="self">self</span>.slots.len() - <span class="number">1</span>).wrapping_sub(<span class="self">self</span>.inserted);
 
         <span class="macro">debug_assert!</span>(!<span class="self">self</span>.slots.is_empty());
-        <span class="macro">debug_assert!</span>(<span class="self">self</span>.assert_valid_state(<span class="string">&quot;one&quot;</span>));
+        <span class="macro">debug_assert!</span>(<span class="self">self</span>.assert_valid_state(<span class="string">"one"</span>));
 
         <span class="comment">// Remove the header
         </span><span class="kw">let </span>slot = <span class="self">self</span>.slots.pop_back().unwrap();
@@ -1190,7 +1190,7 @@
             }
         });
 
-        <span class="macro">debug_assert!</span>(<span class="self">self</span>.assert_valid_state(<span class="string">&quot;two&quot;</span>));
+        <span class="macro">debug_assert!</span>(<span class="self">self</span>.assert_valid_state(<span class="string">"two"</span>));
     }
 
     <span class="comment">// Shifts all indices that were displaced by the header that has just been
@@ -1213,7 +1213,7 @@
             last_probe = probe;
         });
 
-        <span class="macro">debug_assert!</span>(<span class="self">self</span>.assert_valid_state(<span class="string">&quot;two&quot;</span>));
+        <span class="macro">debug_assert!</span>(<span class="self">self</span>.assert_valid_state(<span class="string">"two"</span>));
     }
 
     <span class="kw">fn </span>reserve_one(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
@@ -1236,7 +1236,7 @@
         <span class="comment">// This path can never be reached when handling the first allocation in
         // the map.
 
-        </span><span class="macro">debug_assert!</span>(<span class="self">self</span>.assert_valid_state(<span class="string">&quot;top&quot;</span>));
+        </span><span class="macro">debug_assert!</span>(<span class="self">self</span>.assert_valid_state(<span class="string">"top"</span>));
 
         <span class="comment">// find first ideally placed element -- start of cluster
         </span><span class="kw">let </span><span class="kw-2">mut </span>first_ideal = <span class="number">0</span>;
@@ -1263,7 +1263,7 @@
             <span class="self">self</span>.reinsert_entry_in_order(pos);
         }
 
-        <span class="macro">debug_assert!</span>(<span class="self">self</span>.assert_valid_state(<span class="string">&quot;bottom&quot;</span>));
+        <span class="macro">debug_assert!</span>(<span class="self">self</span>.assert_valid_state(<span class="string">"bottom"</span>));
     }
 
     <span class="kw">fn </span>reinsert_entry_in_order(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos: <span class="prelude-ty">Option</span>&lt;Pos&gt;) {
@@ -1290,12 +1290,12 @@
     }
 
     <span class="attr">#[cfg(not(test))]
-    </span><span class="kw">fn </span>assert_valid_state(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str) -&gt; bool {
+    </span><span class="kw">fn </span>assert_valid_state(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str) -&gt; bool {
         <span class="bool-val">true
     </span>}
 
     <span class="attr">#[cfg(test)]
-    </span><span class="kw">fn </span>assert_valid_state(<span class="kw-2">&amp;</span><span class="self">self</span>, _msg: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str) -&gt; bool {
+    </span><span class="kw">fn </span>assert_valid_state(<span class="kw-2">&amp;</span><span class="self">self</span>, _msg: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str) -&gt; bool {
         <span class="comment">/*
             // Checks that the internal map structure is valid
             //
@@ -1306,11 +1306,11 @@
 
                     if real_idx.wrapping_add(1) != 0 {
                         assert!(real_idx &lt; self.slots.len(),
-                                &quot;out of index; real={}; len={}, msg={}&quot;,
+                                "out of index; real={}; len={}, msg={}",
                                 real_idx, self.slots.len(), msg);
 
                         assert_eq!(pos.hash, self.slots[real_idx].hash,
-                                   &quot;index hash does not match slot; msg={}&quot;, msg);
+                                   "index hash does not match slot; msg={}", msg);
                     }
                 }
             }
@@ -1323,7 +1323,7 @@
 
                 for j in i+1..self.indices.len() {
                     assert_ne!(self.indices[i], self.indices[j],
-                                &quot;duplicate indices; msg={}&quot;, msg);
+                                "duplicate indices; msg={}", msg);
                 }
             }
 
@@ -1350,7 +1350,7 @@
 
                     probe_loop!(probe &lt; self.indices.len(), {
                         assert!(self.indices[probe].is_some(),
-                                &quot;unexpected empty slot; probe={}; hash={:?}; msg={}&quot;,
+                                "unexpected empty slot; probe={}; hash={:?}; msg={}",
                                 probe, slot.hash, msg);
 
                         let pos = self.indices[probe].unwrap();
@@ -1363,8 +1363,8 @@
                         }
 
                         assert!(dist &lt;= their_dist,
-                                &quot;could not find entry; actual={}; desired={}&quot; +
-                                &quot;probe={}, dist={}; their_dist={}; index={}; msg={}&quot;,
+                                "could not find entry; actual={}; desired={}" +
+                                "probe={}, dist={}; their_dist={}; index={}; msg={}",
                                 actual, desired, probe, dist, their_dist,
                                 index.wrapping_sub(self.inserted), msg);
 
@@ -1376,7 +1376,7 @@
                         .filter(|n| *n == Some(index.wrapping_sub(self.inserted)))
                         .count();
 
-                    assert_eq!(1, cnt, &quot;more than one node pointing here; msg={}&quot;, msg);
+                    assert_eq!(1, cnt, "more than one node pointing here; msg={}", msg);
                 }
             }
         */
@@ -1448,7 +1448,7 @@
         } =&gt; <span class="kw">match </span><span class="kw-2">*</span>name {
             header::ACCEPT_CHARSET =&gt; <span class="prelude-val">Some</span>((<span class="number">15</span>, <span class="bool-val">false</span>)),
             header::ACCEPT_ENCODING =&gt; {
-                <span class="kw">if </span>value == <span class="string">&quot;gzip, deflate&quot; </span>{
+                <span class="kw">if </span>value == <span class="string">"gzip, deflate" </span>{
                     <span class="prelude-val">Some</span>((<span class="number">16</span>, <span class="bool-val">true</span>))
                 } <span class="kw">else </span>{
                     <span class="prelude-val">Some</span>((<span class="number">16</span>, <span class="bool-val">false</span>))
@@ -1508,13 +1508,13 @@
             <span class="kw">_ </span>=&gt; <span class="prelude-val">Some</span>((<span class="number">2</span>, <span class="bool-val">false</span>)),
         },
         Header::Scheme(<span class="kw-2">ref </span>v) =&gt; <span class="kw">match </span><span class="kw-2">&amp;**</span>v {
-            <span class="string">&quot;http&quot; </span>=&gt; <span class="prelude-val">Some</span>((<span class="number">6</span>, <span class="bool-val">true</span>)),
-            <span class="string">&quot;https&quot; </span>=&gt; <span class="prelude-val">Some</span>((<span class="number">7</span>, <span class="bool-val">true</span>)),
+            <span class="string">"http" </span>=&gt; <span class="prelude-val">Some</span>((<span class="number">6</span>, <span class="bool-val">true</span>)),
+            <span class="string">"https" </span>=&gt; <span class="prelude-val">Some</span>((<span class="number">7</span>, <span class="bool-val">true</span>)),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">Some</span>((<span class="number">6</span>, <span class="bool-val">false</span>)),
         },
         Header::Path(<span class="kw-2">ref </span>v) =&gt; <span class="kw">match </span><span class="kw-2">&amp;**</span>v {
-            <span class="string">&quot;/&quot; </span>=&gt; <span class="prelude-val">Some</span>((<span class="number">4</span>, <span class="bool-val">true</span>)),
-            <span class="string">&quot;/index.html&quot; </span>=&gt; <span class="prelude-val">Some</span>((<span class="number">5</span>, <span class="bool-val">true</span>)),
+            <span class="string">"/" </span>=&gt; <span class="prelude-val">Some</span>((<span class="number">4</span>, <span class="bool-val">true</span>)),
+            <span class="string">"/index.html" </span>=&gt; <span class="prelude-val">Some</span>((<span class="number">5</span>, <span class="bool-val">true</span>)),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">Some</span>((<span class="number">4</span>, <span class="bool-val">false</span>)),
         },
         Header::Protocol(..) =&gt; <span class="prelude-val">None</span>,

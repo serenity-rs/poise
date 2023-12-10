@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/url-2.5.0/src/host.rs`."><title>host.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="url" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/url-2.5.0/src/host.rs`."><title>host.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="url" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -507,12 +507,12 @@
 <span class="kw">use </span>std::net::{Ipv4Addr, Ipv6Addr};
 
 <span class="kw">use </span>percent_encoding::{percent_decode, utf8_percent_encode, CONTROLS};
-<span class="attr">#[cfg(feature = <span class="string">&quot;serde&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"serde"</span>)]
 </span><span class="kw">use </span>serde::{Deserialize, Serialize};
 
 <span class="kw">use </span><span class="kw">crate</span>::parser::{ParseError, ParseResult};
 
-<span class="attr">#[cfg_attr(feature = <span class="string">&quot;serde&quot;</span>, derive(Deserialize, Serialize))]
+<span class="attr">#[cfg_attr(feature = <span class="string">"serde"</span>, derive(Deserialize, Serialize))]
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">enum </span>HostInternal {
     <span class="prelude-val">None</span>,
@@ -533,10 +533,10 @@
 }
 
 <span class="doccomment">/// The host name of an URL.
-</span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;serde&quot;</span>, derive(Deserialize, Serialize))]
+</span><span class="attr">#[cfg_attr(feature = <span class="string">"serde"</span>, derive(Deserialize, Serialize))]
 #[derive(Clone, Debug, Eq, Ord, PartialOrd, Hash)]
 </span><span class="kw">pub enum </span>Host&lt;S = String&gt; {
-    <span class="doccomment">/// A DNS domain name, as &#39;.&#39; dot-separated labels.
+    <span class="doccomment">/// A DNS domain name, as '.' dot-separated labels.
     /// Non-ASCII labels are encoded in punycode per IDNA if this is the host of
     /// a special URL, or percent encoded for non-special URLs. Hosts for
     /// non-special URLs are also called opaque hosts.
@@ -555,7 +555,7 @@
     </span>Ipv6(Ipv6Addr),
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Host&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Host&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>str&gt; {
     <span class="doccomment">/// Return a copy of `self` that owns an allocated `String` but does not borrow an `&amp;Url`.
     </span><span class="kw">pub fn </span>to_owned(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Host&lt;String&gt; {
         <span class="kw">match </span><span class="kw-2">*</span><span class="self">self </span>{
@@ -571,8 +571,8 @@
     ///
     /// &lt;https://url.spec.whatwg.org/#host-parsing&gt;
     </span><span class="kw">pub fn </span>parse(input: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ParseError&gt; {
-        <span class="kw">if </span>input.starts_with(<span class="string">&#39;[&#39;</span>) {
-            <span class="kw">if </span>!input.ends_with(<span class="string">&#39;]&#39;</span>) {
+        <span class="kw">if </span>input.starts_with(<span class="string">'['</span>) {
+            <span class="kw">if </span>!input.ends_with(<span class="string">']'</span>) {
                 <span class="kw">return </span><span class="prelude-val">Err</span>(ParseError::InvalidIpv6Address);
             }
             <span class="kw">return </span>parse_ipv6addr(<span class="kw-2">&amp;</span>input[<span class="number">1</span>..input.len() - <span class="number">1</span>]).map(Host::Ipv6);
@@ -588,22 +588,22 @@
         <span class="kw">let </span>is_invalid_domain_char = |c| {
             <span class="macro">matches!</span>(
                 c,
-                <span class="string">&#39;\0&#39;</span>..=<span class="string">&#39;\u{001F}&#39;
-                    </span>| <span class="string">&#39; &#39;
-                    </span>| <span class="string">&#39;#&#39;
-                    </span>| <span class="string">&#39;%&#39;
-                    </span>| <span class="string">&#39;/&#39;
-                    </span>| <span class="string">&#39;:&#39;
-                    </span>| <span class="string">&#39;&lt;&#39;
-                    </span>| <span class="string">&#39;&gt;&#39;
-                    </span>| <span class="string">&#39;?&#39;
-                    </span>| <span class="string">&#39;@&#39;
-                    </span>| <span class="string">&#39;[&#39;
-                    </span>| <span class="string">&#39;\\&#39;
-                    </span>| <span class="string">&#39;]&#39;
-                    </span>| <span class="string">&#39;^&#39;
-                    </span>| <span class="string">&#39;\u{007F}&#39;
-                    </span>| <span class="string">&#39;|&#39;
+                <span class="string">'\0'</span>..=<span class="string">'\u{001F}'
+                    </span>| <span class="string">' '
+                    </span>| <span class="string">'#'
+                    </span>| <span class="string">'%'
+                    </span>| <span class="string">'/'
+                    </span>| <span class="string">':'
+                    </span>| <span class="string">'&lt;'
+                    </span>| <span class="string">'&gt;'
+                    </span>| <span class="string">'?'
+                    </span>| <span class="string">'@'
+                    </span>| <span class="string">'['
+                    </span>| <span class="string">'\\'
+                    </span>| <span class="string">']'
+                    </span>| <span class="string">'^'
+                    </span>| <span class="string">'\u{007F}'
+                    </span>| <span class="string">'|'
             </span>)
         };
 
@@ -619,8 +619,8 @@
 
     <span class="comment">// &lt;https://url.spec.whatwg.org/#concept-opaque-host-parser&gt;
     </span><span class="kw">pub fn </span>parse_opaque(input: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ParseError&gt; {
-        <span class="kw">if </span>input.starts_with(<span class="string">&#39;[&#39;</span>) {
-            <span class="kw">if </span>!input.ends_with(<span class="string">&#39;]&#39;</span>) {
+        <span class="kw">if </span>input.starts_with(<span class="string">'['</span>) {
+            <span class="kw">if </span>!input.ends_with(<span class="string">']'</span>) {
                 <span class="kw">return </span><span class="prelude-val">Err</span>(ParseError::InvalidIpv6Address);
             }
             <span class="kw">return </span>parse_ipv6addr(<span class="kw-2">&amp;</span>input[<span class="number">1</span>..input.len() - <span class="number">1</span>]).map(Host::Ipv6);
@@ -629,22 +629,22 @@
         <span class="kw">let </span>is_invalid_host_char = |c| {
             <span class="macro">matches!</span>(
                 c,
-                <span class="string">&#39;\0&#39; </span>| <span class="string">&#39;\t&#39;
-                    </span>| <span class="string">&#39;\n&#39;
-                    </span>| <span class="string">&#39;\r&#39;
-                    </span>| <span class="string">&#39; &#39;
-                    </span>| <span class="string">&#39;#&#39;
-                    </span>| <span class="string">&#39;/&#39;
-                    </span>| <span class="string">&#39;:&#39;
-                    </span>| <span class="string">&#39;&lt;&#39;
-                    </span>| <span class="string">&#39;&gt;&#39;
-                    </span>| <span class="string">&#39;?&#39;
-                    </span>| <span class="string">&#39;@&#39;
-                    </span>| <span class="string">&#39;[&#39;
-                    </span>| <span class="string">&#39;\\&#39;
-                    </span>| <span class="string">&#39;]&#39;
-                    </span>| <span class="string">&#39;^&#39;
-                    </span>| <span class="string">&#39;|&#39;
+                <span class="string">'\0' </span>| <span class="string">'\t'
+                    </span>| <span class="string">'\n'
+                    </span>| <span class="string">'\r'
+                    </span>| <span class="string">' '
+                    </span>| <span class="string">'#'
+                    </span>| <span class="string">'/'
+                    </span>| <span class="string">':'
+                    </span>| <span class="string">'&lt;'
+                    </span>| <span class="string">'&gt;'
+                    </span>| <span class="string">'?'
+                    </span>| <span class="string">'@'
+                    </span>| <span class="string">'['
+                    </span>| <span class="string">'\\'
+                    </span>| <span class="string">']'
+                    </span>| <span class="string">'^'
+                    </span>| <span class="string">'|'
             </span>)
         };
 
@@ -664,14 +664,14 @@
 }
 
 <span class="kw">impl</span>&lt;S: AsRef&lt;str&gt;&gt; fmt::Display <span class="kw">for </span>Host&lt;S&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         <span class="kw">match </span><span class="kw-2">*</span><span class="self">self </span>{
             Host::Domain(<span class="kw-2">ref </span>domain) =&gt; domain.as_ref().fmt(f),
             Host::Ipv4(<span class="kw-2">ref </span>addr) =&gt; addr.fmt(f),
             Host::Ipv6(<span class="kw-2">ref </span>addr) =&gt; {
-                f.write_str(<span class="string">&quot;[&quot;</span>)<span class="question-mark">?</span>;
+                f.write_str(<span class="string">"["</span>)<span class="question-mark">?</span>;
                 write_ipv6(addr, f)<span class="question-mark">?</span>;
-                f.write_str(<span class="string">&quot;]&quot;</span>)
+                f.write_str(<span class="string">"]"</span>)
             }
         }
     }
@@ -691,15 +691,15 @@
     }
 }
 
-<span class="kw">fn </span>write_ipv6(addr: <span class="kw-2">&amp;</span>Ipv6Addr, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+<span class="kw">fn </span>write_ipv6(addr: <span class="kw-2">&amp;</span>Ipv6Addr, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
     <span class="kw">let </span>segments = addr.segments();
     <span class="kw">let </span>(compress_start, compress_end) = longest_zero_sequence(<span class="kw-2">&amp;</span>segments);
     <span class="kw">let </span><span class="kw-2">mut </span>i = <span class="number">0</span>;
     <span class="kw">while </span>i &lt; <span class="number">8 </span>{
         <span class="kw">if </span>i == compress_start {
-            f.write_str(<span class="string">&quot;:&quot;</span>)<span class="question-mark">?</span>;
+            f.write_str(<span class="string">":"</span>)<span class="question-mark">?</span>;
             <span class="kw">if </span>i == <span class="number">0 </span>{
-                f.write_str(<span class="string">&quot;:&quot;</span>)<span class="question-mark">?</span>;
+                f.write_str(<span class="string">":"</span>)<span class="question-mark">?</span>;
             }
             <span class="kw">if </span>compress_end &lt; <span class="number">8 </span>{
                 i = compress_end;
@@ -707,9 +707,9 @@
                 <span class="kw">break</span>;
             }
         }
-        <span class="macro">write!</span>(f, <span class="string">&quot;{:x}&quot;</span>, segments[i <span class="kw">as </span>usize])<span class="question-mark">?</span>;
+        <span class="macro">write!</span>(f, <span class="string">"{:x}"</span>, segments[i <span class="kw">as </span>usize])<span class="question-mark">?</span>;
         <span class="kw">if </span>i &lt; <span class="number">7 </span>{
-            f.write_str(<span class="string">&quot;:&quot;</span>)<span class="question-mark">?</span>;
+            f.write_str(<span class="string">":"</span>)<span class="question-mark">?</span>;
         }
         i += <span class="number">1</span>;
     }
@@ -754,7 +754,7 @@
 
 <span class="doccomment">/// &lt;https://url.spec.whatwg.org/#ends-in-a-number-checker&gt;
 </span><span class="kw">fn </span>ends_in_a_number(input: <span class="kw-2">&amp;</span>str) -&gt; bool {
-    <span class="kw">let </span><span class="kw-2">mut </span>parts = input.rsplit(<span class="string">&#39;.&#39;</span>);
+    <span class="kw">let </span><span class="kw-2">mut </span>parts = input.rsplit(<span class="string">'.'</span>);
     <span class="kw">let </span>last = parts.next().unwrap();
     <span class="kw">let </span>last = <span class="kw">if </span>last.is_empty() {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(last) = parts.next() {
@@ -780,10 +780,10 @@
     }
 
     <span class="kw">let </span><span class="kw-2">mut </span>r = <span class="number">10</span>;
-    <span class="kw">if </span>input.starts_with(<span class="string">&quot;0x&quot;</span>) || input.starts_with(<span class="string">&quot;0X&quot;</span>) {
+    <span class="kw">if </span>input.starts_with(<span class="string">"0x"</span>) || input.starts_with(<span class="string">"0X"</span>) {
         input = <span class="kw-2">&amp;</span>input[<span class="number">2</span>..];
         r = <span class="number">16</span>;
-    } <span class="kw">else if </span>input.len() &gt;= <span class="number">2 </span>&amp;&amp; input.starts_with(<span class="string">&#39;0&#39;</span>) {
+    } <span class="kw">else if </span>input.len() &gt;= <span class="number">2 </span>&amp;&amp; input.starts_with(<span class="string">'0'</span>) {
         input = <span class="kw-2">&amp;</span>input[<span class="number">1</span>..];
         r = <span class="number">8</span>;
     }
@@ -793,7 +793,7 @@
     }
 
     <span class="kw">let </span>valid_number = <span class="kw">match </span>r {
-        <span class="number">8 </span>=&gt; input.as_bytes().iter().all(|c| (<span class="string">b&#39;0&#39;</span>..=<span class="string">b&#39;7&#39;</span>).contains(c)),
+        <span class="number">8 </span>=&gt; input.as_bytes().iter().all(|c| (<span class="string">b'0'</span>..=<span class="string">b'7'</span>).contains(c)),
         <span class="number">10 </span>=&gt; input.as_bytes().iter().all(|c| c.is_ascii_digit()),
         <span class="number">16 </span>=&gt; input.as_bytes().iter().all(|c| c.is_ascii_hexdigit()),
         <span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
@@ -811,8 +811,8 @@
 
 <span class="doccomment">/// &lt;https://url.spec.whatwg.org/#concept-ipv4-parser&gt;
 </span><span class="kw">fn </span>parse_ipv4addr(input: <span class="kw-2">&amp;</span>str) -&gt; ParseResult&lt;Ipv4Addr&gt; {
-    <span class="kw">let </span><span class="kw-2">mut </span>parts: Vec&lt;<span class="kw-2">&amp;</span>str&gt; = input.split(<span class="string">&#39;.&#39;</span>).collect();
-    <span class="kw">if </span>parts.last() == <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="string">&quot;&quot;</span>) {
+    <span class="kw">let </span><span class="kw-2">mut </span>parts: Vec&lt;<span class="kw-2">&amp;</span>str&gt; = input.split(<span class="string">'.'</span>).collect();
+    <span class="kw">if </span>parts.last() == <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="string">""</span>) {
         parts.pop();
     }
     <span class="kw">if </span>parts.len() &gt; <span class="number">4 </span>{
@@ -826,7 +826,7 @@
             </span><span class="prelude-val">Err</span>(()) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(ParseError::InvalidIpv4Address),
         };
     }
-    <span class="kw">let </span><span class="kw-2">mut </span>ipv4 = numbers.pop().expect(<span class="string">&quot;a non-empty list of numbers&quot;</span>);
+    <span class="kw">let </span><span class="kw-2">mut </span>ipv4 = numbers.pop().expect(<span class="string">"a non-empty list of numbers"</span>);
     <span class="comment">// Equivalent to: ipv4 &gt;= 256 ** (4 − numbers.len())
     </span><span class="kw">if </span>ipv4 &gt; u32::max_value() &gt;&gt; (<span class="number">8 </span>* numbers.len() <span class="kw">as </span>u32) {
         <span class="kw">return </span><span class="prelude-val">Err</span>(ParseError::InvalidIpv4Address);
@@ -854,8 +854,8 @@
         <span class="kw">return </span><span class="prelude-val">Err</span>(ParseError::InvalidIpv6Address);
     }
 
-    <span class="kw">if </span>input[<span class="number">0</span>] == <span class="string">b&#39;:&#39; </span>{
-        <span class="kw">if </span>input[<span class="number">1</span>] != <span class="string">b&#39;:&#39; </span>{
+    <span class="kw">if </span>input[<span class="number">0</span>] == <span class="string">b':' </span>{
+        <span class="kw">if </span>input[<span class="number">1</span>] != <span class="string">b':' </span>{
             <span class="kw">return </span><span class="prelude-val">Err</span>(ParseError::InvalidIpv6Address);
         }
         i = <span class="number">2</span>;
@@ -867,7 +867,7 @@
         <span class="kw">if </span>piece_pointer == <span class="number">8 </span>{
             <span class="kw">return </span><span class="prelude-val">Err</span>(ParseError::InvalidIpv6Address);
         }
-        <span class="kw">if </span>input[i] == <span class="string">b&#39;:&#39; </span>{
+        <span class="kw">if </span>input[i] == <span class="string">b':' </span>{
             <span class="kw">if </span>compress_pointer.is_some() {
                 <span class="kw">return </span><span class="prelude-val">Err</span>(ParseError::InvalidIpv6Address);
             }
@@ -890,7 +890,7 @@
         }
         <span class="kw">if </span>i &lt; len {
             <span class="kw">match </span>input[i] {
-                <span class="string">b&#39;.&#39; </span>=&gt; {
+                <span class="string">b'.' </span>=&gt; {
                     <span class="kw">if </span>i == start {
                         <span class="kw">return </span><span class="prelude-val">Err</span>(ParseError::InvalidIpv6Address);
                     }
@@ -900,7 +900,7 @@
                     }
                     is_ip_v4 = <span class="bool-val">true</span>;
                 }
-                <span class="string">b&#39;:&#39; </span>=&gt; {
+                <span class="string">b':' </span>=&gt; {
                     i += <span class="number">1</span>;
                     <span class="kw">if </span>i == len {
                         <span class="kw">return </span><span class="prelude-val">Err</span>(ParseError::InvalidIpv6Address);
@@ -923,7 +923,7 @@
         <span class="kw">let </span><span class="kw-2">mut </span>numbers_seen = <span class="number">0</span>;
         <span class="kw">while </span>i &lt; len {
             <span class="kw">if </span>numbers_seen &gt; <span class="number">0 </span>{
-                <span class="kw">if </span>numbers_seen &lt; <span class="number">4 </span>&amp;&amp; (i &lt; len &amp;&amp; input[i] == <span class="string">b&#39;.&#39;</span>) {
+                <span class="kw">if </span>numbers_seen &lt; <span class="number">4 </span>&amp;&amp; (i &lt; len &amp;&amp; input[i] == <span class="string">b'.'</span>) {
                     i += <span class="number">1
                 </span>} <span class="kw">else </span>{
                     <span class="kw">return </span><span class="prelude-val">Err</span>(ParseError::InvalidIpv6Address);
@@ -933,7 +933,7 @@
             <span class="kw">let </span><span class="kw-2">mut </span>ipv4_piece = <span class="prelude-val">None</span>;
             <span class="kw">while </span>i &lt; len {
                 <span class="kw">let </span>digit = <span class="kw">match </span>input[i] {
-                    c @ <span class="string">b&#39;0&#39;</span>..=<span class="string">b&#39;9&#39; </span>=&gt; c - <span class="string">b&#39;0&#39;</span>,
+                    c @ <span class="string">b'0'</span>..=<span class="string">b'9' </span>=&gt; c - <span class="string">b'0'</span>,
                     <span class="kw">_ </span>=&gt; <span class="kw">break</span>,
                 };
                 <span class="kw">match </span>ipv4_piece {

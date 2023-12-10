@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tungstenite-0.20.1/src/handshake/client.rs`."><title>client.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tungstenite" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tungstenite-0.20.1/src/handshake/client.rs`."><title>client.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tungstenite" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -424,7 +424,7 @@
             ClientHandshake { verify_data: VerifyData { accept_key }, config, _marker: PhantomData }
         };
 
-        <span class="macro">trace!</span>(<span class="string">&quot;Client handshake initiated.&quot;</span>);
+        <span class="macro">trace!</span>(<span class="string">"Client handshake initiated."</span>);
         <span class="prelude-val">Ok</span>(MidHandshake { role: client, machine })
     }
 }
@@ -451,7 +451,7 @@
                     <span class="prelude-val">Err</span>(e) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(e),
                 };
 
-                <span class="macro">debug!</span>(<span class="string">&quot;Client handshake done.&quot;</span>);
+                <span class="macro">debug!</span>(<span class="string">"Client handshake done."</span>);
                 <span class="kw">let </span>websocket =
                     WebSocket::from_partially_read(stream, tail, Role::Client, <span class="self">self</span>.config);
                 ProcessingResult::Done((websocket, result))
@@ -465,18 +465,18 @@
     <span class="kw">let </span><span class="kw-2">mut </span>req = Vec::new();
     <span class="macro">write!</span>(
         req,
-        <span class="string">&quot;GET {path} {version:?}\r\n&quot;</span>,
+        <span class="string">"GET {path} {version:?}\r\n"</span>,
         path = request.uri().path_and_query().ok_or(Error::Url(UrlError::NoPathOrQuery))<span class="question-mark">?</span>.as_str(),
         version = request.version()
     )
     .unwrap();
 
     <span class="comment">// Headers that must be present in a correct request.
-    </span><span class="kw">const </span>KEY_HEADERNAME: <span class="kw-2">&amp;</span>str = <span class="string">&quot;Sec-WebSocket-Key&quot;</span>;
+    </span><span class="kw">const </span>KEY_HEADERNAME: <span class="kw-2">&amp;</span>str = <span class="string">"Sec-WebSocket-Key"</span>;
     <span class="kw">const </span>WEBSOCKET_HEADERS: [<span class="kw-2">&amp;</span>str; <span class="number">5</span>] =
-        [<span class="string">&quot;Host&quot;</span>, <span class="string">&quot;Connection&quot;</span>, <span class="string">&quot;Upgrade&quot;</span>, <span class="string">&quot;Sec-WebSocket-Version&quot;</span>, KEY_HEADERNAME];
+        [<span class="string">"Host"</span>, <span class="string">"Connection"</span>, <span class="string">"Upgrade"</span>, <span class="string">"Sec-WebSocket-Version"</span>, KEY_HEADERNAME];
 
-    <span class="comment">// We must extract a WebSocket key from a properly formed request or fail if it&#39;s not present.
+    <span class="comment">// We must extract a WebSocket key from a properly formed request or fail if it's not present.
     </span><span class="kw">let </span>key = request
         .headers()
         .get(KEY_HEADERNAME)
@@ -502,10 +502,10 @@
                 HeaderName::from_bytes(header.as_bytes()).unwrap(),
             ))
         })<span class="question-mark">?</span>;
-        <span class="macro">write!</span>(req, <span class="string">&quot;{header}: {value}\r\n&quot;</span>, header = header, value = value.to_str()<span class="question-mark">?</span>).unwrap();
+        <span class="macro">write!</span>(req, <span class="string">"{header}: {value}\r\n"</span>, header = header, value = value.to_str()<span class="question-mark">?</span>).unwrap();
     }
 
-    <span class="comment">// Now we must ensure that the headers that we&#39;ve written once are not anymore present in the map.
+    <span class="comment">// Now we must ensure that the headers that we've written once are not anymore present in the map.
     // If they do, then the request is invalid (some headers are duplicated there for some reason).
     </span><span class="kw">let </span>insensitive: Vec&lt;String&gt; =
         WEBSOCKET_HEADERS.iter().map(|h| h.to_ascii_lowercase()).collect();
@@ -514,26 +514,26 @@
 
         <span class="comment">// We have already written the necessary headers once (above) and removed them from the map.
         // If we encounter them again, then the request is considered invalid and error is returned.
-        // Note that we can&#39;t use `.contains()`, since `&amp;str` does not coerce to `&amp;String` in Rust.
+        // Note that we can't use `.contains()`, since `&amp;str` does not coerce to `&amp;String` in Rust.
         </span><span class="kw">if </span>insensitive.iter().any(|x| x == name) {
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::Protocol(ProtocolError::InvalidHeader(k.clone())));
         }
 
         <span class="comment">// Relates to the issue of some servers treating headers in a case-sensitive way, please see:
         // https://github.com/snapview/tungstenite-rs/pull/119 (original fix of the problem)
-        </span><span class="kw">if </span>name == <span class="string">&quot;sec-websocket-protocol&quot; </span>{
-            name = <span class="string">&quot;Sec-WebSocket-Protocol&quot;</span>;
+        </span><span class="kw">if </span>name == <span class="string">"sec-websocket-protocol" </span>{
+            name = <span class="string">"Sec-WebSocket-Protocol"</span>;
         }
 
-        <span class="kw">if </span>name == <span class="string">&quot;origin&quot; </span>{
-            name = <span class="string">&quot;Origin&quot;</span>;
+        <span class="kw">if </span>name == <span class="string">"origin" </span>{
+            name = <span class="string">"Origin"</span>;
         }
 
-        <span class="macro">writeln!</span>(req, <span class="string">&quot;{}: {}\r&quot;</span>, name, v.to_str()<span class="question-mark">?</span>).unwrap();
+        <span class="macro">writeln!</span>(req, <span class="string">"{}: {}\r"</span>, name, v.to_str()<span class="question-mark">?</span>).unwrap();
     }
 
-    <span class="macro">writeln!</span>(req, <span class="string">&quot;\r&quot;</span>).unwrap();
-    <span class="macro">trace!</span>(<span class="string">&quot;Request: {:?}&quot;</span>, String::from_utf8_lossy(<span class="kw-2">&amp;</span>req));
+    <span class="macro">writeln!</span>(req, <span class="string">"\r"</span>).unwrap();
+    <span class="macro">trace!</span>(<span class="string">"Request: {:?}"</span>, String::from_utf8_lossy(<span class="kw-2">&amp;</span>req));
     <span class="prelude-val">Ok</span>((req, key))
 }
 
@@ -556,24 +556,24 @@
 
         <span class="comment">// 2. If the response lacks an |Upgrade| header field or the |Upgrade|
         // header field contains a value that is not an ASCII case-
-        // insensitive match for the value &quot;websocket&quot;, the client MUST
+        // insensitive match for the value "websocket", the client MUST
         // _Fail the WebSocket Connection_. (RFC 6455)
         </span><span class="kw">if </span>!headers
-            .get(<span class="string">&quot;Upgrade&quot;</span>)
+            .get(<span class="string">"Upgrade"</span>)
             .and_then(|h| h.to_str().ok())
-            .map(|h| h.eq_ignore_ascii_case(<span class="string">&quot;websocket&quot;</span>))
+            .map(|h| h.eq_ignore_ascii_case(<span class="string">"websocket"</span>))
             .unwrap_or(<span class="bool-val">false</span>)
         {
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::Protocol(ProtocolError::MissingUpgradeWebSocketHeader));
         }
         <span class="comment">// 3.  If the response lacks a |Connection| header field or the
-        // |Connection| header field doesn&#39;t contain a token that is an
-        // ASCII case-insensitive match for the value &quot;Upgrade&quot;, the client
+        // |Connection| header field doesn't contain a token that is an
+        // ASCII case-insensitive match for the value "Upgrade", the client
         // MUST _Fail the WebSocket Connection_. (RFC 6455)
         </span><span class="kw">if </span>!headers
-            .get(<span class="string">&quot;Connection&quot;</span>)
+            .get(<span class="string">"Connection"</span>)
             .and_then(|h| h.to_str().ok())
-            .map(|h| h.eq_ignore_ascii_case(<span class="string">&quot;Upgrade&quot;</span>))
+            .map(|h| h.eq_ignore_ascii_case(<span class="string">"Upgrade"</span>))
             .unwrap_or(<span class="bool-val">false</span>)
         {
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::Protocol(ProtocolError::MissingConnectionUpgradeHeader));
@@ -582,19 +582,19 @@
         // the |Sec-WebSocket-Accept| contains a value other than the
         // base64-encoded SHA-1 of ... the client MUST _Fail the WebSocket
         // Connection_. (RFC 6455)
-        </span><span class="kw">if </span>!headers.get(<span class="string">&quot;Sec-WebSocket-Accept&quot;</span>).map(|h| h == <span class="kw-2">&amp;</span><span class="self">self</span>.accept_key).unwrap_or(<span class="bool-val">false</span>) {
+        </span><span class="kw">if </span>!headers.get(<span class="string">"Sec-WebSocket-Accept"</span>).map(|h| h == <span class="kw-2">&amp;</span><span class="self">self</span>.accept_key).unwrap_or(<span class="bool-val">false</span>) {
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::Protocol(ProtocolError::SecWebSocketAcceptKeyMismatch));
         }
         <span class="comment">// 5.  If the response includes a |Sec-WebSocket-Extensions| header
         // field and this header field indicates the use of an extension
-        // that was not present in the client&#39;s handshake (the server has
+        // that was not present in the client's handshake (the server has
         // indicated an extension not requested by the client), the client
         // MUST _Fail the WebSocket Connection_. (RFC 6455)
         // TODO
 
         // 6.  If the response includes a |Sec-WebSocket-Protocol| header field
         // and this header field indicates the use of a subprotocol that was
-        // not present in the client&#39;s handshake (the server has indicated a
+        // not present in the client's handshake (the server has indicated a
         // subprotocol not requested by the client), the client MUST _Fail
         // the WebSocket Connection_. (RFC 6455)
         // TODO
@@ -614,16 +614,16 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;h</span>, <span class="lifetime">&#39;b</span>: <span class="lifetime">&#39;h</span>&gt; FromHttparse&lt;httparse::Response&lt;<span class="lifetime">&#39;h</span>, <span class="lifetime">&#39;b</span>&gt;&gt; <span class="kw">for </span>Response {
-    <span class="kw">fn </span>from_httparse(raw: httparse::Response&lt;<span class="lifetime">&#39;h</span>, <span class="lifetime">&#39;b</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
-        <span class="kw">if </span>raw.version.expect(<span class="string">&quot;Bug: no HTTP version&quot;</span>) &lt; <span class="comment">/*1.*/</span><span class="number">1 </span>{
+<span class="kw">impl</span>&lt;<span class="lifetime">'h</span>, <span class="lifetime">'b</span>: <span class="lifetime">'h</span>&gt; FromHttparse&lt;httparse::Response&lt;<span class="lifetime">'h</span>, <span class="lifetime">'b</span>&gt;&gt; <span class="kw">for </span>Response {
+    <span class="kw">fn </span>from_httparse(raw: httparse::Response&lt;<span class="lifetime">'h</span>, <span class="lifetime">'b</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
+        <span class="kw">if </span>raw.version.expect(<span class="string">"Bug: no HTTP version"</span>) &lt; <span class="comment">/*1.*/</span><span class="number">1 </span>{
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::Protocol(ProtocolError::WrongHttpVersion));
         }
 
         <span class="kw">let </span>headers = HeaderMap::from_httparse(raw.headers)<span class="question-mark">?</span>;
 
         <span class="kw">let </span><span class="kw-2">mut </span>response = Response::new(<span class="prelude-val">None</span>);
-        <span class="kw-2">*</span>response.status_mut() = StatusCode::from_u16(raw.code.expect(<span class="string">&quot;Bug: no HTTP status code&quot;</span>))<span class="question-mark">?</span>;
+        <span class="kw-2">*</span>response.status_mut() = StatusCode::from_u16(raw.code.expect(<span class="string">"Bug: no HTTP status code"</span>))<span class="question-mark">?</span>;
         <span class="kw-2">*</span>response.headers_mut() = headers;
         <span class="comment">// TODO: httparse only supports HTTP 0.9/1.0/1.1 but not HTTP 2.0
         // so the only valid value we could get in the response would be 1.1.
@@ -649,29 +649,29 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>random_keys() {
         <span class="kw">let </span>k1 = generate_key();
-        <span class="macro">println!</span>(<span class="string">&quot;Generated random key 1: {}&quot;</span>, k1);
+        <span class="macro">println!</span>(<span class="string">"Generated random key 1: {}"</span>, k1);
         <span class="kw">let </span>k2 = generate_key();
-        <span class="macro">println!</span>(<span class="string">&quot;Generated random key 2: {}&quot;</span>, k2);
+        <span class="macro">println!</span>(<span class="string">"Generated random key 2: {}"</span>, k2);
         <span class="macro">assert_ne!</span>(k1, k2);
         <span class="macro">assert_eq!</span>(k1.len(), k2.len());
         <span class="macro">assert_eq!</span>(k1.len(), <span class="number">24</span>);
         <span class="macro">assert_eq!</span>(k2.len(), <span class="number">24</span>);
-        <span class="macro">assert!</span>(k1.ends_with(<span class="string">&quot;==&quot;</span>));
-        <span class="macro">assert!</span>(k2.ends_with(<span class="string">&quot;==&quot;</span>));
-        <span class="macro">assert!</span>(k1[..<span class="number">22</span>].find(<span class="string">&#39;=&#39;</span>).is_none());
-        <span class="macro">assert!</span>(k2[..<span class="number">22</span>].find(<span class="string">&#39;=&#39;</span>).is_none());
+        <span class="macro">assert!</span>(k1.ends_with(<span class="string">"=="</span>));
+        <span class="macro">assert!</span>(k2.ends_with(<span class="string">"=="</span>));
+        <span class="macro">assert!</span>(k1[..<span class="number">22</span>].find(<span class="string">'='</span>).is_none());
+        <span class="macro">assert!</span>(k2[..<span class="number">22</span>].find(<span class="string">'='</span>).is_none());
     }
 
     <span class="kw">fn </span>construct_expected(host: <span class="kw-2">&amp;</span>str, key: <span class="kw-2">&amp;</span>str) -&gt; Vec&lt;u8&gt; {
         <span class="macro">format!</span>(
-            <span class="string">&quot;\
+            <span class="string">"\
             GET /getCaseCount HTTP/1.1\r\n\
             Host: {host}\r\n\
             Connection: Upgrade\r\n\
             Upgrade: websocket\r\n\
             Sec-WebSocket-Version: 13\r\n\
             Sec-WebSocket-Key: {key}\r\n\
-            \r\n&quot;</span>,
+            \r\n"</span>,
             host = host,
             key = key
         )
@@ -680,39 +680,39 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>request_formatting() {
-        <span class="kw">let </span>request = <span class="string">&quot;ws://localhost/getCaseCount&quot;</span>.into_client_request().unwrap();
+        <span class="kw">let </span>request = <span class="string">"ws://localhost/getCaseCount"</span>.into_client_request().unwrap();
         <span class="kw">let </span>(request, key) = generate_request(request).unwrap();
-        <span class="kw">let </span>correct = construct_expected(<span class="string">&quot;localhost&quot;</span>, <span class="kw-2">&amp;</span>key);
+        <span class="kw">let </span>correct = construct_expected(<span class="string">"localhost"</span>, <span class="kw-2">&amp;</span>key);
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>request[..], <span class="kw-2">&amp;</span>correct[..]);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>request_formatting_with_host() {
-        <span class="kw">let </span>request = <span class="string">&quot;wss://localhost:9001/getCaseCount&quot;</span>.into_client_request().unwrap();
+        <span class="kw">let </span>request = <span class="string">"wss://localhost:9001/getCaseCount"</span>.into_client_request().unwrap();
         <span class="kw">let </span>(request, key) = generate_request(request).unwrap();
-        <span class="kw">let </span>correct = construct_expected(<span class="string">&quot;localhost:9001&quot;</span>, <span class="kw-2">&amp;</span>key);
+        <span class="kw">let </span>correct = construct_expected(<span class="string">"localhost:9001"</span>, <span class="kw-2">&amp;</span>key);
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>request[..], <span class="kw-2">&amp;</span>correct[..]);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>request_formatting_with_at() {
-        <span class="kw">let </span>request = <span class="string">&quot;wss://user:pass@localhost:9001/getCaseCount&quot;</span>.into_client_request().unwrap();
+        <span class="kw">let </span>request = <span class="string">"wss://user:pass@localhost:9001/getCaseCount"</span>.into_client_request().unwrap();
         <span class="kw">let </span>(request, key) = generate_request(request).unwrap();
-        <span class="kw">let </span>correct = construct_expected(<span class="string">&quot;localhost:9001&quot;</span>, <span class="kw-2">&amp;</span>key);
+        <span class="kw">let </span>correct = construct_expected(<span class="string">"localhost:9001"</span>, <span class="kw-2">&amp;</span>key);
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>request[..], <span class="kw-2">&amp;</span>correct[..]);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>response_parsing() {
-        <span class="kw">const </span>DATA: <span class="kw-2">&amp;</span>[u8] = <span class="string">b&quot;HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n&quot;</span>;
+        <span class="kw">const </span>DATA: <span class="kw-2">&amp;</span>[u8] = <span class="string">b"HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n"</span>;
         <span class="kw">let </span>(<span class="kw">_</span>, resp) = Response::try_parse(DATA).unwrap().unwrap();
         <span class="macro">assert_eq!</span>(resp.status(), http::StatusCode::OK);
-        <span class="macro">assert_eq!</span>(resp.headers().get(<span class="string">&quot;Content-Type&quot;</span>).unwrap(), <span class="kw-2">&amp;</span><span class="string">b&quot;text/html&quot;</span>[..],);
+        <span class="macro">assert_eq!</span>(resp.headers().get(<span class="string">"Content-Type"</span>).unwrap(), <span class="kw-2">&amp;</span><span class="string">b"text/html"</span>[..],);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>invalid_custom_request() {
-        <span class="kw">let </span>request = http::Request::builder().method(<span class="string">&quot;GET&quot;</span>).body(()).unwrap();
+        <span class="kw">let </span>request = http::Request::builder().method(<span class="string">"GET"</span>).body(()).unwrap();
         <span class="macro">assert!</span>(generate_request(request).is_err());
     }
 }

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/reqwest-0.11.22/src/connect.rs`."><title>connect.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="reqwest" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/reqwest-0.11.22/src/connect.rs`."><title>connect.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="reqwest" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1327,13 +1327,13 @@
 <a href="#1327" id="1327">1327</a>
 <a href="#1328" id="1328">1328</a>
 <a href="#1329" id="1329">1329</a>
-</pre></div><pre class="rust"><code><span class="attr">#[cfg(feature = <span class="string">&quot;__tls&quot;</span>)]
+</pre></div><pre class="rust"><code><span class="attr">#[cfg(feature = <span class="string">"__tls"</span>)]
 </span><span class="kw">use </span>http::header::HeaderValue;
 <span class="kw">use </span>http::uri::{Authority, Scheme};
 <span class="kw">use </span>http::Uri;
 <span class="kw">use </span>hyper::client::connect::{Connected, Connection};
 <span class="kw">use </span>hyper::service::Service;
-<span class="attr">#[cfg(feature = <span class="string">&quot;native-tls-crate&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"native-tls-crate"</span>)]
 </span><span class="kw">use </span>native_tls_crate::{TlsConnector, TlsConnectorBuilder};
 <span class="kw">use </span>tokio::io::{AsyncRead, AsyncWrite, ReadBuf};
 
@@ -1346,9 +1346,9 @@
 <span class="kw">use </span>std::task::{Context, Poll};
 <span class="kw">use </span>std::time::Duration;
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;default-tls&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"default-tls"</span>)]
 </span><span class="kw">use </span><span class="self">self</span>::native_tls_conn::NativeTlsConn;
-<span class="attr">#[cfg(feature = <span class="string">&quot;__rustls&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"__rustls"</span>)]
 </span><span class="kw">use </span><span class="self">self</span>::rustls_tls_conn::RustlsTlsConn;
 <span class="kw">use </span><span class="kw">crate</span>::dns::DynResolver;
 <span class="kw">use </span><span class="kw">crate</span>::error::BoxError;
@@ -1362,21 +1362,21 @@
     proxies: Arc&lt;Vec&lt;Proxy&gt;&gt;,
     verbose: verbose::Wrapper,
     timeout: <span class="prelude-ty">Option</span>&lt;Duration&gt;,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;__tls&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"__tls"</span>)]
     </span>nodelay: bool,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;__tls&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"__tls"</span>)]
     </span>tls_info: bool,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;__tls&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"__tls"</span>)]
     </span>user_agent: <span class="prelude-ty">Option</span>&lt;HeaderValue&gt;,
 }
 
 <span class="attr">#[derive(Clone)]
 </span><span class="kw">enum </span>Inner {
-    <span class="attr">#[cfg(not(feature = <span class="string">&quot;__tls&quot;</span>))]
+    <span class="attr">#[cfg(not(feature = <span class="string">"__tls"</span>))]
     </span>Http(HttpConnector),
-    <span class="attr">#[cfg(feature = <span class="string">&quot;default-tls&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"default-tls"</span>)]
     </span>DefaultTls(HttpConnector, TlsConnector),
-    <span class="attr">#[cfg(feature = <span class="string">&quot;__rustls&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"__rustls"</span>)]
     </span>RustlsTls {
         http: HttpConnector,
         tls: Arc&lt;rustls::ClientConfig&gt;,
@@ -1385,7 +1385,7 @@
 }
 
 <span class="kw">impl </span>Connector {
-    <span class="attr">#[cfg(not(feature = <span class="string">&quot;__tls&quot;</span>))]
+    <span class="attr">#[cfg(not(feature = <span class="string">"__tls"</span>))]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new&lt;T&gt;(
         <span class="kw-2">mut </span>http: HttpConnector,
         proxies: Arc&lt;Vec&lt;Proxy&gt;&gt;,
@@ -1405,7 +1405,7 @@
         }
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;default-tls&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"default-tls"</span>)]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new_default_tls&lt;T&gt;(
         http: HttpConnector,
         tls: TlsConnectorBuilder,
@@ -1424,7 +1424,7 @@
         ))
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;default-tls&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"default-tls"</span>)]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>from_built_default_tls&lt;T&gt;(
         <span class="kw-2">mut </span>http: HttpConnector,
         tls: TlsConnector,
@@ -1451,7 +1451,7 @@
         }
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;__rustls&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"__rustls"</span>)]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new_rustls_tls&lt;T&gt;(
         <span class="kw-2">mut </span>http: HttpConnector,
         tls: rustls::ClientConfig,
@@ -1499,7 +1499,7 @@
         <span class="self">self</span>.verbose.<span class="number">0 </span>= enabled;
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;socks&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"socks"</span>)]
     </span><span class="kw">async fn </span>connect_socks(<span class="kw-2">&amp;</span><span class="self">self</span>, dst: Uri, proxy: ProxyScheme) -&gt; <span class="prelude-ty">Result</span>&lt;Conn, BoxError&gt; {
         <span class="kw">let </span>dns = <span class="kw">match </span>proxy {
             ProxyScheme::Socks5 {
@@ -1509,15 +1509,15 @@
                 remote_dns: <span class="bool-val">true</span>, ..
             } =&gt; socks::DnsResolve::Proxy,
             ProxyScheme::Http { .. } | ProxyScheme::Https { .. } =&gt; {
-                <span class="macro">unreachable!</span>(<span class="string">&quot;connect_socks is only called for socks proxies&quot;</span>);
+                <span class="macro">unreachable!</span>(<span class="string">"connect_socks is only called for socks proxies"</span>);
             }
         };
 
         <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.inner {
-            <span class="attr">#[cfg(feature = <span class="string">&quot;default-tls&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"default-tls"</span>)]
             </span>Inner::DefaultTls(_http, tls) =&gt; {
                 <span class="kw">if </span>dst.scheme() == <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>Scheme::HTTPS) {
-                    <span class="kw">let </span>host = dst.host().ok_or(<span class="string">&quot;no host in url&quot;</span>)<span class="question-mark">?</span>.to_string();
+                    <span class="kw">let </span>host = dst.host().ok_or(<span class="string">"no host in url"</span>)<span class="question-mark">?</span>.to_string();
                     <span class="kw">let </span>conn = socks::connect(proxy, dst, dns).<span class="kw">await</span><span class="question-mark">?</span>;
                     <span class="kw">let </span>tls_connector = tokio_native_tls::TlsConnector::from(tls.clone());
                     <span class="kw">let </span>io = tls_connector.connect(<span class="kw-2">&amp;</span>host, conn).<span class="kw">await</span><span class="question-mark">?</span>;
@@ -1528,17 +1528,17 @@
                     });
                 }
             }
-            <span class="attr">#[cfg(feature = <span class="string">&quot;__rustls&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"__rustls"</span>)]
             </span>Inner::RustlsTls { tls_proxy, .. } =&gt; {
                 <span class="kw">if </span>dst.scheme() == <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>Scheme::HTTPS) {
                     <span class="kw">use </span>std::convert::TryFrom;
                     <span class="kw">use </span>tokio_rustls::TlsConnector <span class="kw">as </span>RustlsConnector;
 
                     <span class="kw">let </span>tls = tls_proxy.clone();
-                    <span class="kw">let </span>host = dst.host().ok_or(<span class="string">&quot;no host in url&quot;</span>)<span class="question-mark">?</span>.to_string();
+                    <span class="kw">let </span>host = dst.host().ok_or(<span class="string">"no host in url"</span>)<span class="question-mark">?</span>.to_string();
                     <span class="kw">let </span>conn = socks::connect(proxy, dst, dns).<span class="kw">await</span><span class="question-mark">?</span>;
                     <span class="kw">let </span>server_name = rustls::ServerName::try_from(host.as_str())
-                        .map_err(|<span class="kw">_</span>| <span class="string">&quot;Invalid Server Name&quot;</span>)<span class="question-mark">?</span>;
+                        .map_err(|<span class="kw">_</span>| <span class="string">"Invalid Server Name"</span>)<span class="question-mark">?</span>;
                     <span class="kw">let </span>io = RustlsConnector::from(tls)
                         .connect(server_name, conn)
                         .<span class="kw">await</span><span class="question-mark">?</span>;
@@ -1549,7 +1549,7 @@
                     });
                 }
             }
-            <span class="attr">#[cfg(not(feature = <span class="string">&quot;__tls&quot;</span>))]
+            <span class="attr">#[cfg(not(feature = <span class="string">"__tls"</span>))]
             </span>Inner::Http(<span class="kw">_</span>) =&gt; (),
         }
 
@@ -1562,7 +1562,7 @@
 
     <span class="kw">async fn </span>connect_with_maybe_proxy(<span class="self">self</span>, dst: Uri, is_proxy: bool) -&gt; <span class="prelude-ty">Result</span>&lt;Conn, BoxError&gt; {
         <span class="kw">match </span><span class="self">self</span>.inner {
-            <span class="attr">#[cfg(not(feature = <span class="string">&quot;__tls&quot;</span>))]
+            <span class="attr">#[cfg(not(feature = <span class="string">"__tls"</span>))]
             </span>Inner::Http(<span class="kw-2">mut </span>http) =&gt; {
                 <span class="kw">let </span>io = http.call(dst).<span class="kw">await</span><span class="question-mark">?</span>;
                 <span class="prelude-val">Ok</span>(Conn {
@@ -1571,11 +1571,11 @@
                     tls_info: <span class="bool-val">false</span>,
                 })
             }
-            <span class="attr">#[cfg(feature = <span class="string">&quot;default-tls&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"default-tls"</span>)]
             </span>Inner::DefaultTls(http, tls) =&gt; {
                 <span class="kw">let </span><span class="kw-2">mut </span>http = http.clone();
 
-                <span class="comment">// Disable Nagle&#39;s algorithm for TLS handshake
+                <span class="comment">// Disable Nagle's algorithm for TLS handshake
                 //
                 // https://www.openssl.org/docs/man1.1.1/man3/SSL_connect.html#NOTES
                 </span><span class="kw">if </span>!<span class="self">self</span>.nodelay &amp;&amp; (dst.scheme() == <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>Scheme::HTTPS)) {
@@ -1603,11 +1603,11 @@
                     })
                 }
             }
-            <span class="attr">#[cfg(feature = <span class="string">&quot;__rustls&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"__rustls"</span>)]
             </span>Inner::RustlsTls { http, tls, .. } =&gt; {
                 <span class="kw">let </span><span class="kw-2">mut </span>http = http.clone();
 
-                <span class="comment">// Disable Nagle&#39;s algorithm for TLS handshake
+                <span class="comment">// Disable Nagle's algorithm for TLS handshake
                 //
                 // https://www.openssl.org/docs/man1.1.1/man3/SSL_connect.html#NOTES
                 </span><span class="kw">if </span>!<span class="self">self</span>.nodelay &amp;&amp; (dst.scheme() == <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>Scheme::HTTPS)) {
@@ -1643,20 +1643,20 @@
         dst: Uri,
         proxy_scheme: ProxyScheme,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Conn, BoxError&gt; {
-        <span class="macro">log::debug!</span>(<span class="string">&quot;proxy({:?}) intercepts &#39;{:?}&#39;&quot;</span>, proxy_scheme, dst);
+        <span class="macro">log::debug!</span>(<span class="string">"proxy({:?}) intercepts '{:?}'"</span>, proxy_scheme, dst);
 
         <span class="kw">let </span>(proxy_dst, _auth) = <span class="kw">match </span>proxy_scheme {
             ProxyScheme::Http { host, auth } =&gt; (into_uri(Scheme::HTTP, host), auth),
             ProxyScheme::Https { host, auth } =&gt; (into_uri(Scheme::HTTPS, host), auth),
-            <span class="attr">#[cfg(feature = <span class="string">&quot;socks&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"socks"</span>)]
             </span>ProxyScheme::Socks5 { .. } =&gt; <span class="kw">return </span><span class="self">self</span>.connect_socks(dst, proxy_scheme).<span class="kw">await</span>,
         };
 
-        <span class="attr">#[cfg(feature = <span class="string">&quot;__tls&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"__tls"</span>)]
         </span><span class="kw">let </span>auth = _auth;
 
         <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.inner {
-            <span class="attr">#[cfg(feature = <span class="string">&quot;default-tls&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"default-tls"</span>)]
             </span>Inner::DefaultTls(http, tls) =&gt; {
                 <span class="kw">if </span>dst.scheme() == <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>Scheme::HTTPS) {
                     <span class="kw">let </span>host = dst.host().to_owned();
@@ -1665,10 +1665,10 @@
                     <span class="kw">let </span>tls_connector = tokio_native_tls::TlsConnector::from(tls.clone());
                     <span class="kw">let </span><span class="kw-2">mut </span>http = hyper_tls::HttpsConnector::from((http, tls_connector));
                     <span class="kw">let </span>conn = http.call(proxy_dst).<span class="kw">await</span><span class="question-mark">?</span>;
-                    <span class="macro">log::trace!</span>(<span class="string">&quot;tunneling HTTPS over proxy&quot;</span>);
+                    <span class="macro">log::trace!</span>(<span class="string">"tunneling HTTPS over proxy"</span>);
                     <span class="kw">let </span>tunneled = tunnel(
                         conn,
-                        host.ok_or(<span class="string">&quot;no host in url&quot;</span>)<span class="question-mark">?</span>.to_string(),
+                        host.ok_or(<span class="string">"no host in url"</span>)<span class="question-mark">?</span>.to_string(),
                         port,
                         <span class="self">self</span>.user_agent.clone(),
                         auth,
@@ -1676,7 +1676,7 @@
                     .<span class="kw">await</span><span class="question-mark">?</span>;
                     <span class="kw">let </span>tls_connector = tokio_native_tls::TlsConnector::from(tls.clone());
                     <span class="kw">let </span>io = tls_connector
-                        .connect(host.ok_or(<span class="string">&quot;no host in url&quot;</span>)<span class="question-mark">?</span>, tunneled)
+                        .connect(host.ok_or(<span class="string">"no host in url"</span>)<span class="question-mark">?</span>, tunneled)
                         .<span class="kw">await</span><span class="question-mark">?</span>;
                     <span class="kw">return </span><span class="prelude-val">Ok</span>(Conn {
                         inner: <span class="self">self</span>.verbose.wrap(NativeTlsConn { inner: io }),
@@ -1685,7 +1685,7 @@
                     });
                 }
             }
-            <span class="attr">#[cfg(feature = <span class="string">&quot;__rustls&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"__rustls"</span>)]
             </span>Inner::RustlsTls {
                 http,
                 tls,
@@ -1696,15 +1696,15 @@
                     <span class="kw">use </span>std::convert::TryFrom;
                     <span class="kw">use </span>tokio_rustls::TlsConnector <span class="kw">as </span>RustlsConnector;
 
-                    <span class="kw">let </span>host = dst.host().ok_or(<span class="string">&quot;no host in url&quot;</span>)<span class="question-mark">?</span>.to_string();
+                    <span class="kw">let </span>host = dst.host().ok_or(<span class="string">"no host in url"</span>)<span class="question-mark">?</span>.to_string();
                     <span class="kw">let </span>port = dst.port().map(|r| r.as_u16()).unwrap_or(<span class="number">443</span>);
                     <span class="kw">let </span>http = http.clone();
                     <span class="kw">let </span><span class="kw-2">mut </span>http = hyper_rustls::HttpsConnector::from((http, tls_proxy.clone()));
                     <span class="kw">let </span>tls = tls.clone();
                     <span class="kw">let </span>conn = http.call(proxy_dst).<span class="kw">await</span><span class="question-mark">?</span>;
-                    <span class="macro">log::trace!</span>(<span class="string">&quot;tunneling HTTPS over proxy&quot;</span>);
+                    <span class="macro">log::trace!</span>(<span class="string">"tunneling HTTPS over proxy"</span>);
                     <span class="kw">let </span>maybe_server_name =
-                        ServerName::try_from(host.as_str()).map_err(|<span class="kw">_</span>| <span class="string">&quot;Invalid Server Name&quot;</span>);
+                        ServerName::try_from(host.as_str()).map_err(|<span class="kw">_</span>| <span class="string">"Invalid Server Name"</span>);
                     <span class="kw">let </span>tunneled = tunnel(conn, host, port, <span class="self">self</span>.user_agent.clone(), auth).<span class="kw">await</span><span class="question-mark">?</span>;
                     <span class="kw">let </span>server_name = maybe_server_name<span class="question-mark">?</span>;
                     <span class="kw">let </span>io = RustlsConnector::from(tls)
@@ -1718,7 +1718,7 @@
                     });
                 }
             }
-            <span class="attr">#[cfg(not(feature = <span class="string">&quot;__tls&quot;</span>))]
+            <span class="attr">#[cfg(not(feature = <span class="string">"__tls"</span>))]
             </span>Inner::Http(<span class="kw">_</span>) =&gt; (),
         }
 
@@ -1727,11 +1727,11 @@
 
     <span class="kw">pub fn </span>set_keepalive(<span class="kw-2">&amp;mut </span><span class="self">self</span>, dur: <span class="prelude-ty">Option</span>&lt;Duration&gt;) {
         <span class="kw">match </span><span class="kw-2">&amp;mut </span><span class="self">self</span>.inner {
-            <span class="attr">#[cfg(feature = <span class="string">&quot;default-tls&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"default-tls"</span>)]
             </span>Inner::DefaultTls(http, _tls) =&gt; http.set_keepalive(dur),
-            <span class="attr">#[cfg(feature = <span class="string">&quot;__rustls&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"__rustls"</span>)]
             </span>Inner::RustlsTls { http, .. } =&gt; http.set_keepalive(dur),
-            <span class="attr">#[cfg(not(feature = <span class="string">&quot;__tls&quot;</span>))]
+            <span class="attr">#[cfg(not(feature = <span class="string">"__tls"</span>))]
             </span>Inner::Http(http) =&gt; http.set_keepalive(dur),
         }
     }
@@ -1742,9 +1742,9 @@
     </span>http::Uri::builder()
         .scheme(scheme)
         .authority(host)
-        .path_and_query(http::uri::PathAndQuery::from_static(<span class="string">&quot;/&quot;</span>))
+        .path_and_query(http::uri::PathAndQuery::from_static(<span class="string">"/"</span>))
         .build()
-        .expect(<span class="string">&quot;scheme and authority is valid Uri&quot;</span>)
+        .expect(<span class="string">"scheme and authority is valid Uri"</span>)
 }
 
 <span class="kw">async fn </span>with_timeout&lt;T, F&gt;(f: F, timeout: <span class="prelude-ty">Option</span>&lt;Duration&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;T, BoxError&gt;
@@ -1767,12 +1767,12 @@
     <span class="kw">type </span>Error = BoxError;
     <span class="kw">type </span>Future = Connecting;
 
-    <span class="kw">fn </span>poll_ready(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt;&gt; {
+    <span class="kw">fn </span>poll_ready(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt;&gt; {
         Poll::Ready(<span class="prelude-val">Ok</span>(()))
     }
 
     <span class="kw">fn </span>call(<span class="kw-2">&amp;mut </span><span class="self">self</span>, dst: Uri) -&gt; <span class="self">Self</span>::Future {
-        <span class="macro">log::debug!</span>(<span class="string">&quot;starting new connection: {:?}&quot;</span>, dst);
+        <span class="macro">log::debug!</span>(<span class="string">"starting new connection: {:?}"</span>, dst);
         <span class="kw">let </span>timeout = <span class="self">self</span>.timeout;
         <span class="kw">for </span>prox <span class="kw">in </span><span class="self">self</span>.proxies.iter() {
             <span class="kw">if let </span><span class="prelude-val">Some</span>(proxy_scheme) = prox.intercept(<span class="kw-2">&amp;</span>dst) {
@@ -1790,19 +1790,19 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;__tls&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"__tls"</span>)]
 </span><span class="kw">trait </span>TlsInfoFactory {
     <span class="kw">fn </span>tls_info(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw">crate</span>::tls::TlsInfo&gt;;
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;__tls&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"__tls"</span>)]
 </span><span class="kw">impl </span>TlsInfoFactory <span class="kw">for </span>tokio::net::TcpStream {
     <span class="kw">fn </span>tls_info(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw">crate</span>::tls::TlsInfo&gt; {
         <span class="prelude-val">None
     </span>}
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;default-tls&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"default-tls"</span>)]
 </span><span class="kw">impl </span>TlsInfoFactory <span class="kw">for </span>hyper_tls::MaybeHttpsStream&lt;tokio::net::TcpStream&gt; {
     <span class="kw">fn </span>tls_info(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw">crate</span>::tls::TlsInfo&gt; {
         <span class="kw">match </span><span class="self">self </span>{
@@ -1812,7 +1812,7 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;default-tls&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"default-tls"</span>)]
 </span><span class="kw">impl </span>TlsInfoFactory <span class="kw">for </span>hyper_tls::TlsStream&lt;hyper_tls::MaybeHttpsStream&lt;tokio::net::TcpStream&gt;&gt; {
     <span class="kw">fn </span>tls_info(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw">crate</span>::tls::TlsInfo&gt; {
         <span class="kw">let </span>peer_certificate = <span class="self">self
@@ -1825,7 +1825,7 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;default-tls&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"default-tls"</span>)]
 </span><span class="kw">impl </span>TlsInfoFactory <span class="kw">for </span>tokio_native_tls::TlsStream&lt;tokio::net::TcpStream&gt; {
     <span class="kw">fn </span>tls_info(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw">crate</span>::tls::TlsInfo&gt; {
         <span class="kw">let </span>peer_certificate = <span class="self">self
@@ -1838,7 +1838,7 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;__rustls&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"__rustls"</span>)]
 </span><span class="kw">impl </span>TlsInfoFactory <span class="kw">for </span>hyper_rustls::MaybeHttpsStream&lt;tokio::net::TcpStream&gt; {
     <span class="kw">fn </span>tls_info(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw">crate</span>::tls::TlsInfo&gt; {
         <span class="kw">match </span><span class="self">self </span>{
@@ -1848,7 +1848,7 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;__rustls&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"__rustls"</span>)]
 </span><span class="kw">impl </span>TlsInfoFactory <span class="kw">for </span>tokio_rustls::TlsStream&lt;tokio::net::TcpStream&gt; {
     <span class="kw">fn </span>tls_info(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw">crate</span>::tls::TlsInfo&gt; {
         <span class="kw">let </span>peer_certificate = <span class="self">self
@@ -1861,7 +1861,7 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;__rustls&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"__rustls"</span>)]
 </span><span class="kw">impl </span>TlsInfoFactory
     <span class="kw">for </span>tokio_rustls::client::TlsStream&lt;hyper_rustls::MaybeHttpsStream&lt;tokio::net::TcpStream&gt;&gt;
 {
@@ -1876,7 +1876,7 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;__rustls&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"__rustls"</span>)]
 </span><span class="kw">impl </span>TlsInfoFactory <span class="kw">for </span>tokio_rustls::client::TlsStream&lt;tokio::net::TcpStream&gt; {
     <span class="kw">fn </span>tls_info(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw">crate</span>::tls::TlsInfo&gt; {
         <span class="kw">let </span>peer_certificate = <span class="self">self
@@ -1890,20 +1890,20 @@
 }
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">trait </span>AsyncConn:
-    AsyncRead + AsyncWrite + Connection + Send + Sync + Unpin + <span class="lifetime">&#39;static
+    AsyncRead + AsyncWrite + Connection + Send + Sync + Unpin + <span class="lifetime">'static
 </span>{
 }
 
-<span class="kw">impl</span>&lt;T: AsyncRead + AsyncWrite + Connection + Send + Sync + Unpin + <span class="lifetime">&#39;static</span>&gt; AsyncConn <span class="kw">for </span>T {}
+<span class="kw">impl</span>&lt;T: AsyncRead + AsyncWrite + Connection + Send + Sync + Unpin + <span class="lifetime">'static</span>&gt; AsyncConn <span class="kw">for </span>T {}
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;__tls&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"__tls"</span>)]
 </span><span class="kw">trait </span>AsyncConnWithInfo: AsyncConn + TlsInfoFactory {}
-<span class="attr">#[cfg(not(feature = <span class="string">&quot;__tls&quot;</span>))]
+<span class="attr">#[cfg(not(feature = <span class="string">"__tls"</span>))]
 </span><span class="kw">trait </span>AsyncConnWithInfo: AsyncConn {}
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;__tls&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"__tls"</span>)]
 </span><span class="kw">impl</span>&lt;T: AsyncConn + TlsInfoFactory&gt; AsyncConnWithInfo <span class="kw">for </span>T {}
-<span class="attr">#[cfg(not(feature = <span class="string">&quot;__tls&quot;</span>))]
+<span class="attr">#[cfg(not(feature = <span class="string">"__tls"</span>))]
 </span><span class="kw">impl</span>&lt;T: AsyncConn&gt; AsyncConnWithInfo <span class="kw">for </span>T {}
 
 <span class="kw">type </span>BoxConn = Box&lt;<span class="kw">dyn </span>AsyncConnWithInfo&gt;;
@@ -1925,7 +1925,7 @@
 <span class="kw">impl </span>Connection <span class="kw">for </span>Conn {
     <span class="kw">fn </span>connected(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Connected {
         <span class="kw">let </span>connected = <span class="self">self</span>.inner.connected().proxy(<span class="self">self</span>.is_proxy);
-        <span class="attr">#[cfg(feature = <span class="string">&quot;__tls&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"__tls"</span>)]
         </span><span class="kw">if </span><span class="self">self</span>.tls_info {
             <span class="kw">if let </span><span class="prelude-val">Some</span>(tls_info) = <span class="self">self</span>.inner.tls_info() {
                 connected.extra(tls_info)
@@ -1935,7 +1935,7 @@
         } <span class="kw">else </span>{
             connected
         }
-        <span class="attr">#[cfg(not(feature = <span class="string">&quot;__tls&quot;</span>))]
+        <span class="attr">#[cfg(not(feature = <span class="string">"__tls"</span>))]
         </span>connected
     }
 }
@@ -1944,7 +1944,7 @@
     <span class="kw">fn </span>poll_read(
         <span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;,
         cx: <span class="kw-2">&amp;mut </span>Context,
-        buf: <span class="kw-2">&amp;mut </span>ReadBuf&lt;<span class="lifetime">&#39;_</span>&gt;,
+        buf: <span class="kw-2">&amp;mut </span>ReadBuf&lt;<span class="lifetime">'_</span>&gt;,
     ) -&gt; Poll&lt;io::Result&lt;()&gt;&gt; {
         <span class="kw">let </span>this = <span class="self">self</span>.project();
         AsyncRead::poll_read(this.inner, cx, buf)
@@ -1963,8 +1963,8 @@
 
     <span class="kw">fn </span>poll_write_vectored(
         <span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;,
-        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;,
-        bufs: <span class="kw-2">&amp;</span>[IoSlice&lt;<span class="lifetime">&#39;_</span>&gt;],
+        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;,
+        bufs: <span class="kw-2">&amp;</span>[IoSlice&lt;<span class="lifetime">'_</span>&gt;],
     ) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize, io::Error&gt;&gt; {
         <span class="kw">let </span>this = <span class="self">self</span>.project();
         AsyncWrite::poll_write_vectored(this.inner, cx, bufs)
@@ -1987,7 +1987,7 @@
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">type </span>Connecting = Pin&lt;Box&lt;<span class="kw">dyn </span>Future&lt;Output = <span class="prelude-ty">Result</span>&lt;Conn, BoxError&gt;&gt; + Send&gt;&gt;;
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;__tls&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"__tls"</span>)]
 </span><span class="kw">async fn </span>tunnel&lt;T&gt;(
     <span class="kw-2">mut </span>conn: T,
     host: String,
@@ -2001,31 +2001,31 @@
     <span class="kw">use </span>tokio::io::{AsyncReadExt, AsyncWriteExt};
 
     <span class="kw">let </span><span class="kw-2">mut </span>buf = <span class="macro">format!</span>(
-        <span class="string">&quot;\
+        <span class="string">"\
          CONNECT {0}:{1} HTTP/1.1\r\n\
          Host: {0}:{1}\r\n\
-         &quot;</span>,
+         "</span>,
         host, port
     )
     .into_bytes();
 
     <span class="comment">// user-agent
     </span><span class="kw">if let </span><span class="prelude-val">Some</span>(user_agent) = user_agent {
-        buf.extend_from_slice(<span class="string">b&quot;User-Agent: &quot;</span>);
+        buf.extend_from_slice(<span class="string">b"User-Agent: "</span>);
         buf.extend_from_slice(user_agent.as_bytes());
-        buf.extend_from_slice(<span class="string">b&quot;\r\n&quot;</span>);
+        buf.extend_from_slice(<span class="string">b"\r\n"</span>);
     }
 
     <span class="comment">// proxy-authorization
     </span><span class="kw">if let </span><span class="prelude-val">Some</span>(value) = auth {
-        <span class="macro">log::debug!</span>(<span class="string">&quot;tunnel to {}:{} using basic auth&quot;</span>, host, port);
-        buf.extend_from_slice(<span class="string">b&quot;Proxy-Authorization: &quot;</span>);
+        <span class="macro">log::debug!</span>(<span class="string">"tunnel to {}:{} using basic auth"</span>, host, port);
+        buf.extend_from_slice(<span class="string">b"Proxy-Authorization: "</span>);
         buf.extend_from_slice(value.as_bytes());
-        buf.extend_from_slice(<span class="string">b&quot;\r\n&quot;</span>);
+        buf.extend_from_slice(<span class="string">b"\r\n"</span>);
     }
 
     <span class="comment">// headers end
-    </span>buf.extend_from_slice(<span class="string">b&quot;\r\n&quot;</span>);
+    </span>buf.extend_from_slice(<span class="string">b"\r\n"</span>);
 
     conn.write_all(<span class="kw-2">&amp;</span>buf).<span class="kw">await</span><span class="question-mark">?</span>;
 
@@ -2041,28 +2041,28 @@
         pos += n;
 
         <span class="kw">let </span>recvd = <span class="kw-2">&amp;</span>buf[..pos];
-        <span class="kw">if </span>recvd.starts_with(<span class="string">b&quot;HTTP/1.1 200&quot;</span>) || recvd.starts_with(<span class="string">b&quot;HTTP/1.0 200&quot;</span>) {
-            <span class="kw">if </span>recvd.ends_with(<span class="string">b&quot;\r\n\r\n&quot;</span>) {
+        <span class="kw">if </span>recvd.starts_with(<span class="string">b"HTTP/1.1 200"</span>) || recvd.starts_with(<span class="string">b"HTTP/1.0 200"</span>) {
+            <span class="kw">if </span>recvd.ends_with(<span class="string">b"\r\n\r\n"</span>) {
                 <span class="kw">return </span><span class="prelude-val">Ok</span>(conn);
             }
             <span class="kw">if </span>pos == buf.len() {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="string">&quot;proxy headers too long for tunnel&quot;</span>.into());
+                <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="string">"proxy headers too long for tunnel"</span>.into());
             }
         <span class="comment">// else read more
-        </span>} <span class="kw">else if </span>recvd.starts_with(<span class="string">b&quot;HTTP/1.1 407&quot;</span>) {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="string">&quot;proxy authentication required&quot;</span>.into());
+        </span>} <span class="kw">else if </span>recvd.starts_with(<span class="string">b"HTTP/1.1 407"</span>) {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="string">"proxy authentication required"</span>.into());
         } <span class="kw">else </span>{
-            <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="string">&quot;unsuccessful tunnel&quot;</span>.into());
+            <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="string">"unsuccessful tunnel"</span>.into());
         }
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;__tls&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"__tls"</span>)]
 </span><span class="kw">fn </span>tunnel_eof() -&gt; BoxError {
-    <span class="string">&quot;unexpected eof while tunneling&quot;</span>.into()
+    <span class="string">"unexpected eof while tunneling"</span>.into()
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;default-tls&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"default-tls"</span>)]
 </span><span class="kw">mod </span>native_tls_conn {
     <span class="kw">use </span><span class="kw">super</span>::TlsInfoFactory;
     <span class="kw">use </span>hyper::client::connect::{Connected, Connection};
@@ -2082,10 +2082,10 @@
     }
 
     <span class="kw">impl</span>&lt;T: Connection + AsyncRead + AsyncWrite + Unpin&gt; Connection <span class="kw">for </span>NativeTlsConn&lt;T&gt; {
-        <span class="attr">#[cfg(feature = <span class="string">&quot;native-tls-alpn&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"native-tls-alpn"</span>)]
         </span><span class="kw">fn </span>connected(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Connected {
             <span class="kw">match </span><span class="self">self</span>.inner.get_ref().negotiated_alpn().ok() {
-                <span class="prelude-val">Some</span>(<span class="prelude-val">Some</span>(alpn_protocol)) <span class="kw">if </span>alpn_protocol == <span class="string">b&quot;h2&quot; </span>=&gt; <span class="self">self
+                <span class="prelude-val">Some</span>(<span class="prelude-val">Some</span>(alpn_protocol)) <span class="kw">if </span>alpn_protocol == <span class="string">b"h2" </span>=&gt; <span class="self">self
                     </span>.inner
                     .get_ref()
                     .get_ref()
@@ -2096,7 +2096,7 @@
             }
         }
 
-        <span class="attr">#[cfg(not(feature = <span class="string">&quot;native-tls-alpn&quot;</span>))]
+        <span class="attr">#[cfg(not(feature = <span class="string">"native-tls-alpn"</span>))]
         </span><span class="kw">fn </span>connected(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Connected {
             <span class="self">self</span>.inner.get_ref().get_ref().get_ref().connected()
         }
@@ -2106,7 +2106,7 @@
         <span class="kw">fn </span>poll_read(
             <span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;,
             cx: <span class="kw-2">&amp;mut </span>Context,
-            buf: <span class="kw-2">&amp;mut </span>ReadBuf&lt;<span class="lifetime">&#39;_</span>&gt;,
+            buf: <span class="kw-2">&amp;mut </span>ReadBuf&lt;<span class="lifetime">'_</span>&gt;,
         ) -&gt; Poll&lt;tokio::io::Result&lt;()&gt;&gt; {
             <span class="kw">let </span>this = <span class="self">self</span>.project();
             AsyncRead::poll_read(this.inner, cx, buf)
@@ -2125,8 +2125,8 @@
 
         <span class="kw">fn </span>poll_write_vectored(
             <span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;,
-            cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;,
-            bufs: <span class="kw-2">&amp;</span>[IoSlice&lt;<span class="lifetime">&#39;_</span>&gt;],
+            cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;,
+            bufs: <span class="kw-2">&amp;</span>[IoSlice&lt;<span class="lifetime">'_</span>&gt;],
         ) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize, io::Error&gt;&gt; {
             <span class="kw">let </span>this = <span class="self">self</span>.project();
             AsyncWrite::poll_write_vectored(this.inner, cx, bufs)
@@ -2166,7 +2166,7 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;__rustls&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"__rustls"</span>)]
 </span><span class="kw">mod </span>rustls_tls_conn {
     <span class="kw">use </span><span class="kw">super</span>::TlsInfoFactory;
     <span class="kw">use </span>hyper::client::connect::{Connected, Connection};
@@ -2187,7 +2187,7 @@
 
     <span class="kw">impl</span>&lt;T: Connection + AsyncRead + AsyncWrite + Unpin&gt; Connection <span class="kw">for </span>RustlsTlsConn&lt;T&gt; {
         <span class="kw">fn </span>connected(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Connected {
-            <span class="kw">if </span><span class="self">self</span>.inner.get_ref().<span class="number">1</span>.alpn_protocol() == <span class="prelude-val">Some</span>(<span class="string">b&quot;h2&quot;</span>) {
+            <span class="kw">if </span><span class="self">self</span>.inner.get_ref().<span class="number">1</span>.alpn_protocol() == <span class="prelude-val">Some</span>(<span class="string">b"h2"</span>) {
                 <span class="self">self</span>.inner.get_ref().<span class="number">0</span>.connected().negotiated_h2()
             } <span class="kw">else </span>{
                 <span class="self">self</span>.inner.get_ref().<span class="number">0</span>.connected()
@@ -2199,7 +2199,7 @@
         <span class="kw">fn </span>poll_read(
             <span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;,
             cx: <span class="kw-2">&amp;mut </span>Context,
-            buf: <span class="kw-2">&amp;mut </span>ReadBuf&lt;<span class="lifetime">&#39;_</span>&gt;,
+            buf: <span class="kw-2">&amp;mut </span>ReadBuf&lt;<span class="lifetime">'_</span>&gt;,
         ) -&gt; Poll&lt;tokio::io::Result&lt;()&gt;&gt; {
             <span class="kw">let </span>this = <span class="self">self</span>.project();
             AsyncRead::poll_read(this.inner, cx, buf)
@@ -2218,8 +2218,8 @@
 
         <span class="kw">fn </span>poll_write_vectored(
             <span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;,
-            cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;,
-            bufs: <span class="kw-2">&amp;</span>[IoSlice&lt;<span class="lifetime">&#39;_</span>&gt;],
+            cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;,
+            bufs: <span class="kw-2">&amp;</span>[IoSlice&lt;<span class="lifetime">'_</span>&gt;],
         ) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize, io::Error&gt;&gt; {
             <span class="kw">let </span>this = <span class="self">self</span>.project();
             AsyncWrite::poll_write_vectored(this.inner, cx, bufs)
@@ -2259,7 +2259,7 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;socks&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"socks"</span>)]
 </span><span class="kw">mod </span>socks {
     <span class="kw">use </span>std::io;
     <span class="kw">use </span>std::net::ToSocketAddrs;
@@ -2284,7 +2284,7 @@
         <span class="kw">let </span>https = dst.scheme() == <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>Scheme::HTTPS);
         <span class="kw">let </span>original_host = dst
             .host()
-            .ok_or(io::Error::new(io::ErrorKind::Other, <span class="string">&quot;no host in url&quot;</span>))<span class="question-mark">?</span>;
+            .ok_or(io::Error::new(io::ErrorKind::Other, <span class="string">"no host in url"</span>))<span class="question-mark">?</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>host = original_host.to_owned();
         <span class="kw">let </span>port = <span class="kw">match </span>dst.port() {
             <span class="prelude-val">Some</span>(p) =&gt; p.as_u16(),
@@ -2313,11 +2313,11 @@
                 <span class="kw-2">&amp;</span>password,
             )
             .<span class="kw">await
-            </span>.map_err(|e| <span class="macro">format!</span>(<span class="string">&quot;socks connect error: {}&quot;</span>, e))<span class="question-mark">?
+            </span>.map_err(|e| <span class="macro">format!</span>(<span class="string">"socks connect error: {}"</span>, e))<span class="question-mark">?
         </span>} <span class="kw">else </span>{
             Socks5Stream::connect(socket_addr, (host.as_str(), port))
                 .<span class="kw">await
-                </span>.map_err(|e| <span class="macro">format!</span>(<span class="string">&quot;socks connect error: {}&quot;</span>, e))<span class="question-mark">?
+                </span>.map_err(|e| <span class="macro">format!</span>(<span class="string">"socks connect error: {}"</span>, e))<span class="question-mark">?
         </span>};
 
         <span class="prelude-val">Ok</span>(stream.into_inner())
@@ -2367,11 +2367,11 @@
         <span class="kw">fn </span>poll_read(
             <span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;,
             cx: <span class="kw-2">&amp;mut </span>Context,
-            buf: <span class="kw-2">&amp;mut </span>ReadBuf&lt;<span class="lifetime">&#39;_</span>&gt;,
+            buf: <span class="kw-2">&amp;mut </span>ReadBuf&lt;<span class="lifetime">'_</span>&gt;,
         ) -&gt; Poll&lt;std::io::Result&lt;()&gt;&gt; {
             <span class="kw">match </span>Pin::new(<span class="kw-2">&amp;mut </span><span class="self">self</span>.inner).poll_read(cx, buf) {
                 Poll::Ready(<span class="prelude-val">Ok</span>(())) =&gt; {
-                    <span class="macro">log::trace!</span>(<span class="string">&quot;{:08x} read: {:?}&quot;</span>, <span class="self">self</span>.id, Escape(buf.filled()));
+                    <span class="macro">log::trace!</span>(<span class="string">"{:08x} read: {:?}"</span>, <span class="self">self</span>.id, Escape(buf.filled()));
                     Poll::Ready(<span class="prelude-val">Ok</span>(()))
                 }
                 Poll::Ready(<span class="prelude-val">Err</span>(e)) =&gt; Poll::Ready(<span class="prelude-val">Err</span>(e)),
@@ -2388,7 +2388,7 @@
         ) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize, std::io::Error&gt;&gt; {
             <span class="kw">match </span>Pin::new(<span class="kw-2">&amp;mut </span><span class="self">self</span>.inner).poll_write(cx, buf) {
                 Poll::Ready(<span class="prelude-val">Ok</span>(n)) =&gt; {
-                    <span class="macro">log::trace!</span>(<span class="string">&quot;{:08x} write: {:?}&quot;</span>, <span class="self">self</span>.id, Escape(<span class="kw-2">&amp;</span>buf[..n]));
+                    <span class="macro">log::trace!</span>(<span class="string">"{:08x} write: {:?}"</span>, <span class="self">self</span>.id, Escape(<span class="kw-2">&amp;</span>buf[..n]));
                     Poll::Ready(<span class="prelude-val">Ok</span>(n))
                 }
                 Poll::Ready(<span class="prelude-val">Err</span>(e)) =&gt; Poll::Ready(<span class="prelude-val">Err</span>(e)),
@@ -2398,13 +2398,13 @@
 
         <span class="kw">fn </span>poll_write_vectored(
             <span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;,
-            cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;,
-            bufs: <span class="kw-2">&amp;</span>[IoSlice&lt;<span class="lifetime">&#39;_</span>&gt;],
+            cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;,
+            bufs: <span class="kw-2">&amp;</span>[IoSlice&lt;<span class="lifetime">'_</span>&gt;],
         ) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize, io::Error&gt;&gt; {
             <span class="kw">match </span>Pin::new(<span class="kw-2">&amp;mut </span><span class="self">self</span>.inner).poll_write_vectored(cx, bufs) {
                 Poll::Ready(<span class="prelude-val">Ok</span>(nwritten)) =&gt; {
                     <span class="macro">log::trace!</span>(
-                        <span class="string">&quot;{:08x} write (vectored): {:?}&quot;</span>,
+                        <span class="string">"{:08x} write (vectored): {:?}"</span>,
                         <span class="self">self</span>.id,
                         Vectored { bufs, nwritten }
                     );
@@ -2434,48 +2434,48 @@
         }
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;__tls&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"__tls"</span>)]
     </span><span class="kw">impl</span>&lt;T: <span class="kw">super</span>::TlsInfoFactory&gt; <span class="kw">super</span>::TlsInfoFactory <span class="kw">for </span>Verbose&lt;T&gt; {
         <span class="kw">fn </span>tls_info(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw">crate</span>::tls::TlsInfo&gt; {
             <span class="self">self</span>.inner.tls_info()
         }
     }
 
-    <span class="kw">struct </span>Escape&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]);
+    <span class="kw">struct </span>Escape&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]);
 
-    <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>Escape&lt;<span class="lifetime">&#39;_</span>&gt; {
-        <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-            <span class="macro">write!</span>(f, <span class="string">&quot;b\&quot;&quot;</span>)<span class="question-mark">?</span>;
+    <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>Escape&lt;<span class="lifetime">'_</span>&gt; {
+        <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+            <span class="macro">write!</span>(f, <span class="string">"b\""</span>)<span class="question-mark">?</span>;
             <span class="kw">for </span><span class="kw-2">&amp;</span>c <span class="kw">in </span><span class="self">self</span>.<span class="number">0 </span>{
                 <span class="comment">// https://doc.rust-lang.org/reference.html#byte-escapes
-                </span><span class="kw">if </span>c == <span class="string">b&#39;\n&#39; </span>{
-                    <span class="macro">write!</span>(f, <span class="string">&quot;\\n&quot;</span>)<span class="question-mark">?</span>;
-                } <span class="kw">else if </span>c == <span class="string">b&#39;\r&#39; </span>{
-                    <span class="macro">write!</span>(f, <span class="string">&quot;\\r&quot;</span>)<span class="question-mark">?</span>;
-                } <span class="kw">else if </span>c == <span class="string">b&#39;\t&#39; </span>{
-                    <span class="macro">write!</span>(f, <span class="string">&quot;\\t&quot;</span>)<span class="question-mark">?</span>;
-                } <span class="kw">else if </span>c == <span class="string">b&#39;\\&#39; </span>|| c == <span class="string">b&#39;&quot;&#39; </span>{
-                    <span class="macro">write!</span>(f, <span class="string">&quot;\\{}&quot;</span>, c <span class="kw">as </span>char)<span class="question-mark">?</span>;
-                } <span class="kw">else if </span>c == <span class="string">b&#39;\0&#39; </span>{
-                    <span class="macro">write!</span>(f, <span class="string">&quot;\\0&quot;</span>)<span class="question-mark">?</span>;
+                </span><span class="kw">if </span>c == <span class="string">b'\n' </span>{
+                    <span class="macro">write!</span>(f, <span class="string">"\\n"</span>)<span class="question-mark">?</span>;
+                } <span class="kw">else if </span>c == <span class="string">b'\r' </span>{
+                    <span class="macro">write!</span>(f, <span class="string">"\\r"</span>)<span class="question-mark">?</span>;
+                } <span class="kw">else if </span>c == <span class="string">b'\t' </span>{
+                    <span class="macro">write!</span>(f, <span class="string">"\\t"</span>)<span class="question-mark">?</span>;
+                } <span class="kw">else if </span>c == <span class="string">b'\\' </span>|| c == <span class="string">b'"' </span>{
+                    <span class="macro">write!</span>(f, <span class="string">"\\{}"</span>, c <span class="kw">as </span>char)<span class="question-mark">?</span>;
+                } <span class="kw">else if </span>c == <span class="string">b'\0' </span>{
+                    <span class="macro">write!</span>(f, <span class="string">"\\0"</span>)<span class="question-mark">?</span>;
                 <span class="comment">// ASCII printable
                 </span>} <span class="kw">else if </span>c &gt;= <span class="number">0x20 </span>&amp;&amp; c &lt; <span class="number">0x7f </span>{
-                    <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, c <span class="kw">as </span>char)<span class="question-mark">?</span>;
+                    <span class="macro">write!</span>(f, <span class="string">"{}"</span>, c <span class="kw">as </span>char)<span class="question-mark">?</span>;
                 } <span class="kw">else </span>{
-                    <span class="macro">write!</span>(f, <span class="string">&quot;\\x{:02x}&quot;</span>, c)<span class="question-mark">?</span>;
+                    <span class="macro">write!</span>(f, <span class="string">"\\x{:02x}"</span>, c)<span class="question-mark">?</span>;
                 }
             }
-            <span class="macro">write!</span>(f, <span class="string">&quot;\&quot;&quot;</span>)<span class="question-mark">?</span>;
+            <span class="macro">write!</span>(f, <span class="string">"\""</span>)<span class="question-mark">?</span>;
             <span class="prelude-val">Ok</span>(())
         }
     }
 
-    <span class="kw">struct </span>Vectored&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>&gt; {
-        bufs: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[IoSlice&lt;<span class="lifetime">&#39;b</span>&gt;],
+    <span class="kw">struct </span>Vectored&lt;<span class="lifetime">'a</span>, <span class="lifetime">'b</span>&gt; {
+        bufs: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[IoSlice&lt;<span class="lifetime">'b</span>&gt;],
         nwritten: usize,
     }
 
-    <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>Vectored&lt;<span class="lifetime">&#39;_</span>, <span class="lifetime">&#39;_</span>&gt; {
+    <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>Vectored&lt;<span class="lifetime">'_</span>, <span class="lifetime">'_</span>&gt; {
         <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
             <span class="kw">let </span><span class="kw-2">mut </span>left = <span class="self">self</span>.nwritten;
             <span class="kw">for </span>buf <span class="kw">in </span><span class="self">self</span>.bufs.iter() {
@@ -2491,7 +2491,7 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;__tls&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"__tls"</span>)]
 #[cfg(test)]
 </span><span class="kw">mod </span>tests {
     <span class="kw">use </span><span class="kw">super</span>::tunnel;
@@ -2502,30 +2502,30 @@
     <span class="kw">use </span>tokio::net::TcpStream;
     <span class="kw">use </span>tokio::runtime;
 
-    <span class="kw">static </span>TUNNEL_UA: <span class="kw-2">&amp;</span>str = <span class="string">&quot;tunnel-test/x.y&quot;</span>;
-    <span class="kw">static </span>TUNNEL_OK: <span class="kw-2">&amp;</span>[u8] = <span class="string">b&quot;\
+    <span class="kw">static </span>TUNNEL_UA: <span class="kw-2">&amp;</span>str = <span class="string">"tunnel-test/x.y"</span>;
+    <span class="kw">static </span>TUNNEL_OK: <span class="kw-2">&amp;</span>[u8] = <span class="string">b"\
         HTTP/1.1 200 OK\r\n\
         \r\n\
-    &quot;</span>;
+    "</span>;
 
     <span class="macro">macro_rules! </span>mock_tunnel {
         () =&gt; {{
             <span class="macro">mock_tunnel!</span>(TUNNEL_OK)
         }};
         (<span class="macro-nonterminal">$write</span>:expr) =&gt; {{
-            <span class="macro">mock_tunnel!</span>(<span class="macro-nonterminal">$write</span>, <span class="string">&quot;&quot;</span>)
+            <span class="macro">mock_tunnel!</span>(<span class="macro-nonterminal">$write</span>, <span class="string">""</span>)
         }};
         (<span class="macro-nonterminal">$write</span>:expr, <span class="macro-nonterminal">$auth</span>:expr) =&gt; {{
-            <span class="kw">let </span>listener = TcpListener::bind(<span class="string">&quot;127.0.0.1:0&quot;</span>).unwrap();
+            <span class="kw">let </span>listener = TcpListener::bind(<span class="string">"127.0.0.1:0"</span>).unwrap();
             <span class="kw">let </span>addr = listener.local_addr().unwrap();
             <span class="kw">let </span>connect_expected = <span class="macro">format!</span>(
-                <span class="string">&quot;\
+                <span class="string">"\
                  CONNECT {0}:{1} HTTP/1.1\r\n\
                  Host: {0}:{1}\r\n\
                  User-Agent: {2}\r\n\
                  {3}\
                  \r\n\
-                 &quot;</span>,
+                 "</span>,
                 addr.ip(),
                 addr.port(),
                 TUNNEL_UA,
@@ -2556,7 +2556,7 @@
         <span class="kw">let </span>rt = runtime::Builder::new_current_thread()
             .enable_all()
             .build()
-            .expect(<span class="string">&quot;new rt&quot;</span>);
+            .expect(<span class="string">"new rt"</span>);
         <span class="kw">let </span>f = <span class="kw">async move </span>{
             <span class="kw">let </span>tcp = TcpStream::connect(<span class="kw-2">&amp;</span>addr).<span class="kw">await</span><span class="question-mark">?</span>;
             <span class="kw">let </span>host = addr.ip().to_string();
@@ -2569,12 +2569,12 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_tunnel_eof() {
-        <span class="kw">let </span>addr = <span class="macro">mock_tunnel!</span>(<span class="string">b&quot;HTTP/1.1 200 OK&quot;</span>);
+        <span class="kw">let </span>addr = <span class="macro">mock_tunnel!</span>(<span class="string">b"HTTP/1.1 200 OK"</span>);
 
         <span class="kw">let </span>rt = runtime::Builder::new_current_thread()
             .enable_all()
             .build()
-            .expect(<span class="string">&quot;new rt&quot;</span>);
+            .expect(<span class="string">"new rt"</span>);
         <span class="kw">let </span>f = <span class="kw">async move </span>{
             <span class="kw">let </span>tcp = TcpStream::connect(<span class="kw-2">&amp;</span>addr).<span class="kw">await</span><span class="question-mark">?</span>;
             <span class="kw">let </span>host = addr.ip().to_string();
@@ -2587,12 +2587,12 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_tunnel_non_http_response() {
-        <span class="kw">let </span>addr = <span class="macro">mock_tunnel!</span>(<span class="string">b&quot;foo bar baz hallo&quot;</span>);
+        <span class="kw">let </span>addr = <span class="macro">mock_tunnel!</span>(<span class="string">b"foo bar baz hallo"</span>);
 
         <span class="kw">let </span>rt = runtime::Builder::new_current_thread()
             .enable_all()
             .build()
-            .expect(<span class="string">&quot;new rt&quot;</span>);
+            .expect(<span class="string">"new rt"</span>);
         <span class="kw">let </span>f = <span class="kw">async move </span>{
             <span class="kw">let </span>tcp = TcpStream::connect(<span class="kw-2">&amp;</span>addr).<span class="kw">await</span><span class="question-mark">?</span>;
             <span class="kw">let </span>host = addr.ip().to_string();
@@ -2606,17 +2606,17 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_tunnel_proxy_unauthorized() {
         <span class="kw">let </span>addr = <span class="macro">mock_tunnel!</span>(
-            <span class="string">b&quot;\
+            <span class="string">b"\
             HTTP/1.1 407 Proxy Authentication Required\r\n\
-            Proxy-Authenticate: Basic realm=\&quot;nope\&quot;\r\n\
+            Proxy-Authenticate: Basic realm=\"nope\"\r\n\
             \r\n\
-        &quot;
+        "
         </span>);
 
         <span class="kw">let </span>rt = runtime::Builder::new_current_thread()
             .enable_all()
             .build()
-            .expect(<span class="string">&quot;new rt&quot;</span>);
+            .expect(<span class="string">"new rt"</span>);
         <span class="kw">let </span>f = <span class="kw">async move </span>{
             <span class="kw">let </span>tcp = TcpStream::connect(<span class="kw-2">&amp;</span>addr).<span class="kw">await</span><span class="question-mark">?</span>;
             <span class="kw">let </span>host = addr.ip().to_string();
@@ -2625,20 +2625,20 @@
         </span>};
 
         <span class="kw">let </span>error = rt.block_on(f).unwrap_err();
-        <span class="macro">assert_eq!</span>(error.to_string(), <span class="string">&quot;proxy authentication required&quot;</span>);
+        <span class="macro">assert_eq!</span>(error.to_string(), <span class="string">"proxy authentication required"</span>);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_tunnel_basic_auth() {
         <span class="kw">let </span>addr = <span class="macro">mock_tunnel!</span>(
             TUNNEL_OK,
-            <span class="string">&quot;Proxy-Authorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==\r\n&quot;
+            <span class="string">"Proxy-Authorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==\r\n"
         </span>);
 
         <span class="kw">let </span>rt = runtime::Builder::new_current_thread()
             .enable_all()
             .build()
-            .expect(<span class="string">&quot;new rt&quot;</span>);
+            .expect(<span class="string">"new rt"</span>);
         <span class="kw">let </span>f = <span class="kw">async move </span>{
             <span class="kw">let </span>tcp = TcpStream::connect(<span class="kw-2">&amp;</span>addr).<span class="kw">await</span><span class="question-mark">?</span>;
             <span class="kw">let </span>host = addr.ip().to_string();
@@ -2648,7 +2648,7 @@
                 host,
                 port,
                 ua(),
-                <span class="prelude-val">Some</span>(proxy::encode_basic_auth(<span class="string">&quot;Aladdin&quot;</span>, <span class="string">&quot;open sesame&quot;</span>)),
+                <span class="prelude-val">Some</span>(proxy::encode_basic_auth(<span class="string">"Aladdin"</span>, <span class="string">"open sesame"</span>)),
             )
             .<span class="kw">await
         </span>};

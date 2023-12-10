@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/mio-0.8.9/src/sys/unix/selector/epoll.rs`."><title>epoll.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../../../" data-static-root-path="../../../../../static.files/" data-current-crate="mio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../../src-files.js"></script><script defer src="../../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/mio-0.8.9/src/sys/unix/selector/epoll.rs`."><title>epoll.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../../../" data-static-root-path="../../../../../static.files/" data-current-crate="mio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../../src-files.js"></script><script defer src="../../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -298,7 +298,7 @@
 
 <span class="kw">impl </span>Selector {
     <span class="kw">pub fn </span>new() -&gt; io::Result&lt;Selector&gt; {
-        <span class="attr">#[cfg(not(target_os = <span class="string">&quot;android&quot;</span>))]
+        <span class="attr">#[cfg(not(target_os = <span class="string">"android"</span>))]
         </span><span class="kw">let </span>res = <span class="macro">syscall!</span>(epoll_create1(libc::EPOLL_CLOEXEC));
 
         <span class="comment">// On Android &lt; API level 16 `epoll_create1` is not defined, so use a
@@ -306,7 +306,7 @@
         // According to libuv, `EPOLL_CLOEXEC` is not defined on Android API &lt;
         // 21. But `EPOLL_CLOEXEC` is an alias for `O_CLOEXEC` on that platform,
         // so we use it instead.
-        </span><span class="attr">#[cfg(target_os = <span class="string">&quot;android&quot;</span>)]
+        </span><span class="attr">#[cfg(target_os = <span class="string">"android"</span>)]
         </span><span class="kw">let </span>res = <span class="macro">syscall!</span>(syscall(libc::SYS_epoll_create1, libc::O_CLOEXEC));
 
         <span class="kw">let </span>ep = <span class="kw">match </span>res {
@@ -341,7 +341,7 @@
 
     <span class="kw">pub fn </span>try_clone(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; io::Result&lt;Selector&gt; {
         <span class="macro">syscall!</span>(fcntl(<span class="self">self</span>.ep, libc::F_DUPFD_CLOEXEC, <span class="kw">super</span>::LOWEST_FD)).map(|ep| Selector {
-            <span class="comment">// It&#39;s the same selector, so we use the same id.
+            <span class="comment">// It's the same selector, so we use the same id.
             </span><span class="attr">#[cfg(debug_assertions)]
             </span>id: <span class="self">self</span>.id,
             ep,
@@ -352,9 +352,9 @@
         <span class="comment">// A bug in kernels &lt; 2.6.37 makes timeouts larger than LONG_MAX / CONFIG_HZ
         // (approx. 30 minutes with CONFIG_HZ=1200) effectively infinite on 32 bits
         // architectures. The magic number is the same constant used by libuv.
-        </span><span class="attr">#[cfg(target_pointer_width = <span class="string">&quot;32&quot;</span>)]
+        </span><span class="attr">#[cfg(target_pointer_width = <span class="string">"32"</span>)]
         </span><span class="kw">const </span>MAX_SAFE_TIMEOUT: u128 = <span class="number">1789569</span>;
-        <span class="attr">#[cfg(not(target_pointer_width = <span class="string">&quot;32&quot;</span>))]
+        <span class="attr">#[cfg(not(target_pointer_width = <span class="string">"32"</span>))]
         </span><span class="kw">const </span>MAX_SAFE_TIMEOUT: u128 = libc::c_int::max_value() <span class="kw">as </span>u128;
 
         <span class="kw">let </span>timeout = timeout
@@ -389,7 +389,7 @@
         <span class="kw">let </span><span class="kw-2">mut </span>event = libc::epoll_event {
             events: interests_to_epoll(interests),
             u64: usize::from(token) <span class="kw">as </span>u64,
-            <span class="attr">#[cfg(target_os = <span class="string">&quot;redox&quot;</span>)]
+            <span class="attr">#[cfg(target_os = <span class="string">"redox"</span>)]
             </span>_pad: <span class="number">0</span>,
         };
 
@@ -400,7 +400,7 @@
         <span class="kw">let </span><span class="kw-2">mut </span>event = libc::epoll_event {
             events: interests_to_epoll(interests),
             u64: usize::from(token) <span class="kw">as </span>u64,
-            <span class="attr">#[cfg(target_os = <span class="string">&quot;redox&quot;</span>)]
+            <span class="attr">#[cfg(target_os = <span class="string">"redox"</span>)]
             </span>_pad: <span class="number">0</span>,
         };
 
@@ -430,7 +430,7 @@
 <span class="kw">impl </span>Drop <span class="kw">for </span>Selector {
     <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="kw">if let </span><span class="prelude-val">Err</span>(err) = <span class="macro">syscall!</span>(close(<span class="self">self</span>.ep)) {
-            <span class="macro">error!</span>(<span class="string">&quot;error closing epoll: {}&quot;</span>, err);
+            <span class="macro">error!</span>(<span class="string">"error closing epoll: {}"</span>, err);
         }
     }
 }
@@ -511,7 +511,7 @@
         </span><span class="bool-val">false
     </span>}
 
-    <span class="kw">pub fn </span>debug_details(f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;, event: <span class="kw-2">&amp;</span>Event) -&gt; fmt::Result {
+    <span class="kw">pub fn </span>debug_details(f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;, event: <span class="kw-2">&amp;</span>Event) -&gt; fmt::Result {
         <span class="attr">#[allow(clippy::trivially_copy_pass_by_ref)]
         </span><span class="kw">fn </span>check_events(got: <span class="kw-2">&amp;</span>u32, want: <span class="kw-2">&amp;</span>libc::c_int) -&gt; bool {
             (<span class="kw-2">*</span>got <span class="kw">as </span>libc::c_int &amp; want) != <span class="number">0
@@ -532,23 +532,23 @@
             libc::EPOLLET,
             libc::EPOLLRDHUP,
             libc::EPOLLONESHOT,
-            <span class="attr">#[cfg(target_os = <span class="string">&quot;linux&quot;</span>)]
+            <span class="attr">#[cfg(target_os = <span class="string">"linux"</span>)]
             </span>libc::EPOLLEXCLUSIVE,
-            <span class="attr">#[cfg(any(target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;linux&quot;</span>))]
+            <span class="attr">#[cfg(any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"linux"</span>))]
             </span>libc::EPOLLWAKEUP,
             libc::EPOLL_CLOEXEC,
         );
 
-        <span class="comment">// Can&#39;t reference fields in packed structures.
+        <span class="comment">// Can't reference fields in packed structures.
         </span><span class="kw">let </span>e_u64 = event.u64;
-        f.debug_struct(<span class="string">&quot;epoll_event&quot;</span>)
-            .field(<span class="string">&quot;events&quot;</span>, <span class="kw-2">&amp;</span>EventsDetails(event.events))
-            .field(<span class="string">&quot;u64&quot;</span>, <span class="kw-2">&amp;</span>e_u64)
+        f.debug_struct(<span class="string">"epoll_event"</span>)
+            .field(<span class="string">"events"</span>, <span class="kw-2">&amp;</span>EventsDetails(event.events))
+            .field(<span class="string">"u64"</span>, <span class="kw-2">&amp;</span>e_u64)
             .finish()
     }
 }
 
-<span class="attr">#[cfg(target_os = <span class="string">&quot;android&quot;</span>)]
+<span class="attr">#[cfg(target_os = <span class="string">"android"</span>)]
 #[test]
 </span><span class="kw">fn </span>assert_close_on_exec_flag() {
     <span class="comment">// This assertion need to be true for Selector::new.

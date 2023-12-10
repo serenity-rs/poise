@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/time/interval.rs`."><title>interval.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/time/interval.rs`."><title>interval.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -695,7 +695,7 @@
 /// use tokio::time;
 ///
 /// async fn task_that_takes_a_second() {
-///     println!(&quot;hello&quot;);
+///     println!("hello");
 ///     time::sleep(time::Duration::from_secs(1)).await
 /// }
 ///
@@ -713,7 +713,7 @@
 /// [`.tick().await`]: Interval::tick
 </span><span class="attr">#[track_caller]
 </span><span class="kw">pub fn </span>interval(period: Duration) -&gt; Interval {
-    <span class="macro">assert!</span>(period &gt; Duration::new(<span class="number">0</span>, <span class="number">0</span>), <span class="string">&quot;`period` must be non-zero.&quot;</span>);
+    <span class="macro">assert!</span>(period &gt; Duration::new(<span class="number">0</span>, <span class="number">0</span>), <span class="string">"`period` must be non-zero."</span>);
     internal_interval_at(Instant::now(), period, trace::caller_location())
 }
 
@@ -748,48 +748,48 @@
 /// ```
 </span><span class="attr">#[track_caller]
 </span><span class="kw">pub fn </span>interval_at(start: Instant, period: Duration) -&gt; Interval {
-    <span class="macro">assert!</span>(period &gt; Duration::new(<span class="number">0</span>, <span class="number">0</span>), <span class="string">&quot;`period` must be non-zero.&quot;</span>);
+    <span class="macro">assert!</span>(period &gt; Duration::new(<span class="number">0</span>, <span class="number">0</span>), <span class="string">"`period` must be non-zero."</span>);
     internal_interval_at(start, period, trace::caller_location())
 }
 
-<span class="attr">#[cfg_attr(not(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>)), allow(unused_variables))]
+<span class="attr">#[cfg_attr(not(all(tokio_unstable, feature = <span class="string">"tracing"</span>)), allow(unused_variables))]
 </span><span class="kw">fn </span>internal_interval_at(
     start: Instant,
     period: Duration,
-    location: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Location&lt;<span class="lifetime">&#39;static</span>&gt;&gt;,
+    location: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'static </span>Location&lt;<span class="lifetime">'static</span>&gt;&gt;,
 ) -&gt; Interval {
-    <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+    <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
     </span><span class="kw">let </span>resource_span = {
-        <span class="kw">let </span>location = location.expect(<span class="string">&quot;should have location if tracing&quot;</span>);
+        <span class="kw">let </span>location = location.expect(<span class="string">"should have location if tracing"</span>);
 
         <span class="macro">tracing::trace_span!</span>(
-            <span class="string">&quot;runtime.resource&quot;</span>,
-            concrete_type = <span class="string">&quot;Interval&quot;</span>,
-            kind = <span class="string">&quot;timer&quot;</span>,
+            <span class="string">"runtime.resource"</span>,
+            concrete_type = <span class="string">"Interval"</span>,
+            kind = <span class="string">"timer"</span>,
             loc.file = location.file(),
             loc.line = location.line(),
             loc.col = location.column(),
         )
     };
 
-    <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+    <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
     </span><span class="kw">let </span>delay = resource_span.in_scope(|| Box::pin(sleep_until(start)));
 
-    <span class="attr">#[cfg(not(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>)))]
+    <span class="attr">#[cfg(not(all(tokio_unstable, feature = <span class="string">"tracing"</span>)))]
     </span><span class="kw">let </span>delay = Box::pin(sleep_until(start));
 
     Interval {
         delay,
         period,
         missed_tick_behavior: MissedTickBehavior::default(),
-        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
         </span>resource_span,
     }
 }
 
 <span class="doccomment">/// Defines the behavior of an [`Interval`] when it misses a tick.
 ///
-/// Sometimes, an [`Interval`]&#39;s tick is missed. For example, consider the
+/// Sometimes, an [`Interval`]'s tick is missed. For example, consider the
 /// following:
 ///
 /// ```
@@ -812,7 +812,7 @@
 /// [`Interval::tick()`].
 ///
 /// By default, when a tick is missed, [`Interval`] fires ticks as quickly as it
-/// can until it is &quot;caught up&quot; in time to where it should be.
+/// can until it is "caught up" in time to where it should be.
 /// `MissedTickBehavior` can be used to specify a different behavior for
 /// [`Interval`] to exhibit. Each variant represents a different strategy.
 ///
@@ -823,12 +823,12 @@
 </span><span class="kw">pub enum </span>MissedTickBehavior {
     <span class="doccomment">/// Ticks as fast as possible until caught up.
     ///
-    /// When this strategy is used, [`Interval`] schedules ticks &quot;normally&quot; (the
-    /// same as it would have if the ticks hadn&#39;t been delayed), which results
+    /// When this strategy is used, [`Interval`] schedules ticks "normally" (the
+    /// same as it would have if the ticks hadn't been delayed), which results
     /// in it firing ticks as fast as possible until it is caught up in time to
     /// where it should be. Unlike [`Delay`] and [`Skip`], the ticks yielded
     /// when `Burst` is used (the [`Instant`]s that [`tick`](Interval::tick)
-    /// yields) aren&#39;t different than they would have been if a tick had not
+    /// yields) aren't different than they would have been if a tick had not
     /// been missed. Like [`Skip`], and unlike [`Delay`], the ticks may be
     /// shortened.
     ///
@@ -844,7 +844,7 @@
     /// use tokio::time::{interval, Duration};
     /// # async fn task_that_takes_200_millis() {}
     ///
-    /// # #[tokio::main(flavor = &quot;current_thread&quot;)]
+    /// # #[tokio::main(flavor = "current_thread")]
     /// # async fn main() {
     /// let mut interval = interval(Duration::from_millis(50));
     ///
@@ -888,7 +888,7 @@
     /// of scheduling ticks to fire at multiples of `period` from `start` (the
     /// time when the first tick was fired), it schedules all future ticks to
     /// happen at a regular `period` from the point when [`tick`] was called.
-    /// Unlike [`Burst`] and [`Skip`], ticks are not shortened, and they aren&#39;t
+    /// Unlike [`Burst`] and [`Skip`], ticks are not shortened, and they aren't
     /// guaranteed to happen at a multiple of `period` from `start` any longer.
     ///
     /// This looks something like this:
@@ -903,7 +903,7 @@
     /// use tokio::time::{interval, Duration, MissedTickBehavior};
     /// # async fn task_that_takes_more_than_50_millis() {}
     ///
-    /// # #[tokio::main(flavor = &quot;current_thread&quot;)]
+    /// # #[tokio::main(flavor = "current_thread")]
     /// # async fn main() {
     /// let mut interval = interval(Duration::from_millis(50));
     /// interval.set_missed_tick_behavior(MissedTickBehavior::Delay);
@@ -954,7 +954,7 @@
     /// use tokio::time::{interval, Duration, MissedTickBehavior};
     /// # async fn task_that_takes_75_millis() {}
     ///
-    /// # #[tokio::main(flavor = &quot;current_thread&quot;)]
+    /// # #[tokio::main(flavor = "current_thread")]
     /// # async fn main() {
     /// let mut interval = interval(Duration::from_millis(50));
     /// interval.set_missed_tick_behavior(MissedTickBehavior::Skip);
@@ -993,10 +993,10 @@
                             // have to be longer than `now - timeout`, and both
                             // would have to be longer than 584 years.
                             //
-                            // If it did fail, there&#39;s not a good way to pass
+                            // If it did fail, there's not a good way to pass
                             // the error along to the user, so we just panic.
                             </span>.expect(
-                                <span class="string">&quot;too much time has elapsed since the interval was supposed to tick&quot;</span>,
+                                <span class="string">"too much time has elapsed since the interval was supposed to tick"</span>,
                             ),
                     )
             }
@@ -1040,7 +1040,7 @@
     <span class="doccomment">/// The strategy `Interval` should use when a tick is missed.
     </span>missed_tick_behavior: MissedTickBehavior,
 
-    <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+    <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
     </span>resource_span: tracing::Span,
 }
 
@@ -1072,17 +1072,17 @@
     /// }
     /// ```
     </span><span class="kw">pub async fn </span>tick(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; Instant {
-        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
         </span><span class="kw">let </span>resource_span = <span class="self">self</span>.resource_span.clone();
-        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
         </span><span class="kw">let </span>instant = trace::async_op(
             || poll_fn(|cx| <span class="self">self</span>.poll_tick(cx)),
             resource_span,
-            <span class="string">&quot;Interval::tick&quot;</span>,
-            <span class="string">&quot;poll_tick&quot;</span>,
+            <span class="string">"Interval::tick"</span>,
+            <span class="string">"poll_tick"</span>,
             <span class="bool-val">false</span>,
         );
-        <span class="attr">#[cfg(not(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>)))]
+        <span class="attr">#[cfg(not(all(tokio_unstable, feature = <span class="string">"tracing"</span>)))]
         </span><span class="kw">let </span>instant = poll_fn(|cx| <span class="self">self</span>.poll_tick(cx));
 
         instant.<span class="kw">await
@@ -1100,7 +1100,7 @@
     /// calls to `poll_tick`, only the [`Waker`](std::task::Waker) from the
     /// [`Context`] passed to the most recent call is scheduled to receive a
     /// wakeup.
-    </span><span class="kw">pub fn </span>poll_tick(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;Instant&gt; {
+    </span><span class="kw">pub fn </span>poll_tick(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;Instant&gt; {
         <span class="comment">// Wait for the delay to be done
         </span><span class="macro">ready!</span>(Pin::new(<span class="kw-2">&amp;mut </span><span class="self">self</span>.delay).poll(cx));
 

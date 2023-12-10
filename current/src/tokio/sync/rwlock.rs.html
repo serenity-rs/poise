@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/sync/rwlock.rs`."><title>rwlock.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/sync/rwlock.rs`."><title>rwlock.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1117,7 +1117,7 @@
 <a href="#1117" id="1117">1117</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::sync::batch_semaphore::{Semaphore, TryAcquireError};
 <span class="kw">use </span><span class="kw">crate</span>::sync::mutex::TryLockError;
-<span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+<span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
 </span><span class="kw">use </span><span class="kw">crate</span>::util::trace;
 <span class="kw">use </span>std::cell::UnsafeCell;
 <span class="kw">use </span>std::marker;
@@ -1155,14 +1155,14 @@
 /// become available to yield. An `RwLock` will allow any number of readers to
 /// acquire the lock as long as a writer is not holding the lock.
 ///
-/// The priority policy of Tokio&#39;s read-write lock is _fair_ (or
+/// The priority policy of Tokio's read-write lock is _fair_ (or
 /// [_write-preferring_]), in order to ensure that readers cannot starve
 /// writers. Fairness is ensured using a first-in, first-out queue for the tasks
 /// awaiting the lock; if a task that wishes to acquire the write lock is at the
 /// head of the queue, read locks will not be given out until the write lock has
-/// been released. This is in contrast to the Rust standard library&#39;s
+/// been released. This is in contrast to the Rust standard library's
 /// `std::sync::RwLock`, where the priority policy is dependent on the
-/// operating system&#39;s implementation.
+/// operating system's implementation.
 ///
 /// The type parameter `T` represents the data that this lock protects. It is
 /// required that `T` satisfies [`Send`] to be shared across threads. The RAII guards
@@ -1203,7 +1203,7 @@
 /// [`Send`]: trait@std::marker::Send
 /// [_write-preferring_]: https://en.wikipedia.org/wiki/Readers%E2%80%93writer_lock#Priority_policies
 </span><span class="kw">pub struct </span>RwLock&lt;T: <span class="question-mark">?</span>Sized&gt; {
-    <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+    <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
     </span>resource_span: tracing::Span,
 
     <span class="comment">// maximum number of concurrent readers
@@ -1222,28 +1222,28 @@
     <span class="kw">fn </span>check_send&lt;T: Send&gt;() {}
     <span class="kw">fn </span>check_sync&lt;T: Sync&gt;() {}
     <span class="kw">fn </span>check_unpin&lt;T: Unpin&gt;() {}
-    <span class="comment">// This has to take a value, since the async fn&#39;s return type is unnameable.
+    <span class="comment">// This has to take a value, since the async fn's return type is unnameable.
     </span><span class="kw">fn </span>check_send_sync_val&lt;T: Send + Sync&gt;(_t: T) {}
 
     check_send::&lt;RwLock&lt;u32&gt;&gt;();
     check_sync::&lt;RwLock&lt;u32&gt;&gt;();
     check_unpin::&lt;RwLock&lt;u32&gt;&gt;();
 
-    check_send::&lt;RwLockReadGuard&lt;<span class="lifetime">&#39;_</span>, u32&gt;&gt;();
-    check_sync::&lt;RwLockReadGuard&lt;<span class="lifetime">&#39;_</span>, u32&gt;&gt;();
-    check_unpin::&lt;RwLockReadGuard&lt;<span class="lifetime">&#39;_</span>, u32&gt;&gt;();
+    check_send::&lt;RwLockReadGuard&lt;<span class="lifetime">'_</span>, u32&gt;&gt;();
+    check_sync::&lt;RwLockReadGuard&lt;<span class="lifetime">'_</span>, u32&gt;&gt;();
+    check_unpin::&lt;RwLockReadGuard&lt;<span class="lifetime">'_</span>, u32&gt;&gt;();
 
     check_send::&lt;OwnedRwLockReadGuard&lt;u32, i32&gt;&gt;();
     check_sync::&lt;OwnedRwLockReadGuard&lt;u32, i32&gt;&gt;();
     check_unpin::&lt;OwnedRwLockReadGuard&lt;u32, i32&gt;&gt;();
 
-    check_send::&lt;RwLockWriteGuard&lt;<span class="lifetime">&#39;_</span>, u32&gt;&gt;();
-    check_sync::&lt;RwLockWriteGuard&lt;<span class="lifetime">&#39;_</span>, u32&gt;&gt;();
-    check_unpin::&lt;RwLockWriteGuard&lt;<span class="lifetime">&#39;_</span>, u32&gt;&gt;();
+    check_send::&lt;RwLockWriteGuard&lt;<span class="lifetime">'_</span>, u32&gt;&gt;();
+    check_sync::&lt;RwLockWriteGuard&lt;<span class="lifetime">'_</span>, u32&gt;&gt;();
+    check_unpin::&lt;RwLockWriteGuard&lt;<span class="lifetime">'_</span>, u32&gt;&gt;();
 
-    check_send::&lt;RwLockMappedWriteGuard&lt;<span class="lifetime">&#39;_</span>, u32&gt;&gt;();
-    check_sync::&lt;RwLockMappedWriteGuard&lt;<span class="lifetime">&#39;_</span>, u32&gt;&gt;();
-    check_unpin::&lt;RwLockMappedWriteGuard&lt;<span class="lifetime">&#39;_</span>, u32&gt;&gt;();
+    check_send::&lt;RwLockMappedWriteGuard&lt;<span class="lifetime">'_</span>, u32&gt;&gt;();
+    check_sync::&lt;RwLockMappedWriteGuard&lt;<span class="lifetime">'_</span>, u32&gt;&gt;();
+    check_unpin::&lt;RwLockMappedWriteGuard&lt;<span class="lifetime">'_</span>, u32&gt;&gt;();
 
     check_send::&lt;OwnedRwLockWriteGuard&lt;u32&gt;&gt;();
     check_sync::&lt;OwnedRwLockWriteGuard&lt;u32&gt;&gt;();
@@ -1260,16 +1260,16 @@
     check_send_sync_val(Arc::clone(<span class="kw-2">&amp;</span>rwlock).write_owned());
 }
 
-<span class="comment">// As long as T: Send + Sync, it&#39;s fine to send and share RwLock&lt;T&gt; between threads.
+<span class="comment">// As long as T: Send + Sync, it's fine to send and share RwLock&lt;T&gt; between threads.
 // If T were not Send, sending and sharing a RwLock&lt;T&gt; would be bad, since you can access T through
 // RwLock&lt;T&gt;.
 </span><span class="kw">unsafe impl</span>&lt;T&gt; Send <span class="kw">for </span>RwLock&lt;T&gt; <span class="kw">where </span>T: <span class="question-mark">?</span>Sized + Send {}
 <span class="kw">unsafe impl</span>&lt;T&gt; Sync <span class="kw">for </span>RwLock&lt;T&gt; <span class="kw">where </span>T: <span class="question-mark">?</span>Sized + Send + Sync {}
-<span class="comment">// NB: These impls need to be explicit since we&#39;re storing a raw pointer.
+<span class="comment">// NB: These impls need to be explicit since we're storing a raw pointer.
 // Safety: Stores a raw pointer to `T`, so if `T` is `Sync`, the lock guard over
 // `T` is `Send`.
-</span><span class="kw">unsafe impl</span>&lt;T&gt; Send <span class="kw">for </span>RwLockReadGuard&lt;<span class="lifetime">&#39;_</span>, T&gt; <span class="kw">where </span>T: <span class="question-mark">?</span>Sized + Sync {}
-<span class="kw">unsafe impl</span>&lt;T&gt; Sync <span class="kw">for </span>RwLockReadGuard&lt;<span class="lifetime">&#39;_</span>, T&gt; <span class="kw">where </span>T: <span class="question-mark">?</span>Sized + Send + Sync {}
+</span><span class="kw">unsafe impl</span>&lt;T&gt; Send <span class="kw">for </span>RwLockReadGuard&lt;<span class="lifetime">'_</span>, T&gt; <span class="kw">where </span>T: <span class="question-mark">?</span>Sized + Sync {}
+<span class="kw">unsafe impl</span>&lt;T&gt; Sync <span class="kw">for </span>RwLockReadGuard&lt;<span class="lifetime">'_</span>, T&gt; <span class="kw">where </span>T: <span class="question-mark">?</span>Sized + Send + Sync {}
 <span class="comment">// T is required to be `Send` because an OwnedRwLockReadGuard can be used to drop the value held in
 // the RwLock, unlike RwLockReadGuard.
 </span><span class="kw">unsafe impl</span>&lt;T, U&gt; Send <span class="kw">for </span>OwnedRwLockReadGuard&lt;T, U&gt;
@@ -1284,9 +1284,9 @@
     U: <span class="question-mark">?</span>Sized + Send + Sync,
 {
 }
-<span class="kw">unsafe impl</span>&lt;T&gt; Sync <span class="kw">for </span>RwLockWriteGuard&lt;<span class="lifetime">&#39;_</span>, T&gt; <span class="kw">where </span>T: <span class="question-mark">?</span>Sized + Send + Sync {}
+<span class="kw">unsafe impl</span>&lt;T&gt; Sync <span class="kw">for </span>RwLockWriteGuard&lt;<span class="lifetime">'_</span>, T&gt; <span class="kw">where </span>T: <span class="question-mark">?</span>Sized + Send + Sync {}
 <span class="kw">unsafe impl</span>&lt;T&gt; Sync <span class="kw">for </span>OwnedRwLockWriteGuard&lt;T&gt; <span class="kw">where </span>T: <span class="question-mark">?</span>Sized + Send + Sync {}
-<span class="kw">unsafe impl</span>&lt;T&gt; Sync <span class="kw">for </span>RwLockMappedWriteGuard&lt;<span class="lifetime">&#39;_</span>, T&gt; <span class="kw">where </span>T: <span class="question-mark">?</span>Sized + Send + Sync {}
+<span class="kw">unsafe impl</span>&lt;T&gt; Sync <span class="kw">for </span>RwLockMappedWriteGuard&lt;<span class="lifetime">'_</span>, T&gt; <span class="kw">where </span>T: <span class="question-mark">?</span>Sized + Send + Sync {}
 <span class="kw">unsafe impl</span>&lt;T, U&gt; Sync <span class="kw">for </span>OwnedRwLockMappedWriteGuard&lt;T, U&gt;
 <span class="kw">where
     </span>T: <span class="question-mark">?</span>Sized + Send + Sync,
@@ -1297,9 +1297,9 @@
 // `T` is `Send` - but since this is also provides mutable access, we need to
 // make sure that `T` is `Send` since its value can be sent across thread
 // boundaries.
-</span><span class="kw">unsafe impl</span>&lt;T&gt; Send <span class="kw">for </span>RwLockWriteGuard&lt;<span class="lifetime">&#39;_</span>, T&gt; <span class="kw">where </span>T: <span class="question-mark">?</span>Sized + Send + Sync {}
+</span><span class="kw">unsafe impl</span>&lt;T&gt; Send <span class="kw">for </span>RwLockWriteGuard&lt;<span class="lifetime">'_</span>, T&gt; <span class="kw">where </span>T: <span class="question-mark">?</span>Sized + Send + Sync {}
 <span class="kw">unsafe impl</span>&lt;T&gt; Send <span class="kw">for </span>OwnedRwLockWriteGuard&lt;T&gt; <span class="kw">where </span>T: <span class="question-mark">?</span>Sized + Send + Sync {}
-<span class="kw">unsafe impl</span>&lt;T&gt; Send <span class="kw">for </span>RwLockMappedWriteGuard&lt;<span class="lifetime">&#39;_</span>, T&gt; <span class="kw">where </span>T: <span class="question-mark">?</span>Sized + Send + Sync {}
+<span class="kw">unsafe impl</span>&lt;T&gt; Send <span class="kw">for </span>RwLockMappedWriteGuard&lt;<span class="lifetime">'_</span>, T&gt; <span class="kw">where </span>T: <span class="question-mark">?</span>Sized + Send + Sync {}
 <span class="kw">unsafe impl</span>&lt;T, U&gt; Send <span class="kw">for </span>OwnedRwLockMappedWriteGuard&lt;T, U&gt;
 <span class="kw">where
     </span>T: <span class="question-mark">?</span>Sized + Send + Sync,
@@ -1322,13 +1322,13 @@
     <span class="kw">where
         </span>T: Sized,
     {
-        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
         </span><span class="kw">let </span>resource_span = {
             <span class="kw">let </span>location = std::panic::Location::caller();
             <span class="kw">let </span>resource_span = <span class="macro">tracing::trace_span!</span>(
-                <span class="string">&quot;runtime.resource&quot;</span>,
-                concrete_type = <span class="string">&quot;RwLock&quot;</span>,
-                kind = <span class="string">&quot;Sync&quot;</span>,
+                <span class="string">"runtime.resource"</span>,
+                concrete_type = <span class="string">"RwLock"</span>,
+                kind = <span class="string">"Sync"</span>,
                 loc.file = location.file(),
                 loc.line = location.line(),
                 loc.col = location.column(),
@@ -1336,17 +1336,17 @@
 
             resource_span.in_scope(|| {
                 <span class="macro">tracing::trace!</span>(
-                    target: <span class="string">&quot;runtime::resource::state_update&quot;</span>,
+                    target: <span class="string">"runtime::resource::state_update"</span>,
                     max_readers = MAX_READS,
                 );
 
                 <span class="macro">tracing::trace!</span>(
-                    target: <span class="string">&quot;runtime::resource::state_update&quot;</span>,
+                    target: <span class="string">"runtime::resource::state_update"</span>,
                     write_locked = <span class="bool-val">false</span>,
                 );
 
                 <span class="macro">tracing::trace!</span>(
-                    target: <span class="string">&quot;runtime::resource::state_update&quot;</span>,
+                    target: <span class="string">"runtime::resource::state_update"</span>,
                     current_readers = <span class="number">0</span>,
                 );
             });
@@ -1354,17 +1354,17 @@
             resource_span
         };
 
-        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
         </span><span class="kw">let </span>s = resource_span.in_scope(|| Semaphore::new(MAX_READS <span class="kw">as </span>usize));
 
-        <span class="attr">#[cfg(any(not(tokio_unstable), not(feature = <span class="string">&quot;tracing&quot;</span>)))]
+        <span class="attr">#[cfg(any(not(tokio_unstable), not(feature = <span class="string">"tracing"</span>)))]
         </span><span class="kw">let </span>s = Semaphore::new(MAX_READS <span class="kw">as </span>usize);
 
         RwLock {
             mr: MAX_READS,
             c: UnsafeCell::new(value),
             s,
-            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
             </span>resource_span,
         }
     }
@@ -1390,18 +1390,18 @@
     {
         <span class="macro">assert!</span>(
             max_reads &lt;= MAX_READS,
-            <span class="string">&quot;a RwLock may not be created with more than {} readers&quot;</span>,
+            <span class="string">"a RwLock may not be created with more than {} readers"</span>,
             MAX_READS
         );
 
-        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
         </span><span class="kw">let </span>resource_span = {
             <span class="kw">let </span>location = std::panic::Location::caller();
 
             <span class="kw">let </span>resource_span = <span class="macro">tracing::trace_span!</span>(
-                <span class="string">&quot;runtime.resource&quot;</span>,
-                concrete_type = <span class="string">&quot;RwLock&quot;</span>,
-                kind = <span class="string">&quot;Sync&quot;</span>,
+                <span class="string">"runtime.resource"</span>,
+                concrete_type = <span class="string">"RwLock"</span>,
+                kind = <span class="string">"Sync"</span>,
                 loc.file = location.file(),
                 loc.line = location.line(),
                 loc.col = location.column(),
@@ -1409,17 +1409,17 @@
 
             resource_span.in_scope(|| {
                 <span class="macro">tracing::trace!</span>(
-                    target: <span class="string">&quot;runtime::resource::state_update&quot;</span>,
+                    target: <span class="string">"runtime::resource::state_update"</span>,
                     max_readers = max_reads,
                 );
 
                 <span class="macro">tracing::trace!</span>(
-                    target: <span class="string">&quot;runtime::resource::state_update&quot;</span>,
+                    target: <span class="string">"runtime::resource::state_update"</span>,
                     write_locked = <span class="bool-val">false</span>,
                 );
 
                 <span class="macro">tracing::trace!</span>(
-                    target: <span class="string">&quot;runtime::resource::state_update&quot;</span>,
+                    target: <span class="string">"runtime::resource::state_update"</span>,
                     current_readers = <span class="number">0</span>,
                 );
             });
@@ -1427,17 +1427,17 @@
             resource_span
         };
 
-        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
         </span><span class="kw">let </span>s = resource_span.in_scope(|| Semaphore::new(max_reads <span class="kw">as </span>usize));
 
-        <span class="attr">#[cfg(any(not(tokio_unstable), not(feature = <span class="string">&quot;tracing&quot;</span>)))]
+        <span class="attr">#[cfg(any(not(tokio_unstable), not(feature = <span class="string">"tracing"</span>)))]
         </span><span class="kw">let </span>s = Semaphore::new(max_reads <span class="kw">as </span>usize);
 
         RwLock {
             mr: max_reads,
             c: UnsafeCell::new(value),
             s,
-            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
             </span>resource_span,
         }
     }
@@ -1468,7 +1468,7 @@
             mr: MAX_READS,
             c: UnsafeCell::new(value),
             s: Semaphore::const_new(MAX_READS <span class="kw">as </span>usize),
-            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
             </span>resource_span: tracing::Span::none(),
         }
     }
@@ -1494,7 +1494,7 @@
             mr: max_reads,
             c: UnsafeCell::new(value),
             s: Semaphore::const_new(max_reads <span class="kw">as </span>usize),
-            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
             </span>resource_span: tracing::Span::none(),
         }
     }
@@ -1538,13 +1538,13 @@
     ///         // While main has an active read lock, we acquire one too.
     ///         let r = c_lock.read().await;
     ///         assert_eq!(*r, 1);
-    ///     }).await.expect(&quot;The spawned task has panicked&quot;);
+    ///     }).await.expect("The spawned task has panicked");
     ///
     ///     // Drop the guard after the spawned task finishes.
     ///     drop(n);
     /// }
     /// ```
-    </span><span class="kw">pub async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; RwLockReadGuard&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+    </span><span class="kw">pub async fn </span>read(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; RwLockReadGuard&lt;<span class="lifetime">'_</span>, T&gt; {
         <span class="kw">let </span>acquire_fut = <span class="kw">async </span>{
             <span class="self">self</span>.s.acquire(<span class="number">1</span>).<span class="kw">await</span>.unwrap_or_else(|<span class="kw">_</span>| {
                 <span class="comment">// The semaphore was closed. but, we never explicitly close it, and we have a
@@ -1556,29 +1556,29 @@
                 s: <span class="kw-2">&amp;</span><span class="self">self</span>.s,
                 data: <span class="self">self</span>.c.get(),
                 marker: PhantomData,
-                <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+                <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
                 </span>resource_span: <span class="self">self</span>.resource_span.clone(),
             }
         };
 
-        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
         </span><span class="kw">let </span>acquire_fut = trace::async_op(
             <span class="kw">move </span>|| acquire_fut,
             <span class="self">self</span>.resource_span.clone(),
-            <span class="string">&quot;RwLock::read&quot;</span>,
-            <span class="string">&quot;poll&quot;</span>,
+            <span class="string">"RwLock::read"</span>,
+            <span class="string">"poll"</span>,
             <span class="bool-val">false</span>,
         );
 
         <span class="attr">#[allow(clippy::let_and_return)] </span><span class="comment">// this lint triggers when disabling tracing
         </span><span class="kw">let </span>guard = acquire_fut.<span class="kw">await</span>;
 
-        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
         </span><span class="self">self</span>.resource_span.in_scope(|| {
             <span class="macro">tracing::trace!</span>(
-            target: <span class="string">&quot;runtime::resource::state_update&quot;</span>,
+            target: <span class="string">"runtime::resource::state_update"</span>,
             current_readers = <span class="number">1</span>,
-            current_readers.op = <span class="string">&quot;add&quot;</span>,
+            current_readers.op = <span class="string">"add"</span>,
             )
         });
 
@@ -1633,8 +1633,8 @@
     /// }
     /// ```
     </span><span class="attr">#[track_caller]
-    #[cfg(feature = <span class="string">&quot;sync&quot;</span>)]
-    </span><span class="kw">pub fn </span>blocking_read(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; RwLockReadGuard&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+    #[cfg(feature = <span class="string">"sync"</span>)]
+    </span><span class="kw">pub fn </span>blocking_read(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; RwLockReadGuard&lt;<span class="lifetime">'_</span>, T&gt; {
         <span class="kw">crate</span>::future::block_on(<span class="self">self</span>.read())
     }
 
@@ -1647,7 +1647,7 @@
     /// This method is identical to [`RwLock::read`], except that the returned
     /// guard references the `RwLock` with an [`Arc`] rather than by borrowing
     /// it. Therefore, the `RwLock` must be wrapped in an `Arc` to call this
-    /// method, and the guard will live for the `&#39;static` lifetime, as it keeps
+    /// method, and the guard will live for the `'static` lifetime, as it keeps
     /// the `RwLock` alive by holding an `Arc`.
     ///
     /// Note that under the priority policy of [`RwLock`], read locks are not
@@ -1683,14 +1683,14 @@
     ///         // While main has an active read lock, we acquire one too.
     ///         let r = c_lock.read_owned().await;
     ///         assert_eq!(*r, 1);
-    ///     }).await.expect(&quot;The spawned task has panicked&quot;);
+    ///     }).await.expect("The spawned task has panicked");
     ///
     ///     // Drop the guard after the spawned task finishes.
     ///     drop(n);
     ///}
     /// ```
     </span><span class="kw">pub async fn </span>read_owned(<span class="self">self</span>: Arc&lt;<span class="self">Self</span>&gt;) -&gt; OwnedRwLockReadGuard&lt;T&gt; {
-        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
         </span><span class="kw">let </span>resource_span = <span class="self">self</span>.resource_span.clone();
 
         <span class="kw">let </span>acquire_fut = <span class="kw">async </span>{
@@ -1701,7 +1701,7 @@
             });
 
             OwnedRwLockReadGuard {
-                <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+                <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
                 </span>resource_span: <span class="self">self</span>.resource_span.clone(),
                 data: <span class="self">self</span>.c.get(),
                 lock: <span class="self">self</span>,
@@ -1709,24 +1709,24 @@
             }
         };
 
-        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
         </span><span class="kw">let </span>acquire_fut = trace::async_op(
             <span class="kw">move </span>|| acquire_fut,
             resource_span,
-            <span class="string">&quot;RwLock::read_owned&quot;</span>,
-            <span class="string">&quot;poll&quot;</span>,
+            <span class="string">"RwLock::read_owned"</span>,
+            <span class="string">"poll"</span>,
             <span class="bool-val">false</span>,
         );
 
         <span class="attr">#[allow(clippy::let_and_return)] </span><span class="comment">// this lint triggers when disabling tracing
         </span><span class="kw">let </span>guard = acquire_fut.<span class="kw">await</span>;
 
-        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
         </span>guard.resource_span.in_scope(|| {
             <span class="macro">tracing::trace!</span>(
-            target: <span class="string">&quot;runtime::resource::state_update&quot;</span>,
+            target: <span class="string">"runtime::resource::state_update"</span>,
             current_readers = <span class="number">1</span>,
-            current_readers.op = <span class="string">&quot;add&quot;</span>,
+            current_readers.op = <span class="string">"add"</span>,
             )
         });
 
@@ -1735,7 +1735,7 @@
 
     <span class="doccomment">/// Attempts to acquire this `RwLock` with shared read access.
     ///
-    /// If the access couldn&#39;t be acquired immediately, returns [`TryLockError`].
+    /// If the access couldn't be acquired immediately, returns [`TryLockError`].
     /// Otherwise, an RAII guard is returned which will release read access
     /// when dropped.
     ///
@@ -1759,13 +1759,13 @@
     ///         // While main has an active read lock, we acquire one too.
     ///         let n = c_lock.read().await;
     ///         assert_eq!(*n, 1);
-    ///     }).await.expect(&quot;The spawned task has panicked&quot;);
+    ///     }).await.expect("The spawned task has panicked");
     ///
     ///     // Drop the guard when spawned task finishes.
     ///     drop(v);
     /// }
     /// ```
-    </span><span class="kw">pub fn </span>try_read(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;RwLockReadGuard&lt;<span class="lifetime">&#39;_</span>, T&gt;, TryLockError&gt; {
+    </span><span class="kw">pub fn </span>try_read(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;RwLockReadGuard&lt;<span class="lifetime">'_</span>, T&gt;, TryLockError&gt; {
         <span class="kw">match </span><span class="self">self</span>.s.try_acquire(<span class="number">1</span>) {
             <span class="prelude-val">Ok</span>(permit) =&gt; permit,
             <span class="prelude-val">Err</span>(TryAcquireError::NoPermits) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(TryLockError(())),
@@ -1776,16 +1776,16 @@
             s: <span class="kw-2">&amp;</span><span class="self">self</span>.s,
             data: <span class="self">self</span>.c.get(),
             marker: marker::PhantomData,
-            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
             </span>resource_span: <span class="self">self</span>.resource_span.clone(),
         };
 
-        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
         </span><span class="self">self</span>.resource_span.in_scope(|| {
             <span class="macro">tracing::trace!</span>(
-            target: <span class="string">&quot;runtime::resource::state_update&quot;</span>,
+            target: <span class="string">"runtime::resource::state_update"</span>,
             current_readers = <span class="number">1</span>,
-            current_readers.op = <span class="string">&quot;add&quot;</span>,
+            current_readers.op = <span class="string">"add"</span>,
             )
         });
 
@@ -1794,14 +1794,14 @@
 
     <span class="doccomment">/// Attempts to acquire this `RwLock` with shared read access.
     ///
-    /// If the access couldn&#39;t be acquired immediately, returns [`TryLockError`].
+    /// If the access couldn't be acquired immediately, returns [`TryLockError`].
     /// Otherwise, an RAII guard is returned which will release read access
     /// when dropped.
     ///
     /// This method is identical to [`RwLock::try_read`], except that the
     /// returned guard references the `RwLock` with an [`Arc`] rather than by
     /// borrowing it. Therefore, the `RwLock` must be wrapped in an `Arc` to
-    /// call this method, and the guard will live for the `&#39;static` lifetime,
+    /// call this method, and the guard will live for the `'static` lifetime,
     /// as it keeps the `RwLock` alive by holding an `Arc`.
     ///
     /// [`TryLockError`]: TryLockError
@@ -1824,7 +1824,7 @@
     ///         // While main has an active read lock, we acquire one too.
     ///         let n = c_lock.read_owned().await;
     ///         assert_eq!(*n, 1);
-    ///     }).await.expect(&quot;The spawned task has panicked&quot;);
+    ///     }).await.expect("The spawned task has panicked");
     ///
     ///     // Drop the guard when spawned task finishes.
     ///     drop(v);
@@ -1838,19 +1838,19 @@
         }
 
         <span class="kw">let </span>guard = OwnedRwLockReadGuard {
-            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
             </span>resource_span: <span class="self">self</span>.resource_span.clone(),
             data: <span class="self">self</span>.c.get(),
             lock: <span class="self">self</span>,
             _p: PhantomData,
         };
 
-        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
         </span>guard.resource_span.in_scope(|| {
             <span class="macro">tracing::trace!</span>(
-            target: <span class="string">&quot;runtime::resource::state_update&quot;</span>,
+            target: <span class="string">"runtime::resource::state_update"</span>,
             current_readers = <span class="number">1</span>,
-            current_readers.op = <span class="string">&quot;add&quot;</span>,
+            current_readers.op = <span class="string">"add"</span>,
             )
         });
 
@@ -1885,7 +1885,7 @@
     ///   *n = 2;
     ///}
     /// ```
-    </span><span class="kw">pub async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; RwLockWriteGuard&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+    </span><span class="kw">pub async fn </span>write(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; RwLockWriteGuard&lt;<span class="lifetime">'_</span>, T&gt; {
         <span class="kw">let </span>acquire_fut = <span class="kw">async </span>{
             <span class="self">self</span>.s.acquire(<span class="self">self</span>.mr).<span class="kw">await</span>.unwrap_or_else(|<span class="kw">_</span>| {
                 <span class="comment">// The semaphore was closed. but, we never explicitly close it, and we have a
@@ -1898,29 +1898,29 @@
                 s: <span class="kw-2">&amp;</span><span class="self">self</span>.s,
                 data: <span class="self">self</span>.c.get(),
                 marker: marker::PhantomData,
-                <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+                <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
                 </span>resource_span: <span class="self">self</span>.resource_span.clone(),
             }
         };
 
-        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
         </span><span class="kw">let </span>acquire_fut = trace::async_op(
             <span class="kw">move </span>|| acquire_fut,
             <span class="self">self</span>.resource_span.clone(),
-            <span class="string">&quot;RwLock::write&quot;</span>,
-            <span class="string">&quot;poll&quot;</span>,
+            <span class="string">"RwLock::write"</span>,
+            <span class="string">"poll"</span>,
             <span class="bool-val">false</span>,
         );
 
         <span class="attr">#[allow(clippy::let_and_return)] </span><span class="comment">// this lint triggers when disabling tracing
         </span><span class="kw">let </span>guard = acquire_fut.<span class="kw">await</span>;
 
-        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
         </span><span class="self">self</span>.resource_span.in_scope(|| {
             <span class="macro">tracing::trace!</span>(
-            target: <span class="string">&quot;runtime::resource::state_update&quot;</span>,
+            target: <span class="string">"runtime::resource::state_update"</span>,
             write_locked = <span class="bool-val">true</span>,
-            write_locked.op = <span class="string">&quot;override&quot;</span>,
+            write_locked.op = <span class="string">"override"</span>,
             )
         });
 
@@ -1977,8 +1977,8 @@
     /// }
     /// ```
     </span><span class="attr">#[track_caller]
-    #[cfg(feature = <span class="string">&quot;sync&quot;</span>)]
-    </span><span class="kw">pub fn </span>blocking_write(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; RwLockWriteGuard&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+    #[cfg(feature = <span class="string">"sync"</span>)]
+    </span><span class="kw">pub fn </span>blocking_write(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; RwLockWriteGuard&lt;<span class="lifetime">'_</span>, T&gt; {
         <span class="kw">crate</span>::future::block_on(<span class="self">self</span>.write())
     }
 
@@ -1991,7 +1991,7 @@
     /// This method is identical to [`RwLock::write`], except that the returned
     /// guard references the `RwLock` with an [`Arc`] rather than by borrowing
     /// it. Therefore, the `RwLock` must be wrapped in an `Arc` to call this
-    /// method, and the guard will live for the `&#39;static` lifetime, as it keeps
+    /// method, and the guard will live for the `'static` lifetime, as it keeps
     /// the `RwLock` alive by holding an `Arc`.
     ///
     /// Returns an RAII guard which will drop the write access of this `RwLock`
@@ -2018,7 +2018,7 @@
     ///}
     /// ```
     </span><span class="kw">pub async fn </span>write_owned(<span class="self">self</span>: Arc&lt;<span class="self">Self</span>&gt;) -&gt; OwnedRwLockWriteGuard&lt;T&gt; {
-        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
         </span><span class="kw">let </span>resource_span = <span class="self">self</span>.resource_span.clone();
 
         <span class="kw">let </span>acquire_fut = <span class="kw">async </span>{
@@ -2029,7 +2029,7 @@
             });
 
             OwnedRwLockWriteGuard {
-                <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+                <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
                 </span>resource_span: <span class="self">self</span>.resource_span.clone(),
                 permits_acquired: <span class="self">self</span>.mr,
                 data: <span class="self">self</span>.c.get(),
@@ -2038,24 +2038,24 @@
             }
         };
 
-        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
         </span><span class="kw">let </span>acquire_fut = trace::async_op(
             <span class="kw">move </span>|| acquire_fut,
             resource_span,
-            <span class="string">&quot;RwLock::write_owned&quot;</span>,
-            <span class="string">&quot;poll&quot;</span>,
+            <span class="string">"RwLock::write_owned"</span>,
+            <span class="string">"poll"</span>,
             <span class="bool-val">false</span>,
         );
 
         <span class="attr">#[allow(clippy::let_and_return)] </span><span class="comment">// this lint triggers when disabling tracing
         </span><span class="kw">let </span>guard = acquire_fut.<span class="kw">await</span>;
 
-        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
         </span>guard.resource_span.in_scope(|| {
             <span class="macro">tracing::trace!</span>(
-            target: <span class="string">&quot;runtime::resource::state_update&quot;</span>,
+            target: <span class="string">"runtime::resource::state_update"</span>,
             write_locked = <span class="bool-val">true</span>,
-            write_locked.op = <span class="string">&quot;override&quot;</span>,
+            write_locked.op = <span class="string">"override"</span>,
             )
         });
 
@@ -2064,7 +2064,7 @@
 
     <span class="doccomment">/// Attempts to acquire this `RwLock` with exclusive write access.
     ///
-    /// If the access couldn&#39;t be acquired immediately, returns [`TryLockError`].
+    /// If the access couldn't be acquired immediately, returns [`TryLockError`].
     /// Otherwise, an RAII guard is returned which will release write access
     /// when dropped.
     ///
@@ -2085,7 +2085,7 @@
     ///     assert!(rw.try_write().is_err());
     /// }
     /// ```
-    </span><span class="kw">pub fn </span>try_write(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;RwLockWriteGuard&lt;<span class="lifetime">&#39;_</span>, T&gt;, TryLockError&gt; {
+    </span><span class="kw">pub fn </span>try_write(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;RwLockWriteGuard&lt;<span class="lifetime">'_</span>, T&gt;, TryLockError&gt; {
         <span class="kw">match </span><span class="self">self</span>.s.try_acquire(<span class="self">self</span>.mr) {
             <span class="prelude-val">Ok</span>(permit) =&gt; permit,
             <span class="prelude-val">Err</span>(TryAcquireError::NoPermits) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(TryLockError(())),
@@ -2097,16 +2097,16 @@
             s: <span class="kw-2">&amp;</span><span class="self">self</span>.s,
             data: <span class="self">self</span>.c.get(),
             marker: marker::PhantomData,
-            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
             </span>resource_span: <span class="self">self</span>.resource_span.clone(),
         };
 
-        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
         </span><span class="self">self</span>.resource_span.in_scope(|| {
             <span class="macro">tracing::trace!</span>(
-            target: <span class="string">&quot;runtime::resource::state_update&quot;</span>,
+            target: <span class="string">"runtime::resource::state_update"</span>,
             write_locked = <span class="bool-val">true</span>,
-            write_locked.op = <span class="string">&quot;override&quot;</span>,
+            write_locked.op = <span class="string">"override"</span>,
             )
         });
 
@@ -2115,14 +2115,14 @@
 
     <span class="doccomment">/// Attempts to acquire this `RwLock` with exclusive write access.
     ///
-    /// If the access couldn&#39;t be acquired immediately, returns [`TryLockError`].
+    /// If the access couldn't be acquired immediately, returns [`TryLockError`].
     /// Otherwise, an RAII guard is returned which will release write access
     /// when dropped.
     ///
     /// This method is identical to [`RwLock::try_write`], except that the
     /// returned guard references the `RwLock` with an [`Arc`] rather than by
     /// borrowing it. Therefore, the `RwLock` must be wrapped in an `Arc` to
-    /// call this method, and the guard will live for the `&#39;static` lifetime,
+    /// call this method, and the guard will live for the `'static` lifetime,
     /// as it keeps the `RwLock` alive by holding an `Arc`.
     ///
     /// [`TryLockError`]: TryLockError
@@ -2151,7 +2151,7 @@
         }
 
         <span class="kw">let </span>guard = OwnedRwLockWriteGuard {
-            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
             </span>resource_span: <span class="self">self</span>.resource_span.clone(),
             permits_acquired: <span class="self">self</span>.mr,
             data: <span class="self">self</span>.c.get(),
@@ -2159,12 +2159,12 @@
             _p: PhantomData,
         };
 
-        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">&quot;tracing&quot;</span>))]
+        <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
         </span>guard.resource_span.in_scope(|| {
             <span class="macro">tracing::trace!</span>(
-            target: <span class="string">&quot;runtime::resource::state_update&quot;</span>,
+            target: <span class="string">"runtime::resource::state_update"</span>,
             write_locked = <span class="bool-val">true</span>,
-            write_locked.op = <span class="string">&quot;override&quot;</span>,
+            write_locked.op = <span class="string">"override"</span>,
             )
         });
 
@@ -2223,11 +2223,11 @@
 <span class="kw">where
     </span>T: std::fmt::Debug,
 {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
-        <span class="kw">let </span><span class="kw-2">mut </span>d = f.debug_struct(<span class="string">&quot;RwLock&quot;</span>);
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
+        <span class="kw">let </span><span class="kw-2">mut </span>d = f.debug_struct(<span class="string">"RwLock"</span>);
         <span class="kw">match </span><span class="self">self</span>.try_read() {
-            <span class="prelude-val">Ok</span>(inner) =&gt; d.field(<span class="string">&quot;data&quot;</span>, &amp;&amp;<span class="kw-2">*</span>inner),
-            <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; d.field(<span class="string">&quot;data&quot;</span>, <span class="kw-2">&amp;</span><span class="macro">format_args!</span>(<span class="string">&quot;&lt;locked&gt;&quot;</span>)),
+            <span class="prelude-val">Ok</span>(inner) =&gt; d.field(<span class="string">"data"</span>, &amp;&amp;<span class="kw-2">*</span>inner),
+            <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; d.field(<span class="string">"data"</span>, <span class="kw-2">&amp;</span><span class="macro">format_args!</span>(<span class="string">"&lt;locked&gt;"</span>)),
         };
         d.finish()
     }

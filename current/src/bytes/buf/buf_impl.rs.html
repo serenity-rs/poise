@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bytes-1.5.0/src/buf/buf_impl.rs`."><title>buf_impl.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="bytes" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bytes-1.5.0/src/buf/buf_impl.rs`."><title>buf_impl.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="bytes" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1392,13 +1392,13 @@
 <a href="#1392" id="1392">1392</a>
 <a href="#1393" id="1393">1393</a>
 <a href="#1394" id="1394">1394</a>
-</pre></div><pre class="rust"><code><span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+</pre></div><pre class="rust"><code><span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::buf::{reader, Reader};
 <span class="kw">use </span><span class="kw">crate</span>::buf::{take, Chain, Take};
 
 <span class="kw">use </span>core::{cmp, mem, ptr};
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
 </span><span class="kw">use </span>std::io::IoSlice;
 
 <span class="kw">use </span>alloc::boxed::Box;
@@ -1456,16 +1456,16 @@
 /// ```
 /// use bytes::Buf;
 ///
-/// let mut buf = &amp;b&quot;hello world&quot;[..];
+/// let mut buf = &amp;b"hello world"[..];
 ///
-/// assert_eq!(b&#39;h&#39;, buf.get_u8());
-/// assert_eq!(b&#39;e&#39;, buf.get_u8());
-/// assert_eq!(b&#39;l&#39;, buf.get_u8());
+/// assert_eq!(b'h', buf.get_u8());
+/// assert_eq!(b'e', buf.get_u8());
+/// assert_eq!(b'l', buf.get_u8());
 ///
 /// let mut rest = [0; 8];
 /// buf.copy_to_slice(&amp;mut rest);
 ///
-/// assert_eq!(&amp;rest[..], &amp;b&quot;lo world&quot;[..]);
+/// assert_eq!(&amp;rest[..], &amp;b"lo world"[..]);
 /// ```
 </span><span class="kw">pub trait </span>Buf {
     <span class="doccomment">/// Returns the number of bytes between the current position and the end of
@@ -1479,7 +1479,7 @@
     /// ```
     /// use bytes::Buf;
     ///
-    /// let mut buf = &amp;b&quot;hello world&quot;[..];
+    /// let mut buf = &amp;b"hello world"[..];
     ///
     /// assert_eq!(buf.remaining(), 11);
     ///
@@ -1492,7 +1492,7 @@
     ///
     /// Implementations of `remaining` should ensure that the return value does
     /// not change unless a call is made to `advance` or any other function that
-    /// is documented to change the `Buf`&#39;s current position.
+    /// is documented to change the `Buf`'s current position.
     </span><span class="kw">fn </span>remaining(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize;
 
     <span class="doccomment">/// Returns a slice starting at the current position and of length between 0
@@ -1507,13 +1507,13 @@
     /// ```
     /// use bytes::Buf;
     ///
-    /// let mut buf = &amp;b&quot;hello world&quot;[..];
+    /// let mut buf = &amp;b"hello world"[..];
     ///
-    /// assert_eq!(buf.chunk(), &amp;b&quot;hello world&quot;[..]);
+    /// assert_eq!(buf.chunk(), &amp;b"hello world"[..]);
     ///
     /// buf.advance(6);
     ///
-    /// assert_eq!(buf.chunk(), &amp;b&quot;world&quot;[..]);
+    /// assert_eq!(buf.chunk(), &amp;b"world"[..]);
     /// ```
     ///
     /// # Implementer notes
@@ -1523,10 +1523,10 @@
     /// empty slice.
     </span><span class="comment">// The `chunk` method was previously called `bytes`. This alias makes the rename
     // more easily discoverable.
-    </span><span class="attr">#[cfg_attr(docsrs, doc(alias = <span class="string">&quot;bytes&quot;</span>))]
+    </span><span class="attr">#[cfg_attr(docsrs, doc(alias = <span class="string">"bytes"</span>))]
     </span><span class="kw">fn </span>chunk(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[u8];
 
-    <span class="doccomment">/// Fills `dst` with potentially multiple slices starting at `self`&#39;s
+    <span class="doccomment">/// Fills `dst` with potentially multiple slices starting at `self`'s
     /// current position.
     ///
     /// If the `Buf` is backed by disjoint slices of bytes, `chunk_vectored` enables
@@ -1553,9 +1553,9 @@
     /// with `dst` being a zero length slice.
     ///
     /// [`writev`]: http://man7.org/linux/man-pages/man2/readv.2.html
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;std&quot;</span>)))]
-    </span><span class="kw">fn </span>chunks_vectored&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>, dst: <span class="kw-2">&amp;mut </span>[IoSlice&lt;<span class="lifetime">&#39;a</span>&gt;]) -&gt; usize {
+    </span><span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"std"</span>)))]
+    </span><span class="kw">fn </span>chunks_vectored&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>, dst: <span class="kw-2">&amp;mut </span>[IoSlice&lt;<span class="lifetime">'a</span>&gt;]) -&gt; usize {
         <span class="kw">if </span>dst.is_empty() {
             <span class="kw">return </span><span class="number">0</span>;
         }
@@ -1578,13 +1578,13 @@
     /// ```
     /// use bytes::Buf;
     ///
-    /// let mut buf = &amp;b&quot;hello world&quot;[..];
+    /// let mut buf = &amp;b"hello world"[..];
     ///
-    /// assert_eq!(buf.chunk(), &amp;b&quot;hello world&quot;[..]);
+    /// assert_eq!(buf.chunk(), &amp;b"hello world"[..]);
     ///
     /// buf.advance(6);
     ///
-    /// assert_eq!(buf.chunk(), &amp;b&quot;world&quot;[..]);
+    /// assert_eq!(buf.chunk(), &amp;b"world"[..]);
     /// ```
     ///
     /// # Panics
@@ -1609,7 +1609,7 @@
     /// ```
     /// use bytes::Buf;
     ///
-    /// let mut buf = &amp;b&quot;a&quot;[..];
+    /// let mut buf = &amp;b"a"[..];
     ///
     /// assert!(buf.has_remaining());
     ///
@@ -1631,11 +1631,11 @@
     /// ```
     /// use bytes::Buf;
     ///
-    /// let mut buf = &amp;b&quot;hello world&quot;[..];
+    /// let mut buf = &amp;b"hello world"[..];
     /// let mut dst = [0; 5];
     ///
     /// buf.copy_to_slice(&amp;mut dst);
-    /// assert_eq!(&amp;b&quot;hello&quot;[..], &amp;dst);
+    /// assert_eq!(&amp;b"hello"[..], &amp;dst);
     /// assert_eq!(6, buf.remaining());
     /// ```
     ///
@@ -1672,7 +1672,7 @@
     /// ```
     /// use bytes::Buf;
     ///
-    /// let mut buf = &amp;b&quot;\x08 hello&quot;[..];
+    /// let mut buf = &amp;b"\x08 hello"[..];
     /// assert_eq!(8, buf.get_u8());
     /// ```
     ///
@@ -1695,7 +1695,7 @@
     /// ```
     /// use bytes::Buf;
     ///
-    /// let mut buf = &amp;b&quot;\x08 hello&quot;[..];
+    /// let mut buf = &amp;b"\x08 hello"[..];
     /// assert_eq!(8, buf.get_i8());
     /// ```
     ///
@@ -1718,7 +1718,7 @@
     /// ```
     /// use bytes::Buf;
     ///
-    /// let mut buf = &amp;b&quot;\x08\x09 hello&quot;[..];
+    /// let mut buf = &amp;b"\x08\x09 hello"[..];
     /// assert_eq!(0x0809, buf.get_u16());
     /// ```
     ///
@@ -1738,7 +1738,7 @@
     /// ```
     /// use bytes::Buf;
     ///
-    /// let mut buf = &amp;b&quot;\x09\x08 hello&quot;[..];
+    /// let mut buf = &amp;b"\x09\x08 hello"[..];
     /// assert_eq!(0x0809, buf.get_u16_le());
     /// ```
     ///
@@ -1758,9 +1758,9 @@
     /// ```
     /// use bytes::Buf;
     ///
-    /// let mut buf: &amp;[u8] = match cfg!(target_endian = &quot;big&quot;) {
-    ///     true =&gt; b&quot;\x08\x09 hello&quot;,
-    ///     false =&gt; b&quot;\x09\x08 hello&quot;,
+    /// let mut buf: &amp;[u8] = match cfg!(target_endian = "big") {
+    ///     true =&gt; b"\x08\x09 hello",
+    ///     false =&gt; b"\x09\x08 hello",
     /// };
     /// assert_eq!(0x0809, buf.get_u16_ne());
     /// ```
@@ -1781,7 +1781,7 @@
     /// ```
     /// use bytes::Buf;
     ///
-    /// let mut buf = &amp;b&quot;\x08\x09 hello&quot;[..];
+    /// let mut buf = &amp;b"\x08\x09 hello"[..];
     /// assert_eq!(0x0809, buf.get_i16());
     /// ```
     ///
@@ -1801,7 +1801,7 @@
     /// ```
     /// use bytes::Buf;
     ///
-    /// let mut buf = &amp;b&quot;\x09\x08 hello&quot;[..];
+    /// let mut buf = &amp;b"\x09\x08 hello"[..];
     /// assert_eq!(0x0809, buf.get_i16_le());
     /// ```
     ///
@@ -1821,9 +1821,9 @@
     /// ```
     /// use bytes::Buf;
     ///
-    /// let mut buf: &amp;[u8] = match cfg!(target_endian = &quot;big&quot;) {
-    ///     true =&gt; b&quot;\x08\x09 hello&quot;,
-    ///     false =&gt; b&quot;\x09\x08 hello&quot;,
+    /// let mut buf: &amp;[u8] = match cfg!(target_endian = "big") {
+    ///     true =&gt; b"\x08\x09 hello",
+    ///     false =&gt; b"\x09\x08 hello",
     /// };
     /// assert_eq!(0x0809, buf.get_i16_ne());
     /// ```
@@ -1844,7 +1844,7 @@
     /// ```
     /// use bytes::Buf;
     ///
-    /// let mut buf = &amp;b&quot;\x08\x09\xA0\xA1 hello&quot;[..];
+    /// let mut buf = &amp;b"\x08\x09\xA0\xA1 hello"[..];
     /// assert_eq!(0x0809A0A1, buf.get_u32());
     /// ```
     ///
@@ -1864,7 +1864,7 @@
     /// ```
     /// use bytes::Buf;
     ///
-    /// let mut buf = &amp;b&quot;\xA1\xA0\x09\x08 hello&quot;[..];
+    /// let mut buf = &amp;b"\xA1\xA0\x09\x08 hello"[..];
     /// assert_eq!(0x0809A0A1, buf.get_u32_le());
     /// ```
     ///
@@ -1884,9 +1884,9 @@
     /// ```
     /// use bytes::Buf;
     ///
-    /// let mut buf: &amp;[u8] = match cfg!(target_endian = &quot;big&quot;) {
-    ///     true =&gt; b&quot;\x08\x09\xA0\xA1 hello&quot;,
-    ///     false =&gt; b&quot;\xA1\xA0\x09\x08 hello&quot;,
+    /// let mut buf: &amp;[u8] = match cfg!(target_endian = "big") {
+    ///     true =&gt; b"\x08\x09\xA0\xA1 hello",
+    ///     false =&gt; b"\xA1\xA0\x09\x08 hello",
     /// };
     /// assert_eq!(0x0809A0A1, buf.get_u32_ne());
     /// ```
@@ -1907,7 +1907,7 @@
     /// ```
     /// use bytes::Buf;
     ///
-    /// let mut buf = &amp;b&quot;\x08\x09\xA0\xA1 hello&quot;[..];
+    /// let mut buf = &amp;b"\x08\x09\xA0\xA1 hello"[..];
     /// assert_eq!(0x0809A0A1, buf.get_i32());
     /// ```
     ///
@@ -1927,7 +1927,7 @@
     /// ```
     /// use bytes::Buf;
     ///
-    /// let mut buf = &amp;b&quot;\xA1\xA0\x09\x08 hello&quot;[..];
+    /// let mut buf = &amp;b"\xA1\xA0\x09\x08 hello"[..];
     /// assert_eq!(0x0809A0A1, buf.get_i32_le());
     /// ```
     ///
@@ -1947,9 +1947,9 @@
     /// ```
     /// use bytes::Buf;
     ///
-    /// let mut buf: &amp;[u8] = match cfg!(target_endian = &quot;big&quot;) {
-    ///     true =&gt; b&quot;\x08\x09\xA0\xA1 hello&quot;,
-    ///     false =&gt; b&quot;\xA1\xA0\x09\x08 hello&quot;,
+    /// let mut buf: &amp;[u8] = match cfg!(target_endian = "big") {
+    ///     true =&gt; b"\x08\x09\xA0\xA1 hello",
+    ///     false =&gt; b"\xA1\xA0\x09\x08 hello",
     /// };
     /// assert_eq!(0x0809A0A1, buf.get_i32_ne());
     /// ```
@@ -1970,7 +1970,7 @@
     /// ```
     /// use bytes::Buf;
     ///
-    /// let mut buf = &amp;b&quot;\x01\x02\x03\x04\x05\x06\x07\x08 hello&quot;[..];
+    /// let mut buf = &amp;b"\x01\x02\x03\x04\x05\x06\x07\x08 hello"[..];
     /// assert_eq!(0x0102030405060708, buf.get_u64());
     /// ```
     ///
@@ -1990,7 +1990,7 @@
     /// ```
     /// use bytes::Buf;
     ///
-    /// let mut buf = &amp;b&quot;\x08\x07\x06\x05\x04\x03\x02\x01 hello&quot;[..];
+    /// let mut buf = &amp;b"\x08\x07\x06\x05\x04\x03\x02\x01 hello"[..];
     /// assert_eq!(0x0102030405060708, buf.get_u64_le());
     /// ```
     ///
@@ -2010,9 +2010,9 @@
     /// ```
     /// use bytes::Buf;
     ///
-    /// let mut buf: &amp;[u8] = match cfg!(target_endian = &quot;big&quot;) {
-    ///     true =&gt; b&quot;\x01\x02\x03\x04\x05\x06\x07\x08 hello&quot;,
-    ///     false =&gt; b&quot;\x08\x07\x06\x05\x04\x03\x02\x01 hello&quot;,
+    /// let mut buf: &amp;[u8] = match cfg!(target_endian = "big") {
+    ///     true =&gt; b"\x01\x02\x03\x04\x05\x06\x07\x08 hello",
+    ///     false =&gt; b"\x08\x07\x06\x05\x04\x03\x02\x01 hello",
     /// };
     /// assert_eq!(0x0102030405060708, buf.get_u64_ne());
     /// ```
@@ -2033,7 +2033,7 @@
     /// ```
     /// use bytes::Buf;
     ///
-    /// let mut buf = &amp;b&quot;\x01\x02\x03\x04\x05\x06\x07\x08 hello&quot;[..];
+    /// let mut buf = &amp;b"\x01\x02\x03\x04\x05\x06\x07\x08 hello"[..];
     /// assert_eq!(0x0102030405060708, buf.get_i64());
     /// ```
     ///
@@ -2053,7 +2053,7 @@
     /// ```
     /// use bytes::Buf;
     ///
-    /// let mut buf = &amp;b&quot;\x08\x07\x06\x05\x04\x03\x02\x01 hello&quot;[..];
+    /// let mut buf = &amp;b"\x08\x07\x06\x05\x04\x03\x02\x01 hello"[..];
     /// assert_eq!(0x0102030405060708, buf.get_i64_le());
     /// ```
     ///
@@ -2073,9 +2073,9 @@
     /// ```
     /// use bytes::Buf;
     ///
-    /// let mut buf: &amp;[u8] = match cfg!(target_endian = &quot;big&quot;) {
-    ///     true =&gt; b&quot;\x01\x02\x03\x04\x05\x06\x07\x08 hello&quot;,
-    ///     false =&gt; b&quot;\x08\x07\x06\x05\x04\x03\x02\x01 hello&quot;,
+    /// let mut buf: &amp;[u8] = match cfg!(target_endian = "big") {
+    ///     true =&gt; b"\x01\x02\x03\x04\x05\x06\x07\x08 hello",
+    ///     false =&gt; b"\x08\x07\x06\x05\x04\x03\x02\x01 hello",
     /// };
     /// assert_eq!(0x0102030405060708, buf.get_i64_ne());
     /// ```
@@ -2096,7 +2096,7 @@
     /// ```
     /// use bytes::Buf;
     ///
-    /// let mut buf = &amp;b&quot;\x01\x02\x03\x04\x05\x06\x07\x08\x09\x10\x11\x12\x13\x14\x15\x16 hello&quot;[..];
+    /// let mut buf = &amp;b"\x01\x02\x03\x04\x05\x06\x07\x08\x09\x10\x11\x12\x13\x14\x15\x16 hello"[..];
     /// assert_eq!(0x01020304050607080910111213141516, buf.get_u128());
     /// ```
     ///
@@ -2116,7 +2116,7 @@
     /// ```
     /// use bytes::Buf;
     ///
-    /// let mut buf = &amp;b&quot;\x16\x15\x14\x13\x12\x11\x10\x09\x08\x07\x06\x05\x04\x03\x02\x01 hello&quot;[..];
+    /// let mut buf = &amp;b"\x16\x15\x14\x13\x12\x11\x10\x09\x08\x07\x06\x05\x04\x03\x02\x01 hello"[..];
     /// assert_eq!(0x01020304050607080910111213141516, buf.get_u128_le());
     /// ```
     ///
@@ -2136,9 +2136,9 @@
     /// ```
     /// use bytes::Buf;
     ///
-    /// let mut buf: &amp;[u8] = match cfg!(target_endian = &quot;big&quot;) {
-    ///     true =&gt; b&quot;\x01\x02\x03\x04\x05\x06\x07\x08\x09\x10\x11\x12\x13\x14\x15\x16 hello&quot;,
-    ///     false =&gt; b&quot;\x16\x15\x14\x13\x12\x11\x10\x09\x08\x07\x06\x05\x04\x03\x02\x01 hello&quot;,
+    /// let mut buf: &amp;[u8] = match cfg!(target_endian = "big") {
+    ///     true =&gt; b"\x01\x02\x03\x04\x05\x06\x07\x08\x09\x10\x11\x12\x13\x14\x15\x16 hello",
+    ///     false =&gt; b"\x16\x15\x14\x13\x12\x11\x10\x09\x08\x07\x06\x05\x04\x03\x02\x01 hello",
     /// };
     /// assert_eq!(0x01020304050607080910111213141516, buf.get_u128_ne());
     /// ```
@@ -2159,7 +2159,7 @@
     /// ```
     /// use bytes::Buf;
     ///
-    /// let mut buf = &amp;b&quot;\x01\x02\x03\x04\x05\x06\x07\x08\x09\x10\x11\x12\x13\x14\x15\x16 hello&quot;[..];
+    /// let mut buf = &amp;b"\x01\x02\x03\x04\x05\x06\x07\x08\x09\x10\x11\x12\x13\x14\x15\x16 hello"[..];
     /// assert_eq!(0x01020304050607080910111213141516, buf.get_i128());
     /// ```
     ///
@@ -2179,7 +2179,7 @@
     /// ```
     /// use bytes::Buf;
     ///
-    /// let mut buf = &amp;b&quot;\x16\x15\x14\x13\x12\x11\x10\x09\x08\x07\x06\x05\x04\x03\x02\x01 hello&quot;[..];
+    /// let mut buf = &amp;b"\x16\x15\x14\x13\x12\x11\x10\x09\x08\x07\x06\x05\x04\x03\x02\x01 hello"[..];
     /// assert_eq!(0x01020304050607080910111213141516, buf.get_i128_le());
     /// ```
     ///
@@ -2199,9 +2199,9 @@
     /// ```
     /// use bytes::Buf;
     ///
-    /// let mut buf: &amp;[u8] = match cfg!(target_endian = &quot;big&quot;) {
-    ///     true =&gt; b&quot;\x01\x02\x03\x04\x05\x06\x07\x08\x09\x10\x11\x12\x13\x14\x15\x16 hello&quot;,
-    ///     false =&gt; b&quot;\x16\x15\x14\x13\x12\x11\x10\x09\x08\x07\x06\x05\x04\x03\x02\x01 hello&quot;,
+    /// let mut buf: &amp;[u8] = match cfg!(target_endian = "big") {
+    ///     true =&gt; b"\x01\x02\x03\x04\x05\x06\x07\x08\x09\x10\x11\x12\x13\x14\x15\x16 hello",
+    ///     false =&gt; b"\x16\x15\x14\x13\x12\x11\x10\x09\x08\x07\x06\x05\x04\x03\x02\x01 hello",
     /// };
     /// assert_eq!(0x01020304050607080910111213141516, buf.get_i128_ne());
     /// ```
@@ -2222,7 +2222,7 @@
     /// ```
     /// use bytes::Buf;
     ///
-    /// let mut buf = &amp;b&quot;\x01\x02\x03 hello&quot;[..];
+    /// let mut buf = &amp;b"\x01\x02\x03 hello"[..];
     /// assert_eq!(0x010203, buf.get_uint(3));
     /// ```
     ///
@@ -2242,7 +2242,7 @@
     /// ```
     /// use bytes::Buf;
     ///
-    /// let mut buf = &amp;b&quot;\x03\x02\x01 hello&quot;[..];
+    /// let mut buf = &amp;b"\x03\x02\x01 hello"[..];
     /// assert_eq!(0x010203, buf.get_uint_le(3));
     /// ```
     ///
@@ -2262,9 +2262,9 @@
     /// ```
     /// use bytes::Buf;
     ///
-    /// let mut buf: &amp;[u8] = match cfg!(target_endian = &quot;big&quot;) {
-    ///     true =&gt; b&quot;\x01\x02\x03 hello&quot;,
-    ///     false =&gt; b&quot;\x03\x02\x01 hello&quot;,
+    /// let mut buf: &amp;[u8] = match cfg!(target_endian = "big") {
+    ///     true =&gt; b"\x01\x02\x03 hello",
+    ///     false =&gt; b"\x03\x02\x01 hello",
     /// };
     /// assert_eq!(0x010203, buf.get_uint_ne(3));
     /// ```
@@ -2273,7 +2273,7 @@
     ///
     /// This function panics if there is not enough remaining data in `self`.
     </span><span class="kw">fn </span>get_uint_ne(<span class="kw-2">&amp;mut </span><span class="self">self</span>, nbytes: usize) -&gt; u64 {
-        <span class="kw">if </span><span class="macro">cfg!</span>(target_endian = <span class="string">&quot;big&quot;</span>) {
+        <span class="kw">if </span><span class="macro">cfg!</span>(target_endian = <span class="string">"big"</span>) {
             <span class="self">self</span>.get_uint(nbytes)
         } <span class="kw">else </span>{
             <span class="self">self</span>.get_uint_le(nbytes)
@@ -2289,7 +2289,7 @@
     /// ```
     /// use bytes::Buf;
     ///
-    /// let mut buf = &amp;b&quot;\x01\x02\x03 hello&quot;[..];
+    /// let mut buf = &amp;b"\x01\x02\x03 hello"[..];
     /// assert_eq!(0x010203, buf.get_int(3));
     /// ```
     ///
@@ -2309,7 +2309,7 @@
     /// ```
     /// use bytes::Buf;
     ///
-    /// let mut buf = &amp;b&quot;\x03\x02\x01 hello&quot;[..];
+    /// let mut buf = &amp;b"\x03\x02\x01 hello"[..];
     /// assert_eq!(0x010203, buf.get_int_le(3));
     /// ```
     ///
@@ -2329,9 +2329,9 @@
     /// ```
     /// use bytes::Buf;
     ///
-    /// let mut buf: &amp;[u8] = match cfg!(target_endian = &quot;big&quot;) {
-    ///     true =&gt; b&quot;\x01\x02\x03 hello&quot;,
-    ///     false =&gt; b&quot;\x03\x02\x01 hello&quot;,
+    /// let mut buf: &amp;[u8] = match cfg!(target_endian = "big") {
+    ///     true =&gt; b"\x01\x02\x03 hello",
+    ///     false =&gt; b"\x03\x02\x01 hello",
     /// };
     /// assert_eq!(0x010203, buf.get_int_ne(3));
     /// ```
@@ -2340,7 +2340,7 @@
     ///
     /// This function panics if there is not enough remaining data in `self`.
     </span><span class="kw">fn </span>get_int_ne(<span class="kw-2">&amp;mut </span><span class="self">self</span>, nbytes: usize) -&gt; i64 {
-        <span class="kw">if </span><span class="macro">cfg!</span>(target_endian = <span class="string">&quot;big&quot;</span>) {
+        <span class="kw">if </span><span class="macro">cfg!</span>(target_endian = <span class="string">"big"</span>) {
             <span class="self">self</span>.get_int(nbytes)
         } <span class="kw">else </span>{
             <span class="self">self</span>.get_int_le(nbytes)
@@ -2357,7 +2357,7 @@
     /// ```
     /// use bytes::Buf;
     ///
-    /// let mut buf = &amp;b&quot;\x3F\x99\x99\x9A hello&quot;[..];
+    /// let mut buf = &amp;b"\x3F\x99\x99\x9A hello"[..];
     /// assert_eq!(1.2f32, buf.get_f32());
     /// ```
     ///
@@ -2378,7 +2378,7 @@
     /// ```
     /// use bytes::Buf;
     ///
-    /// let mut buf = &amp;b&quot;\x9A\x99\x99\x3F hello&quot;[..];
+    /// let mut buf = &amp;b"\x9A\x99\x99\x3F hello"[..];
     /// assert_eq!(1.2f32, buf.get_f32_le());
     /// ```
     ///
@@ -2399,9 +2399,9 @@
     /// ```
     /// use bytes::Buf;
     ///
-    /// let mut buf: &amp;[u8] = match cfg!(target_endian = &quot;big&quot;) {
-    ///     true =&gt; b&quot;\x3F\x99\x99\x9A hello&quot;,
-    ///     false =&gt; b&quot;\x9A\x99\x99\x3F hello&quot;,
+    /// let mut buf: &amp;[u8] = match cfg!(target_endian = "big") {
+    ///     true =&gt; b"\x3F\x99\x99\x9A hello",
+    ///     false =&gt; b"\x9A\x99\x99\x3F hello",
     /// };
     /// assert_eq!(1.2f32, buf.get_f32_ne());
     /// ```
@@ -2423,7 +2423,7 @@
     /// ```
     /// use bytes::Buf;
     ///
-    /// let mut buf = &amp;b&quot;\x3F\xF3\x33\x33\x33\x33\x33\x33 hello&quot;[..];
+    /// let mut buf = &amp;b"\x3F\xF3\x33\x33\x33\x33\x33\x33 hello"[..];
     /// assert_eq!(1.2f64, buf.get_f64());
     /// ```
     ///
@@ -2444,7 +2444,7 @@
     /// ```
     /// use bytes::Buf;
     ///
-    /// let mut buf = &amp;b&quot;\x33\x33\x33\x33\x33\x33\xF3\x3F hello&quot;[..];
+    /// let mut buf = &amp;b"\x33\x33\x33\x33\x33\x33\xF3\x3F hello"[..];
     /// assert_eq!(1.2f64, buf.get_f64_le());
     /// ```
     ///
@@ -2465,9 +2465,9 @@
     /// ```
     /// use bytes::Buf;
     ///
-    /// let mut buf: &amp;[u8] = match cfg!(target_endian = &quot;big&quot;) {
-    ///     true =&gt; b&quot;\x3F\xF3\x33\x33\x33\x33\x33\x33 hello&quot;,
-    ///     false =&gt; b&quot;\x33\x33\x33\x33\x33\x33\xF3\x3F hello&quot;,
+    /// let mut buf: &amp;[u8] = match cfg!(target_endian = "big") {
+    ///     true =&gt; b"\x3F\xF3\x33\x33\x33\x33\x33\x33 hello",
+    ///     false =&gt; b"\x33\x33\x33\x33\x33\x33\xF3\x3F hello",
     /// };
     /// assert_eq!(1.2f64, buf.get_f64_ne());
     /// ```
@@ -2491,13 +2491,13 @@
     /// ```
     /// use bytes::Buf;
     ///
-    /// let bytes = (&amp;b&quot;hello world&quot;[..]).copy_to_bytes(5);
-    /// assert_eq!(&amp;bytes[..], &amp;b&quot;hello&quot;[..]);
+    /// let bytes = (&amp;b"hello world"[..]).copy_to_bytes(5);
+    /// assert_eq!(&amp;bytes[..], &amp;b"hello"[..]);
     /// ```
     </span><span class="kw">fn </span>copy_to_bytes(<span class="kw-2">&amp;mut </span><span class="self">self</span>, len: usize) -&gt; <span class="kw">crate</span>::Bytes {
         <span class="kw">use </span><span class="kw">super</span>::BufMut;
 
-        <span class="macro">assert!</span>(len &lt;= <span class="self">self</span>.remaining(), <span class="string">&quot;`len` greater than remaining&quot;</span>);
+        <span class="macro">assert!</span>(len &lt;= <span class="self">self</span>.remaining(), <span class="string">"`len` greater than remaining"</span>);
 
         <span class="kw">let </span><span class="kw-2">mut </span>ret = <span class="kw">crate</span>::BytesMut::with_capacity(len);
         ret.put(<span class="self">self</span>.take(len));
@@ -2514,16 +2514,16 @@
     /// ```
     /// use bytes::{Buf, BufMut};
     ///
-    /// let mut buf = b&quot;hello world&quot;[..].take(5);
+    /// let mut buf = b"hello world"[..].take(5);
     /// let mut dst = vec![];
     ///
     /// dst.put(&amp;mut buf);
-    /// assert_eq!(dst, b&quot;hello&quot;);
+    /// assert_eq!(dst, b"hello");
     ///
     /// let mut buf = buf.into_inner();
     /// dst.clear();
     /// dst.put(&amp;mut buf);
-    /// assert_eq!(dst, b&quot; world&quot;);
+    /// assert_eq!(dst, b" world");
     /// ```
     </span><span class="kw">fn </span>take(<span class="self">self</span>, limit: usize) -&gt; Take&lt;<span class="self">Self</span>&gt;
     <span class="kw">where
@@ -2542,10 +2542,10 @@
     /// ```
     /// use bytes::Buf;
     ///
-    /// let mut chain = b&quot;hello &quot;[..].chain(&amp;b&quot;world&quot;[..]);
+    /// let mut chain = b"hello "[..].chain(&amp;b"world"[..]);
     ///
     /// let full = chain.copy_to_bytes(11);
-    /// assert_eq!(full.chunk(), b&quot;hello world&quot;);
+    /// assert_eq!(full.chunk(), b"hello world");
     /// ```
     </span><span class="kw">fn </span>chain&lt;U: Buf&gt;(<span class="self">self</span>, next: U) -&gt; Chain&lt;<span class="self">Self</span>, U&gt;
     <span class="kw">where
@@ -2567,7 +2567,7 @@
     /// use bytes::{Bytes, Buf};
     /// use std::io::Read;
     ///
-    /// let buf = Bytes::from(&quot;hello world&quot;);
+    /// let buf = Bytes::from("hello world");
     ///
     /// let mut reader = buf.reader();
     /// let mut dst = [0; 1024];
@@ -2575,10 +2575,10 @@
     /// let num = reader.read(&amp;mut dst).unwrap();
     ///
     /// assert_eq!(11, num);
-    /// assert_eq!(&amp;dst[..11], &amp;b&quot;hello world&quot;[..]);
+    /// assert_eq!(&amp;dst[..11], &amp;b"hello world"[..]);
     /// ```
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;std&quot;</span>)))]
+    </span><span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"std"</span>)))]
     </span><span class="kw">fn </span>reader(<span class="self">self</span>) -&gt; Reader&lt;<span class="self">Self</span>&gt;
     <span class="kw">where
         </span><span class="self">Self</span>: Sized,
@@ -2597,8 +2597,8 @@
             (<span class="kw-2">**</span><span class="self">self</span>).chunk()
         }
 
-        <span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
-        </span><span class="kw">fn </span>chunks_vectored&lt;<span class="lifetime">&#39;b</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span><span class="self">self</span>, dst: <span class="kw-2">&amp;mut </span>[IoSlice&lt;<span class="lifetime">&#39;b</span>&gt;]) -&gt; usize {
+        <span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
+        </span><span class="kw">fn </span>chunks_vectored&lt;<span class="lifetime">'b</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'b </span><span class="self">self</span>, dst: <span class="kw-2">&amp;mut </span>[IoSlice&lt;<span class="lifetime">'b</span>&gt;]) -&gt; usize {
             (<span class="kw-2">**</span><span class="self">self</span>).chunks_vectored(dst)
         }
 
@@ -2749,7 +2749,7 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
 </span><span class="kw">impl</span>&lt;T: AsRef&lt;[u8]&gt;&gt; Buf <span class="kw">for </span>std::io::Cursor&lt;T&gt; {
     <span class="kw">fn </span>remaining(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
         <span class="kw">let </span>len = <span class="self">self</span>.get_ref().as_ref().len();
@@ -2776,7 +2776,7 @@
     <span class="kw">fn </span>advance(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cnt: usize) {
         <span class="kw">let </span>pos = (<span class="self">self</span>.position() <span class="kw">as </span>usize)
             .checked_add(cnt)
-            .expect(<span class="string">&quot;overflow&quot;</span>);
+            .expect(<span class="string">"overflow"</span>);
 
         <span class="macro">assert!</span>(pos &lt;= <span class="self">self</span>.get_ref().as_ref().len());
         <span class="self">self</span>.set_position(pos <span class="kw">as </span>u64);
@@ -2784,6 +2784,6 @@
 }
 
 <span class="comment">// The existence of this function makes the compiler catch if the Buf
-// trait is &quot;object-safe&quot; or not.
+// trait is "object-safe" or not.
 </span><span class="kw">fn </span>_assert_trait_object(_b: <span class="kw-2">&amp;</span><span class="kw">dyn </span>Buf) {}
 </code></pre></div></section></main></body></html>

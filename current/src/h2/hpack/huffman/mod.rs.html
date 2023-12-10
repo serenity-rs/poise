@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/h2-0.3.22/src/hpack/huffman/mod.rs`."><title>mod.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="h2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/h2-0.3.22/src/hpack/huffman/mod.rs`."><title>mod.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="h2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -310,64 +310,64 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>decode_single_byte() {
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;o&quot;</span>, decode(<span class="kw-2">&amp;</span>[<span class="number">0b00111111</span>]).unwrap());
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;0&quot;</span>, decode(<span class="kw-2">&amp;</span>[<span class="number">7</span>]).unwrap());
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;A&quot;</span>, decode(<span class="kw-2">&amp;</span>[(<span class="number">0x21 </span>&lt;&lt; <span class="number">2</span>) + <span class="number">3</span>]).unwrap());
+        <span class="macro">assert_eq!</span>(<span class="string">"o"</span>, decode(<span class="kw-2">&amp;</span>[<span class="number">0b00111111</span>]).unwrap());
+        <span class="macro">assert_eq!</span>(<span class="string">"0"</span>, decode(<span class="kw-2">&amp;</span>[<span class="number">7</span>]).unwrap());
+        <span class="macro">assert_eq!</span>(<span class="string">"A"</span>, decode(<span class="kw-2">&amp;</span>[(<span class="number">0x21 </span>&lt;&lt; <span class="number">2</span>) + <span class="number">3</span>]).unwrap());
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>single_char_multi_byte() {
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;#&quot;</span>, decode(<span class="kw-2">&amp;</span>[<span class="number">255</span>, <span class="number">160 </span>+ <span class="number">15</span>]).unwrap());
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;$&quot;</span>, decode(<span class="kw-2">&amp;</span>[<span class="number">255</span>, <span class="number">200 </span>+ <span class="number">7</span>]).unwrap());
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;\x0a&quot;</span>, decode(<span class="kw-2">&amp;</span>[<span class="number">255</span>, <span class="number">255</span>, <span class="number">255</span>, <span class="number">240 </span>+ <span class="number">3</span>]).unwrap());
+        <span class="macro">assert_eq!</span>(<span class="string">"#"</span>, decode(<span class="kw-2">&amp;</span>[<span class="number">255</span>, <span class="number">160 </span>+ <span class="number">15</span>]).unwrap());
+        <span class="macro">assert_eq!</span>(<span class="string">"$"</span>, decode(<span class="kw-2">&amp;</span>[<span class="number">255</span>, <span class="number">200 </span>+ <span class="number">7</span>]).unwrap());
+        <span class="macro">assert_eq!</span>(<span class="string">"\x0a"</span>, decode(<span class="kw-2">&amp;</span>[<span class="number">255</span>, <span class="number">255</span>, <span class="number">255</span>, <span class="number">240 </span>+ <span class="number">3</span>]).unwrap());
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>multi_char() {
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;!0&quot;</span>, decode(<span class="kw-2">&amp;</span>[<span class="number">254</span>, <span class="number">1</span>]).unwrap());
-        <span class="macro">assert_eq!</span>(<span class="string">&quot; !&quot;</span>, decode(<span class="kw-2">&amp;</span>[<span class="number">0b01010011</span>, <span class="number">0b11111000</span>]).unwrap());
+        <span class="macro">assert_eq!</span>(<span class="string">"!0"</span>, decode(<span class="kw-2">&amp;</span>[<span class="number">254</span>, <span class="number">1</span>]).unwrap());
+        <span class="macro">assert_eq!</span>(<span class="string">" !"</span>, decode(<span class="kw-2">&amp;</span>[<span class="number">0b01010011</span>, <span class="number">0b11111000</span>]).unwrap());
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>encode_single_byte() {
         <span class="kw">let </span><span class="kw-2">mut </span>dst = BytesMut::with_capacity(<span class="number">1</span>);
 
-        encode(<span class="string">b&quot;o&quot;</span>, <span class="kw-2">&amp;mut </span>dst);
+        encode(<span class="string">b"o"</span>, <span class="kw-2">&amp;mut </span>dst);
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>dst[..], <span class="kw-2">&amp;</span>[<span class="number">0b00111111</span>]);
 
         dst.clear();
-        encode(<span class="string">b&quot;0&quot;</span>, <span class="kw-2">&amp;mut </span>dst);
+        encode(<span class="string">b"0"</span>, <span class="kw-2">&amp;mut </span>dst);
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>dst[..], <span class="kw-2">&amp;</span>[<span class="number">7</span>]);
 
         dst.clear();
-        encode(<span class="string">b&quot;A&quot;</span>, <span class="kw-2">&amp;mut </span>dst);
+        encode(<span class="string">b"A"</span>, <span class="kw-2">&amp;mut </span>dst);
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>dst[..], <span class="kw-2">&amp;</span>[(<span class="number">0x21 </span>&lt;&lt; <span class="number">2</span>) + <span class="number">3</span>]);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>encode_decode_str() {
         <span class="kw">const </span>DATA: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>str] = <span class="kw-2">&amp;</span>[
-            <span class="string">&quot;hello world&quot;</span>,
-            <span class="string">&quot;:method&quot;</span>,
-            <span class="string">&quot;:scheme&quot;</span>,
-            <span class="string">&quot;:authority&quot;</span>,
-            <span class="string">&quot;yahoo.co.jp&quot;</span>,
-            <span class="string">&quot;GET&quot;</span>,
-            <span class="string">&quot;http&quot;</span>,
-            <span class="string">&quot;:path&quot;</span>,
-            <span class="string">&quot;/images/top/sp2/cmn/logo-ns-130528.png&quot;</span>,
-            <span class="string">&quot;example.com&quot;</span>,
-            <span class="string">&quot;hpack-test&quot;</span>,
-            <span class="string">&quot;xxxxxxx1&quot;</span>,
-            <span class="string">&quot;Mozilla/5.0 (Macintosh; Intel Mac OS X 10.8; rv:16.0) Gecko/20100101 Firefox/16.0&quot;</span>,
-            <span class="string">&quot;accept&quot;</span>,
-            <span class="string">&quot;Accept&quot;</span>,
-            <span class="string">&quot;text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8&quot;</span>,
-            <span class="string">&quot;cookie&quot;</span>,
-            <span class="string">&quot;B=76j09a189a6h4&amp;b=3&amp;s=0b&quot;</span>,
-            <span class="string">&quot;TE&quot;</span>,
-            <span class="string">&quot;Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi non bibendum libero. \
-             Etiam ultrices lorem ut.&quot;</span>,
+            <span class="string">"hello world"</span>,
+            <span class="string">":method"</span>,
+            <span class="string">":scheme"</span>,
+            <span class="string">":authority"</span>,
+            <span class="string">"yahoo.co.jp"</span>,
+            <span class="string">"GET"</span>,
+            <span class="string">"http"</span>,
+            <span class="string">":path"</span>,
+            <span class="string">"/images/top/sp2/cmn/logo-ns-130528.png"</span>,
+            <span class="string">"example.com"</span>,
+            <span class="string">"hpack-test"</span>,
+            <span class="string">"xxxxxxx1"</span>,
+            <span class="string">"Mozilla/5.0 (Macintosh; Intel Mac OS X 10.8; rv:16.0) Gecko/20100101 Firefox/16.0"</span>,
+            <span class="string">"accept"</span>,
+            <span class="string">"Accept"</span>,
+            <span class="string">"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"</span>,
+            <span class="string">"cookie"</span>,
+            <span class="string">"B=76j09a189a6h4&amp;b=3&amp;s=0b"</span>,
+            <span class="string">"TE"</span>,
+            <span class="string">"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi non bibendum libero. \
+             Etiam ultrices lorem ut."</span>,
         ];
 
         <span class="kw">for </span>s <span class="kw">in </span>DATA {
@@ -383,7 +383,7 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>encode_decode_u8() {
-        <span class="kw">const </span>DATA: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>[u8]] = <span class="kw-2">&amp;</span>[<span class="string">b&quot;\0&quot;</span>, <span class="string">b&quot;\0\0\0&quot;</span>, <span class="string">b&quot;\0\x01\x02\x03\x04\x05&quot;</span>, <span class="string">b&quot;\xFF\xF8&quot;</span>];
+        <span class="kw">const </span>DATA: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>[u8]] = <span class="kw-2">&amp;</span>[<span class="string">b"\0"</span>, <span class="string">b"\0\0\0"</span>, <span class="string">b"\0\x01\x02\x03\x04\x05"</span>, <span class="string">b"\xFF\xF8"</span>];
 
         <span class="kw">for </span>s <span class="kw">in </span>DATA {
             <span class="kw">let </span><span class="kw-2">mut </span>dst = BytesMut::with_capacity(s.len());

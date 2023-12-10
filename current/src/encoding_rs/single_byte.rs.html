@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/encoding_rs-0.8.33/src/single_byte.rs`."><title>single_byte.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="encoding_rs" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/encoding_rs-0.8.33/src/single_byte.rs`."><title>single_byte.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="encoding_rs" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -728,11 +728,11 @@
 <span class="kw">use </span><span class="kw">crate</span>::variant::<span class="kw-2">*</span>;
 
 <span class="kw">pub struct </span>SingleByteDecoder {
-    table: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[u16; <span class="number">128</span>],
+    table: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>[u16; <span class="number">128</span>],
 }
 
 <span class="kw">impl </span>SingleByteDecoder {
-    <span class="kw">pub fn </span>new(data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[u16; <span class="number">128</span>]) -&gt; VariantDecoder {
+    <span class="kw">pub fn </span>new(data: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>[u16; <span class="number">128</span>]) -&gt; VariantDecoder {
         VariantDecoder::SingleByte(SingleByteDecoder { table: data })
     }
 
@@ -756,14 +756,14 @@
     ) -&gt; (DecoderResult, usize, usize) {
         <span class="kw">let </span><span class="kw-2">mut </span>source = ByteSource::new(src);
         <span class="kw">let </span><span class="kw-2">mut </span>dest = Utf8Destination::new(dst);
-        <span class="lifetime">&#39;outermost</span>: <span class="kw">loop </span>{
+        <span class="lifetime">'outermost</span>: <span class="kw">loop </span>{
             <span class="kw">match </span>dest.copy_ascii_from_check_space_bmp(<span class="kw-2">&amp;mut </span>source) {
                 CopyAsciiResult::Stop(ret) =&gt; <span class="kw">return </span>ret,
-                CopyAsciiResult::GoOn((<span class="kw-2">mut </span>non_ascii, <span class="kw-2">mut </span>handle)) =&gt; <span class="lifetime">&#39;middle</span>: <span class="kw">loop </span>{
+                CopyAsciiResult::GoOn((<span class="kw-2">mut </span>non_ascii, <span class="kw-2">mut </span>handle)) =&gt; <span class="lifetime">'middle</span>: <span class="kw">loop </span>{
                     <span class="comment">// Start non-boilerplate
                     //
                     // Since the non-ASCIIness of `non_ascii` is hidden from
-                    // the optimizer, it can&#39;t figure out that it&#39;s OK to
+                    // the optimizer, it can't figure out that it's OK to
                     // statically omit the bound check when accessing
                     // `[u16; 128]` with an index
                     // `non_ascii as usize - 0x80usize`.
@@ -799,18 +799,18 @@
                                 Space::Available(<span class="kw-2">mut </span>destination_handle) =&gt; {
                                     <span class="kw">let </span>(<span class="kw-2">mut </span>b, unread_handle) = source_handle.read();
                                     <span class="kw">let </span>source_again = unread_handle.commit();
-                                    <span class="lifetime">&#39;innermost</span>: <span class="kw">loop </span>{
+                                    <span class="lifetime">'innermost</span>: <span class="kw">loop </span>{
                                         <span class="kw">if </span>b &gt; <span class="number">127 </span>{
                                             non_ascii = b;
                                             handle = destination_handle;
-                                            <span class="kw">continue </span><span class="lifetime">&#39;middle</span>;
+                                            <span class="kw">continue </span><span class="lifetime">'middle</span>;
                                         }
                                         <span class="comment">// Testing on Haswell says that we should write the
                                         // byte unconditionally instead of trying to unread it
                                         // to make it part of the next SIMD stride.
                                         </span><span class="kw">let </span>dest_again_again = destination_handle.write_ascii(b);
                                         <span class="kw">if </span>b &lt; <span class="number">60 </span>{
-                                            <span class="comment">// We&#39;ve got punctuation
+                                            <span class="comment">// We've got punctuation
                                             </span><span class="kw">match </span>source_again.check_available() {
                                                 Space::Full(src_consumed_again) =&gt; {
                                                     <span class="kw">return </span>(
@@ -836,14 +836,14 @@
                                                             b = b_again;
                                                             destination_handle =
                                                                 destination_handle_again;
-                                                            <span class="kw">continue </span><span class="lifetime">&#39;innermost</span>;
+                                                            <span class="kw">continue </span><span class="lifetime">'innermost</span>;
                                                         }
                                                     }
                                                 }
                                             }
                                         }
-                                        <span class="comment">// We&#39;ve got markup or ASCII text
-                                        </span><span class="kw">continue </span><span class="lifetime">&#39;outermost</span>;
+                                        <span class="comment">// We've got markup or ASCII text
+                                        </span><span class="kw">continue </span><span class="lifetime">'outermost</span>;
                                     }
                                 }
                             }
@@ -866,7 +866,7 @@
             (DecoderResult::InputEmpty, src.len())
         };
         <span class="kw">let </span><span class="kw-2">mut </span>converted = <span class="number">0usize</span>;
-        <span class="lifetime">&#39;outermost</span>: <span class="kw">loop </span>{
+        <span class="lifetime">'outermost</span>: <span class="kw">loop </span>{
             <span class="kw">match unsafe </span>{
                 ascii_to_basic_latin(
                     src.as_ptr().add(converted),
@@ -879,10 +879,10 @@
                 }
                 <span class="prelude-val">Some</span>((<span class="kw-2">mut </span>non_ascii, consumed)) =&gt; {
                     converted += consumed;
-                    <span class="lifetime">&#39;middle</span>: <span class="kw">loop </span>{
-                        <span class="comment">// `converted` doesn&#39;t count the reading of `non_ascii` yet.
+                    <span class="lifetime">'middle</span>: <span class="kw">loop </span>{
+                        <span class="comment">// `converted` doesn't count the reading of `non_ascii` yet.
                         // Since the non-ASCIIness of `non_ascii` is hidden from
-                        // the optimizer, it can&#39;t figure out that it&#39;s OK to
+                        // the optimizer, it can't figure out that it's OK to
                         // statically omit the bound check when accessing
                         // `[u16; 128]` with an index
                         // `non_ascii as usize - 0x80usize`.
@@ -913,10 +913,10 @@
                             <span class="kw">return </span>(pending, length, length);
                         }
                         <span class="kw">let </span><span class="kw-2">mut </span>b = <span class="kw">unsafe </span>{ <span class="kw-2">*</span>(src.get_unchecked(converted)) };
-                        <span class="lifetime">&#39;innermost</span>: <span class="kw">loop </span>{
+                        <span class="lifetime">'innermost</span>: <span class="kw">loop </span>{
                             <span class="kw">if </span>b &gt; <span class="number">127 </span>{
                                 non_ascii = b;
-                                <span class="kw">continue </span><span class="lifetime">&#39;middle</span>;
+                                <span class="kw">continue </span><span class="lifetime">'middle</span>;
                             }
                             <span class="comment">// Testing on Haswell says that we should write the
                             // byte unconditionally instead of trying to unread it
@@ -926,15 +926,15 @@
                             }
                             converted += <span class="number">1</span>;
                             <span class="kw">if </span>b &lt; <span class="number">60 </span>{
-                                <span class="comment">// We&#39;ve got punctuation
+                                <span class="comment">// We've got punctuation
                                 </span><span class="kw">if </span>converted == length {
                                     <span class="kw">return </span>(pending, length, length);
                                 }
                                 b = <span class="kw">unsafe </span>{ <span class="kw-2">*</span>(src.get_unchecked(converted)) };
-                                <span class="kw">continue </span><span class="lifetime">&#39;innermost</span>;
+                                <span class="kw">continue </span><span class="lifetime">'innermost</span>;
                             }
-                            <span class="comment">// We&#39;ve got markup or ASCII text
-                            </span><span class="kw">continue </span><span class="lifetime">&#39;outermost</span>;
+                            <span class="comment">// We've got markup or ASCII text
+                            </span><span class="kw">continue </span><span class="lifetime">'outermost</span>;
                         }
                     }
                 }
@@ -962,7 +962,7 @@
 }
 
 <span class="kw">pub struct </span>SingleByteEncoder {
-    table: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[u16; <span class="number">128</span>],
+    table: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>[u16; <span class="number">128</span>],
     run_bmp_offset: usize,
     run_byte_offset: usize,
     run_length: usize,
@@ -970,8 +970,8 @@
 
 <span class="kw">impl </span>SingleByteEncoder {
     <span class="kw">pub fn </span>new(
-        encoding: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Encoding,
-        data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[u16; <span class="number">128</span>],
+        encoding: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Encoding,
+        data: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>[u16; <span class="number">128</span>],
         run_bmp_offset: u16,
         run_byte_offset: u8,
         run_length: u8,
@@ -1007,7 +1007,7 @@
         // code units that can be mapped by offset. This is very efficient
         // for most non-Latin encodings as well as Latin1-ish encodings.
         //
-        // For encodings that don&#39;t fit this pattern, the run (which may
+        // For encodings that don't fit this pattern, the run (which may
         // have the length of just one) just establishes the starting point
         // for the next rule.
         //
@@ -1099,7 +1099,7 @@
             (EncoderResult::InputEmpty, src.len())
         };
         <span class="kw">let </span><span class="kw-2">mut </span>converted = <span class="number">0usize</span>;
-        <span class="lifetime">&#39;outermost</span>: <span class="kw">loop </span>{
+        <span class="lifetime">'outermost</span>: <span class="kw">loop </span>{
             <span class="kw">match unsafe </span>{
                 basic_latin_to_ascii(
                     src.as_ptr().add(converted),
@@ -1112,8 +1112,8 @@
                 }
                 <span class="prelude-val">Some</span>((<span class="kw-2">mut </span>non_ascii, consumed)) =&gt; {
                     converted += consumed;
-                    <span class="lifetime">&#39;middle</span>: <span class="kw">loop </span>{
-                        <span class="comment">// `converted` doesn&#39;t count the reading of `non_ascii` yet.
+                    <span class="lifetime">'middle</span>: <span class="kw">loop </span>{
+                        <span class="comment">// `converted` doesn't count the reading of `non_ascii` yet.
                         </span><span class="kw">match </span><span class="self">self</span>.encode_u16(non_ascii) {
                             <span class="prelude-val">Some</span>(byte) =&gt; {
                                 <span class="kw">unsafe </span>{
@@ -1130,7 +1130,7 @@
                                     </span><span class="kw">if </span>converted + <span class="number">1 </span>== length {
                                         <span class="comment">// End of buffer. This surrogate is unpaired.
                                         </span><span class="kw">return </span>(
-                                            EncoderResult::Unmappable(<span class="string">&#39;\u{FFFD}&#39;</span>),
+                                            EncoderResult::Unmappable(<span class="string">'\u{FFFD}'</span>),
                                             converted + <span class="number">1</span>, <span class="comment">// +1 `for non_ascii`
                                             </span>converted,
                                         );
@@ -1139,7 +1139,7 @@
                                         u32::from(<span class="kw">unsafe </span>{ <span class="kw-2">*</span>src.get_unchecked(converted + <span class="number">1</span>) });
                                     <span class="kw">if </span>second &amp; <span class="number">0xFC00u32 </span>!= <span class="number">0xDC00u32 </span>{
                                         <span class="kw">return </span>(
-                                            EncoderResult::Unmappable(<span class="string">&#39;\u{FFFD}&#39;</span>),
+                                            EncoderResult::Unmappable(<span class="string">'\u{FFFD}'</span>),
                                             converted + <span class="number">1</span>, <span class="comment">// +1 `for non_ascii`
                                             </span>converted,
                                         );
@@ -1160,7 +1160,7 @@
                                 <span class="kw">if </span>high_bits == <span class="number">0xDC00u16 </span>{
                                     <span class="comment">// Unpaired low surrogate
                                     </span><span class="kw">return </span>(
-                                        EncoderResult::Unmappable(<span class="string">&#39;\u{FFFD}&#39;</span>),
+                                        EncoderResult::Unmappable(<span class="string">'\u{FFFD}'</span>),
                                         converted + <span class="number">1</span>, <span class="comment">// +1 `for non_ascii`
                                         </span>converted,
                                     );
@@ -1184,10 +1184,10 @@
                             <span class="kw">return </span>(pending, length, length);
                         }
                         <span class="kw">let </span><span class="kw-2">mut </span>unit = <span class="kw">unsafe </span>{ <span class="kw-2">*</span>(src.get_unchecked(converted)) };
-                        <span class="lifetime">&#39;innermost</span>: <span class="kw">loop </span>{
+                        <span class="lifetime">'innermost</span>: <span class="kw">loop </span>{
                             <span class="kw">if </span>unit &gt; <span class="number">127 </span>{
                                 non_ascii = unit;
-                                <span class="kw">continue </span><span class="lifetime">&#39;middle</span>;
+                                <span class="kw">continue </span><span class="lifetime">'middle</span>;
                             }
                             <span class="comment">// Testing on Haswell says that we should write the
                             // byte unconditionally instead of trying to unread it
@@ -1197,15 +1197,15 @@
                             }
                             converted += <span class="number">1</span>;
                             <span class="kw">if </span>unit &lt; <span class="number">60 </span>{
-                                <span class="comment">// We&#39;ve got punctuation
+                                <span class="comment">// We've got punctuation
                                 </span><span class="kw">if </span>converted == length {
                                     <span class="kw">return </span>(pending, length, length);
                                 }
                                 unit = <span class="kw">unsafe </span>{ <span class="kw-2">*</span>(src.get_unchecked(converted)) };
-                                <span class="kw">continue </span><span class="lifetime">&#39;innermost</span>;
+                                <span class="kw">continue </span><span class="lifetime">'innermost</span>;
                             }
-                            <span class="comment">// We&#39;ve got markup or ASCII text
-                            </span><span class="kw">continue </span><span class="lifetime">&#39;outermost</span>;
+                            <span class="comment">// We've got markup or ASCII text
+                            </span><span class="kw">continue </span><span class="lifetime">'outermost</span>;
                         }
                     }
                 }
@@ -1217,25 +1217,25 @@
 <span class="comment">// Any copyright to the test code below this comment is dedicated to the
 // Public Domain. http://creativecommons.org/publicdomain/zero/1.0/
 
-</span><span class="attr">#[cfg(all(test, feature = <span class="string">&quot;alloc&quot;</span>))]
+</span><span class="attr">#[cfg(all(test, feature = <span class="string">"alloc"</span>))]
 </span><span class="kw">mod </span>tests {
     <span class="kw">use </span><span class="kw">super</span>::<span class="kw">super</span>::testing::<span class="kw-2">*</span>;
     <span class="kw">use </span><span class="kw">super</span>::<span class="kw">super</span>::<span class="kw-2">*</span>;
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_windows_1255_ca() {
-        decode(WINDOWS_1255, <span class="string">b&quot;\xCA&quot;</span>, <span class="string">&quot;\u{05BA}&quot;</span>);
-        encode(WINDOWS_1255, <span class="string">&quot;\u{05BA}&quot;</span>, <span class="string">b&quot;\xCA&quot;</span>);
+        decode(WINDOWS_1255, <span class="string">b"\xCA"</span>, <span class="string">"\u{05BA}"</span>);
+        encode(WINDOWS_1255, <span class="string">"\u{05BA}"</span>, <span class="string">b"\xCA"</span>);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_ascii_punctuation() {
-        <span class="kw">let </span>bytes = <span class="string">b&quot;\xC1\xF5\xF4\xFC \xE5\xDF\xED\xE1\xE9 \xDD\xED\xE1 \xF4\xE5\xF3\xF4. \xC1\xF5\xF4\xFC \xE5\xDF\xED\xE1\xE9 \xDD\xED\xE1 \xF4\xE5\xF3\xF4.&quot;</span>;
-        <span class="kw">let </span>characters = <span class="string">&quot;\u{0391}\u{03C5}\u{03C4}\u{03CC} \
+        <span class="kw">let </span>bytes = <span class="string">b"\xC1\xF5\xF4\xFC \xE5\xDF\xED\xE1\xE9 \xDD\xED\xE1 \xF4\xE5\xF3\xF4. \xC1\xF5\xF4\xFC \xE5\xDF\xED\xE1\xE9 \xDD\xED\xE1 \xF4\xE5\xF3\xF4."</span>;
+        <span class="kw">let </span>characters = <span class="string">"\u{0391}\u{03C5}\u{03C4}\u{03CC} \
                           \u{03B5}\u{03AF}\u{03BD}\u{03B1}\u{03B9} \u{03AD}\u{03BD}\u{03B1} \
                           \u{03C4}\u{03B5}\u{03C3}\u{03C4}. \u{0391}\u{03C5}\u{03C4}\u{03CC} \
                           \u{03B5}\u{03AF}\u{03BD}\u{03B1}\u{03B9} \u{03AD}\u{03BD}\u{03B1} \
-                          \u{03C4}\u{03B5}\u{03C3}\u{03C4}.&quot;</span>;
+                          \u{03C4}\u{03B5}\u{03C3}\u{03C4}."</span>;
         decode(WINDOWS_1253, bytes, characters);
         encode(WINDOWS_1253, characters, bytes);
     }
@@ -1244,8 +1244,8 @@
     </span><span class="kw">fn </span>test_decode_malformed() {
         decode(
             WINDOWS_1253,
-            <span class="string">b&quot;\xC1\xF5\xD2\xF4\xFC&quot;</span>,
-            <span class="string">&quot;\u{0391}\u{03C5}\u{FFFD}\u{03C4}\u{03CC}&quot;</span>,
+            <span class="string">b"\xC1\xF5\xD2\xF4\xFC"</span>,
+            <span class="string">"\u{0391}\u{03C5}\u{FFFD}\u{03C4}\u{03CC}"</span>,
         );
     }
 
@@ -1253,13 +1253,13 @@
     </span><span class="kw">fn </span>test_encode_unmappables() {
         encode(
             WINDOWS_1253,
-            <span class="string">&quot;\u{0391}\u{03C5}\u{2603}\u{03C4}\u{03CC}&quot;</span>,
-            <span class="string">b&quot;\xC1\xF5&amp;#9731;\xF4\xFC&quot;</span>,
+            <span class="string">"\u{0391}\u{03C5}\u{2603}\u{03C4}\u{03CC}"</span>,
+            <span class="string">b"\xC1\xF5&amp;#9731;\xF4\xFC"</span>,
         );
         encode(
             WINDOWS_1253,
-            <span class="string">&quot;\u{0391}\u{03C5}\u{1F4A9}\u{03C4}\u{03CC}&quot;</span>,
-            <span class="string">b&quot;\xC1\xF5&amp;#128169;\xF4\xFC&quot;</span>,
+            <span class="string">"\u{0391}\u{03C5}\u{1F4A9}\u{03C4}\u{03CC}"</span>,
+            <span class="string">b"\xC1\xF5&amp;#128169;\xF4\xFC"</span>,
         );
     }
 
@@ -1268,21 +1268,21 @@
         encode_from_utf16(
             WINDOWS_1253,
             <span class="kw-2">&amp;</span>[<span class="number">0x0391u16</span>, <span class="number">0x03C5u16</span>, <span class="number">0xDCA9u16</span>, <span class="number">0x03C4u16</span>, <span class="number">0x03CCu16</span>],
-            <span class="string">b&quot;\xC1\xF5&amp;#65533;\xF4\xFC&quot;</span>,
+            <span class="string">b"\xC1\xF5&amp;#65533;\xF4\xFC"</span>,
         );
         encode_from_utf16(
             WINDOWS_1253,
             <span class="kw-2">&amp;</span>[<span class="number">0x0391u16</span>, <span class="number">0x03C5u16</span>, <span class="number">0xD83Du16</span>, <span class="number">0x03C4u16</span>, <span class="number">0x03CCu16</span>],
-            <span class="string">b&quot;\xC1\xF5&amp;#65533;\xF4\xFC&quot;</span>,
+            <span class="string">b"\xC1\xF5&amp;#65533;\xF4\xFC"</span>,
         );
         encode_from_utf16(
             WINDOWS_1253,
             <span class="kw-2">&amp;</span>[<span class="number">0x0391u16</span>, <span class="number">0x03C5u16</span>, <span class="number">0x03C4u16</span>, <span class="number">0x03CCu16</span>, <span class="number">0xD83Du16</span>],
-            <span class="string">b&quot;\xC1\xF5\xF4\xFC&amp;#65533;&quot;</span>,
+            <span class="string">b"\xC1\xF5\xF4\xFC&amp;#65533;"</span>,
         );
     }
 
-    <span class="kw">pub const </span>HIGH_BYTES: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[u8; <span class="number">128</span>] = <span class="kw-2">&amp;</span>[
+    <span class="kw">pub const </span>HIGH_BYTES: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>[u8; <span class="number">128</span>] = <span class="kw-2">&amp;</span>[
         <span class="number">0x80</span>, <span class="number">0x81</span>, <span class="number">0x82</span>, <span class="number">0x83</span>, <span class="number">0x84</span>, <span class="number">0x85</span>, <span class="number">0x86</span>, <span class="number">0x87</span>, <span class="number">0x88</span>, <span class="number">0x89</span>, <span class="number">0x8A</span>, <span class="number">0x8B</span>, <span class="number">0x8C</span>, <span class="number">0x8D</span>, <span class="number">0x8E</span>,
         <span class="number">0x8F</span>, <span class="number">0x90</span>, <span class="number">0x91</span>, <span class="number">0x92</span>, <span class="number">0x93</span>, <span class="number">0x94</span>, <span class="number">0x95</span>, <span class="number">0x96</span>, <span class="number">0x97</span>, <span class="number">0x98</span>, <span class="number">0x99</span>, <span class="number">0x9A</span>, <span class="number">0x9B</span>, <span class="number">0x9C</span>, <span class="number">0x9D</span>,
         <span class="number">0x9E</span>, <span class="number">0x9F</span>, <span class="number">0xA0</span>, <span class="number">0xA1</span>, <span class="number">0xA2</span>, <span class="number">0xA3</span>, <span class="number">0xA4</span>, <span class="number">0xA5</span>, <span class="number">0xA6</span>, <span class="number">0xA7</span>, <span class="number">0xA8</span>, <span class="number">0xA9</span>, <span class="number">0xAA</span>, <span class="number">0xAB</span>, <span class="number">0xAC</span>,
@@ -1294,7 +1294,7 @@
         <span class="number">0xF8</span>, <span class="number">0xF9</span>, <span class="number">0xFA</span>, <span class="number">0xFB</span>, <span class="number">0xFC</span>, <span class="number">0xFD</span>, <span class="number">0xFE</span>, <span class="number">0xFF</span>,
     ];
 
-    <span class="kw">fn </span>decode_single_byte(encoding: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Encoding, data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[u16; <span class="number">128</span>]) {
+    <span class="kw">fn </span>decode_single_byte(encoding: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Encoding, data: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>[u16; <span class="number">128</span>]) {
         <span class="kw">let </span><span class="kw-2">mut </span>with_replacement = [<span class="number">0u16</span>; <span class="number">128</span>];
         <span class="kw">let </span><span class="kw-2">mut </span>it = data.iter().enumerate();
         <span class="kw">loop </span>{
@@ -1315,7 +1315,7 @@
         decode_to_utf16(encoding, HIGH_BYTES, <span class="kw-2">&amp;</span>with_replacement[..]);
     }
 
-    <span class="kw">fn </span>encode_single_byte(encoding: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Encoding, data: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[u16; <span class="number">128</span>]) {
+    <span class="kw">fn </span>encode_single_byte(encoding: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Encoding, data: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>[u16; <span class="number">128</span>]) {
         <span class="kw">let </span><span class="kw-2">mut </span>with_zeros = [<span class="number">0u8</span>; <span class="number">128</span>];
         <span class="kw">let </span><span class="kw-2">mut </span>it = data.iter().enumerate();
         <span class="kw">loop </span>{
@@ -1338,7 +1338,7 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_single_byte_from_two_low_surrogates() {
-        <span class="kw">let </span>expectation = <span class="string">b&quot;&amp;#65533;&amp;#65533;&quot;</span>;
+        <span class="kw">let </span>expectation = <span class="string">b"&amp;#65533;&amp;#65533;"</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>output = [<span class="number">0u8</span>; <span class="number">40</span>];
         <span class="kw">let </span><span class="kw-2">mut </span>encoder = WINDOWS_1253.new_encoder();
         <span class="kw">let </span>(result, read, written, had_errors) =

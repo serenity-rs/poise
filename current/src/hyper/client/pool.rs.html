@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hyper-0.14.27/src/client/pool.rs`."><title>pool.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="hyper" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hyper-0.14.27/src/client/pool.rs`."><title>pool.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="hyper" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1048,11 +1048,11 @@
 <span class="kw">use </span>std::ops::{Deref, DerefMut};
 <span class="kw">use </span>std::sync::{Arc, Mutex, Weak};
 
-<span class="attr">#[cfg(not(feature = <span class="string">&quot;runtime&quot;</span>))]
+<span class="attr">#[cfg(not(feature = <span class="string">"runtime"</span>))]
 </span><span class="kw">use </span>std::time::{Duration, Instant};
 
 <span class="kw">use </span>futures_channel::oneshot;
-<span class="attr">#[cfg(feature = <span class="string">&quot;runtime&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
 </span><span class="kw">use </span>tokio::time::{Duration, Instant, Interval};
 <span class="kw">use </span>tracing::{debug, trace};
 
@@ -1071,7 +1071,7 @@
 // This is a trait to allow the `client::pool::tests` to work for `i32`.
 //
 // See https://github.com/hyperium/hyper/issues/1429
-</span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">trait </span>Poolable: Unpin + Send + Sized + <span class="lifetime">&#39;static </span>{
+</span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">trait </span>Poolable: Unpin + Send + Sized + <span class="lifetime">'static </span>{
     <span class="kw">fn </span>is_open(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool;
     <span class="doccomment">/// Reserve this connection.
     ///
@@ -1091,7 +1091,7 @@
     <span class="doccomment">/// This connection could be used multiple times, the first one will be
     /// reinserted into the `idle` pool, and the second will be given to
     /// the `Checkout`.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;http2&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"http2"</span>)]
     </span>Shared(T, T),
     <span class="doccomment">/// This connection requires unique access. It will be returned after
     /// use is complete.
@@ -1111,7 +1111,7 @@
     </span>idle: HashMap&lt;Key, Vec&lt;Idle&lt;T&gt;&gt;&gt;,
     max_idle_per_host: usize,
     <span class="comment">// These are outstanding Checkouts that are waiting for a socket to be
-    // able to send a Request one. This is used when &quot;racing&quot; for a new
+    // able to send a Request one. This is used when "racing" for a new
     // connection.
     //
     // The Client starts 2 tasks, 1 to connect a new socket, and 1 to wait
@@ -1122,15 +1122,15 @@
     </span>waiters: HashMap&lt;Key, VecDeque&lt;oneshot::Sender&lt;T&gt;&gt;&gt;,
     <span class="comment">// A oneshot channel is used to allow the interval to be notified when
     // the Pool completely drops. That way, the interval can cancel immediately.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;runtime&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
     </span>idle_interval_ref: <span class="prelude-ty">Option</span>&lt;oneshot::Sender&lt;<span class="kw">crate</span>::common::Never&gt;&gt;,
-    <span class="attr">#[cfg(feature = <span class="string">&quot;runtime&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
     </span>exec: Exec,
     timeout: <span class="prelude-ty">Option</span>&lt;Duration&gt;,
 }
 
 <span class="comment">// This is because `Weak::new()` *allocates* space for `T`, even if it
-// doesn&#39;t need it!
+// doesn't need it!
 </span><span class="kw">struct </span>WeakOpt&lt;T&gt;(<span class="prelude-ty">Option</span>&lt;Weak&lt;T&gt;&gt;);
 
 <span class="attr">#[derive(Clone, Copy, Debug)]
@@ -1151,11 +1151,11 @@
             <span class="prelude-val">Some</span>(Arc::new(Mutex::new(PoolInner {
                 connecting: HashSet::new(),
                 idle: HashMap::new(),
-                <span class="attr">#[cfg(feature = <span class="string">&quot;runtime&quot;</span>)]
+                <span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
                 </span>idle_interval_ref: <span class="prelude-val">None</span>,
                 max_idle_per_host: config.max_idle_per_host,
                 waiters: HashMap::new(),
-                <span class="attr">#[cfg(feature = <span class="string">&quot;runtime&quot;</span>)]
+                <span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
                 </span>exec: __exec.clone(),
                 timeout: config.idle_timeout,
             })))
@@ -1173,10 +1173,10 @@
     <span class="attr">#[cfg(test)]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>no_timer(<span class="kw-2">&amp;</span><span class="self">self</span>) {
         <span class="comment">// Prevent an actual interval from being created for this pool...
-        </span><span class="attr">#[cfg(feature = <span class="string">&quot;runtime&quot;</span>)]
+        </span><span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
         </span>{
             <span class="kw">let </span><span class="kw-2">mut </span>inner = <span class="self">self</span>.inner.as_ref().unwrap().lock().unwrap();
-            <span class="macro">assert!</span>(inner.idle_interval_ref.is_none(), <span class="string">&quot;timer already spawned&quot;</span>);
+            <span class="macro">assert!</span>(inner.idle_interval_ref.is_none(), <span class="string">"timer already spawned"</span>);
             <span class="kw">let </span>(tx, <span class="kw">_</span>) = oneshot::channel();
             inner.idle_interval_ref = <span class="prelude-val">Some</span>(tx);
         }
@@ -1207,7 +1207,7 @@
                     };
                     <span class="prelude-val">Some</span>(connecting)
                 } <span class="kw">else </span>{
-                    <span class="macro">trace!</span>(<span class="string">&quot;HTTP/2 connecting already in progress for {:?}&quot;</span>, key);
+                    <span class="macro">trace!</span>(<span class="string">"HTTP/2 connecting already in progress for {:?}"</span>, key);
                     <span class="prelude-val">None
                 </span>};
             }
@@ -1216,25 +1216,25 @@
         <span class="comment">// else
         </span><span class="prelude-val">Some</span>(Connecting {
             key: key.clone(),
-            <span class="comment">// in HTTP/1&#39;s case, there is never a lock, so we don&#39;t
+            <span class="comment">// in HTTP/1's case, there is never a lock, so we don't
             // need to do anything in Drop.
             </span>pool: WeakOpt::none(),
         })
     }
 
     <span class="attr">#[cfg(test)]
-    </span><span class="kw">fn </span>locked(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; std::sync::MutexGuard&lt;<span class="lifetime">&#39;_</span>, PoolInner&lt;T&gt;&gt; {
-        <span class="self">self</span>.inner.as_ref().expect(<span class="string">&quot;enabled&quot;</span>).lock().expect(<span class="string">&quot;lock&quot;</span>)
+    </span><span class="kw">fn </span>locked(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; std::sync::MutexGuard&lt;<span class="lifetime">'_</span>, PoolInner&lt;T&gt;&gt; {
+        <span class="self">self</span>.inner.as_ref().expect(<span class="string">"enabled"</span>).lock().expect(<span class="string">"lock"</span>)
     }
 
     <span class="comment">/* Used in client/tests.rs...
-    #[cfg(feature = &quot;runtime&quot;)]
+    #[cfg(feature = "runtime")]
     #[cfg(test)]
     pub(super) fn h1_key(&amp;self, s: &amp;str) -&gt; Key {
         Arc::new(s.to_string())
     }
 
-    #[cfg(feature = &quot;runtime&quot;)]
+    #[cfg(feature = "runtime")]
     #[cfg(test)]
     pub(super) fn idle_count(&amp;self, key: &amp;Key) -&gt; usize {
         self
@@ -1248,12 +1248,12 @@
 
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>pooled(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="attr">#[cfg_attr(not(feature = <span class="string">&quot;http2&quot;</span>), allow(unused_mut))] </span><span class="kw-2">mut </span>connecting: Connecting&lt;T&gt;,
+        <span class="attr">#[cfg_attr(not(feature = <span class="string">"http2"</span>), allow(unused_mut))] </span><span class="kw-2">mut </span>connecting: Connecting&lt;T&gt;,
         value: T,
     ) -&gt; Pooled&lt;T&gt; {
         <span class="kw">let </span>(value, pool_ref) = <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref </span>enabled) = <span class="self">self</span>.inner {
             <span class="kw">match </span>value.reserve() {
-                <span class="attr">#[cfg(feature = <span class="string">&quot;http2&quot;</span>)]
+                <span class="attr">#[cfg(feature = <span class="string">"http2"</span>)]
                 </span>Reservation::Shared(to_insert, to_return) =&gt; {
                     <span class="kw">let </span><span class="kw-2">mut </span>inner = enabled.lock().unwrap();
                     inner.put(connecting.key.clone(), to_insert, enabled);
@@ -1263,7 +1263,7 @@
                     <span class="comment">// prevent the Drop of Connecting from repeating inner.connected()
                     </span>connecting.pool = WeakOpt::none();
 
-                    <span class="comment">// Shared reservations don&#39;t need a reference to the pool,
+                    <span class="comment">// Shared reservations don't need a reference to the pool,
                     // since the pool always keeps a copy.
                     </span>(to_return, WeakOpt::none())
                 }
@@ -1291,10 +1291,10 @@
     }
 
     <span class="kw">fn </span>reuse(<span class="kw-2">&amp;</span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>Key, value: T) -&gt; Pooled&lt;T&gt; {
-        <span class="macro">debug!</span>(<span class="string">&quot;reuse idle connection for {:?}&quot;</span>, key);
+        <span class="macro">debug!</span>(<span class="string">"reuse idle connection for {:?}"</span>, key);
         <span class="comment">// TODO: unhack this
         // In Pool::pooled(), which is used for inserting brand new connections,
-        // there&#39;s some code that adjusts the pool reference taken depending
+        // there's some code that adjusts the pool reference taken depending
         // on if the Reservation can be shared or is unique. By the time
         // reuse() is called, the reservation has already been made, and
         // we just have the final value, without knowledge of if this is
@@ -1316,34 +1316,34 @@
     }
 }
 
-<span class="doccomment">/// Pop off this list, looking for a usable connection that hasn&#39;t expired.
-</span><span class="kw">struct </span>IdlePopper&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    key: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Key,
-    list: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>Vec&lt;Idle&lt;T&gt;&gt;,
+<span class="doccomment">/// Pop off this list, looking for a usable connection that hasn't expired.
+</span><span class="kw">struct </span>IdlePopper&lt;<span class="lifetime">'a</span>, T&gt; {
+    key: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Key,
+    list: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>Vec&lt;Idle&lt;T&gt;&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: Poolable + <span class="lifetime">&#39;a</span>&gt; IdlePopper&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T: Poolable + <span class="lifetime">'a</span>&gt; IdlePopper&lt;<span class="lifetime">'a</span>, T&gt; {
     <span class="kw">fn </span>pop(<span class="self">self</span>, expiration: <span class="kw-2">&amp;</span>Expiration) -&gt; <span class="prelude-ty">Option</span>&lt;Idle&lt;T&gt;&gt; {
         <span class="kw">while let </span><span class="prelude-val">Some</span>(entry) = <span class="self">self</span>.list.pop() {
             <span class="comment">// If the connection has been closed, or is older than our idle
             // timeout, simply drop it and keep looking...
             </span><span class="kw">if </span>!entry.value.is_open() {
-                <span class="macro">trace!</span>(<span class="string">&quot;removing closed connection for {:?}&quot;</span>, <span class="self">self</span>.key);
+                <span class="macro">trace!</span>(<span class="string">"removing closed connection for {:?}"</span>, <span class="self">self</span>.key);
                 <span class="kw">continue</span>;
             }
             <span class="comment">// TODO: Actually, since the `idle` list is pushed to the end always,
             // that would imply that if *this* entry is expired, then anything
-            // &quot;earlier&quot; in the list would *have* to be expired also... Right?
+            // "earlier" in the list would *have* to be expired also... Right?
             //
             // In that case, we could just break out of the loop and drop the
             // whole list...
             </span><span class="kw">if </span>expiration.expires(entry.idle_at) {
-                <span class="macro">trace!</span>(<span class="string">&quot;removing expired connection for {:?}&quot;</span>, <span class="self">self</span>.key);
+                <span class="macro">trace!</span>(<span class="string">"removing expired connection for {:?}"</span>, <span class="self">self</span>.key);
                 <span class="kw">continue</span>;
             }
 
             <span class="kw">let </span>value = <span class="kw">match </span>entry.value.reserve() {
-                <span class="attr">#[cfg(feature = <span class="string">&quot;http2&quot;</span>)]
+                <span class="attr">#[cfg(feature = <span class="string">"http2"</span>)]
                 </span>Reservation::Shared(to_reinsert, to_checkout) =&gt; {
                     <span class="self">self</span>.list.push(Idle {
                         idle_at: Instant::now(),
@@ -1367,18 +1367,18 @@
 <span class="kw">impl</span>&lt;T: Poolable&gt; PoolInner&lt;T&gt; {
     <span class="kw">fn </span>put(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: Key, value: T, __pool_ref: <span class="kw-2">&amp;</span>Arc&lt;Mutex&lt;PoolInner&lt;T&gt;&gt;&gt;) {
         <span class="kw">if </span>value.can_share() &amp;&amp; <span class="self">self</span>.idle.contains_key(<span class="kw-2">&amp;</span>key) {
-            <span class="macro">trace!</span>(<span class="string">&quot;put; existing idle HTTP/2 connection for {:?}&quot;</span>, key);
+            <span class="macro">trace!</span>(<span class="string">"put; existing idle HTTP/2 connection for {:?}"</span>, key);
             <span class="kw">return</span>;
         }
-        <span class="macro">trace!</span>(<span class="string">&quot;put; add idle connection for {:?}&quot;</span>, key);
+        <span class="macro">trace!</span>(<span class="string">"put; add idle connection for {:?}"</span>, key);
         <span class="kw">let </span><span class="kw-2">mut </span>remove_waiters = <span class="bool-val">false</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>value = <span class="prelude-val">Some</span>(value);
         <span class="kw">if let </span><span class="prelude-val">Some</span>(waiters) = <span class="self">self</span>.waiters.get_mut(<span class="kw-2">&amp;</span>key) {
             <span class="kw">while let </span><span class="prelude-val">Some</span>(tx) = waiters.pop_front() {
                 <span class="kw">if </span>!tx.is_canceled() {
-                    <span class="kw">let </span>reserved = value.take().expect(<span class="string">&quot;value already sent&quot;</span>);
+                    <span class="kw">let </span>reserved = value.take().expect(<span class="string">"value already sent"</span>);
                     <span class="kw">let </span>reserved = <span class="kw">match </span>reserved.reserve() {
-                        <span class="attr">#[cfg(feature = <span class="string">&quot;http2&quot;</span>)]
+                        <span class="attr">#[cfg(feature = <span class="string">"http2"</span>)]
                         </span>Reservation::Shared(to_keep, to_send) =&gt; {
                             value = <span class="prelude-val">Some</span>(to_keep);
                             to_send
@@ -1399,7 +1399,7 @@
                     }
                 }
 
-                <span class="macro">trace!</span>(<span class="string">&quot;put; removing canceled waiter for {:?}&quot;</span>, key);
+                <span class="macro">trace!</span>(<span class="string">"put; removing canceled waiter for {:?}"</span>, key);
             }
             remove_waiters = waiters.is_empty();
         }
@@ -1413,23 +1413,23 @@
                 </span>{
                     <span class="kw">let </span>idle_list = <span class="self">self</span>.idle.entry(key.clone()).or_insert_with(Vec::new);
                     <span class="kw">if </span><span class="self">self</span>.max_idle_per_host &lt;= idle_list.len() {
-                        <span class="macro">trace!</span>(<span class="string">&quot;max idle per host for {:?}, dropping connection&quot;</span>, key);
+                        <span class="macro">trace!</span>(<span class="string">"max idle per host for {:?}, dropping connection"</span>, key);
                         <span class="kw">return</span>;
                     }
 
-                    <span class="macro">debug!</span>(<span class="string">&quot;pooling idle connection for {:?}&quot;</span>, key);
+                    <span class="macro">debug!</span>(<span class="string">"pooling idle connection for {:?}"</span>, key);
                     idle_list.push(Idle {
                         value,
                         idle_at: Instant::now(),
                     });
                 }
 
-                <span class="attr">#[cfg(feature = <span class="string">&quot;runtime&quot;</span>)]
+                <span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
                 </span>{
                     <span class="self">self</span>.spawn_idle_interval(__pool_ref);
                 }
             }
-            <span class="prelude-val">None </span>=&gt; <span class="macro">trace!</span>(<span class="string">&quot;put; found waiter for {:?}&quot;</span>, key),
+            <span class="prelude-val">None </span>=&gt; <span class="macro">trace!</span>(<span class="string">"put; found waiter for {:?}"</span>, key),
         }
     }
 
@@ -1437,14 +1437,14 @@
     /// but the lock is going away, so clean up.
     </span><span class="kw">fn </span>connected(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>Key) {
         <span class="kw">let </span>existed = <span class="self">self</span>.connecting.remove(key);
-        <span class="macro">debug_assert!</span>(existed, <span class="string">&quot;Connecting dropped, key not in pool.connecting&quot;</span>);
-        <span class="comment">// cancel any waiters. if there are any, it&#39;s because
-        // this Connecting task didn&#39;t complete successfully.
+        <span class="macro">debug_assert!</span>(existed, <span class="string">"Connecting dropped, key not in pool.connecting"</span>);
+        <span class="comment">// cancel any waiters. if there are any, it's because
+        // this Connecting task didn't complete successfully.
         // those waiters would never receive a connection.
         </span><span class="self">self</span>.waiters.remove(key);
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;runtime&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
     </span><span class="kw">fn </span>spawn_idle_interval(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pool_ref: <span class="kw-2">&amp;</span>Arc&lt;Mutex&lt;PoolInner&lt;T&gt;&gt;&gt;) {
         <span class="kw">let </span>(dur, rx) = {
             <span class="kw">if </span><span class="self">self</span>.idle_interval_ref.is_some() {
@@ -1487,11 +1487,11 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;runtime&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
 </span><span class="kw">impl</span>&lt;T: Poolable&gt; PoolInner&lt;T&gt; {
     <span class="doccomment">/// This should *only* be called by the IdleTask
     </span><span class="kw">fn </span>clear_expired(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
-        <span class="kw">let </span>dur = <span class="self">self</span>.timeout.expect(<span class="string">&quot;interval assumes timeout&quot;</span>);
+        <span class="kw">let </span>dur = <span class="self">self</span>.timeout.expect(<span class="string">"interval assumes timeout"</span>);
 
         <span class="kw">let </span>now = Instant::now();
         <span class="comment">//self.last_idle_check_at = now;
@@ -1499,13 +1499,13 @@
         </span><span class="self">self</span>.idle.retain(|key, values| {
             values.retain(|entry| {
                 <span class="kw">if </span>!entry.value.is_open() {
-                    <span class="macro">trace!</span>(<span class="string">&quot;idle interval evicting closed for {:?}&quot;</span>, key);
+                    <span class="macro">trace!</span>(<span class="string">"idle interval evicting closed for {:?}"</span>, key);
                     <span class="kw">return </span><span class="bool-val">false</span>;
                 }
 
                 <span class="comment">// Avoid `Instant::sub` to avoid issues like rust-lang/rust#86470.
                 </span><span class="kw">if </span>now.saturating_duration_since(entry.idle_at) &gt; dur {
-                    <span class="macro">trace!</span>(<span class="string">&quot;idle interval evicting expired for {:?}&quot;</span>, key);
+                    <span class="macro">trace!</span>(<span class="string">"idle interval evicting expired for {:?}"</span>, key);
                     <span class="kw">return </span><span class="bool-val">false</span>;
                 }
 
@@ -1546,11 +1546,11 @@
     }
 
     <span class="kw">fn </span>as_ref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>T {
-        <span class="self">self</span>.value.as_ref().expect(<span class="string">&quot;not dropped&quot;</span>)
+        <span class="self">self</span>.value.as_ref().expect(<span class="string">"not dropped"</span>)
     }
 
     <span class="kw">fn </span>as_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>T {
-        <span class="self">self</span>.value.as_mut().expect(<span class="string">&quot;not dropped&quot;</span>)
+        <span class="self">self</span>.value.as_mut().expect(<span class="string">"not dropped"</span>)
     }
 }
 
@@ -1572,7 +1572,7 @@
         <span class="kw">if let </span><span class="prelude-val">Some</span>(value) = <span class="self">self</span>.value.take() {
             <span class="kw">if </span>!value.is_open() {
                 <span class="comment">// If we *already* know the connection is done here,
-                // it shouldn&#39;t be re-inserted back into the pool.
+                // it shouldn't be re-inserted back into the pool.
                 </span><span class="kw">return</span>;
             }
 
@@ -1581,17 +1581,17 @@
                     inner.put(<span class="self">self</span>.key.clone(), value, <span class="kw-2">&amp;</span>pool);
                 }
             } <span class="kw">else if </span>!value.can_share() {
-                <span class="macro">trace!</span>(<span class="string">&quot;pool dropped, dropping pooled ({:?})&quot;</span>, <span class="self">self</span>.key);
+                <span class="macro">trace!</span>(<span class="string">"pool dropped, dropping pooled ({:?})"</span>, <span class="self">self</span>.key);
             }
-            <span class="comment">// Ver::Http2 is already in the Pool (or dead), so we wouldn&#39;t
+            <span class="comment">// Ver::Http2 is already in the Pool (or dead), so we wouldn't
             // have an actual reference to the Pool.
         </span>}
     }
 }
 
 <span class="kw">impl</span>&lt;T: Poolable&gt; fmt::Debug <span class="kw">for </span>Pooled&lt;T&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        f.debug_struct(<span class="string">&quot;Pooled&quot;</span>).field(<span class="string">&quot;key&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.key).finish()
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        f.debug_struct(<span class="string">"Pooled"</span>).field(<span class="string">"key"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.key).finish()
     }
 }
 
@@ -1614,15 +1614,15 @@
 <span class="kw">impl </span>StdError <span class="kw">for </span>CheckoutIsClosedError {}
 
 <span class="kw">impl </span>fmt::Display <span class="kw">for </span>CheckoutIsClosedError {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        f.write_str(<span class="string">&quot;checked out connection was closed&quot;</span>)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        f.write_str(<span class="string">"checked out connection was closed"</span>)
     }
 }
 
 <span class="kw">impl</span>&lt;T: Poolable&gt; Checkout&lt;T&gt; {
     <span class="kw">fn </span>poll_waiter(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;,
+        cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;,
     ) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;<span class="kw">crate</span>::Result&lt;Pooled&lt;T&gt;&gt;&gt;&gt; {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">mut </span>rx) = <span class="self">self</span>.waiter.take() {
             <span class="kw">match </span>Pin::new(<span class="kw-2">&amp;mut </span>rx).poll(cx) {
@@ -1640,7 +1640,7 @@
                     Poll::Pending
                 }
                 Poll::Ready(<span class="prelude-val">Err</span>(_canceled)) =&gt; Poll::Ready(<span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(
-                    <span class="kw">crate</span>::Error::new_canceled().with(<span class="string">&quot;request has been canceled&quot;</span>)
+                    <span class="kw">crate</span>::Error::new_canceled().with(<span class="string">"request has been canceled"</span>)
                 ))),
             }
         } <span class="kw">else </span>{
@@ -1648,12 +1648,12 @@
         }
     }
 
-    <span class="kw">fn </span>checkout(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;Pooled&lt;T&gt;&gt; {
+    <span class="kw">fn </span>checkout(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;Pooled&lt;T&gt;&gt; {
         <span class="kw">let </span>entry = {
             <span class="kw">let </span><span class="kw-2">mut </span>inner = <span class="self">self</span>.pool.inner.as_ref()<span class="question-mark">?</span>.lock().unwrap();
             <span class="kw">let </span>expiration = Expiration::new(inner.timeout);
             <span class="kw">let </span>maybe_entry = inner.idle.get_mut(<span class="kw-2">&amp;</span><span class="self">self</span>.key).and_then(|list| {
-                <span class="macro">trace!</span>(<span class="string">&quot;take? {:?}: expiration = {:?}&quot;</span>, <span class="self">self</span>.key, expiration.<span class="number">0</span>);
+                <span class="macro">trace!</span>(<span class="string">"take? {:?}: expiration = {:?}"</span>, <span class="self">self</span>.key, expiration.<span class="number">0</span>);
                 <span class="comment">// A block to end the mutable borrow on list,
                 // so the map below can check is_empty()
                 </span>{
@@ -1679,7 +1679,7 @@
 
             <span class="kw">if </span>entry.is_none() &amp;&amp; <span class="self">self</span>.waiter.is_none() {
                 <span class="kw">let </span>(tx, <span class="kw-2">mut </span>rx) = oneshot::channel();
-                <span class="macro">trace!</span>(<span class="string">&quot;checkout waiting for idle connection: {:?}&quot;</span>, <span class="self">self</span>.key);
+                <span class="macro">trace!</span>(<span class="string">"checkout waiting for idle connection: {:?}"</span>, <span class="self">self</span>.key);
                 inner
                     .waiters
                     .entry(<span class="self">self</span>.key.clone())
@@ -1701,7 +1701,7 @@
 <span class="kw">impl</span>&lt;T: Poolable&gt; Future <span class="kw">for </span>Checkout&lt;T&gt; {
     <span class="kw">type </span>Output = <span class="kw">crate</span>::Result&lt;Pooled&lt;T&gt;&gt;;
 
-    <span class="kw">fn </span>poll(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
+    <span class="kw">fn </span>poll(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(pooled) = <span class="macro">ready!</span>(<span class="self">self</span>.poll_waiter(cx)<span class="question-mark">?</span>) {
             <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Ok</span>(pooled));
         }
@@ -1709,9 +1709,9 @@
         <span class="kw">if let </span><span class="prelude-val">Some</span>(pooled) = <span class="self">self</span>.checkout(cx) {
             Poll::Ready(<span class="prelude-val">Ok</span>(pooled))
         } <span class="kw">else if </span>!<span class="self">self</span>.pool.is_enabled() {
-            Poll::Ready(<span class="prelude-val">Err</span>(<span class="kw">crate</span>::Error::new_canceled().with(<span class="string">&quot;pool is disabled&quot;</span>)))
+            Poll::Ready(<span class="prelude-val">Err</span>(<span class="kw">crate</span>::Error::new_canceled().with(<span class="string">"pool is disabled"</span>)))
         } <span class="kw">else </span>{
-            <span class="comment">// There&#39;s a new waiter, already registered in self.checkout()
+            <span class="comment">// There's a new waiter, already registered in self.checkout()
             </span><span class="macro">debug_assert!</span>(<span class="self">self</span>.waiter.is_some());
             Poll::Pending
         }
@@ -1721,7 +1721,7 @@
 <span class="kw">impl</span>&lt;T&gt; Drop <span class="kw">for </span>Checkout&lt;T&gt; {
     <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="kw">if </span><span class="self">self</span>.waiter.take().is_some() {
-            <span class="macro">trace!</span>(<span class="string">&quot;checkout dropped for {:?}&quot;</span>, <span class="self">self</span>.key);
+            <span class="macro">trace!</span>(<span class="string">"checkout dropped for {:?}"</span>, <span class="self">self</span>.key);
             <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(<span class="kw-2">mut </span>inner)) = <span class="self">self</span>.pool.inner.as_ref().map(|i| i.lock()) {
                 inner.clean_waiters(<span class="kw-2">&amp;</span><span class="self">self</span>.key);
             }
@@ -1740,7 +1740,7 @@
     <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>alpn_h2(<span class="self">self</span>, pool: <span class="kw-2">&amp;</span>Pool&lt;T&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="macro">debug_assert!</span>(
             <span class="self">self</span>.pool.<span class="number">0</span>.is_none(),
-            <span class="string">&quot;Connecting::alpn_h2 but already Http2&quot;
+            <span class="string">"Connecting::alpn_h2 but already Http2"
         </span>);
 
         pool.connecting(<span class="kw-2">&amp;</span><span class="self">self</span>.key, Ver::Http2)
@@ -1774,7 +1774,7 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;runtime&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
 </span><span class="macro">pin_project_lite::pin_project! </span>{
     <span class="kw">struct </span>IdleTask&lt;T&gt; {
         <span class="attr">#[pin]
@@ -1788,18 +1788,18 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;runtime&quot;</span>)]
-</span><span class="kw">impl</span>&lt;T: Poolable + <span class="lifetime">&#39;static</span>&gt; Future <span class="kw">for </span>IdleTask&lt;T&gt; {
+<span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
+</span><span class="kw">impl</span>&lt;T: Poolable + <span class="lifetime">'static</span>&gt; Future <span class="kw">for </span>IdleTask&lt;T&gt; {
     <span class="kw">type </span>Output = ();
 
-    <span class="kw">fn </span>poll(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
+    <span class="kw">fn </span>poll(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>this = <span class="self">self</span>.project();
         <span class="kw">loop </span>{
             <span class="kw">match </span>this.pool_drop_notifier.as_mut().poll(cx) {
                 Poll::Ready(<span class="prelude-val">Ok</span>(n)) =&gt; <span class="kw">match </span>n {},
                 Poll::Pending =&gt; (),
                 Poll::Ready(<span class="prelude-val">Err</span>(_canceled)) =&gt; {
-                    <span class="macro">trace!</span>(<span class="string">&quot;pool closed, canceling idle interval&quot;</span>);
+                    <span class="macro">trace!</span>(<span class="string">"pool closed, canceling idle interval"</span>);
                     <span class="kw">return </span>Poll::Ready(());
                 }
             }
@@ -1808,7 +1808,7 @@
 
             <span class="kw">if let </span><span class="prelude-val">Some</span>(inner) = this.pool.upgrade() {
                 <span class="kw">if let </span><span class="prelude-val">Ok</span>(<span class="kw-2">mut </span>inner) = inner.lock() {
-                    <span class="macro">trace!</span>(<span class="string">&quot;idle interval checking for expired&quot;</span>);
+                    <span class="macro">trace!</span>(<span class="string">"idle interval checking for expired"</span>);
                     inner.clear_expired();
                     <span class="kw">continue</span>;
                 }
@@ -1844,7 +1844,7 @@
     </span><span class="attr">#[derive(Debug, PartialEq, Eq)]
     </span><span class="kw">struct </span>Uniq&lt;T&gt;(T);
 
-    <span class="kw">impl</span>&lt;T: Send + <span class="lifetime">&#39;static </span>+ Unpin&gt; Poolable <span class="kw">for </span>Uniq&lt;T&gt; {
+    <span class="kw">impl</span>&lt;T: Send + <span class="lifetime">'static </span>+ Unpin&gt; Poolable <span class="kw">for </span>Uniq&lt;T&gt; {
         <span class="kw">fn </span>is_open(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
             <span class="bool-val">true
         </span>}
@@ -1866,7 +1866,7 @@
     }
 
     <span class="kw">fn </span>host_key(s: <span class="kw-2">&amp;</span>str) -&gt; Key {
-        (http::uri::Scheme::HTTP, s.parse().expect(<span class="string">&quot;host key&quot;</span>))
+        (http::uri::Scheme::HTTP, s.parse().expect(<span class="string">"host key"</span>))
     }
 
     <span class="kw">fn </span>pool_no_timer&lt;T&gt;() -&gt; Pool&lt;T&gt; {
@@ -1888,27 +1888,27 @@
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_pool_checkout_smoke() {
         <span class="kw">let </span>pool = pool_no_timer();
-        <span class="kw">let </span>key = host_key(<span class="string">&quot;foo&quot;</span>);
+        <span class="kw">let </span>key = host_key(<span class="string">"foo"</span>);
         <span class="kw">let </span>pooled = pool.pooled(c(key.clone()), Uniq(<span class="number">41</span>));
 
         drop(pooled);
 
         <span class="kw">match </span>pool.checkout(key).<span class="kw">await </span>{
             <span class="prelude-val">Ok</span>(pooled) =&gt; <span class="macro">assert_eq!</span>(<span class="kw-2">*</span>pooled, Uniq(<span class="number">41</span>)),
-            <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="macro">panic!</span>(<span class="string">&quot;not ready&quot;</span>),
+            <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="macro">panic!</span>(<span class="string">"not ready"</span>),
         };
     }
 
     <span class="doccomment">/// Helper to check if the future is ready after polling once.
-    </span><span class="kw">struct </span>PollOnce&lt;<span class="lifetime">&#39;a</span>, F&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>F);
+    </span><span class="kw">struct </span>PollOnce&lt;<span class="lifetime">'a</span>, F&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>F);
 
-    <span class="kw">impl</span>&lt;F, T, U&gt; Future <span class="kw">for </span>PollOnce&lt;<span class="lifetime">&#39;_</span>, F&gt;
+    <span class="kw">impl</span>&lt;F, T, U&gt; Future <span class="kw">for </span>PollOnce&lt;<span class="lifetime">'_</span>, F&gt;
     <span class="kw">where
         </span>F: Future&lt;Output = <span class="prelude-ty">Result</span>&lt;T, U&gt;&gt; + Unpin,
     {
         <span class="kw">type </span>Output = <span class="prelude-ty">Option</span>&lt;()&gt;;
 
-        <span class="kw">fn </span>poll(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
+        <span class="kw">fn </span>poll(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
             <span class="kw">match </span>Pin::new(<span class="kw-2">&amp;mut </span><span class="self">self</span>.<span class="number">0</span>).poll(cx) {
                 Poll::Ready(<span class="prelude-val">Ok</span>(<span class="kw">_</span>)) =&gt; Poll::Ready(<span class="prelude-val">Some</span>(())),
                 Poll::Ready(<span class="prelude-val">Err</span>(<span class="kw">_</span>)) =&gt; Poll::Ready(<span class="prelude-val">Some</span>(())),
@@ -1920,7 +1920,7 @@
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_pool_checkout_returns_none_if_expired() {
         <span class="kw">let </span>pool = pool_no_timer();
-        <span class="kw">let </span>key = host_key(<span class="string">&quot;foo&quot;</span>);
+        <span class="kw">let </span>key = host_key(<span class="string">"foo"</span>);
         <span class="kw">let </span>pooled = pool.pooled(c(key.clone()), Uniq(<span class="number">41</span>));
 
         drop(pooled);
@@ -1931,11 +1931,11 @@
         <span class="macro">assert!</span>(is_not_ready);
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;runtime&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
     #[tokio::test]
     </span><span class="kw">async fn </span>test_pool_checkout_removes_expired() {
         <span class="kw">let </span>pool = pool_no_timer();
-        <span class="kw">let </span>key = host_key(<span class="string">&quot;foo&quot;</span>);
+        <span class="kw">let </span>key = host_key(<span class="string">"foo"</span>);
 
         pool.pooled(c(key.clone()), Uniq(<span class="number">41</span>));
         pool.pooled(c(key.clone()), Uniq(<span class="number">5</span>));
@@ -1957,7 +1957,7 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_pool_max_idle_per_host() {
         <span class="kw">let </span>pool = pool_max_idle_no_timer(<span class="number">2</span>);
-        <span class="kw">let </span>key = host_key(<span class="string">&quot;foo&quot;</span>);
+        <span class="kw">let </span>key = host_key(<span class="string">"foo"</span>);
 
         pool.pooled(c(key.clone()), Uniq(<span class="number">41</span>));
         pool.pooled(c(key.clone()), Uniq(<span class="number">5</span>));
@@ -1970,7 +1970,7 @@
         );
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;runtime&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
     #[tokio::test]
     </span><span class="kw">async fn </span>test_pool_timer_removes_expired() {
         <span class="kw">let _ </span>= pretty_env_logger::try_init();
@@ -1984,7 +1984,7 @@
             <span class="kw-2">&amp;</span>Exec::Default,
         );
 
-        <span class="kw">let </span>key = host_key(<span class="string">&quot;foo&quot;</span>);
+        <span class="kw">let </span>key = host_key(<span class="string">"foo"</span>);
 
         pool.pooled(c(key.clone()), Uniq(<span class="number">41</span>));
         pool.pooled(c(key.clone()), Uniq(<span class="number">5</span>));
@@ -2009,7 +2009,7 @@
         <span class="kw">use </span>futures_util::FutureExt;
 
         <span class="kw">let </span>pool = pool_no_timer();
-        <span class="kw">let </span>key = host_key(<span class="string">&quot;foo&quot;</span>);
+        <span class="kw">let </span>key = host_key(<span class="string">"foo"</span>);
         <span class="kw">let </span>pooled = pool.pooled(c(key.clone()), Uniq(<span class="number">41</span>));
 
         <span class="kw">let </span>checkout = join(pool.checkout(key), <span class="kw">async </span>{
@@ -2028,7 +2028,7 @@
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_pool_checkout_drop_cleans_up_waiters() {
         <span class="kw">let </span>pool = pool_no_timer::&lt;Uniq&lt;i32&gt;&gt;();
-        <span class="kw">let </span>key = host_key(<span class="string">&quot;foo&quot;</span>);
+        <span class="kw">let </span>key = host_key(<span class="string">"foo"</span>);
 
         <span class="kw">let </span><span class="kw-2">mut </span>checkout1 = pool.checkout(key.clone());
         <span class="kw">let </span><span class="kw-2">mut </span>checkout2 = pool.checkout(key.clone());
@@ -2036,7 +2036,7 @@
         <span class="kw">let </span>poll_once1 = PollOnce(<span class="kw-2">&amp;mut </span>checkout1);
         <span class="kw">let </span>poll_once2 = PollOnce(<span class="kw-2">&amp;mut </span>checkout2);
 
-        <span class="comment">// first poll needed to get into Pool&#39;s parked
+        <span class="comment">// first poll needed to get into Pool's parked
         </span>poll_once1.<span class="kw">await</span>;
         <span class="macro">assert_eq!</span>(pool.locked().waiters.get(<span class="kw-2">&amp;</span>key).unwrap().len(), <span class="number">1</span>);
         poll_once2.<span class="kw">await</span>;
@@ -2074,7 +2074,7 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>pooled_drop_if_closed_doesnt_reinsert() {
         <span class="kw">let </span>pool = pool_no_timer();
-        <span class="kw">let </span>key = host_key(<span class="string">&quot;foo&quot;</span>);
+        <span class="kw">let </span>key = host_key(<span class="string">"foo"</span>);
         pool.pooled(
             c(key.clone()),
             CanClose {

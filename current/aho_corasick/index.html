@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="A library for finding occurrences of many patterns at once. This library provides multiple pattern search principally through an implementation of the Aho-Corasick algorithm, which builds a fast finite state machine for executing searches in linear time."><title>aho_corasick - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../" data-static-root-path="../static.files/" data-current-crate="aho_corasick" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../crates.js"></script><script defer src="../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc mod crate"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button></nav><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../aho_corasick/index.html">aho_corasick</a><span class="version">1.1.2</span></h2></div><div class="sidebar-elems"><ul class="block">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="A library for finding occurrences of many patterns at once. This library provides multiple pattern search principally through an implementation of the Aho-Corasick algorithm, which builds a fast finite state machine for executing searches in linear time."><title>aho_corasick - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../" data-static-root-path="../static.files/" data-current-crate="aho_corasick" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../crates.js"></script><script defer src="../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc mod crate"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button></nav><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../aho_corasick/index.html">aho_corasick</a><span class="version">1.1.2</span></h2></div><div class="sidebar-elems"><ul class="block">
             <li><a id="all-types" href="all.html">All Items</a></li></ul><section><ul class="block"><li><a href="#modules">Modules</a></li><li><a href="#structs">Structs</a></li><li><a href="#enums">Enums</a></li></ul></section></div></nav><main><div class="width-limiter"><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="main-heading"><h1>Crate <a class="mod" href="#">aho_corasick</a><button id="copy-path" title="Copy item path to clipboard"><img src="../static.files/clipboard-7571035ce49a181d.svg" width="19" height="18" alt="Copy item path"></button></h1><span class="out-of-band"><a class="src" href="../src/aho_corasick/lib.rs.html#1-326">source</a> · <button id="toggle-all-docs" title="collapse all docs">[<span>&#x2212;</span>]</button></span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>A library for finding occurrences of many patterns at once. This library
 provides multiple pattern search principally through an implementation of the
 <a href="https://en.wikipedia.org/wiki/Aho%E2%80%93Corasick_algorithm">Aho-Corasick algorithm</a>,
@@ -32,8 +32,8 @@ byte offsets of the match.</p>
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>aho_corasick::{AhoCorasick, PatternID};
 
-<span class="kw">let </span>patterns = <span class="kw-2">&amp;</span>[<span class="string">&quot;apple&quot;</span>, <span class="string">&quot;maple&quot;</span>, <span class="string">&quot;Snapple&quot;</span>];
-<span class="kw">let </span>haystack = <span class="string">&quot;Nobody likes maple in their apple flavored Snapple.&quot;</span>;
+<span class="kw">let </span>patterns = <span class="kw-2">&amp;</span>[<span class="string">"apple"</span>, <span class="string">"maple"</span>, <span class="string">"Snapple"</span>];
+<span class="kw">let </span>haystack = <span class="string">"Nobody likes maple in their apple flavored Snapple."</span>;
 
 <span class="kw">let </span>ac = AhoCorasick::new(patterns).unwrap();
 <span class="kw">let </span><span class="kw-2">mut </span>matches = <span class="macro">vec!</span>[];
@@ -51,8 +51,8 @@ using <code>AhoCorasickBuilder</code>:</p>
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>aho_corasick::{AhoCorasick, PatternID};
 
-<span class="kw">let </span>patterns = <span class="kw-2">&amp;</span>[<span class="string">&quot;apple&quot;</span>, <span class="string">&quot;maple&quot;</span>, <span class="string">&quot;snapple&quot;</span>];
-<span class="kw">let </span>haystack = <span class="string">&quot;Nobody likes maple in their apple flavored Snapple.&quot;</span>;
+<span class="kw">let </span>patterns = <span class="kw-2">&amp;</span>[<span class="string">"apple"</span>, <span class="string">"maple"</span>, <span class="string">"snapple"</span>];
+<span class="kw">let </span>haystack = <span class="string">"Nobody likes maple in their apple flavored Snapple."</span>;
 
 <span class="kw">let </span>ac = AhoCorasick::builder()
     .ascii_case_insensitive(<span class="bool-val">true</span>)
@@ -73,17 +73,17 @@ loading the entire stream into memory first.</p>
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>aho_corasick::AhoCorasick;
 
-<span class="kw">let </span>patterns = <span class="kw-2">&amp;</span>[<span class="string">&quot;fox&quot;</span>, <span class="string">&quot;brown&quot;</span>, <span class="string">&quot;quick&quot;</span>];
-<span class="kw">let </span>replace_with = <span class="kw-2">&amp;</span>[<span class="string">&quot;sloth&quot;</span>, <span class="string">&quot;grey&quot;</span>, <span class="string">&quot;slow&quot;</span>];
+<span class="kw">let </span>patterns = <span class="kw-2">&amp;</span>[<span class="string">"fox"</span>, <span class="string">"brown"</span>, <span class="string">"quick"</span>];
+<span class="kw">let </span>replace_with = <span class="kw-2">&amp;</span>[<span class="string">"sloth"</span>, <span class="string">"grey"</span>, <span class="string">"slow"</span>];
 
 <span class="comment">// In a real example, these might be `std::fs::File`s instead. All you need to
 // do is supply a pair of `std::io::Read` and `std::io::Write` implementations.
-</span><span class="kw">let </span>rdr = <span class="string">&quot;The quick brown fox.&quot;</span>;
+</span><span class="kw">let </span>rdr = <span class="string">"The quick brown fox."</span>;
 <span class="kw">let </span><span class="kw-2">mut </span>wtr = <span class="macro">vec!</span>[];
 
 <span class="kw">let </span>ac = AhoCorasick::new(patterns).unwrap();
 ac.try_stream_replace_all(rdr.as_bytes(), <span class="kw-2">&amp;mut </span>wtr, replace_with)<span class="question-mark">?</span>;
-<span class="macro">assert_eq!</span>(<span class="string">b&quot;The slow grey sloth.&quot;</span>.to_vec(), wtr);</code></pre></div>
+<span class="macro">assert_eq!</span>(<span class="string">b"The slow grey sloth."</span>.to_vec(), wtr);</code></pre></div>
 <h2 id="example-finding-the-leftmost-first-match"><a href="#example-finding-the-leftmost-first-match">Example: finding the leftmost first match</a></h2>
 <p>In the textbook description of Aho-Corasick, its formulation is typically
 structured such that it reports all possible matches, even when they overlap
@@ -102,26 +102,26 @@ semantics of Aho-Corasick (without additional search time overhead) such that
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>aho_corasick::AhoCorasick;
 
-<span class="kw">let </span>patterns = <span class="kw-2">&amp;</span>[<span class="string">&quot;Samwise&quot;</span>, <span class="string">&quot;Sam&quot;</span>];
-<span class="kw">let </span>haystack = <span class="string">&quot;Samwise&quot;</span>;
+<span class="kw">let </span>patterns = <span class="kw-2">&amp;</span>[<span class="string">"Samwise"</span>, <span class="string">"Sam"</span>];
+<span class="kw">let </span>haystack = <span class="string">"Samwise"</span>;
 
 <span class="kw">let </span>ac = AhoCorasick::new(patterns).unwrap();
-<span class="kw">let </span>mat = ac.find(haystack).expect(<span class="string">&quot;should have a match&quot;</span>);
-<span class="macro">assert_eq!</span>(<span class="string">&quot;Sam&quot;</span>, <span class="kw-2">&amp;</span>haystack[mat.start()..mat.end()]);</code></pre></div>
+<span class="kw">let </span>mat = ac.find(haystack).expect(<span class="string">"should have a match"</span>);
+<span class="macro">assert_eq!</span>(<span class="string">"Sam"</span>, <span class="kw-2">&amp;</span>haystack[mat.start()..mat.end()]);</code></pre></div>
 <p>And now here’s the leftmost-first version, which matches how a Perl-like
 regex will work:</p>
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>aho_corasick::{AhoCorasick, MatchKind};
 
-<span class="kw">let </span>patterns = <span class="kw-2">&amp;</span>[<span class="string">&quot;Samwise&quot;</span>, <span class="string">&quot;Sam&quot;</span>];
-<span class="kw">let </span>haystack = <span class="string">&quot;Samwise&quot;</span>;
+<span class="kw">let </span>patterns = <span class="kw-2">&amp;</span>[<span class="string">"Samwise"</span>, <span class="string">"Sam"</span>];
+<span class="kw">let </span>haystack = <span class="string">"Samwise"</span>;
 
 <span class="kw">let </span>ac = AhoCorasick::builder()
     .match_kind(MatchKind::LeftmostFirst)
     .build(patterns)
     .unwrap();
-<span class="kw">let </span>mat = ac.find(haystack).expect(<span class="string">&quot;should have a match&quot;</span>);
-<span class="macro">assert_eq!</span>(<span class="string">&quot;Samwise&quot;</span>, <span class="kw-2">&amp;</span>haystack[mat.start()..mat.end()]);</code></pre></div>
+<span class="kw">let </span>mat = ac.find(haystack).expect(<span class="string">"should have a match"</span>);
+<span class="macro">assert_eq!</span>(<span class="string">"Samwise"</span>, <span class="kw-2">&amp;</span>haystack[mat.start()..mat.end()]);</code></pre></div>
 <p>In addition to leftmost-first semantics, this library also supports
 leftmost-longest semantics, which match the POSIX behavior of a regular
 expression alternation. See <a href="enum.MatchKind.html" title="enum aho_corasick::MatchKind"><code>MatchKind</code></a> for more details.</p>

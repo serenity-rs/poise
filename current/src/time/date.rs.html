@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/time-0.3.30/src/date.rs`."><title>date.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="time" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="icon" href="https://avatars0.githubusercontent.com/u/55999857"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../time/index.html"><img src="https://avatars0.githubusercontent.com/u/55999857" alt="time"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/time-0.3.30/src/date.rs`."><title>date.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="time" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="icon" href="https://avatars0.githubusercontent.com/u/55999857"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../time/index.html"><img src="https://avatars0.githubusercontent.com/u/55999857" alt="time"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1454,7 +1454,7 @@
 <span class="kw">use </span>core::ops::{Add, Sub};
 <span class="kw">use </span>core::time::Duration <span class="kw">as </span>StdDuration;
 <span class="kw">use </span>core::{cmp, fmt};
-<span class="attr">#[cfg(feature = <span class="string">&quot;formatting&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"formatting"</span>)]
 </span><span class="kw">use </span>std::io;
 
 <span class="kw">use </span>deranged::RangedI32;
@@ -1463,13 +1463,13 @@
 
 <span class="kw">use </span><span class="kw">crate</span>::convert::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::ext::DigitCount;
-<span class="attr">#[cfg(feature = <span class="string">&quot;formatting&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"formatting"</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::formatting::Formattable;
 <span class="kw">use </span><span class="kw">crate</span>::internal_macros::{
     cascade, const_try, const_try_opt, div_floor, ensure_ranged, expect_opt, impl_add_assign,
     impl_sub_assign,
 };
-<span class="attr">#[cfg(feature = <span class="string">&quot;parsing&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"parsing"</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::parsing::Parsable;
 <span class="kw">use </span><span class="kw">crate</span>::util::{days_in_year, days_in_year_month, is_leap_year, weeks_in_year};
 <span class="kw">use crate</span>::{error, Duration, Month, PrimitiveDateTime, Time, Weekday};
@@ -1477,13 +1477,13 @@
 <span class="kw">type </span>Year = RangedI32&lt;MIN_YEAR, MAX_YEAR&gt;;
 
 <span class="doccomment">/// The minimum valid year.
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>MIN_YEAR: i32 = <span class="kw">if </span><span class="macro">cfg!</span>(feature = <span class="string">&quot;large-dates&quot;</span>) {
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>MIN_YEAR: i32 = <span class="kw">if </span><span class="macro">cfg!</span>(feature = <span class="string">"large-dates"</span>) {
     -<span class="number">999_999
 </span>} <span class="kw">else </span>{
     -<span class="number">9999
 </span>};
 <span class="doccomment">/// The maximum valid year.
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>MAX_YEAR: i32 = <span class="kw">if </span><span class="macro">cfg!</span>(feature = <span class="string">&quot;large-dates&quot;</span>) {
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>MAX_YEAR: i32 = <span class="kw">if </span><span class="macro">cfg!</span>(feature = <span class="string">"large-dates"</span>) {
     <span class="number">999_999
 </span>} <span class="kw">else </span>{
     <span class="number">9999
@@ -1551,7 +1551,7 @@
     ///
     /// ```rust
     /// # use time::{Date, Month};
-    /// assert!(Date::from_calendar_date(2019, Month::February, 29).is_err()); // 2019 isn&#39;t a leap year.
+    /// assert!(Date::from_calendar_date(2019, Month::February, 29).is_err()); // 2019 isn't a leap year.
     /// ```
     </span><span class="kw">pub const fn </span>from_calendar_date(
         year: i32,
@@ -1570,7 +1570,7 @@
             <span class="number">29</span>..=<span class="number">31 </span><span class="kw">if </span>day &lt;= days_in_year_month(year, month) =&gt; {}
             <span class="kw">_ </span>=&gt; {
                 <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="kw">crate</span>::error::ComponentRange {
-                    name: <span class="string">&quot;day&quot;</span>,
+                    name: <span class="string">"day"</span>,
                     minimum: <span class="number">1</span>,
                     maximum: days_in_year_month(year, month) <span class="kw">as _</span>,
                     value: day <span class="kw">as _</span>,
@@ -1599,7 +1599,7 @@
     ///
     /// ```rust
     /// # use time::Date;
-    /// assert!(Date::from_ordinal_date(2019, 366).is_err()); // 2019 isn&#39;t a leap year.
+    /// assert!(Date::from_ordinal_date(2019, 366).is_err()); // 2019 isn't a leap year.
     /// ```
     </span><span class="kw">pub const fn </span>from_ordinal_date(year: i32, ordinal: u16) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, error::ComponentRange&gt; {
         <span class="macro">ensure_ranged!</span>(Year: year);
@@ -1608,7 +1608,7 @@
             <span class="number">366 </span><span class="kw">if </span>is_leap_year(year) =&gt; {}
             <span class="kw">_ </span>=&gt; {
                 <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="kw">crate</span>::error::ComponentRange {
-                    name: <span class="string">&quot;ordinal&quot;</span>,
+                    name: <span class="string">"ordinal"</span>,
                     minimum: <span class="number">1</span>,
                     maximum: days_in_year(year) <span class="kw">as _</span>,
                     value: ordinal <span class="kw">as _</span>,
@@ -1632,7 +1632,7 @@
     ///
     /// ```rust
     /// # use time::{Date, Weekday::*};
-    /// assert!(Date::from_iso_week_date(2019, 53, Monday).is_err()); // 2019 doesn&#39;t have 53 weeks.
+    /// assert!(Date::from_iso_week_date(2019, 53, Monday).is_err()); // 2019 doesn't have 53 weeks.
     /// ```
     </span><span class="kw">pub const fn </span>from_iso_week_date(
         year: i32,
@@ -1645,7 +1645,7 @@
             <span class="number">53 </span><span class="kw">if </span>week &lt;= weeks_in_year(year) =&gt; {}
             <span class="kw">_ </span>=&gt; {
                 <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="kw">crate</span>::error::ComponentRange {
-                    name: <span class="string">&quot;week&quot;</span>,
+                    name: <span class="string">"week"</span>,
                     minimum: <span class="number">1</span>,
                     maximum: weeks_in_year(year) <span class="kw">as _</span>,
                     value: week <span class="kw">as _</span>,
@@ -1700,7 +1700,7 @@
     /// assert_eq!(Date::from_julian_day(2_458_485), Ok(date!(2019 - 01 - 01)));
     /// assert_eq!(Date::from_julian_day(2_458_849), Ok(date!(2019 - 12 - 31)));
     /// ```
-    </span><span class="attr">#[doc(alias = <span class="string">&quot;from_julian_date&quot;</span>)]
+    </span><span class="attr">#[doc(alias = <span class="string">"from_julian_date"</span>)]
     </span><span class="kw">pub const fn </span>from_julian_day(julian_day: i32) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, error::ComponentRange&gt; {
         <span class="kw">type </span>JulianDay = RangedI32&lt;{ Date::MIN.to_julian_day() }, { Date::MAX.to_julian_day() }&gt;;
         <span class="macro">ensure_ranged!</span>(JulianDay: julian_day);
@@ -1711,7 +1711,7 @@
     ///
     /// This does not check the validity of the provided Julian day, and as such may result in an
     /// internally invalid value.
-    </span><span class="attr">#[doc(alias = <span class="string">&quot;from_julian_date_unchecked&quot;</span>)]
+    </span><span class="attr">#[doc(alias = <span class="string">"from_julian_date_unchecked"</span>)]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const fn </span>from_julian_day_unchecked(julian_day: i32) -&gt; <span class="self">Self </span>{
         <span class="macro">debug_assert!</span>(julian_day &gt;= <span class="self">Self</span>::MIN.to_julian_day());
         <span class="macro">debug_assert!</span>(julian_day &lt;= <span class="self">Self</span>::MAX.to_julian_day());
@@ -1787,7 +1787,7 @@
     </span>}
 
     <span class="doccomment">/// Get the month and day. This is more efficient than fetching the components individually.
-    </span><span class="comment">// For whatever reason, rustc has difficulty optimizing this function. It&#39;s significantly faster
+    </span><span class="comment">// For whatever reason, rustc has difficulty optimizing this function. It's significantly faster
     // to write the statements out by hand.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const fn </span>month_day(<span class="self">self</span>) -&gt; (Month, u8) {
         <span class="doccomment">/// The number of days up to and including the given month. Common years
@@ -2074,7 +2074,7 @@
     </span><span class="kw">pub const fn </span>next_occurrence(<span class="self">self</span>, weekday: Weekday) -&gt; <span class="self">Self </span>{
         <span class="macro">expect_opt!</span>(
             <span class="self">self</span>.checked_next_occurrence(weekday),
-            <span class="string">&quot;overflow calculating the next occurrence of a weekday&quot;
+            <span class="string">"overflow calculating the next occurrence of a weekday"
         </span>)
     }
 
@@ -2099,7 +2099,7 @@
     </span><span class="kw">pub const fn </span>prev_occurrence(<span class="self">self</span>, weekday: Weekday) -&gt; <span class="self">Self </span>{
         <span class="macro">expect_opt!</span>(
             <span class="self">self</span>.checked_prev_occurrence(weekday),
-            <span class="string">&quot;overflow calculating the previous occurrence of a weekday&quot;
+            <span class="string">"overflow calculating the previous occurrence of a weekday"
         </span>)
     }
 
@@ -2124,7 +2124,7 @@
     </span><span class="kw">pub const fn </span>nth_next_occurrence(<span class="self">self</span>, weekday: Weekday, n: u8) -&gt; <span class="self">Self </span>{
         <span class="macro">expect_opt!</span>(
             <span class="self">self</span>.checked_nth_next_occurrence(weekday, n),
-            <span class="string">&quot;overflow calculating the next occurrence of a weekday&quot;
+            <span class="string">"overflow calculating the next occurrence of a weekday"
         </span>)
     }
 
@@ -2149,7 +2149,7 @@
     </span><span class="kw">pub const fn </span>nth_prev_occurrence(<span class="self">self</span>, weekday: Weekday, n: u8) -&gt; <span class="self">Self </span>{
         <span class="macro">expect_opt!</span>(
             <span class="self">self</span>.checked_nth_prev_occurrence(weekday, n),
-            <span class="string">&quot;overflow calculating the previous occurrence of a weekday&quot;
+            <span class="string">"overflow calculating the previous occurrence of a weekday"
         </span>)
     }
 
@@ -2504,10 +2504,10 @@
     ///     date!(2022 - 02 - 18).replace_year(2019),
     ///     Ok(date!(2019 - 02 - 18))
     /// );
-    /// assert!(date!(2022 - 02 - 18).replace_year(-1_000_000_000).is_err()); // -1_000_000_000 isn&#39;t a valid year
-    /// assert!(date!(2022 - 02 - 18).replace_year(1_000_000_000).is_err()); // 1_000_000_000 isn&#39;t a valid year
+    /// assert!(date!(2022 - 02 - 18).replace_year(-1_000_000_000).is_err()); // -1_000_000_000 isn't a valid year
+    /// assert!(date!(2022 - 02 - 18).replace_year(1_000_000_000).is_err()); // 1_000_000_000 isn't a valid year
     /// ```
-    </span><span class="attr">#[must_use = <span class="string">&quot;This method does not mutate the original `Date`.&quot;</span>]
+    </span><span class="attr">#[must_use = <span class="string">"This method does not mutate the original `Date`."</span>]
     </span><span class="kw">pub const fn </span>replace_year(<span class="self">self</span>, year: i32) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, error::ComponentRange&gt; {
         <span class="macro">ensure_ranged!</span>(Year: year);
 
@@ -2526,17 +2526,17 @@
             }
             <span class="comment">// February 29 does not exist in common years.
             </span>(<span class="bool-val">true</span>, <span class="bool-val">false</span>) <span class="kw">if </span>ordinal == <span class="number">60 </span>=&gt; <span class="prelude-val">Err</span>(error::ComponentRange {
-                name: <span class="string">&quot;day&quot;</span>,
+                name: <span class="string">"day"</span>,
                 value: <span class="number">29</span>,
                 minimum: <span class="number">1</span>,
                 maximum: <span class="number">28</span>,
                 conditional_range: <span class="bool-val">true</span>,
             }),
-            <span class="comment">// We&#39;re going from a common year to a leap year. Shift dates in March and later by
+            <span class="comment">// We're going from a common year to a leap year. Shift dates in March and later by
             // one day.
             // Safety: `ordinal` is not zero.
             </span>(<span class="bool-val">false</span>, <span class="bool-val">true</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="kw">unsafe </span>{ <span class="self">Self</span>::__from_ordinal_date_unchecked(year, ordinal + <span class="number">1</span>) }),
-            <span class="comment">// We&#39;re going from a leap year to a common year. Shift dates in January and
+            <span class="comment">// We're going from a leap year to a common year. Shift dates in January and
             // February by one day.
             // Safety: `ordinal` is not zero.
             </span>(<span class="bool-val">true</span>, <span class="bool-val">false</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="kw">unsafe </span>{ <span class="self">Self</span>::__from_ordinal_date_unchecked(year, ordinal - <span class="number">1</span>) }),
@@ -2556,9 +2556,9 @@
     ///     date!(2022 - 01 - 30)
     ///         .replace_month(Month::February)
     ///         .is_err()
-    /// ); // 30 isn&#39;t a valid day in February
+    /// ); // 30 isn't a valid day in February
     /// ```
-    </span><span class="attr">#[must_use = <span class="string">&quot;This method does not mutate the original `Date`.&quot;</span>]
+    </span><span class="attr">#[must_use = <span class="string">"This method does not mutate the original `Date`."</span>]
     </span><span class="kw">pub const fn </span>replace_month(<span class="self">self</span>, month: Month) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, error::ComponentRange&gt; {
         <span class="kw">let </span>(year, <span class="kw">_</span>, day) = <span class="self">self</span>.to_calendar_date();
         <span class="self">Self</span>::from_calendar_date(year, month, day)
@@ -2572,17 +2572,17 @@
     ///     date!(2022 - 02 - 18).replace_day(1),
     ///     Ok(date!(2022 - 02 - 01))
     /// );
-    /// assert!(date!(2022 - 02 - 18).replace_day(0).is_err()); // 0 isn&#39;t a valid day
-    /// assert!(date!(2022 - 02 - 18).replace_day(30).is_err()); // 30 isn&#39;t a valid day in February
+    /// assert!(date!(2022 - 02 - 18).replace_day(0).is_err()); // 0 isn't a valid day
+    /// assert!(date!(2022 - 02 - 18).replace_day(30).is_err()); // 30 isn't a valid day in February
     /// ```
-    </span><span class="attr">#[must_use = <span class="string">&quot;This method does not mutate the original `Date`.&quot;</span>]
+    </span><span class="attr">#[must_use = <span class="string">"This method does not mutate the original `Date`."</span>]
     </span><span class="kw">pub const fn </span>replace_day(<span class="self">self</span>, day: u8) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, error::ComponentRange&gt; {
         <span class="kw">match </span>day {
             <span class="number">1</span>..=<span class="number">28 </span>=&gt; {}
             <span class="number">29</span>..=<span class="number">31 </span><span class="kw">if </span>day &lt;= days_in_year_month(<span class="self">self</span>.year(), <span class="self">self</span>.month()) =&gt; {}
             <span class="kw">_ </span>=&gt; {
                 <span class="kw">return </span><span class="prelude-val">Err</span>(<span class="kw">crate</span>::error::ComponentRange {
-                    name: <span class="string">&quot;day&quot;</span>,
+                    name: <span class="string">"day"</span>,
                     minimum: <span class="number">1</span>,
                     maximum: days_in_year_month(<span class="self">self</span>.year(), <span class="self">self</span>.month()) <span class="kw">as _</span>,
                     value: day <span class="kw">as _</span>,
@@ -2711,7 +2711,7 @@
 <span class="comment">// endregion attach time
 
 // region: formatting &amp; parsing
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;formatting&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">"formatting"</span>)]
 </span><span class="kw">impl </span>Date {
     <span class="doccomment">/// Format the `Date` using the provided [format description](crate::format_description).
     </span><span class="kw">pub fn </span>format_into(
@@ -2727,8 +2727,8 @@
     /// ```rust
     /// # use time::{format_description};
     /// # use time_macros::date;
-    /// let format = format_description::parse(&quot;[year]-[month]-[day]&quot;)?;
-    /// assert_eq!(date!(2020 - 01 - 02).format(&amp;format)?, &quot;2020-01-02&quot;);
+    /// let format = format_description::parse("[year]-[month]-[day]")?;
+    /// assert_eq!(date!(2020 - 01 - 02).format(&amp;format)?, "2020-01-02");
     /// # Ok::&lt;_, time::Error&gt;(())
     /// ```
     </span><span class="kw">pub fn </span>format(<span class="self">self</span>, format: <span class="kw-2">&amp;</span>(<span class="kw">impl </span>Formattable + <span class="question-mark">?</span>Sized)) -&gt; <span class="prelude-ty">Result</span>&lt;String, error::Format&gt; {
@@ -2736,7 +2736,7 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;parsing&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"parsing"</span>)]
 </span><span class="kw">impl </span>Date {
     <span class="doccomment">/// Parse a `Date` from the input using the provided [format
     /// description](crate::format_description).
@@ -2744,8 +2744,8 @@
     /// ```rust
     /// # use time::Date;
     /// # use time_macros::{date, format_description};
-    /// let format = format_description!(&quot;[year]-[month]-[day]&quot;);
-    /// assert_eq!(Date::parse(&quot;2020-01-02&quot;, &amp;format)?, date!(2020 - 01 - 02));
+    /// let format = format_description!("[year]-[month]-[day]");
+    /// assert_eq!(Date::parse("2020-01-02", &amp;format)?, date!(2020 - 01 - 02));
     /// # Ok::&lt;_, time::Error&gt;(())
     /// ```
     </span><span class="kw">pub fn </span>parse(
@@ -2789,9 +2789,9 @@
 
         <span class="kw">let </span>formatted_width = year_width <span class="kw">as </span>usize
             + <span class="macro">smart_display::padded_width_of!</span>(
-                <span class="string">&quot;-&quot;</span>,
+                <span class="string">"-"</span>,
                 month <span class="kw">as </span>u8 =&gt; width(<span class="number">2</span>),
-                <span class="string">&quot;-&quot;</span>,
+                <span class="string">"-"</span>,
                 day =&gt; width(<span class="number">2</span>),
             );
 
@@ -2810,7 +2810,7 @@
 
     <span class="kw">fn </span>fmt_with_metadata(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;,
+        f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;,
         metadata: Metadata&lt;<span class="self">Self</span>&gt;,
     ) -&gt; fmt::Result {
         <span class="kw">let </span>DateMetadata {
@@ -2825,25 +2825,25 @@
         <span class="kw">if </span>display_sign {
             f.pad_with_width(
                 metadata.unpadded_width(),
-                <span class="macro">format_args!</span>(<span class="string">&quot;{year:+0year_width$}-{month:02}-{day:02}&quot;</span>),
+                <span class="macro">format_args!</span>(<span class="string">"{year:+0year_width$}-{month:02}-{day:02}"</span>),
             )
         } <span class="kw">else </span>{
             f.pad_with_width(
                 metadata.unpadded_width(),
-                <span class="macro">format_args!</span>(<span class="string">&quot;{year:0year_width$}-{month:02}-{day:02}&quot;</span>),
+                <span class="macro">format_args!</span>(<span class="string">"{year:0year_width$}-{month:02}-{day:02}"</span>),
             )
         }
     }
 }
 
 <span class="kw">impl </span>fmt::Display <span class="kw">for </span>Date {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         SmartDisplay::fmt(<span class="self">self</span>, f)
     }
 }
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>Date {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;(), fmt::Error&gt; {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;(), fmt::Error&gt; {
         fmt::Display::fmt(<span class="self">self</span>, f)
     }
 }
@@ -2855,7 +2855,7 @@
 
     <span class="kw">fn </span>add(<span class="self">self</span>, duration: Duration) -&gt; <span class="self">Self</span>::Output {
         <span class="self">self</span>.checked_add(duration)
-            .expect(<span class="string">&quot;overflow adding duration to date&quot;</span>)
+            .expect(<span class="string">"overflow adding duration to date"</span>)
     }
 }
 
@@ -2864,7 +2864,7 @@
 
     <span class="kw">fn </span>add(<span class="self">self</span>, duration: StdDuration) -&gt; <span class="self">Self</span>::Output {
         <span class="self">self</span>.checked_add_std(duration)
-            .expect(<span class="string">&quot;overflow adding duration to date&quot;</span>)
+            .expect(<span class="string">"overflow adding duration to date"</span>)
     }
 }
 
@@ -2875,7 +2875,7 @@
 
     <span class="kw">fn </span>sub(<span class="self">self</span>, duration: Duration) -&gt; <span class="self">Self</span>::Output {
         <span class="self">self</span>.checked_sub(duration)
-            .expect(<span class="string">&quot;overflow subtracting duration from date&quot;</span>)
+            .expect(<span class="string">"overflow subtracting duration from date"</span>)
     }
 }
 
@@ -2884,7 +2884,7 @@
 
     <span class="kw">fn </span>sub(<span class="self">self</span>, duration: StdDuration) -&gt; <span class="self">Self</span>::Output {
         <span class="self">self</span>.checked_sub_std(duration)
-            .expect(<span class="string">&quot;overflow subtracting duration from date&quot;</span>)
+            .expect(<span class="string">"overflow subtracting duration from date"</span>)
     }
 }
 

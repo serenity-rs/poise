@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/chrono-0.4.31/src/format/formatting.rs`."><title>formatting.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="chrono" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/chrono-0.4.31/src/format/formatting.rs`."><title>formatting.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="chrono" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -982,50 +982,50 @@
 
 </span><span class="doccomment">//! Date and time formatting routines.
 
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
 </span><span class="kw">use </span>alloc::string::{String, ToString};
-<span class="attr">#[cfg(any(feature = <span class="string">&quot;alloc&quot;</span>, feature = <span class="string">&quot;std&quot;</span>))]
+<span class="attr">#[cfg(any(feature = <span class="string">"alloc"</span>, feature = <span class="string">"std"</span>))]
 </span><span class="kw">use </span>core::borrow::Borrow;
 <span class="kw">use </span>core::fmt;
 <span class="kw">use </span>core::fmt::Write;
 
 <span class="attr">#[cfg(any(
-    feature = <span class="string">&quot;alloc&quot;</span>,
-    feature = <span class="string">&quot;std&quot;</span>,
-    feature = <span class="string">&quot;serde&quot;</span>,
-    feature = <span class="string">&quot;rustc-serialize&quot;
+    feature = <span class="string">"alloc"</span>,
+    feature = <span class="string">"std"</span>,
+    feature = <span class="string">"serde"</span>,
+    feature = <span class="string">"rustc-serialize"
 </span>))]
 </span><span class="kw">use </span><span class="kw">crate</span>::datetime::SecondsFormat;
-<span class="attr">#[cfg(any(feature = <span class="string">&quot;alloc&quot;</span>, feature = <span class="string">&quot;std&quot;</span>))]
+<span class="attr">#[cfg(any(feature = <span class="string">"alloc"</span>, feature = <span class="string">"std"</span>))]
 </span><span class="kw">use </span><span class="kw">crate</span>::offset::Offset;
 <span class="attr">#[cfg(any(
-    feature = <span class="string">&quot;alloc&quot;</span>,
-    feature = <span class="string">&quot;std&quot;</span>,
-    feature = <span class="string">&quot;serde&quot;</span>,
-    feature = <span class="string">&quot;rustc-serialize&quot;
+    feature = <span class="string">"alloc"</span>,
+    feature = <span class="string">"std"</span>,
+    feature = <span class="string">"serde"</span>,
+    feature = <span class="string">"rustc-serialize"
 </span>))]
 </span><span class="kw">use crate</span>::{Datelike, FixedOffset, NaiveDateTime, Timelike};
-<span class="attr">#[cfg(any(feature = <span class="string">&quot;alloc&quot;</span>, feature = <span class="string">&quot;std&quot;</span>))]
+<span class="attr">#[cfg(any(feature = <span class="string">"alloc"</span>, feature = <span class="string">"std"</span>))]
 </span><span class="kw">use crate</span>::{NaiveDate, NaiveTime, Weekday};
 
-<span class="attr">#[cfg(any(feature = <span class="string">&quot;alloc&quot;</span>, feature = <span class="string">&quot;std&quot;</span>))]
+<span class="attr">#[cfg(any(feature = <span class="string">"alloc"</span>, feature = <span class="string">"std"</span>))]
 </span><span class="kw">use </span><span class="kw">super</span>::locales;
 <span class="attr">#[cfg(any(
-    feature = <span class="string">&quot;alloc&quot;</span>,
-    feature = <span class="string">&quot;std&quot;</span>,
-    feature = <span class="string">&quot;serde&quot;</span>,
-    feature = <span class="string">&quot;rustc-serialize&quot;
+    feature = <span class="string">"alloc"</span>,
+    feature = <span class="string">"std"</span>,
+    feature = <span class="string">"serde"</span>,
+    feature = <span class="string">"rustc-serialize"
 </span>))]
 </span><span class="kw">use super</span>::{Colons, OffsetFormat, OffsetPrecision, Pad};
-<span class="attr">#[cfg(any(feature = <span class="string">&quot;alloc&quot;</span>, feature = <span class="string">&quot;std&quot;</span>))]
+<span class="attr">#[cfg(any(feature = <span class="string">"alloc"</span>, feature = <span class="string">"std"</span>))]
 </span><span class="kw">use super</span>::{Fixed, InternalFixed, InternalInternal, Item, Locale, Numeric};
-<span class="attr">#[cfg(any(feature = <span class="string">&quot;alloc&quot;</span>, feature = <span class="string">&quot;std&quot;</span>))]
+<span class="attr">#[cfg(any(feature = <span class="string">"alloc"</span>, feature = <span class="string">"std"</span>))]
 </span><span class="kw">use </span>locales::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// A *temporary* object which can be used as an argument to `format!` or others.
 /// This is normally constructed via `format` methods of each date and time type.
-</span><span class="attr">#[cfg(any(feature = <span class="string">&quot;alloc&quot;</span>, feature = <span class="string">&quot;std&quot;</span>))]
-#[cfg_attr(docsrs, doc(cfg(any(feature = <span class="string">&quot;alloc&quot;</span>, feature = <span class="string">&quot;std&quot;</span>))))]
+</span><span class="attr">#[cfg(any(feature = <span class="string">"alloc"</span>, feature = <span class="string">"std"</span>))]
+#[cfg_attr(docsrs, doc(cfg(any(feature = <span class="string">"alloc"</span>, feature = <span class="string">"std"</span>))))]
 #[derive(Debug)]
 </span><span class="kw">pub struct </span>DelayedFormat&lt;I&gt; {
     <span class="doccomment">/// The date view, if any.
@@ -1039,12 +1039,12 @@
     <span class="doccomment">/// Locale used for text.
     </span><span class="comment">// TODO: Only used with the locale feature. We should make this property
     // only present when the feature is enabled.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;unstable-locales&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"unstable-locales"</span>)]
     </span>locale: <span class="prelude-ty">Option</span>&lt;Locale&gt;,
 }
 
-<span class="attr">#[cfg(any(feature = <span class="string">&quot;alloc&quot;</span>, feature = <span class="string">&quot;std&quot;</span>))]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, I: Iterator&lt;Item = B&gt; + Clone, B: Borrow&lt;Item&lt;<span class="lifetime">&#39;a</span>&gt;&gt;&gt; DelayedFormat&lt;I&gt; {
+<span class="attr">#[cfg(any(feature = <span class="string">"alloc"</span>, feature = <span class="string">"std"</span>))]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, I: Iterator&lt;Item = B&gt; + Clone, B: Borrow&lt;Item&lt;<span class="lifetime">'a</span>&gt;&gt;&gt; DelayedFormat&lt;I&gt; {
     <span class="doccomment">/// Makes a new `DelayedFormat` value out of local date and time.
     </span><span class="attr">#[must_use]
     </span><span class="kw">pub fn </span>new(date: <span class="prelude-ty">Option</span>&lt;NaiveDate&gt;, time: <span class="prelude-ty">Option</span>&lt;NaiveTime&gt;, items: I) -&gt; DelayedFormat&lt;I&gt; {
@@ -1053,7 +1053,7 @@
             time,
             off: <span class="prelude-val">None</span>,
             items,
-            <span class="attr">#[cfg(feature = <span class="string">&quot;unstable-locales&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"unstable-locales"</span>)]
             </span>locale: <span class="prelude-val">None</span>,
         }
     }
@@ -1075,14 +1075,14 @@
             time,
             off: <span class="prelude-val">Some</span>(name_and_diff),
             items,
-            <span class="attr">#[cfg(feature = <span class="string">&quot;unstable-locales&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"unstable-locales"</span>)]
             </span>locale: <span class="prelude-val">None</span>,
         }
     }
 
     <span class="doccomment">/// Makes a new `DelayedFormat` value out of local date and time and locale.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;unstable-locales&quot;</span>)]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;unstable-locales&quot;</span>)))]
+    </span><span class="attr">#[cfg(feature = <span class="string">"unstable-locales"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"unstable-locales"</span>)))]
     #[must_use]
     </span><span class="kw">pub fn </span>new_with_locale(
         date: <span class="prelude-ty">Option</span>&lt;NaiveDate&gt;,
@@ -1094,8 +1094,8 @@
     }
 
     <span class="doccomment">/// Makes a new `DelayedFormat` value out of local date and time, UTC offset and locale.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;unstable-locales&quot;</span>)]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;unstable-locales&quot;</span>)))]
+    </span><span class="attr">#[cfg(feature = <span class="string">"unstable-locales"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"unstable-locales"</span>)))]
     #[must_use]
     </span><span class="kw">pub fn </span>new_with_offset_and_locale&lt;Off&gt;(
         date: <span class="prelude-ty">Option</span>&lt;NaiveDate&gt;,
@@ -1112,10 +1112,10 @@
     }
 }
 
-<span class="attr">#[cfg(any(feature = <span class="string">&quot;alloc&quot;</span>, feature = <span class="string">&quot;std&quot;</span>))]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, I: Iterator&lt;Item = B&gt; + Clone, B: Borrow&lt;Item&lt;<span class="lifetime">&#39;a</span>&gt;&gt;&gt; fmt::Display <span class="kw">for </span>DelayedFormat&lt;I&gt; {
+<span class="attr">#[cfg(any(feature = <span class="string">"alloc"</span>, feature = <span class="string">"std"</span>))]
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, I: Iterator&lt;Item = B&gt; + Clone, B: Borrow&lt;Item&lt;<span class="lifetime">'a</span>&gt;&gt;&gt; fmt::Display <span class="kw">for </span>DelayedFormat&lt;I&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
-        <span class="attr">#[cfg(feature = <span class="string">&quot;unstable-locales&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"unstable-locales"</span>)]
         </span>{
             <span class="kw">if let </span><span class="prelude-val">Some</span>(locale) = <span class="self">self</span>.locale {
                 <span class="kw">return </span>format_localized(
@@ -1135,9 +1135,9 @@
 
 <span class="doccomment">/// Tries to format given arguments with given formatting items.
 /// Internally used by `DelayedFormat`.
-</span><span class="attr">#[cfg(any(feature = <span class="string">&quot;alloc&quot;</span>, feature = <span class="string">&quot;std&quot;</span>))]
-#[cfg_attr(docsrs, doc(cfg(any(feature = <span class="string">&quot;alloc&quot;</span>, feature = <span class="string">&quot;std&quot;</span>))))]
-</span><span class="kw">pub fn </span>format&lt;<span class="lifetime">&#39;a</span>, I, B&gt;(
+</span><span class="attr">#[cfg(any(feature = <span class="string">"alloc"</span>, feature = <span class="string">"std"</span>))]
+#[cfg_attr(docsrs, doc(cfg(any(feature = <span class="string">"alloc"</span>, feature = <span class="string">"std"</span>))))]
+</span><span class="kw">pub fn </span>format&lt;<span class="lifetime">'a</span>, I, B&gt;(
     w: <span class="kw-2">&amp;mut </span>fmt::Formatter,
     date: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>NaiveDate&gt;,
     time: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>NaiveTime&gt;,
@@ -1146,7 +1146,7 @@
 ) -&gt; fmt::Result
 <span class="kw">where
     </span>I: Iterator&lt;Item = B&gt; + Clone,
-    B: Borrow&lt;Item&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
+    B: Borrow&lt;Item&lt;<span class="lifetime">'a</span>&gt;&gt;,
 {
     <span class="kw">let </span><span class="kw-2">mut </span>result = String::new();
     <span class="kw">for </span>item <span class="kw">in </span>items {
@@ -1155,14 +1155,14 @@
     w.pad(<span class="kw-2">&amp;</span>result)
 }
 <span class="doccomment">/// Formats single formatting item
-</span><span class="attr">#[cfg(any(feature = <span class="string">&quot;alloc&quot;</span>, feature = <span class="string">&quot;std&quot;</span>))]
-#[cfg_attr(docsrs, doc(cfg(any(feature = <span class="string">&quot;alloc&quot;</span>, feature = <span class="string">&quot;std&quot;</span>))))]
+</span><span class="attr">#[cfg(any(feature = <span class="string">"alloc"</span>, feature = <span class="string">"std"</span>))]
+#[cfg_attr(docsrs, doc(cfg(any(feature = <span class="string">"alloc"</span>, feature = <span class="string">"std"</span>))))]
 </span><span class="kw">pub fn </span>format_item(
     w: <span class="kw-2">&amp;mut </span>fmt::Formatter,
     date: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>NaiveDate&gt;,
     time: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>NaiveTime&gt;,
     off: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>(String, FixedOffset)&gt;,
-    item: <span class="kw-2">&amp;</span>Item&lt;<span class="lifetime">&#39;_</span>&gt;,
+    item: <span class="kw-2">&amp;</span>Item&lt;<span class="lifetime">'_</span>&gt;,
 ) -&gt; fmt::Result {
     <span class="kw">let </span><span class="kw-2">mut </span>result = String::new();
     format_inner(<span class="kw-2">&amp;mut </span>result, date, time, off, item, <span class="prelude-val">None</span>)<span class="question-mark">?</span>;
@@ -1171,9 +1171,9 @@
 
 <span class="doccomment">/// Tries to format given arguments with given formatting items.
 /// Internally used by `DelayedFormat`.
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;unstable-locales&quot;</span>)]
-#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;unstable-locales&quot;</span>)))]
-</span><span class="kw">pub fn </span>format_localized&lt;<span class="lifetime">&#39;a</span>, I, B&gt;(
+</span><span class="attr">#[cfg(feature = <span class="string">"unstable-locales"</span>)]
+#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"unstable-locales"</span>)))]
+</span><span class="kw">pub fn </span>format_localized&lt;<span class="lifetime">'a</span>, I, B&gt;(
     w: <span class="kw-2">&amp;mut </span>fmt::Formatter,
     date: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>NaiveDate&gt;,
     time: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>NaiveTime&gt;,
@@ -1183,7 +1183,7 @@
 ) -&gt; fmt::Result
 <span class="kw">where
     </span>I: Iterator&lt;Item = B&gt; + Clone,
-    B: Borrow&lt;Item&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
+    B: Borrow&lt;Item&lt;<span class="lifetime">'a</span>&gt;&gt;,
 {
     <span class="kw">let </span><span class="kw-2">mut </span>result = String::new();
     <span class="kw">for </span>item <span class="kw">in </span>items {
@@ -1193,14 +1193,14 @@
 }
 
 <span class="doccomment">/// Formats single formatting item
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;unstable-locales&quot;</span>)]
-#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;unstable-locales&quot;</span>)))]
+</span><span class="attr">#[cfg(feature = <span class="string">"unstable-locales"</span>)]
+#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"unstable-locales"</span>)))]
 </span><span class="kw">pub fn </span>format_item_localized(
     w: <span class="kw-2">&amp;mut </span>fmt::Formatter,
     date: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>NaiveDate&gt;,
     time: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>NaiveTime&gt;,
     off: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>(String, FixedOffset)&gt;,
-    item: <span class="kw-2">&amp;</span>Item&lt;<span class="lifetime">&#39;_</span>&gt;,
+    item: <span class="kw-2">&amp;</span>Item&lt;<span class="lifetime">'_</span>&gt;,
     locale: Locale,
 ) -&gt; fmt::Result {
     <span class="kw">let </span><span class="kw-2">mut </span>result = String::new();
@@ -1208,20 +1208,20 @@
     w.pad(<span class="kw-2">&amp;</span>result)
 }
 
-<span class="attr">#[cfg(any(feature = <span class="string">&quot;alloc&quot;</span>, feature = <span class="string">&quot;std&quot;</span>))]
+<span class="attr">#[cfg(any(feature = <span class="string">"alloc"</span>, feature = <span class="string">"std"</span>))]
 </span><span class="kw">fn </span>format_inner(
     w: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Write,
     date: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>NaiveDate&gt;,
     time: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>NaiveTime&gt;,
     off: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>(String, FixedOffset)&gt;,
-    item: <span class="kw-2">&amp;</span>Item&lt;<span class="lifetime">&#39;_</span>&gt;,
+    item: <span class="kw-2">&amp;</span>Item&lt;<span class="lifetime">'_</span>&gt;,
     locale: <span class="prelude-ty">Option</span>&lt;Locale&gt;,
 ) -&gt; fmt::Result {
     <span class="kw">let </span>locale = locale.unwrap_or(default_locale());
 
     <span class="kw">match </span><span class="kw-2">*</span>item {
         Item::Literal(s) | Item::Space(s) =&gt; w.write_str(s),
-        <span class="attr">#[cfg(any(feature = <span class="string">&quot;alloc&quot;</span>, feature = <span class="string">&quot;std&quot;</span>))]
+        <span class="attr">#[cfg(any(feature = <span class="string">"alloc"</span>, feature = <span class="string">"std"</span>))]
         </span>Item::OwnedLiteral(<span class="kw-2">ref </span>s) | Item::OwnedSpace(<span class="kw-2">ref </span>s) =&gt; w.write_str(s),
 
         Item::Numeric(<span class="kw-2">ref </span>spec, <span class="kw-2">ref </span>pad) =&gt; {
@@ -1269,15 +1269,15 @@
                 <span class="kw">if </span>(spec == <span class="kw-2">&amp;</span>Year || spec == <span class="kw-2">&amp;</span>IsoYear) &amp;&amp; !(<span class="number">0</span>..<span class="number">10_000</span>).contains(<span class="kw-2">&amp;</span>v) {
                     <span class="comment">// non-four-digit years require an explicit sign as per ISO 8601
                     </span><span class="kw">match </span><span class="kw-2">*</span>pad {
-                        Pad::None =&gt; <span class="macro">write!</span>(w, <span class="string">&quot;{:+}&quot;</span>, v),
-                        Pad::Zero =&gt; <span class="macro">write!</span>(w, <span class="string">&quot;{:+01$}&quot;</span>, v, width + <span class="number">1</span>),
-                        Pad::Space =&gt; <span class="macro">write!</span>(w, <span class="string">&quot;{:+1$}&quot;</span>, v, width + <span class="number">1</span>),
+                        Pad::None =&gt; <span class="macro">write!</span>(w, <span class="string">"{:+}"</span>, v),
+                        Pad::Zero =&gt; <span class="macro">write!</span>(w, <span class="string">"{:+01$}"</span>, v, width + <span class="number">1</span>),
+                        Pad::Space =&gt; <span class="macro">write!</span>(w, <span class="string">"{:+1$}"</span>, v, width + <span class="number">1</span>),
                     }
                 } <span class="kw">else </span>{
                     <span class="kw">match </span><span class="kw-2">*</span>pad {
-                        Pad::None =&gt; <span class="macro">write!</span>(w, <span class="string">&quot;{}&quot;</span>, v),
-                        Pad::Zero =&gt; <span class="macro">write!</span>(w, <span class="string">&quot;{:01$}&quot;</span>, v, width),
-                        Pad::Space =&gt; <span class="macro">write!</span>(w, <span class="string">&quot;{:1$}&quot;</span>, v, width),
+                        Pad::None =&gt; <span class="macro">write!</span>(w, <span class="string">"{}"</span>, v),
+                        Pad::Zero =&gt; <span class="macro">write!</span>(w, <span class="string">"{:01$}"</span>, v, width),
+                        Pad::Space =&gt; <span class="macro">write!</span>(w, <span class="string">"{:1$}"</span>, v, width),
                     }
                 }
             } <span class="kw">else </span>{
@@ -1327,45 +1327,45 @@
                     } <span class="kw">else </span>{
                         w.write_str(decimal_point(locale))<span class="question-mark">?</span>;
                         <span class="kw">if </span>nano % <span class="number">1_000_000 </span>== <span class="number">0 </span>{
-                            <span class="macro">write!</span>(w, <span class="string">&quot;{:03}&quot;</span>, nano / <span class="number">1_000_000</span>)
+                            <span class="macro">write!</span>(w, <span class="string">"{:03}"</span>, nano / <span class="number">1_000_000</span>)
                         } <span class="kw">else if </span>nano % <span class="number">1_000 </span>== <span class="number">0 </span>{
-                            <span class="macro">write!</span>(w, <span class="string">&quot;{:06}&quot;</span>, nano / <span class="number">1_000</span>)
+                            <span class="macro">write!</span>(w, <span class="string">"{:06}"</span>, nano / <span class="number">1_000</span>)
                         } <span class="kw">else </span>{
-                            <span class="macro">write!</span>(w, <span class="string">&quot;{:09}&quot;</span>, nano)
+                            <span class="macro">write!</span>(w, <span class="string">"{:09}"</span>, nano)
                         }
                     }
                 }),
                 Nanosecond3 =&gt; time.map(|t| {
                     <span class="kw">let </span>nano = t.nanosecond() % <span class="number">1_000_000_000</span>;
                     w.write_str(decimal_point(locale))<span class="question-mark">?</span>;
-                    <span class="macro">write!</span>(w, <span class="string">&quot;{:03}&quot;</span>, nano / <span class="number">1_000_000</span>)
+                    <span class="macro">write!</span>(w, <span class="string">"{:03}"</span>, nano / <span class="number">1_000_000</span>)
                 }),
                 Nanosecond6 =&gt; time.map(|t| {
                     <span class="kw">let </span>nano = t.nanosecond() % <span class="number">1_000_000_000</span>;
                     w.write_str(decimal_point(locale))<span class="question-mark">?</span>;
-                    <span class="macro">write!</span>(w, <span class="string">&quot;{:06}&quot;</span>, nano / <span class="number">1_000</span>)
+                    <span class="macro">write!</span>(w, <span class="string">"{:06}"</span>, nano / <span class="number">1_000</span>)
                 }),
                 Nanosecond9 =&gt; time.map(|t| {
                     <span class="kw">let </span>nano = t.nanosecond() % <span class="number">1_000_000_000</span>;
                     w.write_str(decimal_point(locale))<span class="question-mark">?</span>;
-                    <span class="macro">write!</span>(w, <span class="string">&quot;{:09}&quot;</span>, nano)
+                    <span class="macro">write!</span>(w, <span class="string">"{:09}"</span>, nano)
                 }),
                 Internal(InternalFixed { val: InternalInternal::Nanosecond3NoDot }) =&gt; {
                     time.map(|t| {
                         <span class="kw">let </span>nano = t.nanosecond() % <span class="number">1_000_000_000</span>;
-                        <span class="macro">write!</span>(w, <span class="string">&quot;{:03}&quot;</span>, nano / <span class="number">1_000_000</span>)
+                        <span class="macro">write!</span>(w, <span class="string">"{:03}"</span>, nano / <span class="number">1_000_000</span>)
                     })
                 }
                 Internal(InternalFixed { val: InternalInternal::Nanosecond6NoDot }) =&gt; {
                     time.map(|t| {
                         <span class="kw">let </span>nano = t.nanosecond() % <span class="number">1_000_000_000</span>;
-                        <span class="macro">write!</span>(w, <span class="string">&quot;{:06}&quot;</span>, nano / <span class="number">1_000</span>)
+                        <span class="macro">write!</span>(w, <span class="string">"{:06}"</span>, nano / <span class="number">1_000</span>)
                     })
                 }
                 Internal(InternalFixed { val: InternalInternal::Nanosecond9NoDot }) =&gt; {
                     time.map(|t| {
                         <span class="kw">let </span>nano = t.nanosecond() % <span class="number">1_000_000_000</span>;
-                        <span class="macro">write!</span>(w, <span class="string">&quot;{:09}&quot;</span>, nano)
+                        <span class="macro">write!</span>(w, <span class="string">"{:09}"</span>, nano)
                     })
                 }
                 TimezoneName =&gt; off.map(|(name, <span class="kw">_</span>)| {
@@ -1444,16 +1444,16 @@
     }
 }
 
-<span class="attr">#[cfg(any(feature = <span class="string">&quot;alloc&quot;</span>, feature = <span class="string">&quot;std&quot;</span>, feature = <span class="string">&quot;serde&quot;</span>, feature = <span class="string">&quot;rustc-serialize&quot;</span>))]
+<span class="attr">#[cfg(any(feature = <span class="string">"alloc"</span>, feature = <span class="string">"std"</span>, feature = <span class="string">"serde"</span>, feature = <span class="string">"rustc-serialize"</span>))]
 </span><span class="kw">impl </span>OffsetFormat {
     <span class="doccomment">/// Writes an offset from UTC with the format defined by `self`.
     </span><span class="kw">fn </span>format(<span class="kw-2">&amp;</span><span class="self">self</span>, w: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Write, off: FixedOffset) -&gt; fmt::Result {
         <span class="kw">let </span>off = off.local_minus_utc();
         <span class="kw">if </span><span class="self">self</span>.allow_zulu &amp;&amp; off == <span class="number">0 </span>{
-            w.write_char(<span class="string">&#39;Z&#39;</span>)<span class="question-mark">?</span>;
+            w.write_char(<span class="string">'Z'</span>)<span class="question-mark">?</span>;
             <span class="kw">return </span><span class="prelude-val">Ok</span>(());
         }
-        <span class="kw">let </span>(sign, off) = <span class="kw">if </span>off &lt; <span class="number">0 </span>{ (<span class="string">&#39;-&#39;</span>, -off) } <span class="kw">else </span>{ (<span class="string">&#39;+&#39;</span>, off) };
+        <span class="kw">let </span>(sign, off) = <span class="kw">if </span>off &lt; <span class="number">0 </span>{ (<span class="string">'-'</span>, -off) } <span class="kw">else </span>{ (<span class="string">'+'</span>, off) };
 
         <span class="kw">let </span>hours;
         <span class="kw">let </span><span class="kw-2">mut </span>mins = <span class="number">0</span>;
@@ -1497,26 +1497,26 @@
 
         <span class="kw">if </span>hours &lt; <span class="number">10 </span>{
             <span class="kw">if </span><span class="self">self</span>.padding == Pad::Space {
-                w.write_char(<span class="string">&#39; &#39;</span>)<span class="question-mark">?</span>;
+                w.write_char(<span class="string">' '</span>)<span class="question-mark">?</span>;
             }
             w.write_char(sign)<span class="question-mark">?</span>;
             <span class="kw">if </span><span class="self">self</span>.padding == Pad::Zero {
-                w.write_char(<span class="string">&#39;0&#39;</span>)<span class="question-mark">?</span>;
+                w.write_char(<span class="string">'0'</span>)<span class="question-mark">?</span>;
             }
-            w.write_char((<span class="string">b&#39;0&#39; </span>+ hours) <span class="kw">as </span>char)<span class="question-mark">?</span>;
+            w.write_char((<span class="string">b'0' </span>+ hours) <span class="kw">as </span>char)<span class="question-mark">?</span>;
         } <span class="kw">else </span>{
             w.write_char(sign)<span class="question-mark">?</span>;
             write_hundreds(w, hours)<span class="question-mark">?</span>;
         }
         <span class="kw">if let </span>OffsetPrecision::Minutes | OffsetPrecision::Seconds = precision {
             <span class="kw">if </span>colons {
-                w.write_char(<span class="string">&#39;:&#39;</span>)<span class="question-mark">?</span>;
+                w.write_char(<span class="string">':'</span>)<span class="question-mark">?</span>;
             }
             write_hundreds(w, mins)<span class="question-mark">?</span>;
         }
         <span class="kw">if let </span>OffsetPrecision::Seconds = precision {
             <span class="kw">if </span>colons {
-                w.write_char(<span class="string">&#39;:&#39;</span>)<span class="question-mark">?</span>;
+                w.write_char(<span class="string">':'</span>)<span class="question-mark">?</span>;
             }
             write_hundreds(w, secs)<span class="question-mark">?</span>;
         }
@@ -1526,7 +1526,7 @@
 
 <span class="doccomment">/// Writes the date, time and offset to the string. same as `%Y-%m-%dT%H:%M:%S%.f%:z`
 </span><span class="attr">#[inline]
-#[cfg(any(feature = <span class="string">&quot;alloc&quot;</span>, feature = <span class="string">&quot;std&quot;</span>, feature = <span class="string">&quot;serde&quot;</span>, feature = <span class="string">&quot;rustc-serialize&quot;</span>))]
+#[cfg(any(feature = <span class="string">"alloc"</span>, feature = <span class="string">"std"</span>, feature = <span class="string">"serde"</span>, feature = <span class="string">"rustc-serialize"</span>))]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>write_rfc3339(
     w: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Write,
     dt: NaiveDateTime,
@@ -1540,14 +1540,14 @@
         write_hundreds(w, (year % <span class="number">100</span>) <span class="kw">as </span>u8)<span class="question-mark">?</span>;
     } <span class="kw">else </span>{
         <span class="comment">// ISO 8601 requires the explicit sign for out-of-range years
-        </span><span class="macro">write!</span>(w, <span class="string">&quot;{:+05}&quot;</span>, year)<span class="question-mark">?</span>;
+        </span><span class="macro">write!</span>(w, <span class="string">"{:+05}"</span>, year)<span class="question-mark">?</span>;
     }
-    w.write_char(<span class="string">&#39;-&#39;</span>)<span class="question-mark">?</span>;
+    w.write_char(<span class="string">'-'</span>)<span class="question-mark">?</span>;
     write_hundreds(w, dt.date().month() <span class="kw">as </span>u8)<span class="question-mark">?</span>;
-    w.write_char(<span class="string">&#39;-&#39;</span>)<span class="question-mark">?</span>;
+    w.write_char(<span class="string">'-'</span>)<span class="question-mark">?</span>;
     write_hundreds(w, dt.date().day() <span class="kw">as </span>u8)<span class="question-mark">?</span>;
 
-    w.write_char(<span class="string">&#39;T&#39;</span>)<span class="question-mark">?</span>;
+    w.write_char(<span class="string">'T'</span>)<span class="question-mark">?</span>;
 
     <span class="kw">let </span>(hour, min, <span class="kw-2">mut </span>sec) = dt.time().hms();
     <span class="kw">let </span><span class="kw-2">mut </span>nano = dt.nanosecond();
@@ -1556,25 +1556,25 @@
         nano -= <span class="number">1_000_000_000</span>;
     }
     write_hundreds(w, hour <span class="kw">as </span>u8)<span class="question-mark">?</span>;
-    w.write_char(<span class="string">&#39;:&#39;</span>)<span class="question-mark">?</span>;
+    w.write_char(<span class="string">':'</span>)<span class="question-mark">?</span>;
     write_hundreds(w, min <span class="kw">as </span>u8)<span class="question-mark">?</span>;
-    w.write_char(<span class="string">&#39;:&#39;</span>)<span class="question-mark">?</span>;
+    w.write_char(<span class="string">':'</span>)<span class="question-mark">?</span>;
     <span class="kw">let </span>sec = sec;
     write_hundreds(w, sec <span class="kw">as </span>u8)<span class="question-mark">?</span>;
 
     <span class="kw">match </span>secform {
         SecondsFormat::Secs =&gt; {}
-        SecondsFormat::Millis =&gt; <span class="macro">write!</span>(w, <span class="string">&quot;.{:03}&quot;</span>, nano / <span class="number">1_000_000</span>)<span class="question-mark">?</span>,
-        SecondsFormat::Micros =&gt; <span class="macro">write!</span>(w, <span class="string">&quot;.{:06}&quot;</span>, nano / <span class="number">1000</span>)<span class="question-mark">?</span>,
-        SecondsFormat::Nanos =&gt; <span class="macro">write!</span>(w, <span class="string">&quot;.{:09}&quot;</span>, nano)<span class="question-mark">?</span>,
+        SecondsFormat::Millis =&gt; <span class="macro">write!</span>(w, <span class="string">".{:03}"</span>, nano / <span class="number">1_000_000</span>)<span class="question-mark">?</span>,
+        SecondsFormat::Micros =&gt; <span class="macro">write!</span>(w, <span class="string">".{:06}"</span>, nano / <span class="number">1000</span>)<span class="question-mark">?</span>,
+        SecondsFormat::Nanos =&gt; <span class="macro">write!</span>(w, <span class="string">".{:09}"</span>, nano)<span class="question-mark">?</span>,
         SecondsFormat::AutoSi =&gt; {
             <span class="kw">if </span>nano == <span class="number">0 </span>{
             } <span class="kw">else if </span>nano % <span class="number">1_000_000 </span>== <span class="number">0 </span>{
-                <span class="macro">write!</span>(w, <span class="string">&quot;.{:03}&quot;</span>, nano / <span class="number">1_000_000</span>)<span class="question-mark">?
+                <span class="macro">write!</span>(w, <span class="string">".{:03}"</span>, nano / <span class="number">1_000_000</span>)<span class="question-mark">?
             </span>} <span class="kw">else if </span>nano % <span class="number">1_000 </span>== <span class="number">0 </span>{
-                <span class="macro">write!</span>(w, <span class="string">&quot;.{:06}&quot;</span>, nano / <span class="number">1_000</span>)<span class="question-mark">?
+                <span class="macro">write!</span>(w, <span class="string">".{:06}"</span>, nano / <span class="number">1_000</span>)<span class="question-mark">?
             </span>} <span class="kw">else </span>{
-                <span class="macro">write!</span>(w, <span class="string">&quot;.{:09}&quot;</span>, nano)<span class="question-mark">?
+                <span class="macro">write!</span>(w, <span class="string">".{:09}"</span>, nano)<span class="question-mark">?
             </span>}
         }
         SecondsFormat::__NonExhaustive =&gt; <span class="macro">unreachable!</span>(),
@@ -1589,7 +1589,7 @@
     .format(w, off)
 }
 
-<span class="attr">#[cfg(any(feature = <span class="string">&quot;alloc&quot;</span>, feature = <span class="string">&quot;std&quot;</span>))]
+<span class="attr">#[cfg(any(feature = <span class="string">"alloc"</span>, feature = <span class="string">"std"</span>))]
 </span><span class="doccomment">/// write datetimes like `Tue, 1 Jul 2003 10:52:37 +0200`, same as `%a, %d %b %Y %H:%M:%S %z`
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>write_rfc2822(
     w: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Write,
@@ -1599,7 +1599,7 @@
     write_rfc2822_inner(w, dt.date(), dt.time(), off, default_locale())
 }
 
-<span class="attr">#[cfg(any(feature = <span class="string">&quot;alloc&quot;</span>, feature = <span class="string">&quot;std&quot;</span>))]
+<span class="attr">#[cfg(any(feature = <span class="string">"alloc"</span>, feature = <span class="string">"std"</span>))]
 </span><span class="doccomment">/// write datetimes like `Tue, 1 Jul 2003 10:52:37 +0200`, same as `%a, %d %b %Y %H:%M:%S %z`
 </span><span class="kw">fn </span>write_rfc2822_inner(
     w: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>Write,
@@ -1615,28 +1615,28 @@
     }
 
     w.write_str(short_weekdays(locale)[d.weekday().num_days_from_sunday() <span class="kw">as </span>usize])<span class="question-mark">?</span>;
-    w.write_str(<span class="string">&quot;, &quot;</span>)<span class="question-mark">?</span>;
+    w.write_str(<span class="string">", "</span>)<span class="question-mark">?</span>;
     <span class="kw">let </span>day = d.day();
     <span class="kw">if </span>day &lt; <span class="number">10 </span>{
-        w.write_char((<span class="string">b&#39;0&#39; </span>+ day <span class="kw">as </span>u8) <span class="kw">as </span>char)<span class="question-mark">?</span>;
+        w.write_char((<span class="string">b'0' </span>+ day <span class="kw">as </span>u8) <span class="kw">as </span>char)<span class="question-mark">?</span>;
     } <span class="kw">else </span>{
         write_hundreds(w, day <span class="kw">as </span>u8)<span class="question-mark">?</span>;
     }
-    w.write_char(<span class="string">&#39; &#39;</span>)<span class="question-mark">?</span>;
+    w.write_char(<span class="string">' '</span>)<span class="question-mark">?</span>;
     w.write_str(short_months(locale)[d.month0() <span class="kw">as </span>usize])<span class="question-mark">?</span>;
-    w.write_char(<span class="string">&#39; &#39;</span>)<span class="question-mark">?</span>;
+    w.write_char(<span class="string">' '</span>)<span class="question-mark">?</span>;
     write_hundreds(w, (year / <span class="number">100</span>) <span class="kw">as </span>u8)<span class="question-mark">?</span>;
     write_hundreds(w, (year % <span class="number">100</span>) <span class="kw">as </span>u8)<span class="question-mark">?</span>;
-    w.write_char(<span class="string">&#39; &#39;</span>)<span class="question-mark">?</span>;
+    w.write_char(<span class="string">' '</span>)<span class="question-mark">?</span>;
 
     <span class="kw">let </span>(hour, min, sec) = t.hms();
     write_hundreds(w, hour <span class="kw">as </span>u8)<span class="question-mark">?</span>;
-    w.write_char(<span class="string">&#39;:&#39;</span>)<span class="question-mark">?</span>;
+    w.write_char(<span class="string">':'</span>)<span class="question-mark">?</span>;
     write_hundreds(w, min <span class="kw">as </span>u8)<span class="question-mark">?</span>;
-    w.write_char(<span class="string">&#39;:&#39;</span>)<span class="question-mark">?</span>;
+    w.write_char(<span class="string">':'</span>)<span class="question-mark">?</span>;
     <span class="kw">let </span>sec = sec + t.nanosecond() / <span class="number">1_000_000_000</span>;
     write_hundreds(w, sec <span class="kw">as </span>u8)<span class="question-mark">?</span>;
-    w.write_char(<span class="string">&#39; &#39;</span>)<span class="question-mark">?</span>;
+    w.write_char(<span class="string">' '</span>)<span class="question-mark">?</span>;
     OffsetFormat {
         precision: OffsetPrecision::Minutes,
         colons: Colons::None,
@@ -1652,121 +1652,121 @@
         <span class="kw">return </span><span class="prelude-val">Err</span>(fmt::Error);
     }
 
-    <span class="kw">let </span>tens = <span class="string">b&#39;0&#39; </span>+ n / <span class="number">10</span>;
-    <span class="kw">let </span>ones = <span class="string">b&#39;0&#39; </span>+ n % <span class="number">10</span>;
+    <span class="kw">let </span>tens = <span class="string">b'0' </span>+ n / <span class="number">10</span>;
+    <span class="kw">let </span>ones = <span class="string">b'0' </span>+ n % <span class="number">10</span>;
     w.write_char(tens <span class="kw">as </span>char)<span class="question-mark">?</span>;
     w.write_char(ones <span class="kw">as </span>char)
 }
 
 <span class="attr">#[cfg(test)]
-#[cfg(any(feature = <span class="string">&quot;alloc&quot;</span>, feature = <span class="string">&quot;std&quot;</span>))]
+#[cfg(any(feature = <span class="string">"alloc"</span>, feature = <span class="string">"std"</span>))]
 </span><span class="kw">mod </span>tests {
     <span class="kw">use super</span>::{Colons, OffsetFormat, OffsetPrecision, Pad};
     <span class="kw">use </span><span class="kw">crate</span>::FixedOffset;
-    <span class="attr">#[cfg(any(feature = <span class="string">&quot;alloc&quot;</span>, feature = <span class="string">&quot;std&quot;</span>))]
+    <span class="attr">#[cfg(any(feature = <span class="string">"alloc"</span>, feature = <span class="string">"std"</span>))]
     </span><span class="kw">use crate</span>::{NaiveDate, NaiveTime, TimeZone, Timelike, Utc};
 
     <span class="attr">#[test]
-    #[cfg(any(feature = <span class="string">&quot;alloc&quot;</span>, feature = <span class="string">&quot;std&quot;</span>))]
+    #[cfg(any(feature = <span class="string">"alloc"</span>, feature = <span class="string">"std"</span>))]
     </span><span class="kw">fn </span>test_date_format() {
         <span class="kw">let </span>d = NaiveDate::from_ymd_opt(<span class="number">2012</span>, <span class="number">3</span>, <span class="number">4</span>).unwrap();
-        <span class="macro">assert_eq!</span>(d.format(<span class="string">&quot;%Y,%C,%y,%G,%g&quot;</span>).to_string(), <span class="string">&quot;2012,20,12,2012,12&quot;</span>);
-        <span class="macro">assert_eq!</span>(d.format(<span class="string">&quot;%m,%b,%h,%B&quot;</span>).to_string(), <span class="string">&quot;03,Mar,Mar,March&quot;</span>);
-        <span class="macro">assert_eq!</span>(d.format(<span class="string">&quot;%d,%e&quot;</span>).to_string(), <span class="string">&quot;04, 4&quot;</span>);
-        <span class="macro">assert_eq!</span>(d.format(<span class="string">&quot;%U,%W,%V&quot;</span>).to_string(), <span class="string">&quot;10,09,09&quot;</span>);
-        <span class="macro">assert_eq!</span>(d.format(<span class="string">&quot;%a,%A,%w,%u&quot;</span>).to_string(), <span class="string">&quot;Sun,Sunday,0,7&quot;</span>);
-        <span class="macro">assert_eq!</span>(d.format(<span class="string">&quot;%j&quot;</span>).to_string(), <span class="string">&quot;064&quot;</span>); <span class="comment">// since 2012 is a leap year
-        </span><span class="macro">assert_eq!</span>(d.format(<span class="string">&quot;%D,%x&quot;</span>).to_string(), <span class="string">&quot;03/04/12,03/04/12&quot;</span>);
-        <span class="macro">assert_eq!</span>(d.format(<span class="string">&quot;%F&quot;</span>).to_string(), <span class="string">&quot;2012-03-04&quot;</span>);
-        <span class="macro">assert_eq!</span>(d.format(<span class="string">&quot;%v&quot;</span>).to_string(), <span class="string">&quot; 4-Mar-2012&quot;</span>);
-        <span class="macro">assert_eq!</span>(d.format(<span class="string">&quot;%t%n%%%n%t&quot;</span>).to_string(), <span class="string">&quot;\t\n%\n\t&quot;</span>);
+        <span class="macro">assert_eq!</span>(d.format(<span class="string">"%Y,%C,%y,%G,%g"</span>).to_string(), <span class="string">"2012,20,12,2012,12"</span>);
+        <span class="macro">assert_eq!</span>(d.format(<span class="string">"%m,%b,%h,%B"</span>).to_string(), <span class="string">"03,Mar,Mar,March"</span>);
+        <span class="macro">assert_eq!</span>(d.format(<span class="string">"%d,%e"</span>).to_string(), <span class="string">"04, 4"</span>);
+        <span class="macro">assert_eq!</span>(d.format(<span class="string">"%U,%W,%V"</span>).to_string(), <span class="string">"10,09,09"</span>);
+        <span class="macro">assert_eq!</span>(d.format(<span class="string">"%a,%A,%w,%u"</span>).to_string(), <span class="string">"Sun,Sunday,0,7"</span>);
+        <span class="macro">assert_eq!</span>(d.format(<span class="string">"%j"</span>).to_string(), <span class="string">"064"</span>); <span class="comment">// since 2012 is a leap year
+        </span><span class="macro">assert_eq!</span>(d.format(<span class="string">"%D,%x"</span>).to_string(), <span class="string">"03/04/12,03/04/12"</span>);
+        <span class="macro">assert_eq!</span>(d.format(<span class="string">"%F"</span>).to_string(), <span class="string">"2012-03-04"</span>);
+        <span class="macro">assert_eq!</span>(d.format(<span class="string">"%v"</span>).to_string(), <span class="string">" 4-Mar-2012"</span>);
+        <span class="macro">assert_eq!</span>(d.format(<span class="string">"%t%n%%%n%t"</span>).to_string(), <span class="string">"\t\n%\n\t"</span>);
 
         <span class="comment">// non-four-digit years
         </span><span class="macro">assert_eq!</span>(
-            NaiveDate::from_ymd_opt(<span class="number">12345</span>, <span class="number">1</span>, <span class="number">1</span>).unwrap().format(<span class="string">&quot;%Y&quot;</span>).to_string(),
-            <span class="string">&quot;+12345&quot;
+            NaiveDate::from_ymd_opt(<span class="number">12345</span>, <span class="number">1</span>, <span class="number">1</span>).unwrap().format(<span class="string">"%Y"</span>).to_string(),
+            <span class="string">"+12345"
         </span>);
-        <span class="macro">assert_eq!</span>(NaiveDate::from_ymd_opt(<span class="number">1234</span>, <span class="number">1</span>, <span class="number">1</span>).unwrap().format(<span class="string">&quot;%Y&quot;</span>).to_string(), <span class="string">&quot;1234&quot;</span>);
-        <span class="macro">assert_eq!</span>(NaiveDate::from_ymd_opt(<span class="number">123</span>, <span class="number">1</span>, <span class="number">1</span>).unwrap().format(<span class="string">&quot;%Y&quot;</span>).to_string(), <span class="string">&quot;0123&quot;</span>);
-        <span class="macro">assert_eq!</span>(NaiveDate::from_ymd_opt(<span class="number">12</span>, <span class="number">1</span>, <span class="number">1</span>).unwrap().format(<span class="string">&quot;%Y&quot;</span>).to_string(), <span class="string">&quot;0012&quot;</span>);
-        <span class="macro">assert_eq!</span>(NaiveDate::from_ymd_opt(<span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>).unwrap().format(<span class="string">&quot;%Y&quot;</span>).to_string(), <span class="string">&quot;0001&quot;</span>);
-        <span class="macro">assert_eq!</span>(NaiveDate::from_ymd_opt(<span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>).unwrap().format(<span class="string">&quot;%Y&quot;</span>).to_string(), <span class="string">&quot;0000&quot;</span>);
-        <span class="macro">assert_eq!</span>(NaiveDate::from_ymd_opt(-<span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>).unwrap().format(<span class="string">&quot;%Y&quot;</span>).to_string(), <span class="string">&quot;-0001&quot;</span>);
-        <span class="macro">assert_eq!</span>(NaiveDate::from_ymd_opt(-<span class="number">12</span>, <span class="number">1</span>, <span class="number">1</span>).unwrap().format(<span class="string">&quot;%Y&quot;</span>).to_string(), <span class="string">&quot;-0012&quot;</span>);
-        <span class="macro">assert_eq!</span>(NaiveDate::from_ymd_opt(-<span class="number">123</span>, <span class="number">1</span>, <span class="number">1</span>).unwrap().format(<span class="string">&quot;%Y&quot;</span>).to_string(), <span class="string">&quot;-0123&quot;</span>);
-        <span class="macro">assert_eq!</span>(NaiveDate::from_ymd_opt(-<span class="number">1234</span>, <span class="number">1</span>, <span class="number">1</span>).unwrap().format(<span class="string">&quot;%Y&quot;</span>).to_string(), <span class="string">&quot;-1234&quot;</span>);
+        <span class="macro">assert_eq!</span>(NaiveDate::from_ymd_opt(<span class="number">1234</span>, <span class="number">1</span>, <span class="number">1</span>).unwrap().format(<span class="string">"%Y"</span>).to_string(), <span class="string">"1234"</span>);
+        <span class="macro">assert_eq!</span>(NaiveDate::from_ymd_opt(<span class="number">123</span>, <span class="number">1</span>, <span class="number">1</span>).unwrap().format(<span class="string">"%Y"</span>).to_string(), <span class="string">"0123"</span>);
+        <span class="macro">assert_eq!</span>(NaiveDate::from_ymd_opt(<span class="number">12</span>, <span class="number">1</span>, <span class="number">1</span>).unwrap().format(<span class="string">"%Y"</span>).to_string(), <span class="string">"0012"</span>);
+        <span class="macro">assert_eq!</span>(NaiveDate::from_ymd_opt(<span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>).unwrap().format(<span class="string">"%Y"</span>).to_string(), <span class="string">"0001"</span>);
+        <span class="macro">assert_eq!</span>(NaiveDate::from_ymd_opt(<span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>).unwrap().format(<span class="string">"%Y"</span>).to_string(), <span class="string">"0000"</span>);
+        <span class="macro">assert_eq!</span>(NaiveDate::from_ymd_opt(-<span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>).unwrap().format(<span class="string">"%Y"</span>).to_string(), <span class="string">"-0001"</span>);
+        <span class="macro">assert_eq!</span>(NaiveDate::from_ymd_opt(-<span class="number">12</span>, <span class="number">1</span>, <span class="number">1</span>).unwrap().format(<span class="string">"%Y"</span>).to_string(), <span class="string">"-0012"</span>);
+        <span class="macro">assert_eq!</span>(NaiveDate::from_ymd_opt(-<span class="number">123</span>, <span class="number">1</span>, <span class="number">1</span>).unwrap().format(<span class="string">"%Y"</span>).to_string(), <span class="string">"-0123"</span>);
+        <span class="macro">assert_eq!</span>(NaiveDate::from_ymd_opt(-<span class="number">1234</span>, <span class="number">1</span>, <span class="number">1</span>).unwrap().format(<span class="string">"%Y"</span>).to_string(), <span class="string">"-1234"</span>);
         <span class="macro">assert_eq!</span>(
-            NaiveDate::from_ymd_opt(-<span class="number">12345</span>, <span class="number">1</span>, <span class="number">1</span>).unwrap().format(<span class="string">&quot;%Y&quot;</span>).to_string(),
-            <span class="string">&quot;-12345&quot;
+            NaiveDate::from_ymd_opt(-<span class="number">12345</span>, <span class="number">1</span>, <span class="number">1</span>).unwrap().format(<span class="string">"%Y"</span>).to_string(),
+            <span class="string">"-12345"
         </span>);
 
         <span class="comment">// corner cases
         </span><span class="macro">assert_eq!</span>(
-            NaiveDate::from_ymd_opt(<span class="number">2007</span>, <span class="number">12</span>, <span class="number">31</span>).unwrap().format(<span class="string">&quot;%G,%g,%U,%W,%V&quot;</span>).to_string(),
-            <span class="string">&quot;2008,08,52,53,01&quot;
+            NaiveDate::from_ymd_opt(<span class="number">2007</span>, <span class="number">12</span>, <span class="number">31</span>).unwrap().format(<span class="string">"%G,%g,%U,%W,%V"</span>).to_string(),
+            <span class="string">"2008,08,52,53,01"
         </span>);
         <span class="macro">assert_eq!</span>(
-            NaiveDate::from_ymd_opt(<span class="number">2010</span>, <span class="number">1</span>, <span class="number">3</span>).unwrap().format(<span class="string">&quot;%G,%g,%U,%W,%V&quot;</span>).to_string(),
-            <span class="string">&quot;2009,09,01,00,53&quot;
+            NaiveDate::from_ymd_opt(<span class="number">2010</span>, <span class="number">1</span>, <span class="number">3</span>).unwrap().format(<span class="string">"%G,%g,%U,%W,%V"</span>).to_string(),
+            <span class="string">"2009,09,01,00,53"
         </span>);
     }
 
     <span class="attr">#[test]
-    #[cfg(any(feature = <span class="string">&quot;alloc&quot;</span>, feature = <span class="string">&quot;std&quot;</span>))]
+    #[cfg(any(feature = <span class="string">"alloc"</span>, feature = <span class="string">"std"</span>))]
     </span><span class="kw">fn </span>test_time_format() {
         <span class="kw">let </span>t = NaiveTime::from_hms_nano_opt(<span class="number">3</span>, <span class="number">5</span>, <span class="number">7</span>, <span class="number">98765432</span>).unwrap();
-        <span class="macro">assert_eq!</span>(t.format(<span class="string">&quot;%H,%k,%I,%l,%P,%p&quot;</span>).to_string(), <span class="string">&quot;03, 3,03, 3,am,AM&quot;</span>);
-        <span class="macro">assert_eq!</span>(t.format(<span class="string">&quot;%M&quot;</span>).to_string(), <span class="string">&quot;05&quot;</span>);
-        <span class="macro">assert_eq!</span>(t.format(<span class="string">&quot;%S,%f,%.f&quot;</span>).to_string(), <span class="string">&quot;07,098765432,.098765432&quot;</span>);
-        <span class="macro">assert_eq!</span>(t.format(<span class="string">&quot;%.3f,%.6f,%.9f&quot;</span>).to_string(), <span class="string">&quot;.098,.098765,.098765432&quot;</span>);
-        <span class="macro">assert_eq!</span>(t.format(<span class="string">&quot;%R&quot;</span>).to_string(), <span class="string">&quot;03:05&quot;</span>);
-        <span class="macro">assert_eq!</span>(t.format(<span class="string">&quot;%T,%X&quot;</span>).to_string(), <span class="string">&quot;03:05:07,03:05:07&quot;</span>);
-        <span class="macro">assert_eq!</span>(t.format(<span class="string">&quot;%r&quot;</span>).to_string(), <span class="string">&quot;03:05:07 AM&quot;</span>);
-        <span class="macro">assert_eq!</span>(t.format(<span class="string">&quot;%t%n%%%n%t&quot;</span>).to_string(), <span class="string">&quot;\t\n%\n\t&quot;</span>);
+        <span class="macro">assert_eq!</span>(t.format(<span class="string">"%H,%k,%I,%l,%P,%p"</span>).to_string(), <span class="string">"03, 3,03, 3,am,AM"</span>);
+        <span class="macro">assert_eq!</span>(t.format(<span class="string">"%M"</span>).to_string(), <span class="string">"05"</span>);
+        <span class="macro">assert_eq!</span>(t.format(<span class="string">"%S,%f,%.f"</span>).to_string(), <span class="string">"07,098765432,.098765432"</span>);
+        <span class="macro">assert_eq!</span>(t.format(<span class="string">"%.3f,%.6f,%.9f"</span>).to_string(), <span class="string">".098,.098765,.098765432"</span>);
+        <span class="macro">assert_eq!</span>(t.format(<span class="string">"%R"</span>).to_string(), <span class="string">"03:05"</span>);
+        <span class="macro">assert_eq!</span>(t.format(<span class="string">"%T,%X"</span>).to_string(), <span class="string">"03:05:07,03:05:07"</span>);
+        <span class="macro">assert_eq!</span>(t.format(<span class="string">"%r"</span>).to_string(), <span class="string">"03:05:07 AM"</span>);
+        <span class="macro">assert_eq!</span>(t.format(<span class="string">"%t%n%%%n%t"</span>).to_string(), <span class="string">"\t\n%\n\t"</span>);
 
         <span class="kw">let </span>t = NaiveTime::from_hms_micro_opt(<span class="number">3</span>, <span class="number">5</span>, <span class="number">7</span>, <span class="number">432100</span>).unwrap();
-        <span class="macro">assert_eq!</span>(t.format(<span class="string">&quot;%S,%f,%.f&quot;</span>).to_string(), <span class="string">&quot;07,432100000,.432100&quot;</span>);
-        <span class="macro">assert_eq!</span>(t.format(<span class="string">&quot;%.3f,%.6f,%.9f&quot;</span>).to_string(), <span class="string">&quot;.432,.432100,.432100000&quot;</span>);
+        <span class="macro">assert_eq!</span>(t.format(<span class="string">"%S,%f,%.f"</span>).to_string(), <span class="string">"07,432100000,.432100"</span>);
+        <span class="macro">assert_eq!</span>(t.format(<span class="string">"%.3f,%.6f,%.9f"</span>).to_string(), <span class="string">".432,.432100,.432100000"</span>);
 
         <span class="kw">let </span>t = NaiveTime::from_hms_milli_opt(<span class="number">3</span>, <span class="number">5</span>, <span class="number">7</span>, <span class="number">210</span>).unwrap();
-        <span class="macro">assert_eq!</span>(t.format(<span class="string">&quot;%S,%f,%.f&quot;</span>).to_string(), <span class="string">&quot;07,210000000,.210&quot;</span>);
-        <span class="macro">assert_eq!</span>(t.format(<span class="string">&quot;%.3f,%.6f,%.9f&quot;</span>).to_string(), <span class="string">&quot;.210,.210000,.210000000&quot;</span>);
+        <span class="macro">assert_eq!</span>(t.format(<span class="string">"%S,%f,%.f"</span>).to_string(), <span class="string">"07,210000000,.210"</span>);
+        <span class="macro">assert_eq!</span>(t.format(<span class="string">"%.3f,%.6f,%.9f"</span>).to_string(), <span class="string">".210,.210000,.210000000"</span>);
 
         <span class="kw">let </span>t = NaiveTime::from_hms_opt(<span class="number">3</span>, <span class="number">5</span>, <span class="number">7</span>).unwrap();
-        <span class="macro">assert_eq!</span>(t.format(<span class="string">&quot;%S,%f,%.f&quot;</span>).to_string(), <span class="string">&quot;07,000000000,&quot;</span>);
-        <span class="macro">assert_eq!</span>(t.format(<span class="string">&quot;%.3f,%.6f,%.9f&quot;</span>).to_string(), <span class="string">&quot;.000,.000000,.000000000&quot;</span>);
+        <span class="macro">assert_eq!</span>(t.format(<span class="string">"%S,%f,%.f"</span>).to_string(), <span class="string">"07,000000000,"</span>);
+        <span class="macro">assert_eq!</span>(t.format(<span class="string">"%.3f,%.6f,%.9f"</span>).to_string(), <span class="string">".000,.000000,.000000000"</span>);
 
         <span class="comment">// corner cases
         </span><span class="macro">assert_eq!</span>(
-            NaiveTime::from_hms_opt(<span class="number">13</span>, <span class="number">57</span>, <span class="number">9</span>).unwrap().format(<span class="string">&quot;%r&quot;</span>).to_string(),
-            <span class="string">&quot;01:57:09 PM&quot;
+            NaiveTime::from_hms_opt(<span class="number">13</span>, <span class="number">57</span>, <span class="number">9</span>).unwrap().format(<span class="string">"%r"</span>).to_string(),
+            <span class="string">"01:57:09 PM"
         </span>);
         <span class="macro">assert_eq!</span>(
-            NaiveTime::from_hms_milli_opt(<span class="number">23</span>, <span class="number">59</span>, <span class="number">59</span>, <span class="number">1_000</span>).unwrap().format(<span class="string">&quot;%X&quot;</span>).to_string(),
-            <span class="string">&quot;23:59:60&quot;
+            NaiveTime::from_hms_milli_opt(<span class="number">23</span>, <span class="number">59</span>, <span class="number">59</span>, <span class="number">1_000</span>).unwrap().format(<span class="string">"%X"</span>).to_string(),
+            <span class="string">"23:59:60"
         </span>);
     }
 
     <span class="attr">#[test]
-    #[cfg(any(feature = <span class="string">&quot;alloc&quot;</span>, feature = <span class="string">&quot;std&quot;</span>))]
+    #[cfg(any(feature = <span class="string">"alloc"</span>, feature = <span class="string">"std"</span>))]
     </span><span class="kw">fn </span>test_datetime_format() {
         <span class="kw">let </span>dt =
             NaiveDate::from_ymd_opt(<span class="number">2010</span>, <span class="number">9</span>, <span class="number">8</span>).unwrap().and_hms_milli_opt(<span class="number">7</span>, <span class="number">6</span>, <span class="number">54</span>, <span class="number">321</span>).unwrap();
-        <span class="macro">assert_eq!</span>(dt.format(<span class="string">&quot;%c&quot;</span>).to_string(), <span class="string">&quot;Wed Sep  8 07:06:54 2010&quot;</span>);
-        <span class="macro">assert_eq!</span>(dt.format(<span class="string">&quot;%s&quot;</span>).to_string(), <span class="string">&quot;1283929614&quot;</span>);
-        <span class="macro">assert_eq!</span>(dt.format(<span class="string">&quot;%t%n%%%n%t&quot;</span>).to_string(), <span class="string">&quot;\t\n%\n\t&quot;</span>);
+        <span class="macro">assert_eq!</span>(dt.format(<span class="string">"%c"</span>).to_string(), <span class="string">"Wed Sep  8 07:06:54 2010"</span>);
+        <span class="macro">assert_eq!</span>(dt.format(<span class="string">"%s"</span>).to_string(), <span class="string">"1283929614"</span>);
+        <span class="macro">assert_eq!</span>(dt.format(<span class="string">"%t%n%%%n%t"</span>).to_string(), <span class="string">"\t\n%\n\t"</span>);
 
         <span class="comment">// a horror of leap second: coming near to you.
         </span><span class="kw">let </span>dt = NaiveDate::from_ymd_opt(<span class="number">2012</span>, <span class="number">6</span>, <span class="number">30</span>)
             .unwrap()
             .and_hms_milli_opt(<span class="number">23</span>, <span class="number">59</span>, <span class="number">59</span>, <span class="number">1_000</span>)
             .unwrap();
-        <span class="macro">assert_eq!</span>(dt.format(<span class="string">&quot;%c&quot;</span>).to_string(), <span class="string">&quot;Sat Jun 30 23:59:60 2012&quot;</span>);
-        <span class="macro">assert_eq!</span>(dt.format(<span class="string">&quot;%s&quot;</span>).to_string(), <span class="string">&quot;1341100799&quot;</span>); <span class="comment">// not 1341100800, it&#39;s intentional.
+        <span class="macro">assert_eq!</span>(dt.format(<span class="string">"%c"</span>).to_string(), <span class="string">"Sat Jun 30 23:59:60 2012"</span>);
+        <span class="macro">assert_eq!</span>(dt.format(<span class="string">"%s"</span>).to_string(), <span class="string">"1341100799"</span>); <span class="comment">// not 1341100800, it's intentional.
     </span>}
 
     <span class="attr">#[test]
-    #[cfg(any(feature = <span class="string">&quot;alloc&quot;</span>, feature = <span class="string">&quot;std&quot;</span>))]
+    #[cfg(any(feature = <span class="string">"alloc"</span>, feature = <span class="string">"std"</span>))]
     </span><span class="kw">fn </span>test_datetime_format_alignment() {
         <span class="kw">let </span>datetime = Utc
             .with_ymd_and_hms(<span class="number">2007</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">12</span>, <span class="number">34</span>, <span class="number">56</span>)
@@ -1775,32 +1775,32 @@
             .unwrap();
 
         <span class="comment">// Item::Literal, odd number of padding bytes.
-        </span><span class="kw">let </span>percent = datetime.format(<span class="string">&quot;%%&quot;</span>);
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;   %&quot;</span>, <span class="macro">format!</span>(<span class="string">&quot;{:&gt;4}&quot;</span>, percent));
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;%   &quot;</span>, <span class="macro">format!</span>(<span class="string">&quot;{:&lt;4}&quot;</span>, percent));
-        <span class="macro">assert_eq!</span>(<span class="string">&quot; %  &quot;</span>, <span class="macro">format!</span>(<span class="string">&quot;{:^4}&quot;</span>, percent));
+        </span><span class="kw">let </span>percent = datetime.format(<span class="string">"%%"</span>);
+        <span class="macro">assert_eq!</span>(<span class="string">"   %"</span>, <span class="macro">format!</span>(<span class="string">"{:&gt;4}"</span>, percent));
+        <span class="macro">assert_eq!</span>(<span class="string">"%   "</span>, <span class="macro">format!</span>(<span class="string">"{:&lt;4}"</span>, percent));
+        <span class="macro">assert_eq!</span>(<span class="string">" %  "</span>, <span class="macro">format!</span>(<span class="string">"{:^4}"</span>, percent));
 
         <span class="comment">// Item::Numeric, custom non-ASCII padding character
-        </span><span class="kw">let </span>year = datetime.format(<span class="string">&quot;%Y&quot;</span>);
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;——2007&quot;</span>, <span class="macro">format!</span>(<span class="string">&quot;{:—&gt;6}&quot;</span>, year));
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;2007——&quot;</span>, <span class="macro">format!</span>(<span class="string">&quot;{:—&lt;6}&quot;</span>, year));
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;—2007—&quot;</span>, <span class="macro">format!</span>(<span class="string">&quot;{:—^6}&quot;</span>, year));
+        </span><span class="kw">let </span>year = datetime.format(<span class="string">"%Y"</span>);
+        <span class="macro">assert_eq!</span>(<span class="string">"——2007"</span>, <span class="macro">format!</span>(<span class="string">"{:—&gt;6}"</span>, year));
+        <span class="macro">assert_eq!</span>(<span class="string">"2007——"</span>, <span class="macro">format!</span>(<span class="string">"{:—&lt;6}"</span>, year));
+        <span class="macro">assert_eq!</span>(<span class="string">"—2007—"</span>, <span class="macro">format!</span>(<span class="string">"{:—^6}"</span>, year));
 
         <span class="comment">// Item::Fixed
-        </span><span class="kw">let </span>tz = datetime.format(<span class="string">&quot;%Z&quot;</span>);
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;  UTC&quot;</span>, <span class="macro">format!</span>(<span class="string">&quot;{:&gt;5}&quot;</span>, tz));
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;UTC  &quot;</span>, <span class="macro">format!</span>(<span class="string">&quot;{:&lt;5}&quot;</span>, tz));
-        <span class="macro">assert_eq!</span>(<span class="string">&quot; UTC &quot;</span>, <span class="macro">format!</span>(<span class="string">&quot;{:^5}&quot;</span>, tz));
+        </span><span class="kw">let </span>tz = datetime.format(<span class="string">"%Z"</span>);
+        <span class="macro">assert_eq!</span>(<span class="string">"  UTC"</span>, <span class="macro">format!</span>(<span class="string">"{:&gt;5}"</span>, tz));
+        <span class="macro">assert_eq!</span>(<span class="string">"UTC  "</span>, <span class="macro">format!</span>(<span class="string">"{:&lt;5}"</span>, tz));
+        <span class="macro">assert_eq!</span>(<span class="string">" UTC "</span>, <span class="macro">format!</span>(<span class="string">"{:^5}"</span>, tz));
 
         <span class="comment">// [Item::Numeric, Item::Space, Item::Literal, Item::Space, Item::Numeric]
-        </span><span class="kw">let </span>ymd = datetime.format(<span class="string">&quot;%Y %B %d&quot;</span>);
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;  2007 January 02&quot;</span>, <span class="macro">format!</span>(<span class="string">&quot;{:&gt;17}&quot;</span>, ymd));
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;2007 January 02  &quot;</span>, <span class="macro">format!</span>(<span class="string">&quot;{:&lt;17}&quot;</span>, ymd));
-        <span class="macro">assert_eq!</span>(<span class="string">&quot; 2007 January 02 &quot;</span>, <span class="macro">format!</span>(<span class="string">&quot;{:^17}&quot;</span>, ymd));
+        </span><span class="kw">let </span>ymd = datetime.format(<span class="string">"%Y %B %d"</span>);
+        <span class="macro">assert_eq!</span>(<span class="string">"  2007 January 02"</span>, <span class="macro">format!</span>(<span class="string">"{:&gt;17}"</span>, ymd));
+        <span class="macro">assert_eq!</span>(<span class="string">"2007 January 02  "</span>, <span class="macro">format!</span>(<span class="string">"{:&lt;17}"</span>, ymd));
+        <span class="macro">assert_eq!</span>(<span class="string">" 2007 January 02 "</span>, <span class="macro">format!</span>(<span class="string">"{:^17}"</span>, ymd));
 
         <span class="comment">// Truncated
-        </span><span class="kw">let </span>time = datetime.format(<span class="string">&quot;%T%.6f&quot;</span>);
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;12:34:56.1234&quot;</span>, <span class="macro">format!</span>(<span class="string">&quot;{:.13}&quot;</span>, time));
+        </span><span class="kw">let </span>time = datetime.format(<span class="string">"%T%.6f"</span>);
+        <span class="macro">assert_eq!</span>(<span class="string">"12:34:56.1234"</span>, <span class="macro">format!</span>(<span class="string">"{:.13}"</span>, time));
     }
 
     <span class="attr">#[test]
@@ -1854,104 +1854,104 @@
         check_all(
             OffsetPrecision::Hours,
             [
-                [<span class="string">&quot;+03&quot;</span>, <span class="string">&quot;-03&quot;</span>, <span class="string">&quot;+11&quot;</span>, <span class="string">&quot;-11&quot;</span>, <span class="string">&quot;+02&quot;</span>, <span class="string">&quot;-12&quot;</span>, <span class="string">&quot;+00&quot;</span>],
-                [<span class="string">&quot;+03&quot;</span>, <span class="string">&quot;-03&quot;</span>, <span class="string">&quot;+11&quot;</span>, <span class="string">&quot;-11&quot;</span>, <span class="string">&quot;+02&quot;</span>, <span class="string">&quot;-12&quot;</span>, <span class="string">&quot;Z&quot;</span>],
-                [<span class="string">&quot; +3&quot;</span>, <span class="string">&quot; -3&quot;</span>, <span class="string">&quot;+11&quot;</span>, <span class="string">&quot;-11&quot;</span>, <span class="string">&quot; +2&quot;</span>, <span class="string">&quot;-12&quot;</span>, <span class="string">&quot; +0&quot;</span>],
-                [<span class="string">&quot; +3&quot;</span>, <span class="string">&quot; -3&quot;</span>, <span class="string">&quot;+11&quot;</span>, <span class="string">&quot;-11&quot;</span>, <span class="string">&quot; +2&quot;</span>, <span class="string">&quot;-12&quot;</span>, <span class="string">&quot;Z&quot;</span>],
-                [<span class="string">&quot;+3&quot;</span>, <span class="string">&quot;-3&quot;</span>, <span class="string">&quot;+11&quot;</span>, <span class="string">&quot;-11&quot;</span>, <span class="string">&quot;+2&quot;</span>, <span class="string">&quot;-12&quot;</span>, <span class="string">&quot;+0&quot;</span>],
-                [<span class="string">&quot;+3&quot;</span>, <span class="string">&quot;-3&quot;</span>, <span class="string">&quot;+11&quot;</span>, <span class="string">&quot;-11&quot;</span>, <span class="string">&quot;+2&quot;</span>, <span class="string">&quot;-12&quot;</span>, <span class="string">&quot;Z&quot;</span>],
-                [<span class="string">&quot;+03&quot;</span>, <span class="string">&quot;-03&quot;</span>, <span class="string">&quot;+11&quot;</span>, <span class="string">&quot;-11&quot;</span>, <span class="string">&quot;+02&quot;</span>, <span class="string">&quot;-12&quot;</span>, <span class="string">&quot;+00&quot;</span>],
-                [<span class="string">&quot;+03&quot;</span>, <span class="string">&quot;-03&quot;</span>, <span class="string">&quot;+11&quot;</span>, <span class="string">&quot;-11&quot;</span>, <span class="string">&quot;+02&quot;</span>, <span class="string">&quot;-12&quot;</span>, <span class="string">&quot;Z&quot;</span>],
-                [<span class="string">&quot; +3&quot;</span>, <span class="string">&quot; -3&quot;</span>, <span class="string">&quot;+11&quot;</span>, <span class="string">&quot;-11&quot;</span>, <span class="string">&quot; +2&quot;</span>, <span class="string">&quot;-12&quot;</span>, <span class="string">&quot; +0&quot;</span>],
-                [<span class="string">&quot; +3&quot;</span>, <span class="string">&quot; -3&quot;</span>, <span class="string">&quot;+11&quot;</span>, <span class="string">&quot;-11&quot;</span>, <span class="string">&quot; +2&quot;</span>, <span class="string">&quot;-12&quot;</span>, <span class="string">&quot;Z&quot;</span>],
-                [<span class="string">&quot;+3&quot;</span>, <span class="string">&quot;-3&quot;</span>, <span class="string">&quot;+11&quot;</span>, <span class="string">&quot;-11&quot;</span>, <span class="string">&quot;+2&quot;</span>, <span class="string">&quot;-12&quot;</span>, <span class="string">&quot;+0&quot;</span>],
-                [<span class="string">&quot;+3&quot;</span>, <span class="string">&quot;-3&quot;</span>, <span class="string">&quot;+11&quot;</span>, <span class="string">&quot;-11&quot;</span>, <span class="string">&quot;+2&quot;</span>, <span class="string">&quot;-12&quot;</span>, <span class="string">&quot;Z&quot;</span>],
+                [<span class="string">"+03"</span>, <span class="string">"-03"</span>, <span class="string">"+11"</span>, <span class="string">"-11"</span>, <span class="string">"+02"</span>, <span class="string">"-12"</span>, <span class="string">"+00"</span>],
+                [<span class="string">"+03"</span>, <span class="string">"-03"</span>, <span class="string">"+11"</span>, <span class="string">"-11"</span>, <span class="string">"+02"</span>, <span class="string">"-12"</span>, <span class="string">"Z"</span>],
+                [<span class="string">" +3"</span>, <span class="string">" -3"</span>, <span class="string">"+11"</span>, <span class="string">"-11"</span>, <span class="string">" +2"</span>, <span class="string">"-12"</span>, <span class="string">" +0"</span>],
+                [<span class="string">" +3"</span>, <span class="string">" -3"</span>, <span class="string">"+11"</span>, <span class="string">"-11"</span>, <span class="string">" +2"</span>, <span class="string">"-12"</span>, <span class="string">"Z"</span>],
+                [<span class="string">"+3"</span>, <span class="string">"-3"</span>, <span class="string">"+11"</span>, <span class="string">"-11"</span>, <span class="string">"+2"</span>, <span class="string">"-12"</span>, <span class="string">"+0"</span>],
+                [<span class="string">"+3"</span>, <span class="string">"-3"</span>, <span class="string">"+11"</span>, <span class="string">"-11"</span>, <span class="string">"+2"</span>, <span class="string">"-12"</span>, <span class="string">"Z"</span>],
+                [<span class="string">"+03"</span>, <span class="string">"-03"</span>, <span class="string">"+11"</span>, <span class="string">"-11"</span>, <span class="string">"+02"</span>, <span class="string">"-12"</span>, <span class="string">"+00"</span>],
+                [<span class="string">"+03"</span>, <span class="string">"-03"</span>, <span class="string">"+11"</span>, <span class="string">"-11"</span>, <span class="string">"+02"</span>, <span class="string">"-12"</span>, <span class="string">"Z"</span>],
+                [<span class="string">" +3"</span>, <span class="string">" -3"</span>, <span class="string">"+11"</span>, <span class="string">"-11"</span>, <span class="string">" +2"</span>, <span class="string">"-12"</span>, <span class="string">" +0"</span>],
+                [<span class="string">" +3"</span>, <span class="string">" -3"</span>, <span class="string">"+11"</span>, <span class="string">"-11"</span>, <span class="string">" +2"</span>, <span class="string">"-12"</span>, <span class="string">"Z"</span>],
+                [<span class="string">"+3"</span>, <span class="string">"-3"</span>, <span class="string">"+11"</span>, <span class="string">"-11"</span>, <span class="string">"+2"</span>, <span class="string">"-12"</span>, <span class="string">"+0"</span>],
+                [<span class="string">"+3"</span>, <span class="string">"-3"</span>, <span class="string">"+11"</span>, <span class="string">"-11"</span>, <span class="string">"+2"</span>, <span class="string">"-12"</span>, <span class="string">"Z"</span>],
             ],
         );
         check_all(
             OffsetPrecision::Minutes,
             [
-                [<span class="string">&quot;+03:45&quot;</span>, <span class="string">&quot;-03:30&quot;</span>, <span class="string">&quot;+11:00&quot;</span>, <span class="string">&quot;-11:00&quot;</span>, <span class="string">&quot;+02:34&quot;</span>, <span class="string">&quot;-12:35&quot;</span>, <span class="string">&quot;+00:00&quot;</span>],
-                [<span class="string">&quot;+03:45&quot;</span>, <span class="string">&quot;-03:30&quot;</span>, <span class="string">&quot;+11:00&quot;</span>, <span class="string">&quot;-11:00&quot;</span>, <span class="string">&quot;+02:34&quot;</span>, <span class="string">&quot;-12:35&quot;</span>, <span class="string">&quot;Z&quot;</span>],
-                [<span class="string">&quot; +3:45&quot;</span>, <span class="string">&quot; -3:30&quot;</span>, <span class="string">&quot;+11:00&quot;</span>, <span class="string">&quot;-11:00&quot;</span>, <span class="string">&quot; +2:34&quot;</span>, <span class="string">&quot;-12:35&quot;</span>, <span class="string">&quot; +0:00&quot;</span>],
-                [<span class="string">&quot; +3:45&quot;</span>, <span class="string">&quot; -3:30&quot;</span>, <span class="string">&quot;+11:00&quot;</span>, <span class="string">&quot;-11:00&quot;</span>, <span class="string">&quot; +2:34&quot;</span>, <span class="string">&quot;-12:35&quot;</span>, <span class="string">&quot;Z&quot;</span>],
-                [<span class="string">&quot;+3:45&quot;</span>, <span class="string">&quot;-3:30&quot;</span>, <span class="string">&quot;+11:00&quot;</span>, <span class="string">&quot;-11:00&quot;</span>, <span class="string">&quot;+2:34&quot;</span>, <span class="string">&quot;-12:35&quot;</span>, <span class="string">&quot;+0:00&quot;</span>],
-                [<span class="string">&quot;+3:45&quot;</span>, <span class="string">&quot;-3:30&quot;</span>, <span class="string">&quot;+11:00&quot;</span>, <span class="string">&quot;-11:00&quot;</span>, <span class="string">&quot;+2:34&quot;</span>, <span class="string">&quot;-12:35&quot;</span>, <span class="string">&quot;Z&quot;</span>],
-                [<span class="string">&quot;+0345&quot;</span>, <span class="string">&quot;-0330&quot;</span>, <span class="string">&quot;+1100&quot;</span>, <span class="string">&quot;-1100&quot;</span>, <span class="string">&quot;+0234&quot;</span>, <span class="string">&quot;-1235&quot;</span>, <span class="string">&quot;+0000&quot;</span>],
-                [<span class="string">&quot;+0345&quot;</span>, <span class="string">&quot;-0330&quot;</span>, <span class="string">&quot;+1100&quot;</span>, <span class="string">&quot;-1100&quot;</span>, <span class="string">&quot;+0234&quot;</span>, <span class="string">&quot;-1235&quot;</span>, <span class="string">&quot;Z&quot;</span>],
-                [<span class="string">&quot; +345&quot;</span>, <span class="string">&quot; -330&quot;</span>, <span class="string">&quot;+1100&quot;</span>, <span class="string">&quot;-1100&quot;</span>, <span class="string">&quot; +234&quot;</span>, <span class="string">&quot;-1235&quot;</span>, <span class="string">&quot; +000&quot;</span>],
-                [<span class="string">&quot; +345&quot;</span>, <span class="string">&quot; -330&quot;</span>, <span class="string">&quot;+1100&quot;</span>, <span class="string">&quot;-1100&quot;</span>, <span class="string">&quot; +234&quot;</span>, <span class="string">&quot;-1235&quot;</span>, <span class="string">&quot;Z&quot;</span>],
-                [<span class="string">&quot;+345&quot;</span>, <span class="string">&quot;-330&quot;</span>, <span class="string">&quot;+1100&quot;</span>, <span class="string">&quot;-1100&quot;</span>, <span class="string">&quot;+234&quot;</span>, <span class="string">&quot;-1235&quot;</span>, <span class="string">&quot;+000&quot;</span>],
-                [<span class="string">&quot;+345&quot;</span>, <span class="string">&quot;-330&quot;</span>, <span class="string">&quot;+1100&quot;</span>, <span class="string">&quot;-1100&quot;</span>, <span class="string">&quot;+234&quot;</span>, <span class="string">&quot;-1235&quot;</span>, <span class="string">&quot;Z&quot;</span>],
+                [<span class="string">"+03:45"</span>, <span class="string">"-03:30"</span>, <span class="string">"+11:00"</span>, <span class="string">"-11:00"</span>, <span class="string">"+02:34"</span>, <span class="string">"-12:35"</span>, <span class="string">"+00:00"</span>],
+                [<span class="string">"+03:45"</span>, <span class="string">"-03:30"</span>, <span class="string">"+11:00"</span>, <span class="string">"-11:00"</span>, <span class="string">"+02:34"</span>, <span class="string">"-12:35"</span>, <span class="string">"Z"</span>],
+                [<span class="string">" +3:45"</span>, <span class="string">" -3:30"</span>, <span class="string">"+11:00"</span>, <span class="string">"-11:00"</span>, <span class="string">" +2:34"</span>, <span class="string">"-12:35"</span>, <span class="string">" +0:00"</span>],
+                [<span class="string">" +3:45"</span>, <span class="string">" -3:30"</span>, <span class="string">"+11:00"</span>, <span class="string">"-11:00"</span>, <span class="string">" +2:34"</span>, <span class="string">"-12:35"</span>, <span class="string">"Z"</span>],
+                [<span class="string">"+3:45"</span>, <span class="string">"-3:30"</span>, <span class="string">"+11:00"</span>, <span class="string">"-11:00"</span>, <span class="string">"+2:34"</span>, <span class="string">"-12:35"</span>, <span class="string">"+0:00"</span>],
+                [<span class="string">"+3:45"</span>, <span class="string">"-3:30"</span>, <span class="string">"+11:00"</span>, <span class="string">"-11:00"</span>, <span class="string">"+2:34"</span>, <span class="string">"-12:35"</span>, <span class="string">"Z"</span>],
+                [<span class="string">"+0345"</span>, <span class="string">"-0330"</span>, <span class="string">"+1100"</span>, <span class="string">"-1100"</span>, <span class="string">"+0234"</span>, <span class="string">"-1235"</span>, <span class="string">"+0000"</span>],
+                [<span class="string">"+0345"</span>, <span class="string">"-0330"</span>, <span class="string">"+1100"</span>, <span class="string">"-1100"</span>, <span class="string">"+0234"</span>, <span class="string">"-1235"</span>, <span class="string">"Z"</span>],
+                [<span class="string">" +345"</span>, <span class="string">" -330"</span>, <span class="string">"+1100"</span>, <span class="string">"-1100"</span>, <span class="string">" +234"</span>, <span class="string">"-1235"</span>, <span class="string">" +000"</span>],
+                [<span class="string">" +345"</span>, <span class="string">" -330"</span>, <span class="string">"+1100"</span>, <span class="string">"-1100"</span>, <span class="string">" +234"</span>, <span class="string">"-1235"</span>, <span class="string">"Z"</span>],
+                [<span class="string">"+345"</span>, <span class="string">"-330"</span>, <span class="string">"+1100"</span>, <span class="string">"-1100"</span>, <span class="string">"+234"</span>, <span class="string">"-1235"</span>, <span class="string">"+000"</span>],
+                [<span class="string">"+345"</span>, <span class="string">"-330"</span>, <span class="string">"+1100"</span>, <span class="string">"-1100"</span>, <span class="string">"+234"</span>, <span class="string">"-1235"</span>, <span class="string">"Z"</span>],
             ],
         );
         <span class="attr">#[rustfmt::skip]
         </span>check_all(
             OffsetPrecision::Seconds,
             [
-                [<span class="string">&quot;+03:45:00&quot;</span>, <span class="string">&quot;-03:30:00&quot;</span>, <span class="string">&quot;+11:00:00&quot;</span>, <span class="string">&quot;-11:00:22&quot;</span>, <span class="string">&quot;+02:34:26&quot;</span>, <span class="string">&quot;-12:34:30&quot;</span>, <span class="string">&quot;+00:00:00&quot;</span>],
-                [<span class="string">&quot;+03:45:00&quot;</span>, <span class="string">&quot;-03:30:00&quot;</span>, <span class="string">&quot;+11:00:00&quot;</span>, <span class="string">&quot;-11:00:22&quot;</span>, <span class="string">&quot;+02:34:26&quot;</span>, <span class="string">&quot;-12:34:30&quot;</span>, <span class="string">&quot;Z&quot;</span>],
-                [<span class="string">&quot; +3:45:00&quot;</span>, <span class="string">&quot; -3:30:00&quot;</span>, <span class="string">&quot;+11:00:00&quot;</span>, <span class="string">&quot;-11:00:22&quot;</span>, <span class="string">&quot; +2:34:26&quot;</span>, <span class="string">&quot;-12:34:30&quot;</span>, <span class="string">&quot; +0:00:00&quot;</span>],
-                [<span class="string">&quot; +3:45:00&quot;</span>, <span class="string">&quot; -3:30:00&quot;</span>, <span class="string">&quot;+11:00:00&quot;</span>, <span class="string">&quot;-11:00:22&quot;</span>, <span class="string">&quot; +2:34:26&quot;</span>, <span class="string">&quot;-12:34:30&quot;</span>, <span class="string">&quot;Z&quot;</span>],
-                [<span class="string">&quot;+3:45:00&quot;</span>, <span class="string">&quot;-3:30:00&quot;</span>, <span class="string">&quot;+11:00:00&quot;</span>, <span class="string">&quot;-11:00:22&quot;</span>, <span class="string">&quot;+2:34:26&quot;</span>, <span class="string">&quot;-12:34:30&quot;</span>, <span class="string">&quot;+0:00:00&quot;</span>],
-                [<span class="string">&quot;+3:45:00&quot;</span>, <span class="string">&quot;-3:30:00&quot;</span>, <span class="string">&quot;+11:00:00&quot;</span>, <span class="string">&quot;-11:00:22&quot;</span>, <span class="string">&quot;+2:34:26&quot;</span>, <span class="string">&quot;-12:34:30&quot;</span>, <span class="string">&quot;Z&quot;</span>],
-                [<span class="string">&quot;+034500&quot;</span>, <span class="string">&quot;-033000&quot;</span>, <span class="string">&quot;+110000&quot;</span>, <span class="string">&quot;-110022&quot;</span>, <span class="string">&quot;+023426&quot;</span>, <span class="string">&quot;-123430&quot;</span>, <span class="string">&quot;+000000&quot;</span>],
-                [<span class="string">&quot;+034500&quot;</span>, <span class="string">&quot;-033000&quot;</span>, <span class="string">&quot;+110000&quot;</span>, <span class="string">&quot;-110022&quot;</span>, <span class="string">&quot;+023426&quot;</span>, <span class="string">&quot;-123430&quot;</span>, <span class="string">&quot;Z&quot;</span>],
-                [<span class="string">&quot; +34500&quot;</span>, <span class="string">&quot; -33000&quot;</span>, <span class="string">&quot;+110000&quot;</span>, <span class="string">&quot;-110022&quot;</span>, <span class="string">&quot; +23426&quot;</span>, <span class="string">&quot;-123430&quot;</span>, <span class="string">&quot; +00000&quot;</span>],
-                [<span class="string">&quot; +34500&quot;</span>, <span class="string">&quot; -33000&quot;</span>, <span class="string">&quot;+110000&quot;</span>, <span class="string">&quot;-110022&quot;</span>, <span class="string">&quot; +23426&quot;</span>, <span class="string">&quot;-123430&quot;</span>, <span class="string">&quot;Z&quot;</span>],
-                [<span class="string">&quot;+34500&quot;</span>, <span class="string">&quot;-33000&quot;</span>, <span class="string">&quot;+110000&quot;</span>, <span class="string">&quot;-110022&quot;</span>, <span class="string">&quot;+23426&quot;</span>, <span class="string">&quot;-123430&quot;</span>, <span class="string">&quot;+00000&quot;</span>],
-                [<span class="string">&quot;+34500&quot;</span>, <span class="string">&quot;-33000&quot;</span>, <span class="string">&quot;+110000&quot;</span>, <span class="string">&quot;-110022&quot;</span>, <span class="string">&quot;+23426&quot;</span>, <span class="string">&quot;-123430&quot;</span>, <span class="string">&quot;Z&quot;</span>],
+                [<span class="string">"+03:45:00"</span>, <span class="string">"-03:30:00"</span>, <span class="string">"+11:00:00"</span>, <span class="string">"-11:00:22"</span>, <span class="string">"+02:34:26"</span>, <span class="string">"-12:34:30"</span>, <span class="string">"+00:00:00"</span>],
+                [<span class="string">"+03:45:00"</span>, <span class="string">"-03:30:00"</span>, <span class="string">"+11:00:00"</span>, <span class="string">"-11:00:22"</span>, <span class="string">"+02:34:26"</span>, <span class="string">"-12:34:30"</span>, <span class="string">"Z"</span>],
+                [<span class="string">" +3:45:00"</span>, <span class="string">" -3:30:00"</span>, <span class="string">"+11:00:00"</span>, <span class="string">"-11:00:22"</span>, <span class="string">" +2:34:26"</span>, <span class="string">"-12:34:30"</span>, <span class="string">" +0:00:00"</span>],
+                [<span class="string">" +3:45:00"</span>, <span class="string">" -3:30:00"</span>, <span class="string">"+11:00:00"</span>, <span class="string">"-11:00:22"</span>, <span class="string">" +2:34:26"</span>, <span class="string">"-12:34:30"</span>, <span class="string">"Z"</span>],
+                [<span class="string">"+3:45:00"</span>, <span class="string">"-3:30:00"</span>, <span class="string">"+11:00:00"</span>, <span class="string">"-11:00:22"</span>, <span class="string">"+2:34:26"</span>, <span class="string">"-12:34:30"</span>, <span class="string">"+0:00:00"</span>],
+                [<span class="string">"+3:45:00"</span>, <span class="string">"-3:30:00"</span>, <span class="string">"+11:00:00"</span>, <span class="string">"-11:00:22"</span>, <span class="string">"+2:34:26"</span>, <span class="string">"-12:34:30"</span>, <span class="string">"Z"</span>],
+                [<span class="string">"+034500"</span>, <span class="string">"-033000"</span>, <span class="string">"+110000"</span>, <span class="string">"-110022"</span>, <span class="string">"+023426"</span>, <span class="string">"-123430"</span>, <span class="string">"+000000"</span>],
+                [<span class="string">"+034500"</span>, <span class="string">"-033000"</span>, <span class="string">"+110000"</span>, <span class="string">"-110022"</span>, <span class="string">"+023426"</span>, <span class="string">"-123430"</span>, <span class="string">"Z"</span>],
+                [<span class="string">" +34500"</span>, <span class="string">" -33000"</span>, <span class="string">"+110000"</span>, <span class="string">"-110022"</span>, <span class="string">" +23426"</span>, <span class="string">"-123430"</span>, <span class="string">" +00000"</span>],
+                [<span class="string">" +34500"</span>, <span class="string">" -33000"</span>, <span class="string">"+110000"</span>, <span class="string">"-110022"</span>, <span class="string">" +23426"</span>, <span class="string">"-123430"</span>, <span class="string">"Z"</span>],
+                [<span class="string">"+34500"</span>, <span class="string">"-33000"</span>, <span class="string">"+110000"</span>, <span class="string">"-110022"</span>, <span class="string">"+23426"</span>, <span class="string">"-123430"</span>, <span class="string">"+00000"</span>],
+                [<span class="string">"+34500"</span>, <span class="string">"-33000"</span>, <span class="string">"+110000"</span>, <span class="string">"-110022"</span>, <span class="string">"+23426"</span>, <span class="string">"-123430"</span>, <span class="string">"Z"</span>],
             ],
         );
         check_all(
             OffsetPrecision::OptionalMinutes,
             [
-                [<span class="string">&quot;+03:45&quot;</span>, <span class="string">&quot;-03:30&quot;</span>, <span class="string">&quot;+11&quot;</span>, <span class="string">&quot;-11&quot;</span>, <span class="string">&quot;+02:34&quot;</span>, <span class="string">&quot;-12:35&quot;</span>, <span class="string">&quot;+00&quot;</span>],
-                [<span class="string">&quot;+03:45&quot;</span>, <span class="string">&quot;-03:30&quot;</span>, <span class="string">&quot;+11&quot;</span>, <span class="string">&quot;-11&quot;</span>, <span class="string">&quot;+02:34&quot;</span>, <span class="string">&quot;-12:35&quot;</span>, <span class="string">&quot;Z&quot;</span>],
-                [<span class="string">&quot; +3:45&quot;</span>, <span class="string">&quot; -3:30&quot;</span>, <span class="string">&quot;+11&quot;</span>, <span class="string">&quot;-11&quot;</span>, <span class="string">&quot; +2:34&quot;</span>, <span class="string">&quot;-12:35&quot;</span>, <span class="string">&quot; +0&quot;</span>],
-                [<span class="string">&quot; +3:45&quot;</span>, <span class="string">&quot; -3:30&quot;</span>, <span class="string">&quot;+11&quot;</span>, <span class="string">&quot;-11&quot;</span>, <span class="string">&quot; +2:34&quot;</span>, <span class="string">&quot;-12:35&quot;</span>, <span class="string">&quot;Z&quot;</span>],
-                [<span class="string">&quot;+3:45&quot;</span>, <span class="string">&quot;-3:30&quot;</span>, <span class="string">&quot;+11&quot;</span>, <span class="string">&quot;-11&quot;</span>, <span class="string">&quot;+2:34&quot;</span>, <span class="string">&quot;-12:35&quot;</span>, <span class="string">&quot;+0&quot;</span>],
-                [<span class="string">&quot;+3:45&quot;</span>, <span class="string">&quot;-3:30&quot;</span>, <span class="string">&quot;+11&quot;</span>, <span class="string">&quot;-11&quot;</span>, <span class="string">&quot;+2:34&quot;</span>, <span class="string">&quot;-12:35&quot;</span>, <span class="string">&quot;Z&quot;</span>],
-                [<span class="string">&quot;+0345&quot;</span>, <span class="string">&quot;-0330&quot;</span>, <span class="string">&quot;+11&quot;</span>, <span class="string">&quot;-11&quot;</span>, <span class="string">&quot;+0234&quot;</span>, <span class="string">&quot;-1235&quot;</span>, <span class="string">&quot;+00&quot;</span>],
-                [<span class="string">&quot;+0345&quot;</span>, <span class="string">&quot;-0330&quot;</span>, <span class="string">&quot;+11&quot;</span>, <span class="string">&quot;-11&quot;</span>, <span class="string">&quot;+0234&quot;</span>, <span class="string">&quot;-1235&quot;</span>, <span class="string">&quot;Z&quot;</span>],
-                [<span class="string">&quot; +345&quot;</span>, <span class="string">&quot; -330&quot;</span>, <span class="string">&quot;+11&quot;</span>, <span class="string">&quot;-11&quot;</span>, <span class="string">&quot; +234&quot;</span>, <span class="string">&quot;-1235&quot;</span>, <span class="string">&quot; +0&quot;</span>],
-                [<span class="string">&quot; +345&quot;</span>, <span class="string">&quot; -330&quot;</span>, <span class="string">&quot;+11&quot;</span>, <span class="string">&quot;-11&quot;</span>, <span class="string">&quot; +234&quot;</span>, <span class="string">&quot;-1235&quot;</span>, <span class="string">&quot;Z&quot;</span>],
-                [<span class="string">&quot;+345&quot;</span>, <span class="string">&quot;-330&quot;</span>, <span class="string">&quot;+11&quot;</span>, <span class="string">&quot;-11&quot;</span>, <span class="string">&quot;+234&quot;</span>, <span class="string">&quot;-1235&quot;</span>, <span class="string">&quot;+0&quot;</span>],
-                [<span class="string">&quot;+345&quot;</span>, <span class="string">&quot;-330&quot;</span>, <span class="string">&quot;+11&quot;</span>, <span class="string">&quot;-11&quot;</span>, <span class="string">&quot;+234&quot;</span>, <span class="string">&quot;-1235&quot;</span>, <span class="string">&quot;Z&quot;</span>],
+                [<span class="string">"+03:45"</span>, <span class="string">"-03:30"</span>, <span class="string">"+11"</span>, <span class="string">"-11"</span>, <span class="string">"+02:34"</span>, <span class="string">"-12:35"</span>, <span class="string">"+00"</span>],
+                [<span class="string">"+03:45"</span>, <span class="string">"-03:30"</span>, <span class="string">"+11"</span>, <span class="string">"-11"</span>, <span class="string">"+02:34"</span>, <span class="string">"-12:35"</span>, <span class="string">"Z"</span>],
+                [<span class="string">" +3:45"</span>, <span class="string">" -3:30"</span>, <span class="string">"+11"</span>, <span class="string">"-11"</span>, <span class="string">" +2:34"</span>, <span class="string">"-12:35"</span>, <span class="string">" +0"</span>],
+                [<span class="string">" +3:45"</span>, <span class="string">" -3:30"</span>, <span class="string">"+11"</span>, <span class="string">"-11"</span>, <span class="string">" +2:34"</span>, <span class="string">"-12:35"</span>, <span class="string">"Z"</span>],
+                [<span class="string">"+3:45"</span>, <span class="string">"-3:30"</span>, <span class="string">"+11"</span>, <span class="string">"-11"</span>, <span class="string">"+2:34"</span>, <span class="string">"-12:35"</span>, <span class="string">"+0"</span>],
+                [<span class="string">"+3:45"</span>, <span class="string">"-3:30"</span>, <span class="string">"+11"</span>, <span class="string">"-11"</span>, <span class="string">"+2:34"</span>, <span class="string">"-12:35"</span>, <span class="string">"Z"</span>],
+                [<span class="string">"+0345"</span>, <span class="string">"-0330"</span>, <span class="string">"+11"</span>, <span class="string">"-11"</span>, <span class="string">"+0234"</span>, <span class="string">"-1235"</span>, <span class="string">"+00"</span>],
+                [<span class="string">"+0345"</span>, <span class="string">"-0330"</span>, <span class="string">"+11"</span>, <span class="string">"-11"</span>, <span class="string">"+0234"</span>, <span class="string">"-1235"</span>, <span class="string">"Z"</span>],
+                [<span class="string">" +345"</span>, <span class="string">" -330"</span>, <span class="string">"+11"</span>, <span class="string">"-11"</span>, <span class="string">" +234"</span>, <span class="string">"-1235"</span>, <span class="string">" +0"</span>],
+                [<span class="string">" +345"</span>, <span class="string">" -330"</span>, <span class="string">"+11"</span>, <span class="string">"-11"</span>, <span class="string">" +234"</span>, <span class="string">"-1235"</span>, <span class="string">"Z"</span>],
+                [<span class="string">"+345"</span>, <span class="string">"-330"</span>, <span class="string">"+11"</span>, <span class="string">"-11"</span>, <span class="string">"+234"</span>, <span class="string">"-1235"</span>, <span class="string">"+0"</span>],
+                [<span class="string">"+345"</span>, <span class="string">"-330"</span>, <span class="string">"+11"</span>, <span class="string">"-11"</span>, <span class="string">"+234"</span>, <span class="string">"-1235"</span>, <span class="string">"Z"</span>],
             ],
         );
         check_all(
             OffsetPrecision::OptionalSeconds,
             [
-                [<span class="string">&quot;+03:45&quot;</span>, <span class="string">&quot;-03:30&quot;</span>, <span class="string">&quot;+11:00&quot;</span>, <span class="string">&quot;-11:00:22&quot;</span>, <span class="string">&quot;+02:34:26&quot;</span>, <span class="string">&quot;-12:34:30&quot;</span>, <span class="string">&quot;+00:00&quot;</span>],
-                [<span class="string">&quot;+03:45&quot;</span>, <span class="string">&quot;-03:30&quot;</span>, <span class="string">&quot;+11:00&quot;</span>, <span class="string">&quot;-11:00:22&quot;</span>, <span class="string">&quot;+02:34:26&quot;</span>, <span class="string">&quot;-12:34:30&quot;</span>, <span class="string">&quot;Z&quot;</span>],
-                [<span class="string">&quot; +3:45&quot;</span>, <span class="string">&quot; -3:30&quot;</span>, <span class="string">&quot;+11:00&quot;</span>, <span class="string">&quot;-11:00:22&quot;</span>, <span class="string">&quot; +2:34:26&quot;</span>, <span class="string">&quot;-12:34:30&quot;</span>, <span class="string">&quot; +0:00&quot;</span>],
-                [<span class="string">&quot; +3:45&quot;</span>, <span class="string">&quot; -3:30&quot;</span>, <span class="string">&quot;+11:00&quot;</span>, <span class="string">&quot;-11:00:22&quot;</span>, <span class="string">&quot; +2:34:26&quot;</span>, <span class="string">&quot;-12:34:30&quot;</span>, <span class="string">&quot;Z&quot;</span>],
-                [<span class="string">&quot;+3:45&quot;</span>, <span class="string">&quot;-3:30&quot;</span>, <span class="string">&quot;+11:00&quot;</span>, <span class="string">&quot;-11:00:22&quot;</span>, <span class="string">&quot;+2:34:26&quot;</span>, <span class="string">&quot;-12:34:30&quot;</span>, <span class="string">&quot;+0:00&quot;</span>],
-                [<span class="string">&quot;+3:45&quot;</span>, <span class="string">&quot;-3:30&quot;</span>, <span class="string">&quot;+11:00&quot;</span>, <span class="string">&quot;-11:00:22&quot;</span>, <span class="string">&quot;+2:34:26&quot;</span>, <span class="string">&quot;-12:34:30&quot;</span>, <span class="string">&quot;Z&quot;</span>],
-                [<span class="string">&quot;+0345&quot;</span>, <span class="string">&quot;-0330&quot;</span>, <span class="string">&quot;+1100&quot;</span>, <span class="string">&quot;-110022&quot;</span>, <span class="string">&quot;+023426&quot;</span>, <span class="string">&quot;-123430&quot;</span>, <span class="string">&quot;+0000&quot;</span>],
-                [<span class="string">&quot;+0345&quot;</span>, <span class="string">&quot;-0330&quot;</span>, <span class="string">&quot;+1100&quot;</span>, <span class="string">&quot;-110022&quot;</span>, <span class="string">&quot;+023426&quot;</span>, <span class="string">&quot;-123430&quot;</span>, <span class="string">&quot;Z&quot;</span>],
-                [<span class="string">&quot; +345&quot;</span>, <span class="string">&quot; -330&quot;</span>, <span class="string">&quot;+1100&quot;</span>, <span class="string">&quot;-110022&quot;</span>, <span class="string">&quot; +23426&quot;</span>, <span class="string">&quot;-123430&quot;</span>, <span class="string">&quot; +000&quot;</span>],
-                [<span class="string">&quot; +345&quot;</span>, <span class="string">&quot; -330&quot;</span>, <span class="string">&quot;+1100&quot;</span>, <span class="string">&quot;-110022&quot;</span>, <span class="string">&quot; +23426&quot;</span>, <span class="string">&quot;-123430&quot;</span>, <span class="string">&quot;Z&quot;</span>],
-                [<span class="string">&quot;+345&quot;</span>, <span class="string">&quot;-330&quot;</span>, <span class="string">&quot;+1100&quot;</span>, <span class="string">&quot;-110022&quot;</span>, <span class="string">&quot;+23426&quot;</span>, <span class="string">&quot;-123430&quot;</span>, <span class="string">&quot;+000&quot;</span>],
-                [<span class="string">&quot;+345&quot;</span>, <span class="string">&quot;-330&quot;</span>, <span class="string">&quot;+1100&quot;</span>, <span class="string">&quot;-110022&quot;</span>, <span class="string">&quot;+23426&quot;</span>, <span class="string">&quot;-123430&quot;</span>, <span class="string">&quot;Z&quot;</span>],
+                [<span class="string">"+03:45"</span>, <span class="string">"-03:30"</span>, <span class="string">"+11:00"</span>, <span class="string">"-11:00:22"</span>, <span class="string">"+02:34:26"</span>, <span class="string">"-12:34:30"</span>, <span class="string">"+00:00"</span>],
+                [<span class="string">"+03:45"</span>, <span class="string">"-03:30"</span>, <span class="string">"+11:00"</span>, <span class="string">"-11:00:22"</span>, <span class="string">"+02:34:26"</span>, <span class="string">"-12:34:30"</span>, <span class="string">"Z"</span>],
+                [<span class="string">" +3:45"</span>, <span class="string">" -3:30"</span>, <span class="string">"+11:00"</span>, <span class="string">"-11:00:22"</span>, <span class="string">" +2:34:26"</span>, <span class="string">"-12:34:30"</span>, <span class="string">" +0:00"</span>],
+                [<span class="string">" +3:45"</span>, <span class="string">" -3:30"</span>, <span class="string">"+11:00"</span>, <span class="string">"-11:00:22"</span>, <span class="string">" +2:34:26"</span>, <span class="string">"-12:34:30"</span>, <span class="string">"Z"</span>],
+                [<span class="string">"+3:45"</span>, <span class="string">"-3:30"</span>, <span class="string">"+11:00"</span>, <span class="string">"-11:00:22"</span>, <span class="string">"+2:34:26"</span>, <span class="string">"-12:34:30"</span>, <span class="string">"+0:00"</span>],
+                [<span class="string">"+3:45"</span>, <span class="string">"-3:30"</span>, <span class="string">"+11:00"</span>, <span class="string">"-11:00:22"</span>, <span class="string">"+2:34:26"</span>, <span class="string">"-12:34:30"</span>, <span class="string">"Z"</span>],
+                [<span class="string">"+0345"</span>, <span class="string">"-0330"</span>, <span class="string">"+1100"</span>, <span class="string">"-110022"</span>, <span class="string">"+023426"</span>, <span class="string">"-123430"</span>, <span class="string">"+0000"</span>],
+                [<span class="string">"+0345"</span>, <span class="string">"-0330"</span>, <span class="string">"+1100"</span>, <span class="string">"-110022"</span>, <span class="string">"+023426"</span>, <span class="string">"-123430"</span>, <span class="string">"Z"</span>],
+                [<span class="string">" +345"</span>, <span class="string">" -330"</span>, <span class="string">"+1100"</span>, <span class="string">"-110022"</span>, <span class="string">" +23426"</span>, <span class="string">"-123430"</span>, <span class="string">" +000"</span>],
+                [<span class="string">" +345"</span>, <span class="string">" -330"</span>, <span class="string">"+1100"</span>, <span class="string">"-110022"</span>, <span class="string">" +23426"</span>, <span class="string">"-123430"</span>, <span class="string">"Z"</span>],
+                [<span class="string">"+345"</span>, <span class="string">"-330"</span>, <span class="string">"+1100"</span>, <span class="string">"-110022"</span>, <span class="string">"+23426"</span>, <span class="string">"-123430"</span>, <span class="string">"+000"</span>],
+                [<span class="string">"+345"</span>, <span class="string">"-330"</span>, <span class="string">"+1100"</span>, <span class="string">"-110022"</span>, <span class="string">"+23426"</span>, <span class="string">"-123430"</span>, <span class="string">"Z"</span>],
             ],
         );
         check_all(
             OffsetPrecision::OptionalMinutesAndSeconds,
             [
-                [<span class="string">&quot;+03:45&quot;</span>, <span class="string">&quot;-03:30&quot;</span>, <span class="string">&quot;+11&quot;</span>, <span class="string">&quot;-11:00:22&quot;</span>, <span class="string">&quot;+02:34:26&quot;</span>, <span class="string">&quot;-12:34:30&quot;</span>, <span class="string">&quot;+00&quot;</span>],
-                [<span class="string">&quot;+03:45&quot;</span>, <span class="string">&quot;-03:30&quot;</span>, <span class="string">&quot;+11&quot;</span>, <span class="string">&quot;-11:00:22&quot;</span>, <span class="string">&quot;+02:34:26&quot;</span>, <span class="string">&quot;-12:34:30&quot;</span>, <span class="string">&quot;Z&quot;</span>],
-                [<span class="string">&quot; +3:45&quot;</span>, <span class="string">&quot; -3:30&quot;</span>, <span class="string">&quot;+11&quot;</span>, <span class="string">&quot;-11:00:22&quot;</span>, <span class="string">&quot; +2:34:26&quot;</span>, <span class="string">&quot;-12:34:30&quot;</span>, <span class="string">&quot; +0&quot;</span>],
-                [<span class="string">&quot; +3:45&quot;</span>, <span class="string">&quot; -3:30&quot;</span>, <span class="string">&quot;+11&quot;</span>, <span class="string">&quot;-11:00:22&quot;</span>, <span class="string">&quot; +2:34:26&quot;</span>, <span class="string">&quot;-12:34:30&quot;</span>, <span class="string">&quot;Z&quot;</span>],
-                [<span class="string">&quot;+3:45&quot;</span>, <span class="string">&quot;-3:30&quot;</span>, <span class="string">&quot;+11&quot;</span>, <span class="string">&quot;-11:00:22&quot;</span>, <span class="string">&quot;+2:34:26&quot;</span>, <span class="string">&quot;-12:34:30&quot;</span>, <span class="string">&quot;+0&quot;</span>],
-                [<span class="string">&quot;+3:45&quot;</span>, <span class="string">&quot;-3:30&quot;</span>, <span class="string">&quot;+11&quot;</span>, <span class="string">&quot;-11:00:22&quot;</span>, <span class="string">&quot;+2:34:26&quot;</span>, <span class="string">&quot;-12:34:30&quot;</span>, <span class="string">&quot;Z&quot;</span>],
-                [<span class="string">&quot;+0345&quot;</span>, <span class="string">&quot;-0330&quot;</span>, <span class="string">&quot;+11&quot;</span>, <span class="string">&quot;-110022&quot;</span>, <span class="string">&quot;+023426&quot;</span>, <span class="string">&quot;-123430&quot;</span>, <span class="string">&quot;+00&quot;</span>],
-                [<span class="string">&quot;+0345&quot;</span>, <span class="string">&quot;-0330&quot;</span>, <span class="string">&quot;+11&quot;</span>, <span class="string">&quot;-110022&quot;</span>, <span class="string">&quot;+023426&quot;</span>, <span class="string">&quot;-123430&quot;</span>, <span class="string">&quot;Z&quot;</span>],
-                [<span class="string">&quot; +345&quot;</span>, <span class="string">&quot; -330&quot;</span>, <span class="string">&quot;+11&quot;</span>, <span class="string">&quot;-110022&quot;</span>, <span class="string">&quot; +23426&quot;</span>, <span class="string">&quot;-123430&quot;</span>, <span class="string">&quot; +0&quot;</span>],
-                [<span class="string">&quot; +345&quot;</span>, <span class="string">&quot; -330&quot;</span>, <span class="string">&quot;+11&quot;</span>, <span class="string">&quot;-110022&quot;</span>, <span class="string">&quot; +23426&quot;</span>, <span class="string">&quot;-123430&quot;</span>, <span class="string">&quot;Z&quot;</span>],
-                [<span class="string">&quot;+345&quot;</span>, <span class="string">&quot;-330&quot;</span>, <span class="string">&quot;+11&quot;</span>, <span class="string">&quot;-110022&quot;</span>, <span class="string">&quot;+23426&quot;</span>, <span class="string">&quot;-123430&quot;</span>, <span class="string">&quot;+0&quot;</span>],
-                [<span class="string">&quot;+345&quot;</span>, <span class="string">&quot;-330&quot;</span>, <span class="string">&quot;+11&quot;</span>, <span class="string">&quot;-110022&quot;</span>, <span class="string">&quot;+23426&quot;</span>, <span class="string">&quot;-123430&quot;</span>, <span class="string">&quot;Z&quot;</span>],
+                [<span class="string">"+03:45"</span>, <span class="string">"-03:30"</span>, <span class="string">"+11"</span>, <span class="string">"-11:00:22"</span>, <span class="string">"+02:34:26"</span>, <span class="string">"-12:34:30"</span>, <span class="string">"+00"</span>],
+                [<span class="string">"+03:45"</span>, <span class="string">"-03:30"</span>, <span class="string">"+11"</span>, <span class="string">"-11:00:22"</span>, <span class="string">"+02:34:26"</span>, <span class="string">"-12:34:30"</span>, <span class="string">"Z"</span>],
+                [<span class="string">" +3:45"</span>, <span class="string">" -3:30"</span>, <span class="string">"+11"</span>, <span class="string">"-11:00:22"</span>, <span class="string">" +2:34:26"</span>, <span class="string">"-12:34:30"</span>, <span class="string">" +0"</span>],
+                [<span class="string">" +3:45"</span>, <span class="string">" -3:30"</span>, <span class="string">"+11"</span>, <span class="string">"-11:00:22"</span>, <span class="string">" +2:34:26"</span>, <span class="string">"-12:34:30"</span>, <span class="string">"Z"</span>],
+                [<span class="string">"+3:45"</span>, <span class="string">"-3:30"</span>, <span class="string">"+11"</span>, <span class="string">"-11:00:22"</span>, <span class="string">"+2:34:26"</span>, <span class="string">"-12:34:30"</span>, <span class="string">"+0"</span>],
+                [<span class="string">"+3:45"</span>, <span class="string">"-3:30"</span>, <span class="string">"+11"</span>, <span class="string">"-11:00:22"</span>, <span class="string">"+2:34:26"</span>, <span class="string">"-12:34:30"</span>, <span class="string">"Z"</span>],
+                [<span class="string">"+0345"</span>, <span class="string">"-0330"</span>, <span class="string">"+11"</span>, <span class="string">"-110022"</span>, <span class="string">"+023426"</span>, <span class="string">"-123430"</span>, <span class="string">"+00"</span>],
+                [<span class="string">"+0345"</span>, <span class="string">"-0330"</span>, <span class="string">"+11"</span>, <span class="string">"-110022"</span>, <span class="string">"+023426"</span>, <span class="string">"-123430"</span>, <span class="string">"Z"</span>],
+                [<span class="string">" +345"</span>, <span class="string">" -330"</span>, <span class="string">"+11"</span>, <span class="string">"-110022"</span>, <span class="string">" +23426"</span>, <span class="string">"-123430"</span>, <span class="string">" +0"</span>],
+                [<span class="string">" +345"</span>, <span class="string">" -330"</span>, <span class="string">"+11"</span>, <span class="string">"-110022"</span>, <span class="string">" +23426"</span>, <span class="string">"-123430"</span>, <span class="string">"Z"</span>],
+                [<span class="string">"+345"</span>, <span class="string">"-330"</span>, <span class="string">"+11"</span>, <span class="string">"-110022"</span>, <span class="string">"+23426"</span>, <span class="string">"-123430"</span>, <span class="string">"+0"</span>],
+                [<span class="string">"+345"</span>, <span class="string">"-330"</span>, <span class="string">"+11"</span>, <span class="string">"-110022"</span>, <span class="string">"+23426"</span>, <span class="string">"-123430"</span>, <span class="string">"Z"</span>],
             ],
         );
     }

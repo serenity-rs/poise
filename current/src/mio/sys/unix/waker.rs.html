@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/mio-0.8.9/src/sys/unix/waker.rs`."><title>waker.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="mio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/mio-0.8.9/src/sys/unix/waker.rs`."><title>waker.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="mio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -328,29 +328,29 @@
     not(all(
         not(mio_unsupported_force_waker_pipe),
         any(
-            target_os = <span class="string">&quot;freebsd&quot;</span>,
-            target_os = <span class="string">&quot;ios&quot;</span>,
-            target_os = <span class="string">&quot;macos&quot;</span>,
-            target_os = <span class="string">&quot;tvos&quot;</span>,
-            target_os = <span class="string">&quot;watchos&quot;</span>,
+            target_os = <span class="string">"freebsd"</span>,
+            target_os = <span class="string">"ios"</span>,
+            target_os = <span class="string">"macos"</span>,
+            target_os = <span class="string">"tvos"</span>,
+            target_os = <span class="string">"watchos"</span>,
         )
     )),
-    not(target_os = <span class="string">&quot;vita&quot;</span>),
+    not(target_os = <span class="string">"vita"</span>),
 ))]
 </span><span class="kw">mod </span>fdbased {
     <span class="attr">#[cfg(all(
         not(mio_unsupported_force_waker_pipe),
-        any(target_os = <span class="string">&quot;linux&quot;</span>, target_os = <span class="string">&quot;android&quot;</span>),
+        any(target_os = <span class="string">"linux"</span>, target_os = <span class="string">"android"</span>),
     ))]
     </span><span class="kw">use </span><span class="kw">crate</span>::sys::unix::waker::eventfd::WakerInternal;
     <span class="attr">#[cfg(any(
         mio_unsupported_force_waker_pipe,
-        target_os = <span class="string">&quot;aix&quot;</span>,
-        target_os = <span class="string">&quot;dragonfly&quot;</span>,
-        target_os = <span class="string">&quot;illumos&quot;</span>,
-        target_os = <span class="string">&quot;netbsd&quot;</span>,
-        target_os = <span class="string">&quot;openbsd&quot;</span>,
-        target_os = <span class="string">&quot;redox&quot;</span>,
+        target_os = <span class="string">"aix"</span>,
+        target_os = <span class="string">"dragonfly"</span>,
+        target_os = <span class="string">"illumos"</span>,
+        target_os = <span class="string">"netbsd"</span>,
+        target_os = <span class="string">"openbsd"</span>,
+        target_os = <span class="string">"redox"</span>,
     ))]
     </span><span class="kw">use </span><span class="kw">crate</span>::sys::unix::waker::pipe::WakerInternal;
     <span class="kw">use </span><span class="kw">crate</span>::sys::Selector;
@@ -381,20 +381,20 @@
     not(all(
         not(mio_unsupported_force_waker_pipe),
         any(
-            target_os = <span class="string">&quot;freebsd&quot;</span>,
-            target_os = <span class="string">&quot;ios&quot;</span>,
-            target_os = <span class="string">&quot;macos&quot;</span>,
-            target_os = <span class="string">&quot;tvos&quot;</span>,
-            target_os = <span class="string">&quot;watchos&quot;</span>,
+            target_os = <span class="string">"freebsd"</span>,
+            target_os = <span class="string">"ios"</span>,
+            target_os = <span class="string">"macos"</span>,
+            target_os = <span class="string">"tvos"</span>,
+            target_os = <span class="string">"watchos"</span>,
         )
     )),
-    not(target_os = <span class="string">&quot;vita&quot;</span>),
+    not(target_os = <span class="string">"vita"</span>),
 ))]
 </span><span class="kw">pub use </span><span class="self">self</span>::fdbased::Waker;
 
 <span class="attr">#[cfg(all(
     not(mio_unsupported_force_waker_pipe),
-    any(target_os = <span class="string">&quot;linux&quot;</span>, target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;espidf&quot;</span>)
+    any(target_os = <span class="string">"linux"</span>, target_os = <span class="string">"android"</span>, target_os = <span class="string">"espidf"</span>)
 ))]
 </span><span class="kw">mod </span>eventfd {
     <span class="kw">use </span>std::fs::File;
@@ -414,10 +414,10 @@
 
     <span class="kw">impl </span>WakerInternal {
         <span class="kw">pub fn </span>new() -&gt; io::Result&lt;WakerInternal&gt; {
-            <span class="attr">#[cfg(not(target_os = <span class="string">&quot;espidf&quot;</span>))]
+            <span class="attr">#[cfg(not(target_os = <span class="string">"espidf"</span>))]
             </span><span class="kw">let </span>flags = libc::EFD_CLOEXEC | libc::EFD_NONBLOCK;
             <span class="comment">// ESP-IDF is EFD_NONBLOCK by default and errors if you try to pass this flag.
-            </span><span class="attr">#[cfg(target_os = <span class="string">&quot;espidf&quot;</span>)]
+            </span><span class="attr">#[cfg(target_os = <span class="string">"espidf"</span>)]
             </span><span class="kw">let </span>flags = <span class="number">0</span>;
             <span class="kw">let </span>fd = <span class="macro">syscall!</span>(eventfd(<span class="number">0</span>, flags))<span class="question-mark">?</span>;
 
@@ -431,7 +431,7 @@
                 <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Ok</span>(()),
                 <span class="prelude-val">Err</span>(<span class="kw-2">ref </span>err) <span class="kw">if </span>err.kind() == io::ErrorKind::WouldBlock =&gt; {
                     <span class="comment">// Writing only blocks if the counter is going to overflow.
-                    // So we&#39;ll reset the counter to 0 and wake it again.
+                    // So we'll reset the counter to 0 and wake it again.
                     </span><span class="self">self</span>.reset()<span class="question-mark">?</span>;
                     <span class="self">self</span>.wake()
                 }
@@ -449,7 +449,7 @@
             <span class="kw">let </span><span class="kw-2">mut </span>buf: [u8; <span class="number">8</span>] = <span class="number">0u64</span>.to_ne_bytes();
             <span class="kw">match </span>(<span class="kw-2">&amp;</span><span class="self">self</span>.fd).read(<span class="kw-2">&amp;mut </span>buf) {
                 <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Ok</span>(()),
-                <span class="comment">// If the `Waker` hasn&#39;t been awoken yet this will return a
+                <span class="comment">// If the `Waker` hasn't been awoken yet this will return a
                 // `WouldBlock` error which we can safely ignore.
                 </span><span class="prelude-val">Err</span>(<span class="kw-2">ref </span>err) <span class="kw">if </span>err.kind() == io::ErrorKind::WouldBlock =&gt; <span class="prelude-val">Ok</span>(()),
                 <span class="prelude-val">Err</span>(err) =&gt; <span class="prelude-val">Err</span>(err),
@@ -467,18 +467,18 @@
 <span class="attr">#[cfg(all(
     mio_unsupported_force_poll_poll,
     not(mio_unsupported_force_waker_pipe),
-    any(target_os = <span class="string">&quot;linux&quot;</span>, target_os = <span class="string">&quot;android&quot;</span>, target_os = <span class="string">&quot;espidf&quot;</span>)
+    any(target_os = <span class="string">"linux"</span>, target_os = <span class="string">"android"</span>, target_os = <span class="string">"espidf"</span>)
 ))]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span><span class="self">self</span>::eventfd::WakerInternal;
 
 <span class="attr">#[cfg(all(
     not(mio_unsupported_force_waker_pipe),
     any(
-        target_os = <span class="string">&quot;freebsd&quot;</span>,
-        target_os = <span class="string">&quot;ios&quot;</span>,
-        target_os = <span class="string">&quot;macos&quot;</span>,
-        target_os = <span class="string">&quot;tvos&quot;</span>,
-        target_os = <span class="string">&quot;watchos&quot;</span>,
+        target_os = <span class="string">"freebsd"</span>,
+        target_os = <span class="string">"ios"</span>,
+        target_os = <span class="string">"macos"</span>,
+        target_os = <span class="string">"tvos"</span>,
+        target_os = <span class="string">"watchos"</span>,
     )
 ))]
 </span><span class="kw">mod </span>kqueue {
@@ -515,24 +515,24 @@
 <span class="attr">#[cfg(all(
     not(mio_unsupported_force_waker_pipe),
     any(
-        target_os = <span class="string">&quot;freebsd&quot;</span>,
-        target_os = <span class="string">&quot;ios&quot;</span>,
-        target_os = <span class="string">&quot;macos&quot;</span>,
-        target_os = <span class="string">&quot;tvos&quot;</span>,
-        target_os = <span class="string">&quot;watchos&quot;</span>,
+        target_os = <span class="string">"freebsd"</span>,
+        target_os = <span class="string">"ios"</span>,
+        target_os = <span class="string">"macos"</span>,
+        target_os = <span class="string">"tvos"</span>,
+        target_os = <span class="string">"watchos"</span>,
     )
 ))]
 </span><span class="kw">pub use </span><span class="self">self</span>::kqueue::Waker;
 
 <span class="attr">#[cfg(any(
     mio_unsupported_force_waker_pipe,
-    target_os = <span class="string">&quot;aix&quot;</span>,
-    target_os = <span class="string">&quot;dragonfly&quot;</span>,
-    target_os = <span class="string">&quot;illumos&quot;</span>,
-    target_os = <span class="string">&quot;netbsd&quot;</span>,
-    target_os = <span class="string">&quot;openbsd&quot;</span>,
-    target_os = <span class="string">&quot;redox&quot;</span>,
-    target_os = <span class="string">&quot;vita&quot;</span>,
+    target_os = <span class="string">"aix"</span>,
+    target_os = <span class="string">"dragonfly"</span>,
+    target_os = <span class="string">"illumos"</span>,
+    target_os = <span class="string">"netbsd"</span>,
+    target_os = <span class="string">"openbsd"</span>,
+    target_os = <span class="string">"redox"</span>,
+    target_os = <span class="string">"vita"</span>,
 ))]
 </span><span class="kw">mod </span>pipe {
     <span class="kw">use </span><span class="kw">crate</span>::sys::unix::pipe;
@@ -562,13 +562,13 @@
             <span class="comment">// The epoll emulation on some illumos systems currently requires
             // the pipe buffer to be completely empty for an edge-triggered
             // wakeup on the pipe read side.
-            </span><span class="attr">#[cfg(target_os = <span class="string">&quot;illumos&quot;</span>)]
+            </span><span class="attr">#[cfg(target_os = <span class="string">"illumos"</span>)]
             </span><span class="self">self</span>.empty();
 
             <span class="kw">match </span>(<span class="kw-2">&amp;</span><span class="self">self</span>.sender).write(<span class="kw-2">&amp;</span>[<span class="number">1</span>]) {
                 <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Ok</span>(()),
                 <span class="prelude-val">Err</span>(<span class="kw-2">ref </span>err) <span class="kw">if </span>err.kind() == io::ErrorKind::WouldBlock =&gt; {
-                    <span class="comment">// The reading end is full so we&#39;ll empty the buffer and try
+                    <span class="comment">// The reading end is full so we'll empty the buffer and try
                     // again.
                     </span><span class="self">self</span>.empty();
                     <span class="self">self</span>.wake()
@@ -578,12 +578,12 @@
             }
         }
 
-        <span class="attr">#[cfg(any(mio_unsupported_force_poll_poll, target_os = <span class="string">&quot;vita&quot;</span>))]
+        <span class="attr">#[cfg(any(mio_unsupported_force_poll_poll, target_os = <span class="string">"vita"</span>))]
         </span><span class="kw">pub fn </span>ack_and_reset(<span class="kw-2">&amp;</span><span class="self">self</span>) {
             <span class="self">self</span>.empty();
         }
 
-        <span class="doccomment">/// Empty the pipe&#39;s buffer, only need to call this if `wake` fails.
+        <span class="doccomment">/// Empty the pipe's buffer, only need to call this if `wake` fails.
         /// This ignores any errors.
         </span><span class="kw">fn </span>empty(<span class="kw-2">&amp;</span><span class="self">self</span>) {
             <span class="kw">let </span><span class="kw-2">mut </span>buf = [<span class="number">0</span>; <span class="number">4096</span>];
@@ -608,19 +608,19 @@
         mio_unsupported_force_poll_poll,
         any(
             mio_unsupported_force_waker_pipe,
-            target_os = <span class="string">&quot;aix&quot;</span>,
-            target_os = <span class="string">&quot;dragonfly&quot;</span>,
-            target_os = <span class="string">&quot;illumos&quot;</span>,
-            target_os = <span class="string">&quot;netbsd&quot;</span>,
-            target_os = <span class="string">&quot;openbsd&quot;</span>,
-            target_os = <span class="string">&quot;redox&quot;</span>,
+            target_os = <span class="string">"aix"</span>,
+            target_os = <span class="string">"dragonfly"</span>,
+            target_os = <span class="string">"illumos"</span>,
+            target_os = <span class="string">"netbsd"</span>,
+            target_os = <span class="string">"openbsd"</span>,
+            target_os = <span class="string">"redox"</span>,
         )
     ),
-    target_os = <span class="string">&quot;vita&quot;</span>,
+    target_os = <span class="string">"vita"</span>,
 ))]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span><span class="self">self</span>::pipe::WakerInternal;
 
-<span class="attr">#[cfg(any(mio_unsupported_force_poll_poll, target_os = <span class="string">&quot;vita&quot;</span>))]
+<span class="attr">#[cfg(any(mio_unsupported_force_poll_poll, target_os = <span class="string">"vita"</span>))]
 </span><span class="kw">mod </span>poll {
     <span class="kw">use </span><span class="kw">crate</span>::sys::Selector;
     <span class="kw">use </span><span class="kw">crate</span>::Token;
@@ -646,6 +646,6 @@
     }
 }
 
-<span class="attr">#[cfg(any(mio_unsupported_force_poll_poll, target_os = <span class="string">&quot;vita&quot;</span>))]
+<span class="attr">#[cfg(any(mio_unsupported_force_poll_poll, target_os = <span class="string">"vita"</span>))]
 </span><span class="kw">pub use </span><span class="self">self</span>::poll::Waker;
 </code></pre></div></section></main></body></html>

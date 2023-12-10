@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-webpki-0.101.7/src/der.rs`."><title>der.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="webpki" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-webpki-0.101.7/src/der.rs`."><title>der.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="webpki" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -701,7 +701,7 @@
 // purpose with or without fee is hereby granted, provided that the above
 // copyright notice and this permission notice appear in all copies.
 //
-// THE SOFTWARE IS PROVIDED &quot;AS IS&quot; AND THE AUTHORS DISCLAIM ALL WARRANTIES
+// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHORS DISCLAIM ALL WARRANTIES
 // WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
 // MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR
 // ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
@@ -712,7 +712,7 @@
 </span><span class="kw">use crate</span>::{calendar, time, Error};
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>ring::io::der::{CONSTRUCTED, CONTEXT_SPECIFIC};
 
-<span class="comment">// Copied (and extended) from ring&#39;s src/der.rs
+<span class="comment">// Copied (and extended) from ring's src/der.rs
 </span><span class="attr">#[allow(clippy::upper_case_acronyms)]
 #[derive(Clone, Copy, Eq, PartialEq)]
 #[repr(u8)]
@@ -748,10 +748,10 @@
 </span>}
 
 <span class="attr">#[inline(always)]
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>expect_tag_and_get_value&lt;<span class="lifetime">&#39;a</span>&gt;(
-    input: <span class="kw-2">&amp;mut </span>untrusted::Reader&lt;<span class="lifetime">&#39;a</span>&gt;,
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>expect_tag_and_get_value&lt;<span class="lifetime">'a</span>&gt;(
+    input: <span class="kw-2">&amp;mut </span>untrusted::Reader&lt;<span class="lifetime">'a</span>&gt;,
     tag: Tag,
-) -&gt; <span class="prelude-ty">Result</span>&lt;untrusted::Input&lt;<span class="lifetime">&#39;a</span>&gt;, Error&gt; {
+) -&gt; <span class="prelude-ty">Result</span>&lt;untrusted::Input&lt;<span class="lifetime">'a</span>&gt;, Error&gt; {
     <span class="kw">let </span>(actual_tag, inner) = read_tag_and_get_value(input)<span class="question-mark">?</span>;
     <span class="kw">if </span>usize::from(tag) != usize::from(actual_tag) {
         <span class="kw">return </span><span class="prelude-val">Err</span>(Error::BadDer);
@@ -760,11 +760,11 @@
 }
 
 <span class="attr">#[inline(always)]
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>expect_tag_and_get_value_limited&lt;<span class="lifetime">&#39;a</span>&gt;(
-    input: <span class="kw-2">&amp;mut </span>untrusted::Reader&lt;<span class="lifetime">&#39;a</span>&gt;,
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>expect_tag_and_get_value_limited&lt;<span class="lifetime">'a</span>&gt;(
+    input: <span class="kw-2">&amp;mut </span>untrusted::Reader&lt;<span class="lifetime">'a</span>&gt;,
     tag: Tag,
     size_limit: usize,
-) -&gt; <span class="prelude-ty">Result</span>&lt;untrusted::Input&lt;<span class="lifetime">&#39;a</span>&gt;, Error&gt; {
+) -&gt; <span class="prelude-ty">Result</span>&lt;untrusted::Input&lt;<span class="lifetime">'a</span>&gt;, Error&gt; {
     <span class="kw">let </span>(actual_tag, inner) = read_tag_and_get_value_limited(input, size_limit)<span class="question-mark">?</span>;
     <span class="kw">if </span>usize::from(tag) != usize::from(actual_tag) {
         <span class="kw">return </span><span class="prelude-val">Err</span>(Error::BadDer);
@@ -772,11 +772,11 @@
     <span class="prelude-val">Ok</span>(inner)
 }
 
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>nested_limited&lt;<span class="lifetime">&#39;a</span>, R, E: Copy&gt;(
-    input: <span class="kw-2">&amp;mut </span>untrusted::Reader&lt;<span class="lifetime">&#39;a</span>&gt;,
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>nested_limited&lt;<span class="lifetime">'a</span>, R, E: Copy&gt;(
+    input: <span class="kw-2">&amp;mut </span>untrusted::Reader&lt;<span class="lifetime">'a</span>&gt;,
     tag: Tag,
     error: E,
-    decoder: <span class="kw">impl </span>FnOnce(<span class="kw-2">&amp;mut </span>untrusted::Reader&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;R, E&gt;,
+    decoder: <span class="kw">impl </span>FnOnce(<span class="kw-2">&amp;mut </span>untrusted::Reader&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;R, E&gt;,
     size_limit: usize,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;R, E&gt; {
     expect_tag_and_get_value_limited(input, tag, size_limit)
@@ -786,29 +786,29 @@
 
 <span class="comment">// TODO: investigate taking decoder as a reference to reduce generated code
 // size.
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>nested&lt;<span class="lifetime">&#39;a</span>, R, E: Copy&gt;(
-    input: <span class="kw-2">&amp;mut </span>untrusted::Reader&lt;<span class="lifetime">&#39;a</span>&gt;,
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>nested&lt;<span class="lifetime">'a</span>, R, E: Copy&gt;(
+    input: <span class="kw-2">&amp;mut </span>untrusted::Reader&lt;<span class="lifetime">'a</span>&gt;,
     tag: Tag,
     error: E,
-    decoder: <span class="kw">impl </span>FnOnce(<span class="kw-2">&amp;mut </span>untrusted::Reader&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;R, E&gt;,
+    decoder: <span class="kw">impl </span>FnOnce(<span class="kw-2">&amp;mut </span>untrusted::Reader&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;R, E&gt;,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;R, E&gt; {
     nested_limited(input, tag, error, decoder, TWO_BYTE_DER_SIZE)
 }
 
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>Value&lt;<span class="lifetime">&#39;a</span>&gt; {
-    value: untrusted::Input&lt;<span class="lifetime">&#39;a</span>&gt;,
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>Value&lt;<span class="lifetime">'a</span>&gt; {
+    value: untrusted::Input&lt;<span class="lifetime">'a</span>&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Value&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>value(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; untrusted::Input&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Value&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>value(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; untrusted::Input&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.value
     }
 }
 
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>expect_tag&lt;<span class="lifetime">&#39;a</span>&gt;(
-    input: <span class="kw-2">&amp;mut </span>untrusted::Reader&lt;<span class="lifetime">&#39;a</span>&gt;,
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>expect_tag&lt;<span class="lifetime">'a</span>&gt;(
+    input: <span class="kw-2">&amp;mut </span>untrusted::Reader&lt;<span class="lifetime">'a</span>&gt;,
     tag: Tag,
-) -&gt; <span class="prelude-ty">Result</span>&lt;Value&lt;<span class="lifetime">&#39;a</span>&gt;, Error&gt; {
+) -&gt; <span class="prelude-ty">Result</span>&lt;Value&lt;<span class="lifetime">'a</span>&gt;, Error&gt; {
     <span class="kw">let </span>(actual_tag, value) = read_tag_and_get_value(input)<span class="question-mark">?</span>;
     <span class="kw">if </span>usize::from(tag) != usize::from(actual_tag) {
         <span class="kw">return </span><span class="prelude-val">Err</span>(Error::BadDer);
@@ -818,17 +818,17 @@
 }
 
 <span class="attr">#[inline(always)]
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>read_tag_and_get_value&lt;<span class="lifetime">&#39;a</span>&gt;(
-    input: <span class="kw-2">&amp;mut </span>untrusted::Reader&lt;<span class="lifetime">&#39;a</span>&gt;,
-) -&gt; <span class="prelude-ty">Result</span>&lt;(u8, untrusted::Input&lt;<span class="lifetime">&#39;a</span>&gt;), Error&gt; {
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>read_tag_and_get_value&lt;<span class="lifetime">'a</span>&gt;(
+    input: <span class="kw-2">&amp;mut </span>untrusted::Reader&lt;<span class="lifetime">'a</span>&gt;,
+) -&gt; <span class="prelude-ty">Result</span>&lt;(u8, untrusted::Input&lt;<span class="lifetime">'a</span>&gt;), Error&gt; {
     read_tag_and_get_value_limited(input, TWO_BYTE_DER_SIZE)
 }
 
 <span class="attr">#[inline(always)]
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>read_tag_and_get_value_limited&lt;<span class="lifetime">&#39;a</span>&gt;(
-    input: <span class="kw-2">&amp;mut </span>untrusted::Reader&lt;<span class="lifetime">&#39;a</span>&gt;,
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>read_tag_and_get_value_limited&lt;<span class="lifetime">'a</span>&gt;(
+    input: <span class="kw-2">&amp;mut </span>untrusted::Reader&lt;<span class="lifetime">'a</span>&gt;,
     size_limit: usize,
-) -&gt; <span class="prelude-ty">Result</span>&lt;(u8, untrusted::Input&lt;<span class="lifetime">&#39;a</span>&gt;), Error&gt; {
+) -&gt; <span class="prelude-ty">Result</span>&lt;(u8, untrusted::Input&lt;<span class="lifetime">'a</span>&gt;), Error&gt; {
     <span class="kw">let </span>tag = input.read_byte()<span class="question-mark">?</span>;
     <span class="kw">if </span>(tag &amp; HIGH_TAG_RANGE_START) == HIGH_TAG_RANGE_START {
         <span class="kw">return </span><span class="prelude-val">Err</span>(Error::BadDer); <span class="comment">// High tag number form is not allowed.
@@ -880,7 +880,7 @@
             combined
         }
         <span class="kw">_ </span>=&gt; {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::BadDer); <span class="comment">// We don&#39;t support longer lengths.
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::BadDer); <span class="comment">// We don't support longer lengths.
         </span>}
     };
 
@@ -942,12 +942,12 @@
 
 <span class="comment">// TODO: investigate taking decoder as a reference to reduce generated code
 // size.
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>nested_of_mut&lt;<span class="lifetime">&#39;a</span>, E&gt;(
-    input: <span class="kw-2">&amp;mut </span>untrusted::Reader&lt;<span class="lifetime">&#39;a</span>&gt;,
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>nested_of_mut&lt;<span class="lifetime">'a</span>, E&gt;(
+    input: <span class="kw-2">&amp;mut </span>untrusted::Reader&lt;<span class="lifetime">'a</span>&gt;,
     outer_tag: Tag,
     inner_tag: Tag,
     error: E,
-    <span class="kw-2">mut </span>decoder: <span class="kw">impl </span>FnMut(<span class="kw-2">&amp;mut </span>untrusted::Reader&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;(), E&gt;,
+    <span class="kw-2">mut </span>decoder: <span class="kw">impl </span>FnMut(<span class="kw-2">&amp;mut </span>untrusted::Reader&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;(), E&gt;,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;(), E&gt;
 <span class="kw">where
     </span>E: Copy,
@@ -963,9 +963,9 @@
     })
 }
 
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>bit_string_with_no_unused_bits&lt;<span class="lifetime">&#39;a</span>&gt;(
-    input: <span class="kw-2">&amp;mut </span>untrusted::Reader&lt;<span class="lifetime">&#39;a</span>&gt;,
-) -&gt; <span class="prelude-ty">Result</span>&lt;untrusted::Input&lt;<span class="lifetime">&#39;a</span>&gt;, Error&gt; {
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>bit_string_with_no_unused_bits&lt;<span class="lifetime">'a</span>&gt;(
+    input: <span class="kw-2">&amp;mut </span>untrusted::Reader&lt;<span class="lifetime">'a</span>&gt;,
+) -&gt; <span class="prelude-ty">Result</span>&lt;untrusted::Input&lt;<span class="lifetime">'a</span>&gt;, Error&gt; {
     nested(input, Tag::BitString, Error::BadDer, |value| {
         <span class="kw">let </span>unused_bits_at_end = value.read_byte().map_err(|<span class="kw">_</span>| Error::BadDer)<span class="question-mark">?</span>;
         <span class="kw">if </span>unused_bits_at_end != <span class="number">0 </span>{
@@ -975,11 +975,11 @@
     })
 }
 
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>BitStringFlags&lt;<span class="lifetime">&#39;a</span>&gt; {
-    raw_bits: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>BitStringFlags&lt;<span class="lifetime">'a</span>&gt; {
+    raw_bits: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; BitStringFlags&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; BitStringFlags&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>bit_set(<span class="kw-2">&amp;</span><span class="self">self</span>, bit: usize) -&gt; bool {
         <span class="kw">let </span>byte_index = bit / <span class="number">8</span>;
         <span class="kw">let </span>bit_shift = <span class="number">7 </span>- (bit % <span class="number">8</span>);
@@ -999,18 +999,18 @@
 //
 // [0]: https://security.stackexchange.com/a/10396
 // [1]: https://www.itu.int/ITU-T/studygroups/com17/languages/X.690-0207.pdf
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>bit_string_flags&lt;<span class="lifetime">&#39;a</span>&gt;(
-    input: <span class="kw-2">&amp;mut </span>untrusted::Reader&lt;<span class="lifetime">&#39;a</span>&gt;,
-) -&gt; <span class="prelude-ty">Result</span>&lt;BitStringFlags&lt;<span class="lifetime">&#39;a</span>&gt;, Error&gt; {
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>bit_string_flags&lt;<span class="lifetime">'a</span>&gt;(
+    input: <span class="kw-2">&amp;mut </span>untrusted::Reader&lt;<span class="lifetime">'a</span>&gt;,
+) -&gt; <span class="prelude-ty">Result</span>&lt;BitStringFlags&lt;<span class="lifetime">'a</span>&gt;, Error&gt; {
     expect_tag_and_get_value(input, Tag::BitString)<span class="question-mark">?</span>.read_all(Error::BadDer, |bit_string| {
         <span class="comment">// ITU X690-0207 11.2:
-        //   &quot;The initial octet shall encode, as an unsigned binary integer with bit 1 as the least
+        //   "The initial octet shall encode, as an unsigned binary integer with bit 1 as the least
         //   significant bit, the number of unused bits in the final subsequent octet.
-        //   The number shall be in the range zero to seven&quot;
+        //   The number shall be in the range zero to seven"
         </span><span class="kw">let </span>padding_bits = bit_string.read_byte().map_err(|<span class="kw">_</span>| Error::BadDer)<span class="question-mark">?</span>;
         <span class="kw">let </span>raw_bits = bit_string.read_bytes_to_end().as_slice_less_safe();
 
-        <span class="comment">// It&#39;s illegal to have more than 7 bits of padding. Similarly, if the raw bitflags
+        <span class="comment">// It's illegal to have more than 7 bits of padding. Similarly, if the raw bitflags
         // are empty there should be no padding.
         </span><span class="kw">if </span>padding_bits &gt; <span class="number">7 </span>|| (raw_bits.is_empty() &amp;&amp; padding_bits != <span class="number">0</span>) {
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::BadDer);
@@ -1056,7 +1056,7 @@
     };
 
     <span class="kw">fn </span>read_digit(inner: <span class="kw-2">&amp;mut </span>untrusted::Reader) -&gt; <span class="prelude-ty">Result</span>&lt;u64, Error&gt; {
-        <span class="kw">const </span>DIGIT: core::ops::RangeInclusive&lt;u8&gt; = <span class="string">b&#39;0&#39;</span>..=<span class="string">b&#39;9&#39;</span>;
+        <span class="kw">const </span>DIGIT: core::ops::RangeInclusive&lt;u8&gt; = <span class="string">b'0'</span>..=<span class="string">b'9'</span>;
         <span class="kw">let </span>b = inner.read_byte().map_err(|<span class="kw">_</span>| Error::BadDerTime)<span class="question-mark">?</span>;
         <span class="kw">if </span>DIGIT.contains(<span class="kw-2">&amp;</span>b) {
             <span class="kw">return </span><span class="prelude-val">Ok</span>(u64::from(b - DIGIT.start()));
@@ -1094,7 +1094,7 @@
         <span class="kw">let </span>seconds = read_two_digits(value, <span class="number">0</span>, <span class="number">59</span>)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>time_zone = value.read_byte().map_err(|<span class="kw">_</span>| Error::BadDerTime)<span class="question-mark">?</span>;
-        <span class="kw">if </span>time_zone != <span class="string">b&#39;Z&#39; </span>{
+        <span class="kw">if </span>time_zone != <span class="string">b'Z' </span>{
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::BadDerTime);
         }
 
@@ -1203,7 +1203,7 @@
         <span class="kw">use super</span>::{read_tag_and_get_value_limited, Error, LONG_FORM_LEN_TWO_BYTES_MAX};
 
         <span class="kw">let </span><span class="kw-2">mut </span>bytes = untrusted::Reader::new(untrusted::Input::from(<span class="kw-2">&amp;</span>[<span class="number">0xFF</span>]));
-        <span class="comment">// read_tag_and_get_value_limited_high_form should reject DER with &quot;high tag number form&quot; tags.
+        <span class="comment">// read_tag_and_get_value_limited_high_form should reject DER with "high tag number form" tags.
         </span><span class="macro">assert!</span>(<span class="macro">matches!</span>(
             read_tag_and_get_value_limited(<span class="kw-2">&amp;mut </span>bytes, LONG_FORM_LEN_TWO_BYTES_MAX),
             <span class="prelude-val">Err</span>(Error::BadDer)
@@ -1236,7 +1236,7 @@
     }
 
     <span class="attr">#[test]
-    #[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+    #[cfg(feature = <span class="string">"alloc"</span>)]
     </span><span class="kw">fn </span>read_tag_and_get_value_limited_limits() {
         <span class="kw">use super</span>::{read_tag_and_get_value_limited, Error};
 
@@ -1256,8 +1256,8 @@
         ]
         .concat();
 
-        <span class="kw">struct </span>Testcase&lt;<span class="lifetime">&#39;a</span>&gt; {
-            input: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+        <span class="kw">struct </span>Testcase&lt;<span class="lifetime">'a</span>&gt; {
+            input: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
             limit: usize,
             err: <span class="prelude-ty">Option</span>&lt;Error&gt;,
         }
@@ -1302,7 +1302,7 @@
     <span class="attr">#[allow(clippy::as_conversions)] </span><span class="comment">// infallible.
     </span><span class="kw">const </span>EXAMPLE_TAG: u8 = <span class="kw">super</span>::Tag::Sequence <span class="kw">as </span>u8;
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
     #[allow(clippy::as_conversions)] </span><span class="comment">// test code.
     </span><span class="kw">fn </span>der_encode_length(length: usize) -&gt; Vec&lt;u8&gt; {
         <span class="kw">if </span>length &lt; <span class="number">128 </span>{
@@ -1388,7 +1388,7 @@
         <span class="macro">assert!</span>(res.bit_set(<span class="number">6</span>));
         <span class="macro">assert!</span>(!res.bit_set(<span class="number">7</span>));
         <span class="macro">assert!</span>(!res.bit_set(<span class="number">8</span>));
-        <span class="comment">// Bits outside the range of values shouldn&#39;t be considered set.
+        <span class="comment">// Bits outside the range of values shouldn't be considered set.
         </span><span class="macro">assert!</span>(!res.bit_set(<span class="number">256</span>));
     }
 }

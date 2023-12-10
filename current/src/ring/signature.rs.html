@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.5/src/signature.rs`."><title>signature.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="ring" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.5/src/signature.rs`."><title>signature.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="ring" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -413,7 +413,7 @@
 // purpose with or without fee is hereby granted, provided that the above
 // copyright notice and this permission notice appear in all copies.
 //
-// THE SOFTWARE IS PROVIDED &quot;AS IS&quot; AND THE AUTHORS DISCLAIM ALL WARRANTIES
+// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHORS DISCLAIM ALL WARRANTIES
 // WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
 // MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY
 // SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
@@ -428,7 +428,7 @@
 //! for examples.
 //!
 //! For signature verification, this API treats each combination of parameters
-//! as a separate algorithm. For example, instead of having a single &quot;RSA&quot;
+//! as a separate algorithm. For example, instead of having a single "RSA"
 //! algorithm with a verification function that takes a bunch of parameters,
 //! there are `RSA_PKCS1_2048_8192_SHA256`, `RSA_PKCS1_2048_8192_SHA384`, etc.,
 //! which encode sets of parameter choices into objects. This is designed to
@@ -448,7 +448,7 @@
 //!
 //! The signature is a ASN.1 DER-encoded `Ecdsa-Sig-Value` as described in
 //! [RFC 3279 Section 2.2.3]. This is the form of ECDSA signature used in
-//! X.509-related structures and in TLS&#39;s `ServerKeyExchange` messages.
+//! X.509-related structures and in TLS's `ServerKeyExchange` messages.
 //!
 //! The public key is encoding in uncompressed form using the
 //! Octet-String-to-Elliptic-Curve-Point algorithm in
@@ -457,7 +457,7 @@
 //! During verification, the public key is validated using the ECC Partial
 //! Public-Key Validation Routine from Section 5.6.2.3.3 of
 //! [NIST Special Publication 800-56A, revision 2] and Appendix A.3 of the
-//! NSA&#39;s [Suite B implementer&#39;s guide to FIPS 186-3]. Note that, as explained
+//! NSA's [Suite B implementer's guide to FIPS 186-3]. Note that, as explained
 //! in the NSA guide, ECC Partial Public-Key Validation is equivalent to ECC
 //! Full Public-Key Validation for prime-order curves like this one.
 //!
@@ -476,7 +476,7 @@
 //! During verification, the public key is validated using the ECC Partial
 //! Public-Key Validation Routine from Section 5.6.2.3.3 of
 //! [NIST Special Publication 800-56A, revision 2] and Appendix A.3 of the
-//! NSA&#39;s [Suite B implementer&#39;s guide to FIPS 186-3]. Note that, as explained
+//! NSA's [Suite B implementer's guide to FIPS 186-3]. Note that, as explained
 //! in the NSA guide, ECC Partial Public-Key Validation is equivalent to ECC
 //! Full Public-Key Validation for prime-order curves like this one.
 //!
@@ -519,7 +519,7 @@
 //!     http://www.secg.org/sec1-v2.pdf
 //! [NIST Special Publication 800-56A, revision 2]:
 //!     http://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-56Ar2.pdf
-//! [Suite B implementer&#39;s guide to FIPS 186-3]:
+//! [Suite B implementer's guide to FIPS 186-3]:
 //!     https://github.com/briansmith/ring/blob/main/doc/ecdsa.pdf
 //! [RFC 3279 Section 2.2.3]:
 //!     https://tools.ietf.org/html/rfc3279#section-2.2.3
@@ -551,8 +551,8 @@
 //!
 //! let key_pair = signature::Ed25519KeyPair::from_pkcs8(pkcs8_bytes.as_ref())?;
 //!
-//! // Sign the message &quot;hello, world&quot;.
-//! const MESSAGE: &amp;[u8] = b&quot;hello, world&quot;;
+//! // Sign the message "hello, world".
+//! const MESSAGE: &amp;[u8] = b"hello, world";
 //! let sig = key_pair.sign(MESSAGE);
 //!
 //! // Normally an application would extract the bytes of the signature and
@@ -600,10 +600,10 @@
 //! ```
 //!
 //! ```
-//! # #[cfg(feature = &quot;std&quot;)]
+//! # #[cfg(feature = "std")]
 //! use ring::{rand, rsa, signature};
 //!
-//! # #[cfg(feature = &quot;std&quot;)]
+//! # #[cfg(feature = "std")]
 //! fn sign_and_verify_rsa(private_key_path: &amp;std::path::Path,
 //!                        public_key_path: &amp;std::path::Path)
 //!                        -&gt; Result&lt;(), MyError&gt; {
@@ -613,9 +613,9 @@
 //! let key_pair = rsa::KeyPair::from_der(&amp;private_key_der)
 //!     .map_err(|_| MyError::BadPrivateKey)?;
 //!
-//! // Sign the message &quot;hello, world&quot;, using PKCS#1 v1.5 padding and the
+//! // Sign the message "hello, world", using PKCS#1 v1.5 padding and the
 //! // SHA256 digest algorithm.
-//! const MESSAGE: &amp;&#39;static [u8] = b&quot;hello, world&quot;;
+//! const MESSAGE: &amp;'static [u8] = b"hello, world";
 //! let rng = rand::SystemRandom::new();
 //! let mut signature = vec![0; key_pair.public().modulus_len()];
 //! key_pair.sign(&amp;signature::RSA_PKCS1_SHA256, &amp;rng, MESSAGE, &amp;mut signature)
@@ -631,14 +631,14 @@
 //!
 //! #[derive(Debug)]
 //! enum MyError {
-//! #  #[cfg(feature = &quot;std&quot;)]
+//! #  #[cfg(feature = "std")]
 //!    IO(std::io::Error),
 //!    BadPrivateKey,
 //!    OOM,
 //!    BadSignature,
 //! }
 //!
-//! # #[cfg(feature = &quot;std&quot;)]
+//! # #[cfg(feature = "std")]
 //! fn read_file(path: &amp;std::path::Path) -&gt; Result&lt;Vec&lt;u8&gt;, MyError&gt; {
 //!     use std::io::Read;
 //!
@@ -648,7 +648,7 @@
 //!     Ok(contents)
 //! }
 //! #
-//! # #[cfg(not(feature = &quot;std&quot;))]
+//! # #[cfg(not(feature = "std"))]
 //! # fn sign_and_verify_rsa(_private_key_path: &amp;std::path::Path,
 //! #                        _public_key_path: &amp;std::path::Path)
 //! #                        -&gt; Result&lt;(), ()&gt; {
@@ -657,9 +657,9 @@
 //! #
 //! # fn main() {
 //! #     let private_key_path =
-//! #         std::path::Path::new(&quot;src/rsa/signature_rsa_example_private_key.der&quot;);
+//! #         std::path::Path::new("src/rsa/signature_rsa_example_private_key.der");
 //! #     let public_key_path =
-//! #         std::path::Path::new(&quot;src/rsa/signature_rsa_example_public_key.der&quot;);
+//! #         std::path::Path::new("src/rsa/signature_rsa_example_public_key.der");
 //! #     sign_and_verify_rsa(&amp;private_key_path, &amp;public_key_path).unwrap()
 //! # }
 //! ```
@@ -686,7 +686,7 @@
     },
 };
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
 </span><span class="kw">pub use </span><span class="kw">crate</span>::rsa::{
     padding::{
         RsaEncoding, RSA_PKCS1_SHA256, RSA_PKCS1_SHA384, RSA_PKCS1_SHA512, RSA_PSS_SHA256,
@@ -704,7 +704,7 @@
 };
 
 <span class="doccomment">/// An RSA key pair, used for signing.
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
 </span><span class="kw">pub type </span>RsaKeyPair = <span class="kw">crate</span>::rsa::KeyPair;
 
 <span class="doccomment">/// A public key signature returned from a signing operation.
@@ -746,7 +746,7 @@
 
 <span class="doccomment">/// The longest signature is an ASN.1 P-384 signature where *r* and *s* are of
 /// maximum length with the leading high bit set on each. Then each component
-/// will have a tag, a one-byte length, and a one-byte “I&#39;m not negative”
+/// will have a tag, a one-byte length, and a one-byte “I'm not negative”
 /// prefix, and the outer sequence will have a two-byte length.
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>MAX_LEN: usize = <span class="number">1</span><span class="comment">/*tag:SEQUENCE*/ </span>+ <span class="number">2</span><span class="comment">/*len*/ </span>+
     (<span class="number">2 </span>* (<span class="number">1</span><span class="comment">/*tag:INTEGER*/ </span>+ <span class="number">1</span><span class="comment">/*len*/ </span>+ <span class="number">1</span><span class="comment">/*zero*/ </span>+ ec::SCALAR_MAX_BYTES));
@@ -766,7 +766,7 @@
 <span class="doccomment">/// An unparsed, possibly malformed, public key for signature verification.
 </span><span class="attr">#[derive(Clone, Copy)]
 </span><span class="kw">pub struct </span>UnparsedPublicKey&lt;B&gt; {
-    algorithm: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw">dyn </span>VerificationAlgorithm,
+    algorithm: <span class="kw-2">&amp;</span><span class="lifetime">'static </span><span class="kw">dyn </span>VerificationAlgorithm,
     bytes: B,
 }
 
@@ -784,9 +784,9 @@
     </span>B: AsRef&lt;[u8]&gt;,
 {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter) -&gt; <span class="prelude-ty">Result</span>&lt;(), core::fmt::Error&gt; {
-        f.debug_struct(<span class="string">&quot;UnparsedPublicKey&quot;</span>)
-            .field(<span class="string">&quot;algorithm&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.algorithm)
-            .field(<span class="string">&quot;bytes&quot;</span>, <span class="kw-2">&amp;</span>debug::HexStr(<span class="self">self</span>.bytes.as_ref()))
+        f.debug_struct(<span class="string">"UnparsedPublicKey"</span>)
+            .field(<span class="string">"algorithm"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.algorithm)
+            .field(<span class="string">"bytes"</span>, <span class="kw-2">&amp;</span>debug::HexStr(<span class="self">self</span>.bytes.as_ref()))
             .finish()
     }
 }
@@ -796,7 +796,7 @@
     ///
     /// No validation of `bytes` is done until `verify()` is called.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>new(algorithm: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw">dyn </span>VerificationAlgorithm, bytes: B) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(algorithm: <span class="kw-2">&amp;</span><span class="lifetime">'static </span><span class="kw">dyn </span>VerificationAlgorithm, bytes: B) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{ algorithm, bytes }
     }
 

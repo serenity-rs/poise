@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/mio-0.8.9/src/net/udp.rs`."><title>udp.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="mio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/mio-0.8.9/src/net/udp.rs`."><title>udp.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="mio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -724,8 +724,8 @@
 ///
 /// # Examples
 ///
-</span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;os-poll&quot;</span>, doc = <span class="string">&quot;```&quot;</span>)]
-#[cfg_attr(not(feature = <span class="string">&quot;os-poll&quot;</span>), doc = <span class="string">&quot;```ignore&quot;</span>)]
+</span><span class="attr">#[cfg_attr(feature = <span class="string">"os-poll"</span>, doc = <span class="string">"```"</span>)]
+#[cfg_attr(not(feature = <span class="string">"os-poll"</span>), doc = <span class="string">"```ignore"</span>)]
 </span><span class="doccomment">/// # use std::error::Error;
 /// #
 /// # fn main() -&gt; Result&lt;(), Box&lt;dyn Error&gt;&gt; {
@@ -742,8 +742,8 @@
 ///
 /// // This operation will fail if the address is in use, so we select different ports for each
 /// // socket.
-/// let mut sender_socket = UdpSocket::bind(&quot;127.0.0.1:0&quot;.parse()?)?;
-/// let mut echoer_socket = UdpSocket::bind(&quot;127.0.0.1:0&quot;.parse()?)?;
+/// let mut sender_socket = UdpSocket::bind("127.0.0.1:0".parse()?)?;
+/// let mut echoer_socket = UdpSocket::bind("127.0.0.1:0".parse()?)?;
 ///
 /// // If we do not use connect here, SENDER and ECHOER would need to call send_to and recv_from
 /// // respectively.
@@ -769,12 +769,12 @@
 ///             SENDER =&gt; {
 ///                 let bytes_sent = sender_socket.send(&amp;msg_to_send)?;
 ///                 assert_eq!(bytes_sent, 9);
-///                 println!(&quot;sent {:?} -&gt; {:?} bytes&quot;, msg_to_send, bytes_sent);
+///                 println!("sent {:?} -&gt; {:?} bytes", msg_to_send, bytes_sent);
 ///             },
 ///             // Our ECHOER is ready to be read from.
 ///             ECHOER =&gt; {
 ///                 let num_recv = echoer_socket.recv(&amp;mut buffer)?;
-///                 println!(&quot;echo {:?} -&gt; {:?}&quot;, buffer, num_recv);
+///                 println!("echo {:?} -&gt; {:?}", buffer, num_recv);
 ///                 buffer = [0; 9];
 ///                 # _ = buffer; // Silence unused assignment warning.
 ///                 # return Ok(());
@@ -794,23 +794,23 @@
     ///
     /// # Examples
     ///
-    </span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;os-poll&quot;</span>, doc = <span class="string">&quot;```&quot;</span>)]
-    #[cfg_attr(not(feature = <span class="string">&quot;os-poll&quot;</span>), doc = <span class="string">&quot;```ignore&quot;</span>)]
+    </span><span class="attr">#[cfg_attr(feature = <span class="string">"os-poll"</span>, doc = <span class="string">"```"</span>)]
+    #[cfg_attr(not(feature = <span class="string">"os-poll"</span>), doc = <span class="string">"```ignore"</span>)]
     </span><span class="doccomment">/// # use std::error::Error;
     /// #
     /// # fn main() -&gt; Result&lt;(), Box&lt;dyn Error&gt;&gt; {
     /// use mio::net::UdpSocket;
     ///
     /// // We must bind it to an open address.
-    /// let socket = match UdpSocket::bind(&quot;127.0.0.1:0&quot;.parse()?) {
+    /// let socket = match UdpSocket::bind("127.0.0.1:0".parse()?) {
     ///     Ok(new_socket) =&gt; new_socket,
     ///     Err(fail) =&gt; {
     ///         // We panic! here, but you could try to bind it again on another address.
-    ///         panic!(&quot;Failed to bind socket. {:?}&quot;, fail);
+    ///         panic!("Failed to bind socket. {:?}", fail);
     ///     }
     /// };
     ///
-    /// // Our socket was created, but we should not use it before checking it&#39;s readiness.
+    /// // Our socket was created, but we should not use it before checking it's readiness.
     /// #    drop(socket); // Silence unused variable warning.
     /// #    Ok(())
     /// # }
@@ -836,19 +836,19 @@
     /// # Examples
     ///
     </span><span class="comment">// This assertion is almost, but not quite, universal.  It fails on
-    // shared-IP FreeBSD jails.  It&#39;s hard for mio to know whether we&#39;re jailed,
+    // shared-IP FreeBSD jails.  It's hard for mio to know whether we're jailed,
     // so simply disable the test on FreeBSD.
-    </span><span class="attr">#[cfg_attr(all(feature = <span class="string">&quot;os-poll&quot;</span>, not(target_os = <span class="string">&quot;freebsd&quot;</span>)), doc = <span class="string">&quot;```&quot;</span>)]
+    </span><span class="attr">#[cfg_attr(all(feature = <span class="string">"os-poll"</span>, not(target_os = <span class="string">"freebsd"</span>)), doc = <span class="string">"```"</span>)]
     #[cfg_attr(
-        any(not(feature = <span class="string">&quot;os-poll&quot;</span>), target_os = <span class="string">&quot;freebsd&quot;</span>),
-        doc = <span class="string">&quot;```ignore&quot;
+        any(not(feature = <span class="string">"os-poll"</span>), target_os = <span class="string">"freebsd"</span>),
+        doc = <span class="string">"```ignore"
     </span>)]
     </span><span class="doccomment">/// # use std::error::Error;
     /// #
     /// # fn main() -&gt; Result&lt;(), Box&lt;dyn Error&gt;&gt; {
     /// use mio::net::UdpSocket;
     ///
-    /// let addr = &quot;127.0.0.1:0&quot;.parse()?;
+    /// let addr = "127.0.0.1:0".parse()?;
     /// let socket = UdpSocket::bind(addr)?;
     /// assert_eq!(socket.local_addr()?.ip(), addr.ip());
     /// #    Ok(())
@@ -862,15 +862,15 @@
     ///
     /// # Examples
     ///
-    </span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;os-poll&quot;</span>, doc = <span class="string">&quot;```&quot;</span>)]
-    #[cfg_attr(not(feature = <span class="string">&quot;os-poll&quot;</span>), doc = <span class="string">&quot;```ignore&quot;</span>)]
+    </span><span class="attr">#[cfg_attr(feature = <span class="string">"os-poll"</span>, doc = <span class="string">"```"</span>)]
+    #[cfg_attr(not(feature = <span class="string">"os-poll"</span>), doc = <span class="string">"```ignore"</span>)]
     </span><span class="doccomment">/// # use std::error::Error;
     /// #
     /// # fn main() -&gt; Result&lt;(), Box&lt;dyn Error&gt;&gt; {
     /// use mio::net::UdpSocket;
     ///
-    /// let addr = &quot;127.0.0.1:0&quot;.parse()?;
-    /// let peer_addr = &quot;127.0.0.1:11100&quot;.parse()?;
+    /// let addr = "127.0.0.1:0".parse()?;
+    /// let peer_addr = "127.0.0.1:11100".parse()?;
     /// let socket = UdpSocket::bind(addr)?;
     /// socket.connect(peer_addr)?;
     /// assert_eq!(socket.peer_addr()?.ip(), peer_addr.ip());
@@ -894,12 +894,12 @@
     /// # fn main() -&gt; Result&lt;(), Box&lt;dyn Error&gt;&gt; {
     /// use mio::net::UdpSocket;
     ///
-    /// let socket = UdpSocket::bind(&quot;127.0.0.1:0&quot;.parse()?)?;
+    /// let socket = UdpSocket::bind("127.0.0.1:0".parse()?)?;
     ///
     /// // We must check if the socket is writable before calling send_to,
     /// // or we could run into a WouldBlock error.
     ///
-    /// let bytes_sent = socket.send_to(&amp;[9; 9], &quot;127.0.0.1:11100&quot;.parse()?)?;
+    /// let bytes_sent = socket.send_to(&amp;[9; 9], "127.0.0.1:11100".parse()?)?;
     /// assert_eq!(bytes_sent, 9);
     /// #
     /// #    Ok(())
@@ -928,14 +928,14 @@
     /// # fn main() -&gt; Result&lt;(), Box&lt;dyn Error&gt;&gt; {
     /// use mio::net::UdpSocket;
     ///
-    /// let socket = UdpSocket::bind(&quot;127.0.0.1:0&quot;.parse()?)?;
+    /// let socket = UdpSocket::bind("127.0.0.1:0".parse()?)?;
     ///
     /// // We must check if the socket is readable before calling recv_from,
     /// // or we could run into a WouldBlock error.
     ///
     /// let mut buf = [0; 9];
     /// let (num_recv, from_addr) = socket.recv_from(&amp;mut buf)?;
-    /// println!(&quot;Received {:?} -&gt; {:?} bytes from {:?}&quot;, buf, num_recv, from_addr);
+    /// println!("Received {:?} -&gt; {:?} bytes from {:?}", buf, num_recv, from_addr);
     /// #
     /// #    Ok(())
     /// # }
@@ -964,14 +964,14 @@
     /// # fn main() -&gt; Result&lt;(), Box&lt;dyn Error&gt;&gt; {
     /// use mio::net::UdpSocket;
     ///
-    /// let socket = UdpSocket::bind(&quot;127.0.0.1:0&quot;.parse()?)?;
+    /// let socket = UdpSocket::bind("127.0.0.1:0".parse()?)?;
     ///
     /// // We must check if the socket is readable before calling recv_from,
     /// // or we could run into a WouldBlock error.
     ///
     /// let mut buf = [0; 9];
     /// let (num_recv, from_addr) = socket.peek_from(&amp;mut buf)?;
-    /// println!(&quot;Received {:?} -&gt; {:?} bytes from {:?}&quot;, buf, num_recv, from_addr);
+    /// println!("Received {:?} -&gt; {:?} bytes from {:?}", buf, num_recv, from_addr);
     /// #
     /// #    Ok(())
     /// # }
@@ -1032,14 +1032,14 @@
     ///
     /// # Examples
     ///
-    </span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;os-poll&quot;</span>, doc = <span class="string">&quot;```&quot;</span>)]
-    #[cfg_attr(not(feature = <span class="string">&quot;os-poll&quot;</span>), doc = <span class="string">&quot;```ignore&quot;</span>)]
+    </span><span class="attr">#[cfg_attr(feature = <span class="string">"os-poll"</span>, doc = <span class="string">"```"</span>)]
+    #[cfg_attr(not(feature = <span class="string">"os-poll"</span>), doc = <span class="string">"```ignore"</span>)]
     </span><span class="doccomment">/// # use std::error::Error;
     /// #
     /// # fn main() -&gt; Result&lt;(), Box&lt;dyn Error&gt;&gt; {
     /// use mio::net::UdpSocket;
     ///
-    /// let broadcast_socket = UdpSocket::bind(&quot;127.0.0.1:0&quot;.parse()?)?;
+    /// let broadcast_socket = UdpSocket::bind("127.0.0.1:0".parse()?)?;
     /// if broadcast_socket.broadcast()? == false {
     ///     broadcast_socket.set_broadcast(true)?;
     /// }
@@ -1062,14 +1062,14 @@
     ///
     /// # Examples
     ///
-    </span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;os-poll&quot;</span>, doc = <span class="string">&quot;```&quot;</span>)]
-    #[cfg_attr(not(feature = <span class="string">&quot;os-poll&quot;</span>), doc = <span class="string">&quot;```ignore&quot;</span>)]
+    </span><span class="attr">#[cfg_attr(feature = <span class="string">"os-poll"</span>, doc = <span class="string">"```"</span>)]
+    #[cfg_attr(not(feature = <span class="string">"os-poll"</span>), doc = <span class="string">"```ignore"</span>)]
     </span><span class="doccomment">/// # use std::error::Error;
     /// #
     /// # fn main() -&gt; Result&lt;(), Box&lt;dyn Error&gt;&gt; {
     /// use mio::net::UdpSocket;
     ///
-    /// let broadcast_socket = UdpSocket::bind(&quot;127.0.0.1:0&quot;.parse()?)?;
+    /// let broadcast_socket = UdpSocket::bind("127.0.0.1:0".parse()?)?;
     /// assert_eq!(broadcast_socket.broadcast()?, false);
     /// #
     /// #    Ok(())
@@ -1101,7 +1101,7 @@
     ///
     /// Indicates the time-to-live value of outgoing multicast packets for
     /// this socket. The default value is 1 which means that multicast packets
-    /// don&#39;t leave the local network unless explicitly requested.
+    /// don't leave the local network unless explicitly requested.
     ///
     /// Note that this may not have any affect on IPv6 sockets.
     </span><span class="kw">pub fn </span>set_multicast_ttl_v4(<span class="kw-2">&amp;</span><span class="self">self</span>, ttl: u32) -&gt; io::Result&lt;()&gt; {
@@ -1143,14 +1143,14 @@
     ///
     /// # Examples
     ///
-    </span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;os-poll&quot;</span>, doc = <span class="string">&quot;```&quot;</span>)]
-    #[cfg_attr(not(feature = <span class="string">&quot;os-poll&quot;</span>), doc = <span class="string">&quot;```ignore&quot;</span>)]
+    </span><span class="attr">#[cfg_attr(feature = <span class="string">"os-poll"</span>, doc = <span class="string">"```"</span>)]
+    #[cfg_attr(not(feature = <span class="string">"os-poll"</span>), doc = <span class="string">"```ignore"</span>)]
     </span><span class="doccomment">/// # use std::error::Error;
     /// #
     /// # fn main() -&gt; Result&lt;(), Box&lt;dyn Error&gt;&gt; {
     /// use mio::net::UdpSocket;
     ///
-    /// let socket = UdpSocket::bind(&quot;127.0.0.1:0&quot;.parse()?)?;
+    /// let socket = UdpSocket::bind("127.0.0.1:0".parse()?)?;
     /// if socket.ttl()? &lt; 255 {
     ///     socket.set_ttl(255)?;
     /// }
@@ -1172,14 +1172,14 @@
     ///
     /// # Examples
     ///
-    </span><span class="attr">#[cfg_attr(feature = <span class="string">&quot;os-poll&quot;</span>, doc = <span class="string">&quot;```&quot;</span>)]
-    #[cfg_attr(not(feature = <span class="string">&quot;os-poll&quot;</span>), doc = <span class="string">&quot;```ignore&quot;</span>)]
+    </span><span class="attr">#[cfg_attr(feature = <span class="string">"os-poll"</span>, doc = <span class="string">"```"</span>)]
+    #[cfg_attr(not(feature = <span class="string">"os-poll"</span>), doc = <span class="string">"```ignore"</span>)]
     </span><span class="doccomment">/// # use std::error::Error;
     /// #
     /// # fn main() -&gt; Result&lt;(), Box&lt;dyn Error&gt;&gt; {
     /// use mio::net::UdpSocket;
     ///
-    /// let socket = UdpSocket::bind(&quot;127.0.0.1:0&quot;.parse()?)?;
+    /// let socket = UdpSocket::bind("127.0.0.1:0".parse()?)?;
     /// socket.set_ttl(255)?;
     ///
     /// assert_eq!(socket.ttl()?, 255);
@@ -1196,7 +1196,7 @@
     /// This function specifies a new multicast group for this socket to join.
     /// The address must be a valid multicast address, and `interface` is the
     /// address of the local interface with which the system should join the
-    /// multicast group. If it&#39;s equal to `INADDR_ANY` then an appropriate
+    /// multicast group. If it's equal to `INADDR_ANY` then an appropriate
     /// interface is chosen by the system.
     </span><span class="attr">#[allow(clippy::trivially_copy_pass_by_ref)]
     </span><span class="kw">pub fn </span>join_multicast_v4(<span class="kw-2">&amp;</span><span class="self">self</span>, multiaddr: <span class="kw-2">&amp;</span>Ipv4Addr, interface: <span class="kw-2">&amp;</span>Ipv4Addr) -&gt; io::Result&lt;()&gt; {
@@ -1263,8 +1263,8 @@
     ///
     /// # Examples
     ///
-    </span><span class="attr">#[cfg_attr(unix, doc = <span class="string">&quot;```no_run&quot;</span>)]
-    #[cfg_attr(windows, doc = <span class="string">&quot;```ignore&quot;</span>)]
+    </span><span class="attr">#[cfg_attr(unix, doc = <span class="string">"```no_run"</span>)]
+    #[cfg_attr(windows, doc = <span class="string">"```ignore"</span>)]
     </span><span class="doccomment">/// # use std::error::Error;
     /// #
     /// # fn main() -&gt; Result&lt;(), Box&lt;dyn Error&gt;&gt; {
@@ -1275,7 +1275,7 @@
     /// use std::os::windows::io::AsRawSocket;
     /// use mio::net::UdpSocket;
     ///
-    /// let address = &quot;127.0.0.1:8080&quot;.parse().unwrap();
+    /// let address = "127.0.0.1:8080".parse().unwrap();
     /// let dgram = UdpSocket::bind(address)?;
     ///
     /// // Wait until the dgram is readable...
@@ -1297,7 +1297,7 @@
     ///         Err(io::Error::last_os_error())
     ///     }
     /// })?;
-    /// eprintln!(&quot;read {} bytes&quot;, n);
+    /// eprintln!("read {} bytes", n);
     /// # Ok(())
     /// # }
     /// ```
@@ -1334,7 +1334,7 @@
 }
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>UdpSocket {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         <span class="self">self</span>.inner.fmt(f)
     }
 }

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/h2-0.3.22/src/proto/streams/send.rs`."><title>send.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="h2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/h2-0.3.22/src/proto/streams/send.rs`."><title>send.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="h2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -667,14 +667,14 @@
         </span><span class="kw">if </span>fields.contains_key(http::header::CONNECTION)
             || fields.contains_key(http::header::TRANSFER_ENCODING)
             || fields.contains_key(http::header::UPGRADE)
-            || fields.contains_key(<span class="string">&quot;keep-alive&quot;</span>)
-            || fields.contains_key(<span class="string">&quot;proxy-connection&quot;</span>)
+            || fields.contains_key(<span class="string">"keep-alive"</span>)
+            || fields.contains_key(<span class="string">"proxy-connection"</span>)
         {
-            <span class="macro">tracing::debug!</span>(<span class="string">&quot;illegal connection-specific headers found&quot;</span>);
+            <span class="macro">tracing::debug!</span>(<span class="string">"illegal connection-specific headers found"</span>);
             <span class="kw">return </span><span class="prelude-val">Err</span>(UserError::MalformedHeaders);
         } <span class="kw">else if let </span><span class="prelude-val">Some</span>(te) = fields.get(http::header::TE) {
-            <span class="kw">if </span>te != <span class="string">&quot;trailers&quot; </span>{
-                <span class="macro">tracing::debug!</span>(<span class="string">&quot;illegal connection-specific headers found&quot;</span>);
+            <span class="kw">if </span>te != <span class="string">"trailers" </span>{
+                <span class="macro">tracing::debug!</span>(<span class="string">"illegal connection-specific headers found"</span>);
                 <span class="kw">return </span><span class="prelude-val">Err</span>(UserError::MalformedHeaders);
             }
         }
@@ -693,7 +693,7 @@
         }
 
         <span class="macro">tracing::trace!</span>(
-            <span class="string">&quot;send_push_promise; frame={:?}; init_window={:?}&quot;</span>,
+            <span class="string">"send_push_promise; frame={:?}; init_window={:?}"</span>,
             frame,
             <span class="self">self</span>.init_window_sz
         );
@@ -716,7 +716,7 @@
         task: <span class="kw-2">&amp;mut </span><span class="prelude-ty">Option</span>&lt;Waker&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(), UserError&gt; {
         <span class="macro">tracing::trace!</span>(
-            <span class="string">&quot;send_headers; frame={:?}; init_window={:?}&quot;</span>,
+            <span class="string">"send_headers; frame={:?}; init_window={:?}"</span>,
             frame,
             <span class="self">self</span>.init_window_sz
         );
@@ -737,7 +737,7 @@
         <span class="comment">// Queue the frame for sending
         //
         // This call expects that, since new streams are in the open queue, new
-        // streams won&#39;t be pushed on pending_send.
+        // streams won't be pushed on pending_send.
         </span><span class="self">self</span>.prioritize
             .queue_frame(frame.into(), buffer, stream, task);
 
@@ -768,10 +768,10 @@
         <span class="kw">let </span>stream_id = stream.id;
 
         <span class="macro">tracing::trace!</span>(
-            <span class="string">&quot;send_reset(..., reason={:?}, initiator={:?}, stream={:?}, ..., \
+            <span class="string">"send_reset(..., reason={:?}, initiator={:?}, stream={:?}, ..., \
              is_reset={:?}; is_closed={:?}; pending_send.is_empty={:?}; \
              state={:?} \
-             &quot;</span>,
+             "</span>,
             reason,
             initiator,
             stream_id,
@@ -782,9 +782,9 @@
         );
 
         <span class="kw">if </span>is_reset {
-            <span class="comment">// Don&#39;t double reset
+            <span class="comment">// Don't double reset
             </span><span class="macro">tracing::trace!</span>(
-                <span class="string">&quot; -&gt; not sending RST_STREAM ({:?} is already reset)&quot;</span>,
+                <span class="string">" -&gt; not sending RST_STREAM ({:?} is already reset)"</span>,
                 stream_id
             );
             <span class="kw">return</span>;
@@ -797,22 +797,22 @@
         // reset explicitly, either. Implicit resets can still be queued.
         </span><span class="kw">if </span>is_closed &amp;&amp; is_empty {
             <span class="macro">tracing::trace!</span>(
-                <span class="string">&quot; -&gt; not sending explicit RST_STREAM ({:?} was closed \
-                 and send queue was flushed)&quot;</span>,
+                <span class="string">" -&gt; not sending explicit RST_STREAM ({:?} was closed \
+                 and send queue was flushed)"</span>,
                 stream_id
             );
             <span class="kw">return</span>;
         }
 
         <span class="comment">// Clear all pending outbound frames.
-        // Note that we don&#39;t call `self.recv_err` because we want to enqueue
+        // Note that we don't call `self.recv_err` because we want to enqueue
         // the reset frame before transitioning the stream inside
         // `reclaim_all_capacity`.
         </span><span class="self">self</span>.prioritize.clear_queue(buffer, stream);
 
         <span class="kw">let </span>frame = frame::Reset::new(stream.id, reason);
 
-        <span class="macro">tracing::trace!</span>(<span class="string">&quot;send_reset -- queueing; frame={:?}&quot;</span>, frame);
+        <span class="macro">tracing::trace!</span>(<span class="string">"send_reset -- queueing; frame={:?}"</span>, frame);
         <span class="self">self</span>.prioritize
             .queue_frame(frame.into(), buffer, stream, task);
         <span class="self">self</span>.prioritize.reclaim_all_capacity(stream, counts);
@@ -866,7 +866,7 @@
 
         stream.state.send_close();
 
-        <span class="macro">tracing::trace!</span>(<span class="string">&quot;send_trailers -- queuing; frame={:?}&quot;</span>, frame);
+        <span class="macro">tracing::trace!</span>(<span class="string">"send_trailers -- queuing; frame={:?}"</span>, frame);
         <span class="self">self</span>.prioritize
             .queue_frame(frame.into(), buffer, stream, task);
 
@@ -960,7 +960,7 @@
         task: <span class="kw-2">&amp;mut </span><span class="prelude-ty">Option</span>&lt;Waker&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(), Reason&gt; {
         <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = <span class="self">self</span>.prioritize.recv_stream_window_update(sz, stream) {
-            <span class="macro">tracing::debug!</span>(<span class="string">&quot;recv_stream_window_update !!; err={:?}&quot;</span>, e);
+            <span class="macro">tracing::debug!</span>(<span class="string">"recv_stream_window_update !!; err={:?}"</span>, e);
 
             <span class="self">self</span>.send_reset(
                 Reason::FLOW_CONTROL_ERROR,
@@ -982,12 +982,12 @@
             <span class="comment">// The remote endpoint sent a `GOAWAY` frame indicating a stream
             // that we never sent, or that we have already terminated on account
             // of previous `GOAWAY` frame. In either case, that is illegal.
-            // (When sending multiple `GOAWAY`s, &quot;Endpoints MUST NOT increase
+            // (When sending multiple `GOAWAY`s, "Endpoints MUST NOT increase
             // the value they send in the last stream identifier, since the
             // peers might already have retried unprocessed requests on another
-            // connection.&quot;)
+            // connection.")
             </span><span class="macro">proto_err!</span>(conn:
-                <span class="string">&quot;recv_go_away: last_stream_id ({:?}) &gt; max_stream_id ({:?})&quot;</span>,
+                <span class="string">"recv_go_away: last_stream_id ({:?}) &gt; max_stream_id ({:?})"</span>,
                 last_stream_id, <span class="self">self</span>.max_stream_id,
             );
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::library_go_away(Reason::PROTOCOL_ERROR));
@@ -1020,14 +1020,14 @@
             <span class="self">self</span>.is_extended_connect_protocol_enabled = val;
         }
 
-        <span class="comment">// Applies an update to the remote endpoint&#39;s initial window size.
+        <span class="comment">// Applies an update to the remote endpoint's initial window size.
         //
         // Per RFC 7540 §6.9.2:
         //
         // In addition to changing the flow-control window for streams that are
         // not yet active, a SETTINGS frame can alter the initial flow-control
         // window size for streams with active flow-control windows (that is,
-        // streams in the &quot;open&quot; or &quot;half-closed (remote)&quot; state). When the
+        // streams in the "open" or "half-closed (remote)" state). When the
         // value of SETTINGS_INITIAL_WINDOW_SIZE changes, a receiver MUST adjust
         // the size of all stream flow-control windows that it maintains by the
         // difference between the new value and the old value.
@@ -1045,14 +1045,14 @@
                 Ordering::Less =&gt; {
                     <span class="comment">// We must decrease the (remote) window on every open stream.
                     </span><span class="kw">let </span>dec = old_val - val;
-                    <span class="macro">tracing::trace!</span>(<span class="string">&quot;decrementing all windows; dec={}&quot;</span>, dec);
+                    <span class="macro">tracing::trace!</span>(<span class="string">"decrementing all windows; dec={}"</span>, dec);
 
                     <span class="kw">let </span><span class="kw-2">mut </span>total_reclaimed = <span class="number">0</span>;
                     store.try_for_each(|<span class="kw-2">mut </span>stream| {
                         <span class="kw">let </span>stream = <span class="kw-2">&amp;mut *</span>stream;
 
                         <span class="macro">tracing::trace!</span>(
-                            <span class="string">&quot;decrementing stream window; id={:?}; decr={}; flow={:?}&quot;</span>,
+                            <span class="string">"decrementing stream window; id={:?}; decr={}; flow={:?}"</span>,
                             stream.id,
                             dec,
                             stream.send_flow
@@ -1064,7 +1064,7 @@
                             .dec_send_window(dec)
                             .map_err(proto::Error::library_go_away)<span class="question-mark">?</span>;
 
-                        <span class="comment">// It&#39;s possible that decreasing the window causes
+                        <span class="comment">// It's possible that decreasing the window causes
                         // `window_size` (the stream-specific window) to fall below
                         // `available` (the portion of the connection-level window
                         // that we have allocated to the stream).
@@ -1086,7 +1086,7 @@
                         </span>};
 
                         <span class="macro">tracing::trace!</span>(
-                            <span class="string">&quot;decremented stream window; id={:?}; decr={}; reclaimed={}; flow={:?}&quot;</span>,
+                            <span class="string">"decremented stream window; id={:?}; decr={}; reclaimed={}; flow={:?}"</span>,
                             stream.id,
                             dec,
                             reclaimed,
@@ -1134,7 +1134,7 @@
                 <span class="kw">return </span><span class="prelude-val">Err</span>(Reason::PROTOCOL_ERROR);
             }
         }
-        <span class="comment">// if next_stream_id is overflowed, that&#39;s ok.
+        <span class="comment">// if next_stream_id is overflowed, that's ok.
 
         </span><span class="prelude-val">Ok</span>(())
     }

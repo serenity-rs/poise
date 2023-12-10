@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/runtime/scheduler/multi_thread/queue.rs`."><title>queue.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../../../" data-static-root-path="../../../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../../src-files.js"></script><script defer src="../../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/runtime/scheduler/multi_thread/queue.rs`."><title>queue.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../../../" data-static-root-path="../../../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../../src-files.js"></script><script defer src="../../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -634,17 +634,17 @@
 }
 
 <span class="doccomment">/// Producer handle. May only be used from a single thread.
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>Local&lt;T: <span class="lifetime">&#39;static</span>&gt; {
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>Local&lt;T: <span class="lifetime">'static</span>&gt; {
     inner: Arc&lt;Inner&lt;T&gt;&gt;,
 }
 
 <span class="doccomment">/// Consumer handle. May be used from many threads.
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>Steal&lt;T: <span class="lifetime">&#39;static</span>&gt;(Arc&lt;Inner&lt;T&gt;&gt;);
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>Steal&lt;T: <span class="lifetime">'static</span>&gt;(Arc&lt;Inner&lt;T&gt;&gt;);
 
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>Inner&lt;T: <span class="lifetime">&#39;static</span>&gt; {
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>Inner&lt;T: <span class="lifetime">'static</span>&gt; {
     <span class="doccomment">/// Concurrently updated by many threads.
     ///
-    /// Contains two `UnsignedShort` values. The LSB byte is the &quot;real&quot; head of
+    /// Contains two `UnsignedShort` values. The LSB byte is the "real" head of
     /// the queue. The `UnsignedShort` in the MSB is set by a stealer in process
     /// of stealing values. It represents the first value being stolen in the
     /// batch. The `UnsignedShort` indices are intentionally wider than strictly
@@ -670,7 +670,7 @@
 <span class="attr">#[cfg(not(loom))]
 </span><span class="kw">const </span>LOCAL_QUEUE_CAPACITY: usize = <span class="number">256</span>;
 
-<span class="comment">// Shrink the size of the local queue when using loom. This shouldn&#39;t impact
+<span class="comment">// Shrink the size of the local queue when using loom. This shouldn't impact
 // logic, but allows loom to test more edge cases in a reasonable a mount of
 // time.
 </span><span class="attr">#[cfg(loom)]
@@ -680,7 +680,7 @@
 
 <span class="comment">// Constructing the fixed size array directly is very awkward. The only way to
 // do it is to repeat `UnsafeCell::new(MaybeUninit::uninit())` 256 times, as
-// the contents are not Copy. The trick with defining a const doesn&#39;t work for
+// the contents are not Copy. The trick with defining a const doesn't work for
 // generic types.
 </span><span class="kw">fn </span>make_fixed_size&lt;T&gt;(buffer: Box&lt;[T]&gt;) -&gt; Box&lt;[T; LOCAL_QUEUE_CAPACITY]&gt; {
     <span class="macro">assert_eq!</span>(buffer.len(), LOCAL_QUEUE_CAPACITY);
@@ -690,7 +690,7 @@
 }
 
 <span class="doccomment">/// Create a new local run-queue
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>local&lt;T: <span class="lifetime">&#39;static</span>&gt;() -&gt; (Steal&lt;T&gt;, Local&lt;T&gt;) {
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>local&lt;T: <span class="lifetime">'static</span>&gt;() -&gt; (Steal&lt;T&gt;, Local&lt;T&gt;) {
     <span class="kw">let </span><span class="kw-2">mut </span>buffer = Vec::with_capacity(LOCAL_QUEUE_CAPACITY);
 
     <span class="kw">for _ in </span><span class="number">0</span>..LOCAL_QUEUE_CAPACITY {
@@ -729,8 +729,8 @@
 
     <span class="doccomment">/// Returns false if there are any entries in the queue
     ///
-    /// Separate to `is_stealable` so that refactors of `is_stealable` to &quot;protect&quot;
-    /// some tasks from stealing won&#39;t affect this
+    /// Separate to `is_stealable` so that refactors of `is_stealable` to "protect"
+    /// some tasks from stealing won't affect this
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>has_tasks(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         !<span class="self">self</span>.inner.is_empty()
     }
@@ -771,7 +771,7 @@
                 <span class="comment">// Write the task to the slot
                 //
                 // Safety: There is only one producer and the above `if`
-                // condition ensures we don&#39;t touch a cell if there is a
+                // condition ensures we don't touch a cell if there is a
                 // value, thus no consumer.
                 </span><span class="kw">unsafe </span>{
                     ptr::write((<span class="kw-2">*</span>ptr).as_mut_ptr(), task);
@@ -836,7 +836,7 @@
             <span class="comment">// Write the task to the slot
             //
             // Safety: There is only one producer and the above `if`
-            // condition ensures we don&#39;t touch a cell if there is a
+            // condition ensures we don't touch a cell if there is a
             // value, thus no consumer.
             </span><span class="kw">unsafe </span>{
                 ptr::write((<span class="kw-2">*</span>ptr).as_mut_ptr(), task);
@@ -852,7 +852,7 @@
     ///
     /// This will temporarily make some of the tasks unavailable to stealers.
     /// Once `push_overflow` is done, a notification is sent out, so if other
-    /// workers &quot;missed&quot; some of the tasks during a steal, they will get
+    /// workers "missed" some of the tasks during a steal, they will get
     /// another opportunity.
     </span><span class="attr">#[inline(never)]
     </span><span class="kw">fn </span>push_overflow&lt;O: Overflow&lt;T&gt;&gt;(
@@ -872,7 +872,7 @@
         <span class="macro">assert_eq!</span>(
             tail.wrapping_sub(head) <span class="kw">as </span>usize,
             LOCAL_QUEUE_CAPACITY,
-            <span class="string">&quot;queue is not full; tail = {}; head = {}&quot;</span>,
+            <span class="string">"queue is not full; tail = {}; head = {}"</span>,
             tail,
             head
         );
@@ -885,7 +885,7 @@
         // This is safe because only the **current** thread is able to push new
         // tasks.
         //
-        // There isn&#39;t really any need for memory ordering... Relaxed would
+        // There isn't really any need for memory ordering... Relaxed would
         // work. This is because all tasks are pushed into the queue from the
         // current thread (or memory has been acquired if the local queue handle
         // moved).
@@ -910,12 +910,12 @@
         }
 
         <span class="doccomment">/// An iterator that takes elements out of the run queue.
-        </span><span class="kw">struct </span>BatchTaskIter&lt;<span class="lifetime">&#39;a</span>, T: <span class="lifetime">&#39;static</span>&gt; {
-            buffer: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[UnsafeCell&lt;MaybeUninit&lt;task::Notified&lt;T&gt;&gt;&gt;; LOCAL_QUEUE_CAPACITY],
+        </span><span class="kw">struct </span>BatchTaskIter&lt;<span class="lifetime">'a</span>, T: <span class="lifetime">'static</span>&gt; {
+            buffer: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[UnsafeCell&lt;MaybeUninit&lt;task::Notified&lt;T&gt;&gt;&gt;; LOCAL_QUEUE_CAPACITY],
             head: UnsignedLong,
             i: UnsignedLong,
         }
-        <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: <span class="lifetime">&#39;static</span>&gt; Iterator <span class="kw">for </span>BatchTaskIter&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+        <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T: <span class="lifetime">'static</span>&gt; Iterator <span class="kw">for </span>BatchTaskIter&lt;<span class="lifetime">'a</span>, T&gt; {
             <span class="kw">type </span>Item = task::Notified&lt;T&gt;;
 
             <span class="attr">#[inline]
@@ -1014,12 +1014,12 @@
         </span><span class="kw">let </span>(steal, <span class="kw">_</span>) = unpack(dst.inner.head.load(Acquire));
 
         <span class="kw">if </span>dst_tail.wrapping_sub(steal) &gt; LOCAL_QUEUE_CAPACITY <span class="kw">as </span>UnsignedShort / <span class="number">2 </span>{
-            <span class="comment">// we *could* try to steal less here, but for simplicity, we&#39;re just
+            <span class="comment">// we *could* try to steal less here, but for simplicity, we're just
             // going to abort.
             </span><span class="kw">return </span><span class="prelude-val">None</span>;
         }
 
-        <span class="comment">// Steal the tasks into `dst`&#39;s buffer. This does not yet expose the
+        <span class="comment">// Steal the tasks into `dst`'s buffer. This does not yet expose the
         // tasks in `dst`.
         </span><span class="kw">let </span><span class="kw-2">mut </span>n = <span class="self">self</span>.steal_into2(dst, dst_tail);
 
@@ -1082,7 +1082,7 @@
             <span class="macro">assert_ne!</span>(src_head_steal, steal_to);
             next_packed = pack(src_head_steal, steal_to);
 
-            <span class="comment">// Claim all those tasks. This is done by incrementing the &quot;real&quot;
+            <span class="comment">// Claim all those tasks. This is done by incrementing the "real"
             // head but not the steal. By doing this, no other thread is able to
             // steal from this queue until the current thread completes.
             </span><span class="kw">let </span>res = <span class="self">self
@@ -1098,7 +1098,7 @@
 
         <span class="macro">assert!</span>(
             n &lt;= LOCAL_QUEUE_CAPACITY <span class="kw">as </span>UnsignedShort / <span class="number">2</span>,
-            <span class="string">&quot;actual = {}&quot;</span>,
+            <span class="string">"actual = {}"</span>,
             n
         );
 
@@ -1171,7 +1171,7 @@
 <span class="kw">impl</span>&lt;T&gt; Drop <span class="kw">for </span>Local&lt;T&gt; {
     <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="kw">if </span>!std::thread::panicking() {
-            <span class="macro">assert!</span>(<span class="self">self</span>.pop().is_none(), <span class="string">&quot;queue not empty&quot;</span>);
+            <span class="macro">assert!</span>(<span class="self">self</span>.pop().is_none(), <span class="string">"queue not empty"</span>);
         }
     }
 }

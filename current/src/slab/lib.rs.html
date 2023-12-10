@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/slab-0.4.9/src/lib.rs`."><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="slab" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/slab-0.4.9/src/lib.rs`."><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="slab" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1587,7 +1587,7 @@
 <a href="#1587" id="1587">1587</a>
 <a href="#1588" id="1588">1588</a>
 <a href="#1589" id="1589">1589</a>
-</pre></div><pre class="rust"><code><span class="attr">#![cfg_attr(not(feature = <span class="string">&quot;std&quot;</span>), no_std)]
+</pre></div><pre class="rust"><code><span class="attr">#![cfg_attr(not(feature = <span class="string">"std"</span>), no_std)]
 #![warn(
     missing_debug_implementations,
     missing_docs,
@@ -1623,14 +1623,14 @@
 //! # use slab::*;
 //! let mut slab = Slab::new();
 //!
-//! let hello = slab.insert(&quot;hello&quot;);
-//! let world = slab.insert(&quot;world&quot;);
+//! let hello = slab.insert("hello");
+//! let world = slab.insert("world");
 //!
-//! assert_eq!(slab[hello], &quot;hello&quot;);
-//! assert_eq!(slab[world], &quot;world&quot;);
+//! assert_eq!(slab[hello], "hello");
+//! assert_eq!(slab[world], "world");
 //!
-//! slab[world] = &quot;earth&quot;;
-//! assert_eq!(slab[world], &quot;earth&quot;);
+//! slab[world] = "earth";
+//! assert_eq!(slab[world], "earth");
 //! ```
 //!
 //! Sometimes it is useful to be able to associate the key with the value being
@@ -1644,12 +1644,12 @@
 //!     let entry = slab.vacant_entry();
 //!     let key = entry.key();
 //!
-//!     entry.insert((key, &quot;hello&quot;));
+//!     entry.insert((key, "hello"));
 //!     key
 //! };
 //!
 //! assert_eq!(hello, slab[hello].0);
-//! assert_eq!(&quot;hello&quot;, slab[hello].1);
+//! assert_eq!("hello", slab[hello].1);
 //! ```
 //!
 //! It is generally a good idea to specify the desired capacity of a slab at
@@ -1664,10 +1664,10 @@
 //! // ... use the slab
 //!
 //! if slab.len() == slab.capacity() {
-//!     panic!(&quot;slab full&quot;);
+//!     panic!("slab full");
 //! }
 //!
-//! slab.insert(&quot;the slab is not at capacity yet&quot;);
+//! slab.insert("the slab is not at capacity yet");
 //! ```
 //!
 //! # Capacity and reallocation
@@ -1675,7 +1675,7 @@
 //! The capacity of a slab is the amount of space allocated for any future
 //! values that will be inserted in the slab. This is not to be confused with
 //! the *length* of the slab, which specifies the number of actual values
-//! currently being inserted. If a slab&#39;s length is equal to its capacity, the
+//! currently being inserted. If a slab's length is equal to its capacity, the
 //! next value inserted into the slab will require growing the slab by
 //! reallocating.
 //!
@@ -1699,12 +1699,12 @@
 //!
 //! [`Slab::with_capacity`]: struct.Slab.html#with_capacity
 
-</span><span class="attr">#[cfg(not(feature = <span class="string">&quot;std&quot;</span>))]
+</span><span class="attr">#[cfg(not(feature = <span class="string">"std"</span>))]
 </span><span class="kw">extern crate </span>alloc;
-<span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
 </span><span class="kw">extern crate </span>std <span class="kw">as </span>alloc;
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;serde&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"serde"</span>)]
 </span><span class="kw">mod </span>serde;
 
 <span class="kw">mod </span>builder;
@@ -1725,7 +1725,7 @@
     <span class="comment">// Number of Filled elements currently in the slab
     </span>len: usize,
 
-    <span class="comment">// Offset of the next available slot in the slab. Set to the slab&#39;s
+    <span class="comment">// Offset of the next available slot in the slab. Set to the slab's
     // capacity when the slab is full.
     </span>next: usize,
 }
@@ -1770,16 +1770,16 @@
 ///     let entry = slab.vacant_entry();
 ///     let key = entry.key();
 ///
-///     entry.insert((key, &quot;hello&quot;));
+///     entry.insert((key, "hello"));
 ///     key
 /// };
 ///
 /// assert_eq!(hello, slab[hello].0);
-/// assert_eq!(&quot;hello&quot;, slab[hello].1);
+/// assert_eq!("hello", slab[hello].1);
 /// ```
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>VacantEntry&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    slab: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>Slab&lt;T&gt;,
+</span><span class="kw">pub struct </span>VacantEntry&lt;<span class="lifetime">'a</span>, T&gt; {
+    slab: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>Slab&lt;T&gt;,
     key: usize,
 }
 
@@ -1790,12 +1790,12 @@
 }
 
 <span class="doccomment">/// An iterator over the values stored in the `Slab`
-</span><span class="kw">pub struct </span>Iter&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    entries: iter::Enumerate&lt;slice::Iter&lt;<span class="lifetime">&#39;a</span>, Entry&lt;T&gt;&gt;&gt;,
+</span><span class="kw">pub struct </span>Iter&lt;<span class="lifetime">'a</span>, T&gt; {
+    entries: iter::Enumerate&lt;slice::Iter&lt;<span class="lifetime">'a</span>, Entry&lt;T&gt;&gt;&gt;,
     len: usize,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; Clone <span class="kw">for </span>Iter&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; Clone <span class="kw">for </span>Iter&lt;<span class="lifetime">'a</span>, T&gt; {
     <span class="kw">fn </span>clone(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             entries: <span class="self">self</span>.entries.clone(),
@@ -1805,14 +1805,14 @@
 }
 
 <span class="doccomment">/// A mutable iterator over the values stored in the `Slab`
-</span><span class="kw">pub struct </span>IterMut&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    entries: iter::Enumerate&lt;slice::IterMut&lt;<span class="lifetime">&#39;a</span>, Entry&lt;T&gt;&gt;&gt;,
+</span><span class="kw">pub struct </span>IterMut&lt;<span class="lifetime">'a</span>, T&gt; {
+    entries: iter::Enumerate&lt;slice::IterMut&lt;<span class="lifetime">'a</span>, Entry&lt;T&gt;&gt;&gt;,
     len: usize,
 }
 
 <span class="doccomment">/// A draining iterator for `Slab`
-</span><span class="kw">pub struct </span>Drain&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    inner: vec::Drain&lt;<span class="lifetime">&#39;a</span>, Entry&lt;T&gt;&gt;,
+</span><span class="kw">pub struct </span>Drain&lt;<span class="lifetime">'a</span>, T&gt; {
+    inner: vec::Drain&lt;<span class="lifetime">'a</span>, Entry&lt;T&gt;&gt;,
     len: usize,
 }
 
@@ -1929,7 +1929,7 @@
     /// ```
     /// # use slab::*;
     /// let mut slab = Slab::new();
-    /// slab.insert(&quot;hello&quot;);
+    /// slab.insert("hello");
     /// slab.reserve(10);
     /// assert!(slab.capacity() &gt;= 11);
     /// ```
@@ -1963,7 +1963,7 @@
     /// ```
     /// # use slab::*;
     /// let mut slab = Slab::new();
-    /// slab.insert(&quot;hello&quot;);
+    /// slab.insert("hello");
     /// slab.reserve_exact(10);
     /// assert!(slab.capacity() &gt;= 11);
     /// ```
@@ -2047,7 +2047,7 @@
     /// self.len must be correct and is not modified.
     </span><span class="kw">fn </span>recreate_vacant_list(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="self">self</span>.next = <span class="self">self</span>.entries.len();
-        <span class="comment">// We can stop once we&#39;ve found all vacant entries
+        <span class="comment">// We can stop once we've found all vacant entries
         </span><span class="kw">let </span><span class="kw-2">mut </span>remaining_vacant = <span class="self">self</span>.entries.len() - <span class="self">self</span>.len;
         <span class="kw">if </span>remaining_vacant == <span class="number">0 </span>{
             <span class="kw">return</span>;
@@ -2086,12 +2086,12 @@
     /// # use slab::*;
     ///
     /// let mut slab = Slab::with_capacity(10);
-    /// let a = slab.insert(&#39;a&#39;);
-    /// slab.insert(&#39;b&#39;);
-    /// slab.insert(&#39;c&#39;);
+    /// let a = slab.insert('a');
+    /// slab.insert('b');
+    /// slab.insert('c');
     /// slab.remove(a);
     /// slab.compact(|&amp;mut value, from, to| {
-    ///     assert_eq!((value, from, to), (&#39;c&#39;, 2, 0));
+    ///     assert_eq!((value, from, to), ('c', 2, 0));
     ///     true
     /// });
     /// assert!(slab.capacity() &gt;= 2 &amp;&amp; slab.capacity() &lt; 10);
@@ -2103,22 +2103,22 @@
     /// # use slab::*;
     ///
     /// let mut slab = Slab::with_capacity(100);
-    /// let a = slab.insert(&#39;a&#39;);
-    /// let b = slab.insert(&#39;b&#39;);
+    /// let a = slab.insert('a');
+    /// let b = slab.insert('b');
     /// slab.remove(a);
     /// slab.compact(|&amp;mut value, from, to| false);
-    /// assert_eq!(slab.iter().next(), Some((b, &amp;&#39;b&#39;)));
+    /// assert_eq!(slab.iter().next(), Some((b, &amp;'b')));
     /// ```
     </span><span class="kw">pub fn </span>compact&lt;F&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>rekey: F)
     <span class="kw">where
         </span>F: FnMut(<span class="kw-2">&amp;mut </span>T, usize, usize) -&gt; bool,
     {
         <span class="comment">// If the closure unwinds, we need to restore a valid list of vacant entries
-        </span><span class="kw">struct </span>CleanupGuard&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-            slab: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>Slab&lt;T&gt;,
+        </span><span class="kw">struct </span>CleanupGuard&lt;<span class="lifetime">'a</span>, T&gt; {
+            slab: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>Slab&lt;T&gt;,
             decrement: bool,
         }
-        <span class="kw">impl</span>&lt;T&gt; Drop <span class="kw">for </span>CleanupGuard&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+        <span class="kw">impl</span>&lt;T&gt; Drop <span class="kw">for </span>CleanupGuard&lt;<span class="lifetime">'_</span>, T&gt; {
             <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
                 <span class="kw">if </span><span class="self">self</span>.decrement {
                     <span class="comment">// Value was popped and not pushed back on
@@ -2243,7 +2243,7 @@
     /// assert_eq!(iterator.next(), Some((2, &amp;2)));
     /// assert_eq!(iterator.next(), None);
     /// ```
-    </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Iter&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+    </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Iter&lt;<span class="lifetime">'_</span>, T&gt; {
         Iter {
             entries: <span class="self">self</span>.entries.iter().enumerate(),
             len: <span class="self">self</span>.len,
@@ -2275,7 +2275,7 @@
     /// assert_eq!(slab[key1], 2);
     /// assert_eq!(slab[key2], 1);
     /// ```
-    </span><span class="kw">pub fn </span>iter_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; IterMut&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+    </span><span class="kw">pub fn </span>iter_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; IterMut&lt;<span class="lifetime">'_</span>, T&gt; {
         IterMut {
             entries: <span class="self">self</span>.entries.iter_mut().enumerate(),
             len: <span class="self">self</span>.len,
@@ -2292,9 +2292,9 @@
     /// ```
     /// # use slab::*;
     /// let mut slab = Slab::new();
-    /// let key = slab.insert(&quot;hello&quot;);
+    /// let key = slab.insert("hello");
     ///
-    /// assert_eq!(slab.get(key), Some(&amp;&quot;hello&quot;));
+    /// assert_eq!(slab.get(key), Some(&amp;"hello"));
     /// assert_eq!(slab.get(123), None);
     /// ```
     </span><span class="kw">pub fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, key: usize) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>T&gt; {
@@ -2314,11 +2314,11 @@
     /// ```
     /// # use slab::*;
     /// let mut slab = Slab::new();
-    /// let key = slab.insert(&quot;hello&quot;);
+    /// let key = slab.insert("hello");
     ///
-    /// *slab.get_mut(key).unwrap() = &quot;world&quot;;
+    /// *slab.get_mut(key).unwrap() = "world";
     ///
-    /// assert_eq!(slab[key], &quot;world&quot;);
+    /// assert_eq!(slab[key], "world");
     /// assert_eq!(slab.get_mut(123), None);
     /// ```
     </span><span class="kw">pub fn </span>get_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: usize) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>T&gt; {
@@ -2498,7 +2498,7 @@
     /// # use slab::*;
     ///
     /// let mut slab = Slab::new();
-    /// let key = slab.insert(String::from(&quot;foo&quot;));
+    /// let key = slab.insert(String::from("foo"));
     /// let value = &amp;slab[key];
     /// assert_eq!(slab.key_of(value), key);
     /// ```
@@ -2526,7 +2526,7 @@
         </span><span class="kw">let </span>key = byte_offset / mem::size_of::&lt;Entry&lt;T&gt;&gt;();
         <span class="comment">// Prevent returning unspecified (but out of bounds) values
         </span><span class="kw">if </span>key &gt;= <span class="self">self</span>.entries.len() {
-            <span class="macro">panic!</span>(<span class="string">&quot;The reference points to a value outside this slab&quot;</span>);
+            <span class="macro">panic!</span>(<span class="string">"The reference points to a value outside this slab"</span>);
         }
         <span class="comment">// The reference cannot point to a vacant entry, because then it would not be valid
         </span>key
@@ -2547,8 +2547,8 @@
     /// ```
     /// # use slab::*;
     /// let mut slab = Slab::new();
-    /// let key = slab.insert(&quot;hello&quot;);
-    /// assert_eq!(slab[key], &quot;hello&quot;);
+    /// let key = slab.insert("hello");
+    /// assert_eq!(slab[key], "hello");
     /// ```
     </span><span class="kw">pub fn </span>insert(<span class="kw-2">&amp;mut </span><span class="self">self</span>, val: T) -&gt; usize {
         <span class="kw">let </span>key = <span class="self">self</span>.next;
@@ -2562,7 +2562,7 @@
     ///
     /// This function returns the key of the vacant entry which  will be used
     /// for the next insertion. This is equivalent to
-    /// `slab.vacant_entry().key()`, but it doesn&#39;t require mutable access.
+    /// `slab.vacant_entry().key()`, but it doesn't require mutable access.
     ///
     /// # Examples
     ///
@@ -2598,14 +2598,14 @@
     ///     let entry = slab.vacant_entry();
     ///     let key = entry.key();
     ///
-    ///     entry.insert((key, &quot;hello&quot;));
+    ///     entry.insert((key, "hello"));
     ///     key
     /// };
     ///
     /// assert_eq!(hello, slab[hello].0);
-    /// assert_eq!(&quot;hello&quot;, slab[hello].1);
+    /// assert_eq!("hello", slab[hello].1);
     /// ```
-    </span><span class="kw">pub fn </span>vacant_entry(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; VacantEntry&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+    </span><span class="kw">pub fn </span>vacant_entry(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; VacantEntry&lt;<span class="lifetime">'_</span>, T&gt; {
         VacantEntry {
             key: <span class="self">self</span>.next,
             slab: <span class="self">self</span>,
@@ -2639,9 +2639,9 @@
     /// # use slab::*;
     /// let mut slab = Slab::new();
     ///
-    /// let hello = slab.insert(&quot;hello&quot;);
+    /// let hello = slab.insert("hello");
     ///
-    /// assert_eq!(slab.try_remove(hello), Some(&quot;hello&quot;));
+    /// assert_eq!(slab.try_remove(hello), Some("hello"));
     /// assert!(!slab.contains(hello));
     /// ```
     </span><span class="kw">pub fn </span>try_remove(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: usize) -&gt; <span class="prelude-ty">Option</span>&lt;T&gt; {
@@ -2679,14 +2679,14 @@
     /// # use slab::*;
     /// let mut slab = Slab::new();
     ///
-    /// let hello = slab.insert(&quot;hello&quot;);
+    /// let hello = slab.insert("hello");
     ///
-    /// assert_eq!(slab.remove(hello), &quot;hello&quot;);
+    /// assert_eq!(slab.remove(hello), "hello");
     /// assert!(!slab.contains(hello));
     /// ```
     </span><span class="attr">#[cfg_attr(not(slab_no_track_caller), track_caller)]
     </span><span class="kw">pub fn </span>remove(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: usize) -&gt; T {
-        <span class="self">self</span>.try_remove(key).expect(<span class="string">&quot;invalid key&quot;</span>)
+        <span class="self">self</span>.try_remove(key).expect(<span class="string">"invalid key"</span>)
     }
 
     <span class="doccomment">/// Return `true` if a value is associated with the given key.
@@ -2697,7 +2697,7 @@
     /// # use slab::*;
     /// let mut slab = Slab::new();
     ///
-    /// let hello = slab.insert(&quot;hello&quot;);
+    /// let hello = slab.insert("hello");
     /// assert!(slab.contains(hello));
     ///
     /// slab.remove(hello);
@@ -2778,7 +2778,7 @@
     ///
     /// assert!(slab.is_empty());
     /// ```
-    </span><span class="kw">pub fn </span>drain(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; Drain&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+    </span><span class="kw">pub fn </span>drain(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; Drain&lt;<span class="lifetime">'_</span>, T&gt; {
         <span class="kw">let </span>old_len = <span class="self">self</span>.len;
         <span class="self">self</span>.len = <span class="number">0</span>;
         <span class="self">self</span>.next = <span class="number">0</span>;
@@ -2796,7 +2796,7 @@
     </span><span class="kw">fn </span>index(<span class="kw-2">&amp;</span><span class="self">self</span>, key: usize) -&gt; <span class="kw-2">&amp;</span>T {
         <span class="kw">match </span><span class="self">self</span>.entries.get(key) {
             <span class="prelude-val">Some</span>(Entry::Occupied(v)) =&gt; v,
-            <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;invalid key&quot;</span>),
+            <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">"invalid key"</span>),
         }
     }
 }
@@ -2806,7 +2806,7 @@
     </span><span class="kw">fn </span>index_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: usize) -&gt; <span class="kw-2">&amp;mut </span>T {
         <span class="kw">match </span><span class="self">self</span>.entries.get_mut(key) {
             <span class="prelude-val">Some</span>(<span class="kw-2">&amp;mut </span>Entry::Occupied(<span class="kw-2">ref mut </span>v)) =&gt; v,
-            <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;invalid key&quot;</span>),
+            <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">"invalid key"</span>),
         }
     }
 }
@@ -2823,20 +2823,20 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Slab&lt;T&gt; {
-    <span class="kw">type </span>Item = (usize, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>T);
-    <span class="kw">type </span>IntoIter = Iter&lt;<span class="lifetime">&#39;a</span>, T&gt;;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>Slab&lt;T&gt; {
+    <span class="kw">type </span>Item = (usize, <span class="kw-2">&amp;</span><span class="lifetime">'a </span>T);
+    <span class="kw">type </span>IntoIter = Iter&lt;<span class="lifetime">'a</span>, T&gt;;
 
-    <span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; Iter&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+    <span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; Iter&lt;<span class="lifetime">'a</span>, T&gt; {
         <span class="self">self</span>.iter()
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>Slab&lt;T&gt; {
-    <span class="kw">type </span>Item = (usize, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>T);
-    <span class="kw">type </span>IntoIter = IterMut&lt;<span class="lifetime">&#39;a</span>, T&gt;;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>Slab&lt;T&gt; {
+    <span class="kw">type </span>Item = (usize, <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>T);
+    <span class="kw">type </span>IntoIter = IterMut&lt;<span class="lifetime">'a</span>, T&gt;;
 
-    <span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; IterMut&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+    <span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; IterMut&lt;<span class="lifetime">'a</span>, T&gt; {
         <span class="self">self</span>.iter_mut()
     }
 }
@@ -2847,18 +2847,18 @@
 /// The keys does not need to be sorted beforehand, and this function always
 /// takes O(n) time.
 /// Note that the returned slab will use space proportional to the largest key,
-/// so don&#39;t use `Slab` with untrusted keys.
+/// so don't use `Slab` with untrusted keys.
 ///
 /// # Examples
 ///
 /// ```
 /// # use slab::*;
 ///
-/// let vec = vec![(2,&#39;a&#39;), (6,&#39;b&#39;), (7,&#39;c&#39;)];
+/// let vec = vec![(2,'a'), (6,'b'), (7,'c')];
 /// let slab = vec.into_iter().collect::&lt;Slab&lt;char&gt;&gt;();
 /// assert_eq!(slab.len(), 3);
 /// assert!(slab.capacity() &gt;= 8);
-/// assert_eq!(slab[2], &#39;a&#39;);
+/// assert_eq!(slab[2], 'a');
 /// ```
 ///
 /// With duplicate and unsorted keys:
@@ -2866,10 +2866,10 @@
 /// ```
 /// # use slab::*;
 ///
-/// let vec = vec![(20,&#39;a&#39;), (10,&#39;b&#39;), (11,&#39;c&#39;), (10,&#39;d&#39;)];
+/// let vec = vec![(20,'a'), (10,'b'), (11,'c'), (10,'d')];
 /// let slab = vec.into_iter().collect::&lt;Slab&lt;char&gt;&gt;();
 /// assert_eq!(slab.len(), 3);
-/// assert_eq!(slab[10], &#39;d&#39;);
+/// assert_eq!(slab[10], 'd');
 /// ```
 </span><span class="kw">impl</span>&lt;T&gt; FromIterator&lt;(usize, T)&gt; <span class="kw">for </span>Slab&lt;T&gt; {
     <span class="kw">fn </span>from_iter&lt;I&gt;(iterable: I) -&gt; <span class="self">Self
@@ -2890,13 +2890,13 @@
 <span class="kw">where
     </span>T: fmt::Debug,
 {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         <span class="kw">if </span>fmt.alternate() {
             fmt.debug_map().entries(<span class="self">self</span>.iter()).finish()
         } <span class="kw">else </span>{
-            fmt.debug_struct(<span class="string">&quot;Slab&quot;</span>)
-                .field(<span class="string">&quot;len&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.len)
-                .field(<span class="string">&quot;cap&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.capacity())
+            fmt.debug_struct(<span class="string">"Slab"</span>)
+                .field(<span class="string">"len"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.len)
+                .field(<span class="string">"cap"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.capacity())
                 .finish()
         }
     }
@@ -2906,44 +2906,44 @@
 <span class="kw">where
     </span>T: fmt::Debug,
 {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        fmt.debug_struct(<span class="string">&quot;IntoIter&quot;</span>)
-            .field(<span class="string">&quot;remaining&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.len)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        fmt.debug_struct(<span class="string">"IntoIter"</span>)
+            .field(<span class="string">"remaining"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.len)
             .finish()
     }
 }
 
-<span class="kw">impl</span>&lt;T&gt; fmt::Debug <span class="kw">for </span>Iter&lt;<span class="lifetime">&#39;_</span>, T&gt;
+<span class="kw">impl</span>&lt;T&gt; fmt::Debug <span class="kw">for </span>Iter&lt;<span class="lifetime">'_</span>, T&gt;
 <span class="kw">where
     </span>T: fmt::Debug,
 {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        fmt.debug_struct(<span class="string">&quot;Iter&quot;</span>)
-            .field(<span class="string">&quot;remaining&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.len)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        fmt.debug_struct(<span class="string">"Iter"</span>)
+            .field(<span class="string">"remaining"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.len)
             .finish()
     }
 }
 
-<span class="kw">impl</span>&lt;T&gt; fmt::Debug <span class="kw">for </span>IterMut&lt;<span class="lifetime">&#39;_</span>, T&gt;
+<span class="kw">impl</span>&lt;T&gt; fmt::Debug <span class="kw">for </span>IterMut&lt;<span class="lifetime">'_</span>, T&gt;
 <span class="kw">where
     </span>T: fmt::Debug,
 {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        fmt.debug_struct(<span class="string">&quot;IterMut&quot;</span>)
-            .field(<span class="string">&quot;remaining&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.len)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        fmt.debug_struct(<span class="string">"IterMut"</span>)
+            .field(<span class="string">"remaining"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.len)
             .finish()
     }
 }
 
-<span class="kw">impl</span>&lt;T&gt; fmt::Debug <span class="kw">for </span>Drain&lt;<span class="lifetime">&#39;_</span>, T&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        fmt.debug_struct(<span class="string">&quot;Drain&quot;</span>).finish()
+<span class="kw">impl</span>&lt;T&gt; fmt::Debug <span class="kw">for </span>Drain&lt;<span class="lifetime">'_</span>, T&gt; {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        fmt.debug_struct(<span class="string">"Drain"</span>).finish()
     }
 }
 
 <span class="comment">// ===== VacantEntry =====
 
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; VacantEntry&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; VacantEntry&lt;<span class="lifetime">'a</span>, T&gt; {
     <span class="doccomment">/// Insert a value in the entry, returning a mutable reference to the value.
     ///
     /// To get the key associated with the value, use `key` prior to calling
@@ -2959,14 +2959,14 @@
     ///     let entry = slab.vacant_entry();
     ///     let key = entry.key();
     ///
-    ///     entry.insert((key, &quot;hello&quot;));
+    ///     entry.insert((key, "hello"));
     ///     key
     /// };
     ///
     /// assert_eq!(hello, slab[hello].0);
-    /// assert_eq!(&quot;hello&quot;, slab[hello].1);
+    /// assert_eq!("hello", slab[hello].1);
     /// ```
-    </span><span class="kw">pub fn </span>insert(<span class="self">self</span>, val: T) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>T {
+    </span><span class="kw">pub fn </span>insert(<span class="self">self</span>, val: T) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>T {
         <span class="self">self</span>.slab.insert_at(<span class="self">self</span>.key, val);
 
         <span class="kw">match </span><span class="self">self</span>.slab.entries.get_mut(<span class="self">self</span>.key) {
@@ -2989,12 +2989,12 @@
     ///     let entry = slab.vacant_entry();
     ///     let key = entry.key();
     ///
-    ///     entry.insert((key, &quot;hello&quot;));
+    ///     entry.insert((key, "hello"));
     ///     key
     /// };
     ///
     /// assert_eq!(hello, slab[hello].0);
-    /// assert_eq!(&quot;hello&quot;, slab[hello].1);
+    /// assert_eq!("hello", slab[hello].1);
     /// ```
     </span><span class="kw">pub fn </span>key(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
         <span class="self">self</span>.key
@@ -3047,8 +3047,8 @@
 
 <span class="comment">// ===== Iter =====
 
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; Iterator <span class="kw">for </span>Iter&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    <span class="kw">type </span>Item = (usize, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>T);
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; Iterator <span class="kw">for </span>Iter&lt;<span class="lifetime">'a</span>, T&gt; {
+    <span class="kw">type </span>Item = (usize, <span class="kw-2">&amp;</span><span class="lifetime">'a </span>T);
 
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
         <span class="kw">for </span>(key, entry) <span class="kw">in </span><span class="kw-2">&amp;mut </span><span class="self">self</span>.entries {
@@ -3067,7 +3067,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;T&gt; DoubleEndedIterator <span class="kw">for </span>Iter&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+<span class="kw">impl</span>&lt;T&gt; DoubleEndedIterator <span class="kw">for </span>Iter&lt;<span class="lifetime">'_</span>, T&gt; {
     <span class="kw">fn </span>next_back(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
         <span class="kw">while let </span><span class="prelude-val">Some</span>((key, entry)) = <span class="self">self</span>.entries.next_back() {
             <span class="kw">if let </span>Entry::Occupied(<span class="kw-2">ref </span>v) = <span class="kw-2">*</span>entry {
@@ -3081,18 +3081,18 @@
     </span>}
 }
 
-<span class="kw">impl</span>&lt;T&gt; ExactSizeIterator <span class="kw">for </span>Iter&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+<span class="kw">impl</span>&lt;T&gt; ExactSizeIterator <span class="kw">for </span>Iter&lt;<span class="lifetime">'_</span>, T&gt; {
     <span class="kw">fn </span>len(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
         <span class="self">self</span>.len
     }
 }
 
-<span class="kw">impl</span>&lt;T&gt; FusedIterator <span class="kw">for </span>Iter&lt;<span class="lifetime">&#39;_</span>, T&gt; {}
+<span class="kw">impl</span>&lt;T&gt; FusedIterator <span class="kw">for </span>Iter&lt;<span class="lifetime">'_</span>, T&gt; {}
 
 <span class="comment">// ===== IterMut =====
 
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; Iterator <span class="kw">for </span>IterMut&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    <span class="kw">type </span>Item = (usize, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>T);
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; Iterator <span class="kw">for </span>IterMut&lt;<span class="lifetime">'a</span>, T&gt; {
+    <span class="kw">type </span>Item = (usize, <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>T);
 
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
         <span class="kw">for </span>(key, entry) <span class="kw">in </span><span class="kw-2">&amp;mut </span><span class="self">self</span>.entries {
@@ -3111,7 +3111,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;T&gt; DoubleEndedIterator <span class="kw">for </span>IterMut&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+<span class="kw">impl</span>&lt;T&gt; DoubleEndedIterator <span class="kw">for </span>IterMut&lt;<span class="lifetime">'_</span>, T&gt; {
     <span class="kw">fn </span>next_back(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
         <span class="kw">while let </span><span class="prelude-val">Some</span>((key, entry)) = <span class="self">self</span>.entries.next_back() {
             <span class="kw">if let </span>Entry::Occupied(<span class="kw-2">ref mut </span>v) = <span class="kw-2">*</span>entry {
@@ -3125,17 +3125,17 @@
     </span>}
 }
 
-<span class="kw">impl</span>&lt;T&gt; ExactSizeIterator <span class="kw">for </span>IterMut&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+<span class="kw">impl</span>&lt;T&gt; ExactSizeIterator <span class="kw">for </span>IterMut&lt;<span class="lifetime">'_</span>, T&gt; {
     <span class="kw">fn </span>len(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
         <span class="self">self</span>.len
     }
 }
 
-<span class="kw">impl</span>&lt;T&gt; FusedIterator <span class="kw">for </span>IterMut&lt;<span class="lifetime">&#39;_</span>, T&gt; {}
+<span class="kw">impl</span>&lt;T&gt; FusedIterator <span class="kw">for </span>IterMut&lt;<span class="lifetime">'_</span>, T&gt; {}
 
 <span class="comment">// ===== Drain =====
 
-</span><span class="kw">impl</span>&lt;T&gt; Iterator <span class="kw">for </span>Drain&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+</span><span class="kw">impl</span>&lt;T&gt; Iterator <span class="kw">for </span>Drain&lt;<span class="lifetime">'_</span>, T&gt; {
     <span class="kw">type </span>Item = T;
 
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
@@ -3155,7 +3155,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;T&gt; DoubleEndedIterator <span class="kw">for </span>Drain&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+<span class="kw">impl</span>&lt;T&gt; DoubleEndedIterator <span class="kw">for </span>Drain&lt;<span class="lifetime">'_</span>, T&gt; {
     <span class="kw">fn </span>next_back(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
         <span class="kw">while let </span><span class="prelude-val">Some</span>(entry) = <span class="self">self</span>.inner.next_back() {
             <span class="kw">if let </span>Entry::Occupied(v) = entry {
@@ -3169,11 +3169,11 @@
     </span>}
 }
 
-<span class="kw">impl</span>&lt;T&gt; ExactSizeIterator <span class="kw">for </span>Drain&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+<span class="kw">impl</span>&lt;T&gt; ExactSizeIterator <span class="kw">for </span>Drain&lt;<span class="lifetime">'_</span>, T&gt; {
     <span class="kw">fn </span>len(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
         <span class="self">self</span>.len
     }
 }
 
-<span class="kw">impl</span>&lt;T&gt; FusedIterator <span class="kw">for </span>Drain&lt;<span class="lifetime">&#39;_</span>, T&gt; {}
+<span class="kw">impl</span>&lt;T&gt; FusedIterator <span class="kw">for </span>Drain&lt;<span class="lifetime">'_</span>, T&gt; {}
 </code></pre></div></section></main></body></html>

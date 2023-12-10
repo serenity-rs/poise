@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/indexmap-2.1.0/src/set.rs`."><title>set.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="indexmap" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/indexmap-2.1.0/src/set.rs`."><title>set.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="indexmap" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1084,11 +1084,11 @@
 <span class="kw">pub use </span><span class="self">self</span>::iter::{Difference, Drain, Intersection, IntoIter, Iter, SymmetricDifference, Union};
 <span class="kw">pub use </span><span class="self">self</span>::slice::Slice;
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;rayon&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"rayon"</span>)]
 </span><span class="kw">pub use </span><span class="kw">crate</span>::rayon::set <span class="kw">as </span>rayon;
 <span class="kw">use </span><span class="kw">crate</span>::TryReserveError;
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
 </span><span class="kw">use </span>std::collections::hash_map::RandomState;
 
 <span class="kw">use </span><span class="kw">crate</span>::util::try_simplify_range;
@@ -1118,7 +1118,7 @@
 /// already present.
 ///
 /// All iterators traverse the set *in order*.  Set operation iterators like
-/// `union` produce a concatenated order, as do their matching &quot;bitwise&quot;
+/// `union` produce a concatenated order, as do their matching "bitwise"
 /// operators.  See their documentation for specifics.
 ///
 /// The insertion order is preserved, with **notable exceptions** like the
@@ -1142,18 +1142,18 @@
 /// use indexmap::IndexSet;
 ///
 /// // Collects which letters appear in a sentence.
-/// let letters: IndexSet&lt;_&gt; = &quot;a short treatise on fungi&quot;.chars().collect();
+/// let letters: IndexSet&lt;_&gt; = "a short treatise on fungi".chars().collect();
 ///
-/// assert!(letters.contains(&amp;&#39;s&#39;));
-/// assert!(letters.contains(&amp;&#39;t&#39;));
-/// assert!(letters.contains(&amp;&#39;u&#39;));
-/// assert!(!letters.contains(&amp;&#39;y&#39;));
+/// assert!(letters.contains(&amp;'s'));
+/// assert!(letters.contains(&amp;'t'));
+/// assert!(letters.contains(&amp;'u'));
+/// assert!(!letters.contains(&amp;'y'));
 /// ```
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
 </span><span class="kw">pub struct </span>IndexSet&lt;T, S = RandomState&gt; {
     <span class="kw">pub</span>(<span class="kw">crate</span>) map: IndexMap&lt;T, (), S&gt;,
 }
-<span class="attr">#[cfg(not(feature = <span class="string">&quot;std&quot;</span>))]
+<span class="attr">#[cfg(not(feature = <span class="string">"std"</span>))]
 </span><span class="kw">pub struct </span>IndexSet&lt;T, S&gt; {
     <span class="kw">pub</span>(<span class="kw">crate</span>) map: IndexMap&lt;T, (), S&gt;,
 }
@@ -1204,18 +1204,18 @@
 <span class="kw">where
     </span>T: fmt::Debug,
 {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        <span class="kw">if </span><span class="macro">cfg!</span>(not(feature = <span class="string">&quot;test_debug&quot;</span>)) {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        <span class="kw">if </span><span class="macro">cfg!</span>(not(feature = <span class="string">"test_debug"</span>)) {
             f.debug_set().entries(<span class="self">self</span>.iter()).finish()
         } <span class="kw">else </span>{
             <span class="comment">// Let the inner `IndexMap` print all of its details
-            </span>f.debug_struct(<span class="string">&quot;IndexSet&quot;</span>).field(<span class="string">&quot;map&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.map).finish()
+            </span>f.debug_struct(<span class="string">"IndexSet"</span>).field(<span class="string">"map"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.map).finish()
         }
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
-#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;std&quot;</span>)))]
+<span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
+#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"std"</span>)))]
 </span><span class="kw">impl</span>&lt;T&gt; IndexSet&lt;T&gt; {
     <span class="doccomment">/// Create a new set. (Does not allocate.)
     </span><span class="kw">pub fn </span>new() -&gt; <span class="self">Self </span>{
@@ -1266,7 +1266,7 @@
         <span class="self">self</span>.map.capacity()
     }
 
-    <span class="doccomment">/// Return a reference to the set&#39;s `BuildHasher`.
+    <span class="doccomment">/// Return a reference to the set's `BuildHasher`.
     </span><span class="kw">pub fn </span>hasher(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>S {
         <span class="self">self</span>.map.hasher()
     }
@@ -1286,7 +1286,7 @@
     }
 
     <span class="doccomment">/// Return an iterator over the values of the set, in their order
-    </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Iter&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+    </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Iter&lt;<span class="lifetime">'_</span>, T&gt; {
         Iter::new(<span class="self">self</span>.as_entries())
     }
 
@@ -1299,7 +1299,7 @@
 
     <span class="doccomment">/// Shortens the set, keeping the first `len` elements and dropping the rest.
     ///
-    /// If `len` is greater than the set&#39;s current length, this has no effect.
+    /// If `len` is greater than the set's current length, this has no effect.
     </span><span class="kw">pub fn </span>truncate(<span class="kw-2">&amp;mut </span><span class="self">self</span>, len: usize) {
         <span class="self">self</span>.map.truncate(len);
     }
@@ -1317,7 +1317,7 @@
     ///
     /// ***Panics*** if the starting point is greater than the end point or if
     /// the end point is greater than the length of the set.
-    </span><span class="kw">pub fn </span>drain&lt;R&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, range: R) -&gt; Drain&lt;<span class="lifetime">&#39;_</span>, T&gt;
+    </span><span class="kw">pub fn </span>drain&lt;R&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, range: R) -&gt; Drain&lt;<span class="lifetime">'_</span>, T&gt;
     <span class="kw">where
         </span>R: RangeBounds&lt;usize&gt;,
     {
@@ -1427,7 +1427,7 @@
     <span class="doccomment">/// Return an iterator over the values that are in `self` but not `other`.
     ///
     /// Values are produced in the same order that they appear in `self`.
-    </span><span class="kw">pub fn </span>difference&lt;<span class="lifetime">&#39;a</span>, S2&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>IndexSet&lt;T, S2&gt;) -&gt; Difference&lt;<span class="lifetime">&#39;a</span>, T, S2&gt;
+    </span><span class="kw">pub fn </span>difference&lt;<span class="lifetime">'a</span>, S2&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>IndexSet&lt;T, S2&gt;) -&gt; Difference&lt;<span class="lifetime">'a</span>, T, S2&gt;
     <span class="kw">where
         </span>S2: BuildHasher,
     {
@@ -1439,10 +1439,10 @@
     ///
     /// Values from `self` are produced in their original order, followed by
     /// values from `other` in their original order.
-    </span><span class="kw">pub fn </span>symmetric_difference&lt;<span class="lifetime">&#39;a</span>, S2&gt;(
-        <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>,
-        other: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>IndexSet&lt;T, S2&gt;,
-    ) -&gt; SymmetricDifference&lt;<span class="lifetime">&#39;a</span>, T, S, S2&gt;
+    </span><span class="kw">pub fn </span>symmetric_difference&lt;<span class="lifetime">'a</span>, S2&gt;(
+        <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>,
+        other: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>IndexSet&lt;T, S2&gt;,
+    ) -&gt; SymmetricDifference&lt;<span class="lifetime">'a</span>, T, S, S2&gt;
     <span class="kw">where
         </span>S2: BuildHasher,
     {
@@ -1452,7 +1452,7 @@
     <span class="doccomment">/// Return an iterator over the values that are in both `self` and `other`.
     ///
     /// Values are produced in the same order that they appear in `self`.
-    </span><span class="kw">pub fn </span>intersection&lt;<span class="lifetime">&#39;a</span>, S2&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>IndexSet&lt;T, S2&gt;) -&gt; Intersection&lt;<span class="lifetime">&#39;a</span>, T, S2&gt;
+    </span><span class="kw">pub fn </span>intersection&lt;<span class="lifetime">'a</span>, S2&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>IndexSet&lt;T, S2&gt;) -&gt; Intersection&lt;<span class="lifetime">'a</span>, T, S2&gt;
     <span class="kw">where
         </span>S2: BuildHasher,
     {
@@ -1463,7 +1463,7 @@
     ///
     /// Values from `self` are produced in their original order, followed by
     /// values that are unique to `other` in their original order.
-    </span><span class="kw">pub fn </span>union&lt;<span class="lifetime">&#39;a</span>, S2&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>IndexSet&lt;T, S2&gt;) -&gt; Union&lt;<span class="lifetime">&#39;a</span>, T, S&gt;
+    </span><span class="kw">pub fn </span>union&lt;<span class="lifetime">'a</span>, S2&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>IndexSet&lt;T, S2&gt;) -&gt; Union&lt;<span class="lifetime">'a</span>, T, S&gt;
     <span class="kw">where
         </span>S2: BuildHasher,
     {
@@ -1714,7 +1714,7 @@
         IntoIter::new(entries)
     }
 
-    <span class="doccomment">/// Sort the set&#39;s values by their default ordering.
+    <span class="doccomment">/// Sort the set's values by their default ordering.
     ///
     /// See [`sort_unstable_by`](Self::sort_unstable_by) for details.
     </span><span class="kw">pub fn </span>sort_unstable(<span class="kw-2">&amp;mut </span><span class="self">self</span>)
@@ -1724,7 +1724,7 @@
         <span class="self">self</span>.map.sort_unstable_keys()
     }
 
-    <span class="doccomment">/// Sort the set&#39;s values in place using the comparison function `cmp`.
+    <span class="doccomment">/// Sort the set's values in place using the comparison function `cmp`.
     ///
     /// Computes in **O(n log n)** time. The sort is unstable.
     </span><span class="kw">pub fn </span>sort_unstable_by&lt;F&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>cmp: F)
@@ -1784,9 +1784,9 @@
     ///
     /// Computes in **O(log(n))** time.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>binary_search_by&lt;<span class="lifetime">&#39;a</span>, F&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>, f: F) -&gt; <span class="prelude-ty">Result</span>&lt;usize, usize&gt;
+    </span><span class="kw">pub fn </span>binary_search_by&lt;<span class="lifetime">'a</span>, F&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>, f: F) -&gt; <span class="prelude-ty">Result</span>&lt;usize, usize&gt;
     <span class="kw">where
-        </span>F: FnMut(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>T) -&gt; Ordering,
+        </span>F: FnMut(<span class="kw-2">&amp;</span><span class="lifetime">'a </span>T) -&gt; Ordering,
     {
         <span class="self">self</span>.as_slice().binary_search_by(f)
     }
@@ -1798,9 +1798,9 @@
     ///
     /// Computes in **O(log(n))** time.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>binary_search_by_key&lt;<span class="lifetime">&#39;a</span>, B, F&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>, b: <span class="kw-2">&amp;</span>B, f: F) -&gt; <span class="prelude-ty">Result</span>&lt;usize, usize&gt;
+    </span><span class="kw">pub fn </span>binary_search_by_key&lt;<span class="lifetime">'a</span>, B, F&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>, b: <span class="kw-2">&amp;</span>B, f: F) -&gt; <span class="prelude-ty">Result</span>&lt;usize, usize&gt;
     <span class="kw">where
-        </span>F: FnMut(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>T) -&gt; B,
+        </span>F: FnMut(<span class="kw-2">&amp;</span><span class="lifetime">'a </span>T) -&gt; B,
         B: Ord,
     {
         <span class="self">self</span>.as_slice().binary_search_by_key(b, f)
@@ -1932,25 +1932,25 @@
 /// use indexmap::IndexSet;
 ///
 /// let mut set = IndexSet::new();
-/// for word in &quot;Lorem ipsum dolor sit amet&quot;.split_whitespace() {
+/// for word in "Lorem ipsum dolor sit amet".split_whitespace() {
 ///     set.insert(word.to_string());
 /// }
-/// assert_eq!(set[0], &quot;Lorem&quot;);
-/// assert_eq!(set[1], &quot;ipsum&quot;);
+/// assert_eq!(set[0], "Lorem");
+/// assert_eq!(set[1], "ipsum");
 /// set.reverse();
-/// assert_eq!(set[0], &quot;amet&quot;);
-/// assert_eq!(set[1], &quot;sit&quot;);
+/// assert_eq!(set[0], "amet");
+/// assert_eq!(set[1], "sit");
 /// set.sort();
-/// assert_eq!(set[0], &quot;Lorem&quot;);
-/// assert_eq!(set[1], &quot;amet&quot;);
+/// assert_eq!(set[0], "Lorem");
+/// assert_eq!(set[1], "amet");
 /// ```
 ///
 /// ```should_panic
 /// use indexmap::IndexSet;
 ///
 /// let mut set = IndexSet::new();
-/// set.insert(&quot;foo&quot;);
-/// println!(&quot;{:?}&quot;, set[10]); // panics!
+/// set.insert("foo");
+/// println!("{:?}", set[10]); // panics!
 /// ```
 </span><span class="kw">impl</span>&lt;T, S&gt; Index&lt;usize&gt; <span class="kw">for </span>IndexSet&lt;T, S&gt; {
     <span class="kw">type </span>Output = T;
@@ -1960,7 +1960,7 @@
     /// ***Panics*** if `index` is out of bounds.
     </span><span class="kw">fn </span>index(<span class="kw-2">&amp;</span><span class="self">self</span>, index: usize) -&gt; <span class="kw-2">&amp;</span>T {
         <span class="self">self</span>.get_index(index)
-            .expect(<span class="string">&quot;IndexSet: index out of bounds&quot;</span>)
+            .expect(<span class="string">"IndexSet: index out of bounds"</span>)
     }
 }
 
@@ -1977,8 +1977,8 @@
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
-#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;std&quot;</span>)))]
+<span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
+#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"std"</span>)))]
 </span><span class="kw">impl</span>&lt;T, <span class="kw">const </span>N: usize&gt; From&lt;[T; N]&gt; <span class="kw">for </span>IndexSet&lt;T, RandomState&gt;
 <span class="kw">where
     </span>T: Eq + Hash,
@@ -2008,12 +2008,12 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T, S&gt; Extend&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>T&gt; <span class="kw">for </span>IndexSet&lt;T, S&gt;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T, S&gt; Extend&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>T&gt; <span class="kw">for </span>IndexSet&lt;T, S&gt;
 <span class="kw">where
-    </span>T: Hash + Eq + Copy + <span class="lifetime">&#39;a</span>,
+    </span>T: Hash + Eq + Copy + <span class="lifetime">'a</span>,
     S: BuildHasher,
 {
-    <span class="kw">fn </span>extend&lt;I: IntoIterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>T&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, iterable: I) {
+    <span class="kw">fn </span>extend&lt;I: IntoIterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">'a </span>T&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, iterable: I) {
         <span class="kw">let </span>iter = iterable.into_iter().copied();
         <span class="self">self</span>.extend(iter);
     }

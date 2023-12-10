@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tracing-core-0.1.32/src/span.rs`."><title>span.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="tracing_core" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../tracing_core/index.html"><img src="https://raw.githubusercontent.com/tokio-rs/tracing/master/assets/logo-type.png" alt="tracing_core"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tracing-core-0.1.32/src/span.rs`."><title>span.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="tracing_core" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../tracing_core/index.html"><img src="https://raw.githubusercontent.com/tokio-rs/tracing/master/assets/logo-type.png" alt="tracing_core"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -359,25 +359,25 @@
 <span class="doccomment">/// Attributes provided to a `Subscriber` describing a new span when it is
 /// created.
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>Attributes&lt;<span class="lifetime">&#39;a</span>&gt; {
-    metadata: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Metadata&lt;<span class="lifetime">&#39;static</span>&gt;,
-    values: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>field::ValueSet&lt;<span class="lifetime">&#39;a</span>&gt;,
+</span><span class="kw">pub struct </span>Attributes&lt;<span class="lifetime">'a</span>&gt; {
+    metadata: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Metadata&lt;<span class="lifetime">'static</span>&gt;,
+    values: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>field::ValueSet&lt;<span class="lifetime">'a</span>&gt;,
     parent: Parent,
 }
 
 <span class="doccomment">/// A set of fields recorded by a span.
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>Record&lt;<span class="lifetime">&#39;a</span>&gt; {
-    values: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>field::ValueSet&lt;<span class="lifetime">&#39;a</span>&gt;,
+</span><span class="kw">pub struct </span>Record&lt;<span class="lifetime">'a</span>&gt; {
+    values: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>field::ValueSet&lt;<span class="lifetime">'a</span>&gt;,
 }
 
-<span class="doccomment">/// Indicates what [the `Subscriber` considers] the &quot;current&quot; span.
+<span class="doccomment">/// Indicates what [the `Subscriber` considers] the "current" span.
 ///
 /// As subscribers may not track a notion of a current span, this has three
 /// possible states:
-/// - &quot;unknown&quot;, indicating that the subscriber does not track a current span,
-/// - &quot;none&quot;, indicating that the current context is known to not be in a span,
-/// - &quot;some&quot;, with the current span&#39;s [`Id`] and [`Metadata`].
+/// - "unknown", indicating that the subscriber does not track a current span,
+/// - "none", indicating that the current context is known to not be in a span,
+/// - "some", with the current span's [`Id`] and [`Metadata`].
 ///
 /// [the `Subscriber` considers]: super::subscriber::Subscriber::current_span
 /// [`Metadata`]: super::metadata::Metadata
@@ -390,7 +390,7 @@
 </span><span class="kw">enum </span>CurrentInner {
     Current {
         id: Id,
-        metadata: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Metadata&lt;<span class="lifetime">&#39;static</span>&gt;,
+        metadata: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Metadata&lt;<span class="lifetime">'static</span>&gt;,
     },
     <span class="prelude-val">None</span>,
     Unknown,
@@ -401,14 +401,14 @@
 </span><span class="kw">impl </span>Id {
     <span class="doccomment">/// Constructs a new span ID from the given `u64`.
     ///
-    /// &lt;pre class=&quot;ignore&quot; style=&quot;white-space:normal;font:inherit;&quot;&gt;
+    /// &lt;pre class="ignore" style="white-space:normal;font:inherit;"&gt;
     ///     &lt;strong&gt;Note&lt;/strong&gt;: Span IDs must be greater than zero.
     /// &lt;/pre&gt;
     ///
     /// # Panics
     /// - If the provided `u64` is 0.
     </span><span class="kw">pub fn </span>from_u64(u: u64) -&gt; <span class="self">Self </span>{
-        Id(NonZeroU64::new(u).expect(<span class="string">&quot;span IDs must be &gt; 0&quot;</span>))
+        Id(NonZeroU64::new(u).expect(<span class="string">"span IDs must be &gt; 0"</span>))
     }
 
     <span class="doccomment">/// Constructs a new span ID from the given `NonZeroU64`.
@@ -419,34 +419,34 @@
         Id(id)
     }
 
-    <span class="comment">// Allow `into` by-ref since we don&#39;t want to impl Copy for Id
+    <span class="comment">// Allow `into` by-ref since we don't want to impl Copy for Id
     </span><span class="attr">#[allow(clippy::wrong_self_convention)]
-    </span><span class="doccomment">/// Returns the span&#39;s ID as a `u64`.
+    </span><span class="doccomment">/// Returns the span's ID as a `u64`.
     </span><span class="kw">pub fn </span>into_u64(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u64 {
         <span class="self">self</span>.<span class="number">0</span>.get()
     }
 
-    <span class="comment">// Allow `into` by-ref since we don&#39;t want to impl Copy for Id
+    <span class="comment">// Allow `into` by-ref since we don't want to impl Copy for Id
     </span><span class="attr">#[allow(clippy::wrong_self_convention)]
-    </span><span class="doccomment">/// Returns the span&#39;s ID as a `NonZeroU64`.
+    </span><span class="doccomment">/// Returns the span's ID as a `NonZeroU64`.
     </span><span class="attr">#[inline]
     </span><span class="kw">pub const fn </span>into_non_zero_u64(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; NonZeroU64 {
         <span class="self">self</span>.<span class="number">0
     </span>}
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Id&gt; <span class="kw">for </span><span class="prelude-ty">Option</span>&lt;Id&gt; {
-    <span class="kw">fn </span>from(id: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Id) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>Id&gt; <span class="kw">for </span><span class="prelude-ty">Option</span>&lt;Id&gt; {
+    <span class="kw">fn </span>from(id: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Id) -&gt; <span class="self">Self </span>{
         <span class="prelude-val">Some</span>(id.clone())
     }
 }
 
 <span class="comment">// ===== impl Attributes =====
 
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Attributes&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Attributes&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Returns `Attributes` describing a new child span of the current span,
     /// with the provided metadata and values.
-    </span><span class="kw">pub fn </span>new(metadata: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Metadata&lt;<span class="lifetime">&#39;static</span>&gt;, values: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>field::ValueSet&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(metadata: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Metadata&lt;<span class="lifetime">'static</span>&gt;, values: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>field::ValueSet&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="self">Self </span>{
         Attributes {
             metadata,
             values,
@@ -456,7 +456,7 @@
 
     <span class="doccomment">/// Returns `Attributes` describing a new span at the root of its own trace
     /// tree, with the provided metadata and values.
-    </span><span class="kw">pub fn </span>new_root(metadata: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Metadata&lt;<span class="lifetime">&#39;static</span>&gt;, values: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>field::ValueSet&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new_root(metadata: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Metadata&lt;<span class="lifetime">'static</span>&gt;, values: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>field::ValueSet&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="self">Self </span>{
         Attributes {
             metadata,
             values,
@@ -468,8 +468,8 @@
     /// parent span, with the provided metadata and values.
     </span><span class="kw">pub fn </span>child_of(
         parent: Id,
-        metadata: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Metadata&lt;<span class="lifetime">&#39;static</span>&gt;,
-        values: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>field::ValueSet&lt;<span class="lifetime">&#39;a</span>&gt;,
+        metadata: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Metadata&lt;<span class="lifetime">'static</span>&gt;,
+        values: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>field::ValueSet&lt;<span class="lifetime">'a</span>&gt;,
     ) -&gt; <span class="self">Self </span>{
         Attributes {
             metadata,
@@ -478,14 +478,14 @@
         }
     }
 
-    <span class="doccomment">/// Returns a reference to the new span&#39;s metadata.
-    </span><span class="kw">pub fn </span>metadata(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Metadata&lt;<span class="lifetime">&#39;static</span>&gt; {
+    <span class="doccomment">/// Returns a reference to the new span's metadata.
+    </span><span class="kw">pub fn </span>metadata(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Metadata&lt;<span class="lifetime">'static</span>&gt; {
         <span class="self">self</span>.metadata
     }
 
     <span class="doccomment">/// Returns a reference to a `ValueSet` containing any values the new span
     /// was created with.
-    </span><span class="kw">pub fn </span>values(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>field::ValueSet&lt;<span class="lifetime">&#39;a</span>&gt; {
+    </span><span class="kw">pub fn </span>values(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>field::ValueSet&lt;<span class="lifetime">'a</span>&gt; {
         <span class="self">self</span>.values
     }
 
@@ -494,18 +494,18 @@
         <span class="macro">matches!</span>(<span class="self">self</span>.parent, Parent::Root)
     }
 
-    <span class="doccomment">/// Returns true if the new span&#39;s parent should be determined based on the
+    <span class="doccomment">/// Returns true if the new span's parent should be determined based on the
     /// current context.
     ///
     /// If this is true and the current thread is currently inside a span, then
-    /// that span should be the new span&#39;s parent. Otherwise, if the current
+    /// that span should be the new span's parent. Otherwise, if the current
     /// thread is _not_ inside a span, then the new span will be the root of its
     /// own trace tree.
     </span><span class="kw">pub fn </span>is_contextual(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         <span class="macro">matches!</span>(<span class="self">self</span>.parent, Parent::Current)
     }
 
-    <span class="doccomment">/// Returns the new span&#39;s explicitly-specified parent, if there is one.
+    <span class="doccomment">/// Returns the new span's explicitly-specified parent, if there is one.
     ///
     /// Otherwise (if the new span is a root or is a child of the current span),
     /// returns `None`.
@@ -535,12 +535,12 @@
         <span class="self">self</span>.values.is_empty()
     }
 
-    <span class="doccomment">/// Returns the set of all [fields] defined by this span&#39;s [`Metadata`].
+    <span class="doccomment">/// Returns the set of all [fields] defined by this span's [`Metadata`].
     ///
     /// Note that the [`FieldSet`] returned by this method includes *all* the
     /// fields declared by this span, not just those with values that are recorded
     /// as part of this set of `Attributes`. Other fields with values not present in
-    /// this `Attributes`&#39; value set may [record] values later.
+    /// this `Attributes`' value set may [record] values later.
     ///
     /// [fields]: crate::field
     /// [record]: Attributes::record()
@@ -553,9 +553,9 @@
 
 <span class="comment">// ===== impl Record =====
 
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Record&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Record&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Constructs a new `Record` from a `ValueSet`.
-    </span><span class="kw">pub fn </span>new(values: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>field::ValueSet&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(values: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>field::ValueSet&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{ values }
     }
 
@@ -590,7 +590,7 @@
 </span><span class="kw">impl </span>Current {
     <span class="doccomment">/// Constructs a new `Current` that indicates the current context is a span
     /// with the given `metadata` and `metadata`.
-    </span><span class="kw">pub fn </span>new(id: Id, metadata: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Metadata&lt;<span class="lifetime">&#39;static</span>&gt;) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(id: Id, metadata: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Metadata&lt;<span class="lifetime">'static</span>&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             inner: CurrentInner::Current { id, metadata },
         }
@@ -630,7 +630,7 @@
 
     <span class="doccomment">/// Consumes `self` and returns the span `Id` and `Metadata` of the current
     /// span, if one exists and is known.
-    </span><span class="kw">pub fn </span>into_inner(<span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;(Id, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Metadata&lt;<span class="lifetime">&#39;static</span>&gt;)&gt; {
+    </span><span class="kw">pub fn </span>into_inner(<span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;(Id, <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Metadata&lt;<span class="lifetime">'static</span>&gt;)&gt; {
         <span class="kw">match </span><span class="self">self</span>.inner {
             CurrentInner::Current { id, metadata } =&gt; <span class="prelude-val">Some</span>((id, metadata)),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
@@ -646,7 +646,7 @@
     }
 
     <span class="doccomment">/// Borrows the `Metadata` of the current span, if one exists and is known.
-    </span><span class="kw">pub fn </span>metadata(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Metadata&lt;<span class="lifetime">&#39;static</span>&gt;&gt; {
+    </span><span class="kw">pub fn </span>metadata(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'static </span>Metadata&lt;<span class="lifetime">'static</span>&gt;&gt; {
         <span class="kw">match </span><span class="self">self</span>.inner {
             CurrentInner::Current { metadata, .. } =&gt; <span class="prelude-val">Some</span>(metadata),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
@@ -654,14 +654,14 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Current&gt; <span class="kw">for </span><span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Id&gt; {
-    <span class="kw">fn </span>from(cur: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Current) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>Current&gt; <span class="kw">for </span><span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>Id&gt; {
+    <span class="kw">fn </span>from(cur: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Current) -&gt; <span class="self">Self </span>{
         cur.id()
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Current&gt; <span class="kw">for </span><span class="prelude-ty">Option</span>&lt;Id&gt; {
-    <span class="kw">fn </span>from(cur: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Current) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>Current&gt; <span class="kw">for </span><span class="prelude-ty">Option</span>&lt;Id&gt; {
+    <span class="kw">fn </span>from(cur: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Current) -&gt; <span class="self">Self </span>{
         cur.id().cloned()
     }
 }
@@ -675,8 +675,8 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Current&gt; <span class="kw">for </span><span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Metadata&lt;<span class="lifetime">&#39;static</span>&gt;&gt; {
-    <span class="kw">fn </span>from(cur: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Current) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>Current&gt; <span class="kw">for </span><span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'static </span>Metadata&lt;<span class="lifetime">'static</span>&gt;&gt; {
+    <span class="kw">fn </span>from(cur: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Current) -&gt; <span class="self">Self </span>{
         cur.metadata()
     }
 }

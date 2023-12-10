@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.5/src/ec/suite_b/private_key.rs`."><title>private_key.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="ring" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.5/src/ec/suite_b/private_key.rs`."><title>private_key.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="ring" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -207,7 +207,7 @@
 // purpose with or without fee is hereby granted, provided that the above
 // copyright notice and this permission notice appear in all copies.
 //
-// THE SOFTWARE IS PROVIDED &quot;AS IS&quot; AND THE AUTHORS DISCLAIM ALL WARRANTIES
+// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHORS DISCLAIM ALL WARRANTIES
 // WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
 // MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY
 // SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
@@ -243,18 +243,18 @@
     rng: <span class="kw-2">&amp;</span><span class="kw">dyn </span>rand::SecureRandom,
     out: <span class="kw-2">&amp;mut </span>[u8],
 ) -&gt; <span class="prelude-ty">Result</span>&lt;(), error::Unspecified&gt; {
-    <span class="comment">// [NSA Suite B Implementer&#39;s Guide to ECDSA] Appendix A.1.2, and
-    // [NSA Suite B Implementer&#39;s Guide to NIST SP 800-56A] Appendix B.2,
-    // &quot;Key Pair Generation by Testing Candidates&quot;.
+    <span class="comment">// [NSA Suite B Implementer's Guide to ECDSA] Appendix A.1.2, and
+    // [NSA Suite B Implementer's Guide to NIST SP 800-56A] Appendix B.2,
+    // "Key Pair Generation by Testing Candidates".
     //
-    // [NSA Suite B Implementer&#39;s Guide to ECDSA]: doc/ecdsa.pdf
-    // [NSA Suite B Implementer&#39;s Guide to NIST SP 800-56A]: doc/ecdh.pdf
+    // [NSA Suite B Implementer's Guide to ECDSA]: doc/ecdsa.pdf
+    // [NSA Suite B Implementer's Guide to NIST SP 800-56A]: doc/ecdh.pdf
 
     // TODO: The NSA guide also suggests, in appendix B.1, another mechanism
     // that would avoid the need to use `rng.fill()` more than once. It works
     // by generating an extra 64 bits of random bytes and then reducing the
     // output (mod n). Supposedly, this removes enough of the bias towards
-    // small values from the modular reduction, but it isn&#39;t obvious that it is
+    // small values from the modular reduction, but it isn't obvious that it is
     // sufficient. TODO: Figure out what we can do to mitigate the bias issue
     // and switch to the other mechanism.
 
@@ -308,19 +308,19 @@
 
 <span class="comment">// Parses a fixed-length (zero-padded) big-endian-encoded scalar in the range
 // [1, n). This is constant-time with respect to the actual value *only if* the
-// value is actually in range. In other words, this won&#39;t leak anything about a
+// value is actually in range. In other words, this won't leak anything about a
 // valid value, but it might leak small amounts of information about an invalid
 // value (which constraint it failed).
 </span><span class="kw">pub fn </span>scalar_from_big_endian_bytes(
     ops: <span class="kw-2">&amp;</span>PrivateKeyOps,
     bytes: <span class="kw-2">&amp;</span>[u8],
 ) -&gt; <span class="prelude-ty">Result</span>&lt;Scalar, error::Unspecified&gt; {
-    <span class="comment">// [NSA Suite B Implementer&#39;s Guide to ECDSA] Appendix A.1.2, and
-    // [NSA Suite B Implementer&#39;s Guide to NIST SP 800-56A] Appendix B.2,
-    // &quot;Key Pair Generation by Testing Candidates&quot;.
+    <span class="comment">// [NSA Suite B Implementer's Guide to ECDSA] Appendix A.1.2, and
+    // [NSA Suite B Implementer's Guide to NIST SP 800-56A] Appendix B.2,
+    // "Key Pair Generation by Testing Candidates".
     //
-    // [NSA Suite B Implementer&#39;s Guide to ECDSA]: doc/ecdsa.pdf
-    // [NSA Suite B Implementer&#39;s Guide to NIST SP 800-56A]: doc/ecdh.pdf
+    // [NSA Suite B Implementer's Guide to ECDSA]: doc/ecdsa.pdf
+    // [NSA Suite B Implementer's Guide to NIST SP 800-56A]: doc/ecdh.pdf
     //
     // Steps 5, 6, and 7.
     //
@@ -357,8 +357,8 @@
     <span class="kw">let </span>z = ops.common.point_z(p);
 
     <span class="comment">// Since we restrict our private key to the range [1, n), the curve has
-    // prime order, and we verify that the peer&#39;s point is on the curve,
-    // there&#39;s no way that the result can be at infinity. But, use `assert!`
+    // prime order, and we verify that the peer's point is on the curve,
+    // there's no way that the result can be at infinity. But, use `assert!`
     // instead of `debug_assert!` anyway
     </span><span class="macro">assert!</span>(ops.common.elem_verify_is_not_zero(<span class="kw-2">&amp;</span>z).is_ok());
 

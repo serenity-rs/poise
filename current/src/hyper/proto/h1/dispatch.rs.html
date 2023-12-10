@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hyper-0.14.27/src/proto/h1/dispatch.rs`."><title>dispatch.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="hyper" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hyper-0.14.27/src/proto/h1/dispatch.rs`."><title>dispatch.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="hyper" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -787,10 +787,10 @@
     <span class="kw">type </span>RecvItem;
     <span class="kw">fn </span>poll_msg(
         <span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;,
-        cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;,
+        cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;,
     ) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;(<span class="self">Self</span>::PollItem, <span class="self">Self</span>::PollBody), <span class="self">Self</span>::PollError&gt;&gt;&gt;;
     <span class="kw">fn </span>recv_msg(<span class="kw-2">&amp;mut </span><span class="self">self</span>, msg: <span class="kw">crate</span>::Result&lt;(<span class="self">Self</span>::RecvItem, Body)&gt;) -&gt; <span class="kw">crate</span>::Result&lt;()&gt;;
-    <span class="kw">fn </span>poll_ready(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;(), ()&gt;&gt;;
+    <span class="kw">fn </span>poll_ready(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;(), ()&gt;&gt;;
     <span class="kw">fn </span>should_poll(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool;
 }
 
@@ -826,7 +826,7 @@
     D::PollError: Into&lt;Box&lt;<span class="kw">dyn </span>StdError + Send + Sync&gt;&gt;,
     I: AsyncRead + AsyncWrite + Unpin,
     T: Http1Transaction + Unpin,
-    Bs: HttpBody + <span class="lifetime">&#39;static</span>,
+    Bs: HttpBody + <span class="lifetime">'static</span>,
     Bs::Error: Into&lt;Box&lt;<span class="kw">dyn </span>StdError + Send + Sync&gt;&gt;,
 {
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(dispatch: D, conn: Conn&lt;I, Bs::Data, T&gt;) -&gt; <span class="self">Self </span>{
@@ -839,7 +839,7 @@
         }
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;server&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"server"</span>)]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>disable_keep_alive(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="self">self</span>.conn.disable_keep_alive();
         <span class="kw">if </span><span class="self">self</span>.conn.is_write_closed() {
@@ -853,13 +853,13 @@
     }
 
     <span class="doccomment">/// Run this dispatcher until HTTP says this connection is done,
-    /// but don&#39;t call `AsyncWrite::shutdown` on the underlying IO.
+    /// but don't call `AsyncWrite::shutdown` on the underlying IO.
     ///
     /// This is useful for old-style HTTP upgrades, but ignores
     /// newer-style upgrade API.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>poll_without_shutdown(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;,
+        cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;,
     ) -&gt; Poll&lt;<span class="kw">crate</span>::Result&lt;()&gt;&gt;
     <span class="kw">where
         </span><span class="self">Self</span>: Unpin,
@@ -873,15 +873,15 @@
 
     <span class="kw">fn </span>poll_catch(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;,
+        cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;,
         should_shutdown: bool,
     ) -&gt; Poll&lt;<span class="kw">crate</span>::Result&lt;Dispatched&gt;&gt; {
         Poll::Ready(<span class="macro">ready!</span>(<span class="self">self</span>.poll_inner(cx, should_shutdown)).or_else(|e| {
             <span class="comment">// Be sure to alert a streaming body of the failure.
             </span><span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">mut </span>body) = <span class="self">self</span>.body_tx.take() {
-                body.send_error(<span class="kw">crate</span>::Error::new_body(<span class="string">&quot;connection error&quot;</span>));
+                body.send_error(<span class="kw">crate</span>::Error::new_body(<span class="string">"connection error"</span>));
             }
-            <span class="comment">// An error means we&#39;re shutting down either way.
+            <span class="comment">// An error means we're shutting down either way.
             // We just try to give the error to the user,
             // and close the connection with an Ok. If we
             // cannot give it to the user, then return the Err.
@@ -892,7 +892,7 @@
 
     <span class="kw">fn </span>poll_inner(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;,
+        cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;,
         should_shutdown: bool,
     ) -&gt; Poll&lt;<span class="kw">crate</span>::Result&lt;Dispatched&gt;&gt; {
         T::update_date();
@@ -913,9 +913,9 @@
         }
     }
 
-    <span class="kw">fn </span>poll_loop(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="kw">crate</span>::Result&lt;()&gt;&gt; {
+    <span class="kw">fn </span>poll_loop(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="kw">crate</span>::Result&lt;()&gt;&gt; {
         <span class="comment">// Limit the looping on this connection, in case it is ready far too
-        // often, so that other futures don&#39;t starve.
+        // often, so that other futures don't starve.
         //
         // 16 was chosen arbitrarily, as that is number of pipelined requests
         // benchmarks often use. Perhaps it should be a config option instead.
@@ -927,8 +927,8 @@
             <span class="comment">// This could happen if reading paused before blocking on IO,
             // such as getting to the end of a framed message, but then
             // writing/flushing set the state back to Init. In that case,
-            // if the read buffer still had bytes, we&#39;d want to try poll_read
-            // again, or else we wouldn&#39;t ever be woken up again.
+            // if the read buffer still had bytes, we'd want to try poll_read
+            // again, or else we wouldn't ever be woken up again.
             //
             // Using this instead of task::current() and notify() inside
             // the Conn is noticeably faster in pipelined benchmarks.
@@ -938,12 +938,12 @@
             }
         }
 
-        <span class="macro">trace!</span>(<span class="string">&quot;poll_loop yielding (self = {:p})&quot;</span>, <span class="self">self</span>);
+        <span class="macro">trace!</span>(<span class="string">"poll_loop yielding (self = {:p})"</span>, <span class="self">self</span>);
 
         task::yield_now(cx).map(|never| <span class="kw">match </span>never {})
     }
 
-    <span class="kw">fn </span>poll_read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="kw">crate</span>::Result&lt;()&gt;&gt; {
+    <span class="kw">fn </span>poll_read(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="kw">crate</span>::Result&lt;()&gt;&gt; {
         <span class="kw">loop </span>{
             <span class="kw">if </span><span class="self">self</span>.is_closing {
                 <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Ok</span>(()));
@@ -958,9 +958,9 @@
                             <span class="kw">return </span>Poll::Pending;
                         }
                         Poll::Ready(<span class="prelude-val">Err</span>(_canceled)) =&gt; {
-                            <span class="comment">// user doesn&#39;t care about the body
+                            <span class="comment">// user doesn't care about the body
                             // so we should stop reading
-                            </span><span class="macro">trace!</span>(<span class="string">&quot;body receiver dropped before eof, draining or closing&quot;</span>);
+                            </span><span class="macro">trace!</span>(<span class="string">"body receiver dropped before eof, draining or closing"</span>);
                             <span class="self">self</span>.conn.poll_drain_or_close_read(cx);
                             <span class="kw">continue</span>;
                         }
@@ -972,7 +972,7 @@
                             }
                             <span class="prelude-val">Err</span>(_canceled) =&gt; {
                                 <span class="kw">if </span><span class="self">self</span>.conn.can_read_body() {
-                                    <span class="macro">trace!</span>(<span class="string">&quot;body receiver dropped before eof, closing&quot;</span>);
+                                    <span class="macro">trace!</span>(<span class="string">"body receiver dropped before eof, closing"</span>);
                                     <span class="self">self</span>.conn.close_read();
                                 }
                             }
@@ -997,12 +997,12 @@
         }
     }
 
-    <span class="kw">fn </span>poll_read_head(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="kw">crate</span>::Result&lt;()&gt;&gt; {
+    <span class="kw">fn </span>poll_read_head(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="kw">crate</span>::Result&lt;()&gt;&gt; {
         <span class="comment">// can dispatch receive, or does it still care about, an incoming message?
         </span><span class="kw">match </span><span class="macro">ready!</span>(<span class="self">self</span>.dispatch.poll_ready(cx)) {
             <span class="prelude-val">Ok</span>(()) =&gt; (),
             <span class="prelude-val">Err</span>(()) =&gt; {
-                <span class="macro">trace!</span>(<span class="string">&quot;dispatch no longer receiving messages&quot;</span>);
+                <span class="macro">trace!</span>(<span class="string">"dispatch no longer receiving messages"</span>);
                 <span class="self">self</span>.close();
                 <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Ok</span>(()));
             }
@@ -1020,15 +1020,15 @@
                 };
                 <span class="kw">if </span>wants.contains(Wants::UPGRADE) {
                     <span class="kw">let </span>upgrade = <span class="self">self</span>.conn.on_upgrade();
-                    <span class="macro">debug_assert!</span>(!upgrade.is_none(), <span class="string">&quot;empty upgrade&quot;</span>);
-                    <span class="macro">debug_assert!</span>(head.extensions.get::&lt;OnUpgrade&gt;().is_none(), <span class="string">&quot;OnUpgrade already set&quot;</span>);
+                    <span class="macro">debug_assert!</span>(!upgrade.is_none(), <span class="string">"empty upgrade"</span>);
+                    <span class="macro">debug_assert!</span>(head.extensions.get::&lt;OnUpgrade&gt;().is_none(), <span class="string">"OnUpgrade already set"</span>);
                     head.extensions.insert(upgrade);
                 }
                 <span class="self">self</span>.dispatch.recv_msg(<span class="prelude-val">Ok</span>((head, body)))<span class="question-mark">?</span>;
                 Poll::Ready(<span class="prelude-val">Ok</span>(()))
             }
             <span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(err)) =&gt; {
-                <span class="macro">debug!</span>(<span class="string">&quot;read_head error: {}&quot;</span>, err);
+                <span class="macro">debug!</span>(<span class="string">"read_head error: {}"</span>, err);
                 <span class="self">self</span>.dispatch.recv_msg(<span class="prelude-val">Err</span>(err))<span class="question-mark">?</span>;
                 <span class="comment">// if here, the dispatcher gave the user the error
                 // somewhere else. we still need to shutdown, but
@@ -1049,7 +1049,7 @@
         }
     }
 
-    <span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="kw">crate</span>::Result&lt;()&gt;&gt; {
+    <span class="kw">fn </span>poll_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="kw">crate</span>::Result&lt;()&gt;&gt; {
         <span class="kw">loop </span>{
             <span class="kw">if </span><span class="self">self</span>.is_closing {
                 <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Ok</span>(()));
@@ -1093,10 +1093,10 @@
                 </span><span class="kw">if let </span>(<span class="prelude-val">Some</span>(<span class="kw-2">mut </span>body), clear_body) =
                     OptGuard::new(<span class="self">self</span>.body_rx.as_mut()).guard_mut()
                 {
-                    <span class="macro">debug_assert!</span>(!<span class="kw-2">*</span>clear_body, <span class="string">&quot;opt guard defaults to keeping body&quot;</span>);
+                    <span class="macro">debug_assert!</span>(!<span class="kw-2">*</span>clear_body, <span class="string">"opt guard defaults to keeping body"</span>);
                     <span class="kw">if </span>!<span class="self">self</span>.conn.can_write_body() {
                         <span class="macro">trace!</span>(
-                            <span class="string">&quot;no more write body allowed, user body is_end_stream = {}&quot;</span>,
+                            <span class="string">"no more write body allowed, user body is_end_stream = {}"</span>,
                             body.is_end_stream(),
                         );
                         <span class="kw-2">*</span>clear_body = <span class="bool-val">true</span>;
@@ -1113,14 +1113,14 @@
                         <span class="kw">if </span>eos {
                             <span class="kw-2">*</span>clear_body = <span class="bool-val">true</span>;
                             <span class="kw">if </span>chunk.remaining() == <span class="number">0 </span>{
-                                <span class="macro">trace!</span>(<span class="string">&quot;discarding empty chunk&quot;</span>);
+                                <span class="macro">trace!</span>(<span class="string">"discarding empty chunk"</span>);
                                 <span class="self">self</span>.conn.end_body()<span class="question-mark">?</span>;
                             } <span class="kw">else </span>{
                                 <span class="self">self</span>.conn.write_body_and_end(chunk);
                             }
                         } <span class="kw">else </span>{
                             <span class="kw">if </span>chunk.remaining() == <span class="number">0 </span>{
-                                <span class="macro">trace!</span>(<span class="string">&quot;discarding empty chunk&quot;</span>);
+                                <span class="macro">trace!</span>(<span class="string">"discarding empty chunk"</span>);
                                 <span class="kw">continue</span>;
                             }
                             <span class="self">self</span>.conn.write_body(chunk);
@@ -1130,7 +1130,7 @@
                         <span class="self">self</span>.conn.end_body()<span class="question-mark">?</span>;
                     }
                 } <span class="kw">else </span>{
-                    <span class="comment">// If there&#39;s no body_rx, end the body
+                    <span class="comment">// If there's no body_rx, end the body
                     </span><span class="kw">if </span><span class="self">self</span>.conn.can_write_body() {
                         <span class="self">self</span>.conn.end_body()<span class="question-mark">?</span>;
                     } <span class="kw">else </span>{
@@ -1141,9 +1141,9 @@
         }
     }
 
-    <span class="kw">fn </span>poll_flush(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="kw">crate</span>::Result&lt;()&gt;&gt; {
+    <span class="kw">fn </span>poll_flush(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="kw">crate</span>::Result&lt;()&gt;&gt; {
         <span class="self">self</span>.conn.poll_flush(cx).map_err(|err| {
-            <span class="macro">debug!</span>(<span class="string">&quot;error writing: {}&quot;</span>, err);
+            <span class="macro">debug!</span>(<span class="string">"error writing: {}"</span>, err);
             <span class="kw">crate</span>::Error::new_body_write(err)
         })
     }
@@ -1182,13 +1182,13 @@
     D::PollError: Into&lt;Box&lt;<span class="kw">dyn </span>StdError + Send + Sync&gt;&gt;,
     I: AsyncRead + AsyncWrite + Unpin,
     T: Http1Transaction + Unpin,
-    Bs: HttpBody + <span class="lifetime">&#39;static</span>,
+    Bs: HttpBody + <span class="lifetime">'static</span>,
     Bs::Error: Into&lt;Box&lt;<span class="kw">dyn </span>StdError + Send + Sync&gt;&gt;,
 {
     <span class="kw">type </span>Output = <span class="kw">crate</span>::Result&lt;Dispatched&gt;;
 
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>poll(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
+    </span><span class="kw">fn </span>poll(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
         <span class="self">self</span>.poll_catch(cx, <span class="bool-val">true</span>)
     }
 }
@@ -1197,10 +1197,10 @@
 
 </span><span class="doccomment">/// A drop guard to allow a mutable borrow of an Option while being able to
 /// set whether the `Option` should be cleared on drop.
-</span><span class="kw">struct </span>OptGuard&lt;<span class="lifetime">&#39;a</span>, T&gt;(Pin&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="prelude-ty">Option</span>&lt;T&gt;&gt;, bool);
+</span><span class="kw">struct </span>OptGuard&lt;<span class="lifetime">'a</span>, T&gt;(Pin&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span><span class="prelude-ty">Option</span>&lt;T&gt;&gt;, bool);
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; OptGuard&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    <span class="kw">fn </span>new(pin: Pin&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="prelude-ty">Option</span>&lt;T&gt;&gt;) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; OptGuard&lt;<span class="lifetime">'a</span>, T&gt; {
+    <span class="kw">fn </span>new(pin: Pin&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span><span class="prelude-ty">Option</span>&lt;T&gt;&gt;) -&gt; <span class="self">Self </span>{
         OptGuard(pin, <span class="bool-val">false</span>)
     }
 
@@ -1209,7 +1209,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; Drop <span class="kw">for </span>OptGuard&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; Drop <span class="kw">for </span>OptGuard&lt;<span class="lifetime">'a</span>, T&gt; {
     <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="kw">if </span><span class="self">self</span>.<span class="number">1 </span>{
             <span class="self">self</span>.<span class="number">0</span>.set(<span class="prelude-val">None</span>);
@@ -1252,7 +1252,7 @@
 
         <span class="kw">fn </span>poll_msg(
             <span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;,
-            cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;,
+            cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;,
         ) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;(<span class="self">Self</span>::PollItem, <span class="self">Self</span>::PollBody), <span class="self">Self</span>::PollError&gt;&gt;&gt; {
             <span class="kw">let </span><span class="kw-2">mut </span>this = <span class="self">self</span>.as_mut();
             <span class="kw">let </span>ret = <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref mut </span>fut) = this.in_flight.as_mut().as_pin_mut() {
@@ -1266,7 +1266,7 @@
                 };
                 Poll::Ready(<span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>((head, body))))
             } <span class="kw">else </span>{
-                <span class="macro">unreachable!</span>(<span class="string">&quot;poll_msg shouldn&#39;t be called if no inflight&quot;</span>);
+                <span class="macro">unreachable!</span>(<span class="string">"poll_msg shouldn't be called if no inflight"</span>);
             };
 
             <span class="comment">// Since in_flight finished, remove it
@@ -1287,13 +1287,13 @@
             <span class="prelude-val">Ok</span>(())
         }
 
-        <span class="kw">fn </span>poll_ready(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;(), ()&gt;&gt; {
+        <span class="kw">fn </span>poll_ready(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;(), ()&gt;&gt; {
             <span class="kw">if </span><span class="self">self</span>.in_flight.is_some() {
                 Poll::Pending
             } <span class="kw">else </span>{
                 <span class="self">self</span>.service.poll_ready(cx).map_err(|_e| {
                     <span class="comment">// FIXME: return error value.
-                    </span><span class="macro">trace!</span>(<span class="string">&quot;service closed&quot;</span>);
+                    </span><span class="macro">trace!</span>(<span class="string">"service closed"</span>);
                 })
             }
         }
@@ -1328,16 +1328,16 @@
 
         <span class="kw">fn </span>poll_msg(
             <span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;,
-            cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;,
+            cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;,
         ) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;(<span class="self">Self</span>::PollItem, <span class="self">Self</span>::PollBody), <span class="kw">crate</span>::common::Never&gt;&gt;&gt; {
             <span class="kw">let </span><span class="kw-2">mut </span>this = <span class="self">self</span>.as_mut();
             <span class="macro">debug_assert!</span>(!this.rx_closed);
             <span class="kw">match </span>this.rx.poll_recv(cx) {
                 Poll::Ready(<span class="prelude-val">Some</span>((req, <span class="kw-2">mut </span>cb))) =&gt; {
-                    <span class="comment">// check that future hasn&#39;t been canceled already
+                    <span class="comment">// check that future hasn't been canceled already
                     </span><span class="kw">match </span>cb.poll_canceled(cx) {
                         Poll::Ready(()) =&gt; {
-                            <span class="macro">trace!</span>(<span class="string">&quot;request canceled&quot;</span>);
+                            <span class="macro">trace!</span>(<span class="string">"request canceled"</span>);
                             Poll::Ready(<span class="prelude-val">None</span>)
                         }
                         Poll::Pending =&gt; {
@@ -1355,7 +1355,7 @@
                 }
                 Poll::Ready(<span class="prelude-val">None</span>) =&gt; {
                     <span class="comment">// user has dropped sender handle
-                    </span><span class="macro">trace!</span>(<span class="string">&quot;client tx closed&quot;</span>);
+                    </span><span class="macro">trace!</span>(<span class="string">"client tx closed"</span>);
                     this.rx_closed = <span class="bool-val">true</span>;
                     Poll::Ready(<span class="prelude-val">None</span>)
                 }
@@ -1384,8 +1384,8 @@
                     } <span class="kw">else if </span>!<span class="self">self</span>.rx_closed {
                         <span class="self">self</span>.rx.close();
                         <span class="kw">if let </span><span class="prelude-val">Some</span>((req, cb)) = <span class="self">self</span>.rx.try_recv() {
-                            <span class="macro">trace!</span>(<span class="string">&quot;canceling queued request with connection error: {}&quot;</span>, err);
-                            <span class="comment">// in this case, the message was never even started, so it&#39;s safe to tell
+                            <span class="macro">trace!</span>(<span class="string">"canceling queued request with connection error: {}"</span>, err);
+                            <span class="comment">// in this case, the message was never even started, so it's safe to tell
                             // the user that the request was completely canceled
                             </span>cb.send(<span class="prelude-val">Err</span>((<span class="kw">crate</span>::Error::new_canceled().with(err), <span class="prelude-val">Some</span>(req))));
                             <span class="prelude-val">Ok</span>(())
@@ -1399,11 +1399,11 @@
             }
         }
 
-        <span class="kw">fn </span>poll_ready(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;(), ()&gt;&gt; {
+        <span class="kw">fn </span>poll_ready(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;(), ()&gt;&gt; {
             <span class="kw">match </span><span class="self">self</span>.callback {
                 <span class="prelude-val">Some</span>(<span class="kw-2">ref mut </span>cb) =&gt; <span class="kw">match </span>cb.poll_canceled(cx) {
                     Poll::Ready(()) =&gt; {
-                        <span class="macro">trace!</span>(<span class="string">&quot;callback receiver has dropped&quot;</span>);
+                        <span class="macro">trace!</span>(<span class="string">"callback receiver has dropped"</span>);
                         Poll::Ready(<span class="prelude-val">Err</span>(()))
                     }
                     Poll::Pending =&gt; Poll::Ready(<span class="prelude-val">Ok</span>(())),
@@ -1440,9 +1440,9 @@
             <span class="comment">// First poll is needed to allow tx to send...
             </span><span class="macro">assert!</span>(Pin::new(<span class="kw-2">&amp;mut </span>dispatcher).poll(cx).is_pending());
 
-            <span class="comment">// Unblock our IO, which has a response before we&#39;ve sent request!
+            <span class="comment">// Unblock our IO, which has a response before we've sent request!
             //
-            </span>handle.read(<span class="string">b&quot;HTTP/1.1 200 OK\r\n\r\n&quot;</span>);
+            </span>handle.read(<span class="string">b"HTTP/1.1 200 OK\r\n\r\n"</span>);
 
             <span class="kw">let </span><span class="kw-2">mut </span>res_rx = tx
                 .try_send(<span class="kw">crate</span>::Request::new(<span class="kw">crate</span>::Body::empty()))
@@ -1450,11 +1450,11 @@
 
             <span class="macro">tokio_test::assert_ready_ok!</span>(Pin::new(<span class="kw-2">&amp;mut </span>dispatcher).poll(cx));
             <span class="kw">let </span>err = <span class="macro">tokio_test::assert_ready_ok!</span>(Pin::new(<span class="kw-2">&amp;mut </span>res_rx).poll(cx))
-                .expect_err(<span class="string">&quot;callback should send error&quot;</span>);
+                .expect_err(<span class="string">"callback should send error"</span>);
 
             <span class="kw">match </span>(err.<span class="number">0</span>.kind(), err.<span class="number">1</span>) {
                 (<span class="kw-2">&amp;</span><span class="kw">crate</span>::error::Kind::Canceled, <span class="prelude-val">Some</span>(<span class="kw">_</span>)) =&gt; (),
-                other =&gt; <span class="macro">panic!</span>(<span class="string">&quot;expected Canceled, got {:?}&quot;</span>, other),
+                other =&gt; <span class="macro">panic!</span>(<span class="string">"expected Canceled, got {:?}"</span>, other),
             }
         });
     }
@@ -1464,8 +1464,8 @@
         <span class="kw">let _ </span>= pretty_env_logger::try_init();
 
         <span class="kw">let </span>(io, _handle) = tokio_test::io::Builder::new()
-            .write(<span class="string">b&quot;POST / HTTP/1.1\r\ncontent-length: 4\r\n\r\n&quot;</span>)
-            .read(<span class="string">b&quot;HTTP/1.1 200 OK\r\ncontent-length: 0\r\n\r\n&quot;</span>)
+            .write(<span class="string">b"POST / HTTP/1.1\r\ncontent-length: 4\r\n\r\n"</span>)
+            .read(<span class="string">b"HTTP/1.1 200 OK\r\ncontent-length: 0\r\n\r\n"</span>)
             .wait(std::time::Duration::from_secs(<span class="number">2</span>))
             .build_with_handle();
 
@@ -1477,11 +1477,11 @@
         <span class="kw">let </span>_dispatcher = tokio::spawn(<span class="kw">async move </span>{ dispatcher.<span class="kw">await </span>});
 
         <span class="kw">let </span>req = <span class="kw">crate</span>::Request::builder()
-            .method(<span class="string">&quot;POST&quot;</span>)
-            .body(<span class="kw">crate</span>::Body::from(<span class="string">&quot;reee&quot;</span>))
+            .method(<span class="string">"POST"</span>)
+            .body(<span class="kw">crate</span>::Body::from(<span class="string">"reee"</span>))
             .unwrap();
 
-        <span class="kw">let </span>res = tx.try_send(req).unwrap().<span class="kw">await</span>.expect(<span class="string">&quot;response&quot;</span>);
+        <span class="kw">let </span>res = tx.try_send(req).unwrap().<span class="kw">await</span>.expect(<span class="string">"response"</span>);
         drop(res);
 
         <span class="macro">assert!</span>(!tx.is_ready());
@@ -1505,13 +1505,13 @@
 
         <span class="kw">let </span>body = {
             <span class="kw">let </span>(<span class="kw-2">mut </span>tx, body) = <span class="kw">crate</span>::Body::channel();
-            tx.try_send_data(<span class="string">&quot;&quot;</span>.into()).unwrap();
+            tx.try_send_data(<span class="string">""</span>.into()).unwrap();
             body
         };
 
         <span class="kw">let </span>_res_rx = tx.try_send(<span class="kw">crate</span>::Request::new(body)).unwrap();
 
-        <span class="comment">// Ensure conn.write_body wasn&#39;t called with the empty chunk.
+        <span class="comment">// Ensure conn.write_body wasn't called with the empty chunk.
         // If it is, it will trigger an assertion.
         </span><span class="macro">assert!</span>(dispatcher.poll().is_pending());
     }

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hyper-0.14.27/src/proto/h1/io.rs`."><title>io.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="hyper" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hyper-0.14.27/src/proto/h1/io.rs`."><title>io.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="hyper" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1002,17 +1002,17 @@
 <a href="#1002" id="1002">1002</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::cmp;
 <span class="kw">use </span>std::fmt;
-<span class="attr">#[cfg(all(feature = <span class="string">&quot;server&quot;</span>, feature = <span class="string">&quot;runtime&quot;</span>))]
+<span class="attr">#[cfg(all(feature = <span class="string">"server"</span>, feature = <span class="string">"runtime"</span>))]
 </span><span class="kw">use </span>std::future::Future;
 <span class="kw">use </span>std::io::{<span class="self">self</span>, IoSlice};
 <span class="kw">use </span>std::marker::Unpin;
 <span class="kw">use </span>std::mem::MaybeUninit;
-<span class="attr">#[cfg(all(feature = <span class="string">&quot;server&quot;</span>, feature = <span class="string">&quot;runtime&quot;</span>))]
+<span class="attr">#[cfg(all(feature = <span class="string">"server"</span>, feature = <span class="string">"runtime"</span>))]
 </span><span class="kw">use </span>std::time::Duration;
 
 <span class="kw">use </span>bytes::{Buf, BufMut, Bytes, BytesMut};
 <span class="kw">use </span>tokio::io::{AsyncRead, AsyncWrite, ReadBuf};
-<span class="attr">#[cfg(all(feature = <span class="string">&quot;server&quot;</span>, feature = <span class="string">&quot;runtime&quot;</span>))]
+<span class="attr">#[cfg(all(feature = <span class="string">"server"</span>, feature = <span class="string">"runtime"</span>))]
 </span><span class="kw">use </span>tokio::time::Instant;
 <span class="kw">use </span>tracing::{debug, trace};
 
@@ -1051,10 +1051,10 @@
 <span class="kw">where
     </span>B: Buf,
 {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        f.debug_struct(<span class="string">&quot;Buffered&quot;</span>)
-            .field(<span class="string">&quot;read_buf&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.read_buf)
-            .field(<span class="string">&quot;write_buf&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.write_buf)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        f.debug_struct(<span class="string">"Buffered"</span>)
+            .field(<span class="string">"read_buf"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.read_buf)
+            .field(<span class="string">"write_buf"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.write_buf)
             .finish()
     }
 }
@@ -1081,7 +1081,7 @@
         }
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;server&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"server"</span>)]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>set_flush_pipeline(<span class="kw-2">&amp;mut </span><span class="self">self</span>, enabled: bool) {
         <span class="macro">debug_assert!</span>(!<span class="self">self</span>.write_buf.has_remaining());
         <span class="self">self</span>.flush_pipeline = enabled;
@@ -1093,14 +1093,14 @@
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>set_max_buf_size(<span class="kw-2">&amp;mut </span><span class="self">self</span>, max: usize) {
         <span class="macro">assert!</span>(
             max &gt;= MINIMUM_MAX_BUFFER_SIZE,
-            <span class="string">&quot;The max_buf_size cannot be smaller than {}.&quot;</span>,
+            <span class="string">"The max_buf_size cannot be smaller than {}."</span>,
             MINIMUM_MAX_BUFFER_SIZE,
         );
         <span class="self">self</span>.read_buf_strategy = ReadStrategy::with_max(max);
         <span class="self">self</span>.write_buf.max_buf_size = max;
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;client&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"client"</span>)]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>set_read_buf_exact_size(<span class="kw-2">&amp;mut </span><span class="self">self</span>, sz: usize) {
         <span class="self">self</span>.read_buf_strategy = ReadStrategy::Exact(sz);
     }
@@ -1124,12 +1124,12 @@
     }
 
     <span class="attr">#[cfg(test)]
-    #[cfg(feature = <span class="string">&quot;nightly&quot;</span>)]
+    #[cfg(feature = <span class="string">"nightly"</span>)]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>read_buf_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>BytesMut {
         <span class="kw-2">&amp;mut </span><span class="self">self</span>.read_buf
     }
 
-    <span class="doccomment">/// Return the &quot;allocated&quot; available space, not the potential space
+    <span class="doccomment">/// Return the "allocated" available space, not the potential space
     /// that could be allocated in the future.
     </span><span class="kw">fn </span>read_buf_remaining_mut(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
         <span class="self">self</span>.read_buf.capacity() - <span class="self">self</span>.read_buf.len()
@@ -1137,7 +1137,7 @@
 
     <span class="doccomment">/// Return whether we can append to the headers buffer.
     ///
-    /// Reasons we can&#39;t:
+    /// Reasons we can't:
     /// - The write buf is in queue mode, and some of the past body is still
     ///   needing to be flushed.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>can_headers_buf(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
@@ -1166,7 +1166,7 @@
             <span class="kw">let </span><span class="kw-2">mut </span>i = <span class="number">0</span>;
             <span class="kw">while </span>i &lt; <span class="self">self</span>.read_buf.len() {
                 <span class="kw">match </span><span class="self">self</span>.read_buf[i] {
-                    <span class="string">b&#39;\r&#39; </span>| <span class="string">b&#39;\n&#39; </span>=&gt; i += <span class="number">1</span>,
+                    <span class="string">b'\r' </span>| <span class="string">b'\n' </span>=&gt; i += <span class="number">1</span>,
                     <span class="kw">_ </span>=&gt; <span class="kw">break</span>,
                 }
             }
@@ -1176,8 +1176,8 @@
 
     <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>parse&lt;S&gt;(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;,
-        parse_ctx: ParseContext&lt;<span class="lifetime">&#39;_</span>&gt;,
+        cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;,
+        parse_ctx: ParseContext&lt;<span class="lifetime">'_</span>&gt;,
     ) -&gt; Poll&lt;<span class="kw">crate</span>::Result&lt;ParsedMessage&lt;S::Incoming&gt;&gt;&gt;
     <span class="kw">where
         </span>S: Http1Transaction,
@@ -1189,26 +1189,26 @@
                     cached_headers: parse_ctx.cached_headers,
                     req_method: parse_ctx.req_method,
                     h1_parser_config: parse_ctx.h1_parser_config.clone(),
-                    <span class="attr">#[cfg(all(feature = <span class="string">&quot;server&quot;</span>, feature = <span class="string">&quot;runtime&quot;</span>))]
+                    <span class="attr">#[cfg(all(feature = <span class="string">"server"</span>, feature = <span class="string">"runtime"</span>))]
                     </span>h1_header_read_timeout: parse_ctx.h1_header_read_timeout,
-                    <span class="attr">#[cfg(all(feature = <span class="string">&quot;server&quot;</span>, feature = <span class="string">&quot;runtime&quot;</span>))]
+                    <span class="attr">#[cfg(all(feature = <span class="string">"server"</span>, feature = <span class="string">"runtime"</span>))]
                     </span>h1_header_read_timeout_fut: parse_ctx.h1_header_read_timeout_fut,
-                    <span class="attr">#[cfg(all(feature = <span class="string">&quot;server&quot;</span>, feature = <span class="string">&quot;runtime&quot;</span>))]
+                    <span class="attr">#[cfg(all(feature = <span class="string">"server"</span>, feature = <span class="string">"runtime"</span>))]
                     </span>h1_header_read_timeout_running: parse_ctx.h1_header_read_timeout_running,
                     preserve_header_case: parse_ctx.preserve_header_case,
-                    <span class="attr">#[cfg(feature = <span class="string">&quot;ffi&quot;</span>)]
+                    <span class="attr">#[cfg(feature = <span class="string">"ffi"</span>)]
                     </span>preserve_header_order: parse_ctx.preserve_header_order,
                     h09_responses: parse_ctx.h09_responses,
-                    <span class="attr">#[cfg(feature = <span class="string">&quot;ffi&quot;</span>)]
+                    <span class="attr">#[cfg(feature = <span class="string">"ffi"</span>)]
                     </span>on_informational: parse_ctx.on_informational,
-                    <span class="attr">#[cfg(feature = <span class="string">&quot;ffi&quot;</span>)]
+                    <span class="attr">#[cfg(feature = <span class="string">"ffi"</span>)]
                     </span>raw_headers: parse_ctx.raw_headers,
                 },
             )<span class="question-mark">? </span>{
                 <span class="prelude-val">Some</span>(msg) =&gt; {
-                    <span class="macro">debug!</span>(<span class="string">&quot;parsed {} headers&quot;</span>, msg.head.headers.len());
+                    <span class="macro">debug!</span>(<span class="string">"parsed {} headers"</span>, msg.head.headers.len());
 
-                    <span class="attr">#[cfg(all(feature = <span class="string">&quot;server&quot;</span>, feature = <span class="string">&quot;runtime&quot;</span>))]
+                    <span class="attr">#[cfg(all(feature = <span class="string">"server"</span>, feature = <span class="string">"runtime"</span>))]
                     </span>{
                         <span class="kw-2">*</span>parse_ctx.h1_header_read_timeout_running = <span class="bool-val">false</span>;
 
@@ -1226,11 +1226,11 @@
                 <span class="prelude-val">None </span>=&gt; {
                     <span class="kw">let </span>max = <span class="self">self</span>.read_buf_strategy.max();
                     <span class="kw">if </span><span class="self">self</span>.read_buf.len() &gt;= max {
-                        <span class="macro">debug!</span>(<span class="string">&quot;max_buf_size ({}) reached, closing&quot;</span>, max);
+                        <span class="macro">debug!</span>(<span class="string">"max_buf_size ({}) reached, closing"</span>, max);
                         <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Err</span>(<span class="kw">crate</span>::Error::new_too_large()));
                     }
 
-                    <span class="attr">#[cfg(all(feature = <span class="string">&quot;server&quot;</span>, feature = <span class="string">&quot;runtime&quot;</span>))]
+                    <span class="attr">#[cfg(all(feature = <span class="string">"server"</span>, feature = <span class="string">"runtime"</span>))]
                     </span><span class="kw">if </span><span class="kw-2">*</span>parse_ctx.h1_header_read_timeout_running {
                         <span class="kw">if let </span><span class="prelude-val">Some</span>(h1_header_read_timeout_fut) =
                             parse_ctx.h1_header_read_timeout_fut
@@ -1238,7 +1238,7 @@
                             <span class="kw">if </span>Pin::new(h1_header_read_timeout_fut).poll(cx).is_ready() {
                                 <span class="kw-2">*</span>parse_ctx.h1_header_read_timeout_running = <span class="bool-val">false</span>;
 
-                                <span class="macro">tracing::warn!</span>(<span class="string">&quot;read header from client timeout&quot;</span>);
+                                <span class="macro">tracing::warn!</span>(<span class="string">"read header from client timeout"</span>);
                                 <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Err</span>(<span class="kw">crate</span>::Error::new_header_timeout()));
                             }
                         }
@@ -1246,7 +1246,7 @@
                 }
             }
             <span class="kw">if </span><span class="macro">ready!</span>(<span class="self">self</span>.poll_read_from_io(cx)).map_err(<span class="kw">crate</span>::Error::new_io)<span class="question-mark">? </span>== <span class="number">0 </span>{
-                <span class="macro">trace!</span>(<span class="string">&quot;parse eof&quot;</span>);
+                <span class="macro">trace!</span>(<span class="string">"parse eof"</span>);
                 <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Err</span>(<span class="kw">crate</span>::Error::new_incomplete()));
             }
         }
@@ -1254,7 +1254,7 @@
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>poll_read_from_io(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;,
+        cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;,
     ) -&gt; Poll&lt;io::Result&lt;usize&gt;&gt; {
         <span class="self">self</span>.read_blocked = <span class="bool-val">false</span>;
         <span class="kw">let </span>next = <span class="self">self</span>.read_buf_strategy.next();
@@ -1268,7 +1268,7 @@
         <span class="kw">match </span>Pin::new(<span class="kw-2">&amp;mut </span><span class="self">self</span>.io).poll_read(cx, <span class="kw-2">&amp;mut </span>buf) {
             Poll::Ready(<span class="prelude-val">Ok</span>(<span class="kw">_</span>)) =&gt; {
                 <span class="kw">let </span>n = buf.filled().len();
-                <span class="macro">trace!</span>(<span class="string">&quot;received {} bytes&quot;</span>, n);
+                <span class="macro">trace!</span>(<span class="string">"received {} bytes"</span>, n);
                 <span class="kw">unsafe </span>{
                     <span class="comment">// Safety: we just read that many bytes into the
                     // uninitialized part of the buffer, so this is okay.
@@ -1298,7 +1298,7 @@
         <span class="self">self</span>.read_blocked
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>poll_flush(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;io::Result&lt;()&gt;&gt; {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>poll_flush(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;io::Result&lt;()&gt;&gt; {
         <span class="kw">if </span><span class="self">self</span>.flush_pipeline &amp;&amp; !<span class="self">self</span>.read_buf.is_empty() {
             Poll::Ready(<span class="prelude-val">Ok</span>(()))
         } <span class="kw">else if </span><span class="self">self</span>.write_buf.remaining() == <span class="number">0 </span>{
@@ -1316,15 +1316,15 @@
                     <span class="macro">ready!</span>(Pin::new(<span class="kw-2">&amp;mut </span><span class="self">self</span>.io).poll_write_vectored(cx, <span class="kw-2">&amp;</span>iovs[..len]))<span class="question-mark">?
                 </span>};
                 <span class="comment">// TODO(eliza): we have to do this manually because
-                // `poll_write_buf` doesn&#39;t exist in Tokio 0.3 yet...when
+                // `poll_write_buf` doesn't exist in Tokio 0.3 yet...when
                 // `poll_write_buf` comes back, the manual advance will need to leave!
                 </span><span class="self">self</span>.write_buf.advance(n);
-                <span class="macro">debug!</span>(<span class="string">&quot;flushed {} bytes&quot;</span>, n);
+                <span class="macro">debug!</span>(<span class="string">"flushed {} bytes"</span>, n);
                 <span class="kw">if </span><span class="self">self</span>.write_buf.remaining() == <span class="number">0 </span>{
                     <span class="kw">break</span>;
                 } <span class="kw">else if </span>n == <span class="number">0 </span>{
                     <span class="macro">trace!</span>(
-                        <span class="string">&quot;write returned zero, but {} bytes remaining&quot;</span>,
+                        <span class="string">"write returned zero, but {} bytes remaining"</span>,
                         <span class="self">self</span>.write_buf.remaining()
                     );
                     <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Err</span>(io::ErrorKind::WriteZero.into()));
@@ -1338,17 +1338,17 @@
     ///
     /// Since all buffered bytes are flattened into the single headers buffer,
     /// that skips some bookkeeping around using multiple buffers.
-    </span><span class="kw">fn </span>poll_flush_flattened(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;io::Result&lt;()&gt;&gt; {
+    </span><span class="kw">fn </span>poll_flush_flattened(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;io::Result&lt;()&gt;&gt; {
         <span class="kw">loop </span>{
             <span class="kw">let </span>n = <span class="macro">ready!</span>(Pin::new(<span class="kw-2">&amp;mut </span><span class="self">self</span>.io).poll_write(cx, <span class="self">self</span>.write_buf.headers.chunk()))<span class="question-mark">?</span>;
-            <span class="macro">debug!</span>(<span class="string">&quot;flushed {} bytes&quot;</span>, n);
+            <span class="macro">debug!</span>(<span class="string">"flushed {} bytes"</span>, n);
             <span class="self">self</span>.write_buf.headers.advance(n);
             <span class="kw">if </span><span class="self">self</span>.write_buf.headers.remaining() == <span class="number">0 </span>{
                 <span class="self">self</span>.write_buf.headers.reset();
                 <span class="kw">break</span>;
             } <span class="kw">else if </span>n == <span class="number">0 </span>{
                 <span class="macro">trace!</span>(
-                    <span class="string">&quot;write returned zero, but {} bytes remaining&quot;</span>,
+                    <span class="string">"write returned zero, but {} bytes remaining"</span>,
                     <span class="self">self</span>.write_buf.remaining()
                 );
                 <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Err</span>(io::ErrorKind::WriteZero.into()));
@@ -1358,7 +1358,7 @@
     }
 
     <span class="attr">#[cfg(test)]
-    </span><span class="kw">fn </span>flush&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="kw">impl </span>std::future::Future&lt;Output = io::Result&lt;()&gt;&gt; + <span class="lifetime">&#39;a </span>{
+    </span><span class="kw">fn </span>flush&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="kw">impl </span>std::future::Future&lt;Output = io::Result&lt;()&gt;&gt; + <span class="lifetime">'a </span>{
         futures_util::future::poll_fn(<span class="kw">move </span>|cx| <span class="self">self</span>.poll_flush(cx))
     }
 }
@@ -1368,7 +1368,7 @@
 
 <span class="comment">// TODO: This trait is old... at least rename to PollBytes or something...
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">trait </span>MemRead {
-    <span class="kw">fn </span>read_mem(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;, len: usize) -&gt; Poll&lt;io::Result&lt;Bytes&gt;&gt;;
+    <span class="kw">fn </span>read_mem(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;, len: usize) -&gt; Poll&lt;io::Result&lt;Bytes&gt;&gt;;
 }
 
 <span class="kw">impl</span>&lt;T, B&gt; MemRead <span class="kw">for </span>Buffered&lt;T, B&gt;
@@ -1376,7 +1376,7 @@
     </span>T: AsyncRead + AsyncWrite + Unpin,
     B: Buf,
 {
-    <span class="kw">fn </span>read_mem(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;, len: usize) -&gt; Poll&lt;io::Result&lt;Bytes&gt;&gt; {
+    <span class="kw">fn </span>read_mem(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;, len: usize) -&gt; Poll&lt;io::Result&lt;Bytes&gt;&gt; {
         <span class="kw">if </span>!<span class="self">self</span>.read_buf.is_empty() {
             <span class="kw">let </span>n = std::cmp::min(len, <span class="self">self</span>.read_buf.len());
             Poll::Ready(<span class="prelude-val">Ok</span>(<span class="self">self</span>.read_buf.split_to(n).freeze()))
@@ -1394,7 +1394,7 @@
         next: usize,
         max: usize,
     },
-    <span class="attr">#[cfg(feature = <span class="string">&quot;client&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"client"</span>)]
     </span>Exact(usize),
 }
 
@@ -1410,7 +1410,7 @@
     <span class="kw">fn </span>next(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
         <span class="kw">match </span><span class="kw-2">*</span><span class="self">self </span>{
             ReadStrategy::Adaptive { next, .. } =&gt; next,
-            <span class="attr">#[cfg(feature = <span class="string">&quot;client&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"client"</span>)]
             </span>ReadStrategy::Exact(exact) =&gt; exact,
         }
     }
@@ -1418,7 +1418,7 @@
     <span class="kw">fn </span>max(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
         <span class="kw">match </span><span class="kw-2">*</span><span class="self">self </span>{
             ReadStrategy::Adaptive { max, .. } =&gt; max,
-            <span class="attr">#[cfg(feature = <span class="string">&quot;client&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"client"</span>)]
             </span>ReadStrategy::Exact(exact) =&gt; exact,
         }
     }
@@ -1441,7 +1441,7 @@
                             <span class="kw-2">*</span>next = cmp::max(decr_to, INIT_BUFFER_SIZE);
                             <span class="kw-2">*</span>decrease_now = <span class="bool-val">false</span>;
                         } <span class="kw">else </span>{
-                            <span class="comment">// Decreasing is a two &quot;record&quot; process.
+                            <span class="comment">// Decreasing is a two "record" process.
                             </span><span class="kw-2">*</span>decrease_now = <span class="bool-val">true</span>;
                         }
                     } <span class="kw">else </span>{
@@ -1452,7 +1452,7 @@
                     }
                 }
             }
-            <span class="attr">#[cfg(feature = <span class="string">&quot;client&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"client"</span>)]
             </span>ReadStrategy::Exact(<span class="kw">_</span>) =&gt; (),
         }
     }
@@ -1489,8 +1489,8 @@
 }
 
 <span class="kw">impl </span>Cursor&lt;Vec&lt;u8&gt;&gt; {
-    <span class="doccomment">/// If we&#39;ve advanced the position a bit in this cursor, and wish to
-    /// extend the underlying vector, we may wish to unshift the &quot;read&quot; bytes
+    <span class="doccomment">/// If we've advanced the position a bit in this cursor, and wish to
+    /// extend the underlying vector, we may wish to unshift the "read" bytes
     /// off, and move everything else over.
     </span><span class="kw">fn </span>maybe_unshift(<span class="kw-2">&amp;mut </span><span class="self">self</span>, additional: usize) {
         <span class="kw">if </span><span class="self">self</span>.pos == <span class="number">0 </span>{
@@ -1499,7 +1499,7 @@
         }
 
         <span class="kw">if </span><span class="self">self</span>.bytes.capacity() - <span class="self">self</span>.bytes.len() &gt;= additional {
-            <span class="comment">// there&#39;s room!
+            <span class="comment">// there's room!
             </span><span class="kw">return</span>;
         }
 
@@ -1514,10 +1514,10 @@
 }
 
 <span class="kw">impl</span>&lt;T: AsRef&lt;[u8]&gt;&gt; fmt::Debug <span class="kw">for </span>Cursor&lt;T&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        f.debug_struct(<span class="string">&quot;Cursor&quot;</span>)
-            .field(<span class="string">&quot;pos&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.pos)
-            .field(<span class="string">&quot;len&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.bytes.as_ref().len())
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        f.debug_struct(<span class="string">"Cursor"</span>)
+            .field(<span class="string">"pos"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.pos)
+            .field(<span class="string">"len"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.bytes.as_ref().len())
             .finish()
     }
 }
@@ -1579,7 +1579,7 @@
                 <span class="macro">trace!</span>(
                     <span class="self">self</span>.len = head.remaining(),
                     buf.len = buf.remaining(),
-                    <span class="string">&quot;buffer.flatten&quot;
+                    <span class="string">"buffer.flatten"
                 </span>);
                 <span class="comment">//perf: This is a little faster than &lt;Vec as BufMut&gt;&gt;::put,
                 //but accomplishes the same result.
@@ -1599,7 +1599,7 @@
                 <span class="macro">trace!</span>(
                     <span class="self">self</span>.len = <span class="self">self</span>.remaining(),
                     buf.len = buf.remaining(),
-                    <span class="string">&quot;buffer.queue&quot;
+                    <span class="string">"buffer.queue"
                 </span>);
                 <span class="self">self</span>.queue.push(buf.into());
             }
@@ -1622,10 +1622,10 @@
 }
 
 <span class="kw">impl</span>&lt;B: Buf&gt; fmt::Debug <span class="kw">for </span>WriteBuf&lt;B&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        f.debug_struct(<span class="string">&quot;WriteBuf&quot;</span>)
-            .field(<span class="string">&quot;remaining&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.remaining())
-            .field(<span class="string">&quot;strategy&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.strategy)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        f.debug_struct(<span class="string">"WriteBuf"</span>)
+            .field(<span class="string">"remaining"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.remaining())
+            .field(<span class="string">"strategy"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.strategy)
             .finish()
     }
 }
@@ -1662,7 +1662,7 @@
     }
 
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>chunks_vectored&lt;<span class="lifetime">&#39;t</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;t </span><span class="self">self</span>, dst: <span class="kw-2">&amp;mut </span>[IoSlice&lt;<span class="lifetime">&#39;t</span>&gt;]) -&gt; usize {
+    </span><span class="kw">fn </span>chunks_vectored&lt;<span class="lifetime">'t</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'t </span><span class="self">self</span>, dst: <span class="kw-2">&amp;mut </span>[IoSlice&lt;<span class="lifetime">'t</span>&gt;]) -&gt; usize {
         <span class="kw">let </span>n = <span class="self">self</span>.headers.chunks_vectored(dst);
         <span class="self">self</span>.queue.chunks_vectored(<span class="kw-2">&amp;mut </span>dst[n..]) + n
     }
@@ -1681,7 +1681,7 @@
 
     <span class="kw">use </span>tokio_test::io::Builder <span class="kw">as </span>Mock;
 
-    <span class="comment">// #[cfg(feature = &quot;nightly&quot;)]
+    <span class="comment">// #[cfg(feature = "nightly")]
     // use test::Bencher;
 
     /*
@@ -1698,21 +1698,21 @@
     #[ignore]
     </span><span class="kw">async fn </span>iobuf_write_empty_slice() {
         <span class="comment">// TODO(eliza): can i have writev back pls T_T
-        // // First, let&#39;s just check that the Mock would normally return an
+        // // First, let's just check that the Mock would normally return an
         // // error on an unexpected write, even if the buffer is empty...
         // let mut mock = Mock::new().build();
         // futures_util::future::poll_fn(|cx| {
         //     Pin::new(&amp;mut mock).poll_write_buf(cx, &amp;mut Cursor::new(&amp;[]))
         // })
         // .await
-        // .expect_err(&quot;should be a broken pipe&quot;);
+        // .expect_err("should be a broken pipe");
 
         // // underlying io will return the logic error upon write,
         // // so we are testing that the io_buf does not trigger a write
         // // when there is nothing to flush
         // let mock = Mock::new().build();
         // let mut io_buf = Buffered::&lt;_, Cursor&lt;Vec&lt;u8&gt;&gt;&gt;::new(mock);
-        // io_buf.flush().await.expect(&quot;should short-circuit flush&quot;);
+        // io_buf.flush().await.expect("should short-circuit flush");
     </span>}
 
     <span class="attr">#[tokio::test]
@@ -1722,34 +1722,34 @@
         <span class="kw">let _ </span>= pretty_env_logger::try_init();
         <span class="kw">let </span>mock = Mock::new()
             <span class="comment">// Split over multiple reads will read all of it
-            </span>.read(<span class="string">b&quot;HTTP/1.1 200 OK\r\n&quot;</span>)
-            .read(<span class="string">b&quot;Server: hyper\r\n&quot;</span>)
+            </span>.read(<span class="string">b"HTTP/1.1 200 OK\r\n"</span>)
+            .read(<span class="string">b"Server: hyper\r\n"</span>)
             <span class="comment">// missing last line ending
             </span>.wait(Duration::from_secs(<span class="number">1</span>))
             .build();
 
         <span class="kw">let </span><span class="kw-2">mut </span>buffered = Buffered::&lt;<span class="kw">_</span>, Cursor&lt;Vec&lt;u8&gt;&gt;&gt;::new(mock);
 
-        <span class="comment">// We expect a `parse` to be not ready, and so can&#39;t await it directly.
+        <span class="comment">// We expect a `parse` to be not ready, and so can't await it directly.
         // Rather, this `poll_fn` will wrap the `Poll` result.
         </span>futures_util::future::poll_fn(|cx| {
             <span class="kw">let </span>parse_ctx = ParseContext {
                 cached_headers: <span class="kw-2">&amp;mut </span><span class="prelude-val">None</span>,
                 req_method: <span class="kw-2">&amp;mut </span><span class="prelude-val">None</span>,
                 h1_parser_config: Default::default(),
-                <span class="attr">#[cfg(feature = <span class="string">&quot;runtime&quot;</span>)]
+                <span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
                 </span>h1_header_read_timeout: <span class="prelude-val">None</span>,
-                <span class="attr">#[cfg(feature = <span class="string">&quot;runtime&quot;</span>)]
+                <span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
                 </span>h1_header_read_timeout_fut: <span class="kw-2">&amp;mut </span><span class="prelude-val">None</span>,
-                <span class="attr">#[cfg(feature = <span class="string">&quot;runtime&quot;</span>)]
+                <span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
                 </span>h1_header_read_timeout_running: <span class="kw-2">&amp;mut </span><span class="bool-val">false</span>,
                 preserve_header_case: <span class="bool-val">false</span>,
-                <span class="attr">#[cfg(feature = <span class="string">&quot;ffi&quot;</span>)]
+                <span class="attr">#[cfg(feature = <span class="string">"ffi"</span>)]
                 </span>preserve_header_order: <span class="bool-val">false</span>,
                 h09_responses: <span class="bool-val">false</span>,
-                <span class="attr">#[cfg(feature = <span class="string">&quot;ffi&quot;</span>)]
+                <span class="attr">#[cfg(feature = <span class="string">"ffi"</span>)]
                 </span>on_informational: <span class="kw-2">&amp;mut </span><span class="prelude-val">None</span>,
-                <span class="attr">#[cfg(feature = <span class="string">&quot;ffi&quot;</span>)]
+                <span class="attr">#[cfg(feature = <span class="string">"ffi"</span>)]
                 </span>raw_headers: <span class="bool-val">false</span>,
             };
             <span class="macro">assert!</span>(buffered
@@ -1761,7 +1761,7 @@
 
         <span class="macro">assert_eq!</span>(
             buffered.read_buf,
-            <span class="string">b&quot;HTTP/1.1 200 OK\r\nServer: hyper\r\n&quot;</span>[..]
+            <span class="string">b"HTTP/1.1 200 OK\r\nServer: hyper\r\n"</span>[..]
         );
     }
 
@@ -1786,9 +1786,9 @@
             strategy.record(max);
         }
 
-        <span class="macro">assert_eq!</span>(strategy.next(), max, <span class="string">&quot;never goes over max&quot;</span>);
+        <span class="macro">assert_eq!</span>(strategy.next(), max, <span class="string">"never goes over max"</span>);
         strategy.record(max + <span class="number">1</span>);
-        <span class="macro">assert_eq!</span>(strategy.next(), max, <span class="string">&quot;never goes over max&quot;</span>);
+        <span class="macro">assert_eq!</span>(strategy.next(), max, <span class="string">"never goes over max"</span>);
     }
 
     <span class="attr">#[test]
@@ -1801,25 +1801,25 @@
         <span class="macro">assert_eq!</span>(
             strategy.next(),
             <span class="number">16384</span>,
-            <span class="string">&quot;first smaller record doesn&#39;t decrement yet&quot;
+            <span class="string">"first smaller record doesn't decrement yet"
         </span>);
         strategy.record(<span class="number">8192</span>);
-        <span class="macro">assert_eq!</span>(strategy.next(), <span class="number">16384</span>, <span class="string">&quot;record was with range&quot;</span>);
+        <span class="macro">assert_eq!</span>(strategy.next(), <span class="number">16384</span>, <span class="string">"record was with range"</span>);
 
         strategy.record(<span class="number">1</span>);
         <span class="macro">assert_eq!</span>(
             strategy.next(),
             <span class="number">16384</span>,
-            <span class="string">&quot;in-range record should make this the &#39;first&#39; again&quot;
+            <span class="string">"in-range record should make this the 'first' again"
         </span>);
 
         strategy.record(<span class="number">1</span>);
-        <span class="macro">assert_eq!</span>(strategy.next(), <span class="number">8192</span>, <span class="string">&quot;second smaller record decrements&quot;</span>);
+        <span class="macro">assert_eq!</span>(strategy.next(), <span class="number">8192</span>, <span class="string">"second smaller record decrements"</span>);
 
         strategy.record(<span class="number">1</span>);
-        <span class="macro">assert_eq!</span>(strategy.next(), <span class="number">8192</span>, <span class="string">&quot;first doesn&#39;t decrement&quot;</span>);
+        <span class="macro">assert_eq!</span>(strategy.next(), <span class="number">8192</span>, <span class="string">"first doesn't decrement"</span>);
         strategy.record(<span class="number">1</span>);
-        <span class="macro">assert_eq!</span>(strategy.next(), <span class="number">8192</span>, <span class="string">&quot;doesn&#39;t decrement under minimum&quot;</span>);
+        <span class="macro">assert_eq!</span>(strategy.next(), <span class="number">8192</span>, <span class="string">"doesn't decrement under minimum"</span>);
     }
 
     <span class="attr">#[test]
@@ -1832,14 +1832,14 @@
         <span class="macro">assert_eq!</span>(
             strategy.next(),
             <span class="number">16384</span>,
-            <span class="string">&quot;first smaller record doesn&#39;t decrement yet&quot;
+            <span class="string">"first smaller record doesn't decrement yet"
         </span>);
 
         strategy.record(<span class="number">8193</span>);
         <span class="macro">assert_eq!</span>(
             strategy.next(),
             <span class="number">16384</span>,
-            <span class="string">&quot;with current step does not decrement&quot;
+            <span class="string">"with current step does not decrement"
         </span>);
     }
 
@@ -1857,7 +1857,7 @@
                 next = strategy.next();
                 <span class="macro">assert!</span>(
                     next.is_power_of_two(),
-                    <span class="string">&quot;decrement should be powers of two: {} (max = {})&quot;</span>,
+                    <span class="string">"decrement should be powers of two: {} (max = {})"</span>,
                     next,
                     max,
                 );
@@ -1892,14 +1892,14 @@
         let mut buffered = Buffered::&lt;_, Cursor&lt;Vec&lt;u8&gt;&gt;&gt;::new(mock);
 
 
-        buffered.headers_buf().extend(b&quot;hello &quot;);
-        buffered.buffer(Cursor::new(b&quot;world, &quot;.to_vec()));
-        buffered.buffer(Cursor::new(b&quot;it&#39;s &quot;.to_vec()));
-        buffered.buffer(Cursor::new(b&quot;hyper!&quot;.to_vec()));
+        buffered.headers_buf().extend(b"hello ");
+        buffered.buffer(Cursor::new(b"world, ".to_vec()));
+        buffered.buffer(Cursor::new(b"it's ".to_vec()));
+        buffered.buffer(Cursor::new(b"hyper!".to_vec()));
         assert_eq!(buffered.write_buf.queue.bufs_cnt(), 3);
         buffered.flush().unwrap();
 
-        assert_eq!(buffered.io, b&quot;hello world, it&#39;s hyper!&quot;);
+        assert_eq!(buffered.io, b"hello world, it's hyper!");
         assert_eq!(buffered.io.num_writes(), 1);
         assert_eq!(buffered.write_buf.queue.bufs_cnt(), 0);
     }
@@ -1909,18 +1909,18 @@
     </span><span class="kw">async fn </span>write_buf_flatten() {
         <span class="kw">let _ </span>= pretty_env_logger::try_init();
 
-        <span class="kw">let </span>mock = Mock::new().write(<span class="string">b&quot;hello world, it&#39;s hyper!&quot;</span>).build();
+        <span class="kw">let </span>mock = Mock::new().write(<span class="string">b"hello world, it's hyper!"</span>).build();
 
         <span class="kw">let </span><span class="kw-2">mut </span>buffered = Buffered::&lt;<span class="kw">_</span>, Cursor&lt;Vec&lt;u8&gt;&gt;&gt;::new(mock);
         buffered.write_buf.set_strategy(WriteStrategy::Flatten);
 
-        buffered.headers_buf().extend(<span class="string">b&quot;hello &quot;</span>);
-        buffered.buffer(Cursor::new(<span class="string">b&quot;world, &quot;</span>.to_vec()));
-        buffered.buffer(Cursor::new(<span class="string">b&quot;it&#39;s &quot;</span>.to_vec()));
-        buffered.buffer(Cursor::new(<span class="string">b&quot;hyper!&quot;</span>.to_vec()));
+        buffered.headers_buf().extend(<span class="string">b"hello "</span>);
+        buffered.buffer(Cursor::new(<span class="string">b"world, "</span>.to_vec()));
+        buffered.buffer(Cursor::new(<span class="string">b"it's "</span>.to_vec()));
+        buffered.buffer(Cursor::new(<span class="string">b"hyper!"</span>.to_vec()));
         <span class="macro">assert_eq!</span>(buffered.write_buf.queue.bufs_cnt(), <span class="number">0</span>);
 
-        buffered.flush().<span class="kw">await</span>.expect(<span class="string">&quot;flush&quot;</span>);
+        buffered.flush().<span class="kw">await</span>.expect(<span class="string">"flush"</span>);
     }
 
     <span class="attr">#[test]
@@ -1931,29 +1931,29 @@
 
         <span class="kw">let </span><span class="kw-2">mut </span>write_buf = WriteBuf::&lt;Cursor&lt;Vec&lt;u8&gt;&gt;&gt;::new(WriteStrategy::Flatten);
 
-        write_buf.buffer(b(<span class="string">&quot;hello &quot;</span>));
-        write_buf.buffer(b(<span class="string">&quot;world, &quot;</span>));
+        write_buf.buffer(b(<span class="string">"hello "</span>));
+        write_buf.buffer(b(<span class="string">"world, "</span>));
 
-        <span class="macro">assert_eq!</span>(write_buf.chunk(), <span class="string">b&quot;hello world, &quot;</span>);
+        <span class="macro">assert_eq!</span>(write_buf.chunk(), <span class="string">b"hello world, "</span>);
 
         <span class="comment">// advance most of the way, but not all
         </span>write_buf.advance(<span class="number">11</span>);
 
-        <span class="macro">assert_eq!</span>(write_buf.chunk(), <span class="string">b&quot;, &quot;</span>);
+        <span class="macro">assert_eq!</span>(write_buf.chunk(), <span class="string">b", "</span>);
         <span class="macro">assert_eq!</span>(write_buf.headers.pos, <span class="number">11</span>);
         <span class="macro">assert_eq!</span>(write_buf.headers.bytes.capacity(), INIT_BUFFER_SIZE);
 
-        <span class="comment">// there&#39;s still room in the headers buffer, so just push on the end
-        </span>write_buf.buffer(b(<span class="string">&quot;it&#39;s hyper!&quot;</span>));
+        <span class="comment">// there's still room in the headers buffer, so just push on the end
+        </span>write_buf.buffer(b(<span class="string">"it's hyper!"</span>));
 
-        <span class="macro">assert_eq!</span>(write_buf.chunk(), <span class="string">b&quot;, it&#39;s hyper!&quot;</span>);
+        <span class="macro">assert_eq!</span>(write_buf.chunk(), <span class="string">b", it's hyper!"</span>);
         <span class="macro">assert_eq!</span>(write_buf.headers.pos, <span class="number">11</span>);
 
         <span class="kw">let </span>rem1 = write_buf.remaining();
         <span class="kw">let </span>cap = write_buf.headers.bytes.capacity();
 
-        <span class="comment">// but when this would go over capacity, don&#39;t copy the old bytes
-        </span>write_buf.buffer(Cursor::new(<span class="macro">vec!</span>[<span class="string">b&#39;X&#39;</span>; cap]));
+        <span class="comment">// but when this would go over capacity, don't copy the old bytes
+        </span>write_buf.buffer(Cursor::new(<span class="macro">vec!</span>[<span class="string">b'X'</span>; cap]));
         <span class="macro">assert_eq!</span>(write_buf.remaining(), cap + rem1);
         <span class="macro">assert_eq!</span>(write_buf.headers.pos, <span class="number">0</span>);
     }
@@ -1963,33 +1963,33 @@
         <span class="kw">let _ </span>= pretty_env_logger::try_init();
 
         <span class="kw">let </span>mock = Mock::new()
-            .write(<span class="string">b&quot;hello &quot;</span>)
-            .write(<span class="string">b&quot;world, &quot;</span>)
-            .write(<span class="string">b&quot;it&#39;s &quot;</span>)
-            .write(<span class="string">b&quot;hyper!&quot;</span>)
+            .write(<span class="string">b"hello "</span>)
+            .write(<span class="string">b"world, "</span>)
+            .write(<span class="string">b"it's "</span>)
+            .write(<span class="string">b"hyper!"</span>)
             .build();
 
         <span class="kw">let </span><span class="kw-2">mut </span>buffered = Buffered::&lt;<span class="kw">_</span>, Cursor&lt;Vec&lt;u8&gt;&gt;&gt;::new(mock);
         buffered.write_buf.set_strategy(WriteStrategy::Queue);
 
         <span class="comment">// we have 4 buffers, and vec IO disabled, but explicitly said
-        // don&#39;t try to auto detect (via setting strategy above)
+        // don't try to auto detect (via setting strategy above)
 
-        </span>buffered.headers_buf().extend(<span class="string">b&quot;hello &quot;</span>);
-        buffered.buffer(Cursor::new(<span class="string">b&quot;world, &quot;</span>.to_vec()));
-        buffered.buffer(Cursor::new(<span class="string">b&quot;it&#39;s &quot;</span>.to_vec()));
-        buffered.buffer(Cursor::new(<span class="string">b&quot;hyper!&quot;</span>.to_vec()));
+        </span>buffered.headers_buf().extend(<span class="string">b"hello "</span>);
+        buffered.buffer(Cursor::new(<span class="string">b"world, "</span>.to_vec()));
+        buffered.buffer(Cursor::new(<span class="string">b"it's "</span>.to_vec()));
+        buffered.buffer(Cursor::new(<span class="string">b"hyper!"</span>.to_vec()));
         <span class="macro">assert_eq!</span>(buffered.write_buf.queue.bufs_cnt(), <span class="number">3</span>);
 
-        buffered.flush().<span class="kw">await</span>.expect(<span class="string">&quot;flush&quot;</span>);
+        buffered.flush().<span class="kw">await</span>.expect(<span class="string">"flush"</span>);
 
         <span class="macro">assert_eq!</span>(buffered.write_buf.queue.bufs_cnt(), <span class="number">0</span>);
     }
 
-    <span class="comment">// #[cfg(feature = &quot;nightly&quot;)]
+    <span class="comment">// #[cfg(feature = "nightly")]
     // #[bench]
     // fn bench_write_buf_flatten_buffer_chunk(b: &amp;mut Bencher) {
-    //     let s = &quot;Hello, World!&quot;;
+    //     let s = "Hello, World!";
     //     b.bytes = s.len() as u64;
 
     //     let mut write_buf = WriteBuf::&lt;bytes::Bytes&gt;::new();

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bytes-1.5.0/src/buf/buf_mut.rs`."><title>buf_mut.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="bytes" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bytes-1.5.0/src/buf/buf_mut.rs`."><title>buf_mut.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="bytes" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1527,7 +1527,7 @@
 <a href="#1527" id="1527">1527</a>
 <a href="#1528" id="1528">1528</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::buf::{limit, Chain, Limit, UninitSlice};
-<span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::buf::{writer, Writer};
 
 <span class="kw">use </span>core::{cmp, mem, ptr, usize};
@@ -1550,9 +1550,9 @@
 ///
 /// let mut buf = vec![];
 ///
-/// buf.put(&amp;b&quot;hello world&quot;[..]);
+/// buf.put(&amp;b"hello world"[..]);
 ///
-/// assert_eq!(buf, b&quot;hello world&quot;);
+/// assert_eq!(buf, b"hello world");
 /// ```
 </span><span class="kw">pub unsafe trait </span>BufMut {
     <span class="doccomment">/// Returns the number of bytes that can be written from the current
@@ -1574,7 +1574,7 @@
     /// let mut buf = &amp;mut dst[..];
     ///
     /// let original_remaining = buf.remaining_mut();
-    /// buf.put(&amp;b&quot;hello&quot;[..]);
+    /// buf.put(&amp;b"hello"[..]);
     ///
     /// assert_eq!(original_remaining - 5, buf.remaining_mut());
     /// ```
@@ -1583,7 +1583,7 @@
     ///
     /// Implementations of `remaining_mut` should ensure that the return value
     /// does not change unless a call is made to `advance_mut` or any other
-    /// function that is documented to change the `BufMut`&#39;s current position.
+    /// function that is documented to change the `BufMut`'s current position.
     ///
     /// # Note
     ///
@@ -1606,16 +1606,16 @@
     /// let mut buf = Vec::with_capacity(16);
     ///
     /// // Write some data
-    /// buf.chunk_mut()[0..2].copy_from_slice(b&quot;he&quot;);
+    /// buf.chunk_mut()[0..2].copy_from_slice(b"he");
     /// unsafe { buf.advance_mut(2) };
     ///
     /// // write more bytes
-    /// buf.chunk_mut()[0..3].copy_from_slice(b&quot;llo&quot;);
+    /// buf.chunk_mut()[0..3].copy_from_slice(b"llo");
     ///
     /// unsafe { buf.advance_mut(3); }
     ///
     /// assert_eq!(5, buf.len());
-    /// assert_eq!(buf, b&quot;hello&quot;);
+    /// assert_eq!(buf, b"hello");
     /// ```
     ///
     /// # Panics
@@ -1645,7 +1645,7 @@
     ///
     /// assert!(buf.has_remaining_mut());
     ///
-    /// buf.put(&amp;b&quot;hello&quot;[..]);
+    /// buf.put(&amp;b"hello"[..]);
     ///
     /// assert!(!buf.has_remaining_mut());
     /// ```
@@ -1671,20 +1671,20 @@
     ///
     /// unsafe {
     ///     // MaybeUninit::as_mut_ptr
-    ///     buf.chunk_mut()[0..].as_mut_ptr().write(b&#39;h&#39;);
-    ///     buf.chunk_mut()[1..].as_mut_ptr().write(b&#39;e&#39;);
+    ///     buf.chunk_mut()[0..].as_mut_ptr().write(b'h');
+    ///     buf.chunk_mut()[1..].as_mut_ptr().write(b'e');
     ///
     ///     buf.advance_mut(2);
     ///
-    ///     buf.chunk_mut()[0..].as_mut_ptr().write(b&#39;l&#39;);
-    ///     buf.chunk_mut()[1..].as_mut_ptr().write(b&#39;l&#39;);
-    ///     buf.chunk_mut()[2..].as_mut_ptr().write(b&#39;o&#39;);
+    ///     buf.chunk_mut()[0..].as_mut_ptr().write(b'l');
+    ///     buf.chunk_mut()[1..].as_mut_ptr().write(b'l');
+    ///     buf.chunk_mut()[2..].as_mut_ptr().write(b'o');
     ///
     ///     buf.advance_mut(3);
     /// }
     ///
     /// assert_eq!(5, buf.len());
-    /// assert_eq!(buf, b&quot;hello&quot;);
+    /// assert_eq!(buf, b"hello");
     /// ```
     ///
     /// # Implementer notes
@@ -1699,7 +1699,7 @@
     /// memory and fails to do so.
     </span><span class="comment">// The `chunk_mut` method was previously called `bytes_mut`. This alias makes the
     // rename more easily discoverable.
-    </span><span class="attr">#[cfg_attr(docsrs, doc(alias = <span class="string">&quot;bytes_mut&quot;</span>))]
+    </span><span class="attr">#[cfg_attr(docsrs, doc(alias = <span class="string">"bytes_mut"</span>))]
     </span><span class="kw">fn </span>chunk_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>UninitSlice;
 
     <span class="doccomment">/// Transfer bytes into `self` from `src` and advance the cursor by the
@@ -1712,11 +1712,11 @@
     ///
     /// let mut buf = vec![];
     ///
-    /// buf.put_u8(b&#39;h&#39;);
-    /// buf.put(&amp;b&quot;ello&quot;[..]);
-    /// buf.put(&amp;b&quot; world&quot;[..]);
+    /// buf.put_u8(b'h');
+    /// buf.put(&amp;b"ello"[..]);
+    /// buf.put(&amp;b" world"[..]);
     ///
-    /// assert_eq!(buf, b&quot;hello world&quot;);
+    /// assert_eq!(buf, b"hello world");
     /// ```
     ///
     /// # Panics
@@ -1758,19 +1758,19 @@
     ///
     /// {
     ///     let mut buf = &amp;mut dst[..];
-    ///     buf.put_slice(b&quot;hello&quot;);
+    ///     buf.put_slice(b"hello");
     ///
     ///     assert_eq!(1, buf.remaining_mut());
     /// }
     ///
-    /// assert_eq!(b&quot;hello\0&quot;, &amp;dst);
+    /// assert_eq!(b"hello\0", &amp;dst);
     /// ```
     </span><span class="kw">fn </span>put_slice(<span class="kw-2">&amp;mut </span><span class="self">self</span>, src: <span class="kw-2">&amp;</span>[u8]) {
         <span class="kw">let </span><span class="kw-2">mut </span>off = <span class="number">0</span>;
 
         <span class="macro">assert!</span>(
             <span class="self">self</span>.remaining_mut() &gt;= src.len(),
-            <span class="string">&quot;buffer overflow; remaining = {}; src = {}&quot;</span>,
+            <span class="string">"buffer overflow; remaining = {}; src = {}"</span>,
             <span class="self">self</span>.remaining_mut(),
             src.len()
         );
@@ -1806,12 +1806,12 @@
     ///
     /// {
     ///     let mut buf = &amp;mut dst[..];
-    ///     buf.put_bytes(b&#39;a&#39;, 4);
+    ///     buf.put_bytes(b'a', 4);
     ///
     ///     assert_eq!(2, buf.remaining_mut());
     /// }
     ///
-    /// assert_eq!(b&quot;aaaa\0\0&quot;, &amp;dst);
+    /// assert_eq!(b"aaaa\0\0", &amp;dst);
     /// ```
     ///
     /// # Panics
@@ -1835,7 +1835,7 @@
     ///
     /// let mut buf = vec![];
     /// buf.put_u8(0x01);
-    /// assert_eq!(buf, b&quot;\x01&quot;);
+    /// assert_eq!(buf, b"\x01");
     /// ```
     ///
     /// # Panics
@@ -1858,7 +1858,7 @@
     ///
     /// let mut buf = vec![];
     /// buf.put_i8(0x01);
-    /// assert_eq!(buf, b&quot;\x01&quot;);
+    /// assert_eq!(buf, b"\x01");
     /// ```
     ///
     /// # Panics
@@ -1881,7 +1881,7 @@
     ///
     /// let mut buf = vec![];
     /// buf.put_u16(0x0809);
-    /// assert_eq!(buf, b&quot;\x08\x09&quot;);
+    /// assert_eq!(buf, b"\x08\x09");
     /// ```
     ///
     /// # Panics
@@ -1903,7 +1903,7 @@
     ///
     /// let mut buf = vec![];
     /// buf.put_u16_le(0x0809);
-    /// assert_eq!(buf, b&quot;\x09\x08&quot;);
+    /// assert_eq!(buf, b"\x09\x08");
     /// ```
     ///
     /// # Panics
@@ -1925,10 +1925,10 @@
     ///
     /// let mut buf = vec![];
     /// buf.put_u16_ne(0x0809);
-    /// if cfg!(target_endian = &quot;big&quot;) {
-    ///     assert_eq!(buf, b&quot;\x08\x09&quot;);
+    /// if cfg!(target_endian = "big") {
+    ///     assert_eq!(buf, b"\x08\x09");
     /// } else {
-    ///     assert_eq!(buf, b&quot;\x09\x08&quot;);
+    ///     assert_eq!(buf, b"\x09\x08");
     /// }
     /// ```
     ///
@@ -1951,7 +1951,7 @@
     ///
     /// let mut buf = vec![];
     /// buf.put_i16(0x0809);
-    /// assert_eq!(buf, b&quot;\x08\x09&quot;);
+    /// assert_eq!(buf, b"\x08\x09");
     /// ```
     ///
     /// # Panics
@@ -1973,7 +1973,7 @@
     ///
     /// let mut buf = vec![];
     /// buf.put_i16_le(0x0809);
-    /// assert_eq!(buf, b&quot;\x09\x08&quot;);
+    /// assert_eq!(buf, b"\x09\x08");
     /// ```
     ///
     /// # Panics
@@ -1995,10 +1995,10 @@
     ///
     /// let mut buf = vec![];
     /// buf.put_i16_ne(0x0809);
-    /// if cfg!(target_endian = &quot;big&quot;) {
-    ///     assert_eq!(buf, b&quot;\x08\x09&quot;);
+    /// if cfg!(target_endian = "big") {
+    ///     assert_eq!(buf, b"\x08\x09");
     /// } else {
-    ///     assert_eq!(buf, b&quot;\x09\x08&quot;);
+    ///     assert_eq!(buf, b"\x09\x08");
     /// }
     /// ```
     ///
@@ -2021,7 +2021,7 @@
     ///
     /// let mut buf = vec![];
     /// buf.put_u32(0x0809A0A1);
-    /// assert_eq!(buf, b&quot;\x08\x09\xA0\xA1&quot;);
+    /// assert_eq!(buf, b"\x08\x09\xA0\xA1");
     /// ```
     ///
     /// # Panics
@@ -2043,7 +2043,7 @@
     ///
     /// let mut buf = vec![];
     /// buf.put_u32_le(0x0809A0A1);
-    /// assert_eq!(buf, b&quot;\xA1\xA0\x09\x08&quot;);
+    /// assert_eq!(buf, b"\xA1\xA0\x09\x08");
     /// ```
     ///
     /// # Panics
@@ -2065,10 +2065,10 @@
     ///
     /// let mut buf = vec![];
     /// buf.put_u32_ne(0x0809A0A1);
-    /// if cfg!(target_endian = &quot;big&quot;) {
-    ///     assert_eq!(buf, b&quot;\x08\x09\xA0\xA1&quot;);
+    /// if cfg!(target_endian = "big") {
+    ///     assert_eq!(buf, b"\x08\x09\xA0\xA1");
     /// } else {
-    ///     assert_eq!(buf, b&quot;\xA1\xA0\x09\x08&quot;);
+    ///     assert_eq!(buf, b"\xA1\xA0\x09\x08");
     /// }
     /// ```
     ///
@@ -2091,7 +2091,7 @@
     ///
     /// let mut buf = vec![];
     /// buf.put_i32(0x0809A0A1);
-    /// assert_eq!(buf, b&quot;\x08\x09\xA0\xA1&quot;);
+    /// assert_eq!(buf, b"\x08\x09\xA0\xA1");
     /// ```
     ///
     /// # Panics
@@ -2113,7 +2113,7 @@
     ///
     /// let mut buf = vec![];
     /// buf.put_i32_le(0x0809A0A1);
-    /// assert_eq!(buf, b&quot;\xA1\xA0\x09\x08&quot;);
+    /// assert_eq!(buf, b"\xA1\xA0\x09\x08");
     /// ```
     ///
     /// # Panics
@@ -2135,10 +2135,10 @@
     ///
     /// let mut buf = vec![];
     /// buf.put_i32_ne(0x0809A0A1);
-    /// if cfg!(target_endian = &quot;big&quot;) {
-    ///     assert_eq!(buf, b&quot;\x08\x09\xA0\xA1&quot;);
+    /// if cfg!(target_endian = "big") {
+    ///     assert_eq!(buf, b"\x08\x09\xA0\xA1");
     /// } else {
-    ///     assert_eq!(buf, b&quot;\xA1\xA0\x09\x08&quot;);
+    ///     assert_eq!(buf, b"\xA1\xA0\x09\x08");
     /// }
     /// ```
     ///
@@ -2161,7 +2161,7 @@
     ///
     /// let mut buf = vec![];
     /// buf.put_u64(0x0102030405060708);
-    /// assert_eq!(buf, b&quot;\x01\x02\x03\x04\x05\x06\x07\x08&quot;);
+    /// assert_eq!(buf, b"\x01\x02\x03\x04\x05\x06\x07\x08");
     /// ```
     ///
     /// # Panics
@@ -2183,7 +2183,7 @@
     ///
     /// let mut buf = vec![];
     /// buf.put_u64_le(0x0102030405060708);
-    /// assert_eq!(buf, b&quot;\x08\x07\x06\x05\x04\x03\x02\x01&quot;);
+    /// assert_eq!(buf, b"\x08\x07\x06\x05\x04\x03\x02\x01");
     /// ```
     ///
     /// # Panics
@@ -2205,10 +2205,10 @@
     ///
     /// let mut buf = vec![];
     /// buf.put_u64_ne(0x0102030405060708);
-    /// if cfg!(target_endian = &quot;big&quot;) {
-    ///     assert_eq!(buf, b&quot;\x01\x02\x03\x04\x05\x06\x07\x08&quot;);
+    /// if cfg!(target_endian = "big") {
+    ///     assert_eq!(buf, b"\x01\x02\x03\x04\x05\x06\x07\x08");
     /// } else {
-    ///     assert_eq!(buf, b&quot;\x08\x07\x06\x05\x04\x03\x02\x01&quot;);
+    ///     assert_eq!(buf, b"\x08\x07\x06\x05\x04\x03\x02\x01");
     /// }
     /// ```
     ///
@@ -2231,7 +2231,7 @@
     ///
     /// let mut buf = vec![];
     /// buf.put_i64(0x0102030405060708);
-    /// assert_eq!(buf, b&quot;\x01\x02\x03\x04\x05\x06\x07\x08&quot;);
+    /// assert_eq!(buf, b"\x01\x02\x03\x04\x05\x06\x07\x08");
     /// ```
     ///
     /// # Panics
@@ -2253,7 +2253,7 @@
     ///
     /// let mut buf = vec![];
     /// buf.put_i64_le(0x0102030405060708);
-    /// assert_eq!(buf, b&quot;\x08\x07\x06\x05\x04\x03\x02\x01&quot;);
+    /// assert_eq!(buf, b"\x08\x07\x06\x05\x04\x03\x02\x01");
     /// ```
     ///
     /// # Panics
@@ -2275,10 +2275,10 @@
     ///
     /// let mut buf = vec![];
     /// buf.put_i64_ne(0x0102030405060708);
-    /// if cfg!(target_endian = &quot;big&quot;) {
-    ///     assert_eq!(buf, b&quot;\x01\x02\x03\x04\x05\x06\x07\x08&quot;);
+    /// if cfg!(target_endian = "big") {
+    ///     assert_eq!(buf, b"\x01\x02\x03\x04\x05\x06\x07\x08");
     /// } else {
-    ///     assert_eq!(buf, b&quot;\x08\x07\x06\x05\x04\x03\x02\x01&quot;);
+    ///     assert_eq!(buf, b"\x08\x07\x06\x05\x04\x03\x02\x01");
     /// }
     /// ```
     ///
@@ -2301,7 +2301,7 @@
     ///
     /// let mut buf = vec![];
     /// buf.put_u128(0x01020304050607080910111213141516);
-    /// assert_eq!(buf, b&quot;\x01\x02\x03\x04\x05\x06\x07\x08\x09\x10\x11\x12\x13\x14\x15\x16&quot;);
+    /// assert_eq!(buf, b"\x01\x02\x03\x04\x05\x06\x07\x08\x09\x10\x11\x12\x13\x14\x15\x16");
     /// ```
     ///
     /// # Panics
@@ -2323,7 +2323,7 @@
     ///
     /// let mut buf = vec![];
     /// buf.put_u128_le(0x01020304050607080910111213141516);
-    /// assert_eq!(buf, b&quot;\x16\x15\x14\x13\x12\x11\x10\x09\x08\x07\x06\x05\x04\x03\x02\x01&quot;);
+    /// assert_eq!(buf, b"\x16\x15\x14\x13\x12\x11\x10\x09\x08\x07\x06\x05\x04\x03\x02\x01");
     /// ```
     ///
     /// # Panics
@@ -2345,10 +2345,10 @@
     ///
     /// let mut buf = vec![];
     /// buf.put_u128_ne(0x01020304050607080910111213141516);
-    /// if cfg!(target_endian = &quot;big&quot;) {
-    ///     assert_eq!(buf, b&quot;\x01\x02\x03\x04\x05\x06\x07\x08\x09\x10\x11\x12\x13\x14\x15\x16&quot;);
+    /// if cfg!(target_endian = "big") {
+    ///     assert_eq!(buf, b"\x01\x02\x03\x04\x05\x06\x07\x08\x09\x10\x11\x12\x13\x14\x15\x16");
     /// } else {
-    ///     assert_eq!(buf, b&quot;\x16\x15\x14\x13\x12\x11\x10\x09\x08\x07\x06\x05\x04\x03\x02\x01&quot;);
+    ///     assert_eq!(buf, b"\x16\x15\x14\x13\x12\x11\x10\x09\x08\x07\x06\x05\x04\x03\x02\x01");
     /// }
     /// ```
     ///
@@ -2371,7 +2371,7 @@
     ///
     /// let mut buf = vec![];
     /// buf.put_i128(0x01020304050607080910111213141516);
-    /// assert_eq!(buf, b&quot;\x01\x02\x03\x04\x05\x06\x07\x08\x09\x10\x11\x12\x13\x14\x15\x16&quot;);
+    /// assert_eq!(buf, b"\x01\x02\x03\x04\x05\x06\x07\x08\x09\x10\x11\x12\x13\x14\x15\x16");
     /// ```
     ///
     /// # Panics
@@ -2393,7 +2393,7 @@
     ///
     /// let mut buf = vec![];
     /// buf.put_i128_le(0x01020304050607080910111213141516);
-    /// assert_eq!(buf, b&quot;\x16\x15\x14\x13\x12\x11\x10\x09\x08\x07\x06\x05\x04\x03\x02\x01&quot;);
+    /// assert_eq!(buf, b"\x16\x15\x14\x13\x12\x11\x10\x09\x08\x07\x06\x05\x04\x03\x02\x01");
     /// ```
     ///
     /// # Panics
@@ -2415,10 +2415,10 @@
     ///
     /// let mut buf = vec![];
     /// buf.put_i128_ne(0x01020304050607080910111213141516);
-    /// if cfg!(target_endian = &quot;big&quot;) {
-    ///     assert_eq!(buf, b&quot;\x01\x02\x03\x04\x05\x06\x07\x08\x09\x10\x11\x12\x13\x14\x15\x16&quot;);
+    /// if cfg!(target_endian = "big") {
+    ///     assert_eq!(buf, b"\x01\x02\x03\x04\x05\x06\x07\x08\x09\x10\x11\x12\x13\x14\x15\x16");
     /// } else {
-    ///     assert_eq!(buf, b&quot;\x16\x15\x14\x13\x12\x11\x10\x09\x08\x07\x06\x05\x04\x03\x02\x01&quot;);
+    ///     assert_eq!(buf, b"\x16\x15\x14\x13\x12\x11\x10\x09\x08\x07\x06\x05\x04\x03\x02\x01");
     /// }
     /// ```
     ///
@@ -2441,7 +2441,7 @@
     ///
     /// let mut buf = vec![];
     /// buf.put_uint(0x010203, 3);
-    /// assert_eq!(buf, b&quot;\x01\x02\x03&quot;);
+    /// assert_eq!(buf, b"\x01\x02\x03");
     /// ```
     ///
     /// # Panics
@@ -2463,7 +2463,7 @@
     ///
     /// let mut buf = vec![];
     /// buf.put_uint_le(0x010203, 3);
-    /// assert_eq!(buf, b&quot;\x03\x02\x01&quot;);
+    /// assert_eq!(buf, b"\x03\x02\x01");
     /// ```
     ///
     /// # Panics
@@ -2485,10 +2485,10 @@
     ///
     /// let mut buf = vec![];
     /// buf.put_uint_ne(0x010203, 3);
-    /// if cfg!(target_endian = &quot;big&quot;) {
-    ///     assert_eq!(buf, b&quot;\x01\x02\x03&quot;);
+    /// if cfg!(target_endian = "big") {
+    ///     assert_eq!(buf, b"\x01\x02\x03");
     /// } else {
-    ///     assert_eq!(buf, b&quot;\x03\x02\x01&quot;);
+    ///     assert_eq!(buf, b"\x03\x02\x01");
     /// }
     /// ```
     ///
@@ -2497,7 +2497,7 @@
     /// This function panics if there is not enough remaining capacity in
     /// `self`.
     </span><span class="kw">fn </span>put_uint_ne(<span class="kw-2">&amp;mut </span><span class="self">self</span>, n: u64, nbytes: usize) {
-        <span class="kw">if </span><span class="macro">cfg!</span>(target_endian = <span class="string">&quot;big&quot;</span>) {
+        <span class="kw">if </span><span class="macro">cfg!</span>(target_endian = <span class="string">"big"</span>) {
             <span class="self">self</span>.put_uint(n, nbytes)
         } <span class="kw">else </span>{
             <span class="self">self</span>.put_uint_le(n, nbytes)
@@ -2515,7 +2515,7 @@
     ///
     /// let mut buf = vec![];
     /// buf.put_int(0x0504010203, 3);
-    /// assert_eq!(buf, b&quot;\x01\x02\x03&quot;);
+    /// assert_eq!(buf, b"\x01\x02\x03");
     /// ```
     ///
     /// # Panics
@@ -2537,7 +2537,7 @@
     ///
     /// let mut buf = vec![];
     /// buf.put_int_le(0x0504010203, 3);
-    /// assert_eq!(buf, b&quot;\x03\x02\x01&quot;);
+    /// assert_eq!(buf, b"\x03\x02\x01");
     /// ```
     ///
     /// # Panics
@@ -2559,10 +2559,10 @@
     ///
     /// let mut buf = vec![];
     /// buf.put_int_ne(0x010203, 3);
-    /// if cfg!(target_endian = &quot;big&quot;) {
-    ///     assert_eq!(buf, b&quot;\x01\x02\x03&quot;);
+    /// if cfg!(target_endian = "big") {
+    ///     assert_eq!(buf, b"\x01\x02\x03");
     /// } else {
-    ///     assert_eq!(buf, b&quot;\x03\x02\x01&quot;);
+    ///     assert_eq!(buf, b"\x03\x02\x01");
     /// }
     /// ```
     ///
@@ -2571,7 +2571,7 @@
     /// This function panics if there is not enough remaining capacity in
     /// `self` or if `nbytes` is greater than 8.
     </span><span class="kw">fn </span>put_int_ne(<span class="kw-2">&amp;mut </span><span class="self">self</span>, n: i64, nbytes: usize) {
-        <span class="kw">if </span><span class="macro">cfg!</span>(target_endian = <span class="string">&quot;big&quot;</span>) {
+        <span class="kw">if </span><span class="macro">cfg!</span>(target_endian = <span class="string">"big"</span>) {
             <span class="self">self</span>.put_int(n, nbytes)
         } <span class="kw">else </span>{
             <span class="self">self</span>.put_int_le(n, nbytes)
@@ -2590,7 +2590,7 @@
     ///
     /// let mut buf = vec![];
     /// buf.put_f32(1.2f32);
-    /// assert_eq!(buf, b&quot;\x3F\x99\x99\x9A&quot;);
+    /// assert_eq!(buf, b"\x3F\x99\x99\x9A");
     /// ```
     ///
     /// # Panics
@@ -2613,7 +2613,7 @@
     ///
     /// let mut buf = vec![];
     /// buf.put_f32_le(1.2f32);
-    /// assert_eq!(buf, b&quot;\x9A\x99\x99\x3F&quot;);
+    /// assert_eq!(buf, b"\x9A\x99\x99\x3F");
     /// ```
     ///
     /// # Panics
@@ -2636,10 +2636,10 @@
     ///
     /// let mut buf = vec![];
     /// buf.put_f32_ne(1.2f32);
-    /// if cfg!(target_endian = &quot;big&quot;) {
-    ///     assert_eq!(buf, b&quot;\x3F\x99\x99\x9A&quot;);
+    /// if cfg!(target_endian = "big") {
+    ///     assert_eq!(buf, b"\x3F\x99\x99\x9A");
     /// } else {
-    ///     assert_eq!(buf, b&quot;\x9A\x99\x99\x3F&quot;);
+    ///     assert_eq!(buf, b"\x9A\x99\x99\x3F");
     /// }
     /// ```
     ///
@@ -2663,7 +2663,7 @@
     ///
     /// let mut buf = vec![];
     /// buf.put_f64(1.2f64);
-    /// assert_eq!(buf, b&quot;\x3F\xF3\x33\x33\x33\x33\x33\x33&quot;);
+    /// assert_eq!(buf, b"\x3F\xF3\x33\x33\x33\x33\x33\x33");
     /// ```
     ///
     /// # Panics
@@ -2686,7 +2686,7 @@
     ///
     /// let mut buf = vec![];
     /// buf.put_f64_le(1.2f64);
-    /// assert_eq!(buf, b&quot;\x33\x33\x33\x33\x33\x33\xF3\x3F&quot;);
+    /// assert_eq!(buf, b"\x33\x33\x33\x33\x33\x33\xF3\x3F");
     /// ```
     ///
     /// # Panics
@@ -2709,10 +2709,10 @@
     ///
     /// let mut buf = vec![];
     /// buf.put_f64_ne(1.2f64);
-    /// if cfg!(target_endian = &quot;big&quot;) {
-    ///     assert_eq!(buf, b&quot;\x3F\xF3\x33\x33\x33\x33\x33\x33&quot;);
+    /// if cfg!(target_endian = "big") {
+    ///     assert_eq!(buf, b"\x3F\xF3\x33\x33\x33\x33\x33\x33");
     /// } else {
-    ///     assert_eq!(buf, b&quot;\x33\x33\x33\x33\x33\x33\xF3\x3F&quot;);
+    ///     assert_eq!(buf, b"\x33\x33\x33\x33\x33\x33\xF3\x3F");
     /// }
     /// ```
     ///
@@ -2759,15 +2759,15 @@
     ///
     /// let mut buf = vec![].writer();
     ///
-    /// let num = buf.write(&amp;b&quot;hello world&quot;[..]).unwrap();
+    /// let num = buf.write(&amp;b"hello world"[..]).unwrap();
     /// assert_eq!(11, num);
     ///
     /// let buf = buf.into_inner();
     ///
-    /// assert_eq!(*buf, b&quot;hello world&quot;[..]);
+    /// assert_eq!(*buf, b"hello world"[..]);
     /// ```
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;std&quot;</span>)))]
+    </span><span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"std"</span>)))]
     </span><span class="kw">fn </span>writer(<span class="self">self</span>) -&gt; Writer&lt;<span class="self">Self</span>&gt;
     <span class="kw">where
         </span><span class="self">Self</span>: Sized,
@@ -2790,10 +2790,10 @@
     ///
     /// let mut chain = (&amp;mut a[..]).chain_mut(&amp;mut b[..]);
     ///
-    /// chain.put_slice(b&quot;hello world&quot;);
+    /// chain.put_slice(b"hello world");
     ///
-    /// assert_eq!(&amp;a[..], b&quot;hello&quot;);
-    /// assert_eq!(&amp;b[..], b&quot; world&quot;);
+    /// assert_eq!(&amp;a[..], b"hello");
+    /// assert_eq!(&amp;b[..], b" world");
     /// ```
     </span><span class="kw">fn </span>chain_mut&lt;U: BufMut&gt;(<span class="self">self</span>, next: U) -&gt; Chain&lt;<span class="self">Self</span>, U&gt;
     <span class="kw">where
@@ -2996,7 +2996,7 @@
 
         <span class="macro">assert!</span>(
             cnt &lt;= remaining,
-            <span class="string">&quot;cannot advance past `remaining_mut`: {:?} &lt;= {:?}&quot;</span>,
+            <span class="string">"cannot advance past `remaining_mut`: {:?} &lt;= {:?}"</span>,
             cnt,
             remaining
         );
@@ -3023,7 +3023,7 @@
     <span class="kw">where
         </span><span class="self">Self</span>: Sized,
     {
-        <span class="comment">// In case the src isn&#39;t contiguous, reserve upfront
+        <span class="comment">// In case the src isn't contiguous, reserve upfront
         </span><span class="self">self</span>.reserve(src.remaining());
 
         <span class="kw">while </span>src.has_remaining() {
@@ -3052,6 +3052,6 @@
 }
 
 <span class="comment">// The existence of this function makes the compiler catch if the BufMut
-// trait is &quot;object-safe&quot; or not.
+// trait is "object-safe" or not.
 </span><span class="kw">fn </span>_assert_trait_object(_b: <span class="kw-2">&amp;</span><span class="kw">dyn </span>BufMut) {}
 </code></pre></div></section></main></body></html>

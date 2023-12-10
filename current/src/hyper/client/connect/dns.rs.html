@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hyper-0.14.27/src/client/connect/dns.rs`."><title>dns.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="hyper" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hyper-0.14.27/src/client/connect/dns.rs`."><title>dns.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="hyper" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -494,13 +494,13 @@
 }
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>Name {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         fmt::Debug::fmt(<span class="kw-2">&amp;</span><span class="self">self</span>.host, f)
     }
 }
 
 <span class="kw">impl </span>fmt::Display <span class="kw">for </span>Name {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         fmt::Display::fmt(<span class="kw-2">&amp;</span><span class="self">self</span>.host, f)
     }
 }
@@ -519,8 +519,8 @@
 </span><span class="kw">pub struct </span>InvalidNameError(());
 
 <span class="kw">impl </span>fmt::Display <span class="kw">for </span>InvalidNameError {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        f.write_str(<span class="string">&quot;Not a valid domain name&quot;</span>)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        f.write_str(<span class="string">"Not a valid domain name"</span>)
     }
 }
 
@@ -538,13 +538,13 @@
     <span class="kw">type </span>Error = io::Error;
     <span class="kw">type </span>Future = GaiFuture;
 
-    <span class="kw">fn </span>poll_ready(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;(), io::Error&gt;&gt; {
+    <span class="kw">fn </span>poll_ready(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;(), io::Error&gt;&gt; {
         Poll::Ready(<span class="prelude-val">Ok</span>(()))
     }
 
     <span class="kw">fn </span>call(<span class="kw-2">&amp;mut </span><span class="self">self</span>, name: Name) -&gt; <span class="self">Self</span>::Future {
         <span class="kw">let </span>blocking = tokio::task::spawn_blocking(<span class="kw">move </span>|| {
-            <span class="macro">debug!</span>(<span class="string">&quot;resolving host={:?}&quot;</span>, name.host);
+            <span class="macro">debug!</span>(<span class="string">"resolving host={:?}"</span>, name.host);
             (<span class="kw-2">&amp;*</span>name.host, <span class="number">0</span>)
                 .to_socket_addrs()
                 .map(|i| SocketAddrs { iter: i })
@@ -555,15 +555,15 @@
 }
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>GaiResolver {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        f.pad(<span class="string">&quot;GaiResolver&quot;</span>)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        f.pad(<span class="string">"GaiResolver"</span>)
     }
 }
 
 <span class="kw">impl </span>Future <span class="kw">for </span>GaiFuture {
     <span class="kw">type </span>Output = <span class="prelude-ty">Result</span>&lt;GaiAddrs, io::Error&gt;;
 
-    <span class="kw">fn </span>poll(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
+    <span class="kw">fn </span>poll(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
         Pin::new(<span class="kw-2">&amp;mut </span><span class="self">self</span>.inner).poll(cx).map(|res| <span class="kw">match </span>res {
             <span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(addrs)) =&gt; <span class="prelude-val">Ok</span>(GaiAddrs { inner: addrs }),
             <span class="prelude-val">Ok</span>(<span class="prelude-val">Err</span>(err)) =&gt; <span class="prelude-val">Err</span>(err),
@@ -571,7 +571,7 @@
                 <span class="kw">if </span>join_err.is_cancelled() {
                     <span class="prelude-val">Err</span>(io::Error::new(io::ErrorKind::Interrupted, join_err))
                 } <span class="kw">else </span>{
-                    <span class="macro">panic!</span>(<span class="string">&quot;gai background task failed: {:?}&quot;</span>, join_err)
+                    <span class="macro">panic!</span>(<span class="string">"gai background task failed: {:?}"</span>, join_err)
                 }
             }
         })
@@ -579,8 +579,8 @@
 }
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>GaiFuture {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        f.pad(<span class="string">&quot;GaiFuture&quot;</span>)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        f.pad(<span class="string">"GaiFuture"</span>)
     }
 }
 
@@ -599,8 +599,8 @@
 }
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>GaiAddrs {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        f.pad(<span class="string">&quot;GaiAddrs&quot;</span>)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        f.pad(<span class="string">"GaiAddrs"</span>)
     }
 }
 
@@ -683,20 +683,20 @@
 ///
 /// Unlike the `GaiResolver` this will not spawn dedicated threads, but only works when running on the
 /// multi-threaded Tokio runtime.
-#[cfg(feature = &quot;runtime&quot;)]
+#[cfg(feature = "runtime")]
 #[derive(Clone, Debug)]
 pub struct TokioThreadpoolGaiResolver(());
 
 /// The future returned by `TokioThreadpoolGaiResolver`.
-#[cfg(feature = &quot;runtime&quot;)]
+#[cfg(feature = "runtime")]
 #[derive(Debug)]
 pub struct TokioThreadpoolGaiFuture {
     name: Name,
 }
 
-#[cfg(feature = &quot;runtime&quot;)]
+#[cfg(feature = "runtime")]
 impl TokioThreadpoolGaiResolver {
-    /// Creates a new DNS resolver that will use tokio threadpool&#39;s blocking
+    /// Creates a new DNS resolver that will use tokio threadpool's blocking
     /// feature.
     ///
     /// **Requires** its futures to be run on the threadpool runtime.
@@ -705,13 +705,13 @@ impl TokioThreadpoolGaiResolver {
     }
 }
 
-#[cfg(feature = &quot;runtime&quot;)]
+#[cfg(feature = "runtime")]
 impl Service&lt;Name&gt; for TokioThreadpoolGaiResolver {
     type Response = GaiAddrs;
     type Error = io::Error;
     type Future = TokioThreadpoolGaiFuture;
 
-    fn poll_ready(&amp;mut self, _cx: &amp;mut task::Context&lt;&#39;_&gt;) -&gt; Poll&lt;Result&lt;(), io::Error&gt;&gt; {
+    fn poll_ready(&amp;mut self, _cx: &amp;mut task::Context&lt;'_&gt;) -&gt; Poll&lt;Result&lt;(), io::Error&gt;&gt; {
         Poll::Ready(Ok(()))
     }
 
@@ -720,11 +720,11 @@ impl Service&lt;Name&gt; for TokioThreadpoolGaiResolver {
     }
 }
 
-#[cfg(feature = &quot;runtime&quot;)]
+#[cfg(feature = "runtime")]
 impl Future for TokioThreadpoolGaiFuture {
     type Output = Result&lt;GaiAddrs, io::Error&gt;;
 
-    fn poll(self: Pin&lt;&amp;mut Self&gt;, _cx: &amp;mut task::Context&lt;&#39;_&gt;) -&gt; Poll&lt;Self::Output&gt; {
+    fn poll(self: Pin&lt;&amp;mut Self&gt;, _cx: &amp;mut task::Context&lt;'_&gt;) -&gt; Poll&lt;Self::Output&gt; {
         match ready!(tokio_executor::threadpool::blocking(|| (
             self.name.as_str(),
             0
@@ -747,13 +747,13 @@ impl Future for TokioThreadpoolGaiFuture {
     <span class="kw">use </span><span class="kw">crate</span>::common::{task, Future, Poll};
     <span class="kw">use </span>tower_service::Service;
 
-    <span class="comment">// &quot;Trait alias&quot; for `Service&lt;Name, Response = Addrs&gt;`
+    <span class="comment">// "Trait alias" for `Service&lt;Name, Response = Addrs&gt;`
     </span><span class="kw">pub trait </span>Resolve {
         <span class="kw">type </span>Addrs: Iterator&lt;Item = SocketAddr&gt;;
         <span class="kw">type </span>Error: Into&lt;Box&lt;<span class="kw">dyn </span>std::error::Error + Send + Sync&gt;&gt;;
         <span class="kw">type </span>Future: Future&lt;Output = <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Addrs, <span class="self">Self</span>::Error&gt;&gt;;
 
-        <span class="kw">fn </span>poll_ready(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt;&gt;;
+        <span class="kw">fn </span>poll_ready(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt;&gt;;
         <span class="kw">fn </span>resolve(<span class="kw-2">&amp;mut </span><span class="self">self</span>, name: Name) -&gt; <span class="self">Self</span>::Future;
     }
 
@@ -767,7 +767,7 @@ impl Future for TokioThreadpoolGaiFuture {
         <span class="kw">type </span>Error = S::Error;
         <span class="kw">type </span>Future = S::Future;
 
-        <span class="kw">fn </span>poll_ready(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt;&gt; {
+        <span class="kw">fn </span>poll_ready(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt;&gt; {
             Service::poll_ready(<span class="self">self</span>, cx)
         }
 
@@ -842,8 +842,8 @@ impl Future for TokioThreadpoolGaiFuture {
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_name_from_str() {
-        <span class="kw">const </span>DOMAIN: <span class="kw-2">&amp;</span>str = <span class="string">&quot;test.example.com&quot;</span>;
-        <span class="kw">let </span>name = Name::from_str(DOMAIN).expect(<span class="string">&quot;Should be a valid domain&quot;</span>);
+        <span class="kw">const </span>DOMAIN: <span class="kw-2">&amp;</span>str = <span class="string">"test.example.com"</span>;
+        <span class="kw">let </span>name = Name::from_str(DOMAIN).expect(<span class="string">"Should be a valid domain"</span>);
         <span class="macro">assert_eq!</span>(name.as_str(), DOMAIN);
         <span class="macro">assert_eq!</span>(name.to_string(), DOMAIN);
     }

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.5/src/ec/suite_b/ecdh.rs`."><title>ecdh.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="ring" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.5/src/ec/suite_b/ecdh.rs`."><title>ecdh.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="ring" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -240,7 +240,7 @@
 // purpose with or without fee is hereby granted, provided that the above
 // copyright notice and this permission notice appear in all copies.
 //
-// THE SOFTWARE IS PROVIDED &quot;AS IS&quot; AND THE AUTHORS DISCLAIM ALL WARRANTIES
+// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHORS DISCLAIM ALL WARRANTIES
 // WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
 // MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY
 // SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
@@ -257,22 +257,22 @@
 </span><span class="macro">macro_rules! </span>ecdh {
     ( <span class="macro-nonterminal">$NAME</span>:ident, <span class="macro-nonterminal">$curve</span>:expr, <span class="macro-nonterminal">$name_str</span>:expr, <span class="macro-nonterminal">$private_key_ops</span>:expr,
       <span class="macro-nonterminal">$public_key_ops</span>:expr, <span class="macro-nonterminal">$ecdh</span>:ident ) =&gt; {
-        <span class="attr">#[doc = <span class="string">&quot;ECDH using the NSA Suite B&quot;</span>]
+        <span class="attr">#[doc = <span class="string">"ECDH using the NSA Suite B"</span>]
         #[doc=<span class="macro-nonterminal">$name_str</span>]
-        #[doc = <span class="string">&quot;curve.&quot;</span>]
+        #[doc = <span class="string">"curve."</span>]
         </span><span class="doccomment">///
         /// Public keys are encoding in uncompressed form using the
         /// Octet-String-to-Elliptic-Curve-Point algorithm in
         /// [SEC 1: Elliptic Curve Cryptography, Version 2.0]. Public keys are
         /// validated during key agreement according to
         /// [NIST Special Publication 800-56A, revision 2] and Appendix B.3 of
-        /// the NSA&#39;s [Suite B Implementer&#39;s Guide to NIST SP 800-56A].
+        /// the NSA's [Suite B Implementer's Guide to NIST SP 800-56A].
         ///
         /// [SEC 1: Elliptic Curve Cryptography, Version 2.0]:
         ///     http://www.secg.org/sec1-v2.pdf
         /// [NIST Special Publication 800-56A, revision 2]:
         ///     http://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-56Ar2.pdf
-        /// [Suite B Implementer&#39;s Guide to NIST SP 800-56A]:
+        /// [Suite B Implementer's Guide to NIST SP 800-56A]:
         ///     https://github.com/briansmith/ring/blob/main/doc/ecdh.pdf
         </span><span class="kw">pub static </span><span class="macro-nonterminal">$NAME</span>: agreement::Algorithm = agreement::Algorithm {
             curve: <span class="macro-nonterminal">$curve</span>,
@@ -298,7 +298,7 @@
 <span class="macro">ecdh!</span>(
     ECDH_P256,
     <span class="kw-2">&amp;</span>ec::suite_b::curve::P256,
-    <span class="string">&quot;P-256 (secp256r1)&quot;</span>,
+    <span class="string">"P-256 (secp256r1)"</span>,
     <span class="kw-2">&amp;</span>p256::PRIVATE_KEY_OPS,
     <span class="kw-2">&amp;</span>p256::PUBLIC_KEY_OPS,
     p256_ecdh
@@ -307,7 +307,7 @@
 <span class="macro">ecdh!</span>(
     ECDH_P384,
     <span class="kw-2">&amp;</span>ec::suite_b::curve::P384,
-    <span class="string">&quot;P-384 (secp384r1)&quot;</span>,
+    <span class="string">"P-384 (secp384r1)"</span>,
     <span class="kw-2">&amp;</span>p384::PRIVATE_KEY_OPS,
     <span class="kw-2">&amp;</span>p384::PUBLIC_KEY_OPS,
     p384_ecdh
@@ -323,8 +323,8 @@
     <span class="comment">// The NIST SP 800-56Ar2 steps are from section 5.7.1.2 Elliptic Curve
     // Cryptography Cofactor Diffie-Hellman (ECC CDH) Primitive.
     //
-    // The &quot;NSA Guide&quot; steps are from section 3.1 of the NSA guide, &quot;Ephemeral
-    // Unified Model.&quot;
+    // The "NSA Guide" steps are from section 3.1 of the NSA guide, "Ephemeral
+    // Unified Model."
 
     // NSA Guide Step 1 is handled separately.
 
@@ -348,13 +348,13 @@
     // curve and not at infinity. However, since the standards require the
     // check, we do it using `assert!`.
     //
-    // NIST SP 800-56Ar2 defines &quot;Destroy&quot; thusly: &quot;In this Recommendation, to
+    // NIST SP 800-56Ar2 defines "Destroy" thusly: "In this Recommendation, to
     // destroy is an action applied to a key or a piece of secret data. After
     // a key or a piece of secret data is destroyed, no information about its
-    // value can be recovered.&quot; We interpret &quot;destroy&quot; somewhat liberally: we
+    // value can be recovered." We interpret "destroy" somewhat liberally: we
     // assume that since we throw away the values to be destroyed, no
-    // information about their values can be recovered. This doesn&#39;t meet the
-    // NSA guide&#39;s explicit requirement to &quot;zeroize&quot; them though.
+    // information about their values can be recovered. This doesn't meet the
+    // NSA guide's explicit requirement to "zeroize" them though.
     // TODO: this only needs common scalar ops
     </span><span class="kw">let </span>my_private_key = private_key_as_scalar(private_key_ops, my_private_key);
     <span class="kw">let </span>product = private_key_ops.point_mul(<span class="kw-2">&amp;</span>my_private_key, <span class="kw-2">&amp;</span>peer_public_key);
@@ -362,16 +362,16 @@
     <span class="comment">// NIST SP 800-56Ar2 Steps 2, 3, 4, and 5.
     // NSA Guide Steps 3 (point at infinity check) and 4.
     //
-    // Again, we have a pretty liberal interpretation of the NIST&#39;s spec&#39;s
-    // &quot;Destroy&quot; that doesn&#39;t meet the NSA requirement to &quot;zeroize.&quot;
+    // Again, we have a pretty liberal interpretation of the NIST's spec's
+    // "Destroy" that doesn't meet the NSA requirement to "zeroize."
     // `big_endian_affine_from_jacobian` verifies that the result is not at
     // infinity and also does an extra check to verify that the point is on
     // the curve.
     </span>big_endian_affine_from_jacobian(private_key_ops, <span class="prelude-val">Some</span>(out), <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>product)
 
     <span class="comment">// NSA Guide Step 5 &amp; 6 are deferred to the caller. Again, we have a
-    // pretty liberal interpretation of the NIST&#39;s spec&#39;s &quot;Destroy&quot; that
-    // doesn&#39;t meet the NSA requirement to &quot;zeroize.&quot;
+    // pretty liberal interpretation of the NIST's spec's "Destroy" that
+    // doesn't meet the NSA requirement to "zeroize."
 </span>}
 
 <span class="attr">#[cfg(test)]
@@ -381,13 +381,13 @@
 
     <span class="kw">static </span>SUPPORTED_SUITE_B_ALGS: [(<span class="kw-2">&amp;</span>str, <span class="kw-2">&amp;</span>agreement::Algorithm, <span class="kw-2">&amp;</span>ec::Curve, <span class="kw-2">&amp;</span>ops::CommonOps); <span class="number">2</span>] = [
         (
-            <span class="string">&quot;P-256&quot;</span>,
+            <span class="string">"P-256"</span>,
             <span class="kw-2">&amp;</span>agreement::ECDH_P256,
             <span class="kw-2">&amp;</span><span class="kw">super</span>::<span class="kw">super</span>::curve::P256,
             <span class="kw-2">&amp;</span><span class="kw">super</span>::<span class="kw">super</span>::ops::p256::COMMON_OPS,
         ),
         (
-            <span class="string">&quot;P-384&quot;</span>,
+            <span class="string">"P-384"</span>,
             <span class="kw-2">&amp;</span>agreement::ECDH_P384,
             <span class="kw-2">&amp;</span><span class="kw">super</span>::<span class="kw">super</span>::curve::P384,
             <span class="kw-2">&amp;</span><span class="kw">super</span>::<span class="kw">super</span>::ops::p384::COMMON_OPS,

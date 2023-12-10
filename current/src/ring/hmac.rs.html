@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.5/src/hmac.rs`."><title>hmac.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="ring" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.5/src/hmac.rs`."><title>hmac.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="ring" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -373,7 +373,7 @@
 // purpose with or without fee is hereby granted, provided that the above
 // copyright notice and this permission notice appear in all copies.
 //
-// THE SOFTWARE IS PROVIDED &quot;AS IS&quot; AND THE AUTHORS DISCLAIM ALL WARRANTIES
+// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHORS DISCLAIM ALL WARRANTIES
 // WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
 // MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY
 // SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
@@ -395,7 +395,7 @@
 //!
 //! # Examples:
 //!
-//! ## Signing a value and verifying it wasn&#39;t tampered with
+//! ## Signing a value and verifying it wasn't tampered with
 //!
 //! ```
 //! use ring::{hmac, rand};
@@ -403,12 +403,12 @@
 //! let rng = rand::SystemRandom::new();
 //! let key = hmac::Key::generate(hmac::HMAC_SHA256, &amp;rng)?;
 //!
-//! let msg = &quot;hello, world&quot;;
+//! let msg = "hello, world";
 //!
 //! let tag = hmac::sign(&amp;key, msg.as_bytes());
 //!
 //! // [We give access to the message to an untrusted party, and they give it
-//! // back to us. We need to verify they didn&#39;t tamper with it.]
+//! // back to us. We need to verify they didn't tamper with it.]
 //!
 //! hmac::verify(&amp;key, msg.as_bytes(), tag.as_ref())?;
 //!
@@ -421,7 +421,7 @@
 //! use ring::{digest, hmac, rand};
 //! use ring::rand::SecureRandom;
 //!
-//! let msg = &quot;hello, world&quot;;
+//! let msg = "hello, world";
 //!
 //! // The sender generates a secure key value and signs the message with it.
 //! // Note that in a real protocol, a key agreement protocol would be used to
@@ -445,7 +445,7 @@
 //! use ring::{digest, hmac, rand};
 //! use ring::rand::SecureRandom;
 //!
-//! let parts = [&quot;hello&quot;, &quot;, &quot;, &quot;world&quot;];
+//! let parts = ["hello", ", ", "world"];
 //!
 //! // The sender generates a secure key value and signs the message with it.
 //! // Note that in a real protocol, a key agreement protocol would be used to
@@ -482,12 +482,12 @@
 
 <span class="doccomment">/// An HMAC algorithm.
 </span><span class="attr">#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-</span><span class="kw">pub struct </span>Algorithm(<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>digest::Algorithm);
+</span><span class="kw">pub struct </span>Algorithm(<span class="kw-2">&amp;</span><span class="lifetime">'static </span>digest::Algorithm);
 
 <span class="kw">impl </span>Algorithm {
     <span class="doccomment">/// The digest algorithm this HMAC algorithm is based on.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>digest_algorithm(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>digest::Algorithm {
+    </span><span class="kw">pub fn </span>digest_algorithm(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'static </span>digest::Algorithm {
         <span class="self">self</span>.<span class="number">0
     </span>}
 }
@@ -526,8 +526,8 @@
 
 <span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>Key {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter) -&gt; <span class="prelude-ty">Result</span>&lt;(), core::fmt::Error&gt; {
-        f.debug_struct(<span class="string">&quot;Key&quot;</span>)
-            .field(<span class="string">&quot;algorithm&quot;</span>, <span class="self">self</span>.algorithm().digest_algorithm())
+        f.debug_struct(<span class="string">"Key"</span>)
+            .field(<span class="string">"algorithm"</span>, <span class="self">self</span>.algorithm().digest_algorithm())
             .finish()
     }
 }
@@ -564,10 +564,10 @@
     /// generator (e.g. the `key_value` output by
     /// `SealingKey::generate_serializable()`) or derived from a random key by
     /// a key derivation function (e.g. `ring::hkdf`). In particular,
-    /// `key_value` shouldn&#39;t be a password.
+    /// `key_value` shouldn't be a password.
     ///
     /// As specified in RFC 2104, if `key_value` is shorter than the digest
-    /// algorithm&#39;s block length (as returned by `digest::Algorithm::block_len()`,
+    /// algorithm's block length (as returned by `digest::Algorithm::block_len()`,
     /// not the digest length returned by `digest::Algorithm::output_len()`) then
     /// it will be padded with zeros. Similarly, if it is longer than the block
     /// length then it will be compressed using the digest algorithm.
@@ -598,7 +598,7 @@
         <span class="kw">let </span><span class="kw-2">mut </span>padded_key = [IPAD; digest::MAX_BLOCK_LEN];
         <span class="kw">let </span>padded_key = <span class="kw-2">&amp;mut </span>padded_key[..block_len];
 
-        <span class="comment">// If the key is shorter than one block then we&#39;re supposed to act like
+        <span class="comment">// If the key is shorter than one block then we're supposed to act like
         // it is padded with zero bytes up to the block length. `x ^ 0 == x` so
         // we can just leave the trailing bytes of `padded_key` untouched.
         </span><span class="kw">for </span>(padded_key, key_value) <span class="kw">in </span>padded_key.iter_mut().zip(key_value.iter()) {
@@ -631,7 +631,7 @@
     }
 }
 
-<span class="kw">impl </span>From&lt;hkdf::Okm&lt;<span class="lifetime">&#39;_</span>, Algorithm&gt;&gt; <span class="kw">for </span>Key {
+<span class="kw">impl </span>From&lt;hkdf::Okm&lt;<span class="lifetime">'_</span>, Algorithm&gt;&gt; <span class="kw">for </span>Key {
     <span class="kw">fn </span>from(okm: hkdf::Okm&lt;Algorithm&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>::construct(<span class="kw-2">*</span>okm.len(), |buf| okm.fill(buf)).unwrap()
     }
@@ -648,8 +648,8 @@
 
 <span class="kw">impl </span>core::fmt::Debug <span class="kw">for </span>Context {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>core::fmt::Formatter) -&gt; <span class="prelude-ty">Result</span>&lt;(), core::fmt::Error&gt; {
-        f.debug_struct(<span class="string">&quot;Context&quot;</span>)
-            .field(<span class="string">&quot;algorithm&quot;</span>, <span class="self">self</span>.inner.algorithm())
+        f.debug_struct(<span class="string">"Context"</span>)
+            .field(<span class="string">"algorithm"</span>, <span class="self">self</span>.inner.algorithm())
             .finish()
     }
 }
@@ -714,14 +714,14 @@
 </span><span class="kw">mod </span>tests {
     <span class="kw">use crate</span>::{hmac, rand};
 
-    <span class="comment">// Make sure that `Key::generate` and `verify_with_own_key` aren&#39;t
+    <span class="comment">// Make sure that `Key::generate` and `verify_with_own_key` aren't
     // completely wacky.
     </span><span class="attr">#[test]
     </span><span class="kw">pub fn </span>hmac_signing_key_coverage() {
         <span class="kw">let </span>rng = rand::SystemRandom::new();
 
-        <span class="kw">const </span>HELLO_WORLD_GOOD: <span class="kw-2">&amp;</span>[u8] = <span class="string">b&quot;hello, world&quot;</span>;
-        <span class="kw">const </span>HELLO_WORLD_BAD: <span class="kw-2">&amp;</span>[u8] = <span class="string">b&quot;hello, worle&quot;</span>;
+        <span class="kw">const </span>HELLO_WORLD_GOOD: <span class="kw-2">&amp;</span>[u8] = <span class="string">b"hello, world"</span>;
+        <span class="kw">const </span>HELLO_WORLD_BAD: <span class="kw-2">&amp;</span>[u8] = <span class="string">b"hello, worle"</span>;
 
         <span class="kw">for </span>algorithm <span class="kw">in </span><span class="kw-2">&amp;</span>[
             hmac::HMAC_SHA1_FOR_LEGACY_USE_ONLY,

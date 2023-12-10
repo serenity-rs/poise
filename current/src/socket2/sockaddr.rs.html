@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/socket2-0.5.5/src/sockaddr.rs`."><title>sockaddr.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="socket2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/socket2-0.5.5/src/sockaddr.rs`."><title>sockaddr.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="socket2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -704,7 +704,7 @@
         </span><span class="kw">let </span><span class="kw-2">mut </span>storage = MaybeUninit::&lt;sockaddr_storage&gt;::zeroed();
         <span class="kw">let </span><span class="kw-2">mut </span>len = STORAGE_SIZE;
         init(storage.as_mut_ptr(), <span class="kw-2">&amp;mut </span>len).map(|res| {
-            <span class="macro">debug_assert!</span>(len &lt;= STORAGE_SIZE, <span class="string">&quot;overflown address storage&quot;</span>);
+            <span class="macro">debug_assert!</span>(len &lt;= STORAGE_SIZE, <span class="string">"overflown address storage"</span>);
             <span class="kw">let </span>addr = SockAddr {
                 <span class="comment">// Safety: zeroed-out `sockaddr_storage` is valid, caller must
                 // ensure at least `len` bytes are valid.
@@ -735,12 +735,12 @@
         <span class="self">self</span>.len = length;
     }
 
-    <span class="doccomment">/// Returns this address&#39;s family.
+    <span class="doccomment">/// Returns this address's family.
     </span><span class="kw">pub const fn </span>family(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; sa_family_t {
         <span class="self">self</span>.storage.ss_family
     }
 
-    <span class="doccomment">/// Returns this address&#39;s `Domain`.
+    <span class="doccomment">/// Returns this address's `Domain`.
     </span><span class="kw">pub const fn </span>domain(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Domain {
         Domain(<span class="self">self</span>.storage.ss_family <span class="kw">as </span>c_int)
     }
@@ -830,7 +830,7 @@
     <span class="doccomment">/// Returns the initialised storage bytes.
     </span><span class="kw">fn </span>as_bytes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[u8] {
         <span class="comment">// SAFETY: `self.storage` is a C struct which can always be treated a
-        // slice of bytes. Futhermore we ensure we don&#39;t read any unitialised
+        // slice of bytes. Futhermore we ensure we don't read any unitialised
         // bytes by using `self.len`.
         </span><span class="kw">unsafe </span>{ std::slice::from_raw_parts(<span class="self">self</span>.as_ptr().cast(), <span class="self">self</span>.len <span class="kw">as </span>usize) }
     }
@@ -858,18 +858,18 @@
             mem::size_of::&lt;sockaddr_in&gt;() <span class="kw">as </span>socklen_t
         };
         <span class="attr">#[cfg(any(
-            target_os = <span class="string">&quot;dragonfly&quot;</span>,
-            target_os = <span class="string">&quot;freebsd&quot;</span>,
-            target_os = <span class="string">&quot;haiku&quot;</span>,
-            target_os = <span class="string">&quot;hermit&quot;</span>,
-            target_os = <span class="string">&quot;ios&quot;</span>,
-            target_os = <span class="string">&quot;macos&quot;</span>,
-            target_os = <span class="string">&quot;netbsd&quot;</span>,
-            target_os = <span class="string">&quot;nto&quot;</span>,
-            target_os = <span class="string">&quot;openbsd&quot;</span>,
-            target_os = <span class="string">&quot;tvos&quot;</span>,
-            target_os = <span class="string">&quot;vxworks&quot;</span>,
-            target_os = <span class="string">&quot;watchos&quot;</span>,
+            target_os = <span class="string">"dragonfly"</span>,
+            target_os = <span class="string">"freebsd"</span>,
+            target_os = <span class="string">"haiku"</span>,
+            target_os = <span class="string">"hermit"</span>,
+            target_os = <span class="string">"ios"</span>,
+            target_os = <span class="string">"macos"</span>,
+            target_os = <span class="string">"netbsd"</span>,
+            target_os = <span class="string">"nto"</span>,
+            target_os = <span class="string">"openbsd"</span>,
+            target_os = <span class="string">"tvos"</span>,
+            target_os = <span class="string">"vxworks"</span>,
+            target_os = <span class="string">"watchos"</span>,
         ))]
         </span>{
             storage.ss_len = len <span class="kw">as </span>u8;
@@ -901,18 +901,18 @@
             mem::size_of::&lt;sockaddr_in6&gt;() <span class="kw">as </span>socklen_t
         };
         <span class="attr">#[cfg(any(
-            target_os = <span class="string">&quot;dragonfly&quot;</span>,
-            target_os = <span class="string">&quot;freebsd&quot;</span>,
-            target_os = <span class="string">&quot;haiku&quot;</span>,
-            target_os = <span class="string">&quot;hermit&quot;</span>,
-            target_os = <span class="string">&quot;ios&quot;</span>,
-            target_os = <span class="string">&quot;macos&quot;</span>,
-            target_os = <span class="string">&quot;netbsd&quot;</span>,
-            target_os = <span class="string">&quot;nto&quot;</span>,
-            target_os = <span class="string">&quot;openbsd&quot;</span>,
-            target_os = <span class="string">&quot;tvos&quot;</span>,
-            target_os = <span class="string">&quot;vxworks&quot;</span>,
-            target_os = <span class="string">&quot;watchos&quot;</span>,
+            target_os = <span class="string">"dragonfly"</span>,
+            target_os = <span class="string">"freebsd"</span>,
+            target_os = <span class="string">"haiku"</span>,
+            target_os = <span class="string">"hermit"</span>,
+            target_os = <span class="string">"ios"</span>,
+            target_os = <span class="string">"macos"</span>,
+            target_os = <span class="string">"netbsd"</span>,
+            target_os = <span class="string">"nto"</span>,
+            target_os = <span class="string">"openbsd"</span>,
+            target_os = <span class="string">"tvos"</span>,
+            target_os = <span class="string">"vxworks"</span>,
+            target_os = <span class="string">"watchos"</span>,
         ))]
         </span>{
             storage.ss_len = len <span class="kw">as </span>u8;
@@ -922,25 +922,25 @@
 }
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>SockAddr {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        <span class="kw">let </span><span class="kw-2">mut </span>f = fmt.debug_struct(<span class="string">&quot;SockAddr&quot;</span>);
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        <span class="kw">let </span><span class="kw-2">mut </span>f = fmt.debug_struct(<span class="string">"SockAddr"</span>);
         <span class="attr">#[cfg(any(
-            target_os = <span class="string">&quot;dragonfly&quot;</span>,
-            target_os = <span class="string">&quot;freebsd&quot;</span>,
-            target_os = <span class="string">&quot;haiku&quot;</span>,
-            target_os = <span class="string">&quot;hermit&quot;</span>,
-            target_os = <span class="string">&quot;ios&quot;</span>,
-            target_os = <span class="string">&quot;macos&quot;</span>,
-            target_os = <span class="string">&quot;netbsd&quot;</span>,
-            target_os = <span class="string">&quot;nto&quot;</span>,
-            target_os = <span class="string">&quot;openbsd&quot;</span>,
-            target_os = <span class="string">&quot;tvos&quot;</span>,
-            target_os = <span class="string">&quot;vxworks&quot;</span>,
-            target_os = <span class="string">&quot;watchos&quot;</span>,
+            target_os = <span class="string">"dragonfly"</span>,
+            target_os = <span class="string">"freebsd"</span>,
+            target_os = <span class="string">"haiku"</span>,
+            target_os = <span class="string">"hermit"</span>,
+            target_os = <span class="string">"ios"</span>,
+            target_os = <span class="string">"macos"</span>,
+            target_os = <span class="string">"netbsd"</span>,
+            target_os = <span class="string">"nto"</span>,
+            target_os = <span class="string">"openbsd"</span>,
+            target_os = <span class="string">"tvos"</span>,
+            target_os = <span class="string">"vxworks"</span>,
+            target_os = <span class="string">"watchos"</span>,
         ))]
-        </span>f.field(<span class="string">&quot;ss_len&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.storage.ss_len);
-        f.field(<span class="string">&quot;ss_family&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.storage.ss_family)
-            .field(<span class="string">&quot;len&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.len)
+        </span>f.field(<span class="string">"ss_len"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.storage.ss_len);
+        f.field(<span class="string">"ss_family"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.storage.ss_family)
+            .field(<span class="string">"len"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.len)
             .finish()
     }
 }

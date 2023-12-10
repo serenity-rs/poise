@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/h2-0.3.22/src/proto/streams/streams.rs`."><title>streams.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="h2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/h2-0.3.22/src/proto/streams/streams.rs`."><title>streams.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="h2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1634,10 +1634,10 @@
 <span class="comment">// Like `Streams` but with a `peer::Dyn` field instead of a static `P: Peer` type parameter.
 // Ensures that the methods only get one instantiation, instead of two (client and server)
 </span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>DynStreams&lt;<span class="lifetime">&#39;a</span>, B&gt; {
-    inner: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Mutex&lt;Inner&gt;,
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>DynStreams&lt;<span class="lifetime">'a</span>, B&gt; {
+    inner: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Mutex&lt;Inner&gt;,
 
-    send_buffer: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>SendBuffer&lt;B&gt;,
+    send_buffer: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>SendBuffer&lt;B&gt;,
 
     peer: peer::Dyn,
 }
@@ -1727,12 +1727,12 @@
         me.actions.recv.next_incoming(<span class="kw-2">&amp;mut </span>me.store).map(|key| {
             <span class="kw">let </span>stream = <span class="kw-2">&amp;mut </span>me.store.resolve(key);
             <span class="macro">tracing::trace!</span>(
-                <span class="string">&quot;next_incoming; id={:?}, state={:?}&quot;</span>,
+                <span class="string">"next_incoming; id={:?}, state={:?}"</span>,
                 stream.id,
                 stream.state
             );
-            <span class="comment">// TODO: ideally, OpaqueStreamRefs::new would do this, but we&#39;re holding
-            // the lock, so it can&#39;t.
+            <span class="comment">// TODO: ideally, OpaqueStreamRefs::new would do this, but we're holding
+            // the lock, so it can't.
             </span>me.refs += <span class="number">1</span>;
 
             <span class="comment">// Pending-accepted remotely-reset streams are counted.
@@ -1837,7 +1837,7 @@
         // a store `Key` of a `Stream` that may have been not been opened
         // yet.
         //
-        // If that stream is still pending, the Client isn&#39;t allowed to
+        // If that stream is still pending, the Client isn't allowed to
         // queue up another pending stream. They should use `poll_ready`.
         </span><span class="kw">if let </span><span class="prelude-val">Some</span>(stream) = pending {
             <span class="kw">if </span>me.store.resolve(stream.key).is_pending_open {
@@ -1888,8 +1888,8 @@
         // closed state.
         </span><span class="macro">debug_assert!</span>(!stream.state.is_closed());
 
-        <span class="comment">// TODO: ideally, OpaqueStreamRefs::new would do this, but we&#39;re holding
-        // the lock, so it can&#39;t.
+        <span class="comment">// TODO: ideally, OpaqueStreamRefs::new would do this, but we're holding
+        // the lock, so it can't.
         </span>me.refs += <span class="number">1</span>;
 
         <span class="kw">let </span>is_full = me.counts.next_send_stream_will_reach_capacity();
@@ -1912,7 +1912,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;B&gt; DynStreams&lt;<span class="lifetime">&#39;_</span>, B&gt; {
+<span class="kw">impl</span>&lt;B&gt; DynStreams&lt;<span class="lifetime">'_</span>, B&gt; {
     <span class="kw">pub fn </span>recv_headers(<span class="kw-2">&amp;mut </span><span class="self">self</span>, frame: frame::Headers) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>me = <span class="self">self</span>.inner.lock().unwrap();
 
@@ -1998,7 +1998,7 @@
         // specified as part of GOAWAY should be ignored.
         </span><span class="kw">if </span>id &gt; <span class="self">self</span>.actions.recv.max_stream_id() {
             <span class="macro">tracing::trace!</span>(
-                <span class="string">&quot;id ({:?}) &gt; max_stream_id ({:?}), ignoring HEADERS&quot;</span>,
+                <span class="string">"id ({:?}) &gt; max_stream_id ({:?}), ignoring HEADERS"</span>,
                 id,
                 <span class="self">self</span>.actions.recv.max_stream_id()
             );
@@ -2008,17 +2008,17 @@
         <span class="kw">let </span>key = <span class="kw">match </span><span class="self">self</span>.store.find_entry(id) {
             Entry::Occupied(e) =&gt; e.key(),
             Entry::Vacant(e) =&gt; {
-                <span class="comment">// Client: it&#39;s possible to send a request, and then send
+                <span class="comment">// Client: it's possible to send a request, and then send
                 // a RST_STREAM while the response HEADERS were in transit.
                 //
-                // Server: we can&#39;t reset a stream before having received
-                // the request headers, so don&#39;t allow.
+                // Server: we can't reset a stream before having received
+                // the request headers, so don't allow.
                 </span><span class="kw">if </span>!peer.is_server() {
-                    <span class="comment">// This may be response headers for a stream we&#39;ve already
+                    <span class="comment">// This may be response headers for a stream we've already
                     // forgotten about...
                     </span><span class="kw">if </span><span class="self">self</span>.actions.may_have_forgotten_stream(peer, id) {
                         <span class="macro">tracing::debug!</span>(
-                            <span class="string">&quot;recv_headers for old stream={:?}, sending STREAM_CLOSED&quot;</span>,
+                            <span class="string">"recv_headers for old stream={:?}, sending STREAM_CLOSED"</span>,
                             id,
                         );
                         <span class="kw">return </span><span class="prelude-val">Err</span>(Error::library_reset(id, Reason::STREAM_CLOSED));
@@ -2047,10 +2047,10 @@
         <span class="kw">let </span>stream = <span class="self">self</span>.store.resolve(key);
 
         <span class="kw">if </span>stream.state.is_local_error() {
-            <span class="comment">// Locally reset streams must ignore frames &quot;for some time&quot;.
+            <span class="comment">// Locally reset streams must ignore frames "for some time".
             // This is because the remote may have sent trailers before
             // receiving the RST_STREAM frame.
-            </span><span class="macro">tracing::trace!</span>(<span class="string">&quot;recv_headers; ignoring trailers on {:?}&quot;</span>, stream.id);
+            </span><span class="macro">tracing::trace!</span>(<span class="string">"recv_headers; ignoring trailers on {:?}"</span>, stream.id);
             <span class="kw">return </span><span class="prelude-val">Ok</span>(());
         }
 
@@ -2060,7 +2060,7 @@
 
         <span class="self">self</span>.counts.transition(stream, |counts, stream| {
             <span class="macro">tracing::trace!</span>(
-                <span class="string">&quot;recv_headers; stream={:?}; state={:?}&quot;</span>,
+                <span class="string">"recv_headers; stream={:?}; state={:?}"</span>,
                 stream.id,
                 stream.state
             );
@@ -2072,7 +2072,7 @@
                         <span class="kw">if let </span><span class="prelude-val">Some</span>(resp) = resp {
                             <span class="kw">let </span>sent = actions.send.send_headers(
                                 resp, send_buffer, stream, counts, <span class="kw-2">&amp;mut </span>actions.task);
-                            <span class="macro">debug_assert!</span>(sent.is_ok(), <span class="string">&quot;oversize response should not fail&quot;</span>);
+                            <span class="macro">debug_assert!</span>(sent.is_ok(), <span class="string">"oversize response should not fail"</span>);
 
                             actions.send.schedule_implicit_reset(
                                 stream,
@@ -2091,9 +2091,9 @@
                 }
             } <span class="kw">else </span>{
                 <span class="kw">if </span>!frame.is_end_stream() {
-                    <span class="comment">// Receiving trailers that don&#39;t set EOS is a &quot;malformed&quot;
+                    <span class="comment">// Receiving trailers that don't set EOS is a "malformed"
                     // message. Malformed messages are a stream error.
-                    </span><span class="macro">proto_err!</span>(stream: <span class="string">&quot;recv_headers: trailers frame was not EOS; stream={:?}&quot;</span>, stream.id);
+                    </span><span class="macro">proto_err!</span>(stream: <span class="string">"recv_headers: trailers frame was not EOS; stream={:?}"</span>, stream.id);
                     <span class="kw">return </span><span class="prelude-val">Err</span>(Error::library_reset(stream.id, Reason::PROTOCOL_ERROR));
                 }
 
@@ -2119,7 +2119,7 @@
                 // than specified as part of GOAWAY should be ignored.
                 </span><span class="kw">if </span>id &gt; <span class="self">self</span>.actions.recv.max_stream_id() {
                     <span class="macro">tracing::trace!</span>(
-                        <span class="string">&quot;id ({:?}) &gt; max_stream_id ({:?}), ignoring DATA&quot;</span>,
+                        <span class="string">"id ({:?}) &gt; max_stream_id ({:?}), ignoring DATA"</span>,
                         id,
                         <span class="self">self</span>.actions.recv.max_stream_id()
                     );
@@ -2127,7 +2127,7 @@
                 }
 
                 <span class="kw">if </span><span class="self">self</span>.actions.may_have_forgotten_stream(peer, id) {
-                    <span class="macro">tracing::debug!</span>(<span class="string">&quot;recv_data for old stream={:?}, sending STREAM_CLOSED&quot;</span>, id,);
+                    <span class="macro">tracing::debug!</span>(<span class="string">"recv_data for old stream={:?}, sending STREAM_CLOSED"</span>, id,);
 
                     <span class="kw">let </span>sz = frame.payload().len();
                     <span class="comment">// This should have been enforced at the codec::FramedRead layer, so
@@ -2139,7 +2139,7 @@
                     <span class="kw">return </span><span class="prelude-val">Err</span>(Error::library_reset(id, Reason::STREAM_CLOSED));
                 }
 
-                <span class="macro">proto_err!</span>(conn: <span class="string">&quot;recv_data: stream not found; id={:?}&quot;</span>, id);
+                <span class="macro">proto_err!</span>(conn: <span class="string">"recv_data: stream not found; id={:?}"</span>, id);
                 <span class="kw">return </span><span class="prelude-val">Err</span>(Error::library_go_away(Reason::PROTOCOL_ERROR));
             }
         };
@@ -2153,7 +2153,7 @@
             <span class="kw">let </span>res = actions.recv.recv_data(frame, stream);
 
             <span class="comment">// Any stream error after receiving a DATA frame means
-            // we won&#39;t give the data to the user, and so they can&#39;t
+            // we won't give the data to the user, and so they can't
             // release the capacity. We do it automatically.
             </span><span class="kw">if let </span><span class="prelude-val">Err</span>(Error::Reset(..)) = res {
                 actions
@@ -2172,7 +2172,7 @@
         <span class="kw">let </span>id = frame.stream_id();
 
         <span class="kw">if </span>id.is_zero() {
-            <span class="macro">proto_err!</span>(conn: <span class="string">&quot;recv_reset: invalid stream ID 0&quot;</span>);
+            <span class="macro">proto_err!</span>(conn: <span class="string">"recv_reset: invalid stream ID 0"</span>);
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::library_go_away(Reason::PROTOCOL_ERROR));
         }
 
@@ -2180,7 +2180,7 @@
         // specified as part of GOAWAY should be ignored.
         </span><span class="kw">if </span>id &gt; <span class="self">self</span>.actions.recv.max_stream_id() {
             <span class="macro">tracing::trace!</span>(
-                <span class="string">&quot;id ({:?}) &gt; max_stream_id ({:?}), ignoring RST_STREAM&quot;</span>,
+                <span class="string">"id ({:?}) &gt; max_stream_id ({:?}), ignoring RST_STREAM"</span>,
                 id,
                 <span class="self">self</span>.actions.recv.max_stream_id()
             );
@@ -2229,7 +2229,7 @@
                 .map_err(Error::library_go_away)<span class="question-mark">?</span>;
         } <span class="kw">else </span>{
             <span class="comment">// The remote may send window updates for streams that the local now
-            // considers closed. It&#39;s ok...
+            // considers closed. It's ok...
             </span><span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">mut </span>stream) = <span class="self">self</span>.store.find_mut(<span class="kw-2">&amp;</span>id) {
                 <span class="comment">// This result is ignored as there is nothing to do when there
                 // is an error. The stream is reset by the function on error and
@@ -2316,7 +2316,7 @@
                 // than specified as part of GOAWAY should be ignored.
                 </span><span class="kw">if </span>id &gt; <span class="self">self</span>.actions.recv.max_stream_id() {
                     <span class="macro">tracing::trace!</span>(
-                        <span class="string">&quot;id ({:?}) &gt; max_stream_id ({:?}), ignoring PUSH_PROMISE&quot;</span>,
+                        <span class="string">"id ({:?}) &gt; max_stream_id ({:?}), ignoring PUSH_PROMISE"</span>,
                         id,
                         <span class="self">self</span>.actions.recv.max_stream_id()
                     );
@@ -2325,14 +2325,14 @@
 
                 <span class="comment">// The stream must be receive open
                 </span><span class="kw">if </span>!stream.state.ensure_recv_open()<span class="question-mark">? </span>{
-                    <span class="macro">proto_err!</span>(conn: <span class="string">&quot;recv_push_promise: initiating stream is not opened&quot;</span>);
+                    <span class="macro">proto_err!</span>(conn: <span class="string">"recv_push_promise: initiating stream is not opened"</span>);
                     <span class="kw">return </span><span class="prelude-val">Err</span>(Error::library_go_away(Reason::PROTOCOL_ERROR));
                 }
 
                 stream.key()
             }
             <span class="prelude-val">None </span>=&gt; {
-                <span class="macro">proto_err!</span>(conn: <span class="string">&quot;recv_push_promise: initiating stream is in an invalid state&quot;</span>);
+                <span class="macro">proto_err!</span>(conn: <span class="string">"recv_push_promise: initiating stream is in an invalid state"</span>);
                 <span class="kw">return </span><span class="prelude-val">Err</span>(Error::library_go_away(Reason::PROTOCOL_ERROR));
             }
         };
@@ -2390,7 +2390,7 @@
                 }
             })<span class="question-mark">?
         </span>};
-        <span class="comment">// If we&#39;re successful, push the headers and stream...
+        <span class="comment">// If we're successful, push the headers and stream...
         </span><span class="kw">if let </span><span class="prelude-val">Some</span>(child) = child_key {
             <span class="kw">let </span><span class="kw-2">mut </span>ppp = <span class="self">self</span>.store[parent_key].pending_push_promises.take();
             ppp.push(<span class="kw-2">&amp;mut </span><span class="self">self</span>.store.resolve(child));
@@ -2417,13 +2417,13 @@
             actions.conn_error = <span class="prelude-val">Some</span>(
                 io::Error::new(
                     io::ErrorKind::BrokenPipe,
-                    <span class="string">&quot;connection closed because of a broken pipe&quot;</span>,
+                    <span class="string">"connection closed because of a broken pipe"</span>,
                 )
                 .into(),
             );
         }
 
-        <span class="macro">tracing::trace!</span>(<span class="string">&quot;Streams::recv_eof&quot;</span>);
+        <span class="macro">tracing::trace!</span>(<span class="string">"Streams::recv_eof"</span>);
 
         <span class="self">self</span>.store.for_each(|stream| {
             counts.transition(stream, |counts, stream| {
@@ -2480,15 +2480,15 @@
         <span class="kw">let </span>key = <span class="kw">match </span><span class="self">self</span>.store.find_entry(id) {
             Entry::Occupied(e) =&gt; e.key(),
             Entry::Vacant(e) =&gt; {
-                <span class="comment">// Resetting a stream we don&#39;t know about? That could be OK...
+                <span class="comment">// Resetting a stream we don't know about? That could be OK...
                 //
                 // 1. As a server, we just received a request, but that request
-                //    was bad, so we&#39;re resetting before even accepting it.
+                //    was bad, so we're resetting before even accepting it.
                 //    This is totally fine.
                 //
                 // 2. The remote may have sent us a frame on new stream that
-                //    it&#39;s *not* supposed to have done, and thus, we don&#39;t know
-                //    the stream. In that case, sending a reset will &quot;open&quot; the
+                //    it's *not* supposed to have done, and thus, we don't know
+                //    the stream. In that case, sending a reset will "open" the
                 //    stream in our store. Maybe that should be a connection
                 //    error instead? At least for now, we need to update what
                 //    our vision of the next stream is.
@@ -2538,7 +2538,7 @@
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(pending) = pending {
             <span class="kw">let </span><span class="kw-2">mut </span>stream = me.store.resolve(pending.key);
-            <span class="macro">tracing::trace!</span>(<span class="string">&quot;poll_pending_open; stream = {:?}&quot;</span>, stream.is_pending_open);
+            <span class="macro">tracing::trace!</span>(<span class="string">"poll_pending_open; stream = {:?}"</span>, stream.is_pending_open);
             <span class="kw">if </span>stream.is_pending_open {
                 stream.wait_send(cx);
                 <span class="kw">return </span>Poll::Pending;
@@ -2580,7 +2580,7 @@
         <span class="self">self</span>.inner.lock().unwrap().counts.max_recv_streams()
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;unstable&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"unstable"</span>)]
     </span><span class="kw">pub fn </span>num_active_streams(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
         <span class="kw">let </span>me = <span class="self">self</span>.inner.lock().unwrap();
         me.store.num_active_streams()
@@ -2596,14 +2596,14 @@
         me.counts.has_streams() || me.refs &gt; <span class="number">1
     </span>}
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;unstable&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"unstable"</span>)]
     </span><span class="kw">pub fn </span>num_wired_streams(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
         <span class="kw">let </span>me = <span class="self">self</span>.inner.lock().unwrap();
         me.store.num_wired_streams()
     }
 }
 
-<span class="comment">// no derive because we don&#39;t need B and P to be Clone.
+<span class="comment">// no derive because we don't need B and P to be Clone.
 </span><span class="kw">impl</span>&lt;B, P&gt; Clone <span class="kw">for </span>Streams&lt;B, P&gt;
 <span class="kw">where
     </span>P: Peer,
@@ -2779,7 +2779,7 @@
     ///
     /// # Panics
     ///
-    /// This function panics if the request isn&#39;t present.
+    /// This function panics if the request isn't present.
     </span><span class="kw">pub fn </span>take_request(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Request&lt;()&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>me = <span class="self">self</span>.opaque.inner.lock().unwrap();
         <span class="kw">let </span>me = <span class="kw-2">&amp;mut *</span>me;
@@ -2806,7 +2806,7 @@
             .reserve_capacity(capacity, <span class="kw-2">&amp;mut </span>stream, <span class="kw-2">&amp;mut </span>me.counts)
     }
 
-    <span class="doccomment">/// Returns the stream&#39;s current send capacity.
+    <span class="doccomment">/// Returns the stream's current send capacity.
     </span><span class="kw">pub fn </span>capacity(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; WindowSize {
         <span class="kw">let </span><span class="kw-2">mut </span>me = <span class="self">self</span>.opaque.inner.lock().unwrap();
         <span class="kw">let </span>me = <span class="kw-2">&amp;mut *</span>me;
@@ -2816,7 +2816,7 @@
         me.actions.send.capacity(<span class="kw-2">&amp;mut </span>stream)
     }
 
-    <span class="doccomment">/// Request to be notified when the stream&#39;s capacity increases
+    <span class="doccomment">/// Request to be notified when the stream's capacity increases
     </span><span class="kw">pub fn </span>poll_capacity(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;</span>Context) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;WindowSize, UserError&gt;&gt;&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>me = <span class="self">self</span>.opaque.inner.lock().unwrap();
         <span class="kw">let </span>me = <span class="kw-2">&amp;mut *</span>me;
@@ -2978,18 +2978,18 @@
         <span class="kw">match </span><span class="self">self</span>.inner.try_lock() {
             <span class="prelude-val">Ok</span>(me) =&gt; {
                 <span class="kw">let </span>stream = <span class="kw-2">&amp;</span>me.store[<span class="self">self</span>.key];
-                fmt.debug_struct(<span class="string">&quot;OpaqueStreamRef&quot;</span>)
-                    .field(<span class="string">&quot;stream_id&quot;</span>, <span class="kw-2">&amp;</span>stream.id)
-                    .field(<span class="string">&quot;ref_count&quot;</span>, <span class="kw-2">&amp;</span>stream.ref_count)
+                fmt.debug_struct(<span class="string">"OpaqueStreamRef"</span>)
+                    .field(<span class="string">"stream_id"</span>, <span class="kw-2">&amp;</span>stream.id)
+                    .field(<span class="string">"ref_count"</span>, <span class="kw-2">&amp;</span>stream.ref_count)
                     .finish()
             }
             <span class="prelude-val">Err</span>(Poisoned(<span class="kw">_</span>)) =&gt; fmt
-                .debug_struct(<span class="string">&quot;OpaqueStreamRef&quot;</span>)
-                .field(<span class="string">&quot;inner&quot;</span>, <span class="kw-2">&amp;</span><span class="string">&quot;&lt;Poisoned&gt;&quot;</span>)
+                .debug_struct(<span class="string">"OpaqueStreamRef"</span>)
+                .field(<span class="string">"inner"</span>, <span class="kw-2">&amp;</span><span class="string">"&lt;Poisoned&gt;"</span>)
                 .finish(),
             <span class="prelude-val">Err</span>(WouldBlock) =&gt; fmt
-                .debug_struct(<span class="string">&quot;OpaqueStreamRef&quot;</span>)
-                .field(<span class="string">&quot;inner&quot;</span>, <span class="kw-2">&amp;</span><span class="string">&quot;&lt;Locked&gt;&quot;</span>)
+                .debug_struct(<span class="string">"OpaqueStreamRef"</span>)
+                .field(<span class="string">"inner"</span>, <span class="kw-2">&amp;</span><span class="string">"&lt;Locked&gt;"</span>)
                 .finish(),
         }
     }
@@ -3021,10 +3021,10 @@
         <span class="prelude-val">Ok</span>(inner) =&gt; inner,
         <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; {
             <span class="kw">if </span>::std::thread::panicking() {
-                <span class="macro">tracing::trace!</span>(<span class="string">&quot;StreamRef::drop; mutex poisoned&quot;</span>);
+                <span class="macro">tracing::trace!</span>(<span class="string">"StreamRef::drop; mutex poisoned"</span>);
                 <span class="kw">return</span>;
             } <span class="kw">else </span>{
-                <span class="macro">panic!</span>(<span class="string">&quot;StreamRef::drop; mutex poisoned&quot;</span>);
+                <span class="macro">panic!</span>(<span class="string">"StreamRef::drop; mutex poisoned"</span>);
             }
         }
     };
@@ -3033,9 +3033,9 @@
     me.refs -= <span class="number">1</span>;
     <span class="kw">let </span><span class="kw-2">mut </span>stream = me.store.resolve(key);
 
-    <span class="macro">tracing::trace!</span>(<span class="string">&quot;drop_stream_ref; stream={:?}&quot;</span>, stream);
+    <span class="macro">tracing::trace!</span>(<span class="string">"drop_stream_ref; stream={:?}"</span>, stream);
 
-    <span class="comment">// decrement the stream&#39;s ref count by 1.
+    <span class="comment">// decrement the stream's ref count by 1.
     </span>stream.ref_dec();
 
     <span class="kw">let </span>actions = <span class="kw-2">&amp;mut </span>me.actions;
@@ -3060,7 +3060,7 @@
                 .recv
                 .release_closed_capacity(stream, <span class="kw-2">&amp;mut </span>actions.task);
 
-            <span class="comment">// We won&#39;t be able to reach our push promises anymore
+            <span class="comment">// We won't be able to reach our push promises anymore
             </span><span class="kw">let </span><span class="kw-2">mut </span>ppp = stream.pending_push_promises.take();
             <span class="kw">while let </span><span class="prelude-val">Some</span>(promise) = ppp.pop(stream.store_mut()) {
                 counts.transition(promise, |counts, stream| {
@@ -3122,7 +3122,7 @@
                 <span class="kw-2">&amp;mut </span><span class="self">self</span>.task,
             );
             <span class="self">self</span>.recv.enqueue_reset_expiration(stream, counts);
-            <span class="comment">// if a RecvStream is parked, ensure it&#39;s notified
+            <span class="comment">// if a RecvStream is parked, ensure it's notified
             </span>stream.notify_recv();
         });
     }
@@ -3163,8 +3163,8 @@
 
     <span class="doccomment">/// Check if we possibly could have processed and since forgotten this stream.
     ///
-    /// If we send a RST_STREAM for a stream, we will eventually &quot;forget&quot; about
-    /// the stream to free up memory. It&#39;s possible that the remote peer had
+    /// If we send a RST_STREAM for a stream, we will eventually "forget" about
+    /// the stream to free up memory. It's possible that the remote peer had
     /// frames in-flight, and by the time we receive them, our own state is
     /// gone. We *could* tear everything down by sending a GOAWAY, but it
     /// is more likely to be latency/memory constraints that caused this,

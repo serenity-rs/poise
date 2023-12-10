@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/macros/select.rs`."><title>select.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/macros/select.rs`."><title>select.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1043,7 +1043,7 @@
 /// The macro aggregates all `&lt;async expression&gt;` expressions and runs them
 /// concurrently on the **current** task. Once the **first** expression
 /// completes with a value that matches its `&lt;pattern&gt;`, the `select!` macro
-/// returns the result of evaluating the completed branch&#39;s `&lt;handler&gt;`
+/// returns the result of evaluating the completed branch's `&lt;handler&gt;`
 /// expression.
 ///
 /// Additionally, each branch may include an optional `if` precondition. If the
@@ -1055,7 +1055,7 @@
 ///
 /// 1. Evaluate all provided `&lt;precondition&gt;` expressions. If the precondition
 ///    returns `false`, disable the branch for the remainder of the current call
-///    to `select!`. Re-entering `select!` due to a loop clears the &quot;disabled&quot;
+///    to `select!`. Re-entering `select!` due to a loop clears the "disabled"
 ///    state.
 /// 2. Aggregate the `&lt;async expression&gt;`s from each branch, including the
 ///    disabled ones. If the branch is disabled, `&lt;async expression&gt;` is still
@@ -1163,7 +1163,7 @@
 ///
 /// Be aware that cancelling something that is not cancellation safe is not
 /// necessarily wrong. For example, if you are cancelling a task because the
-/// application is shutting down, then you probably don&#39;t care that partially
+/// application is shutting down, then you probably don't care that partially
 /// read data is lost.
 ///
 /// # Examples
@@ -1183,10 +1183,10 @@
 /// async fn main() {
 ///     tokio::select! {
 ///         _ = do_stuff_async() =&gt; {
-///             println!(&quot;do_stuff_async() completed first&quot;)
+///             println!("do_stuff_async() completed first")
 ///         }
 ///         _ = more_async_work() =&gt; {
-///             println!(&quot;more_async_work() completed first&quot;)
+///             println!("more_async_work() completed first")
 ///         }
 ///     };
 /// }
@@ -1212,7 +1212,7 @@
 /// ```
 ///
 /// Collect the contents of two streams. In this example, we rely on pattern
-/// matching and the fact that `stream::iter` is &quot;fused&quot;, i.e. once the stream
+/// matching and the fact that `stream::iter` is "fused", i.e. once the stream
 /// is complete, all calls to `next()` return `None`.
 ///
 /// ```
@@ -1261,13 +1261,13 @@
 ///         tokio::select! {
 ///             maybe_v = stream.next() =&gt; {
 ///                 if let Some(v) = maybe_v {
-///                     println!(&quot;got = {}&quot;, v);
+///                     println!("got = {}", v);
 ///                 } else {
 ///                     break;
 ///                 }
 ///             }
 ///             _ = &amp;mut sleep =&gt; {
-///                 println!(&quot;timeout&quot;);
+///                 println!("timeout");
 ///                 break;
 ///             }
 ///         }
@@ -1286,11 +1286,11 @@
 ///     let (tx2, mut rx2) = oneshot::channel();
 ///
 ///     tokio::spawn(async move {
-///         tx1.send(&quot;first&quot;).unwrap();
+///         tx1.send("first").unwrap();
 ///     });
 ///
 ///     tokio::spawn(async move {
-///         tx2.send(&quot;second&quot;).unwrap();
+///         tx2.send("second").unwrap();
 ///     });
 ///
 ///     let mut a = None;
@@ -1305,8 +1305,8 @@
 ///
 ///     let res = (a.unwrap(), b.unwrap());
 ///
-///     assert_eq!(res.0, &quot;first&quot;);
-///     assert_eq!(res.1, &quot;second&quot;);
+///     assert_eq!(res.0, "first");
+///     assert_eq!(res.1, "second");
 /// }
 /// ```
 ///
@@ -1373,15 +1373,15 @@
 ///     while !sleep.is_elapsed() {
 ///         tokio::select! {
 ///             _ = &amp;mut sleep, if !sleep.is_elapsed() =&gt; {
-///                 println!(&quot;operation timed out&quot;);
+///                 println!("operation timed out");
 ///             }
 ///             _ = some_async_work() =&gt; {
-///                 println!(&quot;operation completed&quot;);
+///                 println!("operation completed");
 ///             }
 ///         }
 ///     }
 ///
-///     panic!(&quot;This example shows how not to do it!&quot;);
+///     panic!("This example shows how not to do it!");
 /// }
 /// ```
 ///
@@ -1409,18 +1409,18 @@
 ///     loop {
 ///         tokio::select! {
 ///             _ = &amp;mut sleep =&gt; {
-///                 println!(&quot;operation timed out&quot;);
+///                 println!("operation timed out");
 ///                 break;
 ///             }
 ///             _ = some_async_work() =&gt; {
-///                 println!(&quot;operation completed&quot;);
+///                 println!("operation completed");
 ///             }
 ///         }
 ///     }
 /// }
 /// ```
 </span><span class="attr">#[macro_export]
-#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;macros&quot;</span>)))]
+#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"macros"</span>)))]
 </span><span class="macro">macro_rules! </span>select {
     <span class="comment">// Uses a declarative macro to do **most** of the work. While it is possible
     // to implement fully with a declarative macro, a procedural macro is used
@@ -1456,7 +1456,7 @@
         </span>; <span class="macro-nonterminal">$</span><span class="kw">else</span>:<span class="macro-nonterminal">expr
 
     </span>}) =&gt; {{
-        <span class="comment">// Enter a context where stable &quot;function-like&quot; proc macros can be used.
+        <span class="comment">// Enter a context where stable "function-like" proc macros can be used.
         //
         // This module is defined within a scope and should not leak out of this
         // macro.
@@ -1491,7 +1491,7 @@
             <span class="comment">// Safety: Nothing must be moved out of `futures`. This is to
             // satisfy the requirement of `Pin::new_unchecked` called below.
             //
-            // We can&#39;t use the `pin!` macro for this because `futures` is a
+            // We can't use the `pin!` macro for this because `futures` is a
             // tuple and the standard library provides no way to pin-project to
             // the fields of a tuple.
             </span><span class="kw">let </span><span class="kw-2">mut </span>futures = ( $( <span class="macro-nonterminal">$fut </span>, )+ );
@@ -1570,7 +1570,7 @@
                                 </span><span class="kw">return </span>Ready(<span class="macro-nonterminal">$</span><span class="macro">crate::select_variant!</span>(<span class="macro-nonterminal">__tokio_select_util::Out</span>, ($(<span class="macro-nonterminal">$skip</span>)<span class="kw-2">*</span>))(out));
                             }
                         )*
-                        <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;reaching this means there probably is an off by one bug&quot;</span>),
+                        <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(<span class="string">"reaching this means there probably is an off by one bug"</span>),
                     }
                 }
 
@@ -1588,7 +1588,7 @@
                 <span class="macro-nonterminal">$</span><span class="macro">crate::select_variant!</span>(<span class="macro-nonterminal">__tokio_select_util::Out</span>, ($(<span class="macro-nonterminal">$skip</span>)<span class="kw-2">*</span>) (<span class="macro-nonterminal">$bind</span>)) =&gt; <span class="macro-nonterminal">$handle</span>,
             )*
             __tokio_select_util::Out::Disabled =&gt; <span class="macro-nonterminal">$</span><span class="kw">else</span>,
-            <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;failed to match bind&quot;</span>),
+            <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(<span class="string">"failed to match bind"</span>),
         }
     }};
 
@@ -1599,7 +1599,7 @@
 
     </span>(@ { <span class="macro-nonterminal">start</span>=<span class="macro-nonterminal">$start</span>:expr; $(<span class="macro-nonterminal">$t</span>:tt)* } ) =&gt; {
         <span class="comment">// No `else` branch
-        </span><span class="macro-nonterminal">$</span><span class="macro">crate::select!</span>(@{ <span class="macro-nonterminal">start</span>=<span class="macro-nonterminal">$start</span>; $(<span class="macro-nonterminal">$t</span>)<span class="kw-2">*</span>; <span class="macro">panic!</span>(<span class="string">&quot;all branches are disabled and there is no else branch&quot;</span>) })
+        </span><span class="macro-nonterminal">$</span><span class="macro">crate::select!</span>(@{ <span class="macro-nonterminal">start</span>=<span class="macro-nonterminal">$start</span>; $(<span class="macro-nonterminal">$t</span>)<span class="kw-2">*</span>; <span class="macro">panic!</span>(<span class="string">"all branches are disabled and there is no else branch"</span>) })
     };
     (@ { start=<span class="macro-nonterminal">$start</span>:expr; $(<span class="macro-nonterminal">$t</span>:tt)* } <span class="kw">else </span>=&gt; <span class="macro-nonterminal">$</span><span class="kw">else</span>:<span class="macro-nonterminal">expr </span>$(,)<span class="question-mark">?</span>) =&gt; {
         <span class="macro-nonterminal">$</span><span class="macro">crate::select!</span>(@{ <span class="macro-nonterminal">start</span>=<span class="macro-nonterminal">$start</span>; $(<span class="macro-nonterminal">$t</span>)<span class="kw-2">*</span>; <span class="macro-nonterminal">$</span><span class="kw">else </span>})
@@ -1641,11 +1641,11 @@
         </span><span class="macro-nonterminal">$</span><span class="macro">crate::select!</span>(@{ <span class="macro-nonterminal">start</span>={ <span class="macro-nonterminal">$crate::macros::support::thread_rng_n</span>(BRANCHES) }; () } <span class="macro-nonterminal">$p </span>= $(<span class="macro-nonterminal">$t</span>)<span class="kw-2">*</span>)
     };
     () =&gt; {
-        <span class="macro">compile_error!</span>(<span class="string">&quot;select! requires at least one branch.&quot;</span>)
+        <span class="macro">compile_error!</span>(<span class="string">"select! requires at least one branch."</span>)
     };
 }
 
-<span class="comment">// And here... we manually list out matches for up to 64 branches... I&#39;m not
+<span class="comment">// And here... we manually list out matches for up to 64 branches... I'm not
 // happy about it either, but this is how we manage to use a declarative macro!
 
 </span><span class="attr">#[macro_export]

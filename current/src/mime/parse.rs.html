@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/mime-0.3.17/src/parse.rs`."><title>parse.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="mime" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/mime-0.3.17/src/parse.rs`."><title>parse.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="mime" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -477,10 +477,10 @@
         <span class="kw">use </span><span class="self">self</span>::ParseError::<span class="kw-2">*</span>;
 
         <span class="kw">match </span><span class="kw-2">*</span><span class="self">self </span>{
-            MissingSlash =&gt; <span class="string">&quot;a slash (/) was missing between the type and subtype&quot;</span>,
-            MissingEqual =&gt; <span class="string">&quot;an equals sign (=) was missing between a parameter and its value&quot;</span>,
-            MissingQuote =&gt; <span class="string">&quot;a quote (\&quot;) was missing from a parameter value&quot;</span>,
-            InvalidToken { .. } =&gt; <span class="string">&quot;an invalid token was encountered&quot;</span>,
+            MissingSlash =&gt; <span class="string">"a slash (/) was missing between the type and subtype"</span>,
+            MissingEqual =&gt; <span class="string">"an equals sign (=) was missing between a parameter and its value"</span>,
+            MissingQuote =&gt; <span class="string">"a quote (\") was missing from a parameter value"</span>,
+            InvalidToken { .. } =&gt; <span class="string">"an invalid token was encountered"</span>,
         }
     }
 }
@@ -488,7 +488,7 @@
 <span class="kw">impl </span>fmt::Display <span class="kw">for </span>ParseError {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
         <span class="kw">if let </span>ParseError::InvalidToken { pos, byte } = <span class="kw-2">*</span><span class="self">self </span>{
-            <span class="macro">write!</span>(f, <span class="string">&quot;{}, {:X} at position {}&quot;</span>, <span class="self">self</span>.s(), byte, pos)
+            <span class="macro">write!</span>(f, <span class="string">"{}, {:X} at position {}"</span>, <span class="self">self</span>.s(), byte, pos)
         } <span class="kw">else </span>{
             f.write_str(<span class="self">self</span>.s())
         }
@@ -503,9 +503,9 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; MimeIter&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; MimeIter&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// A new iterator over mimes or media types
-    </span><span class="kw">pub fn </span>new(s: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(s: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             pos: <span class="number">0</span>,
             source: s,
@@ -513,8 +513,8 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>MimeIter&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">type </span>Item = <span class="prelude-ty">Result</span>&lt;Mime, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str&gt;;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Iterator <span class="kw">for </span>MimeIter&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">type </span>Item = <span class="prelude-ty">Result</span>&lt;Mime, <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str&gt;;
 
     <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
         <span class="kw">let </span>start = <span class="self">self</span>.pos;
@@ -563,7 +563,7 @@
 }
 
 <span class="kw">pub fn </span>parse(s: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Mime, ParseError&gt; {
-    <span class="kw">if </span>s == <span class="string">&quot;*/*&quot; </span>{
+    <span class="kw">if </span>s == <span class="string">"*/*" </span>{
         <span class="kw">return </span><span class="prelude-val">Ok</span>(::STAR_STAR);
     }
 
@@ -574,7 +574,7 @@
     <span class="kw">loop </span>{
         <span class="kw">match </span>iter.next() {
             <span class="prelude-val">Some</span>((<span class="kw">_</span>, c)) <span class="kw">if </span>is_token(c) =&gt; (),
-            <span class="prelude-val">Some</span>((i, <span class="string">b&#39;/&#39;</span>)) <span class="kw">if </span>i &gt; <span class="number">0 </span>=&gt; {
+            <span class="prelude-val">Some</span>((i, <span class="string">b'/'</span>)) <span class="kw">if </span>i &gt; <span class="number">0 </span>=&gt; {
                 slash = i;
                 start = i + <span class="number">1</span>;
                 <span class="kw">break</span>;
@@ -592,10 +592,10 @@
     </span><span class="kw">let </span><span class="kw-2">mut </span>plus = <span class="prelude-val">None</span>;
     <span class="kw">loop </span>{
         <span class="kw">match </span>iter.next() {
-            <span class="prelude-val">Some</span>((i, <span class="string">b&#39;+&#39;</span>)) <span class="kw">if </span>i &gt; start =&gt; {
+            <span class="prelude-val">Some</span>((i, <span class="string">b'+'</span>)) <span class="kw">if </span>i &gt; start =&gt; {
                 plus = <span class="prelude-val">Some</span>(i);
             },
-            <span class="prelude-val">Some</span>((i, <span class="string">b&#39;;&#39;</span>)) <span class="kw">if </span>i &gt; start =&gt; {
+            <span class="prelude-val">Some</span>((i, <span class="string">b';'</span>)) <span class="kw">if </span>i &gt; start =&gt; {
                 start = i;
                 <span class="kw">break</span>;
             },
@@ -640,20 +640,20 @@
     <span class="kw">let </span>semicolon = start;
     start += <span class="number">1</span>;
     <span class="kw">let </span><span class="kw-2">mut </span>params = ParamSource::None;
-    <span class="lifetime">&#39;params</span>: <span class="kw">while </span>start &lt; s.len() {
+    <span class="lifetime">'params</span>: <span class="kw">while </span>start &lt; s.len() {
         <span class="kw">let </span>name;
         <span class="comment">// name
-        </span><span class="lifetime">&#39;name</span>: <span class="kw">loop </span>{
+        </span><span class="lifetime">'name</span>: <span class="kw">loop </span>{
             <span class="kw">match </span>iter.next() {
-                <span class="prelude-val">Some</span>((i, <span class="string">b&#39; &#39;</span>)) <span class="kw">if </span>i == start =&gt; {
+                <span class="prelude-val">Some</span>((i, <span class="string">b' '</span>)) <span class="kw">if </span>i == start =&gt; {
                     start = i + <span class="number">1</span>;
-                    <span class="kw">continue </span><span class="lifetime">&#39;params</span>;
+                    <span class="kw">continue </span><span class="lifetime">'params</span>;
                 },
                 <span class="prelude-val">Some</span>((<span class="kw">_</span>, c)) <span class="kw">if </span>is_token(c) =&gt; (),
-                <span class="prelude-val">Some</span>((i, <span class="string">b&#39;=&#39;</span>)) <span class="kw">if </span>i &gt; start =&gt; {
+                <span class="prelude-val">Some</span>((i, <span class="string">b'='</span>)) <span class="kw">if </span>i &gt; start =&gt; {
                     name = Indexed(start, i);
                     start = i + <span class="number">1</span>;
-                    <span class="kw">break </span><span class="lifetime">&#39;name</span>;
+                    <span class="kw">break </span><span class="lifetime">'name</span>;
                 },
                 <span class="prelude-val">None </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(ParseError::MissingEqual),
                 <span class="prelude-val">Some</span>((pos, byte)) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(ParseError::InvalidToken {
@@ -664,15 +664,15 @@
         }
 
         <span class="kw">let </span>value;
-        <span class="comment">// values must be restrict-name-char or &quot;anything goes&quot;
+        <span class="comment">// values must be restrict-name-char or "anything goes"
         </span><span class="kw">let </span><span class="kw-2">mut </span>is_quoted = <span class="bool-val">false</span>;
 
-        <span class="lifetime">&#39;value</span>: <span class="kw">loop </span>{
+        <span class="lifetime">'value</span>: <span class="kw">loop </span>{
             <span class="kw">if </span>is_quoted {
                 <span class="kw">match </span>iter.next() {
-                    <span class="prelude-val">Some</span>((i, <span class="string">b&#39;&quot;&#39;</span>)) <span class="kw">if </span>i &gt; start =&gt; {
+                    <span class="prelude-val">Some</span>((i, <span class="string">b'"'</span>)) <span class="kw">if </span>i &gt; start =&gt; {
                         value = Indexed(start, i);
-                        <span class="kw">break </span><span class="lifetime">&#39;value</span>;
+                        <span class="kw">break </span><span class="lifetime">'value</span>;
                     },
                     <span class="prelude-val">Some</span>((<span class="kw">_</span>, c)) <span class="kw">if </span>is_restricted_quoted_char(c) =&gt; (),
                     <span class="prelude-val">None </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(ParseError::MissingQuote),
@@ -683,20 +683,20 @@
                 }
             } <span class="kw">else </span>{
                 <span class="kw">match </span>iter.next() {
-                    <span class="prelude-val">Some</span>((i, <span class="string">b&#39;&quot;&#39;</span>)) <span class="kw">if </span>i == start =&gt; {
+                    <span class="prelude-val">Some</span>((i, <span class="string">b'"'</span>)) <span class="kw">if </span>i == start =&gt; {
                         is_quoted = <span class="bool-val">true</span>;
                         start = i + <span class="number">1</span>;
                     },
                     <span class="prelude-val">Some</span>((<span class="kw">_</span>, c)) <span class="kw">if </span>is_token(c) =&gt; (),
-                    <span class="prelude-val">Some</span>((i, <span class="string">b&#39;;&#39;</span>)) <span class="kw">if </span>i &gt; start =&gt; {
+                    <span class="prelude-val">Some</span>((i, <span class="string">b';'</span>)) <span class="kw">if </span>i &gt; start =&gt; {
                         value = Indexed(start, i);
                         start = i + <span class="number">1</span>;
-                        <span class="kw">break </span><span class="lifetime">&#39;value</span>;
+                        <span class="kw">break </span><span class="lifetime">'value</span>;
                     }
                     <span class="prelude-val">None </span>=&gt; {
                         value = Indexed(start, s.len());
                         start = s.len();
-                        <span class="kw">break </span><span class="lifetime">&#39;value</span>;
+                        <span class="kw">break </span><span class="lifetime">'value</span>;
                     },
 
                     <span class="prelude-val">Some</span>((pos, byte)) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(ParseError::InvalidToken {
@@ -708,20 +708,20 @@
         }
 
         <span class="kw">if </span>is_quoted {
-            <span class="lifetime">&#39;ws</span>: <span class="kw">loop </span>{
+            <span class="lifetime">'ws</span>: <span class="kw">loop </span>{
                 <span class="kw">match </span>iter.next() {
-                    <span class="prelude-val">Some</span>((i, <span class="string">b&#39;;&#39;</span>)) =&gt; {
+                    <span class="prelude-val">Some</span>((i, <span class="string">b';'</span>)) =&gt; {
                         <span class="comment">// next param
                         </span>start = i + <span class="number">1</span>;
-                        <span class="kw">break </span><span class="lifetime">&#39;ws</span>;
+                        <span class="kw">break </span><span class="lifetime">'ws</span>;
                     },
-                    <span class="prelude-val">Some</span>((<span class="kw">_</span>, <span class="string">b&#39; &#39;</span>)) =&gt; {
+                    <span class="prelude-val">Some</span>((<span class="kw">_</span>, <span class="string">b' '</span>)) =&gt; {
                         <span class="comment">// skip whitespace
                     </span>},
                     <span class="prelude-val">None </span>=&gt; {
                         <span class="comment">// eof
                         </span>start = s.len();
-                        <span class="kw">break </span><span class="lifetime">&#39;ws</span>;
+                        <span class="kw">break </span><span class="lifetime">'ws</span>;
                     },
                     <span class="prelude-val">Some</span>((pos, byte)) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(ParseError::InvalidToken {
                         pos: pos,
@@ -734,8 +734,8 @@
         <span class="kw">match </span>params {
             ParamSource::Utf8(i) =&gt; {
                 <span class="kw">let </span>i = i + <span class="number">2</span>;
-                <span class="kw">let </span>charset = Indexed(i, <span class="string">&quot;charset&quot;</span>.len() + i);
-                <span class="kw">let </span>utf8 = Indexed(charset.<span class="number">1 </span>+ <span class="number">1</span>, charset.<span class="number">1 </span>+ <span class="string">&quot;utf-8&quot;</span>.len() + <span class="number">1</span>);
+                <span class="kw">let </span>charset = Indexed(i, <span class="string">"charset"</span>.len() + i);
+                <span class="kw">let </span>utf8 = Indexed(charset.<span class="number">1 </span>+ <span class="number">1</span>, charset.<span class="number">1 </span>+ <span class="string">"utf-8"</span>.len() + <span class="number">1</span>);
                 params = ParamSource::Custom(semicolon, <span class="macro">vec!</span>[
                     (charset, utf8),
                     (name, value),
@@ -748,7 +748,7 @@
                 <span class="kw">if </span>semicolon + <span class="number">2 </span>== name.<span class="number">0 </span>&amp;&amp; CHARSET == <span class="kw-2">&amp;</span>s[name.<span class="number">0</span>..name.<span class="number">1</span>] {
                     <span class="kw">if </span>UTF_8 == <span class="kw-2">&amp;</span>s[value.<span class="number">0</span>..value.<span class="number">1</span>] {
                         params = ParamSource::Utf8(semicolon);
-                        <span class="kw">continue </span><span class="lifetime">&#39;params</span>;
+                        <span class="kw">continue </span><span class="lifetime">'params</span>;
                     }
                 }
                 params = ParamSource::Custom(semicolon, <span class="macro">vec!</span>[(name, value)]);
@@ -790,25 +790,25 @@
 // &gt;
 // &gt;     restricted-name = restricted-name-first *126restricted-name-chars
 // &gt;     restricted-name-first  = ALPHA / DIGIT
-// &gt;     restricted-name-chars  = ALPHA / DIGIT / &quot;!&quot; / &quot;#&quot; /
-// &gt;                              &quot;$&quot; / &quot;&amp;&quot; / &quot;-&quot; / &quot;^&quot; / &quot;_&quot;
-// &gt;     restricted-name-chars =/ &quot;.&quot; ; Characters before first dot always
+// &gt;     restricted-name-chars  = ALPHA / DIGIT / "!" / "#" /
+// &gt;                              "$" / "&amp;" / "-" / "^" / "_"
+// &gt;     restricted-name-chars =/ "." ; Characters before first dot always
 // &gt;                                  ; specify a facet name
-// &gt;     restricted-name-chars =/ &quot;+&quot; ; Characters after last plus always
+// &gt;     restricted-name-chars =/ "+" ; Characters after last plus always
 // &gt;                                  ; specify a structured syntax suffix
 
 // However, [HTTP](https://tools.ietf.org/html/rfc7231#section-3.1.1.1):
 //
-// &gt;     media-type = type &quot;/&quot; subtype *( OWS &quot;;&quot; OWS parameter )
+// &gt;     media-type = type "/" subtype *( OWS ";" OWS parameter )
 // &gt;     type       = token
 // &gt;     subtype    = token
-// &gt;     parameter  = token &quot;=&quot; ( token / quoted-string )
+// &gt;     parameter  = token "=" ( token / quoted-string )
 //
 // Where token is defined as:
 //
 // &gt;     token = 1*tchar
-// &gt;     tchar = &quot;!&quot; / &quot;#&quot; / &quot;$&quot; / &quot;%&quot; / &quot;&amp;&quot; / &quot;&#39;&quot; / &quot;*&quot; / &quot;+&quot; / &quot;-&quot; / &quot;.&quot; /
-// &gt;        &quot;^&quot; / &quot;_&quot; / &quot;`&quot; / &quot;|&quot; / &quot;~&quot; / DIGIT / ALPHA
+// &gt;     tchar = "!" / "#" / "$" / "%" / "&amp;" / "'" / "*" / "+" / "-" / "." /
+// &gt;        "^" / "_" / "`" / "|" / "~" / DIGIT / ALPHA
 //
 // So, clearly, ¯\_(Ä_/¯
 
@@ -851,59 +851,59 @@
     <span class="kw">for </span>(i, <span class="kw-2">&amp;</span>valid) <span class="kw">in </span>TOKEN_MAP.iter().enumerate() {
         <span class="kw">let </span>i = i <span class="kw">as </span>u8;
         <span class="kw">let </span>should = <span class="kw">match </span>i {
-            <span class="string">b&#39;a&#39;</span>...<span class="string">b&#39;z&#39; </span>|
-            <span class="string">b&#39;A&#39;</span>...<span class="string">b&#39;Z&#39; </span>|
-            <span class="string">b&#39;0&#39;</span>...<span class="string">b&#39;9&#39; </span>|
-            <span class="string">b&#39;!&#39; </span>|
-            <span class="string">b&#39;#&#39; </span>|
-            <span class="string">b&#39;$&#39; </span>|
-            <span class="string">b&#39;%&#39; </span>|
-            <span class="string">b&#39;&amp;&#39; </span>|
-            <span class="string">b&#39;\&#39;&#39; </span>|
-            <span class="string">b&#39;*&#39; </span>|
-            <span class="string">b&#39;+&#39; </span>|
-            <span class="string">b&#39;-&#39; </span>|
-            <span class="string">b&#39;.&#39; </span>|
-            <span class="string">b&#39;^&#39; </span>|
-            <span class="string">b&#39;_&#39; </span>|
-            <span class="string">b&#39;`&#39; </span>|
-            <span class="string">b&#39;|&#39; </span>|
-            <span class="string">b&#39;~&#39; </span>=&gt; <span class="bool-val">true</span>,
+            <span class="string">b'a'</span>...<span class="string">b'z' </span>|
+            <span class="string">b'A'</span>...<span class="string">b'Z' </span>|
+            <span class="string">b'0'</span>...<span class="string">b'9' </span>|
+            <span class="string">b'!' </span>|
+            <span class="string">b'#' </span>|
+            <span class="string">b'$' </span>|
+            <span class="string">b'%' </span>|
+            <span class="string">b'&amp;' </span>|
+            <span class="string">b'\'' </span>|
+            <span class="string">b'*' </span>|
+            <span class="string">b'+' </span>|
+            <span class="string">b'-' </span>|
+            <span class="string">b'.' </span>|
+            <span class="string">b'^' </span>|
+            <span class="string">b'_' </span>|
+            <span class="string">b'`' </span>|
+            <span class="string">b'|' </span>|
+            <span class="string">b'~' </span>=&gt; <span class="bool-val">true</span>,
             <span class="kw">_ </span>=&gt; <span class="bool-val">false
         </span>};
-        <span class="macro">assert_eq!</span>(valid, should, <span class="string">&quot;{:?} ({}) should be {}&quot;</span>, i <span class="kw">as </span>char, i, should);
+        <span class="macro">assert_eq!</span>(valid, should, <span class="string">"{:?} ({}) should be {}"</span>, i <span class="kw">as </span>char, i, should);
     }
 }
 
 <span class="attr">#[test]
 </span><span class="kw">fn </span>test_parse_iterator() {
-    <span class="kw">let </span><span class="kw-2">mut </span>iter = MimeIter::new(<span class="string">&quot;application/json, application/json&quot;</span>);
-    <span class="macro">assert_eq!</span>(iter.next().unwrap().unwrap(), parse(<span class="string">&quot;application/json&quot;</span>).unwrap());
-    <span class="macro">assert_eq!</span>(iter.next().unwrap().unwrap(), parse(<span class="string">&quot;application/json&quot;</span>).unwrap());
+    <span class="kw">let </span><span class="kw-2">mut </span>iter = MimeIter::new(<span class="string">"application/json, application/json"</span>);
+    <span class="macro">assert_eq!</span>(iter.next().unwrap().unwrap(), parse(<span class="string">"application/json"</span>).unwrap());
+    <span class="macro">assert_eq!</span>(iter.next().unwrap().unwrap(), parse(<span class="string">"application/json"</span>).unwrap());
     <span class="macro">assert_eq!</span>(iter.next(), <span class="prelude-val">None</span>);
 
-    <span class="kw">let </span><span class="kw-2">mut </span>iter = MimeIter::new(<span class="string">&quot;application/json&quot;</span>);
-    <span class="macro">assert_eq!</span>(iter.next().unwrap().unwrap(), parse(<span class="string">&quot;application/json&quot;</span>).unwrap());
+    <span class="kw">let </span><span class="kw-2">mut </span>iter = MimeIter::new(<span class="string">"application/json"</span>);
+    <span class="macro">assert_eq!</span>(iter.next().unwrap().unwrap(), parse(<span class="string">"application/json"</span>).unwrap());
     <span class="macro">assert_eq!</span>(iter.next(), <span class="prelude-val">None</span>);
 
-    <span class="kw">let </span><span class="kw-2">mut </span>iter = MimeIter::new(<span class="string">&quot;application/json;  &quot;</span>);
-    <span class="macro">assert_eq!</span>(iter.next().unwrap().unwrap(), parse(<span class="string">&quot;application/json&quot;</span>).unwrap());
+    <span class="kw">let </span><span class="kw-2">mut </span>iter = MimeIter::new(<span class="string">"application/json;  "</span>);
+    <span class="macro">assert_eq!</span>(iter.next().unwrap().unwrap(), parse(<span class="string">"application/json"</span>).unwrap());
     <span class="macro">assert_eq!</span>(iter.next(), <span class="prelude-val">None</span>);
 }
 
 <span class="attr">#[test]
 </span><span class="kw">fn </span>test_parse_iterator_invalid() {
-    <span class="kw">let </span><span class="kw-2">mut </span>iter = MimeIter::new(<span class="string">&quot;application/json, invalid, application/json&quot;</span>);
-    <span class="macro">assert_eq!</span>(iter.next().unwrap().unwrap(), parse(<span class="string">&quot;application/json&quot;</span>).unwrap());
-    <span class="macro">assert_eq!</span>(iter.next().unwrap().unwrap_err(), <span class="string">&quot;invalid&quot;</span>);
-    <span class="macro">assert_eq!</span>(iter.next().unwrap().unwrap(), parse(<span class="string">&quot;application/json&quot;</span>).unwrap());
+    <span class="kw">let </span><span class="kw-2">mut </span>iter = MimeIter::new(<span class="string">"application/json, invalid, application/json"</span>);
+    <span class="macro">assert_eq!</span>(iter.next().unwrap().unwrap(), parse(<span class="string">"application/json"</span>).unwrap());
+    <span class="macro">assert_eq!</span>(iter.next().unwrap().unwrap_err(), <span class="string">"invalid"</span>);
+    <span class="macro">assert_eq!</span>(iter.next().unwrap().unwrap(), parse(<span class="string">"application/json"</span>).unwrap());
     <span class="macro">assert_eq!</span>(iter.next(), <span class="prelude-val">None</span>);
 }
 
 <span class="attr">#[test]
 </span><span class="kw">fn </span>test_parse_iterator_all_invalid() {
-    <span class="kw">let </span><span class="kw-2">mut </span>iter = MimeIter::new(<span class="string">&quot;application/json, text/html&quot;</span>);
-    <span class="macro">assert_eq!</span>(iter.next().unwrap().unwrap_err(), <span class="string">&quot;application/json&quot;</span>);
+    <span class="kw">let </span><span class="kw-2">mut </span>iter = MimeIter::new(<span class="string">"application/json, text/html"</span>);
+    <span class="macro">assert_eq!</span>(iter.next().unwrap().unwrap_err(), <span class="string">"application/json"</span>);
     <span class="macro">assert_eq!</span>(iter.next(), <span class="prelude-val">None</span>);
 }
 </code></pre></div></section></main></body></html>

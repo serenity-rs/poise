@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/h2-0.3.22/src/hpack/decoder.rs`."><title>decoder.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="h2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/h2-0.3.22/src/hpack/decoder.rs`."><title>decoder.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="h2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1126,10 +1126,10 @@
             <span class="self">self</span>.last_max_update = size;
         }
 
-        <span class="kw">let </span>span = <span class="macro">tracing::trace_span!</span>(<span class="string">&quot;hpack::decode&quot;</span>);
+        <span class="kw">let </span>span = <span class="macro">tracing::trace_span!</span>(<span class="string">"hpack::decode"</span>);
         <span class="kw">let </span>_e = span.enter();
 
-        <span class="macro">tracing::trace!</span>(<span class="string">&quot;decode&quot;</span>);
+        <span class="macro">tracing::trace!</span>(<span class="string">"decode"</span>);
 
         <span class="kw">while let </span><span class="prelude-val">Some</span>(ty) = peek_u8(src) {
             <span class="comment">// At this point we are always at the beginning of the next block
@@ -1137,14 +1137,14 @@
             // determined from the first byte.
             </span><span class="kw">match </span>Representation::load(ty)<span class="question-mark">? </span>{
                 Indexed =&gt; {
-                    <span class="macro">tracing::trace!</span>(rem = src.remaining(), kind = %<span class="string">&quot;Indexed&quot;</span>);
+                    <span class="macro">tracing::trace!</span>(rem = src.remaining(), kind = %<span class="string">"Indexed"</span>);
                     can_resize = <span class="bool-val">false</span>;
                     <span class="kw">let </span>entry = <span class="self">self</span>.decode_indexed(src)<span class="question-mark">?</span>;
                     consume(src);
                     f(entry);
                 }
                 LiteralWithIndexing =&gt; {
-                    <span class="macro">tracing::trace!</span>(rem = src.remaining(), kind = %<span class="string">&quot;LiteralWithIndexing&quot;</span>);
+                    <span class="macro">tracing::trace!</span>(rem = src.remaining(), kind = %<span class="string">"LiteralWithIndexing"</span>);
                     can_resize = <span class="bool-val">false</span>;
                     <span class="kw">let </span>entry = <span class="self">self</span>.decode_literal(src, <span class="bool-val">true</span>)<span class="question-mark">?</span>;
 
@@ -1155,14 +1155,14 @@
                     f(entry);
                 }
                 LiteralWithoutIndexing =&gt; {
-                    <span class="macro">tracing::trace!</span>(rem = src.remaining(), kind = %<span class="string">&quot;LiteralWithoutIndexing&quot;</span>);
+                    <span class="macro">tracing::trace!</span>(rem = src.remaining(), kind = %<span class="string">"LiteralWithoutIndexing"</span>);
                     can_resize = <span class="bool-val">false</span>;
                     <span class="kw">let </span>entry = <span class="self">self</span>.decode_literal(src, <span class="bool-val">false</span>)<span class="question-mark">?</span>;
                     consume(src);
                     f(entry);
                 }
                 LiteralNeverIndexed =&gt; {
-                    <span class="macro">tracing::trace!</span>(rem = src.remaining(), kind = %<span class="string">&quot;LiteralNeverIndexed&quot;</span>);
+                    <span class="macro">tracing::trace!</span>(rem = src.remaining(), kind = %<span class="string">"LiteralNeverIndexed"</span>);
                     can_resize = <span class="bool-val">false</span>;
                     <span class="kw">let </span>entry = <span class="self">self</span>.decode_literal(src, <span class="bool-val">false</span>)<span class="question-mark">?</span>;
                     consume(src);
@@ -1172,7 +1172,7 @@
                     </span>f(entry);
                 }
                 SizeUpdate =&gt; {
-                    <span class="macro">tracing::trace!</span>(rem = src.remaining(), kind = %<span class="string">&quot;SizeUpdate&quot;</span>);
+                    <span class="macro">tracing::trace!</span>(rem = src.remaining(), kind = %<span class="string">"SizeUpdate"</span>);
                     <span class="kw">if </span>!can_resize {
                         <span class="kw">return </span><span class="prelude-val">Err</span>(DecoderError::InvalidMaxDynamicSize);
                     }
@@ -1197,7 +1197,7 @@
         <span class="macro">tracing::debug!</span>(
             from = <span class="self">self</span>.table.size(),
             to = new_size,
-            <span class="string">&quot;Decoder changed max table size&quot;
+            <span class="string">"Decoder changed max table size"
         </span>);
 
         <span class="self">self</span>.table.set_max_size(new_size);
@@ -1255,7 +1255,7 @@
         </span><span class="kw">let </span>len = decode_int(buf, <span class="number">7</span>)<span class="question-mark">?</span>;
 
         <span class="kw">if </span>len &gt; buf.remaining() {
-            <span class="macro">tracing::trace!</span>(len, remaining = buf.remaining(), <span class="string">&quot;decode_string underflow&quot;</span>,);
+            <span class="macro">tracing::trace!</span>(len, remaining = buf.remaining(), <span class="string">"decode_string underflow"</span>,);
             <span class="kw">return </span><span class="prelude-val">Err</span>(DecoderError::NeedMore(NeedMore::StringUnderflow));
         }
 
@@ -1496,8 +1496,8 @@
                     <span class="prelude-val">Some</span>(x) =&gt; x,
                     <span class="prelude-val">None </span>=&gt; {
                         <span class="comment">// Can never happen as the size of the table must reach
-                        // 0 by the time we&#39;ve exhausted all elements.
-                        </span><span class="macro">panic!</span>(<span class="string">&quot;Size of table != 0, but no headers left!&quot;</span>);
+                        // 0 by the time we've exhausted all elements.
+                        </span><span class="macro">panic!</span>(<span class="string">"Size of table != 0, but no headers left!"</span>);
                     }
                 };
 
@@ -1557,13 +1557,13 @@
     <span class="kw">use </span>http::header::HeaderValue;
 
     <span class="kw">match </span>idx {
-        <span class="number">1 </span>=&gt; Header::Authority(BytesStr::from_static(<span class="string">&quot;&quot;</span>)),
+        <span class="number">1 </span>=&gt; Header::Authority(BytesStr::from_static(<span class="string">""</span>)),
         <span class="number">2 </span>=&gt; Header::Method(Method::GET),
         <span class="number">3 </span>=&gt; Header::Method(Method::POST),
-        <span class="number">4 </span>=&gt; Header::Path(BytesStr::from_static(<span class="string">&quot;/&quot;</span>)),
-        <span class="number">5 </span>=&gt; Header::Path(BytesStr::from_static(<span class="string">&quot;/index.html&quot;</span>)),
-        <span class="number">6 </span>=&gt; Header::Scheme(BytesStr::from_static(<span class="string">&quot;http&quot;</span>)),
-        <span class="number">7 </span>=&gt; Header::Scheme(BytesStr::from_static(<span class="string">&quot;https&quot;</span>)),
+        <span class="number">4 </span>=&gt; Header::Path(BytesStr::from_static(<span class="string">"/"</span>)),
+        <span class="number">5 </span>=&gt; Header::Path(BytesStr::from_static(<span class="string">"/index.html"</span>)),
+        <span class="number">6 </span>=&gt; Header::Scheme(BytesStr::from_static(<span class="string">"http"</span>)),
+        <span class="number">7 </span>=&gt; Header::Scheme(BytesStr::from_static(<span class="string">"https"</span>)),
         <span class="number">8 </span>=&gt; Header::Status(StatusCode::OK),
         <span class="number">9 </span>=&gt; Header::Status(StatusCode::NO_CONTENT),
         <span class="number">10 </span>=&gt; Header::Status(StatusCode::PARTIAL_CONTENT),
@@ -1573,191 +1573,191 @@
         <span class="number">14 </span>=&gt; Header::Status(StatusCode::INTERNAL_SERVER_ERROR),
         <span class="number">15 </span>=&gt; Header::Field {
             name: header::ACCEPT_CHARSET,
-            value: HeaderValue::from_static(<span class="string">&quot;&quot;</span>),
+            value: HeaderValue::from_static(<span class="string">""</span>),
         },
         <span class="number">16 </span>=&gt; Header::Field {
             name: header::ACCEPT_ENCODING,
-            value: HeaderValue::from_static(<span class="string">&quot;gzip, deflate&quot;</span>),
+            value: HeaderValue::from_static(<span class="string">"gzip, deflate"</span>),
         },
         <span class="number">17 </span>=&gt; Header::Field {
             name: header::ACCEPT_LANGUAGE,
-            value: HeaderValue::from_static(<span class="string">&quot;&quot;</span>),
+            value: HeaderValue::from_static(<span class="string">""</span>),
         },
         <span class="number">18 </span>=&gt; Header::Field {
             name: header::ACCEPT_RANGES,
-            value: HeaderValue::from_static(<span class="string">&quot;&quot;</span>),
+            value: HeaderValue::from_static(<span class="string">""</span>),
         },
         <span class="number">19 </span>=&gt; Header::Field {
             name: header::ACCEPT,
-            value: HeaderValue::from_static(<span class="string">&quot;&quot;</span>),
+            value: HeaderValue::from_static(<span class="string">""</span>),
         },
         <span class="number">20 </span>=&gt; Header::Field {
             name: header::ACCESS_CONTROL_ALLOW_ORIGIN,
-            value: HeaderValue::from_static(<span class="string">&quot;&quot;</span>),
+            value: HeaderValue::from_static(<span class="string">""</span>),
         },
         <span class="number">21 </span>=&gt; Header::Field {
             name: header::AGE,
-            value: HeaderValue::from_static(<span class="string">&quot;&quot;</span>),
+            value: HeaderValue::from_static(<span class="string">""</span>),
         },
         <span class="number">22 </span>=&gt; Header::Field {
             name: header::ALLOW,
-            value: HeaderValue::from_static(<span class="string">&quot;&quot;</span>),
+            value: HeaderValue::from_static(<span class="string">""</span>),
         },
         <span class="number">23 </span>=&gt; Header::Field {
             name: header::AUTHORIZATION,
-            value: HeaderValue::from_static(<span class="string">&quot;&quot;</span>),
+            value: HeaderValue::from_static(<span class="string">""</span>),
         },
         <span class="number">24 </span>=&gt; Header::Field {
             name: header::CACHE_CONTROL,
-            value: HeaderValue::from_static(<span class="string">&quot;&quot;</span>),
+            value: HeaderValue::from_static(<span class="string">""</span>),
         },
         <span class="number">25 </span>=&gt; Header::Field {
             name: header::CONTENT_DISPOSITION,
-            value: HeaderValue::from_static(<span class="string">&quot;&quot;</span>),
+            value: HeaderValue::from_static(<span class="string">""</span>),
         },
         <span class="number">26 </span>=&gt; Header::Field {
             name: header::CONTENT_ENCODING,
-            value: HeaderValue::from_static(<span class="string">&quot;&quot;</span>),
+            value: HeaderValue::from_static(<span class="string">""</span>),
         },
         <span class="number">27 </span>=&gt; Header::Field {
             name: header::CONTENT_LANGUAGE,
-            value: HeaderValue::from_static(<span class="string">&quot;&quot;</span>),
+            value: HeaderValue::from_static(<span class="string">""</span>),
         },
         <span class="number">28 </span>=&gt; Header::Field {
             name: header::CONTENT_LENGTH,
-            value: HeaderValue::from_static(<span class="string">&quot;&quot;</span>),
+            value: HeaderValue::from_static(<span class="string">""</span>),
         },
         <span class="number">29 </span>=&gt; Header::Field {
             name: header::CONTENT_LOCATION,
-            value: HeaderValue::from_static(<span class="string">&quot;&quot;</span>),
+            value: HeaderValue::from_static(<span class="string">""</span>),
         },
         <span class="number">30 </span>=&gt; Header::Field {
             name: header::CONTENT_RANGE,
-            value: HeaderValue::from_static(<span class="string">&quot;&quot;</span>),
+            value: HeaderValue::from_static(<span class="string">""</span>),
         },
         <span class="number">31 </span>=&gt; Header::Field {
             name: header::CONTENT_TYPE,
-            value: HeaderValue::from_static(<span class="string">&quot;&quot;</span>),
+            value: HeaderValue::from_static(<span class="string">""</span>),
         },
         <span class="number">32 </span>=&gt; Header::Field {
             name: header::COOKIE,
-            value: HeaderValue::from_static(<span class="string">&quot;&quot;</span>),
+            value: HeaderValue::from_static(<span class="string">""</span>),
         },
         <span class="number">33 </span>=&gt; Header::Field {
             name: header::DATE,
-            value: HeaderValue::from_static(<span class="string">&quot;&quot;</span>),
+            value: HeaderValue::from_static(<span class="string">""</span>),
         },
         <span class="number">34 </span>=&gt; Header::Field {
             name: header::ETAG,
-            value: HeaderValue::from_static(<span class="string">&quot;&quot;</span>),
+            value: HeaderValue::from_static(<span class="string">""</span>),
         },
         <span class="number">35 </span>=&gt; Header::Field {
             name: header::EXPECT,
-            value: HeaderValue::from_static(<span class="string">&quot;&quot;</span>),
+            value: HeaderValue::from_static(<span class="string">""</span>),
         },
         <span class="number">36 </span>=&gt; Header::Field {
             name: header::EXPIRES,
-            value: HeaderValue::from_static(<span class="string">&quot;&quot;</span>),
+            value: HeaderValue::from_static(<span class="string">""</span>),
         },
         <span class="number">37 </span>=&gt; Header::Field {
             name: header::FROM,
-            value: HeaderValue::from_static(<span class="string">&quot;&quot;</span>),
+            value: HeaderValue::from_static(<span class="string">""</span>),
         },
         <span class="number">38 </span>=&gt; Header::Field {
             name: header::HOST,
-            value: HeaderValue::from_static(<span class="string">&quot;&quot;</span>),
+            value: HeaderValue::from_static(<span class="string">""</span>),
         },
         <span class="number">39 </span>=&gt; Header::Field {
             name: header::IF_MATCH,
-            value: HeaderValue::from_static(<span class="string">&quot;&quot;</span>),
+            value: HeaderValue::from_static(<span class="string">""</span>),
         },
         <span class="number">40 </span>=&gt; Header::Field {
             name: header::IF_MODIFIED_SINCE,
-            value: HeaderValue::from_static(<span class="string">&quot;&quot;</span>),
+            value: HeaderValue::from_static(<span class="string">""</span>),
         },
         <span class="number">41 </span>=&gt; Header::Field {
             name: header::IF_NONE_MATCH,
-            value: HeaderValue::from_static(<span class="string">&quot;&quot;</span>),
+            value: HeaderValue::from_static(<span class="string">""</span>),
         },
         <span class="number">42 </span>=&gt; Header::Field {
             name: header::IF_RANGE,
-            value: HeaderValue::from_static(<span class="string">&quot;&quot;</span>),
+            value: HeaderValue::from_static(<span class="string">""</span>),
         },
         <span class="number">43 </span>=&gt; Header::Field {
             name: header::IF_UNMODIFIED_SINCE,
-            value: HeaderValue::from_static(<span class="string">&quot;&quot;</span>),
+            value: HeaderValue::from_static(<span class="string">""</span>),
         },
         <span class="number">44 </span>=&gt; Header::Field {
             name: header::LAST_MODIFIED,
-            value: HeaderValue::from_static(<span class="string">&quot;&quot;</span>),
+            value: HeaderValue::from_static(<span class="string">""</span>),
         },
         <span class="number">45 </span>=&gt; Header::Field {
             name: header::LINK,
-            value: HeaderValue::from_static(<span class="string">&quot;&quot;</span>),
+            value: HeaderValue::from_static(<span class="string">""</span>),
         },
         <span class="number">46 </span>=&gt; Header::Field {
             name: header::LOCATION,
-            value: HeaderValue::from_static(<span class="string">&quot;&quot;</span>),
+            value: HeaderValue::from_static(<span class="string">""</span>),
         },
         <span class="number">47 </span>=&gt; Header::Field {
             name: header::MAX_FORWARDS,
-            value: HeaderValue::from_static(<span class="string">&quot;&quot;</span>),
+            value: HeaderValue::from_static(<span class="string">""</span>),
         },
         <span class="number">48 </span>=&gt; Header::Field {
             name: header::PROXY_AUTHENTICATE,
-            value: HeaderValue::from_static(<span class="string">&quot;&quot;</span>),
+            value: HeaderValue::from_static(<span class="string">""</span>),
         },
         <span class="number">49 </span>=&gt; Header::Field {
             name: header::PROXY_AUTHORIZATION,
-            value: HeaderValue::from_static(<span class="string">&quot;&quot;</span>),
+            value: HeaderValue::from_static(<span class="string">""</span>),
         },
         <span class="number">50 </span>=&gt; Header::Field {
             name: header::RANGE,
-            value: HeaderValue::from_static(<span class="string">&quot;&quot;</span>),
+            value: HeaderValue::from_static(<span class="string">""</span>),
         },
         <span class="number">51 </span>=&gt; Header::Field {
             name: header::REFERER,
-            value: HeaderValue::from_static(<span class="string">&quot;&quot;</span>),
+            value: HeaderValue::from_static(<span class="string">""</span>),
         },
         <span class="number">52 </span>=&gt; Header::Field {
             name: header::REFRESH,
-            value: HeaderValue::from_static(<span class="string">&quot;&quot;</span>),
+            value: HeaderValue::from_static(<span class="string">""</span>),
         },
         <span class="number">53 </span>=&gt; Header::Field {
             name: header::RETRY_AFTER,
-            value: HeaderValue::from_static(<span class="string">&quot;&quot;</span>),
+            value: HeaderValue::from_static(<span class="string">""</span>),
         },
         <span class="number">54 </span>=&gt; Header::Field {
             name: header::SERVER,
-            value: HeaderValue::from_static(<span class="string">&quot;&quot;</span>),
+            value: HeaderValue::from_static(<span class="string">""</span>),
         },
         <span class="number">55 </span>=&gt; Header::Field {
             name: header::SET_COOKIE,
-            value: HeaderValue::from_static(<span class="string">&quot;&quot;</span>),
+            value: HeaderValue::from_static(<span class="string">""</span>),
         },
         <span class="number">56 </span>=&gt; Header::Field {
             name: header::STRICT_TRANSPORT_SECURITY,
-            value: HeaderValue::from_static(<span class="string">&quot;&quot;</span>),
+            value: HeaderValue::from_static(<span class="string">""</span>),
         },
         <span class="number">57 </span>=&gt; Header::Field {
             name: header::TRANSFER_ENCODING,
-            value: HeaderValue::from_static(<span class="string">&quot;&quot;</span>),
+            value: HeaderValue::from_static(<span class="string">""</span>),
         },
         <span class="number">58 </span>=&gt; Header::Field {
             name: header::USER_AGENT,
-            value: HeaderValue::from_static(<span class="string">&quot;&quot;</span>),
+            value: HeaderValue::from_static(<span class="string">""</span>),
         },
         <span class="number">59 </span>=&gt; Header::Field {
             name: header::VARY,
-            value: HeaderValue::from_static(<span class="string">&quot;&quot;</span>),
+            value: HeaderValue::from_static(<span class="string">""</span>),
         },
         <span class="number">60 </span>=&gt; Header::Field {
             name: header::VIA,
-            value: HeaderValue::from_static(<span class="string">&quot;&quot;</span>),
+            value: HeaderValue::from_static(<span class="string">""</span>),
         },
         <span class="number">61 </span>=&gt; Header::Field {
             name: header::WWW_AUTHENTICATE,
-            value: HeaderValue::from_static(<span class="string">&quot;&quot;</span>),
+            value: HeaderValue::from_static(<span class="string">""</span>),
         },
         <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
     }
@@ -1798,9 +1798,9 @@
 
         <span class="kw">let </span><span class="kw-2">mut </span>buf = BytesMut::new();
         buf.extend([<span class="number">0b01000000</span>, <span class="number">0x80 </span>| <span class="number">2</span>]);
-        buf.extend(huff_encode(<span class="string">b&quot;foo&quot;</span>));
+        buf.extend(huff_encode(<span class="string">b"foo"</span>));
         buf.extend([<span class="number">0x80 </span>| <span class="number">3</span>]);
-        buf.extend(huff_encode(<span class="string">b&quot;bar&quot;</span>));
+        buf.extend(huff_encode(<span class="string">b"bar"</span>));
 
         <span class="kw">let </span><span class="kw-2">mut </span>res = <span class="macro">vec!</span>[];
         de.decode(<span class="kw-2">&amp;mut </span>Cursor::new(<span class="kw-2">&amp;mut </span>buf), |h| {
@@ -1816,8 +1816,8 @@
                 <span class="kw-2">ref </span>name,
                 <span class="kw-2">ref </span>value,
             } =&gt; {
-                <span class="macro">assert_eq!</span>(name, <span class="string">&quot;foo&quot;</span>);
-                <span class="macro">assert_eq!</span>(value, <span class="string">&quot;bar&quot;</span>);
+                <span class="macro">assert_eq!</span>(name, <span class="string">"foo"</span>);
+                <span class="macro">assert_eq!</span>(value, <span class="string">"bar"</span>);
             }
             <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(),
         }
@@ -1832,11 +1832,11 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_decode_continuation_header_with_non_huff_encoded_name() {
         <span class="kw">let </span><span class="kw-2">mut </span>de = Decoder::new(<span class="number">0</span>);
-        <span class="kw">let </span>value = huff_encode(<span class="string">b&quot;bar&quot;</span>);
+        <span class="kw">let </span>value = huff_encode(<span class="string">b"bar"</span>);
         <span class="kw">let </span><span class="kw-2">mut </span>buf = BytesMut::new();
         <span class="comment">// header name is non_huff encoded
         </span>buf.extend([<span class="number">0b01000000</span>, <span class="number">3</span>]);
-        buf.extend(<span class="string">b&quot;foo&quot;</span>);
+        buf.extend(<span class="string">b"foo"</span>);
         <span class="comment">// header value is partial
         </span>buf.extend([<span class="number">0x80 </span>| <span class="number">3</span>]);
         buf.extend(<span class="kw-2">&amp;</span>value[<span class="number">0</span>..<span class="number">1</span>]);
@@ -1865,8 +1865,8 @@
                 <span class="kw-2">ref </span>name,
                 <span class="kw-2">ref </span>value,
             } =&gt; {
-                <span class="macro">assert_eq!</span>(name, <span class="string">&quot;foo&quot;</span>);
-                <span class="macro">assert_eq!</span>(value, <span class="string">&quot;bar&quot;</span>);
+                <span class="macro">assert_eq!</span>(name, <span class="string">"foo"</span>);
+                <span class="macro">assert_eq!</span>(value, <span class="string">"bar"</span>);
             }
             <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(),
         }

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/darling_core-0.20.3/src/codegen/field.rs`."><title>field.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="darling_core" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/darling_core-0.20.3/src/codegen/field.rs`."><title>field.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="darling_core" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -209,60 +209,60 @@
 <span class="doccomment">/// Properties needed to generate code for a field in all the contexts
 /// where one may appear.
 </span><span class="attr">#[derive(Debug, Clone)]
-</span><span class="kw">pub struct </span>Field&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub struct </span>Field&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// The name presented to the user of the library. This will appear
     /// in error messages and will be looked when parsing names.
-    </span><span class="kw">pub </span>name_in_attr: Cow&lt;<span class="lifetime">&#39;a</span>, String&gt;,
+    </span><span class="kw">pub </span>name_in_attr: Cow&lt;<span class="lifetime">'a</span>, String&gt;,
 
     <span class="doccomment">/// The name presented to the author of the library. This will appear
     /// in the setters or temporary variables which contain the values.
-    </span><span class="kw">pub </span>ident: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Ident,
+    </span><span class="kw">pub </span>ident: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Ident,
 
     <span class="doccomment">/// The type of the field in the input.
-    </span><span class="kw">pub </span>ty: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Type,
-    <span class="kw">pub </span>default_expression: <span class="prelude-ty">Option</span>&lt;DefaultExpression&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
-    <span class="kw">pub </span>with_path: Cow&lt;<span class="lifetime">&#39;a</span>, Path&gt;,
-    <span class="kw">pub </span>post_transform: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>PostfixTransform&gt;,
+    </span><span class="kw">pub </span>ty: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Type,
+    <span class="kw">pub </span>default_expression: <span class="prelude-ty">Option</span>&lt;DefaultExpression&lt;<span class="lifetime">'a</span>&gt;&gt;,
+    <span class="kw">pub </span>with_path: Cow&lt;<span class="lifetime">'a</span>, Path&gt;,
+    <span class="kw">pub </span>post_transform: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>PostfixTransform&gt;,
     <span class="kw">pub </span>skip: bool,
     <span class="kw">pub </span>multiple: bool,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Field&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">pub fn </span>as_name(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Field&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">pub fn </span>as_name(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str {
         <span class="kw-2">&amp;</span><span class="self">self</span>.name_in_attr
     }
 
-    <span class="kw">pub fn </span>as_declaration(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>) -&gt; Declaration&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">pub fn </span>as_declaration(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>) -&gt; Declaration&lt;<span class="lifetime">'a</span>&gt; {
         Declaration(<span class="self">self</span>)
     }
 
-    <span class="kw">pub fn </span>as_match(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>) -&gt; MatchArm&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">pub fn </span>as_match(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>) -&gt; MatchArm&lt;<span class="lifetime">'a</span>&gt; {
         MatchArm(<span class="self">self</span>)
     }
 
-    <span class="kw">pub fn </span>as_initializer(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>) -&gt; Initializer&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">pub fn </span>as_initializer(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>) -&gt; Initializer&lt;<span class="lifetime">'a</span>&gt; {
         Initializer(<span class="self">self</span>)
     }
 
-    <span class="kw">pub fn </span>as_presence_check(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>) -&gt; CheckMissing&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">pub fn </span>as_presence_check(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>) -&gt; CheckMissing&lt;<span class="lifetime">'a</span>&gt; {
         CheckMissing(<span class="self">self</span>)
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; UsesTypeParams <span class="kw">for </span>Field&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>uses_type_params&lt;<span class="lifetime">&#39;b</span>&gt;(
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; UsesTypeParams <span class="kw">for </span>Field&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>uses_type_params&lt;<span class="lifetime">'b</span>&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         options: <span class="kw-2">&amp;</span>usage::Options,
-        type_set: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span>IdentSet,
-    ) -&gt; IdentRefSet&lt;<span class="lifetime">&#39;b</span>&gt; {
+        type_set: <span class="kw-2">&amp;</span><span class="lifetime">'b </span>IdentSet,
+    ) -&gt; IdentRefSet&lt;<span class="lifetime">'b</span>&gt; {
         <span class="self">self</span>.ty.uses_type_params(options, type_set)
     }
 }
 
 <span class="doccomment">/// An individual field during variable declaration in the generated parsing method.
-</span><span class="kw">pub struct </span>Declaration&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Field&lt;<span class="lifetime">&#39;a</span>&gt;);
+</span><span class="kw">pub struct </span>Declaration&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span>Field&lt;<span class="lifetime">'a</span>&gt;);
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; ToTokens <span class="kw">for </span>Declaration&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; ToTokens <span class="kw">for </span>Declaration&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>to_tokens(<span class="kw-2">&amp;</span><span class="self">self</span>, tokens: <span class="kw-2">&amp;mut </span>TokenStream) {
         <span class="kw">let </span>field: <span class="kw-2">&amp;</span>Field = <span class="self">self</span>.<span class="number">0</span>;
         <span class="kw">let </span>ident = field.ident;
@@ -278,9 +278,9 @@
 }
 
 <span class="doccomment">/// Represents an individual field in the match.
-</span><span class="kw">pub struct </span>MatchArm&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Field&lt;<span class="lifetime">&#39;a</span>&gt;);
+</span><span class="kw">pub struct </span>MatchArm&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span>Field&lt;<span class="lifetime">'a</span>&gt;);
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; ToTokens <span class="kw">for </span>MatchArm&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; ToTokens <span class="kw">for </span>MatchArm&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>to_tokens(<span class="kw-2">&amp;</span><span class="self">self</span>, tokens: <span class="kw-2">&amp;mut </span>TokenStream) {
         <span class="kw">let </span>field: <span class="kw-2">&amp;</span>Field = <span class="self">self</span>.<span class="number">0</span>;
         <span class="kw">if </span>!field.skip {
@@ -296,15 +296,15 @@
                 <span class="comment">// we use the local variable `len` here because location is accessed via
                 // a closure, and the borrow checker gets very unhappy if we try to immutably
                 // borrow `#ident` in that closure when it was declared `mut` outside.
-                </span><span class="macro">quote!</span>(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;{}[{}]&quot;</span>, #name_str, __len))
+                </span><span class="macro">quote!</span>(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"{}[{}]"</span>, #name_str, __len))
             } <span class="kw">else </span>{
                 <span class="macro">quote!</span>(#name_str)
             };
 
-            <span class="comment">// Give darling&#39;s generated code the span of the `with_path` so that if the target
-            // type doesn&#39;t impl FromMeta, darling&#39;s immediate user gets a properly-spanned error.
+            <span class="comment">// Give darling's generated code the span of the `with_path` so that if the target
+            // type doesn't impl FromMeta, darling's immediate user gets a properly-spanned error.
             //
-            // Within the generated code, add the span immediately on extraction failure, so that it&#39;s
+            // Within the generated code, add the span immediately on extraction failure, so that it's
             // as specific as possible.
             // The behavior of `with_span` makes this safe to do; if the child applied an
             // even-more-specific span, our attempt here will not overwrite that and will only cost
@@ -314,7 +314,7 @@
             tokens.append_all(<span class="kw">if </span>field.multiple {
                 <span class="macro">quote!</span>(
                     #name_str =&gt; {
-                        <span class="comment">// Store the index of the name we&#39;re assessing in case we need
+                        <span class="comment">// Store the index of the name we're assessing in case we need
                         // it for error reporting.
                         </span><span class="kw">let </span>__len = #ident.len();
                         <span class="kw">if let </span>::darling::export::Some(__val) = __errors.handle(#extractor) {
@@ -338,9 +338,9 @@
 }
 
 <span class="doccomment">/// Wrapper to generate initialization code for a field.
-</span><span class="kw">pub struct </span>Initializer&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Field&lt;<span class="lifetime">&#39;a</span>&gt;);
+</span><span class="kw">pub struct </span>Initializer&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span>Field&lt;<span class="lifetime">'a</span>&gt;);
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; ToTokens <span class="kw">for </span>Initializer&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; ToTokens <span class="kw">for </span>Initializer&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>to_tokens(<span class="kw-2">&amp;</span><span class="self">self</span>, tokens: <span class="kw-2">&amp;mut </span>TokenStream) {
         <span class="kw">let </span>field: <span class="kw-2">&amp;</span>Field = <span class="self">self</span>.<span class="number">0</span>;
         <span class="kw">let </span>ident = field.ident;
@@ -361,15 +361,15 @@
                 #expr
             })
         } <span class="kw">else </span>{
-            <span class="macro">quote!</span>(#ident: #ident.<span class="number">1</span>.expect(<span class="string">&quot;Uninitialized fields without defaults were already checked&quot;</span>))
+            <span class="macro">quote!</span>(#ident: #ident.<span class="number">1</span>.expect(<span class="string">"Uninitialized fields without defaults were already checked"</span>))
         });
     }
 }
 
 <span class="doccomment">/// Creates an error if a field has no value and no default.
-</span><span class="kw">pub struct </span>CheckMissing&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Field&lt;<span class="lifetime">&#39;a</span>&gt;);
+</span><span class="kw">pub struct </span>CheckMissing&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span>Field&lt;<span class="lifetime">'a</span>&gt;);
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; ToTokens <span class="kw">for </span>CheckMissing&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; ToTokens <span class="kw">for </span>CheckMissing&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>to_tokens(<span class="kw-2">&amp;</span><span class="self">self</span>, tokens: <span class="kw-2">&amp;mut </span>TokenStream) {
         <span class="kw">if </span>!<span class="self">self</span>.<span class="number">0</span>.multiple &amp;&amp; <span class="self">self</span>.<span class="number">0</span>.default_expression.is_none() {
             <span class="kw">let </span>ident = <span class="self">self</span>.<span class="number">0</span>.ident;

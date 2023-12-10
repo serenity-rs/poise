@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rand-0.8.5/src/distributions/float.rs`."><title>float.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="rand" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="icon" href="https://www.rust-lang.org/favicon.ico"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../rand/index.html"><img src="https://www.rust-lang.org/logos/rust-logo-128x128-blk.png" alt="rand"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rand-0.8.5/src/distributions/float.rs`."><title>float.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="rand" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="icon" href="https://www.rust-lang.org/favicon.ico"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../rand/index.html"><img src="https://www.rust-lang.org/logos/rust-logo-128x128-blk.png" alt="rand"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -324,9 +324,9 @@
 <span class="kw">use </span><span class="kw">crate</span>::distributions::{Distribution, Standard};
 <span class="kw">use </span><span class="kw">crate</span>::Rng;
 <span class="kw">use </span>core::mem;
-<span class="attr">#[cfg(feature = <span class="string">&quot;simd_support&quot;</span>)] </span><span class="kw">use </span>packed_simd::<span class="kw-2">*</span>;
+<span class="attr">#[cfg(feature = <span class="string">"simd_support"</span>)] </span><span class="kw">use </span>packed_simd::<span class="kw-2">*</span>;
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;serde1&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"serde1"</span>)]
 </span><span class="kw">use </span>serde::{Serialize, Deserialize};
 
 <span class="doccomment">/// A distribution to sample floating point numbers uniformly in the half-open
@@ -347,14 +347,14 @@
 /// use rand::distributions::OpenClosed01;
 ///
 /// let val: f32 = thread_rng().sample(OpenClosed01);
-/// println!(&quot;f32 from (0, 1): {}&quot;, val);
+/// println!("f32 from (0, 1): {}", val);
 /// ```
 ///
 /// [`Standard`]: crate::distributions::Standard
 /// [`Open01`]: crate::distributions::Open01
 /// [`Uniform`]: crate::distributions::uniform::Uniform
 </span><span class="attr">#[derive(Clone, Copy, Debug)]
-#[cfg_attr(feature = <span class="string">&quot;serde1&quot;</span>, derive(Serialize, Deserialize))]
+#[cfg_attr(feature = <span class="string">"serde1"</span>, derive(Serialize, Deserialize))]
 </span><span class="kw">pub struct </span>OpenClosed01;
 
 <span class="doccomment">/// A distribution to sample floating point numbers uniformly in the open
@@ -374,14 +374,14 @@
 /// use rand::distributions::Open01;
 ///
 /// let val: f32 = thread_rng().sample(Open01);
-/// println!(&quot;f32 from (0, 1): {}&quot;, val);
+/// println!("f32 from (0, 1): {}", val);
 /// ```
 ///
 /// [`Standard`]: crate::distributions::Standard
 /// [`OpenClosed01`]: crate::distributions::OpenClosed01
 /// [`Uniform`]: crate::distributions::uniform::Uniform
 </span><span class="attr">#[derive(Clone, Copy, Debug)]
-#[cfg_attr(feature = <span class="string">&quot;serde1&quot;</span>, derive(Serialize, Deserialize))]
+#[cfg_attr(feature = <span class="string">"serde1"</span>, derive(Serialize, Deserialize))]
 </span><span class="kw">pub struct </span>Open01;
 
 
@@ -465,20 +465,20 @@
 <span class="macro">float_impls! </span>{ f32, u32, f32, u32, <span class="number">23</span>, <span class="number">127 </span>}
 <span class="macro">float_impls! </span>{ f64, u64, f64, u64, <span class="number">52</span>, <span class="number">1023 </span>}
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;simd_support&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"simd_support"</span>)]
 </span><span class="macro">float_impls! </span>{ f32x2, u32x2, f32, u32, <span class="number">23</span>, <span class="number">127 </span>}
-<span class="attr">#[cfg(feature = <span class="string">&quot;simd_support&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"simd_support"</span>)]
 </span><span class="macro">float_impls! </span>{ f32x4, u32x4, f32, u32, <span class="number">23</span>, <span class="number">127 </span>}
-<span class="attr">#[cfg(feature = <span class="string">&quot;simd_support&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"simd_support"</span>)]
 </span><span class="macro">float_impls! </span>{ f32x8, u32x8, f32, u32, <span class="number">23</span>, <span class="number">127 </span>}
-<span class="attr">#[cfg(feature = <span class="string">&quot;simd_support&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"simd_support"</span>)]
 </span><span class="macro">float_impls! </span>{ f32x16, u32x16, f32, u32, <span class="number">23</span>, <span class="number">127 </span>}
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;simd_support&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"simd_support"</span>)]
 </span><span class="macro">float_impls! </span>{ f64x2, u64x2, f64, u64, <span class="number">52</span>, <span class="number">1023 </span>}
-<span class="attr">#[cfg(feature = <span class="string">&quot;simd_support&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"simd_support"</span>)]
 </span><span class="macro">float_impls! </span>{ f64x4, u64x4, f64, u64, <span class="number">52</span>, <span class="number">1023 </span>}
-<span class="attr">#[cfg(feature = <span class="string">&quot;simd_support&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"simd_support"</span>)]
 </span><span class="macro">float_impls! </span>{ f64x8, u64x8, f64, u64, <span class="number">52</span>, <span class="number">1023 </span>}
 
 
@@ -521,13 +521,13 @@
         };
     }
     <span class="macro">test_f32! </span>{ f32_edge_cases, f32, <span class="number">0.0</span>, EPSILON32 }
-    <span class="attr">#[cfg(feature = <span class="string">&quot;simd_support&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"simd_support"</span>)]
     </span><span class="macro">test_f32! </span>{ f32x2_edge_cases, f32x2, f32x2::splat(<span class="number">0.0</span>), f32x2::splat(EPSILON32) }
-    <span class="attr">#[cfg(feature = <span class="string">&quot;simd_support&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"simd_support"</span>)]
     </span><span class="macro">test_f32! </span>{ f32x4_edge_cases, f32x4, f32x4::splat(<span class="number">0.0</span>), f32x4::splat(EPSILON32) }
-    <span class="attr">#[cfg(feature = <span class="string">&quot;simd_support&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"simd_support"</span>)]
     </span><span class="macro">test_f32! </span>{ f32x8_edge_cases, f32x8, f32x8::splat(<span class="number">0.0</span>), f32x8::splat(EPSILON32) }
-    <span class="attr">#[cfg(feature = <span class="string">&quot;simd_support&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"simd_support"</span>)]
     </span><span class="macro">test_f32! </span>{ f32x16_edge_cases, f32x16, f32x16::splat(<span class="number">0.0</span>), f32x16::splat(EPSILON32) }
 
     <span class="macro">macro_rules! </span>test_f64 {
@@ -561,11 +561,11 @@
         };
     }
     <span class="macro">test_f64! </span>{ f64_edge_cases, f64, <span class="number">0.0</span>, EPSILON64 }
-    <span class="attr">#[cfg(feature = <span class="string">&quot;simd_support&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"simd_support"</span>)]
     </span><span class="macro">test_f64! </span>{ f64x2_edge_cases, f64x2, f64x2::splat(<span class="number">0.0</span>), f64x2::splat(EPSILON64) }
-    <span class="attr">#[cfg(feature = <span class="string">&quot;simd_support&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"simd_support"</span>)]
     </span><span class="macro">test_f64! </span>{ f64x4_edge_cases, f64x4, f64x4::splat(<span class="number">0.0</span>), f64x4::splat(EPSILON64) }
-    <span class="attr">#[cfg(feature = <span class="string">&quot;simd_support&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"simd_support"</span>)]
     </span><span class="macro">test_f64! </span>{ f64x8_edge_cases, f64x8, f64x8::splat(<span class="number">0.0</span>), f64x8::splat(EPSILON64) }
 
     <span class="attr">#[test]
@@ -602,7 +602,7 @@
             <span class="number">0.8166436635290656</span>,
         ]);
 
-        <span class="attr">#[cfg(feature = <span class="string">&quot;simd_support&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"simd_support"</span>)]
         </span>{
             <span class="comment">// We only test a sub-set of types here. Values are identical to
             // non-SIMD types; we assume this pattern continues across all

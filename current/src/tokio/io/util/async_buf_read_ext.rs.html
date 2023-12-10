@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/io/util/async_buf_read_ext.rs`."><title>async_buf_read_ext.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/io/util/async_buf_read_ext.rs`."><title>async_buf_read_ext.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -415,36 +415,36 @@
         ///
         /// #[tokio::main]
         /// async fn main() {
-        ///     let mut cursor = Cursor::new(b&quot;lorem-ipsum&quot;);
+        ///     let mut cursor = Cursor::new(b"lorem-ipsum");
         ///     let mut buf = vec![];
         ///
-        ///     // cursor is at &#39;l&#39;
-        ///     let num_bytes = cursor.read_until(b&#39;-&#39;, &amp;mut buf)
+        ///     // cursor is at 'l'
+        ///     let num_bytes = cursor.read_until(b'-', &amp;mut buf)
         ///         .await
-        ///         .expect(&quot;reading from cursor won&#39;t fail&quot;);
+        ///         .expect("reading from cursor won't fail");
         ///
         ///     assert_eq!(num_bytes, 6);
-        ///     assert_eq!(buf, b&quot;lorem-&quot;);
+        ///     assert_eq!(buf, b"lorem-");
         ///     buf.clear();
         ///
-        ///     // cursor is at &#39;i&#39;
-        ///     let num_bytes = cursor.read_until(b&#39;-&#39;, &amp;mut buf)
+        ///     // cursor is at 'i'
+        ///     let num_bytes = cursor.read_until(b'-', &amp;mut buf)
         ///         .await
-        ///         .expect(&quot;reading from cursor won&#39;t fail&quot;);
+        ///         .expect("reading from cursor won't fail");
         ///
         ///     assert_eq!(num_bytes, 5);
-        ///     assert_eq!(buf, b&quot;ipsum&quot;);
+        ///     assert_eq!(buf, b"ipsum");
         ///     buf.clear();
         ///
         ///     // cursor is at EOF
-        ///     let num_bytes = cursor.read_until(b&#39;-&#39;, &amp;mut buf)
+        ///     let num_bytes = cursor.read_until(b'-', &amp;mut buf)
         ///         .await
-        ///         .expect(&quot;reading from cursor won&#39;t fail&quot;);
+        ///         .expect("reading from cursor won't fail");
         ///     assert_eq!(num_bytes, 0);
-        ///     assert_eq!(buf, b&quot;&quot;);
+        ///     assert_eq!(buf, b"");
         /// }
         /// ```
-        </span><span class="kw">fn </span>read_until&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="self">self</span>, byte: u8, buf: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>Vec&lt;u8&gt;) -&gt; ReadUntil&lt;<span class="lifetime">&#39;a</span>, <span class="self">Self</span>&gt;
+        </span><span class="kw">fn </span>read_until&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span><span class="self">self</span>, byte: u8, buf: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>Vec&lt;u8&gt;) -&gt; ReadUntil&lt;<span class="lifetime">'a</span>, <span class="self">Self</span>&gt;
         <span class="kw">where
             </span><span class="self">Self</span>: Unpin,
         {
@@ -517,37 +517,37 @@
         ///
         /// #[tokio::main]
         /// async fn main() {
-        ///     let mut cursor = Cursor::new(b&quot;foo\nbar&quot;);
+        ///     let mut cursor = Cursor::new(b"foo\nbar");
         ///     let mut buf = String::new();
         ///
-        ///     // cursor is at &#39;f&#39;
+        ///     // cursor is at 'f'
         ///     let num_bytes = cursor.read_line(&amp;mut buf)
         ///         .await
-        ///         .expect(&quot;reading from cursor won&#39;t fail&quot;);
+        ///         .expect("reading from cursor won't fail");
         ///
         ///     assert_eq!(num_bytes, 4);
-        ///     assert_eq!(buf, &quot;foo\n&quot;);
+        ///     assert_eq!(buf, "foo\n");
         ///     buf.clear();
         ///
-        ///     // cursor is at &#39;b&#39;
+        ///     // cursor is at 'b'
         ///     let num_bytes = cursor.read_line(&amp;mut buf)
         ///         .await
-        ///         .expect(&quot;reading from cursor won&#39;t fail&quot;);
+        ///         .expect("reading from cursor won't fail");
         ///
         ///     assert_eq!(num_bytes, 3);
-        ///     assert_eq!(buf, &quot;bar&quot;);
+        ///     assert_eq!(buf, "bar");
         ///     buf.clear();
         ///
         ///     // cursor is at EOF
         ///     let num_bytes = cursor.read_line(&amp;mut buf)
         ///         .await
-        ///         .expect(&quot;reading from cursor won&#39;t fail&quot;);
+        ///         .expect("reading from cursor won't fail");
         ///
         ///     assert_eq!(num_bytes, 0);
-        ///     assert_eq!(buf, &quot;&quot;);
+        ///     assert_eq!(buf, "");
         /// }
         /// ```
-        </span><span class="kw">fn </span>read_line&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="self">self</span>, buf: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>String) -&gt; ReadLine&lt;<span class="lifetime">&#39;a</span>, <span class="self">Self</span>&gt;
+        </span><span class="kw">fn </span>read_line&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span><span class="self">self</span>, buf: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>String) -&gt; ReadLine&lt;<span class="lifetime">'a</span>, <span class="self">Self</span>&gt;
         <span class="kw">where
             </span><span class="self">Self</span>: Unpin,
         {
@@ -580,10 +580,10 @@
         /// use tokio::io::AsyncBufReadExt;
         ///
         /// # async fn dox(my_buf_read: impl AsyncBufRead + Unpin) -&gt; std::io::Result&lt;()&gt; {
-        /// let mut segments = my_buf_read.split(b&#39;f&#39;);
+        /// let mut segments = my_buf_read.split(b'f');
         ///
         /// while let Some(segment) = segments.next_segment().await? {
-        ///     println!(&quot;length = {}&quot;, segment.len())
+        ///     println!("length = {}", segment.len())
         /// }
         /// # Ok(())
         /// # }
@@ -600,7 +600,7 @@
         ///
         /// This function is a lower-level call. It needs to be paired with the
         /// [`consume`] method to function properly. When calling this method,
-        /// none of the contents will be &quot;read&quot; in the sense that later calling
+        /// none of the contents will be "read" in the sense that later calling
         /// `read` may return the same contents. As such, [`consume`] must be
         /// called with the number of bytes that are consumed from this buffer
         /// to ensure that the bytes are never returned twice.
@@ -619,7 +619,7 @@
         /// read, but returned an error.
         ///
         /// [`consume`]: crate::io::AsyncBufReadExt::consume
-        </span><span class="kw">fn </span>fill_buf(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; FillBuf&lt;<span class="lifetime">&#39;_</span>, <span class="self">Self</span>&gt;
+        </span><span class="kw">fn </span>fill_buf(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; FillBuf&lt;<span class="lifetime">'_</span>, <span class="self">Self</span>&gt;
         <span class="kw">where
             </span><span class="self">Self</span>: Unpin,
         {
@@ -634,7 +634,7 @@
         /// perform any I/O, it simply informs this object that some amount of
         /// its buffer, returned from [`fill_buf`], has been consumed and should
         /// no longer be returned. As such, this function may do odd things if
-        /// [`fill_buf`] isn&#39;t called before calling it.
+        /// [`fill_buf`] isn't called before calling it.
         ///
         /// The `amt` must be less than the number of bytes in the buffer
         /// returned by [`fill_buf`].
@@ -678,13 +678,13 @@
         ///
         /// #[tokio::main]
         /// async fn main() {
-        ///     let cursor = Cursor::new(b&quot;lorem\nipsum\r\ndolor&quot;);
+        ///     let cursor = Cursor::new(b"lorem\nipsum\r\ndolor");
         ///
         ///     let mut lines = cursor.lines();
         ///
-        ///     assert_eq!(lines.next_line().await.unwrap(), Some(String::from(&quot;lorem&quot;)));
-        ///     assert_eq!(lines.next_line().await.unwrap(), Some(String::from(&quot;ipsum&quot;)));
-        ///     assert_eq!(lines.next_line().await.unwrap(), Some(String::from(&quot;dolor&quot;)));
+        ///     assert_eq!(lines.next_line().await.unwrap(), Some(String::from("lorem")));
+        ///     assert_eq!(lines.next_line().await.unwrap(), Some(String::from("ipsum")));
+        ///     assert_eq!(lines.next_line().await.unwrap(), Some(String::from("dolor")));
         ///     assert_eq!(lines.next_line().await.unwrap(), None);
         /// }
         /// ```

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-0.21.9/src/client/client_conn.rs`."><title>client_conn.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="rustls" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-0.21.9/src/client/client_conn.rs`."><title>client_conn.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="rustls" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -698,7 +698,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::enums::{CipherSuite, ProtocolVersion, SignatureScheme};
 <span class="kw">use </span><span class="kw">crate</span>::error::Error;
 <span class="kw">use </span><span class="kw">crate</span>::kx::SupportedKxGroup;
-<span class="attr">#[cfg(feature = <span class="string">&quot;logging&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"logging"</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::log::trace;
 <span class="kw">use </span><span class="kw">crate</span>::msgs::enums::NamedGroup;
 <span class="kw">use </span><span class="kw">crate</span>::msgs::handshake::ClientExtension;
@@ -707,7 +707,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::suites::SupportedCipherSuite;
 <span class="kw">use </span><span class="kw">crate</span>::verify;
 <span class="kw">use </span><span class="kw">crate</span>::versions;
-<span class="attr">#[cfg(feature = <span class="string">&quot;secret_extraction&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"secret_extraction"</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::ExtractedSecrets;
 <span class="kw">use </span><span class="kw">crate</span>::KeyLog;
 
@@ -727,7 +727,7 @@
 /// **highly sensitive**, containing enough key material to break all security
 /// of the corresponding session.
 ///
-/// `set_`, `insert_`, `remove_` and `take_` operations are mutating; this isn&#39;t
+/// `set_`, `insert_`, `remove_` and `take_` operations are mutating; this isn't
 /// expressed in the type system to allow implementations freedom in
 /// how to achieve interior mutability.  `Mutex` is a common choice.
 </span><span class="kw">pub trait </span>ClientSessionStore: Send + Sync {
@@ -779,7 +779,7 @@
 /// private key for the purposes of client authentication.
 </span><span class="kw">pub trait </span>ResolvesClientCert: Send + Sync {
     <span class="doccomment">/// With the server-supplied acceptable issuers in `acceptable_issuers`,
-    /// the server&#39;s supported signature schemes in `sigschemes`,
+    /// the server's supported signature schemes in `sigschemes`,
     /// return a certificate chain and signing key to authenticate.
     ///
     /// `acceptable_issuers` is undecoded and unverified by the rustls
@@ -827,7 +827,7 @@
     ///
     /// The first element in this list is the _default key share algorithm_,
     /// and in TLS1.3 a key share for it is sent in the client hello.
-    </span><span class="kw">pub</span>(<span class="kw">super</span>) kx_groups: Vec&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>SupportedKxGroup&gt;,
+    </span><span class="kw">pub</span>(<span class="kw">super</span>) kx_groups: Vec&lt;<span class="kw-2">&amp;</span><span class="lifetime">'static </span>SupportedKxGroup&gt;,
 
     <span class="doccomment">/// Which ALPN protocols we include in our client hello.
     /// If empty, no ALPN extension is sent.
@@ -836,7 +836,7 @@
     <span class="doccomment">/// How and when the client can resume a previous session.
     </span><span class="kw">pub </span>resumption: Resumption,
 
-    <span class="doccomment">/// The maximum size of TLS message we&#39;ll emit.  If None, we don&#39;t limit TLS
+    <span class="doccomment">/// The maximum size of TLS message we'll emit.  If None, we don't limit TLS
     /// message lengths except to the 2**16 limit specified in the standard.
     ///
     /// rustls enforces an arbitrary minimum of 32 bytes for this field.
@@ -867,11 +867,11 @@
 
     <span class="doccomment">/// Allows traffic secrets to be extracted after the handshake,
     /// e.g. for kTLS setup.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;secret_extraction&quot;</span>)]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;secret_extraction&quot;</span>)))]
+    </span><span class="attr">#[cfg(feature = <span class="string">"secret_extraction"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"secret_extraction"</span>)))]
     </span><span class="kw">pub </span>enable_secret_extraction: bool,
 
-    <span class="doccomment">/// Whether to send data on the first flight (&quot;early data&quot;) in
+    <span class="doccomment">/// Whether to send data on the first flight ("early data") in
     /// TLS 1.3 handshakes.
     ///
     /// The default is false.
@@ -895,13 +895,13 @@
 }
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>ClientConfig {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        f.debug_struct(<span class="string">&quot;ClientConfig&quot;</span>)
-            .field(<span class="string">&quot;alpn_protocols&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.alpn_protocols)
-            .field(<span class="string">&quot;resumption&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.resumption)
-            .field(<span class="string">&quot;max_fragment_size&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.max_fragment_size)
-            .field(<span class="string">&quot;enable_sni&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.enable_sni)
-            .field(<span class="string">&quot;enable_early_data&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.enable_early_data)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        f.debug_struct(<span class="string">"ClientConfig"</span>)
+            .field(<span class="string">"alpn_protocols"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.alpn_protocols)
+            .field(<span class="string">"resumption"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.resumption)
+            .field(<span class="string">"max_fragment_size"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.max_fragment_size)
+            .field(<span class="string">"enable_sni"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.enable_sni)
+            .field(<span class="string">"enable_early_data"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.enable_early_data)
             .finish_non_exhaustive()
     }
 }
@@ -917,7 +917,7 @@
         }
     }
 
-    <span class="doccomment">/// We support a given TLS version if it&#39;s quoted in the configured
+    <span class="doccomment">/// We support a given TLS version if it's quoted in the configured
     /// versions *and* at least one ciphersuite for this version is
     /// also configured.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>supports_version(<span class="kw-2">&amp;</span><span class="self">self</span>, v: ProtocolVersion) -&gt; bool {
@@ -930,7 +930,7 @@
 
     <span class="doccomment">/// Access configuration options whose use is dangerous and requires
     /// extra care.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;dangerous_configuration&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"dangerous_configuration"</span>)]
     </span><span class="kw">pub fn </span>dangerous(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; danger::DangerousClientConfig {
         danger::DangerousClientConfig { cfg: <span class="self">self </span>}
     }
@@ -986,7 +986,7 @@
 
     <span class="doccomment">/// Configure whether TLS 1.2 sessions may be resumed, and by what mechanism.
     ///
-    /// This is meaningless if you&#39;ve disabled resumption entirely.
+    /// This is meaningless if you've disabled resumption entirely.
     </span><span class="kw">pub fn </span>tls12_resumption(<span class="kw-2">mut </span><span class="self">self</span>, tls12: Tls12Resumption) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.tls12_resumption = tls12;
         <span class="self">self
@@ -994,9 +994,9 @@
 }
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>Resumption {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        f.debug_struct(<span class="string">&quot;Resumption&quot;</span>)
-            .field(<span class="string">&quot;tls12_resumption&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.tls12_resumption)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        f.debug_struct(<span class="string">"Resumption"</span>)
+            .field(<span class="string">"tls12_resumption"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.tls12_resumption)
             .finish()
     }
 }
@@ -1013,7 +1013,7 @@
 ///
 /// This currently covers knowing the DNS name of the server, but
 /// will be extended in the future to supporting privacy-preserving names
-/// for the server (&quot;ECH&quot;).  For this reason this enum is `non_exhaustive`.
+/// for the server ("ECH").  For this reason this enum is `non_exhaustive`.
 ///
 /// # Making one
 ///
@@ -1022,11 +1022,11 @@
 ///
 /// ```
 /// # use rustls::ServerName;
-/// ServerName::try_from(&quot;example.com&quot;).expect(&quot;invalid DNS name&quot;);
+/// ServerName::try_from("example.com").expect("invalid DNS name");
 ///
 /// // or, alternatively...
 ///
-/// let x = &quot;example.com&quot;.try_into().expect(&quot;invalid DNS name&quot;);
+/// let x = "example.com".try_into().expect("invalid DNS name");
 /// # let _: ServerName = x;
 /// ```
 </span><span class="attr">#[non_exhaustive]
@@ -1046,11 +1046,11 @@
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
         <span class="kw">match </span><span class="self">self </span>{
             <span class="self">Self</span>::DnsName(d) =&gt; f
-                .debug_tuple(<span class="string">&quot;DnsName&quot;</span>)
+                .debug_tuple(<span class="string">"DnsName"</span>)
                 .field(<span class="kw-2">&amp;</span>d.as_ref())
                 .finish(),
             <span class="self">Self</span>::IpAddress(i) =&gt; f
-                .debug_tuple(<span class="string">&quot;IpAddress&quot;</span>)
+                .debug_tuple(<span class="string">"IpAddress"</span>)
                 .field(i)
                 .finish(),
         }
@@ -1085,7 +1085,7 @@
 }
 
 <span class="doccomment">/// Container for unsafe APIs
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;dangerous_configuration&quot;</span>)]
+</span><span class="attr">#[cfg(feature = <span class="string">"dangerous_configuration"</span>)]
 </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">mod </span>danger {
     <span class="kw">use </span>std::sync::Arc;
 
@@ -1094,13 +1094,13 @@
 
     <span class="doccomment">/// Accessor for dangerous configuration options.
     </span><span class="attr">#[derive(Debug)]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;dangerous_configuration&quot;</span>)))]
-    </span><span class="kw">pub struct </span>DangerousClientConfig&lt;<span class="lifetime">&#39;a</span>&gt; {
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"dangerous_configuration"</span>)))]
+    </span><span class="kw">pub struct </span>DangerousClientConfig&lt;<span class="lifetime">'a</span>&gt; {
         <span class="doccomment">/// The underlying ClientConfig
-        </span><span class="kw">pub </span>cfg: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>ClientConfig,
+        </span><span class="kw">pub </span>cfg: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>ClientConfig,
     }
 
-    <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; DangerousClientConfig&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; DangerousClientConfig&lt;<span class="lifetime">'a</span>&gt; {
         <span class="doccomment">/// Overrides the default `ServerCertVerifier` with something else.
         </span><span class="kw">pub fn </span>set_certificate_verifier(<span class="kw-2">&amp;mut </span><span class="self">self</span>, verifier: Arc&lt;<span class="kw">dyn </span>ServerCertVerifier&gt;) {
             <span class="self">self</span>.cfg.verifier = verifier;
@@ -1148,21 +1148,21 @@
     }
 
     <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>rejected(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
-        <span class="macro">trace!</span>(<span class="string">&quot;EarlyData rejected&quot;</span>);
+        <span class="macro">trace!</span>(<span class="string">"EarlyData rejected"</span>);
         <span class="self">self</span>.state = EarlyDataState::Rejected;
     }
 
     <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>accepted(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
-        <span class="macro">trace!</span>(<span class="string">&quot;EarlyData accepted&quot;</span>);
+        <span class="macro">trace!</span>(<span class="string">"EarlyData accepted"</span>);
         <span class="macro">assert_eq!</span>(<span class="self">self</span>.state, EarlyDataState::Ready);
         <span class="self">self</span>.state = EarlyDataState::Accepted;
     }
 
     <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>finished(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
-        <span class="macro">trace!</span>(<span class="string">&quot;EarlyData finished&quot;</span>);
+        <span class="macro">trace!</span>(<span class="string">"EarlyData finished"</span>);
         <span class="self">self</span>.state = <span class="kw">match </span><span class="self">self</span>.state {
             EarlyDataState::Accepted =&gt; EarlyDataState::AcceptedFinished,
-            <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;bad EarlyData state&quot;</span>),
+            <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">"bad EarlyData state"</span>),
         }
     }
 
@@ -1191,12 +1191,12 @@
 }
 
 <span class="doccomment">/// Stub that implements io::Write and dispatches to `write_early_data`.
-</span><span class="kw">pub struct </span>WriteEarlyData&lt;<span class="lifetime">&#39;a</span>&gt; {
-    sess: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>ClientConnection,
+</span><span class="kw">pub struct </span>WriteEarlyData&lt;<span class="lifetime">'a</span>&gt; {
+    sess: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>ClientConnection,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; WriteEarlyData&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>new(sess: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>ClientConnection) -&gt; WriteEarlyData&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; WriteEarlyData&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>new(sess: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>ClientConnection) -&gt; WriteEarlyData&lt;<span class="lifetime">'a</span>&gt; {
         WriteEarlyData { sess }
     }
 
@@ -1212,7 +1212,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; io::Write <span class="kw">for </span>WriteEarlyData&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; io::Write <span class="kw">for </span>WriteEarlyData&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, buf: <span class="kw-2">&amp;</span>[u8]) -&gt; io::Result&lt;usize&gt; {
         <span class="self">self</span>.sess.write_early_data(buf)
     }
@@ -1229,7 +1229,7 @@
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>ClientConnection {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
-        f.debug_struct(<span class="string">&quot;ClientConnection&quot;</span>)
+        f.debug_struct(<span class="string">"ClientConnection"</span>)
             .finish()
     }
 }
@@ -1245,12 +1245,12 @@
     }
 
     <span class="doccomment">/// Returns an `io::Write` implementer you can write bytes to
-    /// to send TLS1.3 early data (a.k.a. &quot;0-RTT data&quot;) to the server.
+    /// to send TLS1.3 early data (a.k.a. "0-RTT data") to the server.
     ///
     /// This returns None in many circumstances when the capability to
     /// send early data is not available, including but not limited to:
     ///
-    /// - The server hasn&#39;t been talked to previously.
+    /// - The server hasn't been talked to previously.
     /// - The server does not support resumption.
     /// - The server does not support early data.
     /// - The resumption data for the server has expired.
@@ -1298,8 +1298,8 @@
     }
 
     <span class="doccomment">/// Extract secrets, so they can be used when configuring kTLS, for example.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;secret_extraction&quot;</span>)]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;secret_extraction&quot;</span>)))]
+    </span><span class="attr">#[cfg(feature = <span class="string">"secret_extraction"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"secret_extraction"</span>)))]
     </span><span class="kw">pub fn </span>extract_secrets(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;ExtractedSecrets, Error&gt; {
         <span class="self">self</span>.inner.extract_secrets()
     }
@@ -1320,10 +1320,10 @@
 }
 
 <span class="attr">#[doc(hidden)]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; TryFrom&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="kw">crate</span>::Connection&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>ClientConnection {
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; TryFrom&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span><span class="kw">crate</span>::Connection&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>ClientConnection {
     <span class="kw">type </span>Error = ();
 
-    <span class="kw">fn </span>try_from(value: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="kw">crate</span>::Connection) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
+    <span class="kw">fn </span>try_from(value: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span><span class="kw">crate</span>::Connection) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
         <span class="kw">use </span><span class="kw">crate</span>::Connection::<span class="kw-2">*</span>;
         <span class="kw">match </span>value {
             Client(conn) =&gt; <span class="prelude-val">Ok</span>(conn),
@@ -1348,7 +1348,7 @@
         <span class="kw">let </span><span class="kw-2">mut </span>common_state = CommonState::new(Side::Client);
         common_state.set_max_fragment_size(config.max_fragment_size)<span class="question-mark">?</span>;
         common_state.protocol = proto;
-        <span class="attr">#[cfg(feature = <span class="string">&quot;secret_extraction&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"secret_extraction"</span>)]
         </span>{
             common_state.enable_secret_extraction = config.enable_secret_extraction;
         }

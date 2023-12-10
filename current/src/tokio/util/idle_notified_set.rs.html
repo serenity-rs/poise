@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/util/idle_notified_set.rs`."><title>idle_notified_set.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/util/idle_notified_set.rs`."><title>idle_notified_set.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -483,7 +483,7 @@
 //! Each element is intended to correspond to a task, and the collection will
 //! keep track of which tasks have had their waker notified, and which have not.
 //!
-//! Each entry in the set holds some user-specified value. The value&#39;s type is
+//! Each entry in the set holds some user-specified value. The value's type is
 //! specified using the `T` parameter. It will usually be a `JoinHandle` or
 //! similar.
 
@@ -516,9 +516,9 @@
 ///
 /// Note: This entry can be moved from the idle to the notified list while this
 /// object exists by waking its waker.
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>EntryInOneOfTheLists&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>EntryInOneOfTheLists&lt;<span class="lifetime">'a</span>, T&gt; {
     entry: Arc&lt;ListEntry&lt;T&gt;&gt;,
-    set: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>IdleNotifiedSet&lt;T&gt;,
+    set: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>IdleNotifiedSet&lt;T&gt;,
 }
 
 <span class="kw">type </span>Lists&lt;T&gt; = Mutex&lt;ListsInner&lt;T&gt;&gt;;
@@ -537,7 +537,7 @@
 
 <span class="doccomment">/// Which of the two lists in the shared Lists object is this entry stored in?
 ///
-/// If the value is `Idle`, then an entry&#39;s waker may move it to the notified
+/// If the value is `Idle`, then an entry's waker may move it to the notified
 /// list. Otherwise, only the `IdleNotifiedSet` may move it.
 ///
 /// If the value is `Neither`, then it is still possible that the entry is in
@@ -593,7 +593,7 @@
 <span class="comment">// With mutable access to the `IdleNotifiedSet`, you can get mutable access to
 // the values.
 </span><span class="kw">unsafe impl</span>&lt;T: Send&gt; Send <span class="kw">for </span>IdleNotifiedSet&lt;T&gt; {}
-<span class="comment">// With the current API we strictly speaking don&#39;t even need `T: Sync`, but we
+<span class="comment">// With the current API we strictly speaking don't even need `T: Sync`, but we
 // require it anyway to support adding &amp;self APIs that access the values in the
 // future.
 </span><span class="kw">unsafe impl</span>&lt;T: Sync&gt; Sync <span class="kw">for </span>IdleNotifiedSet&lt;T&gt; {}
@@ -628,7 +628,7 @@
     </span>}
 
     <span class="doccomment">/// Insert the given value into the `idle` list.
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>insert_idle(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: T) -&gt; EntryInOneOfTheLists&lt;<span class="lifetime">&#39;_</span>, T&gt; {
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>insert_idle(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: T) -&gt; EntryInOneOfTheLists&lt;<span class="lifetime">'_</span>, T&gt; {
         <span class="self">self</span>.length += <span class="number">1</span>;
 
         <span class="kw">let </span>entry = Arc::new(ListEntry {
@@ -650,8 +650,8 @@
 
     <span class="doccomment">/// Pop an entry from the notified list to poll it. The entry is moved to
     /// the idle list atomically.
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>pop_notified(<span class="kw-2">&amp;mut </span><span class="self">self</span>, waker: <span class="kw-2">&amp;</span>Waker) -&gt; <span class="prelude-ty">Option</span>&lt;EntryInOneOfTheLists&lt;<span class="lifetime">&#39;_</span>, T&gt;&gt; {
-        <span class="comment">// We don&#39;t decrement the length because this call moves the entry to
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>pop_notified(<span class="kw-2">&amp;mut </span><span class="self">self</span>, waker: <span class="kw-2">&amp;</span>Waker) -&gt; <span class="prelude-ty">Option</span>&lt;EntryInOneOfTheLists&lt;<span class="lifetime">'_</span>, T&gt;&gt; {
+        <span class="comment">// We don't decrement the length because this call moves the entry to
         // the idle list rather than removing it.
         </span><span class="kw">if </span><span class="self">self</span>.length == <span class="number">0 </span>{
             <span class="comment">// Fast path.
@@ -720,7 +720,7 @@
             <span class="comment">// Safety: When we grabbed the pointers, the entries were in one of
             // the two lists. This means that their value was valid at the time,
             // and it must still be valid because we are the IdleNotifiedSet,
-            // and only we can remove an entry from the two lists. (It&#39;s
+            // and only we can remove an entry from the two lists. (It's
             // possible that an entry is moved from one list to the other during
             // this loop, but that is ok.)
             </span>func(<span class="kw">unsafe </span>{ <span class="kw-2">&amp;mut *</span>ptr });
@@ -808,7 +808,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; EntryInOneOfTheLists&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; EntryInOneOfTheLists&lt;<span class="lifetime">'a</span>, T&gt; {
     <span class="doccomment">/// Remove this entry from the list it is in, returning the value associated
     /// with the entry.
     ///
@@ -855,8 +855,8 @@
     <span class="doccomment">/// Access the value in this entry together with a context for its waker.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>with_value_and_context&lt;F, U&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, func: F) -&gt; U
     <span class="kw">where
-        </span>F: FnOnce(<span class="kw-2">&amp;mut </span>T, <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; U,
-        T: <span class="lifetime">&#39;static</span>,
+        </span>F: FnOnce(<span class="kw-2">&amp;mut </span>T, <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; U,
+        T: <span class="lifetime">'static</span>,
     {
         <span class="kw">let </span>waker = waker_ref(<span class="kw-2">&amp;</span><span class="self">self</span>.entry);
 
@@ -884,7 +884,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;T: <span class="lifetime">&#39;static</span>&gt; Wake <span class="kw">for </span>ListEntry&lt;T&gt; {
+<span class="kw">impl</span>&lt;T: <span class="lifetime">'static</span>&gt; Wake <span class="kw">for </span>ListEntry&lt;T&gt; {
     <span class="kw">fn </span>wake_by_ref(me: <span class="kw-2">&amp;</span>Arc&lt;<span class="self">Self</span>&gt;) {
         <span class="kw">let </span><span class="kw-2">mut </span>lock = me.parent.lock();
 
@@ -927,7 +927,7 @@
 
     <span class="kw">fn </span>as_raw(handle: <span class="kw-2">&amp;</span><span class="self">Self</span>::Handle) -&gt; NonNull&lt;ListEntry&lt;T&gt;&gt; {
         <span class="kw">let </span>ptr: <span class="kw-2">*const </span>ListEntry&lt;T&gt; = Arc::as_ptr(handle);
-        <span class="comment">// Safety: We can&#39;t get a null pointer from `Arc::as_ptr`.
+        <span class="comment">// Safety: We can't get a null pointer from `Arc::as_ptr`.
         </span><span class="kw">unsafe </span>{ NonNull::new_unchecked(ptr <span class="kw">as </span><span class="kw-2">*mut </span>ListEntry&lt;T&gt;) }
     }
 

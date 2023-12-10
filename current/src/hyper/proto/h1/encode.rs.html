@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hyper-0.14.27/src/proto/h1/encode.rs`."><title>encode.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="hyper" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hyper-0.14.27/src/proto/h1/encode.rs`."><title>encode.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="hyper" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -446,7 +446,7 @@
 
 <span class="kw">use </span><span class="kw">super</span>::io::WriteBuf;
 
-<span class="kw">type </span>StaticBuf = <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[u8];
+<span class="kw">type </span>StaticBuf = <span class="kw-2">&amp;</span><span class="lifetime">'static </span>[u8];
 
 <span class="doccomment">/// Encoders to handle different Transfer-Encodings.
 </span><span class="attr">#[derive(Debug, Clone, PartialEq)]
@@ -475,7 +475,7 @@
     ///
     /// This is mostly only used with HTTP/1.0 with a length. This kind requires
     /// the connection to be closed when the body is finished.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;server&quot;</span>)]
+    </span><span class="attr">#[cfg(feature = <span class="string">"server"</span>)]
     </span>CloseDelimited,
 }
 
@@ -502,7 +502,7 @@
         Encoder::new(Kind::Length(len))
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;server&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"server"</span>)]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>close_delimited() -&gt; Encoder {
         Encoder::new(Kind::CloseDelimited)
     }
@@ -511,7 +511,7 @@
         <span class="macro">matches!</span>(<span class="self">self</span>.kind, Kind::Length(<span class="number">0</span>))
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;server&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"server"</span>)]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>set_last(<span class="kw-2">mut </span><span class="self">self</span>, is_last: bool) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.is_last = is_last;
         <span class="self">self
@@ -523,7 +523,7 @@
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>is_close_delimited(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         <span class="kw">match </span><span class="self">self</span>.kind {
-            <span class="attr">#[cfg(feature = <span class="string">&quot;server&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"server"</span>)]
             </span>Kind::CloseDelimited =&gt; <span class="bool-val">true</span>,
             <span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
         }
@@ -533,9 +533,9 @@
         <span class="kw">match </span><span class="self">self</span>.kind {
             Kind::Length(<span class="number">0</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
             Kind::Chunked =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(EncodedBuf {
-                kind: BufKind::ChunkedEnd(<span class="string">b&quot;0\r\n\r\n&quot;</span>),
+                kind: BufKind::ChunkedEnd(<span class="string">b"0\r\n\r\n"</span>),
             })),
-            <span class="attr">#[cfg(feature = <span class="string">&quot;server&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"server"</span>)]
             </span>Kind::CloseDelimited =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
             Kind::Length(n) =&gt; <span class="prelude-val">Err</span>(NotEof(n)),
         }
@@ -546,18 +546,18 @@
         </span>B: Buf,
     {
         <span class="kw">let </span>len = msg.remaining();
-        <span class="macro">debug_assert!</span>(len &gt; <span class="number">0</span>, <span class="string">&quot;encode() called with empty buf&quot;</span>);
+        <span class="macro">debug_assert!</span>(len &gt; <span class="number">0</span>, <span class="string">"encode() called with empty buf"</span>);
 
         <span class="kw">let </span>kind = <span class="kw">match </span><span class="self">self</span>.kind {
             Kind::Chunked =&gt; {
-                <span class="macro">trace!</span>(<span class="string">&quot;encoding chunked {}B&quot;</span>, len);
+                <span class="macro">trace!</span>(<span class="string">"encoding chunked {}B"</span>, len);
                 <span class="kw">let </span>buf = ChunkSize::new(len)
                     .chain(msg)
-                    .chain(<span class="string">b&quot;\r\n&quot; </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[u8]);
+                    .chain(<span class="string">b"\r\n" </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="lifetime">'static </span>[u8]);
                 BufKind::Chunked(buf)
             }
             Kind::Length(<span class="kw-2">ref mut </span>remaining) =&gt; {
-                <span class="macro">trace!</span>(<span class="string">&quot;sized write, len = {}&quot;</span>, len);
+                <span class="macro">trace!</span>(<span class="string">"sized write, len = {}"</span>, len);
                 <span class="kw">if </span>len <span class="kw">as </span>u64 &gt; <span class="kw-2">*</span>remaining {
                     <span class="kw">let </span>limit = <span class="kw-2">*</span>remaining <span class="kw">as </span>usize;
                     <span class="kw-2">*</span>remaining = <span class="number">0</span>;
@@ -567,9 +567,9 @@
                     BufKind::Exact(msg)
                 }
             }
-            <span class="attr">#[cfg(feature = <span class="string">&quot;server&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"server"</span>)]
             </span>Kind::CloseDelimited =&gt; {
-                <span class="macro">trace!</span>(<span class="string">&quot;close delimited write {}B&quot;</span>, len);
+                <span class="macro">trace!</span>(<span class="string">"close delimited write {}B"</span>, len);
                 BufKind::Exact(msg)
             }
         };
@@ -581,21 +581,21 @@
         </span>B: Buf,
     {
         <span class="kw">let </span>len = msg.remaining();
-        <span class="macro">debug_assert!</span>(len &gt; <span class="number">0</span>, <span class="string">&quot;encode() called with empty buf&quot;</span>);
+        <span class="macro">debug_assert!</span>(len &gt; <span class="number">0</span>, <span class="string">"encode() called with empty buf"</span>);
 
         <span class="kw">match </span><span class="self">self</span>.kind {
             Kind::Chunked =&gt; {
-                <span class="macro">trace!</span>(<span class="string">&quot;encoding chunked {}B&quot;</span>, len);
+                <span class="macro">trace!</span>(<span class="string">"encoding chunked {}B"</span>, len);
                 <span class="kw">let </span>buf = ChunkSize::new(len)
                     .chain(msg)
-                    .chain(<span class="string">b&quot;\r\n0\r\n\r\n&quot; </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[u8]);
+                    .chain(<span class="string">b"\r\n0\r\n\r\n" </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="lifetime">'static </span>[u8]);
                 dst.buffer(buf);
                 !<span class="self">self</span>.is_last
             }
             Kind::Length(remaining) =&gt; {
                 <span class="kw">use </span>std::cmp::Ordering;
 
-                <span class="macro">trace!</span>(<span class="string">&quot;sized write, len = {}&quot;</span>, len);
+                <span class="macro">trace!</span>(<span class="string">"sized write, len = {}"</span>, len);
                 <span class="kw">match </span>(len <span class="kw">as </span>u64).cmp(<span class="kw-2">&amp;</span>remaining) {
                     Ordering::Equal =&gt; {
                         dst.buffer(msg);
@@ -611,9 +611,9 @@
                     </span>}
                 }
             }
-            <span class="attr">#[cfg(feature = <span class="string">&quot;server&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"server"</span>)]
             </span>Kind::CloseDelimited =&gt; {
-                <span class="macro">trace!</span>(<span class="string">&quot;close delimited write {}B&quot;</span>, len);
+                <span class="macro">trace!</span>(<span class="string">"close delimited write {}B"</span>, len);
                 dst.buffer(msg);
                 <span class="bool-val">false
             </span>}
@@ -629,22 +629,22 @@
     <span class="kw">where
         </span>B: Buf,
     {
-        <span class="macro">debug_assert!</span>(msg.remaining() &gt; <span class="number">0</span>, <span class="string">&quot;encode() called with empty buf&quot;</span>);
+        <span class="macro">debug_assert!</span>(msg.remaining() &gt; <span class="number">0</span>, <span class="string">"encode() called with empty buf"</span>);
         <span class="macro">debug_assert!</span>(
             <span class="kw">match </span><span class="self">self</span>.kind {
                 Kind::Length(len) =&gt; len == msg.remaining() <span class="kw">as </span>u64,
                 <span class="kw">_ </span>=&gt; <span class="bool-val">true</span>,
             },
-            <span class="string">&quot;danger_full_buf length mismatches&quot;
+            <span class="string">"danger_full_buf length mismatches"
         </span>);
 
         <span class="kw">match </span><span class="self">self</span>.kind {
             Kind::Chunked =&gt; {
                 <span class="kw">let </span>len = msg.remaining();
-                <span class="macro">trace!</span>(<span class="string">&quot;encoding chunked {}B&quot;</span>, len);
+                <span class="macro">trace!</span>(<span class="string">"encoding chunked {}B"</span>, len);
                 <span class="kw">let </span>buf = ChunkSize::new(len)
                     .chain(msg)
-                    .chain(<span class="string">b&quot;\r\n0\r\n\r\n&quot; </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[u8]);
+                    .chain(<span class="string">b"\r\n0\r\n\r\n" </span><span class="kw">as </span><span class="kw-2">&amp;</span><span class="lifetime">'static </span>[u8]);
                 dst.buffer(buf);
             }
             <span class="kw">_ </span>=&gt; {
@@ -689,7 +689,7 @@
     }
 
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>chunks_vectored&lt;<span class="lifetime">&#39;t</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;t </span><span class="self">self</span>, dst: <span class="kw-2">&amp;mut </span>[IoSlice&lt;<span class="lifetime">&#39;t</span>&gt;]) -&gt; usize {
+    </span><span class="kw">fn </span>chunks_vectored&lt;<span class="lifetime">'t</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'t </span><span class="self">self</span>, dst: <span class="kw-2">&amp;mut </span>[IoSlice&lt;<span class="lifetime">'t</span>&gt;]) -&gt; usize {
         <span class="kw">match </span><span class="self">self</span>.kind {
             BufKind::Exact(<span class="kw-2">ref </span>b) =&gt; b.chunks_vectored(dst),
             BufKind::Limited(<span class="kw-2">ref </span>b) =&gt; b.chunks_vectored(dst),
@@ -699,10 +699,10 @@
     }
 }
 
-<span class="attr">#[cfg(target_pointer_width = <span class="string">&quot;32&quot;</span>)]
+<span class="attr">#[cfg(target_pointer_width = <span class="string">"32"</span>)]
 </span><span class="kw">const </span>USIZE_BYTES: usize = <span class="number">4</span>;
 
-<span class="attr">#[cfg(target_pointer_width = <span class="string">&quot;64&quot;</span>)]
+<span class="attr">#[cfg(target_pointer_width = <span class="string">"64"</span>)]
 </span><span class="kw">const </span>USIZE_BYTES: usize = <span class="number">8</span>;
 
 <span class="comment">// each byte will become 2 hex
@@ -723,7 +723,7 @@
             pos: <span class="number">0</span>,
             len: <span class="number">0</span>,
         };
-        <span class="macro">write!</span>(<span class="kw-2">&amp;mut </span>size, <span class="string">&quot;{:X}\r\n&quot;</span>, len).expect(<span class="string">&quot;CHUNK_SIZE_MAX_BYTES should fit any usize&quot;</span>);
+        <span class="macro">write!</span>(<span class="kw-2">&amp;mut </span>size, <span class="string">"{:X}\r\n"</span>, len).expect(<span class="string">"CHUNK_SIZE_MAX_BYTES should fit any usize"</span>);
         size
     }
 }
@@ -747,10 +747,10 @@
 }
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>ChunkSize {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        f.debug_struct(<span class="string">&quot;ChunkSize&quot;</span>)
-            .field(<span class="string">&quot;bytes&quot;</span>, &amp;&amp;<span class="self">self</span>.bytes[..<span class="self">self</span>.len.into()])
-            .field(<span class="string">&quot;pos&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.pos)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        f.debug_struct(<span class="string">"ChunkSize"</span>)
+            .field(<span class="string">"bytes"</span>, &amp;&amp;<span class="self">self</span>.bytes[..<span class="self">self</span>.len.into()])
+            .field(<span class="string">"pos"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.pos)
             .finish()
     }
 }
@@ -760,7 +760,7 @@
         <span class="kw">use </span>std::io::Write;
         (<span class="kw-2">&amp;mut </span><span class="self">self</span>.bytes[<span class="self">self</span>.len.into()..])
             .write_all(num.as_bytes())
-            .expect(<span class="string">&quot;&amp;mut [u8].write() cannot error&quot;</span>);
+            .expect(<span class="string">"&amp;mut [u8].write() cannot error"</span>);
         <span class="self">self</span>.len += num.len() <span class="kw">as </span>u8; <span class="comment">// safe because bytes is never bigger than 256
         </span><span class="prelude-val">Ok</span>(())
     }
@@ -791,8 +791,8 @@
 }
 
 <span class="kw">impl </span>fmt::Display <span class="kw">for </span>NotEof {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;early end, expected {} more bytes&quot;</span>, <span class="self">self</span>.<span class="number">0</span>)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        <span class="macro">write!</span>(f, <span class="string">"early end, expected {} more bytes"</span>, <span class="self">self</span>.<span class="number">0</span>)
     }
 }
 
@@ -810,23 +810,23 @@
         <span class="kw">let </span><span class="kw-2">mut </span>encoder = Encoder::chunked();
         <span class="kw">let </span><span class="kw-2">mut </span>dst = Vec::new();
 
-        <span class="kw">let </span>msg1 = <span class="string">b&quot;foo bar&quot;</span>.as_ref();
+        <span class="kw">let </span>msg1 = <span class="string">b"foo bar"</span>.as_ref();
         <span class="kw">let </span>buf1 = encoder.encode(msg1);
         dst.put(buf1);
-        <span class="macro">assert_eq!</span>(dst, <span class="string">b&quot;7\r\nfoo bar\r\n&quot;</span>);
+        <span class="macro">assert_eq!</span>(dst, <span class="string">b"7\r\nfoo bar\r\n"</span>);
 
-        <span class="kw">let </span>msg2 = <span class="string">b&quot;baz quux herp&quot;</span>.as_ref();
+        <span class="kw">let </span>msg2 = <span class="string">b"baz quux herp"</span>.as_ref();
         <span class="kw">let </span>buf2 = encoder.encode(msg2);
         dst.put(buf2);
 
-        <span class="macro">assert_eq!</span>(dst, <span class="string">b&quot;7\r\nfoo bar\r\nD\r\nbaz quux herp\r\n&quot;</span>);
+        <span class="macro">assert_eq!</span>(dst, <span class="string">b"7\r\nfoo bar\r\nD\r\nbaz quux herp\r\n"</span>);
 
         <span class="kw">let </span>end = encoder.end::&lt;Cursor&lt;Vec&lt;u8&gt;&gt;&gt;().unwrap().unwrap();
         dst.put(end);
 
         <span class="macro">assert_eq!</span>(
             dst,
-            <span class="string">b&quot;7\r\nfoo bar\r\nD\r\nbaz quux herp\r\n0\r\n\r\n&quot;</span>.as_ref()
+            <span class="string">b"7\r\nfoo bar\r\nD\r\nbaz quux herp\r\n0\r\n\r\n"</span>.as_ref()
         );
     }
 
@@ -836,20 +836,20 @@
         <span class="kw">let </span><span class="kw-2">mut </span>encoder = Encoder::length(max_len <span class="kw">as </span>u64);
         <span class="kw">let </span><span class="kw-2">mut </span>dst = Vec::new();
 
-        <span class="kw">let </span>msg1 = <span class="string">b&quot;foo bar&quot;</span>.as_ref();
+        <span class="kw">let </span>msg1 = <span class="string">b"foo bar"</span>.as_ref();
         <span class="kw">let </span>buf1 = encoder.encode(msg1);
         dst.put(buf1);
 
-        <span class="macro">assert_eq!</span>(dst, <span class="string">b&quot;foo bar&quot;</span>);
+        <span class="macro">assert_eq!</span>(dst, <span class="string">b"foo bar"</span>);
         <span class="macro">assert!</span>(!encoder.is_eof());
         encoder.end::&lt;()&gt;().unwrap_err();
 
-        <span class="kw">let </span>msg2 = <span class="string">b&quot;baz&quot;</span>.as_ref();
+        <span class="kw">let </span>msg2 = <span class="string">b"baz"</span>.as_ref();
         <span class="kw">let </span>buf2 = encoder.encode(msg2);
         dst.put(buf2);
 
         <span class="macro">assert_eq!</span>(dst.len(), max_len);
-        <span class="macro">assert_eq!</span>(dst, <span class="string">b&quot;foo barb&quot;</span>);
+        <span class="macro">assert_eq!</span>(dst, <span class="string">b"foo barb"</span>);
         <span class="macro">assert!</span>(encoder.is_eof());
         <span class="macro">assert!</span>(encoder.end::&lt;()&gt;().unwrap().is_none());
     }
@@ -859,19 +859,19 @@
         <span class="kw">let </span><span class="kw-2">mut </span>encoder = Encoder::close_delimited();
         <span class="kw">let </span><span class="kw-2">mut </span>dst = Vec::new();
 
-        <span class="kw">let </span>msg1 = <span class="string">b&quot;foo bar&quot;</span>.as_ref();
+        <span class="kw">let </span>msg1 = <span class="string">b"foo bar"</span>.as_ref();
         <span class="kw">let </span>buf1 = encoder.encode(msg1);
         dst.put(buf1);
 
-        <span class="macro">assert_eq!</span>(dst, <span class="string">b&quot;foo bar&quot;</span>);
+        <span class="macro">assert_eq!</span>(dst, <span class="string">b"foo bar"</span>);
         <span class="macro">assert!</span>(!encoder.is_eof());
         encoder.end::&lt;()&gt;().unwrap();
 
-        <span class="kw">let </span>msg2 = <span class="string">b&quot;baz&quot;</span>.as_ref();
+        <span class="kw">let </span>msg2 = <span class="string">b"baz"</span>.as_ref();
         <span class="kw">let </span>buf2 = encoder.encode(msg2);
         dst.put(buf2);
 
-        <span class="macro">assert_eq!</span>(dst, <span class="string">b&quot;foo barbaz&quot;</span>);
+        <span class="macro">assert_eq!</span>(dst, <span class="string">b"foo barbaz"</span>);
         <span class="macro">assert!</span>(!encoder.is_eof());
         encoder.end::&lt;()&gt;().unwrap();
     }

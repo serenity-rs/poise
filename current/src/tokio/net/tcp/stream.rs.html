@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/net/tcp/stream.rs`."><title>stream.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/net/tcp/stream.rs`."><title>stream.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1470,10 +1470,10 @@
     /// #[tokio::main]
     /// async fn main() -&gt; Result&lt;(), Box&lt;dyn Error&gt;&gt; {
     ///     // Connect to a peer
-    ///     let mut stream = TcpStream::connect(&quot;127.0.0.1:8080&quot;).await?;
+    ///     let mut stream = TcpStream::connect("127.0.0.1:8080").await?;
     ///
     ///     // Write some data.
-    ///     stream.write_all(b&quot;hello world!&quot;).await?;
+    ///     stream.write_all(b"hello world!").await?;
     ///
     ///     Ok(())
     /// }
@@ -1522,10 +1522,10 @@
         /// #[tokio::main]
         /// async fn main() -&gt; Result&lt;(), Box&lt;dyn Error&gt;&gt; {
         ///     // Connect to a peer
-        ///     let mut stream = TcpStream::connect(&quot;127.0.0.1:8080&quot;).await?;
+        ///     let mut stream = TcpStream::connect("127.0.0.1:8080").await?;
         ///
         ///     // Write some data.
-        ///     stream.write_all(b&quot;hello world!&quot;).await?;
+        ///     stream.write_all(b"hello world!").await?;
         ///
         ///     Ok(())
         /// }
@@ -1550,7 +1550,7 @@
             <span class="prelude-val">Err</span>(last_err.unwrap_or_else(|| {
                 io::Error::new(
                     io::ErrorKind::InvalidInput,
-                    <span class="string">&quot;could not resolve to any address&quot;</span>,
+                    <span class="string">"could not resolve to any address"</span>,
                 )
             }))
         }
@@ -1564,8 +1564,8 @@
         <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">async fn </span>connect_mio(sys: mio::net::TcpStream) -&gt; io::Result&lt;TcpStream&gt; {
             <span class="kw">let </span>stream = TcpStream::new(sys)<span class="question-mark">?</span>;
 
-            <span class="comment">// Once we&#39;ve connected, wait for the stream to be writable as
-            // that&#39;s when the actual connection has been initiated. Once we&#39;re
+            <span class="comment">// Once we've connected, wait for the stream to be writable as
+            // that's when the actual connection has been initiated. Once we're
             // writable we check for `take_socket_error` to see if the connect
             // actually hit an error or not.
             //
@@ -1607,7 +1607,7 @@
     ///
     /// #[tokio::main]
     /// async fn main() -&gt; Result&lt;(), Box&lt;dyn Error&gt;&gt; {
-    ///     let std_stream = std::net::TcpStream::connect(&quot;127.0.0.1:34254&quot;)?;
+    ///     let std_stream = std::net::TcpStream::connect("127.0.0.1:34254")?;
     ///     std_stream.set_nonblocking(true)?;
     ///     let stream = TcpStream::from_std(std_stream)?;
     ///     Ok(())
@@ -1647,20 +1647,20 @@
     /// async fn main() -&gt; Result&lt;(), Box&lt;dyn Error&gt;&gt; {
     ///     let mut data = [0u8; 12];
     /// #   if false {
-    ///     let listener = TcpListener::bind(&quot;127.0.0.1:34254&quot;).await?;
+    ///     let listener = TcpListener::bind("127.0.0.1:34254").await?;
     /// #   }
-    /// #   let listener = TcpListener::bind(&quot;127.0.0.1:0&quot;).await?;
+    /// #   let listener = TcpListener::bind("127.0.0.1:0").await?;
     /// #   let addr = listener.local_addr().unwrap();
     /// #   let handle = tokio::spawn(async move {
     /// #       let mut stream: TcpStream = TcpStream::connect(addr).await.unwrap();
-    /// #       stream.write_all(b&quot;Hello world!&quot;).await.unwrap();
+    /// #       stream.write_all(b"Hello world!").await.unwrap();
     /// #   });
     ///     let (tokio_tcp_stream, _) = listener.accept().await?;
     ///     let mut std_tcp_stream = tokio_tcp_stream.into_std()?;
-    /// #   handle.await.expect(&quot;The task being joined has panicked&quot;);
+    /// #   handle.await.expect("The task being joined has panicked");
     ///     std_tcp_stream.set_nonblocking(false)?;
     ///     std_tcp_stream.read_exact(&amp;mut data)?;
-    /// #   assert_eq!(b&quot;Hello world!&quot;, &amp;data);
+    /// #   assert_eq!(b"Hello world!", &amp;data);
     ///     Ok(())
     /// }
     /// ```
@@ -1686,7 +1686,7 @@
                 .map(|raw_socket| <span class="kw">unsafe </span>{ std::net::TcpStream::from_raw_socket(raw_socket) })
         }
 
-        <span class="attr">#[cfg(target_os = <span class="string">&quot;wasi&quot;</span>)]
+        <span class="attr">#[cfg(target_os = <span class="string">"wasi"</span>)]
         </span>{
             <span class="kw">use </span>std::os::wasi::io::{FromRawFd, IntoRawFd};
             <span class="self">self</span>.io
@@ -1704,9 +1704,9 @@
     /// use tokio::net::TcpStream;
     ///
     /// # async fn dox() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
-    /// let stream = TcpStream::connect(&quot;127.0.0.1:8080&quot;).await?;
+    /// let stream = TcpStream::connect("127.0.0.1:8080").await?;
     ///
-    /// println!(&quot;{:?}&quot;, stream.local_addr()?);
+    /// println!("{:?}", stream.local_addr()?);
     /// # Ok(())
     /// # }
     /// ```
@@ -1727,9 +1727,9 @@
     /// use tokio::net::TcpStream;
     ///
     /// # async fn dox() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
-    /// let stream = TcpStream::connect(&quot;127.0.0.1:8080&quot;).await?;
+    /// let stream = TcpStream::connect("127.0.0.1:8080").await?;
     ///
-    /// println!(&quot;{:?}&quot;, stream.peer_addr()?);
+    /// println!("{:?}", stream.peer_addr()?);
     /// # Ok(())
     /// # }
     /// ```
@@ -1768,7 +1768,7 @@
     ///
     /// #[tokio::main]
     /// async fn main() -&gt; io::Result&lt;()&gt; {
-    ///     let stream = TcpStream::connect(&quot;127.0.0.1:8000&quot;).await?;
+    ///     let stream = TcpStream::connect("127.0.0.1:8000").await?;
     ///     let mut buf = [0; 10];
     ///     let mut buf = ReadBuf::new(&amp;mut buf);
     ///
@@ -1781,8 +1781,8 @@
     /// ```
     </span><span class="kw">pub fn </span>poll_peek(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;,
-        buf: <span class="kw-2">&amp;mut </span>ReadBuf&lt;<span class="lifetime">&#39;_</span>&gt;,
+        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;,
+        buf: <span class="kw-2">&amp;mut </span>ReadBuf&lt;<span class="lifetime">'_</span>&gt;,
     ) -&gt; Poll&lt;io::Result&lt;usize&gt;&gt; {
         <span class="kw">loop </span>{
             <span class="kw">let </span>ev = <span class="macro">ready!</span>(<span class="self">self</span>.io.registration().poll_read_ready(cx))<span class="question-mark">?</span>;
@@ -1837,7 +1837,7 @@
     ///
     /// #[tokio::main]
     /// async fn main() -&gt; Result&lt;(), Box&lt;dyn Error&gt;&gt; {
-    ///     let stream = TcpStream::connect(&quot;127.0.0.1:8080&quot;).await?;
+    ///     let stream = TcpStream::connect("127.0.0.1:8080").await?;
     ///
     ///     loop {
     ///         let ready = stream.ready(Interest::READABLE | Interest::WRITABLE).await?;
@@ -1848,7 +1848,7 @@
     ///             // if the readiness event is a false positive.
     ///             match stream.try_read(&amp;mut data) {
     ///                 Ok(n) =&gt; {
-    ///                     println!(&quot;read {} bytes&quot;, n);
+    ///                     println!("read {} bytes", n);
     ///                 }
     ///                 Err(ref e) if e.kind() == io::ErrorKind::WouldBlock =&gt; {
     ///                     continue;
@@ -1863,9 +1863,9 @@
     ///         if ready.is_writable() {
     ///             // Try to write data, this may still fail with `WouldBlock`
     ///             // if the readiness event is a false positive.
-    ///             match stream.try_write(b&quot;hello world&quot;) {
+    ///             match stream.try_write(b"hello world") {
     ///                 Ok(n) =&gt; {
-    ///                     println!(&quot;write {} bytes&quot;, n);
+    ///                     println!("write {} bytes", n);
     ///                 }
     ///                 Err(ref e) if e.kind() == io::ErrorKind::WouldBlock =&gt; {
     ///                     continue
@@ -1905,7 +1905,7 @@
     /// #[tokio::main]
     /// async fn main() -&gt; Result&lt;(), Box&lt;dyn Error&gt;&gt; {
     ///     // Connect to a peer
-    ///     let stream = TcpStream::connect(&quot;127.0.0.1:8080&quot;).await?;
+    ///     let stream = TcpStream::connect("127.0.0.1:8080").await?;
     ///
     ///     let mut msg = vec![0; 1024];
     ///
@@ -1929,7 +1929,7 @@
     ///         }
     ///     }
     ///
-    ///     println!(&quot;GOT = {:?}&quot;, msg);
+    ///     println!("GOT = {:?}", msg);
     ///     Ok(())
     /// }
     /// ```
@@ -1967,7 +1967,7 @@
     /// This function may encounter any standard I/O error except `WouldBlock`.
     ///
     /// [`readable`]: method@Self::readable
-    </span><span class="kw">pub fn </span>poll_read_ready(<span class="kw-2">&amp;</span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;io::Result&lt;()&gt;&gt; {
+    </span><span class="kw">pub fn </span>poll_read_ready(<span class="kw-2">&amp;</span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;io::Result&lt;()&gt;&gt; {
         <span class="self">self</span>.io.registration().poll_read_ready(cx).map_ok(|<span class="kw">_</span>| ())
     }
 
@@ -1989,7 +1989,7 @@
     /// If data is successfully read, `Ok(n)` is returned, where `n` is the
     /// number of bytes read. If `n` is `0`, then it can indicate one of two scenarios:
     ///
-    /// 1. The stream&#39;s read half is closed and will no longer yield data.
+    /// 1. The stream's read half is closed and will no longer yield data.
     /// 2. The specified buffer was 0 bytes in length.
     ///
     /// If the stream is not ready to read data,
@@ -2005,7 +2005,7 @@
     /// #[tokio::main]
     /// async fn main() -&gt; Result&lt;(), Box&lt;dyn Error&gt;&gt; {
     ///     // Connect to a peer
-    ///     let stream = TcpStream::connect(&quot;127.0.0.1:8080&quot;).await?;
+    ///     let stream = TcpStream::connect("127.0.0.1:8080").await?;
     ///
     ///     loop {
     ///         // Wait for the socket to be readable
@@ -2020,7 +2020,7 @@
     ///         match stream.try_read(&amp;mut buf) {
     ///             Ok(0) =&gt; break,
     ///             Ok(n) =&gt; {
-    ///                 println!(&quot;read {} bytes&quot;, n);
+    ///                 println!("read {} bytes", n);
     ///             }
     ///             Err(ref e) if e.kind() == io::ErrorKind::WouldBlock =&gt; {
     ///                 continue;
@@ -2064,7 +2064,7 @@
     /// # Return
     ///
     /// If data is successfully read, `Ok(n)` is returned, where `n` is the
-    /// number of bytes read. `Ok(0)` indicates the stream&#39;s read half is closed
+    /// number of bytes read. `Ok(0)` indicates the stream's read half is closed
     /// and will no longer yield data. If the stream is not ready to read data
     /// `Err(io::ErrorKind::WouldBlock)` is returned.
     ///
@@ -2078,7 +2078,7 @@
     /// #[tokio::main]
     /// async fn main() -&gt; Result&lt;(), Box&lt;dyn Error&gt;&gt; {
     ///     // Connect to a peer
-    ///     let stream = TcpStream::connect(&quot;127.0.0.1:8080&quot;).await?;
+    ///     let stream = TcpStream::connect("127.0.0.1:8080").await?;
     ///
     ///     loop {
     ///         // Wait for the socket to be readable
@@ -2098,7 +2098,7 @@
     ///         match stream.try_read_vectored(&amp;mut bufs) {
     ///             Ok(0) =&gt; break,
     ///             Ok(n) =&gt; {
-    ///                 println!(&quot;read {} bytes&quot;, n);
+    ///                 println!("read {} bytes", n);
     ///             }
     ///             Err(ref e) if e.kind() == io::ErrorKind::WouldBlock =&gt; {
     ///                 continue;
@@ -2112,7 +2112,7 @@
     ///     Ok(())
     /// }
     /// ```
-    </span><span class="kw">pub fn </span>try_read_vectored(<span class="kw-2">&amp;</span><span class="self">self</span>, bufs: <span class="kw-2">&amp;mut </span>[io::IoSliceMut&lt;<span class="lifetime">&#39;_</span>&gt;]) -&gt; io::Result&lt;usize&gt; {
+    </span><span class="kw">pub fn </span>try_read_vectored(<span class="kw-2">&amp;</span><span class="self">self</span>, bufs: <span class="kw-2">&amp;mut </span>[io::IoSliceMut&lt;<span class="lifetime">'_</span>&gt;]) -&gt; io::Result&lt;usize&gt; {
         <span class="kw">use </span>std::io::Read;
 
         <span class="self">self</span>.io
@@ -2122,7 +2122,7 @@
 
     <span class="macro">cfg_io_util! </span>{
         <span class="doccomment">/// Tries to read data from the stream into the provided buffer, advancing the
-        /// buffer&#39;s internal cursor, returning how many bytes were read.
+        /// buffer's internal cursor, returning how many bytes were read.
         ///
         /// Receives any pending data from the socket but does not wait for new data
         /// to arrive. On success, returns the number of bytes read. Because
@@ -2137,7 +2137,7 @@
         /// # Return
         ///
         /// If data is successfully read, `Ok(n)` is returned, where `n` is the
-        /// number of bytes read. `Ok(0)` indicates the stream&#39;s read half is closed
+        /// number of bytes read. `Ok(0)` indicates the stream's read half is closed
         /// and will no longer yield data. If the stream is not ready to read data
         /// `Err(io::ErrorKind::WouldBlock)` is returned.
         ///
@@ -2151,7 +2151,7 @@
         /// #[tokio::main]
         /// async fn main() -&gt; Result&lt;(), Box&lt;dyn Error&gt;&gt; {
         ///     // Connect to a peer
-        ///     let stream = TcpStream::connect(&quot;127.0.0.1:8080&quot;).await?;
+        ///     let stream = TcpStream::connect("127.0.0.1:8080").await?;
         ///
         ///     loop {
         ///         // Wait for the socket to be readable
@@ -2164,7 +2164,7 @@
         ///         match stream.try_read_buf(&amp;mut buf) {
         ///             Ok(0) =&gt; break,
         ///             Ok(n) =&gt; {
-        ///                 println!(&quot;read {} bytes&quot;, n);
+        ///                 println!("read {} bytes", n);
         ///             }
         ///             Err(ref e) if e.kind() == io::ErrorKind::WouldBlock =&gt; {
         ///                 continue;
@@ -2221,7 +2221,7 @@
     /// #[tokio::main]
     /// async fn main() -&gt; Result&lt;(), Box&lt;dyn Error&gt;&gt; {
     ///     // Connect to a peer
-    ///     let stream = TcpStream::connect(&quot;127.0.0.1:8080&quot;).await?;
+    ///     let stream = TcpStream::connect("127.0.0.1:8080").await?;
     ///
     ///     loop {
     ///         // Wait for the socket to be writable
@@ -2229,7 +2229,7 @@
     ///
     ///         // Try to write data, this may still fail with `WouldBlock`
     ///         // if the readiness event is a false positive.
-    ///         match stream.try_write(b&quot;hello world&quot;) {
+    ///         match stream.try_write(b"hello world") {
     ///             Ok(n) =&gt; {
     ///                 break;
     ///             }
@@ -2279,7 +2279,7 @@
     /// This function may encounter any standard I/O error except `WouldBlock`.
     ///
     /// [`writable`]: method@Self::writable
-    </span><span class="kw">pub fn </span>poll_write_ready(<span class="kw-2">&amp;</span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;io::Result&lt;()&gt;&gt; {
+    </span><span class="kw">pub fn </span>poll_write_ready(<span class="kw-2">&amp;</span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;io::Result&lt;()&gt;&gt; {
         <span class="self">self</span>.io.registration().poll_write_ready(cx).map_ok(|<span class="kw">_</span>| ())
     }
 
@@ -2307,7 +2307,7 @@
     /// #[tokio::main]
     /// async fn main() -&gt; Result&lt;(), Box&lt;dyn Error&gt;&gt; {
     ///     // Connect to a peer
-    ///     let stream = TcpStream::connect(&quot;127.0.0.1:8080&quot;).await?;
+    ///     let stream = TcpStream::connect("127.0.0.1:8080").await?;
     ///
     ///     loop {
     ///         // Wait for the socket to be writable
@@ -2315,7 +2315,7 @@
     ///
     ///         // Try to write data, this may still fail with `WouldBlock`
     ///         // if the readiness event is a false positive.
-    ///         match stream.try_write(b&quot;hello world&quot;) {
+    ///         match stream.try_write(b"hello world") {
     ///             Ok(n) =&gt; {
     ///                 break;
     ///             }
@@ -2367,9 +2367,9 @@
     /// #[tokio::main]
     /// async fn main() -&gt; Result&lt;(), Box&lt;dyn Error&gt;&gt; {
     ///     // Connect to a peer
-    ///     let stream = TcpStream::connect(&quot;127.0.0.1:8080&quot;).await?;
+    ///     let stream = TcpStream::connect("127.0.0.1:8080").await?;
     ///
-    ///     let bufs = [io::IoSlice::new(b&quot;hello &quot;), io::IoSlice::new(b&quot;world&quot;)];
+    ///     let bufs = [io::IoSlice::new(b"hello "), io::IoSlice::new(b"world")];
     ///
     ///     loop {
     ///         // Wait for the socket to be writable
@@ -2393,7 +2393,7 @@
     ///     Ok(())
     /// }
     /// ```
-    </span><span class="kw">pub fn </span>try_write_vectored(<span class="kw-2">&amp;</span><span class="self">self</span>, bufs: <span class="kw-2">&amp;</span>[io::IoSlice&lt;<span class="lifetime">&#39;_</span>&gt;]) -&gt; io::Result&lt;usize&gt; {
+    </span><span class="kw">pub fn </span>try_write_vectored(<span class="kw-2">&amp;</span><span class="self">self</span>, bufs: <span class="kw-2">&amp;</span>[io::IoSlice&lt;<span class="lifetime">'_</span>&gt;]) -&gt; io::Result&lt;usize&gt; {
         <span class="kw">use </span>std::io::Write;
 
         <span class="self">self</span>.io
@@ -2496,7 +2496,7 @@
     /// #[tokio::main]
     /// async fn main() -&gt; Result&lt;(), Box&lt;dyn Error&gt;&gt; {
     ///     // Connect to a peer
-    ///     let mut stream = TcpStream::connect(&quot;127.0.0.1:8080&quot;).await?;
+    ///     let mut stream = TcpStream::connect("127.0.0.1:8080").await?;
     ///
     ///     let mut b1 = [0; 10];
     ///     let mut b2 = [0; 10];
@@ -2544,9 +2544,9 @@
     /// use tokio::net::TcpStream;
     ///
     /// # async fn dox() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
-    /// let stream = TcpStream::connect(&quot;127.0.0.1:8080&quot;).await?;
+    /// let stream = TcpStream::connect("127.0.0.1:8080").await?;
     ///
-    /// println!(&quot;{:?}&quot;, stream.nodelay()?);
+    /// println!("{:?}", stream.nodelay()?);
     /// # Ok(())
     /// # }
     /// ```
@@ -2568,7 +2568,7 @@
     /// use tokio::net::TcpStream;
     ///
     /// # async fn dox() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
-    /// let stream = TcpStream::connect(&quot;127.0.0.1:8080&quot;).await?;
+    /// let stream = TcpStream::connect("127.0.0.1:8080").await?;
     ///
     /// stream.set_nodelay(true)?;
     /// # Ok(())
@@ -2592,9 +2592,9 @@
         /// use tokio::net::TcpStream;
         ///
         /// # async fn dox() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
-        /// let stream = TcpStream::connect(&quot;127.0.0.1:8080&quot;).await?;
+        /// let stream = TcpStream::connect("127.0.0.1:8080").await?;
         ///
-        /// println!(&quot;{:?}&quot;, stream.linger()?);
+        /// println!("{:?}", stream.linger()?);
         /// # Ok(())
         /// # }
         /// ```
@@ -2617,7 +2617,7 @@
         /// use tokio::net::TcpStream;
         ///
         /// # async fn dox() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
-        /// let stream = TcpStream::connect(&quot;127.0.0.1:8080&quot;).await?;
+        /// let stream = TcpStream::connect("127.0.0.1:8080").await?;
         ///
         /// stream.set_linger(None)?;
         /// # Ok(())
@@ -2640,9 +2640,9 @@
     /// use tokio::net::TcpStream;
     ///
     /// # async fn dox() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
-    /// let stream = TcpStream::connect(&quot;127.0.0.1:8080&quot;).await?;
+    /// let stream = TcpStream::connect("127.0.0.1:8080").await?;
     ///
-    /// println!(&quot;{:?}&quot;, stream.ttl()?);
+    /// println!("{:?}", stream.ttl()?);
     /// # Ok(())
     /// # }
     /// ```
@@ -2661,7 +2661,7 @@
     /// use tokio::net::TcpStream;
     ///
     /// # async fn dox() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
-    /// let stream = TcpStream::connect(&quot;127.0.0.1:8080&quot;).await?;
+    /// let stream = TcpStream::connect("127.0.0.1:8080").await?;
     ///
     /// stream.set_ttl(123)?;
     /// # Ok(())
@@ -2681,7 +2681,7 @@
     /// moved into independently spawned tasks.
     ///
     /// [`into_split`]: TcpStream::into_split()
-    </span><span class="kw">pub fn </span>split&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span><span class="self">self</span>) -&gt; (ReadHalf&lt;<span class="lifetime">&#39;a</span>&gt;, WriteHalf&lt;<span class="lifetime">&#39;a</span>&gt;) {
+    </span><span class="kw">pub fn </span>split&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span><span class="self">self</span>) -&gt; (ReadHalf&lt;<span class="lifetime">'a</span>&gt;, WriteHalf&lt;<span class="lifetime">'a</span>&gt;) {
         split(<span class="self">self</span>)
     }
 
@@ -2708,8 +2708,8 @@
 
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>poll_read_priv(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;,
-        buf: <span class="kw-2">&amp;mut </span>ReadBuf&lt;<span class="lifetime">&#39;_</span>&gt;,
+        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;,
+        buf: <span class="kw-2">&amp;mut </span>ReadBuf&lt;<span class="lifetime">'_</span>&gt;,
     ) -&gt; Poll&lt;io::Result&lt;()&gt;&gt; {
         <span class="comment">// Safety: `TcpStream::read` correctly handles reads into uninitialized memory
         </span><span class="kw">unsafe </span>{ <span class="self">self</span>.io.poll_read(cx, buf) }
@@ -2717,7 +2717,7 @@
 
     <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>poll_write_priv(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;,
+        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;,
         buf: <span class="kw-2">&amp;</span>[u8],
     ) -&gt; Poll&lt;io::Result&lt;usize&gt;&gt; {
         <span class="self">self</span>.io.poll_write(cx, buf)
@@ -2725,8 +2725,8 @@
 
     <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>poll_write_vectored_priv(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;,
-        bufs: <span class="kw-2">&amp;</span>[io::IoSlice&lt;<span class="lifetime">&#39;_</span>&gt;],
+        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;,
+        bufs: <span class="kw-2">&amp;</span>[io::IoSlice&lt;<span class="lifetime">'_</span>&gt;],
     ) -&gt; Poll&lt;io::Result&lt;usize&gt;&gt; {
         <span class="self">self</span>.io.poll_write_vectored(cx, bufs)
     }
@@ -2749,8 +2749,8 @@
 </span><span class="kw">impl </span>AsyncRead <span class="kw">for </span>TcpStream {
     <span class="kw">fn </span>poll_read(
         <span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;,
-        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;,
-        buf: <span class="kw-2">&amp;mut </span>ReadBuf&lt;<span class="lifetime">&#39;_</span>&gt;,
+        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;,
+        buf: <span class="kw-2">&amp;mut </span>ReadBuf&lt;<span class="lifetime">'_</span>&gt;,
     ) -&gt; Poll&lt;io::Result&lt;()&gt;&gt; {
         <span class="self">self</span>.poll_read_priv(cx, buf)
     }
@@ -2759,7 +2759,7 @@
 <span class="kw">impl </span>AsyncWrite <span class="kw">for </span>TcpStream {
     <span class="kw">fn </span>poll_write(
         <span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;,
-        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;,
+        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;,
         buf: <span class="kw-2">&amp;</span>[u8],
     ) -&gt; Poll&lt;io::Result&lt;usize&gt;&gt; {
         <span class="self">self</span>.poll_write_priv(cx, buf)
@@ -2767,8 +2767,8 @@
 
     <span class="kw">fn </span>poll_write_vectored(
         <span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;,
-        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;,
-        bufs: <span class="kw-2">&amp;</span>[io::IoSlice&lt;<span class="lifetime">&#39;_</span>&gt;],
+        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;,
+        bufs: <span class="kw-2">&amp;</span>[io::IoSlice&lt;<span class="lifetime">'_</span>&gt;],
     ) -&gt; Poll&lt;io::Result&lt;usize&gt;&gt; {
         <span class="self">self</span>.poll_write_vectored_priv(cx, bufs)
     }
@@ -2778,19 +2778,19 @@
     </span>}
 
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>poll_flush(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;io::Result&lt;()&gt;&gt; {
+    </span><span class="kw">fn </span>poll_flush(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;io::Result&lt;()&gt;&gt; {
         <span class="comment">// tcp flush is a no-op
         </span>Poll::Ready(<span class="prelude-val">Ok</span>(()))
     }
 
-    <span class="kw">fn </span>poll_shutdown(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;io::Result&lt;()&gt;&gt; {
+    <span class="kw">fn </span>poll_shutdown(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;io::Result&lt;()&gt;&gt; {
         <span class="self">self</span>.shutdown_std(std::net::Shutdown::Write)<span class="question-mark">?</span>;
         Poll::Ready(<span class="prelude-val">Ok</span>(()))
     }
 }
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>TcpStream {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         <span class="self">self</span>.io.fmt(f)
     }
 }
@@ -2807,7 +2807,7 @@
     }
 
     <span class="kw">impl </span>AsFd <span class="kw">for </span>TcpStream {
-        <span class="kw">fn </span>as_fd(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; BorrowedFd&lt;<span class="lifetime">&#39;_</span>&gt; {
+        <span class="kw">fn </span>as_fd(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; BorrowedFd&lt;<span class="lifetime">'_</span>&gt; {
             <span class="kw">unsafe </span>{ BorrowedFd::borrow_raw(<span class="self">self</span>.as_raw_fd()) }
         }
     }
@@ -2823,13 +2823,13 @@
     }
 
     <span class="kw">impl </span>AsSocket <span class="kw">for </span>TcpStream {
-        <span class="kw">fn </span>as_socket(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; BorrowedSocket&lt;<span class="lifetime">&#39;_</span>&gt; {
+        <span class="kw">fn </span>as_socket(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; BorrowedSocket&lt;<span class="lifetime">'_</span>&gt; {
             <span class="kw">unsafe </span>{ BorrowedSocket::borrow_raw(<span class="self">self</span>.as_raw_socket()) }
         }
     }
 }
 
-<span class="attr">#[cfg(all(tokio_unstable, target_os = <span class="string">&quot;wasi&quot;</span>))]
+<span class="attr">#[cfg(all(tokio_unstable, target_os = <span class="string">"wasi"</span>))]
 </span><span class="kw">mod </span>sys {
     <span class="kw">use </span><span class="kw">super</span>::TcpStream;
     <span class="kw">use </span>std::os::wasi::prelude::<span class="kw-2">*</span>;
@@ -2841,7 +2841,7 @@
     }
 
     <span class="kw">impl </span>AsFd <span class="kw">for </span>TcpStream {
-        <span class="kw">fn </span>as_fd(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; BorrowedFd&lt;<span class="lifetime">&#39;_</span>&gt; {
+        <span class="kw">fn </span>as_fd(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; BorrowedFd&lt;<span class="lifetime">'_</span>&gt; {
             <span class="kw">unsafe </span>{ BorrowedFd::borrow_raw(<span class="self">self</span>.as_raw_fd()) }
         }
     }

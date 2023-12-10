@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rand-0.8.5/src/rng.rs`."><title>rng.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="rand" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="icon" href="https://www.rust-lang.org/favicon.ico"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../rand/index.html"><img src="https://www.rust-lang.org/logos/rust-logo-128x128-blk.png" alt="rand"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rand-0.8.5/src/rng.rs`."><title>rng.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="rand" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="icon" href="https://www.rust-lang.org/favicon.ico"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../rand/index.html"><img src="https://www.rust-lang.org/logos/rust-logo-128x128-blk.png" alt="rand"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -662,8 +662,8 @@
     ///
     /// let mut rng = thread_rng();
     /// let x: u32 = rng.gen();
-    /// println!(&quot;{}&quot;, x);
-    /// println!(&quot;{:?}&quot;, rng.gen::&lt;(f64, bool)&gt;());
+    /// println!("{}", x);
+    /// println!("{:?}", rng.gen::&lt;(f64, bool)&gt;());
     /// ```
     ///
     /// # Arrays and tuples
@@ -716,13 +716,13 @@
     ///
     /// // Exclusive range
     /// let n: u32 = rng.gen_range(0..10);
-    /// println!(&quot;{}&quot;, n);
+    /// println!("{}", n);
     /// let m: f64 = rng.gen_range(-40.0..1.3e5);
-    /// println!(&quot;{}&quot;, m);
+    /// println!("{}", m);
     ///
     /// // Inclusive range
     /// let n: u32 = rng.gen_range(0..=10);
-    /// println!(&quot;{}&quot;, n);
+    /// println!("{}", n);
     /// ```
     ///
     /// [`Uniform`]: distributions::uniform::Uniform
@@ -731,7 +731,7 @@
         </span>T: SampleUniform,
         R: SampleRange&lt;T&gt;
     {
-        <span class="macro">assert!</span>(!range.is_empty(), <span class="string">&quot;cannot sample empty range&quot;</span>);
+        <span class="macro">assert!</span>(!range.is_empty(), <span class="string">"cannot sample empty range"</span>);
         range.sample_single(<span class="self">self</span>)
     }
 
@@ -779,14 +779,14 @@
     ///     .collect();
     ///
     /// // Combined values
-    /// println!(&quot;{:?}&quot;, (&amp;mut rng).sample_iter(Standard).take(5)
+    /// println!("{:?}", (&amp;mut rng).sample_iter(Standard).take(5)
     ///                              .collect::&lt;Vec&lt;(f64, bool)&gt;&gt;());
     ///
     /// // Dice-rolling:
     /// let die_range = Uniform::new_inclusive(1, 6);
     /// let mut roll_die = (&amp;mut rng).sample_iter(die_range);
     /// while roll_die.next().unwrap() != 6 {
-    ///     println!(&quot;Not a 6; rolling again!&quot;);
+    ///     println!("Not a 6; rolling again!");
     /// }
     /// ```
     </span><span class="kw">fn </span>sample_iter&lt;T, D&gt;(<span class="self">self</span>, distr: D) -&gt; distributions::DistIter&lt;D, <span class="self">Self</span>, T&gt;
@@ -816,7 +816,7 @@
     /// [`fill_bytes`]: RngCore::fill_bytes
     /// [`try_fill`]: Rng::try_fill
     </span><span class="kw">fn </span>fill&lt;T: Fill + <span class="question-mark">?</span>Sized&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, dest: <span class="kw-2">&amp;mut </span>T) {
-        dest.try_fill(<span class="self">self</span>).unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Rng::fill failed&quot;</span>))
+        dest.try_fill(<span class="self">self</span>).unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">"Rng::fill failed"</span>))
     }
 
     <span class="doccomment">/// Fill any type implementing [`Fill`] with random data
@@ -858,7 +858,7 @@
     /// use rand::{thread_rng, Rng};
     ///
     /// let mut rng = thread_rng();
-    /// println!(&quot;{}&quot;, rng.gen_bool(1.0 / 3.0));
+    /// println!("{}", rng.gen_bool(1.0 / 3.0));
     /// ```
     ///
     /// # Panics
@@ -891,7 +891,7 @@
     /// use rand::{thread_rng, Rng};
     ///
     /// let mut rng = thread_rng();
-    /// println!(&quot;{}&quot;, rng.gen_ratio(2, 3));
+    /// println!("{}", rng.gen_ratio(2, 3));
     /// ```
     ///
     /// [`Bernoulli`]: distributions::Bernoulli
@@ -992,8 +992,8 @@
 <span class="macro">impl_fill!</span>(u16, u32, u64, usize, u128,);
 <span class="macro">impl_fill!</span>(i8, i16, i32, i64, isize, i128,);
 
-<span class="attr">#[cfg_attr(doc_cfg, doc(cfg(feature = <span class="string">&quot;min_const_gen&quot;</span>)))]
-#[cfg(feature = <span class="string">&quot;min_const_gen&quot;</span>)]
+<span class="attr">#[cfg_attr(doc_cfg, doc(cfg(feature = <span class="string">"min_const_gen"</span>)))]
+#[cfg(feature = <span class="string">"min_const_gen"</span>)]
 </span><span class="kw">impl</span>&lt;T, <span class="kw">const </span>N: usize&gt; Fill <span class="kw">for </span>[T; N]
 <span class="kw">where </span>[T]: Fill
 {
@@ -1002,7 +1002,7 @@
     }
 }
 
-<span class="attr">#[cfg(not(feature = <span class="string">&quot;min_const_gen&quot;</span>))]
+<span class="attr">#[cfg(not(feature = <span class="string">"min_const_gen"</span>))]
 </span><span class="macro">macro_rules! </span>impl_fill_arrays {
     (<span class="macro-nonterminal">$n</span>:expr,) =&gt; {};
     (<span class="macro-nonterminal">$n</span>:expr, <span class="macro-nonterminal">$N</span>:ident) =&gt; {
@@ -1022,10 +1022,10 @@
         <span class="macro">impl_fill_arrays!</span>(!div <span class="macro-nonterminal">$n </span>/ <span class="number">2</span>, $(<span class="macro-nonterminal">$NN</span>,)<span class="kw-2">*</span>);
     };
 }
-<span class="attr">#[cfg(not(feature = <span class="string">&quot;min_const_gen&quot;</span>))]
+<span class="attr">#[cfg(not(feature = <span class="string">"min_const_gen"</span>))]
 #[rustfmt::skip]
 </span><span class="macro">impl_fill_arrays!</span>(<span class="number">32</span>, N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,);
-<span class="attr">#[cfg(not(feature = <span class="string">&quot;min_const_gen&quot;</span>))]
+<span class="attr">#[cfg(not(feature = <span class="string">"min_const_gen"</span>))]
 </span><span class="macro">impl_fill_arrays!</span>(!div <span class="number">4096</span>, N,N,N,N,N,N,N,);
 
 <span class="attr">#[cfg(test)]
@@ -1033,7 +1033,7 @@
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
     <span class="kw">use </span><span class="kw">crate</span>::test::rng;
     <span class="kw">use </span><span class="kw">crate</span>::rngs::mock::StepRng;
-    <span class="attr">#[cfg(feature = <span class="string">&quot;alloc&quot;</span>)] </span><span class="kw">use </span>alloc::boxed::Box;
+    <span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)] </span><span class="kw">use </span>alloc::boxed::Box;
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_fill_bytes_default() {
@@ -1049,7 +1049,7 @@
             <span class="comment">// use this to get nicer error messages.
             </span><span class="kw">for </span>(i, <span class="kw-2">&amp;</span>byte) <span class="kw">in </span>v.iter().enumerate() {
                 <span class="kw">if </span>byte == <span class="number">0 </span>{
-                    <span class="macro">panic!</span>(<span class="string">&quot;byte {} of {} is zero&quot;</span>, i, n)
+                    <span class="macro">panic!</span>(<span class="string">"byte {} of {} is zero"</span>, i, n)
                 }
             }
         }
@@ -1168,7 +1168,7 @@
     }
 
     <span class="attr">#[test]
-    #[cfg(feature = <span class="string">&quot;alloc&quot;</span>)]
+    #[cfg(feature = <span class="string">"alloc"</span>)]
     </span><span class="kw">fn </span>test_rng_boxed_trait() {
         <span class="kw">use </span><span class="kw">crate</span>::distributions::{Distribution, Standard};
         <span class="kw">let </span>rng = rng(<span class="number">110</span>);

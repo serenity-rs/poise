@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/net/unix/pipe.rs`."><title>pipe.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/net/unix/pipe.rs`."><title>pipe.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1236,7 +1236,7 @@
 <span class="doccomment">/// Options and flags which can be used to configure how a FIFO file is opened.
 ///
 /// This builder allows configuring how to create a pipe end from a FIFO file.
-/// Generally speaking, when using `OpenOptions`, you&#39;ll first call [`new`],
+/// Generally speaking, when using `OpenOptions`, you'll first call [`new`],
 /// then chain calls to methods to set each option, then call either
 /// [`open_receiver`] or [`open_sender`], passing the path of the FIFO file you
 /// are trying to open. This will give you a [`io::Result`] with a pipe end
@@ -1254,7 +1254,7 @@
 /// use tokio::net::unix::pipe;
 /// # use std::error::Error;
 ///
-/// const FIFO_NAME: &amp;str = &quot;path/to/a/fifo&quot;;
+/// const FIFO_NAME: &amp;str = "path/to/a/fifo";
 ///
 /// # async fn dox() -&gt; Result&lt;(), Box&lt;dyn Error&gt;&gt; {
 /// let rx = pipe::OpenOptions::new().open_receiver(FIFO_NAME)?;
@@ -1271,7 +1271,7 @@
 /// # use std::error::Error;
 ///
 /// // Our program has exclusive access to this path.
-/// const FIFO_NAME: &amp;str = &quot;path/to/a/new/fifo&quot;;
+/// const FIFO_NAME: &amp;str = "path/to/a/new/fifo";
 ///
 /// # async fn dox() -&gt; Result&lt;(), Box&lt;dyn Error&gt;&gt; {
 /// mkfifo(FIFO_NAME, Mode::S_IRWXU)?;
@@ -1284,7 +1284,7 @@
 /// ```
 </span><span class="attr">#[derive(Clone, Debug)]
 </span><span class="kw">pub struct </span>OpenOptions {
-    <span class="attr">#[cfg(target_os = <span class="string">&quot;linux&quot;</span>)]
+    <span class="attr">#[cfg(target_os = <span class="string">"linux"</span>)]
     </span>read_write: bool,
     unchecked: bool,
 }
@@ -1295,7 +1295,7 @@
     /// All options are initially set to `false`.
     </span><span class="kw">pub fn </span>new() -&gt; OpenOptions {
         OpenOptions {
-            <span class="attr">#[cfg(target_os = <span class="string">&quot;linux&quot;</span>)]
+            <span class="attr">#[cfg(target_os = <span class="string">"linux"</span>)]
             </span>read_write: <span class="bool-val">false</span>,
             unchecked: <span class="bool-val">false</span>,
         }
@@ -1316,7 +1316,7 @@
     ///
     /// let tx = pipe::OpenOptions::new()
     ///     .read_write(true)
-    ///     .open_sender(&quot;path/to/a/fifo&quot;);
+    ///     .open_sender("path/to/a/fifo");
     /// ```
     ///
     /// Opening a resilient [`Receiver`] i.e. a reading pipe end which will not
@@ -1330,10 +1330,10 @@
     ///
     /// let tx = pipe::OpenOptions::new()
     ///     .read_write(true)
-    ///     .open_receiver(&quot;path/to/a/fifo&quot;);
+    ///     .open_receiver("path/to/a/fifo");
     /// ```
-    </span><span class="attr">#[cfg(target_os = <span class="string">&quot;linux&quot;</span>)]
-    #[cfg_attr(docsrs, doc(cfg(target_os = <span class="string">&quot;linux&quot;</span>)))]
+    </span><span class="attr">#[cfg(target_os = <span class="string">"linux"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(target_os = <span class="string">"linux"</span>)))]
     </span><span class="kw">pub fn </span>read_write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: bool) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
         <span class="self">self</span>.read_write = value;
         <span class="self">self
@@ -1356,7 +1356,7 @@
     /// # use std::error::Error;
     ///
     /// // Our program has exclusive access to this path.
-    /// const FIFO_NAME: &amp;str = &quot;path/to/a/new/fifo&quot;;
+    /// const FIFO_NAME: &amp;str = "path/to/a/new/fifo";
     ///
     /// # async fn dox() -&gt; Result&lt;(), Box&lt;dyn Error&gt;&gt; {
     /// mkfifo(FIFO_NAME, Mode::S_IRWXU)?;
@@ -1428,7 +1428,7 @@
             .write(pipe_end == PipeEnd::Sender)
             .custom_flags(libc::O_NONBLOCK);
 
-        <span class="attr">#[cfg(target_os = <span class="string">&quot;linux&quot;</span>)]
+        <span class="attr">#[cfg(target_os = <span class="string">"linux"</span>)]
         </span><span class="kw">if </span><span class="self">self</span>.read_write {
             options.read(<span class="bool-val">true</span>).write(<span class="bool-val">true</span>);
         }
@@ -1436,7 +1436,7 @@
         <span class="kw">let </span>file = options.open(path)<span class="question-mark">?</span>;
 
         <span class="kw">if </span>!<span class="self">self</span>.unchecked &amp;&amp; !is_fifo(<span class="kw-2">&amp;</span>file)<span class="question-mark">? </span>{
-            <span class="kw">return </span><span class="prelude-val">Err</span>(io::Error::new(io::ErrorKind::InvalidInput, <span class="string">&quot;not a pipe&quot;</span>));
+            <span class="kw">return </span><span class="prelude-val">Err</span>(io::Error::new(io::ErrorKind::InvalidInput, <span class="string">"not a pipe"</span>));
         }
 
         <span class="prelude-val">Ok</span>(file)
@@ -1475,7 +1475,7 @@
 /// use tokio::net::unix::pipe;
 /// use tokio::time::{self, Duration};
 ///
-/// const FIFO_NAME: &amp;str = &quot;path/to/a/fifo&quot;;
+/// const FIFO_NAME: &amp;str = "path/to/a/fifo";
 ///
 /// # async fn dox() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
 /// // Wait for a reader to open the file.
@@ -1511,7 +1511,7 @@
 /// use tokio::io::AsyncWriteExt;
 /// use tokio::net::unix::pipe;
 ///
-/// const FIFO_NAME: &amp;str = &quot;path/to/a/fifo&quot;;
+/// const FIFO_NAME: &amp;str = "path/to/a/fifo";
 ///
 /// # async fn dox() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
 /// let mut tx = pipe::OpenOptions::new()
@@ -1519,7 +1519,7 @@
 ///     .open_sender(FIFO_NAME)?;
 ///
 /// // Asynchronously write to the pipe before a reader.
-/// tx.write_all(b&quot;hello world&quot;).await?;
+/// tx.write_all(b"hello world").await?;
 /// # Ok(())
 /// # }
 /// ```
@@ -1557,7 +1557,7 @@
     /// explicitly with [`Runtime::enter`](crate::runtime::Runtime::enter) function.
     </span><span class="kw">pub fn </span>from_file(<span class="kw-2">mut </span>file: File) -&gt; io::Result&lt;Sender&gt; {
         <span class="kw">if </span>!is_fifo(<span class="kw-2">&amp;</span>file)<span class="question-mark">? </span>{
-            <span class="kw">return </span><span class="prelude-val">Err</span>(io::Error::new(io::ErrorKind::InvalidInput, <span class="string">&quot;not a pipe&quot;</span>));
+            <span class="kw">return </span><span class="prelude-val">Err</span>(io::Error::new(io::ErrorKind::InvalidInput, <span class="string">"not a pipe"</span>));
         }
 
         <span class="kw">let </span>flags = get_file_flags(<span class="kw-2">&amp;</span>file)<span class="question-mark">?</span>;
@@ -1567,7 +1567,7 @@
         } <span class="kw">else </span>{
             <span class="prelude-val">Err</span>(io::Error::new(
                 io::ErrorKind::InvalidInput,
-                <span class="string">&quot;not in O_WRONLY or O_RDWR access mode&quot;</span>,
+                <span class="string">"not in O_WRONLY or O_RDWR access mode"</span>,
             ))
         }
     }
@@ -1587,7 +1587,7 @@
     /// use std::os::unix::fs::{FileTypeExt, OpenOptionsExt};
     /// # use std::error::Error;
     ///
-    /// const FIFO_NAME: &amp;str = &quot;path/to/a/fifo&quot;;
+    /// const FIFO_NAME: &amp;str = "path/to/a/fifo";
     ///
     /// # async fn dox() -&gt; Result&lt;(), Box&lt;dyn Error&gt;&gt; {
     /// let file = OpenOptions::new()
@@ -1656,7 +1656,7 @@
     /// #[tokio::main]
     /// async fn main() -&gt; io::Result&lt;()&gt; {
     ///     // Open a writing end of a fifo
-    ///     let tx = pipe::OpenOptions::new().open_sender(&quot;path/to/a/fifo&quot;)?;
+    ///     let tx = pipe::OpenOptions::new().open_sender("path/to/a/fifo")?;
     ///
     ///     loop {
     ///         // Wait for the pipe to be writable
@@ -1664,7 +1664,7 @@
     ///
     ///         // Try to write data, this may still fail with `WouldBlock`
     ///         // if the readiness event is a false positive.
-    ///         match tx.try_write(b&quot;hello world&quot;) {
+    ///         match tx.try_write(b"hello world") {
     ///             Ok(n) =&gt; {
     ///                 break;
     ///             }
@@ -1712,7 +1712,7 @@
     /// # Errors
     ///
     /// This function may encounter any standard I/O error except `WouldBlock`.
-    </span><span class="kw">pub fn </span>poll_write_ready(<span class="kw-2">&amp;</span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;io::Result&lt;()&gt;&gt; {
+    </span><span class="kw">pub fn </span>poll_write_ready(<span class="kw-2">&amp;</span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;io::Result&lt;()&gt;&gt; {
         <span class="self">self</span>.io.registration().poll_write_ready(cx).map_ok(|<span class="kw">_</span>| ())
     }
 
@@ -1745,7 +1745,7 @@
     /// #[tokio::main]
     /// async fn main() -&gt; io::Result&lt;()&gt; {
     ///     // Open a writing end of a fifo
-    ///     let tx = pipe::OpenOptions::new().open_sender(&quot;path/to/a/fifo&quot;)?;
+    ///     let tx = pipe::OpenOptions::new().open_sender("path/to/a/fifo")?;
     ///
     ///     loop {
     ///         // Wait for the pipe to be writable
@@ -1753,7 +1753,7 @@
     ///
     ///         // Try to write data, this may still fail with `WouldBlock`
     ///         // if the readiness event is a false positive.
-    ///         match tx.try_write(b&quot;hello world&quot;) {
+    ///         match tx.try_write(b"hello world") {
     ///             Ok(n) =&gt; {
     ///                 break;
     ///             }
@@ -1809,9 +1809,9 @@
     /// #[tokio::main]
     /// async fn main() -&gt; io::Result&lt;()&gt; {
     ///     // Open a writing end of a fifo
-    ///     let tx = pipe::OpenOptions::new().open_sender(&quot;path/to/a/fifo&quot;)?;
+    ///     let tx = pipe::OpenOptions::new().open_sender("path/to/a/fifo")?;
     ///
-    ///     let bufs = [io::IoSlice::new(b&quot;hello &quot;), io::IoSlice::new(b&quot;world&quot;)];
+    ///     let bufs = [io::IoSlice::new(b"hello "), io::IoSlice::new(b"world")];
     ///
     ///     loop {
     ///         // Wait for the pipe to be writable
@@ -1835,7 +1835,7 @@
     ///     Ok(())
     /// }
     /// ```
-    </span><span class="kw">pub fn </span>try_write_vectored(<span class="kw-2">&amp;</span><span class="self">self</span>, buf: <span class="kw-2">&amp;</span>[io::IoSlice&lt;<span class="lifetime">&#39;_</span>&gt;]) -&gt; io::Result&lt;usize&gt; {
+    </span><span class="kw">pub fn </span>try_write_vectored(<span class="kw-2">&amp;</span><span class="self">self</span>, buf: <span class="kw-2">&amp;</span>[io::IoSlice&lt;<span class="lifetime">'_</span>&gt;]) -&gt; io::Result&lt;usize&gt; {
         <span class="self">self</span>.io
             .registration()
             .try_io(Interest::WRITABLE, || (<span class="kw-2">&amp;*</span><span class="self">self</span>.io).write_vectored(buf))
@@ -1845,7 +1845,7 @@
 <span class="kw">impl </span>AsyncWrite <span class="kw">for </span>Sender {
     <span class="kw">fn </span>poll_write(
         <span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;,
-        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;,
+        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;,
         buf: <span class="kw-2">&amp;</span>[u8],
     ) -&gt; Poll&lt;io::Result&lt;usize&gt;&gt; {
         <span class="self">self</span>.io.poll_write(cx, buf)
@@ -1853,8 +1853,8 @@
 
     <span class="kw">fn </span>poll_write_vectored(
         <span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;,
-        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;,
-        bufs: <span class="kw-2">&amp;</span>[io::IoSlice&lt;<span class="lifetime">&#39;_</span>&gt;],
+        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;,
+        bufs: <span class="kw-2">&amp;</span>[io::IoSlice&lt;<span class="lifetime">'_</span>&gt;],
     ) -&gt; Poll&lt;io::Result&lt;usize&gt;&gt; {
         <span class="self">self</span>.io.poll_write_vectored(cx, bufs)
     }
@@ -1863,11 +1863,11 @@
         <span class="bool-val">true
     </span>}
 
-    <span class="kw">fn </span>poll_flush(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;io::Result&lt;()&gt;&gt; {
+    <span class="kw">fn </span>poll_flush(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;io::Result&lt;()&gt;&gt; {
         Poll::Ready(<span class="prelude-val">Ok</span>(()))
     }
 
-    <span class="kw">fn </span>poll_shutdown(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;io::Result&lt;()&gt;&gt; {
+    <span class="kw">fn </span>poll_shutdown(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;io::Result&lt;()&gt;&gt; {
         Poll::Ready(<span class="prelude-val">Ok</span>(()))
     }
 }
@@ -1879,7 +1879,7 @@
 }
 
 <span class="kw">impl </span>AsFd <span class="kw">for </span>Sender {
-    <span class="kw">fn </span>as_fd(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; BorrowedFd&lt;<span class="lifetime">&#39;_</span>&gt; {
+    <span class="kw">fn </span>as_fd(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; BorrowedFd&lt;<span class="lifetime">'_</span>&gt; {
         <span class="kw">unsafe </span>{ BorrowedFd::borrow_raw(<span class="self">self</span>.as_raw_fd()) }
     }
 }
@@ -1896,7 +1896,7 @@
 /// use tokio::net::unix::pipe;
 /// use tokio::io::{self, AsyncReadExt};
 ///
-/// const FIFO_NAME: &amp;str = &quot;path/to/a/fifo&quot;;
+/// const FIFO_NAME: &amp;str = "path/to/a/fifo";
 ///
 /// # async fn dox() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
 /// let mut rx = pipe::OpenOptions::new().open_receiver(FIFO_NAME)?;
@@ -1936,7 +1936,7 @@
 /// use tokio::io::AsyncReadExt;
 /// # use std::error::Error;
 ///
-/// const FIFO_NAME: &amp;str = &quot;path/to/a/fifo&quot;;
+/// const FIFO_NAME: &amp;str = "path/to/a/fifo";
 ///
 /// # async fn dox() -&gt; Result&lt;(), Box&lt;dyn Error&gt;&gt; {
 /// let mut rx = pipe::OpenOptions::new()
@@ -1983,7 +1983,7 @@
     /// explicitly with [`Runtime::enter`](crate::runtime::Runtime::enter) function.
     </span><span class="kw">pub fn </span>from_file(<span class="kw-2">mut </span>file: File) -&gt; io::Result&lt;Receiver&gt; {
         <span class="kw">if </span>!is_fifo(<span class="kw-2">&amp;</span>file)<span class="question-mark">? </span>{
-            <span class="kw">return </span><span class="prelude-val">Err</span>(io::Error::new(io::ErrorKind::InvalidInput, <span class="string">&quot;not a pipe&quot;</span>));
+            <span class="kw">return </span><span class="prelude-val">Err</span>(io::Error::new(io::ErrorKind::InvalidInput, <span class="string">"not a pipe"</span>));
         }
 
         <span class="kw">let </span>flags = get_file_flags(<span class="kw-2">&amp;</span>file)<span class="question-mark">?</span>;
@@ -1993,7 +1993,7 @@
         } <span class="kw">else </span>{
             <span class="prelude-val">Err</span>(io::Error::new(
                 io::ErrorKind::InvalidInput,
-                <span class="string">&quot;not in O_RDONLY or O_RDWR access mode&quot;</span>,
+                <span class="string">"not in O_RDONLY or O_RDWR access mode"</span>,
             ))
         }
     }
@@ -2013,7 +2013,7 @@
     /// use std::os::unix::fs::{FileTypeExt, OpenOptionsExt};
     /// # use std::error::Error;
     ///
-    /// const FIFO_NAME: &amp;str = &quot;path/to/a/fifo&quot;;
+    /// const FIFO_NAME: &amp;str = "path/to/a/fifo";
     ///
     /// # async fn dox() -&gt; Result&lt;(), Box&lt;dyn Error&gt;&gt; {
     /// let file = OpenOptions::new()
@@ -2082,7 +2082,7 @@
     /// #[tokio::main]
     /// async fn main() -&gt; io::Result&lt;()&gt; {
     ///     // Open a reading end of a fifo
-    ///     let rx = pipe::OpenOptions::new().open_receiver(&quot;path/to/a/fifo&quot;)?;
+    ///     let rx = pipe::OpenOptions::new().open_receiver("path/to/a/fifo")?;
     ///
     ///     let mut msg = vec![0; 1024];
     ///
@@ -2106,7 +2106,7 @@
     ///         }
     ///     }
     ///
-    ///     println!(&quot;GOT = {:?}&quot;, msg);
+    ///     println!("GOT = {:?}", msg);
     ///     Ok(())
     /// }
     /// ```
@@ -2142,7 +2142,7 @@
     /// # Errors
     ///
     /// This function may encounter any standard I/O error except `WouldBlock`.
-    </span><span class="kw">pub fn </span>poll_read_ready(<span class="kw-2">&amp;</span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;io::Result&lt;()&gt;&gt; {
+    </span><span class="kw">pub fn </span>poll_read_ready(<span class="kw-2">&amp;</span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;io::Result&lt;()&gt;&gt; {
         <span class="self">self</span>.io.registration().poll_read_ready(cx).map_ok(|<span class="kw">_</span>| ())
     }
 
@@ -2163,7 +2163,7 @@
     /// If data is successfully read, `Ok(n)` is returned, where `n` is the
     /// number of bytes read. If `n` is `0`, then it can indicate one of two scenarios:
     ///
-    /// 1. The pipe&#39;s writing end is closed and will no longer write data.
+    /// 1. The pipe's writing end is closed and will no longer write data.
     /// 2. The specified buffer was 0 bytes in length.
     ///
     /// If the pipe is not ready to read data,
@@ -2178,7 +2178,7 @@
     /// #[tokio::main]
     /// async fn main() -&gt; io::Result&lt;()&gt; {
     ///     // Open a reading end of a fifo
-    ///     let rx = pipe::OpenOptions::new().open_receiver(&quot;path/to/a/fifo&quot;)?;
+    ///     let rx = pipe::OpenOptions::new().open_receiver("path/to/a/fifo")?;
     ///
     ///     let mut msg = vec![0; 1024];
     ///
@@ -2202,7 +2202,7 @@
     ///         }
     ///     }
     ///
-    ///     println!(&quot;GOT = {:?}&quot;, msg);
+    ///     println!("GOT = {:?}", msg);
     ///     Ok(())
     /// }
     /// ```
@@ -2233,7 +2233,7 @@
     /// # Return
     ///
     /// If data is successfully read, `Ok(n)` is returned, where `n` is the
-    /// number of bytes read. `Ok(0)` indicates the pipe&#39;s writing end is
+    /// number of bytes read. `Ok(0)` indicates the pipe's writing end is
     /// closed and will no longer write data. If the pipe is not ready to read
     /// data `Err(io::ErrorKind::WouldBlock)` is returned.
     ///
@@ -2246,7 +2246,7 @@
     /// #[tokio::main]
     /// async fn main() -&gt; io::Result&lt;()&gt; {
     ///     // Open a reading end of a fifo
-    ///     let rx = pipe::OpenOptions::new().open_receiver(&quot;path/to/a/fifo&quot;)?;
+    ///     let rx = pipe::OpenOptions::new().open_receiver("path/to/a/fifo")?;
     ///
     ///     loop {
     ///         // Wait for the pipe to be readable
@@ -2266,7 +2266,7 @@
     ///         match rx.try_read_vectored(&amp;mut bufs) {
     ///             Ok(0) =&gt; break,
     ///             Ok(n) =&gt; {
-    ///                 println!(&quot;read {} bytes&quot;, n);
+    ///                 println!("read {} bytes", n);
     ///             }
     ///             Err(e) if e.kind() == io::ErrorKind::WouldBlock =&gt; {
     ///                 continue;
@@ -2280,7 +2280,7 @@
     ///     Ok(())
     /// }
     /// ```
-    </span><span class="kw">pub fn </span>try_read_vectored(<span class="kw-2">&amp;</span><span class="self">self</span>, bufs: <span class="kw-2">&amp;mut </span>[io::IoSliceMut&lt;<span class="lifetime">&#39;_</span>&gt;]) -&gt; io::Result&lt;usize&gt; {
+    </span><span class="kw">pub fn </span>try_read_vectored(<span class="kw-2">&amp;</span><span class="self">self</span>, bufs: <span class="kw-2">&amp;mut </span>[io::IoSliceMut&lt;<span class="lifetime">'_</span>&gt;]) -&gt; io::Result&lt;usize&gt; {
         <span class="self">self</span>.io
             .registration()
             .try_io(Interest::READABLE, || (<span class="kw-2">&amp;*</span><span class="self">self</span>.io).read_vectored(bufs))
@@ -2288,7 +2288,7 @@
 
     <span class="macro">cfg_io_util! </span>{
         <span class="doccomment">/// Tries to read data from the pipe into the provided buffer, advancing the
-        /// buffer&#39;s internal cursor, returning how many bytes were read.
+        /// buffer's internal cursor, returning how many bytes were read.
         ///
         /// Reads any pending data from the pipe but does not wait for new data
         /// to arrive. On success, returns the number of bytes read. Because
@@ -2303,7 +2303,7 @@
         /// # Return
         ///
         /// If data is successfully read, `Ok(n)` is returned, where `n` is the
-        /// number of bytes read. `Ok(0)` indicates the pipe&#39;s writing end is
+        /// number of bytes read. `Ok(0)` indicates the pipe's writing end is
         /// closed and will no longer write data. If the pipe is not ready to read
         /// data `Err(io::ErrorKind::WouldBlock)` is returned.
         ///
@@ -2316,7 +2316,7 @@
         /// #[tokio::main]
         /// async fn main() -&gt; io::Result&lt;()&gt; {
         ///     // Open a reading end of a fifo
-        ///     let rx = pipe::OpenOptions::new().open_receiver(&quot;path/to/a/fifo&quot;)?;
+        ///     let rx = pipe::OpenOptions::new().open_receiver("path/to/a/fifo")?;
         ///
         ///     loop {
         ///         // Wait for the pipe to be readable
@@ -2329,7 +2329,7 @@
         ///         match rx.try_read_buf(&amp;mut buf) {
         ///             Ok(0) =&gt; break,
         ///             Ok(n) =&gt; {
-        ///                 println!(&quot;read {} bytes&quot;, n);
+        ///                 println!("read {} bytes", n);
         ///             }
         ///             Err(ref e) if e.kind() == io::ErrorKind::WouldBlock =&gt; {
         ///                 continue;
@@ -2368,8 +2368,8 @@
 <span class="kw">impl </span>AsyncRead <span class="kw">for </span>Receiver {
     <span class="kw">fn </span>poll_read(
         <span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;,
-        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;,
-        buf: <span class="kw-2">&amp;mut </span>ReadBuf&lt;<span class="lifetime">&#39;_</span>&gt;,
+        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;,
+        buf: <span class="kw-2">&amp;mut </span>ReadBuf&lt;<span class="lifetime">'_</span>&gt;,
     ) -&gt; Poll&lt;io::Result&lt;()&gt;&gt; {
         <span class="comment">// Safety: `mio_pipe::Receiver` uses a `std::fs::File` underneath,
         // which correctly handles reads into uninitialized memory.
@@ -2384,7 +2384,7 @@
 }
 
 <span class="kw">impl </span>AsFd <span class="kw">for </span>Receiver {
-    <span class="kw">fn </span>as_fd(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; BorrowedFd&lt;<span class="lifetime">&#39;_</span>&gt; {
+    <span class="kw">fn </span>as_fd(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; BorrowedFd&lt;<span class="lifetime">'_</span>&gt; {
         <span class="kw">unsafe </span>{ BorrowedFd::borrow_raw(<span class="self">self</span>.as_raw_fd()) }
     }
 }
@@ -2394,7 +2394,7 @@
     <span class="prelude-val">Ok</span>(file.metadata()<span class="question-mark">?</span>.file_type().is_fifo())
 }
 
-<span class="doccomment">/// Gets file descriptor&#39;s flags by fcntl.
+<span class="doccomment">/// Gets file descriptor's flags by fcntl.
 </span><span class="kw">fn </span>get_file_flags(file: <span class="kw-2">&amp;</span>File) -&gt; io::Result&lt;libc::c_int&gt; {
     <span class="kw">let </span>fd = file.as_raw_fd();
     <span class="kw">let </span>flags = <span class="kw">unsafe </span>{ libc::fcntl(fd, libc::F_GETFL) };
@@ -2417,7 +2417,7 @@
     mode == libc::O_WRONLY || mode == libc::O_RDWR
 }
 
-<span class="doccomment">/// Sets file&#39;s flags with `O_NONBLOCK` by fcntl.
+<span class="doccomment">/// Sets file's flags with `O_NONBLOCK` by fcntl.
 </span><span class="kw">fn </span>set_nonblocking(file: <span class="kw-2">&amp;mut </span>File, current_flags: libc::c_int) -&gt; io::Result&lt;()&gt; {
     <span class="kw">let </span>fd = file.as_raw_fd();
 

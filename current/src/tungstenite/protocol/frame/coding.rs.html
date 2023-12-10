@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tungstenite-0.20.1/src/protocol/frame/coding.rs`."><title>coding.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="tungstenite" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tungstenite-0.20.1/src/protocol/frame/coding.rs`."><title>coding.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="tungstenite" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -334,10 +334,10 @@
 <span class="kw">impl </span>fmt::Display <span class="kw">for </span>Data {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
         <span class="kw">match </span><span class="kw-2">*</span><span class="self">self </span>{
-            Data::Continue =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;CONTINUE&quot;</span>),
-            Data::Text =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;TEXT&quot;</span>),
-            Data::Binary =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;BINARY&quot;</span>),
-            Data::Reserved(x) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;RESERVED_DATA_{}&quot;</span>, x),
+            Data::Continue =&gt; <span class="macro">write!</span>(f, <span class="string">"CONTINUE"</span>),
+            Data::Text =&gt; <span class="macro">write!</span>(f, <span class="string">"TEXT"</span>),
+            Data::Binary =&gt; <span class="macro">write!</span>(f, <span class="string">"BINARY"</span>),
+            Data::Reserved(x) =&gt; <span class="macro">write!</span>(f, <span class="string">"RESERVED_DATA_{}"</span>, x),
         }
     }
 }
@@ -345,10 +345,10 @@
 <span class="kw">impl </span>fmt::Display <span class="kw">for </span>Control {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
         <span class="kw">match </span><span class="kw-2">*</span><span class="self">self </span>{
-            Control::Close =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;CLOSE&quot;</span>),
-            Control::Ping =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;PING&quot;</span>),
-            Control::Pong =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;PONG&quot;</span>),
-            Control::Reserved(x) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;RESERVED_CONTROL_{}&quot;</span>, x),
+            Control::Close =&gt; <span class="macro">write!</span>(f, <span class="string">"CLOSE"</span>),
+            Control::Ping =&gt; <span class="macro">write!</span>(f, <span class="string">"PING"</span>),
+            Control::Pong =&gt; <span class="macro">write!</span>(f, <span class="string">"PONG"</span>),
+            Control::Reserved(x) =&gt; <span class="macro">write!</span>(f, <span class="string">"RESERVED_CONTROL_{}"</span>, x),
         }
     }
 }
@@ -399,7 +399,7 @@
             <span class="number">9 </span>=&gt; Control(Ping),
             <span class="number">10 </span>=&gt; Control(Pong),
             i @ <span class="number">11</span>..=<span class="number">15 </span>=&gt; Control(<span class="self">self</span>::Control::Reserved(i)),
-            <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;Bug: OpCode out of range&quot;</span>),
+            <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">"Bug: OpCode out of range"</span>),
         }
     }
 }
@@ -411,7 +411,7 @@
     <span class="doccomment">/// Indicates a normal closure, meaning that the purpose for
     /// which the connection was established has been fulfilled.
     </span>Normal,
-    <span class="doccomment">/// Indicates that an endpoint is &quot;going away&quot;, such as a server
+    <span class="doccomment">/// Indicates that an endpoint is "going away", such as a server
     /// going down or a browser having navigated away from a page.
     </span>Away,
     <span class="doccomment">/// Indicates that an endpoint is terminating the connection due
@@ -449,7 +449,7 @@
     </span>Size,
     <span class="doccomment">/// Indicates that an endpoint (client) is terminating the
     /// connection because it has expected the server to negotiate one or
-    /// more extension, but the server didn&#39;t return them in the response
+    /// more extension, but the server didn't return them in the response
     /// message of the WebSocket handshake.  The list of extensions that
     /// are needed should be given as the reason for closing.
     /// Note that this status code is not used by the server, because it
@@ -488,7 +488,7 @@
 <span class="kw">impl </span>fmt::Display <span class="kw">for </span>CloseCode {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
         <span class="kw">let </span>code: u16 = <span class="self">self</span>.into();
-        <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, code)
+        <span class="macro">write!</span>(f, <span class="string">"{}"</span>, code)
     }
 }
 
@@ -517,8 +517,8 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;t</span>&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;t </span>CloseCode&gt; <span class="kw">for </span>u16 {
-    <span class="kw">fn </span>from(code: <span class="kw-2">&amp;</span><span class="lifetime">&#39;t </span>CloseCode) -&gt; u16 {
+<span class="kw">impl</span>&lt;<span class="lifetime">'t</span>&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">'t </span>CloseCode&gt; <span class="kw">for </span>u16 {
+    <span class="kw">fn </span>from(code: <span class="kw-2">&amp;</span><span class="lifetime">'t </span>CloseCode) -&gt; u16 {
         (<span class="kw-2">*</span>code).into()
     }
 }

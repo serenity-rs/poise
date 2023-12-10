@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/mio-0.8.9/src/sys/unix/net.rs`."><title>net.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="mio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/mio-0.8.9/src/sys/unix/net.rs`."><title>net.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="mio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -208,13 +208,13 @@
 <span class="doccomment">/// Create a new non-blocking socket.
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new_socket(domain: libc::c_int, socket_type: libc::c_int) -&gt; io::Result&lt;libc::c_int&gt; {
     <span class="attr">#[cfg(any(
-        target_os = <span class="string">&quot;android&quot;</span>,
-        target_os = <span class="string">&quot;dragonfly&quot;</span>,
-        target_os = <span class="string">&quot;freebsd&quot;</span>,
-        target_os = <span class="string">&quot;illumos&quot;</span>,
-        target_os = <span class="string">&quot;linux&quot;</span>,
-        target_os = <span class="string">&quot;netbsd&quot;</span>,
-        target_os = <span class="string">&quot;openbsd&quot;</span>,
+        target_os = <span class="string">"android"</span>,
+        target_os = <span class="string">"dragonfly"</span>,
+        target_os = <span class="string">"freebsd"</span>,
+        target_os = <span class="string">"illumos"</span>,
+        target_os = <span class="string">"linux"</span>,
+        target_os = <span class="string">"netbsd"</span>,
+        target_os = <span class="string">"openbsd"</span>,
     ))]
     </span><span class="kw">let </span>socket_type = socket_type | libc::SOCK_NONBLOCK | libc::SOCK_CLOEXEC;
 
@@ -222,10 +222,10 @@
 
     <span class="comment">// Mimick `libstd` and set `SO_NOSIGPIPE` on apple systems.
     </span><span class="attr">#[cfg(any(
-        target_os = <span class="string">&quot;ios&quot;</span>,
-        target_os = <span class="string">&quot;macos&quot;</span>,
-        target_os = <span class="string">&quot;tvos&quot;</span>,
-        target_os = <span class="string">&quot;watchos&quot;</span>,
+        target_os = <span class="string">"ios"</span>,
+        target_os = <span class="string">"macos"</span>,
+        target_os = <span class="string">"tvos"</span>,
+        target_os = <span class="string">"watchos"</span>,
     ))]
     </span><span class="kw">if let </span><span class="prelude-val">Err</span>(err) = <span class="macro">syscall!</span>(setsockopt(
         socket,
@@ -238,21 +238,21 @@
         <span class="kw">return </span><span class="prelude-val">Err</span>(err);
     }
 
-    <span class="comment">// Darwin (and others) doesn&#39;t have SOCK_NONBLOCK or SOCK_CLOEXEC.
+    <span class="comment">// Darwin (and others) doesn't have SOCK_NONBLOCK or SOCK_CLOEXEC.
     </span><span class="attr">#[cfg(any(
-        target_os = <span class="string">&quot;ios&quot;</span>,
-        target_os = <span class="string">&quot;macos&quot;</span>,
-        target_os = <span class="string">&quot;tvos&quot;</span>,
-        target_os = <span class="string">&quot;watchos&quot;</span>,
-        target_os = <span class="string">&quot;espidf&quot;</span>,
-        target_os = <span class="string">&quot;vita&quot;</span>,
+        target_os = <span class="string">"ios"</span>,
+        target_os = <span class="string">"macos"</span>,
+        target_os = <span class="string">"tvos"</span>,
+        target_os = <span class="string">"watchos"</span>,
+        target_os = <span class="string">"espidf"</span>,
+        target_os = <span class="string">"vita"</span>,
     ))]
     </span>{
         <span class="kw">if let </span><span class="prelude-val">Err</span>(err) = <span class="macro">syscall!</span>(fcntl(socket, libc::F_SETFL, libc::O_NONBLOCK)) {
             <span class="kw">let _ </span>= <span class="macro">syscall!</span>(close(socket));
             <span class="kw">return </span><span class="prelude-val">Err</span>(err);
         }
-        <span class="attr">#[cfg(not(any(target_os = <span class="string">&quot;espidf&quot;</span>, target_os = <span class="string">&quot;vita&quot;</span>)))]
+        <span class="attr">#[cfg(not(any(target_os = <span class="string">"espidf"</span>, target_os = <span class="string">"vita"</span>)))]
         </span><span class="kw">if let </span><span class="prelude-val">Err</span>(err) = <span class="macro">syscall!</span>(fcntl(socket, libc::F_SETFD, libc::FD_CLOEXEC)) {
             <span class="kw">let _ </span>= <span class="macro">syscall!</span>(close(socket));
             <span class="kw">return </span><span class="prelude-val">Err</span>(err);
@@ -283,7 +283,7 @@
     <span class="kw">match </span>addr {
         SocketAddr::V4(<span class="kw-2">ref </span>addr) =&gt; {
             <span class="comment">// `s_addr` is stored as BE on all machine and the array is in BE order.
-            // So the native endian conversion method is used so that it&#39;s never swapped.
+            // So the native endian conversion method is used so that it's never swapped.
             </span><span class="kw">let </span>sin_addr = libc::in_addr {
                 s_addr: u32::from_ne_bytes(addr.ip().octets()),
             };
@@ -292,25 +292,25 @@
                 sin_family: libc::AF_INET <span class="kw">as </span>libc::sa_family_t,
                 sin_port: addr.port().to_be(),
                 sin_addr,
-                <span class="attr">#[cfg(not(target_os = <span class="string">&quot;vita&quot;</span>))]
+                <span class="attr">#[cfg(not(target_os = <span class="string">"vita"</span>))]
                 </span>sin_zero: [<span class="number">0</span>; <span class="number">8</span>],
-                <span class="attr">#[cfg(target_os = <span class="string">&quot;vita&quot;</span>)]
+                <span class="attr">#[cfg(target_os = <span class="string">"vita"</span>)]
                 </span>sin_zero: [<span class="number">0</span>; <span class="number">6</span>],
                 <span class="attr">#[cfg(any(
-                    target_os = <span class="string">&quot;aix&quot;</span>,
-                    target_os = <span class="string">&quot;dragonfly&quot;</span>,
-                    target_os = <span class="string">&quot;freebsd&quot;</span>,
-                    target_os = <span class="string">&quot;ios&quot;</span>,
-                    target_os = <span class="string">&quot;macos&quot;</span>,
-                    target_os = <span class="string">&quot;netbsd&quot;</span>,
-                    target_os = <span class="string">&quot;openbsd&quot;</span>,
-                    target_os = <span class="string">&quot;tvos&quot;</span>,
-                    target_os = <span class="string">&quot;watchos&quot;</span>,
-                    target_os = <span class="string">&quot;espidf&quot;</span>,
-                    target_os = <span class="string">&quot;vita&quot;</span>,
+                    target_os = <span class="string">"aix"</span>,
+                    target_os = <span class="string">"dragonfly"</span>,
+                    target_os = <span class="string">"freebsd"</span>,
+                    target_os = <span class="string">"ios"</span>,
+                    target_os = <span class="string">"macos"</span>,
+                    target_os = <span class="string">"netbsd"</span>,
+                    target_os = <span class="string">"openbsd"</span>,
+                    target_os = <span class="string">"tvos"</span>,
+                    target_os = <span class="string">"watchos"</span>,
+                    target_os = <span class="string">"espidf"</span>,
+                    target_os = <span class="string">"vita"</span>,
                 ))]
                 </span>sin_len: <span class="number">0</span>,
-                <span class="attr">#[cfg(target_os = <span class="string">&quot;vita&quot;</span>)]
+                <span class="attr">#[cfg(target_os = <span class="string">"vita"</span>)]
                 </span>sin_vport: addr.port().to_be(),
             };
 
@@ -328,22 +328,22 @@
                 sin6_flowinfo: addr.flowinfo(),
                 sin6_scope_id: addr.scope_id(),
                 <span class="attr">#[cfg(any(
-                    target_os = <span class="string">&quot;aix&quot;</span>,
-                    target_os = <span class="string">&quot;dragonfly&quot;</span>,
-                    target_os = <span class="string">&quot;freebsd&quot;</span>,
-                    target_os = <span class="string">&quot;ios&quot;</span>,
-                    target_os = <span class="string">&quot;macos&quot;</span>,
-                    target_os = <span class="string">&quot;netbsd&quot;</span>,
-                    target_os = <span class="string">&quot;openbsd&quot;</span>,
-                    target_os = <span class="string">&quot;tvos&quot;</span>,
-                    target_os = <span class="string">&quot;watchos&quot;</span>,
-                    target_os = <span class="string">&quot;espidf&quot;</span>,
-                    target_os = <span class="string">&quot;vita&quot;</span>,
+                    target_os = <span class="string">"aix"</span>,
+                    target_os = <span class="string">"dragonfly"</span>,
+                    target_os = <span class="string">"freebsd"</span>,
+                    target_os = <span class="string">"ios"</span>,
+                    target_os = <span class="string">"macos"</span>,
+                    target_os = <span class="string">"netbsd"</span>,
+                    target_os = <span class="string">"openbsd"</span>,
+                    target_os = <span class="string">"tvos"</span>,
+                    target_os = <span class="string">"watchos"</span>,
+                    target_os = <span class="string">"espidf"</span>,
+                    target_os = <span class="string">"vita"</span>,
                 ))]
                 </span>sin6_len: <span class="number">0</span>,
-                <span class="attr">#[cfg(target_os = <span class="string">&quot;vita&quot;</span>)]
+                <span class="attr">#[cfg(target_os = <span class="string">"vita"</span>)]
                 </span>sin6_vport: addr.port().to_be(),
-                <span class="attr">#[cfg(target_os = <span class="string">&quot;illumos&quot;</span>)]
+                <span class="attr">#[cfg(target_os = <span class="string">"illumos"</span>)]
                 </span>__sin6_src_id: <span class="number">0</span>,
             };
 

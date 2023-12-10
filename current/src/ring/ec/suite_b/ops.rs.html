@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.5/src/ec/suite_b/ops.rs`."><title>ops.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="ring" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.5/src/ec/suite_b/ops.rs`."><title>ops.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="ring" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1191,7 +1191,7 @@
 // purpose with or without fee is hereby granted, provided that the above
 // copyright notice and this permission notice appear in all copies.
 //
-// THE SOFTWARE IS PROVIDED &quot;AS IS&quot; AND THE AUTHORS DISCLAIM ALL WARRANTIES
+// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHORS DISCLAIM ALL WARRANTIES
 // WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
 // MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY
 // SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
@@ -1204,11 +1204,11 @@
 
 <span class="kw">pub use </span><span class="self">self</span>::elem::<span class="kw-2">*</span>;
 
-<span class="doccomment">/// A field element, i.e. an element of ℤ/qℤ for the curve&#39;s field modulus
+<span class="doccomment">/// A field element, i.e. an element of ℤ/qℤ for the curve's field modulus
 /// *q*.
 </span><span class="kw">pub type </span>Elem&lt;E&gt; = elem::Elem&lt;Q, E&gt;;
 
-<span class="doccomment">/// Represents the (prime) order *q* of the curve&#39;s prime field.
+<span class="doccomment">/// Represents the (prime) order *q* of the curve's prime field.
 </span><span class="attr">#[derive(Clone, Copy)]
 </span><span class="kw">pub enum </span>Q {}
 
@@ -1216,7 +1216,7 @@
 /// contexts.
 </span><span class="kw">pub type </span>Scalar&lt;E = Unencoded&gt; = elem::Elem&lt;N, E&gt;;
 
-<span class="doccomment">/// Represents the prime order *n* of the curve&#39;s group.
+<span class="doccomment">/// Represents the prime order *n* of the curve's group.
 </span><span class="attr">#[derive(Clone, Copy)]
 </span><span class="kw">pub enum </span>N {}
 
@@ -1237,7 +1237,7 @@
     }
 }
 
-<span class="kw">const </span>ONE: Elem&lt;Unencoded&gt; = Elem::from_hex(<span class="string">&quot;1&quot;</span>);
+<span class="kw">const </span>ONE: Elem&lt;Unencoded&gt; = Elem::from_hex(<span class="string">"1"</span>);
 
 <span class="doccomment">/// Operations and values needed by all curve operations.
 </span><span class="kw">pub struct </span>CommonOps {
@@ -1249,10 +1249,10 @@
     </span><span class="kw">pub </span>b: Elem&lt;R&gt;,
 
     <span class="comment">// In all cases, `r`, `a`, and `b` may all alias each other.
-    </span>elem_mul_mont: <span class="kw">unsafe extern </span><span class="string">&quot;C&quot; </span><span class="kw">fn</span>(r: <span class="kw-2">*mut </span>Limb, a: <span class="kw-2">*const </span>Limb, b: <span class="kw-2">*const </span>Limb),
-    elem_sqr_mont: <span class="kw">unsafe extern </span><span class="string">&quot;C&quot; </span><span class="kw">fn</span>(r: <span class="kw-2">*mut </span>Limb, a: <span class="kw-2">*const </span>Limb),
+    </span>elem_mul_mont: <span class="kw">unsafe extern </span><span class="string">"C" </span><span class="kw">fn</span>(r: <span class="kw-2">*mut </span>Limb, a: <span class="kw-2">*const </span>Limb, b: <span class="kw-2">*const </span>Limb),
+    elem_sqr_mont: <span class="kw">unsafe extern </span><span class="string">"C" </span><span class="kw">fn</span>(r: <span class="kw-2">*mut </span>Limb, a: <span class="kw-2">*const </span>Limb),
 
-    point_add_jacobian_impl: <span class="kw">unsafe extern </span><span class="string">&quot;C&quot; </span><span class="kw">fn</span>(r: <span class="kw-2">*mut </span>Limb, a: <span class="kw-2">*const </span>Limb, b: <span class="kw-2">*const </span>Limb),
+    point_add_jacobian_impl: <span class="kw">unsafe extern </span><span class="string">"C" </span><span class="kw">fn</span>(r: <span class="kw-2">*mut </span>Limb, a: <span class="kw-2">*const </span>Limb, b: <span class="kw-2">*const </span>Limb),
 }
 
 <span class="kw">impl </span>CommonOps {
@@ -1351,10 +1351,10 @@
 
 <span class="doccomment">/// Operations on private keys, for ECDH and ECDSA signing.
 </span><span class="kw">pub struct </span>PrivateKeyOps {
-    <span class="kw">pub </span>common: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>CommonOps,
+    <span class="kw">pub </span>common: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>CommonOps,
     elem_inv_squared: <span class="kw">fn</span>(a: <span class="kw-2">&amp;</span>Elem&lt;R&gt;) -&gt; Elem&lt;R&gt;,
     point_mul_base_impl: <span class="kw">fn</span>(a: <span class="kw-2">&amp;</span>Scalar) -&gt; Point,
-    point_mul_impl: <span class="kw">unsafe extern </span><span class="string">&quot;C&quot; </span><span class="kw">fn</span>(
+    point_mul_impl: <span class="kw">unsafe extern </span><span class="string">"C" </span><span class="kw">fn</span>(
         r: <span class="kw-2">*mut </span>Limb,          <span class="comment">// [3][num_limbs]
         </span>p_scalar: <span class="kw-2">*const </span>Limb, <span class="comment">// [num_limbs]
         </span>p_x: <span class="kw-2">*const </span>Limb,      <span class="comment">// [num_limbs]
@@ -1391,15 +1391,15 @@
 <span class="doccomment">/// Operations and values needed by all operations on public keys (ECDH
 /// agreement and ECDSA verification).
 </span><span class="kw">pub struct </span>PublicKeyOps {
-    <span class="kw">pub </span>common: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>CommonOps,
+    <span class="kw">pub </span>common: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>CommonOps,
 }
 
 <span class="kw">impl </span>PublicKeyOps {
     <span class="comment">// The serialized bytes are in big-endian order, zero-padded. The limbs
     // of `Elem` are in the native endianness, least significant limb to
     // most significant limb. Besides the parsing, conversion, this also
-    // implements NIST SP 800-56A Step 2: &quot;Verify that xQ and yQ are integers
-    // in the interval [0, p-1] in the case that q is an odd prime p[.]&quot;
+    // implements NIST SP 800-56A Step 2: "Verify that xQ and yQ are integers
+    // in the interval [0, p-1] in the case that q is an odd prime p[.]"
     </span><span class="kw">pub fn </span>elem_parse(<span class="kw-2">&amp;</span><span class="self">self</span>, input: <span class="kw-2">&amp;mut </span>untrusted::Reader) -&gt; <span class="prelude-ty">Result</span>&lt;Elem&lt;R&gt;, error::Unspecified&gt; {
         <span class="kw">let </span>encoded_value = input.read_bytes(<span class="self">self</span>.common.num_limbs * LIMB_BYTES)<span class="question-mark">?</span>;
         <span class="kw">let </span>parsed = elem_parse_big_endian_fixed_consttime(<span class="self">self</span>.common, encoded_value)<span class="question-mark">?</span>;
@@ -1420,10 +1420,10 @@
 <span class="comment">// Operations used by both ECDSA signing and ECDSA verification. In general
 // these must be side-channel resistant.
 </span><span class="kw">pub struct </span>ScalarOps {
-    <span class="kw">pub </span>common: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>CommonOps,
+    <span class="kw">pub </span>common: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>CommonOps,
 
     scalar_inv_to_mont_impl: <span class="kw">fn</span>(a: <span class="kw-2">&amp;</span>Scalar) -&gt; Scalar&lt;R&gt;,
-    scalar_mul_mont: <span class="kw">unsafe extern </span><span class="string">&quot;C&quot; </span><span class="kw">fn</span>(r: <span class="kw-2">*mut </span>Limb, a: <span class="kw-2">*const </span>Limb, b: <span class="kw-2">*const </span>Limb),
+    scalar_mul_mont: <span class="kw">unsafe extern </span><span class="string">"C" </span><span class="kw">fn</span>(r: <span class="kw-2">*mut </span>Limb, a: <span class="kw-2">*const </span>Limb, b: <span class="kw-2">*const </span>Limb),
 }
 
 <span class="kw">impl </span>ScalarOps {
@@ -1433,7 +1433,7 @@
     }
 
     <span class="doccomment">/// Returns the modular inverse of `a` (mod `n`). Panics of `a` is zero,
-    /// because zero isn&#39;t invertible.
+    /// because zero isn't invertible.
     </span><span class="kw">pub fn </span>scalar_inv_to_mont(<span class="kw-2">&amp;</span><span class="self">self</span>, a: <span class="kw-2">&amp;</span>Scalar) -&gt; Scalar&lt;R&gt; {
         <span class="macro">assert!</span>(!<span class="self">self</span>.common.is_zero(a));
         (<span class="self">self</span>.scalar_inv_to_mont_impl)(a)
@@ -1454,8 +1454,8 @@
 
 <span class="doccomment">/// Operations on public scalars needed by ECDSA signature verification.
 </span><span class="kw">pub struct </span>PublicScalarOps {
-    <span class="kw">pub </span>scalar_ops: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>ScalarOps,
-    <span class="kw">pub </span>public_key_ops: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>PublicKeyOps,
+    <span class="kw">pub </span>scalar_ops: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>ScalarOps,
+    <span class="kw">pub </span>public_key_ops: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>PublicKeyOps,
 
     <span class="kw">pub </span>twin_mul: <span class="kw">fn</span>(g_scalar: <span class="kw-2">&amp;</span>Scalar, p_scalar: <span class="kw-2">&amp;</span>Scalar, p_xy: <span class="kw-2">&amp;</span>(Elem&lt;R&gt;, Elem&lt;R&gt;)) -&gt; Point,
     <span class="kw">pub </span>q_minus_n: Elem&lt;Unencoded&gt;,
@@ -1484,7 +1484,7 @@
 
 <span class="attr">#[allow(non_snake_case)]
 </span><span class="kw">pub struct </span>PrivateScalarOps {
-    <span class="kw">pub </span>scalar_ops: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>ScalarOps,
+    <span class="kw">pub </span>scalar_ops: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>ScalarOps,
 
     <span class="kw">pub </span>oneRR_mod_n: Scalar&lt;RR&gt;, <span class="comment">// 1 * R**2 (mod n). TOOD: Use One&lt;RR&gt;.
 </span>}
@@ -1657,7 +1657,7 @@
     </span><span class="kw">fn </span>p256_elem_add_test() {
         elem_add_test(
             <span class="kw-2">&amp;</span>p256::PUBLIC_SCALAR_OPS,
-            <span class="macro">test_file!</span>(<span class="string">&quot;ops/p256_elem_sum_tests.txt&quot;</span>),
+            <span class="macro">test_file!</span>(<span class="string">"ops/p256_elem_sum_tests.txt"</span>),
         );
     }
 
@@ -1665,18 +1665,18 @@
     </span><span class="kw">fn </span>p384_elem_add_test() {
         elem_add_test(
             <span class="kw-2">&amp;</span>p384::PUBLIC_SCALAR_OPS,
-            <span class="macro">test_file!</span>(<span class="string">&quot;ops/p384_elem_sum_tests.txt&quot;</span>),
+            <span class="macro">test_file!</span>(<span class="string">"ops/p384_elem_sum_tests.txt"</span>),
         );
     }
 
     <span class="kw">fn </span>elem_add_test(ops: <span class="kw-2">&amp;</span>PublicScalarOps, test_file: test::File) {
         test::run(test_file, |section, test_case| {
-            <span class="macro">assert_eq!</span>(section, <span class="string">&quot;&quot;</span>);
+            <span class="macro">assert_eq!</span>(section, <span class="string">""</span>);
 
             <span class="kw">let </span>cops = ops.public_key_ops.common;
-            <span class="kw">let </span>a = consume_elem(cops, test_case, <span class="string">&quot;a&quot;</span>);
-            <span class="kw">let </span>b = consume_elem(cops, test_case, <span class="string">&quot;b&quot;</span>);
-            <span class="kw">let </span>expected_sum = consume_elem(cops, test_case, <span class="string">&quot;r&quot;</span>);
+            <span class="kw">let </span>a = consume_elem(cops, test_case, <span class="string">"a"</span>);
+            <span class="kw">let </span>b = consume_elem(cops, test_case, <span class="string">"b"</span>);
+            <span class="kw">let </span>expected_sum = consume_elem(cops, test_case, <span class="string">"r"</span>);
 
             <span class="kw">let </span><span class="kw-2">mut </span>actual_sum = a;
             ops.public_key_ops.common.elem_add(<span class="kw-2">&amp;mut </span>actual_sum, <span class="kw-2">&amp;</span>b);
@@ -1690,8 +1690,8 @@
         })
     }
 
-    <span class="comment">// XXX: There&#39;s no `p256_sub` in *ring*; it&#39;s logic is inlined into
-    // the point arithmetic functions. Thus, we can&#39;t test it.
+    <span class="comment">// XXX: There's no `p256_sub` in *ring*; it's logic is inlined into
+    // the point arithmetic functions. Thus, we can't test it.
 
     </span><span class="attr">#[test]
     </span><span class="kw">fn </span>p384_elem_sub_test() {
@@ -1701,21 +1701,21 @@
         elem_sub_test(
             <span class="kw-2">&amp;</span>p384::COMMON_OPS,
             p384_elem_sub,
-            <span class="macro">test_file!</span>(<span class="string">&quot;ops/p384_elem_sum_tests.txt&quot;</span>),
+            <span class="macro">test_file!</span>(<span class="string">"ops/p384_elem_sum_tests.txt"</span>),
         );
     }
 
     <span class="kw">fn </span>elem_sub_test(
         ops: <span class="kw-2">&amp;</span>CommonOps,
-        elem_sub: <span class="kw">unsafe extern </span><span class="string">&quot;C&quot; </span><span class="kw">fn</span>(r: <span class="kw-2">*mut </span>Limb, a: <span class="kw-2">*const </span>Limb, b: <span class="kw-2">*const </span>Limb),
+        elem_sub: <span class="kw">unsafe extern </span><span class="string">"C" </span><span class="kw">fn</span>(r: <span class="kw-2">*mut </span>Limb, a: <span class="kw-2">*const </span>Limb, b: <span class="kw-2">*const </span>Limb),
         test_file: test::File,
     ) {
         test::run(test_file, |section, test_case| {
-            <span class="macro">assert_eq!</span>(section, <span class="string">&quot;&quot;</span>);
+            <span class="macro">assert_eq!</span>(section, <span class="string">""</span>);
 
-            <span class="kw">let </span>a = consume_elem(ops, test_case, <span class="string">&quot;a&quot;</span>);
-            <span class="kw">let </span>b = consume_elem(ops, test_case, <span class="string">&quot;b&quot;</span>);
-            <span class="kw">let </span>r = consume_elem(ops, test_case, <span class="string">&quot;r&quot;</span>);
+            <span class="kw">let </span>a = consume_elem(ops, test_case, <span class="string">"a"</span>);
+            <span class="kw">let </span>b = consume_elem(ops, test_case, <span class="string">"b"</span>);
+            <span class="kw">let </span>r = consume_elem(ops, test_case, <span class="string">"r"</span>);
 
             <span class="kw">let </span><span class="kw-2">mut </span>actual_difference = Elem::&lt;R&gt;::zero();
             <span class="kw">unsafe </span>{
@@ -1741,8 +1741,8 @@
         })
     }
 
-    <span class="comment">// XXX: There&#39;s no `p256_div_by_2` in *ring*; it&#39;s logic is inlined
-    // into the point arithmetic functions. Thus, we can&#39;t test it.
+    <span class="comment">// XXX: There's no `p256_div_by_2` in *ring*; it's logic is inlined
+    // into the point arithmetic functions. Thus, we can't test it.
 
     </span><span class="attr">#[test]
     </span><span class="kw">fn </span>p384_elem_div_by_2_test() {
@@ -1752,20 +1752,20 @@
         elem_div_by_2_test(
             <span class="kw-2">&amp;</span>p384::COMMON_OPS,
             p384_elem_div_by_2,
-            <span class="macro">test_file!</span>(<span class="string">&quot;ops/p384_elem_div_by_2_tests.txt&quot;</span>),
+            <span class="macro">test_file!</span>(<span class="string">"ops/p384_elem_div_by_2_tests.txt"</span>),
         );
     }
 
     <span class="kw">fn </span>elem_div_by_2_test(
         ops: <span class="kw-2">&amp;</span>CommonOps,
-        elem_div_by_2: <span class="kw">unsafe extern </span><span class="string">&quot;C&quot; </span><span class="kw">fn</span>(r: <span class="kw-2">*mut </span>Limb, a: <span class="kw-2">*const </span>Limb),
+        elem_div_by_2: <span class="kw">unsafe extern </span><span class="string">"C" </span><span class="kw">fn</span>(r: <span class="kw-2">*mut </span>Limb, a: <span class="kw-2">*const </span>Limb),
         test_file: test::File,
     ) {
         test::run(test_file, |section, test_case| {
-            <span class="macro">assert_eq!</span>(section, <span class="string">&quot;&quot;</span>);
+            <span class="macro">assert_eq!</span>(section, <span class="string">""</span>);
 
-            <span class="kw">let </span>a = consume_elem(ops, test_case, <span class="string">&quot;a&quot;</span>);
-            <span class="kw">let </span>r = consume_elem(ops, test_case, <span class="string">&quot;r&quot;</span>);
+            <span class="kw">let </span>a = consume_elem(ops, test_case, <span class="string">"a"</span>);
+            <span class="kw">let </span>r = consume_elem(ops, test_case, <span class="string">"r"</span>);
 
             <span class="kw">let </span><span class="kw-2">mut </span>actual_result = Elem::&lt;R&gt;::zero();
             <span class="kw">unsafe </span>{
@@ -1778,7 +1778,7 @@
     }
 
     <span class="comment">// There is no `ecp_nistz256_neg` on other targets.
-    </span><span class="attr">#[cfg(target_arch = <span class="string">&quot;x86_64&quot;</span>)]
+    </span><span class="attr">#[cfg(target_arch = <span class="string">"x86_64"</span>)]
     #[test]
     </span><span class="kw">fn </span>p256_elem_neg_test() {
         <span class="macro">prefixed_extern! </span>{
@@ -1787,7 +1787,7 @@
         elem_neg_test(
             <span class="kw-2">&amp;</span>p256::COMMON_OPS,
             ecp_nistz256_neg,
-            <span class="macro">test_file!</span>(<span class="string">&quot;ops/p256_elem_neg_tests.txt&quot;</span>),
+            <span class="macro">test_file!</span>(<span class="string">"ops/p256_elem_neg_tests.txt"</span>),
         );
     }
 
@@ -1799,20 +1799,20 @@
         elem_neg_test(
             <span class="kw-2">&amp;</span>p384::COMMON_OPS,
             p384_elem_neg,
-            <span class="macro">test_file!</span>(<span class="string">&quot;ops/p384_elem_neg_tests.txt&quot;</span>),
+            <span class="macro">test_file!</span>(<span class="string">"ops/p384_elem_neg_tests.txt"</span>),
         );
     }
 
     <span class="kw">fn </span>elem_neg_test(
         ops: <span class="kw-2">&amp;</span>CommonOps,
-        elem_neg: <span class="kw">unsafe extern </span><span class="string">&quot;C&quot; </span><span class="kw">fn</span>(r: <span class="kw-2">*mut </span>Limb, a: <span class="kw-2">*const </span>Limb),
+        elem_neg: <span class="kw">unsafe extern </span><span class="string">"C" </span><span class="kw">fn</span>(r: <span class="kw-2">*mut </span>Limb, a: <span class="kw-2">*const </span>Limb),
         test_file: test::File,
     ) {
         test::run(test_file, |section, test_case| {
-            <span class="macro">assert_eq!</span>(section, <span class="string">&quot;&quot;</span>);
+            <span class="macro">assert_eq!</span>(section, <span class="string">""</span>);
 
-            <span class="kw">let </span>a = consume_elem(ops, test_case, <span class="string">&quot;a&quot;</span>);
-            <span class="kw">let </span>b = consume_elem(ops, test_case, <span class="string">&quot;b&quot;</span>);
+            <span class="kw">let </span>a = consume_elem(ops, test_case, <span class="string">"a"</span>);
+            <span class="kw">let </span>b = consume_elem(ops, test_case, <span class="string">"b"</span>);
 
             <span class="comment">// Verify -a == b.
             </span>{
@@ -1838,21 +1838,21 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>p256_elem_mul_test() {
-        elem_mul_test(<span class="kw-2">&amp;</span>p256::COMMON_OPS, <span class="macro">test_file!</span>(<span class="string">&quot;ops/p256_elem_mul_tests.txt&quot;</span>));
+        elem_mul_test(<span class="kw-2">&amp;</span>p256::COMMON_OPS, <span class="macro">test_file!</span>(<span class="string">"ops/p256_elem_mul_tests.txt"</span>));
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>p384_elem_mul_test() {
-        elem_mul_test(<span class="kw-2">&amp;</span>p384::COMMON_OPS, <span class="macro">test_file!</span>(<span class="string">&quot;ops/p384_elem_mul_tests.txt&quot;</span>));
+        elem_mul_test(<span class="kw-2">&amp;</span>p384::COMMON_OPS, <span class="macro">test_file!</span>(<span class="string">"ops/p384_elem_mul_tests.txt"</span>));
     }
 
     <span class="kw">fn </span>elem_mul_test(ops: <span class="kw-2">&amp;</span>CommonOps, test_file: test::File) {
         test::run(test_file, |section, test_case| {
-            <span class="macro">assert_eq!</span>(section, <span class="string">&quot;&quot;</span>);
+            <span class="macro">assert_eq!</span>(section, <span class="string">""</span>);
 
-            <span class="kw">let </span><span class="kw-2">mut </span>a = consume_elem(ops, test_case, <span class="string">&quot;a&quot;</span>);
-            <span class="kw">let </span>b = consume_elem(ops, test_case, <span class="string">&quot;b&quot;</span>);
-            <span class="kw">let </span>r = consume_elem(ops, test_case, <span class="string">&quot;r&quot;</span>);
+            <span class="kw">let </span><span class="kw-2">mut </span>a = consume_elem(ops, test_case, <span class="string">"a"</span>);
+            <span class="kw">let </span>b = consume_elem(ops, test_case, <span class="string">"b"</span>);
+            <span class="kw">let </span>r = consume_elem(ops, test_case, <span class="string">"r"</span>);
             ops.elem_mul(<span class="kw-2">&amp;mut </span>a, <span class="kw-2">&amp;</span>b);
             assert_limbs_are_equal(ops, <span class="kw-2">&amp;</span>a.limbs, <span class="kw-2">&amp;</span>r.limbs);
 
@@ -1864,7 +1864,7 @@
     </span><span class="kw">fn </span>p256_scalar_mul_test() {
         scalar_mul_test(
             <span class="kw-2">&amp;</span>p256::SCALAR_OPS,
-            <span class="macro">test_file!</span>(<span class="string">&quot;ops/p256_scalar_mul_tests.txt&quot;</span>),
+            <span class="macro">test_file!</span>(<span class="string">"ops/p256_scalar_mul_tests.txt"</span>),
         );
     }
 
@@ -1872,17 +1872,17 @@
     </span><span class="kw">fn </span>p384_scalar_mul_test() {
         scalar_mul_test(
             <span class="kw-2">&amp;</span>p384::SCALAR_OPS,
-            <span class="macro">test_file!</span>(<span class="string">&quot;ops/p384_scalar_mul_tests.txt&quot;</span>),
+            <span class="macro">test_file!</span>(<span class="string">"ops/p384_scalar_mul_tests.txt"</span>),
         );
     }
 
     <span class="kw">fn </span>scalar_mul_test(ops: <span class="kw-2">&amp;</span>ScalarOps, test_file: test::File) {
         test::run(test_file, |section, test_case| {
-            <span class="macro">assert_eq!</span>(section, <span class="string">&quot;&quot;</span>);
+            <span class="macro">assert_eq!</span>(section, <span class="string">""</span>);
             <span class="kw">let </span>cops = ops.common;
-            <span class="kw">let </span>a = consume_scalar(cops, test_case, <span class="string">&quot;a&quot;</span>);
-            <span class="kw">let </span>b = consume_scalar_mont(cops, test_case, <span class="string">&quot;b&quot;</span>);
-            <span class="kw">let </span>expected_result = consume_scalar(cops, test_case, <span class="string">&quot;r&quot;</span>);
+            <span class="kw">let </span>a = consume_scalar(cops, test_case, <span class="string">"a"</span>);
+            <span class="kw">let </span>b = consume_scalar_mont(cops, test_case, <span class="string">"b"</span>);
+            <span class="kw">let </span>expected_result = consume_scalar(cops, test_case, <span class="string">"r"</span>);
             <span class="kw">let </span>actual_result = ops.scalar_product(<span class="kw-2">&amp;</span>a, <span class="kw-2">&amp;</span>b);
             assert_limbs_are_equal(cops, <span class="kw-2">&amp;</span>actual_result.limbs, <span class="kw-2">&amp;</span>expected_result.limbs);
 
@@ -1898,23 +1898,23 @@
         scalar_square_test(
             <span class="kw-2">&amp;</span>p256::SCALAR_OPS,
             p256_scalar_sqr_rep_mont,
-            <span class="macro">test_file!</span>(<span class="string">&quot;ops/p256_scalar_square_tests.txt&quot;</span>),
+            <span class="macro">test_file!</span>(<span class="string">"ops/p256_scalar_square_tests.txt"</span>),
         );
     }
 
-    <span class="comment">// XXX: There&#39;s no `p384_scalar_square_test()` because there&#39;s no dedicated
+    <span class="comment">// XXX: There's no `p384_scalar_square_test()` because there's no dedicated
     // `p384_scalar_sqr_rep_mont()`.
 
     </span><span class="kw">fn </span>scalar_square_test(
         ops: <span class="kw-2">&amp;</span>ScalarOps,
-        sqr_rep: <span class="kw">unsafe extern </span><span class="string">&quot;C&quot; </span><span class="kw">fn</span>(r: <span class="kw-2">*mut </span>Limb, a: <span class="kw-2">*const </span>Limb, rep: Limb),
+        sqr_rep: <span class="kw">unsafe extern </span><span class="string">"C" </span><span class="kw">fn</span>(r: <span class="kw-2">*mut </span>Limb, a: <span class="kw-2">*const </span>Limb, rep: Limb),
         test_file: test::File,
     ) {
         test::run(test_file, |section, test_case| {
-            <span class="macro">assert_eq!</span>(section, <span class="string">&quot;&quot;</span>);
+            <span class="macro">assert_eq!</span>(section, <span class="string">""</span>);
             <span class="kw">let </span>cops = <span class="kw-2">&amp;</span>ops.common;
-            <span class="kw">let </span>a = consume_scalar(cops, test_case, <span class="string">&quot;a&quot;</span>);
-            <span class="kw">let </span>expected_result = consume_scalar(cops, test_case, <span class="string">&quot;r&quot;</span>);
+            <span class="kw">let </span>a = consume_scalar(cops, test_case, <span class="string">"a"</span>);
+            <span class="kw">let </span>expected_result = consume_scalar(cops, test_case, <span class="string">"r"</span>);
 
             {
                 <span class="kw">let </span><span class="kw-2">mut </span>actual_result: Scalar&lt;R&gt; = Scalar {
@@ -1938,13 +1938,13 @@
     }
 
     <span class="attr">#[test]
-    #[should_panic(expected = <span class="string">&quot;!self.common.is_zero(a)&quot;</span>)]
+    #[should_panic(expected = <span class="string">"!self.common.is_zero(a)"</span>)]
     </span><span class="kw">fn </span>p256_scalar_inv_to_mont_zero_panic_test() {
         <span class="kw">let _ </span>= p256::SCALAR_OPS.scalar_inv_to_mont(<span class="kw-2">&amp;</span>ZERO_SCALAR);
     }
 
     <span class="attr">#[test]
-    #[should_panic(expected = <span class="string">&quot;!self.common.is_zero(a)&quot;</span>)]
+    #[should_panic(expected = <span class="string">"!self.common.is_zero(a)"</span>)]
     </span><span class="kw">fn </span>p384_scalar_inv_to_mont_zero_panic_test() {
         <span class="kw">let _ </span>= p384::SCALAR_OPS.scalar_inv_to_mont(<span class="kw-2">&amp;</span>ZERO_SCALAR);
     }
@@ -1953,7 +1953,7 @@
     </span><span class="kw">fn </span>p256_point_sum_test() {
         point_sum_test(
             <span class="kw-2">&amp;</span>p256::PRIVATE_KEY_OPS,
-            <span class="macro">test_file!</span>(<span class="string">&quot;ops/p256_point_sum_tests.txt&quot;</span>),
+            <span class="macro">test_file!</span>(<span class="string">"ops/p256_point_sum_tests.txt"</span>),
         );
     }
 
@@ -1961,17 +1961,17 @@
     </span><span class="kw">fn </span>p384_point_sum_test() {
         point_sum_test(
             <span class="kw-2">&amp;</span>p384::PRIVATE_KEY_OPS,
-            <span class="macro">test_file!</span>(<span class="string">&quot;ops/p384_point_sum_tests.txt&quot;</span>),
+            <span class="macro">test_file!</span>(<span class="string">"ops/p384_point_sum_tests.txt"</span>),
         );
     }
 
     <span class="kw">fn </span>point_sum_test(ops: <span class="kw-2">&amp;</span>PrivateKeyOps, test_file: test::File) {
         test::run(test_file, |section, test_case| {
-            <span class="macro">assert_eq!</span>(section, <span class="string">&quot;&quot;</span>);
+            <span class="macro">assert_eq!</span>(section, <span class="string">""</span>);
 
-            <span class="kw">let </span>a = consume_jacobian_point(ops, test_case, <span class="string">&quot;a&quot;</span>);
-            <span class="kw">let </span>b = consume_jacobian_point(ops, test_case, <span class="string">&quot;b&quot;</span>);
-            <span class="kw">let </span>r_expected = consume_point(ops, test_case, <span class="string">&quot;r&quot;</span>);
+            <span class="kw">let </span>a = consume_jacobian_point(ops, test_case, <span class="string">"a"</span>);
+            <span class="kw">let </span>b = consume_jacobian_point(ops, test_case, <span class="string">"b"</span>);
+            <span class="kw">let </span>r_expected = consume_point(ops, test_case, <span class="string">"r"</span>);
 
             <span class="kw">let </span>r_actual = ops.common.point_sum(<span class="kw-2">&amp;</span>a, <span class="kw-2">&amp;</span>b);
             assert_point_actual_equals_expected(ops, <span class="kw-2">&amp;</span>r_actual, <span class="kw-2">&amp;</span>r_expected);
@@ -1992,7 +1992,7 @@
         point_sum_mixed_test(
             <span class="kw-2">&amp;</span>p256::PRIVATE_KEY_OPS,
             p256_point_add_affine,
-            <span class="macro">test_file!</span>(<span class="string">&quot;ops/p256_point_sum_mixed_tests.txt&quot;</span>),
+            <span class="macro">test_file!</span>(<span class="string">"ops/p256_point_sum_mixed_tests.txt"</span>),
         );
     }
 
@@ -2000,7 +2000,7 @@
 
     </span><span class="kw">fn </span>point_sum_mixed_test(
         ops: <span class="kw-2">&amp;</span>PrivateKeyOps,
-        point_add_affine: <span class="kw">unsafe extern </span><span class="string">&quot;C&quot; </span><span class="kw">fn</span>(
+        point_add_affine: <span class="kw">unsafe extern </span><span class="string">"C" </span><span class="kw">fn</span>(
             r: <span class="kw-2">*mut </span>Limb,   <span class="comment">// [ops.num_limbs*3]
             </span>a: <span class="kw-2">*const </span>Limb, <span class="comment">// [ops.num_limbs*3]
             </span>b: <span class="kw-2">*const </span>Limb, <span class="comment">// [ops.num_limbs*2]
@@ -2008,11 +2008,11 @@
         test_file: test::File,
     ) {
         test::run(test_file, |section, test_case| {
-            <span class="macro">assert_eq!</span>(section, <span class="string">&quot;&quot;</span>);
+            <span class="macro">assert_eq!</span>(section, <span class="string">""</span>);
 
-            <span class="kw">let </span>a = consume_jacobian_point(ops, test_case, <span class="string">&quot;a&quot;</span>);
-            <span class="kw">let </span>b = consume_affine_point(ops, test_case, <span class="string">&quot;b&quot;</span>);
-            <span class="kw">let </span>r_expected = consume_point(ops, test_case, <span class="string">&quot;r&quot;</span>);
+            <span class="kw">let </span>a = consume_jacobian_point(ops, test_case, <span class="string">"a"</span>);
+            <span class="kw">let </span>b = consume_affine_point(ops, test_case, <span class="string">"b"</span>);
+            <span class="kw">let </span>r_expected = consume_point(ops, test_case, <span class="string">"r"</span>);
 
             <span class="kw">let </span><span class="kw-2">mut </span>r_actual = Point::new_at_infinity();
             <span class="kw">unsafe </span>{
@@ -2036,7 +2036,7 @@
         point_double_test(
             <span class="kw-2">&amp;</span>p256::PRIVATE_KEY_OPS,
             p256_point_double,
-            <span class="macro">test_file!</span>(<span class="string">&quot;ops/p256_point_double_tests.txt&quot;</span>),
+            <span class="macro">test_file!</span>(<span class="string">"ops/p256_point_double_tests.txt"</span>),
         );
     }
 
@@ -2051,23 +2051,23 @@
         point_double_test(
             <span class="kw-2">&amp;</span>p384::PRIVATE_KEY_OPS,
             p384_point_double,
-            <span class="macro">test_file!</span>(<span class="string">&quot;ops/p384_point_double_tests.txt&quot;</span>),
+            <span class="macro">test_file!</span>(<span class="string">"ops/p384_point_double_tests.txt"</span>),
         );
     }
 
     <span class="kw">fn </span>point_double_test(
         ops: <span class="kw-2">&amp;</span>PrivateKeyOps,
-        point_double: <span class="kw">unsafe extern </span><span class="string">&quot;C&quot; </span><span class="kw">fn</span>(
+        point_double: <span class="kw">unsafe extern </span><span class="string">"C" </span><span class="kw">fn</span>(
             r: <span class="kw-2">*mut </span>Limb,   <span class="comment">// [ops.num_limbs*3]
             </span>a: <span class="kw-2">*const </span>Limb, <span class="comment">// [ops.num_limbs*3]
         </span>),
         test_file: test::File,
     ) {
         test::run(test_file, |section, test_case| {
-            <span class="macro">assert_eq!</span>(section, <span class="string">&quot;&quot;</span>);
+            <span class="macro">assert_eq!</span>(section, <span class="string">""</span>);
 
-            <span class="kw">let </span>a = consume_jacobian_point(ops, test_case, <span class="string">&quot;a&quot;</span>);
-            <span class="kw">let </span>r_expected = consume_point(ops, test_case, <span class="string">&quot;r&quot;</span>);
+            <span class="kw">let </span>a = consume_jacobian_point(ops, test_case, <span class="string">"a"</span>);
+            <span class="kw">let </span>r_expected = consume_point(ops, test_case, <span class="string">"r"</span>);
 
             <span class="kw">let </span><span class="kw-2">mut </span>r_actual = Point::new_at_infinity();
             <span class="kw">unsafe </span>{
@@ -2084,7 +2084,7 @@
     </span><span class="kw">fn </span>p256_point_mul_test() {
         point_mul_tests(
             <span class="kw-2">&amp;</span>p256::PRIVATE_KEY_OPS,
-            <span class="macro">test_file!</span>(<span class="string">&quot;ops/p256_point_mul_tests.txt&quot;</span>),
+            <span class="macro">test_file!</span>(<span class="string">"ops/p256_point_mul_tests.txt"</span>),
         );
     }
 
@@ -2092,21 +2092,21 @@
     </span><span class="kw">fn </span>p384_point_mul_test() {
         point_mul_tests(
             <span class="kw-2">&amp;</span>p384::PRIVATE_KEY_OPS,
-            <span class="macro">test_file!</span>(<span class="string">&quot;ops/p384_point_mul_tests.txt&quot;</span>),
+            <span class="macro">test_file!</span>(<span class="string">"ops/p384_point_mul_tests.txt"</span>),
         );
     }
 
     <span class="kw">fn </span>point_mul_tests(ops: <span class="kw-2">&amp;</span>PrivateKeyOps, test_file: test::File) {
         test::run(test_file, |section, test_case| {
-            <span class="macro">assert_eq!</span>(section, <span class="string">&quot;&quot;</span>);
-            <span class="kw">let </span>p_scalar = consume_scalar(ops.common, test_case, <span class="string">&quot;p_scalar&quot;</span>);
-            <span class="kw">let </span>(x, y) = <span class="kw">match </span>consume_point(ops, test_case, <span class="string">&quot;p&quot;</span>) {
+            <span class="macro">assert_eq!</span>(section, <span class="string">""</span>);
+            <span class="kw">let </span>p_scalar = consume_scalar(ops.common, test_case, <span class="string">"p_scalar"</span>);
+            <span class="kw">let </span>(x, y) = <span class="kw">match </span>consume_point(ops, test_case, <span class="string">"p"</span>) {
                 TestPoint::Infinity =&gt; {
-                    <span class="macro">panic!</span>(<span class="string">&quot;can&#39;t be inf.&quot;</span>);
+                    <span class="macro">panic!</span>(<span class="string">"can't be inf."</span>);
                 }
                 TestPoint::Affine(x, y) =&gt; (x, y),
             };
-            <span class="kw">let </span>expected_result = consume_point(ops, test_case, <span class="string">&quot;r&quot;</span>);
+            <span class="kw">let </span>expected_result = consume_point(ops, test_case, <span class="string">"r"</span>);
             <span class="kw">let </span>actual_result = ops.point_mul(<span class="kw-2">&amp;</span>p_scalar, <span class="kw-2">&amp;</span>(x, y));
             assert_point_actual_equals_expected(ops, <span class="kw-2">&amp;</span>actual_result, <span class="kw-2">&amp;</span>expected_result);
             <span class="prelude-val">Ok</span>(())
@@ -2118,7 +2118,7 @@
         point_mul_serialized_test(
             <span class="kw-2">&amp;</span>p256::PRIVATE_KEY_OPS,
             <span class="kw-2">&amp;</span>p256::PUBLIC_KEY_OPS,
-            <span class="macro">test_file!</span>(<span class="string">&quot;ops/p256_point_mul_serialized_tests.txt&quot;</span>),
+            <span class="macro">test_file!</span>(<span class="string">"ops/p256_point_mul_serialized_tests.txt"</span>),
         );
     }
 
@@ -2130,17 +2130,17 @@
         <span class="kw">let </span>cops = pub_ops.common;
 
         test::run(test_file, |section, test_case| {
-            <span class="macro">assert_eq!</span>(section, <span class="string">&quot;&quot;</span>);
-            <span class="kw">let </span>p_scalar = consume_scalar(cops, test_case, <span class="string">&quot;p_scalar&quot;</span>);
+            <span class="macro">assert_eq!</span>(section, <span class="string">""</span>);
+            <span class="kw">let </span>p_scalar = consume_scalar(cops, test_case, <span class="string">"p_scalar"</span>);
 
-            <span class="kw">let </span>p = test_case.consume_bytes(<span class="string">&quot;p&quot;</span>);
+            <span class="kw">let </span>p = test_case.consume_bytes(<span class="string">"p"</span>);
             <span class="kw">let </span>p = <span class="kw">super</span>::<span class="kw">super</span>::public_key::parse_uncompressed_point(
                 pub_ops,
                 untrusted::Input::from(<span class="kw-2">&amp;</span>p),
             )
-            .expect(<span class="string">&quot;valid point&quot;</span>);
+            .expect(<span class="string">"valid point"</span>);
 
-            <span class="kw">let </span>expected_result = test_case.consume_bytes(<span class="string">&quot;r&quot;</span>);
+            <span class="kw">let </span>expected_result = test_case.consume_bytes(<span class="string">"r"</span>);
 
             <span class="kw">let </span>product = priv_ops.point_mul(<span class="kw-2">&amp;</span>p_scalar, <span class="kw-2">&amp;</span>p);
 
@@ -2153,7 +2153,7 @@
                     <span class="prelude-val">Some</span>(y),
                     <span class="kw-2">&amp;</span>product,
                 )
-                .expect(<span class="string">&quot;successful encoding&quot;</span>);
+                .expect(<span class="string">"successful encoding"</span>);
             }
 
             <span class="macro">assert_eq!</span>(expected_result, actual_result);
@@ -2167,7 +2167,7 @@
         point_mul_base_tests(
             <span class="kw-2">&amp;</span>p256::PRIVATE_KEY_OPS,
             |s| p256::PRIVATE_KEY_OPS.point_mul_base(s),
-            <span class="macro">test_file!</span>(<span class="string">&quot;ops/p256_point_mul_base_tests.txt&quot;</span>),
+            <span class="macro">test_file!</span>(<span class="string">"ops/p256_point_mul_base_tests.txt"</span>),
         );
     }
 
@@ -2176,7 +2176,7 @@
         point_mul_base_tests(
             <span class="kw-2">&amp;</span>p384::PRIVATE_KEY_OPS,
             |s| p384::PRIVATE_KEY_OPS.point_mul_base(s),
-            <span class="macro">test_file!</span>(<span class="string">&quot;ops/p384_point_mul_base_tests.txt&quot;</span>),
+            <span class="macro">test_file!</span>(<span class="string">"ops/p384_point_mul_base_tests.txt"</span>),
         );
     }
 
@@ -2186,9 +2186,9 @@
         test_file: test::File,
     ) {
         test::run(test_file, |section, test_case| {
-            <span class="macro">assert_eq!</span>(section, <span class="string">&quot;&quot;</span>);
-            <span class="kw">let </span>g_scalar = consume_scalar(ops.common, test_case, <span class="string">&quot;g_scalar&quot;</span>);
-            <span class="kw">let </span>expected_result = consume_point(ops, test_case, <span class="string">&quot;r&quot;</span>);
+            <span class="macro">assert_eq!</span>(section, <span class="string">""</span>);
+            <span class="kw">let </span>g_scalar = consume_scalar(ops.common, test_case, <span class="string">"g_scalar"</span>);
+            <span class="kw">let </span>expected_result = consume_point(ops, test_case, <span class="string">"r"</span>);
             <span class="kw">let </span>actual_result = f(<span class="kw-2">&amp;</span>g_scalar);
             assert_point_actual_equals_expected(ops, <span class="kw-2">&amp;</span>actual_result, <span class="kw-2">&amp;</span>expected_result);
             <span class="prelude-val">Ok</span>(())
@@ -2230,7 +2230,7 @@
         name: <span class="kw-2">&amp;</span>str,
     ) -&gt; Point {
         <span class="kw">let </span>input = test_case.consume_string(name);
-        <span class="kw">let </span>elems = input.split(<span class="string">&quot;, &quot;</span>).collect::&lt;Vec&lt;<span class="kw-2">&amp;</span>str&gt;&gt;();
+        <span class="kw">let </span>elems = input.split(<span class="string">", "</span>).collect::&lt;Vec&lt;<span class="kw-2">&amp;</span>str&gt;&gt;();
         <span class="macro">assert_eq!</span>(elems.len(), <span class="number">3</span>);
         <span class="kw">let </span><span class="kw-2">mut </span>p = Point::new_at_infinity();
         consume_point_elem(ops.common, <span class="kw-2">&amp;mut </span>p.xyz, <span class="kw-2">&amp;</span>elems, <span class="number">0</span>);
@@ -2249,7 +2249,7 @@
         name: <span class="kw-2">&amp;</span>str,
     ) -&gt; AffinePoint {
         <span class="kw">let </span>input = test_case.consume_string(name);
-        <span class="kw">let </span>elems = input.split(<span class="string">&quot;, &quot;</span>).collect::&lt;Vec&lt;<span class="kw-2">&amp;</span>str&gt;&gt;();
+        <span class="kw">let </span>elems = input.split(<span class="string">", "</span>).collect::&lt;Vec&lt;<span class="kw-2">&amp;</span>str&gt;&gt;();
         <span class="macro">assert_eq!</span>(elems.len(), <span class="number">2</span>);
         <span class="kw">let </span><span class="kw-2">mut </span>p = AffinePoint {
             xy: [<span class="number">0</span>; <span class="number">2 </span>* MAX_LIMBS],
@@ -2288,10 +2288,10 @@
         }
 
         <span class="kw">let </span>input = test_case.consume_string(name);
-        <span class="kw">if </span>input == <span class="string">&quot;inf&quot; </span>{
+        <span class="kw">if </span>input == <span class="string">"inf" </span>{
             <span class="kw">return </span>TestPoint::Infinity;
         }
-        <span class="kw">let </span>elems = input.split(<span class="string">&quot;, &quot;</span>).collect::&lt;Vec&lt;<span class="kw-2">&amp;</span>str&gt;&gt;();
+        <span class="kw">let </span>elems = input.split(<span class="string">", "</span>).collect::&lt;Vec&lt;<span class="kw-2">&amp;</span>str&gt;&gt;();
         <span class="macro">assert_eq!</span>(elems.len(), <span class="number">2</span>);
         <span class="kw">let </span>x = consume_point_elem(ops.common, <span class="kw-2">&amp;</span>elems, <span class="number">0</span>);
         <span class="kw">let </span>y = consume_point_elem(ops.common, <span class="kw-2">&amp;</span>elems, <span class="number">1</span>);
@@ -2311,13 +2311,13 @@
             <span class="kw">let </span><span class="kw-2">mut </span>actual_s = alloc::string::String::new();
             <span class="kw">let </span><span class="kw-2">mut </span>expected_s = alloc::string::String::new();
             <span class="kw">for </span>j <span class="kw">in </span><span class="number">0</span>..ops.num_limbs {
-                <span class="kw">let </span>formatted = <span class="macro">format!</span>(<span class="string">&quot;{:016x}&quot;</span>, actual[ops.num_limbs - j - <span class="number">1</span>]);
+                <span class="kw">let </span>formatted = <span class="macro">format!</span>(<span class="string">"{:016x}"</span>, actual[ops.num_limbs - j - <span class="number">1</span>]);
                 actual_s.push_str(<span class="kw-2">&amp;</span>formatted);
-                <span class="kw">let </span>formatted = <span class="macro">format!</span>(<span class="string">&quot;{:016x}&quot;</span>, expected[ops.num_limbs - j - <span class="number">1</span>]);
+                <span class="kw">let </span>formatted = <span class="macro">format!</span>(<span class="string">"{:016x}"</span>, expected[ops.num_limbs - j - <span class="number">1</span>]);
                 expected_s.push_str(<span class="kw-2">&amp;</span>formatted);
             }
             <span class="macro">panic!</span>(
-                <span class="string">&quot;Actual != Expected,\nActual = {}, Expected = {}&quot;</span>,
+                <span class="string">"Actual != Expected,\nActual = {}, Expected = {}"</span>,
                 actual_s, expected_s
             );
         }

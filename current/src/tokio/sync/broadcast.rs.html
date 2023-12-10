@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/sync/broadcast.rs`."><title>broadcast.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/sync/broadcast.rs`."><title>broadcast.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1539,7 +1539,7 @@
 //! ## Lagging
 //!
 //! As sent messages must be retained until **all** [`Receiver`] handles receive
-//! a clone, broadcast channels are susceptible to the &quot;slow receiver&quot; problem.
+//! a clone, broadcast channels are susceptible to the "slow receiver" problem.
 //! In this case, all but one receiver are able to receive values at the rate
 //! they are sent. Because one receiver is stalled, the channel starts to fill
 //! up.
@@ -1553,7 +1553,7 @@
 //! value. Any receiver that has not yet seen the released value will return
 //! [`RecvError::Lagged`] the next time [`recv`] is called.
 //!
-//! Once [`RecvError::Lagged`] is returned, the lagging receiver&#39;s position is
+//! Once [`RecvError::Lagged`] is returned, the lagging receiver's position is
 //! updated to the oldest value contained by the channel. The next call to
 //! [`recv`] will return this value.
 //!
@@ -1565,7 +1565,7 @@
 //! ## Closing
 //!
 //! When **all** [`Sender`] handles have been dropped, no new values may be
-//! sent. At this point, the channel is &quot;closed&quot;. Once a receiver has received
+//! sent. At this point, the channel is "closed". Once a receiver has received
 //! all values retained by the channel, the next call to [`recv`] will return
 //! with [`RecvError::Closed`].
 //!
@@ -1742,8 +1742,8 @@
     </span><span class="kw">pub struct </span>SendError&lt;T&gt;(<span class="kw">pub </span>T);
 
     <span class="kw">impl</span>&lt;T&gt; fmt::Display <span class="kw">for </span>SendError&lt;T&gt; {
-        <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-            <span class="macro">write!</span>(f, <span class="string">&quot;channel closed&quot;</span>)
+        <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+            <span class="macro">write!</span>(f, <span class="string">"channel closed"</span>)
         }
     }
 
@@ -1767,10 +1767,10 @@
     }
 
     <span class="kw">impl </span>fmt::Display <span class="kw">for </span>RecvError {
-        <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+        <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
             <span class="kw">match </span><span class="self">self </span>{
-                RecvError::Closed =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;channel closed&quot;</span>),
-                RecvError::Lagged(amt) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;channel lagged by {}&quot;</span>, amt),
+                RecvError::Closed =&gt; <span class="macro">write!</span>(f, <span class="string">"channel closed"</span>),
+                RecvError::Lagged(amt) =&gt; <span class="macro">write!</span>(f, <span class="string">"channel lagged by {}"</span>, amt),
             }
         }
     }
@@ -1802,11 +1802,11 @@
     }
 
     <span class="kw">impl </span>fmt::Display <span class="kw">for </span>TryRecvError {
-        <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+        <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
             <span class="kw">match </span><span class="self">self </span>{
-                TryRecvError::Empty =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;channel empty&quot;</span>),
-                TryRecvError::Closed =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;channel closed&quot;</span>),
-                TryRecvError::Lagged(amt) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;channel lagged by {}&quot;</span>, amt),
+                TryRecvError::Empty =&gt; <span class="macro">write!</span>(f, <span class="string">"channel empty"</span>),
+                TryRecvError::Closed =&gt; <span class="macro">write!</span>(f, <span class="string">"channel closed"</span>),
+                TryRecvError::Lagged(amt) =&gt; <span class="macro">write!</span>(f, <span class="string">"channel lagged by {}"</span>, amt),
             }
         }
     }
@@ -1900,21 +1900,21 @@
     }
 }
 
-<span class="kw">struct </span>RecvGuard&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    slot: RwLockReadGuard&lt;<span class="lifetime">&#39;a</span>, Slot&lt;T&gt;&gt;,
+<span class="kw">struct </span>RecvGuard&lt;<span class="lifetime">'a</span>, T&gt; {
+    slot: RwLockReadGuard&lt;<span class="lifetime">'a</span>, Slot&lt;T&gt;&gt;,
 }
 
 <span class="doccomment">/// Receive a value future.
-</span><span class="kw">struct </span>Recv&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+</span><span class="kw">struct </span>Recv&lt;<span class="lifetime">'a</span>, T&gt; {
     <span class="doccomment">/// Receiver being waited on.
-    </span>receiver: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>Receiver&lt;T&gt;,
+    </span>receiver: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>Receiver&lt;T&gt;,
 
     <span class="doccomment">/// Entry in the waiter `LinkedList`.
     </span>waiter: UnsafeCell&lt;Waiter&gt;,
 }
 
-<span class="kw">unsafe impl</span>&lt;<span class="lifetime">&#39;a</span>, T: Send&gt; Send <span class="kw">for </span>Recv&lt;<span class="lifetime">&#39;a</span>, T&gt; {}
-<span class="kw">unsafe impl</span>&lt;<span class="lifetime">&#39;a</span>, T: Send&gt; Sync <span class="kw">for </span>Recv&lt;<span class="lifetime">&#39;a</span>, T&gt; {}
+<span class="kw">unsafe impl</span>&lt;<span class="lifetime">'a</span>, T: Send&gt; Send <span class="kw">for </span>Recv&lt;<span class="lifetime">'a</span>, T&gt; {}
+<span class="kw">unsafe impl</span>&lt;<span class="lifetime">'a</span>, T: Send&gt; Sync <span class="kw">for </span>Recv&lt;<span class="lifetime">'a</span>, T&gt; {}
 
 <span class="doccomment">/// Max number of receivers. Reserve space to lock.
 </span><span class="kw">const </span>MAX_RECEIVERS: usize = usize::MAX &gt;&gt; <span class="number">2</span>;
@@ -1997,7 +1997,7 @@
     /// [`broadcast::channel`]: crate::sync::broadcast::channel
     </span><span class="attr">#[track_caller]
     </span><span class="kw">pub fn </span>new(capacity: usize) -&gt; <span class="self">Self </span>{
-        <span class="comment">// SAFETY: We don&#39;t create extra receivers, so there are 0.
+        <span class="comment">// SAFETY: We don't create extra receivers, so there are 0.
         </span><span class="kw">unsafe </span>{ <span class="self">Self</span>::new_with_receiver_count(<span class="number">0</span>, capacity) }
     }
 
@@ -2014,10 +2014,10 @@
     /// does not create any receivers by itself.
     </span><span class="attr">#[track_caller]
     </span><span class="kw">unsafe fn </span>new_with_receiver_count(receiver_count: usize, <span class="kw-2">mut </span>capacity: usize) -&gt; <span class="self">Self </span>{
-        <span class="macro">assert!</span>(capacity &gt; <span class="number">0</span>, <span class="string">&quot;broadcast channel capacity cannot be zero&quot;</span>);
+        <span class="macro">assert!</span>(capacity &gt; <span class="number">0</span>, <span class="string">"broadcast channel capacity cannot be zero"</span>);
         <span class="macro">assert!</span>(
             capacity &lt;= usize::MAX &gt;&gt; <span class="number">1</span>,
-            <span class="string">&quot;broadcast channel capacity exceeded `usize::MAX / 2`&quot;
+            <span class="string">"broadcast channel capacity exceeded `usize::MAX / 2`"
         </span>);
 
         <span class="comment">// Round to a power of two
@@ -2169,7 +2169,7 @@
     ///
     /// A value is queued until it has either been seen by all receivers that were alive at the time
     /// it was sent, or has been evicted from the queue by subsequent sends that exceeded the
-    /// queue&#39;s capacity.
+    /// queue's capacity.
     ///
     /// # Note
     ///
@@ -2194,7 +2194,7 @@
     ///
     ///     rx1.recv().await.unwrap();
     ///
-    ///     // The len is still 3 since rx2 hasn&#39;t seen the first value yet.
+    ///     // The len is still 3 since rx2 hasn't seen the first value yet.
     ///     assert_eq!(tx.len(), 3);
     ///
     ///     rx2.recv().await.unwrap();
@@ -2241,7 +2241,7 @@
     ///
     ///     rx1.recv().await.unwrap();
     ///
-    ///     // The queue is still not empty since rx2 hasn&#39;t seen the value.
+    ///     // The queue is still not empty since rx2 hasn't seen the value.
     ///     assert!(!tx.is_empty());
     ///
     ///     rx2.recv().await.unwrap();
@@ -2332,9 +2332,9 @@
 </span><span class="kw">fn </span>new_receiver&lt;T&gt;(shared: Arc&lt;Shared&lt;T&gt;&gt;) -&gt; Receiver&lt;T&gt; {
     <span class="kw">let </span><span class="kw-2">mut </span>tail = shared.tail.lock();
 
-    <span class="macro">assert!</span>(tail.rx_cnt != MAX_RECEIVERS, <span class="string">&quot;max receivers&quot;</span>);
+    <span class="macro">assert!</span>(tail.rx_cnt != MAX_RECEIVERS, <span class="string">"max receivers"</span>);
 
-    tail.rx_cnt = tail.rx_cnt.checked_add(<span class="number">1</span>).expect(<span class="string">&quot;overflow&quot;</span>);
+    tail.rx_cnt = tail.rx_cnt.checked_add(<span class="number">1</span>).expect(<span class="string">"overflow"</span>);
 
     <span class="kw">let </span>next = tail.pos;
 
@@ -2346,13 +2346,13 @@
 <span class="doccomment">/// List used in `Shared::notify_rx`. It wraps a guarded linked list
 /// and gates the access to it on the `Shared.tail` mutex. It also empties
 /// the list on drop.
-</span><span class="kw">struct </span>WaitersList&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+</span><span class="kw">struct </span>WaitersList&lt;<span class="lifetime">'a</span>, T&gt; {
     list: GuardedLinkedList&lt;Waiter, &lt;Waiter <span class="kw">as </span>linked_list::Link&gt;::Target&gt;,
     is_empty: bool,
-    shared: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Shared&lt;T&gt;,
+    shared: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Shared&lt;T&gt;,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; Drop <span class="kw">for </span>WaitersList&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; Drop <span class="kw">for </span>WaitersList&lt;<span class="lifetime">'a</span>, T&gt; {
     <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="comment">// If the list is not empty, we unlink all waiters from it.
         // We do not wake the waiters to avoid double panics.
@@ -2363,11 +2363,11 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; WaitersList&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; WaitersList&lt;<span class="lifetime">'a</span>, T&gt; {
     <span class="kw">fn </span>new(
         unguarded_list: LinkedList&lt;Waiter, &lt;Waiter <span class="kw">as </span>linked_list::Link&gt;::Target&gt;,
-        guard: Pin&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Waiter&gt;,
-        shared: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Shared&lt;T&gt;,
+        guard: Pin&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>Waiter&gt;,
+        shared: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Shared&lt;T&gt;,
     ) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>guard_ptr = NonNull::from(guard.get_ref());
         <span class="kw">let </span>list = unguarded_list.into_guarded(guard_ptr);
@@ -2392,7 +2392,7 @@
 }
 
 <span class="kw">impl</span>&lt;T&gt; Shared&lt;T&gt; {
-    <span class="kw">fn </span>notify_rx&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>: <span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;b </span><span class="self">self</span>, <span class="kw-2">mut </span>tail: MutexGuard&lt;<span class="lifetime">&#39;a</span>, Tail&gt;) {
+    <span class="kw">fn </span>notify_rx&lt;<span class="lifetime">'a</span>, <span class="lifetime">'b</span>: <span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'b </span><span class="self">self</span>, <span class="kw-2">mut </span>tail: MutexGuard&lt;<span class="lifetime">'a</span>, Tail&gt;) {
         <span class="comment">// It is critical for `GuardedLinkedList` safety that the guard node is
         // pinned in memory and is not dropped until the guarded list is dropped.
         </span><span class="kw">let </span>guard = Waiter::new();
@@ -2409,7 +2409,7 @@
         </span><span class="kw">let </span><span class="kw-2">mut </span>list = WaitersList::new(std::mem::take(<span class="kw-2">&amp;mut </span>tail.waiters), guard.as_ref(), <span class="self">self</span>);
 
         <span class="kw">let </span><span class="kw-2">mut </span>wakers = WakeList::new();
-        <span class="lifetime">&#39;outer</span>: <span class="kw">loop </span>{
+        <span class="lifetime">'outer</span>: <span class="kw">loop </span>{
             <span class="kw">while </span>wakers.can_push() {
                 <span class="kw">match </span>list.pop_back_locked(<span class="kw-2">&amp;mut </span>tail) {
                     <span class="prelude-val">Some</span>(<span class="kw-2">mut </span>waiter) =&gt; {
@@ -2424,7 +2424,7 @@
                         }
                     }
                     <span class="prelude-val">None </span>=&gt; {
-                        <span class="kw">break </span><span class="lifetime">&#39;outer</span>;
+                        <span class="kw">break </span><span class="lifetime">'outer</span>;
                     }
                 }
             }
@@ -2506,7 +2506,7 @@
         (next_send_pos - <span class="self">self</span>.next) <span class="kw">as </span>usize
     }
 
-    <span class="doccomment">/// Returns true if there aren&#39;t any messages in the channel that the [`Receiver`]
+    <span class="doccomment">/// Returns true if there aren't any messages in the channel that the [`Receiver`]
     /// has yet to receive.
     ///
     /// [`Receiver]: create::sync::broadcast::Receiver
@@ -2562,7 +2562,7 @@
     </span><span class="kw">fn </span>recv_ref(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         waiter: <span class="prelude-ty">Option</span>&lt;(<span class="kw-2">&amp;</span>UnsafeCell&lt;Waiter&gt;, <span class="kw-2">&amp;</span>Waker)&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;RecvGuard&lt;<span class="lifetime">&#39;_</span>, T&gt;, TryRecvError&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;RecvGuard&lt;<span class="lifetime">'_</span>, T&gt;, TryRecvError&gt; {
         <span class="kw">let </span>idx = (<span class="self">self</span>.next &amp; <span class="self">self</span>.shared.mask <span class="kw">as </span>u64) <span class="kw">as </span>usize;
 
         <span class="comment">// The slot holding the next value to read
@@ -2593,7 +2593,7 @@
 
                 <span class="kw">if </span>next_pos == <span class="self">self</span>.next {
                     <span class="comment">// At this point the channel is empty for *this* receiver. If
-                    // it&#39;s been closed, then that&#39;s what we return, otherwise we
+                    // it's been closed, then that's what we return, otherwise we
                     // set a waker and return empty.
                     </span><span class="kw">if </span>tail.closed {
                         <span class="kw">return </span><span class="prelude-val">Err</span>(TryRecvError::Closed);
@@ -2607,7 +2607,7 @@
                             </span>waiter.with_mut(|ptr| {
                                 <span class="comment">// If there is no waker **or** if the currently
                                 // stored waker references a **different** task,
-                                // track the tasks&#39; waker to be notified on
+                                // track the tasks' waker to be notified on
                                 // receipt of a new value.
                                 </span><span class="kw">match </span>(<span class="kw-2">*</span>ptr).waker {
                                     <span class="prelude-val">Some</span>(<span class="kw-2">ref </span>w) <span class="kw">if </span>w.will_wake(waker) =&gt; {}
@@ -2703,7 +2703,7 @@
     ///
     /// If the [`Receiver`] handle falls behind, once the channel is full, newly
     /// sent values will overwrite old values. At this point, a call to [`recv`]
-    /// will return with `Err(RecvError::Lagged)` and the [`Receiver`]&#39;s
+    /// will return with `Err(RecvError::Lagged)` and the [`Receiver`]'s
     /// internal cursor is updated to point to the oldest value still held by
     /// the channel. A subsequent call to [`recv`] will return this value
     /// **unless** it has been since overwritten.
@@ -2772,7 +2772,7 @@
 
     <span class="doccomment">/// Attempts to return a pending value on this receiver without awaiting.
     ///
-    /// This is useful for a flavor of &quot;optimistic check&quot; before deciding to
+    /// This is useful for a flavor of "optimistic check" before deciding to
     /// await on a receiver.
     ///
     /// Compared with [`recv`], this function has three failure cases instead of two
@@ -2783,7 +2783,7 @@
     ///
     /// If the [`Receiver`] handle falls behind, once the channel is full, newly
     /// sent values will overwrite old values. At this point, a call to [`recv`]
-    /// will return with `Err(TryRecvError::Lagged)` and the [`Receiver`]&#39;s
+    /// will return with `Err(TryRecvError::Lagged)` and the [`Receiver`]'s
     /// internal cursor is updated to point to the oldest value still held by
     /// the channel. A subsequent call to [`try_recv`] will return this value
     /// **unless** it has been since overwritten. If there are no values to
@@ -2860,15 +2860,15 @@
                 </span><span class="prelude-val">Err</span>(TryRecvError::Closed) =&gt; <span class="kw">break</span>,
                 <span class="comment">// Ignore lagging, we will catch up
                 </span><span class="prelude-val">Err</span>(TryRecvError::Lagged(..)) =&gt; {}
-                <span class="comment">// Can&#39;t be empty
-                </span><span class="prelude-val">Err</span>(TryRecvError::Empty) =&gt; <span class="macro">panic!</span>(<span class="string">&quot;unexpected empty broadcast channel&quot;</span>),
+                <span class="comment">// Can't be empty
+                </span><span class="prelude-val">Err</span>(TryRecvError::Empty) =&gt; <span class="macro">panic!</span>(<span class="string">"unexpected empty broadcast channel"</span>),
             }
         }
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; Recv&lt;<span class="lifetime">&#39;a</span>, T&gt; {
-    <span class="kw">fn </span>new(receiver: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>Receiver&lt;T&gt;) -&gt; Recv&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; Recv&lt;<span class="lifetime">'a</span>, T&gt; {
+    <span class="kw">fn </span>new(receiver: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>Receiver&lt;T&gt;) -&gt; Recv&lt;<span class="lifetime">'a</span>, T&gt; {
         Recv {
             receiver,
             waiter: UnsafeCell::new(Waiter {
@@ -2893,13 +2893,13 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; Future <span class="kw">for </span>Recv&lt;<span class="lifetime">&#39;a</span>, T&gt;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; Future <span class="kw">for </span>Recv&lt;<span class="lifetime">'a</span>, T&gt;
 <span class="kw">where
     </span>T: Clone,
 {
     <span class="kw">type </span>Output = <span class="prelude-ty">Result</span>&lt;T, RecvError&gt;;
 
-    <span class="kw">fn </span>poll(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;T, RecvError&gt;&gt; {
+    <span class="kw">fn </span>poll(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;T, RecvError&gt;&gt; {
         <span class="macro">ready!</span>(<span class="kw">crate</span>::trace::trace_leaf(cx));
 
         <span class="kw">let </span>(receiver, waiter) = <span class="self">self</span>.project();
@@ -2915,7 +2915,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; Drop <span class="kw">for </span>Recv&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; Drop <span class="kw">for </span>Recv&lt;<span class="lifetime">'a</span>, T&gt; {
     <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="comment">// Acquire the tail lock. This is required for safety before accessing
         // the waiter node.
@@ -2959,18 +2959,18 @@
 }
 
 <span class="kw">impl</span>&lt;T&gt; fmt::Debug <span class="kw">for </span>Sender&lt;T&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        <span class="macro">write!</span>(fmt, <span class="string">&quot;broadcast::Sender&quot;</span>)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        <span class="macro">write!</span>(fmt, <span class="string">"broadcast::Sender"</span>)
     }
 }
 
 <span class="kw">impl</span>&lt;T&gt; fmt::Debug <span class="kw">for </span>Receiver&lt;T&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        <span class="macro">write!</span>(fmt, <span class="string">&quot;broadcast::Receiver&quot;</span>)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        <span class="macro">write!</span>(fmt, <span class="string">"broadcast::Receiver"</span>)
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; RecvGuard&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; RecvGuard&lt;<span class="lifetime">'a</span>, T&gt; {
     <span class="kw">fn </span>clone_value(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;T&gt;
     <span class="kw">where
         </span>T: Clone,
@@ -2979,7 +2979,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; Drop <span class="kw">for </span>RecvGuard&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; Drop <span class="kw">for </span>RecvGuard&lt;<span class="lifetime">'a</span>, T&gt; {
     <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="comment">// Decrement the remaining counter
         </span><span class="kw">if </span><span class="number">1 </span>== <span class="self">self</span>.slot.rem.fetch_sub(<span class="number">1</span>, SeqCst) {

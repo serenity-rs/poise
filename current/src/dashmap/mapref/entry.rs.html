@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/dashmap-5.5.3/src/mapref/entry.rs`."><title>entry.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="dashmap" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/dashmap-5.5.3/src/mapref/entry.rs`."><title>entry.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="dashmap" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -286,12 +286,12 @@
 <span class="kw">use </span>core::ptr;
 <span class="kw">use </span>std::collections::hash_map::RandomState;
 
-<span class="kw">pub enum </span>Entry&lt;<span class="lifetime">&#39;a</span>, K, V, S = RandomState&gt; {
-    Occupied(OccupiedEntry&lt;<span class="lifetime">&#39;a</span>, K, V, S&gt;),
-    Vacant(VacantEntry&lt;<span class="lifetime">&#39;a</span>, K, V, S&gt;),
+<span class="kw">pub enum </span>Entry&lt;<span class="lifetime">'a</span>, K, V, S = RandomState&gt; {
+    Occupied(OccupiedEntry&lt;<span class="lifetime">'a</span>, K, V, S&gt;),
+    Vacant(VacantEntry&lt;<span class="lifetime">'a</span>, K, V, S&gt;),
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Eq + Hash, V, S: BuildHasher&gt; Entry&lt;<span class="lifetime">&#39;a</span>, K, V, S&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: Eq + Hash, V, S: BuildHasher&gt; Entry&lt;<span class="lifetime">'a</span>, K, V, S&gt; {
     <span class="doccomment">/// Apply a function to the stored value if it exists.
     </span><span class="kw">pub fn </span>and_modify(<span class="self">self</span>, f: <span class="kw">impl </span>FnOnce(<span class="kw-2">&amp;mut </span>V)) -&gt; <span class="self">Self </span>{
         <span class="kw">match </span><span class="self">self </span>{
@@ -323,7 +323,7 @@
 
     <span class="doccomment">/// Return a mutable reference to the element if it exists,
     /// otherwise insert the default and return a mutable reference to that.
-    </span><span class="kw">pub fn </span>or_default(<span class="self">self</span>) -&gt; RefMut&lt;<span class="lifetime">&#39;a</span>, K, V, S&gt;
+    </span><span class="kw">pub fn </span>or_default(<span class="self">self</span>) -&gt; RefMut&lt;<span class="lifetime">'a</span>, K, V, S&gt;
     <span class="kw">where
         </span>V: Default,
     {
@@ -335,7 +335,7 @@
 
     <span class="doccomment">/// Return a mutable reference to the element if it exists,
     /// otherwise a provided value and return a mutable reference to that.
-    </span><span class="kw">pub fn </span>or_insert(<span class="self">self</span>, value: V) -&gt; RefMut&lt;<span class="lifetime">&#39;a</span>, K, V, S&gt; {
+    </span><span class="kw">pub fn </span>or_insert(<span class="self">self</span>, value: V) -&gt; RefMut&lt;<span class="lifetime">'a</span>, K, V, S&gt; {
         <span class="kw">match </span><span class="self">self </span>{
             Entry::Occupied(entry) =&gt; entry.into_ref(),
             Entry::Vacant(entry) =&gt; entry.insert(value),
@@ -344,7 +344,7 @@
 
     <span class="doccomment">/// Return a mutable reference to the element if it exists,
     /// otherwise insert the result of a provided function and return a mutable reference to that.
-    </span><span class="kw">pub fn </span>or_insert_with(<span class="self">self</span>, value: <span class="kw">impl </span>FnOnce() -&gt; V) -&gt; RefMut&lt;<span class="lifetime">&#39;a</span>, K, V, S&gt; {
+    </span><span class="kw">pub fn </span>or_insert_with(<span class="self">self</span>, value: <span class="kw">impl </span>FnOnce() -&gt; V) -&gt; RefMut&lt;<span class="lifetime">'a</span>, K, V, S&gt; {
         <span class="kw">match </span><span class="self">self </span>{
             Entry::Occupied(entry) =&gt; entry.into_ref(),
             Entry::Vacant(entry) =&gt; entry.insert(value()),
@@ -354,7 +354,7 @@
     <span class="kw">pub fn </span>or_try_insert_with&lt;E&gt;(
         <span class="self">self</span>,
         value: <span class="kw">impl </span>FnOnce() -&gt; <span class="prelude-ty">Result</span>&lt;V, E&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;RefMut&lt;<span class="lifetime">&#39;a</span>, K, V, S&gt;, E&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;RefMut&lt;<span class="lifetime">'a</span>, K, V, S&gt;, E&gt; {
         <span class="kw">match </span><span class="self">self </span>{
             Entry::Occupied(entry) =&gt; <span class="prelude-val">Ok</span>(entry.into_ref()),
             Entry::Vacant(entry) =&gt; <span class="prelude-val">Ok</span>(entry.insert(value()<span class="question-mark">?</span>)),
@@ -362,7 +362,7 @@
     }
 
     <span class="doccomment">/// Sets the value of the entry, and returns a reference to the inserted value.
-    </span><span class="kw">pub fn </span>insert(<span class="self">self</span>, value: V) -&gt; RefMut&lt;<span class="lifetime">&#39;a</span>, K, V, S&gt; {
+    </span><span class="kw">pub fn </span>insert(<span class="self">self</span>, value: V) -&gt; RefMut&lt;<span class="lifetime">'a</span>, K, V, S&gt; {
         <span class="kw">match </span><span class="self">self </span>{
             Entry::Occupied(<span class="kw-2">mut </span>entry) =&gt; {
                 entry.insert(value);
@@ -375,10 +375,10 @@
     <span class="doccomment">/// Sets the value of the entry, and returns an OccupiedEntry.
     ///
     /// If you are not interested in the occupied entry,
-    /// consider [`insert`] as it doesn&#39;t need to clone the key.
+    /// consider [`insert`] as it doesn't need to clone the key.
     ///
     /// [`insert`]: Entry::insert
-    </span><span class="kw">pub fn </span>insert_entry(<span class="self">self</span>, value: V) -&gt; OccupiedEntry&lt;<span class="lifetime">&#39;a</span>, K, V, S&gt;
+    </span><span class="kw">pub fn </span>insert_entry(<span class="self">self</span>, value: V) -&gt; OccupiedEntry&lt;<span class="lifetime">'a</span>, K, V, S&gt;
     <span class="kw">where
         </span>K: Clone,
     {
@@ -392,20 +392,20 @@
     }
 }
 
-<span class="kw">pub struct </span>VacantEntry&lt;<span class="lifetime">&#39;a</span>, K, V, S = RandomState&gt; {
-    shard: RwLockWriteGuard&lt;<span class="lifetime">&#39;a</span>, HashMap&lt;K, V, S&gt;&gt;,
+<span class="kw">pub struct </span>VacantEntry&lt;<span class="lifetime">'a</span>, K, V, S = RandomState&gt; {
+    shard: RwLockWriteGuard&lt;<span class="lifetime">'a</span>, HashMap&lt;K, V, S&gt;&gt;,
     key: K,
 }
 
-<span class="kw">unsafe impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Eq + Hash + Sync, V: Sync, S: BuildHasher&gt; Send <span class="kw">for </span>VacantEntry&lt;<span class="lifetime">&#39;a</span>, K, V, S&gt; {}
-<span class="kw">unsafe impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Eq + Hash + Sync, V: Sync, S: BuildHasher&gt; Sync <span class="kw">for </span>VacantEntry&lt;<span class="lifetime">&#39;a</span>, K, V, S&gt; {}
+<span class="kw">unsafe impl</span>&lt;<span class="lifetime">'a</span>, K: Eq + Hash + Sync, V: Sync, S: BuildHasher&gt; Send <span class="kw">for </span>VacantEntry&lt;<span class="lifetime">'a</span>, K, V, S&gt; {}
+<span class="kw">unsafe impl</span>&lt;<span class="lifetime">'a</span>, K: Eq + Hash + Sync, V: Sync, S: BuildHasher&gt; Sync <span class="kw">for </span>VacantEntry&lt;<span class="lifetime">'a</span>, K, V, S&gt; {}
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Eq + Hash, V, S: BuildHasher&gt; VacantEntry&lt;<span class="lifetime">&#39;a</span>, K, V, S&gt; {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">unsafe fn </span>new(shard: RwLockWriteGuard&lt;<span class="lifetime">&#39;a</span>, HashMap&lt;K, V, S&gt;&gt;, key: K) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: Eq + Hash, V, S: BuildHasher&gt; VacantEntry&lt;<span class="lifetime">'a</span>, K, V, S&gt; {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">unsafe fn </span>new(shard: RwLockWriteGuard&lt;<span class="lifetime">'a</span>, HashMap&lt;K, V, S&gt;&gt;, key: K) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{ shard, key }
     }
 
-    <span class="kw">pub fn </span>insert(<span class="kw-2">mut </span><span class="self">self</span>, value: V) -&gt; RefMut&lt;<span class="lifetime">&#39;a</span>, K, V, S&gt; {
+    <span class="kw">pub fn </span>insert(<span class="kw-2">mut </span><span class="self">self</span>, value: V) -&gt; RefMut&lt;<span class="lifetime">'a</span>, K, V, S&gt; {
         <span class="kw">unsafe </span>{
             <span class="kw">let </span>c: K = ptr::read(<span class="kw-2">&amp;</span><span class="self">self</span>.key);
 
@@ -426,7 +426,7 @@
     }
 
     <span class="doccomment">/// Sets the value of the entry with the VacantEntry’s key, and returns an OccupiedEntry.
-    </span><span class="kw">pub fn </span>insert_entry(<span class="kw-2">mut </span><span class="self">self</span>, value: V) -&gt; OccupiedEntry&lt;<span class="lifetime">&#39;a</span>, K, V, S&gt;
+    </span><span class="kw">pub fn </span>insert_entry(<span class="kw-2">mut </span><span class="self">self</span>, value: V) -&gt; OccupiedEntry&lt;<span class="lifetime">'a</span>, K, V, S&gt;
     <span class="kw">where
         </span>K: Clone,
     {
@@ -450,18 +450,18 @@
     }
 }
 
-<span class="kw">pub struct </span>OccupiedEntry&lt;<span class="lifetime">&#39;a</span>, K, V, S = RandomState&gt; {
-    shard: RwLockWriteGuard&lt;<span class="lifetime">&#39;a</span>, HashMap&lt;K, V, S&gt;&gt;,
+<span class="kw">pub struct </span>OccupiedEntry&lt;<span class="lifetime">'a</span>, K, V, S = RandomState&gt; {
+    shard: RwLockWriteGuard&lt;<span class="lifetime">'a</span>, HashMap&lt;K, V, S&gt;&gt;,
     elem: (<span class="kw-2">*const </span>K, <span class="kw-2">*mut </span>V),
     key: K,
 }
 
-<span class="kw">unsafe impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Eq + Hash + Sync, V: Sync, S: BuildHasher&gt; Send <span class="kw">for </span>OccupiedEntry&lt;<span class="lifetime">&#39;a</span>, K, V, S&gt; {}
-<span class="kw">unsafe impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Eq + Hash + Sync, V: Sync, S: BuildHasher&gt; Sync <span class="kw">for </span>OccupiedEntry&lt;<span class="lifetime">&#39;a</span>, K, V, S&gt; {}
+<span class="kw">unsafe impl</span>&lt;<span class="lifetime">'a</span>, K: Eq + Hash + Sync, V: Sync, S: BuildHasher&gt; Send <span class="kw">for </span>OccupiedEntry&lt;<span class="lifetime">'a</span>, K, V, S&gt; {}
+<span class="kw">unsafe impl</span>&lt;<span class="lifetime">'a</span>, K: Eq + Hash + Sync, V: Sync, S: BuildHasher&gt; Sync <span class="kw">for </span>OccupiedEntry&lt;<span class="lifetime">'a</span>, K, V, S&gt; {}
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, K: Eq + Hash, V, S: BuildHasher&gt; OccupiedEntry&lt;<span class="lifetime">&#39;a</span>, K, V, S&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K: Eq + Hash, V, S: BuildHasher&gt; OccupiedEntry&lt;<span class="lifetime">'a</span>, K, V, S&gt; {
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">unsafe fn </span>new(
-        shard: RwLockWriteGuard&lt;<span class="lifetime">&#39;a</span>, HashMap&lt;K, V, S&gt;&gt;,
+        shard: RwLockWriteGuard&lt;<span class="lifetime">'a</span>, HashMap&lt;K, V, S&gt;&gt;,
         key: K,
         elem: (<span class="kw-2">*const </span>K, <span class="kw-2">*mut </span>V),
     ) -&gt; <span class="self">Self </span>{
@@ -480,7 +480,7 @@
         mem::replace(<span class="self">self</span>.get_mut(), value)
     }
 
-    <span class="kw">pub fn </span>into_ref(<span class="self">self</span>) -&gt; RefMut&lt;<span class="lifetime">&#39;a</span>, K, V, S&gt; {
+    <span class="kw">pub fn </span>into_ref(<span class="self">self</span>) -&gt; RefMut&lt;<span class="lifetime">'a</span>, K, V, S&gt; {
         <span class="kw">unsafe </span>{ RefMut::new(<span class="self">self</span>.shard, <span class="self">self</span>.elem.<span class="number">0</span>, <span class="self">self</span>.elem.<span class="number">1</span>) }
     }
 

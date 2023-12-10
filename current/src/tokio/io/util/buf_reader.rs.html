@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/io/util/buf_reader.rs`."><title>buf_reader.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/io/util/buf_reader.rs`."><title>buf_reader.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -334,7 +334,7 @@
     /// When the `BufReader` is dropped, the contents of its buffer will be
     /// discarded. Creating multiple instances of a `BufReader` on the same
     /// stream can cause data loss.
-    </span><span class="attr">#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;io-util&quot;</span>)))]
+    </span><span class="attr">#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"io-util"</span>)))]
     </span><span class="kw">pub struct </span>BufReader&lt;R&gt; {
         <span class="attr">#[pin]
         </span><span class="kw">pub</span>(<span class="kw">super</span>) inner: R,
@@ -411,10 +411,10 @@
 <span class="kw">impl</span>&lt;R: AsyncRead&gt; AsyncRead <span class="kw">for </span>BufReader&lt;R&gt; {
     <span class="kw">fn </span>poll_read(
         <span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;,
-        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;,
-        buf: <span class="kw-2">&amp;mut </span>ReadBuf&lt;<span class="lifetime">&#39;_</span>&gt;,
+        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;,
+        buf: <span class="kw-2">&amp;mut </span>ReadBuf&lt;<span class="lifetime">'_</span>&gt;,
     ) -&gt; Poll&lt;io::Result&lt;()&gt;&gt; {
-        <span class="comment">// If we don&#39;t have any buffered data and we&#39;re doing a massive read
+        <span class="comment">// If we don't have any buffered data and we're doing a massive read
         // (larger than our internal buffer), bypass our internal buffer
         // entirely.
         </span><span class="kw">if </span><span class="self">self</span>.pos == <span class="self">self</span>.cap &amp;&amp; buf.remaining() &gt;= <span class="self">self</span>.buf.len() {
@@ -431,10 +431,10 @@
 }
 
 <span class="kw">impl</span>&lt;R: AsyncRead&gt; AsyncBufRead <span class="kw">for </span>BufReader&lt;R&gt; {
-    <span class="kw">fn </span>poll_fill_buf(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;io::Result&lt;<span class="kw-2">&amp;</span>[u8]&gt;&gt; {
+    <span class="kw">fn </span>poll_fill_buf(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;io::Result&lt;<span class="kw-2">&amp;</span>[u8]&gt;&gt; {
         <span class="kw">let </span>me = <span class="self">self</span>.project();
 
-        <span class="comment">// If we&#39;ve reached the end of our internal buffer then we need to fetch
+        <span class="comment">// If we've reached the end of our internal buffer then we need to fetch
         // some more data from the underlying reader.
         // Branch using `&gt;=` instead of the more correct `==`
         // to tell the compiler that the pos..cap slice is always valid.
@@ -479,7 +479,7 @@
 ///
 /// See [`AsyncSeek`] for more details.
 ///
-/// Note: In the edge case where you&#39;re seeking with `SeekFrom::Current(n)`
+/// Note: In the edge case where you're seeking with `SeekFrom::Current(n)`
 /// where `n` minus the internal buffer length overflows an `i64`, two
 /// seeks will be performed instead of one. If the second seek returns
 /// `Err`, the underlying reader will be left at the same position it would
@@ -495,20 +495,20 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn </span>poll_complete(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;io::Result&lt;u64&gt;&gt; {
+    <span class="kw">fn </span>poll_complete(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;io::Result&lt;u64&gt;&gt; {
         <span class="kw">let </span>res = <span class="kw">match </span>mem::replace(<span class="self">self</span>.as_mut().project().seek_state, SeekState::Init) {
             SeekState::Init =&gt; {
                 <span class="comment">// 1.x AsyncSeek recommends calling poll_complete before start_seek.
-                // We don&#39;t have to guarantee that the value returned by
+                // We don't have to guarantee that the value returned by
                 // poll_complete called without start_seek is correct,
-                // so we&#39;ll return 0.
+                // so we'll return 0.
                 </span><span class="kw">return </span>Poll::Ready(<span class="prelude-val">Ok</span>(<span class="number">0</span>));
             }
             SeekState::Start(SeekFrom::Current(n)) =&gt; {
                 <span class="kw">let </span>remainder = (<span class="self">self</span>.cap - <span class="self">self</span>.pos) <span class="kw">as </span>i64;
                 <span class="comment">// it should be safe to assume that remainder fits within an i64 as the alternative
-                // means we managed to allocate 8 exbibytes and that&#39;s absurd.
-                // But it&#39;s not out of the realm of possibility for some weird underlying reader to
+                // means we managed to allocate 8 exbibytes and that's absurd.
+                // But it's not out of the realm of possibility for some weird underlying reader to
                 // support seeking by i64::MIN so we need to handle underflow when subtracting
                 // remainder.
                 </span><span class="kw">if let </span><span class="prelude-val">Some</span>(offset) = n.checked_sub(remainder) {
@@ -549,7 +549,7 @@
                 <span class="self">self</span>.as_mut().get_pin_mut().poll_complete(cx)<span class="question-mark">?
             </span>}
             SeekState::Start(pos) =&gt; {
-                <span class="comment">// Seeking with Start/End doesn&#39;t care about our buffer length.
+                <span class="comment">// Seeking with Start/End doesn't care about our buffer length.
                 </span><span class="self">self</span>.as_mut().get_pin_mut().start_seek(pos)<span class="question-mark">?</span>;
                 <span class="self">self</span>.as_mut().get_pin_mut().poll_complete(cx)<span class="question-mark">?
             </span>}
@@ -572,7 +572,7 @@
 <span class="kw">impl</span>&lt;R: AsyncRead + AsyncWrite&gt; AsyncWrite <span class="kw">for </span>BufReader&lt;R&gt; {
     <span class="kw">fn </span>poll_write(
         <span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;,
-        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;,
+        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;,
         buf: <span class="kw-2">&amp;</span>[u8],
     ) -&gt; Poll&lt;io::Result&lt;usize&gt;&gt; {
         <span class="self">self</span>.get_pin_mut().poll_write(cx, buf)
@@ -580,8 +580,8 @@
 
     <span class="kw">fn </span>poll_write_vectored(
         <span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;,
-        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;,
-        bufs: <span class="kw-2">&amp;</span>[IoSlice&lt;<span class="lifetime">&#39;_</span>&gt;],
+        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;,
+        bufs: <span class="kw-2">&amp;</span>[IoSlice&lt;<span class="lifetime">'_</span>&gt;],
     ) -&gt; Poll&lt;io::Result&lt;usize&gt;&gt; {
         <span class="self">self</span>.get_pin_mut().poll_write_vectored(cx, bufs)
     }
@@ -590,22 +590,22 @@
         <span class="self">self</span>.get_ref().is_write_vectored()
     }
 
-    <span class="kw">fn </span>poll_flush(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;io::Result&lt;()&gt;&gt; {
+    <span class="kw">fn </span>poll_flush(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;io::Result&lt;()&gt;&gt; {
         <span class="self">self</span>.get_pin_mut().poll_flush(cx)
     }
 
-    <span class="kw">fn </span>poll_shutdown(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;io::Result&lt;()&gt;&gt; {
+    <span class="kw">fn </span>poll_shutdown(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;io::Result&lt;()&gt;&gt; {
         <span class="self">self</span>.get_pin_mut().poll_shutdown(cx)
     }
 }
 
 <span class="kw">impl</span>&lt;R: fmt::Debug&gt; fmt::Debug <span class="kw">for </span>BufReader&lt;R&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        f.debug_struct(<span class="string">&quot;BufReader&quot;</span>)
-            .field(<span class="string">&quot;reader&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.inner)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        f.debug_struct(<span class="string">"BufReader"</span>)
+            .field(<span class="string">"reader"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.inner)
             .field(
-                <span class="string">&quot;buffer&quot;</span>,
-                <span class="kw-2">&amp;</span><span class="macro">format_args!</span>(<span class="string">&quot;{}/{}&quot;</span>, <span class="self">self</span>.cap - <span class="self">self</span>.pos, <span class="self">self</span>.buf.len()),
+                <span class="string">"buffer"</span>,
+                <span class="kw-2">&amp;</span><span class="macro">format_args!</span>(<span class="string">"{}/{}"</span>, <span class="self">self</span>.cap - <span class="self">self</span>.pos, <span class="self">self</span>.buf.len()),
             )
             .finish()
     }

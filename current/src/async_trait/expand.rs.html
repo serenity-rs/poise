@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/async-trait-0.1.74/src/expand.rs`."><title>expand.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="async_trait" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/async-trait-0.1.74/src/expand.rs`."><title>expand.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="async_trait" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -509,19 +509,19 @@
 }
 
 <span class="attr">#[derive(Clone, Copy)]
-</span><span class="kw">enum </span>Context&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">enum </span>Context&lt;<span class="lifetime">'a</span>&gt; {
     Trait {
-        generics: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Generics,
-        supertraits: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Supertraits,
+        generics: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Generics,
+        supertraits: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Supertraits,
     },
     Impl {
-        impl_generics: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Generics,
-        associated_type_impl_traits: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Set&lt;Ident&gt;,
+        impl_generics: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Generics,
+        associated_type_impl_traits: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Set&lt;Ident&gt;,
     },
 }
 
-<span class="kw">impl </span>Context&lt;<span class="lifetime">&#39;_</span>&gt; {
-    <span class="kw">fn </span>lifetimes&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="self">self</span>, used: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[Lifetime]) -&gt; <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>LifetimeParam&gt; {
+<span class="kw">impl </span>Context&lt;<span class="lifetime">'_</span>&gt; {
+    <span class="kw">fn </span>lifetimes&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="self">self</span>, used: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[Lifetime]) -&gt; <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">'a </span>LifetimeParam&gt; {
         <span class="kw">let </span>generics = <span class="kw">match </span><span class="self">self </span>{
             Context::Trait { generics, .. } =&gt; generics,
             Context::Impl { impl_generics, .. } =&gt; impl_generics,
@@ -634,15 +634,15 @@
 //     async fn f&lt;T&gt;(&amp;self, x: &amp;T) -&gt; Ret;
 //
 // Output:
-//     fn f&lt;&#39;life0, &#39;life1, &#39;async_trait, T&gt;(
-//         &amp;&#39;life0 self,
-//         x: &amp;&#39;life1 T,
-//     ) -&gt; Pin&lt;Box&lt;dyn Future&lt;Output = Ret&gt; + Send + &#39;async_trait&gt;&gt;
+//     fn f&lt;'life0, 'life1, 'async_trait, T&gt;(
+//         &amp;'life0 self,
+//         x: &amp;'life1 T,
+//     ) -&gt; Pin&lt;Box&lt;dyn Future&lt;Output = Ret&gt; + Send + 'async_trait&gt;&gt;
 //     where
-//         &#39;life0: &#39;async_trait,
-//         &#39;life1: &#39;async_trait,
-//         T: &#39;async_trait,
-//         Self: Sync + &#39;async_trait;
+//         'life0: 'async_trait,
+//         'life1: 'async_trait,
+//         T: 'async_trait,
+//         Self: Sync + 'async_trait;
 </span><span class="kw">fn </span>transform_sig(
     context: Context,
     sig: <span class="kw-2">&amp;mut </span>Signature,
@@ -677,7 +677,7 @@
                 <span class="kw">let </span>bounds = mem::replace(<span class="kw-2">&amp;mut </span>param.bounds, Punctuated::new());
                 where_clause_or_default(<span class="kw-2">&amp;mut </span>sig.generics.where_clause)
                     .predicates
-                    .push(<span class="macro">parse_quote_spanned!</span>(span=&gt; #param_name: <span class="lifetime">&#39;async_trait </span>+ #bounds));
+                    .push(<span class="macro">parse_quote_spanned!</span>(span=&gt; #param_name: <span class="lifetime">'async_trait </span>+ #bounds));
             }
             GenericParam::Lifetime(param) =&gt; {
                 <span class="kw">let </span>param_name = <span class="kw-2">&amp;</span>param.lifetime;
@@ -688,7 +688,7 @@
                 <span class="kw">let </span>bounds = mem::replace(<span class="kw-2">&amp;mut </span>param.bounds, Punctuated::new());
                 where_clause_or_default(<span class="kw-2">&amp;mut </span>sig.generics.where_clause)
                     .predicates
-                    .push(<span class="macro">parse_quote_spanned!</span>(span=&gt; #param: <span class="lifetime">&#39;async_trait </span>+ #bounds));
+                    .push(<span class="macro">parse_quote_spanned!</span>(span=&gt; #param: <span class="lifetime">'async_trait </span>+ #bounds));
             }
             GenericParam::Const(<span class="kw">_</span>) =&gt; {}
         }
@@ -699,7 +699,7 @@
         <span class="kw">let </span>span = param.span();
         where_clause_or_default(<span class="kw-2">&amp;mut </span>sig.generics.where_clause)
             .predicates
-            .push(<span class="macro">parse_quote_spanned!</span>(span=&gt; #param: <span class="lifetime">&#39;async_trait</span>));
+            .push(<span class="macro">parse_quote_spanned!</span>(span=&gt; #param: <span class="lifetime">'async_trait</span>));
     }
 
     <span class="kw">if </span>sig.generics.lt_token.is_none() {
@@ -713,12 +713,12 @@
         sig.generics.params.push(<span class="macro">parse_quote!</span>(#elided));
         where_clause_or_default(<span class="kw-2">&amp;mut </span>sig.generics.where_clause)
             .predicates
-            .push(<span class="macro">parse_quote_spanned!</span>(elided.span()=&gt; #elided: <span class="lifetime">&#39;async_trait</span>));
+            .push(<span class="macro">parse_quote_spanned!</span>(elided.span()=&gt; #elided: <span class="lifetime">'async_trait</span>));
     }
 
     sig.generics
         .params
-        .push(<span class="macro">parse_quote_spanned!</span>(default_span=&gt; <span class="lifetime">&#39;async_trait</span>));
+        .push(<span class="macro">parse_quote_spanned!</span>(default_span=&gt; <span class="lifetime">'async_trait</span>));
 
     <span class="kw">if </span>has_self {
         <span class="kw">let </span>bounds: <span class="kw-2">&amp;</span>[InferredBound] = <span class="kw">if let </span><span class="prelude-val">Some</span>(receiver) = sig.receiver() {
@@ -729,13 +729,13 @@
                 </span>Type::Path(ty)
                     <span class="kw">if </span>{
                         <span class="kw">let </span>segment = ty.path.segments.last().unwrap();
-                        segment.ident == <span class="string">&quot;Arc&quot;
+                        segment.ident == <span class="string">"Arc"
                             </span>&amp;&amp; <span class="kw">match </span><span class="kw-2">&amp;</span>segment.arguments {
                                 PathArguments::AngleBracketed(arguments) =&gt; {
                                     arguments.args.len() == <span class="number">1
                                         </span>&amp;&amp; <span class="kw">match </span><span class="kw-2">&amp;</span>arguments.args[<span class="number">0</span>] {
                                             GenericArgument::Type(Type::Path(arg)) =&gt; {
-                                                arg.path.is_ident(<span class="string">&quot;Self&quot;</span>)
+                                                arg.path.is_ident(<span class="string">"Self"</span>)
                                             }
                                             <span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
                                         }
@@ -767,7 +767,7 @@
         where_clause_or_default(<span class="kw-2">&amp;mut </span>sig.generics.where_clause)
             .predicates
             .push(<span class="macro">parse_quote_spanned! </span>{default_span=&gt;
-                <span class="self">Self</span>: #(#bounds +)* <span class="lifetime">&#39;async_trait
+                <span class="self">Self</span>: #(#bounds +)* <span class="lifetime">'async_trait
             </span>});
     }
 
@@ -798,9 +798,9 @@
     }
 
     <span class="kw">let </span>bounds = <span class="kw">if </span>is_local {
-        <span class="macro">quote_spanned!</span>(default_span=&gt; <span class="lifetime">&#39;async_trait</span>)
+        <span class="macro">quote_spanned!</span>(default_span=&gt; <span class="lifetime">'async_trait</span>)
     } <span class="kw">else </span>{
-        <span class="macro">quote_spanned!</span>(default_span=&gt; ::core::marker::Send + <span class="lifetime">&#39;async_trait</span>)
+        <span class="macro">quote_spanned!</span>(default_span=&gt; ::core::marker::Send + <span class="lifetime">'async_trait</span>)
     };
     sig.output = <span class="macro">parse_quote_spanned! </span>{default_span=&gt;
         #ret_arrow ::core::pin::Pin&lt;Box&lt;
@@ -838,7 +838,7 @@
                 mutability,
                 ..
             }) =&gt; {
-                <span class="kw">let </span>ident = Ident::new(<span class="string">&quot;__self&quot;</span>, self_token.span);
+                <span class="kw">let </span>ident = Ident::new(<span class="string">"__self"</span>, self_token.span);
                 self_span = <span class="prelude-val">Some</span>(self_token.span);
                 <span class="macro">quote!</span>(<span class="kw">let </span>#mutability #ident = #self_token;)
             }
@@ -847,7 +847,7 @@
                 // the parameter, forward it to the variable.
                 //
                 // This is currently not applied to the `self` parameter.
-                </span><span class="kw">let </span>attrs = arg.attrs.iter().filter(|attr| attr.path().is_ident(<span class="string">&quot;cfg&quot;</span>));
+                </span><span class="kw">let </span>attrs = arg.attrs.iter().filter(|attr| attr.path().is_ident(<span class="string">"cfg"</span>));
 
                 <span class="kw">if let </span>Type::Reference(<span class="kw">_</span>) = <span class="kw-2">*</span>arg.ty {
                     <span class="macro">quote!</span>()
@@ -922,20 +922,20 @@
     <span class="kw">let </span>span: Span = syn::spanned::Spanned::span(pat);
     <span class="attr">#[cfg(not(no_span_mixed_site))]
     </span><span class="kw">let </span>span = span.resolved_at(Span::mixed_site());
-    <span class="macro">format_ident!</span>(<span class="string">&quot;__arg{}&quot;</span>, i, span = span)
+    <span class="macro">format_ident!</span>(<span class="string">"__arg{}"</span>, i, span = span)
 }
 
 <span class="kw">fn </span>contains_associated_type_impl_trait(context: Context, ret: <span class="kw-2">&amp;mut </span>Type) -&gt; bool {
-    <span class="kw">struct </span>AssociatedTypeImplTraits&lt;<span class="lifetime">&#39;a</span>&gt; {
-        set: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Set&lt;Ident&gt;,
+    <span class="kw">struct </span>AssociatedTypeImplTraits&lt;<span class="lifetime">'a</span>&gt; {
+        set: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Set&lt;Ident&gt;,
         contains: bool,
     }
 
-    <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; VisitMut <span class="kw">for </span>AssociatedTypeImplTraits&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; VisitMut <span class="kw">for </span>AssociatedTypeImplTraits&lt;<span class="lifetime">'a</span>&gt; {
         <span class="kw">fn </span>visit_type_path_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>, ty: <span class="kw-2">&amp;mut </span>TypePath) {
             <span class="kw">if </span>ty.qself.is_none()
                 &amp;&amp; ty.path.segments.len() == <span class="number">2
-                </span>&amp;&amp; ty.path.segments[<span class="number">0</span>].ident == <span class="string">&quot;Self&quot;
+                </span>&amp;&amp; ty.path.segments[<span class="number">0</span>].ident == <span class="string">"Self"
                 </span>&amp;&amp; <span class="self">self</span>.set.contains(<span class="kw-2">&amp;</span>ty.path.segments[<span class="number">1</span>].ident)
             {
                 <span class="self">self</span>.contains = <span class="bool-val">true</span>;

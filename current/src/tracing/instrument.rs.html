@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tracing-0.1.40/src/instrument.rs`."><title>instrument.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="tracing" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../tracing/index.html"><img src="https://raw.githubusercontent.com/tokio-rs/tracing/master/assets/logo-type.png" alt="tracing"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tracing-0.1.40/src/instrument.rs`."><title>instrument.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="tracing" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../tracing/index.html"><img src="https://raw.githubusercontent.com/tokio-rs/tracing/master/assets/logo-type.png" alt="tracing"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -466,7 +466,7 @@
     /// };
     ///
     /// my_future
-    ///     .instrument(tracing::info_span!(&quot;my_future&quot;))
+    ///     .instrument(tracing::info_span!("my_future"))
     ///     .await
     /// # }
     /// ```
@@ -485,25 +485,25 @@
     ///     // ...
     /// };
     ///
-    /// let outer_span = tracing::info_span!(&quot;outer&quot;).entered();
+    /// let outer_span = tracing::info_span!("outer").entered();
     ///
-    /// // If the &quot;my_future&quot; span is enabled, then the spawned task will
-    /// // be within both &quot;my_future&quot; *and* &quot;outer&quot;, since &quot;outer&quot; is
-    /// // &quot;my_future&quot;&#39;s parent. However, if &quot;my_future&quot; is disabled,
+    /// // If the "my_future" span is enabled, then the spawned task will
+    /// // be within both "my_future" *and* "outer", since "outer" is
+    /// // "my_future"'s parent. However, if "my_future" is disabled,
     /// // the spawned task will *not* be in any span.
     /// tokio::spawn(
     ///     my_future
-    ///         .instrument(tracing::debug_span!(&quot;my_future&quot;))
+    ///         .instrument(tracing::debug_span!("my_future"))
     /// );
     ///
     /// // Using `Span::or_current` ensures the spawned task is instrumented
     /// // with the current span, if the new span passed to `instrument` is
-    /// // not enabled. This means that if the &quot;my_future&quot;  span is disabled,
-    /// // the spawned task will still be instrumented with the &quot;outer&quot; span:
+    /// // not enabled. This means that if the "my_future"  span is disabled,
+    /// // the spawned task will still be instrumented with the "outer" span:
     /// # let my_future = async {};
     /// tokio::spawn(
     ///    my_future
-    ///         .instrument(tracing::debug_span!(&quot;my_future&quot;).or_current())
+    ///         .instrument(tracing::debug_span!("my_future").or_current())
     /// );
     /// ```
     ///
@@ -536,13 +536,13 @@
     /// #     pub(super) fn spawn(_: impl std::future::Future) {}
     /// # }
     /// # async fn doc() {
-    /// let span = tracing::info_span!(&quot;my_span&quot;);
+    /// let span = tracing::info_span!("my_span");
     /// let _enter = span.enter();
     ///
     /// // ...
     ///
     /// let future = async {
-    ///     tracing::debug!(&quot;this event will occur inside `my_span`&quot;);
+    ///     tracing::debug!("this event will occur inside `my_span`");
     ///     // ...
     /// };
     /// tokio::spawn(future.in_current_span());
@@ -561,7 +561,7 @@
 
 <span class="doccomment">/// Extension trait allowing futures to be instrumented with
 /// a `tracing` [`Subscriber`](crate::Subscriber).
-</span><span class="attr">#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;std&quot;</span>)))]
+</span><span class="attr">#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"std"</span>)))]
 </span><span class="kw">pub trait </span>WithSubscriber: Sized {
     <span class="doccomment">/// Attaches the provided [`Subscriber`] to this type, returning a
     /// [`WithDispatch`] wrapper.
@@ -580,12 +580,12 @@
     /// // Set the default `Subscriber`
     /// let _default = tracing::subscriber::set_default(MySubscriber::default());
     ///
-    /// tracing::info!(&quot;this event will be recorded by the default `Subscriber`&quot;);
+    /// tracing::info!("this event will be recorded by the default `Subscriber`");
     ///
     /// // Create a different `Subscriber` and attach it to a future.
     /// let other_subscriber = MyOtherSubscriber::default();
     /// let future = async {
-    ///     tracing::info!(&quot;this event will be recorded by the other `Subscriber`&quot;);
+    ///     tracing::info!("this event will be recorded by the other `Subscriber`");
     ///     // ...
     /// };
     ///
@@ -595,7 +595,7 @@
     ///     .await;
     ///
     /// // Once the future has completed, we return to the default `Subscriber`.
-    /// tracing::info!(&quot;this event will be recorded by the default `Subscriber`&quot;);
+    /// tracing::info!("this event will be recorded by the default `Subscriber`");
     /// # }
     /// ```
     ///
@@ -640,11 +640,11 @@
     /// };
     ///
     /// // If a multi-threaded async runtime is in use, this spawned task may
-    /// // run on a different thread, in a different default `Subscriber`&#39;s context.
+    /// // run on a different thread, in a different default `Subscriber`'s context.
     /// tokio::spawn(future);
     ///
     /// // However, calling `with_current_subscriber` on the future before
-    /// // spawning it, ensures that the current thread&#39;s default `Subscriber` is
+    /// // spawning it, ensures that the current thread's default `Subscriber` is
     /// // propagated to the spawned task, regardless of where it executes:
     /// # let future = async { };
     /// tokio::spawn(future.with_current_subscriber());
@@ -666,13 +666,13 @@
     <span class="doccomment">/// A [`Future`] that has been instrumented with a `tracing` [`Subscriber`].
     ///
     /// This type is returned by the [`WithSubscriber`] extension trait. See that
-    /// trait&#39;s documentation for details.
+    /// trait's documentation for details.
     ///
     /// [`Future`]: std::future::Future
     /// [`Subscriber`]: crate::Subscriber
     </span><span class="attr">#[derive(Clone, Debug)]
-    #[must_use = <span class="string">&quot;futures do nothing unless you `.await` or poll them&quot;</span>]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;std&quot;</span>)))]
+    #[must_use = <span class="string">"futures do nothing unless you `.await` or poll them"</span>]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"std"</span>)))]
     </span><span class="kw">pub struct </span>WithDispatch&lt;T&gt; {
         <span class="attr">#[pin]
         </span>inner: T,
@@ -684,14 +684,14 @@
     <span class="doccomment">/// A [`Future`] that has been instrumented with a `tracing` [`Span`].
     ///
     /// This type is returned by the [`Instrument`] extension trait. See that
-    /// trait&#39;s documentation for details.
+    /// trait's documentation for details.
     ///
     /// [`Future`]: std::future::Future
     /// [`Span`]: crate::Span
     </span><span class="attr">#[project = InstrumentedProj]
     #[project_ref = InstrumentedProjRef]
     #[derive(Debug, Clone)]
-    #[must_use = <span class="string">&quot;futures do nothing unless you `.await` or poll them&quot;</span>]
+    #[must_use = <span class="string">"futures do nothing unless you `.await` or poll them"</span>]
     </span><span class="kw">pub struct </span>Instrumented&lt;T&gt; {
         <span class="comment">// `ManuallyDrop` is used here to to enter instrument `Drop` by entering
         // `Span` and executing `ManuallyDrop::drop`.
@@ -704,7 +704,7 @@
         <span class="kw">fn </span>drop(this: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;) {
             <span class="kw">let </span>this = this.project();
             <span class="kw">let </span>_enter = this.span.enter();
-            <span class="comment">// SAFETY: 1. `Pin::get_unchecked_mut()` is safe, because this isn&#39;t
+            <span class="comment">// SAFETY: 1. `Pin::get_unchecked_mut()` is safe, because this isn't
             //             different from wrapping `T` in `Option` and calling
             //             `Pin::set(&amp;mut this.inner, None)`, except avoiding
             //             additional memory overhead.
@@ -716,11 +716,11 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; InstrumentedProj&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; InstrumentedProj&lt;<span class="lifetime">'a</span>, T&gt; {
     <span class="doccomment">/// Get a mutable reference to the [`Span`] a pinned mutable reference to
     /// the wrapped type.
-    </span><span class="kw">fn </span>span_and_inner_pin_mut(<span class="self">self</span>) -&gt; (<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>Span, Pin&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>T&gt;) {
-        <span class="comment">// SAFETY: As long as `ManuallyDrop&lt;T&gt;` does not move, `T` won&#39;t move
+    </span><span class="kw">fn </span>span_and_inner_pin_mut(<span class="self">self</span>) -&gt; (<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>Span, Pin&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>T&gt;) {
+        <span class="comment">// SAFETY: As long as `ManuallyDrop&lt;T&gt;` does not move, `T` won't move
         //         and `inner` is valid, because `ManuallyDrop::drop` is called
         //         only inside `Drop` of the `Instrumented`.
         </span><span class="kw">let </span>inner = <span class="kw">unsafe </span>{ <span class="self">self</span>.inner.map_unchecked_mut(|v| <span class="kw-2">&amp;mut **</span>v) };
@@ -728,10 +728,10 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T&gt; InstrumentedProjRef&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; InstrumentedProjRef&lt;<span class="lifetime">'a</span>, T&gt; {
     <span class="doccomment">/// Get a reference to the [`Span`] a pinned reference to the wrapped type.
-    </span><span class="kw">fn </span>span_and_inner_pin_ref(<span class="self">self</span>) -&gt; (<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Span, Pin&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>T&gt;) {
-        <span class="comment">// SAFETY: As long as `ManuallyDrop&lt;T&gt;` does not move, `T` won&#39;t move
+    </span><span class="kw">fn </span>span_and_inner_pin_ref(<span class="self">self</span>) -&gt; (<span class="kw-2">&amp;</span><span class="lifetime">'a </span>Span, Pin&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>T&gt;) {
+        <span class="comment">// SAFETY: As long as `ManuallyDrop&lt;T&gt;` does not move, `T` won't move
         //         and `inner` is valid, because `ManuallyDrop::drop` is called
         //         only inside `Drop` of the `Instrumented`.
         </span><span class="kw">let </span>inner = <span class="kw">unsafe </span>{ <span class="self">self</span>.inner.map_unchecked(|v| <span class="kw-2">&amp;**</span>v) };
@@ -744,7 +744,7 @@
 </span><span class="kw">impl</span>&lt;T: Future&gt; Future <span class="kw">for </span>Instrumented&lt;T&gt; {
     <span class="kw">type </span>Output = T::Output;
 
-    <span class="kw">fn </span>poll(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
+    <span class="kw">fn </span>poll(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
         <span class="kw">let </span>(span, inner) = <span class="self">self</span>.project().span_and_inner_pin_mut();
         <span class="kw">let </span>_enter = span.enter();
         inner.poll(cx)
@@ -793,8 +793,8 @@
         </span><span class="kw">let </span>this = ManuallyDrop::new(<span class="self">self</span>);
         <span class="kw">let </span>span: <span class="kw-2">*const </span>Span = <span class="kw-2">&amp;</span>this.span;
         <span class="kw">let </span>inner: <span class="kw-2">*const </span>ManuallyDrop&lt;T&gt; = <span class="kw-2">&amp;</span>this.inner;
-        <span class="comment">// SAFETY: Those pointers are valid for reads, because `Drop` didn&#39;t
-        //         run, and properly aligned, because `Instrumented` isn&#39;t
+        <span class="comment">// SAFETY: Those pointers are valid for reads, because `Drop` didn't
+        //         run, and properly aligned, because `Instrumented` isn't
         //         `#[repr(packed)]`.
         </span><span class="kw">let </span>_span = <span class="kw">unsafe </span>{ span.read() };
         <span class="kw">let </span>inner = <span class="kw">unsafe </span>{ inner.read() };
@@ -804,12 +804,12 @@
 
 <span class="comment">// === impl WithDispatch ===
 
-</span><span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
-#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;std&quot;</span>)))]
+</span><span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
+#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"std"</span>)))]
 </span><span class="kw">impl</span>&lt;T: Future&gt; Future <span class="kw">for </span>WithDispatch&lt;T&gt; {
     <span class="kw">type </span>Output = T::Output;
 
-    <span class="kw">fn </span>poll(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
+    <span class="kw">fn </span>poll(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
         <span class="kw">let </span>this = <span class="self">self</span>.project();
         <span class="kw">let </span>dispatcher = this.dispatcher;
         <span class="kw">let </span>future = this.inner;
@@ -818,11 +818,11 @@
     }
 }
 
-<span class="attr">#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;std&quot;</span>)))]
+<span class="attr">#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"std"</span>)))]
 </span><span class="kw">impl</span>&lt;T: Sized&gt; WithSubscriber <span class="kw">for </span>T {}
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;std&quot;</span>)]
-#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;std&quot;</span>)))]
+<span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
+#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"std"</span>)))]
 </span><span class="kw">impl</span>&lt;T&gt; WithDispatch&lt;T&gt; {
     <span class="doccomment">/// Borrows the [`Dispatch`] that is entered when this type is polled.
     </span><span class="kw">pub fn </span>dispatcher(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Dispatch {

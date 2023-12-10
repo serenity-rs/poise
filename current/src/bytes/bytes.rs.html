@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bytes-1.5.0/src/bytes.rs`."><title>bytes.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="bytes" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bytes-1.5.0/src/bytes.rs`."><title>bytes.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="bytes" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1341,15 +1341,15 @@
 /// ```
 /// use bytes::Bytes;
 ///
-/// let mut mem = Bytes::from(&quot;Hello world&quot;);
+/// let mut mem = Bytes::from("Hello world");
 /// let a = mem.slice(0..5);
 ///
-/// assert_eq!(a, &quot;Hello&quot;);
+/// assert_eq!(a, "Hello");
 ///
 /// let b = mem.split_to(6);
 ///
-/// assert_eq!(mem, &quot;world&quot;);
-/// assert_eq!(b, &quot;Hello &quot;);
+/// assert_eq!(mem, "world");
+/// assert_eq!(b, "Hello ");
 /// ```
 ///
 /// # Memory layout
@@ -1404,9 +1404,9 @@
 </span><span class="kw">pub struct </span>Bytes {
     ptr: <span class="kw-2">*const </span>u8,
     len: usize,
-    <span class="comment">// inlined &quot;trait object&quot;
+    <span class="comment">// inlined "trait object"
     </span>data: AtomicPtr&lt;()&gt;,
-    vtable: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Vtable,
+    vtable: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Vtable,
 }
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>Vtable {
@@ -1431,13 +1431,13 @@
     /// use bytes::Bytes;
     ///
     /// let b = Bytes::new();
-    /// assert_eq!(&amp;b[..], b&quot;&quot;);
+    /// assert_eq!(&amp;b[..], b"");
     /// ```
     </span><span class="attr">#[inline]
     #[cfg(not(all(loom, test)))]
     </span><span class="kw">pub const fn </span>new() -&gt; <span class="self">Self </span>{
         <span class="comment">// Make it a named const to work around
-        // &quot;unsizing casts are not allowed in const fn&quot;
+        // "unsizing casts are not allowed in const fn"
         </span><span class="kw">const </span>EMPTY: <span class="kw-2">&amp;</span>[u8] = <span class="kw-2">&amp;</span>[];
         Bytes::from_static(EMPTY)
     }
@@ -1458,12 +1458,12 @@
     /// ```
     /// use bytes::Bytes;
     ///
-    /// let b = Bytes::from_static(b&quot;hello&quot;);
-    /// assert_eq!(&amp;b[..], b&quot;hello&quot;);
+    /// let b = Bytes::from_static(b"hello");
+    /// assert_eq!(&amp;b[..], b"hello");
     /// ```
     </span><span class="attr">#[inline]
     #[cfg(not(all(loom, test)))]
-    </span><span class="kw">pub const fn </span>from_static(bytes: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[u8]) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub const fn </span>from_static(bytes: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>[u8]) -&gt; <span class="self">Self </span>{
         Bytes {
             ptr: bytes.as_ptr(),
             len: bytes.len(),
@@ -1473,7 +1473,7 @@
     }
 
     <span class="attr">#[cfg(all(loom, test))]
-    </span><span class="kw">pub fn </span>from_static(bytes: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[u8]) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>from_static(bytes: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>[u8]) -&gt; <span class="self">Self </span>{
         Bytes {
             ptr: bytes.as_ptr(),
             len: bytes.len(),
@@ -1489,7 +1489,7 @@
     /// ```
     /// use bytes::Bytes;
     ///
-    /// let b = Bytes::from(&amp;b&quot;hello&quot;[..]);
+    /// let b = Bytes::from(&amp;b"hello"[..]);
     /// assert_eq!(b.len(), 5);
     /// ```
     </span><span class="attr">#[inline]
@@ -1529,10 +1529,10 @@
     /// ```
     /// use bytes::Bytes;
     ///
-    /// let a = Bytes::from(&amp;b&quot;hello world&quot;[..]);
+    /// let a = Bytes::from(&amp;b"hello world"[..]);
     /// let b = a.slice(2..5);
     ///
-    /// assert_eq!(&amp;b[..], b&quot;llo&quot;);
+    /// assert_eq!(&amp;b[..], b"llo");
     /// ```
     ///
     /// # Panics
@@ -1551,20 +1551,20 @@
         };
 
         <span class="kw">let </span>end = <span class="kw">match </span>range.end_bound() {
-            Bound::Included(<span class="kw-2">&amp;</span>n) =&gt; n.checked_add(<span class="number">1</span>).expect(<span class="string">&quot;out of range&quot;</span>),
+            Bound::Included(<span class="kw-2">&amp;</span>n) =&gt; n.checked_add(<span class="number">1</span>).expect(<span class="string">"out of range"</span>),
             Bound::Excluded(<span class="kw-2">&amp;</span>n) =&gt; n,
             Bound::Unbounded =&gt; len,
         };
 
         <span class="macro">assert!</span>(
             begin &lt;= end,
-            <span class="string">&quot;range start must not be greater than end: {:?} &lt;= {:?}&quot;</span>,
+            <span class="string">"range start must not be greater than end: {:?} &lt;= {:?}"</span>,
             begin,
             end,
         );
         <span class="macro">assert!</span>(
             end &lt;= len,
-            <span class="string">&quot;range end out of bounds: {:?} &lt;= {:?}&quot;</span>,
+            <span class="string">"range end out of bounds: {:?} &lt;= {:?}"</span>,
             end,
             len,
         );
@@ -1595,11 +1595,11 @@
     /// ```
     /// use bytes::Bytes;
     ///
-    /// let bytes = Bytes::from(&amp;b&quot;012345678&quot;[..]);
+    /// let bytes = Bytes::from(&amp;b"012345678"[..]);
     /// let as_slice = bytes.as_ref();
     /// let subset = &amp;as_slice[2..6];
     /// let subslice = bytes.slice_ref(&amp;subset);
-    /// assert_eq!(&amp;subslice[..], b&quot;2345&quot;);
+    /// assert_eq!(&amp;subslice[..], b"2345");
     /// ```
     ///
     /// # Panics
@@ -1621,13 +1621,13 @@
 
         <span class="macro">assert!</span>(
             sub_p &gt;= bytes_p,
-            <span class="string">&quot;subset pointer ({:p}) is smaller than self pointer ({:p})&quot;</span>,
+            <span class="string">"subset pointer ({:p}) is smaller than self pointer ({:p})"</span>,
             subset.as_ptr(),
             <span class="self">self</span>.as_ptr(),
         );
         <span class="macro">assert!</span>(
             sub_p + sub_len &lt;= bytes_p + bytes_len,
-            <span class="string">&quot;subset is out of bounds: self = ({:p}, {}), subset = ({:p}, {})&quot;</span>,
+            <span class="string">"subset is out of bounds: self = ({:p}, {}), subset = ({:p}, {})"</span>,
             <span class="self">self</span>.as_ptr(),
             bytes_len,
             subset.as_ptr(),
@@ -1652,21 +1652,21 @@
     /// ```
     /// use bytes::Bytes;
     ///
-    /// let mut a = Bytes::from(&amp;b&quot;hello world&quot;[..]);
+    /// let mut a = Bytes::from(&amp;b"hello world"[..]);
     /// let b = a.split_off(5);
     ///
-    /// assert_eq!(&amp;a[..], b&quot;hello&quot;);
-    /// assert_eq!(&amp;b[..], b&quot; world&quot;);
+    /// assert_eq!(&amp;a[..], b"hello");
+    /// assert_eq!(&amp;b[..], b" world");
     /// ```
     ///
     /// # Panics
     ///
     /// Panics if `at &gt; len`.
-    </span><span class="attr">#[must_use = <span class="string">&quot;consider Bytes::truncate if you don&#39;t need the other half&quot;</span>]
+    </span><span class="attr">#[must_use = <span class="string">"consider Bytes::truncate if you don't need the other half"</span>]
     </span><span class="kw">pub fn </span>split_off(<span class="kw-2">&amp;mut </span><span class="self">self</span>, at: usize) -&gt; <span class="self">Self </span>{
         <span class="macro">assert!</span>(
             at &lt;= <span class="self">self</span>.len(),
-            <span class="string">&quot;split_off out of bounds: {:?} &lt;= {:?}&quot;</span>,
+            <span class="string">"split_off out of bounds: {:?} &lt;= {:?}"</span>,
             at,
             <span class="self">self</span>.len(),
         );
@@ -1701,21 +1701,21 @@
     /// ```
     /// use bytes::Bytes;
     ///
-    /// let mut a = Bytes::from(&amp;b&quot;hello world&quot;[..]);
+    /// let mut a = Bytes::from(&amp;b"hello world"[..]);
     /// let b = a.split_to(5);
     ///
-    /// assert_eq!(&amp;a[..], b&quot; world&quot;);
-    /// assert_eq!(&amp;b[..], b&quot;hello&quot;);
+    /// assert_eq!(&amp;a[..], b" world");
+    /// assert_eq!(&amp;b[..], b"hello");
     /// ```
     ///
     /// # Panics
     ///
     /// Panics if `at &gt; len`.
-    </span><span class="attr">#[must_use = <span class="string">&quot;consider Bytes::advance if you don&#39;t need the other half&quot;</span>]
+    </span><span class="attr">#[must_use = <span class="string">"consider Bytes::advance if you don't need the other half"</span>]
     </span><span class="kw">pub fn </span>split_to(<span class="kw-2">&amp;mut </span><span class="self">self</span>, at: usize) -&gt; <span class="self">Self </span>{
         <span class="macro">assert!</span>(
             at &lt;= <span class="self">self</span>.len(),
-            <span class="string">&quot;split_to out of bounds: {:?} &lt;= {:?}&quot;</span>,
+            <span class="string">"split_to out of bounds: {:?} &lt;= {:?}"</span>,
             at,
             <span class="self">self</span>.len(),
         );
@@ -1739,7 +1739,7 @@
     <span class="doccomment">/// Shortens the buffer, keeping the first `len` bytes and dropping the
     /// rest.
     ///
-    /// If `len` is greater than the buffer&#39;s current length, this has no
+    /// If `len` is greater than the buffer's current length, this has no
     /// effect.
     ///
     /// The [`split_off`] method can emulate `truncate`, but this causes the
@@ -1750,16 +1750,16 @@
     /// ```
     /// use bytes::Bytes;
     ///
-    /// let mut buf = Bytes::from(&amp;b&quot;hello world&quot;[..]);
+    /// let mut buf = Bytes::from(&amp;b"hello world"[..]);
     /// buf.truncate(5);
-    /// assert_eq!(buf, b&quot;hello&quot;[..]);
+    /// assert_eq!(buf, b"hello"[..]);
     /// ```
     ///
     /// [`split_off`]: #method.split_off
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>truncate(<span class="kw-2">&amp;mut </span><span class="self">self</span>, len: usize) {
         <span class="kw">if </span>len &lt; <span class="self">self</span>.len {
-            <span class="comment">// The Vec &quot;promotable&quot; vtables do not store the capacity,
+            <span class="comment">// The Vec "promotable" vtables do not store the capacity,
             // so we cannot truncate while using this repr. We *have* to
             // promote using `split_off` so the capacity can be stored.
             </span><span class="kw">if </span><span class="self">self</span>.vtable <span class="kw">as </span><span class="kw-2">*const </span>Vtable == <span class="kw-2">&amp;</span>PROMOTABLE_EVEN_VTABLE
@@ -1779,7 +1779,7 @@
     /// ```
     /// use bytes::Bytes;
     ///
-    /// let mut buf = Bytes::from(&amp;b&quot;hello world&quot;[..]);
+    /// let mut buf = Bytes::from(&amp;b"hello world"[..]);
     /// buf.clear();
     /// assert!(buf.is_empty());
     /// ```
@@ -1793,7 +1793,7 @@
         ptr: <span class="kw-2">*const </span>u8,
         len: usize,
         data: AtomicPtr&lt;()&gt;,
-        vtable: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>Vtable,
+        vtable: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Vtable,
     ) -&gt; Bytes {
         Bytes {
             ptr,
@@ -1813,7 +1813,7 @@
     <span class="attr">#[inline]
     </span><span class="kw">unsafe fn </span>inc_start(<span class="kw-2">&amp;mut </span><span class="self">self</span>, by: usize) {
         <span class="comment">// should already be asserted, but debug assert for tests
-        </span><span class="macro">debug_assert!</span>(<span class="self">self</span>.len &gt;= by, <span class="string">&quot;internal: inc_start out of bounds&quot;</span>);
+        </span><span class="macro">debug_assert!</span>(<span class="self">self</span>.len &gt;= by, <span class="string">"internal: inc_start out of bounds"</span>);
         <span class="self">self</span>.len -= by;
         <span class="self">self</span>.ptr = <span class="self">self</span>.ptr.add(by);
     }
@@ -1852,7 +1852,7 @@
     </span><span class="kw">fn </span>advance(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cnt: usize) {
         <span class="macro">assert!</span>(
             cnt &lt;= <span class="self">self</span>.len(),
-            <span class="string">&quot;cannot advance past `remaining`: {:?} &lt;= {:?}&quot;</span>,
+            <span class="string">"cannot advance past `remaining`: {:?} &lt;= {:?}"</span>,
             cnt,
             <span class="self">self</span>.len(),
         );
@@ -1913,9 +1913,9 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Bytes {
-    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>u8;
-    <span class="kw">type </span>IntoIter = core::slice::Iter&lt;<span class="lifetime">&#39;a</span>, u8&gt;;
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; IntoIterator <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>Bytes {
+    <span class="kw">type </span>Item = <span class="kw-2">&amp;</span><span class="lifetime">'a </span>u8;
+    <span class="kw">type </span>IntoIter = core::slice::Iter&lt;<span class="lifetime">'a</span>, u8&gt;;
 
     <span class="kw">fn </span>into_iter(<span class="self">self</span>) -&gt; <span class="self">Self</span>::IntoIter {
         <span class="self">self</span>.as_slice().iter()
@@ -2070,20 +2070,20 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: <span class="question-mark">?</span>Sized&gt; PartialEq&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>T&gt; <span class="kw">for </span>Bytes
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T: <span class="question-mark">?</span>Sized&gt; PartialEq&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>T&gt; <span class="kw">for </span>Bytes
 <span class="kw">where
     </span>Bytes: PartialEq&lt;T&gt;,
 {
-    <span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: &amp;&amp;<span class="lifetime">&#39;a </span>T) -&gt; bool {
+    <span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: &amp;&amp;<span class="lifetime">'a </span>T) -&gt; bool {
         <span class="kw-2">*</span><span class="self">self </span>== <span class="kw-2">**</span>other
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: <span class="question-mark">?</span>Sized&gt; PartialOrd&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>T&gt; <span class="kw">for </span>Bytes
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T: <span class="question-mark">?</span>Sized&gt; PartialOrd&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>T&gt; <span class="kw">for </span>Bytes
 <span class="kw">where
     </span>Bytes: PartialOrd&lt;T&gt;,
 {
-    <span class="kw">fn </span>partial_cmp(<span class="kw-2">&amp;</span><span class="self">self</span>, other: &amp;&amp;<span class="lifetime">&#39;a </span>T) -&gt; <span class="prelude-ty">Option</span>&lt;cmp::Ordering&gt; {
+    <span class="kw">fn </span>partial_cmp(<span class="kw-2">&amp;</span><span class="self">self</span>, other: &amp;&amp;<span class="lifetime">'a </span>T) -&gt; <span class="prelude-ty">Option</span>&lt;cmp::Ordering&gt; {
         <span class="self">self</span>.partial_cmp(<span class="kw-2">&amp;**</span>other)
     }
 }
@@ -2097,14 +2097,14 @@
     }
 }
 
-<span class="kw">impl </span>From&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[u8]&gt; <span class="kw">for </span>Bytes {
-    <span class="kw">fn </span>from(slice: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>[u8]) -&gt; Bytes {
+<span class="kw">impl </span>From&lt;<span class="kw-2">&amp;</span><span class="lifetime">'static </span>[u8]&gt; <span class="kw">for </span>Bytes {
+    <span class="kw">fn </span>from(slice: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>[u8]) -&gt; Bytes {
         Bytes::from_static(slice)
     }
 }
 
-<span class="kw">impl </span>From&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str&gt; <span class="kw">for </span>Bytes {
-    <span class="kw">fn </span>from(slice: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str) -&gt; Bytes {
+<span class="kw">impl </span>From&lt;<span class="kw-2">&amp;</span><span class="lifetime">'static </span>str&gt; <span class="kw">for </span>Bytes {
+    <span class="kw">fn </span>from(slice: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str) -&gt; Bytes {
         Bytes::from_static(slice.as_bytes())
     }
 }
@@ -2133,7 +2133,7 @@
         // always succeed.
         </span><span class="macro">debug_assert!</span>(
             <span class="number">0 </span>== (shared <span class="kw">as </span>usize &amp; KIND_MASK),
-            <span class="string">&quot;internal: Box&lt;Shared&gt; should have an aligned pointer&quot;</span>,
+            <span class="string">"internal: Box&lt;Shared&gt; should have an aligned pointer"</span>,
         );
         Bytes {
             ptr,
@@ -2146,8 +2146,8 @@
 
 <span class="kw">impl </span>From&lt;Box&lt;[u8]&gt;&gt; <span class="kw">for </span>Bytes {
     <span class="kw">fn </span>from(slice: Box&lt;[u8]&gt;) -&gt; Bytes {
-        <span class="comment">// Box&lt;[u8]&gt; doesn&#39;t contain a heap allocation for empty slices,
-        // so the pointer isn&#39;t aligned enough for the KIND_VEC stashing to
+        <span class="comment">// Box&lt;[u8]&gt; doesn't contain a heap allocation for empty slices,
+        // so the pointer isn't aligned enough for the KIND_VEC stashing to
         // work.
         </span><span class="kw">if </span>slice.is_empty() {
             <span class="kw">return </span>Bytes::new();
@@ -2191,10 +2191,10 @@
 <span class="comment">// ===== impl Vtable =====
 
 </span><span class="kw">impl </span>fmt::Debug <span class="kw">for </span>Vtable {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
-        f.debug_struct(<span class="string">&quot;Vtable&quot;</span>)
-            .field(<span class="string">&quot;clone&quot;</span>, <span class="kw-2">&amp;</span>(<span class="self">self</span>.clone <span class="kw">as </span><span class="kw-2">*const </span>()))
-            .field(<span class="string">&quot;drop&quot;</span>, <span class="kw-2">&amp;</span>(<span class="self">self</span>.drop <span class="kw">as </span><span class="kw-2">*const </span>()))
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        f.debug_struct(<span class="string">"Vtable"</span>)
+            .field(<span class="string">"clone"</span>, <span class="kw-2">&amp;</span>(<span class="self">self</span>.clone <span class="kw">as </span><span class="kw-2">*const </span>()))
+            .field(<span class="string">"drop"</span>, <span class="kw-2">&amp;</span>(<span class="self">self</span>.drop <span class="kw">as </span><span class="kw-2">*const </span>()))
             .finish()
     }
 }
@@ -2218,7 +2218,7 @@
 }
 
 <span class="kw">unsafe fn </span>static_drop(<span class="kw">_</span>: <span class="kw-2">&amp;mut </span>AtomicPtr&lt;()&gt;, <span class="kw">_</span>: <span class="kw-2">*const </span>u8, <span class="kw">_</span>: usize) {
-    <span class="comment">// nothing to drop for &amp;&#39;static [u8]
+    <span class="comment">// nothing to drop for &amp;'static [u8]
 </span>}
 
 <span class="comment">// ===== impl PromotableVtable =====
@@ -2334,7 +2334,7 @@
 <span class="comment">// ===== impl SharedVtable =====
 
 </span><span class="kw">struct </span>Shared {
-    <span class="comment">// Holds arguments to dealloc upon Drop, but otherwise doesn&#39;t use them
+    <span class="comment">// Holds arguments to dealloc upon Drop, but otherwise doesn't use them
     </span>buf: <span class="kw-2">*mut </span>u8,
     cap: usize,
     ref_cnt: AtomicUsize,
@@ -2434,10 +2434,10 @@
     // concurrently, so some care must be taken.
 
     // First, allocate a new `Shared` instance containing the
-    // `Vec` fields. It&#39;s important to note that `ptr`, `len`,
+    // `Vec` fields. It's important to note that `ptr`, `len`,
     // and `cap` cannot be mutated without having `&amp;mut self`.
     // This means that these fields will not be concurrently
-    // updated and since the buffer hasn&#39;t been promoted to an
+    // updated and since the buffer hasn't been promoted to an
     // `Arc`, those three fields still are the components of the
     // vector.
     </span><span class="kw">let </span>shared = Box::new(Shared {
@@ -2455,7 +2455,7 @@
     // always succeed.
     </span><span class="macro">debug_assert!</span>(
         <span class="number">0 </span>== (shared <span class="kw">as </span>usize &amp; KIND_MASK),
-        <span class="string">&quot;internal: Box&lt;Shared&gt; should have an aligned pointer&quot;</span>,
+        <span class="string">"internal: Box&lt;Shared&gt; should have an aligned pointer"</span>,
     );
 
     <span class="comment">// Try compare &amp; swapping the pointer into the `arc` field.
@@ -2510,10 +2510,10 @@
     //
     // &gt; It is important to enforce any possible access to the object in one
     // &gt; thread (through an existing reference) to *happen before* deleting
-    // &gt; the object in a different thread. This is achieved by a &quot;release&quot;
+    // &gt; the object in a different thread. This is achieved by a "release"
     // &gt; operation after dropping a reference (any access to the object
     // &gt; through this reference must obviously happened before), and an
-    // &gt; &quot;acquire&quot; operation before deleting the object.
+    // &gt; "acquire" operation before deleting the object.
     //
     // [1]: (www.boost.org/doc/libs/1_55_0/doc/html/atomic/usage_examples.html)
     //
@@ -2558,7 +2558,7 @@
 /// use bytes::Bytes;
 /// #[deny(unused_must_use)]
 /// {
-///     let mut b1 = Bytes::from(&quot;hello world&quot;);
+///     let mut b1 = Bytes::from("hello world");
 ///     b1.split_to(6);
 /// }
 /// ```
@@ -2568,7 +2568,7 @@
 /// use bytes::Bytes;
 /// #[deny(unused_must_use)]
 /// {
-///     let mut b1 = Bytes::from(&quot;hello world&quot;);
+///     let mut b1 = Bytes::from("hello world");
 ///     b1.split_off(6);
 /// }
 /// ```
@@ -2584,7 +2584,7 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>bytes_cloning_vec() {
         loom::model(|| {
-            <span class="kw">let </span>a = Bytes::from(<span class="string">b&quot;abcdefgh&quot;</span>.to_vec());
+            <span class="kw">let </span>a = Bytes::from(<span class="string">b"abcdefgh"</span>.to_vec());
             <span class="kw">let </span>addr = a.as_ptr() <span class="kw">as </span>usize;
 
             <span class="comment">// test the Bytes::clone is Sync by putting it in an Arc

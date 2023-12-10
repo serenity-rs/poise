@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/reqwest-0.11.22/src/async_impl/multipart.rs`."><title>multipart.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="reqwest" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/reqwest-0.11.22/src/async_impl/multipart.rs`."><title>multipart.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="reqwest" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -702,13 +702,13 @@
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>FormParts&lt;P&gt; {
     <span class="kw">pub</span>(<span class="kw">crate</span>) boundary: String,
     <span class="kw">pub</span>(<span class="kw">crate</span>) computed_headers: Vec&lt;Vec&lt;u8&gt;&gt;,
-    <span class="kw">pub</span>(<span class="kw">crate</span>) fields: Vec&lt;(Cow&lt;<span class="lifetime">&#39;static</span>, str&gt;, P)&gt;,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) fields: Vec&lt;(Cow&lt;<span class="lifetime">'static</span>, str&gt;, P)&gt;,
     <span class="kw">pub</span>(<span class="kw">crate</span>) percent_encoding: PercentEncoding,
 }
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>PartMetadata {
     mime: <span class="prelude-ty">Option</span>&lt;Mime&gt;,
-    file_name: <span class="prelude-ty">Option</span>&lt;Cow&lt;<span class="lifetime">&#39;static</span>, str&gt;&gt;,
+    file_name: <span class="prelude-ty">Option</span>&lt;Cow&lt;<span class="lifetime">'static</span>, str&gt;&gt;,
     <span class="kw">pub</span>(<span class="kw">crate</span>) headers: HeaderMap,
 }
 
@@ -745,13 +745,13 @@
     ///
     /// ```
     /// let form = reqwest::multipart::Form::new()
-    ///     .text(&quot;username&quot;, &quot;seanmonstar&quot;)
-    ///     .text(&quot;password&quot;, &quot;secret&quot;);
+    ///     .text("username", "seanmonstar")
+    ///     .text("password", "secret");
     /// ```
     </span><span class="kw">pub fn </span>text&lt;T, U&gt;(<span class="self">self</span>, name: T, value: U) -&gt; Form
     <span class="kw">where
-        </span>T: Into&lt;Cow&lt;<span class="lifetime">&#39;static</span>, str&gt;&gt;,
-        U: Into&lt;Cow&lt;<span class="lifetime">&#39;static</span>, str&gt;&gt;,
+        </span>T: Into&lt;Cow&lt;<span class="lifetime">'static</span>, str&gt;&gt;,
+        U: Into&lt;Cow&lt;<span class="lifetime">'static</span>, str&gt;&gt;,
     {
         <span class="self">self</span>.part(name, Part::text(value))
     }
@@ -759,7 +759,7 @@
     <span class="doccomment">/// Adds a customized Part.
     </span><span class="kw">pub fn </span>part&lt;T&gt;(<span class="self">self</span>, name: T, part: Part) -&gt; Form
     <span class="kw">where
-        </span>T: Into&lt;Cow&lt;<span class="lifetime">&#39;static</span>, str&gt;&gt;,
+        </span>T: Into&lt;Cow&lt;<span class="lifetime">'static</span>, str&gt;&gt;,
     {
         <span class="self">self</span>.with_inner(<span class="kw">move </span>|inner| inner.part(name, part))
     }
@@ -799,7 +799,7 @@
         });
         <span class="comment">// append special ending boundary
         </span><span class="kw">let </span>last = stream::once(future::ready(<span class="prelude-val">Ok</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;--{}--\r\n&quot;</span>, <span class="self">self</span>.boundary()).into()
+            <span class="macro">format!</span>(<span class="string">"--{}--\r\n"</span>, <span class="self">self</span>.boundary()).into()
         )));
         Body::stream(stream.chain(last))
     }
@@ -811,11 +811,11 @@
         part: Part,
     ) -&gt; <span class="kw">impl </span>Stream&lt;Item = <span class="prelude-ty">Result</span>&lt;Bytes, <span class="kw">crate</span>::Error&gt;&gt;
     <span class="kw">where
-        </span>T: Into&lt;Cow&lt;<span class="lifetime">&#39;static</span>, str&gt;&gt;,
+        </span>T: Into&lt;Cow&lt;<span class="lifetime">'static</span>, str&gt;&gt;,
     {
         <span class="comment">// start with boundary
         </span><span class="kw">let </span>boundary = stream::once(future::ready(<span class="prelude-val">Ok</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;--{}\r\n&quot;</span>, <span class="self">self</span>.boundary()).into()
+            <span class="macro">format!</span>(<span class="string">"--{}\r\n"</span>, <span class="self">self</span>.boundary()).into()
         )));
         <span class="comment">// append headers
         </span><span class="kw">let </span>header = stream::once(future::ready(<span class="prelude-val">Ok</span>({
@@ -823,14 +823,14 @@
                 </span>.inner
                 .percent_encoding
                 .encode_headers(<span class="kw-2">&amp;</span>name.into(), <span class="kw-2">&amp;</span>part.meta);
-            h.extend_from_slice(<span class="string">b&quot;\r\n\r\n&quot;</span>);
+            h.extend_from_slice(<span class="string">b"\r\n\r\n"</span>);
             h.into()
         })));
         <span class="comment">// then append form data followed by terminating CRLF
         </span>boundary
             .chain(header)
             .chain(part.value.into_stream())
-            .chain(stream::once(future::ready(<span class="prelude-val">Ok</span>(<span class="string">&quot;\r\n&quot;</span>.into()))))
+            .chain(stream::once(future::ready(<span class="prelude-val">Ok</span>(<span class="string">"\r\n"</span>.into()))))
     }
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>compute_length(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;u64&gt; {
@@ -849,7 +849,7 @@
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>Form {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
-        <span class="self">self</span>.inner.fmt_fields(<span class="string">&quot;Form&quot;</span>, f)
+        <span class="self">self</span>.inner.fmt_fields(<span class="string">"Form"</span>, f)
     }
 }
 
@@ -859,7 +859,7 @@
     <span class="doccomment">/// Makes a text parameter.
     </span><span class="kw">pub fn </span>text&lt;T&gt;(value: T) -&gt; Part
     <span class="kw">where
-        </span>T: Into&lt;Cow&lt;<span class="lifetime">&#39;static</span>, str&gt;&gt;,
+        </span>T: Into&lt;Cow&lt;<span class="lifetime">'static</span>, str&gt;&gt;,
     {
         <span class="kw">let </span>body = <span class="kw">match </span>value.into() {
             Cow::Borrowed(slice) =&gt; Body::from(slice),
@@ -871,7 +871,7 @@
     <span class="doccomment">/// Makes a new parameter from arbitrary bytes.
     </span><span class="kw">pub fn </span>bytes&lt;T&gt;(value: T) -&gt; Part
     <span class="kw">where
-        </span>T: Into&lt;Cow&lt;<span class="lifetime">&#39;static</span>, [u8]&gt;&gt;,
+        </span>T: Into&lt;Cow&lt;<span class="lifetime">'static</span>, [u8]&gt;&gt;,
     {
         <span class="kw">let </span>body = <span class="kw">match </span>value.into() {
             Cow::Borrowed(slice) =&gt; Body::from(slice),
@@ -913,7 +913,7 @@
     <span class="doccomment">/// Sets the filename, builder style.
     </span><span class="kw">pub fn </span>file_name&lt;T&gt;(<span class="self">self</span>, filename: T) -&gt; Part
     <span class="kw">where
-        </span>T: Into&lt;Cow&lt;<span class="lifetime">&#39;static</span>, str&gt;&gt;,
+        </span>T: Into&lt;Cow&lt;<span class="lifetime">'static</span>, str&gt;&gt;,
     {
         <span class="self">self</span>.with_inner(<span class="kw">move </span>|inner| inner.file_name(filename))
     }
@@ -936,8 +936,8 @@
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>Part {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
-        <span class="kw">let </span><span class="kw-2">mut </span>dbg = f.debug_struct(<span class="string">&quot;Part&quot;</span>);
-        dbg.field(<span class="string">&quot;value&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.value);
+        <span class="kw">let </span><span class="kw-2">mut </span>dbg = f.debug_struct(<span class="string">"Part"</span>);
+        dbg.field(<span class="string">"value"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.value);
         <span class="self">self</span>.meta.fmt_fields(<span class="kw-2">&amp;mut </span>dbg);
         dbg.finish()
     }
@@ -976,7 +976,7 @@
     <span class="doccomment">/// Adds a customized Part.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>part&lt;T&gt;(<span class="kw-2">mut </span><span class="self">self</span>, name: T, part: P) -&gt; <span class="self">Self
     </span><span class="kw">where
-        </span>T: Into&lt;Cow&lt;<span class="lifetime">&#39;static</span>, str&gt;&gt;,
+        </span>T: Into&lt;Cow&lt;<span class="lifetime">'static</span>, str&gt;&gt;,
     {
         <span class="self">self</span>.fields.push((name.into(), part));
         <span class="self">self
@@ -1036,16 +1036,16 @@
     }
 
     <span class="doccomment">/// Take the fields vector of this instance, replacing with an empty vector.
-    </span><span class="kw">fn </span>take_fields(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; Vec&lt;(Cow&lt;<span class="lifetime">&#39;static</span>, str&gt;, P)&gt; {
+    </span><span class="kw">fn </span>take_fields(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; Vec&lt;(Cow&lt;<span class="lifetime">'static</span>, str&gt;, P)&gt; {
         std::mem::replace(<span class="kw-2">&amp;mut </span><span class="self">self</span>.fields, Vec::new())
     }
 }
 
 <span class="kw">impl</span>&lt;P: fmt::Debug&gt; FormParts&lt;P&gt; {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>fmt_fields(<span class="kw-2">&amp;</span><span class="self">self</span>, ty_name: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>fmt_fields(<span class="kw-2">&amp;</span><span class="self">self</span>, ty_name: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
         f.debug_struct(ty_name)
-            .field(<span class="string">&quot;boundary&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.boundary)
-            .field(<span class="string">&quot;parts&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.fields)
+            .field(<span class="string">"boundary"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.boundary)
+            .field(<span class="string">"parts"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.fields)
             .finish()
     }
 }
@@ -1068,7 +1068,7 @@
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>file_name&lt;T&gt;(<span class="kw-2">mut </span><span class="self">self</span>, filename: T) -&gt; <span class="self">Self
     </span><span class="kw">where
-        </span>T: Into&lt;Cow&lt;<span class="lifetime">&#39;static</span>, str&gt;&gt;,
+        </span>T: Into&lt;Cow&lt;<span class="lifetime">'static</span>, str&gt;&gt;,
     {
         <span class="self">self</span>.file_name = <span class="prelude-val">Some</span>(filename.into());
         <span class="self">self
@@ -1084,44 +1084,44 @@
 }
 
 <span class="kw">impl </span>PartMetadata {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>fmt_fields&lt;<span class="lifetime">&#39;f</span>, <span class="lifetime">&#39;fa</span>, <span class="lifetime">&#39;fb</span>&gt;(
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>fmt_fields&lt;<span class="lifetime">'f</span>, <span class="lifetime">'fa</span>, <span class="lifetime">'fb</span>&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        debug_struct: <span class="kw-2">&amp;</span><span class="lifetime">&#39;f </span><span class="kw-2">mut </span>fmt::DebugStruct&lt;<span class="lifetime">&#39;fa</span>, <span class="lifetime">&#39;fb</span>&gt;,
-    ) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;f </span><span class="kw-2">mut </span>fmt::DebugStruct&lt;<span class="lifetime">&#39;fa</span>, <span class="lifetime">&#39;fb</span>&gt; {
+        debug_struct: <span class="kw-2">&amp;</span><span class="lifetime">'f </span><span class="kw-2">mut </span>fmt::DebugStruct&lt;<span class="lifetime">'fa</span>, <span class="lifetime">'fb</span>&gt;,
+    ) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'f </span><span class="kw-2">mut </span>fmt::DebugStruct&lt;<span class="lifetime">'fa</span>, <span class="lifetime">'fb</span>&gt; {
         debug_struct
-            .field(<span class="string">&quot;mime&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.mime)
-            .field(<span class="string">&quot;file_name&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.file_name)
-            .field(<span class="string">&quot;headers&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.headers)
+            .field(<span class="string">"mime"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.mime)
+            .field(<span class="string">"file_name"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.file_name)
+            .field(<span class="string">"headers"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.headers)
     }
 }
 
 <span class="comment">// https://url.spec.whatwg.org/#fragment-percent-encode-set
 </span><span class="kw">const </span>FRAGMENT_ENCODE_SET: <span class="kw-2">&amp;</span>AsciiSet = <span class="kw-2">&amp;</span>percent_encoding::CONTROLS
-    .add(<span class="string">b&#39; &#39;</span>)
-    .add(<span class="string">b&#39;&quot;&#39;</span>)
-    .add(<span class="string">b&#39;&lt;&#39;</span>)
-    .add(<span class="string">b&#39;&gt;&#39;</span>)
-    .add(<span class="string">b&#39;`&#39;</span>);
+    .add(<span class="string">b' '</span>)
+    .add(<span class="string">b'"'</span>)
+    .add(<span class="string">b'&lt;'</span>)
+    .add(<span class="string">b'&gt;'</span>)
+    .add(<span class="string">b'`'</span>);
 
 <span class="comment">// https://url.spec.whatwg.org/#path-percent-encode-set
-</span><span class="kw">const </span>PATH_ENCODE_SET: <span class="kw-2">&amp;</span>AsciiSet = <span class="kw-2">&amp;</span>FRAGMENT_ENCODE_SET.add(<span class="string">b&#39;#&#39;</span>).add(<span class="string">b&#39;?&#39;</span>).add(<span class="string">b&#39;{&#39;</span>).add(<span class="string">b&#39;}&#39;</span>);
+</span><span class="kw">const </span>PATH_ENCODE_SET: <span class="kw-2">&amp;</span>AsciiSet = <span class="kw-2">&amp;</span>FRAGMENT_ENCODE_SET.add(<span class="string">b'#'</span>).add(<span class="string">b'?'</span>).add(<span class="string">b'{'</span>).add(<span class="string">b'}'</span>);
 
-<span class="kw">const </span>PATH_SEGMENT_ENCODE_SET: <span class="kw-2">&amp;</span>AsciiSet = <span class="kw-2">&amp;</span>PATH_ENCODE_SET.add(<span class="string">b&#39;/&#39;</span>).add(<span class="string">b&#39;%&#39;</span>);
+<span class="kw">const </span>PATH_SEGMENT_ENCODE_SET: <span class="kw-2">&amp;</span>AsciiSet = <span class="kw-2">&amp;</span>PATH_ENCODE_SET.add(<span class="string">b'/'</span>).add(<span class="string">b'%'</span>);
 
 <span class="comment">// https://tools.ietf.org/html/rfc8187#section-3.2.1
 </span><span class="kw">const </span>ATTR_CHAR_ENCODE_SET: <span class="kw-2">&amp;</span>AsciiSet = <span class="kw-2">&amp;</span>NON_ALPHANUMERIC
-    .remove(<span class="string">b&#39;!&#39;</span>)
-    .remove(<span class="string">b&#39;#&#39;</span>)
-    .remove(<span class="string">b&#39;$&#39;</span>)
-    .remove(<span class="string">b&#39;&amp;&#39;</span>)
-    .remove(<span class="string">b&#39;+&#39;</span>)
-    .remove(<span class="string">b&#39;-&#39;</span>)
-    .remove(<span class="string">b&#39;.&#39;</span>)
-    .remove(<span class="string">b&#39;^&#39;</span>)
-    .remove(<span class="string">b&#39;_&#39;</span>)
-    .remove(<span class="string">b&#39;`&#39;</span>)
-    .remove(<span class="string">b&#39;|&#39;</span>)
-    .remove(<span class="string">b&#39;~&#39;</span>);
+    .remove(<span class="string">b'!'</span>)
+    .remove(<span class="string">b'#'</span>)
+    .remove(<span class="string">b'$'</span>)
+    .remove(<span class="string">b'&amp;'</span>)
+    .remove(<span class="string">b'+'</span>)
+    .remove(<span class="string">b'-'</span>)
+    .remove(<span class="string">b'.'</span>)
+    .remove(<span class="string">b'^'</span>)
+    .remove(<span class="string">b'_'</span>)
+    .remove(<span class="string">b'`'</span>)
+    .remove(<span class="string">b'|'</span>)
+    .remove(<span class="string">b'~'</span>);
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">enum </span>PercentEncoding {
     PathSegment,
@@ -1132,18 +1132,18 @@
 <span class="kw">impl </span>PercentEncoding {
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>encode_headers(<span class="kw-2">&amp;</span><span class="self">self</span>, name: <span class="kw-2">&amp;</span>str, field: <span class="kw-2">&amp;</span>PartMetadata) -&gt; Vec&lt;u8&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>buf = Vec::new();
-        buf.extend_from_slice(<span class="string">b&quot;Content-Disposition: form-data; &quot;</span>);
+        buf.extend_from_slice(<span class="string">b"Content-Disposition: form-data; "</span>);
 
         <span class="kw">match </span><span class="self">self</span>.percent_encode(name) {
             Cow::Borrowed(value) =&gt; {
                 <span class="comment">// nothing has been percent encoded
-                </span>buf.extend_from_slice(<span class="string">b&quot;name=\&quot;&quot;</span>);
+                </span>buf.extend_from_slice(<span class="string">b"name=\""</span>);
                 buf.extend_from_slice(value.as_bytes());
-                buf.extend_from_slice(<span class="string">b&quot;\&quot;&quot;</span>);
+                buf.extend_from_slice(<span class="string">b"\""</span>);
             }
             Cow::Owned(value) =&gt; {
                 <span class="comment">// something has been percent encoded
-                </span>buf.extend_from_slice(<span class="string">b&quot;name*=utf-8&#39;&#39;&quot;</span>);
+                </span>buf.extend_from_slice(<span class="string">b"name*=utf-8''"</span>);
                 buf.extend_from_slice(value.as_bytes());
             }
         }
@@ -1151,31 +1151,31 @@
         <span class="comment">// According to RFC7578 Section 4.2, `filename*=` syntax is invalid.
         // See https://github.com/seanmonstar/reqwest/issues/419.
         </span><span class="kw">if let </span><span class="prelude-val">Some</span>(filename) = <span class="kw-2">&amp;</span>field.file_name {
-            buf.extend_from_slice(<span class="string">b&quot;; filename=\&quot;&quot;</span>);
+            buf.extend_from_slice(<span class="string">b"; filename=\""</span>);
             <span class="kw">let </span>legal_filename = filename
-                .replace(<span class="string">&#39;\\&#39;</span>, <span class="string">&quot;\\\\&quot;</span>)
-                .replace(<span class="string">&#39;&quot;&#39;</span>, <span class="string">&quot;\\\&quot;&quot;</span>)
-                .replace(<span class="string">&#39;\r&#39;</span>, <span class="string">&quot;\\\r&quot;</span>)
-                .replace(<span class="string">&#39;\n&#39;</span>, <span class="string">&quot;\\\n&quot;</span>);
+                .replace(<span class="string">'\\'</span>, <span class="string">"\\\\"</span>)
+                .replace(<span class="string">'"'</span>, <span class="string">"\\\""</span>)
+                .replace(<span class="string">'\r'</span>, <span class="string">"\\\r"</span>)
+                .replace(<span class="string">'\n'</span>, <span class="string">"\\\n"</span>);
             buf.extend_from_slice(legal_filename.as_bytes());
-            buf.extend_from_slice(<span class="string">b&quot;\&quot;&quot;</span>);
+            buf.extend_from_slice(<span class="string">b"\""</span>);
         }
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(mime) = <span class="kw-2">&amp;</span>field.mime {
-            buf.extend_from_slice(<span class="string">b&quot;\r\nContent-Type: &quot;</span>);
+            buf.extend_from_slice(<span class="string">b"\r\nContent-Type: "</span>);
             buf.extend_from_slice(mime.as_ref().as_bytes());
         }
 
         <span class="kw">for </span>(k, v) <span class="kw">in </span>field.headers.iter() {
-            buf.extend_from_slice(<span class="string">b&quot;\r\n&quot;</span>);
+            buf.extend_from_slice(<span class="string">b"\r\n"</span>);
             buf.extend_from_slice(k.as_str().as_bytes());
-            buf.extend_from_slice(<span class="string">b&quot;: &quot;</span>);
+            buf.extend_from_slice(<span class="string">b": "</span>);
             buf.extend_from_slice(v.as_bytes());
         }
         buf
     }
 
-    <span class="kw">fn </span>percent_encode&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, value: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str) -&gt; Cow&lt;<span class="lifetime">&#39;a</span>, str&gt; {
+    <span class="kw">fn </span>percent_encode&lt;<span class="lifetime">'a</span>&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, value: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str) -&gt; Cow&lt;<span class="lifetime">'a</span>, str&gt; {
         <span class="kw">use </span>percent_encoding::utf8_percent_encode <span class="kw">as </span>percent_encode;
 
         <span class="kw">match </span><span class="self">self </span>{
@@ -1194,7 +1194,7 @@
     <span class="kw">let </span>c = random();
     <span class="kw">let </span>d = random();
 
-    <span class="macro">format!</span>(<span class="string">&quot;{:016x}-{:016x}-{:016x}-{:016x}&quot;</span>, a, b, c, d)
+    <span class="macro">format!</span>(<span class="string">"{:016x}-{:016x}-{:016x}-{:016x}"</span>, a, b, c, d)
 }
 
 <span class="attr">#[cfg(test)]
@@ -1211,7 +1211,7 @@
         <span class="kw">let </span>rt = runtime::Builder::new_current_thread()
             .enable_all()
             .build()
-            .expect(<span class="string">&quot;new rt&quot;</span>);
+            .expect(<span class="string">"new rt"</span>);
         <span class="kw">let </span>body = form.stream().into_stream();
         <span class="kw">let </span>s = body.map_ok(|try_c| try_c.to_vec()).try_concat();
 
@@ -1223,101 +1223,101 @@
     </span><span class="kw">fn </span>stream_to_end() {
         <span class="kw">let </span><span class="kw-2">mut </span>form = Form::new()
             .part(
-                <span class="string">&quot;reader1&quot;</span>,
+                <span class="string">"reader1"</span>,
                 Part::stream(Body::stream(stream::once(future::ready::&lt;
                     <span class="prelude-ty">Result</span>&lt;String, <span class="kw">crate</span>::Error&gt;,
                 &gt;(<span class="prelude-val">Ok</span>(
-                    <span class="string">&quot;part1&quot;</span>.to_owned()
+                    <span class="string">"part1"</span>.to_owned()
                 ))))),
             )
-            .part(<span class="string">&quot;key1&quot;</span>, Part::text(<span class="string">&quot;value1&quot;</span>))
-            .part(<span class="string">&quot;key2&quot;</span>, Part::text(<span class="string">&quot;value2&quot;</span>).mime(mime::IMAGE_BMP))
+            .part(<span class="string">"key1"</span>, Part::text(<span class="string">"value1"</span>))
+            .part(<span class="string">"key2"</span>, Part::text(<span class="string">"value2"</span>).mime(mime::IMAGE_BMP))
             .part(
-                <span class="string">&quot;reader2&quot;</span>,
+                <span class="string">"reader2"</span>,
                 Part::stream(Body::stream(stream::once(future::ready::&lt;
                     <span class="prelude-ty">Result</span>&lt;String, <span class="kw">crate</span>::Error&gt;,
                 &gt;(<span class="prelude-val">Ok</span>(
-                    <span class="string">&quot;part2&quot;</span>.to_owned()
+                    <span class="string">"part2"</span>.to_owned()
                 ))))),
             )
-            .part(<span class="string">&quot;key3&quot;</span>, Part::text(<span class="string">&quot;value3&quot;</span>).file_name(<span class="string">&quot;filename&quot;</span>));
-        form.inner.boundary = <span class="string">&quot;boundary&quot;</span>.to_string();
-        <span class="kw">let </span>expected = <span class="string">&quot;--boundary\r\n\
-             Content-Disposition: form-data; name=\&quot;reader1\&quot;\r\n\r\n\
+            .part(<span class="string">"key3"</span>, Part::text(<span class="string">"value3"</span>).file_name(<span class="string">"filename"</span>));
+        form.inner.boundary = <span class="string">"boundary"</span>.to_string();
+        <span class="kw">let </span>expected = <span class="string">"--boundary\r\n\
+             Content-Disposition: form-data; name=\"reader1\"\r\n\r\n\
              part1\r\n\
              --boundary\r\n\
-             Content-Disposition: form-data; name=\&quot;key1\&quot;\r\n\r\n\
+             Content-Disposition: form-data; name=\"key1\"\r\n\r\n\
              value1\r\n\
              --boundary\r\n\
-             Content-Disposition: form-data; name=\&quot;key2\&quot;\r\n\
+             Content-Disposition: form-data; name=\"key2\"\r\n\
              Content-Type: image/bmp\r\n\r\n\
              value2\r\n\
              --boundary\r\n\
-             Content-Disposition: form-data; name=\&quot;reader2\&quot;\r\n\r\n\
+             Content-Disposition: form-data; name=\"reader2\"\r\n\r\n\
              part2\r\n\
              --boundary\r\n\
-             Content-Disposition: form-data; name=\&quot;key3\&quot;; filename=\&quot;filename\&quot;\r\n\r\n\
-             value3\r\n--boundary--\r\n&quot;</span>;
+             Content-Disposition: form-data; name=\"key3\"; filename=\"filename\"\r\n\r\n\
+             value3\r\n--boundary--\r\n"</span>;
         <span class="kw">let </span>rt = runtime::Builder::new_current_thread()
             .enable_all()
             .build()
-            .expect(<span class="string">&quot;new rt&quot;</span>);
+            .expect(<span class="string">"new rt"</span>);
         <span class="kw">let </span>body = form.stream().into_stream();
         <span class="kw">let </span>s = body.map(|try_c| try_c.map(|r| r.to_vec())).try_concat();
 
         <span class="kw">let </span>out = rt.block_on(s).unwrap();
         <span class="comment">// These prints are for debug purposes in case the test fails
         </span><span class="macro">println!</span>(
-            <span class="string">&quot;START REAL\n{}\nEND REAL&quot;</span>,
+            <span class="string">"START REAL\n{}\nEND REAL"</span>,
             std::str::from_utf8(<span class="kw-2">&amp;</span>out).unwrap()
         );
-        <span class="macro">println!</span>(<span class="string">&quot;START EXPECTED\n{}\nEND EXPECTED&quot;</span>, expected);
+        <span class="macro">println!</span>(<span class="string">"START EXPECTED\n{}\nEND EXPECTED"</span>, expected);
         <span class="macro">assert_eq!</span>(std::str::from_utf8(<span class="kw-2">&amp;</span>out).unwrap(), expected);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>stream_to_end_with_header() {
-        <span class="kw">let </span><span class="kw-2">mut </span>part = Part::text(<span class="string">&quot;value2&quot;</span>).mime(mime::IMAGE_BMP);
+        <span class="kw">let </span><span class="kw-2">mut </span>part = Part::text(<span class="string">"value2"</span>).mime(mime::IMAGE_BMP);
         <span class="kw">let </span><span class="kw-2">mut </span>headers = HeaderMap::new();
-        headers.insert(<span class="string">&quot;Hdr3&quot;</span>, <span class="string">&quot;/a/b/c&quot;</span>.parse().unwrap());
+        headers.insert(<span class="string">"Hdr3"</span>, <span class="string">"/a/b/c"</span>.parse().unwrap());
         part = part.headers(headers);
-        <span class="kw">let </span><span class="kw-2">mut </span>form = Form::new().part(<span class="string">&quot;key2&quot;</span>, part);
-        form.inner.boundary = <span class="string">&quot;boundary&quot;</span>.to_string();
-        <span class="kw">let </span>expected = <span class="string">&quot;--boundary\r\n\
-                        Content-Disposition: form-data; name=\&quot;key2\&quot;\r\n\
+        <span class="kw">let </span><span class="kw-2">mut </span>form = Form::new().part(<span class="string">"key2"</span>, part);
+        form.inner.boundary = <span class="string">"boundary"</span>.to_string();
+        <span class="kw">let </span>expected = <span class="string">"--boundary\r\n\
+                        Content-Disposition: form-data; name=\"key2\"\r\n\
                         Content-Type: image/bmp\r\n\
                         hdr3: /a/b/c\r\n\
                         \r\n\
                         value2\r\n\
-                        --boundary--\r\n&quot;</span>;
+                        --boundary--\r\n"</span>;
         <span class="kw">let </span>rt = runtime::Builder::new_current_thread()
             .enable_all()
             .build()
-            .expect(<span class="string">&quot;new rt&quot;</span>);
+            .expect(<span class="string">"new rt"</span>);
         <span class="kw">let </span>body = form.stream().into_stream();
         <span class="kw">let </span>s = body.map(|try_c| try_c.map(|r| r.to_vec())).try_concat();
 
         <span class="kw">let </span>out = rt.block_on(s).unwrap();
         <span class="comment">// These prints are for debug purposes in case the test fails
         </span><span class="macro">println!</span>(
-            <span class="string">&quot;START REAL\n{}\nEND REAL&quot;</span>,
+            <span class="string">"START REAL\n{}\nEND REAL"</span>,
             std::str::from_utf8(<span class="kw-2">&amp;</span>out).unwrap()
         );
-        <span class="macro">println!</span>(<span class="string">&quot;START EXPECTED\n{}\nEND EXPECTED&quot;</span>, expected);
+        <span class="macro">println!</span>(<span class="string">"START EXPECTED\n{}\nEND EXPECTED"</span>, expected);
         <span class="macro">assert_eq!</span>(std::str::from_utf8(<span class="kw-2">&amp;</span>out).unwrap(), expected);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>correct_content_length() {
         <span class="comment">// Setup an arbitrary data stream
-        </span><span class="kw">let </span>stream_data = <span class="string">b&quot;just some stream data&quot;</span>;
+        </span><span class="kw">let </span>stream_data = <span class="string">b"just some stream data"</span>;
         <span class="kw">let </span>stream_len = stream_data.len();
         <span class="kw">let </span>stream_data = stream_data
             .chunks(<span class="number">3</span>)
             .map(|c| <span class="prelude-val">Ok</span>::&lt;<span class="kw">_</span>, std::io::Error&gt;(Bytes::from(c)));
         <span class="kw">let </span>the_stream = futures_util::stream::iter(stream_data);
 
-        <span class="kw">let </span>bytes_data = <span class="string">b&quot;some bytes data&quot;</span>.to_vec();
+        <span class="kw">let </span>bytes_data = <span class="string">b"some bytes data"</span>.to_vec();
         <span class="kw">let </span>bytes_len = bytes_data.len();
 
         <span class="kw">let </span>stream_part = Part::stream_with_length(Body::stream(the_stream), stream_len <span class="kw">as </span>u64);
@@ -1332,17 +1332,17 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>header_percent_encoding() {
-        <span class="kw">let </span>name = <span class="string">&quot;start%&#39;\&quot;\r\nßend&quot;</span>;
-        <span class="kw">let </span>field = Part::text(<span class="string">&quot;&quot;</span>);
+        <span class="kw">let </span>name = <span class="string">"start%'\"\r\nßend"</span>;
+        <span class="kw">let </span>field = Part::text(<span class="string">""</span>);
 
         <span class="macro">assert_eq!</span>(
             PercentEncoding::PathSegment.encode_headers(name, <span class="kw-2">&amp;</span>field.meta),
-            <span class="kw-2">&amp;</span><span class="string">b&quot;Content-Disposition: form-data; name*=utf-8&#39;&#39;start%25&#39;%22%0D%0A%C3%9Fend&quot;</span>[..]
+            <span class="kw-2">&amp;</span><span class="string">b"Content-Disposition: form-data; name*=utf-8''start%25'%22%0D%0A%C3%9Fend"</span>[..]
         );
 
         <span class="macro">assert_eq!</span>(
             PercentEncoding::AttrChar.encode_headers(name, <span class="kw-2">&amp;</span>field.meta),
-            <span class="kw-2">&amp;</span><span class="string">b&quot;Content-Disposition: form-data; name*=utf-8&#39;&#39;start%25%27%22%0D%0A%C3%9Fend&quot;</span>[..]
+            <span class="kw-2">&amp;</span><span class="string">b"Content-Disposition: form-data; name*=utf-8''start%25%27%22%0D%0A%C3%9Fend"</span>[..]
         );
     }
 }

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/reqwest-0.11.22/src/async_impl/request.rs`."><title>request.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e6a78389201e676c.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="reqwest" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (87e1447aa 2023-11-30)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/reqwest-0.11.22/src/async_impl/request.rs`."><title>request.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-e883e87179a81222.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="reqwest" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (06e02d5b2 2023-12-09)" data-channel="nightly" data-search-js="search-5a66c239c06b3a66.js" data-settings-js="settings-fe03fdc259827cd2.js" ><script src="../../../static.files/storage-bc37acceda91d44a.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-77dede896d6ac08e.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1133,15 +1133,15 @@
 <span class="kw">use </span>std::time::Duration;
 
 <span class="kw">use </span>serde::Serialize;
-<span class="attr">#[cfg(feature = <span class="string">&quot;json&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"json"</span>)]
 </span><span class="kw">use </span>serde_json;
 
 <span class="kw">use </span><span class="kw">super</span>::body::Body;
 <span class="kw">use </span><span class="kw">super</span>::client::{Client, Pending};
-<span class="attr">#[cfg(feature = <span class="string">&quot;multipart&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"multipart"</span>)]
 </span><span class="kw">use </span><span class="kw">super</span>::multipart;
 <span class="kw">use </span><span class="kw">super</span>::response::Response;
-<span class="attr">#[cfg(feature = <span class="string">&quot;multipart&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"multipart"</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::header::CONTENT_LENGTH;
 <span class="kw">use </span><span class="kw">crate</span>::header::{HeaderMap, HeaderName, HeaderValue, CONTENT_TYPE};
 <span class="kw">use crate</span>::{Method, Url};
@@ -1160,7 +1160,7 @@
 <span class="doccomment">/// A builder to construct the properties of a `Request`.
 ///
 /// To construct a `RequestBuilder`, refer to the `Client` documentation.
-</span><span class="attr">#[must_use = <span class="string">&quot;RequestBuilder does nothing until you &#39;send&#39; it&quot;</span>]
+</span><span class="attr">#[must_use = <span class="string">"RequestBuilder does nothing until you 'send' it"</span>]
 </span><span class="kw">pub struct </span>RequestBuilder {
     client: Client,
     request: <span class="kw">crate</span>::Result&lt;Request&gt;,
@@ -1339,7 +1339,7 @@
                 <span class="prelude-val">Ok</span>(key) =&gt; <span class="kw">match </span>&lt;HeaderValue <span class="kw">as </span>TryFrom&lt;V&gt;&gt;::try_from(value) {
                     <span class="prelude-val">Ok</span>(<span class="kw-2">mut </span>value) =&gt; {
                         <span class="comment">// We want to potentially make an unsensitive header
-                        // to be sensitive, not the reverse. So, don&#39;t turn off
+                        // to be sensitive, not the reverse. So, don't turn off
                         // a previously sensitive header.
                         </span><span class="kw">if </span>sensitive {
                             value.set_sensitive(<span class="bool-val">true</span>);
@@ -1374,8 +1374,8 @@
     ///
     /// # async fn run() -&gt; Result&lt;(), Error&gt; {
     /// let client = reqwest::Client::new();
-    /// let resp = client.delete(&quot;http://httpbin.org/delete&quot;)
-    ///     .basic_auth(&quot;admin&quot;, Some(&quot;good password&quot;))
+    /// let resp = client.delete("http://httpbin.org/delete")
+    ///     .basic_auth("admin", Some("good password"))
     ///     .send()
     ///     .await?;
     /// # Ok(())
@@ -1395,7 +1395,7 @@
     <span class="kw">where
         </span>T: fmt::Display,
     {
-        <span class="kw">let </span>header_value = <span class="macro">format!</span>(<span class="string">&quot;Bearer {}&quot;</span>, token);
+        <span class="kw">let </span>header_value = <span class="macro">format!</span>(<span class="string">"Bearer {}"</span>, token);
         <span class="self">self</span>.header_sensitive(<span class="kw">crate</span>::header::AUTHORIZATION, header_value, <span class="bool-val">true</span>)
     }
 
@@ -1427,23 +1427,23 @@
     /// # async fn run() -&gt; Result&lt;(), Error&gt; {
     /// let client = reqwest::Client::new();
     /// let form = reqwest::multipart::Form::new()
-    ///     .text(&quot;key3&quot;, &quot;value3&quot;)
-    ///     .text(&quot;key4&quot;, &quot;value4&quot;);
+    ///     .text("key3", "value3")
+    ///     .text("key4", "value4");
     ///
     ///
-    /// let response = client.post(&quot;your url&quot;)
+    /// let response = client.post("your url")
     ///     .multipart(form)
     ///     .send()
     ///     .await?;
     /// # Ok(())
     /// # }
     /// ```
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;multipart&quot;</span>)]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;multipart&quot;</span>)))]
+    </span><span class="attr">#[cfg(feature = <span class="string">"multipart"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"multipart"</span>)))]
     </span><span class="kw">pub fn </span>multipart(<span class="self">self</span>, <span class="kw-2">mut </span>multipart: multipart::Form) -&gt; RequestBuilder {
         <span class="kw">let </span><span class="kw-2">mut </span>builder = <span class="self">self</span>.header(
             CONTENT_TYPE,
-            <span class="macro">format!</span>(<span class="string">&quot;multipart/form-data; boundary={}&quot;</span>, multipart.boundary()).as_str(),
+            <span class="macro">format!</span>(<span class="string">"multipart/form-data; boundary={}"</span>, multipart.boundary()).as_str(),
         );
 
         builder = <span class="kw">match </span>multipart.compute_length() {
@@ -1464,12 +1464,12 @@
     /// be called multiple times and that existing query parameters are not
     /// overwritten if the same key is used. The key will simply show up
     /// twice in the query string.
-    /// Calling `.query(&amp;[(&quot;foo&quot;, &quot;a&quot;), (&quot;foo&quot;, &quot;b&quot;)])` gives `&quot;foo=a&amp;foo=b&quot;`.
+    /// Calling `.query(&amp;[("foo", "a"), ("foo", "b")])` gives `"foo=a&amp;foo=b"`.
     ///
     /// # Note
     /// This method does not support serializing a single key-value
-    /// pair. Instead of using `.query((&quot;key&quot;, &quot;val&quot;))`, use a sequence, such
-    /// as `.query(&amp;[(&quot;key&quot;, &quot;val&quot;)])`. It&#39;s also possible to serialize structs
+    /// pair. Instead of using `.query(("key", "val"))`, use a sequence, such
+    /// as `.query(&amp;[("key", "val")])`. It's also possible to serialize structs
     /// and maps into a key-value pair.
     ///
     /// # Errors
@@ -1487,7 +1487,7 @@
             }
         }
         <span class="kw">if let </span><span class="prelude-val">Ok</span>(<span class="kw-2">ref mut </span>req) = <span class="self">self</span>.request {
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="string">&quot;&quot;</span>) = req.url().query() {
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="string">""</span>) = req.url().query() {
                 req.url_mut().set_query(<span class="prelude-val">None</span>);
             }
         }
@@ -1517,10 +1517,10 @@
     /// #
     /// # async fn run() -&gt; Result&lt;(), Error&gt; {
     /// let mut params = HashMap::new();
-    /// params.insert(&quot;lang&quot;, &quot;rust&quot;);
+    /// params.insert("lang", "rust");
     ///
     /// let client = reqwest::Client::new();
-    /// let res = client.post(&quot;http://httpbin.org&quot;)
+    /// let res = client.post("http://httpbin.org")
     ///     .form(&amp;params)
     ///     .send()
     ///     .await?;
@@ -1539,7 +1539,7 @@
                 <span class="prelude-val">Ok</span>(body) =&gt; {
                     req.headers_mut().insert(
                         CONTENT_TYPE,
-                        HeaderValue::from_static(<span class="string">&quot;application/x-www-form-urlencoded&quot;</span>),
+                        HeaderValue::from_static(<span class="string">"application/x-www-form-urlencoded"</span>),
                     );
                     <span class="kw-2">*</span>req.body_mut() = <span class="prelude-val">Some</span>(body.into());
                 }
@@ -1560,10 +1560,10 @@
     ///
     /// # Errors
     ///
-    /// Serialization can fail if `T`&#39;s implementation of `Serialize` decides to
+    /// Serialization can fail if `T`'s implementation of `Serialize` decides to
     /// fail, or if `T` contains a map with non-string keys.
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;json&quot;</span>)]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">&quot;json&quot;</span>)))]
+    </span><span class="attr">#[cfg(feature = <span class="string">"json"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"json"</span>)))]
     </span><span class="kw">pub fn </span>json&lt;T: Serialize + <span class="question-mark">?</span>Sized&gt;(<span class="kw-2">mut </span><span class="self">self</span>, json: <span class="kw-2">&amp;</span>T) -&gt; RequestBuilder {
         <span class="kw">let </span><span class="kw-2">mut </span>error = <span class="prelude-val">None</span>;
         <span class="kw">if let </span><span class="prelude-val">Ok</span>(<span class="kw-2">ref mut </span>req) = <span class="self">self</span>.request {
@@ -1571,7 +1571,7 @@
                 <span class="prelude-val">Ok</span>(body) =&gt; {
                     <span class="kw">if </span>!req.headers().contains_key(CONTENT_TYPE) {
                         req.headers_mut()
-                            .insert(CONTENT_TYPE, HeaderValue::from_static(<span class="string">&quot;application/json&quot;</span>));
+                            .insert(CONTENT_TYPE, HeaderValue::from_static(<span class="string">"application/json"</span>));
                     }
                     <span class="kw-2">*</span>req.body_mut() = <span class="prelude-val">Some</span>(body.into());
                 }
@@ -1590,7 +1590,7 @@
     ///
     /// This option is only effective with WebAssembly target.
     ///
-    /// The [request mode][mdn] will be set to &#39;no-cors&#39;.
+    /// The [request mode][mdn] will be set to 'no-cors'.
     ///
     /// [mdn]: https://developer.mozilla.org/en-US/docs/Web/API/Request/mode
     </span><span class="kw">pub fn </span>fetch_mode_no_cors(<span class="self">self</span>) -&gt; RequestBuilder {
@@ -1627,7 +1627,7 @@
     /// #
     /// # async fn run() -&gt; Result&lt;(), Error&gt; {
     /// let response = reqwest::Client::new()
-    ///     .get(&quot;https://hyper.rs&quot;)
+    ///     .get("https://hyper.rs")
     ///     .send()
     ///     .await?;
     /// # Ok(())
@@ -1652,8 +1652,8 @@
     /// #
     /// # fn run() -&gt; Result&lt;(), Error&gt; {
     /// let client = reqwest::Client::new();
-    /// let builder = client.post(&quot;http://httpbin.org/post&quot;)
-    ///     .body(&quot;from a &amp;str!&quot;);
+    /// let builder = client.post("http://httpbin.org/post")
+    ///     .body("from a &amp;str!");
     /// let clone = builder.try_clone();
     /// assert!(clone.is_some());
     /// # Ok(())
@@ -1673,30 +1673,30 @@
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>Request {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
-        fmt_request_fields(<span class="kw-2">&amp;mut </span>f.debug_struct(<span class="string">&quot;Request&quot;</span>), <span class="self">self</span>).finish()
+        fmt_request_fields(<span class="kw-2">&amp;mut </span>f.debug_struct(<span class="string">"Request"</span>), <span class="self">self</span>).finish()
     }
 }
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>RequestBuilder {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
-        <span class="kw">let </span><span class="kw-2">mut </span>builder = f.debug_struct(<span class="string">&quot;RequestBuilder&quot;</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>builder = f.debug_struct(<span class="string">"RequestBuilder"</span>);
         <span class="kw">match </span><span class="self">self</span>.request {
             <span class="prelude-val">Ok</span>(<span class="kw-2">ref </span>req) =&gt; fmt_request_fields(<span class="kw-2">&amp;mut </span>builder, req).finish(),
-            <span class="prelude-val">Err</span>(<span class="kw-2">ref </span>err) =&gt; builder.field(<span class="string">&quot;error&quot;</span>, err).finish(),
+            <span class="prelude-val">Err</span>(<span class="kw-2">ref </span>err) =&gt; builder.field(<span class="string">"error"</span>, err).finish(),
         }
     }
 }
 
-<span class="kw">fn </span>fmt_request_fields&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>&gt;(
-    f: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>fmt::DebugStruct&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>&gt;,
+<span class="kw">fn </span>fmt_request_fields&lt;<span class="lifetime">'a</span>, <span class="lifetime">'b</span>&gt;(
+    f: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>fmt::DebugStruct&lt;<span class="lifetime">'a</span>, <span class="lifetime">'b</span>&gt;,
     req: <span class="kw-2">&amp;</span>Request,
-) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>fmt::DebugStruct&lt;<span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>&gt; {
-    f.field(<span class="string">&quot;method&quot;</span>, <span class="kw-2">&amp;</span>req.method)
-        .field(<span class="string">&quot;url&quot;</span>, <span class="kw-2">&amp;</span>req.url)
-        .field(<span class="string">&quot;headers&quot;</span>, <span class="kw-2">&amp;</span>req.headers)
+) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>fmt::DebugStruct&lt;<span class="lifetime">'a</span>, <span class="lifetime">'b</span>&gt; {
+    f.field(<span class="string">"method"</span>, <span class="kw-2">&amp;</span>req.method)
+        .field(<span class="string">"url"</span>, <span class="kw-2">&amp;</span>req.url)
+        .field(<span class="string">"headers"</span>, <span class="kw-2">&amp;</span>req.headers)
 }
 
-<span class="doccomment">/// Check the request URL for a &quot;username:password&quot; type authority, and if
+<span class="doccomment">/// Check the request URL for a "username:password" type authority, and if
 /// found, remove it from the URL and return it.
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>extract_authority(url: <span class="kw-2">&amp;mut </span>Url) -&gt; <span class="prelude-ty">Option</span>&lt;(String, <span class="prelude-ty">Option</span>&lt;String&gt;)&gt; {
     <span class="kw">use </span>percent_encoding::percent_decode;
@@ -1713,10 +1713,10 @@
                 .map(String::from)
         });
         <span class="kw">if </span>!username.is_empty() || password.is_some() {
-            url.set_username(<span class="string">&quot;&quot;</span>)
-                .expect(<span class="string">&quot;has_authority means set_username shouldn&#39;t fail&quot;</span>);
+            url.set_username(<span class="string">""</span>)
+                .expect(<span class="string">"has_authority means set_username shouldn't fail"</span>);
             url.set_password(<span class="prelude-val">None</span>)
-                .expect(<span class="string">&quot;has_authority means set_password shouldn&#39;t fail&quot;</span>);
+                .expect(<span class="string">"has_authority means set_password shouldn't fail"</span>);
             <span class="kw">return </span><span class="prelude-val">Some</span>((username, password));
         }
     }
@@ -1787,26 +1787,26 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>add_query_append() {
         <span class="kw">let </span>client = Client::new();
-        <span class="kw">let </span>some_url = <span class="string">&quot;https://google.com/&quot;</span>;
+        <span class="kw">let </span>some_url = <span class="string">"https://google.com/"</span>;
         <span class="kw">let </span>r = client.get(some_url);
 
-        <span class="kw">let </span>r = r.query(<span class="kw-2">&amp;</span>[(<span class="string">&quot;foo&quot;</span>, <span class="string">&quot;bar&quot;</span>)]);
-        <span class="kw">let </span>r = r.query(<span class="kw-2">&amp;</span>[(<span class="string">&quot;qux&quot;</span>, <span class="number">3</span>)]);
+        <span class="kw">let </span>r = r.query(<span class="kw-2">&amp;</span>[(<span class="string">"foo"</span>, <span class="string">"bar"</span>)]);
+        <span class="kw">let </span>r = r.query(<span class="kw-2">&amp;</span>[(<span class="string">"qux"</span>, <span class="number">3</span>)]);
 
-        <span class="kw">let </span>req = r.build().expect(<span class="string">&quot;request is valid&quot;</span>);
-        <span class="macro">assert_eq!</span>(req.url().query(), <span class="prelude-val">Some</span>(<span class="string">&quot;foo=bar&amp;qux=3&quot;</span>));
+        <span class="kw">let </span>req = r.build().expect(<span class="string">"request is valid"</span>);
+        <span class="macro">assert_eq!</span>(req.url().query(), <span class="prelude-val">Some</span>(<span class="string">"foo=bar&amp;qux=3"</span>));
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>add_query_append_same() {
         <span class="kw">let </span>client = Client::new();
-        <span class="kw">let </span>some_url = <span class="string">&quot;https://google.com/&quot;</span>;
+        <span class="kw">let </span>some_url = <span class="string">"https://google.com/"</span>;
         <span class="kw">let </span>r = client.get(some_url);
 
-        <span class="kw">let </span>r = r.query(<span class="kw-2">&amp;</span>[(<span class="string">&quot;foo&quot;</span>, <span class="string">&quot;a&quot;</span>), (<span class="string">&quot;foo&quot;</span>, <span class="string">&quot;b&quot;</span>)]);
+        <span class="kw">let </span>r = r.query(<span class="kw-2">&amp;</span>[(<span class="string">"foo"</span>, <span class="string">"a"</span>), (<span class="string">"foo"</span>, <span class="string">"b"</span>)]);
 
-        <span class="kw">let </span>req = r.build().expect(<span class="string">&quot;request is valid&quot;</span>);
-        <span class="macro">assert_eq!</span>(req.url().query(), <span class="prelude-val">Some</span>(<span class="string">&quot;foo=a&amp;foo=b&quot;</span>));
+        <span class="kw">let </span>req = r.build().expect(<span class="string">"request is valid"</span>);
+        <span class="macro">assert_eq!</span>(req.url().query(), <span class="prelude-val">Some</span>(<span class="string">"foo=a&amp;foo=b"</span>));
     }
 
     <span class="attr">#[test]
@@ -1818,34 +1818,34 @@
         }
 
         <span class="kw">let </span>client = Client::new();
-        <span class="kw">let </span>some_url = <span class="string">&quot;https://google.com/&quot;</span>;
+        <span class="kw">let </span>some_url = <span class="string">"https://google.com/"</span>;
         <span class="kw">let </span>r = client.get(some_url);
 
         <span class="kw">let </span>params = Params {
-            foo: <span class="string">&quot;bar&quot;</span>.into(),
+            foo: <span class="string">"bar"</span>.into(),
             qux: <span class="number">3</span>,
         };
 
         <span class="kw">let </span>r = r.query(<span class="kw-2">&amp;</span>params);
 
-        <span class="kw">let </span>req = r.build().expect(<span class="string">&quot;request is valid&quot;</span>);
-        <span class="macro">assert_eq!</span>(req.url().query(), <span class="prelude-val">Some</span>(<span class="string">&quot;foo=bar&amp;qux=3&quot;</span>));
+        <span class="kw">let </span>req = r.build().expect(<span class="string">"request is valid"</span>);
+        <span class="macro">assert_eq!</span>(req.url().query(), <span class="prelude-val">Some</span>(<span class="string">"foo=bar&amp;qux=3"</span>));
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>add_query_map() {
         <span class="kw">let </span><span class="kw-2">mut </span>params = BTreeMap::new();
-        params.insert(<span class="string">&quot;foo&quot;</span>, <span class="string">&quot;bar&quot;</span>);
-        params.insert(<span class="string">&quot;qux&quot;</span>, <span class="string">&quot;three&quot;</span>);
+        params.insert(<span class="string">"foo"</span>, <span class="string">"bar"</span>);
+        params.insert(<span class="string">"qux"</span>, <span class="string">"three"</span>);
 
         <span class="kw">let </span>client = Client::new();
-        <span class="kw">let </span>some_url = <span class="string">&quot;https://google.com/&quot;</span>;
+        <span class="kw">let </span>some_url = <span class="string">"https://google.com/"</span>;
         <span class="kw">let </span>r = client.get(some_url);
 
         <span class="kw">let </span>r = r.query(<span class="kw-2">&amp;</span>params);
 
-        <span class="kw">let </span>req = r.build().expect(<span class="string">&quot;request is valid&quot;</span>);
-        <span class="macro">assert_eq!</span>(req.url().query(), <span class="prelude-val">Some</span>(<span class="string">&quot;foo=bar&amp;qux=three&quot;</span>));
+        <span class="kw">let </span>req = r.build().expect(<span class="string">"request is valid"</span>);
+        <span class="macro">assert_eq!</span>(req.url().query(), <span class="prelude-val">Some</span>(<span class="string">"foo=bar&amp;qux=three"</span>));
     }
 
     <span class="attr">#[test]
@@ -1853,81 +1853,81 @@
         <span class="kw">use </span>http::HeaderMap;
 
         <span class="kw">let </span><span class="kw-2">mut </span>headers = HeaderMap::new();
-        headers.insert(<span class="string">&quot;foo&quot;</span>, <span class="string">&quot;bar&quot;</span>.parse().unwrap());
-        headers.append(<span class="string">&quot;foo&quot;</span>, <span class="string">&quot;baz&quot;</span>.parse().unwrap());
+        headers.insert(<span class="string">"foo"</span>, <span class="string">"bar"</span>.parse().unwrap());
+        headers.append(<span class="string">"foo"</span>, <span class="string">"baz"</span>.parse().unwrap());
 
         <span class="kw">let </span>client = Client::new();
         <span class="kw">let </span>req = client
-            .get(<span class="string">&quot;https://hyper.rs&quot;</span>)
-            .header(<span class="string">&quot;im-a&quot;</span>, <span class="string">&quot;keeper&quot;</span>)
-            .header(<span class="string">&quot;foo&quot;</span>, <span class="string">&quot;pop me&quot;</span>)
+            .get(<span class="string">"https://hyper.rs"</span>)
+            .header(<span class="string">"im-a"</span>, <span class="string">"keeper"</span>)
+            .header(<span class="string">"foo"</span>, <span class="string">"pop me"</span>)
             .headers(headers)
             .build()
-            .expect(<span class="string">&quot;request build&quot;</span>);
+            .expect(<span class="string">"request build"</span>);
 
-        <span class="macro">assert_eq!</span>(req.headers()[<span class="string">&quot;im-a&quot;</span>], <span class="string">&quot;keeper&quot;</span>);
+        <span class="macro">assert_eq!</span>(req.headers()[<span class="string">"im-a"</span>], <span class="string">"keeper"</span>);
 
-        <span class="kw">let </span>foo = req.headers().get_all(<span class="string">&quot;foo&quot;</span>).iter().collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
+        <span class="kw">let </span>foo = req.headers().get_all(<span class="string">"foo"</span>).iter().collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
         <span class="macro">assert_eq!</span>(foo.len(), <span class="number">2</span>);
-        <span class="macro">assert_eq!</span>(foo[<span class="number">0</span>], <span class="string">&quot;bar&quot;</span>);
-        <span class="macro">assert_eq!</span>(foo[<span class="number">1</span>], <span class="string">&quot;baz&quot;</span>);
+        <span class="macro">assert_eq!</span>(foo[<span class="number">0</span>], <span class="string">"bar"</span>);
+        <span class="macro">assert_eq!</span>(foo[<span class="number">1</span>], <span class="string">"baz"</span>);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>normalize_empty_query() {
         <span class="kw">let </span>client = Client::new();
-        <span class="kw">let </span>some_url = <span class="string">&quot;https://google.com/&quot;</span>;
+        <span class="kw">let </span>some_url = <span class="string">"https://google.com/"</span>;
         <span class="kw">let </span>empty_query: <span class="kw-2">&amp;</span>[(<span class="kw-2">&amp;</span>str, <span class="kw-2">&amp;</span>str)] = <span class="kw-2">&amp;</span>[];
 
         <span class="kw">let </span>req = client
             .get(some_url)
             .query(empty_query)
             .build()
-            .expect(<span class="string">&quot;request build&quot;</span>);
+            .expect(<span class="string">"request build"</span>);
 
         <span class="macro">assert_eq!</span>(req.url().query(), <span class="prelude-val">None</span>);
-        <span class="macro">assert_eq!</span>(req.url().as_str(), <span class="string">&quot;https://google.com/&quot;</span>);
+        <span class="macro">assert_eq!</span>(req.url().as_str(), <span class="string">"https://google.com/"</span>);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>try_clone_reusable() {
         <span class="kw">let </span>client = Client::new();
         <span class="kw">let </span>builder = client
-            .post(<span class="string">&quot;http://httpbin.org/post&quot;</span>)
-            .header(<span class="string">&quot;foo&quot;</span>, <span class="string">&quot;bar&quot;</span>)
-            .body(<span class="string">&quot;from a &amp;str!&quot;</span>);
+            .post(<span class="string">"http://httpbin.org/post"</span>)
+            .header(<span class="string">"foo"</span>, <span class="string">"bar"</span>)
+            .body(<span class="string">"from a &amp;str!"</span>);
         <span class="kw">let </span>req = builder
             .try_clone()
-            .expect(<span class="string">&quot;clone successful&quot;</span>)
+            .expect(<span class="string">"clone successful"</span>)
             .build()
-            .expect(<span class="string">&quot;request is valid&quot;</span>);
-        <span class="macro">assert_eq!</span>(req.url().as_str(), <span class="string">&quot;http://httpbin.org/post&quot;</span>);
+            .expect(<span class="string">"request is valid"</span>);
+        <span class="macro">assert_eq!</span>(req.url().as_str(), <span class="string">"http://httpbin.org/post"</span>);
         <span class="macro">assert_eq!</span>(req.method(), Method::POST);
-        <span class="macro">assert_eq!</span>(req.headers()[<span class="string">&quot;foo&quot;</span>], <span class="string">&quot;bar&quot;</span>);
+        <span class="macro">assert_eq!</span>(req.headers()[<span class="string">"foo"</span>], <span class="string">"bar"</span>);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>try_clone_no_body() {
         <span class="kw">let </span>client = Client::new();
-        <span class="kw">let </span>builder = client.get(<span class="string">&quot;http://httpbin.org/get&quot;</span>);
+        <span class="kw">let </span>builder = client.get(<span class="string">"http://httpbin.org/get"</span>);
         <span class="kw">let </span>req = builder
             .try_clone()
-            .expect(<span class="string">&quot;clone successful&quot;</span>)
+            .expect(<span class="string">"clone successful"</span>)
             .build()
-            .expect(<span class="string">&quot;request is valid&quot;</span>);
-        <span class="macro">assert_eq!</span>(req.url().as_str(), <span class="string">&quot;http://httpbin.org/get&quot;</span>);
+            .expect(<span class="string">"request is valid"</span>);
+        <span class="macro">assert_eq!</span>(req.url().as_str(), <span class="string">"http://httpbin.org/get"</span>);
         <span class="macro">assert_eq!</span>(req.method(), Method::GET);
         <span class="macro">assert!</span>(req.body().is_none());
     }
 
     <span class="attr">#[test]
-    #[cfg(feature = <span class="string">&quot;stream&quot;</span>)]
+    #[cfg(feature = <span class="string">"stream"</span>)]
     </span><span class="kw">fn </span>try_clone_stream() {
-        <span class="kw">let </span>chunks: Vec&lt;<span class="prelude-ty">Result</span>&lt;<span class="kw">_</span>, ::std::io::Error&gt;&gt; = <span class="macro">vec!</span>[<span class="prelude-val">Ok</span>(<span class="string">&quot;hello&quot;</span>), <span class="prelude-val">Ok</span>(<span class="string">&quot; &quot;</span>), <span class="prelude-val">Ok</span>(<span class="string">&quot;world&quot;</span>)];
+        <span class="kw">let </span>chunks: Vec&lt;<span class="prelude-ty">Result</span>&lt;<span class="kw">_</span>, ::std::io::Error&gt;&gt; = <span class="macro">vec!</span>[<span class="prelude-val">Ok</span>(<span class="string">"hello"</span>), <span class="prelude-val">Ok</span>(<span class="string">" "</span>), <span class="prelude-val">Ok</span>(<span class="string">"world"</span>)];
         <span class="kw">let </span>stream = futures_util::stream::iter(chunks);
         <span class="kw">let </span>client = Client::new();
         <span class="kw">let </span>builder = client
-            .get(<span class="string">&quot;http://httpbin.org/get&quot;</span>)
+            .get(<span class="string">"http://httpbin.org/get"</span>)
             .body(<span class="kw">super</span>::Body::wrap_stream(stream));
         <span class="kw">let </span>clone = builder.try_clone();
         <span class="macro">assert!</span>(clone.is_none());
@@ -1936,106 +1936,106 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>convert_url_authority_into_basic_auth() {
         <span class="kw">let </span>client = Client::new();
-        <span class="kw">let </span>some_url = <span class="string">&quot;https://Aladdin:open sesame@localhost/&quot;</span>;
+        <span class="kw">let </span>some_url = <span class="string">"https://Aladdin:open sesame@localhost/"</span>;
 
-        <span class="kw">let </span>req = client.get(some_url).build().expect(<span class="string">&quot;request build&quot;</span>);
+        <span class="kw">let </span>req = client.get(some_url).build().expect(<span class="string">"request build"</span>);
 
-        <span class="macro">assert_eq!</span>(req.url().as_str(), <span class="string">&quot;https://localhost/&quot;</span>);
+        <span class="macro">assert_eq!</span>(req.url().as_str(), <span class="string">"https://localhost/"</span>);
         <span class="macro">assert_eq!</span>(
-            req.headers()[<span class="string">&quot;authorization&quot;</span>],
-            <span class="string">&quot;Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==&quot;
+            req.headers()[<span class="string">"authorization"</span>],
+            <span class="string">"Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ=="
         </span>);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_basic_auth_sensitive_header() {
         <span class="kw">let </span>client = Client::new();
-        <span class="kw">let </span>some_url = <span class="string">&quot;https://localhost/&quot;</span>;
+        <span class="kw">let </span>some_url = <span class="string">"https://localhost/"</span>;
 
         <span class="kw">let </span>req = client
             .get(some_url)
-            .basic_auth(<span class="string">&quot;Aladdin&quot;</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;open sesame&quot;</span>))
+            .basic_auth(<span class="string">"Aladdin"</span>, <span class="prelude-val">Some</span>(<span class="string">"open sesame"</span>))
             .build()
-            .expect(<span class="string">&quot;request build&quot;</span>);
+            .expect(<span class="string">"request build"</span>);
 
-        <span class="macro">assert_eq!</span>(req.url().as_str(), <span class="string">&quot;https://localhost/&quot;</span>);
+        <span class="macro">assert_eq!</span>(req.url().as_str(), <span class="string">"https://localhost/"</span>);
         <span class="macro">assert_eq!</span>(
-            req.headers()[<span class="string">&quot;authorization&quot;</span>],
-            <span class="string">&quot;Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==&quot;
+            req.headers()[<span class="string">"authorization"</span>],
+            <span class="string">"Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ=="
         </span>);
-        <span class="macro">assert!</span>(req.headers()[<span class="string">&quot;authorization&quot;</span>].is_sensitive());
+        <span class="macro">assert!</span>(req.headers()[<span class="string">"authorization"</span>].is_sensitive());
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_bearer_auth_sensitive_header() {
         <span class="kw">let </span>client = Client::new();
-        <span class="kw">let </span>some_url = <span class="string">&quot;https://localhost/&quot;</span>;
+        <span class="kw">let </span>some_url = <span class="string">"https://localhost/"</span>;
 
         <span class="kw">let </span>req = client
             .get(some_url)
-            .bearer_auth(<span class="string">&quot;Hold my bear&quot;</span>)
+            .bearer_auth(<span class="string">"Hold my bear"</span>)
             .build()
-            .expect(<span class="string">&quot;request build&quot;</span>);
+            .expect(<span class="string">"request build"</span>);
 
-        <span class="macro">assert_eq!</span>(req.url().as_str(), <span class="string">&quot;https://localhost/&quot;</span>);
-        <span class="macro">assert_eq!</span>(req.headers()[<span class="string">&quot;authorization&quot;</span>], <span class="string">&quot;Bearer Hold my bear&quot;</span>);
-        <span class="macro">assert!</span>(req.headers()[<span class="string">&quot;authorization&quot;</span>].is_sensitive());
+        <span class="macro">assert_eq!</span>(req.url().as_str(), <span class="string">"https://localhost/"</span>);
+        <span class="macro">assert_eq!</span>(req.headers()[<span class="string">"authorization"</span>], <span class="string">"Bearer Hold my bear"</span>);
+        <span class="macro">assert!</span>(req.headers()[<span class="string">"authorization"</span>].is_sensitive());
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_explicit_sensitive_header() {
         <span class="kw">let </span>client = Client::new();
-        <span class="kw">let </span>some_url = <span class="string">&quot;https://localhost/&quot;</span>;
+        <span class="kw">let </span>some_url = <span class="string">"https://localhost/"</span>;
 
-        <span class="kw">let </span><span class="kw-2">mut </span>header = http::HeaderValue::from_static(<span class="string">&quot;in plain sight&quot;</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>header = http::HeaderValue::from_static(<span class="string">"in plain sight"</span>);
         header.set_sensitive(<span class="bool-val">true</span>);
 
         <span class="kw">let </span>req = client
             .get(some_url)
-            .header(<span class="string">&quot;hiding&quot;</span>, header)
+            .header(<span class="string">"hiding"</span>, header)
             .build()
-            .expect(<span class="string">&quot;request build&quot;</span>);
+            .expect(<span class="string">"request build"</span>);
 
-        <span class="macro">assert_eq!</span>(req.url().as_str(), <span class="string">&quot;https://localhost/&quot;</span>);
-        <span class="macro">assert_eq!</span>(req.headers()[<span class="string">&quot;hiding&quot;</span>], <span class="string">&quot;in plain sight&quot;</span>);
-        <span class="macro">assert!</span>(req.headers()[<span class="string">&quot;hiding&quot;</span>].is_sensitive());
+        <span class="macro">assert_eq!</span>(req.url().as_str(), <span class="string">"https://localhost/"</span>);
+        <span class="macro">assert_eq!</span>(req.headers()[<span class="string">"hiding"</span>], <span class="string">"in plain sight"</span>);
+        <span class="macro">assert!</span>(req.headers()[<span class="string">"hiding"</span>].is_sensitive());
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>convert_from_http_request() {
         <span class="kw">let </span>http_request = HttpRequest::builder()
-            .method(<span class="string">&quot;GET&quot;</span>)
-            .uri(<span class="string">&quot;http://localhost/&quot;</span>)
-            .header(<span class="string">&quot;User-Agent&quot;</span>, <span class="string">&quot;my-awesome-agent/1.0&quot;</span>)
-            .body(<span class="string">&quot;test test test&quot;</span>)
+            .method(<span class="string">"GET"</span>)
+            .uri(<span class="string">"http://localhost/"</span>)
+            .header(<span class="string">"User-Agent"</span>, <span class="string">"my-awesome-agent/1.0"</span>)
+            .body(<span class="string">"test test test"</span>)
             .unwrap();
         <span class="kw">let </span>req: Request = Request::try_from(http_request).unwrap();
         <span class="macro">assert!</span>(req.body().is_some());
-        <span class="kw">let </span>test_data = <span class="string">b&quot;test test test&quot;</span>;
+        <span class="kw">let </span>test_data = <span class="string">b"test test test"</span>;
         <span class="macro">assert_eq!</span>(req.body().unwrap().as_bytes(), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>test_data[..]));
         <span class="kw">let </span>headers = req.headers();
-        <span class="macro">assert_eq!</span>(headers.get(<span class="string">&quot;User-Agent&quot;</span>).unwrap(), <span class="string">&quot;my-awesome-agent/1.0&quot;</span>);
+        <span class="macro">assert_eq!</span>(headers.get(<span class="string">"User-Agent"</span>).unwrap(), <span class="string">"my-awesome-agent/1.0"</span>);
         <span class="macro">assert_eq!</span>(req.method(), Method::GET);
-        <span class="macro">assert_eq!</span>(req.url().as_str(), <span class="string">&quot;http://localhost/&quot;</span>);
+        <span class="macro">assert_eq!</span>(req.url().as_str(), <span class="string">"http://localhost/"</span>);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>set_http_request_version() {
         <span class="kw">let </span>http_request = HttpRequest::builder()
-            .method(<span class="string">&quot;GET&quot;</span>)
-            .uri(<span class="string">&quot;http://localhost/&quot;</span>)
-            .header(<span class="string">&quot;User-Agent&quot;</span>, <span class="string">&quot;my-awesome-agent/1.0&quot;</span>)
+            .method(<span class="string">"GET"</span>)
+            .uri(<span class="string">"http://localhost/"</span>)
+            .header(<span class="string">"User-Agent"</span>, <span class="string">"my-awesome-agent/1.0"</span>)
             .version(Version::HTTP_11)
-            .body(<span class="string">&quot;test test test&quot;</span>)
+            .body(<span class="string">"test test test"</span>)
             .unwrap();
         <span class="kw">let </span>req: Request = Request::try_from(http_request).unwrap();
         <span class="macro">assert!</span>(req.body().is_some());
-        <span class="kw">let </span>test_data = <span class="string">b&quot;test test test&quot;</span>;
+        <span class="kw">let </span>test_data = <span class="string">b"test test test"</span>;
         <span class="macro">assert_eq!</span>(req.body().unwrap().as_bytes(), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>test_data[..]));
         <span class="kw">let </span>headers = req.headers();
-        <span class="macro">assert_eq!</span>(headers.get(<span class="string">&quot;User-Agent&quot;</span>).unwrap(), <span class="string">&quot;my-awesome-agent/1.0&quot;</span>);
+        <span class="macro">assert_eq!</span>(headers.get(<span class="string">"User-Agent"</span>).unwrap(), <span class="string">"my-awesome-agent/1.0"</span>);
         <span class="macro">assert_eq!</span>(req.method(), Method::GET);
-        <span class="macro">assert_eq!</span>(req.url().as_str(), <span class="string">&quot;http://localhost/&quot;</span>);
+        <span class="macro">assert_eq!</span>(req.url().as_str(), <span class="string">"http://localhost/"</span>);
         <span class="macro">assert_eq!</span>(req.version(), Version::HTTP_11);
     }
 
@@ -2043,7 +2043,7 @@
     </span><span class="kw">fn </span>builder_split_reassemble() {
         <span class="kw">let </span>builder = {
             <span class="kw">let </span>client = Client::new();
-            client.get(<span class="string">&quot;http://example.com&quot;</span>)
+            client.get(<span class="string">"http://example.com"</span>)
         };
         <span class="kw">let </span>(client, inner) = builder.build_split();
         <span class="kw">let </span>request = inner.unwrap();
@@ -2062,7 +2062,7 @@
     #[test]
     fn basic_get_request() {
         let client = Client::new().unwrap();
-        let some_url = &quot;https://google.com/&quot;;
+        let some_url = "https://google.com/";
         let r = client.get(some_url).unwrap().build();
 
         assert_eq!(r.method, Method::Get);
@@ -2072,7 +2072,7 @@
     #[test]
     fn basic_head_request() {
         let client = Client::new().unwrap();
-        let some_url = &quot;https://google.com/&quot;;
+        let some_url = "https://google.com/";
         let r = client.head(some_url).unwrap().build();
 
         assert_eq!(r.method, Method::Head);
@@ -2082,7 +2082,7 @@
     #[test]
     fn basic_post_request() {
         let client = Client::new().unwrap();
-        let some_url = &quot;https://google.com/&quot;;
+        let some_url = "https://google.com/";
         let r = client.post(some_url).unwrap().build();
 
         assert_eq!(r.method, Method::Post);
@@ -2092,7 +2092,7 @@
     #[test]
     fn basic_put_request() {
         let client = Client::new().unwrap();
-        let some_url = &quot;https://google.com/&quot;;
+        let some_url = "https://google.com/";
         let r = client.put(some_url).unwrap().build();
 
         assert_eq!(r.method, Method::Put);
@@ -2102,7 +2102,7 @@
     #[test]
     fn basic_patch_request() {
         let client = Client::new().unwrap();
-        let some_url = &quot;https://google.com/&quot;;
+        let some_url = "https://google.com/";
         let r = client.patch(some_url).unwrap().build();
 
         assert_eq!(r.method, Method::Patch);
@@ -2112,7 +2112,7 @@
     #[test]
     fn basic_delete_request() {
         let client = Client::new().unwrap();
-        let some_url = &quot;https://google.com/&quot;;
+        let some_url = "https://google.com/";
         let r = client.delete(some_url).unwrap().build();
 
         assert_eq!(r.method, Method::Delete);
@@ -2122,11 +2122,11 @@
     #[test]
     fn add_header() {
         let client = Client::new().unwrap();
-        let some_url = &quot;https://google.com/&quot;;
+        let some_url = "https://google.com/";
         let mut r = client.post(some_url).unwrap();
 
         let header = Host {
-            hostname: &quot;google.com&quot;.to_string(),
+            hostname: "google.com".to_string(),
             port: None,
         };
 
@@ -2140,11 +2140,11 @@
     #[test]
     fn add_headers() {
         let client = Client::new().unwrap();
-        let some_url = &quot;https://google.com/&quot;;
+        let some_url = "https://google.com/";
         let mut r = client.post(some_url).unwrap();
 
         let header = Host {
-            hostname: &quot;google.com&quot;.to_string(),
+            hostname: "google.com".to_string(),
             port: None,
         };
 
@@ -2161,11 +2161,11 @@
     #[test]
     fn add_headers_multi() {
         let client = Client::new().unwrap();
-        let some_url = &quot;https://google.com/&quot;;
+        let some_url = "https://google.com/";
         let mut r = client.post(some_url).unwrap();
 
         let header = Host {
-            hostname: &quot;google.com&quot;.to_string(),
+            hostname: "google.com".to_string(),
             port: None,
         };
 
@@ -2182,10 +2182,10 @@
     #[test]
     fn add_body() {
         let client = Client::new().unwrap();
-        let some_url = &quot;https://google.com/&quot;;
+        let some_url = "https://google.com/";
         let mut r = client.post(some_url).unwrap();
 
-        let body = &quot;Some interesting content&quot;;
+        let body = "Some interesting content";
 
         let r = r.body(body).build();
 
@@ -2197,11 +2197,11 @@
     #[test]
     fn add_form() {
         let client = Client::new().unwrap();
-        let some_url = &quot;https://google.com/&quot;;
+        let some_url = "https://google.com/";
         let mut r = client.post(some_url).unwrap();
 
         let mut form_data = HashMap::new();
-        form_data.insert(&quot;foo&quot;, &quot;bar&quot;);
+        form_data.insert("foo", "bar");
 
         let r = r.form(&amp;form_data).unwrap().build();
 
@@ -2218,11 +2218,11 @@
     #[test]
     fn add_json() {
         let client = Client::new().unwrap();
-        let some_url = &quot;https://google.com/&quot;;
+        let some_url = "https://google.com/";
         let mut r = client.post(some_url).unwrap();
 
         let mut json_data = HashMap::new();
-        json_data.insert(&quot;foo&quot;, &quot;bar&quot;);
+        json_data.insert("foo", "bar");
 
         let r = r.json(&amp;json_data).unwrap().build();
 
@@ -2244,12 +2244,12 @@
             fn serialize&lt;S&gt;(&amp;self, _serializer: S) -&gt; Result&lt;S::Ok, S::Error&gt;
                 where S: Serializer
                 {
-                    Err(S::Error::custom(&quot;nope&quot;))
+                    Err(S::Error::custom("nope"))
                 }
         }
 
         let client = Client::new().unwrap();
-        let some_url = &quot;https://google.com/&quot;;
+        let some_url = "https://google.com/";
         let mut r = client.post(some_url).unwrap();
         let json_data = MyStruct{};
         assert!(r.json(&amp;json_data).unwrap_err().is_serialization());
