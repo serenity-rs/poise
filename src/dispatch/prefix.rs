@@ -91,7 +91,8 @@ async fn strip_prefix<'a, U, E>(
                 .strip_prefix(&framework.bot_id().to_string())?
                 .strip_prefix('>')
         })() {
-            let mention_prefix = &msg.content[..(msg.content.len() - stripped_content.len())];
+            let mention_prefix =
+                &msg.content[..(msg.content.len() as usize - stripped_content.len())];
             return Some((mention_prefix, stripped_content));
         }
     }

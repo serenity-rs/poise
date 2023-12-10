@@ -66,12 +66,12 @@ pub async fn paginate<U, E>(
         .await
     {
         // Depending on which button was pressed, go to next or previous page
-        if press.data.custom_id == next_button_id {
+        if press.data.custom_id.as_str() == next_button_id {
             current_page += 1;
             if current_page >= pages.len() {
                 current_page = 0;
             }
-        } else if press.data.custom_id == prev_button_id {
+        } else if press.data.custom_id.as_str() == prev_button_id {
             current_page = current_page.checked_sub(1).unwrap_or(pages.len() - 1);
         } else {
             // This is an unrelated button interaction
