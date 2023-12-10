@@ -10,7 +10,7 @@ pub fn find_modal_text(
     data: &mut serenity::ModalInteractionData,
     custom_id: &str,
 ) -> Option<String> {
-    for row in &mut data.components {
+    for row in data.components.iter_mut() {
         let text = match row.components.get_mut(0) {
             Some(serenity::ActionRowComponent::InputText(text)) => text,
             Some(_) => {
@@ -26,7 +26,7 @@ pub fn find_modal_text(
         if text.custom_id == custom_id {
             return match std::mem::take(&mut text.value) {
                 Some(val) if val.is_empty() => None,
-                Some(val) => Some(val),
+                Some(val) => Some(val.into_string()),
                 None => None,
             };
         }
@@ -55,7 +55,7 @@ async fn execute_modal_generic<
 
     // Wait for user to submit
     let response = serenity::collector::ModalInteractionCollector::new(&ctx.shard)
-        .filter(move |d| d.data.custom_id == modal_custom_id)
+        .filter(move |d| d.data.custom_id.as_str() == modal_custom_id)
         .timeout(timeout.unwrap_or(std::time::Duration::from_secs(3600)))
         .await;
     let response = match response {

@@ -49,7 +49,7 @@ async fn is_ferris(ctx: Context<'_>) -> Result<bool, Error> {
         Some(guild_id) => ctx.author().nick_in(ctx, guild_id).await,
         None => None,
     };
-    let name = nickname.as_ref().unwrap_or(&ctx.author().name);
+    let name = nickname.as_deref().unwrap_or(&ctx.author().name);
 
     Ok(name.eq_ignore_ascii_case("ferris"))
 }
