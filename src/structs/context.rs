@@ -461,7 +461,7 @@ context_methods! {
                 }
                 string
             }
-            Context::Prefix(ctx) => ctx.msg.content.clone(),
+            Context::Prefix(ctx) => ctx.msg.content.to_string(),
         }
     }
 
