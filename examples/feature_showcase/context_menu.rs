@@ -23,6 +23,6 @@ pub async fn echo(
     ctx: Context<'_>,
     #[description = "Message to echo (enter a link or ID)"] msg: serenity::Message,
 ) -> Result<(), Error> {
-    ctx.say(&msg.content).await?;
+    ctx.say(msg.content).await?;
     Ok(())
 }
