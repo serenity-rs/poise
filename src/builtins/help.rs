@@ -85,7 +85,7 @@ impl TwoColumnList {
 }
 
 /// Get the prefix from options
-async fn get_prefix_from_options<U, E>(ctx: crate::Context<'_, U, E>) -> Option<String> {
+pub(super) async fn get_prefix_from_options<U, E>(ctx: crate::Context<'_, U, E>) -> Option<String> {
     let options = &ctx.framework().options().prefix_options;
     match &options.prefix {
         Some(fixed_prefix) => Some(fixed_prefix.clone()),

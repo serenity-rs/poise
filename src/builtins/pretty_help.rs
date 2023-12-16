@@ -1,14 +1,123 @@
-
 use super::help::HelpConfiguration;
-
 
 use crate::{serenity_prelude as serenity, CreateReply};
 use std::fmt::Write as _;
+
+/// A help command that works similarly to `builtin::help` butt outputs text in an embed.
+///
+pub async fn pretty_help<U, E>(
+    ctx: crate::Context<'_, U, E>,
+    command: Option<&str>,
+    config: HelpConfiguration<'_>,
+) -> Result<(), serenity::Error> {
+    match command {
+        Some(command) => help_single_command(ctx, command, config).await,
+        None => pretty_help_all_commands(ctx, config).await,
+    }
+}
+
+async fn pretty_help_all_commands<U, E>(
+    ctx: crate::Context<'_, U, E>,
+    config: HelpConfiguration<'_>,
+) -> Result<(), serenity::Error> {
+    let mut categories = crate::util::OrderedMap::new();
+    let commands = ctx.framework().options().commands.iter().filter(|cmd| {
+        !cmd.hide_in_help
+            && (cmd.prefix_action.is_some()
+                || cmd.slash_action.is_some()
+                || (cmd.context_menu_action.is_some() && config.show_context_menu_commands))
+    });
+
+    for cmd in commands {
+        categories
+            .get_or_insert_with(cmd.category.as_deref(), Vec::new)
+            .push(cmd);
+    }
+
+    let options_prefix = super::help::get_prefix_from_options(ctx).await;
+
+    let fields = categories
+        .into_iter()
+        .filter(|(_, cmds)| !cmds.is_empty())
+        .map(|(category, mut cmds)| {
+            // get context menu items at the bottom
+            cmds.sort_by_key(|cmd| cmd.slash_action.is_none() && cmd.prefix_action.is_none());
+
+            let mut buffer = String::new();
+
+            for cmd in cmds {
+                let name = cmd.context_menu_name.as_deref().unwrap_or(&cmd.name);
+                let prefix = format_cmd_prefix(cmd, &options_prefix);
+
+                write!(
+                    buffer,
+                    "{}{}`: _{}_\n",
+                    prefix,
+                    name,
+                    cmd.description.as_deref().unwrap_or_default()
+                )
+                .ok();
+
+                if config.show_subcommands {
+                    for sbcmd in &cmd.subcommands {
+                        let name = sbcmd.context_menu_name.as_deref().unwrap_or(&sbcmd.name);
+                        let prefix = format_cmd_prefix(sbcmd, &options_prefix);
+
+                        write!(
+                            buffer,
+                            "> {}{}`: _{}_\n",
+                            prefix,
+                            name,
+                            sbcmd.description.as_deref().unwrap_or_default()
+                        )
+                        .ok();
+                    }
+                }
+            }
+            (category.unwrap_or_default(), buffer, false)
+        })
+        .collect::<Vec<_>>();
+
+    let embed = serenity::CreateEmbed::new()
+        .title("Help")
+        .fields(fields)
+        .color((0, 110, 51))
+        .footer(serenity::CreateEmbedFooter::new(
+            config.extra_text_at_bottom,
+        ));
+
+    let reply = crate::CreateReply::default()
+        .embed(embed)
+        .ephemeral(config.ephemeral);
+
+    ctx.send(reply).await?;
+
+    Ok(())
+}
+
+fn format_cmd_prefix<U, E>(cmd: &crate::Command<U, E>, options_prefix: &Option<String>) -> String {
+    if cmd.slash_action.is_some() {
+        "`/".into()
+    } else if cmd.prefix_action.is_some() {
+        format!("`{}", options_prefix.as_deref().unwrap_or_default())
+    } else if cmd.context_menu_action.is_some() {
+        match cmd.context_menu_action {
+            Some(crate::ContextMenuCommandAction::Message(_)) => "Message menu: `".into(),
+            Some(crate::ContextMenuCommandAction::User(_)) => "User menu: `".into(),
+            Some(crate::ContextMenuCommandAction::__NonExhaustive) | None => {
+                unreachable!()
+            }
+        }
+    } else {
+        "`".into()
+    }
+}
 
 
 /// Convenience function to align descriptions behind commands
 struct TwoColumnList(Vec<(String, Option<String>)>);
 
+#[allow(unused)]
 impl TwoColumnList {
     /// Creates a new [`TwoColumnList`]
     fn new() -> Self {
@@ -54,23 +163,6 @@ impl TwoColumnList {
             }
         }
         text
-    }
-}
-
-/// Get the prefix from options
-async fn get_prefix_from_options<U, E>(ctx: crate::Context<'_, U, E>) -> Option<String> {
-    let options = &ctx.framework().options().prefix_options;
-    match &options.prefix {
-        Some(fixed_prefix) => Some(fixed_prefix.clone()),
-        None => match options.dynamic_prefix {
-            Some(dynamic_prefix_callback) => {
-                match dynamic_prefix_callback(crate::PartialContext::from(ctx)).await {
-                    Ok(Some(dynamic_prefix)) => Some(dynamic_prefix),
-                    _ => None,
-                }
-            }
-            None => None,
-        },
     }
 }
 
@@ -123,7 +215,7 @@ async fn help_single_command<U, E>(
             subprefix = Some(format!("  /{}", command.name));
         }
         if command.prefix_action.is_some() {
-            let prefix = match get_prefix_from_options(ctx).await {
+            let prefix = match super::help::get_prefix_from_options(ctx).await {
                 Some(prefix) => prefix,
                 // None can happen if the prefix is dynamic, and the callback
                 // fails due to help being invoked with slash or context menu
@@ -228,172 +320,5 @@ fn preformat_subcommands<U, E>(
         // We could recurse here, but things can get cluttered quickly.
         // Instead, we show (using this function) subsubcommands when
         // the user asks for help on the subcommand.
-    }
-}
-
-/// Preformat lines (except for padding,) like `("  /ping", "Emits a ping message")`
-fn preformat_command<U, E>(
-    commands: &mut TwoColumnList,
-    config: &HelpConfiguration<'_>,
-    command: &crate::Command<U, E>,
-    indent: &str,
-    options_prefix: Option<&str>,
-) {
-    let prefix = if command.slash_action.is_some() {
-        String::from("/")
-    } else if command.prefix_action.is_some() {
-        options_prefix.map(String::from).unwrap_or_default()
-    } else {
-        // This is not a prefix or slash command, i.e. probably a context menu only command
-        // This should have been filtered out in `generate_all_commands`
-        unreachable!();
-    };
-
-    let prefix = format!("{}{}{}", indent, prefix, command.name);
-    commands.push_two_colums(
-        prefix.clone(),
-        command.description.as_deref().unwrap_or("").to_string(),
-    );
-    if config.show_subcommands {
-        preformat_subcommands(commands, command, &prefix)
-    }
-}
-
-/// Create help text for `help_all_commands`
-///
-/// This is a separate function so we can have tests for it
-async fn generate_all_commands<U, E>(
-    ctx: crate::Context<'_, U, E>,
-    config: &HelpConfiguration<'_>,
-) -> Result<String, serenity::Error> {
-    let mut categories = crate::util::OrderedMap::<Option<&str>, Vec<&crate::Command<U, E>>>::new();
-    for cmd in &ctx.framework().options().commands {
-        categories
-            .get_or_insert_with(cmd.category.as_deref(), Vec::new)
-            .push(cmd);
-    }
-
-    let options_prefix = get_prefix_from_options(ctx).await;
-
-    let mut menu = String::from("```\n");
-
-    let mut commandlist = TwoColumnList::new();
-    for (category_name, commands) in categories {
-        let commands = commands
-            .into_iter()
-            .filter(|cmd| {
-                !cmd.hide_in_help && (cmd.prefix_action.is_some() || cmd.slash_action.is_some())
-            })
-            .collect::<Vec<_>>();
-        if commands.is_empty() {
-            continue;
-        }
-        commandlist.push_heading(category_name.unwrap_or("Commands"));
-        for command in commands {
-            preformat_command(
-                &mut commandlist,
-                config,
-                command,
-                "  ",
-                options_prefix.as_deref(),
-            );
-        }
-    }
-    menu += &commandlist.into_string();
-
-    if config.show_context_menu_commands {
-        menu += "\nContext menu commands:\n";
-
-        for command in &ctx.framework().options().commands {
-            let name = format_context_menu_name(command);
-            if name.is_none() {
-                continue;
-            };
-            let _ = writeln!(menu, "  {}", name.unwrap());
-        }
-    }
-
-    menu += "\n";
-    menu += config.extra_text_at_bottom;
-    menu += "\n```";
-
-    Ok(menu)
-}
-
-/// Code for printing an overview of all commands (e.g. `~help`)
-async fn help_all_commands<U, E>(
-    ctx: crate::Context<'_, U, E>,
-    config: HelpConfiguration<'_>,
-) -> Result<(), serenity::Error> {
-    let menu = generate_all_commands(ctx, &config).await?;
-    let reply = CreateReply::default()
-        .content(menu)
-        .ephemeral(config.ephemeral);
-
-    ctx.send(reply).await?;
-    Ok(())
-}
-
-/// A help command that outputs text in a code block, groups commands by categories, and annotates
-/// commands with a slash if they exist as slash commands.
-///
-/// Example usage from Ferris, the Discord bot running in the Rust community server:
-/// ```rust
-/// # type Error = Box<dyn std::error::Error>;
-/// # type Context<'a> = poise::Context<'a, (), Error>;
-/// /// Show this menu
-/// #[poise::command(prefix_command, track_edits, slash_command)]
-/// pub async fn help(
-///     ctx: Context<'_>,
-///     #[description = "Specific command to show help about"] command: Option<String>,
-/// ) -> Result<(), Error> {
-///     let config = poise::builtins::HelpConfiguration {
-///         extra_text_at_bottom: "\
-/// Type ?help command for more info on a command.
-/// You can edit your message to the bot and the bot will edit its response.",
-///         ..Default::default()
-///     };
-///     poise::builtins::help(ctx, command.as_deref(), config).await?;
-///     Ok(())
-/// }
-/// ```
-/// Output:
-/// ```text
-/// Playground:
-///   ?play        Compile and run Rust code in a playground
-///   ?eval        Evaluate a single Rust expression
-///   ?miri        Run code and detect undefined behavior using Miri
-///   ?expand      Expand macros to their raw desugared form
-///   ?clippy      Catch common mistakes using the Clippy linter
-///   ?fmt         Format code using rustfmt
-///   ?microbench  Benchmark small snippets of code
-///   ?procmacro   Compile and use a procedural macro
-///   ?godbolt     View assembly using Godbolt
-///   ?mca         Run performance analysis using llvm-mca
-///   ?llvmir      View LLVM IR using Godbolt
-/// Crates:
-///   /crate       Lookup crates on crates.io
-///   /doc         Lookup documentation
-/// Moderation:
-///   /cleanup     Deletes the bot's messages for cleanup
-///   /ban         Bans another person
-///   ?move        Move a discussion to another channel
-///   /rustify     Adds the Rustacean role to members
-/// Miscellaneous:
-///   ?go          Evaluates Go code
-///   /source      Links to the bot GitHub repo
-///   /help        Show this menu
-///
-/// Type ?help command for more info on a command.
-/// You can edit your message to the bot and the bot will edit its response.
-/// ```
-pub async fn pretty_help<U, E>(
-    ctx: crate::Context<'_, U, E>,
-    command: Option<&str>,
-    config: HelpConfiguration<'_>,
-) -> Result<(), serenity::Error> {
-    match command {
-        Some(command) => help_single_command(ctx, command, config).await,
-        None => help_all_commands(ctx, config).await,
     }
 }
