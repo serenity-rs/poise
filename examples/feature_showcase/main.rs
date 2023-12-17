@@ -51,6 +51,8 @@ async fn main() {
                 checks::lennyface(),
                 checks::permissions_v2(),
                 choice_parameter::choice(),
+                choice_parameter::inline_choice(),
+                choice_parameter::inline_choice_int(),
                 code_block_parameter::code(),
                 collector::boop(),
                 context_menu::user_info(),

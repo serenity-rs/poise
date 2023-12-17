@@ -76,17 +76,34 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
             None => quote::quote! {},
         };
         let type_setter = match inv.args.slash_command {
-            true => quote::quote! { Some(|o| {
-                poise::create_slash_argument!(#type_, o)
-                #min_value_setter #max_value_setter
-                #min_length_setter #max_length_setter
-            }) },
+            true => {
+                if let Some(_choices) = &param.args.choices {
+                    quote::quote! { Some(|o| o.kind(::poise::serenity_prelude::CommandOptionType::Integer)) }
+                } else {
+                    quote::quote! { Some(|o| {
+                        poise::create_slash_argument!(#type_, o)
+                        #min_value_setter #max_value_setter
+                        #min_length_setter #max_length_setter
+                    }) }
+                }
+            }
             false => quote::quote! { None },
         };
         // TODO: theoretically a problem that we don't store choices for non slash commands
         // TODO: move this to poise::CommandParameter::choices (is there a reason not to?)
         let choices = match inv.args.slash_command {
-            true => quote::quote! { poise::slash_argument_choices!(#type_) },
+            true => {
+                if let Some(choices) = &param.args.choices {
+                    let choices = &choices.0;
+                    quote::quote! { vec![#( ::poise::CommandParameterChoice {
+                        name: ToString::to_string(&#choices),
+                        localizations: Default::default(),
+                        __non_exhaustive: (),
+                    } ),*] }
+                } else {
+                    quote::quote! { poise::slash_argument_choices!(#type_) }
+                }
+            }
             false => quote::quote! { vec![] },
         };
 
@@ -148,9 +165,17 @@ pub fn generate_slash_action(inv: &Invocation) -> Result<proc_macro2::TokenStrea
     let param_types = inv
         .parameters
         .iter()
-        .map(|p| match p.args.flag {
-            true => syn::parse_quote! { FLAG },
-            false => p.type_.clone(),
+        .map(|p| {
+            let t = &p.type_;
+            if p.args.flag {
+                quote::quote! { FLAG }
+            } else if let Some(choices) = &p.args.choices {
+                let choice_indices = (0..choices.0.len()).map(syn::Index::from);
+                let choice_vals = &choices.0;
+                quote::quote! { INLINE_CHOICE #t [#(#choice_indices: #choice_vals),*] }
+            } else {
+                quote::quote! { #t }
+            }
         })
         .collect::<Vec<_>>();
 
