@@ -15,7 +15,7 @@ Poise is an opinionated Discord bot framework with a few distinctive features:
 # How to use
 
 Most information is in the [API documentation](https://docs.rs/poise/). Also take a
-look at the [examples](examples), especially [`feature_showcase`](https://github.com/ev3nvy/poise/tree/current/examples/feature_showcase), to learn what poise can do.
+look at the [examples](examples), especially [`feature_showcase`](examples/feature_showcase), to learn what poise can do.
 
 If you're using a development version from git directly, you probably want to look at the documentation for
 [`current`](https://serenity-rs.github.io/poise/current), [`next`](https://serenity-rs.github.io/poise/next)
@@ -31,7 +31,7 @@ For each bot, there's a list of notable features for you to take inspiration fro
 - [TTS Bot](https://github.com/Discord-TTS/Bot/) by [@GnomedDev](https://github.com/GnomedDev): localization, database, voice
 - [Scripty](https://github.com/scripty-bot/scripty) by [@tazz4843](https://github.com/tazz4843): localization, database, voice
 - [Etternabot](https://github.com/kangalio/Etternabot) by [@kangalio](https://github.com/kangalio): response transformation, variadic and lazy arguments
-- [Rustbot](https://github.com/kangalio/rustbot) by [@kangalio](https://github.com/kangalio): database, custom prefixes
+- [Rustbot](https://github.com/rust-community-discord/ferrisbot-for-discord) by [@kangalio](https://github.com/kangalio): database, custom prefixes
 
 You're welcome to add your own bot [via a PR](https://github.com/serenity-rs/poise/compare)!
 
