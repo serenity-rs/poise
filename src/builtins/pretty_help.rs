@@ -113,6 +113,117 @@ fn format_cmd_prefix<U, E>(cmd: &crate::Command<U, E>, options_prefix: &Option<S
     }
 }
 
+/// Code for printing help of a specific command (e.g. `~help my_command`)
+async fn pretty_help_single_command<U, E>(
+    ctx: crate::Context<'_, U, E>,
+    command_name: &str,
+    config: HelpConfiguration<'_>,
+) -> Result<(), serenity::Error> {
+    let commands = &ctx.framework().options().commands;
+
+    // Try interpret the command name as a context menu command first
+    let command = commands
+        .iter()
+        .find(|cmd| {
+            cmd.context_menu_name
+                .as_ref()
+                .is_some_and(|n| n.eq_ignore_ascii_case(command_name))
+        })
+        // Then interpret command name as a normal command (possibly nested subcommand)
+        .or(crate::find_command(commands, command_name, true, &mut vec![]).map(|(c, _, _)| c));
+
+    let Some(command) = command else {
+        ctx.send(
+            CreateReply::default()
+                .content(format!("No such command `{}`", command_name))
+                .ephemeral(config.ephemeral),
+        )
+        .await?;
+
+        return Ok(());
+    };
+
+    let reply = {
+        let mut invocations = Vec::new();
+        let mut subprefix = None;
+        if command.slash_action.is_some() {
+            invocations.push(format!("`/{}`", command.name));
+            subprefix = Some(format!("> /{}", command.name));
+        }
+        if command.prefix_action.is_some() {
+            let prefix = super::help::get_prefix_from_options(ctx)
+                .await
+                // This can happen if the prefix is dynamic, and the callback fails
+                // due to help being invoked with slash or context menu commands.
+                .unwrap_or_else(|| String::from("<prefix>"));
+            invocations.push(format!("`{}{}`", prefix, command.name));
+            subprefix = subprefix.or(Some(format!("> {}{}", prefix, command.name)));
+        }
+        if command.context_menu_name.is_some() && command.context_menu_action.is_some() {
+            // Since command.context_menu_action is Some, this unwrap is safe
+            invocations.push(format_context_menu_name(command).unwrap());
+            subprefix = subprefix.or(Some(String::from("> ")));
+        }
+        // At least one of the three if blocks should have triggered
+        assert!(!invocations.is_empty());
+        assert!(subprefix.is_some());
+
+        let invocations = invocations.join("\n");
+        let subprefix = subprefix.unwrap();
+
+        let mut description = match (&command.description, &command.help_text) {
+            (Some(description), Some(help_text)) if config.include_description => {
+                format!("{}\n\n{}", description, help_text)
+            }
+            (_, Some(help_text)) => help_text.clone(),
+            (Some(description), None) => description.clone(),
+            (None, None) => "No help available".to_string(),
+        };
+
+        //
+        // TODO
+        //
+
+        if !command.parameters.is_empty() {
+            description += "\n\n```\nParameters:\n";
+            let mut parameterlist = TwoColumnList::new();
+            for parameter in &command.parameters {
+                let name = parameter.name.clone();
+                let description = parameter.description.as_deref().unwrap_or("");
+                let description = format!(
+                    "({}) {}",
+                    if parameter.required {
+                        "required"
+                    } else {
+                        "optional"
+                    },
+                    description,
+                );
+                parameterlist.push_two_colums(name, description);
+            }
+            description += &parameterlist.into_string();
+            description += "```";
+        }
+        if !command.subcommands.is_empty() {
+            description += "\n\n```\nSubcommands:\n";
+            let mut commandlist = TwoColumnList::new();
+            // Subcommands can exist on context menu commands, but there's no
+            // hierarchy in the menu, so just display them as a list without
+            // subprefix.
+            preformat_subcommands(&mut commandlist, command, &subprefix);
+            description += &commandlist.into_string();
+            description += "```";
+        }
+        format!("**{}**\n\n{}", invocations, description)
+    };
+
+    let reply = CreateReply::default()
+        .content(reply)
+        .ephemeral(config.ephemeral);
+
+    ctx.send(reply).await?;
+    Ok(())
+}
 
 /// Convenience function to align descriptions behind commands
 struct TwoColumnList(Vec<(String, Option<String>)>);
