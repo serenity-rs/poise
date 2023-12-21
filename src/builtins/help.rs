@@ -127,22 +127,28 @@ async fn help_single_command<U, E>(
 ) -> Result<(), serenity::Error> {
     let commands = &ctx.framework().options().commands;
     // Try interpret the command name as a context menu command first
-    let mut command = commands.iter().find(|command| {
-        if let Some(context_menu_name) = &command.context_menu_name {
-            if context_menu_name.eq_ignore_ascii_case(command_name) {
-                return true;
-            }
-        }
-        false
-    });
-    // Then interpret command name as a normal command (possibly nested subcommand)
-    if command.is_none() {
-        if let Some((c, _, _)) = crate::find_command(commands, command_name, true, &mut vec![]) {
-            command = Some(c);
-        }
-    }
+    let command = commands
+        .iter()
+        .find(|cmd| {
+            cmd.context_menu_name
+                .as_deref()
+                .is_some_and(|n| n.eq_ignore_ascii_case(command_name))
+        })
+        // Then interpret command name as a normal command (possibly nested subcommand)
+        .or(crate::find_command(commands, command_name, true, &mut vec![]).map(|(c, _, _)| c));
 
-    let reply = if let Some(command) = command {
+    let Some(command) = command else {
+        ctx.send(
+            CreateReply::default()
+                .content(format!("No such command `{}`", command_name))
+                .ephemeral(config.ephemeral),
+        )
+        .await?;
+
+        return Ok(());
+    };
+
+    let reply = {
         let mut invocations = Vec::new();
         let mut subprefix = None;
         if command.slash_action.is_some() {
@@ -150,24 +156,19 @@ async fn help_single_command<U, E>(
             subprefix = Some(format!("  /{}", command.name));
         }
         if command.prefix_action.is_some() {
-            let prefix = match get_prefix_from_options(ctx).await {
-                Some(prefix) => prefix,
-                // None can happen if the prefix is dynamic, and the callback
-                // fails due to help being invoked with slash or context menu
-                // commands. Not sure there's a better way to handle this.
-                None => String::from("<prefix>"),
-            };
+            let prefix = super::help::get_prefix_from_options(ctx)
+                .await
+                // None can happen if the prefix is dynamic, and the callback fails
+                // due to help being invoked with slash or context menu commands.
+                // there might be a better way to handle this.
+                .unwrap_or_else(|| String::from("<prefix>"));
             invocations.push(format!("`{}{}`", prefix, command.name));
-            if subprefix.is_none() {
-                subprefix = Some(format!("  {}{}", prefix, command.name));
-            }
+            subprefix = subprefix.or(Some(format!("  {}{}", prefix, command.name)));
         }
         if command.context_menu_name.is_some() && command.context_menu_action.is_some() {
             // Since command.context_menu_action is Some, this unwrap is safe
             invocations.push(format_context_menu_name(command).unwrap());
-            if subprefix.is_none() {
-                subprefix = Some(String::from("  "));
-            }
+            subprefix = subprefix.or(Some(String::from("  ")));
         }
         // At least one of the three if blocks should have triggered
         assert!(subprefix.is_some());
@@ -175,15 +176,11 @@ async fn help_single_command<U, E>(
         let invocations = invocations.join("\n");
 
         let mut text = match (&command.description, &command.help_text) {
-            (Some(description), Some(help_text)) => {
-                if config.include_description {
-                    format!("{}\n\n{}", description, help_text)
-                } else {
-                    help_text.clone()
-                }
+            (Some(description), Some(help_text)) if config.include_description => {
+                format!("{}\n\n{}", description, help_text)
             }
-            (Some(description), None) => description.to_owned(),
-            (None, Some(help_text)) => help_text.clone(),
+            (_, Some(help_text)) => help_text.clone(),
+            (Some(description), None) => description.clone(),
             (None, None) => "No help available".to_string(),
         };
         if !command.parameters.is_empty() {
@@ -221,8 +218,6 @@ async fn help_single_command<U, E>(
             text += "```";
         }
         format!("**{}**\n\n{}", invocations, text)
-    } else {
-        format!("No such command `{}`", command_name)
     };
 
     let reply = CreateReply::default()
