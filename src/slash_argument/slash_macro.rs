@@ -112,6 +112,21 @@ impl std::error::Error for SlashArgError {
 #[doc(hidden)]
 #[macro_export]
 macro_rules! _parse_slash {
+    // Extract #[choices(...)] (no Option supported ;-;)
+    ($ctx:ident, $interaction:ident, $args:ident => $name:literal: INLINE_CHOICE $type:ty [$($index:literal: $value:literal),*]) => {
+        if let Some(arg) = $args.iter().find(|arg| arg.name == $name) {
+            let $crate::serenity_prelude::ResolvedValue::Integer(index) = arg.value else {
+                return Err($crate::SlashArgError::new_command_structure_mismatch("expected integer, as the index for an inline choice parameter"));
+            };
+            match index {
+                $( $index => $value, )*
+                _ => return Err($crate::SlashArgError::new_command_structure_mismatch("out of range index for inline choice parameter")),
+            }
+        } else {
+            return Err($crate::SlashArgError::new_command_structure_mismatch("a required argument is missing"));
+        }
+    };
+
     // Extract Option<T>
     ($ctx:ident, $interaction:ident, $args:ident => $name:literal: Option<$type:ty $(,)*>) => {
         if let Some(arg) = $args.iter().find(|arg| arg.name == $name) {
