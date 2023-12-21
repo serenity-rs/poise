@@ -6,8 +6,8 @@
 mod help;
 pub use help::*;
 
- mod pretty_help;
- pub use pretty_help::*;
+mod pretty_help;
+pub use pretty_help::*;
 
 mod register;
 pub use register::*;
