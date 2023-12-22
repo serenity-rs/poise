@@ -16,6 +16,8 @@ pub struct PrettyHelpConfiguration<'a> {
     pub show_subcommands: bool,
     /// Whether to include [`crate::Command::description`] (above [`crate::Command::help_text`]).
     pub include_description: bool,
+    /// Color of the Embed
+    pub color: (u8,u8,u8),
     #[doc(hidden)]
     pub __non_exhaustive: (),
 }
@@ -28,6 +30,7 @@ impl Default for PrettyHelpConfiguration<'_> {
             show_context_menu_commands: false,
             show_subcommands: false,
             include_description: true,
+            color: (0, 110, 51),
             __non_exhaustive: (),
         }
     }
@@ -83,7 +86,7 @@ async fn pretty_help_all_commands<U, E>(
                 if let Some(description) = cmd.description.as_deref() {
                     writeln!(buffer, "{}{}`: *{}*", prefix, name, description).ok();
                 } else {
-                    writeln!(buffer, "> {}{}`.", prefix, name).ok();
+                    writeln!(buffer, "{}{}`.", prefix, name).ok();
                 }
 
                 if config.show_subcommands {
@@ -109,7 +112,7 @@ async fn pretty_help_all_commands<U, E>(
     let embed = serenity::CreateEmbed::new()
         .title("Help")
         .fields(fields)
-        .color((0, 110, 51))
+        .color(config.color)
         .footer(serenity::CreateEmbedFooter::new(
             config.extra_text_at_bottom,
         ));
