@@ -105,6 +105,9 @@ async fn pretty_help_all_commands<U, E>(
                     }
                 }
             }
+            if let Some((i, _)) = buffer.char_indices().nth(1024) {
+                buffer.truncate(i);
+            }
             (category.unwrap_or_default(), buffer, false)
         })
         .collect::<Vec<_>>();
