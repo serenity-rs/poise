@@ -80,28 +80,22 @@ async fn pretty_help_all_commands<U, E>(
                 let name = cmd.context_menu_name.as_deref().unwrap_or(&cmd.name);
                 let prefix = format_cmd_prefix(cmd, &options_prefix);
 
-                writeln!(
-                    buffer,
-                    "{}{}`: _{}_",
-                    prefix,
-                    name,
-                    cmd.description.as_deref().unwrap_or_default()
-                )
-                .ok();
+                if let Some(description) = cmd.description.as_deref() {
+                    writeln!(buffer, "{}{}`: *{}*", prefix, name, description).ok();
+                } else {
+                    writeln!(buffer, "> {}{}`.", prefix, name).ok();
+                }
 
                 if config.show_subcommands {
                     for sbcmd in &cmd.subcommands {
                         let name = sbcmd.context_menu_name.as_deref().unwrap_or(&sbcmd.name);
                         let prefix = format_cmd_prefix(sbcmd, &options_prefix);
 
-                        writeln!(
-                            buffer,
-                            "> {}{}`: _{}_",
-                            prefix,
-                            name,
-                            sbcmd.description.as_deref().unwrap_or_default()
-                        )
-                        .ok();
+                        if let Some(description) = sbcmd.description.as_deref() {
+                            writeln!(buffer, "> {}{}`: *{}*", prefix, name, description).ok();
+                        } else {
+                            writeln!(buffer, "> {}{}`.", prefix, name).ok();
+                        }
                     }
                 }
             }
@@ -183,7 +177,7 @@ async fn pretty_help_single_command<U, E>(
 
     if command.slash_action.is_some() {
         invocations.push(format!("`/{}`", command.name));
-        subprefix = Some(format!("> /{}", command.name));
+        subprefix = Some(format!("> `/{}`", command.name));
     }
     if command.prefix_action.is_some() {
         let prefix = super::help::get_prefix_from_options(ctx)
@@ -192,7 +186,7 @@ async fn pretty_help_single_command<U, E>(
             // due to help being invoked with slash or context menu commands.
             .unwrap_or_else(|| String::from("<prefix>"));
         invocations.push(format!("`{}{}`", prefix, command.name));
-        subprefix = subprefix.or(Some(format!("> {}{}", prefix, command.name)));
+        subprefix = subprefix.or(Some(format!("> `{}{}`", prefix, command.name)));
     }
     if command.context_menu_name.is_some() && command.context_menu_action.is_some() {
         let kind = match command.context_menu_action {
@@ -201,7 +195,7 @@ async fn pretty_help_single_command<U, E>(
             Some(crate::ContextMenuCommandAction::__NonExhaustive) | None => unreachable!(),
         };
         invocations.push(format!(
-            "{} (on {})",
+            "`{}` (on {})",
             command
                 .context_menu_name
                 .as_deref()
@@ -232,16 +226,16 @@ async fn pretty_help_single_command<U, E>(
         .parameters
         .iter()
         .map(|parameter| {
-            format!(
-                "`{}` ({}) _{}_.",
-                parameter.name,
-                if parameter.required {
-                    "required"
-                } else {
-                    "optional"
-                },
-                parameter.description.as_deref().unwrap_or_default(),
-            )
+            let req = if parameter.required {
+                "required"
+            } else {
+                "optional"
+            };
+            if let Some(description) = parameter.description.as_deref() {
+                format!("`{}` ({}) *{} *.", parameter.name, req, description)
+            } else {
+                format!("`{}` ({}).", parameter.name, req)
+            }
         })
         .reduce(|x, y| format!("{x}\n{y}"))
         .map(|s| ("Parameters", s, false));
@@ -250,12 +244,13 @@ async fn pretty_help_single_command<U, E>(
         .subcommands
         .iter()
         .map(|sbcmd| {
-            format!(
-                "> {}{}`: _{}_",
-                format_cmd_prefix(sbcmd, &subprefix), // i have no idea about this really
-                sbcmd.context_menu_name.as_deref().unwrap_or(&sbcmd.name),
-                sbcmd.description.as_deref().unwrap_or_default()
-            )
+            let prefix = format_cmd_prefix(sbcmd, &subprefix); // i have no idea about this really
+            let name = sbcmd.context_menu_name.as_deref().unwrap_or(&sbcmd.name);
+            if let Some(description) = sbcmd.description.as_deref() {
+                format!("> {}{}`: *{} *", prefix, name, description)
+            } else {
+                format!("> {}{}`", prefix, name,)
+            }
         })
         .reduce(|x, y| format!("{x}\n{y}"))
         .map(|s| ("Subcommands", s, false));
