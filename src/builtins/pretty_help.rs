@@ -20,6 +20,19 @@ pub struct PrettyHelpConfiguration<'a> {
     pub __non_exhaustive: (),
 }
 
+impl Default for PrettyHelpConfiguration<'_> {
+    fn default() -> Self {
+        Self {
+            extra_text_at_bottom: "",
+            ephemeral: true,
+            show_context_menu_commands: false,
+            show_subcommands: false,
+            include_description: true,
+            __non_exhaustive: (),
+        }
+    }
+}
+
 /// A help command that works similarly to `builtin::help` butt outputs text in an embed.
 ///
 pub async fn pretty_help<U, E>(
