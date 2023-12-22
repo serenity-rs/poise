@@ -1,15 +1,31 @@
 //! Contains a built-in help command and surrounding infrastructure that uses embeds.
 
-use super::help::HelpConfiguration;
 use crate::{serenity_prelude as serenity, CreateReply};
 use std::fmt::Write as _;
+
+/// Optional configuration for how the help message from [`pretty_help()`] looks
+pub struct PrettyHelpConfiguration<'a> {
+    /// Extra text displayed at the bottom of your message. Can be used for help and tips specific
+    /// to your bot
+    pub extra_text_at_bottom: &'a str,
+    /// Whether to make the response ephemeral if possible. Can be nice to reduce clutter
+    pub ephemeral: bool,
+    /// Whether to list context menu commands as well
+    pub show_context_menu_commands: bool,
+    /// Whether to list context menu commands as well
+    pub show_subcommands: bool,
+    /// Whether to include [`crate::Command::description`] (above [`crate::Command::help_text`]).
+    pub include_description: bool,
+    #[doc(hidden)]
+    pub __non_exhaustive: (),
+}
 
 /// A help command that works similarly to `builtin::help` butt outputs text in an embed.
 ///
 pub async fn pretty_help<U, E>(
     ctx: crate::Context<'_, U, E>,
     command: Option<&str>,
-    config: HelpConfiguration<'_>,
+    config: PrettyHelpConfiguration<'_>,
 ) -> Result<(), serenity::Error> {
     match command {
         Some(command) => pretty_help_single_command(ctx, command, config).await,
@@ -20,7 +36,7 @@ pub async fn pretty_help<U, E>(
 /// Printing an overview of all commands (e.g. `~help`)
 async fn pretty_help_all_commands<U, E>(
     ctx: crate::Context<'_, U, E>,
-    config: HelpConfiguration<'_>,
+    config: PrettyHelpConfiguration<'_>,
 ) -> Result<(), serenity::Error> {
     let mut categories = crate::util::OrderedMap::new();
     let commands = ctx.framework().options().commands.iter().filter(|cmd| {
@@ -120,7 +136,7 @@ fn format_cmd_prefix<U, E>(cmd: &crate::Command<U, E>, options_prefix: &Option<S
 async fn pretty_help_single_command<U, E>(
     ctx: crate::Context<'_, U, E>,
     command_name: &str,
-    config: HelpConfiguration<'_>,
+    config: PrettyHelpConfiguration<'_>,
 ) -> Result<(), serenity::Error> {
     let commands = &ctx.framework().options().commands;
 
