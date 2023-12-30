@@ -45,6 +45,14 @@ impl SlashArgError {
         Self::CommandStructureMismatch { description }
     }
 
+    pub fn new_parse(error: Box<dyn std::error::Error + Send + Sync>, input: String) -> Self {
+        Self::Parse { error, input }
+    }
+
+    pub fn new_invalid(description: &'static str) -> Self {
+        Self::Invalid(description)
+    }
+
     pub fn to_framework_error<U, E>(
         self,
         ctx: crate::ApplicationContext<'_, U, E>,
