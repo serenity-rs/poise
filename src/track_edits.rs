@@ -16,10 +16,10 @@ fn update_message(message: &mut serenity::Message, update: serenity::MessageUpda
         message.content = content;
     }
     if let Some(tts) = update.tts {
-        message.tts = tts;
+        message.set_tts(tts);
     }
     if let Some(pinned) = update.pinned {
-        message.pinned = pinned;
+        message.set_pinned(pinned);
     }
     if let Some(timestamp) = update.timestamp {
         message.timestamp = timestamp;
@@ -31,7 +31,7 @@ fn update_message(message: &mut serenity::Message, update: serenity::MessageUpda
         message.author = author;
     }
     if let Some(mention_everyone) = update.mention_everyone {
-        message.mention_everyone = mention_everyone;
+        message.set_mention_everyone(mention_everyone);
     }
     if let Some(mentions) = update.mentions {
         message.mentions = mentions;

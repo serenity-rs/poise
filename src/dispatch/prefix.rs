@@ -224,7 +224,7 @@ pub async fn parse_invocation<'a, U: Send + Sync, E>(
     parent_commands: &'a mut Vec<&'a crate::Command<U, E>>,
 ) -> Result<Option<crate::PrefixContext<'a, U, E>>, crate::FrameworkError<'a, U, E>> {
     // Check if we're allowed to invoke from bot messages
-    if msg.author.bot && framework.options.prefix_options.ignore_bots {
+    if msg.author.bot() && framework.options.prefix_options.ignore_bots {
         return Ok(None);
     }
 
