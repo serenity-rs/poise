@@ -12,11 +12,11 @@ use crate::{Context, Error};
 //
 // As the return value of autocomplete functions, you must return `serenity::CreateAutocompleteResponse`.
 
-async fn autocomplete_name(
-    _ctx: Context<'_>,
-    partial: &str,
-) -> serenity::CreateAutocompleteResponse {
-    let choices = ["Amanda", "Bob", "Christian", "Danny", "Ester", "Falk"]
+async fn autocomplete_name<'a>(
+    _ctx: Context<'a>,
+    partial: &'a str,
+) -> serenity::CreateAutocompleteResponse<'a> {
+    let choices: Vec<_> = ["Amanda", "Bob", "Christian", "Danny", "Ester", "Falk"]
         .into_iter()
         .filter(move |name| name.starts_with(partial))
         .map(serenity::AutocompleteChoice::from)
@@ -25,10 +25,10 @@ async fn autocomplete_name(
     serenity::CreateAutocompleteResponse::new().set_choices(choices)
 }
 
-async fn autocomplete_number(
-    _ctx: Context<'_>,
-    _partial: &str,
-) -> serenity::CreateAutocompleteResponse {
+async fn autocomplete_number<'a>(
+    _ctx: Context<'a>,
+    _partial: &'a str,
+) -> serenity::CreateAutocompleteResponse<'a> {
     // Dummy choices
     let choices = [1_u32, 2, 3, 4, 5].iter().map(|&n| {
         serenity::AutocompleteChoice::new(
@@ -37,7 +37,7 @@ async fn autocomplete_number(
         )
     });
 
-    serenity::CreateAutocompleteResponse::new().set_choices(choices.collect())
+    serenity::CreateAutocompleteResponse::new().set_choices(choices.collect::<Vec<_>>())
 }
 
 /// Greet a user. Showcasing autocomplete!

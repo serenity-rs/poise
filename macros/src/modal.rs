@@ -101,7 +101,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
     Ok(quote::quote! { const _: () = {
         use poise::serenity_prelude as serenity;
         impl #impl_generics poise::Modal for #struct_ident #ty_generics #where_clause {
-            fn create(mut defaults: Option<Self>, custom_id: String) -> serenity::CreateInteractionResponse {
+            fn create(mut defaults: Option<Self>, custom_id: String) -> serenity::CreateInteractionResponse<'static> {
                 serenity::CreateInteractionResponse::Modal(
                     serenity::CreateModal::new(custom_id, #modal_title).components(vec!{#( #builders )*})
                 )

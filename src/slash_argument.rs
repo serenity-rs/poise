@@ -17,7 +17,7 @@ pub trait SlashArgument: Sized {
     ///
     /// Only fields about the argument type are filled in. The caller is still responsible for
     /// filling in `name()`, `description()`, and possibly `required()` or other fields.
-    fn create(builder: serenity::CreateCommandOption) -> serenity::CreateCommandOption;
+    fn create(builder: serenity::CreateCommandOption<'_>) -> serenity::CreateCommandOption<'_>;
 
     /// If this is a choice parameter, returns the choices
     fn choices() -> CowVec<crate::CommandParameterChoice> {
@@ -76,7 +76,7 @@ macro_rules! argumentconvert_slash_argument {
                     extract_via_argumentconvert(ctx, interaction, value).await
                 }
 
-                fn create(builder: serenity::CreateCommandOption) -> serenity::CreateCommandOption {
+                fn create(builder: serenity::CreateCommandOption<'_>) -> serenity::CreateCommandOption<'_> {
                     builder.kind(serenity::CommandOptionType::String)
                 }
             }
@@ -115,7 +115,7 @@ macro_rules! impl_for_integer {
                 }
             }
 
-            fn create(builder: serenity::CreateCommandOption) -> serenity::CreateCommandOption {
+            fn create(builder: serenity::CreateCommandOption<'_>) -> serenity::CreateCommandOption<'_> {
                 builder
                     .min_number_value(f64::max(<$t>::MIN as f64, -9007199254740991.))
                     .max_number_value(f64::min(<$t>::MAX as f64, 9007199254740991.))
@@ -144,7 +144,7 @@ macro_rules! impl_slash_argument {
                 }
             }
 
-            fn create(builder: serenity::CreateCommandOption) -> serenity::CreateCommandOption {
+            fn create(builder: serenity::CreateCommandOption<'_>) -> serenity::CreateCommandOption<'_> {
                 builder.kind(serenity::CommandOptionType::$slash_param_type)
             }
         }
