@@ -48,23 +48,23 @@ macro_rules! context_methods {
         // pub $(async $($dummy:block)?)? fn $fn_name:ident $()
         // $fn_name:ident ($($sig:tt)*) $body:block
         $($await:ident)? ( $fn_name:ident $self:ident $($arg:ident)* )
-        ( $($sig:tt)* ) $body:block
+        ( $($sig:tt)* ) $(where $b1:lifetime : $b2:lifetime)? $body:block
     )* ) => {
         impl<'a, U, E> Context<'a, U, E> { $(
             $( #[$($attrs)*] )*
-            $($sig)* $body
+            $($sig)* $(where $b1:$b2)* $body
         )* }
 
         impl<'a, U, E> crate::PrefixContext<'a, U, E> { $(
             $( #[$($attrs)*] )*
-            $($sig)* {
+            $($sig)* $(where $b1:$b2)* {
                 $crate::Context::Prefix($self).$fn_name($($arg)*) $(.$await)?
             }
         )* }
 
         impl<'a, U, E> crate::ApplicationContext<'a, U, E> { $(
             $( #[$($attrs)*] )*
-            $($sig)* {
+            $($sig)* $(where $b1:$b2)* {
                 $crate::Context::Application($self).$fn_name($($arg)*) $(.$await)?
             }
         )* }
@@ -144,7 +144,7 @@ context_methods! {
     await (reply self text)
     (pub async fn reply(
         self,
-        text: impl Into<String>,
+        text: impl Into<Cow<'a, str>>,
     ) -> Result<crate::ReplyHandle<'a>, serenity::Error>) {
         self.send(crate::CreateReply::default().content(text).reply(true)).await
     }
@@ -155,7 +155,7 @@ context_methods! {
     await (send self builder)
     (pub async fn send<'att>(
         self,
-        builder: crate::CreateReply,
+        builder: crate::CreateReply<'a>,
     ) -> Result<crate::ReplyHandle<'a>, serenity::Error>) {
         crate::send_reply(self, builder).await
     }
@@ -487,7 +487,7 @@ context_methods! {
     /// convert [`crate::CreateReply`] instances into Discord requests.
     #[allow(unused_mut)] // side effect of how macro works
     (reply_builder self builder)
-    (pub fn reply_builder(self, mut builder: crate::CreateReply) -> crate::CreateReply) {
+    (pub fn reply_builder(self, mut builder: crate::CreateReply<'a>) -> crate::CreateReply<'a>) {
         let fw_options = self.framework().options();
         builder.ephemeral = builder.ephemeral.or(Some(self.command().ephemeral));
         builder.allowed_mentions = builder.allowed_mentions.or_else(|| fw_options.allowed_mentions.clone());
