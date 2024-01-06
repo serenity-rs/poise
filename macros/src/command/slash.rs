@@ -42,7 +42,7 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
                     let choices_stream = ::poise::into_stream!(
                         #autocomplete_fn(ctx.into(), partial).await
                     );
-                    let choices_vec = choices_stream
+                    let choices_vec: Vec<_> = choices_stream
                         .take(25)
                         // T or AutocompleteChoice<T> -> AutocompleteChoice<T>
                         .map(poise::serenity_prelude::AutocompleteChoice::from)
@@ -96,7 +96,7 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
                 if let Some(choices) = &param.args.choices {
                     let choices = &choices.0;
                     quote::quote! { vec![#( ::poise::CommandParameterChoice {
-                        name: ToString::to_string(&#choices),
+                        name: ToString::to_string(&#choices).into(),
                         localizations: Default::default(),
                         __non_exhaustive: (),
                     } ),*] }

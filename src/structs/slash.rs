@@ -1,5 +1,7 @@
 //! Holds application command definition structs.
 
+use std::{borrow::Cow, collections::HashMap};
+
 use crate::{serenity_prelude as serenity, BoxFuture};
 
 /// Specifies if the current invokation is from a Command or Autocomplete.
@@ -111,9 +113,9 @@ impl<U, E> Clone for ContextMenuCommandAction<U, E> {
 #[derive(Debug, Clone)]
 pub struct CommandParameterChoice {
     /// Label of this choice
-    pub name: String,
+    pub name: Cow<'static, str>,
     /// Localized labels with locale string as the key (slash-only)
-    pub localizations: std::collections::HashMap<String, String>,
+    pub localizations: HashMap<Cow<'static, str>, Cow<'static, str>>,
     #[doc(hidden)]
     pub __non_exhaustive: (),
 }
@@ -125,11 +127,11 @@ pub struct CommandParameter<U, E> {
     /// Name of this command parameter
     pub name: String,
     /// Localized names with locale string as the key (slash-only)
-    pub name_localizations: std::collections::HashMap<String, String>,
+    pub name_localizations: HashMap<String, String>,
     /// Description of the command. Required for slash commands
     pub description: Option<String>,
     /// Localized descriptions with locale string as the key (slash-only)
-    pub description_localizations: std::collections::HashMap<String, String>,
+    pub description_localizations: HashMap<String, String>,
     /// `true` is this parameter is required, `false` if it's optional or variadic
     pub required: bool,
     /// If this parameter is a channel, users can only enter these channel types in a slash command
@@ -144,11 +146,12 @@ pub struct CommandParameter<U, E> {
     /// ```rust
     /// # use poise::serenity_prelude as serenity;
     /// # let _: fn(serenity::CreateCommandOption) -> serenity::CreateCommandOption =
-    /// |b| b.kind(serenity::CommandOptionType::Integer).min_int_value(0).max_int_value(u64::MAX)
+    /// |b| b.kind(serenity::CommandOptionType::Integer).min_int_value(0).max_int_value(i64::MAX)
     /// # ;
     /// ```
     #[derivative(Debug = "ignore")]
-    pub type_setter: Option<fn(serenity::CreateCommandOption) -> serenity::CreateCommandOption>,
+    pub type_setter:
+        Option<fn(serenity::CreateCommandOption<'_>) -> serenity::CreateCommandOption<'_>>,
     /// Optionally, a callback that is invoked on autocomplete interactions. This closure should
     /// extract the partial argument from the given JSON value and generate the autocomplete
     /// response which contains the list of autocomplete suggestions.
@@ -159,7 +162,7 @@ pub struct CommandParameter<U, E> {
             &'a str,
         ) -> BoxFuture<
             'a,
-            Result<serenity::CreateAutocompleteResponse, crate::SlashArgError>,
+            Result<serenity::CreateAutocompleteResponse<'a>, crate::SlashArgError>,
         >,
     >,
     #[doc(hidden)]
@@ -169,13 +172,13 @@ pub struct CommandParameter<U, E> {
 impl<U, E> CommandParameter<U, E> {
     /// Generates a slash command parameter builder from this [`CommandParameter`] instance. This
     /// can be used to register the command on Discord's servers
-    pub fn create_as_slash_command_option(&self) -> Option<serenity::CreateCommandOption> {
+    pub fn create_as_slash_command_option(&self) -> Option<serenity::CreateCommandOption<'static>> {
         let description = self
             .description
-            .as_deref()
-            .unwrap_or("A slash command parameter");
+            .clone()
+            .map_or(Cow::Borrowed("A slash command parameter"), Cow::Owned);
 
-        let mut builder = serenity::CreateCommandOption::new(
+        let mut builder = serenity::CreateCommandOption::<'static>::new(
             serenity::CommandOptionType::String,
             self.name.clone(),
             description,
@@ -186,17 +189,20 @@ impl<U, E> CommandParameter<U, E> {
             .set_autocomplete(self.autocomplete_callback.is_some());
 
         for (locale, name) in &self.name_localizations {
-            builder = builder.name_localized(locale, name);
+            builder = builder.name_localized(locale.clone(), name.clone());
         }
         for (locale, description) in &self.description_localizations {
-            builder = builder.description_localized(locale, description);
+            builder = builder.description_localized(locale.clone(), description.clone());
         }
         if let Some(channel_types) = self.channel_types.clone() {
             builder = builder.channel_types(channel_types);
         }
         for (i, choice) in self.choices.iter().enumerate() {
-            builder =
-                builder.add_int_choice_localized(&choice.name, i as _, choice.localizations.iter());
+            builder = builder.add_int_choice_localized(
+                choice.name.clone(),
+                i as _,
+                choice.localizations.clone(),
+            );
         }
 
         Some((self.type_setter?)(builder))

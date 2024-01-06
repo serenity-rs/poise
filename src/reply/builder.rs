@@ -1,31 +1,33 @@
 //! The builder to create a new reply
 
+use std::borrow::Cow;
+
 use crate::serenity_prelude as serenity;
 
 /// Message builder that abstracts over prefix and application command responses
 #[derive(Default, Clone)]
-pub struct CreateReply {
+pub struct CreateReply<'a> {
     /// Message content.
-    pub content: Option<String>,
+    pub content: Option<Cow<'a, str>>,
     /// Embeds, if present.
-    pub embeds: Vec<serenity::CreateEmbed>,
+    pub embeds: Vec<serenity::CreateEmbed<'a>>,
     /// Message attachments.
-    pub attachments: Vec<serenity::CreateAttachment>,
+    pub attachments: Vec<serenity::CreateAttachment<'a>>,
     /// Whether the message is ephemeral (only has an effect in application commands)
     pub ephemeral: Option<bool>,
     /// Message components, that is, buttons and select menus.
-    pub components: Option<Vec<serenity::CreateActionRow>>,
+    pub components: Option<Cow<'a, [serenity::CreateActionRow<'a>]>>,
     /// The allowed mentions for the message.
-    pub allowed_mentions: Option<serenity::CreateAllowedMentions>,
+    pub allowed_mentions: Option<serenity::CreateAllowedMentions<'a>>,
     /// Whether this message is an inline reply.
     pub reply: bool,
     #[doc(hidden)]
     pub __non_exhaustive: (),
 }
 
-impl CreateReply {
+impl<'a> CreateReply<'a> {
     /// Set the content of the message.
-    pub fn content(mut self, content: impl Into<String>) -> Self {
+    pub fn content(mut self, content: impl Into<Cow<'a, str>>) -> Self {
         self.content = Some(content.into());
         self
     }
@@ -33,7 +35,7 @@ impl CreateReply {
     /// Adds an embed to the message.
     ///
     /// Existing embeds are kept.
-    pub fn embed(mut self, embed: serenity::CreateEmbed) -> Self {
+    pub fn embed(mut self, embed: serenity::CreateEmbed<'a>) -> Self {
         self.embeds.push(embed);
         self
     }
@@ -41,15 +43,18 @@ impl CreateReply {
     /// Set components (buttons and select menus) for this message.
     ///
     /// Any previously set components will be overwritten.
-    pub fn components(mut self, components: Vec<serenity::CreateActionRow>) -> Self {
-        self.components = Some(components);
+    pub fn components(
+        mut self,
+        components: impl Into<Cow<'a, [serenity::CreateActionRow<'a>]>>,
+    ) -> Self {
+        self.components = Some(components.into());
         self
     }
 
     /// Add an attachment.
     ///
     /// This will not have an effect in a slash command's initial response!
-    pub fn attachment(mut self, attachment: serenity::CreateAttachment) -> Self {
+    pub fn attachment(mut self, attachment: serenity::CreateAttachment<'a>) -> Self {
         self.attachments.push(attachment);
         self
     }
@@ -65,7 +70,10 @@ impl CreateReply {
     /// Set the allowed mentions for the message.
     ///
     /// See [`serenity::CreateAllowedMentions`] for more information.
-    pub fn allowed_mentions(mut self, allowed_mentions: serenity::CreateAllowedMentions) -> Self {
+    pub fn allowed_mentions(
+        mut self,
+        allowed_mentions: serenity::CreateAllowedMentions<'a>,
+    ) -> Self {
         self.allowed_mentions = Some(allowed_mentions);
         self
     }
@@ -83,12 +91,12 @@ impl CreateReply {
 
 /// Methods to create a message builder from any type from this [`CreateReply`]. Used by poise
 /// internally to actually send a response to Discord
-impl CreateReply {
+impl<'a> CreateReply<'a> {
     /// Serialize this response builder to a [`serenity::CreateInteractionResponseMessage`]
     pub fn to_slash_initial_response(
         self,
-        mut builder: serenity::CreateInteractionResponseMessage,
-    ) -> serenity::CreateInteractionResponseMessage {
+        mut builder: serenity::CreateInteractionResponseMessage<'a>,
+    ) -> serenity::CreateInteractionResponseMessage<'a> {
         let crate::CreateReply {
             content,
             embeds,
@@ -119,8 +127,8 @@ impl CreateReply {
     /// Serialize this response builder to a [`serenity::CreateInteractionResponseFollowup`]
     pub fn to_slash_followup_response(
         self,
-        mut builder: serenity::CreateInteractionResponseFollowup,
-    ) -> serenity::CreateInteractionResponseFollowup {
+        mut builder: serenity::CreateInteractionResponseFollowup<'a>,
+    ) -> serenity::CreateInteractionResponseFollowup<'a> {
         let crate::CreateReply {
             content,
             embeds,
@@ -152,8 +160,8 @@ impl CreateReply {
     /// Serialize this response builder to a [`serenity::EditInteractionResponse`]
     pub fn to_slash_initial_response_edit(
         self,
-        mut builder: serenity::EditInteractionResponse,
-    ) -> serenity::EditInteractionResponse {
+        mut builder: serenity::EditInteractionResponse<'a>,
+    ) -> serenity::EditInteractionResponse<'a> {
         let crate::CreateReply {
             content,
             embeds,
@@ -179,7 +187,10 @@ impl CreateReply {
     }
 
     /// Serialize this response builder to a [`serenity::EditMessage`]
-    pub fn to_prefix_edit(self, mut builder: serenity::EditMessage) -> serenity::EditMessage {
+    pub fn to_prefix_edit(
+        self,
+        mut builder: serenity::EditMessage<'a>,
+    ) -> serenity::EditMessage<'a> {
         let crate::CreateReply {
             content,
             embeds,
@@ -213,7 +224,7 @@ impl CreateReply {
     pub fn to_prefix(
         self,
         invocation_message: serenity::MessageReference,
-    ) -> serenity::CreateMessage {
+    ) -> serenity::CreateMessage<'a> {
         let crate::CreateReply {
             content,
             embeds,
