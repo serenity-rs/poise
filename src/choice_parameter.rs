@@ -46,7 +46,7 @@ impl<T: ChoiceParameter> crate::SlashArgument for T {
         })
     }
 
-    fn create(builder: serenity::CreateCommandOption) -> serenity::CreateCommandOption {
+    fn create(builder: serenity::CreateCommandOption<'_>) -> serenity::CreateCommandOption<'_> {
         builder.kind(serenity::CommandOptionType::Integer)
     }
 

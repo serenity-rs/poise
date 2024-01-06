@@ -1,6 +1,11 @@
 //! The Command struct, which stores all information about a single framework command
 
+use std::borrow::Cow;
+
 use crate::{serenity_prelude as serenity, BoxFuture};
+
+/// Default name given to commands
+const DEFAULT_NAME: Cow<'static, str> = Cow::Borrowed("A slash command");
 
 /// Type returned from `#[poise::command]` annotated functions, which contains all of the generated
 /// prefix and application commands
@@ -138,7 +143,7 @@ impl<U, E> Eq for Command<U, E> {}
 impl<U, E> Command<U, E> {
     /// Serializes this Command into an application command option, which is the form which Discord
     /// requires subcommands to be in
-    fn create_as_subcommand(&self) -> Option<serenity::CreateCommandOption> {
+    fn create_as_subcommand(&self) -> Option<serenity::CreateCommandOption<'static>> {
         self.slash_action?;
 
         let kind = if self.subcommands.is_empty() {
@@ -147,14 +152,14 @@ impl<U, E> Command<U, E> {
             serenity::CommandOptionType::SubCommandGroup
         };
 
-        let description = self.description.as_deref().unwrap_or("A slash command");
+        let description = self.description.clone().map_or(DEFAULT_NAME, Cow::Owned);
         let mut builder = serenity::CreateCommandOption::new(kind, self.name.clone(), description);
 
         for (locale, name) in &self.name_localizations {
-            builder = builder.name_localized(locale, name);
+            builder = builder.name_localized(locale.clone(), name.clone());
         }
         for (locale, description) in &self.description_localizations {
-            builder = builder.description_localized(locale, description);
+            builder = builder.description_localized(locale.clone(), description.clone());
         }
 
         if self.subcommands.is_empty() {
@@ -176,17 +181,17 @@ impl<U, E> Command<U, E> {
 
     /// Generates a slash command builder from this [`Command`] instance. This can be used
     /// to register this command on Discord's servers
-    pub fn create_as_slash_command(&self) -> Option<serenity::CreateCommand> {
+    pub fn create_as_slash_command(&self) -> Option<serenity::CreateCommand<'static>> {
         self.slash_action?;
 
         let mut builder = serenity::CreateCommand::new(self.name.clone())
-            .description(self.description.as_deref().unwrap_or("A slash command"));
+            .description(self.description.clone().map_or(DEFAULT_NAME, Cow::Owned));
 
         for (locale, name) in &self.name_localizations {
-            builder = builder.name_localized(locale, name);
+            builder = builder.name_localized(locale.clone(), name.clone());
         }
         for (locale, description) in &self.description_localizations {
-            builder = builder.description_localized(locale, description);
+            builder = builder.description_localized(locale.clone(), description.clone());
         }
 
         // This is_empty check is needed because Discord special cases empty
@@ -218,11 +223,11 @@ impl<U, E> Command<U, E> {
 
     /// Generates a context menu command builder from this [`Command`] instance. This can be used
     /// to register this command on Discord's servers
-    pub fn create_as_context_menu_command(&self) -> Option<serenity::CreateCommand> {
+    pub fn create_as_context_menu_command(&self) -> Option<serenity::CreateCommand<'static>> {
         let context_menu_action = self.context_menu_action?;
 
         // TODO: localization?
-        let name = self.context_menu_name.as_deref().unwrap_or(&self.name);
+        let name = self.context_menu_name.clone().unwrap_or(self.name.clone());
         let mut builder = serenity::CreateCommand::new(name).kind(match context_menu_action {
             crate::ContextMenuCommandAction::User(_) => serenity::CommandType::User,
             crate::ContextMenuCommandAction::Message(_) => serenity::CommandType::Message,

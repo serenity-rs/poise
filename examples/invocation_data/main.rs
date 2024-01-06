@@ -60,7 +60,7 @@ async fn main() {
                     poise::builtins::create_application_commands(&framework.options().commands);
 
                 serenity::GuildId::new(703332075914264606)
-                    .set_commands(ctx, commands)
+                    .set_commands(ctx, &commands)
                     .await
                     .unwrap();
                 Ok(())
