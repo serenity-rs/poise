@@ -37,7 +37,7 @@ async fn autocomplete_name<'a>(
 async fn autocomplete_number(
     _ctx: Context<'_>,
     _partial: &str,
-) -> impl Iterator<Item = serenity::AutocompleteChoice> {
+) -> impl Iterator<Item = serenity::AutocompleteChoice<'static>> {
     // Dummy choices
     [1_u32, 2, 3, 4, 5].iter().map(|&n| {
         serenity::AutocompleteChoice::new(

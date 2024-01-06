@@ -45,7 +45,7 @@ async fn execute_modal_generic<
     F: std::future::Future<Output = Result<(), serenity::Error>>,
 >(
     ctx: &serenity::Context,
-    create_interaction_response: impl FnOnce(serenity::CreateInteractionResponse) -> F,
+    create_interaction_response: impl FnOnce(serenity::CreateInteractionResponse<'static>) -> F,
     modal_custom_id: String,
     defaults: Option<M>,
     timeout: Option<std::time::Duration>,
@@ -175,7 +175,10 @@ pub trait Modal: Sized {
     ///
     /// Optionally takes an initialized instance as pre-filled values of this modal (see
     /// [`Self::execute_with_defaults()`] for more info)
-    fn create(defaults: Option<Self>, custom_id: String) -> serenity::CreateInteractionResponse;
+    fn create(
+        defaults: Option<Self>,
+        custom_id: String,
+    ) -> serenity::CreateInteractionResponse<'static>;
 
     /// Parses a received modal submit interaction into this type
     ///
