@@ -13,18 +13,18 @@ use crate::serenity_prelude as serenity;
 /// let commands = &ctx.framework().options().commands;
 /// let create_commands = poise::builtins::create_application_commands(commands);
 ///
-/// serenity::Command::set_global_commands(ctx, create_commands).await?;
+/// serenity::Command::set_global_commands(ctx, &create_commands).await?;
 /// # Ok(()) }
 /// ```
 pub fn create_application_commands<'a, U: 'a, E: 'a>(
     commands: impl IntoIterator<Item = &'a crate::Command<U, E>>,
-) -> Vec<serenity::CreateCommand> {
+) -> Vec<serenity::CreateCommand<'static>> {
     /// We decided to extract context menu commands recursively, despite the subcommand hierarchy
     /// not being preserved. Because it's more confusing to just silently discard context menu
     /// commands if they're not top-level commands.
     /// https://discord.com/channels/381880193251409931/919310428344029265/947970605985189989
     fn recursively_add_context_menu_commands<U, E>(
-        builder: &mut Vec<serenity::CreateCommand>,
+        builder: &mut Vec<serenity::CreateCommand<'static>>,
         command: &crate::Command<U, E>,
     ) {
         if let Some(context_menu_command) = command.create_as_context_menu_command() {
@@ -55,7 +55,7 @@ pub async fn register_globally<'a, U: 'a, E: 'a>(
     commands: impl IntoIterator<Item = &'a crate::Command<U, E>>,
 ) -> Result<(), serenity::Error> {
     let builder = create_application_commands(commands);
-    serenity::Command::set_global_commands(http, builder).await?;
+    serenity::Command::set_global_commands(http, &builder).await?;
     Ok(())
 }
 
@@ -69,7 +69,7 @@ pub async fn register_in_guild<'a, U: 'a, E: 'a>(
     guild_id: serenity::GuildId,
 ) -> Result<(), serenity::Error> {
     let builder = create_application_commands(commands);
-    guild_id.set_commands(http, builder).await?;
+    guild_id.set_commands(http, &builder).await?;
     Ok(())
 }
 
@@ -102,7 +102,7 @@ pub async fn register_application_commands<U, E>(
     if global {
         ctx.say(format!("Registering {num_commands} commands...",))
             .await?;
-        serenity::Command::set_global_commands(ctx, commands_builder).await?;
+        serenity::Command::set_global_commands(ctx, &commands_builder).await?;
     } else {
         let guild_id = match ctx.guild_id() {
             Some(x) => x,
@@ -114,7 +114,7 @@ pub async fn register_application_commands<U, E>(
 
         ctx.say(format!("Registering {num_commands} commands..."))
             .await?;
-        guild_id.set_commands(ctx, commands_builder).await?;
+        guild_id.set_commands(ctx, &commands_builder).await?;
     }
 
     ctx.say("Done!").await?;
@@ -229,10 +229,10 @@ pub async fn register_application_commands_buttons<U, E>(
                 ":gear: Registering {num_commands} global commands...",
             ))
             .await?;
-            serenity::Command::set_global_commands(ctx, create_commands).await?;
+            serenity::Command::set_global_commands(ctx, &create_commands).await?;
         } else {
             ctx.say(":gear: Unregistering global commands...").await?;
-            serenity::Command::set_global_commands(ctx, vec![]).await?;
+            serenity::Command::set_global_commands(ctx, &[]).await?;
         }
     } else {
         let guild_id = match ctx.guild_id() {
@@ -247,10 +247,10 @@ pub async fn register_application_commands_buttons<U, E>(
                 ":gear: Registering {num_commands} guild commands...",
             ))
             .await?;
-            guild_id.set_commands(ctx, create_commands).await?;
+            guild_id.set_commands(ctx, &create_commands).await?;
         } else {
             ctx.say(":gear: Unregistering guild commands...").await?;
-            guild_id.set_commands(ctx, vec![]).await?;
+            guild_id.set_commands(ctx, &[]).await?;
         }
     }
 

@@ -18,7 +18,10 @@ async fn my_check(ctx: Context<'_>) -> Result<bool, Error> {
     Ok(true)
 }
 
-async fn my_autocomplete(ctx: Context<'_>, _: &str) -> serenity::CreateAutocompleteResponse {
+async fn my_autocomplete<'a>(
+    ctx: Context<'a>,
+    _: &'a str,
+) -> serenity::CreateAutocompleteResponse<'a> {
     println!(
         "In autocomplete: {:?}",
         ctx.invocation_data::<&str>().await.as_deref()
@@ -60,7 +63,7 @@ async fn main() {
                     poise::builtins::create_application_commands(&framework.options().commands);
 
                 serenity::GuildId::new(703332075914264606)
-                    .set_commands(ctx, commands)
+                    .set_commands(ctx, &commands)
                     .await
                     .unwrap();
                 Ok(())
