@@ -228,13 +228,13 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
 pub async fn autocomplete_command<'a, U, E>(
     ctx: crate::Context<'a, U, E>,
     partial: &'a str,
-) -> serenity::CreateAutocompleteResponse {
+) -> serenity::CreateAutocompleteResponse<'a> {
     let commands = ctx.framework().options.commands.iter();
     let filtered_commands = commands
         .filter(|cmd| cmd.name.starts_with(partial))
         .take(25);
 
-    let choices = filtered_commands
+    let choices: Vec<_> = filtered_commands
         .map(|cmd| serenity::AutocompleteChoice::from(cmd.name.as_ref()))
         .collect();
 

@@ -1,5 +1,7 @@
 //! Holds application command definition structs.
 
+use std::{borrow::Cow, collections::HashMap};
+
 use crate::{serenity_prelude as serenity, BoxFuture};
 
 use super::{CowStr, CowVec};
@@ -146,11 +148,12 @@ pub struct CommandParameter<U, E> {
     /// ```rust
     /// # use poise::serenity_prelude as serenity;
     /// # let _: fn(serenity::CreateCommandOption) -> serenity::CreateCommandOption =
-    /// |b| b.kind(serenity::CommandOptionType::Integer).min_int_value(0).max_int_value(u64::MAX)
+    /// |b| b.kind(serenity::CommandOptionType::Integer).min_int_value(0).max_int_value(i64::MAX)
     /// # ;
     /// ```
     #[derivative(Debug = "ignore")]
-    pub type_setter: Option<fn(serenity::CreateCommandOption) -> serenity::CreateCommandOption>,
+    pub type_setter:
+        Option<fn(serenity::CreateCommandOption<'_>) -> serenity::CreateCommandOption<'_>>,
     /// Optionally, a callback that is invoked on autocomplete interactions. This closure should
     /// extract the partial argument from the given JSON value and generate the autocomplete
     /// response which contains the list of autocomplete suggestions.
@@ -159,7 +162,7 @@ pub struct CommandParameter<U, E> {
         for<'a> fn(
             crate::ApplicationContext<'a, U, E>,
             &'a str,
-        ) -> BoxFuture<'a, serenity::CreateAutocompleteResponse>,
+        ) -> BoxFuture<'a, serenity::CreateAutocompleteResponse<'a>>,
     >,
     #[doc(hidden)]
     pub __non_exhaustive: (),
@@ -168,13 +171,13 @@ pub struct CommandParameter<U, E> {
 impl<U, E> CommandParameter<U, E> {
     /// Generates a slash command parameter builder from this [`CommandParameter`] instance. This
     /// can be used to register the command on Discord's servers
-    pub fn create_as_slash_command_option(&self) -> Option<serenity::CreateCommandOption> {
+    pub fn create_as_slash_command_option(&self) -> Option<serenity::CreateCommandOption<'static>> {
         let description = self
             .description
-            .as_deref()
-            .unwrap_or("A slash command parameter");
+            .clone()
+            .unwrap_or(Cow::Borrowed("A slash command parameter"));
 
-        let mut builder = serenity::CreateCommandOption::new(
+        let mut builder = serenity::CreateCommandOption::<'static>::new(
             serenity::CommandOptionType::String,
             self.name.clone(),
             description,
@@ -185,22 +188,23 @@ impl<U, E> CommandParameter<U, E> {
             .set_autocomplete(self.autocomplete_callback.is_some());
 
         for (locale, name) in self.name_localizations.iter() {
-            builder = builder.name_localized(locale.as_ref(), name.as_ref());
+            builder = builder.name_localized(locale.clone(), name.clone());
         }
         for (locale, description) in self.description_localizations.iter() {
-            builder = builder.description_localized(locale.as_ref(), description.as_ref());
+            builder = builder.description_localized(locale.clone(), description.clone());
         }
         if let Some(channel_types) = self.channel_types.as_deref() {
             builder = builder.channel_types(channel_types.to_owned());
         }
         for (i, choice) in self.choices.iter().enumerate() {
             builder = builder.add_int_choice_localized(
-                choice.name.as_ref(),
+                choice.name.clone(),
                 i as _,
                 choice
                     .localizations
                     .iter()
-                    .map(|(name, description)| (name.as_ref(), description.as_ref())),
+                    .map(|(k, v)| (k.clone(), v.clone()))
+                    .collect::<HashMap<_, _>>(),
             );
         }
 
