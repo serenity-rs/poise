@@ -1,5 +1,7 @@
 //! Wraps the fluent API and provides easy to use functions and macros for translation
 
+use std::borrow::Cow;
+
 use crate::{Context, Data, Error};
 
 type FluentBundle = fluent::bundle::FluentBundle<
@@ -136,8 +138,8 @@ pub fn apply_translations(
                 // If this is a choice parameter, insert its localized variants
                 for choice in &mut parameter.choices {
                     choice.localizations.insert(
-                        locale.clone(),
-                        format(bundle, &choice.name, None, None).unwrap(),
+                        Cow::Owned(locale.clone()),
+                        Cow::Owned(format(bundle, &choice.name, None, None).unwrap()),
                     );
                 }
             }
@@ -171,7 +173,7 @@ pub fn apply_translations(
 
             // If this is a choice parameter, set the choice names to en-US
             for choice in &mut parameter.choices {
-                choice.name = format(bundle, &choice.name, None, None).unwrap();
+                choice.name = Cow::Owned(format(bundle, &choice.name, None, None).unwrap());
             }
         }
     }
