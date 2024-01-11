@@ -23,7 +23,7 @@ pub async fn everywhere(ctx: Context<'_>) -> Result<(), Error> {
     interaction_context = "Guild|BotDm|PrivateChannel"
 )]
 pub async fn everywhere_context(ctx: Context<'_>, msg: serenity::Message) -> Result<(), Error> {
-    msg.reply(ctx, "This context menu is available everywhere!")
+    msg.reply(ctx.http(), "This context menu is available everywhere!")
         .await?;
     Ok(())
 }
