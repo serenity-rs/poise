@@ -75,7 +75,7 @@ async fn main() {
         .setup(move |_, _, _| Box::pin(async move { Ok(Data { translations }) }))
         .build();
 
-    let client = serenity::ClientBuilder::new(token, intents)
+    let client = serenity::ClientBuilder::new(&token, intents)
         .framework(framework)
         .await;
 
