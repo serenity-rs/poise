@@ -86,7 +86,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
         // Create modal parser code for this field
         let ok_or = if required {
             let error = format!("missing {}", field_ident);
-            Some(quote::quote! { .ok_or(#error)? })
+            Some(quote::quote! { .expect(#error) })
         } else {
             None
         };
@@ -107,8 +107,8 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                 )
             }
 
-            fn parse(mut data: serenity::ModalInteractionData) -> ::std::result::Result<Self, &'static str> {
-                Ok(Self { #( #parsers )* })
+            fn parse(mut data: serenity::ModalInteractionData) -> Self {
+                Self { #( #parsers )* }
             }
         }
     }; }
