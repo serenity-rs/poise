@@ -350,7 +350,7 @@ async fn main() {
         })
         .build();
 
-    let client = serenity::ClientBuilder::new(token, intents)
+    let client = serenity::ClientBuilder::new(&token, intents)
         .framework(framework)
         .await;
 

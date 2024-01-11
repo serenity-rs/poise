@@ -46,7 +46,7 @@ async fn main() {
         })
         .build();
 
-    let client = serenity::Client::builder(token, serenity::GatewayIntents::non_privileged())
+    let client = serenity::Client::builder(&token, serenity::GatewayIntents::non_privileged())
         .framework(framework)
         .await;
 

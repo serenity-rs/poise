@@ -51,7 +51,7 @@ async fn main() -> Result<(), Error> {
     poise::set_qualified_names(&mut handler.options.commands); // some setup
 
     let handler = std::sync::Arc::new(handler);
-    let mut client = serenity::Client::builder(token, intents)
+    let mut client = serenity::Client::builder(&token, intents)
         .event_handler::<Handler>(handler.clone())
         .await?;
 
