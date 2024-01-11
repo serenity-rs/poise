@@ -115,7 +115,7 @@ async fn main() {
     let intents =
         serenity::GatewayIntents::non_privileged() | serenity::GatewayIntents::MESSAGE_CONTENT;
 
-    let client = serenity::ClientBuilder::new(token, intents)
+    let client = serenity::ClientBuilder::new(&token, intents)
         .framework(framework)
         .await;
 

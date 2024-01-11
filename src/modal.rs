@@ -68,9 +68,7 @@ async fn execute_modal_generic<
         .create_response(ctx, serenity::CreateInteractionResponse::Acknowledge)
         .await?;
 
-    Ok(Some(
-        M::parse(response.data.clone()).map_err(serenity::Error::Other)?,
-    ))
+    Ok(Some(M::parse(response.data)))
 }
 
 /// Convenience function for showing the modal and waiting for a response.
@@ -184,7 +182,7 @@ pub trait Modal: Sized {
     ///
     /// Returns an error if a field was missing. This should never happen, because Discord will only
     /// let users submit when all required fields are filled properly
-    fn parse(data: serenity::ModalInteractionData) -> Result<Self, &'static str>;
+    fn parse(data: serenity::ModalInteractionData) -> Self;
 
     /// Calls `execute_modal(ctx, None, None)`. See [`execute_modal`]
     ///
