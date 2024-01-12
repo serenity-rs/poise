@@ -196,6 +196,20 @@ pub enum FrameworkError<'a, U, E> {
         /// The interaction in question
         interaction: &'a serenity::CommandInteraction,
     },
+    /// An error occurred in [`crate::PrefixFrameworkOptions::non_command_message`]
+    #[non_exhaustive]
+    NonCommandMessage {
+        /// The error thrown by user code
+        error: E,
+        #[derivative(Debug = "ignore")]
+        /// Serenity's Context
+        ctx: &'a serenity::Context,
+        /// Framework context
+        #[derivative(Debug = "ignore")]
+        framework: crate::FrameworkContext<'a, U, E>,
+        /// The interaction in question
+        msg: &'a serenity::Message,
+    },
     // #[non_exhaustive] forbids struct update syntax for ?? reason
     #[doc(hidden)]
     __NonExhaustive(std::convert::Infallible),
@@ -223,6 +237,7 @@ impl<'a, U, E> FrameworkError<'a, U, E> {
             Self::DynamicPrefix { ctx, .. } => ctx.serenity_context,
             Self::UnknownCommand { ctx, .. } => ctx,
             Self::UnknownInteraction { ctx, .. } => ctx,
+            Self::NonCommandMessage { ctx, .. } => ctx,
             Self::__NonExhaustive(unreachable) => match unreachable {},
         }
     }
@@ -247,6 +262,7 @@ impl<'a, U, E> FrameworkError<'a, U, E> {
             | Self::EventHandler { .. }
             | Self::UnknownCommand { .. }
             | Self::UnknownInteraction { .. }
+            | Self::NonCommandMessage { .. }
             | Self::DynamicPrefix { .. } => return None,
             Self::__NonExhaustive(unreachable) => match unreachable {},
         })
@@ -404,6 +420,9 @@ impl<U, E: std::fmt::Display> std::fmt::Display for FrameworkError<'_, U, E> {
             Self::UnknownInteraction { interaction, .. } => {
                 write!(f, "unknown interaction `{}`", interaction.data.name)
             }
+            Self::NonCommandMessage { msg, .. } => {
+                write!(f, "error in non-command message handler in <@{}> (message ID {})", msg.channel_id, msg.id)
+            }
             Self::__NonExhaustive(unreachable) => match *unreachable {},
         }
     }
@@ -432,6 +451,7 @@ impl<'a, U: std::fmt::Debug, E: std::error::Error + 'static> std::error::Error
             Self::DynamicPrefix { error, .. } => Some(error),
             Self::UnknownCommand { .. } => None,
             Self::UnknownInteraction { .. } => None,
+            Self::NonCommandMessage { error, .. } => Some(error),
             Self::__NonExhaustive(unreachable) => match *unreachable {},
         }
     }
