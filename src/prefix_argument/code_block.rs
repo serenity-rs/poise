@@ -65,10 +65,10 @@ fn pop_from(args: &str) -> Result<(&str, CodeBlock), CodeBlockError> {
         // newline, it's interpreted as the code block language
         let mut language = None;
         if let Some(first_newline) = code_block.find('\n') {
-            // Experimentation revealed language idents may only consist of [A-Za-z0-9+-._]
+            // Experimentation revealed language idents may only consist of [A-Za-z0-9+-._#]
             let is_valid = code_block[..first_newline]
                 .chars()
-                .all(|c| c.is_ascii_alphanumeric() || "+-._".contains(c));
+                .all(|c| c.is_ascii_alphanumeric() || "+-._#".contains(c));
             if is_valid {
                 language = Some(&code_block[..first_newline]);
                 code_block = &code_block[(first_newline + 1)..];
@@ -146,6 +146,7 @@ fn test_pop_code_block() {
             "#![feature(never_type)]\nfn uwu(_: &!) {}",
             None,
         ),
+        ("```c#\nusing System;\n```", "using System;", Some("c#"))
     ] {
         assert_eq!(
             pop_from(string).unwrap().1,
