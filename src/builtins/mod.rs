@@ -192,6 +192,9 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
         crate::FrameworkError::UnknownInteraction { interaction, .. } => {
             tracing::warn!("received unknown interaction \"{}\"", interaction.data.name);
         }
+        crate::FrameworkError::NonCommandMessage { error, .. } => {
+            tracing::warn!("error in non-command message handler: {}", error);
+        }
         crate::FrameworkError::__NonExhaustive(unreachable) => match unreachable {},
     }
 

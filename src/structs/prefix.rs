@@ -152,6 +152,15 @@ pub struct PrefixFrameworkOptions<U, E> {
     pub ignore_thread_creation: bool,
     /// Whether command names should be compared case-insensitively.
     pub case_insensitive_commands: bool,
+    /// Callback for all non-command messages. Useful if you want to run code on any message that
+    /// is not a command
+    pub non_command_message: Option<
+        for<'a> fn(
+            &'a crate::FrameworkContext<'a, U, E>,
+            &'a serenity::Context,
+            &'a serenity::Message,
+        ) -> crate::BoxFuture<'a, Result<(), E>>,
+    >,
     /* // TODO: implement
     /// Whether to invoke help command when someone sends a message with just a bot mention
     pub help_when_mentioned: bool,
@@ -181,6 +190,7 @@ impl<U, E> Default for PrefixFrameworkOptions<U, E> {
             ignore_bots: true,
             ignore_thread_creation: true,
             case_insensitive_commands: true,
+            non_command_message: None,
             // help_when_mentioned: true,
             // help_commmand: None,
             // command_specific_help_commmand: None,

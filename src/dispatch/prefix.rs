@@ -208,12 +208,27 @@ pub async fn dispatch_message<'a, U: Send + Sync, E>(
                 payload,
                 ctx: ctx.into(),
             })??;
+    } else {
+        if let Some(non_command_message) = framework.options.prefix_options.non_command_message {
+            non_command_message(&framework, ctx, msg).await.map_err(|e| {
+                crate::FrameworkError::NonCommandMessage {
+                    error: e,
+                    ctx,
+                    framework,
+                    msg,
+                }
+            })?;
+        }
     }
     Ok(())
 }
 
 /// Given a Message and some context data, parses prefix, command etc. out of the message and
 /// returns the resulting [`crate::PrefixContext`]. To run the command, see [`run_invocation`].
+///
+/// Returns `Ok(None)` if the message does not look like a command invocation.
+/// Returns `Err(...)` if the message _does_ look like a command invocation, but cannot be
+/// fully parsed.
 pub async fn parse_invocation<'a, U: Send + Sync, E>(
     framework: crate::FrameworkContext<'a, U, E>,
     ctx: &'a serenity::Context,

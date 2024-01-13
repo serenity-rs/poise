@@ -31,6 +31,21 @@ this find-and-replace regex (VSCode flavor):
 - Replace: [@$1](https://github.com/$1)
 -->
 
+# 0.6.1
+
+New features:
+- Choice parameters can now be defined inline in a function signature ([6167311](https://github.com/serenity-rs/poise/commit/6167311216065b953c6dc64406e56a31e52cd9a1))
+  
+  For example:
+  ```rust
+  #[choices("Europe", "Asia", "Africa", "America", "Australia", "Antarctica")]
+  continent: &'static str
+  ```
+
+Detailed changelog: https://github.com/serenity-rs/poise/compare/v0.6.0...v0.6.1
+
+Thanks to [@kangalio](https://github.com/kangalio)!
+
 # 0.6.0
 
 Now with serenity 0.12!
