@@ -19,8 +19,6 @@ mod builder;
 ///
 /// You can build a bot without [`Framework`]: see the `manual_dispatch` example in the repository
 pub struct Framework<U, E> {
-    /// Stores user data. Is initialized on first Ready event
-    user_data: std::sync::OnceLock<U>,
     /// Stores bot ID. Is initialized on first Ready event
     bot_id: std::sync::OnceLock<serenity::UserId>,
     /// Stores the framework options
@@ -38,7 +36,7 @@ pub struct Framework<U, E> {
                         &'a serenity::Context,
                         &'a serenity::Ready,
                         &'a Self,
-                    ) -> BoxFuture<'a, Result<U, E>>,
+                    ) -> BoxFuture<'a, Result<(), E>>,
             >,
         >,
     >,
@@ -78,12 +76,11 @@ impl<U, E> Framework<U, E> {
                 &'a serenity::Context,
                 &'a serenity::Ready,
                 &'a Self,
-            ) -> BoxFuture<'a, Result<U, E>>,
-        U: Send + Sync + 'static,
+            ) -> BoxFuture<'a, Result<(), E>>,
+        U: Send + Sync + 'static + 'static,
         E: Send + 'static,
     {
         Self {
-            user_data: std::sync::OnceLock::new(),
             bot_id: std::sync::OnceLock::new(),
             setup: std::sync::Mutex::new(Some(Box::new(setup))),
             edit_tracker_purge_task: None,
@@ -104,17 +101,6 @@ impl<U, E> Framework<U, E> {
             .as_ref()
             .expect("framework should have started")
     }
-
-    /// Retrieves user data, or blocks until it has been initialized (once the Ready event has been
-    /// received).
-    pub async fn user_data(&self) -> &U {
-        loop {
-            match self.user_data.get() {
-                Some(x) => break x,
-                None => tokio::time::sleep(std::time::Duration::from_millis(100)).await,
-            }
-        }
-    }
 }
 
 impl<U, E> Drop for Framework<U, E> {
@@ -126,7 +112,7 @@ impl<U, E> Drop for Framework<U, E> {
 }
 
 #[serenity::async_trait]
-impl<U: Send + Sync, E: Send + Sync> serenity::Framework for Framework<U, E> {
+impl<U: Send + Sync + 'static, E: Send + Sync> serenity::Framework for Framework<U, E> {
     async fn init(&mut self, client: &serenity::Client) {
         set_qualified_names(&mut self.options.commands);
 
@@ -161,16 +147,14 @@ async fn raw_dispatch_event<U, E>(
     ctx: serenity::Context,
     event: serenity::FullEvent,
 ) where
-    U: Send + Sync,
+    U: Send + Sync + 'static,
 {
     if let serenity::FullEvent::Ready { data_about_bot } = &event {
         let _: Result<_, _> = framework.bot_id.set(data_about_bot.user.id);
         let setup = Option::take(&mut *framework.setup.lock().unwrap());
         if let Some(setup) = setup {
             match setup(&ctx, data_about_bot, framework).await {
-                Ok(user_data) => {
-                    let _: Result<_, _> = framework.user_data.set(user_data);
-                }
+                Ok(()) => {}
                 Err(error) => {
                     (framework.options.on_error)(crate::FrameworkError::Setup {
                         error,
@@ -187,7 +171,6 @@ async fn raw_dispatch_event<U, E>(
         }
     }
 
-    let user_data = framework.user_data().await;
     #[cfg(not(feature = "cache"))]
     let bot_id = *framework
         .bot_id
@@ -198,7 +181,6 @@ async fn raw_dispatch_event<U, E>(
         bot_id,
         serenity_context: &ctx,
         options: &framework.options,
-        user_data,
         shard_manager: framework.shard_manager(),
     };
     crate::dispatch_event(framework, event).await;

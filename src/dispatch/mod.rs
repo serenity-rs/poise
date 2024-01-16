@@ -19,8 +19,6 @@ pub struct FrameworkContext<'a, U, E> {
     pub bot_id: serenity::UserId,
     /// Framework configuration
     pub options: &'a crate::FrameworkOptions<U, E>,
-    /// Your provided user data
-    pub user_data: &'a U,
     /// Serenity shard manager. Can be used for example to shutdown the bot
     pub shard_manager: &'a std::sync::Arc<serenity::ShardManager>,
     // deliberately not non exhaustive because you need to create FrameworkContext from scratch
@@ -32,7 +30,7 @@ impl<U, E> Clone for FrameworkContext<'_, U, E> {
         *self
     }
 }
-impl<'a, U, E> FrameworkContext<'a, U, E> {
+impl<'a, U: Send + Sync + 'static, E> FrameworkContext<'a, U, E> {
     /// Returns the user ID of the bot.
     pub fn bot_id(&self) -> serenity::UserId {
         #[cfg(feature = "cache")]
@@ -60,17 +58,13 @@ impl<'a, U, E> FrameworkContext<'a, U, E> {
     }
 
     /// Retrieves user data
-    ///
-    /// This function exists for API compatiblity with [`crate::Framework`]. On this type, you can
-    /// also just access the public `user_data` field.
-    #[allow(clippy::unused_async)] // for API compatibility with Framework
-    pub async fn user_data(&self) -> &'a U {
-        self.user_data
+    pub fn user_data(&self) -> std::sync::Arc<U> {
+        self.serenity_context.data::<U>()
     }
 }
 
 /// Central event handling function of this library
-pub async fn dispatch_event<U: Send + Sync, E>(
+pub async fn dispatch_event<U: Send + Sync + 'static, E>(
     framework: crate::FrameworkContext<'_, U, E>,
     event: serenity::FullEvent,
 ) {
