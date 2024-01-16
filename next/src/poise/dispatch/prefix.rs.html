@@ -353,8 +353,6 @@
 <a href="#351" id="351">351</a>
 <a href="#352" id="352">352</a>
 <a href="#353" id="353">353</a>
-<a href="#354" id="354">354</a>
-<a href="#355" id="355">355</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Dispatches incoming messages and message edits onto framework commands
 
 </span><span class="kw">use </span><span class="kw">crate</span>::serenity_prelude <span class="kw">as </span>serenity;
@@ -565,17 +563,15 @@
                 payload,
                 ctx: ctx.into(),
             })<span class="question-mark">??</span>;
-    } <span class="kw">else </span>{
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(non_command_message) = framework.options.prefix_options.non_command_message {
-            non_command_message(<span class="kw-2">&amp;</span>framework, ctx, msg).<span class="kw">await</span>.map_err(|e| {
-                <span class="kw">crate</span>::FrameworkError::NonCommandMessage {
-                    error: e,
-                    ctx,
-                    framework,
-                    msg,
-                }
+    } <span class="kw">else if let </span><span class="prelude-val">Some</span>(non_command_message) = framework.options.prefix_options.non_command_message {
+        non_command_message(<span class="kw-2">&amp;</span>framework, ctx, msg)
+            .<span class="kw">await
+            </span>.map_err(|e| <span class="kw">crate</span>::FrameworkError::NonCommandMessage {
+                error: e,
+                ctx,
+                framework,
+                msg,
             })<span class="question-mark">?</span>;
-        }
     }
     <span class="prelude-val">Ok</span>(())
 }
