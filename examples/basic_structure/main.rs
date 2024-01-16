@@ -98,9 +98,7 @@ async fn main() {
             Box::pin(async move {
                 println!("Logged in as {}", _ready.user.name);
                 poise::builtins::register_globally(ctx, &framework.options().commands).await?;
-                Ok(Data {
-                    votes: Mutex::new(HashMap::new()),
-                })
+                Ok(())
             })
         })
         .options(options)
@@ -112,6 +110,9 @@ async fn main() {
         serenity::GatewayIntents::non_privileged() | serenity::GatewayIntents::MESSAGE_CONTENT;
 
     let client = serenity::ClientBuilder::new(&token, intents)
+        .data(Arc::new(Data {
+            votes: Mutex::new(HashMap::new()),
+        }) as _)
         .framework(framework)
         .await;
 

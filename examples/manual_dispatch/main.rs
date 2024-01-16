@@ -26,7 +26,6 @@ impl serenity::EventHandler for Handler {
         let framework_data = poise::FrameworkContext {
             serenity_context: &ctx,
             options: &self.options,
-            user_data: &(),
             shard_manager: &shard_manager,
         };
 

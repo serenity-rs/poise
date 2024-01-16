@@ -38,7 +38,7 @@ impl Default for PrettyHelpConfiguration<'_> {
 
 /// A help command that works similarly to `builtin::help` butt outputs text in an embed.
 ///
-pub async fn pretty_help<U, E>(
+pub async fn pretty_help<U: Send + Sync + 'static, E>(
     ctx: crate::Context<'_, U, E>,
     command: Option<&str>,
     config: PrettyHelpConfiguration<'_>,
@@ -50,7 +50,7 @@ pub async fn pretty_help<U, E>(
 }
 
 /// Printing an overview of all commands (e.g. `~help`)
-async fn pretty_help_all_commands<U, E>(
+async fn pretty_help_all_commands<U: Send + Sync + 'static, E>(
     ctx: crate::Context<'_, U, E>,
     config: PrettyHelpConfiguration<'_>,
 ) -> Result<(), serenity::Error> {
@@ -127,7 +127,10 @@ async fn pretty_help_all_commands<U, E>(
 }
 
 /// Figures out which prefix a command should have
-fn format_cmd_prefix<U, E>(cmd: &crate::Command<U, E>, options_prefix: Option<&str>) -> String {
+fn format_cmd_prefix<U: Send + Sync + 'static, E>(
+    cmd: &crate::Command<U, E>,
+    options_prefix: Option<&str>,
+) -> String {
     if cmd.slash_action.is_some() {
         "`/".into()
     } else if cmd.prefix_action.is_some() {
@@ -146,7 +149,7 @@ fn format_cmd_prefix<U, E>(cmd: &crate::Command<U, E>, options_prefix: Option<&s
 }
 
 /// Code for printing help of a specific command (e.g. `~help my_command`)
-async fn pretty_help_single_command<U, E>(
+async fn pretty_help_single_command<U: Send + Sync + 'static, E>(
     ctx: crate::Context<'_, U, E>,
     command_name: &str,
     config: PrettyHelpConfiguration<'_>,

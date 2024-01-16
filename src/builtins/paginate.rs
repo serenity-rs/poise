@@ -32,7 +32,7 @@ use crate::serenity_prelude as serenity;
 /// ```
 ///
 /// ![Screenshot of output](https://i.imgur.com/JGFDveA.png)
-pub async fn paginate<U, E>(
+pub async fn paginate<U: Send + Sync + 'static, E>(
     ctx: crate::Context<'_, U, E>,
     pages: &[&str],
 ) -> Result<(), serenity::Error> {

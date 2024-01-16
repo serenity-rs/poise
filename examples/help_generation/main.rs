@@ -2,7 +2,7 @@ use ::serenity::small_fixed_array::FixedString;
 use poise::{samples::HelpConfiguration, serenity_prelude as serenity};
 use rand::Rng;
 
-struct Data {} // User data, which is stored and accessible in all command invocations
+type Data = (); // User data, which is stored and accessible in all command invocations
 type Error = Box<dyn std::error::Error + Send + Sync>;
 type Context<'a> = poise::Context<'a, Data, Error>;
 
@@ -349,7 +349,7 @@ async fn main() {
         .setup(|ctx, _ready, framework| {
             Box::pin(async move {
                 poise::builtins::register_globally(ctx, &framework.options().commands).await?;
-                Ok(Data {})
+                Ok(())
             })
         })
         .build();

@@ -93,7 +93,7 @@ impl ReplyHandle<'_> {
     // TODO: return the edited Message object?
     // TODO: should I eliminate the ctx parameter by storing it in self instead? Would infect
     //  ReplyHandle with <U, E> type parameters
-    pub async fn edit<'att, 'a, U, E>(
+    pub async fn edit<'att, 'a, U: Send + Sync + 'static, E>(
         &self,
         ctx: crate::Context<'a, U, E>,
         builder: CreateReply<'a>,
@@ -139,7 +139,10 @@ impl ReplyHandle<'_> {
     }
 
     /// Deletes this message
-    pub async fn delete<U, E>(&self, ctx: crate::Context<'_, U, E>) -> Result<(), serenity::Error> {
+    pub async fn delete<U: Send + Sync + 'static, E>(
+        &self,
+        ctx: crate::Context<'_, U, E>,
+    ) -> Result<(), serenity::Error> {
         match &self.0 {
             ReplyHandleInner::Prefix(msg) => msg.delete(ctx.serenity_context()).await?,
             ReplyHandleInner::Application {

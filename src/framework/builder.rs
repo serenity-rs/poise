@@ -18,7 +18,7 @@ pub struct FrameworkBuilder<U, E> {
                     &'a serenity::Context,
                     &'a serenity::Ready,
                     &'a crate::Framework<U, E>,
-                ) -> BoxFuture<'a, Result<U, E>>,
+                ) -> BoxFuture<'a, Result<(), E>>,
         >,
     >,
     /// Framework options
@@ -41,7 +41,7 @@ impl<U, E> Default for FrameworkBuilder<U, E> {
 }
 
 impl<U, E> FrameworkBuilder<U, E> {
-    /// Sets the setup callback which also returns the user data struct.
+    /// Sets the setup callback.
     #[must_use]
     pub fn setup<F>(mut self, setup: F) -> Self
     where
@@ -52,7 +52,7 @@ impl<U, E> FrameworkBuilder<U, E> {
                 &'a serenity::Context,
                 &'a serenity::Ready,
                 &'a crate::Framework<U, E>,
-            ) -> BoxFuture<'a, Result<U, E>>,
+            ) -> BoxFuture<'a, Result<(), E>>,
     {
         self.setup = Some(Box::new(setup) as _);
         self
@@ -79,7 +79,7 @@ impl<U, E> FrameworkBuilder<U, E> {
     /// For more information, see [`FrameworkBuilder`]
     pub fn build(self) -> crate::Framework<U, E>
     where
-        U: Send + Sync + 'static,
+        U: Send + Sync + 'static + 'static,
         E: Send + 'static,
     {
         let setup = self
