@@ -86,7 +86,7 @@ pub async fn register_in_guild<'a, U: 'a, E: 'a>(
 ///
 /// Run with no arguments to register in guild, run with argument "global" to register globally.
 /// ```
-pub async fn register_application_commands<U, E>(
+pub async fn register_application_commands<U: Send + Sync + 'static, E>(
     ctx: crate::Context<'_, U, E>,
     global: bool,
 ) -> Result<(), serenity::Error> {
@@ -149,7 +149,7 @@ pub async fn register_application_commands<U, E>(
 /// ```
 ///
 /// Which you can call like any prefix command, for example `@your_bot register`.
-pub async fn register_application_commands_buttons<U, E>(
+pub async fn register_application_commands_buttons<U: Send + Sync + 'static, E>(
     ctx: crate::Context<'_, U, E>,
 ) -> Result<(), serenity::Error> {
     let create_commands = create_application_commands(&ctx.framework().options().commands);

@@ -1,5 +1,7 @@
 mod translation;
 
+use std::sync::Arc;
+
 use poise::serenity_prelude as serenity;
 use translation::tr;
 
@@ -77,10 +79,10 @@ async fn main() {
             commands,
             ..Default::default()
         })
-        .setup(move |_, _, _| Box::pin(async move { Ok(Data { translations }) }))
         .build();
 
     let client = serenity::ClientBuilder::new(&token, intents)
+        .data(Arc::new(Data { translations }) as _)
         .framework(framework)
         .await;
 
