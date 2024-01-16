@@ -208,17 +208,15 @@ pub async fn dispatch_message<'a, U: Send + Sync, E>(
                 payload,
                 ctx: ctx.into(),
             })??;
-    } else {
-        if let Some(non_command_message) = framework.options.prefix_options.non_command_message {
-            non_command_message(&framework, ctx, msg).await.map_err(|e| {
-                crate::FrameworkError::NonCommandMessage {
-                    error: e,
-                    ctx,
-                    framework,
-                    msg,
-                }
+    } else if let Some(non_command_message) = framework.options.prefix_options.non_command_message {
+        non_command_message(&framework, ctx, msg)
+            .await
+            .map_err(|e| crate::FrameworkError::NonCommandMessage {
+                error: e,
+                ctx,
+                framework,
+                msg,
             })?;
-        }
     }
     Ok(())
 }

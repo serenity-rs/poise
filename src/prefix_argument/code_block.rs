@@ -146,7 +146,7 @@ fn test_pop_code_block() {
             "#![feature(never_type)]\nfn uwu(_: &!) {}",
             None,
         ),
-        ("```c#\nusing System;\n```", "using System;", Some("c#"))
+        ("```c#\nusing System;\n```", "using System;", Some("c#")),
     ] {
         assert_eq!(
             pop_from(string).unwrap().1,

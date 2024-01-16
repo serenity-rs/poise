@@ -421,7 +421,11 @@ impl<U, E: std::fmt::Display> std::fmt::Display for FrameworkError<'_, U, E> {
                 write!(f, "unknown interaction `{}`", interaction.data.name)
             }
             Self::NonCommandMessage { msg, .. } => {
-                write!(f, "error in non-command message handler in <@{}> (message ID {})", msg.channel_id, msg.id)
+                write!(
+                    f,
+                    "error in non-command message handler in <@{}> (message ID {})",
+                    msg.channel_id, msg.id
+                )
             }
             Self::__NonExhaustive(unreachable) => match *unreachable {},
         }
