@@ -10,7 +10,10 @@ pub(in crate::dispatch::permissions) async fn get_author_and_bot_permissions<U, 
     guild_id: serenity::GuildId,
     skip_author: bool,
     skip_bot: bool,
-) -> Option<PermissionsInfo> {
+) -> Option<PermissionsInfo>
+where
+    U: Send + Sync + 'static,
+{
     // Should only fail if the guild is not cached, which is fair to bail on.
     let guild = ctx.cache().guild(guild_id)?;
 
