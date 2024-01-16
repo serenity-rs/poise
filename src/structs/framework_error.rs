@@ -208,7 +208,7 @@ pub enum FrameworkError<'a, U, E> {
     __NonExhaustive(std::convert::Infallible),
 }
 
-impl<'a, U, E> FrameworkError<'a, U, E> {
+impl<'a, U: Send + Sync + 'static, E> FrameworkError<'a, U, E> {
     /// Returns the [`serenity::Context`] of this error
     pub fn serenity_context(&self) -> &'a serenity::Context {
         match *self {
@@ -303,7 +303,9 @@ macro_rules! full_command_name {
     };
 }
 
-impl<U, E: std::fmt::Display> std::fmt::Display for FrameworkError<'_, U, E> {
+impl<U: Send + Sync + 'static, E: std::fmt::Display> std::fmt::Display
+    for FrameworkError<'_, U, E>
+{
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::Setup {
@@ -435,8 +437,10 @@ impl<U, E: std::fmt::Display> std::fmt::Display for FrameworkError<'_, U, E> {
     }
 }
 
-impl<U: std::fmt::Debug, E: std::error::Error + 'static> std::error::Error
-    for FrameworkError<'_, U, E>
+impl<U, E> std::error::Error for FrameworkError<'_, U, E>
+where
+    U: std::fmt::Debug + Send + Sync + 'static,
+    E: std::error::Error + 'static,
 {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         match self {

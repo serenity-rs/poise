@@ -15,7 +15,7 @@ fn prefix_len_to_u16(prefix: &str) -> u16 {
 /// Checks if this message is a bot invocation by attempting to strip the prefix
 ///
 /// Returns tuple of stripped prefix and rest of the message, if any prefix matches
-async fn strip_prefix<'a, U, E>(
+async fn strip_prefix<'a, U: Send + Sync + 'static, E>(
     framework: crate::FrameworkContext<'a, U, E>,
     msg: &'a serenity::Message,
 ) -> Option<u16> {
@@ -188,7 +188,7 @@ pub fn find_command<'a, U, E>(
 }
 
 /// Manually dispatches a message with the prefix framework
-pub async fn dispatch_message<'a, U: Send + Sync, E>(
+pub async fn dispatch_message<'a, U: Send + Sync + 'static, E>(
     framework: crate::FrameworkContext<'a, U, E>,
     msg: &'a serenity::Message,
     trigger: crate::MessageDispatchTrigger,
@@ -292,7 +292,7 @@ pub async fn parse_invocation<'a, U: Send + Sync, E>(
 
 /// Given an existing parsed command invocation from [`parse_invocation`], run it, including all the
 /// before and after code like checks and built in filters from edit tracking
-pub async fn run_invocation<U, E>(
+pub async fn run_invocation<U: Send + Sync + 'static, E>(
     ctx: crate::PrefixContext<'_, U, E>,
 ) -> Result<(), crate::FrameworkError<'_, U, E>> {
     let command = ctx.command();

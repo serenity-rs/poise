@@ -4,7 +4,7 @@ use crate::serenity_prelude as serenity;
 
 /// See [`check_permissions_and_cooldown`]. Runs the check only for a single command. The caller
 /// should call this multiple time for each parent command to achieve the check inheritance logic.
-async fn check_permissions_and_cooldown_single<'a, U, E>(
+async fn check_permissions_and_cooldown_single<'a, U: Send + Sync + 'static, E>(
     ctx: crate::Context<'a, U, E>,
     cmd: &'a crate::Command<U, E>,
 ) -> Result<(), crate::FrameworkError<'a, U, E>> {
@@ -119,7 +119,7 @@ async fn check_permissions_and_cooldown_single<'a, U, E>(
 /// Doesn't actually start the cooldown timer! This should be done by the caller later, after
 /// argument parsing.
 /// (A command that didn't even get past argument parsing shouldn't trigger cooldowns)
-pub async fn check_permissions_and_cooldown<'a, U, E>(
+pub async fn check_permissions_and_cooldown<'a, U: Send + Sync + 'static, E>(
     ctx: crate::Context<'a, U, E>,
 ) -> Result<(), crate::FrameworkError<'a, U, E>> {
     for command in ctx.command_tree() {

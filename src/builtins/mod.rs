@@ -235,7 +235,7 @@ pub async fn on_error<U, E: Into<Box<dyn std::error::Error + Send + Sync>>>(
 ///
 /// See `examples/feature_showcase` for an example
 #[allow(clippy::unused_async)] // Required for the return type
-pub async fn autocomplete_command<'a, U, E>(
+pub async fn autocomplete_command<'a, U: Send + Sync + 'static, E>(
     ctx: crate::Context<'a, U, E>,
     partial: &'a str,
 ) -> serenity::CreateAutocompleteResponse<'a> {
@@ -264,7 +264,9 @@ pub async fn autocomplete_command<'a, U, E>(
 /// > - **A public server** (7123 members)
 /// > - [3 private servers with 456 members total]
 #[cfg(feature = "cache")]
-pub async fn servers<U, E>(ctx: crate::Context<'_, U, E>) -> Result<(), serenity::Error> {
+pub async fn servers<U: Send + Sync + 'static, E>(
+    ctx: crate::Context<'_, U, E>,
+) -> Result<(), serenity::Error> {
     use std::fmt::Write as _;
 
     let show_private_guilds = ctx.framework().options().owners.contains(&ctx.author().id);
