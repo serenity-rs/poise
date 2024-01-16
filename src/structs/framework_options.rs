@@ -49,11 +49,8 @@ pub struct FrameworkOptions<U, E> {
     /// deletions or guild updates.
     #[derivative(Debug = "ignore")]
     pub event_handler: for<'a> fn(
-        &'a serenity::Context,
-        &'a serenity::FullEvent,
         crate::FrameworkContext<'a, U, E>,
-        // TODO: redundant with framework
-        &'a U,
+        &'a serenity::FullEvent,
     ) -> BoxFuture<'a, Result<(), E>>,
     /// Renamed to [`Self::event_handler`]!
     #[deprecated = "renamed to event_handler"]
@@ -101,7 +98,7 @@ where
                     }
                 })
             },
-            event_handler: |_, _, _, _| Box::pin(async { Ok(()) }),
+            event_handler: |_, _| Box::pin(async { Ok(()) }),
             listener: (),
             pre_command: |_| Box::pin(async {}),
             post_command: |_| Box::pin(async {}),

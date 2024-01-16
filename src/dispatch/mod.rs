@@ -10,11 +10,12 @@ pub use slash::*;
 
 use crate::serenity_prelude as serenity;
 
-// TODO: integrate serenity::Context in here? Every place where FrameworkContext is passed is also
-// passed serenity::Context
 /// A view into data stored by [`crate::Framework`]
 pub struct FrameworkContext<'a, U, E> {
-    /// User ID of this bot
+    /// Serenity's context
+    pub serenity_context: &'a serenity::Context,
+    /// User ID of this bot, available through serenity_context if cache is enabled.
+    #[cfg(not(feature = "cache"))]
     pub bot_id: serenity::UserId,
     /// Framework configuration
     pub options: &'a crate::FrameworkOptions<U, E>,
@@ -32,6 +33,16 @@ impl<U, E> Clone for FrameworkContext<'_, U, E> {
     }
 }
 impl<'a, U, E> FrameworkContext<'a, U, E> {
+    /// Returns the user ID of the bot.
+    pub fn bot_id(&self) -> serenity::UserId {
+        #[cfg(feature = "cache")]
+        let bot_id = self.serenity_context.cache.current_user().id;
+        #[cfg(not(feature = "cache"))]
+        let bot_id = self.bot_id;
+
+        bot_id
+    }
+
     /// Returns the stored framework options, including commands.
     ///
     /// This function exists for API compatiblity with [`crate::Framework`]. On this type, you can
@@ -61,7 +72,6 @@ impl<'a, U, E> FrameworkContext<'a, U, E> {
 /// Central event handling function of this library
 pub async fn dispatch_event<U: Send + Sync, E>(
     framework: crate::FrameworkContext<'_, U, E>,
-    ctx: &serenity::Context,
     event: serenity::FullEvent,
 ) {
     match &event {
@@ -71,7 +81,6 @@ pub async fn dispatch_event<U: Send + Sync, E>(
             let trigger = crate::MessageDispatchTrigger::MessageCreate;
             if let Err(error) = prefix::dispatch_message(
                 framework,
-                ctx,
                 new_message,
                 trigger,
                 &invocation_data,
@@ -101,7 +110,6 @@ pub async fn dispatch_event<U: Send + Sync, E>(
                     };
                     if let Err(error) = prefix::dispatch_message(
                         framework,
-                        ctx,
                         &msg,
                         trigger,
                         &invocation_data,
@@ -123,7 +131,7 @@ pub async fn dispatch_event<U: Send + Sync, E>(
                     .unwrap()
                     .process_message_delete(*deleted_message_id);
                 if let Some(bot_response) = bot_response {
-                    if let Err(e) = bot_response.delete(ctx).await {
+                    if let Err(e) = bot_response.delete(framework.serenity_context).await {
                         tracing::warn!("failed to delete bot response: {}", e);
                     }
                 }
@@ -136,7 +144,6 @@ pub async fn dispatch_event<U: Send + Sync, E>(
             let mut parent_commands = Vec::new();
             if let Err(error) = slash::dispatch_interaction(
                 framework,
-                ctx,
                 interaction,
                 &std::sync::atomic::AtomicBool::new(false),
                 &invocation_data,
@@ -155,7 +162,6 @@ pub async fn dispatch_event<U: Send + Sync, E>(
             let mut parent_commands = Vec::new();
             if let Err(error) = slash::dispatch_autocomplete(
                 framework,
-                ctx,
                 interaction,
                 &std::sync::atomic::AtomicBool::new(false),
                 &invocation_data,
@@ -172,12 +178,9 @@ pub async fn dispatch_event<U: Send + Sync, E>(
 
     // Do this after the framework's Ready handling, so that get_user_data() doesnt
     // potentially block infinitely
-    if let Err(error) =
-        (framework.options.event_handler)(ctx, &event, framework, framework.user_data).await
-    {
+    if let Err(error) = (framework.options.event_handler)(framework, &event).await {
         let error = crate::FrameworkError::EventHandler {
             error,
-            ctx,
             event: &event,
             framework,
         };
