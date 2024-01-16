@@ -178,14 +178,7 @@ to use this macro directly.
 ```rust,no_run
 # #[tokio::main] async fn main() -> Result<(), Box<dyn std::error::Error>> {
 # use poise::serenity_prelude as serenity;
-# let ctx = serenity::Context {
-#     data: Default::default(),
-#     shard: todo!(),
-#     shard_id: todo!(),
-#     http: std::sync::Arc::new(::serenity::http::Http::new("example")),
-#     #[cfg(feature = "cache")]
-#     cache: Default::default(),
-# };
+# let ctx = todo!();
 # let msg = serenity::CustomMessage::new().build();
 
 assert_eq!(

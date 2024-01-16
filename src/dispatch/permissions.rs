@@ -28,7 +28,10 @@ async fn get_author_and_bot_permissions<U, E>(
     ctx: crate::Context<'_, U, E>,
     skip_author: bool,
     skip_bot: bool,
-) -> Option<PermissionsInfo> {
+) -> Option<PermissionsInfo>
+where
+    U: Send + Sync + 'static,
+{
     // No permission checks in DMs.
     let Some(guild_id) = ctx.guild_id() else {
         return Some(PermissionsInfo::dm_permissions());
@@ -51,7 +54,10 @@ pub(super) async fn calculate_missing<U, E>(
     ctx: crate::Context<'_, U, E>,
     author_required_permissions: serenity::Permissions,
     bot_required_permissions: serenity::Permissions,
-) -> Option<(serenity::Permissions, serenity::Permissions)> {
+) -> Option<(serenity::Permissions, serenity::Permissions)>
+where
+    U: Send + Sync + 'static,
+{
     // If both user and bot are None, return empty permissions
     if author_required_permissions.is_empty() && bot_required_permissions.is_empty() {
         return Some((

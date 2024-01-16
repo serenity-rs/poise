@@ -10,7 +10,10 @@ pub(in crate::dispatch::permissions) async fn get_author_and_bot_permissions<U, 
     guild_id: serenity::GuildId,
     skip_author: bool,
     skip_bot: bool,
-) -> Option<PermissionsInfo> {
+) -> Option<PermissionsInfo>
+where
+    U: Send + Sync + 'static,
+{
     let http = ctx.http();
     let guild = guild_id.to_partial_guild(http).await.ok()?;
     let guild_channel = {
