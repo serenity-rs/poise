@@ -4,7 +4,7 @@ use crate::serenity_prelude as serenity;
 
 /// See [`check_permissions_and_cooldown`]. Runs the check only for a single command. The caller
 /// should call this multiple time for each parent command to achieve the check inheritance logic.
-async fn check_permissions_and_cooldown_single<'a, U, E>(
+async fn check_permissions_and_cooldown_single<'a, U: Send + Sync + 'static, E>(
     ctx: crate::Context<'a, U, E>,
     cmd: &'a crate::Command<U, E>,
 ) -> Result<(), crate::FrameworkError<'a, U, E>> {
@@ -120,7 +120,7 @@ async fn check_permissions_and_cooldown_single<'a, U, E>(
 /// argument parsing.
 /// (A command that didn't even get past argument parsing shouldn't trigger cooldowns)
 #[allow(clippy::needless_lifetimes)] // false positive (clippy issue 7271)
-pub async fn check_permissions_and_cooldown<'a, U, E>(
+pub async fn check_permissions_and_cooldown<'a, U: Send + Sync + 'static, E>(
     ctx: crate::Context<'a, U, E>,
 ) -> Result<(), crate::FrameworkError<'a, U, E>> {
     for parent_command in ctx.parent_commands() {
