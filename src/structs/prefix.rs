@@ -117,7 +117,7 @@ pub struct PrefixFrameworkOptions<U, E> {
         for<'a> fn(
             &'a serenity::Context,
             &'a serenity::Message,
-            &'a U,
+            std::sync::Arc<U>,
         ) -> BoxFuture<'a, Result<Option<(&'a str, &'a str)>, E>>,
     >,
     /// Treat a bot mention (a ping) like a prefix

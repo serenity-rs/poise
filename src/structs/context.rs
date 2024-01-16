@@ -50,19 +50,19 @@ macro_rules! context_methods {
         $($await:ident)? ( $fn_name:ident $self:ident $($arg:ident)* )
         ( $($sig:tt)* ) $(where $b1:lifetime : $b2:lifetime)? $body:block
     )* ) => {
-        impl<'a, U, E> Context<'a, U, E> { $(
+        impl<'a, U: Send + Sync + 'static, E> Context<'a, U, E> { $(
             $( #[$($attrs)*] )*
             $($sig)* $(where $b1:$b2)* $body
         )* }
 
-        impl<'a, U, E> crate::PrefixContext<'a, U, E> { $(
+        impl<'a, U: Send + Sync + 'static, E> crate::PrefixContext<'a, U, E> { $(
             $( #[$($attrs)*] )*
             $($sig)* $(where $b1:$b2)* {
                 $crate::Context::Prefix($self).$fn_name($($arg)*) $(.$await)?
             }
         )* }
 
-        impl<'a, U, E> crate::ApplicationContext<'a, U, E> { $(
+        impl<'a, U: Send + Sync + 'static, E> crate::ApplicationContext<'a, U, E> { $(
             $( #[$($attrs)*] )*
             $($sig)* $(where $b1:$b2)* {
                 $crate::Context::Application($self).$fn_name($($arg)*) $(.$await)?
@@ -195,8 +195,8 @@ context_methods! {
 
     /// Return a reference to your custom user data
     (data self)
-    (pub fn data(self) -> &'a U) {
-        self.framework().user_data
+    (pub fn data(self) -> std::sync::Arc<U>) {
+        self.framework().user_data()
     }
 
     /// Return the channel ID of this context
@@ -601,29 +601,29 @@ impl<'a, U, E> Context<'a, U, E> {
 macro_rules! context_trait_impls {
     ($($type:tt)*) => {
         #[cfg(feature = "cache")]
-        impl<U, E> AsRef<serenity::Cache> for $($type)*<'_, U, E> {
+        impl<U: Send + Sync + 'static, E> AsRef<serenity::Cache> for $($type)*<'_, U, E> {
             fn as_ref(&self) -> &serenity::Cache {
                 &self.serenity_context().cache
             }
         }
-        impl<U, E> AsRef<serenity::Http> for $($type)*<'_, U, E> {
+        impl<U: Send + Sync + 'static, E> AsRef<serenity::Http> for $($type)*<'_, U, E> {
             fn as_ref(&self) -> &serenity::Http {
                 &self.serenity_context().http
             }
         }
-        impl<U, E> AsRef<serenity::ShardMessenger> for $($type)*<'_, U, E> {
+        impl<U: Send + Sync + 'static, E> AsRef<serenity::ShardMessenger> for $($type)*<'_, U, E> {
             fn as_ref(&self) -> &serenity::ShardMessenger {
                 &self.serenity_context().shard
             }
         }
         // Originally added as part of component interaction modals; not sure if this impl is really
         // required by anything else... It makes sense to have though imo
-        impl<U, E> AsRef<serenity::Context> for $($type)*<'_, U, E> {
+        impl<U: Send + Sync + 'static, E> AsRef<serenity::Context> for $($type)*<'_, U, E> {
             fn as_ref(&self) -> &serenity::Context {
                 self.serenity_context()
             }
         }
-        impl<U: Send + Sync, E> serenity::CacheHttp for $($type)*<'_, U, E> {
+        impl<U: Send + Sync + 'static, E> serenity::CacheHttp for $($type)*<'_, U, E> {
             fn http(&self) -> &serenity::Http {
                 &self.serenity_context().http
             }
@@ -660,7 +660,7 @@ impl<U, E> Clone for PartialContext<'_, U, E> {
     }
 }
 
-impl<'a, U, E> From<Context<'a, U, E>> for PartialContext<'a, U, E> {
+impl<'a, U: Send + Sync + 'static, E> From<Context<'a, U, E>> for PartialContext<'a, U, E> {
     fn from(ctx: Context<'a, U, E>) -> Self {
         Self {
             guild_id: ctx.guild_id(),

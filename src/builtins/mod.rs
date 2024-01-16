@@ -35,9 +35,11 @@ use crate::{serenity::CreateAllowedMentions, serenity_prelude as serenity, Creat
 /// }
 /// # };
 /// ```
-pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
-    error: crate::FrameworkError<'_, U, E>,
-) -> Result<(), serenity::Error> {
+pub async fn on_error<U, E>(error: crate::FrameworkError<'_, U, E>) -> Result<(), serenity::Error>
+where
+    U: Send + Sync + 'static,
+    E: std::fmt::Display + std::fmt::Debug,
+{
     match error {
         crate::FrameworkError::Setup { error, .. } => {
             eprintln!("Error in user data setup: {}", error);
@@ -227,7 +229,7 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
 ///
 /// See `examples/feature_showcase` for an example
 #[allow(clippy::unused_async)] // Required for the return type
-pub async fn autocomplete_command<'a, U, E>(
+pub async fn autocomplete_command<'a, U: Send + Sync + 'static, E>(
     ctx: crate::Context<'a, U, E>,
     partial: &'a str,
 ) -> impl Iterator<Item = String> + 'a {
@@ -252,7 +254,9 @@ pub async fn autocomplete_command<'a, U, E>(
 /// > - **A public server** (7123 members)
 /// > - [3 private servers with 456 members total]
 #[cfg(feature = "cache")]
-pub async fn servers<U, E>(ctx: crate::Context<'_, U, E>) -> Result<(), serenity::Error> {
+pub async fn servers<U: Send + Sync + 'static, E>(
+    ctx: crate::Context<'_, U, E>,
+) -> Result<(), serenity::Error> {
     use std::fmt::Write as _;
 
     let show_private_guilds = ctx.framework().options().owners.contains(&ctx.author().id);
