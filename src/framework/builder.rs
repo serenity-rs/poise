@@ -18,7 +18,7 @@ pub struct FrameworkBuilder<U, E> {
                     &'a serenity::Context,
                     &'a serenity::Ready,
                     &'a crate::Framework<U, E>,
-                ) -> BoxFuture<'a, Result<U, E>>,
+                ) -> BoxFuture<'a, Result<(), E>>,
         >,
     >,
     /// Framework options
@@ -52,7 +52,7 @@ impl<U, E> FrameworkBuilder<U, E> {
                 &'a serenity::Context,
                 &'a serenity::Ready,
                 &'a crate::Framework<U, E>,
-            ) -> BoxFuture<'a, Result<U, E>>,
+            ) -> BoxFuture<'a, Result<(), E>>,
     {
         self.setup = Some(Box::new(setup) as _);
         self

@@ -30,7 +30,8 @@ pub async fn vote(
 ) -> Result<(), Error> {
     // Lock the Mutex in a block {} so the Mutex isn't locked across an await point
     let num_votes = {
-        let mut hash_map = ctx.data().votes.lock().unwrap();
+        let data = ctx.data();
+        let mut hash_map = data.votes.lock().unwrap();
         let num_votes = hash_map.entry(choice.clone()).or_default();
         *num_votes += 1;
         *num_votes

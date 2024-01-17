@@ -74,7 +74,7 @@ fn extract_command<'a, U, E>(
 
 /// Given an interaction, finds the matching framework command and checks if the user is allowed access
 #[allow(clippy::too_many_arguments)] // We need to pass them all in to create Context.
-pub async fn extract_command_and_run_checks<'a, U, E>(
+pub async fn extract_command_and_run_checks<'a, U: Send + Sync + 'static, E>(
     framework: crate::FrameworkContext<'a, U, E>,
     interaction: &'a serenity::CommandInteraction,
     interaction_type: crate::CommandInteractionType,
@@ -98,7 +98,7 @@ pub async fn extract_command_and_run_checks<'a, U, E>(
 
 /// Given the extracted application command data from [`extract_command`], runs the command,
 /// including all the before and after code like checks.
-async fn run_command<U, E>(
+async fn run_command<U: Send + Sync + 'static, E>(
     ctx: crate::ApplicationContext<'_, U, E>,
 ) -> Result<(), crate::FrameworkError<'_, U, E>> {
     super::common::check_permissions_and_cooldown(ctx.into()).await?;
@@ -157,7 +157,7 @@ async fn run_command<U, E>(
 }
 
 /// Dispatches this interaction onto framework commands, i.e. runs the associated command
-pub async fn dispatch_interaction<'a, U, E>(
+pub async fn dispatch_interaction<'a, U: Send + Sync + 'static, E>(
     framework: crate::FrameworkContext<'a, U, E>,
     interaction: &'a serenity::CommandInteraction,
     // Need to pass this in from outside because of lifetime issues
@@ -190,7 +190,7 @@ pub async fn dispatch_interaction<'a, U, E>(
 
 /// Given the extracted application command data from [`extract_command`], runs the autocomplete
 /// callbacks, including all the before and after code like checks.
-async fn run_autocomplete<U, E>(
+async fn run_autocomplete<U: Send + Sync + 'static, E>(
     ctx: crate::ApplicationContext<'_, U, E>,
 ) -> Result<(), crate::FrameworkError<'_, U, E>> {
     super::common::check_permissions_and_cooldown(ctx.into()).await?;
@@ -252,7 +252,7 @@ async fn run_autocomplete<U, E>(
 
 /// Dispatches this interaction onto framework commands, i.e. runs the associated autocomplete
 /// callback
-pub async fn dispatch_autocomplete<'a, U, E>(
+pub async fn dispatch_autocomplete<'a, U: Send + Sync + 'static, E>(
     framework: crate::FrameworkContext<'a, U, E>,
     interaction: &'a serenity::CommandInteraction,
     // Need to pass the following in from outside because of lifetime issues

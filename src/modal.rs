@@ -86,7 +86,7 @@ async fn execute_modal_generic<
 ///
 /// If you need more specialized behavior, you can copy paste the implementation of this function
 /// and adjust to your needs. The code of this function is just a starting point.
-pub async fn execute_modal<U: Send + Sync, E, M: Modal>(
+pub async fn execute_modal<U: Send + Sync + 'static, E, M: Modal>(
     ctx: crate::ApplicationContext<'_, U, E>,
     defaults: Option<M>,
     timeout: Option<std::time::Duration>,
@@ -188,7 +188,7 @@ pub trait Modal: Sized {
     ///
     /// For a variant that is triggered on component interactions, see [`execute_modal_on_component_interaction`].
     // TODO: add execute_with_defaults? Or add a `defaults: Option<Self>` param?
-    async fn execute<U: Send + Sync, E>(
+    async fn execute<U: Send + Sync + 'static, E>(
         ctx: crate::ApplicationContext<'_, U, E>,
     ) -> Result<Option<Self>, serenity::Error> {
         execute_modal(ctx, None::<Self>, None).await
@@ -196,7 +196,7 @@ pub trait Modal: Sized {
 
     /// Calls `execute_modal(ctx, Some(defaults), None)`. See [`execute_modal`]
     // TODO: deprecate this in favor of execute_modal()?
-    async fn execute_with_defaults<U: Send + Sync, E>(
+    async fn execute_with_defaults<U: Send + Sync + 'static, E>(
         ctx: crate::ApplicationContext<'_, U, E>,
         defaults: Self,
     ) -> Result<Option<Self>, serenity::Error> {

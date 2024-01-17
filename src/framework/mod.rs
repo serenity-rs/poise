@@ -19,9 +19,8 @@ mod builder;
 ///
 /// You can build a bot without [`Framework`]: see the `manual_dispatch` example in the repository
 pub struct Framework<U, E> {
-    /// Stores user data. Is initialized on first Ready event
-    user_data: std::sync::OnceLock<U>,
     /// Stores bot ID. Is initialized on first Ready event
+    #[cfg(not(feature = "cache"))]
     bot_id: std::sync::OnceLock<serenity::UserId>,
     /// Stores the framework options
     options: crate::FrameworkOptions<U, E>,
@@ -38,7 +37,7 @@ pub struct Framework<U, E> {
                         &'a serenity::Context,
                         &'a serenity::Ready,
                         &'a Self,
-                    ) -> BoxFuture<'a, Result<U, E>>,
+                    ) -> BoxFuture<'a, Result<(), E>>,
             >,
         >,
     >,
@@ -78,12 +77,12 @@ impl<U, E> Framework<U, E> {
                 &'a serenity::Context,
                 &'a serenity::Ready,
                 &'a Self,
-            ) -> BoxFuture<'a, Result<U, E>>,
+            ) -> BoxFuture<'a, Result<(), E>>,
         U: Send + Sync + 'static,
         E: Send + 'static,
     {
         Self {
-            user_data: std::sync::OnceLock::new(),
+            #[cfg(not(feature = "cache"))]
             bot_id: std::sync::OnceLock::new(),
             setup: std::sync::Mutex::new(Some(Box::new(setup))),
             edit_tracker_purge_task: None,
@@ -104,17 +103,6 @@ impl<U, E> Framework<U, E> {
             .as_ref()
             .expect("framework should have started")
     }
-
-    /// Retrieves user data, or blocks until it has been initialized (once the Ready event has been
-    /// received).
-    pub async fn user_data(&self) -> &U {
-        loop {
-            match self.user_data.get() {
-                Some(x) => break x,
-                None => tokio::time::sleep(std::time::Duration::from_millis(100)).await,
-            }
-        }
-    }
 }
 
 impl<U, E> Drop for Framework<U, E> {
@@ -126,10 +114,13 @@ impl<U, E> Drop for Framework<U, E> {
 }
 
 #[serenity::async_trait]
-impl<U: Send + Sync, E: Send + Sync> serenity::Framework for Framework<U, E> {
+impl<U: Send + Sync + 'static, E: Send + Sync> serenity::Framework for Framework<U, E> {
     async fn init(&mut self, client: &serenity::Client) {
-        set_qualified_names(&mut self.options.commands);
+        if client.try_data::<U>().is_none() {
+            abort_for_invalid_data(std::any::type_name::<U>());
+        }
 
+        set_qualified_names(&mut self.options.commands);
         message_content_intent_sanity_check(
             &self.options.prefix_options,
             client.shard_manager.intents(),
@@ -161,25 +152,21 @@ async fn raw_dispatch_event<U, E>(
     ctx: serenity::Context,
     event: serenity::FullEvent,
 ) where
-    U: Send + Sync,
+    U: Send + Sync + 'static,
 {
     if let serenity::FullEvent::Ready { data_about_bot } = &event {
+        #[cfg(not(feature = "cache"))]
         let _: Result<_, _> = framework.bot_id.set(data_about_bot.user.id);
         let setup = Option::take(&mut *framework.setup.lock().unwrap());
         if let Some(setup) = setup {
-            match setup(&ctx, data_about_bot, framework).await {
-                Ok(user_data) => {
-                    let _: Result<_, _> = framework.user_data.set(user_data);
-                }
-                Err(error) => {
-                    (framework.options.on_error)(crate::FrameworkError::Setup {
-                        error,
-                        framework,
-                        data_about_bot,
-                        ctx: &ctx,
-                    })
-                    .await
-                }
+            if let Err(error) = setup(&ctx, data_about_bot, framework).await {
+                (framework.options.on_error)(crate::FrameworkError::Setup {
+                    error,
+                    framework,
+                    data_about_bot,
+                    ctx: &ctx,
+                })
+                .await
             }
         } else {
             // ignoring duplicate Discord bot ready event
@@ -187,7 +174,6 @@ async fn raw_dispatch_event<U, E>(
         }
     }
 
-    let user_data = framework.user_data().await;
     #[cfg(not(feature = "cache"))]
     let bot_id = *framework
         .bot_id
@@ -198,7 +184,6 @@ async fn raw_dispatch_event<U, E>(
         bot_id,
         serenity_context: &ctx,
         options: &framework.options,
-        user_data,
         shard_manager: framework.shard_manager(),
     };
     crate::dispatch_event(framework, event).await;
@@ -216,6 +201,21 @@ pub fn set_qualified_names<U, E>(commands: &mut [crate::Command<U, E>]) {
     for command in commands {
         set_subcommand_qualified_names(&command.name, &mut command.subcommands);
     }
+}
+
+/// Aborts after printing an error about invalid user data type.
+#[cold]
+fn abort_for_invalid_data(type_name: &'static str) {
+    eprintln!("Error: Poise's data generic does not match the type passed to serenity::ClientBuilder::data.");
+    eprintln!(
+        "Make sure you have provided the initial value for your `{type_name}` type to ClientBuilder",
+    );
+
+    // Panics can be caught, and poise is encoraging users to catch them. This is fatal, as a panic should be,
+    // and should be a compile time error (but can't be). So we abort, which cannot be caught after printing to stderr.
+    //
+    // Tracing is not used as users can forget to setup a tracing subscriber.
+    std::process::abort()
 }
 
 /// Prints a warning on stderr if a prefix is configured but `MESSAGE_CONTENT` is not set

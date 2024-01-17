@@ -1,5 +1,6 @@
 use std::env::var;
 use std::sync::atomic::{AtomicU32, Ordering};
+use std::sync::Arc;
 
 use poise::serenity_prelude as serenity;
 
@@ -23,20 +24,18 @@ async fn main() {
         serenity::GatewayIntents::non_privileged() | serenity::GatewayIntents::MESSAGE_CONTENT;
 
     let framework = poise::Framework::builder()
-        .setup(move |_ctx, _ready, _framework| {
-            Box::pin(async move {
-                Ok(Data {
-                    poise_mentions: AtomicU32::new(0),
-                })
-            })
-        })
         .options(poise::FrameworkOptions {
             event_handler: |framework, event| Box::pin(event_handler(framework, event)),
             ..Default::default()
         })
         .build();
 
+    let data = Data {
+        poise_mentions: AtomicU32::new(0),
+    };
+
     let client = serenity::ClientBuilder::new(&token, intents)
+        .data(Arc::new(data) as _)
         .framework(framework)
         .await;
 
@@ -47,7 +46,7 @@ async fn event_handler(
     framework: poise::FrameworkContext<'_, Data, Error>,
     event: &serenity::FullEvent,
 ) -> Result<(), Error> {
-    let data = framework.user_data;
+    let data = framework.user_data();
     let ctx = framework.serenity_context;
 
     match event {

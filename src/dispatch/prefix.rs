@@ -65,7 +65,7 @@ async fn strip_prefix<'a, U, E>(
     }
 
     if let Some(dynamic_prefix) = framework.options.prefix_options.stripped_dynamic_prefix {
-        match dynamic_prefix(framework.serenity_context, msg, framework.user_data).await {
+        match dynamic_prefix(framework.serenity_context, msg).await {
             Ok(result) => {
                 if let Some((prefix, content)) = result {
                     return Some((prefix, content));
@@ -182,7 +182,7 @@ pub fn find_command<'a, U, E>(
 }
 
 /// Manually dispatches a message with the prefix framework
-pub async fn dispatch_message<'a, U: Send + Sync, E>(
+pub async fn dispatch_message<'a, U: Send + Sync + 'static, E>(
     framework: crate::FrameworkContext<'a, U, E>,
     msg: &'a serenity::Message,
     trigger: crate::MessageDispatchTrigger,
@@ -287,7 +287,7 @@ pub async fn parse_invocation<'a, U: Send + Sync, E>(
 
 /// Given an existing parsed command invocation from [`parse_invocation`], run it, including all the
 /// before and after code like checks and built in filters from edit tracking
-pub async fn run_invocation<U, E>(
+pub async fn run_invocation<U: Send + Sync + 'static, E>(
     ctx: crate::PrefixContext<'_, U, E>,
 ) -> Result<(), crate::FrameworkError<'_, U, E>> {
     // Check if we should disregard this invocation if it was triggered by an edit
