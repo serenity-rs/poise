@@ -1,3 +1,4 @@
+use ::serenity::small_fixed_array::FixedString;
 use poise::{samples::HelpConfiguration, serenity_prelude as serenity};
 use rand::Rng;
 
@@ -235,9 +236,10 @@ async fn food_react(
     ctx: Context<'_>,
     #[description = "Message to react to (enter a link or ID)"] msg: serenity::Message,
 ) -> Result<(), Error> {
-    let reaction = FOOD[rand::thread_rng().gen_range(0..FOOD.len())].to_string();
-    msg.react(ctx, serenity::ReactionType::Unicode(reaction.into()))
-        .await?;
+    let reaction = FOOD[rand::thread_rng().gen_range(0..FOOD.len())];
+    let reaction = serenity::ReactionType::Unicode(FixedString::from_str_trunc(reaction));
+
+    msg.react(ctx, reaction).await?;
     ctx.say("Reacted!").await?;
     Ok(())
 }
@@ -257,9 +259,10 @@ async fn fruit_react(
     ctx: Context<'_>,
     #[description = "Message to react to (enter a link or ID)"] msg: serenity::Message,
 ) -> Result<(), Error> {
-    let reaction = FRUIT[rand::thread_rng().gen_range(0..FRUIT.len())].to_string();
-    msg.react(ctx, serenity::ReactionType::Unicode(reaction.into()))
-        .await?;
+    let reaction = FRUIT[rand::thread_rng().gen_range(0..FRUIT.len())];
+    let reaction = serenity::ReactionType::Unicode(FixedString::from_str_trunc(reaction));
+
+    msg.react(ctx, reaction).await?;
     ctx.say("Reacted!").await?;
     Ok(())
 }
@@ -275,9 +278,10 @@ async fn vegetable_react(
     ctx: Context<'_>,
     #[description = "Message to react to (enter a link or ID)"] msg: serenity::Message,
 ) -> Result<(), Error> {
-    let reaction = VEGETABLES[rand::thread_rng().gen_range(0..VEGETABLES.len())].to_string();
-    msg.react(ctx, serenity::ReactionType::Unicode(reaction.into()))
-        .await?;
+    let reaction = VEGETABLES[rand::thread_rng().gen_range(0..VEGETABLES.len())];
+    let reaction = serenity::ReactionType::Unicode(FixedString::from_str_trunc(reaction));
+
+    msg.react(ctx, reaction).await?;
     ctx.say("Reacted!").await?;
     Ok(())
 }
