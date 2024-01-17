@@ -271,7 +271,7 @@ client.unwrap().start().await.unwrap();
 
 ## Registering slash commands
 
-As explained in [Introduction to slash commands](introduction-to-slash-commands), slash
+As explained in [Introduction to slash commands](#introduction-to-slash-commands), slash
 commands need to be _registered_ to Discord. Poise provides several ways to do it, with varying
 degree of abstraction. (Note: you can access a list of framework commands from anywhere with
 [`ctx.framework().options.commands`](Context::framework)).
