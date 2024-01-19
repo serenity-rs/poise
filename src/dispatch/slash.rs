@@ -40,7 +40,6 @@ fn find_matching_command<'a, 'b, U, E>(
 #[allow(clippy::too_many_arguments)] // We need to pass them all in to create Context.
 fn extract_command<'a, U, E>(
     framework: crate::FrameworkContext<'a, U, E>,
-    ctx: &'a serenity::Context,
     interaction: &'a serenity::CommandInteraction,
     interaction_type: crate::CommandInteractionType,
     has_sent_initial_response: &'a std::sync::atomic::AtomicBool,
@@ -56,14 +55,11 @@ fn extract_command<'a, U, E>(
     );
     let (command, leaf_interaction_options) =
         search_result.ok_or(crate::FrameworkError::UnknownInteraction {
-            ctx,
             framework,
             interaction,
         })?;
 
     Ok(crate::ApplicationContext {
-        data: framework.user_data,
-        serenity_context: ctx,
         framework,
         interaction,
         interaction_type,
@@ -80,7 +76,6 @@ fn extract_command<'a, U, E>(
 #[allow(clippy::too_many_arguments)] // We need to pass them all in to create Context.
 pub async fn extract_command_and_run_checks<'a, U, E>(
     framework: crate::FrameworkContext<'a, U, E>,
-    ctx: &'a serenity::Context,
     interaction: &'a serenity::CommandInteraction,
     interaction_type: crate::CommandInteractionType,
     has_sent_initial_response: &'a std::sync::atomic::AtomicBool,
@@ -90,7 +85,6 @@ pub async fn extract_command_and_run_checks<'a, U, E>(
 ) -> Result<crate::ApplicationContext<'a, U, E>, crate::FrameworkError<'a, U, E>> {
     let ctx = extract_command(
         framework,
-        ctx,
         interaction,
         interaction_type,
         has_sent_initial_response,
@@ -165,7 +159,6 @@ async fn run_command<U, E>(
 /// Dispatches this interaction onto framework commands, i.e. runs the associated command
 pub async fn dispatch_interaction<'a, U, E>(
     framework: crate::FrameworkContext<'a, U, E>,
-    ctx: &'a serenity::Context,
     interaction: &'a serenity::CommandInteraction,
     // Need to pass this in from outside because of lifetime issues
     has_sent_initial_response: &'a std::sync::atomic::AtomicBool,
@@ -177,7 +170,6 @@ pub async fn dispatch_interaction<'a, U, E>(
 ) -> Result<(), crate::FrameworkError<'a, U, E>> {
     let ctx = extract_command(
         framework,
-        ctx,
         interaction,
         crate::CommandInteractionType::Command,
         has_sent_initial_response,
@@ -247,7 +239,7 @@ async fn run_autocomplete<U, E>(
     if let Err(e) = ctx
         .interaction
         .create_response(
-            &ctx.serenity_context,
+            &ctx.framework.serenity_context,
             serenity::CreateInteractionResponse::Autocomplete(autocomplete_response),
         )
         .await
@@ -262,7 +254,6 @@ async fn run_autocomplete<U, E>(
 /// callback
 pub async fn dispatch_autocomplete<'a, U, E>(
     framework: crate::FrameworkContext<'a, U, E>,
-    ctx: &'a serenity::Context,
     interaction: &'a serenity::CommandInteraction,
     // Need to pass the following in from outside because of lifetime issues
     has_sent_initial_response: &'a std::sync::atomic::AtomicBool,
@@ -272,7 +263,6 @@ pub async fn dispatch_autocomplete<'a, U, E>(
 ) -> Result<(), crate::FrameworkError<'a, U, E>> {
     let ctx = extract_command(
         framework,
-        ctx,
         interaction,
         crate::CommandInteractionType::Autocomplete,
         has_sent_initial_response,

@@ -22,9 +22,6 @@ pub enum MessageDispatchTrigger {
 #[derive(derivative::Derivative)]
 #[derivative(Debug(bound = ""))]
 pub struct PrefixContext<'a, U, E> {
-    /// Serenity's context, like HTTP or cache
-    #[derivative(Debug = "ignore")]
-    pub serenity_context: &'a serenity::Context,
     /// The invoking user message
     pub msg: &'a serenity::Message,
     /// Prefix used by the user to invoke this command
@@ -42,10 +39,6 @@ pub struct PrefixContext<'a, U, E> {
     pub parent_commands: &'a [&'a crate::Command<U, E>],
     /// The command object which is the current command
     pub command: &'a crate::Command<U, E>,
-    /// Your custom user data
-    // TODO: redundant with framework
-    #[derivative(Debug = "ignore")]
-    pub data: &'a U,
     /// Custom user data carried across a single command invocation
     pub invocation_data: &'a tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
     /// How this command invocation was triggered
@@ -157,7 +150,6 @@ pub struct PrefixFrameworkOptions<U, E> {
     pub non_command_message: Option<
         for<'a> fn(
             &'a crate::FrameworkContext<'a, U, E>,
-            &'a serenity::Context,
             &'a serenity::Message,
         ) -> crate::BoxFuture<'a, Result<(), E>>,
     >,
