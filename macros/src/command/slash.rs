@@ -181,7 +181,7 @@ pub fn generate_slash_action(inv: &Invocation) -> Result<proc_macro2::TokenStrea
             #[allow(clippy::needless_question_mark)]
 
             let ( #( #param_identifiers, )* ) = ::poise::parse_slash_args!(
-                ctx.serenity_context, ctx.interaction, ctx.args =>
+                ctx.serenity_context(), ctx.interaction, ctx.args =>
                 #( (#param_names: #param_types), )*
             ).await.map_err(|error| error.to_framework_error(ctx))?;
 

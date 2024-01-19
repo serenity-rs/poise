@@ -24,14 +24,14 @@ impl serenity::EventHandler for Handler {
         // FrameworkContext contains all data that poise::Framework usually manages
         let shard_manager = (*self.shard_manager.lock().unwrap()).clone().unwrap();
         let framework_data = poise::FrameworkContext {
-            bot_id: serenity::UserId::new(846453852164587620),
+            serenity_context: &ctx,
             options: &self.options,
             user_data: &(),
             shard_manager: &shard_manager,
         };
 
         let event = serenity::FullEvent::Message { new_message };
-        poise::dispatch_event(framework_data, &ctx, event).await;
+        poise::dispatch_event(framework_data, event).await;
     }
 
     // For slash commands or edit tracking to work, forward interaction_create and message_update

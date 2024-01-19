@@ -71,7 +71,7 @@ pub async fn send_application_reply<U, E>(
                 .to_slash_followup_response(serenity::CreateInteractionResponseFollowup::new());
 
             ctx.interaction
-                .create_followup(ctx.serenity_context, builder)
+                .create_followup(ctx.serenity_context(), builder)
                 .await?
         }))
     } else {
@@ -80,7 +80,7 @@ pub async fn send_application_reply<U, E>(
 
         ctx.interaction
             .create_response(
-                ctx.serenity_context,
+                ctx.serenity_context(),
                 serenity::CreateInteractionResponse::Message(builder),
             )
             .await?;
@@ -91,7 +91,7 @@ pub async fn send_application_reply<U, E>(
     };
 
     Ok(super::ReplyHandle(super::ReplyHandleInner::Application {
-        http: &ctx.serenity_context.http,
+        http: &ctx.serenity_context().http,
         interaction: ctx.interaction,
         followup,
     }))
@@ -124,7 +124,7 @@ pub async fn send_prefix_reply<U, E>(
 
     Ok(Box::new(if let Some(mut response) = existing_response {
         response
-            .edit(ctx.serenity_context, {
+            .edit(ctx.serenity_context(), {
                 // Reset the message. We don't want leftovers of the previous message (e.g. user
                 // sends a message with `.content("abc")` in a track_edits command, and the edited
                 // message happens to contain embeds, we don't want to keep those embeds)
@@ -150,7 +150,7 @@ pub async fn send_prefix_reply<U, E>(
         let new_response = ctx
             .msg
             .channel_id
-            .send_message(ctx.serenity_context, builder.to_prefix(ctx.msg.into()))
+            .send_message(ctx.serenity_context(), builder.to_prefix(ctx.msg.into()))
             .await?;
         // We don't check ctx.command.reuse_response because we need to store bot responses for
         // track_deletion too
