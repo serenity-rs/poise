@@ -28,8 +28,6 @@ pub enum FrameworkError<'a, U, E> {
     EventHandler {
         /// Error which was thrown in the event handler code
         error: E,
-        /// The serenity context passed to the event handler
-        ctx: &'a serenity::Context,
         /// Which event was being processed when the error occurred
         event: &'a serenity::FullEvent,
         /// The Framework passed to the event
@@ -164,9 +162,6 @@ pub enum FrameworkError<'a, U, E> {
     /// A message had the correct prefix but the following string was not a recognized command
     #[non_exhaustive]
     UnknownCommand {
-        /// Serenity's Context
-        #[derivative(Debug = "ignore")]
-        ctx: &'a serenity::Context,
         /// The message in question
         msg: &'a serenity::Message,
         /// The prefix that was recognized
@@ -187,9 +182,6 @@ pub enum FrameworkError<'a, U, E> {
     /// The command name from the interaction is unrecognized
     #[non_exhaustive]
     UnknownInteraction {
-        #[derivative(Debug = "ignore")]
-        /// Serenity's Context
-        ctx: &'a serenity::Context,
         /// Framework context
         #[derivative(Debug = "ignore")]
         framework: crate::FrameworkContext<'a, U, E>,
@@ -201,9 +193,6 @@ pub enum FrameworkError<'a, U, E> {
     NonCommandMessage {
         /// The error thrown by user code
         error: E,
-        #[derivative(Debug = "ignore")]
-        /// Serenity's Context
-        ctx: &'a serenity::Context,
         /// Framework context
         #[derivative(Debug = "ignore")]
         framework: crate::FrameworkContext<'a, U, E>,
@@ -220,12 +209,12 @@ impl<'a, U, E> FrameworkError<'a, U, E> {
     pub fn serenity_context(&self) -> &'a serenity::Context {
         match *self {
             Self::Setup { ctx, .. } => ctx,
-            Self::EventHandler { ctx, .. } => ctx,
+            Self::EventHandler { framework, .. } => framework.serenity_context,
             Self::Command { ctx, .. } => ctx.serenity_context(),
             Self::SubcommandRequired { ctx } => ctx.serenity_context(),
             Self::CommandPanic { ctx, .. } => ctx.serenity_context(),
             Self::ArgumentParse { ctx, .. } => ctx.serenity_context(),
-            Self::CommandStructureMismatch { ctx, .. } => ctx.serenity_context,
+            Self::CommandStructureMismatch { ctx, .. } => ctx.framework.serenity_context,
             Self::CooldownHit { ctx, .. } => ctx.serenity_context(),
             Self::MissingBotPermissions { ctx, .. } => ctx.serenity_context(),
             Self::MissingUserPermissions { ctx, .. } => ctx.serenity_context(),
@@ -234,10 +223,10 @@ impl<'a, U, E> FrameworkError<'a, U, E> {
             Self::DmOnly { ctx, .. } => ctx.serenity_context(),
             Self::NsfwOnly { ctx, .. } => ctx.serenity_context(),
             Self::CommandCheckFailed { ctx, .. } => ctx.serenity_context(),
-            Self::DynamicPrefix { ctx, .. } => ctx.serenity_context,
-            Self::UnknownCommand { ctx, .. } => ctx,
-            Self::UnknownInteraction { ctx, .. } => ctx,
-            Self::NonCommandMessage { ctx, .. } => ctx,
+            Self::DynamicPrefix { ctx, .. } => ctx.framework.serenity_context,
+            Self::UnknownCommand { framework, .. } => framework.serenity_context,
+            Self::UnknownInteraction { framework, .. } => framework.serenity_context,
+            Self::NonCommandMessage { framework, .. } => framework.serenity_context,
             Self::__NonExhaustive(unreachable) => match unreachable {},
         }
     }
