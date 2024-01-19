@@ -7,16 +7,13 @@ use crate::serenity_prelude as serenity;
 /// Returns tuple of stripped prefix and rest of the message, if any prefix matches
 async fn strip_prefix<'a, U, E>(
     framework: crate::FrameworkContext<'a, U, E>,
-    ctx: &'a serenity::Context,
     msg: &'a serenity::Message,
 ) -> Option<(&'a str, &'a str)> {
     let partial_ctx = crate::PartialContext {
         guild_id: msg.guild_id,
         channel_id: msg.channel_id,
         author: &msg.author,
-        serenity_context: ctx,
         framework,
-        data: framework.user_data,
         __non_exhaustive: (),
     };
 
@@ -68,7 +65,7 @@ async fn strip_prefix<'a, U, E>(
     }
 
     if let Some(dynamic_prefix) = framework.options.prefix_options.stripped_dynamic_prefix {
-        match dynamic_prefix(ctx, msg, framework.user_data).await {
+        match dynamic_prefix(framework.serenity_context, msg, framework.user_data).await {
             Ok(result) => {
                 if let Some((prefix, content)) = result {
                     return Some((prefix, content));
@@ -91,7 +88,7 @@ async fn strip_prefix<'a, U, E>(
             msg.content
                 .strip_prefix("<@")?
                 .trim_start_matches('!')
-                .strip_prefix(&framework.bot_id.to_string())?
+                .strip_prefix(&framework.bot_id().to_string())?
                 .strip_prefix('>')
         })() {
             let mention_prefix = &msg.content[..(msg.content.len() - stripped_content.len())];
@@ -186,21 +183,13 @@ pub fn find_command<'a, U, E>(
 /// Manually dispatches a message with the prefix framework
 pub async fn dispatch_message<'a, U: Send + Sync, E>(
     framework: crate::FrameworkContext<'a, U, E>,
-    ctx: &'a serenity::Context,
     msg: &'a serenity::Message,
     trigger: crate::MessageDispatchTrigger,
     invocation_data: &'a tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
     parent_commands: &'a mut Vec<&'a crate::Command<U, E>>,
 ) -> Result<(), crate::FrameworkError<'a, U, E>> {
-    if let Some(ctx) = parse_invocation(
-        framework,
-        ctx,
-        msg,
-        trigger,
-        invocation_data,
-        parent_commands,
-    )
-    .await?
+    if let Some(ctx) =
+        parse_invocation(framework, msg, trigger, invocation_data, parent_commands).await?
     {
         crate::catch_unwind_maybe(run_invocation(ctx))
             .await
@@ -209,14 +198,13 @@ pub async fn dispatch_message<'a, U: Send + Sync, E>(
                 ctx: ctx.into(),
             })??;
     } else if let Some(non_command_message) = framework.options.prefix_options.non_command_message {
-        non_command_message(&framework, ctx, msg)
-            .await
-            .map_err(|e| crate::FrameworkError::NonCommandMessage {
+        non_command_message(&framework, msg).await.map_err(|e| {
+            crate::FrameworkError::NonCommandMessage {
                 error: e,
-                ctx,
                 framework,
                 msg,
-            })?;
+            }
+        })?;
     }
     Ok(())
 }
@@ -229,7 +217,6 @@ pub async fn dispatch_message<'a, U: Send + Sync, E>(
 /// fully parsed.
 pub async fn parse_invocation<'a, U: Send + Sync, E>(
     framework: crate::FrameworkContext<'a, U, E>,
-    ctx: &'a serenity::Context,
     msg: &'a serenity::Message,
     trigger: crate::MessageDispatchTrigger,
     invocation_data: &'a tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
@@ -241,7 +228,8 @@ pub async fn parse_invocation<'a, U: Send + Sync, E>(
     }
 
     // Check if we're allowed to execute our own messages
-    if framework.bot_id == msg.author.id && !framework.options.prefix_options.execute_self_messages
+    if framework.bot_id() == msg.author.id
+        && !framework.options.prefix_options.execute_self_messages
     {
         return Ok(None);
     }
@@ -254,7 +242,7 @@ pub async fn parse_invocation<'a, U: Send + Sync, E>(
     }
 
     // Strip prefix, trim whitespace between prefix and rest, split rest into command name and args
-    let (prefix, msg_content) = match strip_prefix(framework, ctx, msg).await {
+    let (prefix, msg_content) = match strip_prefix(framework, msg).await {
         Some(x) => x,
         None => return Ok(None),
     };
@@ -267,7 +255,6 @@ pub async fn parse_invocation<'a, U: Send + Sync, E>(
         parent_commands,
     )
     .ok_or(crate::FrameworkError::UnknownCommand {
-        ctx,
         msg,
         prefix,
         msg_content,
@@ -283,13 +270,11 @@ pub async fn parse_invocation<'a, U: Send + Sync, E>(
     };
 
     Ok(Some(crate::PrefixContext {
-        serenity_context: ctx,
         msg,
         prefix,
         invoked_command_name,
         args,
         framework,
-        data: framework.user_data,
         parent_commands,
         command,
         invocation_data,
@@ -326,7 +311,11 @@ pub async fn run_invocation<U, E>(
 
     // Typing is broadcasted as long as this object is alive
     let _typing_broadcaster = if ctx.command.broadcast_typing {
-        Some(ctx.msg.channel_id.start_typing(&ctx.serenity_context.http))
+        Some(
+            ctx.msg
+                .channel_id
+                .start_typing(&ctx.framework.serenity_context.http),
+        )
     } else {
         None
     };
