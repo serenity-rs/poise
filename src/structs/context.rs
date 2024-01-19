@@ -116,7 +116,7 @@ context_methods! {
             Self::Prefix(ctx) => Some(
                 ctx.msg
                     .channel_id
-                    .start_typing(&ctx.serenity_context.http),
+                    .start_typing(&ctx.serenity_context().http),
             ),
         })
     }
@@ -163,10 +163,7 @@ context_methods! {
     /// Return the stored [`serenity::Context`] within the underlying context type.
     (serenity_context self)
     (pub fn serenity_context(self) -> &'a serenity::Context) {
-        match self {
-            Self::Application(ctx) => ctx.serenity_context,
-            Self::Prefix(ctx) => ctx.serenity_context,
-        }
+        self.framework().serenity_context
     }
 
     /// Create a [`crate::CooldownContext`] based off the underlying context type.
@@ -199,10 +196,7 @@ context_methods! {
     /// Return a reference to your custom user data
     (data self)
     (pub fn data(self) -> &'a U) {
-        match self {
-            Self::Application(ctx) => ctx.data,
-            Self::Prefix(ctx) => ctx.data,
-        }
+        self.framework().user_data
     }
 
     /// Return the channel ID of this context
@@ -648,13 +642,8 @@ pub struct PartialContext<'a, U, E> {
     pub channel_id: serenity::ChannelId,
     /// ID of the invocation author
     pub author: &'a serenity::User,
-    /// Serenity's context, like HTTP or cache
-    pub serenity_context: &'a serenity::Context,
     /// Useful if you need the list of commands, for example for a custom help command
     pub framework: crate::FrameworkContext<'a, U, E>,
-    /// Your custom user data
-    // TODO: redundant with framework
-    pub data: &'a U,
     #[doc(hidden)]
     pub __non_exhaustive: (),
 }
@@ -672,9 +661,7 @@ impl<'a, U, E> From<Context<'a, U, E>> for PartialContext<'a, U, E> {
             guild_id: ctx.guild_id(),
             channel_id: ctx.channel_id(),
             author: ctx.author(),
-            serenity_context: ctx.serenity_context(),
             framework: ctx.framework(),
-            data: ctx.data(),
             __non_exhaustive: (),
         }
     }
