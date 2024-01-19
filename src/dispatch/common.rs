@@ -129,7 +129,7 @@ async fn check_permissions_and_cooldown_single<'a, U, E>(
     }
 
     // Before running any pre-command checks, make sure the bot has the permissions it needs
-    match missing_permissions(ctx, ctx.framework().bot_id, cmd.required_bot_permissions).await {
+    match missing_permissions(ctx, ctx.framework().bot_id(), cmd.required_bot_permissions).await {
         Some(missing_permissions) if missing_permissions.is_empty() => {}
         Some(missing_permissions) => {
             return Err(crate::FrameworkError::MissingBotPermissions {
