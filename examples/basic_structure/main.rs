@@ -81,7 +81,7 @@ async fn main() {
         // Enforce command checks even for owners (enforced by default)
         // Set to true to bypass checks, which is useful for testing
         skip_checks_for_owners: false,
-        event_handler: |_ctx, event, _framework, _data| {
+        event_handler: |_framework, event| {
             Box::pin(async move {
                 println!(
                     "Got an event in event handler: {:?}",

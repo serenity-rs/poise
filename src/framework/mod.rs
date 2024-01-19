@@ -191,17 +191,20 @@ async fn raw_dispatch_event<U, E>(
     }
 
     let user_data = framework.user_data().await;
+    #[cfg(not(feature = "cache"))]
     let bot_id = *framework
         .bot_id
         .get()
         .expect("bot ID not set even though we awaited Ready");
     let framework = crate::FrameworkContext {
+        #[cfg(not(feature = "cache"))]
         bot_id,
+        serenity_context: &ctx,
         options: &framework.options,
         user_data,
         shard_manager: framework.shard_manager(),
     };
-    crate::dispatch_event(framework, &ctx, event).await;
+    crate::dispatch_event(framework, event).await;
 }
 
 /// Traverses commands recursively and sets [`crate::Command::qualified_name`] to its actual value
