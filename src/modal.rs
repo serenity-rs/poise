@@ -95,7 +95,7 @@ pub async fn execute_modal<U: Send + Sync, E, M: Modal>(
 ) -> Result<Option<M>, serenity::Error> {
     let interaction = ctx.interaction;
     let response = execute_modal_generic(
-        ctx.serenity_context,
+        ctx.serenity_context(),
         |resp| interaction.create_response(ctx, resp),
         interaction.id.to_string(),
         defaults,

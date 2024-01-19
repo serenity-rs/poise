@@ -15,9 +15,6 @@ pub enum CommandInteractionType {
 #[derive(derivative::Derivative)]
 #[derivative(Debug(bound = ""))]
 pub struct ApplicationContext<'a, U, E> {
-    /// Serenity's context, like HTTP or cache
-    #[derivative(Debug = "ignore")]
-    pub serenity_context: &'a serenity::Context,
     /// The interaction which triggered this command execution.
     pub interaction: &'a serenity::CommandInteraction,
     /// The type of the interaction which triggered this command execution.
@@ -41,10 +38,6 @@ pub struct ApplicationContext<'a, U, E> {
     pub parent_commands: &'a [&'a crate::Command<U, E>],
     /// The command object which is the current command
     pub command: &'a crate::Command<U, E>,
-    /// Your custom user data
-    // TODO: redundant with framework
-    #[derivative(Debug = "ignore")]
-    pub data: &'a U,
     /// Custom user data carried across a single command invocation
     pub invocation_data: &'a tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
     // #[non_exhaustive] forbids struct update syntax for ?? reason
@@ -74,7 +67,7 @@ impl<U, E> ApplicationContext<'_, U, E> {
             );
 
             self.interaction
-                .create_response(self.serenity_context, response)
+                .create_response(self.framework.serenity_context, response)
                 .await?;
 
             self.has_sent_initial_response
