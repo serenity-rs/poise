@@ -31,9 +31,7 @@ async fn main() {
             })
         })
         .options(poise::FrameworkOptions {
-            event_handler: |ctx, event, framework, data| {
-                Box::pin(event_handler(ctx, event, framework, data))
-            },
+            event_handler: |framework, event| Box::pin(event_handler(framework, event)),
             ..Default::default()
         })
         .build();
@@ -46,11 +44,12 @@ async fn main() {
 }
 
 async fn event_handler(
-    ctx: &serenity::Context,
+    framework: poise::FrameworkContext<'_, Data, Error>,
     event: &serenity::FullEvent,
-    _framework: poise::FrameworkContext<'_, Data, Error>,
-    data: &Data,
 ) -> Result<(), Error> {
+    let data = framework.user_data;
+    let ctx = framework.serenity_context;
+
     match event {
         serenity::FullEvent::Ready { data_about_bot, .. } => {
             println!("Logged in as {}", data_about_bot.user.name);
