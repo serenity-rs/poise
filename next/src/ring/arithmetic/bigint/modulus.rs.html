@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.5/src/arithmetic/bigint/modulus.rs`."><title>modulus.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-4e54bb2b497cc83f.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="ring" data-themes="" data-resource-suffix="" data-rustdoc-version="1.77.0-nightly (714b29a17 2024-01-15)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-0b2e2def73e61cbe.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.7/src/arithmetic/bigint/modulus.rs`."><title>modulus.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-4e54bb2b497cc83f.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="ring" data-themes="" data-resource-suffix="" data-rustdoc-version="1.77.0-nightly (6ae4cfbbb 2024-01-17)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-0b2e2def73e61cbe.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
             <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
     <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../../ring/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
@@ -247,57 +247,6 @@
 <a href="#245" id="245">245</a>
 <a href="#246" id="246">246</a>
 <a href="#247" id="247">247</a>
-<a href="#248" id="248">248</a>
-<a href="#249" id="249">249</a>
-<a href="#250" id="250">250</a>
-<a href="#251" id="251">251</a>
-<a href="#252" id="252">252</a>
-<a href="#253" id="253">253</a>
-<a href="#254" id="254">254</a>
-<a href="#255" id="255">255</a>
-<a href="#256" id="256">256</a>
-<a href="#257" id="257">257</a>
-<a href="#258" id="258">258</a>
-<a href="#259" id="259">259</a>
-<a href="#260" id="260">260</a>
-<a href="#261" id="261">261</a>
-<a href="#262" id="262">262</a>
-<a href="#263" id="263">263</a>
-<a href="#264" id="264">264</a>
-<a href="#265" id="265">265</a>
-<a href="#266" id="266">266</a>
-<a href="#267" id="267">267</a>
-<a href="#268" id="268">268</a>
-<a href="#269" id="269">269</a>
-<a href="#270" id="270">270</a>
-<a href="#271" id="271">271</a>
-<a href="#272" id="272">272</a>
-<a href="#273" id="273">273</a>
-<a href="#274" id="274">274</a>
-<a href="#275" id="275">275</a>
-<a href="#276" id="276">276</a>
-<a href="#277" id="277">277</a>
-<a href="#278" id="278">278</a>
-<a href="#279" id="279">279</a>
-<a href="#280" id="280">280</a>
-<a href="#281" id="281">281</a>
-<a href="#282" id="282">282</a>
-<a href="#283" id="283">283</a>
-<a href="#284" id="284">284</a>
-<a href="#285" id="285">285</a>
-<a href="#286" id="286">286</a>
-<a href="#287" id="287">287</a>
-<a href="#288" id="288">288</a>
-<a href="#289" id="289">289</a>
-<a href="#290" id="290">290</a>
-<a href="#291" id="291">291</a>
-<a href="#292" id="292">292</a>
-<a href="#293" id="293">293</a>
-<a href="#294" id="294">294</a>
-<a href="#295" id="295">295</a>
-<a href="#296" id="296">296</a>
-<a href="#297" id="297">297</a>
-<a href="#298" id="298">298</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2015-2023 Brian Smith.
 //
 // Permission to use, copy, modify, and/or distribute this software for any
@@ -312,16 +261,10 @@
 // OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 // CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-</span><span class="kw">use super</span>::{
-    <span class="kw">super</span>::{
-        montgomery::{Unencoded, R, RR},
-        n0::N0,
-    },
-    BoxedLimbs, Elem, Nonnegative, One, PublicModulus, SlightlySmallerModulus, SmallerModulus,
-    Width,
-};
+</span><span class="kw">use super</span>::{BoxedLimbs, Elem, PublicModulus, Unencoded, N0};
 <span class="kw">use crate</span>::{
-    bits, cpu, error,
+    bits::BitLength,
+    cpu, error,
     limb::{<span class="self">self</span>, Limb, LimbMask, LIMB_BITS},
     polyfill::LeadingZerosStripped,
 };
@@ -340,7 +283,7 @@
 /// for efficient Montgomery multiplication modulo *m*. The value must be odd
 /// and larger than 2. The larger-than-1 requirement is imposed, at least, by
 /// the modular inversion code.
-</span><span class="kw">pub struct </span>Modulus&lt;M&gt; {
+</span><span class="kw">pub struct </span>OwnedModulus&lt;M&gt; {
     limbs: BoxedLimbs&lt;M&gt;, <span class="comment">// Also `value &gt;= 3`.
 
     // n0 * N == -1 (mod r).
@@ -380,65 +323,28 @@
     // calculations instead of double-precision `u64` calculations.
     </span>n0: N0,
 
-    oneRR: One&lt;M, RR&gt;,
+    len_bits: BitLength,
 
     cpu_features: cpu::Features,
 }
 
-<span class="kw">impl</span>&lt;M: PublicModulus&gt; Clone <span class="kw">for </span>Modulus&lt;M&gt; {
+<span class="kw">impl</span>&lt;M: PublicModulus&gt; Clone <span class="kw">for </span>OwnedModulus&lt;M&gt; {
     <span class="kw">fn </span>clone(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             limbs: <span class="self">self</span>.limbs.clone(),
-            n0: <span class="self">self</span>.n0.clone(),
-            oneRR: <span class="self">self</span>.oneRR.clone(),
+            n0: <span class="self">self</span>.n0,
+            len_bits: <span class="self">self</span>.len_bits,
             cpu_features: <span class="self">self</span>.cpu_features,
         }
     }
 }
 
-<span class="kw">impl</span>&lt;M: PublicModulus&gt; core::fmt::Debug <span class="kw">for </span>Modulus&lt;M&gt; {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, fmt: <span class="kw-2">&amp;mut </span>::core::fmt::Formatter) -&gt; <span class="prelude-ty">Result</span>&lt;(), ::core::fmt::Error&gt; {
-        fmt.debug_struct(<span class="string">"Modulus"</span>)
-            <span class="comment">// TODO: Print modulus value.
-            </span>.finish()
-    }
-}
-
-<span class="kw">impl</span>&lt;M&gt; Modulus&lt;M&gt; {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>from_be_bytes_with_bit_length(
+<span class="kw">impl</span>&lt;M&gt; OwnedModulus&lt;M&gt; {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>from_be_bytes(
         input: untrusted::Input,
         cpu_features: cpu::Features,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;(<span class="self">Self</span>, bits::BitLength), error::KeyRejected&gt; {
-        <span class="kw">let </span>limbs = BoxedLimbs::positive_minimal_width_from_be_bytes(input)<span class="question-mark">?</span>;
-        <span class="self">Self</span>::from_boxed_limbs(limbs, cpu_features)
-    }
-
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>from_nonnegative_with_bit_length(
-        n: Nonnegative,
-        cpu_features: cpu::Features,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;(<span class="self">Self</span>, bits::BitLength), error::KeyRejected&gt; {
-        <span class="kw">let </span>limbs = BoxedLimbs::new_unchecked(n.into_limbs());
-        <span class="self">Self</span>::from_boxed_limbs(limbs, cpu_features)
-    }
-
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>from_elem&lt;L&gt;(
-        elem: Elem&lt;L, Unencoded&gt;,
-        cpu_features: cpu::Features,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, error::KeyRejected&gt;
-    <span class="kw">where
-        </span>M: SlightlySmallerModulus&lt;L&gt;,
-    {
-        <span class="kw">let </span>(m, _bits) = <span class="self">Self</span>::from_boxed_limbs(
-            BoxedLimbs::minimal_width_from_unpadded(<span class="kw-2">&amp;</span>elem.limbs),
-            cpu_features,
-        )<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(m)
-    }
-
-    <span class="kw">fn </span>from_boxed_limbs(
-        n: BoxedLimbs&lt;M&gt;,
-        cpu_features: cpu::Features,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;(<span class="self">Self</span>, bits::BitLength), error::KeyRejected&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, error::KeyRejected&gt; {
+        <span class="kw">let </span>n = BoxedLimbs::positive_minimal_width_from_be_bytes(input)<span class="question-mark">?</span>;
         <span class="kw">if </span>n.len() &gt; MODULUS_MAX_LIMBS {
             <span class="kw">return </span><span class="prelude-val">Err</span>(error::KeyRejected::too_large());
         }
@@ -469,114 +375,102 @@
                 </span><span class="macro">debug_assert_eq!</span>(LIMB_BITS, <span class="number">32</span>);
                 n_mod_r |= u64::from(n[<span class="number">1</span>]) &lt;&lt; <span class="number">32</span>;
             }
-            N0::from(<span class="kw">unsafe </span>{ bn_neg_inv_mod_r_u64(n_mod_r) })
+            N0::precalculated(<span class="kw">unsafe </span>{ bn_neg_inv_mod_r_u64(n_mod_r) })
         };
 
-        <span class="kw">let </span>bits = limb::limbs_minimal_bits(<span class="kw-2">&amp;</span>n);
-        <span class="kw">let </span>oneRR = {
-            <span class="kw">let </span>partial = PartialModulus {
-                limbs: <span class="kw-2">&amp;</span>n,
-                n0: n0.clone(),
-                m: PhantomData,
-                cpu_features,
-            };
+        <span class="kw">let </span>len_bits = limb::limbs_minimal_bits(<span class="kw-2">&amp;</span>n);
 
-            One::newRR(<span class="kw-2">&amp;</span>partial, bits)
-        };
-
-        <span class="prelude-val">Ok</span>((
-            <span class="self">Self </span>{
-                limbs: n,
-                n0,
-                oneRR,
-                cpu_features,
-            },
-            bits,
-        ))
+        <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
+            limbs: n,
+            n0,
+            len_bits,
+            cpu_features,
+        })
     }
 
-    <span class="attr">#[inline]
-    </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>cpu_features(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; cpu::Features {
-        <span class="self">self</span>.cpu_features
-    }
-
-    <span class="attr">#[inline]
-    </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>limbs(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[Limb] {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.limbs
-    }
-
-    <span class="attr">#[inline]
-    </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>n0(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>N0 {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.n0
-    }
-
-    <span class="attr">#[inline]
-    </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>width(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Width&lt;M&gt; {
-        <span class="self">self</span>.limbs.width()
-    }
-
-    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>zero&lt;E&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Elem&lt;M, E&gt; {
-        Elem {
-            limbs: BoxedLimbs::zero(<span class="self">self</span>.width()),
-            encoding: PhantomData,
+    <span class="kw">pub fn </span>verify_less_than&lt;L&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, l: <span class="kw-2">&amp;</span>Modulus&lt;L&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;(), error::Unspecified&gt; {
+        <span class="kw">if </span><span class="self">self</span>.len_bits() &gt; l.len_bits()
+            || (<span class="self">self</span>.limbs.len() == l.limbs().len()
+                &amp;&amp; limb::limbs_less_than_limbs_consttime(<span class="kw-2">&amp;</span><span class="self">self</span>.limbs, l.limbs()) != LimbMask::True)
+        {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(error::Unspecified);
         }
+        <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="comment">// TODO: Get rid of this
-    </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>one(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Elem&lt;M, Unencoded&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>r = <span class="self">self</span>.zero();
-        r.limbs[<span class="number">0</span>] = <span class="number">1</span>;
-        r
-    }
-
-    <span class="kw">pub fn </span>oneRR(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>One&lt;M, RR&gt; {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.oneRR
-    }
-
-    <span class="kw">pub fn </span>to_elem&lt;L&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, l: <span class="kw-2">&amp;</span>Modulus&lt;L&gt;) -&gt; Elem&lt;L, Unencoded&gt;
-    <span class="kw">where
-        </span>M: SmallerModulus&lt;L&gt;,
-    {
-        <span class="comment">// TODO: Encode this assertion into the `where` above.
-        </span><span class="macro">assert_eq!</span>(<span class="self">self</span>.width().num_limbs, l.width().num_limbs);
-        Elem {
-            limbs: BoxedLimbs::new_unchecked(<span class="self">self</span>.limbs.clone().into_limbs()),
+    <span class="kw">pub fn </span>to_elem&lt;L&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, l: <span class="kw-2">&amp;</span>Modulus&lt;L&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Elem&lt;L, Unencoded&gt;, error::Unspecified&gt; {
+        <span class="self">self</span>.verify_less_than(l)<span class="question-mark">?</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>limbs = BoxedLimbs::zero(l.limbs.len());
+        limbs[..<span class="self">self</span>.limbs.len()].copy_from_slice(<span class="kw-2">&amp;</span><span class="self">self</span>.limbs);
+        <span class="prelude-val">Ok</span>(Elem {
+            limbs,
             encoding: PhantomData,
-        }
+        })
     }
-
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>as_partial(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; PartialModulus&lt;M&gt; {
-        PartialModulus {
+    <span class="kw">pub fn </span>modulus(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Modulus&lt;M&gt; {
+        Modulus {
             limbs: <span class="kw-2">&amp;</span><span class="self">self</span>.limbs,
-            n0: <span class="self">self</span>.n0.clone(),
+            n0: <span class="self">self</span>.n0,
+            len_bits: <span class="self">self</span>.len_bits,
             m: PhantomData,
             cpu_features: <span class="self">self</span>.cpu_features,
         }
     }
+
+    <span class="kw">pub fn </span>len_bits(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; BitLength {
+        <span class="self">self</span>.len_bits
+    }
 }
 
-<span class="kw">impl</span>&lt;M: PublicModulus&gt; Modulus&lt;M&gt; {
+<span class="kw">impl</span>&lt;M: PublicModulus&gt; OwnedModulus&lt;M&gt; {
     <span class="kw">pub fn </span>be_bytes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; LeadingZerosStripped&lt;<span class="kw">impl </span>ExactSizeIterator&lt;Item = u8&gt; + Clone + <span class="lifetime">'_</span>&gt; {
         LeadingZerosStripped::new(limb::unstripped_be_bytes(<span class="kw-2">&amp;</span><span class="self">self</span>.limbs))
     }
 }
 
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>PartialModulus&lt;<span class="lifetime">'a</span>, M&gt; {
+<span class="kw">pub struct </span>Modulus&lt;<span class="lifetime">'a</span>, M&gt; {
     limbs: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[Limb],
     n0: N0,
+    len_bits: BitLength,
     m: PhantomData&lt;M&gt;,
     cpu_features: cpu::Features,
 }
 
-<span class="kw">impl</span>&lt;M&gt; PartialModulus&lt;<span class="lifetime">'_</span>, M&gt; {
+<span class="kw">impl</span>&lt;M&gt; Modulus&lt;<span class="lifetime">'_</span>, M&gt; {
+    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>oneR(<span class="kw-2">&amp;</span><span class="self">self</span>, out: <span class="kw-2">&amp;mut </span>[Limb]) {
+        <span class="macro">assert_eq!</span>(<span class="self">self</span>.limbs.len(), out.len());
+
+        <span class="kw">let </span>r = <span class="self">self</span>.limbs.len() * LIMB_BITS;
+
+        <span class="comment">// out = 2**r - m where m = self.
+        </span>limb::limbs_negative_odd(out, <span class="self">self</span>.limbs);
+
+        <span class="kw">let </span>lg_m = <span class="self">self</span>.len_bits().as_usize_bits();
+        <span class="kw">let </span>leading_zero_bits_in_m = r - lg_m;
+
+        <span class="comment">// When m's length is a multiple of LIMB_BITS, which is the case we
+        // most want to optimize for, then we already have
+        // out == 2**r - m == 2**r (mod m).
+        </span><span class="kw">if </span>leading_zero_bits_in_m != <span class="number">0 </span>{
+            <span class="macro">debug_assert!</span>(leading_zero_bits_in_m &lt; LIMB_BITS);
+            <span class="comment">// Correct out to 2**(lg m) (mod m). `limbs_negative_odd` flipped
+            // all the leading zero bits to ones. Flip them back.
+            </span><span class="kw-2">*</span>out.last_mut().unwrap() &amp;= (!<span class="number">0</span>) &gt;&gt; leading_zero_bits_in_m;
+
+            <span class="comment">// Now we have out == 2**(lg m) (mod m). Keep doubling until we get
+            // to 2**r (mod m).
+            </span><span class="kw">for _ in </span><span class="number">0</span>..leading_zero_bits_in_m {
+                limb::limbs_double_mod(out, <span class="self">self</span>.limbs)
+            }
+        }
+
+        <span class="comment">// Now out == 2**r (mod m) == 1*R.
+    </span>}
+
     <span class="comment">// TODO: XXX Avoid duplication with `Modulus`.
-    </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>zero(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Elem&lt;M, R&gt; {
-        <span class="kw">let </span>width = Width {
-            num_limbs: <span class="self">self</span>.limbs.len(),
-            m: PhantomData,
-        };
+    </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>zero&lt;E&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Elem&lt;M, E&gt; {
         Elem {
-            limbs: BoxedLimbs::zero(width),
+            limbs: BoxedLimbs::zero(<span class="self">self</span>.limbs.len()),
             encoding: PhantomData,
         }
     }
@@ -591,8 +485,12 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>.n0
     }
 
+    <span class="kw">pub fn </span>len_bits(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; BitLength {
+        <span class="self">self</span>.len_bits
+    }
+
     <span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>cpu_features(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; cpu::Features {
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>cpu_features(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; cpu::Features {
         <span class="self">self</span>.cpu_features
     }
 }

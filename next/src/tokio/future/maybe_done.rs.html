@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/future/maybe_done.rs`."><title>maybe_done.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-4e54bb2b497cc83f.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.77.0-nightly (714b29a17 2024-01-15)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-0b2e2def73e61cbe.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.35.1/src/future/maybe_done.rs`."><title>maybe_done.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-4e54bb2b497cc83f.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.77.0-nightly (6ae4cfbbb 2024-01-17)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-0b2e2def73e61cbe.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
             <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
     <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../tokio/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
@@ -69,38 +69,32 @@
 <a href="#67" id="67">67</a>
 <a href="#68" id="68">68</a>
 <a href="#69" id="69">69</a>
-<a href="#70" id="70">70</a>
-<a href="#71" id="71">71</a>
-<a href="#72" id="72">72</a>
-<a href="#73" id="73">73</a>
-<a href="#74" id="74">74</a>
-<a href="#75" id="75">75</a>
-<a href="#76" id="76">76</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Definition of the [`MaybeDone`] combinator.
 
-</span><span class="kw">use </span>std::future::Future;
-<span class="kw">use </span>std::mem;
+</span><span class="kw">use </span>pin_project_lite::pin_project;
+<span class="kw">use </span>std::future::Future;
 <span class="kw">use </span>std::pin::Pin;
 <span class="kw">use </span>std::task::{Context, Poll};
 
-<span class="doccomment">/// A future that may have completed.
-</span><span class="attr">#[derive(Debug)]
-</span><span class="kw">pub enum </span>MaybeDone&lt;Fut: Future&gt; {
-    <span class="doccomment">/// A not-yet-completed future.
-    </span>Future(Fut),
-    <span class="doccomment">/// The output of the completed future.
-    </span>Done(Fut::Output),
-    <span class="doccomment">/// The empty variant after the result of a [`MaybeDone`] has been
-    /// taken using the [`take_output`](MaybeDone::take_output) method.
-    </span>Gone,
+<span class="macro">pin_project! </span>{
+    <span class="doccomment">/// A future that may have completed.
+    </span><span class="attr">#[derive(Debug)]
+    #[project = MaybeDoneProj]
+    #[project_replace = MaybeDoneProjReplace]
+    </span><span class="kw">pub enum </span>MaybeDone&lt;Fut: Future&gt; {
+        <span class="doccomment">/// A not-yet-completed future.
+        </span>Future { <span class="attr">#[pin] </span>future: Fut },
+        <span class="doccomment">/// The output of the completed future.
+        </span>Done { output: Fut::Output },
+        <span class="doccomment">/// The empty variant after the result of a [`MaybeDone`] has been
+        /// taken using the [`take_output`](MaybeDone::take_output) method.
+        </span>Gone,
+    }
 }
-
-<span class="comment">// Safe because we never generate `Pin&lt;&amp;mut Fut::Output&gt;`
-</span><span class="kw">impl</span>&lt;Fut: Future + Unpin&gt; Unpin <span class="kw">for </span>MaybeDone&lt;Fut&gt; {}
 
 <span class="doccomment">/// Wraps a future into a `MaybeDone`.
 </span><span class="kw">pub fn </span>maybe_done&lt;Fut: Future&gt;(future: Fut) -&gt; MaybeDone&lt;Fut&gt; {
-    MaybeDone::Future(future)
+    MaybeDone::Future { future }
 }
 
 <span class="kw">impl</span>&lt;Fut: Future&gt; MaybeDone&lt;Fut&gt; {
@@ -109,12 +103,9 @@
     /// future has been completed and [`take_output`](MaybeDone::take_output)
     /// has not yet been called.
     </span><span class="kw">pub fn </span>output_mut(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>Fut::Output&gt; {
-        <span class="kw">unsafe </span>{
-            <span class="kw">let </span>this = <span class="self">self</span>.get_unchecked_mut();
-            <span class="kw">match </span>this {
-                MaybeDone::Done(res) =&gt; <span class="prelude-val">Some</span>(res),
-                <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
-            }
+        <span class="kw">match </span><span class="self">self</span>.project() {
+            MaybeDoneProj::Done { output } =&gt; <span class="prelude-val">Some</span>(output),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
         }
     }
 
@@ -122,17 +113,14 @@
     /// towards completion.
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>take_output(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;Fut::Output&gt; {
-        <span class="kw">unsafe </span>{
-            <span class="kw">let </span>this = <span class="self">self</span>.get_unchecked_mut();
-            <span class="kw">match </span>this {
-                MaybeDone::Done(<span class="kw">_</span>) =&gt; {}
-                MaybeDone::Future(<span class="kw">_</span>) | MaybeDone::Gone =&gt; <span class="kw">return </span><span class="prelude-val">None</span>,
-            };
-            <span class="kw">if let </span>MaybeDone::Done(output) = mem::replace(this, MaybeDone::Gone) {
-                <span class="prelude-val">Some</span>(output)
-            } <span class="kw">else </span>{
-                <span class="macro">unreachable!</span>()
-            }
+        <span class="kw">match </span><span class="kw-2">*</span><span class="self">self </span>{
+            MaybeDone::Done { .. } =&gt; {}
+            MaybeDone::Future { .. } | MaybeDone::Gone =&gt; <span class="kw">return </span><span class="prelude-val">None</span>,
+        };
+        <span class="kw">if let </span>MaybeDoneProjReplace::Done { output } = <span class="self">self</span>.project_replace(MaybeDone::Gone) {
+            <span class="prelude-val">Some</span>(output)
+        } <span class="kw">else </span>{
+            <span class="macro">unreachable!</span>()
         }
     }
 }
@@ -141,14 +129,12 @@
     <span class="kw">type </span>Output = ();
 
     <span class="kw">fn </span>poll(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
-        <span class="kw">let </span>res = <span class="kw">unsafe </span>{
-            <span class="kw">match </span><span class="self">self</span>.as_mut().get_unchecked_mut() {
-                MaybeDone::Future(a) =&gt; <span class="macro">ready!</span>(Pin::new_unchecked(a).poll(cx)),
-                MaybeDone::Done(<span class="kw">_</span>) =&gt; <span class="kw">return </span>Poll::Ready(()),
-                MaybeDone::Gone =&gt; <span class="macro">panic!</span>(<span class="string">"MaybeDone polled after value taken"</span>),
-            }
+        <span class="kw">let </span>output = <span class="kw">match </span><span class="self">self</span>.as_mut().project() {
+            MaybeDoneProj::Future { future } =&gt; <span class="macro">ready!</span>(future.poll(cx)),
+            MaybeDoneProj::Done { .. } =&gt; <span class="kw">return </span>Poll::Ready(()),
+            MaybeDoneProj::Gone =&gt; <span class="macro">panic!</span>(<span class="string">"MaybeDone polled after value taken"</span>),
         };
-        <span class="self">self</span>.set(MaybeDone::Done(res));
+        <span class="self">self</span>.set(MaybeDone::Done { output });
         Poll::Ready(())
     }
 }

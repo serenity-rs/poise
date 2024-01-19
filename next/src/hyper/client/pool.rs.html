@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hyper-0.14.27/src/client/pool.rs`."><title>pool.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-4e54bb2b497cc83f.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="hyper" data-themes="" data-resource-suffix="" data-rustdoc-version="1.77.0-nightly (714b29a17 2024-01-15)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-0b2e2def73e61cbe.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hyper-0.14.28/src/client/pool.rs`."><title>pool.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-4e54bb2b497cc83f.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="hyper" data-themes="" data-resource-suffix="" data-rustdoc-version="1.77.0-nightly (6ae4cfbbb 2024-01-17)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-0b2e2def73e61cbe.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
             <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
     <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../hyper/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
@@ -1044,11 +1044,19 @@
 <a href="#1042" id="1042">1042</a>
 <a href="#1043" id="1043">1043</a>
 <a href="#1044" id="1044">1044</a>
+<a href="#1045" id="1045">1045</a>
+<a href="#1046" id="1046">1046</a>
+<a href="#1047" id="1047">1047</a>
+<a href="#1048" id="1048">1048</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::{HashMap, HashSet, VecDeque};
 <span class="kw">use </span>std::error::Error <span class="kw">as </span>StdError;
 <span class="kw">use </span>std::fmt;
+<span class="kw">use </span>std::future::Future;
+<span class="kw">use </span>std::marker::Unpin;
 <span class="kw">use </span>std::ops::{Deref, DerefMut};
+<span class="kw">use </span>std::pin::Pin;
 <span class="kw">use </span>std::sync::{Arc, Mutex, Weak};
+<span class="kw">use </span>std::task::{Context, Poll};
 
 <span class="attr">#[cfg(not(feature = <span class="string">"runtime"</span>))]
 </span><span class="kw">use </span>std::time::{Duration, Instant};
@@ -1059,7 +1067,7 @@
 <span class="kw">use </span>tracing::{debug, trace};
 
 <span class="kw">use </span><span class="kw">super</span>::client::Ver;
-<span class="kw">use </span><span class="kw">crate</span>::common::{exec::Exec, task, Future, Pin, Poll, Unpin};
+<span class="kw">use </span><span class="kw">crate</span>::common::exec::Exec;
 
 <span class="comment">// FIXME: allow() required due to `impl Trait` leaking types to this lint
 </span><span class="attr">#[allow(missing_debug_implementations)]
@@ -1125,7 +1133,7 @@
     <span class="comment">// A oneshot channel is used to allow the interval to be notified when
     // the Pool completely drops. That way, the interval can cancel immediately.
     </span><span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
-    </span>idle_interval_ref: <span class="prelude-ty">Option</span>&lt;oneshot::Sender&lt;<span class="kw">crate</span>::common::Never&gt;&gt;,
+    </span>idle_interval_ref: <span class="prelude-ty">Option</span>&lt;oneshot::Sender&lt;std::convert::Infallible&gt;&gt;,
     <span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
     </span>exec: Exec,
     timeout: <span class="prelude-ty">Option</span>&lt;Duration&gt;,
@@ -1159,7 +1167,7 @@
                 waiters: HashMap::new(),
                 <span class="attr">#[cfg(feature = <span class="string">"runtime"</span>)]
                 </span>exec: __exec.clone(),
-                timeout: config.idle_timeout,
+                timeout: config.idle_timeout.filter(|<span class="kw-2">&amp;</span>t| t &gt; Duration::ZERO),
             })))
         } <span class="kw">else </span>{
             <span class="prelude-val">None
@@ -1622,10 +1630,7 @@
 }
 
 <span class="kw">impl</span>&lt;T: Poolable&gt; Checkout&lt;T&gt; {
-    <span class="kw">fn </span>poll_waiter(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;,
-    ) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;<span class="kw">crate</span>::Result&lt;Pooled&lt;T&gt;&gt;&gt;&gt; {
+    <span class="kw">fn </span>poll_waiter(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;<span class="kw">crate</span>::Result&lt;Pooled&lt;T&gt;&gt;&gt;&gt; {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">mut </span>rx) = <span class="self">self</span>.waiter.take() {
             <span class="kw">match </span>Pin::new(<span class="kw-2">&amp;mut </span>rx).poll(cx) {
                 Poll::Ready(<span class="prelude-val">Ok</span>(value)) =&gt; {
@@ -1650,7 +1655,7 @@
         }
     }
 
-    <span class="kw">fn </span>checkout(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;Pooled&lt;T&gt;&gt; {
+    <span class="kw">fn </span>checkout(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;Pooled&lt;T&gt;&gt; {
         <span class="kw">let </span>entry = {
             <span class="kw">let </span><span class="kw-2">mut </span>inner = <span class="self">self</span>.pool.inner.as_ref()<span class="question-mark">?</span>.lock().unwrap();
             <span class="kw">let </span>expiration = Expiration::new(inner.timeout);
@@ -1703,7 +1708,7 @@
 <span class="kw">impl</span>&lt;T: Poolable&gt; Future <span class="kw">for </span>Checkout&lt;T&gt; {
     <span class="kw">type </span>Output = <span class="kw">crate</span>::Result&lt;Pooled&lt;T&gt;&gt;;
 
-    <span class="kw">fn </span>poll(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
+    <span class="kw">fn </span>poll(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(pooled) = <span class="macro">ready!</span>(<span class="self">self</span>.poll_waiter(cx)<span class="question-mark">?</span>) {
             <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Ok</span>(pooled));
         }
@@ -1786,7 +1791,7 @@
         // Pool is fully dropped, and shutdown. This channel is never sent on,
         // but Err(Canceled) will be received when the Pool is dropped.
         </span><span class="attr">#[pin]
-        </span>pool_drop_notifier: oneshot::Receiver&lt;<span class="kw">crate</span>::common::Never&gt;,
+        </span>pool_drop_notifier: oneshot::Receiver&lt;std::convert::Infallible&gt;,
     }
 }
 
@@ -1794,7 +1799,7 @@
 </span><span class="kw">impl</span>&lt;T: Poolable + <span class="lifetime">'static</span>&gt; Future <span class="kw">for </span>IdleTask&lt;T&gt; {
     <span class="kw">type </span>Output = ();
 
-    <span class="kw">fn </span>poll(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
+    <span class="kw">fn </span>poll(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>this = <span class="self">self</span>.project();
         <span class="kw">loop </span>{
             <span class="kw">match </span>this.pool_drop_notifier.as_mut().poll(cx) {
@@ -1836,11 +1841,14 @@
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
+    <span class="kw">use </span>std::future::Future;
+    <span class="kw">use </span>std::pin::Pin;
+    <span class="kw">use </span>std::task::Context;
     <span class="kw">use </span>std::task::Poll;
     <span class="kw">use </span>std::time::Duration;
 
     <span class="kw">use super</span>::{Connecting, Key, Pool, Poolable, Reservation, WeakOpt};
-    <span class="kw">use </span><span class="kw">crate</span>::common::{exec::Exec, task, Future, Pin};
+    <span class="kw">use </span><span class="kw">crate</span>::common::exec::Exec;
 
     <span class="doccomment">/// Test unique reservations.
     </span><span class="attr">#[derive(Debug, PartialEq, Eq)]
@@ -1910,7 +1918,7 @@
     {
         <span class="kw">type </span>Output = <span class="prelude-ty">Option</span>&lt;()&gt;;
 
-        <span class="kw">fn </span>poll(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
+        <span class="kw">fn </span>poll(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
             <span class="kw">match </span>Pin::new(<span class="kw-2">&amp;mut </span><span class="self">self</span>.<span class="number">0</span>).poll(cx) {
                 Poll::Ready(<span class="prelude-val">Ok</span>(<span class="kw">_</span>)) =&gt; Poll::Ready(<span class="prelude-val">Some</span>(())),
                 Poll::Ready(<span class="prelude-val">Err</span>(<span class="kw">_</span>)) =&gt; Poll::Ready(<span class="prelude-val">Some</span>(())),

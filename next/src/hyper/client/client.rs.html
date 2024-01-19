@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hyper-0.14.27/src/client/client.rs`."><title>client.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-4e54bb2b497cc83f.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="hyper" data-themes="" data-resource-suffix="" data-rustdoc-version="1.77.0-nightly (714b29a17 2024-01-15)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-0b2e2def73e61cbe.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hyper-0.14.28/src/client/client.rs`."><title>client.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-4e54bb2b497cc83f.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="hyper" data-themes="" data-resource-suffix="" data-rustdoc-version="1.77.0-nightly (6ae4cfbbb 2024-01-17)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-0b2e2def73e61cbe.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
             <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
     <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../hyper/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
@@ -1515,9 +1515,23 @@
 <a href="#1513" id="1513">1513</a>
 <a href="#1514" id="1514">1514</a>
 <a href="#1515" id="1515">1515</a>
+<a href="#1516" id="1516">1516</a>
+<a href="#1517" id="1517">1517</a>
+<a href="#1518" id="1518">1518</a>
+<a href="#1519" id="1519">1519</a>
+<a href="#1520" id="1520">1520</a>
+<a href="#1521" id="1521">1521</a>
+<a href="#1522" id="1522">1522</a>
+<a href="#1523" id="1523">1523</a>
+<a href="#1524" id="1524">1524</a>
+<a href="#1525" id="1525">1525</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::error::Error <span class="kw">as </span>StdError;
 <span class="kw">use </span>std::fmt;
+<span class="kw">use </span>std::future::Future;
+<span class="kw">use </span>std::marker::Unpin;
 <span class="kw">use </span>std::mem;
+<span class="kw">use </span>std::pin::Pin;
+<span class="kw">use </span>std::task::{Context, Poll};
 <span class="kw">use </span>std::time::Duration;
 
 <span class="kw">use </span>futures_channel::oneshot;
@@ -1529,10 +1543,9 @@
 
 <span class="kw">use </span><span class="kw">crate</span>::body::{Body, HttpBody};
 <span class="kw">use </span><span class="kw">crate</span>::client::connect::CaptureConnectionExtension;
-<span class="kw">use </span><span class="kw">crate</span>::common::{
-    exec::BoxSendFuture, lazy <span class="kw">as </span>hyper_lazy, sync_wrapper::SyncWrapper, task, Future, Lazy, Pin,
-    Poll,
-};
+<span class="kw">use </span><span class="kw">crate</span>::common::{exec::BoxSendFuture, lazy <span class="kw">as </span>hyper_lazy, sync_wrapper::SyncWrapper, Lazy};
+<span class="attr">#[cfg(feature = <span class="string">"http2"</span>)]
+</span><span class="kw">use </span><span class="kw">crate</span>::ext::Protocol;
 <span class="kw">use </span><span class="kw">crate</span>::rt::Executor;
 
 <span class="kw">use </span><span class="kw">super</span>::conn;
@@ -1768,7 +1781,8 @@
             <span class="kw">if </span>req.version() == Version::HTTP_2 {
                 <span class="macro">warn!</span>(<span class="string">"Connection is HTTP/1, but request requires HTTP/2"</span>);
                 <span class="kw">return </span><span class="prelude-val">Err</span>(ClientError::Normal(
-                    <span class="kw">crate</span>::Error::new_user_unsupported_version().with_client_connect_info(pooled.conn_info.clone()),
+                    <span class="kw">crate</span>::Error::new_user_unsupported_version()
+                        .with_client_connect_info(pooled.conn_info.clone()),
                 ));
             }
 
@@ -1795,7 +1809,13 @@
                 origin_form(req.uri_mut());
             }
         } <span class="kw">else if </span>req.method() == Method::CONNECT {
-            authority_form(req.uri_mut());
+            <span class="attr">#[cfg(not(feature = <span class="string">"http2"</span>))]
+            </span>authority_form(req.uri_mut());
+
+            <span class="attr">#[cfg(feature = <span class="string">"http2"</span>)]
+            </span><span class="kw">if </span>req.extensions().get::&lt;Protocol&gt;().is_none() {
+                authority_form(req.uri_mut());
+            }
         }
 
         <span class="kw">let </span><span class="kw-2">mut </span>res = <span class="kw">match </span>pooled.send_request_retryable(req).<span class="kw">await </span>{
@@ -2061,7 +2081,7 @@
     <span class="kw">type </span>Error = <span class="kw">crate</span>::Error;
     <span class="kw">type </span>Future = ResponseFuture;
 
-    <span class="kw">fn </span>poll_ready(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt;&gt; {
+    <span class="kw">fn </span>poll_ready(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt;&gt; {
         Poll::Ready(<span class="prelude-val">Ok</span>(()))
     }
 
@@ -2081,7 +2101,7 @@
     <span class="kw">type </span>Error = <span class="kw">crate</span>::Error;
     <span class="kw">type </span>Future = ResponseFuture;
 
-    <span class="kw">fn </span>poll_ready(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt;&gt; {
+    <span class="kw">fn </span>poll_ready(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt;&gt; {
         Poll::Ready(<span class="prelude-val">Ok</span>(()))
     }
 
@@ -2115,7 +2135,7 @@
         </span>F: Future&lt;Output = <span class="kw">crate</span>::Result&lt;Response&lt;Body&gt;&gt;&gt; + Send + <span class="lifetime">'static</span>,
     {
         <span class="self">Self </span>{
-            inner: SyncWrapper::new(Box::pin(value))
+            inner: SyncWrapper::new(Box::pin(value)),
         }
     }
 
@@ -2136,7 +2156,7 @@
 <span class="kw">impl </span>Future <span class="kw">for </span>ResponseFuture {
     <span class="kw">type </span>Output = <span class="kw">crate</span>::Result&lt;Response&lt;Body&gt;&gt;;
 
-    <span class="kw">fn </span>poll(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
+    <span class="kw">fn </span>poll(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="self">Self</span>::Output&gt; {
         <span class="self">self</span>.inner.get_mut().as_mut().poll(cx)
     }
 }
@@ -2158,7 +2178,7 @@
 }
 
 <span class="kw">impl</span>&lt;B&gt; PoolClient&lt;B&gt; {
-    <span class="kw">fn </span>poll_ready(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="kw">crate</span>::Result&lt;()&gt;&gt; {
+    <span class="kw">fn </span>poll_ready(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="kw">crate</span>::Result&lt;()&gt;&gt; {
         <span class="kw">match </span><span class="self">self</span>.tx {
             PoolTx::Http1(<span class="kw-2">ref mut </span>tx) =&gt; tx.poll_ready(cx),
             <span class="attr">#[cfg(feature = <span class="string">"http2"</span>)]
@@ -2220,7 +2240,10 @@
 {
     <span class="kw">fn </span>is_open(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         <span class="kw">if </span><span class="self">self</span>.conn_info.poisoned.poisoned() {
-            <span class="macro">trace!</span>(<span class="string">"marking {:?} as closed because it was poisoned"</span>, <span class="self">self</span>.conn_info);
+            <span class="macro">trace!</span>(
+                <span class="string">"marking {:?} as closed because it was poisoned"</span>,
+                <span class="self">self</span>.conn_info
+            );
             <span class="kw">return </span><span class="bool-val">false</span>;
         }
         <span class="kw">match </span><span class="self">self</span>.tx {
@@ -2623,10 +2646,7 @@
     /// line in the input to resume parsing the rest of the headers. An error
     /// will be emitted nonetheless if it finds `\0` or a lone `\r` while
     /// looking for the next line.
-    </span><span class="kw">pub fn </span>http1_ignore_invalid_headers_in_responses(
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        val: bool,
-    ) -&gt; <span class="kw-2">&amp;mut </span>Builder {
+    </span><span class="kw">pub fn </span>http1_ignore_invalid_headers_in_responses(<span class="kw-2">&amp;mut </span><span class="self">self</span>, val: bool) -&gt; <span class="kw-2">&amp;mut </span>Builder {
         <span class="self">self</span>.conn_builder
             .http1_ignore_invalid_headers_in_responses(val);
         <span class="self">self

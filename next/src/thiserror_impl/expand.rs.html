@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-impl-1.0.50/src/expand.rs`."><title>expand.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-4e54bb2b497cc83f.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="thiserror_impl" data-themes="" data-resource-suffix="" data-rustdoc-version="1.77.0-nightly (714b29a17 2024-01-15)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-0b2e2def73e61cbe.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/thiserror-impl-1.0.56/src/expand.rs`."><title>expand.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-4e54bb2b497cc83f.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="thiserror_impl" data-themes="" data-resource-suffix="" data-rustdoc-version="1.77.0-nightly (6ae4cfbbb 2024-01-17)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-0b2e2def73e61cbe.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
             <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
     <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../thiserror_impl/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
@@ -548,6 +548,20 @@
 <a href="#546" id="546">546</a>
 <a href="#547" id="547">547</a>
 <a href="#548" id="548">548</a>
+<a href="#549" id="549">549</a>
+<a href="#550" id="550">550</a>
+<a href="#551" id="551">551</a>
+<a href="#552" id="552">552</a>
+<a href="#553" id="553">553</a>
+<a href="#554" id="554">554</a>
+<a href="#555" id="555">555</a>
+<a href="#556" id="556">556</a>
+<a href="#557" id="557">557</a>
+<a href="#558" id="558">558</a>
+<a href="#559" id="559">559</a>
+<a href="#560" id="560">560</a>
+<a href="#561" id="561">561</a>
+<a href="#562" id="562">562</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::ast::{Enum, Field, Input, Struct};
 <span class="kw">use </span><span class="kw">crate</span>::attr::Trait;
 <span class="kw">use </span><span class="kw">crate</span>::generics::InferredBounds;
@@ -555,17 +569,51 @@
 <span class="kw">use </span>proc_macro2::TokenStream;
 <span class="kw">use </span>quote::{format_ident, quote, quote_spanned, ToTokens};
 <span class="kw">use </span>std::collections::BTreeSet <span class="kw">as </span>Set;
-<span class="kw">use </span>syn::{
-    Data, DeriveInput, GenericArgument, Member, PathArguments, <span class="prelude-ty">Result</span>, Token, Type, Visibility,
-};
+<span class="kw">use </span>syn::{DeriveInput, GenericArgument, Member, PathArguments, <span class="prelude-ty">Result</span>, Token, Type};
 
-<span class="kw">pub fn </span>derive(node: <span class="kw-2">&amp;</span>DeriveInput) -&gt; <span class="prelude-ty">Result</span>&lt;TokenStream&gt; {
-    <span class="kw">let </span>input = Input::from_syn(node)<span class="question-mark">?</span>;
+<span class="kw">pub fn </span>derive(input: <span class="kw-2">&amp;</span>DeriveInput) -&gt; TokenStream {
+    <span class="kw">match </span>try_expand(input) {
+        <span class="prelude-val">Ok</span>(expanded) =&gt; expanded,
+        <span class="comment">// If there are invalid attributes in the input, expand to an Error impl
+        // anyway to minimize spurious knock-on errors in other code that uses
+        // this type as an Error.
+        </span><span class="prelude-val">Err</span>(error) =&gt; fallback(input, error),
+    }
+}
+
+<span class="kw">fn </span>try_expand(input: <span class="kw-2">&amp;</span>DeriveInput) -&gt; <span class="prelude-ty">Result</span>&lt;TokenStream&gt; {
+    <span class="kw">let </span>input = Input::from_syn(input)<span class="question-mark">?</span>;
     input.validate()<span class="question-mark">?</span>;
     <span class="prelude-val">Ok</span>(<span class="kw">match </span>input {
         Input::Struct(input) =&gt; impl_struct(input),
         Input::Enum(input) =&gt; impl_enum(input),
     })
+}
+
+<span class="kw">fn </span>fallback(input: <span class="kw-2">&amp;</span>DeriveInput, error: syn::Error) -&gt; TokenStream {
+    <span class="kw">let </span>ty = <span class="kw-2">&amp;</span>input.ident;
+    <span class="kw">let </span>(impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
+
+    <span class="kw">let </span>error = error.to_compile_error();
+
+    <span class="macro">quote! </span>{
+        #error
+
+        <span class="attr">#[allow(unused_qualifications)]
+        </span><span class="kw">impl </span>#impl_generics std::error::Error <span class="kw">for </span>#ty #ty_generics #where_clause
+        <span class="kw">where
+            </span><span class="comment">// Work around trivial bounds being unstable.
+            // https://github.com/rust-lang/rust/issues/48214
+            </span><span class="kw">for</span>&lt;<span class="lifetime">'workaround</span>&gt; #ty #ty_generics: ::core::fmt::Debug,
+        {}
+
+        <span class="attr">#[allow(unused_qualifications)]
+        </span><span class="kw">impl </span>#impl_generics ::core::fmt::Display <span class="kw">for </span>#ty #ty_generics #where_clause {
+            <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, __formatter: <span class="kw-2">&amp;mut </span>::core::fmt::Formatter) -&gt; ::core::fmt::Result {
+                <span class="macro">::core::unreachable!</span>()
+            }
+        }
+    }
 }
 
 <span class="kw">fn </span>impl_struct(input: Struct) -&gt; TokenStream {
@@ -605,7 +653,7 @@
     <span class="kw">let </span>source_method = source_body.map(|body| {
         <span class="macro">quote! </span>{
             <span class="kw">fn </span>source(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ::core::option::Option&lt;<span class="kw-2">&amp;</span>(<span class="kw">dyn </span>std::error::Error + <span class="lifetime">'static</span>)&gt; {
-                <span class="kw">use </span>thiserror::__private::AsDynError;
+                <span class="kw">use </span>thiserror::__private::AsDynError <span class="kw">as _</span>;
                 #body
             }
         }
@@ -641,7 +689,7 @@
                 })
             };
             <span class="macro">quote! </span>{
-                <span class="kw">use </span>thiserror::__private::ThiserrorProvide;
+                <span class="kw">use </span>thiserror::__private::ThiserrorProvide <span class="kw">as _</span>;
                 #source_provide
                 #self_provide
             }
@@ -718,7 +766,6 @@
         }
     });
 
-    <span class="kw">let </span>error_trait = spanned_error_trait(input.original);
     <span class="kw">if </span>input.generics.type_params().next().is_some() {
         <span class="kw">let </span>self_token = &lt;<span class="macro">Token!</span>[<span class="self">Self</span>]&gt;::default();
         error_inferred_bounds.insert(self_token, Trait::Debug);
@@ -728,7 +775,7 @@
 
     <span class="macro">quote! </span>{
         <span class="attr">#[allow(unused_qualifications)]
-        </span><span class="kw">impl </span>#impl_generics #error_trait <span class="kw">for </span>#ty #ty_generics #error_where_clause {
+        </span><span class="kw">impl </span>#impl_generics std::error::Error <span class="kw">for </span>#ty #ty_generics #error_where_clause {
             #source_method
             #provide_method
         }
@@ -783,7 +830,7 @@
         });
         <span class="prelude-val">Some</span>(<span class="macro">quote! </span>{
             <span class="kw">fn </span>source(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ::core::option::Option&lt;<span class="kw-2">&amp;</span>(<span class="kw">dyn </span>std::error::Error + <span class="lifetime">'static</span>)&gt; {
-                <span class="kw">use </span>thiserror::__private::AsDynError;
+                <span class="kw">use </span>thiserror::__private::AsDynError <span class="kw">as _</span>;
                 <span class="attr">#[allow(deprecated)]
                 </span><span class="kw">match </span><span class="self">self </span>{
                     #(#arms)*
@@ -833,7 +880,7 @@
                             #source: #varsource,
                             ..
                         } =&gt; {
-                            <span class="kw">use </span>thiserror::__private::ThiserrorProvide;
+                            <span class="kw">use </span>thiserror::__private::ThiserrorProvide <span class="kw">as _</span>;
                             #source_provide
                             #self_provide
                         }
@@ -857,7 +904,7 @@
                     };
                     <span class="macro">quote! </span>{
                         #ty::#ident {#backtrace: #varsource, ..} =&gt; {
-                            <span class="kw">use </span>thiserror::__private::ThiserrorProvide;
+                            <span class="kw">use </span>thiserror::__private::ThiserrorProvide <span class="kw">as _</span>;
                             #source_provide
                         }
                     }
@@ -975,7 +1022,6 @@
         })
     });
 
-    <span class="kw">let </span>error_trait = spanned_error_trait(input.original);
     <span class="kw">if </span>input.generics.type_params().next().is_some() {
         <span class="kw">let </span>self_token = &lt;<span class="macro">Token!</span>[<span class="self">Self</span>]&gt;::default();
         error_inferred_bounds.insert(self_token, Trait::Debug);
@@ -985,7 +1031,7 @@
 
     <span class="macro">quote! </span>{
         <span class="attr">#[allow(unused_qualifications)]
-        </span><span class="kw">impl </span>#impl_generics #error_trait <span class="kw">for </span>#ty #ty_generics #error_where_clause {
+        </span><span class="kw">impl </span>#impl_generics std::error::Error <span class="kw">for </span>#ty #ty_generics #error_where_clause {
             #source_method
             #provide_method
         }
@@ -1077,23 +1123,5 @@
         GenericArgument::Type(arg) =&gt; <span class="prelude-val">Some</span>(arg),
         <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
     }
-}
-
-<span class="kw">fn </span>spanned_error_trait(input: <span class="kw-2">&amp;</span>DeriveInput) -&gt; TokenStream {
-    <span class="kw">let </span>vis_span = <span class="kw">match </span><span class="kw-2">&amp;</span>input.vis {
-        Visibility::Public(vis) =&gt; <span class="prelude-val">Some</span>(vis.span),
-        Visibility::Restricted(vis) =&gt; <span class="prelude-val">Some</span>(vis.pub_token.span),
-        Visibility::Inherited =&gt; <span class="prelude-val">None</span>,
-    };
-    <span class="kw">let </span>data_span = <span class="kw">match </span><span class="kw-2">&amp;</span>input.data {
-        Data::Struct(data) =&gt; data.struct_token.span,
-        Data::Enum(data) =&gt; data.enum_token.span,
-        Data::Union(data) =&gt; data.union_token.span,
-    };
-    <span class="kw">let </span>first_span = vis_span.unwrap_or(data_span);
-    <span class="kw">let </span>last_span = input.ident.span();
-    <span class="kw">let </span>path = <span class="macro">quote_spanned!</span>(first_span=&gt; std::error::);
-    <span class="kw">let </span>error = <span class="macro">quote_spanned!</span>(last_span=&gt; Error);
-    <span class="macro">quote!</span>(#path #error)
 }
 </code></pre></div></section></main></body></html>

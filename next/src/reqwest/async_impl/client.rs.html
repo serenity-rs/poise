@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/reqwest-0.11.22/src/async_impl/client.rs`."><title>client.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-4e54bb2b497cc83f.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="reqwest" data-themes="" data-resource-suffix="" data-rustdoc-version="1.77.0-nightly (714b29a17 2024-01-15)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-0b2e2def73e61cbe.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/reqwest-0.11.23/src/async_impl/client.rs`."><title>client.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-4e54bb2b497cc83f.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="reqwest" data-themes="" data-resource-suffix="" data-rustdoc-version="1.77.0-nightly (6ae4cfbbb 2024-01-17)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-0b2e2def73e61cbe.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
             <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
     <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../reqwest/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
@@ -2492,6 +2492,16 @@
 <a href="#2490" id="2490">2490</a>
 <a href="#2491" id="2491">2491</a>
 <a href="#2492" id="2492">2492</a>
+<a href="#2493" id="2493">2493</a>
+<a href="#2494" id="2494">2494</a>
+<a href="#2495" id="2495">2495</a>
+<a href="#2496" id="2496">2496</a>
+<a href="#2497" id="2497">2497</a>
+<a href="#2498" id="2498">2498</a>
+<a href="#2499" id="2499">2499</a>
+<a href="#2500" id="2500">2500</a>
+<a href="#2501" id="2501">2501</a>
+<a href="#2502" id="2502">2502</a>
 </pre></div><pre class="rust"><code><span class="attr">#[cfg(any(feature = <span class="string">"native-tls"</span>, feature = <span class="string">"__rustls"</span>,))]
 </span><span class="kw">use </span>std::any::Any;
 <span class="kw">use </span>std::net::IpAddr;
@@ -3598,6 +3608,7 @@
 
     <span class="doccomment">/// Only use HTTP/3.
     </span><span class="attr">#[cfg(feature = <span class="string">"http3"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(all(reqwest_unstable, feature = <span class="string">"http3"</span>,))))]
     </span><span class="kw">pub fn </span>http3_prior_knowledge(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; ClientBuilder {
         <span class="self">self</span>.config.http_version_pref = HttpVersionPref::Http3;
         <span class="self">self
@@ -4006,6 +4017,14 @@
         <span class="self">self
     </span>}
 
+    <span class="doccomment">/// Restrict the Client to be used with HTTPS only requests.
+    ///
+    /// Defaults to false.
+    </span><span class="kw">pub fn </span>https_only(<span class="kw-2">mut </span><span class="self">self</span>, enabled: bool) -&gt; ClientBuilder {
+        <span class="self">self</span>.config.https_only = enabled;
+        <span class="self">self
+    </span>}
+
     <span class="doccomment">/// Enables the [trust-dns](trust_dns_resolver) async resolver instead of a default threadpool using `getaddrinfo`.
     ///
     /// If the `trust-dns` feature is turned on, the default option is enabled.
@@ -4036,14 +4055,6 @@
             <span class="self">self
         </span>}
     }
-
-    <span class="doccomment">/// Restrict the Client to be used with HTTPS only requests.
-    ///
-    /// Defaults to false.
-    </span><span class="kw">pub fn </span>https_only(<span class="kw-2">mut </span><span class="self">self</span>, enabled: bool) -&gt; ClientBuilder {
-        <span class="self">self</span>.config.https_only = enabled;
-        <span class="self">self
-    </span>}
 
     <span class="doccomment">/// Override DNS resolution for specific domains to a particular IP address.
     ///
@@ -4087,6 +4098,7 @@
     ///
     /// The default is false.
     </span><span class="attr">#[cfg(feature = <span class="string">"http3"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(all(reqwest_unstable, feature = <span class="string">"http3"</span>,))))]
     </span><span class="kw">pub fn </span>set_tls_enable_early_data(<span class="kw-2">mut </span><span class="self">self</span>, enabled: bool) -&gt; ClientBuilder {
         <span class="self">self</span>.config.tls_enable_early_data = enabled;
         <span class="self">self
@@ -4098,6 +4110,7 @@
     ///
     /// [`TransportConfig`]: https://docs.rs/quinn/latest/quinn/struct.TransportConfig.html
     </span><span class="attr">#[cfg(feature = <span class="string">"http3"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(all(reqwest_unstable, feature = <span class="string">"http3"</span>,))))]
     </span><span class="kw">pub fn </span>set_quic_max_idle_timeout(<span class="kw-2">mut </span><span class="self">self</span>, value: Duration) -&gt; ClientBuilder {
         <span class="self">self</span>.config.quic_max_idle_timeout = <span class="prelude-val">Some</span>(value);
         <span class="self">self
@@ -4110,6 +4123,7 @@
     ///
     /// [`TransportConfig`]: https://docs.rs/quinn/latest/quinn/struct.TransportConfig.html
     </span><span class="attr">#[cfg(feature = <span class="string">"http3"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(all(reqwest_unstable, feature = <span class="string">"http3"</span>,))))]
     </span><span class="kw">pub fn </span>set_quic_stream_receive_window(<span class="kw-2">mut </span><span class="self">self</span>, value: VarInt) -&gt; ClientBuilder {
         <span class="self">self</span>.config.quic_stream_receive_window = <span class="prelude-val">Some</span>(value);
         <span class="self">self
@@ -4122,6 +4136,7 @@
     ///
     /// [`TransportConfig`]: https://docs.rs/quinn/latest/quinn/struct.TransportConfig.html
     </span><span class="attr">#[cfg(feature = <span class="string">"http3"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(all(reqwest_unstable, feature = <span class="string">"http3"</span>,))))]
     </span><span class="kw">pub fn </span>set_quic_receive_window(<span class="kw-2">mut </span><span class="self">self</span>, value: VarInt) -&gt; ClientBuilder {
         <span class="self">self</span>.config.quic_receive_window = <span class="prelude-val">Some</span>(value);
         <span class="self">self
@@ -4133,6 +4148,7 @@
     ///
     /// [`TransportConfig`]: https://docs.rs/quinn/latest/quinn/struct.TransportConfig.html
     </span><span class="attr">#[cfg(feature = <span class="string">"http3"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(all(reqwest_unstable, feature = <span class="string">"http3"</span>,))))]
     </span><span class="kw">pub fn </span>set_quic_send_window(<span class="kw-2">mut </span><span class="self">self</span>, value: u64) -&gt; ClientBuilder {
         <span class="self">self</span>.config.quic_send_window = <span class="prelude-val">Some</span>(value);
         <span class="self">self
@@ -4860,6 +4876,10 @@
                     <span class="kw">match </span>action {
                         redirect::ActionKind::Follow =&gt; {
                             <span class="macro">debug!</span>(<span class="string">"redirecting '{}' to '{}'"</span>, <span class="self">self</span>.url, loc);
+
+                            <span class="kw">if </span>loc.scheme() != <span class="string">"http" </span>&amp;&amp; loc.scheme() != <span class="string">"https" </span>{
+                                <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Err</span>(error::url_bad_scheme(loc)));
+                            }
 
                             <span class="kw">if </span><span class="self">self</span>.client.https_only &amp;&amp; loc.scheme() != <span class="string">"https" </span>{
                                 <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Err</span>(error::redirect(

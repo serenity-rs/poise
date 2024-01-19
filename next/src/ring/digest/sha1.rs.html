@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.5/src/digest/sha1.rs`."><title>sha1.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-4e54bb2b497cc83f.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="ring" data-themes="" data-resource-suffix="" data-rustdoc-version="1.77.0-nightly (714b29a17 2024-01-15)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-0b2e2def73e61cbe.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.7/src/digest/sha1.rs`."><title>sha1.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-4e54bb2b497cc83f.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="ring" data-themes="" data-resource-suffix="" data-rustdoc-version="1.77.0-nightly (6ae4cfbbb 2024-01-17)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-0b2e2def73e61cbe.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
             <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
     <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../ring/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
@@ -108,6 +108,7 @@
 <a href="#106" id="106">106</a>
 <a href="#107" id="107">107</a>
 <a href="#108" id="108">108</a>
+<a href="#109" id="109">109</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2015-2016 Brian Smith.
 // Copyright 2016 Simon Sapin.
 //
@@ -124,7 +125,7 @@
 // CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 </span><span class="kw">use </span><span class="kw">super</span>::sha2::{ch, maj, Word};
-<span class="kw">use crate</span>::{c, polyfill::ChunksFixed};
+<span class="kw">use </span><span class="kw">crate</span>::c;
 <span class="kw">use </span>core::num::Wrapping;
 
 <span class="kw">pub const </span>BLOCK_LEN: usize = <span class="number">512 </span>/ <span class="number">8</span>;
@@ -150,7 +151,7 @@
 ) {
     <span class="kw">let </span>state = <span class="kw">unsafe </span>{ <span class="kw-2">&amp;mut </span>state.as32 };
     <span class="kw">let </span>state: <span class="kw-2">&amp;mut </span>State = (<span class="kw-2">&amp;mut </span>state[..CHAINING_WORDS]).try_into().unwrap();
-    <span class="kw">let </span>data = data <span class="kw">as </span><span class="kw-2">*const </span>[&lt;W32 <span class="kw">as </span>Word&gt;::InputBytes; <span class="number">16</span>];
+    <span class="kw">let </span>data = data.cast::&lt;[&lt;W32 <span class="kw">as </span>Word&gt;::InputBytes; <span class="number">16</span>]&gt;();
     <span class="kw">let </span>blocks = <span class="kw">unsafe </span>{ core::slice::from_raw_parts(data, num) };
     <span class="kw-2">*</span>state = block_data_order_(<span class="kw-2">*</span>state, blocks)
 }
@@ -173,11 +174,10 @@
         </span><span class="kw">let </span>[a, b, c, d, e] = H;
 
         <span class="comment">// FIPS 180-4 6.1.2 Step 3 with constants and functions from FIPS 180-4 {4.1.1, 4.2.1}
-        </span><span class="kw">let </span>W: <span class="kw-2">&amp;</span>[[W32; <span class="number">20</span>]; <span class="number">4</span>] = W.chunks_fixed();
-        <span class="kw">let </span>(a, b, c, d, e) = step3(a, b, c, d, e, W[<span class="number">0</span>], Wrapping(<span class="number">0x5a827999</span>), ch);
-        <span class="kw">let </span>(a, b, c, d, e) = step3(a, b, c, d, e, W[<span class="number">1</span>], Wrapping(<span class="number">0x6ed9eba1</span>), parity);
-        <span class="kw">let </span>(a, b, c, d, e) = step3(a, b, c, d, e, W[<span class="number">2</span>], Wrapping(<span class="number">0x8f1bbcdc</span>), maj);
-        <span class="kw">let </span>(a, b, c, d, e) = step3(a, b, c, d, e, W[<span class="number">3</span>], Wrapping(<span class="number">0xca62c1d6</span>), parity);
+        </span><span class="kw">let </span>(a, b, c, d, e) = step3(a, b, c, d, e, <span class="kw-2">&amp;</span>W, <span class="number">0</span>, Wrapping(<span class="number">0x5a827999</span>), ch);
+        <span class="kw">let </span>(a, b, c, d, e) = step3(a, b, c, d, e, <span class="kw-2">&amp;</span>W, <span class="number">20</span>, Wrapping(<span class="number">0x6ed9eba1</span>), parity);
+        <span class="kw">let </span>(a, b, c, d, e) = step3(a, b, c, d, e, <span class="kw-2">&amp;</span>W, <span class="number">40</span>, Wrapping(<span class="number">0x8f1bbcdc</span>), maj);
+        <span class="kw">let </span>(a, b, c, d, e) = step3(a, b, c, d, e, <span class="kw-2">&amp;</span>W, <span class="number">60</span>, Wrapping(<span class="number">0xca62c1d6</span>), parity);
 
         <span class="comment">// FIPS 180-4 6.1.2 Step 4
         </span>H[<span class="number">0</span>] += a;
@@ -197,10 +197,12 @@
     <span class="kw-2">mut </span>c: W32,
     <span class="kw-2">mut </span>d: W32,
     <span class="kw-2">mut </span>e: W32,
-    W: [W32; <span class="number">20</span>],
+    W: <span class="kw-2">&amp;</span>[W32; <span class="number">80</span>],
+    t: usize,
     k: W32,
     f: <span class="kw">impl </span>Fn(W32, W32, W32) -&gt; W32,
 ) -&gt; (W32, W32, W32, W32, W32) {
+    <span class="kw">let </span>W = <span class="kw-2">&amp;</span>W[t..(t + <span class="number">20</span>)];
     <span class="kw">for </span>W_t <span class="kw">in </span>W.iter() {
         <span class="kw">let </span>T = rotl(a, <span class="number">5</span>) + f(b, c, d) + e + k + W_t;
         e = d;

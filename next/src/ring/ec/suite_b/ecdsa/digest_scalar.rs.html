@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.5/src/ec/suite_b/ecdsa/digest_scalar.rs`."><title>digest_scalar.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../../static.files/rustdoc-4e54bb2b497cc83f.css"><meta name="rustdoc-vars" data-root-path="../../../../../" data-static-root-path="../../../../../static.files/" data-current-crate="ring" data-themes="" data-resource-suffix="" data-rustdoc-version="1.77.0-nightly (714b29a17 2024-01-15)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../../src-files.js"></script><script defer src="../../../../../static.files/main-0b2e2def73e61cbe.js"></script><noscript><link rel="stylesheet" href="../../../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.7/src/ec/suite_b/ecdsa/digest_scalar.rs`."><title>digest_scalar.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../../static.files/rustdoc-4e54bb2b497cc83f.css"><meta name="rustdoc-vars" data-root-path="../../../../../" data-static-root-path="../../../../../static.files/" data-current-crate="ring" data-themes="" data-resource-suffix="" data-rustdoc-version="1.77.0-nightly (6ae4cfbbb 2024-01-17)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../../src-files.js"></script><script defer src="../../../../../static.files/main-0b2e2def73e61cbe.js"></script><noscript><link rel="stylesheet" href="../../../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
             <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
     <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../../../ring/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
@@ -118,19 +118,6 @@
 <a href="#116" id="116">116</a>
 <a href="#117" id="117">117</a>
 <a href="#118" id="118">118</a>
-<a href="#119" id="119">119</a>
-<a href="#120" id="120">120</a>
-<a href="#121" id="121">121</a>
-<a href="#122" id="122">122</a>
-<a href="#123" id="123">123</a>
-<a href="#124" id="124">124</a>
-<a href="#125" id="125">125</a>
-<a href="#126" id="126">126</a>
-<a href="#127" id="127">127</a>
-<a href="#128" id="128">128</a>
-<a href="#129" id="129">129</a>
-<a href="#130" id="130">130</a>
-<a href="#131" id="131">131</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2015-2016 Brian Smith.
 //
 // Permission to use, copy, modify, and/or distribute this software for any
@@ -147,11 +134,7 @@
 
 </span><span class="doccomment">//! ECDSA Signatures using the P-256 and P-384 curves.
 
-</span><span class="kw">use crate</span>::{
-    digest,
-    ec::suite_b::ops::<span class="kw-2">*</span>,
-    limb::{<span class="self">self</span>, LIMB_BYTES},
-};
+</span><span class="kw">use crate</span>::{digest, ec::suite_b::ops::<span class="kw-2">*</span>};
 
 <span class="doccomment">/// Calculate the digest of `msg` using the digest algorithm `digest_alg`. Then
 /// convert the digest to a scalar in the range [0, n) as described in
@@ -191,17 +174,15 @@
 <span class="comment">// This is a separate function solely so that we can test specific digest
 // values like all-zero values and values larger than `n`.
 </span><span class="kw">fn </span>digest_scalar_(ops: <span class="kw-2">&amp;</span>ScalarOps, digest: <span class="kw-2">&amp;</span>[u8]) -&gt; Scalar {
-    <span class="kw">let </span>cops = ops.common;
-    <span class="kw">let </span>num_limbs = cops.num_limbs;
-    <span class="kw">let </span>digest = <span class="kw">if </span>digest.len() &gt; num_limbs * LIMB_BYTES {
-        <span class="kw-2">&amp;</span>digest[..(num_limbs * LIMB_BYTES)]
+    <span class="kw">let </span>len = ops.scalar_bytes_len();
+    <span class="kw">let </span>digest = <span class="kw">if </span>digest.len() &gt; len {
+        <span class="kw-2">&amp;</span>digest[..len]
     } <span class="kw">else </span>{
         digest
     };
 
     scalar_parse_big_endian_partially_reduced_variable_consttime(
-        cops,
-        limb::AllowZero::Yes,
+        ops.common,
         untrusted::Input::from(digest),
     )
     .unwrap()
@@ -210,12 +191,7 @@
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
     <span class="kw">use </span><span class="kw">super</span>::digest_bytes_scalar;
-    <span class="kw">use crate</span>::{
-        digest,
-        ec::suite_b::ops::<span class="kw-2">*</span>,
-        limb::{<span class="self">self</span>, LIMB_BYTES},
-        test,
-    };
+    <span class="kw">use crate</span>::{digest, ec::suite_b::ops::<span class="kw-2">*</span>, limb, test};
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test() {
@@ -239,12 +215,8 @@
                     }
                 };
 
-                <span class="kw">let </span>num_limbs = ops.public_key_ops.common.num_limbs;
                 <span class="macro">assert_eq!</span>(input.len(), digest_alg.output_len());
-                <span class="macro">assert_eq!</span>(
-                    output.len(),
-                    ops.public_key_ops.common.num_limbs * LIMB_BYTES
-                );
+                <span class="macro">assert_eq!</span>(output.len(), ops.scalar_ops.scalar_bytes_len());
 
                 <span class="kw">let </span>expected = scalar_parse_big_endian_variable(
                     ops.public_key_ops.common,
@@ -254,8 +226,10 @@
                 .unwrap();
 
                 <span class="kw">let </span>actual = digest_bytes_scalar(ops.scalar_ops, <span class="kw-2">&amp;</span>input);
-
-                <span class="macro">assert_eq!</span>(actual.limbs[..num_limbs], expected.limbs[..num_limbs]);
+                <span class="macro">assert_eq!</span>(
+                    ops.scalar_ops.leak_limbs(<span class="kw-2">&amp;</span>actual),
+                    ops.scalar_ops.leak_limbs(<span class="kw-2">&amp;</span>expected)
+                );
 
                 <span class="prelude-val">Ok</span>(())
             },

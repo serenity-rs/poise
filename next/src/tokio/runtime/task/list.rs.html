@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/runtime/task/list.rs`."><title>list.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-4e54bb2b497cc83f.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.77.0-nightly (714b29a17 2024-01-15)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-0b2e2def73e61cbe.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.35.1/src/runtime/task/list.rs`."><title>list.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-4e54bb2b497cc83f.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.77.0-nightly (6ae4cfbbb 2024-01-17)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-0b2e2def73e61cbe.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
             <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
     <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../../tokio/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
@@ -322,6 +322,22 @@
 <a href="#320" id="320">320</a>
 <a href="#321" id="321">321</a>
 <a href="#322" id="322">322</a>
+<a href="#323" id="323">323</a>
+<a href="#324" id="324">324</a>
+<a href="#325" id="325">325</a>
+<a href="#326" id="326">326</a>
+<a href="#327" id="327">327</a>
+<a href="#328" id="328">328</a>
+<a href="#329" id="329">329</a>
+<a href="#330" id="330">330</a>
+<a href="#331" id="331">331</a>
+<a href="#332" id="332">332</a>
+<a href="#333" id="333">333</a>
+<a href="#334" id="334">334</a>
+<a href="#335" id="335">335</a>
+<a href="#336" id="336">336</a>
+<a href="#337" id="337">337</a>
+<a href="#338" id="338">338</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! This module has containers for storing the tasks spawned on a scheduler. The
 //! `OwnedTasks` container is thread-safe but can only store tasks that
 //! implement Send. The `LocalOwnedTasks` container is not thread safe, but can
@@ -332,10 +348,11 @@
 
 </span><span class="kw">use </span><span class="kw">crate</span>::future::Future;
 <span class="kw">use </span><span class="kw">crate</span>::loom::cell::UnsafeCell;
-<span class="kw">use </span><span class="kw">crate</span>::loom::sync::Mutex;
 <span class="kw">use </span><span class="kw">crate</span>::runtime::task::{JoinHandle, LocalNotified, Notified, Schedule, Task};
-<span class="kw">use </span><span class="kw">crate</span>::util::linked_list::{CountedLinkedList, Link, LinkedList};
+<span class="kw">use </span><span class="kw">crate</span>::util::linked_list::{Link, LinkedList};
+<span class="kw">use </span><span class="kw">crate</span>::util::sharded_list;
 
+<span class="kw">use </span><span class="kw">crate</span>::loom::sync::atomic::{AtomicBool, Ordering};
 <span class="kw">use </span>std::marker::PhantomData;
 <span class="kw">use </span>std::num::NonZeroU64;
 
@@ -349,7 +366,7 @@
 // mixed up runtimes happen to have the same id.
 
 </span><span class="macro">cfg_has_atomic_u64! </span>{
-    <span class="kw">use </span>std::sync::atomic::{AtomicU64, Ordering};
+    <span class="kw">use </span>std::sync::atomic::AtomicU64;
 
     <span class="kw">static </span>NEXT_OWNED_TASKS_ID: AtomicU64 = AtomicU64::new(<span class="number">1</span>);
 
@@ -364,7 +381,7 @@
 }
 
 <span class="macro">cfg_not_has_atomic_u64! </span>{
-    <span class="kw">use </span>std::sync::atomic::{AtomicU32, Ordering};
+    <span class="kw">use </span>std::sync::atomic::AtomicU32;
 
     <span class="kw">static </span>NEXT_OWNED_TASKS_ID: AtomicU32 = AtomicU32::new(<span class="number">1</span>);
 
@@ -379,30 +396,30 @@
 }
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>OwnedTasks&lt;S: <span class="lifetime">'static</span>&gt; {
-    inner: Mutex&lt;CountedOwnedTasksInner&lt;S&gt;&gt;,
+    list: List&lt;S&gt;,
     <span class="kw">pub</span>(<span class="kw">crate</span>) id: NonZeroU64,
+    closed: AtomicBool,
 }
-<span class="kw">struct </span>CountedOwnedTasksInner&lt;S: <span class="lifetime">'static</span>&gt; {
-    list: CountedLinkedList&lt;Task&lt;S&gt;, &lt;Task&lt;S&gt; <span class="kw">as </span>Link&gt;::Target&gt;,
-    closed: bool,
-}
+
+<span class="kw">type </span>List&lt;S&gt; = sharded_list::ShardedList&lt;Task&lt;S&gt;, &lt;Task&lt;S&gt; <span class="kw">as </span>Link&gt;::Target&gt;;
+
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>LocalOwnedTasks&lt;S: <span class="lifetime">'static</span>&gt; {
     inner: UnsafeCell&lt;OwnedTasksInner&lt;S&gt;&gt;,
     <span class="kw">pub</span>(<span class="kw">crate</span>) id: NonZeroU64,
     _not_send_or_sync: PhantomData&lt;<span class="kw-2">*const </span>()&gt;,
 }
+
 <span class="kw">struct </span>OwnedTasksInner&lt;S: <span class="lifetime">'static</span>&gt; {
     list: LinkedList&lt;Task&lt;S&gt;, &lt;Task&lt;S&gt; <span class="kw">as </span>Link&gt;::Target&gt;,
     closed: bool,
 }
 
 <span class="kw">impl</span>&lt;S: <span class="lifetime">'static</span>&gt; OwnedTasks&lt;S&gt; {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new() -&gt; <span class="self">Self </span>{
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(num_cores: usize) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>shard_size = <span class="self">Self</span>::gen_shared_list_size(num_cores);
         <span class="self">Self </span>{
-            inner: Mutex::new(CountedOwnedTasksInner {
-                list: CountedLinkedList::new(),
-                closed: <span class="bool-val">false</span>,
-            }),
+            list: List::new(shard_size),
+            closed: AtomicBool::new(<span class="bool-val">false</span>),
             id: get_next_id(),
         }
     }
@@ -436,16 +453,16 @@
             </span>task.header().set_owner_id(<span class="self">self</span>.id);
         }
 
-        <span class="kw">let </span><span class="kw-2">mut </span>lock = <span class="self">self</span>.inner.lock();
-        <span class="kw">if </span>lock.closed {
-            drop(lock);
-            drop(notified);
+        <span class="kw">let </span>shard = <span class="self">self</span>.list.lock_shard(<span class="kw-2">&amp;</span>task);
+        <span class="comment">// Check the closed flag in the lock for ensuring all that tasks
+        // will shut down after the OwnedTasks has been closed.
+        </span><span class="kw">if </span><span class="self">self</span>.closed.load(Ordering::Acquire) {
+            drop(shard);
             task.shutdown();
-            <span class="prelude-val">None
-        </span>} <span class="kw">else </span>{
-            lock.list.push_front(task);
-            <span class="prelude-val">Some</span>(notified)
+            <span class="kw">return </span><span class="prelude-val">None</span>;
         }
+        shard.push(task);
+        <span class="prelude-val">Some</span>(notified)
     }
 
     <span class="doccomment">/// Asserts that the given task is owned by this OwnedTasks and convert it to
@@ -453,7 +470,6 @@
     </span><span class="attr">#[inline]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>assert_owner(<span class="kw-2">&amp;</span><span class="self">self</span>, task: Notified&lt;S&gt;) -&gt; LocalNotified&lt;S&gt; {
         <span class="macro">debug_assert_eq!</span>(task.header().get_owner_id(), <span class="prelude-val">Some</span>(<span class="self">self</span>.id));
-
         <span class="comment">// safety: All tasks bound to this OwnedTasks are Send, so it is safe
         // to poll it on this thread no matter what thread we are on.
         </span>LocalNotified {
@@ -464,34 +480,34 @@
 
     <span class="doccomment">/// Shuts down all tasks in the collection. This call also closes the
     /// collection, preventing new items from being added.
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>close_and_shutdown_all(<span class="kw-2">&amp;</span><span class="self">self</span>)
+    ///
+    /// The parameter start determines which shard this method will start at.
+    /// Using different values for each worker thread reduces contention.
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>close_and_shutdown_all(<span class="kw-2">&amp;</span><span class="self">self</span>, start: usize)
     <span class="kw">where
         </span>S: Schedule,
     {
-        <span class="comment">// The first iteration of the loop was unrolled so it can set the
-        // closed bool.
-        </span><span class="kw">let </span>first_task = {
-            <span class="kw">let </span><span class="kw-2">mut </span>lock = <span class="self">self</span>.inner.lock();
-            lock.closed = <span class="bool-val">true</span>;
-            lock.list.pop_back()
-        };
-        <span class="kw">match </span>first_task {
-            <span class="prelude-val">Some</span>(task) =&gt; task.shutdown(),
-            <span class="prelude-val">None </span>=&gt; <span class="kw">return</span>,
-        }
-
-        <span class="kw">loop </span>{
-            <span class="kw">let </span>task = <span class="kw">match </span><span class="self">self</span>.inner.lock().list.pop_back() {
-                <span class="prelude-val">Some</span>(task) =&gt; task,
-                <span class="prelude-val">None </span>=&gt; <span class="kw">return</span>,
-            };
-
-            task.shutdown();
+        <span class="self">self</span>.closed.store(<span class="bool-val">true</span>, Ordering::Release);
+        <span class="kw">for </span>i <span class="kw">in </span>start..<span class="self">self</span>.get_shard_size() + start {
+            <span class="kw">loop </span>{
+                <span class="kw">let </span>task = <span class="self">self</span>.list.pop_back(i);
+                <span class="kw">match </span>task {
+                    <span class="prelude-val">Some</span>(task) =&gt; {
+                        task.shutdown();
+                    }
+                    <span class="prelude-val">None </span>=&gt; <span class="kw">break</span>,
+                }
+            }
         }
     }
 
+    <span class="attr">#[inline]
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>get_shard_size(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
+        <span class="self">self</span>.list.shard_size()
+    }
+
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>active_tasks_count(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
-        <span class="self">self</span>.inner.lock().list.count()
+        <span class="self">self</span>.list.len()
     }
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>remove(<span class="kw-2">&amp;</span><span class="self">self</span>, task: <span class="kw-2">&amp;</span>Task&lt;S&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;Task&lt;S&gt;&gt; {
@@ -503,11 +519,27 @@
 
         <span class="comment">// safety: We just checked that the provided task is not in some other
         // linked list.
-        </span><span class="kw">unsafe </span>{ <span class="self">self</span>.inner.lock().list.remove(task.header_ptr()) }
+        </span><span class="kw">unsafe </span>{ <span class="self">self</span>.list.remove(task.header_ptr()) }
     }
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>is_empty(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="self">self</span>.inner.lock().list.is_empty()
+        <span class="self">self</span>.list.is_empty()
+    }
+
+    <span class="doccomment">/// Generates the size of the sharded list based on the number of worker threads.
+    ///
+    /// The sharded lock design can effectively alleviate
+    /// lock contention performance problems caused by high concurrency.
+    ///
+    /// However, as the number of shards increases, the memory continuity between
+    /// nodes in the intrusive linked list will diminish. Furthermore,
+    /// the construction time of the sharded list will also increase with a higher number of shards.
+    ///
+    /// Due to the above reasons, we set a maximum value for the shared list size,
+    /// denoted as `MAX_SHARED_LIST_SIZE`.
+    </span><span class="kw">fn </span>gen_shared_list_size(num_cores: usize) -&gt; usize {
+        <span class="kw">const </span>MAX_SHARED_LIST_SIZE: usize = <span class="number">1 </span>&lt;&lt; <span class="number">16</span>;
+        usize::min(MAX_SHARED_LIST_SIZE, num_cores.next_power_of_two() * <span class="number">4</span>)
     }
 }
 
@@ -516,9 +548,9 @@
         <span class="doccomment">/// Locks the tasks, and calls `f` on an iterator over them.
         </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>for_each&lt;F&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, f: F)
         <span class="kw">where
-            </span>F: FnMut(<span class="kw-2">&amp;</span>Task&lt;S&gt;)
+            </span>F: FnMut(<span class="kw-2">&amp;</span>Task&lt;S&gt;),
         {
-            <span class="self">self</span>.inner.lock().list.for_each(f)
+            <span class="self">self</span>.list.for_each(f);
         }
     }
 }

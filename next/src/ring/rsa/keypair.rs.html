@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.5/src/rsa/keypair.rs`."><title>keypair.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-4e54bb2b497cc83f.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="ring" data-themes="" data-resource-suffix="" data-rustdoc-version="1.77.0-nightly (714b29a17 2024-01-15)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-0b2e2def73e61cbe.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.7/src/rsa/keypair.rs`."><title>keypair.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-4e54bb2b497cc83f.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="ring" data-themes="" data-resource-suffix="" data-rustdoc-version="1.77.0-nightly (6ae4cfbbb 2024-01-17)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-0b2e2def73e61cbe.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
             <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
     <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../ring/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
@@ -654,11 +654,6 @@
 <a href="#652" id="652">652</a>
 <a href="#653" id="653">653</a>
 <a href="#654" id="654">654</a>
-<a href="#655" id="655">655</a>
-<a href="#656" id="656">656</a>
-<a href="#657" id="657">657</a>
-<a href="#658" id="658">658</a>
-<a href="#659" id="659">659</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2015-2016 Brian Smith.
 //
 // Permission to use, copy, modify, and/or distribute this software for any
@@ -680,10 +675,11 @@
 <span class="doccomment">/// RSA PKCS#1 1.5 signatures.
 </span><span class="kw">use crate</span>::{
     arithmetic::{
-        bigint::{<span class="self">self</span>, Prime},
-        montgomery::R,
+        bigint,
+        montgomery::{R, RR, RRR},
     },
-    bits, cpu, digest,
+    bits::BitLength,
+    cpu, digest,
     error::{<span class="self">self</span>, KeyRejected},
     io::der,
     pkcs8, rand, signature,
@@ -691,11 +687,9 @@
 
 <span class="doccomment">/// An RSA key pair, used for signing.
 </span><span class="kw">pub struct </span>KeyPair {
-    p: PrivatePrime&lt;P&gt;,
-    q: PrivatePrime&lt;Q&gt;,
+    p: PrivateCrtPrime&lt;P&gt;,
+    q: PrivateCrtPrime&lt;Q&gt;,
     qInv: bigint::Elem&lt;P, R&gt;,
-    qq: bigint::Modulus&lt;QQ&gt;,
-    q_mod_n: bigint::Elem&lt;N, R&gt;,
     public: PublicKey,
 }
 
@@ -917,23 +911,6 @@
         <span class="kw">let </span>dQ = untrusted::Input::from(dQ);
         <span class="kw">let </span>qInv = untrusted::Input::from(qInv);
 
-        <span class="kw">let </span>(p, p_bits) = bigint::Nonnegative::from_be_bytes_with_bit_length(p)
-            .map_err(|error::Unspecified| KeyRejected::invalid_encoding())<span class="question-mark">?</span>;
-        <span class="kw">let </span>(q, q_bits) = bigint::Nonnegative::from_be_bytes_with_bit_length(q)
-            .map_err(|error::Unspecified| KeyRejected::invalid_encoding())<span class="question-mark">?</span>;
-
-        <span class="comment">// Our implementation of CRT-based modular exponentiation used requires
-        // that `p &gt; q` so swap them if `p &lt; q`. If swapped, `qInv` is
-        // recalculated below. `p != q` is verified implicitly below, e.g. when
-        // `q_mod_p` is constructed.
-        </span><span class="kw">let </span>((p, p_bits, dP), (q, q_bits, dQ, qInv)) = <span class="kw">match </span>q.verify_less_than(<span class="kw-2">&amp;</span>p) {
-            <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; ((p, p_bits, dP), (q, q_bits, dQ, <span class="prelude-val">Some</span>(qInv))),
-            <span class="prelude-val">Err</span>(error::Unspecified) =&gt; {
-                <span class="comment">// TODO: verify `q` and `qInv` are inverses (mod p).
-                </span>((q, q_bits, dQ), (p, p_bits, dP, <span class="prelude-val">None</span>))
-            }
-        };
-
         <span class="comment">// XXX: Some steps are done out of order, but the NIST steps are worded
         // in such a way that it is clear that NIST intends for them to be done
         // in order. TODO: Does this matter at all?
@@ -957,13 +934,14 @@
         <span class="kw">let </span>public_key = PublicKey::from_modulus_and_exponent(
             n,
             e,
-            bits::BitLength::from_usize_bits(<span class="number">2048</span>),
+            BitLength::from_usize_bits(<span class="number">2048</span>),
             <span class="kw">super</span>::PRIVATE_KEY_PUBLIC_MODULUS_MAX_BITS,
             PublicExponent::_65537,
             cpu_features,
         )<span class="question-mark">?</span>;
 
-        <span class="kw">let </span>n = public_key.n().value();
+        <span class="kw">let </span>n_one = public_key.inner().n().oneRR();
+        <span class="kw">let </span>n = <span class="kw-2">&amp;</span>public_key.inner().n().value();
 
         <span class="comment">// 6.4.1.4.3 says to skip 6.4.1.2.1 Step 2.
 
@@ -979,34 +957,10 @@
 
         // Steps 5.a and 5.b are omitted, as explained above.
 
-        // Step 5.c.
-        //
-        // TODO: First, stop if `p &lt; (√2) * 2**((nBits/2) - 1)`.
-        //
-        // Second, stop if `p &gt; 2**(nBits/2) - 1`.
-        </span><span class="kw">let </span>half_n_bits = public_key.n().len_bits().half_rounded_up();
-        <span class="kw">if </span>p_bits != half_n_bits {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(KeyRejected::inconsistent_components());
-        }
+        </span><span class="kw">let </span>n_bits = public_key.inner().n().len_bits();
 
-        <span class="comment">// TODO: Step 5.d: Verify GCD(p - 1, e) == 1.
-
-        // Steps 5.e and 5.f are omitted as explained above.
-
-        // Step 5.g.
-        //
-        // TODO: First, stop if `q &lt; (√2) * 2**((nBits/2) - 1)`.
-        //
-        // Second, stop if `q &gt; 2**(nBits/2) - 1`.
-        </span><span class="kw">if </span>p_bits != q_bits {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(KeyRejected::inconsistent_components());
-        }
-
-        <span class="comment">// TODO: Step 5.h: Verify GCD(p - 1, e) == 1.
-
-        </span><span class="kw">let </span>q_mod_n_decoded = q
-            .to_elem(n)
-            .map_err(|error::Unspecified| KeyRejected::inconsistent_components())<span class="question-mark">?</span>;
+        <span class="kw">let </span>p = PrivatePrime::new(p, n_bits, cpu_features)<span class="question-mark">?</span>;
+        <span class="kw">let </span>q = PrivatePrime::new(q, n_bits, cpu_features)<span class="question-mark">?</span>;
 
         <span class="comment">// TODO: Step 5.i
         //
@@ -1019,10 +973,15 @@
         // 0 &lt; q &lt; p &lt; n. We check that q and p are close to sqrt(n) and then
         // assume that these preconditions are enough to let us assume that
         // checking p * q == 0 (mod n) is equivalent to checking p * q == n.
-        </span><span class="kw">let </span>q_mod_n = bigint::elem_mul(n.oneRR().as_ref(), q_mod_n_decoded.clone(), n);
-        <span class="kw">let </span>p_mod_n = p
+        </span><span class="kw">let </span>q_mod_n = q
+            .modulus
             .to_elem(n)
             .map_err(|error::Unspecified| KeyRejected::inconsistent_components())<span class="question-mark">?</span>;
+        <span class="kw">let </span>p_mod_n = p
+            .modulus
+            .to_elem(n)
+            .map_err(|error::Unspecified| KeyRejected::inconsistent_components())<span class="question-mark">?</span>;
+        <span class="kw">let </span>p_mod_n = bigint::elem_mul(n_one, p_mod_n, n);
         <span class="kw">let </span>pq_mod_n = bigint::elem_mul(<span class="kw-2">&amp;</span>q_mod_n, p_mod_n, n);
         <span class="kw">if </span>!pq_mod_n.is_zero() {
             <span class="kw">return </span><span class="prelude-val">Err</span>(KeyRejected::inconsistent_components());
@@ -1035,65 +994,46 @@
         // First, validate `2**half_n_bits &lt; d`. Since 2**half_n_bits has a bit
         // length of half_n_bits + 1, this check gives us 2**half_n_bits &lt;= d,
         // and knowing d is odd makes the inequality strict.
-        </span><span class="kw">let </span>(d, d_bits) = bigint::Nonnegative::from_be_bytes_with_bit_length(d)
-            .map_err(|<span class="kw">_</span>| error::KeyRejected::invalid_encoding())<span class="question-mark">?</span>;
-        <span class="kw">if </span>!(half_n_bits &lt; d_bits) {
+        </span><span class="kw">let </span>d = bigint::OwnedModulus::&lt;D&gt;::from_be_bytes(d, cpu_features)
+            .map_err(|<span class="kw">_</span>| error::KeyRejected::invalid_component())<span class="question-mark">?</span>;
+        <span class="kw">if </span>!(n_bits.half_rounded_up() &lt; d.len_bits()) {
             <span class="kw">return </span><span class="prelude-val">Err</span>(KeyRejected::inconsistent_components());
         }
         <span class="comment">// XXX: This check should be `d &lt; LCM(p - 1, q - 1)`, but we don't have
         // a good way of calculating LCM, so it is omitted, as explained above.
-        </span>d.verify_less_than_modulus(n)
+        </span>d.verify_less_than(n)
             .map_err(|error::Unspecified| KeyRejected::inconsistent_components())<span class="question-mark">?</span>;
-        <span class="kw">if </span>!d.is_odd() {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(KeyRejected::invalid_component());
-        }
 
         <span class="comment">// Step 6.b is omitted as explained above.
 
-        // 6.4.1.4.3 - Step 7.
+        </span><span class="kw">let </span>pm = <span class="kw-2">&amp;</span>p.modulus.modulus();
 
-        // Step 7.a.
-        </span><span class="kw">let </span>p = PrivatePrime::new(p, dP, cpu_features)<span class="question-mark">?</span>;
+        <span class="comment">// 6.4.1.4.3 - Step 7.
 
-        <span class="comment">// Step 7.b.
-        </span><span class="kw">let </span>q = PrivatePrime::new(q, dQ, cpu_features)<span class="question-mark">?</span>;
-
-        <span class="kw">let </span>q_mod_p = q.modulus.to_elem(<span class="kw-2">&amp;</span>p.modulus);
-
-        <span class="comment">// Step 7.c.
-        </span><span class="kw">let </span>qInv = <span class="kw">if let </span><span class="prelude-val">Some</span>(qInv) = qInv {
-            bigint::Elem::from_be_bytes_padded(qInv, <span class="kw-2">&amp;</span>p.modulus)
-                .map_err(|error::Unspecified| KeyRejected::invalid_component())<span class="question-mark">?
-        </span>} <span class="kw">else </span>{
-            <span class="comment">// We swapped `p` and `q` above, so we need to calculate `qInv`.
-            // Step 7.f below will verify `qInv` is correct.
-            </span><span class="kw">let </span>q_mod_p = bigint::elem_mul(p.modulus.oneRR().as_ref(), q_mod_p.clone(), <span class="kw-2">&amp;</span>p.modulus);
-            bigint::elem_inverse_consttime(q_mod_p, <span class="kw-2">&amp;</span>p.modulus)
-                .map_err(|error::Unspecified| KeyRejected::unexpected_error())<span class="question-mark">?
-        </span>};
+        // Step 7.c.
+        </span><span class="kw">let </span>qInv = bigint::Elem::from_be_bytes_padded(qInv, pm)
+            .map_err(|error::Unspecified| KeyRejected::invalid_component())<span class="question-mark">?</span>;
 
         <span class="comment">// Steps 7.d and 7.e are omitted per the documentation above, and
         // because we don't (in the long term) have a good way to do modulo
         // with an even modulus.
 
         // Step 7.f.
-        </span><span class="kw">let </span>qInv = bigint::elem_mul(p.modulus.oneRR().as_ref(), qInv, <span class="kw-2">&amp;</span>p.modulus);
-        bigint::verify_inverses_consttime(<span class="kw-2">&amp;</span>qInv, q_mod_p, <span class="kw-2">&amp;</span>p.modulus)
+        </span><span class="kw">let </span>qInv = bigint::elem_mul(p.oneRR.as_ref(), qInv, pm);
+        <span class="kw">let </span>q_mod_p = bigint::elem_reduced(<span class="kw-2">&amp;</span>q_mod_n, pm, q.modulus.len_bits());
+        <span class="kw">let </span>q_mod_p = bigint::elem_mul(p.oneRR.as_ref(), q_mod_p, pm);
+        bigint::verify_inverses_consttime(<span class="kw-2">&amp;</span>qInv, q_mod_p, pm)
             .map_err(|error::Unspecified| KeyRejected::inconsistent_components())<span class="question-mark">?</span>;
-
-        <span class="kw">let </span>qq = bigint::Modulus::from_elem(
-            bigint::elem_mul(<span class="kw-2">&amp;</span>q_mod_n, q_mod_n_decoded, n),
-            cpu_features,
-        )<span class="question-mark">?</span>;
 
         <span class="comment">// This should never fail since `n` and `e` were validated above.
 
-        </span><span class="prelude-val">Ok</span>(<span class="self">Self </span>{
+        </span><span class="kw">let </span>p = PrivateCrtPrime::new(p, dP)<span class="question-mark">?</span>;
+        <span class="kw">let </span>q = PrivateCrtPrime::new(q, dQ)<span class="question-mark">?</span>;
+
+        <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
             p,
             q,
             qInv,
-            q_mod_n,
-            qq,
             public: public_key,
         })
     }
@@ -1121,26 +1061,58 @@
     }
 }
 
-<span class="kw">struct </span>PrivatePrime&lt;M: Prime&gt; {
-    modulus: bigint::Modulus&lt;M&gt;,
-    exponent: bigint::PrivateExponent,
+<span class="kw">struct </span>PrivatePrime&lt;M&gt; {
+    modulus: bigint::OwnedModulus&lt;M&gt;,
+    oneRR: bigint::One&lt;M, RR&gt;,
 }
 
-<span class="kw">impl</span>&lt;M: Prime&gt; PrivatePrime&lt;M&gt; {
-    <span class="doccomment">/// Constructs a `PrivatePrime` from the private prime `p` and `dP` where
-    /// dP == d % (p - 1).
-    </span><span class="kw">fn </span>new(
-        p: bigint::Nonnegative,
-        dP: untrusted::Input,
+<span class="kw">impl</span>&lt;M&gt; PrivatePrime&lt;M&gt; {
+    <span class="kw">fn </span>new(
+        p: untrusted::Input,
+        n_bits: BitLength,
         cpu_features: cpu::Features,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, KeyRejected&gt; {
-        <span class="kw">let </span>(p, p_bits) = bigint::Modulus::from_nonnegative_with_bit_length(p, cpu_features)<span class="question-mark">?</span>;
-        <span class="kw">if </span>p_bits.as_usize_bits() % <span class="number">512 </span>!= <span class="number">0 </span>{
+        <span class="kw">let </span>p = bigint::OwnedModulus::from_be_bytes(p, cpu_features)<span class="question-mark">?</span>;
+
+        <span class="comment">// 5.c / 5.g:
+        //
+        // TODO: First, stop if `p &lt; (√2) * 2**((nBits/2) - 1)`.
+        // TODO: First, stop if `q &lt; (√2) * 2**((nBits/2) - 1)`.
+        //
+        // Second, stop if `p &gt; 2**(nBits/2) - 1`.
+        // Second, stop if `q &gt; 2**(nBits/2) - 1`.
+        </span><span class="kw">if </span>p.len_bits() != n_bits.half_rounded_up() {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(KeyRejected::inconsistent_components());
+        }
+
+        <span class="kw">if </span>p.len_bits().as_usize_bits() % <span class="number">512 </span>!= <span class="number">0 </span>{
             <span class="kw">return </span><span class="prelude-val">Err</span>(error::KeyRejected::private_modulus_len_not_multiple_of_512_bits());
         }
 
+        <span class="comment">// TODO: Step 5.d: Verify GCD(p - 1, e) == 1.
+        // TODO: Step 5.h: Verify GCD(q - 1, e) == 1.
+
+        // Steps 5.e and 5.f are omitted as explained above.
+
+        </span><span class="kw">let </span>oneRR = bigint::One::newRR(<span class="kw-2">&amp;</span>p.modulus());
+
+        <span class="prelude-val">Ok</span>(<span class="self">Self </span>{ modulus: p, oneRR })
+    }
+}
+
+<span class="kw">struct </span>PrivateCrtPrime&lt;M&gt; {
+    modulus: bigint::OwnedModulus&lt;M&gt;,
+    oneRRR: bigint::One&lt;M, RRR&gt;,
+    exponent: bigint::PrivateExponent,
+}
+
+<span class="kw">impl</span>&lt;M&gt; PrivateCrtPrime&lt;M&gt; {
+    <span class="doccomment">/// Constructs a `PrivateCrtPrime` from the private prime `p` and `dP` where
+    /// dP == d % (p - 1).
+    </span><span class="kw">fn </span>new(p: PrivatePrime&lt;M&gt;, dP: untrusted::Input) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, KeyRejected&gt; {
+        <span class="kw">let </span>m = <span class="kw-2">&amp;</span>p.modulus.modulus();
         <span class="comment">// [NIST SP-800-56B rev. 1] 6.4.1.4.3 - Steps 7.a &amp; 7.b.
-        </span><span class="kw">let </span>dP = bigint::PrivateExponent::from_be_bytes_padded(dP, <span class="kw-2">&amp;</span>p)
+        </span><span class="kw">let </span>dP = bigint::PrivateExponent::from_be_bytes_padded(dP, m)
             .map_err(|error::Unspecified| KeyRejected::inconsistent_components())<span class="question-mark">?</span>;
 
         <span class="comment">// XXX: Steps 7.d and 7.e are omitted. We don't check that
@@ -1152,61 +1124,35 @@
         // and `e`. TODO: Either prove that what we do is sufficient, or make
         // it so.
 
-        </span><span class="prelude-val">Ok</span>(<span class="self">Self </span>{
-            modulus: p,
+        </span><span class="kw">let </span>oneRRR = bigint::One::newRRR(p.oneRR, m);
+
+        <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
+            modulus: p.modulus,
+            oneRRR,
             exponent: dP,
         })
     }
 }
 
-<span class="kw">fn </span>elem_exp_consttime&lt;M, MM&gt;(
-    c: <span class="kw-2">&amp;</span>bigint::Elem&lt;MM&gt;,
-    p: <span class="kw-2">&amp;</span>PrivatePrime&lt;M&gt;,
-) -&gt; <span class="prelude-ty">Result</span>&lt;bigint::Elem&lt;M&gt;, error::Unspecified&gt;
-<span class="kw">where
-    </span>M: bigint::NotMuchSmallerModulus&lt;MM&gt;,
-    M: Prime,
-{
-    <span class="kw">let </span>c_mod_m = bigint::elem_reduced(c, <span class="kw-2">&amp;</span>p.modulus);
-    <span class="comment">// We could precompute `oneRRR = elem_squared(&amp;p.oneRR`) as mentioned
-    // in the Smooth CRT-RSA paper.
-    </span><span class="kw">let </span>c_mod_m = bigint::elem_mul(p.modulus.oneRR().as_ref(), c_mod_m, <span class="kw-2">&amp;</span>p.modulus);
-    <span class="kw">let </span>c_mod_m = bigint::elem_mul(p.modulus.oneRR().as_ref(), c_mod_m, <span class="kw-2">&amp;</span>p.modulus);
-    bigint::elem_exp_consttime(c_mod_m, <span class="kw-2">&amp;</span>p.exponent, <span class="kw-2">&amp;</span>p.modulus)
+<span class="kw">fn </span>elem_exp_consttime&lt;M&gt;(
+    c: <span class="kw-2">&amp;</span>bigint::Elem&lt;N&gt;,
+    p: <span class="kw-2">&amp;</span>PrivateCrtPrime&lt;M&gt;,
+    other_prime_len_bits: BitLength,
+) -&gt; <span class="prelude-ty">Result</span>&lt;bigint::Elem&lt;M&gt;, error::Unspecified&gt; {
+    <span class="kw">let </span>m = <span class="kw-2">&amp;</span>p.modulus.modulus();
+    <span class="kw">let </span>c_mod_m = bigint::elem_reduced(c, m, other_prime_len_bits);
+    <span class="kw">let </span>c_mod_m = bigint::elem_mul(p.oneRRR.as_ref(), c_mod_m, m);
+    bigint::elem_exp_consttime(c_mod_m, <span class="kw-2">&amp;</span>p.exponent, m)
 }
 
 <span class="comment">// Type-level representations of the different moduli used in RSA signing, in
 // addition to `super::N`. See `super::bigint`'s modulue-level documentation.
 
-</span><span class="attr">#[derive(Copy, Clone)]
 </span><span class="kw">enum </span>P {}
-<span class="kw">unsafe impl </span>Prime <span class="kw">for </span>P {}
-<span class="kw">unsafe impl </span>bigint::SmallerModulus&lt;N&gt; <span class="kw">for </span>P {}
-<span class="kw">unsafe impl </span>bigint::NotMuchSmallerModulus&lt;N&gt; <span class="kw">for </span>P {}
 
-<span class="attr">#[derive(Copy, Clone)]
-</span><span class="kw">enum </span>QQ {}
-<span class="kw">unsafe impl </span>bigint::SmallerModulus&lt;N&gt; <span class="kw">for </span>QQ {}
-<span class="kw">unsafe impl </span>bigint::NotMuchSmallerModulus&lt;N&gt; <span class="kw">for </span>QQ {}
+<span class="kw">enum </span>Q {}
 
-<span class="comment">// `q &lt; p &lt; 2*q` since `q` is slightly smaller than `p` (see below). Thus:
-//
-//                         q &lt;  p  &lt; 2*q
-//                       q*q &lt; p*q &lt; 2*q*q.
-//                      q**2 &lt;  n  &lt; 2*(q**2).
-</span><span class="kw">unsafe impl </span>bigint::SlightlySmallerModulus&lt;N&gt; <span class="kw">for </span>QQ {}
-
-<span class="attr">#[derive(Copy, Clone)]
-</span><span class="kw">enum </span>Q {}
-<span class="kw">unsafe impl </span>Prime <span class="kw">for </span>Q {}
-<span class="kw">unsafe impl </span>bigint::SmallerModulus&lt;N&gt; <span class="kw">for </span>Q {}
-<span class="kw">unsafe impl </span>bigint::SmallerModulus&lt;P&gt; <span class="kw">for </span>Q {}
-
-<span class="comment">// q &lt; p &amp;&amp; `p.bit_length() == q.bit_length()` implies `q &lt; p &lt; 2*q`.
-</span><span class="kw">unsafe impl </span>bigint::SlightlySmallerModulus&lt;P&gt; <span class="kw">for </span>Q {}
-
-<span class="kw">unsafe impl </span>bigint::SmallerModulus&lt;QQ&gt; <span class="kw">for </span>Q {}
-<span class="kw">unsafe impl </span>bigint::NotMuchSmallerModulus&lt;QQ&gt; <span class="kw">for </span>Q {}
+<span class="kw">enum </span>D {}
 
 <span class="kw">impl </span>KeyPair {
     <span class="doccomment">/// Computes the signature of `msg` and writes it into `signature`.
@@ -1241,7 +1187,7 @@
 
         <span class="comment">// Use the output buffer as the scratch space for the signature to
         // reduce the required stack space.
-        </span>padding_alg.encode(m_hash, signature, <span class="self">self</span>.public().n().len_bits(), rng)<span class="question-mark">?</span>;
+        </span>padding_alg.encode(m_hash, signature, <span class="self">self</span>.public().inner().n().len_bits(), rng)<span class="question-mark">?</span>;
 
         <span class="comment">// RFC 8017 Section 5.1.2: RSADP, using the Chinese Remainder Theorem
         // with Garner's algorithm.
@@ -1268,7 +1214,8 @@
         <span class="comment">// RFC 8017 Section 5.1.2: RSADP, using the Chinese Remainder Theorem
         // with Garner's algorithm.
 
-        </span><span class="kw">let </span>n = <span class="self">self</span>.public.n().value();
+        </span><span class="kw">let </span>n = <span class="kw-2">&amp;</span><span class="self">self</span>.public.inner().n().value();
+        <span class="kw">let </span>n_one = <span class="self">self</span>.public.inner().n().oneRR();
 
         <span class="comment">// Step 1. The value zero is also rejected.
         </span><span class="kw">let </span>base = bigint::Elem::from_be_bytes_padded(untrusted::Input::from(base), n)<span class="question-mark">?</span>;
@@ -1277,25 +1224,30 @@
         </span><span class="kw">let </span>c = base;
 
         <span class="comment">// Step 2.b.i.
-        </span><span class="kw">let </span>m_1 = elem_exp_consttime(<span class="kw-2">&amp;</span>c, <span class="kw-2">&amp;</span><span class="self">self</span>.p)<span class="question-mark">?</span>;
-        <span class="kw">let </span>c_mod_qq = bigint::elem_reduced_once(<span class="kw-2">&amp;</span>c, <span class="kw-2">&amp;</span><span class="self">self</span>.qq);
-        <span class="kw">let </span>m_2 = elem_exp_consttime(<span class="kw-2">&amp;</span>c_mod_qq, <span class="kw-2">&amp;</span><span class="self">self</span>.q)<span class="question-mark">?</span>;
+        </span><span class="kw">let </span>q_bits = <span class="self">self</span>.q.modulus.len_bits();
+        <span class="kw">let </span>m_1 = elem_exp_consttime(<span class="kw-2">&amp;</span>c, <span class="kw-2">&amp;</span><span class="self">self</span>.p, q_bits)<span class="question-mark">?</span>;
+        <span class="kw">let </span>m_2 = elem_exp_consttime(<span class="kw-2">&amp;</span>c, <span class="kw-2">&amp;</span><span class="self">self</span>.q, <span class="self">self</span>.p.modulus.len_bits())<span class="question-mark">?</span>;
 
         <span class="comment">// Step 2.b.ii isn't needed since there are only two primes.
 
         // Step 2.b.iii.
-        </span><span class="kw">let </span>p = <span class="kw-2">&amp;</span><span class="self">self</span>.p.modulus;
-        <span class="kw">let </span>m_2 = bigint::elem_widen(m_2, p);
-        <span class="kw">let </span>m_1_minus_m_2 = bigint::elem_sub(m_1, <span class="kw-2">&amp;</span>m_2, p);
-        <span class="kw">let </span>h = bigint::elem_mul(<span class="kw-2">&amp;</span><span class="self">self</span>.qInv, m_1_minus_m_2, p);
+        </span><span class="kw">let </span>h = {
+            <span class="kw">let </span>p = <span class="kw-2">&amp;</span><span class="self">self</span>.p.modulus.modulus();
+            <span class="kw">let </span>m_2 = bigint::elem_reduced_once(<span class="kw-2">&amp;</span>m_2, p, q_bits);
+            <span class="kw">let </span>m_1_minus_m_2 = bigint::elem_sub(m_1, <span class="kw-2">&amp;</span>m_2, p);
+            bigint::elem_mul(<span class="kw-2">&amp;</span><span class="self">self</span>.qInv, m_1_minus_m_2, p)
+        };
 
         <span class="comment">// Step 2.b.iv. The reduction in the modular multiplication isn't
         // necessary because `h &lt; p` and `p * q == n` implies `h * q &lt; n`.
         // Modular arithmetic is used simply to avoid implementing
         // non-modular arithmetic.
-        </span><span class="kw">let </span>h = bigint::elem_widen(h, n);
-        <span class="kw">let </span>q_times_h = bigint::elem_mul(<span class="kw-2">&amp;</span><span class="self">self</span>.q_mod_n, h, n);
-        <span class="kw">let </span>m_2 = bigint::elem_widen(m_2, n);
+        </span><span class="kw">let </span>p_bits = <span class="self">self</span>.p.modulus.len_bits();
+        <span class="kw">let </span>h = bigint::elem_widen(h, n, p_bits)<span class="question-mark">?</span>;
+        <span class="kw">let </span>q_mod_n = <span class="self">self</span>.q.modulus.to_elem(n)<span class="question-mark">?</span>;
+        <span class="kw">let </span>q_mod_n = bigint::elem_mul(n_one, q_mod_n, n);
+        <span class="kw">let </span>q_times_h = bigint::elem_mul(<span class="kw-2">&amp;</span>q_mod_n, h, n);
+        <span class="kw">let </span>m_2 = bigint::elem_widen(m_2, n, q_bits)<span class="question-mark">?</span>;
         <span class="kw">let </span>m = bigint::elem_add(m_2, q_times_h, n);
 
         <span class="comment">// Step 2.b.v isn't needed since there are only two primes.
@@ -1309,13 +1261,51 @@
         // minimum value, since the relationship of `e` to `d`, `p`, and `q` is
         // not verified during `KeyPair` construction.
         </span>{
-            <span class="kw">let </span>verify = <span class="self">self</span>.public.exponentiate_elem(m.clone());
+            <span class="kw">let </span>verify = <span class="self">self</span>.public.inner().exponentiate_elem(<span class="kw-2">&amp;</span>m);
             bigint::elem_verify_equal_consttime(<span class="kw-2">&amp;</span>verify, <span class="kw-2">&amp;</span>c)<span class="question-mark">?</span>;
         }
 
         <span class="comment">// Step 3 will be done by the caller.
 
         </span><span class="prelude-val">Ok</span>(m)
+    }
+}
+
+<span class="attr">#[cfg(test)]
+</span><span class="kw">mod </span>tests {
+    <span class="kw">use super</span>::<span class="kw-2">*</span>;
+    <span class="kw">use </span><span class="kw">crate</span>::test;
+    <span class="kw">use </span>alloc::vec;
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test_rsakeypair_private_exponentiate() {
+        test::run(
+            <span class="macro">test_file!</span>(<span class="string">"keypair_private_exponentiate_tests.txt"</span>),
+            |section, test_case| {
+                <span class="macro">assert_eq!</span>(section, <span class="string">""</span>);
+
+                <span class="kw">let </span>key = test_case.consume_bytes(<span class="string">"Key"</span>);
+                <span class="kw">let </span>key = KeyPair::from_pkcs8(<span class="kw-2">&amp;</span>key).unwrap();
+                <span class="kw">let </span>test_cases = <span class="kw-2">&amp;</span>[
+                    test_case.consume_bytes(<span class="string">"p"</span>),
+                    test_case.consume_bytes(<span class="string">"p_plus_1"</span>),
+                    test_case.consume_bytes(<span class="string">"p_minus_1"</span>),
+                    test_case.consume_bytes(<span class="string">"q"</span>),
+                    test_case.consume_bytes(<span class="string">"q_plus_1"</span>),
+                    test_case.consume_bytes(<span class="string">"q_minus_1"</span>),
+                ];
+                <span class="kw">for </span>test_case <span class="kw">in </span>test_cases {
+                    <span class="comment">// THe call to `elem_verify_equal_consttime` will cause
+                    // `private_exponentiate` to fail if the computation is
+                    // incorrect.
+                    </span><span class="kw">let </span><span class="kw-2">mut </span>padded = <span class="macro">vec!</span>[<span class="number">0</span>; key.public.modulus_len()];
+                    <span class="kw">let </span>zeroes = padded.len() - test_case.len();
+                    padded[zeroes..].copy_from_slice(test_case);
+                    <span class="kw">let _</span>: bigint::Elem&lt;<span class="kw">_</span>&gt; = key.private_exponentiate(<span class="kw-2">&amp;</span>padded).unwrap();
+                }
+                <span class="prelude-val">Ok</span>(())
+            },
+        );
     }
 }
 </code></pre></div></section></main></body></html>

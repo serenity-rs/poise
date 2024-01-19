@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/unicode-bidi-0.3.13/src/implicit.rs`."><title>implicit.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-4e54bb2b497cc83f.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="unicode_bidi" data-themes="" data-resource-suffix="" data-rustdoc-version="1.77.0-nightly (714b29a17 2024-01-15)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-0b2e2def73e61cbe.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/unicode-bidi-0.3.14/src/implicit.rs`."><title>implicit.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-4e54bb2b497cc83f.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="unicode_bidi" data-themes="" data-resource-suffix="" data-rustdoc-version="1.77.0-nightly (6ae4cfbbb 2024-01-17)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-0b2e2def73e61cbe.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
             <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
     <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../unicode_bidi/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
@@ -585,17 +585,6 @@
 <a href="#583" id="583">583</a>
 <a href="#584" id="584">584</a>
 <a href="#585" id="585">585</a>
-<a href="#586" id="586">586</a>
-<a href="#587" id="587">587</a>
-<a href="#588" id="588">588</a>
-<a href="#589" id="589">589</a>
-<a href="#590" id="590">590</a>
-<a href="#591" id="591">591</a>
-<a href="#592" id="592">592</a>
-<a href="#593" id="593">593</a>
-<a href="#594" id="594">594</a>
-<a href="#595" id="595">595</a>
-<a href="#596" id="596">596</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2015 The Servo Project Developers. See the
 // COPYRIGHT file at the top-level directory of this distribution.
 //
@@ -612,15 +601,15 @@
 
 <span class="kw">use </span><span class="kw">super</span>::char_data::BidiClass::{<span class="self">self</span>, <span class="kw-2">*</span>};
 <span class="kw">use </span><span class="kw">super</span>::level::Level;
-<span class="kw">use </span><span class="kw">super</span>::prepare::{not_removed_by_x9, removed_by_x9, IsolatingRunSequence};
-<span class="kw">use </span><span class="kw">super</span>::BidiDataSource;
+<span class="kw">use </span><span class="kw">super</span>::prepare::{not_removed_by_x9, IsolatingRunSequence};
+<span class="kw">use super</span>::{BidiDataSource, TextSource};
 
 <span class="doccomment">/// 3.3.4 Resolving Weak Types
 ///
 /// &lt;http://www.unicode.org/reports/tr9/#Resolving_Weak_Types&gt;
 </span><span class="attr">#[cfg_attr(feature = <span class="string">"flame_it"</span>, flamer::flame)]
-</span><span class="kw">pub fn </span>resolve_weak(
-    text: <span class="kw-2">&amp;</span>str,
+</span><span class="kw">pub fn </span>resolve_weak&lt;<span class="lifetime">'a</span>, T: TextSource&lt;<span class="lifetime">'a</span>&gt; + <span class="question-mark">?</span>Sized&gt;(
+    text: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>T,
     sequence: <span class="kw-2">&amp;</span>IsolatingRunSequence,
     processing_classes: <span class="kw-2">&amp;mut </span>[BidiClass],
 ) {
@@ -718,9 +707,9 @@
                     <span class="comment">// See https://github.com/servo/unicode-bidi/issues/86 for improving this.
                     // We want to make sure we check the correct next character by skipping past the rest
                     // of this one.
-                    </span><span class="kw">if let </span><span class="prelude-val">Some</span>(ch) = text.get(i..).and_then(|s| s.chars().next()) {
+                    </span><span class="kw">if let </span><span class="prelude-val">Some</span>((<span class="kw">_</span>, char_len)) = text.char_at(i) {
                         <span class="kw">let </span><span class="kw-2">mut </span>next_class = sequence
-                            .iter_forwards_from(i + ch.len_utf8(), run_index)
+                            .iter_forwards_from(i + char_len, run_index)
                             .map(|j| processing_classes[j])
                             <span class="comment">// &lt;https://www.unicode.org/reports/tr9/#Retaining_Explicit_Formatting_Characters&gt;
                             </span>.find(not_removed_by_x9)
@@ -754,7 +743,7 @@
                                 }
                                 <span class="kw-2">*</span>class = ON;
                             }
-                            <span class="kw">for </span>idx <span class="kw">in </span>sequence.iter_forwards_from(i + ch.len_utf8(), run_index) {
+                            <span class="kw">for </span>idx <span class="kw">in </span>sequence.iter_forwards_from(i + char_len, run_index) {
                                 <span class="kw">let </span>class = <span class="kw-2">&amp;mut </span>processing_classes[idx];
                                 <span class="kw">if </span><span class="kw-2">*</span>class != BN {
                                     <span class="kw">break</span>;
@@ -846,8 +835,8 @@
 ///
 /// &lt;http://www.unicode.org/reports/tr9/#Resolving_Neutral_Types&gt;
 </span><span class="attr">#[cfg_attr(feature = <span class="string">"flame_it"</span>, flamer::flame)]
-</span><span class="kw">pub fn </span>resolve_neutral&lt;D: BidiDataSource&gt;(
-    text: <span class="kw-2">&amp;</span>str,
+</span><span class="kw">pub fn </span>resolve_neutral&lt;<span class="lifetime">'a</span>, D: BidiDataSource, T: TextSource&lt;<span class="lifetime">'a</span>&gt; + <span class="question-mark">?</span>Sized&gt;(
+    text: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>T,
     data_source: <span class="kw-2">&amp;</span>D,
     sequence: <span class="kw-2">&amp;</span>IsolatingRunSequence,
     levels: <span class="kw-2">&amp;</span>[Level],
@@ -886,12 +875,13 @@
         <span class="kw">let </span><span class="kw-2">mut </span>found_not_e = <span class="bool-val">false</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>class_to_set = <span class="prelude-val">None</span>;
 
-        <span class="kw">let </span>start_len_utf8 = text[pair.start..].chars().next().unwrap().len_utf8();
+        <span class="kw">let </span>start_char_len =
+            T::char_len(text.subrange(pair.start..pair.end).chars().next().unwrap());
         <span class="comment">// &gt; Inspect the bidirectional types of the characters enclosed within the bracket pair.
         //
         // `pair` is [start, end) so we will end up processing the opening character but not the closing one.
         //
-        </span><span class="kw">for </span>enclosed_i <span class="kw">in </span>sequence.iter_forwards_from(pair.start + start_len_utf8, pair.start_run) {
+        </span><span class="kw">for </span>enclosed_i <span class="kw">in </span>sequence.iter_forwards_from(pair.start + start_char_len, pair.start_run) {
             <span class="kw">if </span>enclosed_i &gt;= pair.end {
                 <span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
                 </span><span class="macro">debug_assert!</span>(
@@ -960,11 +950,12 @@
         <span class="kw">if let </span><span class="prelude-val">Some</span>(class_to_set) = class_to_set {
             <span class="comment">// Update all processing classes corresponding to the start and end elements, as requested.
             // We should include all bytes of the character, not the first one.
-            </span><span class="kw">let </span>end_len_utf8 = text[pair.end..].chars().next().unwrap().len_utf8();
-            <span class="kw">for </span>class <span class="kw">in </span><span class="kw-2">&amp;mut </span>processing_classes[pair.start..pair.start + start_len_utf8] {
+            </span><span class="kw">let </span>end_char_len =
+                T::char_len(text.subrange(pair.end..text.len()).chars().next().unwrap());
+            <span class="kw">for </span>class <span class="kw">in </span><span class="kw-2">&amp;mut </span>processing_classes[pair.start..pair.start + start_char_len] {
                 <span class="kw-2">*</span>class = class_to_set;
             }
-            <span class="kw">for </span>class <span class="kw">in </span><span class="kw-2">&amp;mut </span>processing_classes[pair.end..pair.end + end_len_utf8] {
+            <span class="kw">for </span>class <span class="kw">in </span><span class="kw-2">&amp;mut </span>processing_classes[pair.end..pair.end + end_char_len] {
                 <span class="kw-2">*</span>class = class_to_set;
             }
             <span class="comment">// &lt;https://www.unicode.org/reports/tr9/#Retaining_Explicit_Formatting_Characters&gt;
@@ -980,7 +971,7 @@
 
             // This rule deals with sequences of NSMs, so we can just update them all at once, we don't need to worry
             // about character boundaries. We do need to be careful to skip the full set of bytes for the parentheses characters.
-            </span><span class="kw">let </span>nsm_start = pair.start + start_len_utf8;
+            </span><span class="kw">let </span>nsm_start = pair.start + start_char_len;
             <span class="kw">for </span>idx <span class="kw">in </span>sequence.iter_forwards_from(nsm_start, pair.start_run) {
                 <span class="kw">let </span>class = original_classes[idx];
                 <span class="kw">if </span>class == BidiClass::NSM || processing_classes[idx] == BN {
@@ -989,7 +980,7 @@
                     <span class="kw">break</span>;
                 }
             }
-            <span class="kw">let </span>nsm_end = pair.end + end_len_utf8;
+            <span class="kw">let </span>nsm_end = pair.end + end_char_len;
             <span class="kw">for </span>idx <span class="kw">in </span>sequence.iter_forwards_from(nsm_end, pair.end_run) {
                 <span class="kw">let </span>class = original_classes[idx];
                 <span class="kw">if </span>class == BidiClass::NSM || processing_classes[idx] == BN {
@@ -1075,8 +1066,8 @@
 /// text source.
 ///
 /// &lt;https://www.unicode.org/reports/tr9/#BD16&gt;
-</span><span class="kw">fn </span>identify_bracket_pairs&lt;D: BidiDataSource&gt;(
-    text: <span class="kw-2">&amp;</span>str,
+</span><span class="kw">fn </span>identify_bracket_pairs&lt;<span class="lifetime">'a</span>, T: TextSource&lt;<span class="lifetime">'a</span>&gt; + <span class="question-mark">?</span>Sized, D: BidiDataSource&gt;(
+    text: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>T,
     data_source: <span class="kw-2">&amp;</span>D,
     run_sequence: <span class="kw-2">&amp;</span>IsolatingRunSequence,
     original_classes: <span class="kw-2">&amp;</span>[BidiClass],
@@ -1085,27 +1076,14 @@
     <span class="kw">let </span><span class="kw-2">mut </span>stack = <span class="macro">vec!</span>[];
 
     <span class="kw">for </span>(run_index, level_run) <span class="kw">in </span>run_sequence.runs.iter().enumerate() {
-        <span class="kw">let </span>slice = <span class="kw">if let </span><span class="prelude-val">Some</span>(slice) = text.get(level_run.clone()) {
-            slice
-        } <span class="kw">else </span>{
-            <span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
-            </span><span class="macro">std::debug_assert!</span>(
-                <span class="bool-val">false</span>,
-                <span class="string">"Found broken indices in level run: found indices {}..{} for string of length {}"</span>,
-                level_run.start,
-                level_run.end,
-                text.len()
-            );
-            <span class="kw">return </span>ret;
-        };
-
-        <span class="kw">for </span>(i, ch) <span class="kw">in </span>slice.char_indices() {
+        <span class="kw">for </span>(i, ch) <span class="kw">in </span>text.subrange(level_run.clone()).char_indices() {
             <span class="kw">let </span>actual_index = level_run.start + i;
+
             <span class="comment">// All paren characters are ON.
             // From BidiBrackets.txt:
             // &gt; The Unicode property value stability policy guarantees that characters
             // &gt; which have bpt=o or bpt=c also have bc=ON and Bidi_M=Y
-            </span><span class="kw">if </span>original_classes[level_run.start + i] != BidiClass::ON {
+            </span><span class="kw">if </span>original_classes[actual_index] != BidiClass::ON {
                 <span class="kw">continue</span>;
             }
 
