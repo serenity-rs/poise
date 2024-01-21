@@ -34,9 +34,6 @@ pub async fn on_error<U, E: Into<Box<dyn std::error::Error + Send + Sync>>>(
     error: crate::FrameworkError<'_, U, E>,
 ) -> Result<(), serenity::Error> {
     match error {
-        crate::FrameworkError::Setup { error, .. } => {
-            eprintln!("Error in user data setup: {}", display_error(error));
-        }
         crate::FrameworkError::EventHandler { error, event, .. } => tracing::error!(
             "User event event handler encountered an error on {} event: {}",
             event.snake_case_name(),
