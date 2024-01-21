@@ -319,43 +319,45 @@ You can edit your `?help` message to the bot and the bot will edit its response.
     Ok(())
 }
 
+#[poise::command(prefix_command, owners_only)]
+async fn register_commands(ctx: Context<'_>) -> Result<(), Error> {
+    let commands = &ctx.framework().options().commands;
+    poise::builtins::register_globally(ctx, commands).await?;
+
+    ctx.say("Successfully registered slash commands!").await?;
+    Ok(())
+}
+
 #[tokio::main]
 async fn main() {
     let token = std::env::var("DISCORD_TOKEN").expect("missing DISCORD_TOKEN");
     let intents =
         serenity::GatewayIntents::non_privileged() | serenity::GatewayIntents::MESSAGE_CONTENT;
 
-    let framework = poise::Framework::builder()
-        .options(poise::FrameworkOptions {
-            commands: vec![
-                fruit(),
-                vegetable(),
-                beer(),
-                meat(),
-                dairy(),
-                help(),
-                context_food(),
-                context_fruit(),
-                context_vegetable(),
-                context_meat(),
-                food_react(),
-            ],
-            prefix_options: poise::PrefixFrameworkOptions {
-                prefix: Some("?".into()),
-                ..Default::default()
-            },
+    let options = poise::FrameworkOptions {
+        commands: vec![
+            register_commands(),
+            fruit(),
+            vegetable(),
+            beer(),
+            meat(),
+            dairy(),
+            help(),
+            context_food(),
+            context_fruit(),
+            context_vegetable(),
+            context_meat(),
+            food_react(),
+        ],
+        prefix_options: poise::PrefixFrameworkOptions {
+            prefix: Some("?".into()),
             ..Default::default()
-        })
-        .setup(|ctx, _ready, framework| {
-            Box::pin(async move {
-                poise::builtins::register_globally(ctx, &framework.options().commands).await?;
-                Ok(())
-            })
-        })
-        .build();
+        },
+        ..Default::default()
+    };
 
     let client = serenity::ClientBuilder::new(&token, intents)
-        .framework(framework)
+        .framework(poise::Framework::new(options))
         .await;
 
     client.unwrap().start().await.unwrap();
