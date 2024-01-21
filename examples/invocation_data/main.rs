@@ -6,7 +6,7 @@
 
 use poise::serenity_prelude as serenity;
 
-type Error = &'static str;
+type Error = Box<dyn std::error::Error + Send + Sync>;
 type Context<'a> = poise::Context<'a, (), Error>;
 
 async fn my_check(ctx: Context<'_>) -> Result<bool, Error> {
@@ -43,8 +43,17 @@ pub async fn invocation_data_test(
     if should_succeed > 0 {
         Ok(())
     } else {
-        Err("")
+        Err("".into())
     }
+}
+
+#[poise::command(prefix_command, owners_only)]
+async fn register_commands(ctx: Context<'_>) -> Result<(), Error> {
+    let commands = &ctx.framework().options().commands;
+    poise::builtins::register_globally(ctx, commands).await?;
+
+    ctx.say("Successfully registered slash commands!").await?;
+    Ok(())
 }
 
 #[tokio::main]
@@ -53,76 +62,62 @@ async fn main() {
     let intents =
         serenity::GatewayIntents::non_privileged() | serenity::GatewayIntents::MESSAGE_CONTENT;
 
-    let framework = poise::Framework::builder()
-        .setup(move |ctx, _, framework| {
+    let options = poise::FrameworkOptions {
+        pre_command: |ctx| {
             Box::pin(async move {
-                let commands =
-                    poise::builtins::create_application_commands(&framework.options().commands);
-
-                serenity::GuildId::new(703332075914264606)
-                    .set_commands(ctx, &commands)
-                    .await
-                    .unwrap();
-                Ok(())
+                println!(
+                    "In pre_command: {:?}",
+                    ctx.invocation_data::<&str>().await.as_deref()
+                );
             })
-        })
-        .options(poise::FrameworkOptions {
-            pre_command: |ctx| {
-                Box::pin(async move {
-                    println!(
-                        "In pre_command: {:?}",
-                        ctx.invocation_data::<&str>().await.as_deref()
-                    );
-                })
-            },
-            command_check: Some(|ctx| {
-                Box::pin(async move {
-                    // Global command check is the first callback that's invoked, so let's set the
-                    // data here
-                    println!("Writing invocation data!");
-                    ctx.set_invocation_data("hello").await;
+        },
+        command_check: Some(|ctx| {
+            Box::pin(async move {
+                // Global command check is the first callback that's invoked, so let's set the
+                // data here
+                println!("Writing invocation data!");
+                ctx.set_invocation_data("hello").await;
 
-                    println!(
-                        "In global check: {:?}",
-                        ctx.invocation_data::<&str>().await.as_deref()
-                    );
+                println!(
+                    "In global check: {:?}",
+                    ctx.invocation_data::<&str>().await.as_deref()
+                );
 
-                    Ok(true)
-                })
-            }),
-            post_command: |ctx| {
-                Box::pin(async move {
-                    println!(
-                        "In post_command: {:?}",
-                        ctx.invocation_data::<&str>().await.as_deref()
-                    );
-                })
-            },
-            on_error: |err| {
-                Box::pin(async move {
-                    match err {
-                        poise::FrameworkError::Command { ctx, .. } => {
-                            println!(
-                                "In on_error: {:?}",
-                                ctx.invocation_data::<&str>().await.as_deref()
-                            );
-                        }
-                        err => poise::builtins::on_error(err).await.unwrap(),
+                Ok(true)
+            })
+        }),
+        post_command: |ctx| {
+            Box::pin(async move {
+                println!(
+                    "In post_command: {:?}",
+                    ctx.invocation_data::<&str>().await.as_deref()
+                );
+            })
+        },
+        on_error: |err| {
+            Box::pin(async move {
+                match err {
+                    poise::FrameworkError::Command { ctx, .. } => {
+                        println!(
+                            "In on_error: {:?}",
+                            ctx.invocation_data::<&str>().await.as_deref()
+                        );
                     }
-                })
-            },
+                    err => poise::builtins::on_error(err).await.unwrap(),
+                }
+            })
+        },
 
-            commands: vec![invocation_data_test()],
-            prefix_options: poise::PrefixFrameworkOptions {
-                prefix: Some("~".into()),
-                ..Default::default()
-            },
+        commands: vec![register_commands(), invocation_data_test()],
+        prefix_options: poise::PrefixFrameworkOptions {
+            prefix: Some("~".into()),
             ..Default::default()
-        })
-        .build();
+        },
+        ..Default::default()
+    };
 
     let client = serenity::ClientBuilder::new(&token, intents)
-        .framework(framework)
+        .framework(poise::Framework::new(options))
         .await;
 
     client.unwrap().start().await.unwrap();
