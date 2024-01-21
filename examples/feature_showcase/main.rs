@@ -40,6 +40,7 @@ async fn main() {
                 #[cfg(feature = "cache")]
                 builtins::servers(),
                 builtins::help(),
+                builtins::pretty_help(),
                 checks::shutdown(),
                 checks::modonly(),
                 checks::delete(),

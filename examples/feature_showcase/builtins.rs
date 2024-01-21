@@ -16,3 +16,13 @@ pub async fn help(ctx: Context<'_>, command: Option<String>) -> Result<(), Error
     poise::builtins::help(ctx, command.as_deref(), configuration).await?;
     Ok(())
 }
+
+#[poise::command(slash_command, prefix_command)]
+pub async fn pretty_help(ctx: Context<'_>, command: Option<String>) -> Result<(), Error> {
+    let configuration = poise::builtins::PrettyHelpConfiguration {
+        // [configure aspects about the help message here]
+        ..Default::default()
+    };
+    poise::builtins::pretty_help(ctx, command.as_deref(), configuration).await?;
+    Ok(())
+}
