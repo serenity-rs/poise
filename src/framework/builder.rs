@@ -1,26 +1,9 @@
 //! A builder struct that allows easy and readable creation of a [`crate::Framework`]
 
-use crate::serenity_prelude as serenity;
-use crate::BoxFuture;
-
 /// A builder to configure a framework.
 ///
-/// If one of the following required values is missing, the builder will panic on start:
-/// - [`Self::setup`]
-/// - [`Self::options`]
+/// If [`Self::options`] is missing, the builder will panic on start.
 pub struct FrameworkBuilder<U, E> {
-    /// Callback for startup code and user data creation
-    setup: Option<
-        Box<
-            dyn Send
-                + Sync
-                + for<'a> FnOnce(
-                    &'a serenity::Context,
-                    &'a serenity::Ready,
-                    &'a crate::Framework<U, E>,
-                ) -> BoxFuture<'a, Result<(), E>>,
-        >,
-    >,
     /// Framework options
     options: Option<crate::FrameworkOptions<U, E>>,
     /// List of framework commands
@@ -32,7 +15,6 @@ pub struct FrameworkBuilder<U, E> {
 impl<U, E> Default for FrameworkBuilder<U, E> {
     fn default() -> Self {
         Self {
-            setup: Default::default(),
             options: Default::default(),
             commands: Default::default(),
             initialize_owners: true,
@@ -41,23 +23,6 @@ impl<U, E> Default for FrameworkBuilder<U, E> {
 }
 
 impl<U, E> FrameworkBuilder<U, E> {
-    /// Sets the setup callback.
-    #[must_use]
-    pub fn setup<F>(mut self, setup: F) -> Self
-    where
-        F: Send
-            + Sync
-            + 'static
-            + for<'a> FnOnce(
-                &'a serenity::Context,
-                &'a serenity::Ready,
-                &'a crate::Framework<U, E>,
-            ) -> BoxFuture<'a, Result<(), E>>,
-    {
-        self.setup = Some(Box::new(setup) as _);
-        self
-    }
-
     /// Configure framework options
     #[must_use]
     pub fn options(mut self, options: crate::FrameworkOptions<U, E>) -> Self {
@@ -82,9 +47,6 @@ impl<U, E> FrameworkBuilder<U, E> {
         U: Send + Sync + 'static + 'static,
         E: Send + 'static,
     {
-        let setup = self
-            .setup
-            .expect("No user data setup function was provided to the framework");
         let mut options = self.options.expect("No framework options provided");
 
         // Build framework options by concatenating user-set options with commands and owners
@@ -92,6 +54,6 @@ impl<U, E> FrameworkBuilder<U, E> {
         options.initialize_owners = self.initialize_owners;
 
         // Create framework with specified settings
-        crate::Framework::new(options, setup)
+        crate::Framework::new(options)
     }
 }
