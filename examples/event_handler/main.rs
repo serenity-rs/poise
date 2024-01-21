@@ -23,18 +23,16 @@ async fn main() {
     let intents =
         serenity::GatewayIntents::non_privileged() | serenity::GatewayIntents::MESSAGE_CONTENT;
 
-    let framework = poise::Framework::builder()
-        .options(poise::FrameworkOptions {
-            event_handler: |framework, event| Box::pin(event_handler(framework, event)),
-            ..Default::default()
-        })
-        .build();
+    let options = poise::FrameworkOptions {
+        event_handler: |framework, event| Box::pin(event_handler(framework, event)),
+        ..Default::default()
+    };
 
     let client = serenity::ClientBuilder::new(&token, intents)
+        .framework(poise::Framework::new(options))
         .data(Arc::new(Data {
             poise_mentions: AtomicU32::new(0),
         }) as _)
-        .framework(framework)
         .await;
 
     client.unwrap().start().await.unwrap();

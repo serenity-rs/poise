@@ -27,27 +27,29 @@ async fn dynamic_cooldowns(ctx: Context<'_>) -> Result<(), Error> {
     Ok(())
 }
 
+#[poise::command(prefix_command, owners_only)]
+async fn register_commands(ctx: Context<'_>) -> Result<(), Error> {
+    let commands = &ctx.framework().options().commands;
+    poise::builtins::register_globally(ctx, commands).await?;
+
+    ctx.say("Successfully registered slash commands!").await?;
+    Ok(())
+}
+
 #[tokio::main]
 async fn main() {
     let token = std::env::var("DISCORD_TOKEN").expect("missing DISCORD_TOKEN");
-    let framework = poise::Framework::builder()
-        .options(poise::FrameworkOptions {
-            commands: vec![dynamic_cooldowns()],
-            // This is important! Or else, the command will be marked as invoked before our custom
-            // cooldown code has run - even if the command ends up not running!
-            manual_cooldowns: true,
-            ..Default::default()
-        })
-        .setup(|ctx, _ready, framework| {
-            Box::pin(async move {
-                poise::builtins::register_globally(ctx, &framework.options().commands).await?;
-                Ok(())
-            })
-        })
-        .build();
+
+    let options = poise::FrameworkOptions {
+        commands: vec![register_commands(), dynamic_cooldowns()],
+        // This is important! Or else, the command will be marked as invoked before our custom
+        // cooldown code has run - even if the command ends up not running!
+        manual_cooldowns: true,
+        ..Default::default()
+    };
 
     let client = serenity::Client::builder(&token, serenity::GatewayIntents::non_privileged())
-        .framework(framework)
+        .framework(poise::Framework::new(options))
         .await;
 
     client.unwrap().start().await.unwrap();

@@ -24,7 +24,6 @@ async fn on_error(error: poise::FrameworkError<'_, Data, Error>) {
     // They are many errors that can occur, so we only handle the ones we want to customize
     // and forward the rest to the default handler
     match error {
-        poise::FrameworkError::Setup { error, .. } => panic!("Failed to start bot: {:?}", error),
         poise::FrameworkError::Command { error, ctx, .. } => {
             println!("Error in command `{}`: {:?}", ctx.command().name, error,);
         }
@@ -36,6 +35,15 @@ async fn on_error(error: poise::FrameworkError<'_, Data, Error>) {
     }
 }
 
+#[poise::command(prefix_command, owners_only)]
+async fn register_commands(ctx: Context<'_>) -> Result<(), Error> {
+    let commands = &ctx.framework().options().commands;
+    poise::builtins::register_globally(ctx, commands).await?;
+
+    ctx.say("Successfully registered slash commands!").await?;
+    Ok(())
+}
+
 #[tokio::main]
 async fn main() {
     env_logger::init();
@@ -43,7 +51,12 @@ async fn main() {
     // FrameworkOptions contains all of poise's configuration option in one struct
     // Every option can be omitted to use its default value
     let options = poise::FrameworkOptions {
-        commands: vec![commands::help(), commands::vote(), commands::getvotes()],
+        commands: vec![
+            register_commands(),
+            commands::help(),
+            commands::vote(),
+            commands::getvotes(),
+        ],
         prefix_options: poise::PrefixFrameworkOptions {
             prefix: Some("~".into()),
             edit_tracker: Some(Arc::new(poise::EditTracker::for_timespan(
@@ -93,27 +106,16 @@ async fn main() {
         ..Default::default()
     };
 
-    let framework = poise::Framework::builder()
-        .setup(move |ctx, _ready, framework| {
-            Box::pin(async move {
-                println!("Logged in as {}", _ready.user.name);
-                poise::builtins::register_globally(ctx, &framework.options().commands).await?;
-                Ok(())
-            })
-        })
-        .options(options)
-        .build();
-
     let token = var("DISCORD_TOKEN")
         .expect("Missing `DISCORD_TOKEN` env var, see README for more information.");
     let intents =
         serenity::GatewayIntents::non_privileged() | serenity::GatewayIntents::MESSAGE_CONTENT;
 
     let client = serenity::ClientBuilder::new(&token, intents)
+        .framework(poise::Framework::new(options))
         .data(Arc::new(Data {
             votes: Mutex::new(HashMap::new()),
         }) as _)
-        .framework(framework)
         .await;
 
     client.unwrap().start().await.unwrap()
