@@ -16,26 +16,27 @@ async fn age(
     Ok(())
 }
 
+#[poise::command(prefix_command, owners_only)]
+async fn register_commands(ctx: Context<'_>) -> Result<(), Error> {
+    let commands = &ctx.framework().options().commands;
+    poise::builtins::register_globally(ctx, commands).await?;
+
+    ctx.say("Successfully registered slash commands!").await?;
+    Ok(())
+}
+
 #[tokio::main]
 async fn main() {
     let token = std::env::var("DISCORD_TOKEN").expect("missing DISCORD_TOKEN");
     let intents = serenity::GatewayIntents::non_privileged();
 
-    let framework = poise::Framework::builder()
-        .options(poise::FrameworkOptions {
-            commands: vec![age()],
-            ..Default::default()
-        })
-        .setup(|ctx, _ready, framework| {
-            Box::pin(async move {
-                poise::builtins::register_globally(ctx, &framework.options().commands).await?;
-                Ok(())
-            })
-        })
-        .build();
+    let options = poise::FrameworkOptions {
+        commands: vec![register_commands(), age()],
+        ..Default::default()
+    };
 
     let client = serenity::ClientBuilder::new(&token, intents)
-        .framework(framework)
+        .framework(poise::Framework::new(options))
         .await;
 
     client.unwrap().start().await.unwrap();
