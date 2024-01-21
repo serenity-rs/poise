@@ -57,8 +57,7 @@ To set multiple gateway events, use the OR operator:
 
 You can run Discord actions outside of commands by cloning and storing [`serenity::CacheHttp`]/
 [`Arc<serenity::Http>`](serenity::Http)/[`Arc<serenity::Cache>`](serenity::Cache). You can get
-those either from [`serenity::Context`] (passed to
-[`setup`](crate::FrameworkBuilder::setup) and all commands via
+those either from [`serenity::Context`] (passed serenity event handlers) and all commands via
 [`ctx.serenity_framework()`](crate::Context::discord)) or before starting the client via
 [`http`](serenity::Client::http) and [`cache`](serenity::Client::cache).
 
@@ -233,11 +232,6 @@ use poise::serenity_prelude as serenity;
 // Use `Framework::builder()` to create a framework builder and supply basic data to the framework:
 
 let framework = poise::Framework::builder()
-    .setup(|_, _, _| Box::pin(async move {
-        // construct user data here (invoked when bot connects to Discord)
-        Ok(())
-    }))
-
     // Most configuration is done via the `FrameworkOptions` struct, which you can define with
     // a struct literal (hint: use `..Default::default()` to fill uninitialized
     // settings with their default value):
@@ -286,7 +280,7 @@ functions manually:
 - [`serenity::Command::set_global_commands`]
 - [`serenity::GuildId::set_commands`]
 
-For example, you could call this function in [`FrameworkBuilder::setup`] to automatically
+For example, you could call this function in [`serenity::EventHandler::ready`] to automatically
 register commands on startup. Also see the docs of [`builtins::create_application_commands`].
 
 The lowest level of abstraction for registering commands is [`Command::create_as_slash_command`]

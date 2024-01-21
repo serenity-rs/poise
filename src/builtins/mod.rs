@@ -41,9 +41,6 @@ where
     E: std::fmt::Display + std::fmt::Debug,
 {
     match error {
-        crate::FrameworkError::Setup { error, .. } => {
-            eprintln!("Error in user data setup: {}", error);
-        }
         crate::FrameworkError::EventHandler { error, event, .. } => tracing::error!(
             "User event event handler encountered an error on {} event: {}",
             event.snake_case_name(),

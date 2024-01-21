@@ -4,10 +4,7 @@ use std::sync::Arc;
 
 pub use builder::*;
 
-use crate::{
-    serenity_prelude::{self as serenity, TeamMemberRole},
-    BoxFuture,
-};
+use crate::serenity_prelude::{self as serenity, TeamMemberRole};
 
 mod builder;
 
@@ -29,20 +26,6 @@ pub struct Framework<U, E> {
 
     /// Initialized to Some during construction; so shouldn't be None at any observable point
     shard_manager: Option<Arc<serenity::ShardManager>>,
-    /// Filled with Some on construction. Taken out and executed on first Ready gateway event
-    setup: std::sync::Mutex<
-        Option<
-            Box<
-                dyn Send
-                    + Sync
-                    + for<'a> FnOnce(
-                        &'a serenity::Context,
-                        &'a serenity::Ready,
-                        &'a Self,
-                    ) -> BoxFuture<'a, Result<(), E>>,
-            >,
-        >,
-    >,
 
     /// Handle to the background task in order to `abort()` it on `Drop`
     edit_tracker_purge_task: Option<tokio::task::JoinHandle<()>>,
@@ -64,28 +47,14 @@ impl<U, E> Framework<U, E> {
         FrameworkBuilder::default()
     }
 
-    /// Setup a new [`Framework`]. For more ergonomic setup, please see [`FrameworkBuilder`]
-    ///
-    /// The user data callback is invoked as soon as the bot is logged in. That way, bot data like
-    /// user ID or connected guilds can be made available to the user data setup function. The user
-    /// data setup is not allowed to return Result because there would be no reasonable
-    /// course of action on error.
-    pub fn new<F>(options: crate::FrameworkOptions<U, E>, setup: F) -> Self
+    /// Setup a new [`Framework`].
+    pub fn new(options: crate::FrameworkOptions<U, E>) -> Self
     where
-        F: Send
-            + Sync
-            + 'static
-            + for<'a> FnOnce(
-                &'a serenity::Context,
-                &'a serenity::Ready,
-                &'a Self,
-            ) -> BoxFuture<'a, Result<(), E>>,
         U: Send + Sync + 'static + 'static,
         E: Send + 'static,
     {
         Self {
             bot_id: std::sync::OnceLock::new(),
-            setup: std::sync::Mutex::new(Some(Box::new(setup))),
             edit_tracker_purge_task: None,
             shard_manager: None,
             options,
@@ -143,7 +112,7 @@ impl<U: Send + Sync + 'static, E: Send + Sync> serenity::Framework for Framework
     }
 }
 
-/// If the incoming event is Ready, this method executes the user data setup logic
+/// If the incoming event is Ready, this method sets up [`Framework::bot_id`].
 /// Otherwise, it forwards the event to [`crate::dispatch_event`]
 async fn raw_dispatch_event<U, E>(
     framework: &Framework<U, E>,
@@ -154,24 +123,6 @@ async fn raw_dispatch_event<U, E>(
 {
     if let serenity::FullEvent::Ready { data_about_bot } = &event {
         let _: Result<_, _> = framework.bot_id.set(data_about_bot.user.id);
-        let setup = Option::take(&mut *framework.setup.lock().unwrap());
-        if let Some(setup) = setup {
-            match setup(&ctx, data_about_bot, framework).await {
-                Ok(()) => {}
-                Err(error) => {
-                    (framework.options.on_error)(crate::FrameworkError::Setup {
-                        error,
-                        framework,
-                        data_about_bot,
-                        ctx: &ctx,
-                    })
-                    .await
-                }
-            }
-        } else {
-            // ignoring duplicate Discord bot ready event
-            // (happens regularly when bot is online for long period of time)
-        }
     }
 
     #[cfg(not(feature = "cache"))]
