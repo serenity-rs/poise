@@ -4,26 +4,23 @@ use crate::serenity_prelude as serenity;
 
 /// Message builder that abstracts over prefix and application command responses
 #[derive(Default, Clone)]
+#[allow(clippy::missing_docs_in_private_items)] // docs on setters
 pub struct CreateReply {
-    /// Message content.
-    pub content: Option<String>,
-    /// Embeds, if present.
-    pub embeds: Vec<serenity::CreateEmbed>,
-    /// Message attachments.
-    pub attachments: Vec<serenity::CreateAttachment>,
-    /// Whether the message is ephemeral (only has an effect in application commands)
-    pub ephemeral: Option<bool>,
-    /// Message components, that is, buttons and select menus.
-    pub components: Option<Vec<serenity::CreateActionRow>>,
-    /// The allowed mentions for the message.
-    pub allowed_mentions: Option<serenity::CreateAllowedMentions>,
-    /// Whether this message is an inline reply.
-    pub reply: bool,
-    #[doc(hidden)]
-    pub __non_exhaustive: (),
+    content: Option<String>,
+    embeds: Vec<serenity::CreateEmbed>,
+    attachments: Vec<serenity::CreateAttachment>,
+    pub(crate) ephemeral: Option<bool>,
+    components: Option<Vec<serenity::CreateActionRow>>,
+    pub(crate) allowed_mentions: Option<serenity::CreateAllowedMentions>,
+    reply: bool,
 }
 
 impl CreateReply {
+    /// Creates a blank CreateReply. Equivalent to [`Self::default`].
+    pub fn new() -> Self {
+        Self::default()
+    }
+
     /// Set the content of the message.
     pub fn content(mut self, content: impl Into<String>) -> Self {
         self.content = Some(content.into());
@@ -97,7 +94,6 @@ impl CreateReply {
             ephemeral,
             allowed_mentions,
             reply: _, // can't reply to a message in interactions
-            __non_exhaustive: (),
         } = self;
 
         if let Some(content) = content {
@@ -129,7 +125,6 @@ impl CreateReply {
             ephemeral,
             allowed_mentions,
             reply: _,
-            __non_exhaustive: (),
         } = self;
 
         if let Some(content) = content {
@@ -162,7 +157,6 @@ impl CreateReply {
             ephemeral: _, // can't edit ephemerality in retrospect
             allowed_mentions,
             reply: _,
-            __non_exhaustive: (),
         } = self;
 
         if let Some(content) = content {
@@ -188,7 +182,6 @@ impl CreateReply {
             ephemeral: _, // not supported in prefix
             allowed_mentions,
             reply: _, // can't edit reference message afterwards
-            __non_exhaustive: (),
         } = self;
 
         let mut attachments_builder = serenity::EditAttachments::new();
@@ -222,7 +215,6 @@ impl CreateReply {
             ephemeral: _, // not supported in prefix
             allowed_mentions,
             reply,
-            __non_exhaustive: (),
         } = self;
 
         let mut builder = serenity::CreateMessage::new();
