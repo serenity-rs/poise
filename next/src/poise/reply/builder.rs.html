@@ -240,40 +240,29 @@
 <a href="#238" id="238">238</a>
 <a href="#239" id="239">239</a>
 <a href="#240" id="240">240</a>
-<a href="#241" id="241">241</a>
-<a href="#242" id="242">242</a>
-<a href="#243" id="243">243</a>
-<a href="#244" id="244">244</a>
-<a href="#245" id="245">245</a>
-<a href="#246" id="246">246</a>
-<a href="#247" id="247">247</a>
-<a href="#248" id="248">248</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! The builder to create a new reply
 
 </span><span class="kw">use </span><span class="kw">crate</span>::serenity_prelude <span class="kw">as </span>serenity;
 
 <span class="doccomment">/// Message builder that abstracts over prefix and application command responses
 </span><span class="attr">#[derive(Default, Clone)]
+#[allow(clippy::missing_docs_in_private_items)] </span><span class="comment">// docs on setters
 </span><span class="kw">pub struct </span>CreateReply {
-    <span class="doccomment">/// Message content.
-    </span><span class="kw">pub </span>content: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="doccomment">/// Embeds, if present.
-    </span><span class="kw">pub </span>embeds: Vec&lt;serenity::CreateEmbed&gt;,
-    <span class="doccomment">/// Message attachments.
-    </span><span class="kw">pub </span>attachments: Vec&lt;serenity::CreateAttachment&gt;,
-    <span class="doccomment">/// Whether the message is ephemeral (only has an effect in application commands)
-    </span><span class="kw">pub </span>ephemeral: <span class="prelude-ty">Option</span>&lt;bool&gt;,
-    <span class="doccomment">/// Message components, that is, buttons and select menus.
-    </span><span class="kw">pub </span>components: <span class="prelude-ty">Option</span>&lt;Vec&lt;serenity::CreateActionRow&gt;&gt;,
-    <span class="doccomment">/// The allowed mentions for the message.
-    </span><span class="kw">pub </span>allowed_mentions: <span class="prelude-ty">Option</span>&lt;serenity::CreateAllowedMentions&gt;,
-    <span class="doccomment">/// Whether this message is an inline reply.
-    </span><span class="kw">pub </span>reply: bool,
-    <span class="attr">#[doc(hidden)]
-    </span><span class="kw">pub </span>__non_exhaustive: (),
+    content: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    embeds: Vec&lt;serenity::CreateEmbed&gt;,
+    attachments: Vec&lt;serenity::CreateAttachment&gt;,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) ephemeral: <span class="prelude-ty">Option</span>&lt;bool&gt;,
+    components: <span class="prelude-ty">Option</span>&lt;Vec&lt;serenity::CreateActionRow&gt;&gt;,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) allowed_mentions: <span class="prelude-ty">Option</span>&lt;serenity::CreateAllowedMentions&gt;,
+    reply: bool,
 }
 
 <span class="kw">impl </span>CreateReply {
+    <span class="doccomment">/// Creates a blank CreateReply. Equivalent to [`Self::default`].
+    </span><span class="kw">pub fn </span>new() -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::default()
+    }
+
     <span class="doccomment">/// Set the content of the message.
     </span><span class="kw">pub fn </span>content(<span class="kw-2">mut </span><span class="self">self</span>, content: <span class="kw">impl </span>Into&lt;String&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.content = <span class="prelude-val">Some</span>(content.into());
@@ -347,8 +336,7 @@
             ephemeral,
             allowed_mentions,
             reply: <span class="kw">_</span>, <span class="comment">// can't reply to a message in interactions
-            </span>__non_exhaustive: (),
-        } = <span class="self">self</span>;
+        </span>} = <span class="self">self</span>;
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(content) = content {
             builder = builder.content(content);
@@ -379,7 +367,6 @@
             ephemeral,
             allowed_mentions,
             reply: <span class="kw">_</span>,
-            __non_exhaustive: (),
         } = <span class="self">self</span>;
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(content) = content {
@@ -412,7 +399,6 @@
             ephemeral: <span class="kw">_</span>, <span class="comment">// can't edit ephemerality in retrospect
             </span>allowed_mentions,
             reply: <span class="kw">_</span>,
-            __non_exhaustive: (),
         } = <span class="self">self</span>;
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(content) = content {
@@ -438,8 +424,7 @@
             ephemeral: <span class="kw">_</span>, <span class="comment">// not supported in prefix
             </span>allowed_mentions,
             reply: <span class="kw">_</span>, <span class="comment">// can't edit reference message afterwards
-            </span>__non_exhaustive: (),
-        } = <span class="self">self</span>;
+        </span>} = <span class="self">self</span>;
 
         <span class="kw">let </span><span class="kw-2">mut </span>attachments_builder = serenity::EditAttachments::new();
         <span class="kw">for </span>attachment <span class="kw">in </span>attachments {
@@ -472,7 +457,6 @@
             ephemeral: <span class="kw">_</span>, <span class="comment">// not supported in prefix
             </span>allowed_mentions,
             reply,
-            __non_exhaustive: (),
         } = <span class="self">self</span>;
 
         <span class="kw">let </span><span class="kw-2">mut </span>builder = serenity::CreateMessage::new();
