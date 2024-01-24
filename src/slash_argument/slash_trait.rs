@@ -3,8 +3,6 @@
 use super::SlashArgError;
 use std::convert::TryInto as _;
 
-#[allow(unused_imports)] // import is required if serenity simdjson feature is enabled
-use crate::serenity::json::*;
 use crate::{serenity_prelude as serenity, CowVec};
 
 /// Implement this trait on types that you want to use as a slash command parameter.
