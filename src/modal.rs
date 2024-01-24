@@ -54,7 +54,7 @@ async fn execute_modal_generic<
     create_interaction_response(M::create(defaults, modal_custom_id.clone())).await?;
 
     // Wait for user to submit
-    let response = serenity::collector::ModalInteractionCollector::new(&ctx.shard)
+    let response = serenity::collector::ModalInteractionCollector::new(ctx.shard.clone())
         .filter(move |d| d.data.custom_id.as_str() == modal_custom_id)
         .timeout(timeout.unwrap_or(std::time::Duration::from_secs(3600)))
         .await;
