@@ -17,7 +17,7 @@ pub struct PrettyHelpConfiguration<'a> {
     /// Whether to include [`crate::Command::description`] (above [`crate::Command::help_text`]).
     pub include_description: bool,
     /// Color of the Embed
-    pub color: (u8,u8,u8),
+    pub color: (u8, u8, u8),
     #[doc(hidden)]
     pub __non_exhaustive: (),
 }
