@@ -425,6 +425,8 @@ pub use {async_trait::async_trait, futures_util};
 pub mod serenity_prelude {
     pub use serenity::all::*;
 }
+
+#[cfg(doc)]
 use serenity_prelude as serenity; // private alias for crate root docs intradoc-links
 
 /// Shorthand for a wrapped async future with a lifetime, used by many parts of this framework.
