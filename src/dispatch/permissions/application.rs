@@ -1,5 +1,6 @@
 //! Application command permissions calculation
-use crate::{serenity::Permissions, serenity_prelude as serenity};
+use self::serenity::Permissions;
+use crate::serenity_prelude as serenity;
 
 use super::PermissionsInfo;
 
