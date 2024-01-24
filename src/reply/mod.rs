@@ -151,10 +151,10 @@ impl ReplyHandle<'_> {
                 followup,
             } => match followup {
                 Some(followup) => {
-                    interaction.delete_followup(ctx, followup.id).await?;
+                    interaction.delete_followup(ctx.http(), followup.id).await?;
                 }
                 None => {
-                    interaction.delete_response(ctx).await?;
+                    interaction.delete_response(ctx.http()).await?;
                 }
             },
             ReplyHandleInner::Autocomplete => panic!("delete is a no-op in autocomplete context"),

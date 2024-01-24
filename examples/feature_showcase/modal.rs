@@ -38,7 +38,8 @@ pub async fn component_modal(ctx: crate::Context<'_>) -> Result<(), Error> {
     ctx.send(reply).await?;
 
     let serenity_ctx = ctx.serenity_context();
-    while let Some(mci) = serenity::ComponentInteractionCollector::new(serenity_ctx)
+    let shard_messenger = &serenity_ctx.shard;
+    while let Some(mci) = serenity::ComponentInteractionCollector::new(shard_messenger.clone())
         .timeout(std::time::Duration::from_secs(120))
         .filter(move |mci| mci.data.custom_id == "open_modal")
         .await
@@ -46,6 +47,7 @@ pub async fn component_modal(ctx: crate::Context<'_>) -> Result<(), Error> {
         let data =
             poise::execute_modal_on_component_interaction::<MyModal>(serenity_ctx, mci, None, None)
                 .await?;
+
         println!("Got data: {:?}", data);
     }
     Ok(())

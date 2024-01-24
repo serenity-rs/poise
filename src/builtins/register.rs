@@ -50,7 +50,7 @@ pub fn create_application_commands<U, E>(
 /// Thin wrapper around [`create_application_commands`] that funnels the returned builder into
 /// [`serenity::Command::set_global_commands`].
 pub async fn register_globally<U, E>(
-    http: impl AsRef<serenity::Http>,
+    http: &serenity::Http,
     commands: &[crate::Command<U, E>],
 ) -> Result<(), serenity::Error> {
     let builder = create_application_commands(commands);
@@ -63,7 +63,7 @@ pub async fn register_globally<U, E>(
 /// Thin wrapper around [`create_application_commands`] that funnels the returned builder into
 /// [`serenity::GuildId::set_commands`].
 pub async fn register_in_guild<U, E>(
-    http: impl AsRef<serenity::Http>,
+    http: &serenity::Http,
     commands: &[crate::Command<U, E>],
     guild_id: serenity::GuildId,
 ) -> Result<(), serenity::Error> {
@@ -101,7 +101,7 @@ pub async fn register_application_commands<U: Send + Sync + 'static, E>(
     if global {
         ctx.say(format!("Registering {num_commands} commands...",))
             .await?;
-        serenity::Command::set_global_commands(ctx, &commands_builder).await?;
+        serenity::Command::set_global_commands(ctx.http(), &commands_builder).await?;
     } else {
         let guild_id = match ctx.guild_id() {
             Some(x) => x,
@@ -113,7 +113,7 @@ pub async fn register_application_commands<U: Send + Sync + 'static, E>(
 
         ctx.say(format!("Registering {num_commands} commands..."))
             .await?;
-        guild_id.set_commands(ctx, &commands_builder).await?;
+        guild_id.set_commands(ctx.http(), &commands_builder).await?;
     }
 
     ctx.say("Done!").await?;
@@ -188,7 +188,7 @@ pub async fn register_application_commands_buttons<U: Send + Sync + 'static, E>(
     let interaction = reply
         .message()
         .await?
-        .await_component_interaction(ctx)
+        .await_component_interaction(ctx.serenity_context().shard.clone())
         .author_id(ctx.author().id)
         .await;
 
@@ -228,10 +228,10 @@ pub async fn register_application_commands_buttons<U: Send + Sync + 'static, E>(
                 ":gear: Registering {num_commands} global commands...",
             ))
             .await?;
-            serenity::Command::set_global_commands(ctx, &create_commands).await?;
+            serenity::Command::set_global_commands(ctx.http(), &create_commands).await?;
         } else {
             ctx.say(":gear: Unregistering global commands...").await?;
-            serenity::Command::set_global_commands(ctx, &[]).await?;
+            serenity::Command::set_global_commands(ctx.http(), &[]).await?;
         }
     } else {
         let guild_id = match ctx.guild_id() {
@@ -246,10 +246,10 @@ pub async fn register_application_commands_buttons<U: Send + Sync + 'static, E>(
                 ":gear: Registering {num_commands} guild commands...",
             ))
             .await?;
-            guild_id.set_commands(ctx, &create_commands).await?;
+            guild_id.set_commands(ctx.http(), &create_commands).await?;
         } else {
             ctx.say(":gear: Unregistering guild commands...").await?;
-            guild_id.set_commands(ctx, &[]).await?;
+            guild_id.set_commands(ctx.http(), &[]).await?;
         }
     }
 
