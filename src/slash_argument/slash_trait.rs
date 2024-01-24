@@ -10,7 +10,7 @@ use crate::serenity_prelude as serenity;
 #[async_trait::async_trait]
 pub trait SlashArgument: Sized {
     /// Extract a Rust value of type T from the slash command argument, given via a
-    /// [`serenity::json::Value`].
+    /// [`serenity::ResolvedValue`].
     ///
     /// Don't call this method directly! Use [`crate::extract_slash_argument!`]
     async fn extract(
