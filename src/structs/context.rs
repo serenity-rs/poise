@@ -232,7 +232,7 @@ context_methods! {
     #[cfg(feature = "cache")]
     (guild self)
     (pub fn guild(self) -> Option<serenity::GuildRef<'a>>) {
-        self.guild_id()?.to_guild_cached(self.serenity_context())
+        self.guild_id()?.to_guild_cached(self.cache())
     }
 
     // Doesn't fit in with the rest of the functions here but it's convenient
@@ -399,8 +399,6 @@ context_methods! {
                 }
                 string += &ctx.command.name;
                 for arg in ctx.args {
-                    #[allow(unused_imports)] // required for simd-json
-                    use ::serenity::json::*;
                     use std::fmt::Write as _;
 
                     string += " ";
