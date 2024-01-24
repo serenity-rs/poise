@@ -29,7 +29,7 @@ pub type Data = ();
 #[poise::command(prefix_command, owners_only)]
 async fn register_commands(ctx: Context<'_>) -> Result<(), Error> {
     let commands = &ctx.framework().options().commands;
-    poise::builtins::register_globally(ctx, commands).await?;
+    poise::builtins::register_globally(ctx.http(), commands).await?;
 
     ctx.say("Successfully registered slash commands!").await?;
     Ok(())

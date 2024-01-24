@@ -57,13 +57,15 @@ pub async fn paginate<U: Send + Sync + 'static, E>(
 
     // Loop through incoming interactions with the navigation buttons
     let mut current_page = 0;
-    while let Some(press) = serenity::collector::ComponentInteractionCollector::new(ctx)
-        // We defined our button IDs to start with `ctx_id`. If they don't, some other command's
-        // button was pressed
-        .filter(move |press| press.data.custom_id.starts_with(&ctx_id.to_string()))
-        // Timeout when no navigation button has been pressed for 24 hours
-        .timeout(std::time::Duration::from_secs(3600 * 24))
-        .await
+    let shard_messenger = &ctx.serenity_context().shard;
+    while let Some(press) =
+        serenity::collector::ComponentInteractionCollector::new(shard_messenger.clone())
+            // We defined our button IDs to start with `ctx_id`. If they don't, some other command's
+            // button was pressed
+            .filter(move |press| press.data.custom_id.starts_with(&ctx_id.to_string()))
+            // Timeout when no navigation button has been pressed for 24 hours
+            .timeout(std::time::Duration::from_secs(3600 * 24))
+            .await
     {
         // Depending on which button was pressed, go to next or previous page
         if press.data.custom_id.as_str() == next_button_id {
