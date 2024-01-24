@@ -11,7 +11,7 @@ mod paginate;
 #[cfg(feature = "chrono")]
 pub use paginate::*;
 
-use crate::{serenity::CreateAllowedMentions, serenity_prelude as serenity, CreateReply};
+use crate::{serenity_prelude as serenity, serenity_prelude::CreateAllowedMentions, CreateReply};
 
 /// An error handler that logs errors either via the [`tracing`] crate or via a Discord message. Set
 /// up a logger like tracing subscriber
