@@ -223,9 +223,6 @@ async fn run_autocomplete<U: Send + Sync + 'static, E>(
         _ => return Ok(()),
     };
 
-    #[allow(unused_imports)]
-    use ::serenity::json::*; // as_str() access via trait for simd-json
-
     // Generate an autocomplete response
     let autocomplete_response = match autocomplete_callback(ctx, partial_input).await {
         Ok(x) => x,
