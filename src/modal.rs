@@ -54,7 +54,7 @@ async fn execute_modal_generic<
     create_interaction_response(M::create(defaults, modal_custom_id.clone())).await?;
 
     // Wait for user to submit
-    let response = serenity::collector::ModalInteractionCollector::new(&ctx.shard)
+    let response = serenity::collector::ModalInteractionCollector::new(ctx.shard.clone())
         .filter(move |d| d.data.custom_id.as_str() == modal_custom_id)
         .timeout(timeout.unwrap_or(std::time::Duration::from_secs(3600)))
         .await;
@@ -118,14 +118,14 @@ pub async fn execute_modal<U: Send + Sync + 'static, E, M: Modal>(
 /// If you need more specialized behavior, you can copy paste the implementation of this function
 /// and adjust to your needs. The code of this function is just a starting point.
 pub async fn execute_modal_on_component_interaction<M: Modal>(
-    ctx: impl AsRef<serenity::Context>,
+    ctx: &serenity::Context,
     interaction: serenity::ComponentInteraction,
     defaults: Option<M>,
     timeout: Option<std::time::Duration>,
 ) -> Result<Option<M>, serenity::Error> {
     execute_modal_generic(
-        ctx.as_ref(),
-        |resp| interaction.create_response(ctx.as_ref(), resp),
+        ctx,
+        |resp| interaction.create_response(ctx, resp),
         interaction.id.to_string(),
         defaults,
         timeout,
