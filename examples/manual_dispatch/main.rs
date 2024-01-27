@@ -20,17 +20,30 @@ struct Handler {
 }
 #[serenity::async_trait]
 impl serenity::EventHandler for Handler {
-    async fn message(&self, ctx: serenity::Context, new_message: serenity::Message) {
+    async fn message(&self, serenity_context: &serenity::Context, new_message: &serenity::Message) {
         // FrameworkContext contains all data that poise::Framework usually manages
         let shard_manager = (*self.shard_manager.lock().unwrap()).clone().unwrap();
         let framework_data = poise::FrameworkContext {
-            serenity_context: &ctx,
+            serenity_context,
             options: &self.options,
             shard_manager: &shard_manager,
         };
 
-        let event = serenity::FullEvent::Message { new_message };
-        poise::dispatch_event(framework_data, event).await;
+        let invocation_data = tokio::sync::Mutex::new(Box::new(()) as _);
+        let trigger = poise::MessageDispatchTrigger::MessageCreate;
+        let mut parent_commands = Vec::new();
+
+        let res = poise::dispatch_message(
+            framework_data,
+            new_message,
+            trigger,
+            &invocation_data,
+            &mut parent_commands,
+        );
+
+        if let Err(err) = res.await {
+            err.handle(&self.options).await;
+        }
     }
 
     // For slash commands or edit tracking to work, forward interaction_create and message_update
