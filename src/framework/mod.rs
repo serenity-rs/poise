@@ -107,7 +107,7 @@ impl<U: Send + Sync + 'static, E: Send + Sync> serenity::Framework for Framework
         }
     }
 
-    async fn dispatch(&self, ctx: serenity::Context, event: serenity::FullEvent) {
+    async fn dispatch(&self, ctx: &serenity::Context, event: &serenity::FullEvent) {
         raw_dispatch_event(self, ctx, event).await
     }
 }
@@ -116,12 +116,12 @@ impl<U: Send + Sync + 'static, E: Send + Sync> serenity::Framework for Framework
 /// Otherwise, it forwards the event to [`crate::dispatch_event`]
 async fn raw_dispatch_event<U, E>(
     framework: &Framework<U, E>,
-    ctx: serenity::Context,
-    event: serenity::FullEvent,
+    serenity_context: &serenity::Context,
+    event: &serenity::FullEvent,
 ) where
     U: Send + Sync + 'static,
 {
-    if let serenity::FullEvent::Ready { data_about_bot } = &event {
+    if let serenity::FullEvent::Ready { data_about_bot } = event {
         let _: Result<_, _> = framework.bot_id.set(data_about_bot.user.id);
     }
 
@@ -133,7 +133,7 @@ async fn raw_dispatch_event<U, E>(
     let framework = crate::FrameworkContext {
         #[cfg(not(feature = "cache"))]
         bot_id,
-        serenity_context: &ctx,
+        serenity_context,
         options: &framework.options,
         shard_manager: framework.shard_manager(),
     };

@@ -68,9 +68,8 @@ impl<U, E> ApplicationContext<'_, U, E> {
                 serenity::CreateInteractionResponseMessage::new().ephemeral(ephemeral),
             );
 
-            self.interaction
-                .create_response(self.framework.serenity_context, response)
-                .await?;
+            let http = &self.framework.serenity_context.http;
+            self.interaction.create_response(http, response).await?;
 
             self.has_sent_initial_response
                 .store(true, std::sync::atomic::Ordering::SeqCst);
