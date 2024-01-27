@@ -83,7 +83,7 @@ pub async fn paginate<U: Send + Sync + 'static, E>(
         // Update the message with the new page contents
         press
             .create_response(
-                ctx.serenity_context(),
+                ctx.http(),
                 serenity::CreateInteractionResponse::UpdateMessage(
                     serenity::CreateInteractionResponseMessage::new()
                         .embed(serenity::CreateEmbed::new().description(pages[current_page])),
