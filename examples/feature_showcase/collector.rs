@@ -38,7 +38,7 @@ pub async fn boop(ctx: Context<'_>) -> Result<(), Error> {
         )
         .await?;
 
-        mci.create_response(ctx, serenity::CreateInteractionResponse::Acknowledge)
+        mci.create_response(ctx.http(), serenity::CreateInteractionResponse::Acknowledge)
             .await?;
     }
 
