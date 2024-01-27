@@ -65,7 +65,7 @@ async fn execute_modal_generic<
 
     // Send acknowledgement so that the pop-up is closed
     response
-        .create_response(ctx, serenity::CreateInteractionResponse::Acknowledge)
+        .create_response(&ctx.http, serenity::CreateInteractionResponse::Acknowledge)
         .await?;
 
     Ok(Some(M::parse(response.data)))
@@ -94,7 +94,7 @@ pub async fn execute_modal<U: Send + Sync + 'static, E, M: Modal>(
     let interaction = ctx.interaction;
     let response = execute_modal_generic(
         ctx.serenity_context(),
-        |resp| interaction.create_response(ctx, resp),
+        |resp| interaction.create_response(ctx.http(), resp),
         interaction.id.to_string(),
         defaults,
         timeout,
@@ -125,7 +125,7 @@ pub async fn execute_modal_on_component_interaction<M: Modal>(
 ) -> Result<Option<M>, serenity::Error> {
     execute_modal_generic(
         ctx,
-        |resp| interaction.create_response(ctx, resp),
+        |resp| interaction.create_response(&ctx.http, resp),
         interaction.id.to_string(),
         defaults,
         timeout,
