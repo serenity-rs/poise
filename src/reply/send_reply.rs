@@ -76,9 +76,7 @@ where
             let builder = builder
                 .to_slash_followup_response(serenity::CreateInteractionResponseFollowup::new());
 
-            ctx.interaction
-                .create_followup(ctx.serenity_context(), builder)
-                .await?
+            ctx.interaction.create_followup(ctx.http(), builder).await?
         }))
     } else {
         let builder =
@@ -86,7 +84,7 @@ where
 
         ctx.interaction
             .create_response(
-                ctx.serenity_context(),
+                ctx.http(),
                 serenity::CreateInteractionResponse::Message(builder),
             )
             .await?;

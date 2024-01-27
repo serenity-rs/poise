@@ -236,7 +236,7 @@ async fn run_autocomplete<U: Send + Sync + 'static, E>(
     if let Err(e) = ctx
         .interaction
         .create_response(
-            &ctx.framework.serenity_context,
+            ctx.http(),
             serenity::CreateInteractionResponse::Autocomplete(autocomplete_response),
         )
         .await

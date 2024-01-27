@@ -66,9 +66,9 @@ impl<'a, U: Send + Sync + 'static, E> FrameworkContext<'a, U, E> {
 /// Central event handling function of this library
 pub async fn dispatch_event<U: Send + Sync + 'static, E>(
     framework: crate::FrameworkContext<'_, U, E>,
-    event: serenity::FullEvent,
+    event: &serenity::FullEvent,
 ) {
-    match &event {
+    match event {
         serenity::FullEvent::Message { new_message } => {
             let invocation_data = tokio::sync::Mutex::new(Box::new(()) as _);
             let mut parent_commands = Vec::new();
@@ -172,10 +172,10 @@ pub async fn dispatch_event<U: Send + Sync + 'static, E>(
 
     // Do this after the framework's Ready handling, so that get_user_data() doesnt
     // potentially block infinitely
-    if let Err(error) = (framework.options.event_handler)(framework, &event).await {
+    if let Err(error) = (framework.options.event_handler)(framework, event).await {
         let error = crate::FrameworkError::EventHandler {
             error,
-            event: &event,
+            event,
             framework,
         };
         (framework.options.on_error)(error).await;
