@@ -1,7 +1,7 @@
 //! Contains a built-in help command and surrounding infrastructure that uses embeds.
 
 use crate::{serenity_prelude as serenity, CreateReply};
-use std::fmt::Write as _;
+use std::{borrow::Cow, fmt::Write as _};
 
 /// Optional configuration for how the help message from [`pretty_help()`] looks
 pub struct PrettyHelpConfiguration<'a> {
@@ -81,7 +81,7 @@ async fn pretty_help_all_commands<U, E>(
 
             for cmd in cmds {
                 let name = cmd.context_menu_name.as_deref().unwrap_or(&cmd.name);
-                let prefix = format_cmd_prefix(cmd, &options_prefix);
+                let prefix = format_cmd_prefix(cmd, options_prefix.as_deref());
 
                 if let Some(description) = cmd.description.as_deref() {
                     writeln!(buffer, "{}{}`: *{}*", prefix, name, description).ok();
@@ -92,7 +92,7 @@ async fn pretty_help_all_commands<U, E>(
                 if config.show_subcommands {
                     for sbcmd in &cmd.subcommands {
                         let name = sbcmd.context_menu_name.as_deref().unwrap_or(&sbcmd.name);
-                        let prefix = format_cmd_prefix(sbcmd, &options_prefix);
+                        let prefix = format_cmd_prefix(sbcmd, options_prefix.as_deref());
 
                         if let Some(description) = sbcmd.description.as_deref() {
                             writeln!(buffer, "> {}{}`: *{}*", prefix, name, description).ok();
@@ -127,11 +127,11 @@ async fn pretty_help_all_commands<U, E>(
 }
 
 /// Figures out which prefix a command should have
-fn format_cmd_prefix<U, E>(cmd: &crate::Command<U, E>, options_prefix: &Option<String>) -> String {
+fn format_cmd_prefix<U, E>(cmd: &crate::Command<U, E>, options_prefix: Option<&str>) -> String {
     if cmd.slash_action.is_some() {
         "`/".into()
     } else if cmd.prefix_action.is_some() {
-        format!("`{}", options_prefix.as_deref().unwrap_or_default())
+        format!("`{}", options_prefix.unwrap_or_default())
     } else if cmd.context_menu_action.is_some() {
         match cmd.context_menu_action {
             Some(crate::ContextMenuCommandAction::Message(_)) => "Message menu: `".into(),
@@ -187,7 +187,7 @@ async fn pretty_help_single_command<U, E>(
             .await
             // This can happen if the prefix is dynamic, and the callback fails
             // due to help being invoked with slash or context menu commands.
-            .unwrap_or_else(|| String::from("<prefix>"));
+            .unwrap_or(Cow::Borrowed("<prefix>"));
         invocations.push(format!("`{}{}`", prefix, command.name));
         subprefix = subprefix.or(Some(format!("> `{}{}`", prefix, command.name)));
     }
@@ -247,7 +247,7 @@ async fn pretty_help_single_command<U, E>(
         .subcommands
         .iter()
         .map(|sbcmd| {
-            let prefix = format_cmd_prefix(sbcmd, &subprefix); // i have no idea about this really
+            let prefix = format_cmd_prefix(sbcmd, subprefix.as_deref()); // i have no idea about this really
             let name = sbcmd.context_menu_name.as_deref().unwrap_or(&sbcmd.name);
             if let Some(description) = sbcmd.description.as_deref() {
                 format!("> {}{}`: *{} *", prefix, name, description)
