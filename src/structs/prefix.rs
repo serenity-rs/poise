@@ -1,5 +1,7 @@
 //! Holds prefix-command definition structs.
 
+use std::borrow::Cow;
+
 use crate::{serenity_prelude as serenity, BoxFuture};
 
 /// The event that triggered a prefix command execution
@@ -82,7 +84,7 @@ pub enum Prefix {
 pub struct PrefixFrameworkOptions<U, E> {
     /// The main bot prefix. Can be set to None if the bot supports only
     /// [dynamic prefixes](Self::dynamic_prefix).
-    pub prefix: Option<String>,
+    pub prefix: Option<Cow<'static, str>>,
     /// List of additional bot prefixes
     // TODO: maybe it would be nicer to have separate fields for literal and regex prefixes
     // That way, you don't need to wrap every single literal prefix in a long path which looks ugly
@@ -93,8 +95,9 @@ pub struct PrefixFrameworkOptions<U, E> {
     ///
     /// For more advanced dynamic prefixes, see [`Self::stripped_dynamic_prefix`]
     #[derivative(Debug = "ignore")]
-    pub dynamic_prefix:
-        Option<fn(crate::PartialContext<'_, U, E>) -> BoxFuture<'_, Result<Option<String>, E>>>,
+    pub dynamic_prefix: Option<
+        fn(crate::PartialContext<'_, U, E>) -> BoxFuture<'_, Result<Option<Cow<'static, str>>, E>>,
+    >,
     /// Callback invoked on every message to strip the prefix off an incoming message.
     ///
     /// Override this field for advanced dynamic prefixes which change depending on guild or user.
