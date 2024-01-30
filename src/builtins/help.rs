@@ -1,7 +1,7 @@
 //! Contains the built-in help command and surrounding infrastructure
 
 use crate::{serenity_prelude as serenity, CreateReply};
-use std::fmt::Write as _;
+use std::{borrow::Cow, fmt::Write as _};
 
 /// Optional configuration for how the help message from [`help()`] looks
 pub struct HelpConfiguration<'a> {
@@ -85,7 +85,9 @@ impl TwoColumnList {
 }
 
 /// Get the prefix from options
-pub(super) async fn get_prefix_from_options<U, E>(ctx: crate::Context<'_, U, E>) -> Option<String> {
+pub(super) async fn get_prefix_from_options<U, E>(
+    ctx: crate::Context<'_, U, E>,
+) -> Option<Cow<'static, str>> {
     let options = &ctx.framework().options().prefix_options;
     match &options.prefix {
         Some(fixed_prefix) => Some(fixed_prefix.clone()),
@@ -155,7 +157,7 @@ async fn help_single_command<U, E>(
                 // None can happen if the prefix is dynamic, and the callback
                 // fails due to help being invoked with slash or context menu
                 // commands. Not sure there's a better way to handle this.
-                None => String::from("<prefix>"),
+                None => Cow::Borrowed("<prefix>"),
             };
             invocations.push(format!("`{}{}`", prefix, command.name));
             if subprefix.is_none() {

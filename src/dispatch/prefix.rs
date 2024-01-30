@@ -21,7 +21,7 @@ async fn strip_prefix<'a, U, E>(
         match dynamic_prefix(partial_ctx).await {
             Ok(prefix) => {
                 if let Some(prefix) = prefix {
-                    if msg.content.starts_with(&prefix) {
+                    if msg.content.starts_with(prefix.as_ref()) {
                         return Some(msg.content.split_at(prefix.len()));
                     }
                 }
@@ -37,7 +37,7 @@ async fn strip_prefix<'a, U, E>(
         }
     }
 
-    if let Some(prefix) = &framework.options.prefix_options.prefix {
+    if let Some(prefix) = framework.options.prefix_options.prefix.as_deref() {
         if let Some(content) = msg.content.strip_prefix(prefix) {
             return Some((prefix, content));
         }
