@@ -97,7 +97,8 @@ async fn main() {
         .setup(move |ctx, _ready, framework| {
             Box::pin(async move {
                 println!("Logged in as {}", _ready.user.name);
-                poise::builtins::register_globally(ctx, &framework.options().commands).await?;
+                let commands = &framework.options().commands;
+                poise::builtins::register_globally(&ctx.http, commands).await?;
                 Ok(Data {
                     votes: Mutex::new(HashMap::new()),
                 })
