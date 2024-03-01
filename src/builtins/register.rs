@@ -50,7 +50,7 @@ pub fn create_application_commands<U, E>(
 /// Thin wrapper around [`create_application_commands`] that funnels the returned builder into
 /// [`serenity::Command::set_global_commands`].
 pub async fn register_globally<U, E>(
-    http: impl AsRef<serenity::Http>,
+    http: &serenity::Http,
     commands: &[crate::Command<U, E>],
 ) -> Result<(), serenity::Error> {
     let builder = create_application_commands(commands);
@@ -63,7 +63,7 @@ pub async fn register_globally<U, E>(
 /// Thin wrapper around [`create_application_commands`] that funnels the returned builder into
 /// [`serenity::GuildId::set_commands`].
 pub async fn register_in_guild<U, E>(
-    http: impl AsRef<serenity::Http>,
+    http: &serenity::Http,
     commands: &[crate::Command<U, E>],
     guild_id: serenity::GuildId,
 ) -> Result<(), serenity::Error> {
