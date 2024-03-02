@@ -70,7 +70,7 @@ macro_rules! context_methods {
         )* }
     };
 }
-// Note how you have to surround the function signature in parantheses, and also add a line before
+// Note how you have to surround the function signature in parentheses, and also add a line before
 // the signature with the function name, parameter names and maybe `await` token
 context_methods! {
     /// Defer the response, giving the bot multiple minutes to respond without the user seeing an
