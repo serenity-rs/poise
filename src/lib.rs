@@ -86,7 +86,7 @@ Some examples for methods you should have in your repertoire:
 Discord slash commands can be a bit unintuitive at first. If you're unfamiliar, please read this
 
 To activate a slash command, your bot
-needs to _register_ in on Discord. You may want to do this manually, with a `register` command
+needs to _register_ it on Discord. You may want to do this manually, with a `register` command
 (poise provides [`builtins::register_application_commands_buttons`] as a starting point for that), or you
 may want to re-register commands automatically on every bot startup. Choose what you prefer. Also
 see [Registering Slash Commands](#registering-slash-commands).
