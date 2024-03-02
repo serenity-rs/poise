@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/libc-0.2.150/src/unix/linux_like/mod.rs`."><title>mod.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-b1a3e7f8283b8434.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="libc" data-themes="" data-resource-suffix="" data-rustdoc-version="1.77.0-nightly (5d3d3479d 2024-01-23)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-48f368f3872407c8.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/libc-0.2.150/src/unix/linux_like/mod.rs`."><title>mod.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-e935ef01ae1c1829.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="libc" data-themes="" data-resource-suffix="" data-rustdoc-version="1.78.0-nightly (2dceda4f3 2024-03-01)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-4c98445ec4002617.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-12cf3b4f4f9dc36d.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
             <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
     <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../../libc/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
@@ -1920,7 +1920,7 @@
     </span>}
 }
 
-<span class="macro">s! </span>{
+<span class="macro">s!</span> {
     <span class="kw">pub struct </span>in_addr {
         <span class="kw">pub </span>s_addr: ::in_addr_t,
     }
@@ -2115,7 +2115,7 @@
     }
 }
 
-<span class="macro">s_no_extra_traits! </span>{
+<span class="macro">s_no_extra_traits!</span> {
     <span class="attr">#[cfg_attr(
         any(
             all(
@@ -2166,7 +2166,7 @@
     }
 }
 
-<span class="macro">cfg_if! </span>{
+<span class="macro">cfg_if!</span> {
     <span class="kw">if </span><span class="attr">#[cfg(feature = <span class="string">"extra_traits"</span>)] </span>{
         <span class="kw">impl </span>PartialEq <span class="kw">for </span>epoll_event {
             <span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span>epoll_event) -&gt; bool {
@@ -2343,7 +2343,7 @@
 }
 
 <span class="comment">// intentionally not public, only used for fd_set
-</span><span class="macro">cfg_if! </span>{
+</span><span class="macro">cfg_if!</span> {
     <span class="kw">if </span><span class="attr">#[cfg(target_pointer_width = <span class="string">"32"</span>)] </span>{
         <span class="kw">const </span>ULONG_SIZE: usize = <span class="number">32</span>;
     } <span class="kw">else if </span><span class="attr">#[cfg(target_pointer_width = <span class="string">"64"</span>)] </span>{
@@ -2461,7 +2461,7 @@
 <span class="kw">pub const </span>XATTR_CREATE: ::c_int = <span class="number">0x1</span>;
 <span class="kw">pub const </span>XATTR_REPLACE: ::c_int = <span class="number">0x2</span>;
 
-<span class="macro">cfg_if! </span>{
+<span class="macro">cfg_if!</span> {
     <span class="kw">if </span><span class="attr">#[cfg(target_os = <span class="string">"android"</span>)] </span>{
         <span class="kw">pub const </span>RLIM64_INFINITY: ::c_ulonglong = !<span class="number">0</span>;
     } <span class="kw">else </span>{
@@ -2469,7 +2469,7 @@
     }
 }
 
-<span class="macro">cfg_if! </span>{
+<span class="macro">cfg_if!</span> {
     <span class="kw">if </span><span class="attr">#[cfg(target_env = <span class="string">"ohos"</span>)] </span>{
         <span class="kw">pub const </span>LC_CTYPE: ::c_int = <span class="number">0</span>;
         <span class="kw">pub const </span>LC_NUMERIC: ::c_int = <span class="number">1</span>;
@@ -2572,7 +2572,7 @@
 <span class="kw">pub const </span>MADV_COLD: ::c_int = <span class="number">20</span>;
 <span class="kw">pub const </span>MADV_PAGEOUT: ::c_int = <span class="number">21</span>;
 <span class="kw">pub const </span>MADV_HWPOISON: ::c_int = <span class="number">100</span>;
-<span class="macro">cfg_if! </span>{
+<span class="macro">cfg_if!</span> {
     <span class="kw">if </span><span class="attr">#[cfg(not(target_os = <span class="string">"emscripten"</span>))] </span>{
         <span class="kw">pub const </span>MADV_POPULATE_READ: ::c_int = <span class="number">22</span>;
         <span class="kw">pub const </span>MADV_POPULATE_WRITE: ::c_int = <span class="number">23</span>;
@@ -2914,7 +2914,7 @@
 <span class="kw">pub const </span>TCP_QUICKACK: ::c_int = <span class="number">12</span>;
 <span class="kw">pub const </span>TCP_CONGESTION: ::c_int = <span class="number">13</span>;
 <span class="kw">pub const </span>TCP_MD5SIG: ::c_int = <span class="number">14</span>;
-<span class="macro">cfg_if! </span>{
+<span class="macro">cfg_if!</span> {
     <span class="kw">if </span><span class="attr">#[cfg(all(target_os = <span class="string">"linux"</span>, any(
             target_env = <span class="string">"gnu"</span>,
             target_env = <span class="string">"musl"</span>,
@@ -2937,7 +2937,7 @@
 <span class="kw">pub const </span>TCP_CC_INFO: ::c_int = <span class="number">26</span>;
 <span class="kw">pub const </span>TCP_SAVE_SYN: ::c_int = <span class="number">27</span>;
 <span class="kw">pub const </span>TCP_SAVED_SYN: ::c_int = <span class="number">28</span>;
-<span class="macro">cfg_if! </span>{
+<span class="macro">cfg_if!</span> {
     <span class="kw">if </span><span class="attr">#[cfg(not(target_os = <span class="string">"emscripten"</span>))] </span>{
         <span class="comment">// NOTE: emscripten doesn't support these options yet.
 
@@ -3182,7 +3182,7 @@
 <span class="kw">pub const </span>P_ALL: idtype_t = <span class="number">0</span>;
 <span class="kw">pub const </span>P_PID: idtype_t = <span class="number">1</span>;
 <span class="kw">pub const </span>P_PGID: idtype_t = <span class="number">2</span>;
-<span class="macro">cfg_if! </span>{
+<span class="macro">cfg_if!</span> {
     <span class="kw">if </span><span class="attr">#[cfg(not(target_os = <span class="string">"emscripten"</span>))] </span>{
         <span class="kw">pub const </span>P_PIDFD: idtype_t = <span class="number">3</span>;
     }
@@ -3326,7 +3326,7 @@
 <span class="kw">pub const </span>ARPHRD_VOID: u16 = <span class="number">0xFFFF</span>;
 <span class="kw">pub const </span>ARPHRD_NONE: u16 = <span class="number">0xFFFE</span>;
 
-<span class="macro">cfg_if! </span>{
+<span class="macro">cfg_if!</span> {
     <span class="kw">if </span><span class="attr">#[cfg(target_os = <span class="string">"emscripten"</span>)] </span>{
         <span class="comment">// Emscripten does not define any `*_SUPER_MAGIC` constants.
     </span>} <span class="kw">else if </span><span class="attr">#[cfg(not(target_arch = <span class="string">"s390x"</span>))] </span>{
@@ -3440,13 +3440,13 @@
     }
 }
 
-<span class="macro">const_fn! </span>{
+<span class="macro">const_fn!</span> {
     {<span class="kw">const</span>} <span class="kw">fn </span>CMSG_ALIGN(len: usize) -&gt; usize {
         len + ::mem::size_of::&lt;usize&gt;() - <span class="number">1 </span>&amp; !(::mem::size_of::&lt;usize&gt;() - <span class="number">1</span>)
     }
 }
 
-<span class="macro">f! </span>{
+<span class="macro">f!</span> {
     <span class="kw">pub fn </span>CMSG_FIRSTHDR(mhdr: <span class="kw-2">*const </span>msghdr) -&gt; <span class="kw-2">*mut </span>cmsghdr {
         <span class="kw">if </span>(<span class="kw-2">*</span>mhdr).msg_controllen <span class="kw">as </span>usize &gt;= ::mem::size_of::&lt;cmsghdr&gt;() {
             (<span class="kw-2">*</span>mhdr).msg_control <span class="kw">as </span><span class="kw-2">*mut </span>cmsghdr
@@ -3495,7 +3495,7 @@
     }
 }
 
-<span class="macro">safe_f! </span>{
+<span class="macro">safe_f!</span> {
     <span class="kw">pub fn </span>SIGRTMAX() -&gt; ::c_int {
         <span class="kw">unsafe </span>{ __libc_current_sigrtmax() }
     }
@@ -3690,7 +3690,7 @@
 //
 // * musl and Emscripten has 64-bit versions only so aliases the LFS64 symbols to the standard ones
 // * ulibc doesn't have preadv64/pwritev64
-</span><span class="macro">cfg_if! </span>{
+</span><span class="macro">cfg_if!</span> {
     <span class="kw">if </span><span class="attr">#[cfg(not(any(target_env = <span class="string">"musl"</span>, target_os = <span class="string">"emscripten"</span>)))] </span>{
         <span class="kw">extern </span><span class="string">"C" </span>{
             <span class="kw">pub fn </span>fstatfs64(fd: ::c_int, buf: <span class="kw-2">*mut </span>statfs64) -&gt; ::c_int;
@@ -3748,7 +3748,7 @@
     }
 }
 
-<span class="macro">cfg_if! </span>{
+<span class="macro">cfg_if!</span> {
     <span class="kw">if </span><span class="attr">#[cfg(not(any(target_env = <span class="string">"uclibc"</span>, target_env = <span class="string">"musl"</span>, target_os = <span class="string">"emscripten"</span>)))] </span>{
         <span class="kw">extern </span><span class="string">"C" </span>{
             <span class="kw">pub fn </span>preadv64(
@@ -3767,7 +3767,7 @@
     }
 }
 
-<span class="macro">cfg_if! </span>{
+<span class="macro">cfg_if!</span> {
     <span class="kw">if </span><span class="attr">#[cfg(not(target_env = <span class="string">"uclibc"</span>))] </span>{
         <span class="kw">extern </span><span class="string">"C" </span>{
             <span class="comment">// uclibc has separate non-const version of this function
@@ -3789,7 +3789,7 @@
     }
 }
 
-<span class="macro">cfg_if! </span>{
+<span class="macro">cfg_if!</span> {
     <span class="kw">if </span><span class="attr">#[cfg(target_os = <span class="string">"emscripten"</span>)] </span>{
         <span class="kw">mod </span>emscripten;
         <span class="kw">pub use </span><span class="self">self</span>::emscripten::<span class="kw-2">*</span>;

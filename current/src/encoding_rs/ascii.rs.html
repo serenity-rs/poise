@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/encoding_rs-0.8.33/src/ascii.rs`."><title>ascii.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-b1a3e7f8283b8434.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="encoding_rs" data-themes="" data-resource-suffix="" data-rustdoc-version="1.77.0-nightly (5d3d3479d 2024-01-23)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-48f368f3872407c8.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/encoding_rs-0.8.33/src/ascii.rs`."><title>ascii.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e935ef01ae1c1829.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="encoding_rs" data-themes="" data-resource-suffix="" data-rustdoc-version="1.78.0-nightly (2dceda4f3 2024-03-01)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-4c98445ec4002617.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-12cf3b4f4f9dc36d.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
             <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
     <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../encoding_rs/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
@@ -1579,7 +1579,7 @@
 ))]
 </span><span class="kw">use </span><span class="kw">crate</span>::simd_funcs::<span class="kw-2">*</span>;
 
-<span class="macro">cfg_if! </span>{
+<span class="macro">cfg_if!</span> {
     <span class="kw">if </span><span class="attr">#[cfg(feature = <span class="string">"simd-accel"</span>)] </span>{
         <span class="attr">#[allow(unused_imports)]
         </span><span class="kw">use </span>::core::intrinsics::unlikely;
@@ -1608,7 +1608,7 @@
 </span><span class="kw">pub const </span>BASIC_LATIN_MASK: usize = <span class="number">0xFF80_FF80_FF80_FF80u64 </span><span class="kw">as </span>usize;
 
 <span class="attr">#[allow(unused_macros)]
-</span><span class="macro">macro_rules! </span>ascii_naive {
+</span><span class="macro">macro_rules!</span> ascii_naive {
     (<span class="macro-nonterminal">$name</span>:ident, <span class="macro-nonterminal">$src_unit</span>:ty, <span class="macro-nonterminal">$dst_unit</span>:ty) =&gt; {
         <span class="attr">#[inline(always)]
         </span><span class="kw">pub unsafe fn </span><span class="macro-nonterminal">$name</span>(
@@ -1631,7 +1631,7 @@
 }
 
 <span class="attr">#[allow(unused_macros)]
-</span><span class="macro">macro_rules! </span>ascii_alu {
+</span><span class="macro">macro_rules!</span> ascii_alu {
     (<span class="macro-nonterminal">$name</span>:ident,
      <span class="macro-nonterminal">$src_unit</span>:ty,
      <span class="macro-nonterminal">$dst_unit</span>:ty,
@@ -1722,7 +1722,7 @@
 }
 
 <span class="attr">#[allow(unused_macros)]
-</span><span class="macro">macro_rules! </span>basic_latin_alu {
+</span><span class="macro">macro_rules!</span> basic_latin_alu {
     (<span class="macro-nonterminal">$name</span>:ident,
      <span class="macro-nonterminal">$src_unit</span>:ty,
      <span class="macro-nonterminal">$dst_unit</span>:ty,
@@ -1824,7 +1824,7 @@
 }
 
 <span class="attr">#[allow(unused_macros)]
-</span><span class="macro">macro_rules! </span>latin1_alu {
+</span><span class="macro">macro_rules!</span> latin1_alu {
     (<span class="macro-nonterminal">$name</span>:ident, <span class="macro-nonterminal">$src_unit</span>:ty, <span class="macro-nonterminal">$dst_unit</span>:ty, <span class="macro-nonterminal">$stride_fn</span>:ident) =&gt; {
         <span class="attr">#[cfg_attr(
             feature = <span class="string">"cargo-clippy"</span>,
@@ -1891,7 +1891,7 @@
 }
 
 <span class="attr">#[allow(unused_macros)]
-</span><span class="macro">macro_rules! </span>ascii_simd_check_align {
+</span><span class="macro">macro_rules!</span> ascii_simd_check_align {
     (
         <span class="macro-nonterminal">$name</span>:ident,
         <span class="macro-nonterminal">$src_unit</span>:ty,
@@ -1976,7 +1976,7 @@
 }
 
 <span class="attr">#[allow(unused_macros)]
-</span><span class="macro">macro_rules! </span>ascii_simd_check_align_unrolled {
+</span><span class="macro">macro_rules!</span> ascii_simd_check_align_unrolled {
     (
         <span class="macro-nonterminal">$name</span>:ident,
         <span class="macro-nonterminal">$src_unit</span>:ty,
@@ -2099,7 +2099,7 @@
 }
 
 <span class="attr">#[allow(unused_macros)]
-</span><span class="macro">macro_rules! </span>latin1_simd_check_align {
+</span><span class="macro">macro_rules!</span> latin1_simd_check_align {
     (
         <span class="macro-nonterminal">$name</span>:ident,
         <span class="macro-nonterminal">$src_unit</span>:ty,
@@ -2163,7 +2163,7 @@
 }
 
 <span class="attr">#[allow(unused_macros)]
-</span><span class="macro">macro_rules! </span>latin1_simd_check_align_unrolled {
+</span><span class="macro">macro_rules!</span> latin1_simd_check_align_unrolled {
     (
         <span class="macro-nonterminal">$name</span>:ident,
         <span class="macro-nonterminal">$src_unit</span>:ty,
@@ -2240,7 +2240,7 @@
 }
 
 <span class="attr">#[allow(unused_macros)]
-</span><span class="macro">macro_rules! </span>ascii_simd_unalign {
+</span><span class="macro">macro_rules!</span> ascii_simd_unalign {
     (<span class="macro-nonterminal">$name</span>:ident, <span class="macro-nonterminal">$src_unit</span>:ty, <span class="macro-nonterminal">$dst_unit</span>:ty, <span class="macro-nonterminal">$stride_neither_aligned</span>:ident) =&gt; {
         <span class="attr">#[inline(always)]
         </span><span class="kw">pub unsafe fn </span><span class="macro-nonterminal">$name</span>(
@@ -2275,7 +2275,7 @@
 }
 
 <span class="attr">#[allow(unused_macros)]
-</span><span class="macro">macro_rules! </span>latin1_simd_unalign {
+</span><span class="macro">macro_rules!</span> latin1_simd_unalign {
     (<span class="macro-nonterminal">$name</span>:ident, <span class="macro-nonterminal">$src_unit</span>:ty, <span class="macro-nonterminal">$dst_unit</span>:ty, <span class="macro-nonterminal">$stride_neither_aligned</span>:ident) =&gt; {
         <span class="attr">#[inline(always)]
         </span><span class="kw">pub unsafe fn </span><span class="macro-nonterminal">$name</span>(src: <span class="kw-2">*const </span><span class="macro-nonterminal">$src_unit</span>, dst: <span class="kw-2">*mut </span><span class="macro-nonterminal">$dst_unit</span>, len: usize) {
@@ -2300,7 +2300,7 @@
 }
 
 <span class="attr">#[allow(unused_macros)]
-</span><span class="macro">macro_rules! </span>ascii_to_ascii_simd_stride {
+</span><span class="macro">macro_rules!</span> ascii_to_ascii_simd_stride {
     (<span class="macro-nonterminal">$name</span>:ident, <span class="macro-nonterminal">$load</span>:ident, <span class="macro-nonterminal">$store</span>:ident) =&gt; {
         <span class="attr">#[inline(always)]
         </span><span class="kw">pub unsafe fn </span><span class="macro-nonterminal">$name</span>(src: <span class="kw-2">*const </span>u8, dst: <span class="kw-2">*mut </span>u8) -&gt; bool {
@@ -2315,7 +2315,7 @@
 }
 
 <span class="attr">#[allow(unused_macros)]
-</span><span class="macro">macro_rules! </span>ascii_to_ascii_simd_double_stride {
+</span><span class="macro">macro_rules!</span> ascii_to_ascii_simd_double_stride {
     (<span class="macro-nonterminal">$name</span>:ident, <span class="macro-nonterminal">$store</span>:ident) =&gt; {
         <span class="attr">#[inline(always)]
         </span><span class="kw">pub unsafe fn </span><span class="macro-nonterminal">$name</span>(src: <span class="kw-2">*const </span>u8, dst: <span class="kw-2">*mut </span>u8) -&gt; <span class="prelude-ty">Option</span>&lt;usize&gt; {
@@ -2338,7 +2338,7 @@
 }
 
 <span class="attr">#[allow(unused_macros)]
-</span><span class="macro">macro_rules! </span>ascii_to_basic_latin_simd_stride {
+</span><span class="macro">macro_rules!</span> ascii_to_basic_latin_simd_stride {
     (<span class="macro-nonterminal">$name</span>:ident, <span class="macro-nonterminal">$load</span>:ident, <span class="macro-nonterminal">$store</span>:ident) =&gt; {
         <span class="attr">#[inline(always)]
         </span><span class="kw">pub unsafe fn </span><span class="macro-nonterminal">$name</span>(src: <span class="kw-2">*const </span>u8, dst: <span class="kw-2">*mut </span>u16) -&gt; bool {
@@ -2355,7 +2355,7 @@
 }
 
 <span class="attr">#[allow(unused_macros)]
-</span><span class="macro">macro_rules! </span>ascii_to_basic_latin_simd_double_stride {
+</span><span class="macro">macro_rules!</span> ascii_to_basic_latin_simd_double_stride {
     (<span class="macro-nonterminal">$name</span>:ident, <span class="macro-nonterminal">$store</span>:ident) =&gt; {
         <span class="attr">#[inline(always)]
         </span><span class="kw">pub unsafe fn </span><span class="macro-nonterminal">$name</span>(src: <span class="kw-2">*const </span>u8, dst: <span class="kw-2">*mut </span>u16) -&gt; <span class="prelude-ty">Option</span>&lt;usize&gt; {
@@ -2384,7 +2384,7 @@
 }
 
 <span class="attr">#[allow(unused_macros)]
-</span><span class="macro">macro_rules! </span>unpack_simd_stride {
+</span><span class="macro">macro_rules!</span> unpack_simd_stride {
     (<span class="macro-nonterminal">$name</span>:ident, <span class="macro-nonterminal">$load</span>:ident, <span class="macro-nonterminal">$store</span>:ident) =&gt; {
         <span class="attr">#[inline(always)]
         </span><span class="kw">pub unsafe fn </span><span class="macro-nonterminal">$name</span>(src: <span class="kw-2">*const </span>u8, dst: <span class="kw-2">*mut </span>u16) {
@@ -2397,7 +2397,7 @@
 }
 
 <span class="attr">#[allow(unused_macros)]
-</span><span class="macro">macro_rules! </span>basic_latin_to_ascii_simd_stride {
+</span><span class="macro">macro_rules!</span> basic_latin_to_ascii_simd_stride {
     (<span class="macro-nonterminal">$name</span>:ident, <span class="macro-nonterminal">$load</span>:ident, <span class="macro-nonterminal">$store</span>:ident) =&gt; {
         <span class="attr">#[inline(always)]
         </span><span class="kw">pub unsafe fn </span><span class="macro-nonterminal">$name</span>(src: <span class="kw-2">*const </span>u16, dst: <span class="kw-2">*mut </span>u8) -&gt; bool {
@@ -2414,7 +2414,7 @@
 }
 
 <span class="attr">#[allow(unused_macros)]
-</span><span class="macro">macro_rules! </span>pack_simd_stride {
+</span><span class="macro">macro_rules!</span> pack_simd_stride {
     (<span class="macro-nonterminal">$name</span>:ident, <span class="macro-nonterminal">$load</span>:ident, <span class="macro-nonterminal">$store</span>:ident) =&gt; {
         <span class="attr">#[inline(always)]
         </span><span class="kw">pub unsafe fn </span><span class="macro-nonterminal">$name</span>(src: <span class="kw-2">*const </span>u16, dst: <span class="kw-2">*mut </span>u8) {
@@ -2425,7 +2425,7 @@
     };
 }
 
-<span class="macro">cfg_if! </span>{
+<span class="macro">cfg_if!</span> {
     <span class="kw">if </span><span class="attr">#[cfg(all(feature = <span class="string">"simd-accel"</span>, target_endian = <span class="string">"little"</span>, target_arch = <span class="string">"aarch64"</span>))] </span>{
         <span class="comment">// SIMD with the same instructions for aligned and unaligned loads and stores
 
@@ -2742,7 +2742,7 @@
     }
 }
 
-<span class="macro">cfg_if! </span>{
+<span class="macro">cfg_if!</span> {
     <span class="kw">if </span><span class="attr">#[cfg(target_endian = <span class="string">"little"</span>)] </span>{
         <span class="attr">#[allow(dead_code)]
         #[inline(always)]
@@ -2758,7 +2758,7 @@
     }
 }
 
-<span class="macro">cfg_if! </span>{
+<span class="macro">cfg_if!</span> {
     <span class="kw">if </span><span class="attr">#[cfg(all(feature = <span class="string">"simd-accel"</span>, target_endian = <span class="string">"little"</span>, target_arch = <span class="string">"disabled"</span>))] </span>{
         <span class="attr">#[inline(always)]
         </span><span class="kw">pub fn </span>validate_ascii(slice: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Option</span>&lt;(u8, usize)&gt; {
@@ -2962,7 +2962,7 @@
     }
 }
 
-<span class="macro">cfg_if! </span>{
+<span class="macro">cfg_if!</span> {
     <span class="kw">if </span><span class="attr">#[cfg(all(feature = <span class="string">"simd-accel"</span>, any(target_feature = <span class="string">"sse2"</span>, all(target_endian = <span class="string">"little"</span>, target_arch = <span class="string">"aarch64"</span>))))] </span>{
 
     } <span class="kw">else if </span><span class="attr">#[cfg(all(feature = <span class="string">"simd-accel"</span>, target_endian = <span class="string">"little"</span>, target_feature = <span class="string">"neon"</span>))] </span>{
@@ -3059,7 +3059,7 @@
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
     <span class="kw">use </span>alloc::vec::Vec;
 
-    <span class="macro">macro_rules! </span>test_ascii {
+    <span class="macro">macro_rules!</span> test_ascii {
         (<span class="macro-nonterminal">$test_name</span>:ident, <span class="macro-nonterminal">$fn_tested</span>:ident, <span class="macro-nonterminal">$src_unit</span>:ty, <span class="macro-nonterminal">$dst_unit</span>:ty) =&gt; {
             <span class="attr">#[test]
             </span><span class="kw">fn </span><span class="macro-nonterminal">$test_name</span>() {

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/httparse-1.8.0/src/lib.rs`."><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-b1a3e7f8283b8434.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="httparse" data-themes="" data-resource-suffix="" data-rustdoc-version="1.77.0-nightly (5d3d3479d 2024-01-23)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-48f368f3872407c8.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/httparse-1.8.0/src/lib.rs`."><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e935ef01ae1c1829.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="httparse" data-themes="" data-resource-suffix="" data-rustdoc-version="1.78.0-nightly (2dceda4f3 2024-03-01)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-4c98445ec4002617.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-12cf3b4f4f9dc36d.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
             <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
     <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../httparse/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
@@ -3206,7 +3206,7 @@
 
     <span class="kw">let </span><span class="kw-2">mut </span>iter = autoshrink.headers.iter_mut();
 
-    <span class="macro">macro_rules! </span>maybe_continue_after_obsolete_line_folding {
+    <span class="macro">macro_rules!</span> maybe_continue_after_obsolete_line_folding {
         (<span class="macro-nonterminal">$bytes</span>:ident, <span class="macro-nonterminal">$label</span>:lifetime) =&gt; {
             <span class="kw">if </span>config.allow_obsolete_multiline_headers_in_responses {
                 <span class="kw">match </span><span class="macro-nonterminal">$bytes</span>.peek() {
@@ -3235,7 +3235,7 @@
         <span class="comment">// Return the error `$err` if `ignore_invalid_headers_in_responses`
         // is false, otherwise find the end of the current line and resume
         // parsing on the next one.
-        </span><span class="macro">macro_rules! </span>handle_invalid_char {
+        </span><span class="macro">macro_rules!</span> handle_invalid_char {
             (<span class="macro-nonterminal">$bytes</span>:ident, <span class="macro-nonterminal">$b</span>:ident, <span class="macro-nonterminal">$err</span>:ident) =&gt; {
                 <span class="kw">if </span>!config.ignore_invalid_headers_in_responses {
                     <span class="kw">return </span><span class="prelude-val">Err</span>(Error::<span class="macro-nonterminal">$err</span>);
@@ -3349,7 +3349,7 @@
 
                 <span class="lifetime">'value_line</span>: <span class="kw">loop </span>{
                     <span class="kw">if let </span><span class="prelude-val">Some</span>(bytes8) = bytes.peek_n::&lt;[u8; <span class="number">8</span>]&gt;(<span class="number">8</span>) {
-                        <span class="macro">macro_rules! </span>check {
+                        <span class="macro">macro_rules!</span> check {
                             (<span class="macro-nonterminal">$bytes</span>:ident, <span class="macro-nonterminal">$i</span>:literal) =&gt; ({
                                 b = <span class="macro-nonterminal">$bytes</span>[<span class="macro-nonterminal">$i</span>];
                                 <span class="kw">if </span>!is_header_value_token(b) {
@@ -3509,9 +3509,9 @@
 
     <span class="kw">const </span>NUM_OF_HEADERS: usize = <span class="number">4</span>;
 
-    <span class="macro">macro_rules! </span>req {
+    <span class="macro">macro_rules!</span> req {
         (<span class="macro-nonterminal">$name</span>:ident, <span class="macro-nonterminal">$buf</span>:expr, |<span class="macro-nonterminal">$arg</span>:ident| <span class="macro-nonterminal">$body</span>:expr) =&gt; (
-            <span class="macro">req! </span>{<span class="macro-nonterminal">$name</span>, <span class="macro-nonterminal">$buf</span>, <span class="prelude-val">Ok</span>(Status::Complete(<span class="macro-nonterminal">$buf</span>.len())), |<span class="macro-nonterminal">$arg</span>| <span class="macro-nonterminal">$body </span>}
+            <span class="macro">req!</span> {<span class="macro-nonterminal">$name</span>, <span class="macro-nonterminal">$buf</span>, <span class="prelude-val">Ok</span>(Status::Complete(<span class="macro-nonterminal">$buf</span>.len())), |<span class="macro-nonterminal">$arg</span>| <span class="macro-nonterminal">$body </span>}
         );
         (<span class="macro-nonterminal">$name</span>:ident, <span class="macro-nonterminal">$buf</span>:expr, <span class="macro-nonterminal">$len</span>:expr, |<span class="macro-nonterminal">$arg</span>:ident| <span class="macro-nonterminal">$body</span>:expr) =&gt; (
         <span class="attr">#[test]
@@ -3529,7 +3529,7 @@
         )
     }
 
-    <span class="macro">req! </span>{
+    <span class="macro">req!</span> {
         test_request_simple,
         <span class="string">b"GET / HTTP/1.1\r\n\r\n"</span>,
         |req| {
@@ -3540,7 +3540,7 @@
         }
     }
 
-    <span class="macro">req! </span>{
+    <span class="macro">req!</span> {
         test_request_simple_with_query_params,
         <span class="string">b"GET /thing?data=a HTTP/1.1\r\n\r\n"</span>,
         |req| {
@@ -3551,7 +3551,7 @@
         }
     }
 
-    <span class="macro">req! </span>{
+    <span class="macro">req!</span> {
         test_request_simple_with_whatwg_query_params,
         <span class="string">b"GET /thing?data=a^ HTTP/1.1\r\n\r\n"</span>,
         |req| {
@@ -3562,7 +3562,7 @@
         }
     }
 
-    <span class="macro">req! </span>{
+    <span class="macro">req!</span> {
         test_request_headers,
         <span class="string">b"GET / HTTP/1.1\r\nHost: foo.com\r\nCookie: \r\n\r\n"</span>,
         |req| {
@@ -3577,7 +3577,7 @@
         }
     }
 
-    <span class="macro">req! </span>{
+    <span class="macro">req!</span> {
         test_request_headers_optional_whitespace,
         <span class="string">b"GET / HTTP/1.1\r\nHost: \tfoo.com\t \r\nCookie: \t \r\n\r\n"</span>,
         |req| {
@@ -3592,7 +3592,7 @@
         }
     }
 
-    <span class="macro">req! </span>{
+    <span class="macro">req!</span> {
         <span class="comment">// test the scalar parsing
         </span>test_request_header_value_htab_short,
         <span class="string">b"GET / HTTP/1.1\r\nUser-Agent: some\tagent\r\n\r\n"</span>,
@@ -3606,7 +3606,7 @@
         }
     }
 
-    <span class="macro">req! </span>{
+    <span class="macro">req!</span> {
         <span class="comment">// test the sse42 parsing
         </span>test_request_header_value_htab_med,
         <span class="string">b"GET / HTTP/1.1\r\nUser-Agent: 1234567890some\tagent\r\n\r\n"</span>,
@@ -3620,7 +3620,7 @@
         }
     }
 
-    <span class="macro">req! </span>{
+    <span class="macro">req!</span> {
         <span class="comment">// test the avx2 parsing
         </span>test_request_header_value_htab_long,
         <span class="string">b"GET / HTTP/1.1\r\nUser-Agent: 1234567890some\t1234567890agent1234567890\r\n\r\n"</span>,
@@ -3634,7 +3634,7 @@
         }
     }
 
-    <span class="macro">req! </span>{
+    <span class="macro">req!</span> {
         test_request_headers_max,
         <span class="string">b"GET / HTTP/1.1\r\nA: A\r\nB: B\r\nC: C\r\nD: D\r\n\r\n"</span>,
         |req| {
@@ -3642,7 +3642,7 @@
         }
     }
 
-    <span class="macro">req! </span>{
+    <span class="macro">req!</span> {
         test_request_multibyte,
         <span class="string">b"GET / HTTP/1.1\r\nHost: foo.com\r\nUser-Agent: \xe3\x81\xb2\xe3/1.0\r\n\r\n"</span>,
         |req| {
@@ -3658,19 +3658,19 @@
     }
 
 
-    <span class="macro">req! </span>{
+    <span class="macro">req!</span> {
         test_request_partial,
         <span class="string">b"GET / HTTP/1.1\r\n\r"</span>, <span class="prelude-val">Ok</span>(Status::Partial),
         |_req| {}
     }
 
-    <span class="macro">req! </span>{
+    <span class="macro">req!</span> {
         test_request_partial_version,
         <span class="string">b"GET / HTTP/1."</span>, <span class="prelude-val">Ok</span>(Status::Partial),
         |_req| {}
     }
 
-    <span class="macro">req! </span>{
+    <span class="macro">req!</span> {
         test_request_partial_parses_headers_as_much_as_it_can,
         <span class="string">b"GET / HTTP/1.1\r\nHost: yolo\r\n"</span>,
         <span class="prelude-val">Ok</span>(<span class="kw">crate</span>::Status::Partial),
@@ -3684,13 +3684,13 @@
         }
     }
 
-    <span class="macro">req! </span>{
+    <span class="macro">req!</span> {
         test_request_newlines,
         <span class="string">b"GET / HTTP/1.1\nHost: foo.bar\n\n"</span>,
         |_r| {}
     }
 
-    <span class="macro">req! </span>{
+    <span class="macro">req!</span> {
         test_request_empty_lines_prefix,
         <span class="string">b"\r\n\r\nGET / HTTP/1.1\r\n\r\n"</span>,
         |req| {
@@ -3701,7 +3701,7 @@
         }
     }
 
-    <span class="macro">req! </span>{
+    <span class="macro">req!</span> {
         test_request_empty_lines_prefix_lf_only,
         <span class="string">b"\n\nGET / HTTP/1.1\n\n"</span>,
         |req| {
@@ -3712,7 +3712,7 @@
         }
     }
 
-    <span class="macro">req! </span>{
+    <span class="macro">req!</span> {
         test_request_path_backslash,
         <span class="string">b"\n\nGET /\\?wayne\\=5 HTTP/1.1\n\n"</span>,
         |req| {
@@ -3723,7 +3723,7 @@
         }
     }
 
-    <span class="macro">req! </span>{
+    <span class="macro">req!</span> {
         test_request_with_invalid_token_delimiter,
         <span class="string">b"GET\n/ HTTP/1.1\r\nHost: foo.bar\r\n\r\n"</span>,
         <span class="prelude-val">Err</span>(<span class="kw">crate</span>::Error::Token),
@@ -3731,37 +3731,37 @@
     }
 
 
-    <span class="macro">req! </span>{
+    <span class="macro">req!</span> {
         test_request_with_invalid_but_short_version,
         <span class="string">b"GET / HTTP/1!"</span>,
         <span class="prelude-val">Err</span>(<span class="kw">crate</span>::Error::Version),
         |_r| {}
     }
 
-    <span class="macro">req! </span>{
+    <span class="macro">req!</span> {
         test_request_with_empty_method,
         <span class="string">b" / HTTP/1.1\r\n\r\n"</span>,
         <span class="prelude-val">Err</span>(<span class="kw">crate</span>::Error::Token),
         |_r| {}
     }
 
-    <span class="macro">req! </span>{
+    <span class="macro">req!</span> {
         test_request_with_empty_path,
         <span class="string">b"GET  HTTP/1.1\r\n\r\n"</span>,
         <span class="prelude-val">Err</span>(<span class="kw">crate</span>::Error::Token),
         |_r| {}
     }
 
-    <span class="macro">req! </span>{
+    <span class="macro">req!</span> {
         test_request_with_empty_method_and_path,
         <span class="string">b"  HTTP/1.1\r\n\r\n"</span>,
         <span class="prelude-val">Err</span>(<span class="kw">crate</span>::Error::Token),
         |_r| {}
     }
 
-    <span class="macro">macro_rules! </span>res {
+    <span class="macro">macro_rules!</span> res {
         (<span class="macro-nonterminal">$name</span>:ident, <span class="macro-nonterminal">$buf</span>:expr, |<span class="macro-nonterminal">$arg</span>:ident| <span class="macro-nonterminal">$body</span>:expr) =&gt; (
-            <span class="macro">res! </span>{<span class="macro-nonterminal">$name</span>, <span class="macro-nonterminal">$buf</span>, <span class="prelude-val">Ok</span>(Status::Complete(<span class="macro-nonterminal">$buf</span>.len())), |<span class="macro-nonterminal">$arg</span>| <span class="macro-nonterminal">$body </span>}
+            <span class="macro">res!</span> {<span class="macro-nonterminal">$name</span>, <span class="macro-nonterminal">$buf</span>, <span class="prelude-val">Ok</span>(Status::Complete(<span class="macro-nonterminal">$buf</span>.len())), |<span class="macro-nonterminal">$arg</span>| <span class="macro-nonterminal">$body </span>}
         );
         (<span class="macro-nonterminal">$name</span>:ident, <span class="macro-nonterminal">$buf</span>:expr, <span class="macro-nonterminal">$len</span>:expr, |<span class="macro-nonterminal">$arg</span>:ident| <span class="macro-nonterminal">$body</span>:expr) =&gt; (
         <span class="attr">#[test]
@@ -3779,7 +3779,7 @@
         )
     }
 
-    <span class="macro">res! </span>{
+    <span class="macro">res!</span> {
         test_response_simple,
         <span class="string">b"HTTP/1.1 200 OK\r\n\r\n"</span>,
         |res| {
@@ -3789,13 +3789,13 @@
         }
     }
 
-    <span class="macro">res! </span>{
+    <span class="macro">res!</span> {
         test_response_newlines,
         <span class="string">b"HTTP/1.0 403 Forbidden\nServer: foo.bar\n\n"</span>,
         |_r| {}
     }
 
-    <span class="macro">res! </span>{
+    <span class="macro">res!</span> {
         test_response_reason_missing,
         <span class="string">b"HTTP/1.1 200 \r\n\r\n"</span>,
         |res| {
@@ -3805,7 +3805,7 @@
         }
     }
 
-    <span class="macro">res! </span>{
+    <span class="macro">res!</span> {
         test_response_reason_missing_no_space,
         <span class="string">b"HTTP/1.1 200\r\n\r\n"</span>,
         |res| {
@@ -3815,7 +3815,7 @@
         }
     }
 
-    <span class="macro">res! </span>{
+    <span class="macro">res!</span> {
         test_response_reason_missing_no_space_with_headers,
         <span class="string">b"HTTP/1.1 200\r\nFoo: bar\r\n\r\n"</span>,
         |res| {
@@ -3828,7 +3828,7 @@
         }
     }
 
-    <span class="macro">res! </span>{
+    <span class="macro">res!</span> {
         test_response_reason_with_space_and_tab,
         <span class="string">b"HTTP/1.1 101 Switching Protocols\t\r\n\r\n"</span>,
         |res| {
@@ -3839,7 +3839,7 @@
     }
 
     <span class="kw">static </span>RESPONSE_REASON_WITH_OBS_TEXT_BYTE: <span class="kw-2">&amp;</span>[u8] = <span class="string">b"HTTP/1.1 200 X\xFFZ\r\n\r\n"</span>;
-    <span class="macro">res! </span>{
+    <span class="macro">res!</span> {
         test_response_reason_with_obsolete_text_byte,
         RESPONSE_REASON_WITH_OBS_TEXT_BYTE,
         |res| {
@@ -3850,28 +3850,28 @@
         }
     }
 
-    <span class="macro">res! </span>{
+    <span class="macro">res!</span> {
         test_response_reason_with_nul_byte,
         <span class="string">b"HTTP/1.1 200 \x00\r\n\r\n"</span>,
         <span class="prelude-val">Err</span>(<span class="kw">crate</span>::Error::Status),
         |_res| {}
     }
 
-    <span class="macro">res! </span>{
+    <span class="macro">res!</span> {
         test_response_version_missing_space,
         <span class="string">b"HTTP/1.1"</span>,
         <span class="prelude-val">Ok</span>(Status::Partial),
         |_res| {}
     }
 
-    <span class="macro">res! </span>{
+    <span class="macro">res!</span> {
         test_response_code_missing_space,
         <span class="string">b"HTTP/1.1 200"</span>,
         <span class="prelude-val">Ok</span>(Status::Partial),
         |_res| {}
     }
 
-    <span class="macro">res! </span>{
+    <span class="macro">res!</span> {
         test_response_partial_parses_headers_as_much_as_it_can,
         <span class="string">b"HTTP/1.1 200 OK\r\nServer: yolo\r\n"</span>,
         <span class="prelude-val">Ok</span>(<span class="kw">crate</span>::Status::Partial),
@@ -3885,13 +3885,13 @@
         }
     }
 
-    <span class="macro">res! </span>{
+    <span class="macro">res!</span> {
         test_response_empty_lines_prefix_lf_only,
         <span class="string">b"\n\nHTTP/1.1 200 OK\n\n"</span>,
         |_res| {}
     }
 
-    <span class="macro">res! </span>{
+    <span class="macro">res!</span> {
         test_response_no_cr,
         <span class="string">b"HTTP/1.0 200\nContent-type: text/html\n\n"</span>,
         |res| {

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde_derive-1.0.193/src/ser.rs`."><title>ser.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-b1a3e7f8283b8434.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="serde_derive" data-themes="" data-resource-suffix="" data-rustdoc-version="1.77.0-nightly (5d3d3479d 2024-01-23)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-48f368f3872407c8.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde_derive-1.0.193/src/ser.rs`."><title>ser.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-e935ef01ae1c1829.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="serde_derive" data-themes="" data-resource-suffix="" data-rustdoc-version="1.78.0-nightly (2dceda4f3 2024-03-01)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-4c98445ec4002617.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-12cf3b4f4f9dc36d.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
             <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
     <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../serde_derive/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
@@ -1388,7 +1388,7 @@
     <span class="kw">let </span>impl_block = <span class="kw">if let </span><span class="prelude-val">Some</span>(remote) = cont.attrs.remote() {
         <span class="kw">let </span>vis = <span class="kw-2">&amp;</span>input.vis;
         <span class="kw">let </span>used = pretend::pretend_used(<span class="kw-2">&amp;</span>cont, params.is_packed);
-        <span class="macro">quote! </span>{
+        <span class="macro">quote!</span> {
             <span class="kw">impl </span>#impl_generics #ident #ty_generics #where_clause {
                 #vis <span class="kw">fn </span>serialize&lt;__S&gt;(__self: <span class="kw-2">&amp;</span>#remote #ty_generics, __serializer: __S) -&gt; #serde::__private::Result&lt;__S::Ok, __S::Error&gt;
                 <span class="kw">where
@@ -1400,7 +1400,7 @@
             }
         }
     } <span class="kw">else </span>{
-        <span class="macro">quote! </span>{
+        <span class="macro">quote!</span> {
             <span class="attr">#[automatically_derived]
             </span><span class="kw">impl </span>#impl_generics #serde::Serialize <span class="kw">for </span>#ident #ty_generics #where_clause {
                 <span class="kw">fn </span>serialize&lt;__S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, __serializer: __S) -&gt; #serde::__private::Result&lt;__S::Ok, __S::Error&gt;
@@ -1562,14 +1562,14 @@
         }
     };
 
-    <span class="macro">quote_block! </span>{
+    <span class="macro">quote_block!</span> {
         #path(<span class="kw-2">&amp;</span>#self_var.#member, __serializer)
     }
 }
 
 <span class="kw">fn </span>serialize_into(params: <span class="kw-2">&amp;</span>Parameters, type_into: <span class="kw-2">&amp;</span>syn::Type) -&gt; Fragment {
     <span class="kw">let </span>self_var = <span class="kw-2">&amp;</span>params.self_var;
-    <span class="macro">quote_block! </span>{
+    <span class="macro">quote_block!</span> {
         _serde::Serialize::serialize(
             <span class="kw-2">&amp;</span>_serde::__private::Into::&lt;#type_into&gt;::into(_serde::__private::Clone::clone(#self_var)),
             __serializer)
@@ -1579,7 +1579,7 @@
 <span class="kw">fn </span>serialize_unit_struct(cattrs: <span class="kw-2">&amp;</span>attr::Container) -&gt; Fragment {
     <span class="kw">let </span>type_name = cattrs.name().serialize_name();
 
-    <span class="macro">quote_expr! </span>{
+    <span class="macro">quote_expr!</span> {
         _serde::Serializer::serialize_unit_struct(__serializer, #type_name)
     }
 }
@@ -1605,7 +1605,7 @@
 
     <span class="kw">let </span>span = field.original.span();
     <span class="kw">let </span>func = <span class="macro">quote_spanned!</span>(span=&gt; _serde::Serializer::serialize_newtype_struct);
-    <span class="macro">quote_expr! </span>{
+    <span class="macro">quote_expr!</span> {
         #func(__serializer, #type_name, #field_expr)
     }
 }
@@ -1642,7 +1642,7 @@
         })
         .fold(<span class="macro">quote!</span>(<span class="number">0</span>), |sum, expr| <span class="macro">quote!</span>(#sum + #expr));
 
-    <span class="macro">quote_block! </span>{
+    <span class="macro">quote_block!</span> {
         <span class="kw">let </span>#let_mut __serde_state = _serde::Serializer::serialize_tuple_struct(__serializer, #type_name, #len)<span class="question-mark">?</span>;
         #(#serialize_stmts)*
         _serde::ser::SerializeTupleStruct::end(__serde_state)
@@ -1664,11 +1664,11 @@
         attr::TagType::Internal { tag } =&gt; {
             <span class="kw">let </span>type_name = cattrs.name().serialize_name();
             <span class="kw">let </span>func = struct_trait.serialize_field(Span::call_site());
-            <span class="macro">quote! </span>{
+            <span class="macro">quote!</span> {
                 #func(<span class="kw-2">&amp;mut </span>__serde_state, #tag, #type_name)<span class="question-mark">?</span>;
             }
         }
-        <span class="kw">_ </span>=&gt; <span class="macro">quote! </span>{},
+        <span class="kw">_ </span>=&gt; <span class="macro">quote!</span> {},
     }
 }
 
@@ -1705,7 +1705,7 @@
             |sum, expr| <span class="macro">quote!</span>(#sum + #expr),
         );
 
-    <span class="macro">quote_block! </span>{
+    <span class="macro">quote_block!</span> {
         <span class="kw">let </span>#let_mut __serde_state = _serde::Serializer::serialize_struct(__serializer, #type_name, #len)<span class="question-mark">?</span>;
         #tag_field
         #(#serialize_fields)*
@@ -1749,7 +1749,7 @@
         <span class="macro">quote!</span>(_serde::__private::Some(#len))
     };
 
-    <span class="macro">quote_block! </span>{
+    <span class="macro">quote_block!</span> {
         <span class="kw">let </span>#let_mut __serde_state = _serde::Serializer::serialize_map(__serializer, #len)<span class="question-mark">?</span>;
         #tag_field
         #(#serialize_fields)*
@@ -1771,12 +1771,12 @@
         .collect();
 
     <span class="kw">if </span>cattrs.remote().is_some() &amp;&amp; cattrs.non_exhaustive() {
-        arms.push(<span class="macro">quote! </span>{
+        arms.push(<span class="macro">quote!</span> {
             <span class="kw-2">ref </span>unrecognized =&gt; _serde::__private::Err(_serde::ser::Error::custom(_serde::__private::ser::CannotSerializeVariant(unrecognized))),
         });
     }
 
-    <span class="macro">quote_expr! </span>{
+    <span class="macro">quote_expr!</span> {
         <span class="kw">match </span><span class="kw-2">*</span>#self_var {
             #(#arms)*
         }
@@ -1798,7 +1798,7 @@
             params.type_name(),
             variant_ident
         );
-        <span class="kw">let </span>skipped_err = <span class="macro">quote! </span>{
+        <span class="kw">let </span>skipped_err = <span class="macro">quote!</span> {
             _serde::__private::Err(_serde::ser::Error::custom(#skipped_msg))
         };
         <span class="kw">let </span>fields_pat = <span class="kw">match </span>variant.style {
@@ -1806,32 +1806,32 @@
             Style::Newtype | Style::Tuple =&gt; <span class="macro">quote!</span>((..)),
             Style::Struct =&gt; <span class="macro">quote!</span>({ .. }),
         };
-        <span class="macro">quote! </span>{
+        <span class="macro">quote!</span> {
             #this_value::#variant_ident #fields_pat =&gt; #skipped_err,
         }
     } <span class="kw">else </span>{
         <span class="comment">// variant wasn't skipped
         </span><span class="kw">let </span>case = <span class="kw">match </span>variant.style {
             Style::Unit =&gt; {
-                <span class="macro">quote! </span>{
+                <span class="macro">quote!</span> {
                     #this_value::#variant_ident
                 }
             }
             Style::Newtype =&gt; {
-                <span class="macro">quote! </span>{
+                <span class="macro">quote!</span> {
                     #this_value::#variant_ident(<span class="kw-2">ref </span>__field0)
                 }
             }
             Style::Tuple =&gt; {
                 <span class="kw">let </span>field_names = (<span class="number">0</span>..variant.fields.len())
                     .map(|i| Ident::new(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"__field{}"</span>, i), Span::call_site()));
-                <span class="macro">quote! </span>{
+                <span class="macro">quote!</span> {
                     #this_value::#variant_ident(#(<span class="kw-2">ref </span>#field_names),<span class="kw-2">*</span>)
                 }
             }
             Style::Struct =&gt; {
                 <span class="kw">let </span>members = variant.fields.iter().map(|f| <span class="kw-2">&amp;</span>f.member);
-                <span class="macro">quote! </span>{
+                <span class="macro">quote!</span> {
                     #this_value::#variant_ident { #(<span class="kw-2">ref </span>#members),* }
                 }
             }
@@ -1859,7 +1859,7 @@
             }
         });
 
-        <span class="macro">quote! </span>{
+        <span class="macro">quote!</span> {
             #case =&gt; #body
         }
     }
@@ -1876,7 +1876,7 @@
 
     <span class="kw">if let </span><span class="prelude-val">Some</span>(path) = variant.attrs.serialize_with() {
         <span class="kw">let </span>ser = wrap_serialize_variant_with(params, path, variant);
-        <span class="kw">return </span><span class="macro">quote_expr! </span>{
+        <span class="kw">return </span><span class="macro">quote_expr!</span> {
             _serde::Serializer::serialize_newtype_variant(
                 __serializer,
                 #type_name,
@@ -1889,7 +1889,7 @@
 
     <span class="kw">match </span>effective_style(variant) {
         Style::Unit =&gt; {
-            <span class="macro">quote_expr! </span>{
+            <span class="macro">quote_expr!</span> {
                 _serde::Serializer::serialize_unit_variant(
                     __serializer,
                     #type_name,
@@ -1907,7 +1907,7 @@
 
             <span class="kw">let </span>span = field.original.span();
             <span class="kw">let </span>func = <span class="macro">quote_spanned!</span>(span=&gt; _serde::Serializer::serialize_newtype_variant);
-            <span class="macro">quote_expr! </span>{
+            <span class="macro">quote_expr!</span> {
                 #func(
                     __serializer,
                     #type_name,
@@ -1952,7 +1952,7 @@
 
     <span class="kw">if let </span><span class="prelude-val">Some</span>(path) = variant.attrs.serialize_with() {
         <span class="kw">let </span>ser = wrap_serialize_variant_with(params, path, variant);
-        <span class="kw">return </span><span class="macro">quote_expr! </span>{
+        <span class="kw">return </span><span class="macro">quote_expr!</span> {
             _serde::__private::ser::serialize_tagged_newtype(
                 __serializer,
                 #enum_ident_str,
@@ -1966,7 +1966,7 @@
 
     <span class="kw">match </span>effective_style(variant) {
         Style::Unit =&gt; {
-            <span class="macro">quote_block! </span>{
+            <span class="macro">quote_block!</span> {
                 <span class="kw">let </span><span class="kw-2">mut </span>__struct = _serde::Serializer::serialize_struct(
                     __serializer, #type_name, <span class="number">1</span>)<span class="question-mark">?</span>;
                 _serde::ser::SerializeStruct::serialize_field(
@@ -1983,7 +1983,7 @@
 
             <span class="kw">let </span>span = field.original.span();
             <span class="kw">let </span>func = <span class="macro">quote_spanned!</span>(span=&gt; _serde::__private::ser::serialize_tagged_newtype);
-            <span class="macro">quote_expr! </span>{
+            <span class="macro">quote_expr!</span> {
                 #func(
                     __serializer,
                     #enum_ident_str,
@@ -2015,7 +2015,7 @@
     <span class="kw">let </span>this_type = <span class="kw-2">&amp;</span>params.this_type;
     <span class="kw">let </span>type_name = cattrs.name().serialize_name();
     <span class="kw">let </span>variant_name = variant.attrs.name().serialize_name();
-    <span class="kw">let </span>serialize_variant = <span class="macro">quote! </span>{
+    <span class="kw">let </span>serialize_variant = <span class="macro">quote!</span> {
         <span class="kw-2">&amp;</span>_serde::__private::ser::AdjacentlyTaggedEnumVariant {
             enum_name: #type_name,
             variant_index: #variant_index,
@@ -2025,13 +2025,13 @@
 
     <span class="kw">let </span>inner = Stmts(<span class="kw">if let </span><span class="prelude-val">Some</span>(path) = variant.attrs.serialize_with() {
         <span class="kw">let </span>ser = wrap_serialize_variant_with(params, path, variant);
-        <span class="macro">quote_expr! </span>{
+        <span class="macro">quote_expr!</span> {
             _serde::Serialize::serialize(#ser, __serializer)
         }
     } <span class="kw">else </span>{
         <span class="kw">match </span>effective_style(variant) {
             Style::Unit =&gt; {
-                <span class="kw">return </span><span class="macro">quote_block! </span>{
+                <span class="kw">return </span><span class="macro">quote_block!</span> {
                     <span class="kw">let </span><span class="kw-2">mut </span>__struct = _serde::Serializer::serialize_struct(
                         __serializer, #type_name, <span class="number">1</span>)<span class="question-mark">?</span>;
                     _serde::ser::SerializeStruct::serialize_field(
@@ -2048,7 +2048,7 @@
 
                 <span class="kw">let </span>span = field.original.span();
                 <span class="kw">let </span>func = <span class="macro">quote_spanned!</span>(span=&gt; _serde::ser::SerializeStruct::serialize_field);
-                <span class="kw">return </span><span class="macro">quote_block! </span>{
+                <span class="kw">return </span><span class="macro">quote_block!</span> {
                     <span class="kw">let </span><span class="kw-2">mut </span>__struct = _serde::Serializer::serialize_struct(
                         __serializer, #type_name, <span class="number">2</span>)<span class="question-mark">?</span>;
                     _serde::ser::SerializeStruct::serialize_field(
@@ -2095,7 +2095,7 @@
     };
     <span class="kw">let </span>(wrapper_impl_generics, wrapper_ty_generics, <span class="kw">_</span>) = wrapper_generics.split_for_impl();
 
-    <span class="macro">quote_block! </span>{
+    <span class="macro">quote_block!</span> {
         <span class="attr">#[doc(hidden)]
         </span><span class="kw">struct </span>__AdjacentlyTagged #wrapper_generics #where_clause {
             data: (#(<span class="kw-2">&amp;</span><span class="lifetime">'__a </span>#fields_ty,)<span class="kw-2">*</span>),
@@ -2134,14 +2134,14 @@
 ) -&gt; Fragment {
     <span class="kw">if let </span><span class="prelude-val">Some</span>(path) = variant.attrs.serialize_with() {
         <span class="kw">let </span>ser = wrap_serialize_variant_with(params, path, variant);
-        <span class="kw">return </span><span class="macro">quote_expr! </span>{
+        <span class="kw">return </span><span class="macro">quote_expr!</span> {
             _serde::Serialize::serialize(#ser, __serializer)
         };
     }
 
     <span class="kw">match </span>effective_style(variant) {
         Style::Unit =&gt; {
-            <span class="macro">quote_expr! </span>{
+            <span class="macro">quote_expr!</span> {
                 _serde::Serializer::serialize_unit(__serializer)
             }
         }
@@ -2154,7 +2154,7 @@
 
             <span class="kw">let </span>span = field.original.span();
             <span class="kw">let </span>func = <span class="macro">quote_spanned!</span>(span=&gt; _serde::Serialize::serialize);
-            <span class="macro">quote_expr! </span>{
+            <span class="macro">quote_expr!</span> {
                 #func(#field_expr, __serializer)
             }
         }
@@ -2211,7 +2211,7 @@
             variant_index,
             variant_name,
         } =&gt; {
-            <span class="macro">quote_block! </span>{
+            <span class="macro">quote_block!</span> {
                 <span class="kw">let </span>#let_mut __serde_state = _serde::Serializer::serialize_tuple_variant(
                     __serializer,
                     #type_name,
@@ -2223,7 +2223,7 @@
             }
         }
         TupleVariant::Untagged =&gt; {
-            <span class="macro">quote_block! </span>{
+            <span class="macro">quote_block!</span> {
                 <span class="kw">let </span>#let_mut __serde_state = _serde::Serializer::serialize_tuple(
                     __serializer,
                     #len)<span class="question-mark">?</span>;
@@ -2288,7 +2288,7 @@
             variant_index,
             variant_name,
         } =&gt; {
-            <span class="macro">quote_block! </span>{
+            <span class="macro">quote_block!</span> {
                 <span class="kw">let </span>#let_mut __serde_state = _serde::Serializer::serialize_struct_variant(
                     __serializer,
                     #name,
@@ -2301,7 +2301,7 @@
             }
         }
         StructVariant::InternallyTagged { tag, variant_name } =&gt; {
-            <span class="macro">quote_block! </span>{
+            <span class="macro">quote_block!</span> {
                 <span class="kw">let </span><span class="kw-2">mut </span>__serde_state = _serde::Serializer::serialize_struct(
                     __serializer,
                     #name,
@@ -2317,7 +2317,7 @@
             }
         }
         StructVariant::Untagged =&gt; {
-            <span class="macro">quote_block! </span>{
+            <span class="macro">quote_block!</span> {
                 <span class="kw">let </span>#let_mut __serde_state = _serde::Serializer::serialize_struct(
                     __serializer,
                     #name,
@@ -2359,7 +2359,7 @@
             <span class="kw">let </span>wrapper_generics = bound::with_lifetime_bound(<span class="kw-2">&amp;</span>params.generics, <span class="string">"'__a"</span>);
             <span class="kw">let </span>(wrapper_impl_generics, wrapper_ty_generics, <span class="kw">_</span>) = wrapper_generics.split_for_impl();
 
-            <span class="macro">quote_block! </span>{
+            <span class="macro">quote_block!</span> {
                 <span class="attr">#[doc(hidden)]
                 </span><span class="kw">struct </span>__EnumFlatten #wrapper_generics #where_clause {
                     data: (#(<span class="kw-2">&amp;</span><span class="lifetime">'__a </span>#fields_ty,)<span class="kw-2">*</span>),
@@ -2392,7 +2392,7 @@
             }
         }
         StructVariant::InternallyTagged { tag, variant_name } =&gt; {
-            <span class="macro">quote_block! </span>{
+            <span class="macro">quote_block!</span> {
                 <span class="kw">let </span>#let_mut __serde_state = _serde::Serializer::serialize_map(
                     __serializer,
                     _serde::__private::None)<span class="question-mark">?</span>;
@@ -2406,7 +2406,7 @@
             }
         }
         StructVariant::Untagged =&gt; {
-            <span class="macro">quote_block! </span>{
+            <span class="macro">quote_block!</span> {
                 <span class="kw">let </span>#let_mut __serde_state = _serde::Serializer::serialize_map(
                     __serializer,
                     _serde::__private::None)<span class="question-mark">?</span>;
@@ -2453,7 +2453,7 @@
 
             <span class="kw">let </span>span = field.original.span();
             <span class="kw">let </span>func = tuple_trait.serialize_element(span);
-            <span class="kw">let </span>ser = <span class="macro">quote! </span>{
+            <span class="kw">let </span>ser = <span class="macro">quote!</span> {
                 #func(<span class="kw-2">&amp;mut </span>__serde_state, #field_expr)<span class="question-mark">?</span>;
             };
 
@@ -2497,12 +2497,12 @@
             <span class="kw">let </span>span = field.original.span();
             <span class="kw">let </span>ser = <span class="kw">if </span>field.attrs.flatten() {
                 <span class="kw">let </span>func = <span class="macro">quote_spanned!</span>(span=&gt; _serde::Serialize::serialize);
-                <span class="macro">quote! </span>{
+                <span class="macro">quote!</span> {
                     #func(<span class="kw-2">&amp;</span>#field_expr, _serde::__private::ser::FlatMapSerializer(<span class="kw-2">&amp;mut </span>__serde_state))<span class="question-mark">?</span>;
                 }
             } <span class="kw">else </span>{
                 <span class="kw">let </span>func = struct_trait.serialize_field(span);
-                <span class="macro">quote! </span>{
+                <span class="macro">quote!</span> {
                     #func(<span class="kw-2">&amp;mut </span>__serde_state, #key_expr, #field_expr)<span class="question-mark">?</span>;
                 }
             };
@@ -2511,7 +2511,7 @@
                 <span class="prelude-val">None </span>=&gt; ser,
                 <span class="prelude-val">Some</span>(skip) =&gt; {
                     <span class="kw">if let </span><span class="prelude-val">Some</span>(skip_func) = struct_trait.skip_field(span) {
-                        <span class="macro">quote! </span>{
+                        <span class="macro">quote!</span> {
                             <span class="kw">if </span>!#skip {
                                 #ser
                             } <span class="kw">else </span>{
@@ -2519,7 +2519,7 @@
                             }
                         }
                     } <span class="kw">else </span>{
-                        <span class="macro">quote! </span>{
+                        <span class="macro">quote!</span> {
                             <span class="kw">if </span>!#skip {
                                 #ser
                             }
