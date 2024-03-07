@@ -26,8 +26,8 @@ pub enum MessageDispatchTrigger {
 pub struct PrefixContext<'a, U, E> {
     /// The invoking user message
     pub msg: &'a serenity::Message,
-    /// Prefix used by the user to invoke this command
-    pub prefix: &'a str,
+    /// Position in the string that the prefix used by the user to invoke this command ends.
+    pub content_start: u16,
     /// Command name used by the user to invoke this command
     pub invoked_command_name: &'a str,
     /// Entire argument string
@@ -97,12 +97,12 @@ pub struct PrefixFrameworkOptions<U, E> {
     ///
     /// Override this field for advanced dynamic prefixes which change depending on guild or user.
     ///
-    /// Return value is a tuple of the prefix and the rest of the message:
+    /// Return value is the prefix found
     /// ```rust,no_run
     /// # poise::PrefixFrameworkOptions::<(), ()> { stripped_dynamic_prefix: Some(|_, msg, _| Box::pin(async move {
     /// let my_cool_prefix = "$";
     /// if msg.content.starts_with(my_cool_prefix) {
-    ///     return Ok(Some(msg.content.split_at(my_cool_prefix.len())));
+    ///     return Ok(Some(msg.content[..my_cool_prefix.len()]));
     /// }
     /// Ok(None)
     /// # })), ..Default::default() };
@@ -113,7 +113,7 @@ pub struct PrefixFrameworkOptions<U, E> {
             &'a serenity::Context,
             &'a serenity::Message,
             &'a U,
-        ) -> BoxFuture<'a, Result<Option<(&'a str, &'a str)>, E>>,
+        ) -> BoxFuture<'a, Result<Option<&'a str>, E>>,
     >,
     /// Treat a bot mention (a ping) like a prefix
     pub mention_as_prefix: bool,

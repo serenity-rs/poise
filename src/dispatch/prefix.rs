@@ -1,6 +1,16 @@
 //! Dispatches incoming messages and message edits onto framework commands
 
+use std::convert::TryInto as _;
+
 use crate::serenity_prelude as serenity;
+
+/// Converts a prefix string's length into u16, panicking if it doesn't fit.
+fn prefix_len_to_u16(prefix: &str) -> u16 {
+    prefix
+        .len()
+        .try_into()
+        .expect("messages should not be more than 64k bytes, let alone a prefix")
+}
 
 /// Checks if this message is a bot invocation by attempting to strip the prefix
 ///
@@ -8,7 +18,7 @@ use crate::serenity_prelude as serenity;
 async fn strip_prefix<'a, U, E>(
     framework: crate::FrameworkContext<'a, U, E>,
     msg: &'a serenity::Message,
-) -> Option<(&'a str, &'a str)> {
+) -> Option<u16> {
     let partial_ctx = crate::PartialContext {
         guild_id: msg.guild_id,
         channel_id: msg.channel_id,
@@ -22,7 +32,7 @@ async fn strip_prefix<'a, U, E>(
             Ok(prefix) => {
                 if let Some(prefix) = prefix {
                     if msg.content.starts_with(prefix.as_ref()) {
-                        return Some(msg.content.split_at(prefix.len()));
+                        return Some(prefix_len_to_u16(&prefix));
                     }
                 }
             }
@@ -38,22 +48,22 @@ async fn strip_prefix<'a, U, E>(
     }
 
     if let Some(prefix) = framework.options.prefix_options.prefix.as_deref() {
-        if let Some(content) = msg.content.strip_prefix(prefix) {
-            return Some((prefix, content));
+        if msg.content.starts_with(prefix) {
+            return Some(prefix_len_to_u16(prefix));
         }
     }
 
-    if let Some((prefix, content)) = framework
+    if let Some(prefix) = framework
         .options
         .prefix_options
         .additional_prefixes
         .iter()
         .find_map(|prefix| match prefix {
-            &crate::Prefix::Literal(prefix) => Some((prefix, msg.content.strip_prefix(prefix)?)),
+            &crate::Prefix::Literal(prefix) => Some(prefix),
             crate::Prefix::Regex(prefix) => {
                 let regex_match = prefix.find(&msg.content)?;
                 if regex_match.start() == 0 {
-                    Some(msg.content.split_at(regex_match.end()))
+                    Some(&msg.content[..regex_match.end()])
                 } else {
                     None
                 }
@@ -61,16 +71,13 @@ async fn strip_prefix<'a, U, E>(
             crate::Prefix::__NonExhaustive => unreachable!(),
         })
     {
-        return Some((prefix, content));
+        return Some(prefix_len_to_u16(prefix));
     }
 
     if let Some(dynamic_prefix) = framework.options.prefix_options.stripped_dynamic_prefix {
         match dynamic_prefix(framework.serenity_context, msg, framework.user_data).await {
-            Ok(result) => {
-                if let Some((prefix, content)) = result {
-                    return Some((prefix, content));
-                }
-            }
+            Ok(Some(prefix)) => return Some(prefix_len_to_u16(prefix)),
+            Ok(None) => {}
             Err(error) => {
                 (framework.options.on_error)(crate::FrameworkError::DynamicPrefix {
                     error,
@@ -92,7 +99,7 @@ async fn strip_prefix<'a, U, E>(
                 .strip_prefix('>')
         })() {
             let mention_prefix = &msg.content[..(msg.content.len() - stripped_content.len())];
-            return Some((mention_prefix, stripped_content));
+            return Some(prefix_len_to_u16(mention_prefix));
         }
     }
 
@@ -242,11 +249,11 @@ pub async fn parse_invocation<'a, U: Send + Sync, E>(
     }
 
     // Strip prefix, trim whitespace between prefix and rest, split rest into command name and args
-    let (prefix, msg_content) = match strip_prefix(framework, msg).await {
-        Some(x) => x,
-        None => return Ok(None),
+    let Some(content_start) = strip_prefix(framework, msg).await else {
+        return Ok(None);
     };
-    let msg_content = msg_content.trim_start();
+
+    let msg_content = msg.content[content_start.into()..].trim_start();
 
     let (command, invoked_command_name, args) = find_command(
         &framework.options.commands,
@@ -256,8 +263,7 @@ pub async fn parse_invocation<'a, U: Send + Sync, E>(
     )
     .ok_or(crate::FrameworkError::UnknownCommand {
         msg,
-        prefix,
-        msg_content,
+        content_start,
         framework,
         invocation_data,
         trigger,
@@ -269,7 +275,7 @@ pub async fn parse_invocation<'a, U: Send + Sync, E>(
 
     Ok(Some(crate::PrefixContext {
         msg,
-        prefix,
+        content_start,
         invoked_command_name,
         args,
         framework,

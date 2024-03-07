@@ -343,7 +343,7 @@ context_methods! {
     (prefix self)
     (pub fn prefix(self) -> &'a str) {
         match self {
-            Context::Prefix(ctx) => ctx.prefix,
+            Context::Prefix(ctx) => &ctx.msg.content[..ctx.content_start.into()],
             Context::Application(_) => "/",
         }
     }
