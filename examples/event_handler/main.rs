@@ -57,10 +57,12 @@ async fn event_handler(
         }
         serenity::FullEvent::Message { new_message } => {
             if new_message.content.to_lowercase().contains("poise") {
-                let mentions = data.poise_mentions.load(Ordering::SeqCst) + 1;
-                data.poise_mentions.store(mentions, Ordering::SeqCst);
+                let old_mentions = data.poise_mentions.fetch_add(1, Ordering::SeqCst);
                 new_message
-                    .reply(ctx, format!("Poise has been mentioned {} times", mentions))
+                    .reply(
+                        ctx,
+                        format!("Poise has been mentioned {} times", old_mentions + 1),
+                    )
                     .await?;
             }
         }
