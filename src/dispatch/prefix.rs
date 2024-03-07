@@ -263,11 +263,9 @@ pub async fn parse_invocation<'a, U: Send + Sync, E>(
         trigger,
     })?;
 
-    let action = match command.prefix_action {
-        Some(x) => x,
-        // This command doesn't have a prefix implementation
-        None => return Ok(None),
-    };
+    if command.prefix_action.is_none() {
+        return Ok(None);
+    }
 
     Ok(Some(crate::PrefixContext {
         msg,
@@ -279,7 +277,6 @@ pub async fn parse_invocation<'a, U: Send + Sync, E>(
         command,
         invocation_data,
         trigger,
-        action,
         __non_exhaustive: (),
     }))
 }
@@ -289,6 +286,12 @@ pub async fn parse_invocation<'a, U: Send + Sync, E>(
 pub async fn run_invocation<U, E>(
     ctx: crate::PrefixContext<'_, U, E>,
 ) -> Result<(), crate::FrameworkError<'_, U, E>> {
+    // This was already checked in parse_invocation, so this could be an unwrap,
+    // but this is public so we simply early return if there is no prefix action.
+    let Some(prefix_action) = ctx.command.prefix_action else {
+        return Ok(());
+    };
+
     // Check if we should disregard this invocation if it was triggered by an edit
     if ctx.trigger == crate::MessageDispatchTrigger::MessageEdit && !ctx.command.invoke_on_edit {
         return Ok(());
@@ -334,7 +337,7 @@ pub async fn run_invocation<U, E>(
     }
 
     // Execute command
-    (ctx.action)(ctx).await?;
+    (prefix_action)(ctx).await?;
 
     (ctx.framework.options.post_command)(crate::Context::Prefix(ctx)).await;
 

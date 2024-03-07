@@ -45,11 +45,6 @@ pub struct PrefixContext<'a, U, E> {
     pub invocation_data: &'a tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
     /// How this command invocation was triggered
     pub trigger: MessageDispatchTrigger,
-    /// The function that is called to execute the actual command
-    #[derivative(Debug = "ignore")]
-    pub action: fn(
-        PrefixContext<'_, U, E>,
-    ) -> crate::BoxFuture<'_, Result<(), crate::FrameworkError<'_, U, E>>>,
 
     // #[non_exhaustive] forbids struct update syntax for ?? reason
     #[doc(hidden)]
