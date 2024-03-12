@@ -103,7 +103,7 @@ async fn check_permissions_and_cooldown_single<'a, U: Send + Sync + 'static, E>(
             }
         };
 
-        if !channel.is_nsfw() {
+        if !channel.guild().is_some_and(|c| c.nsfw) {
             return Err(crate::FrameworkError::NsfwOnly { ctx });
         }
     }
