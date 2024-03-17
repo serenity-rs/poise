@@ -56,7 +56,9 @@ async fn event_handler(
             println!("Logged in as {}", data_about_bot.user.name);
         }
         serenity::FullEvent::Message { new_message } => {
-            if new_message.content.to_lowercase().contains("poise") {
+            if new_message.content.to_lowercase().contains("poise")
+                && new_message.author.id != ctx.cache.current_user().id
+            {
                 let old_mentions = data.poise_mentions.fetch_add(1, Ordering::SeqCst);
                 new_message
                     .reply(
