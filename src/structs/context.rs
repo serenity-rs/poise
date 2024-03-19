@@ -116,7 +116,7 @@ context_methods! {
             Self::Prefix(ctx) => Some(
                 ctx.msg
                     .channel_id
-                    .start_typing(&ctx.serenity_context().http),
+                    .start_typing(ctx.serenity_context().http.clone()),
             ),
         })
     }
