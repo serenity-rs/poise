@@ -43,7 +43,7 @@ pub async fn info(ctx: Context<'_>) -> Result<(), Error> {
     let response = tr!(ctx, "guild-info",
         name: &*guild.name,
         emojiCount: guild.emojis.len(),
-        emojis: guild.emojis.values().map(|e| e.to_string()).collect::<String>(),
+        emojis: guild.emojis.iter().map(|e| e.to_string()).collect::<String>(),
         roleCount: guild.roles.len(),
         stickerCount: guild.stickers.len(),
     );
