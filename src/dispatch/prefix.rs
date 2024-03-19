@@ -315,7 +315,7 @@ pub async fn run_invocation<U: Send + Sync + 'static, E>(
         Some(
             ctx.msg
                 .channel_id
-                .start_typing(&ctx.framework.serenity_context.http),
+                .start_typing(ctx.framework.serenity_context.http.clone()),
         )
     } else {
         None
