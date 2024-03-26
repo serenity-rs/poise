@@ -150,7 +150,7 @@ async fn help_single_command<U, E>(
             subprefix = Some(format!("  /{}", command.name));
         }
         if command.prefix_action.is_some() {
-            let prefix = match get_prefix_from_options(ctx).await.unwrap_or_default();
+            let prefix = get_prefix_from_options(ctx).await.unwrap_or_default();
             invocations.push(format!("`{}{}`", prefix, command.name));
             if subprefix.is_none() {
                 subprefix = Some(format!("  {}{}", prefix, command.name));
