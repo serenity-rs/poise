@@ -150,13 +150,7 @@ async fn help_single_command<U, E>(
             subprefix = Some(format!("  /{}", command.name));
         }
         if command.prefix_action.is_some() {
-            let prefix = match get_prefix_from_options(ctx).await {
-                Some(prefix) => prefix,
-                // None can happen if the prefix is dynamic, and the callback
-                // fails due to help being invoked with slash or context menu
-                // commands. Not sure there's a better way to handle this.
-                None => String::from("<prefix>"),
-            };
+            let prefix = match get_prefix_from_options(ctx).await.unwrap_or_default();
             invocations.push(format!("`{}{}`", prefix, command.name));
             if subprefix.is_none() {
                 subprefix = Some(format!("  {}{}", prefix, command.name));
