@@ -1,5 +1,4 @@
 use poise::builtins::get_replied_user;
-use poise::samples::RepliedUserConfiguration;
 
 use poise::serenity_prelude as serenity;
 
@@ -15,8 +14,7 @@ async fn avatar(
         serenity::User,
     >,
 ) -> Result<(), Error> {
-    let config = RepliedUserConfiguration::default();
-    let replied_user = get_replied_user(ctx, user, config);
+    let replied_user = get_replied_user(ctx, user);
 
     let u = replied_user.as_ref().unwrap_or_else(|| ctx.author());
 
