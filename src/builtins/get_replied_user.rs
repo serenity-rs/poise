@@ -5,13 +5,7 @@
 /// in the slash command interaction).
 pub fn get_replied_user<U, E>(
     ctx: crate::Context<'_, U, E>,
-    user: Option<crate::serenity::model::user::User>,
 ) -> Option<crate::serenity::model::user::User> {
-    // If there's already a mentioned user - return them instead.
-    if user.is_some() {
-        return user;
-    };
-
     let crate::Context::Prefix(msg_ctx) = ctx else {
         return None;
     };

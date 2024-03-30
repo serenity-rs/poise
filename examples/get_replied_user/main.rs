@@ -14,9 +14,11 @@ async fn avatar(
         serenity::User,
     >,
 ) -> Result<(), Error> {
-    let replied_user = get_replied_user(ctx, user);
+    let replied_user = get_replied_user(ctx);
 
-    let u = replied_user.as_ref().unwrap_or_else(|| ctx.author());
+    let u = replied_user
+        .as_ref()
+        .unwrap_or(user.as_ref().unwrap_or(ctx.author()));
 
     let response = u.face().replace(".webp", ".png");
     ctx.say(response).await?;
