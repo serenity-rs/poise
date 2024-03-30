@@ -16,9 +16,9 @@ async fn avatar(
 ) -> Result<(), Error> {
     let replied_user = get_replied_user(ctx);
 
-    let u = replied_user
+    let u = user
         .as_ref()
-        .unwrap_or(user.as_ref().unwrap_or(ctx.author()));
+        .unwrap_or(replied_user.as_ref().unwrap_or(ctx.author()));
 
     let response = u.face().replace(".webp", ".png");
     ctx.say(response).await?;
