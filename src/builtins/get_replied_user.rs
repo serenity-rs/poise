@@ -1,5 +1,4 @@
 //! Contains a command utility that can be used to retrieve a replied user.
-//! By default
 
 /// Retrieves the user from a message reply or gets the initial user (the one selected by a ping or
 /// in the slash command interaction).
