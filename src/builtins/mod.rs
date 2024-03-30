@@ -6,6 +6,9 @@
 mod help;
 pub use help::*;
 
+mod get_replied_user;
+pub use get_replied_user::*;
+
 mod pretty_help;
 pub use pretty_help::*;
 
