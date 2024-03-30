@@ -14,8 +14,11 @@ async fn avatar(
         serenity::User,
     >,
 ) -> Result<(), Error> {
-    let replied_user = get_replied_user(ctx);
-
+    let replied_user = if user.is_none() {
+        get_replied_user(ctx)
+    } else {
+        None
+    };
     let u = user
         .as_ref()
         .unwrap_or(replied_user.as_ref().unwrap_or(ctx.author()));
