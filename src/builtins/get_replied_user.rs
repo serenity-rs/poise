@@ -1,7 +1,6 @@
 //! Contains a command utility that can be used to retrieve a replied user.
 
-/// Retrieves the user from a message reply or gets the initial user (the one selected by a ping or
-/// in the slash command interaction).
+/// Retrieves the user from a message reply or returns None if there isn't a replied message.
 pub fn get_replied_user<U, E>(
     ctx: crate::Context<'_, U, E>,
 ) -> Option<crate::serenity::model::user::User> {
