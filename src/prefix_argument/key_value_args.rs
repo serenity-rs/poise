@@ -16,7 +16,7 @@ impl KeyValueArgs {
 
     /// Reads a single key value pair ("key=value") from the front of the arguments
     fn pop_single_key_value_pair(args: &str) -> Option<(&str, (String, String))> {
-        // TODO: share quote parsing machinery with PopArgumentAsync impl for String
+        // TODO: share quote parsing machinery with PopArgument impl for String
 
         if args.is_empty() {
             return None;

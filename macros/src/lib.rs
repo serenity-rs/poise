@@ -88,8 +88,7 @@ for example for command-specific help (i.e. `~help command_name`). Escape newlin
 SlashContext, which contain a variety of context data each. Context provides some utility methods to
 access data present in both PrefixContext and SlashContext, like `author()` or `created_at()`.
 
-All following parameters are inputs to the command. You can use all types that implement
-`poise::PopArgumentAsync`, `poise::PopArgument`, `serenity::ArgumentConvert` or `std::str::FromStr`.
+All following parameters are inputs to the command. You can use all types that implement `poise::PopArgument`, `serenity::ArgumentConvert` or `std::str::FromStr`.
 You can also wrap types in `Option` or `Vec` to make them optional or variadic. In addition, there
 are multiple attributes you can use on parameters:
 
