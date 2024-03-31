@@ -1,5 +1,3 @@
-use poise::builtins::get_replied_user;
-
 use poise::serenity_prelude as serenity;
 
 struct Data {} // User data, which is stored and accessible in all command invocations
@@ -14,8 +12,7 @@ async fn avatar(
         serenity::User,
     >,
 ) -> Result<(), Error> {
-    let selected_user = user.or(get_replied_user(ctx));
-    let u = selected_user.as_ref().unwrap_or(ctx.author());
+    let u = user.as_ref().unwrap_or(ctx.get_replied_msg_author());
 
     let response = u.face().replace(".webp", ".png");
     ctx.say(response).await?;

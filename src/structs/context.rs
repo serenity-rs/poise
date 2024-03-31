@@ -299,6 +299,21 @@ context_methods! {
         }
     }
 
+    /// Return a reference to a replied message author or the context author if there's no replied
+    /// message
+    (author self)
+    (pub fn get_replied_msg_author(self) -> &'a serenity::User) {
+        match self {
+            Self::Application(ctx) => &ctx.interaction.user,
+            Self::Prefix(ctx) => {
+                if ctx.msg.referenced_message.is_none() {
+                    return &ctx.msg.author;
+                }
+                &ctx.msg.referenced_message.as_ref().unwrap().author
+            }
+        }
+    }
+
     /// Return a ID that uniquely identifies this command invocation.
     #[cfg(any(feature = "chrono", feature = "time"))]
     (id self)
