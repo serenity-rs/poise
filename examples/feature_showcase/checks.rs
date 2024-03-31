@@ -38,8 +38,9 @@ pub async fn modonly(ctx: Context<'_>) -> Result<(), Error> {
 pub async fn delete(
     ctx: Context<'_>,
     #[description = "Message to be deleted"] msg: serenity::Message,
+    reason: Option<String>,
 ) -> Result<(), Error> {
-    msg.delete(ctx).await?;
+    msg.delete(ctx, reason.as_deref()).await?;
     Ok(())
 }
 
