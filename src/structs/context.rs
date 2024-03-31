@@ -305,12 +305,7 @@ context_methods! {
     (pub fn get_replied_msg_author(self) -> &'a serenity::User) {
         match self {
             Self::Application(ctx) => &ctx.interaction.user,
-            Self::Prefix(ctx) => {
-                if ctx.msg.referenced_message.is_none() {
-                    return &ctx.msg.author;
-                }
-                &ctx.msg.referenced_message.as_ref().unwrap().author
-            }
+            Self::Prefix(ctx) => &ctx.msg.referenced_message.as_deref().unwrap_or(ctx.msg).author,
         }
     }
 
