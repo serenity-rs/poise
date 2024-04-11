@@ -280,12 +280,7 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
     let description = wrap_option_to_string(inv.description.as_ref());
     let category = wrap_option_to_string(inv.args.category.as_ref());
 
-    let to_seconds_path = quote::quote!(std::time::Duration::from_secs);
-    let global_cooldown = wrap_option_and_map(inv.args.global_cooldown, &to_seconds_path);
-    let user_cooldown = wrap_option_and_map(inv.args.user_cooldown, &to_seconds_path);
-    let guild_cooldown = wrap_option_and_map(inv.args.guild_cooldown, &to_seconds_path);
-    let channel_cooldown = wrap_option_and_map(inv.args.channel_cooldown, &to_seconds_path);
-    let member_cooldown = wrap_option_and_map(inv.args.member_cooldown, &to_seconds_path);
+    let cooldown_config = generate_cooldown_config(&inv.args);
 
     let default_member_permissions = &inv.default_member_permissions;
     let required_permissions = &inv.required_permissions;
@@ -360,14 +355,7 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
                 help_text: #help_text,
                 hide_in_help: #hide_in_help,
                 cooldowns: std::sync::Mutex::new(::poise::Cooldowns::new()),
-                cooldown_config: std::sync::RwLock::new(::poise::CooldownConfig {
-                    global: #global_cooldown,
-                    user: #user_cooldown,
-                    guild: #guild_cooldown,
-                    channel: #channel_cooldown,
-                    member: #member_cooldown,
-                    __non_exhaustive: ()
-                }),
+                cooldown_config: #cooldown_config,
                 reuse_response: #reuse_response,
                 default_member_permissions: #default_member_permissions,
                 required_permissions: #required_permissions,
@@ -393,4 +381,37 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
             }
         }
     })
+}
+
+fn generate_cooldown_config(args: &CommandArgs) -> proc_macro2::TokenStream {
+    let all_cooldowns = [
+        args.global_cooldown,
+        args.user_cooldown,
+        args.guild_cooldown,
+        args.channel_cooldown,
+        args.member_cooldown,
+    ];
+
+    if all_cooldowns.iter().all(Option::is_none) {
+        return quote::quote!(std::sync::RwLock::default());
+    }
+
+    let to_seconds_path = quote::quote!(std::time::Duration::from_secs);
+
+    let global_cooldown = wrap_option_and_map(args.global_cooldown, &to_seconds_path);
+    let user_cooldown = wrap_option_and_map(args.user_cooldown, &to_seconds_path);
+    let guild_cooldown = wrap_option_and_map(args.guild_cooldown, &to_seconds_path);
+    let channel_cooldown = wrap_option_and_map(args.channel_cooldown, &to_seconds_path);
+    let member_cooldown = wrap_option_and_map(args.member_cooldown, &to_seconds_path);
+
+    quote::quote!(
+        std::sync::RwLock::new(::poise::CooldownConfig {
+            global: #global_cooldown,
+            user: #user_cooldown,
+            guild: #guild_cooldown,
+            channel: #channel_cooldown,
+            member: #member_cooldown,
+            __non_exhaustive: ()
+        })
+    )
 }
