@@ -1,6 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rand-0.8.5/src/distributions/uniform.rs`."><title>uniform.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-b1a3e7f8283b8434.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="rand" data-themes="" data-resource-suffix="" data-rustdoc-version="1.77.0-nightly (5518eaa94 2024-01-29)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-48f368f3872407c8.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="icon" href="https://www.rust-lang.org/favicon.ico"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
-            <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
-    <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../rand/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rand-0.8.5/src/distributions/uniform.rs`."><title>uniform.rs - source</title><script>if(window.location.protocol!=="file:")for(f of "SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(","))document.write(`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`)</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-2c208a72533b4dd0.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="rand" data-themes="" data-resource-suffix="" data-rustdoc-version="1.79.0-nightly (aa067fb98 2024-04-10)" data-channel="nightly" data-search-js="search-ffac13a0df2b1870.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-e32f0c247825364d.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-c97aec732c613ca4.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-09095024cf37855e.css"></noscript><link rel="icon" href="https://www.rust-lang.org/favicon.ico"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../rand/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings">Settings</a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -2086,7 +2084,7 @@
     z: X, <span class="comment">// either ints_to_reject or zone depending on implementation
 </span>}
 
-<span class="macro">macro_rules! </span>uniform_int_impl {
+<span class="macro">macro_rules!</span> uniform_int_impl {
     (<span class="macro-nonterminal">$ty</span>:ty, <span class="macro-nonterminal">$unsigned</span>:ident, <span class="macro-nonterminal">$u_large</span>:ident) =&gt; {
         <span class="kw">impl </span>SampleUniform <span class="kw">for </span><span class="macro-nonterminal">$ty </span>{
             <span class="kw">type </span>Sampler = UniformInt&lt;<span class="macro-nonterminal">$ty</span>&gt;;
@@ -2216,21 +2214,21 @@
     };
 }
 
-<span class="macro">uniform_int_impl! </span>{ i8, u8, u32 }
-<span class="macro">uniform_int_impl! </span>{ i16, u16, u32 }
-<span class="macro">uniform_int_impl! </span>{ i32, u32, u32 }
-<span class="macro">uniform_int_impl! </span>{ i64, u64, u64 }
-<span class="macro">uniform_int_impl! </span>{ i128, u128, u128 }
-<span class="macro">uniform_int_impl! </span>{ isize, usize, usize }
-<span class="macro">uniform_int_impl! </span>{ u8, u8, u32 }
-<span class="macro">uniform_int_impl! </span>{ u16, u16, u32 }
-<span class="macro">uniform_int_impl! </span>{ u32, u32, u32 }
-<span class="macro">uniform_int_impl! </span>{ u64, u64, u64 }
-<span class="macro">uniform_int_impl! </span>{ usize, usize, usize }
-<span class="macro">uniform_int_impl! </span>{ u128, u128, u128 }
+<span class="macro">uniform_int_impl!</span> { i8, u8, u32 }
+<span class="macro">uniform_int_impl!</span> { i16, u16, u32 }
+<span class="macro">uniform_int_impl!</span> { i32, u32, u32 }
+<span class="macro">uniform_int_impl!</span> { i64, u64, u64 }
+<span class="macro">uniform_int_impl!</span> { i128, u128, u128 }
+<span class="macro">uniform_int_impl!</span> { isize, usize, usize }
+<span class="macro">uniform_int_impl!</span> { u8, u8, u32 }
+<span class="macro">uniform_int_impl!</span> { u16, u16, u32 }
+<span class="macro">uniform_int_impl!</span> { u32, u32, u32 }
+<span class="macro">uniform_int_impl!</span> { u64, u64, u64 }
+<span class="macro">uniform_int_impl!</span> { usize, usize, usize }
+<span class="macro">uniform_int_impl!</span> { u128, u128, u128 }
 
 <span class="attr">#[cfg(feature = <span class="string">"simd_support"</span>)]
-</span><span class="macro">macro_rules! </span>uniform_simd_int_impl {
+</span><span class="macro">macro_rules!</span> uniform_simd_int_impl {
     (<span class="macro-nonterminal">$ty</span>:ident, <span class="macro-nonterminal">$unsigned</span>:ident, <span class="macro-nonterminal">$u_scalar</span>:ident) =&gt; {
         <span class="comment">// The "pick the largest zone that can fit in an `u32`" optimization
         // is less useful here. Multiple lanes complicate things, we don't
@@ -2337,7 +2335,7 @@
 }
 
 <span class="attr">#[cfg(feature = <span class="string">"simd_support"</span>)]
-</span><span class="macro">uniform_simd_int_impl! </span>{
+</span><span class="macro">uniform_simd_int_impl!</span> {
     (u64x2, i64x2),
     (u64x4, i64x4),
     (u64x8, i64x8),
@@ -2345,7 +2343,7 @@
 }
 
 <span class="attr">#[cfg(feature = <span class="string">"simd_support"</span>)]
-</span><span class="macro">uniform_simd_int_impl! </span>{
+</span><span class="macro">uniform_simd_int_impl!</span> {
     (u32x2, i32x2),
     (u32x4, i32x4),
     (u32x8, i32x8),
@@ -2354,7 +2352,7 @@
 }
 
 <span class="attr">#[cfg(feature = <span class="string">"simd_support"</span>)]
-</span><span class="macro">uniform_simd_int_impl! </span>{
+</span><span class="macro">uniform_simd_int_impl!</span> {
     (u16x2, i16x2),
     (u16x4, i16x4),
     (u16x8, i16x8),
@@ -2364,7 +2362,7 @@
 }
 
 <span class="attr">#[cfg(feature = <span class="string">"simd_support"</span>)]
-</span><span class="macro">uniform_simd_int_impl! </span>{
+</span><span class="macro">uniform_simd_int_impl!</span> {
     (u8x2, i8x2),
     (u8x4, i8x4),
     (u8x8, i8x8),
@@ -2473,7 +2471,7 @@
     scale: X,
 }
 
-<span class="macro">macro_rules! </span>uniform_float_impl {
+<span class="macro">macro_rules!</span> uniform_float_impl {
     (<span class="macro-nonterminal">$ty</span>:ty, <span class="macro-nonterminal">$uty</span>:ident, <span class="macro-nonterminal">$f_scalar</span>:ident, <span class="macro-nonterminal">$u_scalar</span>:ident, <span class="macro-nonterminal">$bits_to_discard</span>:expr) =&gt; {
         <span class="kw">impl </span>SampleUniform <span class="kw">for </span><span class="macro-nonterminal">$ty </span>{
             <span class="kw">type </span>Sampler = UniformFloat&lt;<span class="macro-nonterminal">$ty</span>&gt;;
@@ -2655,24 +2653,24 @@
     };
 }
 
-<span class="macro">uniform_float_impl! </span>{ f32, u32, f32, u32, <span class="number">32 </span>- <span class="number">23 </span>}
-<span class="macro">uniform_float_impl! </span>{ f64, u64, f64, u64, <span class="number">64 </span>- <span class="number">52 </span>}
+<span class="macro">uniform_float_impl!</span> { f32, u32, f32, u32, <span class="number">32 </span>- <span class="number">23 </span>}
+<span class="macro">uniform_float_impl!</span> { f64, u64, f64, u64, <span class="number">64 </span>- <span class="number">52 </span>}
 
 <span class="attr">#[cfg(feature = <span class="string">"simd_support"</span>)]
-</span><span class="macro">uniform_float_impl! </span>{ f32x2, u32x2, f32, u32, <span class="number">32 </span>- <span class="number">23 </span>}
+</span><span class="macro">uniform_float_impl!</span> { f32x2, u32x2, f32, u32, <span class="number">32 </span>- <span class="number">23 </span>}
 <span class="attr">#[cfg(feature = <span class="string">"simd_support"</span>)]
-</span><span class="macro">uniform_float_impl! </span>{ f32x4, u32x4, f32, u32, <span class="number">32 </span>- <span class="number">23 </span>}
+</span><span class="macro">uniform_float_impl!</span> { f32x4, u32x4, f32, u32, <span class="number">32 </span>- <span class="number">23 </span>}
 <span class="attr">#[cfg(feature = <span class="string">"simd_support"</span>)]
-</span><span class="macro">uniform_float_impl! </span>{ f32x8, u32x8, f32, u32, <span class="number">32 </span>- <span class="number">23 </span>}
+</span><span class="macro">uniform_float_impl!</span> { f32x8, u32x8, f32, u32, <span class="number">32 </span>- <span class="number">23 </span>}
 <span class="attr">#[cfg(feature = <span class="string">"simd_support"</span>)]
-</span><span class="macro">uniform_float_impl! </span>{ f32x16, u32x16, f32, u32, <span class="number">32 </span>- <span class="number">23 </span>}
+</span><span class="macro">uniform_float_impl!</span> { f32x16, u32x16, f32, u32, <span class="number">32 </span>- <span class="number">23 </span>}
 
 <span class="attr">#[cfg(feature = <span class="string">"simd_support"</span>)]
-</span><span class="macro">uniform_float_impl! </span>{ f64x2, u64x2, f64, u64, <span class="number">64 </span>- <span class="number">52 </span>}
+</span><span class="macro">uniform_float_impl!</span> { f64x2, u64x2, f64, u64, <span class="number">64 </span>- <span class="number">52 </span>}
 <span class="attr">#[cfg(feature = <span class="string">"simd_support"</span>)]
-</span><span class="macro">uniform_float_impl! </span>{ f64x4, u64x4, f64, u64, <span class="number">64 </span>- <span class="number">52 </span>}
+</span><span class="macro">uniform_float_impl!</span> { f64x4, u64x4, f64, u64, <span class="number">64 </span>- <span class="number">52 </span>}
 <span class="attr">#[cfg(feature = <span class="string">"simd_support"</span>)]
-</span><span class="macro">uniform_float_impl! </span>{ f64x8, u64x8, f64, u64, <span class="number">64 </span>- <span class="number">52 </span>}
+</span><span class="macro">uniform_float_impl!</span> { f64x8, u64x8, f64, u64, <span class="number">64 </span>- <span class="number">52 </span>}
 
 
 <span class="doccomment">/// The back-end implementing [`UniformSampler`] for `Duration`.
@@ -2891,7 +2889,7 @@
         <span class="kw">use </span>core::{u16, u32, u64, u8, usize};
 
         <span class="kw">let </span><span class="kw-2">mut </span>rng = <span class="kw">crate</span>::test::rng(<span class="number">251</span>);
-        <span class="macro">macro_rules! </span>t {
+        <span class="macro">macro_rules!</span> t {
             (<span class="macro-nonterminal">$ty</span>:ident, <span class="macro-nonterminal">$v</span>:expr, <span class="macro-nonterminal">$le</span>:expr, <span class="macro-nonterminal">$lt</span>:expr) =&gt; {{
                 <span class="kw">for </span><span class="kw-2">&amp;</span>(low, high) <span class="kw">in </span><span class="macro-nonterminal">$v</span>.iter() {
                     <span class="kw">let </span>my_uniform = Uniform::new(low, high);
@@ -2996,7 +2994,7 @@
         <span class="kw">let </span><span class="kw-2">mut </span>rng = <span class="kw">crate</span>::test::rng(<span class="number">252</span>);
         <span class="kw">let </span><span class="kw-2">mut </span>zero_rng = StepRng::new(<span class="number">0</span>, <span class="number">0</span>);
         <span class="kw">let </span><span class="kw-2">mut </span>max_rng = StepRng::new(<span class="number">0xffff_ffff_ffff_ffff</span>, <span class="number">0</span>);
-        <span class="macro">macro_rules! </span>t {
+        <span class="macro">macro_rules!</span> t {
             (<span class="macro-nonterminal">$ty</span>:ty, <span class="macro-nonterminal">$f_scalar</span>:ident, <span class="macro-nonterminal">$bits_shifted</span>:expr) =&gt; {{
                 <span class="kw">let </span>v: <span class="kw-2">&amp;</span>[(<span class="macro-nonterminal">$f_scalar</span>, <span class="macro-nonterminal">$f_scalar</span>)] = <span class="kw-2">&amp;</span>[
                     (<span class="number">0.0</span>, <span class="number">100.0</span>),
@@ -3114,7 +3112,7 @@
             T::Sampler::sample_single(low, high, <span class="kw-2">&amp;mut </span>rng);
         }
 
-        <span class="macro">macro_rules! </span>t {
+        <span class="macro">macro_rules!</span> t {
             (<span class="macro-nonterminal">$ty</span>:ident, <span class="macro-nonterminal">$f_scalar</span>:ident) =&gt; {{
                 <span class="kw">let </span>v: <span class="kw-2">&amp;</span>[(<span class="macro-nonterminal">$f_scalar</span>, <span class="macro-nonterminal">$f_scalar</span>)] = <span class="kw-2">&amp;</span>[
                     (::std::<span class="macro-nonterminal">$f_scalar::NAN</span>, <span class="number">0.0</span>),

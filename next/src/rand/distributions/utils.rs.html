@@ -1,6 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rand-0.8.5/src/distributions/utils.rs`."><title>utils.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-b1a3e7f8283b8434.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="rand" data-themes="" data-resource-suffix="" data-rustdoc-version="1.77.0-nightly (5518eaa94 2024-01-29)" data-channel="nightly" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-48f368f3872407c8.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="icon" href="https://www.rust-lang.org/favicon.ico"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
-            <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
-    <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../rand/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rand-0.8.5/src/distributions/utils.rs`."><title>utils.rs - source</title><script>if(window.location.protocol!=="file:")for(f of "SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(","))document.write(`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`)</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-2c208a72533b4dd0.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="rand" data-themes="" data-resource-suffix="" data-rustdoc-version="1.79.0-nightly (aa067fb98 2024-04-10)" data-channel="nightly" data-search-js="search-ffac13a0df2b1870.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-e32f0c247825364d.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-c97aec732c613ca4.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-09095024cf37855e.css"></noscript><link rel="icon" href="https://www.rust-lang.org/favicon.ico"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../rand/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings">Settings</a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -448,7 +446,7 @@
     <span class="kw">fn </span>wmul(<span class="self">self</span>, x: RHS) -&gt; <span class="self">Self</span>::Output;
 }
 
-<span class="macro">macro_rules! </span>wmul_impl {
+<span class="macro">macro_rules!</span> wmul_impl {
     (<span class="macro-nonterminal">$ty</span>:ty, <span class="macro-nonterminal">$wide</span>:ty, <span class="macro-nonterminal">$shift</span>:expr) =&gt; {
         <span class="kw">impl </span>WideningMultiply <span class="kw">for </span><span class="macro-nonterminal">$ty </span>{
             <span class="kw">type </span>Output = (<span class="macro-nonterminal">$ty</span>, <span class="macro-nonterminal">$ty</span>);
@@ -484,10 +482,10 @@
         )+
     };
 }
-<span class="macro">wmul_impl! </span>{ u8, u16, <span class="number">8 </span>}
-<span class="macro">wmul_impl! </span>{ u16, u32, <span class="number">16 </span>}
-<span class="macro">wmul_impl! </span>{ u32, u64, <span class="number">32 </span>}
-<span class="macro">wmul_impl! </span>{ u64, u128, <span class="number">64 </span>}
+<span class="macro">wmul_impl!</span> { u8, u16, <span class="number">8 </span>}
+<span class="macro">wmul_impl!</span> { u16, u32, <span class="number">16 </span>}
+<span class="macro">wmul_impl!</span> { u32, u64, <span class="number">32 </span>}
+<span class="macro">wmul_impl!</span> { u64, u128, <span class="number">64 </span>}
 
 <span class="comment">// This code is a translation of the __mulddi3 function in LLVM's
 // compiler-rt. It is an optimised variant of the common method
@@ -495,7 +493,7 @@
 //
 // For some reason LLVM can optimise the C version very well, but
 // keeps shuffling registers in this Rust translation.
-</span><span class="macro">macro_rules! </span>wmul_impl_large {
+</span><span class="macro">macro_rules!</span> wmul_impl_large {
     (<span class="macro-nonterminal">$ty</span>:ty, <span class="macro-nonterminal">$half</span>:expr) =&gt; {
         <span class="kw">impl </span>WideningMultiply <span class="kw">for </span><span class="macro-nonterminal">$ty </span>{
             <span class="kw">type </span>Output = (<span class="macro-nonterminal">$ty</span>, <span class="macro-nonterminal">$ty</span>);
@@ -550,9 +548,9 @@
         )+
     };
 }
-<span class="macro">wmul_impl_large! </span>{ u128, <span class="number">64 </span>}
+<span class="macro">wmul_impl_large!</span> { u128, <span class="number">64 </span>}
 
-<span class="macro">macro_rules! </span>wmul_impl_usize {
+<span class="macro">macro_rules!</span> wmul_impl_usize {
     (<span class="macro-nonterminal">$ty</span>:ty) =&gt; {
         <span class="kw">impl </span>WideningMultiply <span class="kw">for </span>usize {
             <span class="kw">type </span>Output = (usize, usize);
@@ -566,11 +564,11 @@
     };
 }
 <span class="attr">#[cfg(target_pointer_width = <span class="string">"16"</span>)]
-</span><span class="macro">wmul_impl_usize! </span>{ u16 }
+</span><span class="macro">wmul_impl_usize!</span> { u16 }
 <span class="attr">#[cfg(target_pointer_width = <span class="string">"32"</span>)]
-</span><span class="macro">wmul_impl_usize! </span>{ u32 }
+</span><span class="macro">wmul_impl_usize!</span> { u32 }
 <span class="attr">#[cfg(target_pointer_width = <span class="string">"64"</span>)]
-</span><span class="macro">wmul_impl_usize! </span>{ u64 }
+</span><span class="macro">wmul_impl_usize!</span> { u64 }
 
 <span class="attr">#[cfg(feature = <span class="string">"simd_support"</span>)]
 </span><span class="kw">mod </span>simd_wmul {
@@ -578,7 +576,7 @@
     <span class="attr">#[cfg(target_arch = <span class="string">"x86"</span>)] </span><span class="kw">use </span>core::arch::x86::<span class="kw-2">*</span>;
     <span class="attr">#[cfg(target_arch = <span class="string">"x86_64"</span>)] </span><span class="kw">use </span>core::arch::x86_64::<span class="kw-2">*</span>;
 
-    <span class="macro">wmul_impl! </span>{
+    <span class="macro">wmul_impl!</span> {
         (u8x2, u16x2),
         (u8x4, u16x4),
         (u8x8, u16x8),
@@ -587,17 +585,17 @@
         <span class="number">8
     </span>}
 
-    <span class="macro">wmul_impl! </span>{ (u16x2, u32x2),, <span class="number">16 </span>}
-    <span class="macro">wmul_impl! </span>{ (u16x4, u32x4),, <span class="number">16 </span>}
+    <span class="macro">wmul_impl!</span> { (u16x2, u32x2),, <span class="number">16 </span>}
+    <span class="macro">wmul_impl!</span> { (u16x4, u32x4),, <span class="number">16 </span>}
     <span class="attr">#[cfg(not(target_feature = <span class="string">"sse2"</span>))]
-    </span><span class="macro">wmul_impl! </span>{ (u16x8, u32x8),, <span class="number">16 </span>}
+    </span><span class="macro">wmul_impl!</span> { (u16x8, u32x8),, <span class="number">16 </span>}
     <span class="attr">#[cfg(not(target_feature = <span class="string">"avx2"</span>))]
-    </span><span class="macro">wmul_impl! </span>{ (u16x16, u32x16),, <span class="number">16 </span>}
+    </span><span class="macro">wmul_impl!</span> { (u16x16, u32x16),, <span class="number">16 </span>}
 
     <span class="comment">// 16-bit lane widths allow use of the x86 `mulhi` instructions, which
     // means `wmul` can be implemented with only two instructions.
     </span><span class="attr">#[allow(unused_macros)]
-    </span><span class="macro">macro_rules! </span>wmul_impl_16 {
+    </span><span class="macro">macro_rules!</span> wmul_impl_16 {
         (<span class="macro-nonterminal">$ty</span>:ident, <span class="macro-nonterminal">$intrinsic</span>:ident, <span class="macro-nonterminal">$mulhi</span>:ident, <span class="macro-nonterminal">$mullo</span>:ident) =&gt; {
             <span class="kw">impl </span>WideningMultiply <span class="kw">for </span><span class="macro-nonterminal">$ty </span>{
                 <span class="kw">type </span>Output = (<span class="macro-nonterminal">$ty</span>, <span class="macro-nonterminal">$ty</span>);
@@ -615,13 +613,13 @@
     }
 
     <span class="attr">#[cfg(target_feature = <span class="string">"sse2"</span>)]
-    </span><span class="macro">wmul_impl_16! </span>{ u16x8, __m128i, _mm_mulhi_epu16, _mm_mullo_epi16 }
+    </span><span class="macro">wmul_impl_16!</span> { u16x8, __m128i, _mm_mulhi_epu16, _mm_mullo_epi16 }
     <span class="attr">#[cfg(target_feature = <span class="string">"avx2"</span>)]
-    </span><span class="macro">wmul_impl_16! </span>{ u16x16, __m256i, _mm256_mulhi_epu16, _mm256_mullo_epi16 }
+    </span><span class="macro">wmul_impl_16!</span> { u16x16, __m256i, _mm256_mulhi_epu16, _mm256_mullo_epi16 }
     <span class="comment">// FIXME: there are no `__m512i` types in stdsimd yet, so `wmul::&lt;u16x32&gt;`
     // cannot use the same implementation.
 
-    </span><span class="macro">wmul_impl! </span>{
+    </span><span class="macro">wmul_impl!</span> {
         (u32x2, u64x2),
         (u32x4, u64x4),
         (u32x8, u64x8),,
@@ -629,10 +627,10 @@
     </span>}
 
     <span class="comment">// TODO: optimize, this seems to seriously slow things down
-    </span><span class="macro">wmul_impl_large! </span>{ (u8x64,) u8, <span class="number">4 </span>}
-    <span class="macro">wmul_impl_large! </span>{ (u16x32,) u16, <span class="number">8 </span>}
-    <span class="macro">wmul_impl_large! </span>{ (u32x16,) u32, <span class="number">16 </span>}
-    <span class="macro">wmul_impl_large! </span>{ (u64x2, u64x4, u64x8,) u64, <span class="number">32 </span>}
+    </span><span class="macro">wmul_impl_large!</span> { (u8x64,) u8, <span class="number">4 </span>}
+    <span class="macro">wmul_impl_large!</span> { (u16x32,) u16, <span class="number">8 </span>}
+    <span class="macro">wmul_impl_large!</span> { (u32x16,) u32, <span class="number">16 </span>}
+    <span class="macro">wmul_impl_large!</span> { (u64x2, u64x4, u64x8,) u64, <span class="number">32 </span>}
 }
 
 <span class="doccomment">/// Helper trait when dealing with scalar and SIMD floating point types.
@@ -717,7 +715,7 @@
     </span>}
 }
 
-<span class="macro">macro_rules! </span>scalar_float_impl {
+<span class="macro">macro_rules!</span> scalar_float_impl {
     (<span class="macro-nonterminal">$ty</span>:ident, <span class="macro-nonterminal">$uty</span>:ident) =&gt; {
         <span class="attr">#[cfg(not(std))]
         </span><span class="kw">impl </span>Float <span class="kw">for </span><span class="macro-nonterminal">$ty </span>{
@@ -792,7 +790,7 @@
 
 
 <span class="attr">#[cfg(feature = <span class="string">"simd_support"</span>)]
-</span><span class="macro">macro_rules! </span>simd_impl {
+</span><span class="macro">macro_rules!</span> simd_impl {
     (<span class="macro-nonterminal">$ty</span>:ident, <span class="macro-nonterminal">$f_scalar</span>:ident, <span class="macro-nonterminal">$mty</span>:ident, <span class="macro-nonterminal">$uty</span>:ident) =&gt; {
         <span class="kw">impl </span>FloatSIMDUtils <span class="kw">for </span><span class="macro-nonterminal">$ty </span>{
             <span class="kw">type </span>Mask = <span class="macro-nonterminal">$mty</span>;
@@ -851,11 +849,11 @@
     };
 }
 
-<span class="attr">#[cfg(feature=<span class="string">"simd_support"</span>)] </span><span class="macro">simd_impl! </span>{ f32x2, f32, m32x2, u32x2 }
-<span class="attr">#[cfg(feature=<span class="string">"simd_support"</span>)] </span><span class="macro">simd_impl! </span>{ f32x4, f32, m32x4, u32x4 }
-<span class="attr">#[cfg(feature=<span class="string">"simd_support"</span>)] </span><span class="macro">simd_impl! </span>{ f32x8, f32, m32x8, u32x8 }
-<span class="attr">#[cfg(feature=<span class="string">"simd_support"</span>)] </span><span class="macro">simd_impl! </span>{ f32x16, f32, m32x16, u32x16 }
-<span class="attr">#[cfg(feature=<span class="string">"simd_support"</span>)] </span><span class="macro">simd_impl! </span>{ f64x2, f64, m64x2, u64x2 }
-<span class="attr">#[cfg(feature=<span class="string">"simd_support"</span>)] </span><span class="macro">simd_impl! </span>{ f64x4, f64, m64x4, u64x4 }
-<span class="attr">#[cfg(feature=<span class="string">"simd_support"</span>)] </span><span class="macro">simd_impl! </span>{ f64x8, f64, m64x8, u64x8 }
+<span class="attr">#[cfg(feature=<span class="string">"simd_support"</span>)] </span><span class="macro">simd_impl!</span> { f32x2, f32, m32x2, u32x2 }
+<span class="attr">#[cfg(feature=<span class="string">"simd_support"</span>)] </span><span class="macro">simd_impl!</span> { f32x4, f32, m32x4, u32x4 }
+<span class="attr">#[cfg(feature=<span class="string">"simd_support"</span>)] </span><span class="macro">simd_impl!</span> { f32x8, f32, m32x8, u32x8 }
+<span class="attr">#[cfg(feature=<span class="string">"simd_support"</span>)] </span><span class="macro">simd_impl!</span> { f32x16, f32, m32x16, u32x16 }
+<span class="attr">#[cfg(feature=<span class="string">"simd_support"</span>)] </span><span class="macro">simd_impl!</span> { f64x2, f64, m64x2, u64x2 }
+<span class="attr">#[cfg(feature=<span class="string">"simd_support"</span>)] </span><span class="macro">simd_impl!</span> { f64x4, f64, m64x4, u64x4 }
+<span class="attr">#[cfg(feature=<span class="string">"simd_support"</span>)] </span><span class="macro">simd_impl!</span> { f64x8, f64, m64x8, u64x8 }
 </code></pre></div></section></main></body></html>
