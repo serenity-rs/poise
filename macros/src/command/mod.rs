@@ -1,7 +1,9 @@
 mod prefix;
 mod slash;
 
-use crate::util::{wrap_option, wrap_option_to_string};
+use crate::util::{
+    iter_tuple_2_to_hash_map, wrap_option, wrap_option_and_map, wrap_option_to_string,
+};
 use proc_macro::TokenStream;
 use syn::spanned::Spanned as _;
 
@@ -271,20 +273,19 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
         .rename
         .clone()
         .unwrap_or_else(|| function_name.clone());
+
     let context_menu_name = wrap_option_to_string(inv.args.context_menu_command.as_ref());
 
-    let description = match &inv.description {
-        Some(x) => quote::quote! { Some(#x.to_string()) },
-        None => quote::quote! { None },
-    };
     let hide_in_help = &inv.args.hide_in_help;
+    let description = wrap_option_to_string(inv.description.as_ref());
     let category = wrap_option_to_string(inv.args.category.as_ref());
 
-    let global_cooldown = wrap_option(inv.args.global_cooldown);
-    let user_cooldown = wrap_option(inv.args.user_cooldown);
-    let guild_cooldown = wrap_option(inv.args.guild_cooldown);
-    let channel_cooldown = wrap_option(inv.args.channel_cooldown);
-    let member_cooldown = wrap_option(inv.args.member_cooldown);
+    let to_seconds_path = quote::quote!(std::time::Duration::from_secs);
+    let global_cooldown = wrap_option_and_map(inv.args.global_cooldown, &to_seconds_path);
+    let user_cooldown = wrap_option_and_map(inv.args.user_cooldown, &to_seconds_path);
+    let guild_cooldown = wrap_option_and_map(inv.args.guild_cooldown, &to_seconds_path);
+    let channel_cooldown = wrap_option_and_map(inv.args.channel_cooldown, &to_seconds_path);
+    let member_cooldown = wrap_option_and_map(inv.args.member_cooldown, &to_seconds_path);
 
     let default_member_permissions = &inv.default_member_permissions;
     let required_permissions = &inv.required_permissions;
@@ -324,9 +325,9 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
         None => quote::quote! { Box::new(()) },
     };
 
-    let name_localizations = crate::util::vec_tuple_2_to_hash_map(inv.args.name_localized);
+    let name_localizations = iter_tuple_2_to_hash_map(inv.args.name_localized.into_iter());
     let description_localizations =
-        crate::util::vec_tuple_2_to_hash_map(inv.args.description_localized);
+        iter_tuple_2_to_hash_map(inv.args.description_localized.into_iter());
 
     let function_ident =
         std::mem::replace(&mut inv.function.sig.ident, syn::parse_quote! { inner });
@@ -360,11 +361,11 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
                 hide_in_help: #hide_in_help,
                 cooldowns: std::sync::Mutex::new(::poise::Cooldowns::new()),
                 cooldown_config: std::sync::RwLock::new(::poise::CooldownConfig {
-                    global: #global_cooldown.map(std::time::Duration::from_secs),
-                    user: #user_cooldown.map(std::time::Duration::from_secs),
-                    guild: #guild_cooldown.map(std::time::Duration::from_secs),
-                    channel: #channel_cooldown.map(std::time::Duration::from_secs),
-                    member: #member_cooldown.map(std::time::Duration::from_secs),
+                    global: #global_cooldown,
+                    user: #user_cooldown,
+                    guild: #guild_cooldown,
+                    channel: #channel_cooldown,
+                    member: #member_cooldown,
                     __non_exhaustive: ()
                 }),
                 reuse_response: #reuse_response,
