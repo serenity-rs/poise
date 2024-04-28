@@ -29,7 +29,7 @@ async fn main() {
     };
 
     let client = serenity::ClientBuilder::new(&token, intents)
-        .framework(poise::Framework::new(options))
+        .framework(poise::Framework::new(options, true))
         .data(Arc::new(Data {
             poise_mentions: AtomicU32::new(0),
         }) as _)
