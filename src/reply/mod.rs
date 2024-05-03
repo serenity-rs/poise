@@ -144,7 +144,7 @@ impl ReplyHandle<'_> {
         ctx: crate::Context<'_, U, E>,
     ) -> Result<(), serenity::Error> {
         match &self.0 {
-            ReplyHandleInner::Prefix(msg) => msg.delete(ctx.serenity_context(), None).await?,
+            ReplyHandleInner::Prefix(msg) => msg.delete(ctx.http(), None).await?,
             ReplyHandleInner::Application {
                 http: _,
                 interaction,
