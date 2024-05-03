@@ -20,11 +20,11 @@ struct Handler {
 }
 #[serenity::async_trait]
 impl serenity::EventHandler for Handler {
-    async fn message(&self, serenity_context: &serenity::Context, new_message: &serenity::Message) {
+    async fn message(&self, serenity_context: serenity::Context, new_message: serenity::Message) {
         // FrameworkContext contains all data that poise::Framework usually manages
         let shard_manager = (*self.shard_manager.lock().unwrap()).clone().unwrap();
         let framework_data = poise::FrameworkContext {
-            serenity_context,
+            serenity_context: &serenity_context,
             options: &self.options,
             shard_manager: &shard_manager,
         };
@@ -35,7 +35,7 @@ impl serenity::EventHandler for Handler {
 
         let res = poise::dispatch_message(
             framework_data,
-            new_message,
+            &new_message,
             trigger,
             &invocation_data,
             &mut parent_commands,

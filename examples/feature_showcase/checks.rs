@@ -40,7 +40,7 @@ pub async fn delete(
     #[description = "Message to be deleted"] msg: serenity::Message,
     reason: Option<String>,
 ) -> Result<(), Error> {
-    msg.delete(ctx, reason.as_deref()).await?;
+    msg.delete(ctx.http(), reason.as_deref()).await?;
     Ok(())
 }
 
