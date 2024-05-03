@@ -410,7 +410,7 @@ context_methods! {
                     use std::fmt::Write as _;
 
                     string += " ";
-                    string += &arg.name;
+                    string += arg.name;
                     string += ":";
 
                     let _ = match arg.value {

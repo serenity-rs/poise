@@ -1,6 +1,7 @@
 //! Parsing code for [`CodeBlock`], a prefix-specific command parameter type
 
 use super::*;
+use trim_in_place::TrimInPlace;
 
 /// Error thrown when parsing a malformed [`CodeBlock`] ([`CodeBlock::pop_from`])
 #[derive(Default, Debug, Clone)]
@@ -77,7 +78,7 @@ fn pop_from(args: &str) -> Result<(&str, CodeBlock), CodeBlockError> {
 
         // Discord strips empty lines from start and end, but only if their really empty (even
         // whitespace on the line cancels the stripping)
-        let code_block = code_block.trim_start_matches('\n').trim_end_matches('\n');
+        let code_block = code_block.trim_matches('\n');
 
         CodeBlock {
             code: code_block.to_owned(),
@@ -103,8 +104,7 @@ fn pop_from(args: &str) -> Result<(&str, CodeBlock), CodeBlockError> {
         Err(CodeBlockError::default())
     } else {
         // discord likes to insert hair spaces at the end of code blocks sometimes for no reason
-        code_block.code = code_block.code.trim_end_matches('\u{200a}').to_owned();
-
+        code_block.code.trim_end_matches_in_place('\u{200a}');
         Ok((rest, code_block))
     }
 }
