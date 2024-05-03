@@ -56,7 +56,7 @@ async fn event_handler(
                 let old_mentions = data.poise_mentions.fetch_add(1, Ordering::SeqCst);
                 new_message
                     .reply(
-                        ctx,
+                        &ctx.http,
                         format!("Poise has been mentioned {} times", old_mentions + 1),
                     )
                     .await?;
