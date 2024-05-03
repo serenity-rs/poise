@@ -239,7 +239,7 @@ async fn food_react(
     let reaction = FOOD[rand::thread_rng().gen_range(0..FOOD.len())];
     let reaction = serenity::ReactionType::Unicode(FixedString::from_str_trunc(reaction));
 
-    msg.react(ctx, reaction).await?;
+    msg.react(ctx.http(), reaction).await?;
     ctx.say("Reacted!").await?;
     Ok(())
 }
@@ -262,7 +262,7 @@ async fn fruit_react(
     let reaction = FRUIT[rand::thread_rng().gen_range(0..FRUIT.len())];
     let reaction = serenity::ReactionType::Unicode(FixedString::from_str_trunc(reaction));
 
-    msg.react(ctx, reaction).await?;
+    msg.react(ctx.http(), reaction).await?;
     ctx.say("Reacted!").await?;
     Ok(())
 }
@@ -281,7 +281,7 @@ async fn vegetable_react(
     let reaction = VEGETABLES[rand::thread_rng().gen_range(0..VEGETABLES.len())];
     let reaction = serenity::ReactionType::Unicode(FixedString::from_str_trunc(reaction));
 
-    msg.react(ctx, reaction).await?;
+    msg.react(ctx.http(), reaction).await?;
     ctx.say("Reacted!").await?;
     Ok(())
 }
