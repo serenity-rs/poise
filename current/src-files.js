@@ -113,6 +113,7 @@ var srcIndex = new Map(JSON.parse('[\
 ["tracing",["",[],["dispatcher.rs","field.rs","instrument.rs","level_filters.rs","lib.rs","macros.rs","span.rs","stdlib.rs","subscriber.rs"]]],\
 ["tracing_attributes",["",[],["attr.rs","expand.rs","lib.rs"]]],\
 ["tracing_core",["",[],["callsite.rs","dispatcher.rs","event.rs","field.rs","lazy.rs","lib.rs","metadata.rs","parent.rs","span.rs","stdlib.rs","subscriber.rs"]]],\
+["trim_in_place",["",[],["lib.rs"]]],\
 ["try_lock",["",[],["lib.rs"]]],\
 ["tungstenite",["",[["handshake",[],["client.rs","headers.rs","machine.rs","mod.rs","server.rs"]],["protocol",[["frame",[],["coding.rs","frame.rs","mask.rs","mod.rs"]]],["message.rs","mod.rs"]]],["buffer.rs","client.rs","error.rs","lib.rs","server.rs","stream.rs","tls.rs","util.rs"]]],\
 ["typemap_rev",["",[],["lib.rs"]]],\

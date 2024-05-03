@@ -1,0 +1,1 @@
+searchState.loadedDescShard("poise_macros", 0, "Procedural macros used in poise, like <code>command</code>\nUse this derive macro on an enum to easily generate a …\nSee <code>Modal</code> trait documentation\nSee <code>ChoiceParameter</code>\nThis macro transforms plain functions into poise bot …")
