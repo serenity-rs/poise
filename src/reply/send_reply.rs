@@ -154,7 +154,7 @@ pub async fn send_prefix_reply<'a, U: Send + Sync + 'static, E>(
         let new_response = ctx
             .msg
             .channel_id
-            .send_message(ctx.serenity_context(), builder.to_prefix(ctx.msg.into()))
+            .send_message(ctx.http(), builder.to_prefix(ctx.msg.into()))
             .await?;
         // We don't check ctx.command.reuse_response because we need to store bot responses for
         // track_deletion too
