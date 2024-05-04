@@ -393,10 +393,34 @@
 <a href="#393" id="393">393</a>
 <a href="#394" id="394">394</a>
 <a href="#395" id="395">395</a>
+<a href="#396" id="396">396</a>
+<a href="#397" id="397">397</a>
+<a href="#398" id="398">398</a>
+<a href="#399" id="399">399</a>
+<a href="#400" id="400">400</a>
+<a href="#401" id="401">401</a>
+<a href="#402" id="402">402</a>
+<a href="#403" id="403">403</a>
+<a href="#404" id="404">404</a>
+<a href="#405" id="405">405</a>
+<a href="#406" id="406">406</a>
+<a href="#407" id="407">407</a>
+<a href="#408" id="408">408</a>
+<a href="#409" id="409">409</a>
+<a href="#410" id="410">410</a>
+<a href="#411" id="411">411</a>
+<a href="#412" id="412">412</a>
+<a href="#413" id="413">413</a>
+<a href="#414" id="414">414</a>
+<a href="#415" id="415">415</a>
+<a href="#416" id="416">416</a>
+<a href="#417" id="417">417</a>
 </pre></div><pre class="rust"><code><span class="kw">mod </span>prefix;
 <span class="kw">mod </span>slash;
 
-<span class="kw">use </span><span class="kw">crate</span>::util::{wrap_option, wrap_option_to_string};
+<span class="kw">use </span><span class="kw">crate</span>::util::{
+    iter_tuple_2_to_hash_map, wrap_option, wrap_option_and_map, wrap_option_to_string,
+};
 <span class="kw">use </span>proc_macro::TokenStream;
 <span class="kw">use </span>syn::spanned::Spanned <span class="kw">as _</span>;
 
@@ -666,20 +690,14 @@
         .rename
         .clone()
         .unwrap_or_else(|| function_name.clone());
+
     <span class="kw">let </span>context_menu_name = wrap_option_to_string(inv.args.context_menu_command.as_ref());
 
-    <span class="kw">let </span>description = <span class="kw">match </span><span class="kw-2">&amp;</span>inv.description {
-        <span class="prelude-val">Some</span>(x) =&gt; <span class="macro">quote::quote!</span> { <span class="prelude-val">Some</span>(#x.to_string()) },
-        <span class="prelude-val">None </span>=&gt; <span class="macro">quote::quote!</span> { <span class="prelude-val">None </span>},
-    };
     <span class="kw">let </span>hide_in_help = <span class="kw-2">&amp;</span>inv.args.hide_in_help;
+    <span class="kw">let </span>description = wrap_option_to_string(inv.description.as_ref());
     <span class="kw">let </span>category = wrap_option_to_string(inv.args.category.as_ref());
 
-    <span class="kw">let </span>global_cooldown = wrap_option(inv.args.global_cooldown);
-    <span class="kw">let </span>user_cooldown = wrap_option(inv.args.user_cooldown);
-    <span class="kw">let </span>guild_cooldown = wrap_option(inv.args.guild_cooldown);
-    <span class="kw">let </span>channel_cooldown = wrap_option(inv.args.channel_cooldown);
-    <span class="kw">let </span>member_cooldown = wrap_option(inv.args.member_cooldown);
+    <span class="kw">let </span>cooldown_config = generate_cooldown_config(<span class="kw-2">&amp;</span>inv.args);
 
     <span class="kw">let </span>default_member_permissions = <span class="kw-2">&amp;</span>inv.default_member_permissions;
     <span class="kw">let </span>required_permissions = <span class="kw-2">&amp;</span>inv.required_permissions;
@@ -719,9 +737,9 @@
         <span class="prelude-val">None </span>=&gt; <span class="macro">quote::quote!</span> { Box::new(()) },
     };
 
-    <span class="kw">let </span>name_localizations = <span class="kw">crate</span>::util::vec_tuple_2_to_hash_map(inv.args.name_localized);
+    <span class="kw">let </span>name_localizations = iter_tuple_2_to_hash_map(inv.args.name_localized.into_iter());
     <span class="kw">let </span>description_localizations =
-        <span class="kw">crate</span>::util::vec_tuple_2_to_hash_map(inv.args.description_localized);
+        iter_tuple_2_to_hash_map(inv.args.description_localized.into_iter());
 
     <span class="kw">let </span>function_ident =
         std::mem::replace(<span class="kw-2">&amp;mut </span>inv.function.sig.ident, <span class="macro">syn::parse_quote!</span> { inner });
@@ -754,14 +772,7 @@
                 help_text: #help_text,
                 hide_in_help: #hide_in_help,
                 cooldowns: std::sync::Mutex::new(::poise::Cooldowns::new()),
-                cooldown_config: std::sync::RwLock::new(::poise::CooldownConfig {
-                    global: #global_cooldown.map(std::time::Duration::from_secs),
-                    user: #user_cooldown.map(std::time::Duration::from_secs),
-                    guild: #guild_cooldown.map(std::time::Duration::from_secs),
-                    channel: #channel_cooldown.map(std::time::Duration::from_secs),
-                    member: #member_cooldown.map(std::time::Duration::from_secs),
-                    __non_exhaustive: ()
-                }),
+                cooldown_config: #cooldown_config,
                 reuse_response: #reuse_response,
                 default_member_permissions: #default_member_permissions,
                 required_permissions: #required_permissions,
@@ -787,5 +798,38 @@
             }
         }
     })
+}
+
+<span class="kw">fn </span>generate_cooldown_config(args: <span class="kw-2">&amp;</span>CommandArgs) -&gt; proc_macro2::TokenStream {
+    <span class="kw">let </span>all_cooldowns = [
+        args.global_cooldown,
+        args.user_cooldown,
+        args.guild_cooldown,
+        args.channel_cooldown,
+        args.member_cooldown,
+    ];
+
+    <span class="kw">if </span>all_cooldowns.iter().all(Option::is_none) {
+        <span class="kw">return </span><span class="macro">quote::quote!</span>(std::sync::RwLock::default());
+    }
+
+    <span class="kw">let </span>to_seconds_path = <span class="macro">quote::quote!</span>(std::time::Duration::from_secs);
+
+    <span class="kw">let </span>global_cooldown = wrap_option_and_map(args.global_cooldown, <span class="kw-2">&amp;</span>to_seconds_path);
+    <span class="kw">let </span>user_cooldown = wrap_option_and_map(args.user_cooldown, <span class="kw-2">&amp;</span>to_seconds_path);
+    <span class="kw">let </span>guild_cooldown = wrap_option_and_map(args.guild_cooldown, <span class="kw-2">&amp;</span>to_seconds_path);
+    <span class="kw">let </span>channel_cooldown = wrap_option_and_map(args.channel_cooldown, <span class="kw-2">&amp;</span>to_seconds_path);
+    <span class="kw">let </span>member_cooldown = wrap_option_and_map(args.member_cooldown, <span class="kw-2">&amp;</span>to_seconds_path);
+
+    <span class="macro">quote::quote!</span>(
+        std::sync::RwLock::new(::poise::CooldownConfig {
+            global: #global_cooldown,
+            user: #user_cooldown,
+            guild: #guild_cooldown,
+            channel: #channel_cooldown,
+            member: #member_cooldown,
+            __non_exhaustive: ()
+        })
+    )
 }
 </code></pre></div></section></main></body></html>

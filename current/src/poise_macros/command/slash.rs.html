@@ -229,13 +229,10 @@
 <a href="#229" id="229">229</a>
 <a href="#230" id="230">230</a>
 <a href="#231" id="231">231</a>
-<a href="#232" id="232">232</a>
-<a href="#233" id="233">233</a>
-<a href="#234" id="234">234</a>
-<a href="#235" id="235">235</a>
-<a href="#236" id="236">236</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::Invocation;
-<span class="kw">use </span><span class="kw">crate</span>::util::extract_type_parameter;
+<span class="kw">use </span><span class="kw">crate</span>::util::{
+    extract_type_parameter, iter_tuple_2_to_hash_map, tuple_2_iter_deref, wrap_option_to_string,
+};
 <span class="kw">use </span>quote::format_ident;
 <span class="kw">use </span>syn::spanned::Spanned <span class="kw">as _</span>;
 
@@ -244,10 +241,7 @@
     <span class="kw">for </span>param <span class="kw">in </span><span class="kw-2">&amp;</span>inv.parameters {
         <span class="comment">// no #[description] check here even if slash_command set, so users can programatically
         // supply descriptions later (e.g. via translation framework like fluent)
-        </span><span class="kw">let </span>description = <span class="kw">match </span><span class="kw-2">&amp;</span>param.args.description {
-            <span class="prelude-val">Some</span>(x) =&gt; <span class="macro">quote::quote!</span> { <span class="prelude-val">Some</span>(#x.to_string()) },
-            <span class="prelude-val">None </span>=&gt; <span class="macro">quote::quote!</span> { <span class="prelude-val">None </span>},
-        };
+        </span><span class="kw">let </span>description = wrap_option_to_string(param.args.description.as_ref());
 
         <span class="kw">let </span>(<span class="kw-2">mut </span>required, type_) = <span class="kw">match </span>extract_type_parameter(<span class="string">"Option"</span>, <span class="kw-2">&amp;</span>param.type_)
             .or_else(|| extract_type_parameter(<span class="string">"Vec"</span>, <span class="kw-2">&amp;</span>param.type_))
@@ -262,10 +256,10 @@
         }
 
         <span class="kw">let </span>param_name = <span class="kw-2">&amp;</span>param.name;
-        <span class="kw">let </span>name_locales = param.args.name_localized.iter().map(|x| <span class="kw-2">&amp;</span>x.<span class="number">0</span>);
-        <span class="kw">let </span>name_localized_values = param.args.name_localized.iter().map(|x| <span class="kw-2">&amp;</span>x.<span class="number">1</span>);
-        <span class="kw">let </span>description_locales = param.args.description_localized.iter().map(|x| <span class="kw-2">&amp;</span>x.<span class="number">0</span>);
-        <span class="kw">let </span>description_localized_values = param.args.description_localized.iter().map(|x| <span class="kw-2">&amp;</span>x.<span class="number">1</span>);
+        <span class="kw">let </span>name_localizations =
+            iter_tuple_2_to_hash_map(tuple_2_iter_deref(<span class="kw-2">&amp;</span>param.args.name_localized));
+        <span class="kw">let </span>desc_localizations =
+            iter_tuple_2_to_hash_map(tuple_2_iter_deref(<span class="kw-2">&amp;</span>param.args.description_localized));
 
         <span class="kw">let </span>autocomplete_callback = <span class="kw">match </span><span class="kw-2">&amp;</span>param.args.autocomplete {
             <span class="prelude-val">Some</span>(autocomplete_fn) =&gt; {
@@ -354,13 +348,9 @@
             <span class="macro">quote::quote!</span> {
                 ::poise::CommandParameter {
                     name: #param_name.to_string(),
-                    name_localizations: <span class="macro">vec!</span>[
-                        #( (#name_locales.to_string(), #name_localized_values.to_string()) ),*
-                    ].into_iter().collect(),
+                    name_localizations: #name_localizations,
                     description: #description,
-                    description_localizations: <span class="macro">vec!</span>[
-                        #( (#description_locales.to_string(), #description_localized_values.to_string()) ),*
-                    ].into_iter().collect(),
+                    description_localizations: #desc_localizations,
                     required: #required,
                     channel_types: #channel_types,
                     type_setter: #type_setter,
