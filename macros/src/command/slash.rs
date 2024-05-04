@@ -1,5 +1,7 @@
 use super::Invocation;
-use crate::util::extract_type_parameter;
+use crate::util::{
+    extract_type_parameter, iter_tuple_2_to_hash_map, tuple_2_iter_deref, wrap_option_to_string,
+};
 use quote::format_ident;
 use syn::spanned::Spanned as _;
 
@@ -8,10 +10,7 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
     for param in &inv.parameters {
         // no #[description] check here even if slash_command set, so users can programatically
         // supply descriptions later (e.g. via translation framework like fluent)
-        let description = match &param.args.description {
-            Some(x) => quote::quote! { Some(#x.to_string()) },
-            None => quote::quote! { None },
-        };
+        let description = wrap_option_to_string(param.args.description.as_ref());
 
         let (mut required, type_) = match extract_type_parameter("Option", &param.type_)
             .or_else(|| extract_type_parameter("Vec", &param.type_))
@@ -26,10 +25,10 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
         }
 
         let param_name = &param.name;
-        let name_locales = param.args.name_localized.iter().map(|x| &x.0);
-        let name_localized_values = param.args.name_localized.iter().map(|x| &x.1);
-        let description_locales = param.args.description_localized.iter().map(|x| &x.0);
-        let description_localized_values = param.args.description_localized.iter().map(|x| &x.1);
+        let name_localizations =
+            iter_tuple_2_to_hash_map(tuple_2_iter_deref(&param.args.name_localized));
+        let desc_localizations =
+            iter_tuple_2_to_hash_map(tuple_2_iter_deref(&param.args.description_localized));
 
         let autocomplete_callback = match &param.args.autocomplete {
             Some(autocomplete_fn) => {
@@ -118,13 +117,9 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
             quote::quote! {
                 ::poise::CommandParameter {
                     name: #param_name.to_string(),
-                    name_localizations: vec![
-                        #( (#name_locales.to_string(), #name_localized_values.to_string()) ),*
-                    ].into_iter().collect(),
+                    name_localizations: #name_localizations,
                     description: #description,
-                    description_localizations: vec![
-                        #( (#description_locales.to_string(), #description_localized_values.to_string()) ),*
-                    ].into_iter().collect(),
+                    description_localizations: #desc_localizations,
                     required: #required,
                     channel_types: #channel_types,
                     type_setter: #type_setter,

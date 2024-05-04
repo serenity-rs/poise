@@ -26,12 +26,20 @@ pub fn wrap_option<T: quote::ToTokens>(literal: Option<T>) -> syn::Expr {
     }
 }
 
-/// Converts None => `None` and Some(x) => `Some(#x.to_string())`
-pub fn wrap_option_to_string<T: quote::ToTokens>(literal: Option<T>) -> syn::Expr {
+/// Converts None => `None` and Some(x) => `Some(#map_path(#x))`
+pub fn wrap_option_and_map<T: quote::ToTokens>(
+    literal: Option<T>,
+    map_path: impl quote::ToTokens,
+) -> syn::Expr {
     match literal {
-        Some(literal) => syn::parse_quote! { Some(#literal.to_string()) },
+        Some(literal) => syn::parse_quote! { Some(#map_path(#literal)) },
         None => syn::parse_quote! { None },
     }
+}
+
+pub fn wrap_option_to_string<T: quote::ToTokens>(literal: Option<T>) -> syn::Expr {
+    let to_string_path = quote::quote!(::std::string::ToString::to_string);
+    wrap_option_and_map(literal, to_string_path)
 }
 
 /// Syn Fold to make all lifetimes 'static. Used to access trait items of a type without having its
@@ -79,8 +87,32 @@ impl<T: darling::FromMeta> darling::FromMeta for Tuple2<T> {
     }
 }
 
-pub fn vec_tuple_2_to_hash_map(v: Vec<Tuple2<String>>) -> proc_macro2::TokenStream {
-    let (keys, values): (Vec<String>, Vec<String>) = v.into_iter().map(|x| (x.0, x.1)).unzip();
+pub fn tuple_2_iter_deref<'a, I: 'a, T: 'a, D: ?Sized + 'a>(
+    iter: I,
+) -> impl ExactSizeIterator<Item = Tuple2<&'a D>>
+where
+    I: IntoIterator<Item = &'a Tuple2<T>>,
+    I::IntoIter: ExactSizeIterator,
+    T: std::ops::Deref<Target = D>,
+{
+    iter.into_iter()
+        .map(|Tuple2(t, v)| Tuple2(t.deref(), v.deref()))
+}
+
+pub fn iter_tuple_2_to_hash_map<I, T>(v: I) -> proc_macro2::TokenStream
+where
+    I: ExactSizeIterator<Item = Tuple2<T>>,
+    T: quote::ToTokens,
+{
+    if v.len() == 0 {
+        return quote::quote!(std::collections::HashMap::new());
+    }
+
+    let (keys, values) = v
+        .into_iter()
+        .map(|x| (x.0, x.1))
+        .unzip::<_, _, Vec<_>, Vec<_>>();
+
     quote::quote! {
         std::collections::HashMap::from([
             #( (#keys.to_string(), #values.to_string()) ),*

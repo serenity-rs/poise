@@ -1,7 +1,9 @@
 mod prefix;
 mod slash;
 
-use crate::util::{wrap_option, wrap_option_to_string};
+use crate::util::{
+    iter_tuple_2_to_hash_map, wrap_option, wrap_option_and_map, wrap_option_to_string,
+};
 use proc_macro::TokenStream;
 use syn::spanned::Spanned as _;
 
@@ -271,20 +273,14 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
         .rename
         .clone()
         .unwrap_or_else(|| function_name.clone());
+
     let context_menu_name = wrap_option_to_string(inv.args.context_menu_command.as_ref());
 
-    let description = match &inv.description {
-        Some(x) => quote::quote! { Some(#x.to_string()) },
-        None => quote::quote! { None },
-    };
     let hide_in_help = &inv.args.hide_in_help;
+    let description = wrap_option_to_string(inv.description.as_ref());
     let category = wrap_option_to_string(inv.args.category.as_ref());
 
-    let global_cooldown = wrap_option(inv.args.global_cooldown);
-    let user_cooldown = wrap_option(inv.args.user_cooldown);
-    let guild_cooldown = wrap_option(inv.args.guild_cooldown);
-    let channel_cooldown = wrap_option(inv.args.channel_cooldown);
-    let member_cooldown = wrap_option(inv.args.member_cooldown);
+    let cooldown_config = generate_cooldown_config(&inv.args);
 
     let default_member_permissions = &inv.default_member_permissions;
     let required_permissions = &inv.required_permissions;
@@ -324,9 +320,9 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
         None => quote::quote! { Box::new(()) },
     };
 
-    let name_localizations = crate::util::vec_tuple_2_to_hash_map(inv.args.name_localized);
+    let name_localizations = iter_tuple_2_to_hash_map(inv.args.name_localized.into_iter());
     let description_localizations =
-        crate::util::vec_tuple_2_to_hash_map(inv.args.description_localized);
+        iter_tuple_2_to_hash_map(inv.args.description_localized.into_iter());
 
     let function_ident =
         std::mem::replace(&mut inv.function.sig.ident, syn::parse_quote! { inner });
@@ -359,14 +355,7 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
                 help_text: #help_text,
                 hide_in_help: #hide_in_help,
                 cooldowns: std::sync::Mutex::new(::poise::Cooldowns::new()),
-                cooldown_config: std::sync::RwLock::new(::poise::CooldownConfig {
-                    global: #global_cooldown.map(std::time::Duration::from_secs),
-                    user: #user_cooldown.map(std::time::Duration::from_secs),
-                    guild: #guild_cooldown.map(std::time::Duration::from_secs),
-                    channel: #channel_cooldown.map(std::time::Duration::from_secs),
-                    member: #member_cooldown.map(std::time::Duration::from_secs),
-                    __non_exhaustive: ()
-                }),
+                cooldown_config: #cooldown_config,
                 reuse_response: #reuse_response,
                 default_member_permissions: #default_member_permissions,
                 required_permissions: #required_permissions,
@@ -392,4 +381,37 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
             }
         }
     })
+}
+
+fn generate_cooldown_config(args: &CommandArgs) -> proc_macro2::TokenStream {
+    let all_cooldowns = [
+        args.global_cooldown,
+        args.user_cooldown,
+        args.guild_cooldown,
+        args.channel_cooldown,
+        args.member_cooldown,
+    ];
+
+    if all_cooldowns.iter().all(Option::is_none) {
+        return quote::quote!(std::sync::RwLock::default());
+    }
+
+    let to_seconds_path = quote::quote!(std::time::Duration::from_secs);
+
+    let global_cooldown = wrap_option_and_map(args.global_cooldown, &to_seconds_path);
+    let user_cooldown = wrap_option_and_map(args.user_cooldown, &to_seconds_path);
+    let guild_cooldown = wrap_option_and_map(args.guild_cooldown, &to_seconds_path);
+    let channel_cooldown = wrap_option_and_map(args.channel_cooldown, &to_seconds_path);
+    let member_cooldown = wrap_option_and_map(args.member_cooldown, &to_seconds_path);
+
+    quote::quote!(
+        std::sync::RwLock::new(::poise::CooldownConfig {
+            global: #global_cooldown,
+            user: #user_cooldown,
+            guild: #guild_cooldown,
+            channel: #channel_cooldown,
+            member: #member_cooldown,
+            __non_exhaustive: ()
+        })
+    )
 }
