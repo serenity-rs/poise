@@ -50,8 +50,8 @@ async fn main() {
                 Duration::from_secs(3600),
             ))),
             additional_prefixes: vec![
-                poise::Prefix::Literal("hey bot"),
                 poise::Prefix::Literal("hey bot,"),
+                poise::Prefix::Literal("hey bot"),
             ],
             ..Default::default()
         },
