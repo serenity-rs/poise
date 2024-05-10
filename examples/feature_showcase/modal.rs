@@ -37,13 +37,15 @@ pub async fn component_modal(ctx: crate::Context<'_>) -> Result<(), Error> {
 
     ctx.send(reply).await?;
 
-    while let Some(mci) = serenity::ComponentInteractionCollector::new(ctx.serenity_context())
+    let serenity_ctx = ctx.serenity_context();
+    while let Some(mci) = serenity::ComponentInteractionCollector::new(serenity_ctx)
         .timeout(std::time::Duration::from_secs(120))
         .filter(move |mci| mci.data.custom_id == "open_modal")
         .await
     {
         let data =
-            poise::execute_modal_on_component_interaction::<MyModal>(ctx, mci, None, None).await?;
+            poise::execute_modal_on_component_interaction::<MyModal>(serenity_ctx, mci, None, None)
+                .await?;
         println!("Got data: {:?}", data);
     }
     Ok(())
