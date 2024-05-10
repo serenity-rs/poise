@@ -120,14 +120,14 @@ pub async fn execute_modal<U: Send + Sync, E, M: Modal>(
 /// If you need more specialized behavior, you can copy paste the implementation of this function
 /// and adjust to your needs. The code of this function is just a starting point.
 pub async fn execute_modal_on_component_interaction<M: Modal>(
-    ctx: impl AsRef<serenity::Context>,
+    ctx: &serenity::Context,
     interaction: serenity::ComponentInteraction,
     defaults: Option<M>,
     timeout: Option<std::time::Duration>,
 ) -> Result<Option<M>, serenity::Error> {
     execute_modal_generic(
-        ctx.as_ref(),
-        |resp| interaction.create_response(ctx.as_ref(), resp),
+        ctx,
+        |resp| interaction.create_response(ctx, resp),
         interaction.id.to_string(),
         defaults,
         timeout,
