@@ -49,6 +49,9 @@ pub struct CommandArgs {
     category: Option<String>,
     custom_data: Option<syn::Expr>,
 
+    install_context: Option<syn::punctuated::Punctuated<syn::Ident, syn::Token![|]>>,
+    interaction_context: Option<syn::punctuated::Punctuated<syn::Ident, syn::Token![|]>>,
+
     // In seconds
     global_cooldown: Option<u64>,
     user_cooldown: Option<u64>,
@@ -97,6 +100,8 @@ pub struct Invocation {
     default_member_permissions: syn::Expr,
     required_permissions: syn::Expr,
     required_bot_permissions: syn::Expr,
+    install_context: syn::Expr,
+    interaction_context: syn::Expr,
     args: CommandArgs,
 }
 
@@ -216,6 +221,34 @@ pub fn command(
     let required_permissions = permissions_to_tokens(&args.required_permissions);
     let required_bot_permissions = permissions_to_tokens(&args.required_bot_permissions);
 
+    fn build_install_context(
+        contexts: &Option<syn::punctuated::Punctuated<syn::Ident, syn::Token![|]>>,
+    ) -> syn::Expr {
+        match contexts {
+            Some(contexts) => {
+                let contexts = contexts.iter();
+                syn::parse_quote! { Some(vec![ #(poise::serenity_prelude::InstallationContext::#contexts),* ]) }
+            }
+            None => syn::parse_quote! { None },
+        }
+    }
+
+    let install_context = build_install_context(&args.install_context);
+
+    fn build_interaction_context(
+        contexts: &Option<syn::punctuated::Punctuated<syn::Ident, syn::Token![|]>>,
+    ) -> syn::Expr {
+        match contexts {
+            Some(contexts) => {
+                let contexts = contexts.iter();
+                syn::parse_quote! { Some(vec![ #(poise::serenity_prelude::InteractionContext::#contexts),* ]) }
+            }
+            None => syn::parse_quote! { None },
+        }
+    }
+
+    let interaction_context = build_interaction_context(&args.interaction_context);
+
     let inv = Invocation {
         parameters,
         description,
@@ -225,6 +258,8 @@ pub fn command(
         default_member_permissions,
         required_permissions,
         required_bot_permissions,
+        install_context,
+        interaction_context,
     };
 
     Ok(TokenStream::from(generate_command(inv)?))
@@ -290,6 +325,9 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
     let guild_only = inv.args.guild_only;
     let dm_only = inv.args.dm_only;
     let nsfw_only = inv.args.nsfw_only;
+
+    let install_context = &inv.install_context;
+    let interaction_context = &inv.interaction_context;
 
     let help_text = match &inv.args.help_text_fn {
         Some(help_text_fn) => quote::quote! { Some(#help_text_fn()) },
@@ -364,6 +402,8 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
                 guild_only: #guild_only,
                 dm_only: #dm_only,
                 nsfw_only: #nsfw_only,
+                install_context: #install_context,
+                interaction_context: #interaction_context,
                 checks: vec![ #( |ctx| Box::pin(#checks(ctx)) ),* ],
                 on_error: #on_error,
                 parameters: vec![ #( #parameters ),* ],
