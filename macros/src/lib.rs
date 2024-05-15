@@ -7,7 +7,10 @@ mod command;
 mod modal;
 mod util;
 
+use std::vec;
+
 use proc_macro::TokenStream;
+use quote::quote;
 
 /**
 This macro transforms plain functions into poise bot commands.
@@ -276,4 +279,141 @@ pub fn modal(input: TokenStream) -> TokenStream {
         Ok(x) => x,
         Err(e) => e.write_errors().into(),
     }
+}
+
+/**
+Use this macro on an impl block to implement the CommandGroup trait.
+
+It implements a `commands()` function which returns a Vec with all the commands defined by `#[poise::command]`.
+
+# Usage
+
+The following code defines a command group with two commands,
+both of which will have the `slash_command` and `prefix_command` attributes.
+
+`command_one` will have the default user_cooldown of 1000, while `command_two` overrides it to 2000.
+
+```rust
+struct MyCommands;
+
+#[poise::group(slash_command, prefix_command, user_cooldown=1000)]
+impl MyCommands {
+    /// This is a command
+    #[poise::command()]
+    async fn command_one(ctx: Context<'_>) -> Result<(), Error> {
+        // code
+    }
+
+    /// This is another command
+    #[poise::command(user_cooldown=2000)]
+    async fn command_two(ctx: Context<'_>) -> Result<(), Error> {
+        // code
+    }
+}
+```
+*/
+#[proc_macro_attribute]
+pub fn group(args: TokenStream, input_item: TokenStream) -> TokenStream {
+    let args = match darling::ast::NestedMeta::parse_meta_list(args.into()) {
+        Ok(x) => x,
+        Err(e) => return e.into_compile_error().into(),
+    };
+
+    let group_args = match <command::GroupArgs as darling::FromMeta>::from_list(&args) {
+        Ok(x) => x,
+        Err(e) => return e.write_errors().into(),
+    };
+
+    let item_impl = syn::parse_macro_input!(input_item as syn::ItemImpl);
+    let name = item_impl.self_ty;
+
+    // vector of all #[poise::command(...)] command idents
+    let mut command_idents = vec![];
+
+    // collect each ImplItem in a stream
+    let mut impl_body = quote!();
+
+    for item in item_impl.items.iter() {
+        // if it's a function...
+        if let syn::ImplItem::Fn(f) = item {
+            // ... and it's a command
+            if let Some(attr) = f.attrs.iter().find(|attr| is_command_attr(attr)) {
+                // add to command list
+                command_idents.push(f.sig.ident.clone());
+
+                // Turn a syn::Attribute into command::CommandArgs
+                let attr_args = match attr.meta.require_list() {
+                    Ok(x) => &x.tokens,
+                    Err(e) => return e.into_compile_error().into(),
+                };
+
+                let command_args =
+                    match darling::ast::NestedMeta::parse_meta_list(quote! {#attr_args}) {
+                        Ok(x) => x,
+                        Err(e) => {
+                            return e.into_compile_error().into();
+                        }
+                    };
+                let command_args =
+                    match <command::CommandArgs as darling::FromMeta>::from_list(&command_args) {
+                        Ok(x) => x,
+                        Err(e) => return e.write_errors().into(),
+                    };
+
+                let new_args = command_args.from_group_args(&group_args);
+                let function = syn::ItemFn {
+                    attrs: vec![],
+                    vis: f.vis.clone(),
+                    sig: f.sig.clone(),
+                    block: Box::new(f.block.clone()),
+                };
+                let cmd: proc_macro2::TokenStream = match command::command(new_args, function) {
+                    Ok(x) => x.into(),
+                    Err(e) => e.write_errors().into(),
+                };
+
+                impl_body = quote!(
+                    #impl_body
+                    #cmd
+                );
+                // repeated because if let chains are unstable <https://github.com/rust-lang/rust/issues/53667>
+            } else {
+                impl_body = quote!(
+                    #impl_body
+                    #item
+                );
+            };
+        } else {
+            impl_body = quote!(
+                #impl_body
+                #item
+            );
+        }
+    }
+
+    quote! {
+        impl #name {
+            fn commands() -> Vec<Command<Data, Error>> {
+                vec![#(#name::#command_idents()),*]
+            }
+
+            #impl_body
+        }
+    }
+    .into()
+}
+
+/**
+Returns true if an `Attribute` has `path` equal to "poise::command" or "command"
+*/
+fn is_command_attr(attr: &syn::Attribute) -> bool {
+    let path = attr
+        .path()
+        .segments
+        .iter()
+        .map(|s| format!("{}", s.ident))
+        .collect::<Vec<String>>()
+        .join("::");
+
+    path == "poise::command" || path == "command"
 }
