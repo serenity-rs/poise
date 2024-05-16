@@ -386,14 +386,10 @@ fn group_impl(args: TokenStream, input_item: TokenStream) -> Result<TokenStream,
 Returns true if an `Attribute` has `path` equal to "poise::command" or "command"
 */
 fn is_command_attr(attr: &syn::Attribute) -> bool {
-    let segments = &attr.path().segments;
-    if let Some(last) = segments.last() {
-        if let Some(first) = segments.first() {
-            // match #[poise::command(...)]
-            return first.ident == "poise" && last.ident == "command";
-        }
-        // match #[command(...)]
-        return last.ident == "command";
+    let mut segments = attr.path().segments.iter();
+    match [segments.next(), segments.next(), segments.next()] {
+        [Some(first), Some(second), None] => first.ident == "poise" && second.ident == "command",
+        [Some(first), None, None] => first.ident == "command",
+        [_, _, _] => false,
     }
-    false
 }
