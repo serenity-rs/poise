@@ -7,8 +7,6 @@ mod command;
 mod modal;
 mod util;
 
-use std::vec;
-
 use proc_macro::TokenStream;
 use quote::quote;
 
