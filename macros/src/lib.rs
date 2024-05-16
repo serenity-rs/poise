@@ -7,6 +7,7 @@ mod command;
 mod modal;
 mod util;
 
+use darling::Error;
 use proc_macro::TokenStream;
 use quote::quote;
 
@@ -312,17 +313,22 @@ impl MyCommands {
 */
 #[proc_macro_attribute]
 pub fn group(args: TokenStream, input_item: TokenStream) -> TokenStream {
-    let args = match darling::ast::NestedMeta::parse_meta_list(args.into()) {
+    match group_impl(args, input_item) {
         Ok(x) => x,
-        Err(e) => return e.into_compile_error().into(),
-    };
+        Err(err) => err.write_errors().into(),
+    }
+}
 
-    let group_args = match <command::GroupArgs as darling::FromMeta>::from_list(&args) {
-        Ok(x) => x,
-        Err(e) => return e.write_errors().into(),
-    };
+fn group_impl(args: TokenStream, input_item: TokenStream) -> Result<TokenStream, Error> {
+    let args = darling::ast::NestedMeta::parse_meta_list(args.into())?;
 
-    let item_impl = syn::parse_macro_input!(input_item as syn::ItemImpl);
+    let group_args = <command::GroupArgs as darling::FromMeta>::from_list(&args)?;
+
+    // let item_impl = syn::parse_macro_input!(input_item as syn::ItemImpl);
+    let item_impl = match syn::parse::<syn::ItemImpl>(input_item) {
+        Ok(syntax_tree) => syntax_tree,
+        Err(err) => return Err(err.into()),
+    };
     let name = item_impl.self_ty;
 
     // vector of all #[poise::command(...)] command idents
@@ -332,6 +338,8 @@ pub fn group(args: TokenStream, input_item: TokenStream) -> TokenStream {
     let mut impl_body = quote!();
 
     for item in item_impl.items.iter() {
+        let mut item_stream = quote!(#item);
+
         // if it's a function...
         if let syn::ImplItem::Fn(f) = item {
             // ... and it's a command
@@ -340,23 +348,11 @@ pub fn group(args: TokenStream, input_item: TokenStream) -> TokenStream {
                 command_idents.push(f.sig.ident.clone());
 
                 // Turn a syn::Attribute into command::CommandArgs
-                let attr_args = match attr.meta.require_list() {
-                    Ok(x) => &x.tokens,
-                    Err(e) => return e.into_compile_error().into(),
-                };
+                let attr_args = &attr.meta.require_list()?.tokens;
 
+                let command_args = darling::ast::NestedMeta::parse_meta_list(quote! {#attr_args})?;
                 let command_args =
-                    match darling::ast::NestedMeta::parse_meta_list(quote! {#attr_args}) {
-                        Ok(x) => x,
-                        Err(e) => {
-                            return e.into_compile_error().into();
-                        }
-                    };
-                let command_args =
-                    match <command::CommandArgs as darling::FromMeta>::from_list(&command_args) {
-                        Ok(x) => x,
-                        Err(e) => return e.write_errors().into(),
-                    };
+                    <command::CommandArgs as darling::FromMeta>::from_list(&command_args)?;
 
                 let new_args = command_args.from_group_args(&group_args);
                 let function = syn::ItemFn {
@@ -365,31 +361,16 @@ pub fn group(args: TokenStream, input_item: TokenStream) -> TokenStream {
                     sig: f.sig.clone(),
                     block: Box::new(f.block.clone()),
                 };
-                let cmd: proc_macro2::TokenStream = match command::command(new_args, function) {
-                    Ok(x) => x.into(),
-                    Err(e) => e.write_errors().into(),
-                };
-
-                impl_body = quote!(
-                    #impl_body
-                    #cmd
-                );
-                // repeated because if let chains are unstable <https://github.com/rust-lang/rust/issues/53667>
-            } else {
-                impl_body = quote!(
-                    #impl_body
-                    #item
-                );
-            };
-        } else {
-            impl_body = quote!(
-                #impl_body
-                #item
-            );
+                item_stream = command::command(new_args, function)?.into();
+            }
         }
+        impl_body = quote!(
+            #impl_body
+            #item_stream
+        );
     }
 
-    quote! {
+    Ok(quote! {
         impl #name {
             fn commands() -> Vec<Command<Data, Error>> {
                 vec![#(#name::#command_idents()),*]
@@ -398,7 +379,7 @@ pub fn group(args: TokenStream, input_item: TokenStream) -> TokenStream {
             #impl_body
         }
     }
-    .into()
+    .into())
 }
 
 /**
