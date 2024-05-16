@@ -386,13 +386,14 @@ fn group_impl(args: TokenStream, input_item: TokenStream) -> Result<TokenStream,
 Returns true if an `Attribute` has `path` equal to "poise::command" or "command"
 */
 fn is_command_attr(attr: &syn::Attribute) -> bool {
-    let path = attr
-        .path()
-        .segments
-        .iter()
-        .map(|s| format!("{}", s.ident))
-        .collect::<Vec<String>>()
-        .join("::");
-
-    path == "poise::command" || path == "command"
+    let segments = &attr.path().segments;
+    if let Some(last) = segments.last() {
+        if let Some(first) = segments.first() {
+            // match #[poise::command(...)]
+            return first.ident == "poise" && last.ident == "command";
+        }
+        // match #[command(...)]
+        return last.ident == "command";
+    }
+    false
 }
