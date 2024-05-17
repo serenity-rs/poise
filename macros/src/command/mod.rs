@@ -49,7 +49,9 @@ pub struct CommandArgs {
     category: Option<String>,
     custom_data: Option<syn::Expr>,
 
+    #[cfg(feature = "unstable")]
     install_context: Option<syn::punctuated::Punctuated<syn::Ident, syn::Token![|]>>,
+    #[cfg(feature = "unstable")]
     interaction_context: Option<syn::punctuated::Punctuated<syn::Ident, syn::Token![|]>>,
 
     // In seconds
@@ -100,7 +102,9 @@ pub struct Invocation {
     default_member_permissions: syn::Expr,
     required_permissions: syn::Expr,
     required_bot_permissions: syn::Expr,
+    #[cfg(feature = "unstable")]
     install_context: syn::Expr,
+    #[cfg(feature = "unstable")]
     interaction_context: syn::Expr,
     args: CommandArgs,
 }
@@ -221,6 +225,7 @@ pub fn command(
     let required_permissions = permissions_to_tokens(&args.required_permissions);
     let required_bot_permissions = permissions_to_tokens(&args.required_bot_permissions);
 
+    #[cfg(feature = "unstable")]
     fn build_install_context(
         contexts: &Option<syn::punctuated::Punctuated<syn::Ident, syn::Token![|]>>,
     ) -> syn::Expr {
@@ -233,8 +238,10 @@ pub fn command(
         }
     }
 
+    #[cfg(feature = "unstable")]
     let install_context = build_install_context(&args.install_context);
 
+    #[cfg(feature = "unstable")]
     fn build_interaction_context(
         contexts: &Option<syn::punctuated::Punctuated<syn::Ident, syn::Token![|]>>,
     ) -> syn::Expr {
@@ -247,6 +254,7 @@ pub fn command(
         }
     }
 
+    #[cfg(feature = "unstable")]
     let interaction_context = build_interaction_context(&args.interaction_context);
 
     let inv = Invocation {
@@ -258,7 +266,9 @@ pub fn command(
         default_member_permissions,
         required_permissions,
         required_bot_permissions,
+        #[cfg(feature = "unstable")]
         install_context,
+        #[cfg(feature = "unstable")]
         interaction_context,
     };
 
@@ -326,7 +336,9 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
     let dm_only = inv.args.dm_only;
     let nsfw_only = inv.args.nsfw_only;
 
+    #[cfg(feature = "unstable")]
     let install_context = &inv.install_context;
+    #[cfg(feature = "unstable")]
     let interaction_context = &inv.interaction_context;
 
     let help_text = match &inv.args.help_text_fn {
@@ -367,7 +379,9 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
     let function_generics = &inv.function.sig.generics;
     let function_visibility = &inv.function.vis;
     let function = &inv.function;
-    Ok(quote::quote! {
+
+    #[cfg(feature = "unstable")]
+    return Ok(quote::quote! {
         #[allow(clippy::str_to_string)]
         #function_visibility fn #function_ident #function_generics() -> ::poise::Command<
             <#ctx_type_with_static as poise::_GetGenerics>::U,
@@ -404,6 +418,60 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
                 nsfw_only: #nsfw_only,
                 install_context: #install_context,
                 interaction_context: #interaction_context,
+                checks: vec![ #( |ctx| Box::pin(#checks(ctx)) ),* ],
+                on_error: #on_error,
+                parameters: vec![ #( #parameters ),* ],
+                custom_data: #custom_data,
+
+                aliases: vec![ #( #aliases.to_string(), )* ],
+                invoke_on_edit: #invoke_on_edit,
+                track_deletion: #track_deletion,
+                broadcast_typing: #broadcast_typing,
+
+                context_menu_name: #context_menu_name,
+                ephemeral: #ephemeral,
+
+                __non_exhaustive: (),
+            }
+        }
+    });
+
+    #[cfg(not(feature = "unstable"))]
+    Ok(quote::quote! {
+        #[allow(clippy::str_to_string)]
+        #function_visibility fn #function_ident #function_generics() -> ::poise::Command<
+            <#ctx_type_with_static as poise::_GetGenerics>::U,
+            <#ctx_type_with_static as poise::_GetGenerics>::E,
+        > {
+            #function
+
+            ::poise::Command {
+                prefix_action: #prefix_action,
+                slash_action: #slash_action,
+                context_menu_action: #context_menu_action,
+
+                subcommands: vec![ #( #subcommands() ),* ],
+                subcommand_required: #subcommand_required,
+                name: #command_name.to_string(),
+                name_localizations: #name_localizations,
+                qualified_name: String::from(#command_name), // properly filled in later by Framework
+                identifying_name: String::from(#identifying_name),
+                source_code_name: String::from(#function_name),
+                category: #category,
+                description: #description,
+                description_localizations: #description_localizations,
+                help_text: #help_text,
+                hide_in_help: #hide_in_help,
+                cooldowns: std::sync::Mutex::new(::poise::Cooldowns::new()),
+                cooldown_config: #cooldown_config,
+                reuse_response: #reuse_response,
+                default_member_permissions: #default_member_permissions,
+                required_permissions: #required_permissions,
+                required_bot_permissions: #required_bot_permissions,
+                owners_only: #owners_only,
+                guild_only: #guild_only,
+                dm_only: #dm_only,
+                nsfw_only: #nsfw_only,
                 checks: vec![ #( |ctx| Box::pin(#checks(ctx)) ),* ],
                 on_error: #on_error,
                 parameters: vec![ #( #parameters ),* ],
