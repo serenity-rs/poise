@@ -8,7 +8,7 @@ mod modal;
 mod util;
 
 use proc_macro::TokenStream;
-use quote::quote;
+use quote::{quote, ToTokens};
 
 /**
 This macro transforms plain functions into poise bot commands.
@@ -349,7 +349,8 @@ fn group_impl(args: TokenStream, input_item: TokenStream) -> Result<TokenStream,
                 // Turn a syn::Attribute into command::CommandArgs
                 let attr_args = &attr.meta.require_list()?.tokens;
 
-                let command_args = darling::ast::NestedMeta::parse_meta_list(quote! {#attr_args})?;
+                let command_args =
+                    darling::ast::NestedMeta::parse_meta_list(attr_args.to_token_stream())?;
                 let command_args =
                     <command::CommandArgs as darling::FromMeta>::from_list(&command_args)?;
 
