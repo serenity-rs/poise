@@ -335,7 +335,7 @@ fn group_impl(args: TokenStream, input_item: TokenStream) -> Result<TokenStream,
     let mut command_idents = vec![];
 
     // collect each ImplItem in a stream
-    let mut impl_body = quote!();
+    let mut impl_body = proc_macro2::TokenStream::new();
 
     for item in item_impl.items.iter() {
         let mut item_stream = quote!(#item);
