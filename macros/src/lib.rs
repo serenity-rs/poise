@@ -382,9 +382,7 @@ fn group_impl(args: TokenStream, input_item: TokenStream) -> Result<TokenStream,
     .into())
 }
 
-/**
-Returns true if an `Attribute` has `path` equal to "poise::command" or "command"
-*/
+/// Returns true if an `Attribute` has `path` equal to "poise::command" or "command"
 fn is_command_attr(attr: &syn::Attribute) -> bool {
     let mut segments = attr.path().segments.iter();
     match [segments.next(), segments.next(), segments.next()] {
