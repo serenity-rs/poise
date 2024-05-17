@@ -7,7 +7,6 @@ mod command;
 mod modal;
 mod util;
 
-use darling::Error;
 use proc_macro::TokenStream;
 use quote::quote;
 
@@ -319,7 +318,7 @@ pub fn group(args: TokenStream, input_item: TokenStream) -> TokenStream {
     }
 }
 
-fn group_impl(args: TokenStream, input_item: TokenStream) -> Result<TokenStream, Error> {
+fn group_impl(args: TokenStream, input_item: TokenStream) -> Result<TokenStream, darling::Error> {
     let args = darling::ast::NestedMeta::parse_meta_list(args.into())?;
 
     let group_args = <command::GroupArgs as darling::FromMeta>::from_list(&args)?;
