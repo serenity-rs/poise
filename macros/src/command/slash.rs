@@ -185,7 +185,7 @@ pub fn generate_slash_action(inv: &Invocation) -> Result<proc_macro2::TokenStrea
                 #( (#param_names: #param_types), )*
             ).await.map_err(|error| error.to_framework_error(ctx))?;
 
-            if !ctx.framework.options.manual_cooldowns {
+            if !ctx.framework.options.manual_cooldowns && !ctx.command.manual_cooldowns {
                 ctx.command.cooldowns.lock().unwrap().start_cooldown(ctx.cooldown_context());
             }
 
@@ -215,7 +215,7 @@ pub fn generate_context_menu_action(
     Ok(quote::quote! {
         <#param_type as ::poise::ContextMenuParameter<_, _>>::to_action(|ctx, value| {
             Box::pin(async move {
-                if !ctx.framework.options.manual_cooldowns {
+                if !ctx.framework.options.manual_cooldowns && !ctx.command.manual_cooldowns {
                     ctx.command.cooldowns.lock().unwrap().start_cooldown(ctx.cooldown_context());
                 }
 
