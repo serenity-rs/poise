@@ -16,14 +16,14 @@ pub struct Command<U, E> {
     /// Callback to execute when this command is invoked in a prefix context
     #[derivative(Debug = "ignore")]
     pub prefix_action: Option<
-        for<'a> fn(
+            for<'a> fn(
             crate::PrefixContext<'a, U, E>,
         ) -> BoxFuture<'a, Result<(), crate::FrameworkError<'a, U, E>>>,
     >,
     /// Callback to execute when this command is invoked in a slash context
     #[derivative(Debug = "ignore")]
     pub slash_action: Option<
-        for<'a> fn(
+            for<'a> fn(
             crate::ApplicationContext<'a, U, E>,
         ) -> BoxFuture<'a, Result<(), crate::FrameworkError<'a, U, E>>>,
     >,
@@ -200,10 +200,6 @@ impl<U, E> Command<U, E> {
             builder = builder.default_member_permissions(self.default_member_permissions);
         }
 
-        if self.guild_only {
-            builder = builder.dm_permission(false);
-        }
-
         if self.subcommands.is_empty() {
             for param in &self.parameters {
                 // Using `?` because if this command has slash-incompatible parameters, we cannot
@@ -233,10 +229,6 @@ impl<U, E> Command<U, E> {
             crate::ContextMenuCommandAction::Message(_) => serenity::CommandType::Message,
             crate::ContextMenuCommandAction::__NonExhaustive => unreachable!(),
         });
-
-        if self.guild_only {
-            builder = builder.dm_permission(false);
-        }
 
         Some(builder)
     }
