@@ -393,6 +393,7 @@ pub mod choice_parameter;
 pub mod cooldown;
 pub mod dispatch;
 pub mod framework;
+pub mod group;
 pub mod modal;
 pub mod prefix_argument;
 pub mod reply;
@@ -408,7 +409,7 @@ pub mod macros {
 
 #[doc(no_inline)]
 pub use {
-    choice_parameter::*, cooldown::*, dispatch::*, framework::*, macros::*, modal::*,
+    choice_parameter::*, cooldown::*, dispatch::*, framework::*, group::*, macros::*, modal::*,
     prefix_argument::*, reply::*, slash_argument::*, structs::*, track_edits::*,
 };
 

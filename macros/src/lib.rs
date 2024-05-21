@@ -371,11 +371,12 @@ fn group_impl(args: TokenStream, input_item: TokenStream) -> Result<TokenStream,
     }
 
     Ok(quote! {
-        impl #name {
-            fn commands() -> Vec<Command<Data, Error>> {
+        impl<D, E> ::poise::CommandGroup<D, E> for #name {
+            fn commands() -> Vec<::poise::Command<D, E>> {
                 vec![#(#name::#command_idents()),*]
             }
-
+        }
+        impl #name {
             #impl_body
         }
     }
