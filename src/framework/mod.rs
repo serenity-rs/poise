@@ -4,7 +4,7 @@ use std::sync::Arc;
 
 pub use builder::*;
 
-use crate::serenity_prelude as serenity;
+use crate::serenity_prelude::{self as serenity, TeamMemberRole};
 
 mod builder;
 
@@ -184,9 +184,12 @@ pub async fn insert_owners_from_http(
 
     if let Some(team) = application_info.team {
         for member in team.members {
-            // This `if` currently always evaluates to true but it becomes important once
-            // Discord implements more team roles than Admin
-            if member.permissions.iter().any(|p| p == "*") {
+            // "Owner" is considered anyone with permission to access the token.
+            if member.membership_state != serenity::MembershipState::Accepted {
+                continue;
+            }
+
+            if let TeamMemberRole::Admin | TeamMemberRole::Developer = member.role {
                 owners.insert(member.user.id);
             }
         }
