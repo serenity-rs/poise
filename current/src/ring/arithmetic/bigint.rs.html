@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.5/src/arithmetic/bigint.rs`."><title>bigint.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-b21aa549bf6d91ff.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="ring" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (79734f1db 2024-05-02)" data-channel="nightly" data-search-js="search-bf21c90c8c1d92b1.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-e32f0c247825364d.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-09095024cf37855e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../ring/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Type ‘S’ or ‘/’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings">Settings</a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.8/src/arithmetic/bigint.rs`."><title>bigint.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="ring" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (9cdfe285c 2024-05-22)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -880,166 +880,6 @@
 <a href="#880" id="880">880</a>
 <a href="#881" id="881">881</a>
 <a href="#882" id="882">882</a>
-<a href="#883" id="883">883</a>
-<a href="#884" id="884">884</a>
-<a href="#885" id="885">885</a>
-<a href="#886" id="886">886</a>
-<a href="#887" id="887">887</a>
-<a href="#888" id="888">888</a>
-<a href="#889" id="889">889</a>
-<a href="#890" id="890">890</a>
-<a href="#891" id="891">891</a>
-<a href="#892" id="892">892</a>
-<a href="#893" id="893">893</a>
-<a href="#894" id="894">894</a>
-<a href="#895" id="895">895</a>
-<a href="#896" id="896">896</a>
-<a href="#897" id="897">897</a>
-<a href="#898" id="898">898</a>
-<a href="#899" id="899">899</a>
-<a href="#900" id="900">900</a>
-<a href="#901" id="901">901</a>
-<a href="#902" id="902">902</a>
-<a href="#903" id="903">903</a>
-<a href="#904" id="904">904</a>
-<a href="#905" id="905">905</a>
-<a href="#906" id="906">906</a>
-<a href="#907" id="907">907</a>
-<a href="#908" id="908">908</a>
-<a href="#909" id="909">909</a>
-<a href="#910" id="910">910</a>
-<a href="#911" id="911">911</a>
-<a href="#912" id="912">912</a>
-<a href="#913" id="913">913</a>
-<a href="#914" id="914">914</a>
-<a href="#915" id="915">915</a>
-<a href="#916" id="916">916</a>
-<a href="#917" id="917">917</a>
-<a href="#918" id="918">918</a>
-<a href="#919" id="919">919</a>
-<a href="#920" id="920">920</a>
-<a href="#921" id="921">921</a>
-<a href="#922" id="922">922</a>
-<a href="#923" id="923">923</a>
-<a href="#924" id="924">924</a>
-<a href="#925" id="925">925</a>
-<a href="#926" id="926">926</a>
-<a href="#927" id="927">927</a>
-<a href="#928" id="928">928</a>
-<a href="#929" id="929">929</a>
-<a href="#930" id="930">930</a>
-<a href="#931" id="931">931</a>
-<a href="#932" id="932">932</a>
-<a href="#933" id="933">933</a>
-<a href="#934" id="934">934</a>
-<a href="#935" id="935">935</a>
-<a href="#936" id="936">936</a>
-<a href="#937" id="937">937</a>
-<a href="#938" id="938">938</a>
-<a href="#939" id="939">939</a>
-<a href="#940" id="940">940</a>
-<a href="#941" id="941">941</a>
-<a href="#942" id="942">942</a>
-<a href="#943" id="943">943</a>
-<a href="#944" id="944">944</a>
-<a href="#945" id="945">945</a>
-<a href="#946" id="946">946</a>
-<a href="#947" id="947">947</a>
-<a href="#948" id="948">948</a>
-<a href="#949" id="949">949</a>
-<a href="#950" id="950">950</a>
-<a href="#951" id="951">951</a>
-<a href="#952" id="952">952</a>
-<a href="#953" id="953">953</a>
-<a href="#954" id="954">954</a>
-<a href="#955" id="955">955</a>
-<a href="#956" id="956">956</a>
-<a href="#957" id="957">957</a>
-<a href="#958" id="958">958</a>
-<a href="#959" id="959">959</a>
-<a href="#960" id="960">960</a>
-<a href="#961" id="961">961</a>
-<a href="#962" id="962">962</a>
-<a href="#963" id="963">963</a>
-<a href="#964" id="964">964</a>
-<a href="#965" id="965">965</a>
-<a href="#966" id="966">966</a>
-<a href="#967" id="967">967</a>
-<a href="#968" id="968">968</a>
-<a href="#969" id="969">969</a>
-<a href="#970" id="970">970</a>
-<a href="#971" id="971">971</a>
-<a href="#972" id="972">972</a>
-<a href="#973" id="973">973</a>
-<a href="#974" id="974">974</a>
-<a href="#975" id="975">975</a>
-<a href="#976" id="976">976</a>
-<a href="#977" id="977">977</a>
-<a href="#978" id="978">978</a>
-<a href="#979" id="979">979</a>
-<a href="#980" id="980">980</a>
-<a href="#981" id="981">981</a>
-<a href="#982" id="982">982</a>
-<a href="#983" id="983">983</a>
-<a href="#984" id="984">984</a>
-<a href="#985" id="985">985</a>
-<a href="#986" id="986">986</a>
-<a href="#987" id="987">987</a>
-<a href="#988" id="988">988</a>
-<a href="#989" id="989">989</a>
-<a href="#990" id="990">990</a>
-<a href="#991" id="991">991</a>
-<a href="#992" id="992">992</a>
-<a href="#993" id="993">993</a>
-<a href="#994" id="994">994</a>
-<a href="#995" id="995">995</a>
-<a href="#996" id="996">996</a>
-<a href="#997" id="997">997</a>
-<a href="#998" id="998">998</a>
-<a href="#999" id="999">999</a>
-<a href="#1000" id="1000">1000</a>
-<a href="#1001" id="1001">1001</a>
-<a href="#1002" id="1002">1002</a>
-<a href="#1003" id="1003">1003</a>
-<a href="#1004" id="1004">1004</a>
-<a href="#1005" id="1005">1005</a>
-<a href="#1006" id="1006">1006</a>
-<a href="#1007" id="1007">1007</a>
-<a href="#1008" id="1008">1008</a>
-<a href="#1009" id="1009">1009</a>
-<a href="#1010" id="1010">1010</a>
-<a href="#1011" id="1011">1011</a>
-<a href="#1012" id="1012">1012</a>
-<a href="#1013" id="1013">1013</a>
-<a href="#1014" id="1014">1014</a>
-<a href="#1015" id="1015">1015</a>
-<a href="#1016" id="1016">1016</a>
-<a href="#1017" id="1017">1017</a>
-<a href="#1018" id="1018">1018</a>
-<a href="#1019" id="1019">1019</a>
-<a href="#1020" id="1020">1020</a>
-<a href="#1021" id="1021">1021</a>
-<a href="#1022" id="1022">1022</a>
-<a href="#1023" id="1023">1023</a>
-<a href="#1024" id="1024">1024</a>
-<a href="#1025" id="1025">1025</a>
-<a href="#1026" id="1026">1026</a>
-<a href="#1027" id="1027">1027</a>
-<a href="#1028" id="1028">1028</a>
-<a href="#1029" id="1029">1029</a>
-<a href="#1030" id="1030">1030</a>
-<a href="#1031" id="1031">1031</a>
-<a href="#1032" id="1032">1032</a>
-<a href="#1033" id="1033">1033</a>
-<a href="#1034" id="1034">1034</a>
-<a href="#1035" id="1035">1035</a>
-<a href="#1036" id="1036">1036</a>
-<a href="#1037" id="1037">1037</a>
-<a href="#1038" id="1038">1038</a>
-<a href="#1039" id="1039">1039</a>
-<a href="#1040" id="1040">1040</a>
-<a href="#1041" id="1041">1041</a>
-<a href="#1042" id="1042">1042</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2015-2023 Brian Smith.
 //
 // Permission to use, copy, modify, and/or distribute this software for any
@@ -1080,16 +920,14 @@
 
 </span><span class="kw">use </span><span class="self">self</span>::boxed_limbs::BoxedLimbs;
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span><span class="self">self</span>::{
-    modulus::{Modulus, PartialModulus, MODULUS_MAX_LIMBS},
+    modulus::{Modulus, OwnedModulus, MODULUS_MAX_LIMBS},
     private_exponent::PrivateExponent,
 };
-<span class="kw">use </span><span class="kw">super</span>::n0::N0;
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span><span class="kw">super</span>::nonnegative::Nonnegative;
 <span class="kw">use crate</span>::{
     arithmetic::montgomery::<span class="kw-2">*</span>,
-    bits, c, cpu, error,
+    bits::BitLength,
+    c, error,
     limb::{<span class="self">self</span>, Limb, LimbMask, LIMB_BITS},
-    polyfill::u64_from_usize,
 };
 <span class="kw">use </span>alloc::vec;
 <span class="kw">use </span>core::{marker::PhantomData, num::NonZeroU64};
@@ -1097,62 +935,6 @@
 <span class="kw">mod </span>boxed_limbs;
 <span class="kw">mod </span>modulus;
 <span class="kw">mod </span>private_exponent;
-
-<span class="doccomment">/// A prime modulus.
-///
-/// # Safety
-///
-/// Some logic may assume a `Prime` number is non-zero, and thus a non-empty
-/// array of limbs, or make similar assumptions. TODO: Any such logic should
-/// be encapsulated here, or this trait should be made non-`unsafe`. TODO:
-/// non-zero-ness and non-empty-ness should be factored out into a separate
-/// trait. (In retrospect, this shouldn't have been made an `unsafe` trait
-/// preemptively.)
-</span><span class="kw">pub unsafe trait </span>Prime {}
-
-<span class="kw">struct </span>Width&lt;M&gt; {
-    num_limbs: usize,
-
-    <span class="doccomment">/// The modulus *m* that the width originated from.
-    </span>m: PhantomData&lt;M&gt;,
-}
-
-<span class="doccomment">/// A modulus *s* that is smaller than another modulus *l* so every element of
-/// ℤ/sℤ is also an element of ℤ/lℤ.
-///
-/// # Safety
-///
-/// Some logic may assume that the invariant holds when accessing limbs within
-/// a value, e.g. by assuming the larger modulus has at least as many limbs.
-/// TODO: Any such logic should be encapsulated here, or this trait should be
-/// made non-`unsafe`. (In retrospect, this shouldn't have been made an `unsafe`
-/// trait preemptively.)
-</span><span class="kw">pub unsafe trait </span>SmallerModulus&lt;L&gt; {}
-
-<span class="doccomment">/// A modulus *s* where s &lt; l &lt; 2*s for the given larger modulus *l*. This is
-/// the precondition for reduction by conditional subtraction,
-/// `elem_reduce_once()`.
-///
-/// # Safety
-///
-/// Some logic may assume that the invariant holds when accessing limbs within
-/// a value, e.g. by assuming that the smaller modulus is at most one limb
-/// smaller than the larger modulus. TODO: Any such logic should be
-/// encapsulated here, or this trait should be made non-`unsafe`. (In retrospect,
-/// this shouldn't have been made an `unsafe` trait preemptively.)
-</span><span class="kw">pub unsafe trait </span>SlightlySmallerModulus&lt;L&gt;: SmallerModulus&lt;L&gt; {}
-
-<span class="doccomment">/// A modulus *s* where √l &lt;= s &lt; l for the given larger modulus *l*. This is
-/// the precondition for the more general Montgomery reduction from ℤ/lℤ to
-/// ℤ/sℤ.
-///
-/// # Safety
-///
-/// Some logic may assume that the invariant holds when accessing limbs within
-/// a value. TODO: Any such logic should be encapsulated here, or this trait
-/// should be made non-`unsafe`. (In retrospect, this shouldn't have been made
-/// an `unsafe` trait preemptively.)
-</span><span class="kw">pub unsafe trait </span>NotMuchSmallerModulus&lt;L&gt;: SmallerModulus&lt;L&gt; {}
 
 <span class="kw">pub trait </span>PublicModulus {}
 
@@ -1194,18 +976,18 @@
     <span class="macro">debug_assert_eq!</span>(limbs.len(), m.limbs().len());
 
     <span class="kw">let </span><span class="kw-2">mut </span>limbs = limbs;
-    <span class="kw">let </span>num_limbs = m.width().num_limbs;
     <span class="kw">let </span><span class="kw-2">mut </span>one = [<span class="number">0</span>; MODULUS_MAX_LIMBS];
     one[<span class="number">0</span>] = <span class="number">1</span>;
-    <span class="kw">let </span>one = <span class="kw-2">&amp;</span>one[..num_limbs]; <span class="comment">// assert!(num_limbs &lt;= MODULUS_MAX_LIMBS);
-    </span>limbs_mont_mul(<span class="kw-2">&amp;mut </span>limbs, one, m.limbs(), m.n0(), m.cpu_features());
+    <span class="kw">let </span>one = <span class="kw-2">&amp;</span>one[..m.limbs().len()];
+    limbs_mont_mul(<span class="kw-2">&amp;mut </span>limbs, one, m.limbs(), m.n0(), m.cpu_features());
     Elem {
         limbs,
         encoding: PhantomData,
     }
 }
 
-<span class="kw">impl</span>&lt;M&gt; Elem&lt;M, R&gt; {
+<span class="attr">#[cfg(any(test, not(target_arch = <span class="string">"x86_64"</span>)))]
+</span><span class="kw">impl</span>&lt;M&gt; Elem&lt;M, R&gt; {
     <span class="attr">#[inline]
     </span><span class="kw">pub fn </span>into_unencoded(<span class="self">self</span>, m: <span class="kw-2">&amp;</span>Modulus&lt;M&gt;) -&gt; Elem&lt;M, Unencoded&gt; {
         from_montgomery_amm(<span class="self">self</span>.limbs, m)
@@ -1236,19 +1018,8 @@
 
 <span class="kw">pub fn </span>elem_mul&lt;M, AF, BF&gt;(
     a: <span class="kw-2">&amp;</span>Elem&lt;M, AF&gt;,
-    b: Elem&lt;M, BF&gt;,
-    m: <span class="kw-2">&amp;</span>Modulus&lt;M&gt;,
-) -&gt; Elem&lt;M, &lt;(AF, BF) <span class="kw">as </span>ProductEncoding&gt;::Output&gt;
-<span class="kw">where
-    </span>(AF, BF): ProductEncoding,
-{
-    elem_mul_(a, b, <span class="kw-2">&amp;</span>m.as_partial())
-}
-
-<span class="kw">fn </span>elem_mul_&lt;M, AF, BF&gt;(
-    a: <span class="kw-2">&amp;</span>Elem&lt;M, AF&gt;,
     <span class="kw-2">mut </span>b: Elem&lt;M, BF&gt;,
-    m: <span class="kw-2">&amp;</span>PartialModulus&lt;M&gt;,
+    m: <span class="kw-2">&amp;</span>Modulus&lt;M&gt;,
 ) -&gt; Elem&lt;M, &lt;(AF, BF) <span class="kw">as </span>ProductEncoding&gt;::Output&gt;
 <span class="kw">where
     </span>(AF, BF): ProductEncoding,
@@ -1260,26 +1031,23 @@
     }
 }
 
-<span class="kw">fn </span>elem_mul_by_2&lt;M, AF&gt;(a: <span class="kw-2">&amp;mut </span>Elem&lt;M, AF&gt;, m: <span class="kw-2">&amp;</span>PartialModulus&lt;M&gt;) {
-    <span class="macro">prefixed_extern!</span> {
-        <span class="kw">fn </span>LIMBS_shl_mod(r: <span class="kw-2">*mut </span>Limb, a: <span class="kw-2">*const </span>Limb, m: <span class="kw-2">*const </span>Limb, num_limbs: c::size_t);
-    }
-    <span class="kw">unsafe </span>{
-        LIMBS_shl_mod(
-            a.limbs.as_mut_ptr(),
-            a.limbs.as_ptr(),
-            m.limbs().as_ptr(),
-            m.limbs().len(),
-        );
-    }
+<span class="comment">// r *= 2.
+</span><span class="kw">fn </span>elem_double&lt;M, AF&gt;(r: <span class="kw-2">&amp;mut </span>Elem&lt;M, AF&gt;, m: <span class="kw-2">&amp;</span>Modulus&lt;M&gt;) {
+    limb::limbs_double_mod(<span class="kw-2">&amp;mut </span>r.limbs, m.limbs())
 }
 
-<span class="kw">pub fn </span>elem_reduced_once&lt;Larger, Smaller: SlightlySmallerModulus&lt;Larger&gt;&gt;(
-    a: <span class="kw-2">&amp;</span>Elem&lt;Larger, Unencoded&gt;,
-    m: <span class="kw-2">&amp;</span>Modulus&lt;Smaller&gt;,
-) -&gt; Elem&lt;Smaller, Unencoded&gt; {
+<span class="comment">// TODO: This is currently unused, but we intend to eventually use this to
+// reduce elements (x mod q) mod p in the RSA CRT. If/when we do so, we
+// should update the testing so it is reflective of that usage, instead of
+// the old usage.
+</span><span class="kw">pub fn </span>elem_reduced_once&lt;A, M&gt;(
+    a: <span class="kw-2">&amp;</span>Elem&lt;A, Unencoded&gt;,
+    m: <span class="kw-2">&amp;</span>Modulus&lt;M&gt;,
+    other_modulus_len_bits: BitLength,
+) -&gt; Elem&lt;M, Unencoded&gt; {
+    <span class="macro">assert_eq!</span>(m.len_bits(), other_modulus_len_bits);
+
     <span class="kw">let </span><span class="kw-2">mut </span>r = a.limbs.clone();
-    <span class="macro">assert!</span>(r.len() &lt;= m.limbs().len());
     limb::limbs_reduce_once_constant_time(<span class="kw-2">&amp;mut </span>r, m.limbs());
     Elem {
         limbs: BoxedLimbs::new_unchecked(r.into_limbs()),
@@ -1288,10 +1056,19 @@
 }
 
 <span class="attr">#[inline]
-</span><span class="kw">pub fn </span>elem_reduced&lt;Larger, Smaller: NotMuchSmallerModulus&lt;Larger&gt;&gt;(
+</span><span class="kw">pub fn </span>elem_reduced&lt;Larger, Smaller&gt;(
     a: <span class="kw-2">&amp;</span>Elem&lt;Larger, Unencoded&gt;,
     m: <span class="kw-2">&amp;</span>Modulus&lt;Smaller&gt;,
+    other_prime_len_bits: BitLength,
 ) -&gt; Elem&lt;Smaller, RInverse&gt; {
+    <span class="comment">// This is stricter than required mathematically but this is what we
+    // guarantee and this is easier to check. The real requirement is that
+    // that `a &lt; m*R` where `R` is the Montgomery `R` for `m`.
+    </span><span class="macro">assert_eq!</span>(other_prime_len_bits, m.len_bits());
+
+    <span class="comment">// `limbs_from_mont_in_place` requires this.
+    </span><span class="macro">assert_eq!</span>(a.limbs.len(), m.limbs().len() * <span class="number">2</span>);
+
     <span class="kw">let </span><span class="kw-2">mut </span>tmp = [<span class="number">0</span>; MODULUS_MAX_LIMBS];
     <span class="kw">let </span>tmp = <span class="kw-2">&amp;mut </span>tmp[..a.limbs.len()];
     tmp.copy_from_slice(<span class="kw-2">&amp;</span>a.limbs);
@@ -1303,7 +1080,7 @@
 
 <span class="kw">fn </span>elem_squared&lt;M, E&gt;(
     <span class="kw-2">mut </span>a: Elem&lt;M, E&gt;,
-    m: <span class="kw-2">&amp;</span>PartialModulus&lt;M&gt;,
+    m: <span class="kw-2">&amp;</span>Modulus&lt;M&gt;,
 ) -&gt; Elem&lt;M, &lt;(E, E) <span class="kw">as </span>ProductEncoding&gt;::Output&gt;
 <span class="kw">where
     </span>(E, E): ProductEncoding,
@@ -1315,13 +1092,17 @@
     }
 }
 
-<span class="kw">pub fn </span>elem_widen&lt;Larger, Smaller: SmallerModulus&lt;Larger&gt;&gt;(
+<span class="kw">pub fn </span>elem_widen&lt;Larger, Smaller&gt;(
     a: Elem&lt;Smaller, Unencoded&gt;,
     m: <span class="kw-2">&amp;</span>Modulus&lt;Larger&gt;,
-) -&gt; Elem&lt;Larger, Unencoded&gt; {
+    smaller_modulus_bits: BitLength,
+) -&gt; <span class="prelude-ty">Result</span>&lt;Elem&lt;Larger, Unencoded&gt;, error::Unspecified&gt; {
+    <span class="kw">if </span>smaller_modulus_bits &gt;= m.len_bits() {
+        <span class="kw">return </span><span class="prelude-val">Err</span>(error::Unspecified);
+    }
     <span class="kw">let </span><span class="kw-2">mut </span>r = m.zero();
     r.limbs[..a.limbs.len()].copy_from_slice(<span class="kw-2">&amp;</span>a.limbs);
-    r
+    <span class="prelude-val">Ok</span>(r)
 }
 
 <span class="comment">// TODO: Document why this works for all Montgomery factors.
@@ -1365,53 +1146,81 @@
     // values, using `LIMB_BITS` here, rather than `N0::LIMBS_USED * LIMB_BITS`,
     // is correct because R**2 will still be a multiple of the latter as
     // `N0::LIMBS_USED` is either one or two.
-    </span><span class="kw">fn </span>newRR(m: <span class="kw-2">&amp;</span>PartialModulus&lt;M&gt;, m_bits: bits::BitLength) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>m_bits = m_bits.as_usize_bits();
-        <span class="kw">let </span>r = (m_bits + (LIMB_BITS - <span class="number">1</span>)) / LIMB_BITS * LIMB_BITS;
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>newRR(m: <span class="kw-2">&amp;</span>Modulus&lt;M&gt;) -&gt; <span class="self">Self </span>{
+        <span class="comment">// The number of limbs in the numbers involved.
+        </span><span class="kw">let </span>w = m.limbs().len();
 
-        <span class="comment">// base = 2**(lg m - 1).
-        </span><span class="kw">let </span>bit = m_bits - <span class="number">1</span>;
-        <span class="kw">let </span><span class="kw-2">mut </span>base = m.zero();
-        base.limbs[bit / LIMB_BITS] = <span class="number">1 </span>&lt;&lt; (bit % LIMB_BITS);
+        <span class="comment">// The length of the numbers involved, in bits. R = 2**r.
+        </span><span class="kw">let </span>r = w * LIMB_BITS;
 
-        <span class="comment">// Double `base` so that base == R == 2**r (mod m). For normal moduli
-        // that have the high bit of the highest limb set, this requires one
-        // doubling. Unusual moduli require more doublings but we are less
-        // concerned about the performance of those.
+        <span class="kw">let </span><span class="kw-2">mut </span>acc: Elem&lt;M, R&gt; = m.zero();
+        m.oneR(<span class="kw-2">&amp;mut </span>acc.limbs);
+
+        <span class="comment">// 2**t * R can be calculated by t doublings starting with R.
         //
-        // Then double `base` again so that base == 2*R (mod n), i.e. `2` in
-        // Montgomery form (`elem_exp_vartime()` requires the base to be in
-        // Montgomery form). Then compute
-        // RR = R**2 == base**r == R**r == (2**r)**r (mod n).
+        // Choose a t that divides r and where t doublings are cheaper than 1 squaring.
         //
-        // Take advantage of the fact that `elem_mul_by_2` is faster than
-        // `elem_squared` by replacing some of the early squarings with shifts.
-        // TODO: Benchmark shift vs. squaring performance to determine the
-        // optimal value of `LG_BASE`.
-        </span><span class="kw">const </span>LG_BASE: usize = <span class="number">2</span>; <span class="comment">// Shifts vs. squaring trade-off.
-        </span><span class="macro">debug_assert_eq!</span>(LG_BASE.count_ones(), <span class="number">1</span>); <span class="comment">// Must be 2**n for n &gt;= 0.
-        </span><span class="kw">let </span>shifts = r - bit + LG_BASE;
-        <span class="comment">// `m_bits &gt;= LG_BASE` (for the currently chosen value of `LG_BASE`)
-        // since we require the modulus to have at least `MODULUS_MIN_LIMBS`
-        // limbs. `r &gt;= m_bits` as seen above. So `r &gt;= LG_BASE` and thus
-        // `r / LG_BASE` is non-zero.
+        // We could choose other values of t than w. But if t &lt; d then the exponentiation that
+        // follows would require multiplications. Normally d is 1 (i.e. the modulus length is a
+        // power of two: RSA 1024, 2048, 4097, 8192) or 3 (RSA 1536, 3072).
         //
-        // The maximum value of `r` is determined by
-        // `MODULUS_MAX_LIMBS * LIMB_BITS`. Further `r` is a multiple of
-        // `LIMB_BITS` so the maximum Hamming Weight is bounded by
-        // `MODULUS_MAX_LIMBS`. For the common case of {2048, 4096, 8192}-bit
-        // moduli the Hamming weight is 1. For the other common case of 3072
-        // the Hamming weight is 2.
-        </span><span class="kw">let </span>exponent = NonZeroU64::new(u64_from_usize(r / LG_BASE)).unwrap();
-        <span class="kw">for _ in </span><span class="number">0</span>..shifts {
-            elem_mul_by_2(<span class="kw-2">&amp;mut </span>base, m)
+        // XXX(perf): Currently t = w / 2 is slightly faster. TODO(perf): Optimize `elem_double`
+        // and re-run benchmarks to rebalance this.
+        </span><span class="kw">let </span>t = w;
+        <span class="kw">let </span>z = w.trailing_zeros();
+        <span class="kw">let </span>d = w &gt;&gt; z;
+        <span class="macro">debug_assert_eq!</span>(w, d * (<span class="number">1 </span>&lt;&lt; z));
+        <span class="macro">debug_assert!</span>(d &lt;= t);
+        <span class="macro">debug_assert!</span>(t &lt; r);
+        <span class="kw">for _ in </span><span class="number">0</span>..t {
+            elem_double(<span class="kw-2">&amp;mut </span>acc, m);
         }
-        <span class="kw">let </span>RR = elem_exp_vartime(base, exponent, m);
+
+        <span class="comment">// Because t | r:
+        //
+        //     MontExp(2**t * R, r / t)
+        //   = (2**t)**(r / t)   * R (mod m) by definition of MontExp.
+        //   = (2**t)**(1/t * r) * R (mod m)
+        //   = (2**(t * 1/t))**r * R (mod m)
+        //   = (2**1)**r         * R (mod m)
+        //   = 2**r              * R (mod m)
+        //   = R * R                 (mod m)
+        //   = RR
+        //
+        // Like BoringSSL, use t = w (`m.limbs.len()`) which ensures that the exponent is a power
+        // of two. Consequently, there will be no multiplications in the Montgomery exponentiation;
+        // there will only be lg(r / t) squarings.
+        //
+        //     lg(r / t)
+        //   = lg((w * 2**b) / t)
+        //   = lg((t * 2**b) / t)
+        //   = lg(2**b)
+        //   = b
+        // TODO(MSRV:1.67): const B: u32 = LIMB_BITS.ilog2();
+        </span><span class="kw">const </span>B: u32 = <span class="kw">if </span><span class="macro">cfg!</span>(target_pointer_width = <span class="string">"64"</span>) {
+            <span class="number">6
+        </span>} <span class="kw">else if </span><span class="macro">cfg!</span>(target_pointer_width = <span class="string">"32"</span>) {
+            <span class="number">5
+        </span>} <span class="kw">else </span>{
+            <span class="macro">panic!</span>(<span class="string">"unsupported target_pointer_width"</span>)
+        };
+        <span class="attr">#[allow(clippy::assertions_on_constants)]
+        </span><span class="kw">const </span>_LIMB_BITS_IS_2_POW_B: () = <span class="macro">assert!</span>(LIMB_BITS == <span class="number">1 </span>&lt;&lt; B);
+        <span class="macro">debug_assert_eq!</span>(r, t * (<span class="number">1 </span>&lt;&lt; B));
+        <span class="kw">for _ in </span><span class="number">0</span>..B {
+            acc = elem_squared(acc, m);
+        }
 
         <span class="self">Self</span>(Elem {
-            limbs: RR.limbs,
+            limbs: acc.limbs,
             encoding: PhantomData, <span class="comment">// PhantomData&lt;RR&gt;
         </span>})
+    }
+}
+
+<span class="kw">impl</span>&lt;M&gt; One&lt;M, RRR&gt; {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>newRRR(One(oneRR): One&lt;M, RR&gt;, m: <span class="kw-2">&amp;</span>Modulus&lt;M&gt;) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>(elem_squared(oneRR, m))
     }
 }
 
@@ -1439,7 +1248,7 @@
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>elem_exp_vartime&lt;M&gt;(
     base: Elem&lt;M, R&gt;,
     exponent: NonZeroU64,
-    m: <span class="kw-2">&amp;</span>PartialModulus&lt;M&gt;,
+    m: <span class="kw-2">&amp;</span>Modulus&lt;M&gt;,
 ) -&gt; Elem&lt;M, R&gt; {
     <span class="comment">// Use what [Knuth] calls the "S-and-X binary method", i.e. variable-time
     // square-and-multiply that scans the exponent from the most significant
@@ -1466,18 +1275,10 @@
         bit &gt;&gt;= <span class="number">1</span>;
         acc = elem_squared(acc, m);
         <span class="kw">if </span>(exponent &amp; bit) != <span class="number">0 </span>{
-            acc = elem_mul_(<span class="kw-2">&amp;</span>base, acc, m);
+            acc = elem_mul(<span class="kw-2">&amp;</span>base, acc, m);
         }
     }
     acc
-}
-
-<span class="doccomment">/// Uses Fermat's Little Theorem to calculate modular inverse in constant time.
-</span><span class="kw">pub fn </span>elem_inverse_consttime&lt;M: Prime&gt;(
-    a: Elem&lt;M, R&gt;,
-    m: <span class="kw-2">&amp;</span>Modulus&lt;M&gt;,
-) -&gt; <span class="prelude-ty">Result</span>&lt;Elem&lt;M, Unencoded&gt;, error::Unspecified&gt; {
-    elem_exp_consttime(a, <span class="kw-2">&amp;</span>PrivateExponent::for_flt(m), m)
 }
 
 <span class="attr">#[cfg(not(target_arch = <span class="string">"x86_64"</span>))]
@@ -1495,7 +1296,7 @@
 
     <span class="kw">let </span><span class="kw-2">mut </span>table = <span class="macro">vec!</span>[<span class="number">0</span>; TABLE_ENTRIES * num_limbs];
 
-    <span class="kw">fn </span>gather&lt;M&gt;(table: <span class="kw-2">&amp;</span>[Limb], i: Window, r: <span class="kw-2">&amp;mut </span>Elem&lt;M, R&gt;) {
+    <span class="kw">fn </span>gather&lt;M&gt;(table: <span class="kw-2">&amp;</span>[Limb], acc: <span class="kw-2">&amp;mut </span>Elem&lt;M, R&gt;, i: Window) {
         <span class="macro">prefixed_extern!</span> {
             <span class="kw">fn </span>LIMBS_select_512_32(
                 r: <span class="kw-2">*mut </span>Limb,
@@ -1505,28 +1306,25 @@
             ) -&gt; bssl::Result;
         }
         Result::from(<span class="kw">unsafe </span>{
-            LIMBS_select_512_32(r.limbs.as_mut_ptr(), table.as_ptr(), r.limbs.len(), i)
+            LIMBS_select_512_32(acc.limbs.as_mut_ptr(), table.as_ptr(), acc.limbs.len(), i)
         })
         .unwrap();
     }
 
     <span class="kw">fn </span>power&lt;M&gt;(
         table: <span class="kw-2">&amp;</span>[Limb],
-        i: Window,
         <span class="kw-2">mut </span>acc: Elem&lt;M, R&gt;,
-        <span class="kw-2">mut </span>tmp: Elem&lt;M, R&gt;,
         m: <span class="kw-2">&amp;</span>Modulus&lt;M&gt;,
+        i: Window,
+        <span class="kw-2">mut </span>tmp: Elem&lt;M, R&gt;,
     ) -&gt; (Elem&lt;M, R&gt;, Elem&lt;M, R&gt;) {
         <span class="kw">for _ in </span><span class="number">0</span>..WINDOW_BITS {
-            acc = elem_squared(acc, <span class="kw-2">&amp;</span>m.as_partial());
+            acc = elem_squared(acc, m);
         }
-        gather(table, i, <span class="kw-2">&amp;mut </span>tmp);
+        gather(table, <span class="kw-2">&amp;mut </span>tmp, i);
         <span class="kw">let </span>acc = elem_mul(<span class="kw-2">&amp;</span>tmp, acc, m);
         (acc, tmp)
     }
-
-    <span class="kw">let </span>tmp = m.one();
-    <span class="kw">let </span>tmp = elem_mul(m.oneRR().as_ref(), tmp, m);
 
     <span class="kw">fn </span>entry(table: <span class="kw-2">&amp;</span>[Limb], i: usize, num_limbs: usize) -&gt; <span class="kw-2">&amp;</span>[Limb] {
         <span class="kw-2">&amp;</span>table[(i * num_limbs)..][..num_limbs]
@@ -1534,7 +1332,10 @@
     <span class="kw">fn </span>entry_mut(table: <span class="kw-2">&amp;mut </span>[Limb], i: usize, num_limbs: usize) -&gt; <span class="kw-2">&amp;mut </span>[Limb] {
         <span class="kw-2">&amp;mut </span>table[(i * num_limbs)..][..num_limbs]
     }
-    entry_mut(<span class="kw-2">&amp;mut </span>table, <span class="number">0</span>, num_limbs).copy_from_slice(<span class="kw-2">&amp;</span>tmp.limbs);
+
+    <span class="comment">// table[0] = base**0 (i.e. 1).
+    </span>m.oneR(entry_mut(<span class="kw-2">&amp;mut </span>table, <span class="number">0</span>, num_limbs));
+
     entry_mut(<span class="kw-2">&amp;mut </span>table, <span class="number">1</span>, num_limbs).copy_from_slice(<span class="kw-2">&amp;</span>base.limbs);
     <span class="kw">for </span>i <span class="kw">in </span><span class="number">2</span>..TABLE_ENTRIES {
         <span class="kw">let </span>(src1, src2) = <span class="kw">if </span>i % <span class="number">2 </span>== <span class="number">0 </span>{
@@ -1549,22 +1350,21 @@
         limbs_mont_product(dst, src1, src2, m.limbs(), m.n0(), m.cpu_features());
     }
 
-    <span class="kw">let </span>(r, <span class="kw">_</span>) = limb::fold_5_bit_windows(
+    <span class="kw">let </span>tmp = m.zero();
+    <span class="kw">let </span><span class="kw-2">mut </span>acc = Elem {
+        limbs: base.limbs,
+        encoding: PhantomData,
+    };
+    <span class="kw">let </span>(acc, <span class="kw">_</span>) = limb::fold_5_bit_windows(
         exponent.limbs(),
         |initial_window| {
-            <span class="kw">let </span><span class="kw-2">mut </span>r = Elem {
-                limbs: base.limbs,
-                encoding: PhantomData,
-            };
-            gather(<span class="kw-2">&amp;</span>table, initial_window, <span class="kw-2">&amp;mut </span>r);
-            (r, tmp)
+            gather(<span class="kw-2">&amp;</span>table, <span class="kw-2">&amp;mut </span>acc, initial_window);
+            (acc, tmp)
         },
-        |(acc, tmp), window| power(<span class="kw-2">&amp;</span>table, window, acc, tmp, m),
+        |(acc, tmp), window| power(<span class="kw-2">&amp;</span>table, acc, m, window, tmp),
     );
 
-    <span class="kw">let </span>r = r.into_unencoded(m);
-
-    <span class="prelude-val">Ok</span>(r)
+    <span class="prelude-val">Ok</span>(acc.into_unencoded(m))
 }
 
 <span class="attr">#[cfg(target_arch = <span class="string">"x86_64"</span>)]
@@ -1573,7 +1373,7 @@
     exponent: <span class="kw-2">&amp;</span>PrivateExponent,
     m: <span class="kw-2">&amp;</span>Modulus&lt;M&gt;,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;Elem&lt;M, Unencoded&gt;, error::Unspecified&gt; {
-    <span class="kw">use </span><span class="kw">crate</span>::limb::LIMB_BYTES;
+    <span class="kw">use crate</span>::{cpu, limb::LIMB_BYTES};
 
     <span class="comment">// Pretty much all the math here requires CPU feature detection to have
     // been done. `cpu_features` isn't threaded through all the internal
@@ -1725,11 +1525,7 @@
     <span class="comment">// All entries in `table` will be Montgomery encoded.
 
     // acc = table[0] = base**0 (i.e. 1).
-    // `acc` was initialized to zero and hasn't changed. Change it to 1 and then Montgomery
-    // encode it.
-    </span><span class="macro">debug_assert!</span>(acc.iter().all(|<span class="kw-2">&amp;</span>value| value == <span class="number">0</span>));
-    acc[<span class="number">0</span>] = <span class="number">1</span>;
-    limbs_mont_mul(acc, <span class="kw-2">&amp;</span>m.oneRR().<span class="number">0</span>.limbs, m_cached, n0, cpu_features);
+    </span>m.oneR(acc);
     scatter(table, acc, <span class="number">0</span>, num_limbs);
 
     <span class="comment">// acc = base**1 (i.e. base).
@@ -1787,102 +1583,10 @@
     }
 }
 
-<span class="comment">// TODO: Move these methods from `Nonnegative` to `Modulus`.
-</span><span class="kw">impl </span>Nonnegative {
-    <span class="kw">pub fn </span>to_elem&lt;M&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, m: <span class="kw-2">&amp;</span>Modulus&lt;M&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Elem&lt;M, Unencoded&gt;, error::Unspecified&gt; {
-        <span class="self">self</span>.verify_less_than_modulus(m)<span class="question-mark">?</span>;
-        <span class="kw">let </span><span class="kw-2">mut </span>r = m.zero();
-        r.limbs[<span class="number">0</span>..<span class="self">self</span>.limbs().len()].copy_from_slice(<span class="self">self</span>.limbs());
-        <span class="prelude-val">Ok</span>(r)
-    }
-
-    <span class="kw">pub fn </span>verify_less_than_modulus&lt;M&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, m: <span class="kw-2">&amp;</span>Modulus&lt;M&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;(), error::Unspecified&gt; {
-        <span class="kw">if </span><span class="self">self</span>.limbs().len() &gt; m.limbs().len() {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(error::Unspecified);
-        }
-        <span class="kw">if </span><span class="self">self</span>.limbs().len() == m.limbs().len() {
-            <span class="kw">if </span>limb::limbs_less_than_limbs_consttime(<span class="self">self</span>.limbs(), m.limbs()) != LimbMask::True {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(error::Unspecified);
-            }
-        }
-        <span class="prelude-val">Ok</span>(())
-    }
-}
-
-<span class="doccomment">/// r *= a
-</span><span class="kw">fn </span>limbs_mont_mul(r: <span class="kw-2">&amp;mut </span>[Limb], a: <span class="kw-2">&amp;</span>[Limb], m: <span class="kw-2">&amp;</span>[Limb], n0: <span class="kw-2">&amp;</span>N0, _cpu_features: cpu::Features) {
-    <span class="macro">debug_assert_eq!</span>(r.len(), m.len());
-    <span class="macro">debug_assert_eq!</span>(a.len(), m.len());
-    <span class="kw">unsafe </span>{
-        bn_mul_mont(
-            r.as_mut_ptr(),
-            r.as_ptr(),
-            a.as_ptr(),
-            m.as_ptr(),
-            n0,
-            r.len(),
-        )
-    }
-}
-
-<span class="doccomment">/// r = a * b
-</span><span class="attr">#[cfg(not(target_arch = <span class="string">"x86_64"</span>))]
-</span><span class="kw">fn </span>limbs_mont_product(
-    r: <span class="kw-2">&amp;mut </span>[Limb],
-    a: <span class="kw-2">&amp;</span>[Limb],
-    b: <span class="kw-2">&amp;</span>[Limb],
-    m: <span class="kw-2">&amp;</span>[Limb],
-    n0: <span class="kw-2">&amp;</span>N0,
-    _cpu_features: cpu::Features,
-) {
-    <span class="macro">debug_assert_eq!</span>(r.len(), m.len());
-    <span class="macro">debug_assert_eq!</span>(a.len(), m.len());
-    <span class="macro">debug_assert_eq!</span>(b.len(), m.len());
-
-    <span class="kw">unsafe </span>{
-        bn_mul_mont(
-            r.as_mut_ptr(),
-            a.as_ptr(),
-            b.as_ptr(),
-            m.as_ptr(),
-            n0,
-            r.len(),
-        )
-    }
-}
-
-<span class="doccomment">/// r = r**2
-</span><span class="kw">fn </span>limbs_mont_square(r: <span class="kw-2">&amp;mut </span>[Limb], m: <span class="kw-2">&amp;</span>[Limb], n0: <span class="kw-2">&amp;</span>N0, _cpu_features: cpu::Features) {
-    <span class="macro">debug_assert_eq!</span>(r.len(), m.len());
-    <span class="kw">unsafe </span>{
-        bn_mul_mont(
-            r.as_mut_ptr(),
-            r.as_ptr(),
-            r.as_ptr(),
-            m.as_ptr(),
-            n0,
-            r.len(),
-        )
-    }
-}
-
-<span class="macro">prefixed_extern!</span> {
-    <span class="comment">// `r` and/or 'a' and/or 'b' may alias.
-    </span><span class="kw">fn </span>bn_mul_mont(
-        r: <span class="kw-2">*mut </span>Limb,
-        a: <span class="kw-2">*const </span>Limb,
-        b: <span class="kw-2">*const </span>Limb,
-        n: <span class="kw-2">*const </span>Limb,
-        n0: <span class="kw-2">&amp;</span>N0,
-        num_limbs: c::size_t,
-    );
-}
-
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
-    <span class="kw">use super</span>::{modulus::MODULUS_MIN_LIMBS, <span class="kw-2">*</span>};
-    <span class="kw">use crate</span>::{limb::LIMB_BYTES, test};
-    <span class="kw">use </span>alloc::format;
+    <span class="kw">use super</span>::<span class="kw-2">*</span>;
+    <span class="kw">use crate</span>::{cpu, test};
 
     <span class="comment">// Type-level representation of an arbitrary modulus.
     </span><span class="kw">struct </span>M {}
@@ -1897,7 +1601,8 @@
             |section, test_case| {
                 <span class="macro">assert_eq!</span>(section, <span class="string">""</span>);
 
-                <span class="kw">let </span>m = consume_modulus::&lt;M&gt;(test_case, <span class="string">"M"</span>, cpu_features);
+                <span class="kw">let </span>m = consume_modulus::&lt;M&gt;(test_case, <span class="string">"M"</span>);
+                <span class="kw">let </span>m = m.modulus(cpu_features);
                 <span class="kw">let </span>expected_result = consume_elem(test_case, <span class="string">"ModExp"</span>, <span class="kw-2">&amp;</span>m);
                 <span class="kw">let </span>base = consume_elem(test_case, <span class="string">"A"</span>, <span class="kw-2">&amp;</span>m);
                 <span class="kw">let </span>e = {
@@ -1926,7 +1631,8 @@
             |section, test_case| {
                 <span class="macro">assert_eq!</span>(section, <span class="string">""</span>);
 
-                <span class="kw">let </span>m = consume_modulus::&lt;M&gt;(test_case, <span class="string">"M"</span>, cpu_features);
+                <span class="kw">let </span>m = consume_modulus::&lt;M&gt;(test_case, <span class="string">"M"</span>);
+                <span class="kw">let </span>m = m.modulus(cpu_features);
                 <span class="kw">let </span>expected_result = consume_elem(test_case, <span class="string">"ModMul"</span>, <span class="kw-2">&amp;</span>m);
                 <span class="kw">let </span>a = consume_elem(test_case, <span class="string">"A"</span>, <span class="kw-2">&amp;</span>m);
                 <span class="kw">let </span>b = consume_elem(test_case, <span class="string">"B"</span>, <span class="kw-2">&amp;</span>m);
@@ -1950,12 +1656,13 @@
             |section, test_case| {
                 <span class="macro">assert_eq!</span>(section, <span class="string">""</span>);
 
-                <span class="kw">let </span>m = consume_modulus::&lt;M&gt;(test_case, <span class="string">"M"</span>, cpu_features);
+                <span class="kw">let </span>m = consume_modulus::&lt;M&gt;(test_case, <span class="string">"M"</span>);
+                <span class="kw">let </span>m = m.modulus(cpu_features);
                 <span class="kw">let </span>expected_result = consume_elem(test_case, <span class="string">"ModSquare"</span>, <span class="kw-2">&amp;</span>m);
                 <span class="kw">let </span>a = consume_elem(test_case, <span class="string">"A"</span>, <span class="kw-2">&amp;</span>m);
 
                 <span class="kw">let </span>a = into_encoded(a, <span class="kw-2">&amp;</span>m);
-                <span class="kw">let </span>actual_result = elem_squared(a, <span class="kw-2">&amp;</span>m.as_partial());
+                <span class="kw">let </span>actual_result = elem_squared(a, <span class="kw-2">&amp;</span>m);
                 <span class="kw">let </span>actual_result = actual_result.into_unencoded(<span class="kw-2">&amp;</span>m);
                 assert_elem_eq(<span class="kw-2">&amp;</span>actual_result, <span class="kw-2">&amp;</span>expected_result);
 
@@ -1972,17 +1679,17 @@
             |section, test_case| {
                 <span class="macro">assert_eq!</span>(section, <span class="string">""</span>);
 
-                <span class="kw">struct </span>MM {}
-                <span class="kw">unsafe impl </span>SmallerModulus&lt;MM&gt; <span class="kw">for </span>M {}
-                <span class="kw">unsafe impl </span>NotMuchSmallerModulus&lt;MM&gt; <span class="kw">for </span>M {}
+                <span class="kw">struct </span>M {}
 
-                <span class="kw">let </span>m = consume_modulus::&lt;M&gt;(test_case, <span class="string">"M"</span>, cpu_features);
+                <span class="kw">let </span>m_ = consume_modulus::&lt;M&gt;(test_case, <span class="string">"M"</span>);
+                <span class="kw">let </span>m = m_.modulus(cpu_features);
                 <span class="kw">let </span>expected_result = consume_elem(test_case, <span class="string">"R"</span>, <span class="kw-2">&amp;</span>m);
                 <span class="kw">let </span>a =
-                    consume_elem_unchecked::&lt;MM&gt;(test_case, <span class="string">"A"</span>, expected_result.limbs.len() * <span class="number">2</span>);
+                    consume_elem_unchecked::&lt;M&gt;(test_case, <span class="string">"A"</span>, expected_result.limbs.len() * <span class="number">2</span>);
+                <span class="kw">let </span>other_modulus_len_bits = m_.len_bits();
 
-                <span class="kw">let </span>actual_result = elem_reduced(<span class="kw-2">&amp;</span>a, <span class="kw-2">&amp;</span>m);
-                <span class="kw">let </span>oneRR = m.oneRR();
+                <span class="kw">let </span>actual_result = elem_reduced(<span class="kw-2">&amp;</span>a, <span class="kw-2">&amp;</span>m, other_modulus_len_bits);
+                <span class="kw">let </span>oneRR = One::newRR(<span class="kw-2">&amp;</span>m);
                 <span class="kw">let </span>actual_result = elem_mul(oneRR.as_ref(), actual_result, <span class="kw-2">&amp;</span>m);
                 assert_elem_eq(<span class="kw-2">&amp;</span>actual_result, <span class="kw-2">&amp;</span>expected_result);
 
@@ -1999,32 +1706,20 @@
             |section, test_case| {
                 <span class="macro">assert_eq!</span>(section, <span class="string">""</span>);
 
-                <span class="kw">struct </span>N {}
-                <span class="kw">struct </span>QQ {}
-                <span class="kw">unsafe impl </span>SmallerModulus&lt;N&gt; <span class="kw">for </span>QQ {}
-                <span class="kw">unsafe impl </span>SlightlySmallerModulus&lt;N&gt; <span class="kw">for </span>QQ {}
+                <span class="kw">struct </span>M {}
+                <span class="kw">struct </span>O {}
+                <span class="kw">let </span>m = consume_modulus::&lt;M&gt;(test_case, <span class="string">"m"</span>);
+                <span class="kw">let </span>m = m.modulus(cpu_features);
+                <span class="kw">let </span>a = consume_elem_unchecked::&lt;O&gt;(test_case, <span class="string">"a"</span>, m.limbs().len());
+                <span class="kw">let </span>expected_result = consume_elem::&lt;M&gt;(test_case, <span class="string">"r"</span>, <span class="kw-2">&amp;</span>m);
+                <span class="kw">let </span>other_modulus_len_bits = m.len_bits();
 
-                <span class="kw">let </span>qq = consume_modulus::&lt;QQ&gt;(test_case, <span class="string">"QQ"</span>, cpu_features);
-                <span class="kw">let </span>expected_result = consume_elem::&lt;QQ&gt;(test_case, <span class="string">"R"</span>, <span class="kw-2">&amp;</span>qq);
-                <span class="kw">let </span>n = consume_modulus::&lt;N&gt;(test_case, <span class="string">"N"</span>, cpu_features);
-                <span class="kw">let </span>a = consume_elem::&lt;N&gt;(test_case, <span class="string">"A"</span>, <span class="kw-2">&amp;</span>n);
-
-                <span class="kw">let </span>actual_result = elem_reduced_once(<span class="kw-2">&amp;</span>a, <span class="kw-2">&amp;</span>qq);
+                <span class="kw">let </span>actual_result = elem_reduced_once(<span class="kw-2">&amp;</span>a, <span class="kw-2">&amp;</span>m, other_modulus_len_bits);
                 assert_elem_eq(<span class="kw-2">&amp;</span>actual_result, <span class="kw-2">&amp;</span>expected_result);
 
                 <span class="prelude-val">Ok</span>(())
             },
         )
-    }
-
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>test_modulus_debug() {
-        <span class="kw">let </span>(modulus, <span class="kw">_</span>) = Modulus::&lt;M&gt;::from_be_bytes_with_bit_length(
-            untrusted::Input::from(<span class="kw-2">&amp;</span>[<span class="number">0xff</span>; LIMB_BYTES * MODULUS_MIN_LIMBS]),
-            cpu::features(),
-        )
-        .unwrap();
-        <span class="macro">assert_eq!</span>(<span class="string">"Modulus"</span>, <span class="macro">format!</span>(<span class="string">"{:?}"</span>, modulus));
     }
 
     <span class="kw">fn </span>consume_elem&lt;M&gt;(
@@ -2041,35 +1736,19 @@
         name: <span class="kw-2">&amp;</span>str,
         num_limbs: usize,
     ) -&gt; Elem&lt;M, Unencoded&gt; {
-        <span class="kw">let </span>value = consume_nonnegative(test_case, name);
-        <span class="kw">let </span><span class="kw-2">mut </span>limbs = BoxedLimbs::zero(Width {
-            num_limbs,
-            m: PhantomData,
-        });
-        limbs[<span class="number">0</span>..value.limbs().len()].copy_from_slice(value.limbs());
+        <span class="kw">let </span>bytes = test_case.consume_bytes(name);
+        <span class="kw">let </span><span class="kw-2">mut </span>limbs = BoxedLimbs::zero(num_limbs);
+        limb::parse_big_endian_and_pad_consttime(untrusted::Input::from(<span class="kw-2">&amp;</span>bytes), <span class="kw-2">&amp;mut </span>limbs)
+            .unwrap();
         Elem {
             limbs,
             encoding: PhantomData,
         }
     }
 
-    <span class="kw">fn </span>consume_modulus&lt;M&gt;(
-        test_case: <span class="kw-2">&amp;mut </span>test::TestCase,
-        name: <span class="kw-2">&amp;</span>str,
-        cpu_features: cpu::Features,
-    ) -&gt; Modulus&lt;M&gt; {
+    <span class="kw">fn </span>consume_modulus&lt;M&gt;(test_case: <span class="kw-2">&amp;mut </span>test::TestCase, name: <span class="kw-2">&amp;</span>str) -&gt; OwnedModulus&lt;M&gt; {
         <span class="kw">let </span>value = test_case.consume_bytes(name);
-        <span class="kw">let </span>(value, <span class="kw">_</span>) =
-            Modulus::from_be_bytes_with_bit_length(untrusted::Input::from(<span class="kw-2">&amp;</span>value), cpu_features)
-                .unwrap();
-        value
-    }
-
-    <span class="kw">fn </span>consume_nonnegative(test_case: <span class="kw-2">&amp;mut </span>test::TestCase, name: <span class="kw-2">&amp;</span>str) -&gt; Nonnegative {
-        <span class="kw">let </span>bytes = test_case.consume_bytes(name);
-        <span class="kw">let </span>(r, _r_bits) =
-            Nonnegative::from_be_bytes_with_bit_length(untrusted::Input::from(<span class="kw-2">&amp;</span>bytes)).unwrap();
-        r
+        OwnedModulus::from_be_bytes(untrusted::Input::from(<span class="kw-2">&amp;</span>value)).unwrap()
     }
 
     <span class="kw">fn </span>assert_elem_eq&lt;M, E&gt;(a: <span class="kw-2">&amp;</span>Elem&lt;M, E&gt;, b: <span class="kw-2">&amp;</span>Elem&lt;M, E&gt;) {
@@ -2079,7 +1758,8 @@
     }
 
     <span class="kw">fn </span>into_encoded&lt;M&gt;(a: Elem&lt;M, Unencoded&gt;, m: <span class="kw-2">&amp;</span>Modulus&lt;M&gt;) -&gt; Elem&lt;M, R&gt; {
-        elem_mul(m.oneRR().as_ref(), a, m)
+        <span class="kw">let </span>oneRR = One::newRR(m);
+        elem_mul(oneRR.as_ref(), a, m)
     }
 }
 </code></pre></div></section></main></body></html>

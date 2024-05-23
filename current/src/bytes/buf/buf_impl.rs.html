@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bytes-1.5.0/src/buf/buf_impl.rs`."><title>buf_impl.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-b21aa549bf6d91ff.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="bytes" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (79734f1db 2024-05-02)" data-channel="nightly" data-search-js="search-bf21c90c8c1d92b1.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-e32f0c247825364d.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-09095024cf37855e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../bytes/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Type ‘S’ or ‘/’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings">Settings</a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bytes-1.6.0/src/buf/buf_impl.rs`."><title>buf_impl.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="bytes" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (9cdfe285c 2024-05-22)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1392,11 +1392,82 @@
 <a href="#1392" id="1392">1392</a>
 <a href="#1393" id="1393">1393</a>
 <a href="#1394" id="1394">1394</a>
+<a href="#1395" id="1395">1395</a>
+<a href="#1396" id="1396">1396</a>
+<a href="#1397" id="1397">1397</a>
+<a href="#1398" id="1398">1398</a>
+<a href="#1399" id="1399">1399</a>
+<a href="#1400" id="1400">1400</a>
+<a href="#1401" id="1401">1401</a>
+<a href="#1402" id="1402">1402</a>
+<a href="#1403" id="1403">1403</a>
+<a href="#1404" id="1404">1404</a>
+<a href="#1405" id="1405">1405</a>
+<a href="#1406" id="1406">1406</a>
+<a href="#1407" id="1407">1407</a>
+<a href="#1408" id="1408">1408</a>
+<a href="#1409" id="1409">1409</a>
+<a href="#1410" id="1410">1410</a>
+<a href="#1411" id="1411">1411</a>
+<a href="#1412" id="1412">1412</a>
+<a href="#1413" id="1413">1413</a>
+<a href="#1414" id="1414">1414</a>
+<a href="#1415" id="1415">1415</a>
+<a href="#1416" id="1416">1416</a>
+<a href="#1417" id="1417">1417</a>
+<a href="#1418" id="1418">1418</a>
+<a href="#1419" id="1419">1419</a>
+<a href="#1420" id="1420">1420</a>
+<a href="#1421" id="1421">1421</a>
+<a href="#1422" id="1422">1422</a>
+<a href="#1423" id="1423">1423</a>
+<a href="#1424" id="1424">1424</a>
+<a href="#1425" id="1425">1425</a>
+<a href="#1426" id="1426">1426</a>
+<a href="#1427" id="1427">1427</a>
+<a href="#1428" id="1428">1428</a>
+<a href="#1429" id="1429">1429</a>
+<a href="#1430" id="1430">1430</a>
+<a href="#1431" id="1431">1431</a>
+<a href="#1432" id="1432">1432</a>
+<a href="#1433" id="1433">1433</a>
+<a href="#1434" id="1434">1434</a>
+<a href="#1435" id="1435">1435</a>
+<a href="#1436" id="1436">1436</a>
+<a href="#1437" id="1437">1437</a>
+<a href="#1438" id="1438">1438</a>
+<a href="#1439" id="1439">1439</a>
+<a href="#1440" id="1440">1440</a>
+<a href="#1441" id="1441">1441</a>
+<a href="#1442" id="1442">1442</a>
+<a href="#1443" id="1443">1443</a>
+<a href="#1444" id="1444">1444</a>
+<a href="#1445" id="1445">1445</a>
+<a href="#1446" id="1446">1446</a>
+<a href="#1447" id="1447">1447</a>
+<a href="#1448" id="1448">1448</a>
+<a href="#1449" id="1449">1449</a>
+<a href="#1450" id="1450">1450</a>
+<a href="#1451" id="1451">1451</a>
+<a href="#1452" id="1452">1452</a>
+<a href="#1453" id="1453">1453</a>
+<a href="#1454" id="1454">1454</a>
+<a href="#1455" id="1455">1455</a>
+<a href="#1456" id="1456">1456</a>
+<a href="#1457" id="1457">1457</a>
+<a href="#1458" id="1458">1458</a>
+<a href="#1459" id="1459">1459</a>
+<a href="#1460" id="1460">1460</a>
+<a href="#1461" id="1461">1461</a>
+<a href="#1462" id="1462">1462</a>
+<a href="#1463" id="1463">1463</a>
+<a href="#1464" id="1464">1464</a>
 </pre></div><pre class="rust"><code><span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::buf::{reader, Reader};
 <span class="kw">use </span><span class="kw">crate</span>::buf::{take, Chain, Take};
-
-<span class="kw">use </span>core::{cmp, mem, ptr};
+<span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
+</span><span class="kw">use crate</span>::{min_u64_usize, saturating_sub_usize_u64};
+<span class="kw">use crate</span>::{panic_advance, panic_does_not_fit};
 
 <span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
 </span><span class="kw">use </span>std::io::IoSlice;
@@ -1405,7 +1476,12 @@
 
 <span class="macro">macro_rules!</span> buf_get_impl {
     (<span class="macro-nonterminal">$this</span>:ident, <span class="macro-nonterminal">$typ</span>:tt::<span class="macro-nonterminal">$conv</span>:tt) =&gt; {{
-        <span class="kw">const </span>SIZE: usize = mem::size_of::&lt;<span class="macro-nonterminal">$typ</span>&gt;();
+        <span class="kw">const </span>SIZE: usize = core::mem::size_of::&lt;<span class="macro-nonterminal">$typ</span>&gt;();
+
+        <span class="kw">if </span><span class="macro-nonterminal">$this</span>.remaining() &lt; SIZE {
+            panic_advance(SIZE, <span class="macro-nonterminal">$this</span>.remaining());
+        }
+
         <span class="comment">// try to convert directly from the bytes
         // this Option&lt;ret&gt; trick is to avoid keeping a borrow on self
         // when advance() is called (mut borrow) and to call bytes() only once
@@ -1426,19 +1502,30 @@
         }
     }};
     (le =&gt; <span class="macro-nonterminal">$this</span>:ident, <span class="macro-nonterminal">$typ</span>:tt, <span class="macro-nonterminal">$len_to_read</span>:expr) =&gt; {{
-        <span class="macro">debug_assert!</span>(mem::size_of::&lt;<span class="macro-nonterminal">$typ</span>&gt;() &gt;= <span class="macro-nonterminal">$len_to_read</span>);
+        <span class="kw">const </span>SIZE: usize = core::mem::size_of::&lt;<span class="macro-nonterminal">$typ</span>&gt;();
 
         <span class="comment">// The same trick as above does not improve the best case speed.
         // It seems to be linked to the way the method is optimised by the compiler
-        </span><span class="kw">let </span><span class="kw-2">mut </span>buf = [<span class="number">0</span>; (mem::size_of::&lt;<span class="macro-nonterminal">$typ</span>&gt;())];
-        <span class="macro-nonterminal">$this</span>.copy_to_slice(<span class="kw-2">&amp;mut </span>buf[..(<span class="macro-nonterminal">$len_to_read</span>)]);
+        </span><span class="kw">let </span><span class="kw-2">mut </span>buf = [<span class="number">0</span>; SIZE];
+
+        <span class="kw">let </span>subslice = <span class="kw">match </span>buf.get_mut(..<span class="macro-nonterminal">$len_to_read</span>) {
+            <span class="prelude-val">Some</span>(subslice) =&gt; subslice,
+            <span class="prelude-val">None </span>=&gt; panic_does_not_fit(SIZE, <span class="macro-nonterminal">$len_to_read</span>),
+        };
+
+        <span class="macro-nonterminal">$this</span>.copy_to_slice(subslice);
         <span class="kw">return </span><span class="macro-nonterminal">$typ::from_le_bytes</span>(buf);
     }};
     (be =&gt; <span class="macro-nonterminal">$this</span>:ident, <span class="macro-nonterminal">$typ</span>:tt, <span class="macro-nonterminal">$len_to_read</span>:expr) =&gt; {{
-        <span class="macro">debug_assert!</span>(mem::size_of::&lt;<span class="macro-nonterminal">$typ</span>&gt;() &gt;= <span class="macro-nonterminal">$len_to_read</span>);
+        <span class="kw">const </span>SIZE: usize = core::mem::size_of::&lt;<span class="macro-nonterminal">$typ</span>&gt;();
 
-        <span class="kw">let </span><span class="kw-2">mut </span>buf = [<span class="number">0</span>; (mem::size_of::&lt;<span class="macro-nonterminal">$typ</span>&gt;())];
-        <span class="macro-nonterminal">$this</span>.copy_to_slice(<span class="kw-2">&amp;mut </span>buf[mem::size_of::&lt;<span class="macro-nonterminal">$typ</span>&gt;() - (<span class="macro-nonterminal">$len_to_read</span>)..]);
+        <span class="kw">let </span>slice_at = <span class="kw">match </span>SIZE.checked_sub(<span class="macro-nonterminal">$len_to_read</span>) {
+            <span class="prelude-val">Some</span>(slice_at) =&gt; slice_at,
+            <span class="prelude-val">None </span>=&gt; panic_does_not_fit(SIZE, <span class="macro-nonterminal">$len_to_read</span>),
+        };
+
+        <span class="kw">let </span><span class="kw-2">mut </span>buf = [<span class="number">0</span>; SIZE];
+        <span class="macro-nonterminal">$this</span>.copy_to_slice(<span class="kw-2">&amp;mut </span>buf[slice_at..]);
         <span class="kw">return </span><span class="macro-nonterminal">$typ::from_be_bytes</span>(buf);
     }};
 }
@@ -1641,23 +1728,18 @@
     ///
     /// # Panics
     ///
-    /// This function panics if `self.remaining() &lt; dst.len()`
-    </span><span class="kw">fn </span>copy_to_slice(<span class="kw-2">&amp;mut </span><span class="self">self</span>, dst: <span class="kw-2">&amp;mut </span>[u8]) {
-        <span class="kw">let </span><span class="kw-2">mut </span>off = <span class="number">0</span>;
+    /// This function panics if `self.remaining() &lt; dst.len()`.
+    </span><span class="kw">fn </span>copy_to_slice(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>dst: <span class="kw-2">&amp;mut </span>[u8]) {
+        <span class="kw">if </span><span class="self">self</span>.remaining() &lt; dst.len() {
+            panic_advance(dst.len(), <span class="self">self</span>.remaining());
+        }
 
-        <span class="macro">assert!</span>(<span class="self">self</span>.remaining() &gt;= dst.len());
+        <span class="kw">while </span>!dst.is_empty() {
+            <span class="kw">let </span>src = <span class="self">self</span>.chunk();
+            <span class="kw">let </span>cnt = usize::min(src.len(), dst.len());
 
-        <span class="kw">while </span>off &lt; dst.len() {
-            <span class="kw">let </span>cnt;
-
-            <span class="kw">unsafe </span>{
-                <span class="kw">let </span>src = <span class="self">self</span>.chunk();
-                cnt = cmp::min(src.len(), dst.len() - off);
-
-                ptr::copy_nonoverlapping(src.as_ptr(), dst[off..].as_mut_ptr(), cnt);
-
-                off += cnt;
-            }
+            dst[..cnt].copy_from_slice(<span class="kw-2">&amp;</span>src[..cnt]);
+            dst = <span class="kw-2">&amp;mut </span>dst[cnt..];
 
             <span class="self">self</span>.advance(cnt);
         }
@@ -1680,7 +1762,9 @@
     ///
     /// This function panics if there is no more remaining data in `self`.
     </span><span class="kw">fn </span>get_u8(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; u8 {
-        <span class="macro">assert!</span>(<span class="self">self</span>.remaining() &gt;= <span class="number">1</span>);
+        <span class="kw">if </span><span class="self">self</span>.remaining() &lt; <span class="number">1 </span>{
+            panic_advance(<span class="number">1</span>, <span class="number">0</span>);
+        }
         <span class="kw">let </span>ret = <span class="self">self</span>.chunk()[<span class="number">0</span>];
         <span class="self">self</span>.advance(<span class="number">1</span>);
         ret
@@ -1703,7 +1787,9 @@
     ///
     /// This function panics if there is no more remaining data in `self`.
     </span><span class="kw">fn </span>get_i8(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; i8 {
-        <span class="macro">assert!</span>(<span class="self">self</span>.remaining() &gt;= <span class="number">1</span>);
+        <span class="kw">if </span><span class="self">self</span>.remaining() &lt; <span class="number">1 </span>{
+            panic_advance(<span class="number">1</span>, <span class="number">0</span>);
+        }
         <span class="kw">let </span>ret = <span class="self">self</span>.chunk()[<span class="number">0</span>] <span class="kw">as </span>i8;
         <span class="self">self</span>.advance(<span class="number">1</span>);
         ret
@@ -2271,7 +2357,8 @@
     ///
     /// # Panics
     ///
-    /// This function panics if there is not enough remaining data in `self`.
+    /// This function panics if there is not enough remaining data in `self`, or
+    /// if `nbytes` is greater than 8.
     </span><span class="kw">fn </span>get_uint_ne(<span class="kw-2">&amp;mut </span><span class="self">self</span>, nbytes: usize) -&gt; u64 {
         <span class="kw">if </span><span class="macro">cfg!</span>(target_endian = <span class="string">"big"</span>) {
             <span class="self">self</span>.get_uint(nbytes)
@@ -2295,7 +2382,8 @@
     ///
     /// # Panics
     ///
-    /// This function panics if there is not enough remaining data in `self`.
+    /// This function panics if there is not enough remaining data in `self`, or
+    /// if `nbytes` is greater than 8.
     </span><span class="kw">fn </span>get_int(<span class="kw-2">&amp;mut </span><span class="self">self</span>, nbytes: usize) -&gt; i64 {
         <span class="macro">buf_get_impl!</span>(be =&gt; <span class="self">self</span>, i64, nbytes);
     }
@@ -2315,7 +2403,8 @@
     ///
     /// # Panics
     ///
-    /// This function panics if there is not enough remaining data in `self`.
+    /// This function panics if there is not enough remaining data in `self`, or
+    /// if `nbytes` is greater than 8.
     </span><span class="kw">fn </span>get_int_le(<span class="kw-2">&amp;mut </span><span class="self">self</span>, nbytes: usize) -&gt; i64 {
         <span class="macro">buf_get_impl!</span>(le =&gt; <span class="self">self</span>, i64, nbytes);
     }
@@ -2338,7 +2427,8 @@
     ///
     /// # Panics
     ///
-    /// This function panics if there is not enough remaining data in `self`.
+    /// This function panics if there is not enough remaining data in `self`, or
+    /// if `nbytes` is greater than 8.
     </span><span class="kw">fn </span>get_int_ne(<span class="kw-2">&amp;mut </span><span class="self">self</span>, nbytes: usize) -&gt; i64 {
         <span class="kw">if </span><span class="macro">cfg!</span>(target_endian = <span class="string">"big"</span>) {
             <span class="self">self</span>.get_int(nbytes)
@@ -2365,7 +2455,7 @@
     ///
     /// This function panics if there is not enough remaining data in `self`.
     </span><span class="kw">fn </span>get_f32(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; f32 {
-        f32::from_bits(<span class="self">Self</span>::get_u32(<span class="self">self</span>))
+        f32::from_bits(<span class="self">self</span>.get_u32())
     }
 
     <span class="doccomment">/// Gets an IEEE754 single-precision (4 bytes) floating point number from
@@ -2386,7 +2476,7 @@
     ///
     /// This function panics if there is not enough remaining data in `self`.
     </span><span class="kw">fn </span>get_f32_le(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; f32 {
-        f32::from_bits(<span class="self">Self</span>::get_u32_le(<span class="self">self</span>))
+        f32::from_bits(<span class="self">self</span>.get_u32_le())
     }
 
     <span class="doccomment">/// Gets an IEEE754 single-precision (4 bytes) floating point number from
@@ -2410,7 +2500,7 @@
     ///
     /// This function panics if there is not enough remaining data in `self`.
     </span><span class="kw">fn </span>get_f32_ne(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; f32 {
-        f32::from_bits(<span class="self">Self</span>::get_u32_ne(<span class="self">self</span>))
+        f32::from_bits(<span class="self">self</span>.get_u32_ne())
     }
 
     <span class="doccomment">/// Gets an IEEE754 double-precision (8 bytes) floating point number from
@@ -2431,7 +2521,7 @@
     ///
     /// This function panics if there is not enough remaining data in `self`.
     </span><span class="kw">fn </span>get_f64(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; f64 {
-        f64::from_bits(<span class="self">Self</span>::get_u64(<span class="self">self</span>))
+        f64::from_bits(<span class="self">self</span>.get_u64())
     }
 
     <span class="doccomment">/// Gets an IEEE754 double-precision (8 bytes) floating point number from
@@ -2452,7 +2542,7 @@
     ///
     /// This function panics if there is not enough remaining data in `self`.
     </span><span class="kw">fn </span>get_f64_le(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; f64 {
-        f64::from_bits(<span class="self">Self</span>::get_u64_le(<span class="self">self</span>))
+        f64::from_bits(<span class="self">self</span>.get_u64_le())
     }
 
     <span class="doccomment">/// Gets an IEEE754 double-precision (8 bytes) floating point number from
@@ -2476,7 +2566,7 @@
     ///
     /// This function panics if there is not enough remaining data in `self`.
     </span><span class="kw">fn </span>get_f64_ne(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; f64 {
-        f64::from_bits(<span class="self">Self</span>::get_u64_ne(<span class="self">self</span>))
+        f64::from_bits(<span class="self">self</span>.get_u64_ne())
     }
 
     <span class="doccomment">/// Consumes `len` bytes inside self and returns new instance of `Bytes`
@@ -2494,10 +2584,16 @@
     /// let bytes = (&amp;b"hello world"[..]).copy_to_bytes(5);
     /// assert_eq!(&amp;bytes[..], &amp;b"hello"[..]);
     /// ```
+    ///
+    /// # Panics
+    ///
+    /// This function panics if `len &gt; self.remaining()`.
     </span><span class="kw">fn </span>copy_to_bytes(<span class="kw-2">&amp;mut </span><span class="self">self</span>, len: usize) -&gt; <span class="kw">crate</span>::Bytes {
         <span class="kw">use </span><span class="kw">super</span>::BufMut;
 
-        <span class="macro">assert!</span>(len &lt;= <span class="self">self</span>.remaining(), <span class="string">"`len` greater than remaining"</span>);
+        <span class="kw">if </span><span class="self">self</span>.remaining() &lt; len {
+            panic_advance(len, <span class="self">self</span>.remaining());
+        }
 
         <span class="kw">let </span><span class="kw-2">mut </span>ret = <span class="kw">crate</span>::BytesMut::with_capacity(len);
         ret.put(<span class="self">self</span>.take(len));
@@ -2589,136 +2685,169 @@
 
 <span class="macro">macro_rules!</span> deref_forward_buf {
     () =&gt; {
-        <span class="kw">fn </span>remaining(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
+        <span class="attr">#[inline]
+        </span><span class="kw">fn </span>remaining(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
             (<span class="kw-2">**</span><span class="self">self</span>).remaining()
         }
 
-        <span class="kw">fn </span>chunk(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[u8] {
+        <span class="attr">#[inline]
+        </span><span class="kw">fn </span>chunk(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[u8] {
             (<span class="kw-2">**</span><span class="self">self</span>).chunk()
         }
 
         <span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
+        #[inline]
         </span><span class="kw">fn </span>chunks_vectored&lt;<span class="lifetime">'b</span>&gt;(<span class="kw-2">&amp;</span><span class="lifetime">'b </span><span class="self">self</span>, dst: <span class="kw-2">&amp;mut </span>[IoSlice&lt;<span class="lifetime">'b</span>&gt;]) -&gt; usize {
             (<span class="kw-2">**</span><span class="self">self</span>).chunks_vectored(dst)
         }
 
-        <span class="kw">fn </span>advance(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cnt: usize) {
+        <span class="attr">#[inline]
+        </span><span class="kw">fn </span>advance(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cnt: usize) {
             (<span class="kw-2">**</span><span class="self">self</span>).advance(cnt)
         }
 
-        <span class="kw">fn </span>has_remaining(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="attr">#[inline]
+        </span><span class="kw">fn </span>has_remaining(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
             (<span class="kw-2">**</span><span class="self">self</span>).has_remaining()
         }
 
-        <span class="kw">fn </span>copy_to_slice(<span class="kw-2">&amp;mut </span><span class="self">self</span>, dst: <span class="kw-2">&amp;mut </span>[u8]) {
+        <span class="attr">#[inline]
+        </span><span class="kw">fn </span>copy_to_slice(<span class="kw-2">&amp;mut </span><span class="self">self</span>, dst: <span class="kw-2">&amp;mut </span>[u8]) {
             (<span class="kw-2">**</span><span class="self">self</span>).copy_to_slice(dst)
         }
 
-        <span class="kw">fn </span>get_u8(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; u8 {
+        <span class="attr">#[inline]
+        </span><span class="kw">fn </span>get_u8(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; u8 {
             (<span class="kw-2">**</span><span class="self">self</span>).get_u8()
         }
 
-        <span class="kw">fn </span>get_i8(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; i8 {
+        <span class="attr">#[inline]
+        </span><span class="kw">fn </span>get_i8(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; i8 {
             (<span class="kw-2">**</span><span class="self">self</span>).get_i8()
         }
 
-        <span class="kw">fn </span>get_u16(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; u16 {
+        <span class="attr">#[inline]
+        </span><span class="kw">fn </span>get_u16(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; u16 {
             (<span class="kw-2">**</span><span class="self">self</span>).get_u16()
         }
 
-        <span class="kw">fn </span>get_u16_le(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; u16 {
+        <span class="attr">#[inline]
+        </span><span class="kw">fn </span>get_u16_le(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; u16 {
             (<span class="kw-2">**</span><span class="self">self</span>).get_u16_le()
         }
 
-        <span class="kw">fn </span>get_u16_ne(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; u16 {
+        <span class="attr">#[inline]
+        </span><span class="kw">fn </span>get_u16_ne(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; u16 {
             (<span class="kw-2">**</span><span class="self">self</span>).get_u16_ne()
         }
 
-        <span class="kw">fn </span>get_i16(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; i16 {
+        <span class="attr">#[inline]
+        </span><span class="kw">fn </span>get_i16(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; i16 {
             (<span class="kw-2">**</span><span class="self">self</span>).get_i16()
         }
 
-        <span class="kw">fn </span>get_i16_le(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; i16 {
+        <span class="attr">#[inline]
+        </span><span class="kw">fn </span>get_i16_le(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; i16 {
             (<span class="kw-2">**</span><span class="self">self</span>).get_i16_le()
         }
 
-        <span class="kw">fn </span>get_i16_ne(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; i16 {
+        <span class="attr">#[inline]
+        </span><span class="kw">fn </span>get_i16_ne(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; i16 {
             (<span class="kw-2">**</span><span class="self">self</span>).get_i16_ne()
         }
 
-        <span class="kw">fn </span>get_u32(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; u32 {
+        <span class="attr">#[inline]
+        </span><span class="kw">fn </span>get_u32(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; u32 {
             (<span class="kw-2">**</span><span class="self">self</span>).get_u32()
         }
 
-        <span class="kw">fn </span>get_u32_le(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; u32 {
+        <span class="attr">#[inline]
+        </span><span class="kw">fn </span>get_u32_le(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; u32 {
             (<span class="kw-2">**</span><span class="self">self</span>).get_u32_le()
         }
 
-        <span class="kw">fn </span>get_u32_ne(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; u32 {
+        <span class="attr">#[inline]
+        </span><span class="kw">fn </span>get_u32_ne(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; u32 {
             (<span class="kw-2">**</span><span class="self">self</span>).get_u32_ne()
         }
 
-        <span class="kw">fn </span>get_i32(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; i32 {
+        <span class="attr">#[inline]
+        </span><span class="kw">fn </span>get_i32(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; i32 {
             (<span class="kw-2">**</span><span class="self">self</span>).get_i32()
         }
 
-        <span class="kw">fn </span>get_i32_le(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; i32 {
+        <span class="attr">#[inline]
+        </span><span class="kw">fn </span>get_i32_le(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; i32 {
             (<span class="kw-2">**</span><span class="self">self</span>).get_i32_le()
         }
 
-        <span class="kw">fn </span>get_i32_ne(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; i32 {
+        <span class="attr">#[inline]
+        </span><span class="kw">fn </span>get_i32_ne(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; i32 {
             (<span class="kw-2">**</span><span class="self">self</span>).get_i32_ne()
         }
 
-        <span class="kw">fn </span>get_u64(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; u64 {
+        <span class="attr">#[inline]
+        </span><span class="kw">fn </span>get_u64(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; u64 {
             (<span class="kw-2">**</span><span class="self">self</span>).get_u64()
         }
 
-        <span class="kw">fn </span>get_u64_le(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; u64 {
+        <span class="attr">#[inline]
+        </span><span class="kw">fn </span>get_u64_le(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; u64 {
             (<span class="kw-2">**</span><span class="self">self</span>).get_u64_le()
         }
 
-        <span class="kw">fn </span>get_u64_ne(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; u64 {
+        <span class="attr">#[inline]
+        </span><span class="kw">fn </span>get_u64_ne(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; u64 {
             (<span class="kw-2">**</span><span class="self">self</span>).get_u64_ne()
         }
 
-        <span class="kw">fn </span>get_i64(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; i64 {
+        <span class="attr">#[inline]
+        </span><span class="kw">fn </span>get_i64(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; i64 {
             (<span class="kw-2">**</span><span class="self">self</span>).get_i64()
         }
 
-        <span class="kw">fn </span>get_i64_le(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; i64 {
+        <span class="attr">#[inline]
+        </span><span class="kw">fn </span>get_i64_le(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; i64 {
             (<span class="kw-2">**</span><span class="self">self</span>).get_i64_le()
         }
 
-        <span class="kw">fn </span>get_i64_ne(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; i64 {
+        <span class="attr">#[inline]
+        </span><span class="kw">fn </span>get_i64_ne(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; i64 {
             (<span class="kw-2">**</span><span class="self">self</span>).get_i64_ne()
         }
 
-        <span class="kw">fn </span>get_uint(<span class="kw-2">&amp;mut </span><span class="self">self</span>, nbytes: usize) -&gt; u64 {
+        <span class="attr">#[inline]
+        </span><span class="kw">fn </span>get_uint(<span class="kw-2">&amp;mut </span><span class="self">self</span>, nbytes: usize) -&gt; u64 {
             (<span class="kw-2">**</span><span class="self">self</span>).get_uint(nbytes)
         }
 
-        <span class="kw">fn </span>get_uint_le(<span class="kw-2">&amp;mut </span><span class="self">self</span>, nbytes: usize) -&gt; u64 {
+        <span class="attr">#[inline]
+        </span><span class="kw">fn </span>get_uint_le(<span class="kw-2">&amp;mut </span><span class="self">self</span>, nbytes: usize) -&gt; u64 {
             (<span class="kw-2">**</span><span class="self">self</span>).get_uint_le(nbytes)
         }
 
-        <span class="kw">fn </span>get_uint_ne(<span class="kw-2">&amp;mut </span><span class="self">self</span>, nbytes: usize) -&gt; u64 {
+        <span class="attr">#[inline]
+        </span><span class="kw">fn </span>get_uint_ne(<span class="kw-2">&amp;mut </span><span class="self">self</span>, nbytes: usize) -&gt; u64 {
             (<span class="kw-2">**</span><span class="self">self</span>).get_uint_ne(nbytes)
         }
 
-        <span class="kw">fn </span>get_int(<span class="kw-2">&amp;mut </span><span class="self">self</span>, nbytes: usize) -&gt; i64 {
+        <span class="attr">#[inline]
+        </span><span class="kw">fn </span>get_int(<span class="kw-2">&amp;mut </span><span class="self">self</span>, nbytes: usize) -&gt; i64 {
             (<span class="kw-2">**</span><span class="self">self</span>).get_int(nbytes)
         }
 
-        <span class="kw">fn </span>get_int_le(<span class="kw-2">&amp;mut </span><span class="self">self</span>, nbytes: usize) -&gt; i64 {
+        <span class="attr">#[inline]
+        </span><span class="kw">fn </span>get_int_le(<span class="kw-2">&amp;mut </span><span class="self">self</span>, nbytes: usize) -&gt; i64 {
             (<span class="kw-2">**</span><span class="self">self</span>).get_int_le(nbytes)
         }
 
-        <span class="kw">fn </span>get_int_ne(<span class="kw-2">&amp;mut </span><span class="self">self</span>, nbytes: usize) -&gt; i64 {
+        <span class="attr">#[inline]
+        </span><span class="kw">fn </span>get_int_ne(<span class="kw-2">&amp;mut </span><span class="self">self</span>, nbytes: usize) -&gt; i64 {
             (<span class="kw-2">**</span><span class="self">self</span>).get_int_ne(nbytes)
         }
 
-        <span class="kw">fn </span>copy_to_bytes(<span class="kw-2">&amp;mut </span><span class="self">self</span>, len: usize) -&gt; <span class="kw">crate</span>::Bytes {
+        <span class="attr">#[inline]
+        </span><span class="kw">fn </span>copy_to_bytes(<span class="kw-2">&amp;mut </span><span class="self">self</span>, len: usize) -&gt; <span class="kw">crate</span>::Bytes {
             (<span class="kw-2">**</span><span class="self">self</span>).copy_to_bytes(len)
         }
     };
@@ -2745,41 +2874,52 @@
 
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>advance(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cnt: usize) {
+        <span class="kw">if </span><span class="self">self</span>.len() &lt; cnt {
+            panic_advance(cnt, <span class="self">self</span>.len());
+        }
+
         <span class="kw-2">*</span><span class="self">self </span>= <span class="kw-2">&amp;</span><span class="self">self</span>[cnt..];
+    }
+
+    <span class="attr">#[inline]
+    </span><span class="kw">fn </span>copy_to_slice(<span class="kw-2">&amp;mut </span><span class="self">self</span>, dst: <span class="kw-2">&amp;mut </span>[u8]) {
+        <span class="kw">if </span><span class="self">self</span>.len() &lt; dst.len() {
+            panic_advance(dst.len(), <span class="self">self</span>.len());
+        }
+
+        dst.copy_from_slice(<span class="kw-2">&amp;</span><span class="self">self</span>[..dst.len()]);
+        <span class="self">self</span>.advance(dst.len());
     }
 }
 
 <span class="attr">#[cfg(feature = <span class="string">"std"</span>)]
 </span><span class="kw">impl</span>&lt;T: AsRef&lt;[u8]&gt;&gt; Buf <span class="kw">for </span>std::io::Cursor&lt;T&gt; {
-    <span class="kw">fn </span>remaining(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
+    <span class="attr">#[inline]
+    </span><span class="kw">fn </span>remaining(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
+        saturating_sub_usize_u64(<span class="self">self</span>.get_ref().as_ref().len(), <span class="self">self</span>.position())
+    }
+
+    <span class="attr">#[inline]
+    </span><span class="kw">fn </span>chunk(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[u8] {
+        <span class="kw">let </span>slice = <span class="self">self</span>.get_ref().as_ref();
+        <span class="kw">let </span>pos = min_u64_usize(<span class="self">self</span>.position(), slice.len());
+        <span class="kw-2">&amp;</span>slice[pos..]
+    }
+
+    <span class="attr">#[inline]
+    </span><span class="kw">fn </span>advance(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cnt: usize) {
         <span class="kw">let </span>len = <span class="self">self</span>.get_ref().as_ref().len();
         <span class="kw">let </span>pos = <span class="self">self</span>.position();
 
-        <span class="kw">if </span>pos &gt;= len <span class="kw">as </span>u64 {
-            <span class="kw">return </span><span class="number">0</span>;
+        <span class="comment">// We intentionally allow `cnt == 0` here even if `pos &gt; len`.
+        </span><span class="kw">let </span>max_cnt = saturating_sub_usize_u64(len, pos);
+        <span class="kw">if </span>cnt &gt; max_cnt {
+            panic_advance(cnt, max_cnt);
         }
 
-        len - pos <span class="kw">as </span>usize
-    }
-
-    <span class="kw">fn </span>chunk(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[u8] {
-        <span class="kw">let </span>len = <span class="self">self</span>.get_ref().as_ref().len();
-        <span class="kw">let </span>pos = <span class="self">self</span>.position();
-
-        <span class="kw">if </span>pos &gt;= len <span class="kw">as </span>u64 {
-            <span class="kw">return </span><span class="kw-2">&amp;</span>[];
-        }
-
-        <span class="kw-2">&amp;</span><span class="self">self</span>.get_ref().as_ref()[pos <span class="kw">as </span>usize..]
-    }
-
-    <span class="kw">fn </span>advance(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cnt: usize) {
-        <span class="kw">let </span>pos = (<span class="self">self</span>.position() <span class="kw">as </span>usize)
-            .checked_add(cnt)
-            .expect(<span class="string">"overflow"</span>);
-
-        <span class="macro">assert!</span>(pos &lt;= <span class="self">self</span>.get_ref().as_ref().len());
-        <span class="self">self</span>.set_position(pos <span class="kw">as </span>u64);
+        <span class="comment">// This will not overflow because either `cnt == 0` or the sum is not
+        // greater than `len`.
+        </span><span class="self">self</span>.set_position(pos + cnt <span class="kw">as </span>u64);
     }
 }
 

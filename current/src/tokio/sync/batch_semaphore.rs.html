@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/sync/batch_semaphore.rs`."><title>batch_semaphore.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-b21aa549bf6d91ff.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (79734f1db 2024-05-02)" data-channel="nightly" data-search-js="search-bf21c90c8c1d92b1.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-e32f0c247825364d.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-09095024cf37855e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../tokio/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Type ‘S’ or ‘/’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings">Settings</a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.37.0/src/sync/batch_semaphore.rs`."><title>batch_semaphore.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (9cdfe285c 2024-05-22)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -750,6 +750,31 @@
 <a href="#750" id="750">750</a>
 <a href="#751" id="751">751</a>
 <a href="#752" id="752">752</a>
+<a href="#753" id="753">753</a>
+<a href="#754" id="754">754</a>
+<a href="#755" id="755">755</a>
+<a href="#756" id="756">756</a>
+<a href="#757" id="757">757</a>
+<a href="#758" id="758">758</a>
+<a href="#759" id="759">759</a>
+<a href="#760" id="760">760</a>
+<a href="#761" id="761">761</a>
+<a href="#762" id="762">762</a>
+<a href="#763" id="763">763</a>
+<a href="#764" id="764">764</a>
+<a href="#765" id="765">765</a>
+<a href="#766" id="766">766</a>
+<a href="#767" id="767">767</a>
+<a href="#768" id="768">768</a>
+<a href="#769" id="769">769</a>
+<a href="#770" id="770">770</a>
+<a href="#771" id="771">771</a>
+<a href="#772" id="772">772</a>
+<a href="#773" id="773">773</a>
+<a href="#774" id="774">774</a>
+<a href="#775" id="775">775</a>
+<a href="#776" id="776">776</a>
+<a href="#777" id="777">777</a>
 </pre></div><pre class="rust"><code><span class="attr">#![cfg_attr(not(feature = <span class="string">"sync"</span>), allow(unreachable_pub, dead_code))]
 </span><span class="doccomment">//! # Implementation Details.
 //!
@@ -823,7 +848,7 @@
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>Acquire&lt;<span class="lifetime">'a</span>&gt; {
     node: Waiter,
     semaphore: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Semaphore,
-    num_permits: u32,
+    num_permits: usize,
     queued: bool,
 }
 
@@ -1014,13 +1039,13 @@
         <span class="self">self</span>.permits.load(Acquire) &amp; <span class="self">Self</span>::CLOSED == <span class="self">Self</span>::CLOSED
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>try_acquire(<span class="kw-2">&amp;</span><span class="self">self</span>, num_permits: u32) -&gt; <span class="prelude-ty">Result</span>&lt;(), TryAcquireError&gt; {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>try_acquire(<span class="kw-2">&amp;</span><span class="self">self</span>, num_permits: usize) -&gt; <span class="prelude-ty">Result</span>&lt;(), TryAcquireError&gt; {
         <span class="macro">assert!</span>(
-            num_permits <span class="kw">as </span>usize &lt;= <span class="self">Self</span>::MAX_PERMITS,
+            num_permits &lt;= <span class="self">Self</span>::MAX_PERMITS,
             <span class="string">"a semaphore may not have more than MAX_PERMITS permits ({})"</span>,
             <span class="self">Self</span>::MAX_PERMITS
         );
-        <span class="kw">let </span>num_permits = (num_permits <span class="kw">as </span>usize) &lt;&lt; <span class="self">Self</span>::PERMIT_SHIFT;
+        <span class="kw">let </span>num_permits = num_permits &lt;&lt; <span class="self">Self</span>::PERMIT_SHIFT;
         <span class="kw">let </span><span class="kw-2">mut </span>curr = <span class="self">self</span>.permits.load(Acquire);
         <span class="kw">loop </span>{
             <span class="comment">// Has the semaphore closed?
@@ -1045,7 +1070,7 @@
         }
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>acquire(<span class="kw-2">&amp;</span><span class="self">self</span>, num_permits: u32) -&gt; Acquire&lt;<span class="lifetime">'_</span>&gt; {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>acquire(<span class="kw-2">&amp;</span><span class="self">self</span>, num_permits: usize) -&gt; Acquire&lt;<span class="lifetime">'_</span>&gt; {
         Acquire::new(<span class="self">self</span>, num_permits)
     }
 
@@ -1120,10 +1145,35 @@
         <span class="macro">assert_eq!</span>(rem, <span class="number">0</span>);
     }
 
+    <span class="doccomment">/// Decrease a semaphore's permits by a maximum of `n`.
+    ///
+    /// If there are insufficient permits and it's not possible to reduce by `n`,
+    /// return the number of permits that were actually reduced.
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>forget_permits(<span class="kw-2">&amp;</span><span class="self">self</span>, n: usize) -&gt; usize {
+        <span class="kw">if </span>n == <span class="number">0 </span>{
+            <span class="kw">return </span><span class="number">0</span>;
+        }
+
+        <span class="kw">let </span><span class="kw-2">mut </span>curr_bits = <span class="self">self</span>.permits.load(Acquire);
+        <span class="kw">loop </span>{
+            <span class="kw">let </span>curr = curr_bits &gt;&gt; <span class="self">Self</span>::PERMIT_SHIFT;
+            <span class="kw">let </span>new = curr.saturating_sub(n);
+            <span class="kw">match </span><span class="self">self</span>.permits.compare_exchange_weak(
+                curr_bits,
+                new &lt;&lt; <span class="self">Self</span>::PERMIT_SHIFT,
+                AcqRel,
+                Acquire,
+            ) {
+                <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="kw">return </span>std::cmp::min(curr, n),
+                <span class="prelude-val">Err</span>(actual) =&gt; curr_bits = actual,
+            };
+        }
+    }
+
     <span class="kw">fn </span>poll_acquire(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;,
-        num_permits: u32,
+        num_permits: usize,
         node: Pin&lt;<span class="kw-2">&amp;mut </span>Waiter&gt;,
         queued: bool,
     ) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;(), AcquireError&gt;&gt; {
@@ -1132,7 +1182,7 @@
         <span class="kw">let </span>needed = <span class="kw">if </span>queued {
             node.state.load(Acquire) &lt;&lt; <span class="self">Self</span>::PERMIT_SHIFT
         } <span class="kw">else </span>{
-            (num_permits <span class="kw">as </span>usize) &lt;&lt; <span class="self">Self</span>::PERMIT_SHIFT
+            num_permits &lt;&lt; <span class="self">Self</span>::PERMIT_SHIFT
         };
 
         <span class="kw">let </span><span class="kw-2">mut </span>lock = <span class="prelude-val">None</span>;
@@ -1258,12 +1308,12 @@
 
 <span class="kw">impl </span>Waiter {
     <span class="kw">fn </span>new(
-        num_permits: u32,
+        num_permits: usize,
         <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))] </span>ctx: trace::AsyncOpTracingCtx,
     ) -&gt; <span class="self">Self </span>{
         Waiter {
             waker: UnsafeCell::new(<span class="prelude-val">None</span>),
-            state: AtomicUsize::new(num_permits <span class="kw">as </span>usize),
+            state: AtomicUsize::new(num_permits),
             pointers: linked_list::Pointers::new(),
             <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
             </span>ctx,
@@ -1343,7 +1393,7 @@
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Acquire&lt;<span class="lifetime">'a</span>&gt; {
-    <span class="kw">fn </span>new(semaphore: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Semaphore, num_permits: u32) -&gt; <span class="self">Self </span>{
+    <span class="kw">fn </span>new(semaphore: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Semaphore, num_permits: usize) -&gt; <span class="self">Self </span>{
         <span class="attr">#[cfg(any(not(tokio_unstable), not(feature = <span class="string">"tracing"</span>)))]
         </span><span class="kw">return </span><span class="self">Self </span>{
             node: Waiter::new(num_permits),
@@ -1387,14 +1437,14 @@
         });
     }
 
-    <span class="kw">fn </span>project(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;) -&gt; (Pin&lt;<span class="kw-2">&amp;mut </span>Waiter&gt;, <span class="kw-2">&amp;</span>Semaphore, u32, <span class="kw-2">&amp;mut </span>bool) {
+    <span class="kw">fn </span>project(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;) -&gt; (Pin&lt;<span class="kw-2">&amp;mut </span>Waiter&gt;, <span class="kw-2">&amp;</span>Semaphore, usize, <span class="kw-2">&amp;mut </span>bool) {
         <span class="kw">fn </span>is_unpin&lt;T: Unpin&gt;() {}
         <span class="kw">unsafe </span>{
             <span class="comment">// Safety: all fields other than `node` are `Unpin`
 
             </span>is_unpin::&lt;<span class="kw-2">&amp;</span>Semaphore&gt;();
             is_unpin::&lt;<span class="kw-2">&amp;mut </span>bool&gt;();
-            is_unpin::&lt;u32&gt;();
+            is_unpin::&lt;usize&gt;();
 
             <span class="kw">let </span>this = <span class="self">self</span>.get_unchecked_mut();
             (
@@ -1425,7 +1475,7 @@
         <span class="comment">// Safety: we have locked the wait list.
         </span><span class="kw">unsafe </span>{ waiters.queue.remove(node) };
 
-        <span class="kw">let </span>acquired_permits = <span class="self">self</span>.num_permits <span class="kw">as </span>usize - <span class="self">self</span>.node.state.load(Acquire);
+        <span class="kw">let </span>acquired_permits = <span class="self">self</span>.num_permits - <span class="self">self</span>.node.state.load(Acquire);
         <span class="kw">if </span>acquired_permits &gt; <span class="number">0 </span>{
             <span class="self">self</span>.semaphore.add_permits_locked(acquired_permits, waiters);
         }

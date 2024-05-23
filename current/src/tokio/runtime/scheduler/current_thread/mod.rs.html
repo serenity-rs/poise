@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/runtime/scheduler/current_thread/mod.rs`."><title>mod.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../../static.files/rustdoc-b21aa549bf6d91ff.css"><meta name="rustdoc-vars" data-root-path="../../../../../" data-static-root-path="../../../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (79734f1db 2024-05-02)" data-channel="nightly" data-search-js="search-bf21c90c8c1d92b1.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../../static.files/storage-e32f0c247825364d.js"></script><script defer src="../../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../../src-files.js"></script><script defer src="../../../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../../../static.files/noscript-09095024cf37855e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../../../tokio/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Type ‘S’ or ‘/’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../../settings.html" title="settings">Settings</a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.37.0/src/runtime/scheduler/current_thread/mod.rs`."><title>mod.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../../../" data-static-root-path="../../../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (9cdfe285c 2024-05-22)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../../src-files.js"></script><script defer src="../../../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -756,12 +756,6 @@
 <a href="#756" id="756">756</a>
 <a href="#757" id="757">757</a>
 <a href="#758" id="758">758</a>
-<a href="#759" id="759">759</a>
-<a href="#760" id="760">760</a>
-<a href="#761" id="761">761</a>
-<a href="#762" id="762">762</a>
-<a href="#763" id="763">763</a>
-<a href="#764" id="764">764</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::future::poll_fn;
 <span class="kw">use </span><span class="kw">crate</span>::loom::sync::atomic::AtomicBool;
 <span class="kw">use </span><span class="kw">crate</span>::loom::sync::Arc;
@@ -896,7 +890,7 @@
         <span class="kw">let </span>handle = Arc::new(Handle {
             shared: Shared {
                 inject: Inject::new(),
-                owned: OwnedTasks::new(),
+                owned: OwnedTasks::new(<span class="number">1</span>),
                 woken: AtomicBool::new(<span class="bool-val">false</span>),
                 config,
                 scheduler_metrics: SchedulerMetrics::new(),
@@ -1012,7 +1006,7 @@
     <span class="comment">// Drain the OwnedTasks collection. This call also closes the
     // collection, ensuring that no tasks are ever pushed after this
     // call returns.
-    </span>handle.shared.owned.close_and_shutdown_all();
+    </span>handle.shared.owned.close_and_shutdown_all(<span class="number">0</span>);
 
     <span class="comment">// Drain local queue
     // We already shut down every task, so we just need to drop the task.
@@ -1115,10 +1109,7 @@
         <span class="kw">let </span><span class="kw-2">mut </span>driver = core.driver.take().expect(<span class="string">"driver missing"</span>);
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(f) = <span class="kw-2">&amp;</span>handle.shared.config.before_park {
-            <span class="comment">// Incorrect lint, the closures are actually different types so `f`
-            // cannot be passed as an argument to `enter`.
-            </span><span class="attr">#[allow(clippy::redundant_closure)]
-            </span><span class="kw">let </span>(c, ()) = <span class="self">self</span>.enter(core, || f());
+            <span class="kw">let </span>(c, ()) = <span class="self">self</span>.enter(core, || f());
             core = c;
         }
 
@@ -1138,10 +1129,7 @@
         }
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(f) = <span class="kw-2">&amp;</span>handle.shared.config.after_unpark {
-            <span class="comment">// Incorrect lint, the closures are actually different types so `f`
-            // cannot be passed as an argument to `enter`.
-            </span><span class="attr">#[allow(clippy::redundant_closure)]
-            </span><span class="kw">let </span>(c, ()) = <span class="self">self</span>.enter(core, || f());
+            <span class="kw">let </span>(c, ()) = <span class="self">self</span>.enter(core, || f());
             core = c;
         }
 
@@ -1240,7 +1228,7 @@
 
             traces = trace_current_thread(<span class="kw-2">&amp;</span><span class="self">self</span>.shared.owned, local, <span class="kw-2">&amp;</span><span class="self">self</span>.shared.inject)
                 .into_iter()
-                .map(dump::Task::new)
+                .map(|(id, trace)| dump::Task::new(id, trace))
                 .collect();
 
             <span class="comment">// Avoid double borrow panic
@@ -1378,7 +1366,7 @@
                             <span class="comment">// If `None`, the runtime is shutting down, so there is no need to signal shutdown
                             </span><span class="kw">if let </span><span class="prelude-val">Some</span>(core) = core.as_mut() {
                                 core.unhandled_panic = <span class="bool-val">true</span>;
-                                <span class="self">self</span>.shared.owned.close_and_shutdown_all();
+                                <span class="self">self</span>.shared.owned.close_and_shutdown_all(<span class="number">0</span>);
                             }
                         }
                         <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(<span class="string">"runtime core not set in CURRENT thread-local"</span>),

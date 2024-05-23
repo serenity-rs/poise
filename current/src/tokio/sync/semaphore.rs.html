@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.34.0/src/sync/semaphore.rs`."><title>semaphore.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-b21aa549bf6d91ff.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (79734f1db 2024-05-02)" data-channel="nightly" data-search-js="search-bf21c90c8c1d92b1.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-e32f0c247825364d.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-09095024cf37855e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../tokio/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Type ‘S’ or ‘/’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings">Settings</a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.37.0/src/sync/semaphore.rs`."><title>semaphore.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (9cdfe285c 2024-05-22)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -974,6 +974,68 @@
 <a href="#974" id="974">974</a>
 <a href="#975" id="975">975</a>
 <a href="#976" id="976">976</a>
+<a href="#977" id="977">977</a>
+<a href="#978" id="978">978</a>
+<a href="#979" id="979">979</a>
+<a href="#980" id="980">980</a>
+<a href="#981" id="981">981</a>
+<a href="#982" id="982">982</a>
+<a href="#983" id="983">983</a>
+<a href="#984" id="984">984</a>
+<a href="#985" id="985">985</a>
+<a href="#986" id="986">986</a>
+<a href="#987" id="987">987</a>
+<a href="#988" id="988">988</a>
+<a href="#989" id="989">989</a>
+<a href="#990" id="990">990</a>
+<a href="#991" id="991">991</a>
+<a href="#992" id="992">992</a>
+<a href="#993" id="993">993</a>
+<a href="#994" id="994">994</a>
+<a href="#995" id="995">995</a>
+<a href="#996" id="996">996</a>
+<a href="#997" id="997">997</a>
+<a href="#998" id="998">998</a>
+<a href="#999" id="999">999</a>
+<a href="#1000" id="1000">1000</a>
+<a href="#1001" id="1001">1001</a>
+<a href="#1002" id="1002">1002</a>
+<a href="#1003" id="1003">1003</a>
+<a href="#1004" id="1004">1004</a>
+<a href="#1005" id="1005">1005</a>
+<a href="#1006" id="1006">1006</a>
+<a href="#1007" id="1007">1007</a>
+<a href="#1008" id="1008">1008</a>
+<a href="#1009" id="1009">1009</a>
+<a href="#1010" id="1010">1010</a>
+<a href="#1011" id="1011">1011</a>
+<a href="#1012" id="1012">1012</a>
+<a href="#1013" id="1013">1013</a>
+<a href="#1014" id="1014">1014</a>
+<a href="#1015" id="1015">1015</a>
+<a href="#1016" id="1016">1016</a>
+<a href="#1017" id="1017">1017</a>
+<a href="#1018" id="1018">1018</a>
+<a href="#1019" id="1019">1019</a>
+<a href="#1020" id="1020">1020</a>
+<a href="#1021" id="1021">1021</a>
+<a href="#1022" id="1022">1022</a>
+<a href="#1023" id="1023">1023</a>
+<a href="#1024" id="1024">1024</a>
+<a href="#1025" id="1025">1025</a>
+<a href="#1026" id="1026">1026</a>
+<a href="#1027" id="1027">1027</a>
+<a href="#1028" id="1028">1028</a>
+<a href="#1029" id="1029">1029</a>
+<a href="#1030" id="1030">1030</a>
+<a href="#1031" id="1031">1031</a>
+<a href="#1032" id="1032">1032</a>
+<a href="#1033" id="1033">1033</a>
+<a href="#1034" id="1034">1034</a>
+<a href="#1035" id="1035">1035</a>
+<a href="#1036" id="1036">1036</a>
+<a href="#1037" id="1037">1037</a>
+<a href="#1038" id="1038">1038</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::batch_semaphore <span class="kw">as </span>ll; <span class="comment">// low level implementation
 </span><span class="kw">use super</span>::{AcquireError, TryAcquireError};
 <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
@@ -1050,6 +1112,59 @@
 ///     buffer.write_all(message).await?;
 ///     Ok(()) // Permit goes out of scope here, and is available again for acquisition
 /// }
+/// ```
+///
+/// ## Limit the number of outgoing requests being sent at the same time
+///
+/// In some scenarios, it might be required to limit the number of outgoing
+/// requests being sent in parallel. This could be due to limits of a consumed
+/// API or the network resources of the system the application is running on.
+///
+/// This example uses an `Arc&lt;Semaphore&gt;` with 10 permits. Each task spawned is
+/// given a reference to the semaphore by cloning the `Arc&lt;Semaphore&gt;`. Before
+/// a task sends a request, it must acquire a permit from the semaphore by
+/// calling [`Semaphore::acquire`]. This ensures that at most 10 requests are
+/// sent in parallel at any given time. After a task has sent a request, it
+/// drops the permit to allow other tasks to send requests.
+///
+/// ```
+/// use std::sync::Arc;
+/// use tokio::sync::Semaphore;
+///
+/// #[tokio::main]
+/// async fn main() {
+///     // Define maximum number of parallel requests.
+///     let semaphore = Arc::new(Semaphore::new(10));
+///     // Spawn many tasks that will send requests.
+///     let mut jhs = Vec::new();
+///     for task_id in 0..100 {
+///         let semaphore = semaphore.clone();
+///         let jh = tokio::spawn(async move {
+///             // Acquire permit before sending request.
+///             let _permit = semaphore.acquire().await.unwrap();
+///             // Send the request.
+///             let response = send_request(task_id).await;
+///             // Drop the permit after the request has been sent.
+///             drop(_permit);
+///             // Handle response.
+///             // ...
+///
+///             response
+///         });
+///         jhs.push(jh);
+///     }
+///     // Collect responses from tasks.
+///     let mut responses = Vec::new();
+///     for jh in jhs {
+///         let response = jh.await.unwrap();
+///         responses.push(response);
+///     }
+///     // Process responses.
+///     // ...
+/// }
+/// # async fn send_request(task_id: usize) {
+/// #     // Send request.
+/// # }
 /// ```
 ///
 /// ## Limit the number of incoming requests being handled at the same time
@@ -1376,6 +1491,7 @@
             <span class="kw">let </span>location = std::panic::Location::caller();
 
             <span class="macro">tracing::trace_span!</span>(
+                parent: <span class="prelude-val">None</span>,
                 <span class="string">"runtime.resource"</span>,
                 concrete_type = <span class="string">"Semaphore"</span>,
                 kind = <span class="string">"Sync"</span>,
@@ -1454,6 +1570,14 @@
     /// The maximum number of permits is [`Semaphore::MAX_PERMITS`], and this function will panic if the limit is exceeded.
     </span><span class="kw">pub fn </span>add_permits(<span class="kw-2">&amp;</span><span class="self">self</span>, n: usize) {
         <span class="self">self</span>.ll_sem.release(n);
+    }
+
+    <span class="doccomment">/// Decrease a semaphore's permits by a maximum of `n`.
+    ///
+    /// If there are insufficient permits and it's not possible to reduce by `n`,
+    /// return the number of permits that were actually reduced.
+    </span><span class="kw">pub fn </span>forget_permits(<span class="kw-2">&amp;</span><span class="self">self</span>, n: usize) -&gt; usize {
+        <span class="self">self</span>.ll_sem.forget_permits(n)
     }
 
     <span class="doccomment">/// Acquires a permit from the semaphore.
@@ -1540,7 +1664,7 @@
     </span><span class="kw">pub async fn </span>acquire_many(<span class="kw-2">&amp;</span><span class="self">self</span>, n: u32) -&gt; <span class="prelude-ty">Result</span>&lt;SemaphorePermit&lt;<span class="lifetime">'_</span>&gt;, AcquireError&gt; {
         <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
         </span>trace::async_op(
-            || <span class="self">self</span>.ll_sem.acquire(n),
+            || <span class="self">self</span>.ll_sem.acquire(n <span class="kw">as </span>usize),
             <span class="self">self</span>.resource_span.clone(),
             <span class="string">"Semaphore::acquire_many"</span>,
             <span class="string">"poll"</span>,
@@ -1549,7 +1673,7 @@
         .<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="attr">#[cfg(not(all(tokio_unstable, feature = <span class="string">"tracing"</span>)))]
-        </span><span class="self">self</span>.ll_sem.acquire(n).<span class="kw">await</span><span class="question-mark">?</span>;
+        </span><span class="self">self</span>.ll_sem.acquire(n <span class="kw">as </span>usize).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(SemaphorePermit {
             sem: <span class="self">self</span>,
@@ -1621,7 +1745,7 @@
     /// [`TryAcquireError::NoPermits`]: crate::sync::TryAcquireError::NoPermits
     /// [`SemaphorePermit`]: crate::sync::SemaphorePermit
     </span><span class="kw">pub fn </span>try_acquire_many(<span class="kw-2">&amp;</span><span class="self">self</span>, n: u32) -&gt; <span class="prelude-ty">Result</span>&lt;SemaphorePermit&lt;<span class="lifetime">'_</span>&gt;, TryAcquireError&gt; {
-        <span class="kw">match </span><span class="self">self</span>.ll_sem.try_acquire(n) {
+        <span class="kw">match </span><span class="self">self</span>.ll_sem.try_acquire(n <span class="kw">as </span>usize) {
             <span class="prelude-val">Ok</span>(()) =&gt; <span class="prelude-val">Ok</span>(SemaphorePermit {
                 sem: <span class="self">self</span>,
                 permits: n,
@@ -1739,14 +1863,14 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;OwnedSemaphorePermit, AcquireError&gt; {
         <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"tracing"</span>))]
         </span><span class="kw">let </span>inner = trace::async_op(
-            || <span class="self">self</span>.ll_sem.acquire(n),
+            || <span class="self">self</span>.ll_sem.acquire(n <span class="kw">as </span>usize),
             <span class="self">self</span>.resource_span.clone(),
             <span class="string">"Semaphore::acquire_many_owned"</span>,
             <span class="string">"poll"</span>,
             <span class="bool-val">true</span>,
         );
         <span class="attr">#[cfg(not(all(tokio_unstable, feature = <span class="string">"tracing"</span>)))]
-        </span><span class="kw">let </span>inner = <span class="self">self</span>.ll_sem.acquire(n);
+        </span><span class="kw">let </span>inner = <span class="self">self</span>.ll_sem.acquire(n <span class="kw">as </span>usize);
 
         inner.<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(OwnedSemaphorePermit {
@@ -1830,7 +1954,7 @@
         <span class="self">self</span>: Arc&lt;<span class="self">Self</span>&gt;,
         n: u32,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;OwnedSemaphorePermit, TryAcquireError&gt; {
-        <span class="kw">match </span><span class="self">self</span>.ll_sem.try_acquire(n) {
+        <span class="kw">match </span><span class="self">self</span>.ll_sem.try_acquire(n <span class="kw">as </span>usize) {
             <span class="prelude-val">Ok</span>(()) =&gt; <span class="prelude-val">Ok</span>(OwnedSemaphorePermit {
                 sem: <span class="self">self</span>,
                 permits: n,

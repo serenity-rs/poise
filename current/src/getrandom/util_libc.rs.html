@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/getrandom-0.2.11/src/util_libc.rs`."><title>util_libc.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-b21aa549bf6d91ff.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="getrandom" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (79734f1db 2024-05-02)" data-channel="nightly" data-search-js="search-bf21c90c8c1d92b1.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-e32f0c247825364d.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-09095024cf37855e.css"></noscript><link rel="icon" href="https://www.rust-lang.org/favicon.ico"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../getrandom/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Type ‘S’ or ‘/’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings">Settings</a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/getrandom-0.2.15/src/util_libc.rs`."><title>util_libc.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="getrandom" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (9cdfe285c 2024-05-22)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="icon" href="https://www.rust-lang.org/favicon.ico"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -157,17 +157,12 @@
 <a href="#157" id="157">157</a>
 <a href="#158" id="158">158</a>
 <a href="#159" id="159">159</a>
-</pre></div><pre class="rust"><code><span class="comment">// Copyright 2019 Developers of the Rand project.
-//
-// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
-// https://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
-// &lt;LICENSE-MIT or https://opensource.org/licenses/MIT&gt;, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
-</span><span class="attr">#![allow(dead_code)]
+<a href="#160" id="160">160</a>
+<a href="#161" id="161">161</a>
+<a href="#162" id="162">162</a>
+</pre></div><pre class="rust"><code><span class="attr">#![allow(dead_code)]
 </span><span class="kw">use </span><span class="kw">crate</span>::Error;
 <span class="kw">use </span>core::{
-    cmp::min,
     mem::MaybeUninit,
     num::NonZeroU32,
     ptr::NonNull,
@@ -178,7 +173,7 @@
 <span class="macro">cfg_if!</span> {
     <span class="kw">if </span><span class="attr">#[cfg(any(target_os = <span class="string">"netbsd"</span>, target_os = <span class="string">"openbsd"</span>, target_os = <span class="string">"android"</span>))] </span>{
         <span class="kw">use </span>libc::__errno <span class="kw">as </span>errno_location;
-    } <span class="kw">else if </span><span class="attr">#[cfg(any(target_os = <span class="string">"linux"</span>, target_os = <span class="string">"emscripten"</span>, target_os = <span class="string">"hurd"</span>, target_os = <span class="string">"redox"</span>))] </span>{
+    } <span class="kw">else if </span><span class="attr">#[cfg(any(target_os = <span class="string">"linux"</span>, target_os = <span class="string">"emscripten"</span>, target_os = <span class="string">"hurd"</span>, target_os = <span class="string">"redox"</span>, target_os = <span class="string">"dragonfly"</span>))] </span>{
         <span class="kw">use </span>libc::__errno_location <span class="kw">as </span>errno_location;
     } <span class="kw">else if </span><span class="attr">#[cfg(any(target_os = <span class="string">"solaris"</span>, target_os = <span class="string">"illumos"</span>))] </span>{
         <span class="kw">use </span>libc::___errno <span class="kw">as </span>errno_location;
@@ -202,10 +197,6 @@
 <span class="macro">cfg_if!</span> {
     <span class="kw">if </span><span class="attr">#[cfg(target_os = <span class="string">"vxworks"</span>)] </span>{
         <span class="kw">use </span>libc::errnoGet <span class="kw">as </span>get_errno;
-    } <span class="kw">else if </span><span class="attr">#[cfg(target_os = <span class="string">"dragonfly"</span>)] </span>{
-        <span class="comment">// Until rust-lang/rust#29594 is stable, we cannot get the errno value
-        // on DragonFlyBSD. So we just return an out-of-range errno.
-        </span><span class="kw">unsafe fn </span>get_errno() -&gt; libc::c_int { -<span class="number">1 </span>}
     } <span class="kw">else </span>{
         <span class="kw">unsafe fn </span>get_errno() -&gt; libc::c_int { <span class="kw-2">*</span>errno_location() }
     }
@@ -229,17 +220,19 @@
 ) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
     <span class="kw">while </span>!buf.is_empty() {
         <span class="kw">let </span>res = sys_fill(buf);
-        <span class="kw">if </span>res &lt; <span class="number">0 </span>{
-            <span class="kw">let </span>err = last_os_error();
-            <span class="comment">// We should try again if the call was interrupted.
-            </span><span class="kw">if </span>err.raw_os_error() != <span class="prelude-val">Some</span>(libc::EINTR) {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(err);
+        <span class="kw">match </span>res {
+            res <span class="kw">if </span>res &gt; <span class="number">0 </span>=&gt; buf = buf.get_mut(res <span class="kw">as </span>usize..).ok_or(Error::UNEXPECTED)<span class="question-mark">?</span>,
+            -<span class="number">1 </span>=&gt; {
+                <span class="kw">let </span>err = last_os_error();
+                <span class="comment">// We should try again if the call was interrupted.
+                </span><span class="kw">if </span>err.raw_os_error() != <span class="prelude-val">Some</span>(libc::EINTR) {
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(err);
+                }
             }
-        } <span class="kw">else </span>{
-            <span class="comment">// We don't check for EOF (ret = 0) as the data we are reading
+            <span class="comment">// Negative return codes not equal to -1 should be impossible.
+            // EOF (ret = 0) should be impossible, as the data we are reading
             // should be an infinite stream of random bytes.
-            </span><span class="kw">let </span>len = min(res <span class="kw">as </span>usize, buf.len());
-            buf = <span class="kw-2">&amp;mut </span>buf[len..];
+            </span><span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(Error::UNEXPECTED),
         }
     }
     <span class="prelude-val">Ok</span>(())
@@ -314,6 +307,19 @@
         </span><span class="kw">if </span>err.raw_os_error() != <span class="prelude-val">Some</span>(libc::EINTR) {
             <span class="kw">return </span><span class="prelude-val">Err</span>(err);
         }
+    }
+}
+
+<span class="doccomment">/// Thin wrapper around the `getrandom()` Linux system call
+</span><span class="attr">#[cfg(any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"linux"</span>))]
+</span><span class="kw">pub fn </span>getrandom_syscall(buf: <span class="kw-2">&amp;mut </span>[MaybeUninit&lt;u8&gt;]) -&gt; libc::ssize_t {
+    <span class="kw">unsafe </span>{
+        libc::syscall(
+            libc::SYS_getrandom,
+            buf.as_mut_ptr() <span class="kw">as </span><span class="kw-2">*mut </span>libc::c_void,
+            buf.len(),
+            <span class="number">0</span>,
+        ) <span class="kw">as </span>libc::ssize_t
     }
 }
 </code></pre></div></section></main></body></html>

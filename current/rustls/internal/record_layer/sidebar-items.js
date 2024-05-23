@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["Decrypted","RecordLayer"]};
+window.SIDEBAR_ITEMS = {"struct":["RecordLayer"]};

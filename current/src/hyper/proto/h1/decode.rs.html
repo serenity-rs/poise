@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hyper-0.14.27/src/proto/h1/decode.rs`."><title>decode.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-b21aa549bf6d91ff.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="hyper" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (79734f1db 2024-05-02)" data-channel="nightly" data-search-js="search-bf21c90c8c1d92b1.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-e32f0c247825364d.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-09095024cf37855e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../../hyper/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Type ‘S’ or ‘/’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings">Settings</a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hyper-0.14.28/src/proto/h1/decode.rs`."><title>decode.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="hyper" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (9cdfe285c 2024-05-22)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -729,20 +729,131 @@
 <a href="#729" id="729">729</a>
 <a href="#730" id="730">730</a>
 <a href="#731" id="731">731</a>
+<a href="#732" id="732">732</a>
+<a href="#733" id="733">733</a>
+<a href="#734" id="734">734</a>
+<a href="#735" id="735">735</a>
+<a href="#736" id="736">736</a>
+<a href="#737" id="737">737</a>
+<a href="#738" id="738">738</a>
+<a href="#739" id="739">739</a>
+<a href="#740" id="740">740</a>
+<a href="#741" id="741">741</a>
+<a href="#742" id="742">742</a>
+<a href="#743" id="743">743</a>
+<a href="#744" id="744">744</a>
+<a href="#745" id="745">745</a>
+<a href="#746" id="746">746</a>
+<a href="#747" id="747">747</a>
+<a href="#748" id="748">748</a>
+<a href="#749" id="749">749</a>
+<a href="#750" id="750">750</a>
+<a href="#751" id="751">751</a>
+<a href="#752" id="752">752</a>
+<a href="#753" id="753">753</a>
+<a href="#754" id="754">754</a>
+<a href="#755" id="755">755</a>
+<a href="#756" id="756">756</a>
+<a href="#757" id="757">757</a>
+<a href="#758" id="758">758</a>
+<a href="#759" id="759">759</a>
+<a href="#760" id="760">760</a>
+<a href="#761" id="761">761</a>
+<a href="#762" id="762">762</a>
+<a href="#763" id="763">763</a>
+<a href="#764" id="764">764</a>
+<a href="#765" id="765">765</a>
+<a href="#766" id="766">766</a>
+<a href="#767" id="767">767</a>
+<a href="#768" id="768">768</a>
+<a href="#769" id="769">769</a>
+<a href="#770" id="770">770</a>
+<a href="#771" id="771">771</a>
+<a href="#772" id="772">772</a>
+<a href="#773" id="773">773</a>
+<a href="#774" id="774">774</a>
+<a href="#775" id="775">775</a>
+<a href="#776" id="776">776</a>
+<a href="#777" id="777">777</a>
+<a href="#778" id="778">778</a>
+<a href="#779" id="779">779</a>
+<a href="#780" id="780">780</a>
+<a href="#781" id="781">781</a>
+<a href="#782" id="782">782</a>
+<a href="#783" id="783">783</a>
+<a href="#784" id="784">784</a>
+<a href="#785" id="785">785</a>
+<a href="#786" id="786">786</a>
+<a href="#787" id="787">787</a>
+<a href="#788" id="788">788</a>
+<a href="#789" id="789">789</a>
+<a href="#790" id="790">790</a>
+<a href="#791" id="791">791</a>
+<a href="#792" id="792">792</a>
+<a href="#793" id="793">793</a>
+<a href="#794" id="794">794</a>
+<a href="#795" id="795">795</a>
+<a href="#796" id="796">796</a>
+<a href="#797" id="797">797</a>
+<a href="#798" id="798">798</a>
+<a href="#799" id="799">799</a>
+<a href="#800" id="800">800</a>
+<a href="#801" id="801">801</a>
+<a href="#802" id="802">802</a>
+<a href="#803" id="803">803</a>
+<a href="#804" id="804">804</a>
+<a href="#805" id="805">805</a>
+<a href="#806" id="806">806</a>
+<a href="#807" id="807">807</a>
+<a href="#808" id="808">808</a>
+<a href="#809" id="809">809</a>
+<a href="#810" id="810">810</a>
+<a href="#811" id="811">811</a>
+<a href="#812" id="812">812</a>
+<a href="#813" id="813">813</a>
+<a href="#814" id="814">814</a>
+<a href="#815" id="815">815</a>
+<a href="#816" id="816">816</a>
+<a href="#817" id="817">817</a>
+<a href="#818" id="818">818</a>
+<a href="#819" id="819">819</a>
+<a href="#820" id="820">820</a>
+<a href="#821" id="821">821</a>
+<a href="#822" id="822">822</a>
+<a href="#823" id="823">823</a>
+<a href="#824" id="824">824</a>
+<a href="#825" id="825">825</a>
+<a href="#826" id="826">826</a>
+<a href="#827" id="827">827</a>
+<a href="#828" id="828">828</a>
+<a href="#829" id="829">829</a>
+<a href="#830" id="830">830</a>
+<a href="#831" id="831">831</a>
+<a href="#832" id="832">832</a>
+<a href="#833" id="833">833</a>
+<a href="#834" id="834">834</a>
+<a href="#835" id="835">835</a>
+<a href="#836" id="836">836</a>
+<a href="#837" id="837">837</a>
+<a href="#838" id="838">838</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::error::Error <span class="kw">as </span>StdError;
 <span class="kw">use </span>std::fmt;
 <span class="kw">use </span>std::io;
+<span class="kw">use </span>std::task::{Context, Poll};
 <span class="kw">use </span>std::usize;
 
 <span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>tracing::{debug, trace};
 
-<span class="kw">use </span><span class="kw">crate</span>::common::{task, Poll};
-
 <span class="kw">use </span><span class="kw">super</span>::io::MemRead;
 <span class="kw">use </span><span class="kw">super</span>::DecodedLength;
 
 <span class="kw">use </span><span class="self">self</span>::Kind::{Chunked, Eof, Length};
+
+<span class="doccomment">/// Maximum amount of bytes allowed in chunked extensions.
+///
+/// This limit is currentlty applied for the entire body, not per chunk.
+</span><span class="kw">const </span>CHUNKED_EXTENSIONS_LIMIT: u64 = <span class="number">1024 </span>* <span class="number">16</span>;
 
 <span class="doccomment">/// Decoders to handle different Transfer-Encodings.
 ///
@@ -758,7 +869,11 @@
     <span class="doccomment">/// A Reader used when a Content-Length header is passed with a positive integer.
     </span>Length(u64),
     <span class="doccomment">/// A Reader used when Transfer-Encoding is `chunked`.
-    </span>Chunked(ChunkedState, u64),
+    </span>Chunked {
+        state: ChunkedState,
+        chunk_len: u64,
+        extensions_cnt: u64,
+    },
     <span class="doccomment">/// A Reader used for responses that don't indicate a length or chunked.
     ///
     /// The bool tracks when EOF is seen on the transport.
@@ -780,6 +895,7 @@
 
 <span class="attr">#[derive(Debug, PartialEq, Clone, Copy)]
 </span><span class="kw">enum </span>ChunkedState {
+    Start,
     Size,
     SizeLws,
     Extension,
@@ -805,7 +921,11 @@
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>chunked() -&gt; Decoder {
         Decoder {
-            kind: Kind::Chunked(ChunkedState::Size, <span class="number">0</span>),
+            kind: Kind::Chunked {
+                state: ChunkedState::new(),
+                chunk_len: <span class="number">0</span>,
+                extensions_cnt: <span class="number">0</span>,
+            },
         }
     }
 
@@ -826,12 +946,20 @@
     <span class="comment">// methods
 
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>is_eof(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="macro">matches!</span>(<span class="self">self</span>.kind, Length(<span class="number">0</span>) | Chunked(ChunkedState::End, <span class="kw">_</span>) | Eof(<span class="bool-val">true</span>))
+        <span class="macro">matches!</span>(
+            <span class="self">self</span>.kind,
+            Length(<span class="number">0</span>)
+                | Chunked {
+                    state: ChunkedState::End,
+                    ..
+                }
+                | Eof(<span class="bool-val">true</span>)
+        )
     }
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>decode&lt;R: MemRead&gt;(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
-        cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;,
+        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;,
         body: <span class="kw-2">&amp;mut </span>R,
     ) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;Bytes, io::Error&gt;&gt; {
         <span class="macro">trace!</span>(<span class="string">"decode; state={:?}"</span>, <span class="self">self</span>.kind);
@@ -856,11 +984,15 @@
                     Poll::Ready(<span class="prelude-val">Ok</span>(buf))
                 }
             }
-            Chunked(<span class="kw-2">ref mut </span>state, <span class="kw-2">ref mut </span>size) =&gt; {
+            Chunked {
+                <span class="kw-2">ref mut </span>state,
+                <span class="kw-2">ref mut </span>chunk_len,
+                <span class="kw-2">ref mut </span>extensions_cnt,
+            } =&gt; {
                 <span class="kw">loop </span>{
                     <span class="kw">let </span><span class="kw-2">mut </span>buf = <span class="prelude-val">None</span>;
                     <span class="comment">// advances the chunked state
-                    </span><span class="kw-2">*</span>state = <span class="macro">ready!</span>(state.step(cx, body, size, <span class="kw-2">&amp;mut </span>buf))<span class="question-mark">?</span>;
+                    </span><span class="kw-2">*</span>state = <span class="macro">ready!</span>(state.step(cx, body, chunk_len, extensions_cnt, <span class="kw-2">&amp;mut </span>buf))<span class="question-mark">?</span>;
                     <span class="kw">if </span><span class="kw-2">*</span>state == ChunkedState::End {
                         <span class="macro">trace!</span>(<span class="string">"end of chunked"</span>);
                         <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Ok</span>(Bytes::new()));
@@ -910,19 +1042,36 @@
     })
 );
 
+<span class="macro">macro_rules!</span> or_overflow {
+    (<span class="macro-nonterminal">$e</span>:expr) =&gt; (
+        <span class="kw">match </span><span class="macro-nonterminal">$e </span>{
+            <span class="prelude-val">Some</span>(val) =&gt; val,
+            <span class="prelude-val">None </span>=&gt; <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Err</span>(io::Error::new(
+                io::ErrorKind::InvalidData,
+                <span class="string">"invalid chunk size: overflow"</span>,
+            ))),
+        }
+    )
+}
+
 <span class="kw">impl </span>ChunkedState {
+    <span class="kw">fn </span>new() -&gt; ChunkedState {
+        ChunkedState::Start
+    }
     <span class="kw">fn </span>step&lt;R: MemRead&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;,
+        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;,
         body: <span class="kw-2">&amp;mut </span>R,
         size: <span class="kw-2">&amp;mut </span>u64,
+        extensions_cnt: <span class="kw-2">&amp;mut </span>u64,
         buf: <span class="kw-2">&amp;mut </span><span class="prelude-ty">Option</span>&lt;Bytes&gt;,
     ) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;ChunkedState, io::Error&gt;&gt; {
         <span class="kw">use </span><span class="self">self</span>::ChunkedState::<span class="kw-2">*</span>;
         <span class="kw">match </span><span class="kw-2">*</span><span class="self">self </span>{
+            Start =&gt; ChunkedState::read_start(cx, body, size),
             Size =&gt; ChunkedState::read_size(cx, body, size),
             SizeLws =&gt; ChunkedState::read_size_lws(cx, body),
-            Extension =&gt; ChunkedState::read_extension(cx, body),
+            Extension =&gt; ChunkedState::read_extension(cx, body, extensions_cnt),
             SizeLf =&gt; ChunkedState::read_size_lf(cx, body, <span class="kw-2">*</span>size),
             Body =&gt; ChunkedState::read_body(cx, body, size, buf),
             BodyCr =&gt; ChunkedState::read_body_cr(cx, body),
@@ -934,24 +1083,45 @@
             End =&gt; Poll::Ready(<span class="prelude-val">Ok</span>(ChunkedState::End)),
         }
     }
+
+    <span class="kw">fn </span>read_start&lt;R: MemRead&gt;(
+        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;,
+        rdr: <span class="kw-2">&amp;mut </span>R,
+        size: <span class="kw-2">&amp;mut </span>u64,
+    ) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;ChunkedState, io::Error&gt;&gt; {
+        <span class="macro">trace!</span>(<span class="string">"Read chunk start"</span>);
+
+        <span class="kw">let </span>radix = <span class="number">16</span>;
+        <span class="kw">match </span><span class="macro">byte!</span>(rdr, cx) {
+            b @ <span class="string">b'0'</span>..=<span class="string">b'9' </span>=&gt; {
+                <span class="kw-2">*</span>size = <span class="macro">or_overflow!</span>(size.checked_mul(radix));
+                <span class="kw-2">*</span>size = <span class="macro">or_overflow!</span>(size.checked_add((b - <span class="string">b'0'</span>) <span class="kw">as </span>u64));
+            }
+            b @ <span class="string">b'a'</span>..=<span class="string">b'f' </span>=&gt; {
+                <span class="kw-2">*</span>size = <span class="macro">or_overflow!</span>(size.checked_mul(radix));
+                <span class="kw-2">*</span>size = <span class="macro">or_overflow!</span>(size.checked_add((b + <span class="number">10 </span>- <span class="string">b'a'</span>) <span class="kw">as </span>u64));
+            }
+            b @ <span class="string">b'A'</span>..=<span class="string">b'F' </span>=&gt; {
+                <span class="kw-2">*</span>size = <span class="macro">or_overflow!</span>(size.checked_mul(radix));
+                <span class="kw-2">*</span>size = <span class="macro">or_overflow!</span>(size.checked_add((b + <span class="number">10 </span>- <span class="string">b'A'</span>) <span class="kw">as </span>u64));
+            }
+            <span class="kw">_ </span>=&gt; {
+                <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Err</span>(io::Error::new(
+                    io::ErrorKind::InvalidInput,
+                    <span class="string">"Invalid chunk size line: missing size digit"</span>,
+                )));
+            }
+        }
+
+        Poll::Ready(<span class="prelude-val">Ok</span>(ChunkedState::Size))
+    }
+
     <span class="kw">fn </span>read_size&lt;R: MemRead&gt;(
-        cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;,
+        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;,
         rdr: <span class="kw-2">&amp;mut </span>R,
         size: <span class="kw-2">&amp;mut </span>u64,
     ) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;ChunkedState, io::Error&gt;&gt; {
         <span class="macro">trace!</span>(<span class="string">"Read chunk hex size"</span>);
-
-        <span class="macro">macro_rules!</span> or_overflow {
-            (<span class="macro-nonterminal">$e</span>:expr) =&gt; (
-                <span class="kw">match </span><span class="macro-nonterminal">$e </span>{
-                    <span class="prelude-val">Some</span>(val) =&gt; val,
-                    <span class="prelude-val">None </span>=&gt; <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Err</span>(io::Error::new(
-                        io::ErrorKind::InvalidData,
-                        <span class="string">"invalid chunk size: overflow"</span>,
-                    ))),
-                }
-            )
-        }
 
         <span class="kw">let </span>radix = <span class="number">16</span>;
         <span class="kw">match </span><span class="macro">byte!</span>(rdr, cx) {
@@ -980,7 +1150,7 @@
         Poll::Ready(<span class="prelude-val">Ok</span>(ChunkedState::Size))
     }
     <span class="kw">fn </span>read_size_lws&lt;R: MemRead&gt;(
-        cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;,
+        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;,
         rdr: <span class="kw-2">&amp;mut </span>R,
     ) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;ChunkedState, io::Error&gt;&gt; {
         <span class="macro">trace!</span>(<span class="string">"read_size_lws"</span>);
@@ -996,8 +1166,9 @@
         }
     }
     <span class="kw">fn </span>read_extension&lt;R: MemRead&gt;(
-        cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;,
+        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;,
         rdr: <span class="kw-2">&amp;mut </span>R,
+        extensions_cnt: <span class="kw-2">&amp;mut </span>u64,
     ) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;ChunkedState, io::Error&gt;&gt; {
         <span class="macro">trace!</span>(<span class="string">"read_extension"</span>);
         <span class="comment">// We don't care about extensions really at all. Just ignore them.
@@ -1012,11 +1183,21 @@
                 io::ErrorKind::InvalidData,
                 <span class="string">"invalid chunk extension contains newline"</span>,
             ))),
-            <span class="kw">_ </span>=&gt; Poll::Ready(<span class="prelude-val">Ok</span>(ChunkedState::Extension)), <span class="comment">// no supported extensions
+            <span class="kw">_ </span>=&gt; {
+                <span class="kw-2">*</span>extensions_cnt += <span class="number">1</span>;
+                <span class="kw">if </span><span class="kw-2">*</span>extensions_cnt &gt;= CHUNKED_EXTENSIONS_LIMIT {
+                    Poll::Ready(<span class="prelude-val">Err</span>(io::Error::new(
+                        io::ErrorKind::InvalidData,
+                        <span class="string">"chunk extensions over limit"</span>,
+                    )))
+                } <span class="kw">else </span>{
+                    Poll::Ready(<span class="prelude-val">Ok</span>(ChunkedState::Extension))
+                }
+            } <span class="comment">// no supported extensions
         </span>}
     }
     <span class="kw">fn </span>read_size_lf&lt;R: MemRead&gt;(
-        cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;,
+        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;,
         rdr: <span class="kw-2">&amp;mut </span>R,
         size: u64,
     ) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;ChunkedState, io::Error&gt;&gt; {
@@ -1038,7 +1219,7 @@
     }
 
     <span class="kw">fn </span>read_body&lt;R: MemRead&gt;(
-        cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;,
+        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;,
         rdr: <span class="kw-2">&amp;mut </span>R,
         rem: <span class="kw-2">&amp;mut </span>u64,
         buf: <span class="kw-2">&amp;mut </span><span class="prelude-ty">Option</span>&lt;Bytes&gt;,
@@ -1072,7 +1253,7 @@
         }
     }
     <span class="kw">fn </span>read_body_cr&lt;R: MemRead&gt;(
-        cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;,
+        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;,
         rdr: <span class="kw-2">&amp;mut </span>R,
     ) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;ChunkedState, io::Error&gt;&gt; {
         <span class="kw">match </span><span class="macro">byte!</span>(rdr, cx) {
@@ -1084,7 +1265,7 @@
         }
     }
     <span class="kw">fn </span>read_body_lf&lt;R: MemRead&gt;(
-        cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;,
+        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;,
         rdr: <span class="kw-2">&amp;mut </span>R,
     ) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;ChunkedState, io::Error&gt;&gt; {
         <span class="kw">match </span><span class="macro">byte!</span>(rdr, cx) {
@@ -1097,7 +1278,7 @@
     }
 
     <span class="kw">fn </span>read_trailer&lt;R: MemRead&gt;(
-        cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;,
+        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;,
         rdr: <span class="kw-2">&amp;mut </span>R,
     ) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;ChunkedState, io::Error&gt;&gt; {
         <span class="macro">trace!</span>(<span class="string">"read_trailer"</span>);
@@ -1107,7 +1288,7 @@
         }
     }
     <span class="kw">fn </span>read_trailer_lf&lt;R: MemRead&gt;(
-        cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;,
+        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;,
         rdr: <span class="kw-2">&amp;mut </span>R,
     ) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;ChunkedState, io::Error&gt;&gt; {
         <span class="kw">match </span><span class="macro">byte!</span>(rdr, cx) {
@@ -1120,7 +1301,7 @@
     }
 
     <span class="kw">fn </span>read_end_cr&lt;R: MemRead&gt;(
-        cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;,
+        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;,
         rdr: <span class="kw-2">&amp;mut </span>R,
     ) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;ChunkedState, io::Error&gt;&gt; {
         <span class="kw">match </span><span class="macro">byte!</span>(rdr, cx) {
@@ -1129,7 +1310,7 @@
         }
     }
     <span class="kw">fn </span>read_end_lf&lt;R: MemRead&gt;(
-        cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;,
+        cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;,
         rdr: <span class="kw-2">&amp;mut </span>R,
     ) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;ChunkedState, io::Error&gt;&gt; {
         <span class="kw">match </span><span class="macro">byte!</span>(rdr, cx) {
@@ -1161,7 +1342,7 @@
     <span class="kw">use </span>tokio::io::{AsyncRead, ReadBuf};
 
     <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; MemRead <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8] {
-        <span class="kw">fn </span>read_mem(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;, len: usize) -&gt; Poll&lt;io::Result&lt;Bytes&gt;&gt; {
+        <span class="kw">fn </span>read_mem(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, len: usize) -&gt; Poll&lt;io::Result&lt;Bytes&gt;&gt; {
             <span class="kw">let </span>n = std::cmp::min(len, <span class="self">self</span>.len());
             <span class="kw">if </span>n &gt; <span class="number">0 </span>{
                 <span class="kw">let </span>(a, b) = <span class="self">self</span>.split_at(n);
@@ -1175,7 +1356,7 @@
     }
 
     <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; MemRead <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>(<span class="kw">dyn </span>AsyncRead + Unpin) {
-        <span class="kw">fn </span>read_mem(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;, len: usize) -&gt; Poll&lt;io::Result&lt;Bytes&gt;&gt; {
+        <span class="kw">fn </span>read_mem(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, len: usize) -&gt; Poll&lt;io::Result&lt;Bytes&gt;&gt; {
             <span class="kw">let </span><span class="kw-2">mut </span>v = <span class="macro">vec!</span>[<span class="number">0</span>; len];
             <span class="kw">let </span><span class="kw-2">mut </span>buf = ReadBuf::new(<span class="kw-2">&amp;mut </span>v);
             <span class="macro">ready!</span>(Pin::new(<span class="self">self</span>).poll_read(cx, <span class="kw-2">&amp;mut </span>buf)<span class="question-mark">?</span>);
@@ -1183,9 +1364,8 @@
         }
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">"nightly"</span>)]
-    </span><span class="kw">impl </span>MemRead <span class="kw">for </span>Bytes {
-        <span class="kw">fn </span>read_mem(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;, len: usize) -&gt; Poll&lt;io::Result&lt;Bytes&gt;&gt; {
+    <span class="kw">impl </span>MemRead <span class="kw">for </span>Bytes {
+        <span class="kw">fn </span>read_mem(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;, len: usize) -&gt; Poll&lt;io::Result&lt;Bytes&gt;&gt; {
             <span class="kw">let </span>n = std::cmp::min(len, <span class="self">self</span>.len());
             <span class="kw">let </span>ret = <span class="self">self</span>.split_to(n);
             Poll::Ready(<span class="prelude-val">Ok</span>(ret))
@@ -1207,13 +1387,15 @@
         <span class="kw">use </span>std::io::ErrorKind::{InvalidData, InvalidInput, UnexpectedEof};
 
         <span class="kw">async fn </span>read(s: <span class="kw-2">&amp;</span>str) -&gt; u64 {
-            <span class="kw">let </span><span class="kw-2">mut </span>state = ChunkedState::Size;
+            <span class="kw">let </span><span class="kw-2">mut </span>state = ChunkedState::new();
             <span class="kw">let </span>rdr = <span class="kw-2">&amp;mut </span>s.as_bytes();
             <span class="kw">let </span><span class="kw-2">mut </span>size = <span class="number">0</span>;
+            <span class="kw">let </span><span class="kw-2">mut </span>ext_cnt = <span class="number">0</span>;
             <span class="kw">loop </span>{
-                <span class="kw">let </span>result =
-                    futures_util::future::poll_fn(|cx| state.step(cx, rdr, <span class="kw-2">&amp;mut </span>size, <span class="kw-2">&amp;mut </span><span class="prelude-val">None</span>))
-                        .<span class="kw">await</span>;
+                <span class="kw">let </span>result = futures_util::future::poll_fn(|cx| {
+                    state.step(cx, rdr, <span class="kw-2">&amp;mut </span>size, <span class="kw-2">&amp;mut </span>ext_cnt, <span class="kw-2">&amp;mut </span><span class="prelude-val">None</span>)
+                })
+                .<span class="kw">await</span>;
                 <span class="kw">let </span>desc = <span class="macro">format!</span>(<span class="string">"read_size failed for {:?}"</span>, s);
                 state = result.expect(desc.as_str());
                 <span class="kw">if </span>state == ChunkedState::Body || state == ChunkedState::EndCr {
@@ -1224,13 +1406,15 @@
         }
 
         <span class="kw">async fn </span>read_err(s: <span class="kw-2">&amp;</span>str, expected_err: io::ErrorKind) {
-            <span class="kw">let </span><span class="kw-2">mut </span>state = ChunkedState::Size;
+            <span class="kw">let </span><span class="kw-2">mut </span>state = ChunkedState::new();
             <span class="kw">let </span>rdr = <span class="kw-2">&amp;mut </span>s.as_bytes();
             <span class="kw">let </span><span class="kw-2">mut </span>size = <span class="number">0</span>;
+            <span class="kw">let </span><span class="kw-2">mut </span>ext_cnt = <span class="number">0</span>;
             <span class="kw">loop </span>{
-                <span class="kw">let </span>result =
-                    futures_util::future::poll_fn(|cx| state.step(cx, rdr, <span class="kw-2">&amp;mut </span>size, <span class="kw-2">&amp;mut </span><span class="prelude-val">None</span>))
-                        .<span class="kw">await</span>;
+                <span class="kw">let </span>result = futures_util::future::poll_fn(|cx| {
+                    state.step(cx, rdr, <span class="kw-2">&amp;mut </span>size, <span class="kw-2">&amp;mut </span>ext_cnt, <span class="kw-2">&amp;mut </span><span class="prelude-val">None</span>)
+                })
+                .<span class="kw">await</span>;
                 state = <span class="kw">match </span>result {
                     <span class="prelude-val">Ok</span>(s) =&gt; s,
                     <span class="prelude-val">Err</span>(e) =&gt; {
@@ -1261,6 +1445,9 @@
         <span class="comment">// Missing LF or CRLF
         </span>read_err(<span class="string">"F\rF"</span>, InvalidInput).<span class="kw">await</span>;
         read_err(<span class="string">"F"</span>, UnexpectedEof).<span class="kw">await</span>;
+        <span class="comment">// Missing digit
+        </span>read_err(<span class="string">"\r\n\r\n"</span>, InvalidInput).<span class="kw">await</span>;
+        read_err(<span class="string">"\r\n"</span>, InvalidInput).<span class="kw">await</span>;
         <span class="comment">// Invalid hex digit
         </span>read_err(<span class="string">"X\r\n"</span>, InvalidInput).<span class="kw">await</span>;
         read_err(<span class="string">"1X\r\n"</span>, InvalidInput).<span class="kw">await</span>;
@@ -1318,6 +1505,33 @@
     }
 
     <span class="attr">#[tokio::test]
+    </span><span class="kw">async fn </span>test_read_chunked_extensions_over_limit() {
+        <span class="comment">// construct a chunked body where each individual chunked extension
+        // is totally fine, but combined is over the limit.
+        </span><span class="kw">let </span>per_chunk = <span class="kw">super</span>::CHUNKED_EXTENSIONS_LIMIT * <span class="number">2 </span>/ <span class="number">3</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>scratch = <span class="macro">vec!</span>[];
+        <span class="kw">for _ in </span><span class="number">0</span>..<span class="number">2 </span>{
+            scratch.extend(<span class="string">b"1;"</span>);
+            scratch.extend(<span class="string">b"x"</span>.repeat(per_chunk <span class="kw">as </span>usize));
+            scratch.extend(<span class="string">b"\r\nA\r\n"</span>);
+        }
+        scratch.extend(<span class="string">b"0\r\n\r\n"</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>mock_buf = Bytes::from(scratch);
+
+        <span class="kw">let </span><span class="kw-2">mut </span>decoder = Decoder::chunked();
+        <span class="kw">let </span>buf1 = decoder.decode_fut(<span class="kw-2">&amp;mut </span>mock_buf).<span class="kw">await</span>.expect(<span class="string">"decode1"</span>);
+        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>buf1[..], <span class="string">b"A"</span>);
+
+        <span class="kw">let </span>err = decoder
+            .decode_fut(<span class="kw-2">&amp;mut </span>mock_buf)
+            .<span class="kw">await
+            </span>.expect_err(<span class="string">"decode2"</span>);
+        <span class="macro">assert_eq!</span>(err.kind(), io::ErrorKind::InvalidData);
+        <span class="macro">assert_eq!</span>(err.to_string(), <span class="string">"chunk extensions over limit"</span>);
+    }
+
+    <span class="attr">#[cfg(not(miri))]
+    #[tokio::test]
     </span><span class="kw">async fn </span>test_read_chunked_trailer_with_missing_lf() {
         <span class="kw">let </span><span class="kw-2">mut </span>mock_buf = <span class="kw-2">&amp;</span><span class="string">b"10\r\n1234567890abcdef\r\n0\r\nbad\r\r\n"</span>[..];
         <span class="kw">let </span><span class="kw-2">mut </span>decoder = Decoder::chunked();

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-0.21.9/src/common_state.rs`."><title>common_state.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-b21aa549bf6d91ff.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="rustls" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (79734f1db 2024-05-02)" data-channel="nightly" data-search-js="search-bf21c90c8c1d92b1.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-e32f0c247825364d.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-09095024cf37855e.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../rustls/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Type ‘S’ or ‘/’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings">Settings</a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-0.22.4/src/common_state.rs`."><title>common_state.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="rustls" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (9cdfe285c 2024-05-22)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -670,38 +670,29 @@
 <a href="#670" id="670">670</a>
 <a href="#671" id="671">671</a>
 <a href="#672" id="672">672</a>
-<a href="#673" id="673">673</a>
-<a href="#674" id="674">674</a>
-<a href="#675" id="675">675</a>
-<a href="#676" id="676">676</a>
-<a href="#677" id="677">677</a>
-<a href="#678" id="678">678</a>
-<a href="#679" id="679">679</a>
-<a href="#680" id="680">680</a>
-<a href="#681" id="681">681</a>
-<a href="#682" id="682">682</a>
-<a href="#683" id="683">683</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::enums::{AlertDescription, ContentType, HandshakeType, ProtocolVersion};
 <span class="kw">use </span><span class="kw">crate</span>::error::{Error, InvalidMessage, PeerMisbehaved};
-<span class="kw">use </span><span class="kw">crate</span>::key;
 <span class="attr">#[cfg(feature = <span class="string">"logging"</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::log::{debug, warn};
 <span class="kw">use </span><span class="kw">crate</span>::msgs::alert::AlertMessagePayload;
 <span class="kw">use </span><span class="kw">crate</span>::msgs::base::Payload;
 <span class="kw">use </span><span class="kw">crate</span>::msgs::enums::{AlertLevel, KeyUpdateRequest};
 <span class="kw">use </span><span class="kw">crate</span>::msgs::fragmenter::MessageFragmenter;
-<span class="attr">#[cfg(feature = <span class="string">"quic"</span>)]
-</span><span class="kw">use </span><span class="kw">crate</span>::msgs::message::MessagePayload;
+<span class="kw">use </span><span class="kw">crate</span>::msgs::handshake::CertificateChain;
+<span class="kw">use </span><span class="kw">crate</span>::msgs::message::MessagePayload;
 <span class="kw">use </span><span class="kw">crate</span>::msgs::message::{BorrowedPlainMessage, Message, OpaqueMessage, PlainMessage};
-<span class="attr">#[cfg(feature = <span class="string">"quic"</span>)]
-</span><span class="kw">use </span><span class="kw">crate</span>::quic;
+<span class="kw">use </span><span class="kw">crate</span>::quic;
 <span class="kw">use </span><span class="kw">crate</span>::record_layer;
-<span class="attr">#[cfg(feature = <span class="string">"secret_extraction"</span>)]
-</span><span class="kw">use </span><span class="kw">crate</span>::suites::PartiallyExtractedSecrets;
+<span class="kw">use </span><span class="kw">crate</span>::suites::PartiallyExtractedSecrets;
 <span class="kw">use </span><span class="kw">crate</span>::suites::SupportedCipherSuite;
 <span class="attr">#[cfg(feature = <span class="string">"tls12"</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::tls12::ConnectionSecrets;
 <span class="kw">use </span><span class="kw">crate</span>::vecbuf::ChunkVecBuffer;
+
+<span class="kw">use </span>alloc::boxed::Box;
+<span class="kw">use </span>alloc::vec::Vec;
+
+<span class="kw">use </span>pki_types::CertificateDer;
 
 <span class="doccomment">/// Connection state common to both client and server connections.
 </span><span class="kw">pub struct </span>CommonState {
@@ -719,20 +710,17 @@
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) has_received_close_notify: bool,
     <span class="kw">pub</span>(<span class="kw">crate</span>) has_seen_eof: bool,
     <span class="kw">pub</span>(<span class="kw">crate</span>) received_middlebox_ccs: u8,
-    <span class="kw">pub</span>(<span class="kw">crate</span>) peer_certificates: <span class="prelude-ty">Option</span>&lt;Vec&lt;key::Certificate&gt;&gt;,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) peer_certificates: <span class="prelude-ty">Option</span>&lt;CertificateChain&gt;,
     message_fragmenter: MessageFragmenter,
     <span class="kw">pub</span>(<span class="kw">crate</span>) received_plaintext: ChunkVecBuffer,
     sendable_plaintext: ChunkVecBuffer,
     <span class="kw">pub</span>(<span class="kw">crate</span>) sendable_tls: ChunkVecBuffer,
     queued_key_update_message: <span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;,
 
-    <span class="attr">#[allow(dead_code)] </span><span class="comment">// only read for QUIC
-    </span><span class="doccomment">/// Protocol whose key schedule should be used. Unused for TLS &lt; 1.3.
+    <span class="doccomment">/// Protocol whose key schedule should be used. Unused for TLS &lt; 1.3.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) protocol: Protocol,
-    <span class="attr">#[cfg(feature = <span class="string">"quic"</span>)]
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) quic: quic::Quic,
-    <span class="attr">#[cfg(feature = <span class="string">"secret_extraction"</span>)]
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) enable_secret_extraction: bool,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) quic: quic::Quic,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) enable_secret_extraction: bool,
 }
 
 <span class="kw">impl </span>CommonState {
@@ -757,12 +745,9 @@
             sendable_plaintext: ChunkVecBuffer::new(<span class="prelude-val">Some</span>(DEFAULT_BUFFER_LIMIT)),
             sendable_tls: ChunkVecBuffer::new(<span class="prelude-val">Some</span>(DEFAULT_BUFFER_LIMIT)),
             queued_key_update_message: <span class="prelude-val">None</span>,
-
             protocol: Protocol::Tcp,
-            <span class="attr">#[cfg(feature = <span class="string">"quic"</span>)]
-            </span>quic: quic::Quic::default(),
-            <span class="attr">#[cfg(feature = <span class="string">"secret_extraction"</span>)]
-            </span>enable_secret_extraction: <span class="bool-val">false</span>,
+            quic: quic::Quic::default(),
+            enable_secret_extraction: <span class="bool-val">false</span>,
         }
     }
 
@@ -799,7 +784,7 @@
     /// if client authentication was completed.
     ///
     /// The return value is None until this value is available.
-    </span><span class="kw">pub fn </span>peer_certificates(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>[key::Certificate]&gt; {
+    </span><span class="kw">pub fn </span>peer_certificates(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>[CertificateDer&lt;<span class="lifetime">'_</span>&gt;]&gt; {
         <span class="self">self</span>.peer_certificates.as_deref()
     }
 
@@ -1063,8 +1048,7 @@
 
     <span class="doccomment">/// Send a raw TLS message, fragmenting it if needed.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>send_msg(<span class="kw-2">&amp;mut </span><span class="self">self</span>, m: Message, must_encrypt: bool) {
-        <span class="attr">#[cfg(feature = <span class="string">"quic"</span>)]
-        </span>{
+        {
             <span class="kw">if let </span>Protocol::Quic = <span class="self">self</span>.protocol {
                 <span class="kw">if let </span>MessagePayload::Alert(alert) = m.payload {
                     <span class="self">self</span>.quic.alert = <span class="prelude-val">Some</span>(alert.description);
@@ -1108,8 +1092,7 @@
             .prepare_message_decrypter(dec);
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">"quic"</span>)]
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>missing_extension(<span class="kw-2">&amp;mut </span><span class="self">self</span>, why: PeerMisbehaved) -&gt; Error {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>missing_extension(<span class="kw-2">&amp;mut </span><span class="self">self</span>, why: PeerMisbehaved) -&gt; Error {
         <span class="self">self</span>.send_fatal_alert(AlertDescription::MissingExtension, why)
     }
 
@@ -1128,8 +1111,8 @@
         }
 
         <span class="comment">// If we get a CloseNotify, make a note to declare EOF to our
-        // caller.
-        </span><span class="kw">if </span>alert.description == AlertDescription::CloseNotify {
+        // caller.  But do not treat unauthenticated alerts like this.
+        </span><span class="kw">if </span><span class="self">self</span>.may_receive_application_data &amp;&amp; alert.description == AlertDescription::CloseNotify {
             <span class="self">self</span>.has_received_close_notify = <span class="bool-val">true</span>;
             <span class="kw">return </span><span class="prelude-val">Ok</span>(());
         }
@@ -1228,13 +1211,8 @@
     }
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>is_quic(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="attr">#[cfg(feature = <span class="string">"quic"</span>)]
-        </span>{
-            <span class="self">self</span>.protocol == Protocol::Quic
-        }
-        <span class="attr">#[cfg(not(feature = <span class="string">"quic"</span>))]
-        </span><span class="bool-val">false
-    </span>}
+        <span class="self">self</span>.protocol == Protocol::Quic
+    }
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>should_update_key(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
@@ -1321,10 +1299,11 @@
         <span class="prelude-val">Err</span>(Error::HandshakeNotComplete)
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">"secret_extraction"</span>)]
-    </span><span class="kw">fn </span>extract_secrets(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;PartiallyExtractedSecrets, Error&gt; {
+    <span class="kw">fn </span>extract_secrets(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;PartiallyExtractedSecrets, Error&gt; {
         <span class="prelude-val">Err</span>(Error::HandshakeNotComplete)
     }
+
+    <span class="kw">fn </span>handle_decrypt_error(<span class="kw-2">&amp;</span><span class="self">self</span>) {}
 }
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>Context&lt;<span class="lifetime">'a</span>, Data&gt; {
@@ -1353,8 +1332,7 @@
 <span class="attr">#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">enum </span>Protocol {
     Tcp,
-    <span class="attr">#[cfg(feature = <span class="string">"quic"</span>)]
-    </span>Quic,
+    Quic,
 }
 
 <span class="kw">enum </span>Limit {

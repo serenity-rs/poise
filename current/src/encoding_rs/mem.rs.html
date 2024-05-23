@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/encoding_rs-0.8.33/src/mem.rs`."><title>mem.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-b21aa549bf6d91ff.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="encoding_rs" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (79734f1db 2024-05-02)" data-channel="nightly" data-search-js="search-bf21c90c8c1d92b1.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-e32f0c247825364d.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-09095024cf37855e.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../encoding_rs/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Type ‘S’ or ‘/’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings">Settings</a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/encoding_rs-0.8.34/src/mem.rs`."><title>mem.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="encoding_rs" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (9cdfe285c 2024-05-22)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -3352,6 +3352,20 @@
 <a href="#3352" id="3352">3352</a>
 <a href="#3353" id="3353">3353</a>
 <a href="#3354" id="3354">3354</a>
+<a href="#3355" id="3355">3355</a>
+<a href="#3356" id="3356">3356</a>
+<a href="#3357" id="3357">3357</a>
+<a href="#3358" id="3358">3358</a>
+<a href="#3359" id="3359">3359</a>
+<a href="#3360" id="3360">3360</a>
+<a href="#3361" id="3361">3361</a>
+<a href="#3362" id="3362">3362</a>
+<a href="#3363" id="3363">3363</a>
+<a href="#3364" id="3364">3364</a>
+<a href="#3365" id="3365">3365</a>
+<a href="#3366" id="3366">3366</a>
+<a href="#3367" id="3367">3367</a>
+<a href="#3368" id="3368">3368</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright Mozilla Foundation. See the COPYRIGHT
 // file at the top-level directory of this distribution.
 //
@@ -3470,7 +3484,12 @@
                     }
                     <span class="kw">let </span>len_minus_stride = len - ALU_ALIGNMENT / unit_size;
                     <span class="kw">if </span>offset + (<span class="number">4 </span>* (ALU_ALIGNMENT / unit_size)) &lt;= len {
-                        <span class="kw">let </span>len_minus_unroll = len - (<span class="number">4 </span>* (ALU_ALIGNMENT / unit_size));
+                        <span class="comment">// Safety: the above check lets us perform 4 consecutive reads of
+                        // length ALU_ALIGNMENT / unit_size. ALU_ALIGNMENT is the size of usize, and unit_size
+                        // is the size of the `src` pointer, so this is equal to performing four usize reads.
+                        //
+                        // This invariant is upheld on all loop iterations
+                        </span><span class="kw">let </span>len_minus_unroll = len - (<span class="number">4 </span>* (ALU_ALIGNMENT / unit_size));
                         <span class="kw">loop </span>{
                             <span class="kw">let </span>unroll_accu = <span class="kw">unsafe </span>{ <span class="kw-2">*</span>(src.add(offset) <span class="kw">as </span><span class="kw-2">*const </span>usize) }
                                 | <span class="kw">unsafe </span>{
@@ -3488,13 +3507,15 @@
                                 <span class="kw">return </span><span class="bool-val">false</span>;
                             }
                             offset += <span class="number">4 </span>* (ALU_ALIGNMENT / unit_size);
-                            <span class="kw">if </span>offset &gt; len_minus_unroll {
+                            <span class="comment">// Safety: this check lets us continue to perform the 4 reads earlier
+                            </span><span class="kw">if </span>offset &gt; len_minus_unroll {
                                 <span class="kw">break</span>;
                             }
                         }
                     }
                     <span class="kw">while </span>offset &lt;= len_minus_stride {
-                        accu |= <span class="kw">unsafe </span>{ <span class="kw-2">*</span>(src.add(offset) <span class="kw">as </span><span class="kw-2">*const </span>usize) };
+                        <span class="comment">// Safety: the above check lets us perform one usize read.
+                        </span>accu |= <span class="kw">unsafe </span>{ <span class="kw-2">*</span>(src.add(offset) <span class="kw">as </span><span class="kw-2">*const </span>usize) };
                         offset += ALU_ALIGNMENT / unit_size;
                     }
                 }
@@ -3543,7 +3564,12 @@
                     }
                     <span class="kw">let </span>len_minus_stride = len - SIMD_STRIDE_SIZE / unit_size;
                     <span class="kw">if </span>offset + (<span class="number">4 </span>* (SIMD_STRIDE_SIZE / unit_size)) &lt;= len {
-                        <span class="kw">let </span>len_minus_unroll = len - (<span class="number">4 </span>* (SIMD_STRIDE_SIZE / unit_size));
+                        <span class="comment">// Safety: the above check lets us perform 4 consecutive reads of
+                        // length SIMD_STRIDE_SIZE / unit_size. SIMD_STRIDE_SIZE is the size of $simd_ty, and unit_size
+                        // is the size of the `src` pointer, so this is equal to performing four $simd_ty reads.
+                        //
+                        // This invariant is upheld on all loop iterations
+                        </span><span class="kw">let </span>len_minus_unroll = len - (<span class="number">4 </span>* (SIMD_STRIDE_SIZE / unit_size));
                         <span class="kw">loop </span>{
                             <span class="kw">let </span>unroll_accu = <span class="kw">unsafe </span>{ <span class="kw-2">*</span>(src.add(offset) <span class="kw">as </span><span class="kw-2">*const </span><span class="macro-nonterminal">$simd_ty</span>) }
                                 | <span class="kw">unsafe </span>{
@@ -3562,14 +3588,16 @@
                                 <span class="kw">return </span><span class="bool-val">false</span>;
                             }
                             offset += <span class="number">4 </span>* (SIMD_STRIDE_SIZE / unit_size);
-                            <span class="kw">if </span>offset &gt; len_minus_unroll {
+                            <span class="comment">// Safety: this check lets us continue to perform the 4 reads earlier
+                            </span><span class="kw">if </span>offset &gt; len_minus_unroll {
                                 <span class="kw">break</span>;
                             }
                         }
                     }
                     <span class="kw">let </span><span class="kw-2">mut </span>simd_accu = <span class="macro-nonterminal">$splat</span>;
                     <span class="kw">while </span>offset &lt;= len_minus_stride {
-                        simd_accu = simd_accu | <span class="kw">unsafe </span>{ <span class="kw-2">*</span>(src.add(offset) <span class="kw">as </span><span class="kw-2">*const </span><span class="macro-nonterminal">$simd_ty</span>) };
+                        <span class="comment">// Safety: the above check lets us perform one $simd_ty read.
+                        </span>simd_accu = simd_accu | <span class="kw">unsafe </span>{ <span class="kw-2">*</span>(src.add(offset) <span class="kw">as </span><span class="kw-2">*const </span><span class="macro-nonterminal">$simd_ty</span>) };
                         offset += SIMD_STRIDE_SIZE / unit_size;
                     }
                     <span class="kw">if </span>!<span class="macro-nonterminal">$func</span>(simd_accu) {
@@ -3588,8 +3616,8 @@
 <span class="macro">cfg_if!</span> {
     <span class="kw">if </span><span class="attr">#[cfg(all(feature = <span class="string">"simd-accel"</span>, any(target_feature = <span class="string">"sse2"</span>, all(target_endian = <span class="string">"little"</span>, target_arch = <span class="string">"aarch64"</span>), all(target_endian = <span class="string">"little"</span>, target_feature = <span class="string">"neon"</span>))))] </span>{
         <span class="kw">use </span><span class="kw">crate</span>::simd_funcs::<span class="kw-2">*</span>;
-        <span class="kw">use </span>packed_simd::u8x16;
-        <span class="kw">use </span>packed_simd::u16x8;
+        <span class="kw">use </span>core::simd::u8x16;
+        <span class="kw">use </span>core::simd::u16x8;
 
         <span class="kw">const </span>SIMD_ALIGNMENT: usize = <span class="number">16</span>;
 

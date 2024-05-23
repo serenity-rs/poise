@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.5/src/aead/chacha20_poly1305.rs`."><title>chacha20_poly1305.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-b21aa549bf6d91ff.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="ring" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (79734f1db 2024-05-02)" data-channel="nightly" data-search-js="search-bf21c90c8c1d92b1.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-e32f0c247825364d.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-09095024cf37855e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../ring/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Type ‘S’ or ‘/’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings">Settings</a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.8/src/aead/chacha20_poly1305.rs`."><title>chacha20_poly1305.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="ring" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (9cdfe285c 2024-05-22)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -269,6 +269,27 @@
 <a href="#269" id="269">269</a>
 <a href="#270" id="270">270</a>
 <a href="#271" id="271">271</a>
+<a href="#272" id="272">272</a>
+<a href="#273" id="273">273</a>
+<a href="#274" id="274">274</a>
+<a href="#275" id="275">275</a>
+<a href="#276" id="276">276</a>
+<a href="#277" id="277">277</a>
+<a href="#278" id="278">278</a>
+<a href="#279" id="279">279</a>
+<a href="#280" id="280">280</a>
+<a href="#281" id="281">281</a>
+<a href="#282" id="282">282</a>
+<a href="#283" id="283">283</a>
+<a href="#284" id="284">284</a>
+<a href="#285" id="285">285</a>
+<a href="#286" id="286">286</a>
+<a href="#287" id="287">287</a>
+<a href="#288" id="288">288</a>
+<a href="#289" id="289">289</a>
+<a href="#290" id="290">290</a>
+<a href="#291" id="291">291</a>
+<a href="#292" id="292">292</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2015-2016 Brian Smith.
 //
 // Permission to use, copy, modify, and/or distribute this software for any
@@ -289,7 +310,7 @@
 };
 <span class="kw">use crate</span>::{
     aead, cpu, error,
-    polyfill::{<span class="self">self</span>, ArrayFlatten},
+    polyfill::{u64_from_usize, usize_from_u64_saturated, ArrayFlatten},
 };
 <span class="kw">use </span>core::ops::RangeFrom;
 
@@ -304,19 +325,20 @@
     seal: chacha20_poly1305_seal,
     open: chacha20_poly1305_open,
     id: aead::AlgorithmID::CHACHA20_POLY1305,
-    max_input_len: <span class="kw">super</span>::max_input_len(<span class="number">64</span>, <span class="number">1</span>),
 };
+
+<span class="kw">const </span>MAX_IN_OUT_LEN: usize = <span class="kw">super</span>::max_input_len(<span class="number">64</span>, <span class="number">1</span>);
+<span class="comment">// https://tools.ietf.org/html/rfc8439#section-2.8
+</span><span class="kw">const </span>_MAX_IN_OUT_LEN_BOUNDED_BY_RFC: () =
+    <span class="macro">assert!</span>(MAX_IN_OUT_LEN == usize_from_u64_saturated(<span class="number">274_877_906_880u64</span>));
 
 <span class="doccomment">/// Copies |key| into |ctx_buf|.
 </span><span class="kw">fn </span>chacha20_poly1305_init(
     key: <span class="kw-2">&amp;</span>[u8],
-    cpu_features: cpu::Features,
+    _cpu_features: cpu::Features,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;aead::KeyInner, error::Unspecified&gt; {
     <span class="kw">let </span>key: [u8; chacha::KEY_LEN] = key.try_into()<span class="question-mark">?</span>;
-    <span class="prelude-val">Ok</span>(aead::KeyInner::ChaCha20Poly1305(chacha::Key::new(
-        key,
-        cpu_features,
-    )))
+    <span class="prelude-val">Ok</span>(aead::KeyInner::ChaCha20Poly1305(chacha::Key::new(key)))
 }
 
 <span class="kw">fn </span>chacha20_poly1305_seal(
@@ -324,81 +346,86 @@
     nonce: Nonce,
     aad: Aad&lt;<span class="kw-2">&amp;</span>[u8]&gt;,
     in_out: <span class="kw-2">&amp;mut </span>[u8],
-) -&gt; Tag {
+    cpu_features: cpu::Features,
+) -&gt; <span class="prelude-ty">Result</span>&lt;Tag, error::Unspecified&gt; {
     <span class="kw">let </span>chacha20_key = <span class="kw">match </span>key {
         aead::KeyInner::ChaCha20Poly1305(key) =&gt; key,
         <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
     };
 
+    <span class="kw">if </span>in_out.len() &gt; MAX_IN_OUT_LEN {
+        <span class="kw">return </span><span class="prelude-val">Err</span>(error::Unspecified);
+    }
+    <span class="doccomment">/// RFC 8439 Section 2.8 says the maximum AAD length is 2**64 - 1, which is
+    /// never larger than usize::MAX, so we don't need an explicit length
+    /// check.
+    </span><span class="kw">const </span>_USIZE_BOUNDED_BY_U64: u64 = u64_from_usize(usize::MAX);
+
     <span class="attr">#[cfg(any(target_arch = <span class="string">"aarch64"</span>, target_arch = <span class="string">"x86_64"</span>))]
-    </span>{
-        <span class="kw">if </span>cpu::intel::SSE41.available(chacha20_key.cpu_features())
-            || cpu::arm::NEON.available(chacha20_key.cpu_features())
-        {
-            <span class="comment">// XXX: BoringSSL uses `alignas(16)` on `key` instead of on the
-            // structure, but Rust can't do that yet; see
-            // https://github.com/rust-lang/rust/issues/73557.
-            //
-            // Keep in sync with the anonymous struct of BoringSSL's
-            // `chacha20_poly1305_seal_data`.
-            </span><span class="attr">#[repr(align(<span class="number">16</span>), C)]
-            #[derive(Clone, Copy)]
-            </span><span class="kw">struct </span>seal_data_in {
-                key: [u32; chacha::KEY_LEN / <span class="number">4</span>],
-                counter: u32,
-                nonce: [u8; <span class="kw">super</span>::NONCE_LEN],
-                extra_ciphertext: <span class="kw-2">*const </span>u8,
-                extra_ciphertext_len: usize,
-            }
-
-            <span class="kw">let </span><span class="kw-2">mut </span>data = InOut {
-                input: seal_data_in {
-                    key: <span class="kw-2">*</span>chacha20_key.words_less_safe(),
-                    counter: <span class="number">0</span>,
-                    nonce: <span class="kw-2">*</span>nonce.as_ref(),
-                    extra_ciphertext: core::ptr::null(),
-                    extra_ciphertext_len: <span class="number">0</span>,
-                },
-            };
-
-            <span class="comment">// Encrypts `plaintext_len` bytes from `plaintext` and writes them to `out_ciphertext`.
-            </span><span class="macro">prefixed_extern!</span> {
-                <span class="kw">fn </span>chacha20_poly1305_seal(
-                    out_ciphertext: <span class="kw-2">*mut </span>u8,
-                    plaintext: <span class="kw-2">*const </span>u8,
-                    plaintext_len: usize,
-                    ad: <span class="kw-2">*const </span>u8,
-                    ad_len: usize,
-                    data: <span class="kw-2">&amp;mut </span>InOut&lt;seal_data_in&gt;,
-                );
-            }
-
-            <span class="kw">let </span>out = <span class="kw">unsafe </span>{
-                chacha20_poly1305_seal(
-                    in_out.as_mut_ptr(),
-                    in_out.as_ptr(),
-                    in_out.len(),
-                    aad.as_ref().as_ptr(),
-                    aad.as_ref().len(),
-                    <span class="kw-2">&amp;mut </span>data,
-                );
-                <span class="kw-2">&amp;</span>data.out
-            };
-
-            <span class="kw">return </span>Tag(out.tag);
+    </span><span class="kw">if </span>has_integrated(cpu_features) {
+        <span class="comment">// XXX: BoringSSL uses `alignas(16)` on `key` instead of on the
+        // structure, but Rust can't do that yet; see
+        // https://github.com/rust-lang/rust/issues/73557.
+        //
+        // Keep in sync with the anonymous struct of BoringSSL's
+        // `chacha20_poly1305_seal_data`.
+        </span><span class="attr">#[repr(align(<span class="number">16</span>), C)]
+        #[derive(Clone, Copy)]
+        </span><span class="kw">struct </span>seal_data_in {
+            key: [u32; chacha::KEY_LEN / <span class="number">4</span>],
+            counter: u32,
+            nonce: [u8; <span class="kw">super</span>::NONCE_LEN],
+            extra_ciphertext: <span class="kw-2">*const </span>u8,
+            extra_ciphertext_len: usize,
         }
+
+        <span class="kw">let </span><span class="kw-2">mut </span>data = InOut {
+            input: seal_data_in {
+                key: <span class="kw-2">*</span>chacha20_key.words_less_safe(),
+                counter: <span class="number">0</span>,
+                nonce: <span class="kw-2">*</span>nonce.as_ref(),
+                extra_ciphertext: core::ptr::null(),
+                extra_ciphertext_len: <span class="number">0</span>,
+            },
+        };
+
+        <span class="comment">// Encrypts `plaintext_len` bytes from `plaintext` and writes them to `out_ciphertext`.
+        </span><span class="macro">prefixed_extern!</span> {
+            <span class="kw">fn </span>chacha20_poly1305_seal(
+                out_ciphertext: <span class="kw-2">*mut </span>u8,
+                plaintext: <span class="kw-2">*const </span>u8,
+                plaintext_len: usize,
+                ad: <span class="kw-2">*const </span>u8,
+                ad_len: usize,
+                data: <span class="kw-2">&amp;mut </span>InOut&lt;seal_data_in&gt;,
+            );
+        }
+
+        <span class="kw">let </span>out = <span class="kw">unsafe </span>{
+            chacha20_poly1305_seal(
+                in_out.as_mut_ptr(),
+                in_out.as_ptr(),
+                in_out.len(),
+                aad.as_ref().as_ptr(),
+                aad.as_ref().len(),
+                <span class="kw-2">&amp;mut </span>data,
+            );
+            <span class="kw-2">&amp;</span>data.out
+        };
+
+        <span class="kw">return </span><span class="prelude-val">Ok</span>(Tag(out.tag));
     }
 
     <span class="kw">let </span><span class="kw-2">mut </span>counter = Counter::zero(nonce);
     <span class="kw">let </span><span class="kw-2">mut </span>auth = {
         <span class="kw">let </span>key = derive_poly1305_key(chacha20_key, counter.increment());
-        poly1305::Context::from_key(key)
+        poly1305::Context::from_key(key, cpu_features)
     };
 
     poly1305_update_padded_16(<span class="kw-2">&amp;mut </span>auth, aad.as_ref());
     chacha20_key.encrypt_in_place(counter, in_out);
     poly1305_update_padded_16(<span class="kw-2">&amp;mut </span>auth, in_out);
-    finish(auth, aad.as_ref().len(), in_out.len())
+    <span class="prelude-val">Ok</span>(finish(auth, aad.as_ref().len(), in_out.len()))
 }
 
 <span class="kw">fn </span>chacha20_poly1305_open(
@@ -407,82 +434,106 @@
     aad: Aad&lt;<span class="kw-2">&amp;</span>[u8]&gt;,
     in_out: <span class="kw-2">&amp;mut </span>[u8],
     src: RangeFrom&lt;usize&gt;,
-) -&gt; Tag {
+    cpu_features: cpu::Features,
+) -&gt; <span class="prelude-ty">Result</span>&lt;Tag, error::Unspecified&gt; {
     <span class="kw">let </span>chacha20_key = <span class="kw">match </span>key {
         aead::KeyInner::ChaCha20Poly1305(key) =&gt; key,
         <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
     };
 
+    <span class="kw">let </span>unprefixed_len = in_out
+        .len()
+        .checked_sub(src.start)
+        .ok_or(error::Unspecified)<span class="question-mark">?</span>;
+    <span class="kw">if </span>unprefixed_len &gt; MAX_IN_OUT_LEN {
+        <span class="kw">return </span><span class="prelude-val">Err</span>(error::Unspecified);
+    }
+    <span class="comment">// RFC 8439 Section 2.8 says the maximum AAD length is 2**64 - 1, which is
+    // never larger than usize::MAX, so we don't need an explicit length
+    // check.
+    </span><span class="kw">const </span>_USIZE_BOUNDED_BY_U64: u64 = u64_from_usize(usize::MAX);
+
     <span class="attr">#[cfg(any(target_arch = <span class="string">"aarch64"</span>, target_arch = <span class="string">"x86_64"</span>))]
-    </span>{
-        <span class="kw">if </span>cpu::intel::SSE41.available(chacha20_key.cpu_features())
-            || cpu::arm::NEON.available(chacha20_key.cpu_features())
-        {
-            <span class="comment">// XXX: BoringSSL uses `alignas(16)` on `key` instead of on the
-            // structure, but Rust can't do that yet; see
-            // https://github.com/rust-lang/rust/issues/73557.
-            //
-            // Keep in sync with the anonymous struct of BoringSSL's
-            // `chacha20_poly1305_open_data`.
-            </span><span class="attr">#[derive(Copy, Clone)]
-            #[repr(align(<span class="number">16</span>), C)]
-            </span><span class="kw">struct </span>open_data_in {
-                key: [u32; chacha::KEY_LEN / <span class="number">4</span>],
-                counter: u32,
-                nonce: [u8; <span class="kw">super</span>::NONCE_LEN],
-            }
-
-            <span class="kw">let </span><span class="kw-2">mut </span>data = InOut {
-                input: open_data_in {
-                    key: <span class="kw-2">*</span>chacha20_key.words_less_safe(),
-                    counter: <span class="number">0</span>,
-                    nonce: <span class="kw-2">*</span>nonce.as_ref(),
-                },
-            };
-
-            <span class="comment">// Decrypts `plaintext_len` bytes from `ciphertext` and writes them to `out_plaintext`.
-            </span><span class="macro">prefixed_extern!</span> {
-                <span class="kw">fn </span>chacha20_poly1305_open(
-                    out_plaintext: <span class="kw-2">*mut </span>u8,
-                    ciphertext: <span class="kw-2">*const </span>u8,
-                    plaintext_len: usize,
-                    ad: <span class="kw-2">*const </span>u8,
-                    ad_len: usize,
-                    data: <span class="kw-2">&amp;mut </span>InOut&lt;open_data_in&gt;,
-                );
-            }
-
-            <span class="kw">let </span>out = <span class="kw">unsafe </span>{
-                chacha20_poly1305_open(
-                    in_out.as_mut_ptr(),
-                    in_out.as_ptr().add(src.start),
-                    in_out.len() - src.start,
-                    aad.as_ref().as_ptr(),
-                    aad.as_ref().len(),
-                    <span class="kw-2">&amp;mut </span>data,
-                );
-                <span class="kw-2">&amp;</span>data.out
-            };
-
-            <span class="kw">return </span>Tag(out.tag);
+    </span><span class="kw">if </span>has_integrated(cpu_features) {
+        <span class="comment">// XXX: BoringSSL uses `alignas(16)` on `key` instead of on the
+        // structure, but Rust can't do that yet; see
+        // https://github.com/rust-lang/rust/issues/73557.
+        //
+        // Keep in sync with the anonymous struct of BoringSSL's
+        // `chacha20_poly1305_open_data`.
+        </span><span class="attr">#[derive(Copy, Clone)]
+        #[repr(align(<span class="number">16</span>), C)]
+        </span><span class="kw">struct </span>open_data_in {
+            key: [u32; chacha::KEY_LEN / <span class="number">4</span>],
+            counter: u32,
+            nonce: [u8; <span class="kw">super</span>::NONCE_LEN],
         }
+
+        <span class="kw">let </span><span class="kw-2">mut </span>data = InOut {
+            input: open_data_in {
+                key: <span class="kw-2">*</span>chacha20_key.words_less_safe(),
+                counter: <span class="number">0</span>,
+                nonce: <span class="kw-2">*</span>nonce.as_ref(),
+            },
+        };
+
+        <span class="comment">// Decrypts `plaintext_len` bytes from `ciphertext` and writes them to `out_plaintext`.
+        </span><span class="macro">prefixed_extern!</span> {
+            <span class="kw">fn </span>chacha20_poly1305_open(
+                out_plaintext: <span class="kw-2">*mut </span>u8,
+                ciphertext: <span class="kw-2">*const </span>u8,
+                plaintext_len: usize,
+                ad: <span class="kw-2">*const </span>u8,
+                ad_len: usize,
+                data: <span class="kw-2">&amp;mut </span>InOut&lt;open_data_in&gt;,
+            );
+        }
+
+        <span class="kw">let </span>out = <span class="kw">unsafe </span>{
+            chacha20_poly1305_open(
+                in_out.as_mut_ptr(),
+                in_out.as_ptr().add(src.start),
+                unprefixed_len,
+                aad.as_ref().as_ptr(),
+                aad.as_ref().len(),
+                <span class="kw-2">&amp;mut </span>data,
+            );
+            <span class="kw-2">&amp;</span>data.out
+        };
+
+        <span class="kw">return </span><span class="prelude-val">Ok</span>(Tag(out.tag));
     }
 
     <span class="kw">let </span><span class="kw-2">mut </span>counter = Counter::zero(nonce);
     <span class="kw">let </span><span class="kw-2">mut </span>auth = {
         <span class="kw">let </span>key = derive_poly1305_key(chacha20_key, counter.increment());
-        poly1305::Context::from_key(key)
+        poly1305::Context::from_key(key, cpu_features)
     };
 
     poly1305_update_padded_16(<span class="kw-2">&amp;mut </span>auth, aad.as_ref());
     poly1305_update_padded_16(<span class="kw-2">&amp;mut </span>auth, <span class="kw-2">&amp;</span>in_out[src.clone()]);
     chacha20_key.encrypt_within(counter, in_out, src.clone());
-    finish(auth, aad.as_ref().len(), in_out[src].len())
+    <span class="prelude-val">Ok</span>(finish(auth, aad.as_ref().len(), unprefixed_len))
+}
+
+<span class="attr">#[cfg(any(target_arch = <span class="string">"aarch64"</span>, target_arch = <span class="string">"x86_64"</span>))]
+#[allow(clippy::needless_return)]
+#[inline(always)]
+</span><span class="kw">fn </span>has_integrated(cpu_features: cpu::Features) -&gt; bool {
+    <span class="attr">#[cfg(target_arch = <span class="string">"aarch64"</span>)]
+    </span>{
+        <span class="kw">return </span>cpu::arm::NEON.available(cpu_features);
+    }
+
+    <span class="attr">#[cfg(target_arch = <span class="string">"x86_64"</span>)]
+    </span>{
+        <span class="kw">return </span>cpu::intel::SSE41.available(cpu_features);
+    }
 }
 
 <span class="kw">fn </span>finish(<span class="kw-2">mut </span>auth: poly1305::Context, aad_len: usize, in_out_len: usize) -&gt; Tag {
     <span class="kw">let </span>block: [[u8; <span class="number">8</span>]; <span class="number">2</span>] = [aad_len, in_out_len]
-        .map(polyfill::u64_from_usize)
+        .map(u64_from_usize)
         .map(u64::to_le_bytes);
     auth.update(<span class="kw-2">&amp;</span>block.array_flatten());
     auth.finish()
@@ -529,15 +580,6 @@
 </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>derive_poly1305_key(chacha_key: <span class="kw-2">&amp;</span>chacha::Key, iv: Iv) -&gt; poly1305::Key {
     <span class="kw">let </span><span class="kw-2">mut </span>key_bytes = [<span class="number">0u8</span>; poly1305::KEY_LEN];
     chacha_key.encrypt_iv_xor_in_place(iv, <span class="kw-2">&amp;mut </span>key_bytes);
-    poly1305::Key::new(key_bytes, chacha_key.cpu_features())
-}
-
-<span class="attr">#[cfg(test)]
-</span><span class="kw">mod </span>tests {
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>max_input_len_test() {
-        <span class="comment">// https://tools.ietf.org/html/rfc8439#section-2.8
-        </span><span class="macro">assert_eq!</span>(<span class="kw">super</span>::CHACHA20_POLY1305.max_input_len, <span class="number">274_877_906_880u64</span>);
-    }
+    poly1305::Key::new(key_bytes)
 }
 </code></pre></div></section></main></body></html>

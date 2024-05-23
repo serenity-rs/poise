@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-webpki-0.101.7/src/subject_name/verify.rs`."><title>verify.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-b21aa549bf6d91ff.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="webpki" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (79734f1db 2024-05-02)" data-channel="nightly" data-search-js="search-bf21c90c8c1d92b1.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-e32f0c247825364d.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-09095024cf37855e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../webpki/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Type ‘S’ or ‘/’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings">Settings</a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-webpki-0.102.4/src/subject_name/verify.rs`."><title>verify.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="webpki" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (9cdfe285c 2024-05-22)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -295,134 +295,6 @@
 <a href="#295" id="295">295</a>
 <a href="#296" id="296">296</a>
 <a href="#297" id="297">297</a>
-<a href="#298" id="298">298</a>
-<a href="#299" id="299">299</a>
-<a href="#300" id="300">300</a>
-<a href="#301" id="301">301</a>
-<a href="#302" id="302">302</a>
-<a href="#303" id="303">303</a>
-<a href="#304" id="304">304</a>
-<a href="#305" id="305">305</a>
-<a href="#306" id="306">306</a>
-<a href="#307" id="307">307</a>
-<a href="#308" id="308">308</a>
-<a href="#309" id="309">309</a>
-<a href="#310" id="310">310</a>
-<a href="#311" id="311">311</a>
-<a href="#312" id="312">312</a>
-<a href="#313" id="313">313</a>
-<a href="#314" id="314">314</a>
-<a href="#315" id="315">315</a>
-<a href="#316" id="316">316</a>
-<a href="#317" id="317">317</a>
-<a href="#318" id="318">318</a>
-<a href="#319" id="319">319</a>
-<a href="#320" id="320">320</a>
-<a href="#321" id="321">321</a>
-<a href="#322" id="322">322</a>
-<a href="#323" id="323">323</a>
-<a href="#324" id="324">324</a>
-<a href="#325" id="325">325</a>
-<a href="#326" id="326">326</a>
-<a href="#327" id="327">327</a>
-<a href="#328" id="328">328</a>
-<a href="#329" id="329">329</a>
-<a href="#330" id="330">330</a>
-<a href="#331" id="331">331</a>
-<a href="#332" id="332">332</a>
-<a href="#333" id="333">333</a>
-<a href="#334" id="334">334</a>
-<a href="#335" id="335">335</a>
-<a href="#336" id="336">336</a>
-<a href="#337" id="337">337</a>
-<a href="#338" id="338">338</a>
-<a href="#339" id="339">339</a>
-<a href="#340" id="340">340</a>
-<a href="#341" id="341">341</a>
-<a href="#342" id="342">342</a>
-<a href="#343" id="343">343</a>
-<a href="#344" id="344">344</a>
-<a href="#345" id="345">345</a>
-<a href="#346" id="346">346</a>
-<a href="#347" id="347">347</a>
-<a href="#348" id="348">348</a>
-<a href="#349" id="349">349</a>
-<a href="#350" id="350">350</a>
-<a href="#351" id="351">351</a>
-<a href="#352" id="352">352</a>
-<a href="#353" id="353">353</a>
-<a href="#354" id="354">354</a>
-<a href="#355" id="355">355</a>
-<a href="#356" id="356">356</a>
-<a href="#357" id="357">357</a>
-<a href="#358" id="358">358</a>
-<a href="#359" id="359">359</a>
-<a href="#360" id="360">360</a>
-<a href="#361" id="361">361</a>
-<a href="#362" id="362">362</a>
-<a href="#363" id="363">363</a>
-<a href="#364" id="364">364</a>
-<a href="#365" id="365">365</a>
-<a href="#366" id="366">366</a>
-<a href="#367" id="367">367</a>
-<a href="#368" id="368">368</a>
-<a href="#369" id="369">369</a>
-<a href="#370" id="370">370</a>
-<a href="#371" id="371">371</a>
-<a href="#372" id="372">372</a>
-<a href="#373" id="373">373</a>
-<a href="#374" id="374">374</a>
-<a href="#375" id="375">375</a>
-<a href="#376" id="376">376</a>
-<a href="#377" id="377">377</a>
-<a href="#378" id="378">378</a>
-<a href="#379" id="379">379</a>
-<a href="#380" id="380">380</a>
-<a href="#381" id="381">381</a>
-<a href="#382" id="382">382</a>
-<a href="#383" id="383">383</a>
-<a href="#384" id="384">384</a>
-<a href="#385" id="385">385</a>
-<a href="#386" id="386">386</a>
-<a href="#387" id="387">387</a>
-<a href="#388" id="388">388</a>
-<a href="#389" id="389">389</a>
-<a href="#390" id="390">390</a>
-<a href="#391" id="391">391</a>
-<a href="#392" id="392">392</a>
-<a href="#393" id="393">393</a>
-<a href="#394" id="394">394</a>
-<a href="#395" id="395">395</a>
-<a href="#396" id="396">396</a>
-<a href="#397" id="397">397</a>
-<a href="#398" id="398">398</a>
-<a href="#399" id="399">399</a>
-<a href="#400" id="400">400</a>
-<a href="#401" id="401">401</a>
-<a href="#402" id="402">402</a>
-<a href="#403" id="403">403</a>
-<a href="#404" id="404">404</a>
-<a href="#405" id="405">405</a>
-<a href="#406" id="406">406</a>
-<a href="#407" id="407">407</a>
-<a href="#408" id="408">408</a>
-<a href="#409" id="409">409</a>
-<a href="#410" id="410">410</a>
-<a href="#411" id="411">411</a>
-<a href="#412" id="412">412</a>
-<a href="#413" id="413">413</a>
-<a href="#414" id="414">414</a>
-<a href="#415" id="415">415</a>
-<a href="#416" id="416">416</a>
-<a href="#417" id="417">417</a>
-<a href="#418" id="418">418</a>
-<a href="#419" id="419">419</a>
-<a href="#420" id="420">420</a>
-<a href="#421" id="421">421</a>
-<a href="#422" id="422">422</a>
-<a href="#423" id="423">423</a>
-<a href="#424" id="424">424</a>
-<a href="#425" id="425">425</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2015 Brian Smith.
 //
 // Permission to use, copy, modify, and/or distribute this software for any
@@ -437,89 +309,21 @@
 // ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 // OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-</span><span class="kw">use super</span>::{
-    dns_name::{<span class="self">self</span>, DnsNameRef},
-    ip_address::{<span class="self">self</span>, IpAddrRef},
-    name::SubjectNameRef,
-};
-<span class="kw">use crate</span>::{
-    cert::{Cert, EndEntityOrCa},
-    der,
-    verify_cert::Budget,
-    Error,
-};
-<span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
-</span><span class="kw">use </span>{
-    alloc::vec::Vec,
-    dns_name::{GeneralDnsNameRef, WildcardDnsNameRef},
-};
-
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>verify_cert_dns_name(
-    cert: <span class="kw-2">&amp;</span><span class="kw">crate</span>::EndEntityCert,
-    dns_name: DnsNameRef,
-) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
-    <span class="kw">let </span>cert = cert.inner();
-    <span class="kw">let </span>dns_name = untrusted::Input::from(dns_name.as_ref().as_bytes());
-    iterate_names(
-        <span class="prelude-val">Some</span>(cert.subject),
-        cert.subject_alt_name,
-        <span class="prelude-val">Err</span>(Error::CertNotValidForName),
-        <span class="kw-2">&amp;mut </span>|name| {
-            <span class="kw">if let </span>GeneralName::DnsName(presented_id) = name {
-                <span class="kw">match </span>dns_name::presented_id_matches_reference_id(presented_id, dns_name) {
-                    <span class="prelude-val">Ok</span>(<span class="bool-val">true</span>) =&gt; <span class="kw">return </span>NameIteration::Stop(<span class="prelude-val">Ok</span>(())),
-                    <span class="prelude-val">Ok</span>(<span class="bool-val">false</span>) | <span class="prelude-val">Err</span>(Error::MalformedDnsIdentifier) =&gt; (),
-                    <span class="prelude-val">Err</span>(e) =&gt; <span class="kw">return </span>NameIteration::Stop(<span class="prelude-val">Err</span>(e)),
-                }
-            }
-            NameIteration::KeepGoing
-        },
-    )
-}
-
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>verify_cert_subject_name(
-    cert: <span class="kw-2">&amp;</span><span class="kw">crate</span>::EndEntityCert,
-    subject_name: SubjectNameRef,
-) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
-    <span class="kw">let </span>ip_address = <span class="kw">match </span>subject_name {
-        SubjectNameRef::DnsName(dns_name) =&gt; <span class="kw">return </span>verify_cert_dns_name(cert, dns_name),
-        SubjectNameRef::IpAddress(IpAddrRef::V4(<span class="kw">_</span>, <span class="kw-2">ref </span>ip_address_octets)) =&gt; {
-            untrusted::Input::from(ip_address_octets)
-        }
-        SubjectNameRef::IpAddress(IpAddrRef::V6(<span class="kw">_</span>, <span class="kw-2">ref </span>ip_address_octets)) =&gt; {
-            untrusted::Input::from(ip_address_octets)
-        }
-    };
-
-    iterate_names(
-        <span class="comment">// IP addresses are not compared against the subject field;
-        // only against Subject Alternative Names.
-        </span><span class="prelude-val">None</span>,
-        cert.inner().subject_alt_name,
-        <span class="prelude-val">Err</span>(Error::CertNotValidForName),
-        <span class="kw-2">&amp;mut </span>|name| {
-            <span class="kw">if let </span>GeneralName::IpAddress(presented_id) = name {
-                <span class="kw">match </span>ip_address::presented_id_matches_reference_id(presented_id, ip_address) {
-                    <span class="bool-val">true </span>=&gt; <span class="kw">return </span>NameIteration::Stop(<span class="prelude-val">Ok</span>(())),
-                    <span class="bool-val">false </span>=&gt; (),
-                }
-            }
-            NameIteration::KeepGoing
-        },
-    )
-}
+</span><span class="kw">use </span><span class="kw">super</span>::dns_name::{<span class="self">self</span>, IdRole};
+<span class="kw">use </span><span class="kw">super</span>::ip_address;
+<span class="kw">use </span><span class="kw">crate</span>::der::{<span class="self">self</span>, FromDer};
+<span class="kw">use </span><span class="kw">crate</span>::error::{DerTypeId, Error};
+<span class="kw">use </span><span class="kw">crate</span>::verify_cert::{Budget, PathNode};
 
 <span class="comment">// https://tools.ietf.org/html/rfc5280#section-4.2.1.10
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>check_name_constraints(
-    input: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>untrusted::Reader&gt;,
-    subordinate_certs: <span class="kw-2">&amp;</span>Cert,
+    constraints: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;mut </span>untrusted::Reader&gt;,
+    path: <span class="kw-2">&amp;</span>PathNode&lt;<span class="lifetime">'_</span>&gt;,
     budget: <span class="kw-2">&amp;mut </span>Budget,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
-    <span class="kw">let </span>input = <span class="kw">match </span>input {
+    <span class="kw">let </span>constraints = <span class="kw">match </span>constraints {
         <span class="prelude-val">Some</span>(input) =&gt; input,
-        <span class="prelude-val">None </span>=&gt; {
-            <span class="kw">return </span><span class="prelude-val">Ok</span>(());
-        }
+        <span class="prelude-val">None </span>=&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(()),
     };
 
     <span class="kw">fn </span>parse_subtrees&lt;<span class="lifetime">'b</span>&gt;(
@@ -529,34 +333,31 @@
         <span class="kw">if </span>!inner.peek(subtrees_tag.into()) {
             <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>);
         }
-        der::expect_tag_and_get_value(inner, subtrees_tag).map(<span class="prelude-val">Some</span>)
+        der::expect_tag(inner, subtrees_tag).map(<span class="prelude-val">Some</span>)
     }
 
-    <span class="kw">let </span>permitted_subtrees = parse_subtrees(input, der::Tag::ContextSpecificConstructed0)<span class="question-mark">?</span>;
-    <span class="kw">let </span>excluded_subtrees = parse_subtrees(input, der::Tag::ContextSpecificConstructed1)<span class="question-mark">?</span>;
+    <span class="kw">let </span>permitted_subtrees = parse_subtrees(constraints, der::Tag::ContextSpecificConstructed0)<span class="question-mark">?</span>;
+    <span class="kw">let </span>excluded_subtrees = parse_subtrees(constraints, der::Tag::ContextSpecificConstructed1)<span class="question-mark">?</span>;
 
-    <span class="kw">let </span><span class="kw-2">mut </span>child = subordinate_certs;
-    <span class="kw">loop </span>{
-        iterate_names(
-            <span class="prelude-val">Some</span>(child.subject),
-            child.subject_alt_name,
-            <span class="prelude-val">Ok</span>(()),
-            <span class="kw-2">&amp;mut </span>|name| {
+    <span class="kw">for </span>path <span class="kw">in </span>path.iter() {
+        <span class="kw">let </span>result = NameIterator::new(<span class="prelude-val">Some</span>(path.cert.subject), path.cert.subject_alt_name)
+            .find_map(|result| {
+                <span class="kw">let </span>name = <span class="kw">match </span>result {
+                    <span class="prelude-val">Ok</span>(name) =&gt; name,
+                    <span class="prelude-val">Err</span>(err) =&gt; <span class="kw">return </span><span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(err)),
+                };
+
                 check_presented_id_conforms_to_constraints(
                     name,
                     permitted_subtrees,
                     excluded_subtrees,
                     budget,
                 )
-            },
-        )<span class="question-mark">?</span>;
+            });
 
-        child = <span class="kw">match </span>child.ee_or_ca {
-            EndEntityOrCa::Ca(child_cert) =&gt; child_cert,
-            EndEntityOrCa::EndEntity =&gt; {
-                <span class="kw">break</span>;
-            }
-        };
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(err)) = result {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(err);
+        }
     }
 
     <span class="prelude-val">Ok</span>(())
@@ -567,26 +368,119 @@
     permitted_subtrees: <span class="prelude-ty">Option</span>&lt;untrusted::Input&gt;,
     excluded_subtrees: <span class="prelude-ty">Option</span>&lt;untrusted::Input&gt;,
     budget: <span class="kw-2">&amp;mut </span>Budget,
-) -&gt; NameIteration {
-    <span class="kw">match </span>check_presented_id_conforms_to_constraints_in_subtree(
-        name,
-        Subtrees::PermittedSubtrees,
-        permitted_subtrees,
-        budget,
-    ) {
-        stop @ NameIteration::Stop(..) =&gt; {
-            <span class="kw">return </span>stop;
-        }
-        NameIteration::KeepGoing =&gt; (),
-    };
+) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Result</span>&lt;(), Error&gt;&gt; {
+    <span class="kw">let </span>subtrees = [
+        (Subtrees::PermittedSubtrees, permitted_subtrees),
+        (Subtrees::ExcludedSubtrees, excluded_subtrees),
+    ];
 
-    check_presented_id_conforms_to_constraints_in_subtree(
-        name,
-        Subtrees::ExcludedSubtrees,
-        excluded_subtrees,
-        budget,
-    )
-}
+    <span class="kw">fn </span>general_subtree&lt;<span class="lifetime">'b</span>&gt;(input: <span class="kw-2">&amp;mut </span>untrusted::Reader&lt;<span class="lifetime">'b</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;GeneralName&lt;<span class="lifetime">'b</span>&gt;, Error&gt; {
+        der::read_all(der::expect_tag(input, der::Tag::Sequence)<span class="question-mark">?</span>)
+    }
+
+    <span class="kw">for </span>(subtrees, constraints) <span class="kw">in </span>subtrees {
+        <span class="kw">let </span><span class="kw-2">mut </span>constraints = <span class="kw">match </span>constraints {
+            <span class="prelude-val">Some</span>(constraints) =&gt; untrusted::Reader::new(constraints),
+            <span class="prelude-val">None </span>=&gt; <span class="kw">continue</span>,
+        };
+
+        <span class="kw">let </span><span class="kw-2">mut </span>has_permitted_subtrees_match = <span class="bool-val">false</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>has_permitted_subtrees_mismatch = <span class="bool-val">false</span>;
+        <span class="kw">while </span>!constraints.at_end() {
+            <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = budget.consume_name_constraint_comparison() {
+                <span class="kw">return </span><span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(e));
+            }
+
+            <span class="comment">// http://tools.ietf.org/html/rfc5280#section-4.2.1.10: "Within this
+            // profile, the minimum and maximum fields are not used with any name
+            // forms, thus, the minimum MUST be zero, and maximum MUST be absent."
+            //
+            // Since the default value isn't allowed to be encoded according to the
+            // DER encoding rules for DEFAULT, this is equivalent to saying that
+            // neither minimum or maximum must be encoded.
+            </span><span class="kw">let </span>base = <span class="kw">match </span>general_subtree(<span class="kw-2">&amp;mut </span>constraints) {
+                <span class="prelude-val">Ok</span>(base) =&gt; base,
+                <span class="prelude-val">Err</span>(err) =&gt; <span class="kw">return </span><span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(err)),
+            };
+
+            <span class="kw">let </span>matches = <span class="kw">match </span>(name, base) {
+                (GeneralName::DnsName(name), GeneralName::DnsName(base)) =&gt; {
+                    dns_name::presented_id_matches_reference_id(name, IdRole::NameConstraint, base)
+                }
+
+                (GeneralName::DirectoryName, GeneralName::DirectoryName) =&gt; <span class="prelude-val">Ok</span>(
+                    <span class="comment">// Reject any uses of directory name constraints; we don't implement this.
+                    //
+                    // Rejecting everything technically confirms to RFC5280:
+                    //
+                    //   "If a name constraints extension that is marked as critical imposes constraints
+                    //    on a particular name form, and an instance of that name form appears in the
+                    //    subject field or subjectAltName extension of a subsequent certificate, then
+                    //    the application MUST either process the constraint or _reject the certificate_."
+                    //
+                    // TODO: rustls/webpki#19
+                    //
+                    // Rejection is achieved by not matching any PermittedSubtrees, and matching all
+                    // ExcludedSubtrees.
+                    </span><span class="kw">match </span>subtrees {
+                        Subtrees::PermittedSubtrees =&gt; <span class="bool-val">false</span>,
+                        Subtrees::ExcludedSubtrees =&gt; <span class="bool-val">true</span>,
+                    },
+                ),
+
+                (GeneralName::IpAddress(name), GeneralName::IpAddress(base)) =&gt; {
+                    ip_address::presented_id_matches_constraint(name, base)
+                }
+
+                <span class="comment">// RFC 4280 says "If a name constraints extension that is marked as
+                // critical imposes constraints on a particular name form, and an
+                // instance of that name form appears in the subject field or
+                // subjectAltName extension of a subsequent certificate, then the
+                // application MUST either process the constraint or reject the
+                // certificate." Later, the CABForum agreed to support non-critical
+                // constraints, so it is important to reject the cert without
+                // considering whether the name constraint it critical.
+                </span>(GeneralName::Unsupported(name_tag), GeneralName::Unsupported(base_tag))
+                    <span class="kw">if </span>name_tag == base_tag =&gt;
+                {
+                    <span class="prelude-val">Err</span>(Error::NameConstraintViolation)
+                }
+
+                <span class="kw">_ </span>=&gt; {
+                    <span class="comment">// mismatch between constraint and name types; continue with current
+                    // name and next constraint
+                    </span><span class="kw">continue</span>;
+                }
+            };
+
+            <span class="kw">match </span>(subtrees, matches) {
+                (Subtrees::PermittedSubtrees, <span class="prelude-val">Ok</span>(<span class="bool-val">true</span>)) =&gt; {
+                    has_permitted_subtrees_match = <span class="bool-val">true</span>;
+                }
+
+                (Subtrees::PermittedSubtrees, <span class="prelude-val">Ok</span>(<span class="bool-val">false</span>)) =&gt; {
+                    has_permitted_subtrees_mismatch = <span class="bool-val">true</span>;
+                }
+
+                (Subtrees::ExcludedSubtrees, <span class="prelude-val">Ok</span>(<span class="bool-val">true</span>)) =&gt; {
+                    <span class="kw">return </span><span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(Error::NameConstraintViolation));
+                }
+
+                (Subtrees::ExcludedSubtrees, <span class="prelude-val">Ok</span>(<span class="bool-val">false</span>)) =&gt; (),
+                (<span class="kw">_</span>, <span class="prelude-val">Err</span>(err)) =&gt; <span class="kw">return </span><span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(err)),
+            }
+        }
+
+        <span class="kw">if </span>has_permitted_subtrees_mismatch &amp;&amp; !has_permitted_subtrees_match {
+            <span class="comment">// If there was any entry of the given type in permittedSubtrees, then
+            // it required that at least one of them must match. Since none of them
+            // did, we have a failure.
+            </span><span class="kw">return </span><span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(Error::NameConstraintViolation));
+        }
+    }
+
+    <span class="prelude-val">None
+</span>}
 
 <span class="attr">#[derive(Clone, Copy)]
 </span><span class="kw">enum </span>Subtrees {
@@ -594,208 +488,58 @@
     ExcludedSubtrees,
 }
 
-<span class="kw">fn </span>check_presented_id_conforms_to_constraints_in_subtree(
-    name: GeneralName,
-    subtrees: Subtrees,
-    constraints: <span class="prelude-ty">Option</span>&lt;untrusted::Input&gt;,
-    budget: <span class="kw-2">&amp;mut </span>Budget,
-) -&gt; NameIteration {
-    <span class="kw">let </span><span class="kw-2">mut </span>constraints = <span class="kw">match </span>constraints {
-        <span class="prelude-val">Some</span>(constraints) =&gt; untrusted::Reader::new(constraints),
-        <span class="prelude-val">None </span>=&gt; {
-            <span class="kw">return </span>NameIteration::KeepGoing;
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>NameIterator&lt;<span class="lifetime">'a</span>&gt; {
+    subject_alt_name: <span class="prelude-ty">Option</span>&lt;untrusted::Reader&lt;<span class="lifetime">'a</span>&gt;&gt;,
+    subject_directory_name: <span class="prelude-ty">Option</span>&lt;untrusted::Input&lt;<span class="lifetime">'a</span>&gt;&gt;,
+}
+
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; NameIterator&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(
+        subject: <span class="prelude-ty">Option</span>&lt;untrusted::Input&lt;<span class="lifetime">'a</span>&gt;&gt;,
+        subject_alt_name: <span class="prelude-ty">Option</span>&lt;untrusted::Input&lt;<span class="lifetime">'a</span>&gt;&gt;,
+    ) -&gt; <span class="self">Self </span>{
+        NameIterator {
+            subject_alt_name: subject_alt_name.map(untrusted::Reader::new),
+
+            <span class="comment">// If `subject` is present, we always consider it as a `DirectoryName`.
+            </span>subject_directory_name: subject,
         }
-    };
-
-    <span class="kw">let </span><span class="kw-2">mut </span>has_permitted_subtrees_match = <span class="bool-val">false</span>;
-    <span class="kw">let </span><span class="kw-2">mut </span>has_permitted_subtrees_mismatch = <span class="bool-val">false</span>;
-
-    <span class="kw">while </span>!constraints.at_end() {
-        <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = budget.consume_name_constraint_comparison() {
-            <span class="kw">return </span>NameIteration::Stop(<span class="prelude-val">Err</span>(e));
-        }
-
-        <span class="comment">// http://tools.ietf.org/html/rfc5280#section-4.2.1.10: "Within this
-        // profile, the minimum and maximum fields are not used with any name
-        // forms, thus, the minimum MUST be zero, and maximum MUST be absent."
-        //
-        // Since the default value isn't allowed to be encoded according to the
-        // DER encoding rules for DEFAULT, this is equivalent to saying that
-        // neither minimum or maximum must be encoded.
-        </span><span class="kw">fn </span>general_subtree&lt;<span class="lifetime">'b</span>&gt;(
-            input: <span class="kw-2">&amp;mut </span>untrusted::Reader&lt;<span class="lifetime">'b</span>&gt;,
-        ) -&gt; <span class="prelude-ty">Result</span>&lt;GeneralName&lt;<span class="lifetime">'b</span>&gt;, Error&gt; {
-            <span class="kw">let </span>general_subtree = der::expect_tag_and_get_value(input, der::Tag::Sequence)<span class="question-mark">?</span>;
-            general_subtree.read_all(Error::BadDer, GeneralName::from_der)
-        }
-
-        <span class="kw">let </span>base = <span class="kw">match </span>general_subtree(<span class="kw-2">&amp;mut </span>constraints) {
-            <span class="prelude-val">Ok</span>(base) =&gt; base,
-            <span class="prelude-val">Err</span>(err) =&gt; {
-                <span class="kw">return </span>NameIteration::Stop(<span class="prelude-val">Err</span>(err));
-            }
-        };
-
-        <span class="kw">let </span>matches = <span class="kw">match </span>(name, base) {
-            (GeneralName::DnsName(name), GeneralName::DnsName(base)) =&gt; {
-                dns_name::presented_id_matches_constraint(name, base)
-            }
-
-            (GeneralName::DirectoryName(name), GeneralName::DirectoryName(base)) =&gt; <span class="prelude-val">Ok</span>(
-                presented_directory_name_matches_constraint(name, base, subtrees),
-            ),
-
-            (GeneralName::IpAddress(name), GeneralName::IpAddress(base)) =&gt; {
-                ip_address::presented_id_matches_constraint(name, base)
-            }
-
-            <span class="comment">// RFC 4280 says "If a name constraints extension that is marked as
-            // critical imposes constraints on a particular name form, and an
-            // instance of that name form appears in the subject field or
-            // subjectAltName extension of a subsequent certificate, then the
-            // application MUST either process the constraint or reject the
-            // certificate." Later, the CABForum agreed to support non-critical
-            // constraints, so it is important to reject the cert without
-            // considering whether the name constraint it critical.
-            </span>(GeneralName::Unsupported(name_tag), GeneralName::Unsupported(base_tag))
-                <span class="kw">if </span>name_tag == base_tag =&gt;
-            {
-                <span class="prelude-val">Err</span>(Error::NameConstraintViolation)
-            }
-
-            <span class="kw">_ </span>=&gt; {
-                <span class="comment">// mismatch between constraint and name types; continue with current
-                // name and next constraint
-                </span><span class="kw">continue</span>;
-            }
-        };
-
-        <span class="kw">match </span>(subtrees, matches) {
-            (Subtrees::PermittedSubtrees, <span class="prelude-val">Ok</span>(<span class="bool-val">true</span>)) =&gt; {
-                has_permitted_subtrees_match = <span class="bool-val">true</span>;
-            }
-
-            (Subtrees::PermittedSubtrees, <span class="prelude-val">Ok</span>(<span class="bool-val">false</span>)) =&gt; {
-                has_permitted_subtrees_mismatch = <span class="bool-val">true</span>;
-            }
-
-            (Subtrees::ExcludedSubtrees, <span class="prelude-val">Ok</span>(<span class="bool-val">true</span>)) =&gt; {
-                <span class="kw">return </span>NameIteration::Stop(<span class="prelude-val">Err</span>(Error::NameConstraintViolation));
-            }
-
-            (Subtrees::ExcludedSubtrees, <span class="prelude-val">Ok</span>(<span class="bool-val">false</span>)) =&gt; (),
-
-            (<span class="kw">_</span>, <span class="prelude-val">Err</span>(err)) =&gt; {
-                <span class="kw">return </span>NameIteration::Stop(<span class="prelude-val">Err</span>(err));
-            }
-        }
-    }
-
-    <span class="kw">if </span>has_permitted_subtrees_mismatch &amp;&amp; !has_permitted_subtrees_match {
-        <span class="comment">// If there was any entry of the given type in permittedSubtrees, then
-        // it required that at least one of them must match. Since none of them
-        // did, we have a failure.
-        </span>NameIteration::Stop(<span class="prelude-val">Err</span>(Error::NameConstraintViolation))
-    } <span class="kw">else </span>{
-        NameIteration::KeepGoing
     }
 }
 
-<span class="kw">fn </span>presented_directory_name_matches_constraint(
-    _name: untrusted::Input,
-    _constraint: untrusted::Input,
-    subtrees: Subtrees,
-) -&gt; bool {
-    <span class="comment">// Reject any uses of directory name constraints; we don't implement this.
-    //
-    // Rejecting everything technically confirms to RFC5280:
-    //
-    //   "If a name constraints extension that is marked as critical imposes constraints
-    //    on a particular name form, and an instance of that name form appears in the
-    //    subject field or subjectAltName extension of a subsequent certificate, then
-    //    the application MUST either process the constraint or _reject the certificate_."
-    //
-    // TODO: rustls/webpki#19
-    //
-    // Rejection is achieved by not matching any PermittedSubtrees, and matching all
-    // ExcludedSubtrees.
-    </span><span class="kw">match </span>subtrees {
-        Subtrees::PermittedSubtrees =&gt; <span class="bool-val">false</span>,
-        Subtrees::ExcludedSubtrees =&gt; <span class="bool-val">true</span>,
-    }
-}
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Iterator <span class="kw">for </span>NameIterator&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">type </span>Item = <span class="prelude-ty">Result</span>&lt;GeneralName&lt;<span class="lifetime">'a</span>&gt;, Error&gt;;
 
-<span class="attr">#[derive(Clone, Copy)]
-</span><span class="kw">enum </span>NameIteration {
-    KeepGoing,
-    Stop(<span class="prelude-ty">Result</span>&lt;(), Error&gt;),
-}
+    <span class="kw">fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(subject_alt_name) = <span class="kw-2">&amp;mut </span><span class="self">self</span>.subject_alt_name {
+            <span class="comment">// https://bugzilla.mozilla.org/show_bug.cgi?id=1143085: An empty
+            // subjectAltName is not legal, but some certificates have an empty
+            // subjectAltName. Since we don't support CN-IDs, the certificate
+            // will be rejected either way, but checking `at_end` before
+            // attempting to parse the first entry allows us to return a better
+            // error code.
 
-<span class="kw">fn </span>iterate_names&lt;<span class="lifetime">'names</span>&gt;(
-    subject: <span class="prelude-ty">Option</span>&lt;untrusted::Input&lt;<span class="lifetime">'names</span>&gt;&gt;,
-    subject_alt_name: <span class="prelude-ty">Option</span>&lt;untrusted::Input&lt;<span class="lifetime">'names</span>&gt;&gt;,
-    result_if_never_stopped_early: <span class="prelude-ty">Result</span>&lt;(), Error&gt;,
-    f: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>FnMut(GeneralName&lt;<span class="lifetime">'names</span>&gt;) -&gt; NameIteration,
-) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
-    <span class="kw">if let </span><span class="prelude-val">Some</span>(subject_alt_name) = subject_alt_name {
-        <span class="kw">let </span><span class="kw-2">mut </span>subject_alt_name = untrusted::Reader::new(subject_alt_name);
-        <span class="comment">// https://bugzilla.mozilla.org/show_bug.cgi?id=1143085: An empty
-        // subjectAltName is not legal, but some certificates have an empty
-        // subjectAltName. Since we don't support CN-IDs, the certificate
-        // will be rejected either way, but checking `at_end` before
-        // attempting to parse the first entry allows us to return a better
-        // error code.
-        </span><span class="kw">while </span>!subject_alt_name.at_end() {
-            <span class="kw">let </span>name = GeneralName::from_der(<span class="kw-2">&amp;mut </span>subject_alt_name)<span class="question-mark">?</span>;
-            <span class="kw">match </span>f(name) {
-                NameIteration::Stop(result) =&gt; {
-                    <span class="kw">return </span>result;
-                }
-                NameIteration::KeepGoing =&gt; (),
+            </span><span class="kw">if </span>!subject_alt_name.at_end() {
+                <span class="kw">let </span>err = <span class="kw">match </span>GeneralName::from_der(subject_alt_name) {
+                    <span class="prelude-val">Ok</span>(name) =&gt; <span class="kw">return </span><span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(name)),
+                    <span class="prelude-val">Err</span>(err) =&gt; err,
+                };
+
+                <span class="comment">// Make sure we don't yield any items after this error.
+                </span><span class="self">self</span>.subject_alt_name = <span class="prelude-val">None</span>;
+                <span class="self">self</span>.subject_directory_name = <span class="prelude-val">None</span>;
+                <span class="kw">return </span><span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(err));
+            } <span class="kw">else </span>{
+                <span class="self">self</span>.subject_alt_name = <span class="prelude-val">None</span>;
             }
         }
-    }
 
-    <span class="kw">if let </span><span class="prelude-val">Some</span>(subject) = subject {
-        <span class="kw">match </span>f(GeneralName::DirectoryName(subject)) {
-            NameIteration::Stop(result) =&gt; <span class="kw">return </span>result,
-            NameIteration::KeepGoing =&gt; (),
-        };
-    }
+        <span class="kw">if </span><span class="self">self</span>.subject_directory_name.take().is_some() {
+            <span class="kw">return </span><span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(GeneralName::DirectoryName));
+        }
 
-    result_if_never_stopped_early
-}
-
-<span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>list_cert_dns_names&lt;<span class="lifetime">'names</span>&gt;(
-    cert: <span class="kw-2">&amp;</span><span class="lifetime">'names </span><span class="kw">crate</span>::EndEntityCert&lt;<span class="lifetime">'names</span>&gt;,
-) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw">impl </span>Iterator&lt;Item = GeneralDnsNameRef&lt;<span class="lifetime">'names</span>&gt;&gt;, Error&gt; {
-    <span class="kw">let </span>cert = <span class="kw-2">&amp;</span>cert.inner();
-    <span class="kw">let </span><span class="kw-2">mut </span>names = Vec::new();
-
-    iterate_names(
-        <span class="prelude-val">Some</span>(cert.subject),
-        cert.subject_alt_name,
-        <span class="prelude-val">Ok</span>(()),
-        <span class="kw-2">&amp;mut </span>|name| {
-            <span class="kw">if let </span>GeneralName::DnsName(presented_id) = name {
-                <span class="kw">let </span>dns_name = DnsNameRef::try_from_ascii(presented_id.as_slice_less_safe())
-                    .map(GeneralDnsNameRef::DnsName)
-                    .or_else(|<span class="kw">_</span>| {
-                        WildcardDnsNameRef::try_from_ascii(presented_id.as_slice_less_safe())
-                            .map(GeneralDnsNameRef::Wildcard)
-                    });
-
-                <span class="comment">// if the name could be converted to a DNS name, add it; otherwise,
-                // keep going.
-                </span><span class="kw">if let </span><span class="prelude-val">Ok</span>(name) = dns_name {
-                    names.push(name)
-                }
-            }
-            NameIteration::KeepGoing
-        },
-    )
-    .map(|<span class="kw">_</span>| names.into_iter())
+        <span class="prelude-val">None
+    </span>}
 }
 
 <span class="comment">// It is *not* valid to derive `Eq`, `PartialEq, etc. for this type. In
@@ -804,10 +548,11 @@
 // constraint is different than the meaning of the identically-represented
 // `GeneralName` in other contexts.
 </span><span class="attr">#[derive(Clone, Copy)]
-</span><span class="kw">enum </span>GeneralName&lt;<span class="lifetime">'a</span>&gt; {
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">enum </span>GeneralName&lt;<span class="lifetime">'a</span>&gt; {
     DnsName(untrusted::Input&lt;<span class="lifetime">'a</span>&gt;),
-    DirectoryName(untrusted::Input&lt;<span class="lifetime">'a</span>&gt;),
+    DirectoryName,
     IpAddress(untrusted::Input&lt;<span class="lifetime">'a</span>&gt;),
+    UniformResourceIdentifier(untrusted::Input&lt;<span class="lifetime">'a</span>&gt;),
 
     <span class="comment">// The value is the `tag &amp; ~(der::CONTEXT_SPECIFIC | der::CONSTRUCTED)` so
     // that the name constraint checking matches tags regardless of whether
@@ -815,9 +560,11 @@
     </span>Unsupported(u8),
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; GeneralName&lt;<span class="lifetime">'a</span>&gt; {
-    <span class="kw">fn </span>from_der(input: <span class="kw-2">&amp;mut </span>untrusted::Reader&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, Error&gt; {
-        <span class="kw">use </span>ring::io::der::{CONSTRUCTED, CONTEXT_SPECIFIC};
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; FromDer&lt;<span class="lifetime">'a</span>&gt; <span class="kw">for </span>GeneralName&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>from_der(reader: <span class="kw-2">&amp;mut </span>untrusted::Reader&lt;<span class="lifetime">'a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, Error&gt; {
+        <span class="kw">use </span>der::{CONSTRUCTED, CONTEXT_SPECIFIC};
+        <span class="kw">use </span>GeneralName::<span class="kw-2">*</span>;
+
         <span class="attr">#[allow(clippy::identity_op)]
         </span><span class="kw">const </span>OTHER_NAME_TAG: u8 = CONTEXT_SPECIFIC | CONSTRUCTED | <span class="number">0</span>;
         <span class="kw">const </span>RFC822_NAME_TAG: u8 = CONTEXT_SPECIFIC | <span class="number">1</span>;
@@ -829,23 +576,20 @@
         <span class="kw">const </span>IP_ADDRESS_TAG: u8 = CONTEXT_SPECIFIC | <span class="number">7</span>;
         <span class="kw">const </span>REGISTERED_ID_TAG: u8 = CONTEXT_SPECIFIC | <span class="number">8</span>;
 
-        <span class="kw">let </span>(tag, value) = der::read_tag_and_get_value(input)<span class="question-mark">?</span>;
+        <span class="kw">let </span>(tag, value) = der::read_tag_and_get_value(reader)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="kw">match </span>tag {
-            DNS_NAME_TAG =&gt; GeneralName::DnsName(value),
-            DIRECTORY_NAME_TAG =&gt; GeneralName::DirectoryName(value),
-            IP_ADDRESS_TAG =&gt; GeneralName::IpAddress(value),
+            DNS_NAME_TAG =&gt; DnsName(value),
+            DIRECTORY_NAME_TAG =&gt; DirectoryName,
+            IP_ADDRESS_TAG =&gt; IpAddress(value),
+            UNIFORM_RESOURCE_IDENTIFIER_TAG =&gt; UniformResourceIdentifier(value),
 
-            OTHER_NAME_TAG
-            | RFC822_NAME_TAG
-            | X400_ADDRESS_TAG
-            | EDI_PARTY_NAME_TAG
-            | UNIFORM_RESOURCE_IDENTIFIER_TAG
-            | REGISTERED_ID_TAG =&gt; {
-                GeneralName::Unsupported(tag &amp; !(CONTEXT_SPECIFIC | CONSTRUCTED))
-            }
+            OTHER_NAME_TAG | RFC822_NAME_TAG | X400_ADDRESS_TAG | EDI_PARTY_NAME_TAG
+            | REGISTERED_ID_TAG =&gt; Unsupported(tag &amp; !(CONTEXT_SPECIFIC | CONSTRUCTED)),
 
             <span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(Error::BadDer),
         })
     }
+
+    <span class="kw">const </span>TYPE_ID: DerTypeId = DerTypeId::GeneralName;
 }
 </code></pre></div></section></main></body></html>

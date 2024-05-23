@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-0.21.9/src/msgs/persist.rs`."><title>persist.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-b21aa549bf6d91ff.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="rustls" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (79734f1db 2024-05-02)" data-channel="nightly" data-search-js="search-bf21c90c8c1d92b1.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-e32f0c247825364d.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-09095024cf37855e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../rustls/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Type ‘S’ or ‘/’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings">Settings</a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-0.22.4/src/msgs/persist.rs`."><title>persist.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="rustls" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (9cdfe285c 2024-05-22)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -447,37 +447,39 @@
 <a href="#447" id="447">447</a>
 <a href="#448" id="448">448</a>
 <a href="#449" id="449">449</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::dns_name::DnsName;
-<span class="kw">use </span><span class="kw">crate</span>::enums::{CipherSuite, ProtocolVersion};
+</pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::enums::{CipherSuite, ProtocolVersion};
 <span class="kw">use </span><span class="kw">crate</span>::error::InvalidMessage;
-<span class="kw">use </span><span class="kw">crate</span>::key;
 <span class="kw">use </span><span class="kw">crate</span>::msgs::base::{PayloadU16, PayloadU8};
 <span class="kw">use </span><span class="kw">crate</span>::msgs::codec::{Codec, Reader};
-<span class="kw">use </span><span class="kw">crate</span>::msgs::handshake::CertificatePayload;
-<span class="kw">use </span><span class="kw">crate</span>::msgs::handshake::SessionId;
-<span class="kw">use </span><span class="kw">crate</span>::ticketer::TimeBase;
+<span class="kw">use </span><span class="kw">crate</span>::msgs::handshake::CertificateChain;
+<span class="attr">#[cfg(feature = <span class="string">"tls12"</span>)]
+</span><span class="kw">use </span><span class="kw">crate</span>::msgs::handshake::SessionId;
 <span class="attr">#[cfg(feature = <span class="string">"tls12"</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::tls12::Tls12CipherSuite;
 <span class="kw">use </span><span class="kw">crate</span>::tls13::Tls13CipherSuite;
 
-<span class="kw">use </span>std::cmp;
-<span class="attr">#[cfg(feature = <span class="string">"tls12"</span>)]
-</span><span class="kw">use </span>std::mem;
+<span class="kw">use </span>pki_types::{DnsName, UnixTime};
+<span class="kw">use </span>zeroize::Zeroizing;
 
-<span class="kw">pub struct </span>Retrieved&lt;T&gt; {
-    <span class="kw">pub </span>value: T,
-    retrieved_at: TimeBase,
+<span class="kw">use </span>alloc::vec::Vec;
+<span class="kw">use </span>core::cmp;
+<span class="attr">#[cfg(feature = <span class="string">"tls12"</span>)]
+</span><span class="kw">use </span>core::mem;
+
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>Retrieved&lt;T&gt; {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) value: T,
+    retrieved_at: UnixTime,
 }
 
 <span class="kw">impl</span>&lt;T&gt; Retrieved&lt;T&gt; {
-    <span class="kw">pub fn </span>new(value: T, retrieved_at: TimeBase) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(value: T, retrieved_at: UnixTime) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             value,
             retrieved_at,
         }
     }
 
-    <span class="kw">pub fn </span>map&lt;M&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw">impl </span>FnOnce(<span class="kw-2">&amp;</span>T) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>M&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;Retrieved&lt;<span class="kw-2">&amp;</span>M&gt;&gt; {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>map&lt;M&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw">impl </span>FnOnce(<span class="kw-2">&amp;</span>T) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>M&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;Retrieved&lt;<span class="kw-2">&amp;</span>M&gt;&gt; {
         <span class="prelude-val">Some</span>(Retrieved {
             value: f(<span class="kw-2">&amp;</span><span class="self">self</span>.value)<span class="question-mark">?</span>,
             retrieved_at: <span class="self">self</span>.retrieved_at,
@@ -486,7 +488,7 @@
 }
 
 <span class="kw">impl </span>Retrieved&lt;<span class="kw-2">&amp;</span>Tls13ClientSessionValue&gt; {
-    <span class="kw">pub fn </span>obfuscated_ticket_age(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u32 {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>obfuscated_ticket_age(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u32 {
         <span class="kw">let </span>age_secs = <span class="self">self
             </span>.retrieved_at
             .as_secs()
@@ -496,8 +498,8 @@
     }
 }
 
-<span class="kw">impl</span>&lt;T: std::ops::Deref&lt;Target = ClientSessionCommon&gt;&gt; Retrieved&lt;T&gt; {
-    <span class="kw">pub fn </span>has_expired(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+<span class="kw">impl</span>&lt;T: core::ops::Deref&lt;Target = ClientSessionCommon&gt;&gt; Retrieved&lt;T&gt; {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>has_expired(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         <span class="kw">let </span>common = <span class="kw-2">&amp;*</span><span class="self">self</span>.value;
         common.lifetime_secs != <span class="number">0
             </span>&amp;&amp; common
@@ -507,7 +509,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;T&gt; std::ops::Deref <span class="kw">for </span>Retrieved&lt;T&gt; {
+<span class="kw">impl</span>&lt;T&gt; core::ops::Deref <span class="kw">for </span>Retrieved&lt;T&gt; {
     <span class="kw">type </span>Target = T;
 
     <span class="kw">fn </span>deref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="self">Self</span>::Target {
@@ -521,17 +523,16 @@
     age_add: u32,
     max_early_data_size: u32,
     <span class="kw">pub</span>(<span class="kw">crate</span>) common: ClientSessionCommon,
-    <span class="attr">#[cfg(feature = <span class="string">"quic"</span>)]
-    </span>quic_params: PayloadU16,
+    quic_params: PayloadU16,
 }
 
 <span class="kw">impl </span>Tls13ClientSessionValue {
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(
         suite: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Tls13CipherSuite,
         ticket: Vec&lt;u8&gt;,
-        secret: Vec&lt;u8&gt;,
-        server_cert_chain: Vec&lt;key::Certificate&gt;,
-        time_now: TimeBase,
+        secret: <span class="kw-2">&amp;</span>[u8],
+        server_cert_chain: CertificateChain,
+        time_now: UnixTime,
         lifetime_secs: u32,
         age_add: u32,
         max_early_data_size: u32,
@@ -547,8 +548,7 @@
                 lifetime_secs,
                 server_cert_chain,
             ),
-            <span class="attr">#[cfg(feature = <span class="string">"quic"</span>)]
-            </span>quic_params: PayloadU16(Vec::new()),
+            quic_params: PayloadU16(Vec::new()),
         }
     }
 
@@ -566,18 +566,16 @@
         <span class="self">self</span>.common.epoch -= delta <span class="kw">as </span>u64;
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">"quic"</span>)]
-    </span><span class="kw">pub fn </span>set_quic_params(<span class="kw-2">&amp;mut </span><span class="self">self</span>, quic_params: <span class="kw-2">&amp;</span>[u8]) {
+    <span class="kw">pub fn </span>set_quic_params(<span class="kw-2">&amp;mut </span><span class="self">self</span>, quic_params: <span class="kw-2">&amp;</span>[u8]) {
         <span class="self">self</span>.quic_params = PayloadU16(quic_params.to_vec());
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">"quic"</span>)]
-    </span><span class="kw">pub fn </span>quic_params(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Vec&lt;u8&gt; {
+    <span class="kw">pub fn </span>quic_params(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Vec&lt;u8&gt; {
         <span class="self">self</span>.quic_params.<span class="number">0</span>.clone()
     }
 }
 
-<span class="kw">impl </span>std::ops::Deref <span class="kw">for </span>Tls13ClientSessionValue {
+<span class="kw">impl </span>core::ops::Deref <span class="kw">for </span>Tls13ClientSessionValue {
     <span class="kw">type </span>Target = ClientSessionCommon;
 
     <span class="kw">fn </span>deref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="self">Self</span>::Target {
@@ -604,9 +602,9 @@
         suite: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Tls12CipherSuite,
         session_id: SessionId,
         ticket: Vec&lt;u8&gt;,
-        master_secret: Vec&lt;u8&gt;,
-        server_cert_chain: Vec&lt;key::Certificate&gt;,
-        time_now: TimeBase,
+        master_secret: <span class="kw-2">&amp;</span>[u8],
+        server_cert_chain: CertificateChain,
+        time_now: UnixTime,
         lifetime_secs: u32,
         extended_ms: bool,
     ) -&gt; <span class="self">Self </span>{
@@ -644,7 +642,7 @@
 }
 
 <span class="attr">#[cfg(feature = <span class="string">"tls12"</span>)]
-</span><span class="kw">impl </span>std::ops::Deref <span class="kw">for </span>Tls12ClientSessionValue {
+</span><span class="kw">impl </span>core::ops::Deref <span class="kw">for </span>Tls12ClientSessionValue {
     <span class="kw">type </span>Target = ClientSessionCommon;
 
     <span class="kw">fn </span>deref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="self">Self</span>::Target {
@@ -655,31 +653,31 @@
 <span class="attr">#[derive(Debug, Clone)]
 </span><span class="kw">pub struct </span>ClientSessionCommon {
     ticket: PayloadU16,
-    secret: PayloadU8,
+    secret: Zeroizing&lt;PayloadU8&gt;,
     epoch: u64,
     lifetime_secs: u32,
-    server_cert_chain: CertificatePayload,
+    server_cert_chain: CertificateChain,
 }
 
 <span class="kw">impl </span>ClientSessionCommon {
     <span class="kw">fn </span>new(
         ticket: Vec&lt;u8&gt;,
-        secret: Vec&lt;u8&gt;,
-        time_now: TimeBase,
+        secret: <span class="kw-2">&amp;</span>[u8],
+        time_now: UnixTime,
         lifetime_secs: u32,
-        server_cert_chain: Vec&lt;key::Certificate&gt;,
+        server_cert_chain: CertificateChain,
     ) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             ticket: PayloadU16(ticket),
-            secret: PayloadU8(secret),
+            secret: Zeroizing::new(PayloadU8(secret.to_vec())),
             epoch: time_now.as_secs(),
             lifetime_secs: cmp::min(lifetime_secs, MAX_TICKET_LIFETIME),
             server_cert_chain,
         }
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>server_cert_chain(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[key::Certificate] {
-        <span class="self">self</span>.server_cert_chain.as_ref()
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>server_cert_chain(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>CertificateChain {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.server_cert_chain
     }
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>secret(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[u8] {
@@ -700,20 +698,18 @@
 </span><span class="kw">static </span>MAX_FRESHNESS_SKEW_MS: u32 = <span class="number">60 </span>* <span class="number">1000</span>;
 
 <span class="comment">// --- Server types ---
-</span><span class="kw">pub type </span>ServerSessionKey = SessionId;
-
-<span class="attr">#[derive(Debug)]
+</span><span class="attr">#[derive(Debug)]
 </span><span class="kw">pub struct </span>ServerSessionValue {
-    <span class="kw">pub </span>sni: <span class="prelude-ty">Option</span>&lt;DnsName&gt;,
-    <span class="kw">pub </span>version: ProtocolVersion,
-    <span class="kw">pub </span>cipher_suite: CipherSuite,
-    <span class="kw">pub </span>master_secret: PayloadU8,
-    <span class="kw">pub </span>extended_ms: bool,
-    <span class="kw">pub </span>client_cert_chain: <span class="prelude-ty">Option</span>&lt;CertificatePayload&gt;,
-    <span class="kw">pub </span>alpn: <span class="prelude-ty">Option</span>&lt;PayloadU8&gt;,
-    <span class="kw">pub </span>application_data: PayloadU16,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) sni: <span class="prelude-ty">Option</span>&lt;DnsName&lt;<span class="lifetime">'static</span>&gt;&gt;,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) version: ProtocolVersion,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) cipher_suite: CipherSuite,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) master_secret: Zeroizing&lt;PayloadU8&gt;,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) extended_ms: bool,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) client_cert_chain: <span class="prelude-ty">Option</span>&lt;CertificateChain&gt;,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) alpn: <span class="prelude-ty">Option</span>&lt;PayloadU8&gt;,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) application_data: PayloadU16,
     <span class="kw">pub </span>creation_time_sec: u64,
-    <span class="kw">pub </span>age_obfuscation_offset: u32,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) age_obfuscation_offset: u32,
     freshness: <span class="prelude-ty">Option</span>&lt;bool&gt;,
 }
 
@@ -752,8 +748,8 @@
         <span class="kw">let </span>has_sni = u8::read(r)<span class="question-mark">?</span>;
         <span class="kw">let </span>sni = <span class="kw">if </span>has_sni == <span class="number">1 </span>{
             <span class="kw">let </span>dns_name = PayloadU8::read(r)<span class="question-mark">?</span>;
-            <span class="kw">let </span>dns_name = <span class="kw">match </span>DnsName::try_from_ascii(<span class="kw-2">&amp;</span>dns_name.<span class="number">0</span>) {
-                <span class="prelude-val">Ok</span>(dns_name) =&gt; dns_name,
+            <span class="kw">let </span>dns_name = <span class="kw">match </span>DnsName::try_from(dns_name.<span class="number">0</span>.as_slice()) {
+                <span class="prelude-val">Ok</span>(dns_name) =&gt; dns_name.to_owned(),
                 <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(InvalidMessage::InvalidServerName),
             };
 
@@ -764,11 +760,11 @@
 
         <span class="kw">let </span>v = ProtocolVersion::read(r)<span class="question-mark">?</span>;
         <span class="kw">let </span>cs = CipherSuite::read(r)<span class="question-mark">?</span>;
-        <span class="kw">let </span>ms = PayloadU8::read(r)<span class="question-mark">?</span>;
+        <span class="kw">let </span>ms = Zeroizing::new(PayloadU8::read(r)<span class="question-mark">?</span>);
         <span class="kw">let </span>ems = u8::read(r)<span class="question-mark">?</span>;
         <span class="kw">let </span>has_ccert = u8::read(r)<span class="question-mark">? </span>== <span class="number">1</span>;
         <span class="kw">let </span>ccert = <span class="kw">if </span>has_ccert {
-            <span class="prelude-val">Some</span>(CertificatePayload::read(r)<span class="question-mark">?</span>)
+            <span class="prelude-val">Some</span>(CertificateChain::read(r)<span class="question-mark">?</span>)
         } <span class="kw">else </span>{
             <span class="prelude-val">None
         </span>};
@@ -799,22 +795,22 @@
 }
 
 <span class="kw">impl </span>ServerSessionValue {
-    <span class="kw">pub fn </span>new(
-        sni: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>DnsName&gt;,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(
+        sni: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>DnsName&lt;<span class="lifetime">'_</span>&gt;&gt;,
         v: ProtocolVersion,
         cs: CipherSuite,
-        ms: Vec&lt;u8&gt;,
-        client_cert_chain: <span class="prelude-ty">Option</span>&lt;CertificatePayload&gt;,
+        ms: <span class="kw-2">&amp;</span>[u8],
+        client_cert_chain: <span class="prelude-ty">Option</span>&lt;CertificateChain&gt;,
         alpn: <span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;,
         application_data: Vec&lt;u8&gt;,
-        creation_time: TimeBase,
+        creation_time: UnixTime,
         age_obfuscation_offset: u32,
     ) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            sni: sni.cloned(),
+            sni: sni.map(|dns| dns.to_owned()),
             version: v,
             cipher_suite: cs,
-            master_secret: PayloadU8::new(ms),
+            master_secret: Zeroizing::new(PayloadU8::new(ms.to_vec())),
             extended_ms: <span class="bool-val">false</span>,
             client_cert_chain,
             alpn: alpn.map(PayloadU8::new),
@@ -825,11 +821,16 @@
         }
     }
 
-    <span class="kw">pub fn </span>set_extended_ms_used(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+    <span class="attr">#[cfg(feature = <span class="string">"tls12"</span>)]
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>set_extended_ms_used(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="self">self</span>.extended_ms = <span class="bool-val">true</span>;
     }
 
-    <span class="kw">pub fn </span>set_freshness(<span class="kw-2">mut </span><span class="self">self</span>, obfuscated_client_age_ms: u32, time_now: TimeBase) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>set_freshness(
+        <span class="kw-2">mut </span><span class="self">self</span>,
+        obfuscated_client_age_ms: u32,
+        time_now: UnixTime,
+    ) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>client_age_ms = obfuscated_client_age_ms.wrapping_sub(<span class="self">self</span>.age_obfuscation_offset);
         <span class="kw">let </span>server_age_ms = (time_now
             .as_secs()
@@ -846,7 +847,7 @@
         <span class="self">self
     </span>}
 
-    <span class="kw">pub fn </span>is_fresh(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>is_fresh(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         <span class="self">self</span>.freshness.unwrap_or_default()
     }
 }
@@ -855,20 +856,19 @@
 </span><span class="kw">mod </span>tests {
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
     <span class="kw">use </span><span class="kw">crate</span>::enums::<span class="kw-2">*</span>;
-    <span class="kw">use </span><span class="kw">crate</span>::msgs::codec::{Codec, Reader};
-    <span class="kw">use </span><span class="kw">crate</span>::ticketer::TimeBase;
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>serversessionvalue_is_debug() {
+        <span class="kw">use </span>std::{println, vec};
         <span class="kw">let </span>ssv = ServerSessionValue::new(
             <span class="prelude-val">None</span>,
             ProtocolVersion::TLSv1_3,
             CipherSuite::TLS13_AES_128_GCM_SHA256,
-            <span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>],
+            <span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>],
             <span class="prelude-val">None</span>,
             <span class="prelude-val">None</span>,
             <span class="macro">vec!</span>[<span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>],
-            TimeBase::now().unwrap(),
+            UnixTime::now(),
             <span class="number">0x12345678</span>,
         );
         <span class="macro">println!</span>(<span class="string">"{:?}"</span>, ssv);

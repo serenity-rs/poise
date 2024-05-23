@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/time-0.3.30/src/utc_offset.rs`."><title>utc_offset.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-b21aa549bf6d91ff.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="time" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (79734f1db 2024-05-02)" data-channel="nightly" data-search-js="search-bf21c90c8c1d92b1.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-e32f0c247825364d.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-09095024cf37855e.css"></noscript><link rel="icon" href="https://avatars0.githubusercontent.com/u/55999857"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../time/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Type ‘S’ or ‘/’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings">Settings</a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/time-0.3.36/src/utc_offset.rs`."><title>utc_offset.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="time" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (9cdfe285c 2024-05-22)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="icon" href="https://avatars0.githubusercontent.com/u/55999857"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -459,9 +459,27 @@
 <a href="#459" id="459">459</a>
 <a href="#460" id="460">460</a>
 <a href="#461" id="461">461</a>
+<a href="#462" id="462">462</a>
+<a href="#463" id="463">463</a>
+<a href="#464" id="464">464</a>
+<a href="#465" id="465">465</a>
+<a href="#466" id="466">466</a>
+<a href="#467" id="467">467</a>
+<a href="#468" id="468">468</a>
+<a href="#469" id="469">469</a>
+<a href="#470" id="470">470</a>
+<a href="#471" id="471">471</a>
+<a href="#472" id="472">472</a>
+<a href="#473" id="473">473</a>
+<a href="#474" id="474">474</a>
+<a href="#475" id="475">475</a>
+<a href="#476" id="476">476</a>
+<a href="#477" id="477">477</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! The [`UtcOffset`] struct and its associated `impl`s.
 
-</span><span class="kw">use </span>core::fmt;
+</span><span class="attr">#[cfg(feature = <span class="string">"formatting"</span>)]
+</span><span class="kw">use </span>alloc::string::String;
+<span class="kw">use </span>core::fmt;
 <span class="kw">use </span>core::ops::Neg;
 <span class="attr">#[cfg(feature = <span class="string">"formatting"</span>)]
 </span><span class="kw">use </span>std::io;
@@ -483,15 +501,28 @@
 </span><span class="kw">use </span><span class="kw">crate</span>::OffsetDateTime;
 
 <span class="doccomment">/// The type of the `hours` field of `UtcOffset`.
-</span><span class="kw">type </span>Hours = RangedI8&lt;{ -(Hour::per(Day) <span class="kw">as </span>i8 - <span class="number">1</span>) }, { Hour::per(Day) <span class="kw">as </span>i8 - <span class="number">1 </span>}&gt;;
+</span><span class="kw">type </span>Hours = RangedI8&lt;-<span class="number">25</span>, <span class="number">25</span>&gt;;
 <span class="doccomment">/// The type of the `minutes` field of `UtcOffset`.
 </span><span class="kw">type </span>Minutes = RangedI8&lt;{ -(Minute::per(Hour) <span class="kw">as </span>i8 - <span class="number">1</span>) }, { Minute::per(Hour) <span class="kw">as </span>i8 - <span class="number">1 </span>}&gt;;
 <span class="doccomment">/// The type of the `seconds` field of `UtcOffset`.
 </span><span class="kw">type </span>Seconds = RangedI8&lt;{ -(Second::per(Minute) <span class="kw">as </span>i8 - <span class="number">1</span>) }, { Second::per(Minute) <span class="kw">as </span>i8 - <span class="number">1 </span>}&gt;;
+<span class="doccomment">/// The type capable of storing the range of whole seconds that a `UtcOffset` can encompass.
+</span><span class="kw">type </span>WholeSeconds = RangedI32&lt;
+    {
+        Hours::MIN.get() <span class="kw">as </span>i32 * Second::per(Hour) <span class="kw">as </span>i32
+            + Minutes::MIN.get() <span class="kw">as </span>i32 * Second::per(Minute) <span class="kw">as </span>i32
+            + Seconds::MIN.get() <span class="kw">as </span>i32
+    },
+    {
+        Hours::MAX.get() <span class="kw">as </span>i32 * Second::per(Hour) <span class="kw">as </span>i32
+            + Minutes::MAX.get() <span class="kw">as </span>i32 * Second::per(Minute) <span class="kw">as </span>i32
+            + Seconds::MAX.get() <span class="kw">as </span>i32
+    },
+&gt;;
 
 <span class="doccomment">/// An offset from UTC.
 ///
-/// This struct can store values up to ±23:59:59. If you need support outside this range, please
+/// This struct can store values up to ±25:59:59. If you need support outside this range, please
 /// file an issue with your use case.
 </span><span class="comment">// All three components _must_ have the same sign.
 </span><span class="attr">#[derive(Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
@@ -512,9 +543,7 @@
     /// # use time_macros::offset;
     /// assert_eq!(UtcOffset::UTC, offset!(UTC));
     /// ```
-    </span><span class="attr">#[allow(clippy::undocumented_unsafe_blocks)] </span><span class="comment">// rust-lang/rust-clippy#11246
-    // Safety: All values are in range.
-    </span><span class="kw">pub const </span>UTC: <span class="self">Self </span>= <span class="kw">unsafe </span>{ <span class="self">Self</span>::__from_hms_unchecked(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>) };
+    </span><span class="kw">pub const </span>UTC: <span class="self">Self </span>= <span class="self">Self</span>::from_whole_seconds_ranged(WholeSeconds::new_static::&lt;<span class="number">0</span>&gt;());
 
     <span class="comment">// region: constructors
     </span><span class="doccomment">/// Create a `UtcOffset` representing an offset of the hours, minutes, and seconds provided, the
@@ -523,7 +552,7 @@
     ///
     /// # Safety
     ///
-    /// - Hours must be in the range `-23..=23`.
+    /// - Hours must be in the range `-25..=25`.
     /// - Minutes must be in the range `-59..=59`.
     /// - Seconds must be in the range `-59..=59`.
     ///
@@ -630,28 +659,31 @@
     /// # Ok::&lt;_, time::Error&gt;(())
     /// ```
     </span><span class="kw">pub const fn </span>from_whole_seconds(seconds: i32) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, error::ComponentRange&gt; {
-        <span class="kw">type </span>WholeSeconds = RangedI32&lt;
-            {
-                Hours::MIN.get() <span class="kw">as </span>i32 * Second::per(Hour) <span class="kw">as </span>i32
-                    + Minutes::MIN.get() <span class="kw">as </span>i32 * Second::per(Minute) <span class="kw">as </span>i32
-                    + Seconds::MIN.get() <span class="kw">as </span>i32
-            },
-            {
-                Hours::MAX.get() <span class="kw">as </span>i32 * Second::per(Hour) <span class="kw">as </span>i32
-                    + Minutes::MAX.get() <span class="kw">as </span>i32 * Second::per(Minute) <span class="kw">as </span>i32
-                    + Seconds::MAX.get() <span class="kw">as </span>i32
-            },
-        &gt;;
-        <span class="macro">ensure_ranged!</span>(WholeSeconds: seconds);
+        <span class="prelude-val">Ok</span>(<span class="self">Self</span>::from_whole_seconds_ranged(
+            <span class="macro">ensure_ranged!</span>(WholeSeconds: seconds),
+        ))
+    }
 
-        <span class="comment">// Safety: The value was checked to be in range.
-        </span><span class="prelude-val">Ok</span>(<span class="kw">unsafe </span>{
+    <span class="doccomment">/// Create a `UtcOffset` representing an offset by the number of seconds provided.
+    </span><span class="comment">// ignore because the function is crate-private
+    </span><span class="doccomment">/// ```rust,ignore
+    /// # use time::UtcOffset;
+    /// # use deranged::RangedI32;
+    /// assert_eq!(
+    ///     UtcOffset::from_whole_seconds_ranged(RangedI32::new_static::&lt;3_723&gt;()).as_hms(),
+    ///     (1, 2, 3)
+    /// );
+    /// # Ok::&lt;_, time::Error&gt;(())
+    /// ```
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const fn </span>from_whole_seconds_ranged(seconds: WholeSeconds) -&gt; <span class="self">Self </span>{
+        <span class="comment">// Safety: The type of `seconds` guarantees that all values are in range.
+        </span><span class="kw">unsafe </span>{
             <span class="self">Self</span>::__from_hms_unchecked(
-                (seconds / Second::per(Hour) <span class="kw">as </span>i32) <span class="kw">as _</span>,
-                ((seconds % Second::per(Hour) <span class="kw">as </span>i32) / Minute::per(Hour) <span class="kw">as </span>i32) <span class="kw">as _</span>,
-                (seconds % Second::per(Minute) <span class="kw">as </span>i32) <span class="kw">as _</span>,
+                (seconds.get() / Second::per(Hour) <span class="kw">as </span>i32) <span class="kw">as _</span>,
+                ((seconds.get() % Second::per(Hour) <span class="kw">as </span>i32) / Minute::per(Hour) <span class="kw">as </span>i32) <span class="kw">as _</span>,
+                (seconds.get() % Second::per(Minute) <span class="kw">as </span>i32) <span class="kw">as _</span>,
             )
-        })
+        }
     }
     <span class="comment">// endregion constructors
 

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["cipher","msgs","record_layer"]};
+window.SIDEBAR_ITEMS = {"mod":["msgs","record_layer"]};

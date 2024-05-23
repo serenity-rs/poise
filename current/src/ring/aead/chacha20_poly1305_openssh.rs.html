@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.5/src/aead/chacha20_poly1305_openssh.rs`."><title>chacha20_poly1305_openssh.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-b21aa549bf6d91ff.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="ring" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (79734f1db 2024-05-02)" data-channel="nightly" data-search-js="search-bf21c90c8c1d92b1.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-e32f0c247825364d.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-09095024cf37855e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../ring/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Type ‘S’ or ‘/’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings">Settings</a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.8/src/aead/chacha20_poly1305_openssh.rs`."><title>chacha20_poly1305_openssh.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="ring" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (9cdfe285c 2024-05-22)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -178,7 +178,6 @@
 <a href="#178" id="178">178</a>
 <a href="#179" id="179">179</a>
 <a href="#180" id="180">180</a>
-<a href="#181" id="181">181</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2016 Brian Smith.
 //
 // Permission to use, copy, modify, and/or distribute this software for any
@@ -213,9 +212,7 @@
 </span><span class="kw">use super</span>::{
     chacha::{<span class="self">self</span>, <span class="kw-2">*</span>},
     chacha20_poly1305::derive_poly1305_key,
-    cpu, poly1305,
-    polyfill::ChunksFixed,
-    Nonce, Tag,
+    cpu, poly1305, Nonce, Tag,
 };
 <span class="kw">use crate</span>::{constant_time, error};
 
@@ -228,7 +225,7 @@
     <span class="doccomment">/// Constructs a new `SealingKey`.
     </span><span class="kw">pub fn </span>new(key_material: <span class="kw-2">&amp;</span>[u8; KEY_LEN]) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            key: Key::new(key_material, cpu::features()),
+            key: Key::new(key_material),
         }
     }
 
@@ -245,6 +242,7 @@
         plaintext_in_ciphertext_out: <span class="kw-2">&amp;mut </span>[u8],
         tag_out: <span class="kw-2">&amp;mut </span>[u8; TAG_LEN],
     ) {
+        <span class="kw">let </span>cpu_features = cpu::features();
         <span class="kw">let </span><span class="kw-2">mut </span>counter = make_counter(sequence_number);
         <span class="kw">let </span>poly_key = derive_poly1305_key(<span class="kw-2">&amp;</span><span class="self">self</span>.key.k_2, counter.increment());
 
@@ -260,7 +258,7 @@
                 .encrypt_in_place(counter, data_and_padding_in_out);
         }
 
-        <span class="kw">let </span>Tag(tag) = poly1305::sign(poly_key, plaintext_in_ciphertext_out);
+        <span class="kw">let </span>Tag(tag) = poly1305::sign(poly_key, plaintext_in_ciphertext_out, cpu_features);
         tag_out.copy_from_slice(tag.as_ref());
     }
 }
@@ -274,7 +272,7 @@
     <span class="doccomment">/// Constructs a new `OpeningKey`.
     </span><span class="kw">pub fn </span>new(key_material: <span class="kw-2">&amp;</span>[u8; KEY_LEN]) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            key: Key::new(key_material, cpu::features()),
+            key: Key::new(key_material),
         }
     }
 
@@ -331,12 +329,12 @@
 }
 
 <span class="kw">impl </span>Key {
-    <span class="kw">fn </span>new(key_material: <span class="kw-2">&amp;</span>[u8; KEY_LEN], cpu_features: cpu::Features) -&gt; <span class="self">Self </span>{
+    <span class="kw">fn </span>new(key_material: <span class="kw-2">&amp;</span>[u8; KEY_LEN]) -&gt; <span class="self">Self </span>{
         <span class="comment">// The first half becomes K_2 and the second half becomes K_1.
-        </span><span class="kw">let </span><span class="kw-2">&amp;</span>[k_2, k_1]: <span class="kw-2">&amp;</span>[[u8; chacha::KEY_LEN]; <span class="number">2</span>] = key_material.chunks_fixed();
+        </span><span class="kw">let </span>(k_2, k_1) = key_material.split_at(chacha::KEY_LEN);
         <span class="self">Self </span>{
-            k_1: chacha::Key::new(k_1, cpu_features),
-            k_2: chacha::Key::new(k_2, cpu_features),
+            k_1: chacha::Key::new(k_1.try_into().unwrap()),
+            k_2: chacha::Key::new(k_2.try_into().unwrap()),
         }
     }
 }
@@ -357,7 +355,7 @@
 </span><span class="kw">pub const </span>TAG_LEN: usize = <span class="kw">super</span>::TAG_LEN;
 
 <span class="kw">fn </span>verify(key: poly1305::Key, msg: <span class="kw-2">&amp;</span>[u8], tag: <span class="kw-2">&amp;</span>[u8; TAG_LEN]) -&gt; <span class="prelude-ty">Result</span>&lt;(), error::Unspecified&gt; {
-    <span class="kw">let </span>Tag(calculated_tag) = poly1305::sign(key, msg);
+    <span class="kw">let </span>Tag(calculated_tag) = poly1305::sign(key, msg, cpu::features());
     constant_time::verify_slices_are_equal(calculated_tag.as_ref(), tag)
 }
 </code></pre></div></section></main></body></html>

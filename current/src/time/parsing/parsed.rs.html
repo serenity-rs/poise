@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/time-0.3.30/src/parsing/parsed.rs`."><title>parsed.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-b21aa549bf6d91ff.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="time" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (79734f1db 2024-05-02)" data-channel="nightly" data-search-js="search-bf21c90c8c1d92b1.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-e32f0c247825364d.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-09095024cf37855e.css"></noscript><link rel="icon" href="https://avatars0.githubusercontent.com/u/55999857"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../time/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Type ‘S’ or ‘/’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings">Settings</a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/time-0.3.36/src/parsing/parsed.rs`."><title>parsed.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="time" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (9cdfe285c 2024-05-22)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="icon" href="https://avatars0.githubusercontent.com/u/55999857"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -901,10 +901,6 @@
 <a href="#901" id="901">901</a>
 <a href="#902" id="902">902</a>
 <a href="#903" id="903">903</a>
-<a href="#904" id="904">904</a>
-<a href="#905" id="905">905</a>
-<a href="#906" id="906">906</a>
-<a href="#907" id="907">907</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Information parsed from an input and format description.
 
 </span><span class="kw">use </span>core::num::{NonZeroU16, NonZeroU8};
@@ -913,15 +909,15 @@
     OptionRangedI128, OptionRangedI32, OptionRangedI8, OptionRangedU16, OptionRangedU32,
     OptionRangedU8, RangedI128, RangedI32, RangedI8, RangedU16, RangedU32, RangedU8,
 };
+<span class="kw">use </span>num_conv::prelude::<span class="kw-2">*</span>;
 
 <span class="kw">use </span><span class="kw">crate</span>::convert::{Day, Hour, Minute, Nanosecond, Second};
 <span class="kw">use </span><span class="kw">crate</span>::date::{MAX_YEAR, MIN_YEAR};
-<span class="kw">use </span><span class="kw">crate</span>::date_time::{maybe_offset_from_offset, offset_kind, DateTime, MaybeOffset};
 <span class="kw">use </span><span class="kw">crate</span>::error::TryFromParsed::InsufficientInformation;
 <span class="attr">#[cfg(feature = <span class="string">"alloc"</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::format_description::OwnedFormatItem;
-<span class="kw">use </span><span class="kw">crate</span>::format_description::{modifier, Component, FormatItem};
-<span class="kw">use </span><span class="kw">crate</span>::internal_macros::const_try_opt;
+<span class="kw">use </span><span class="kw">crate</span>::format_description::{modifier, BorrowedFormatItem, Component};
+<span class="kw">use </span><span class="kw">crate</span>::internal_macros::{bug, const_try_opt};
 <span class="kw">use </span><span class="kw">crate</span>::parsing::component::{
     parse_day, parse_end, parse_hour, parse_ignore, parse_minute, parse_month, parse_offset_hour,
     parse_offset_minute, parse_offset_second, parse_ordinal, parse_period, parse_second,
@@ -945,7 +941,7 @@
     }
 }
 
-<span class="kw">impl </span>sealed::AnyFormatItem <span class="kw">for </span>FormatItem&lt;<span class="lifetime">'_</span>&gt; {
+<span class="kw">impl </span>sealed::AnyFormatItem <span class="kw">for </span>BorrowedFormatItem&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>parse_item&lt;<span class="lifetime">'a</span>&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         parsed: <span class="kw-2">&amp;mut </span>Parsed,
@@ -1066,13 +1062,13 @@
     </span>offset_second:
         OptionRangedI8&lt;{ -((Second::per(Minute) - <span class="number">1</span>) <span class="kw">as </span>i8) }, { (Second::per(Minute) - <span class="number">1</span>) <span class="kw">as _ </span>}&gt;,
     <span class="doccomment">/// The Unix timestamp in nanoseconds.
-    </span><span class="comment">// unix_timestamp_nanos: MaybeUninit&lt;i128&gt;,
     </span>unix_timestamp_nanos: OptionRangedI128&lt;
-        { Date::MIN.midnight().assume_utc().unix_timestamp_nanos() },
         {
-            Date::MAX
-                .with_time(Time::MAX)
-                .assume_utc()
+            OffsetDateTime::new_in_offset(Date::MIN, Time::MIDNIGHT, UtcOffset::UTC)
+                .unix_timestamp_nanos()
+        },
+        {
+            OffsetDateTime::new_in_offset(Date::MAX, Time::MAX, UtcOffset::UTC)
                 .unix_timestamp_nanos()
         },
     &gt;,
@@ -1082,6 +1078,12 @@
     <span class="doccomment">/// Indicates whether a leap second is permitted to be parsed. This is required by some
     /// well-known formats.
     </span><span class="kw">pub</span>(<span class="kw">super</span>) leap_second_allowed: bool,
+}
+
+<span class="kw">impl </span>Default <span class="kw">for </span>Parsed {
+    <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::new()
+    }
 }
 
 <span class="kw">impl </span>Parsed {
@@ -1114,11 +1116,11 @@
         }
     }
 
-    <span class="doccomment">/// Parse a single [`FormatItem`] or [`OwnedFormatItem`], mutating the struct. The remaining
-    /// input is returned as the `Ok` value.
+    <span class="doccomment">/// Parse a single [`BorrowedFormatItem`] or [`OwnedFormatItem`], mutating the struct. The
+    /// remaining input is returned as the `Ok` value.
     ///
-    /// If a [`FormatItem::Optional`] or [`OwnedFormatItem::Optional`] is passed, parsing will not
-    /// fail; the input will be returned as-is if the expected format is not present.
+    /// If a [`BorrowedFormatItem::Optional`] or [`OwnedFormatItem::Optional`] is passed, parsing
+    /// will not fail; the input will be returned as-is if the expected format is not present.
     </span><span class="kw">pub fn </span>parse_item&lt;<span class="lifetime">'a</span>&gt;(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         input: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
@@ -1127,11 +1129,11 @@
         item.parse_item(<span class="self">self</span>, input)
     }
 
-    <span class="doccomment">/// Parse a sequence of [`FormatItem`]s or [`OwnedFormatItem`]s, mutating the struct. The
-    /// remaining input is returned as the `Ok` value.
+    <span class="doccomment">/// Parse a sequence of [`BorrowedFormatItem`]s or [`OwnedFormatItem`]s, mutating the struct.
+    /// The remaining input is returned as the `Ok` value.
     ///
-    /// This method will fail if any of the contained [`FormatItem`]s or [`OwnedFormatItem`]s fail
-    /// to parse. `self` will not be mutated in this instance.
+    /// This method will fail if any of the contained [`BorrowedFormatItem`]s or
+    /// [`OwnedFormatItem`]s fail to parse. `self` will not be mutated in this instance.
     </span><span class="kw">pub fn </span>parse_items&lt;<span class="lifetime">'a</span>&gt;(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         <span class="kw-2">mut </span>input: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8],
@@ -1197,9 +1199,13 @@
                     parse_year(input, modifiers).ok_or(InvalidComponent(<span class="string">"year"</span>))<span class="question-mark">?</span>;
                 <span class="kw">match </span>(modifiers.iso_week_based, modifiers.repr) {
                     (<span class="bool-val">false</span>, modifier::YearRepr::Full) =&gt; <span class="self">self</span>.set_year(value),
-                    (<span class="bool-val">false</span>, modifier::YearRepr::LastTwo) =&gt; <span class="self">self</span>.set_year_last_two(value <span class="kw">as _</span>),
+                    (<span class="bool-val">false</span>, modifier::YearRepr::LastTwo) =&gt; {
+                        <span class="self">self</span>.set_year_last_two(value.cast_unsigned().truncate())
+                    }
                     (<span class="bool-val">true</span>, modifier::YearRepr::Full) =&gt; <span class="self">self</span>.set_iso_year(value),
-                    (<span class="bool-val">true</span>, modifier::YearRepr::LastTwo) =&gt; <span class="self">self</span>.set_iso_year_last_two(value <span class="kw">as _</span>),
+                    (<span class="bool-val">true</span>, modifier::YearRepr::LastTwo) =&gt; {
+                        <span class="self">self</span>.set_iso_year_last_two(value.cast_unsigned().truncate())
+                    }
                 }
                 .ok_or(InvalidComponent(<span class="string">"year"</span>))<span class="question-mark">?</span>;
                 <span class="prelude-val">Ok</span>(remaining)
@@ -1440,10 +1446,10 @@
         note = <span class="string">"use `parsed.set_offset_minute_signed()` instead"
     </span>)]
     </span><span class="kw">pub fn </span>set_offset_minute(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: u8) -&gt; <span class="prelude-ty">Option</span>&lt;()&gt; {
-        <span class="kw">if </span>value &gt; i8::MAX <span class="kw">as </span>u8 {
+        <span class="kw">if </span>value &gt; i8::MAX.cast_unsigned() {
             <span class="prelude-val">None
         </span>} <span class="kw">else </span>{
-            <span class="self">self</span>.set_offset_minute_signed(value <span class="kw">as _</span>)
+            <span class="self">self</span>.set_offset_minute_signed(value.cast_signed())
         }
     }
 
@@ -1454,10 +1460,10 @@
         note = <span class="string">"use `parsed.set_offset_second_signed()` instead"
     </span>)]
     </span><span class="kw">pub fn </span>set_offset_second(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: u8) -&gt; <span class="prelude-ty">Option</span>&lt;()&gt; {
-        <span class="kw">if </span>value &gt; i8::MAX <span class="kw">as </span>u8 {
+        <span class="kw">if </span>value &gt; i8::MAX.cast_unsigned() {
             <span class="prelude-val">None
         </span>} <span class="kw">else </span>{
-            <span class="self">self</span>.set_offset_second_signed(value <span class="kw">as _</span>)
+            <span class="self">self</span>.set_offset_second_signed(value.cast_signed())
         }
     }
 }
@@ -1668,15 +1674,17 @@
             )<span class="question-mark">?</span>),
             (year, sunday_week_number, weekday) =&gt; <span class="prelude-val">Ok</span>(<span class="self">Self</span>::from_ordinal_date(
                 year,
-                (sunday_week_number <span class="kw">as </span>i16 * <span class="number">7 </span>+ weekday.number_days_from_sunday() <span class="kw">as </span>i16
+                (sunday_week_number.cast_signed().extend::&lt;i16&gt;() * <span class="number">7
+                    </span>+ weekday.number_days_from_sunday().cast_signed().extend::&lt;i16&gt;()
                     - adjustment(year)
-                    + <span class="number">1</span>) <span class="kw">as </span>u16,
+                    + <span class="number">1</span>).cast_unsigned(),
             )<span class="question-mark">?</span>),
             (year, monday_week_number, weekday) =&gt; <span class="prelude-val">Ok</span>(<span class="self">Self</span>::from_ordinal_date(
                 year,
-                (monday_week_number <span class="kw">as </span>i16 * <span class="number">7 </span>+ weekday.number_days_from_monday() <span class="kw">as </span>i16
+                (monday_week_number.cast_signed().extend::&lt;i16&gt;() * <span class="number">7
+                    </span>+ weekday.number_days_from_monday().cast_signed().extend::&lt;i16&gt;()
                     - adjustment(year)
-                    + <span class="number">1</span>) <span class="kw">as </span>u16,
+                    + <span class="number">1</span>).cast_unsigned(),
             )<span class="question-mark">?</span>),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(InsufficientInformation),
         }
@@ -1742,61 +1750,45 @@
 }
 
 <span class="kw">impl </span>TryFrom&lt;Parsed&gt; <span class="kw">for </span>PrimitiveDateTime {
-    <span class="kw">type </span>Error = &lt;DateTime&lt;offset_kind::None&gt; <span class="kw">as </span>TryFrom&lt;Parsed&gt;&gt;::Error;
+    <span class="kw">type </span>Error = error::TryFromParsed;
 
     <span class="kw">fn </span>try_from(parsed: Parsed) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
-        parsed.try_into().map(<span class="self">Self</span>)
+        <span class="prelude-val">Ok</span>(<span class="self">Self</span>::new(parsed.try_into()<span class="question-mark">?</span>, parsed.try_into()<span class="question-mark">?</span>))
     }
 }
 
 <span class="kw">impl </span>TryFrom&lt;Parsed&gt; <span class="kw">for </span>OffsetDateTime {
-    <span class="kw">type </span>Error = &lt;DateTime&lt;offset_kind::Fixed&gt; <span class="kw">as </span>TryFrom&lt;Parsed&gt;&gt;::Error;
-
-    <span class="kw">fn </span>try_from(parsed: Parsed) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
-        parsed.try_into().map(<span class="self">Self</span>)
-    }
-}
-
-<span class="kw">impl</span>&lt;O: MaybeOffset&gt; TryFrom&lt;Parsed&gt; <span class="kw">for </span>DateTime&lt;O&gt; {
     <span class="kw">type </span>Error = error::TryFromParsed;
 
-    <span class="attr">#[allow(clippy::unwrap_in_result)] </span><span class="comment">// We know the values are valid.
-    </span><span class="kw">fn </span>try_from(<span class="kw-2">mut </span>parsed: Parsed) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
-        <span class="kw">if </span>O::HAS_LOGICAL_OFFSET {
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(timestamp) = parsed.unix_timestamp_nanos() {
-                <span class="kw">let </span>DateTime { date, time, offset } =
-                    DateTime::&lt;offset_kind::Fixed&gt;::from_unix_timestamp_nanos(timestamp)<span class="question-mark">?</span>;
-
-                <span class="kw">let </span><span class="kw-2">mut </span>value = <span class="self">Self </span>{
-                    date,
-                    time,
-                    offset: maybe_offset_from_offset::&lt;O&gt;(offset),
-                };
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(subsecond) = parsed.subsecond() {
-                    value = value.replace_nanosecond(subsecond)<span class="question-mark">?</span>;
-                }
-                <span class="kw">return </span><span class="prelude-val">Ok</span>(value);
+    <span class="kw">fn </span>try_from(<span class="kw-2">mut </span>parsed: Parsed) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(timestamp) = parsed.unix_timestamp_nanos() {
+            <span class="kw">let </span><span class="kw-2">mut </span>value = <span class="self">Self</span>::from_unix_timestamp_nanos(timestamp)<span class="question-mark">?</span>;
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(subsecond) = parsed.subsecond() {
+                value = value.replace_nanosecond(subsecond)<span class="question-mark">?</span>;
             }
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(value);
         }
 
         <span class="comment">// Some well-known formats explicitly allow leap seconds. We don't currently support them,
         // so treat it as the nearest preceding moment that can be represented. Because leap seconds
         // always fall at the end of a month UTC, reject any that are at other times.
         </span><span class="kw">let </span>leap_second_input = <span class="kw">if </span>parsed.leap_second_allowed &amp;&amp; parsed.second() == <span class="prelude-val">Some</span>(<span class="number">60</span>) {
-            parsed.set_second(<span class="number">59</span>).expect(<span class="string">"59 is a valid second"</span>);
-            parsed
-                .set_subsecond(<span class="number">999_999_999</span>)
-                .expect(<span class="string">"999_999_999 is a valid subsecond"</span>);
+            <span class="kw">if </span>parsed.set_second(<span class="number">59</span>).is_none() {
+                <span class="macro">bug!</span>(<span class="string">"59 is a valid second"</span>);
+            }
+            <span class="kw">if </span>parsed.set_subsecond(<span class="number">999_999_999</span>).is_none() {
+                <span class="macro">bug!</span>(<span class="string">"999_999_999 is a valid subsecond"</span>);
+            }
             <span class="bool-val">true
         </span>} <span class="kw">else </span>{
             <span class="bool-val">false
         </span>};
 
-        <span class="kw">let </span>dt = <span class="self">Self </span>{
-            date: Date::try_from(parsed)<span class="question-mark">?</span>,
-            time: Time::try_from(parsed)<span class="question-mark">?</span>,
-            offset: O::try_from_parsed(parsed)<span class="question-mark">?</span>,
-        };
+        <span class="kw">let </span>dt = <span class="self">Self</span>::new_in_offset(
+            Date::try_from(parsed)<span class="question-mark">?</span>,
+            Time::try_from(parsed)<span class="question-mark">?</span>,
+            UtcOffset::try_from(parsed)<span class="question-mark">?</span>,
+        );
 
         <span class="kw">if </span>leap_second_input &amp;&amp; !dt.is_valid_leap_second_stand_in() {
             <span class="kw">return </span><span class="prelude-val">Err</span>(error::TryFromParsed::ComponentRange(

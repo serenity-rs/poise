@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-0.21.9/src/key_log_file.rs`."><title>key_log_file.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-b21aa549bf6d91ff.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="rustls" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (79734f1db 2024-05-02)" data-channel="nightly" data-search-js="search-bf21c90c8c1d92b1.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-e32f0c247825364d.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-09095024cf37855e.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../rustls/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Type ‘S’ or ‘/’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings">Settings</a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-0.22.4/src/key_log_file.rs`."><title>key_log_file.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="rustls" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (9cdfe285c 2024-05-22)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -152,14 +152,26 @@
 <a href="#152" id="152">152</a>
 <a href="#153" id="153">153</a>
 <a href="#154" id="154">154</a>
+<a href="#155" id="155">155</a>
+<a href="#156" id="156">156</a>
+<a href="#157" id="157">157</a>
+<a href="#158" id="158">158</a>
+<a href="#159" id="159">159</a>
+<a href="#160" id="160">160</a>
+<a href="#161" id="161">161</a>
+<a href="#162" id="162">162</a>
+<a href="#163" id="163">163</a>
 </pre></div><pre class="rust"><code><span class="attr">#[cfg(feature = <span class="string">"logging"</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::log::warn;
 <span class="kw">use </span><span class="kw">crate</span>::KeyLog;
-<span class="kw">use </span>std::env;
+
+<span class="kw">use </span>alloc::vec::Vec;
+<span class="kw">use </span>core::fmt::{Debug, Formatter};
+<span class="kw">use </span>std::env::var_os;
+<span class="kw">use </span>std::ffi::OsString;
 <span class="kw">use </span>std::fs::{File, OpenOptions};
 <span class="kw">use </span>std::io;
 <span class="kw">use </span>std::io::Write;
-<span class="kw">use </span>std::path::Path;
 <span class="kw">use </span>std::sync::Mutex;
 
 <span class="comment">// Internal mutable state for KeyLogFile
@@ -169,11 +181,10 @@
 }
 
 <span class="kw">impl </span>KeyLogFileInner {
-    <span class="kw">fn </span>new(var: <span class="prelude-ty">Result</span>&lt;String, env::VarError&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>path = <span class="kw">match </span>var {
-            <span class="prelude-val">Ok</span>(<span class="kw-2">ref </span>s) =&gt; Path::new(s),
-            <span class="prelude-val">Err</span>(env::VarError::NotUnicode(<span class="kw-2">ref </span>s)) =&gt; Path::new(s),
-            <span class="prelude-val">Err</span>(env::VarError::NotPresent) =&gt; {
+    <span class="kw">fn </span>new(var: <span class="prelude-ty">Option</span>&lt;OsString&gt;) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>path = <span class="kw">match </span><span class="kw-2">&amp;</span>var {
+            <span class="prelude-val">Some</span>(path) =&gt; path,
+            <span class="prelude-val">None </span>=&gt; {
                 <span class="kw">return </span><span class="self">Self </span>{
                     file: <span class="prelude-val">None</span>,
                     buf: Vec::new(),
@@ -222,6 +233,15 @@
     }
 }
 
+<span class="kw">impl </span>Debug <span class="kw">for </span>KeyLogFileInner {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; core::fmt::Result {
+        f.debug_struct(<span class="string">"KeyLogFileInner"</span>)
+            <span class="comment">// Note: we omit self.buf deliberately as it may contain key data.
+            </span>.field(<span class="string">"file"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.file)
+            .finish()
+    }
+}
+
 <span class="doccomment">/// [`KeyLog`] implementation that opens a file whose name is
 /// given by the `SSLKEYLOGFILE` environment variable, and writes
 /// keys into it.
@@ -236,7 +256,7 @@
     <span class="doccomment">/// Makes a new `KeyLogFile`.  The environment variable is
     /// inspected and the named file is opened during this call.
     </span><span class="kw">pub fn </span>new() -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>var = env::var(<span class="string">"SSLKEYLOGFILE"</span>);
+        <span class="kw">let </span>var = var_os(<span class="string">"SSLKEYLOGFILE"</span>);
         <span class="self">Self</span>(Mutex::new(KeyLogFileInner::new(var)))
     }
 }
@@ -258,8 +278,17 @@
     }
 }
 
+<span class="kw">impl </span>Debug <span class="kw">for </span>KeyLogFile {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; core::fmt::Result {
+        <span class="kw">match </span><span class="self">self</span>.<span class="number">0</span>.try_lock() {
+            <span class="prelude-val">Ok</span>(key_log_file) =&gt; <span class="macro">write!</span>(f, <span class="string">"{:?}"</span>, key_log_file),
+            <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="macro">write!</span>(f, <span class="string">"KeyLogFile {{ &lt;locked&gt; }}"</span>),
+        }
+    }
+}
+
 <span class="attr">#[cfg(all(test, target_os = <span class="string">"linux"</span>))]
-</span><span class="kw">mod </span>test {
+</span><span class="kw">mod </span>tests {
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
 
     <span class="kw">fn </span>init() {
@@ -269,20 +298,9 @@
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test_env_var_is_not_unicode() {
-        init();
-        <span class="kw">let </span><span class="kw-2">mut </span>inner = KeyLogFileInner::new(<span class="prelude-val">Err</span>(env::VarError::NotUnicode(
-            <span class="string">"/tmp/keylogfileinnertest"</span>.into(),
-        )));
-        <span class="macro">assert!</span>(inner
-            .try_write(<span class="string">"label"</span>, <span class="string">b"random"</span>, <span class="string">b"secret"</span>)
-            .is_ok());
-    }
-
-    <span class="attr">#[test]
     </span><span class="kw">fn </span>test_env_var_is_not_set() {
         init();
-        <span class="kw">let </span><span class="kw-2">mut </span>inner = KeyLogFileInner::new(<span class="prelude-val">Err</span>(env::VarError::NotPresent));
+        <span class="kw">let </span><span class="kw-2">mut </span>inner = KeyLogFileInner::new(<span class="prelude-val">None</span>);
         <span class="macro">assert!</span>(inner
             .try_write(<span class="string">"label"</span>, <span class="string">b"random"</span>, <span class="string">b"secret"</span>)
             .is_ok());
@@ -291,7 +309,7 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_env_var_cannot_be_opened() {
         init();
-        <span class="kw">let </span><span class="kw-2">mut </span>inner = KeyLogFileInner::new(<span class="prelude-val">Ok</span>(<span class="string">"/dev/does-not-exist"</span>.into()));
+        <span class="kw">let </span><span class="kw-2">mut </span>inner = KeyLogFileInner::new(<span class="prelude-val">Some</span>(<span class="string">"/dev/does-not-exist"</span>.into()));
         <span class="macro">assert!</span>(inner
             .try_write(<span class="string">"label"</span>, <span class="string">b"random"</span>, <span class="string">b"secret"</span>)
             .is_ok());
@@ -300,7 +318,7 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_env_var_cannot_be_written() {
         init();
-        <span class="kw">let </span><span class="kw-2">mut </span>inner = KeyLogFileInner::new(<span class="prelude-val">Ok</span>(<span class="string">"/dev/full"</span>.into()));
+        <span class="kw">let </span><span class="kw-2">mut </span>inner = KeyLogFileInner::new(<span class="prelude-val">Some</span>(<span class="string">"/dev/full"</span>.into()));
         <span class="macro">assert!</span>(inner
             .try_write(<span class="string">"label"</span>, <span class="string">b"random"</span>, <span class="string">b"secret"</span>)
             .is_err());

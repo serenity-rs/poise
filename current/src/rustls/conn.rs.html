@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-0.21.9/src/conn.rs`."><title>conn.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-b21aa549bf6d91ff.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="rustls" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (79734f1db 2024-05-02)" data-channel="nightly" data-search-js="search-bf21c90c8c1d92b1.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-e32f0c247825364d.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-09095024cf37855e.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../rustls/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Type ‘S’ or ‘/’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings">Settings</a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-0.22.4/src/conn.rs`."><title>conn.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="rustls" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (9cdfe285c 2024-05-22)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -751,22 +751,77 @@
 <a href="#751" id="751">751</a>
 <a href="#752" id="752">752</a>
 <a href="#753" id="753">753</a>
+<a href="#754" id="754">754</a>
+<a href="#755" id="755">755</a>
+<a href="#756" id="756">756</a>
+<a href="#757" id="757">757</a>
+<a href="#758" id="758">758</a>
+<a href="#759" id="759">759</a>
+<a href="#760" id="760">760</a>
+<a href="#761" id="761">761</a>
+<a href="#762" id="762">762</a>
+<a href="#763" id="763">763</a>
+<a href="#764" id="764">764</a>
+<a href="#765" id="765">765</a>
+<a href="#766" id="766">766</a>
+<a href="#767" id="767">767</a>
+<a href="#768" id="768">768</a>
+<a href="#769" id="769">769</a>
+<a href="#770" id="770">770</a>
+<a href="#771" id="771">771</a>
+<a href="#772" id="772">772</a>
+<a href="#773" id="773">773</a>
+<a href="#774" id="774">774</a>
+<a href="#775" id="775">775</a>
+<a href="#776" id="776">776</a>
+<a href="#777" id="777">777</a>
+<a href="#778" id="778">778</a>
+<a href="#779" id="779">779</a>
+<a href="#780" id="780">780</a>
+<a href="#781" id="781">781</a>
+<a href="#782" id="782">782</a>
+<a href="#783" id="783">783</a>
+<a href="#784" id="784">784</a>
+<a href="#785" id="785">785</a>
+<a href="#786" id="786">786</a>
+<a href="#787" id="787">787</a>
+<a href="#788" id="788">788</a>
+<a href="#789" id="789">789</a>
+<a href="#790" id="790">790</a>
+<a href="#791" id="791">791</a>
+<a href="#792" id="792">792</a>
+<a href="#793" id="793">793</a>
+<a href="#794" id="794">794</a>
+<a href="#795" id="795">795</a>
+<a href="#796" id="796">796</a>
+<a href="#797" id="797">797</a>
+<a href="#798" id="798">798</a>
+<a href="#799" id="799">799</a>
+<a href="#800" id="800">800</a>
+<a href="#801" id="801">801</a>
+<a href="#802" id="802">802</a>
+<a href="#803" id="803">803</a>
+<a href="#804" id="804">804</a>
+<a href="#805" id="805">805</a>
+<a href="#806" id="806">806</a>
+<a href="#807" id="807">807</a>
+<a href="#808" id="808">808</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::common_state::{CommonState, Context, IoState, State};
 <span class="kw">use </span><span class="kw">crate</span>::enums::{AlertDescription, ContentType};
 <span class="kw">use </span><span class="kw">crate</span>::error::{Error, PeerMisbehaved};
 <span class="attr">#[cfg(feature = <span class="string">"logging"</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::log::trace;
-<span class="kw">use </span><span class="kw">crate</span>::msgs::deframer::{Deframed, MessageDeframer};
+<span class="kw">use </span><span class="kw">crate</span>::msgs::deframer::{Deframed, DeframerSliceBuffer, DeframerVecBuffer, MessageDeframer};
 <span class="kw">use </span><span class="kw">crate</span>::msgs::handshake::Random;
 <span class="kw">use </span><span class="kw">crate</span>::msgs::message::{Message, MessagePayload, PlainMessage};
-<span class="attr">#[cfg(feature = <span class="string">"secret_extraction"</span>)]
-</span><span class="kw">use </span><span class="kw">crate</span>::suites::{ExtractedSecrets, PartiallyExtractedSecrets};
+<span class="kw">use </span><span class="kw">crate</span>::suites::{ExtractedSecrets, PartiallyExtractedSecrets};
 <span class="kw">use </span><span class="kw">crate</span>::vecbuf::ChunkVecBuffer;
 
-<span class="kw">use </span>std::fmt::Debug;
+<span class="kw">use </span>alloc::boxed::Box;
+<span class="kw">use </span>core::fmt::Debug;
+<span class="kw">use </span>core::mem;
+<span class="kw">use </span>core::ops::{Deref, DerefMut};
 <span class="kw">use </span>std::io;
-<span class="kw">use </span>std::mem;
-<span class="kw">use </span>std::ops::{Deref, DerefMut};
 
 <span class="doccomment">/// A client or server connection.
 </span><span class="attr">#[derive(Debug)]
@@ -836,16 +891,6 @@
         }
     }
 
-    <span class="doccomment">/// Extract secrets, to set up kTLS for example
-    </span><span class="attr">#[cfg(feature = <span class="string">"secret_extraction"</span>)]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"secret_extraction"</span>)))]
-    </span><span class="kw">pub fn </span>extract_secrets(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;ExtractedSecrets, Error&gt; {
-        <span class="kw">match </span><span class="self">self </span>{
-            <span class="self">Self</span>::Client(conn) =&gt; conn.extract_secrets(),
-            <span class="self">Self</span>::Server(conn) =&gt; conn.extract_secrets(),
-        }
-    }
-
     <span class="doccomment">/// This function uses `io` to complete any outstanding IO for this connection.
     ///
     /// See [`ConnectionCommon::complete_io()`] for more information.
@@ -857,6 +902,15 @@
         <span class="kw">match </span><span class="self">self </span>{
             <span class="self">Self</span>::Client(conn) =&gt; conn.complete_io(io),
             <span class="self">Self</span>::Server(conn) =&gt; conn.complete_io(io),
+        }
+    }
+
+    <span class="doccomment">/// Extract secrets, so they can be used when configuring kTLS, for example.
+    /// Should be used with care as it exposes secret key material.
+    </span><span class="kw">pub fn </span>dangerous_extract_secrets(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;ExtractedSecrets, Error&gt; {
+        <span class="kw">match </span><span class="self">self </span>{
+            <span class="self">Self</span>::Client(client) =&gt; client.dangerous_extract_secrets(),
+            <span class="self">Self</span>::Server(server) =&gt; server.dangerous_extract_secrets(),
         }
     }
 }
@@ -896,8 +950,8 @@
     /// connection, so the underlying TCP connection should be half-closed too.
     ///
     /// If the peer closes the TLS session uncleanly (a TCP EOF without sending a
-    /// `close_notify` alert) this function returns `Err(ErrorKind::UnexpectedEof.into())`
-    /// once any pending data has been read.
+    /// `close_notify` alert) this function returns a `std::io::Error` of type
+    /// `ErrorKind::UnexpectedEof` once any pending data has been read.
     ///
     /// Note that support for `close_notify` varies in peer TLS libraries: many do not
     /// support it and uncleanly close the TCP connection (this might be
@@ -918,8 +972,13 @@
                 <span class="comment">// cleanly closed; don't care about TCP EOF: express this as Ok(0)
                 </span>(<span class="bool-val">true</span>, <span class="kw">_</span>) =&gt; {}
                 <span class="comment">// unclean closure
-                </span>(<span class="bool-val">false</span>, <span class="bool-val">true</span>) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(io::ErrorKind::UnexpectedEof.into()),
-                <span class="comment">// connection still going, but need more data: signal `WouldBlock` so that
+                </span>(<span class="bool-val">false</span>, <span class="bool-val">true</span>) =&gt; {
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(io::Error::new(
+                        io::ErrorKind::UnexpectedEof,
+                        UNEXPECTED_EOF_MESSAGE,
+                    ))
+                }
+                <span class="comment">// connection still going, but needs more data: signal `WouldBlock` so that
                 // the caller knows this
                 </span>(<span class="bool-val">false</span>, <span class="bool-val">false</span>) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(io::ErrorKind::WouldBlock.into()),
             }
@@ -936,8 +995,8 @@
     /// should be half-closed too.
     ///
     /// If the peer closes the TLS session uncleanly (a TCP EOF without sending a
-    /// `close_notify` alert) this function returns `Err(ErrorKind::UnexpectedEof.into())`
-    /// once any pending data has been read.
+    /// `close_notify` alert) this function returns a `std::io::Error` of type
+    /// `ErrorKind::UnexpectedEof` once any pending data has been read.
     ///
     /// Note that support for `close_notify` varies in peer TLS libraries: many do not
     /// support it and uncleanly close the TCP connection (this might be
@@ -962,7 +1021,12 @@
                 <span class="comment">// cleanly closed; don't care about TCP EOF: express this as Ok(0)
                 </span>(<span class="bool-val">true</span>, <span class="kw">_</span>) =&gt; {}
                 <span class="comment">// unclean closure
-                </span>(<span class="bool-val">false</span>, <span class="bool-val">true</span>) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(io::ErrorKind::UnexpectedEof.into()),
+                </span>(<span class="bool-val">false</span>, <span class="bool-val">true</span>) =&gt; {
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(io::Error::new(
+                        io::ErrorKind::UnexpectedEof,
+                        UNEXPECTED_EOF_MESSAGE,
+                    ));
+                }
                 <span class="comment">// connection still going, but need more data: signal `WouldBlock` so that
                 // the caller knows this
                 </span>(<span class="bool-val">false</span>, <span class="bool-val">false</span>) =&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(io::ErrorKind::WouldBlock.into()),
@@ -975,6 +1039,9 @@
 
 <span class="doccomment">/// Internal trait implemented by the [`ServerConnection`]/[`ClientConnection`]
 /// allowing them to be the subject of a [`Writer`].
+///
+/// [`ServerConnection`]: crate::ServerConnection
+/// [`ClientConnection`]: crate::ClientConnection
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">trait </span>PlaintextSink {
     <span class="kw">fn </span>write(<span class="kw-2">&amp;mut </span><span class="self">self</span>, buf: <span class="kw-2">&amp;</span>[u8]) -&gt; io::Result&lt;usize&gt;;
     <span class="kw">fn </span>write_vectored(<span class="kw-2">&amp;mut </span><span class="self">self</span>, bufs: <span class="kw-2">&amp;</span>[io::IoSlice&lt;<span class="lifetime">'_</span>&gt;]) -&gt; io::Result&lt;usize&gt;;
@@ -1009,7 +1076,7 @@
     ///
     /// This is not an external interface.  Get one of these objects
     /// from [`Connection::writer`].
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(sink: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span><span class="kw">dyn </span>PlaintextSink) -&gt; Writer&lt;<span class="lifetime">'a</span>&gt; {
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(sink: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span><span class="kw">dyn </span>PlaintextSink) -&gt; <span class="self">Self </span>{
         Writer { sink }
     }
 }
@@ -1061,7 +1128,7 @@
 
 </span><span class="kw">fn </span>is_valid_ccs(msg: <span class="kw-2">&amp;</span>PlainMessage) -&gt; bool {
     <span class="comment">// We passthrough ChangeCipherSpec messages in the deframer without decrypting them.
-    // nb. this is prior to the record layer, so is unencrypted. see
+    // Note: this is prior to the record layer, so is unencrypted. See
     // third paragraph of section 5 in RFC8446.
     </span>msg.typ == ContentType::ChangeCipherSpec &amp;&amp; msg.payload.<span class="number">0 </span>== [<span class="number">0x01</span>]
 }
@@ -1069,6 +1136,7 @@
 <span class="doccomment">/// Interface shared by client and server connections.
 </span><span class="kw">pub struct </span>ConnectionCommon&lt;Data&gt; {
     <span class="kw">pub</span>(<span class="kw">crate</span>) core: ConnectionCore&lt;Data&gt;,
+    deframer_buffer: DeframerVecBuffer,
 }
 
 <span class="kw">impl</span>&lt;Data&gt; ConnectionCommon&lt;Data&gt; {
@@ -1080,7 +1148,7 @@
             <span class="comment">// Are we done? i.e., have we processed all received messages, and received a
             // close_notify to indicate that no new messages will arrive?
             </span>peer_cleanly_closed: common.has_received_close_notify
-                &amp;&amp; !<span class="self">self</span>.core.message_deframer.has_pending(),
+                &amp;&amp; !<span class="self">self</span>.deframer_buffer.has_pending(),
             has_seen_eof: common.has_seen_eof,
         }
     }
@@ -1130,6 +1198,11 @@
 
         <span class="kw">loop </span>{
             <span class="kw">let </span>until_handshaked = <span class="self">self</span>.is_handshaking();
+
+            <span class="kw">if </span>!<span class="self">self</span>.wants_write() &amp;&amp; !<span class="self">self</span>.wants_read() {
+                <span class="comment">// We will make no further progress.
+                </span><span class="kw">return </span><span class="prelude-val">Ok</span>((rdlen, wrlen));
+            }
 
             <span class="kw">while </span><span class="self">self</span>.wants_write() {
                 wrlen += <span class="self">self</span>.write_tls(io)<span class="question-mark">?</span>;
@@ -1192,11 +1265,14 @@
     /// This is a shortcut to the `process_new_packets()` -&gt; `process_msg()` -&gt;
     /// `process_handshake_messages()` path, specialized for the first handshake message.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>first_handshake_message(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Message&gt;, Error&gt; {
-        <span class="kw">match </span><span class="self">self
+        <span class="kw">let </span><span class="kw-2">mut </span>deframer_buffer = <span class="self">self</span>.deframer_buffer.borrow();
+        <span class="kw">let </span>res = <span class="self">self
             </span>.core
-            .deframe()<span class="question-mark">?
-            </span>.map(Message::try_from)
-        {
+            .deframe(<span class="prelude-val">None</span>, <span class="kw-2">&amp;mut </span>deframer_buffer);
+        <span class="kw">let </span>discard = deframer_buffer.pending_discard();
+        <span class="self">self</span>.deframer_buffer.discard(discard);
+
+        <span class="kw">match </span>res<span class="question-mark">?</span>.map(Message::try_from) {
             <span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(msg)) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(msg)),
             <span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(err)) =&gt; <span class="prelude-val">Err</span>(<span class="self">self</span>.send_fatal_alert(AlertDescription::DecodeError, err)),
             <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
@@ -1227,7 +1303,8 @@
     /// [`process_new_packets`]: Connection::process_new_packets
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>process_new_packets(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;IoState, Error&gt; {
-        <span class="self">self</span>.core.process_new_packets()
+        <span class="self">self</span>.core
+            .process_new_packets(<span class="kw-2">&amp;mut </span><span class="self">self</span>.deframer_buffer)
     }
 
     <span class="doccomment">/// Read TLS content from `rd` into the internal buffer.
@@ -1257,7 +1334,10 @@
             ));
         }
 
-        <span class="kw">let </span>res = <span class="self">self</span>.core.message_deframer.read(rd);
+        <span class="kw">let </span>res = <span class="self">self
+            </span>.core
+            .message_deframer
+            .read(rd, <span class="kw-2">&amp;mut </span><span class="self">self</span>.deframer_buffer);
         <span class="kw">if let </span><span class="prelude-val">Ok</span>(<span class="number">0</span>) = res {
             <span class="self">self</span>.has_seen_eof = <span class="bool-val">true</span>;
         }
@@ -1290,6 +1370,8 @@
     ///
     /// This function fails if called prior to the handshake completing;
     /// check with [`CommonState::is_handshaking`] first.
+    ///
+    /// This function fails if `output.len()` is zero.
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>export_keying_material&lt;T: AsMut&lt;[u8]&gt;&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
@@ -1302,9 +1384,8 @@
     }
 
     <span class="doccomment">/// Extract secrets, so they can be used when configuring kTLS, for example.
-    </span><span class="attr">#[cfg(feature = <span class="string">"secret_extraction"</span>)]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"secret_extraction"</span>)))]
-    </span><span class="kw">pub fn </span>extract_secrets(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;ExtractedSecrets, Error&gt; {
+    /// Should be used with care as it exposes secret key material.
+    </span><span class="kw">pub fn </span>dangerous_extract_secrets(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;ExtractedSecrets, Error&gt; {
         <span class="kw">if </span>!<span class="self">self</span>.enable_secret_extraction {
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::General(<span class="string">"Secret extraction is disabled"</span>.into()));
         }
@@ -1345,7 +1426,10 @@
 
 <span class="kw">impl</span>&lt;Data&gt; From&lt;ConnectionCore&lt;Data&gt;&gt; <span class="kw">for </span>ConnectionCommon&lt;Data&gt; {
     <span class="kw">fn </span>from(core: ConnectionCore&lt;Data&gt;) -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{ core }
+        <span class="self">Self </span>{
+            core,
+            deframer_buffer: DeframerVecBuffer::default(),
+        }
     }
 }
 
@@ -1366,7 +1450,10 @@
         }
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>process_new_packets(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;IoState, Error&gt; {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>process_new_packets(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        deframer_buffer: <span class="kw-2">&amp;mut </span>DeframerVecBuffer,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;IoState, Error&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>state = <span class="kw">match </span>mem::replace(<span class="kw-2">&amp;mut </span><span class="self">self</span>.state, <span class="prelude-val">Err</span>(Error::HandshakeNotComplete)) {
             <span class="prelude-val">Ok</span>(state) =&gt; state,
             <span class="prelude-val">Err</span>(e) =&gt; {
@@ -1375,26 +1462,36 @@
             }
         };
 
-        <span class="kw">while let </span><span class="prelude-val">Some</span>(msg) = <span class="self">self</span>.deframe()<span class="question-mark">? </span>{
+        <span class="kw">let </span><span class="kw-2">mut </span>borrowed_buffer = deframer_buffer.borrow();
+        <span class="kw">while let </span><span class="prelude-val">Some</span>(msg) = <span class="self">self</span>.deframe(<span class="prelude-val">Some</span>(<span class="kw-2">&amp;*</span>state), <span class="kw-2">&amp;mut </span>borrowed_buffer)<span class="question-mark">? </span>{
             <span class="kw">match </span><span class="self">self</span>.process_msg(msg, state) {
                 <span class="prelude-val">Ok</span>(new) =&gt; state = new,
                 <span class="prelude-val">Err</span>(e) =&gt; {
                     <span class="self">self</span>.state = <span class="prelude-val">Err</span>(e.clone());
+                    <span class="kw">let </span>discard = borrowed_buffer.pending_discard();
+                    deframer_buffer.discard(discard);
                     <span class="kw">return </span><span class="prelude-val">Err</span>(e);
                 }
             }
         }
 
+        <span class="kw">let </span>discard = borrowed_buffer.pending_discard();
+        deframer_buffer.discard(discard);
         <span class="self">self</span>.state = <span class="prelude-val">Ok</span>(state);
         <span class="prelude-val">Ok</span>(<span class="self">self</span>.common_state.current_io_state())
     }
 
     <span class="doccomment">/// Pull a message out of the deframer and send any messages that need to be sent as a result.
-    </span><span class="kw">fn </span>deframe(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;PlainMessage&gt;, Error&gt; {
-        <span class="kw">match </span><span class="self">self
-            </span>.message_deframer
-            .pop(<span class="kw-2">&amp;mut </span><span class="self">self</span>.common_state.record_layer)
-        {
+    </span><span class="kw">fn </span>deframe(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        state: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="kw">dyn </span>State&lt;Data&gt;&gt;,
+        deframer_buffer: <span class="kw-2">&amp;mut </span>DeframerSliceBuffer,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;PlainMessage&gt;, Error&gt; {
+        <span class="kw">match </span><span class="self">self</span>.message_deframer.pop(
+            <span class="kw-2">&amp;mut </span><span class="self">self</span>.common_state.record_layer,
+            <span class="self">self</span>.common_state.negotiated_version,
+            deframer_buffer,
+        ) {
             <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(Deframed {
                 want_close_before_decrypt,
                 aligned,
@@ -1416,8 +1513,7 @@
             }
             <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
             <span class="prelude-val">Err</span>(err @ Error::InvalidMessage(<span class="kw">_</span>)) =&gt; {
-                <span class="attr">#[cfg(feature = <span class="string">"quic"</span>)]
-                </span><span class="kw">if </span><span class="self">self</span>.common_state.is_quic() {
+                <span class="kw">if </span><span class="self">self</span>.common_state.is_quic() {
                     <span class="self">self</span>.common_state.quic.alert = <span class="prelude-val">Some</span>(AlertDescription::DecodeError);
                 }
 
@@ -1431,9 +1527,14 @@
             <span class="prelude-val">Err</span>(err @ Error::PeerSentOversizedRecord) =&gt; <span class="prelude-val">Err</span>(<span class="self">self
                 </span>.common_state
                 .send_fatal_alert(AlertDescription::RecordOverflow, err)),
-            <span class="prelude-val">Err</span>(err @ Error::DecryptError) =&gt; <span class="prelude-val">Err</span>(<span class="self">self
-                </span>.common_state
-                .send_fatal_alert(AlertDescription::BadRecordMac, err)),
+            <span class="prelude-val">Err</span>(err @ Error::DecryptError) =&gt; {
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(state) = state {
+                    state.handle_decrypt_error();
+                }
+                <span class="prelude-val">Err</span>(<span class="self">self
+                    </span>.common_state
+                    .send_fatal_alert(AlertDescription::BadRecordMac, err))
+            }
             <span class="prelude-val">Err</span>(e) =&gt; <span class="prelude-val">Err</span>(e),
         }
     }
@@ -1493,6 +1594,12 @@
         label: <span class="kw-2">&amp;</span>[u8],
         context: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>[u8]&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;T, Error&gt; {
+        <span class="kw">if </span>output.as_mut().is_empty() {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(Error::General(
+                <span class="string">"export_keying_material with zero-length output"</span>.into(),
+            ));
+        }
+
         <span class="kw">match </span><span class="self">self</span>.state.as_ref() {
             <span class="prelude-val">Ok</span>(st) =&gt; st
                 .export_keying_material(output.as_mut(), label, context)
@@ -1503,5 +1610,8 @@
 }
 
 <span class="doccomment">/// Data specific to the peer's side (client or server).
-</span><span class="kw">pub trait </span>SideData {}
+</span><span class="kw">pub trait </span>SideData: Debug {}
+
+<span class="kw">const </span>UNEXPECTED_EOF_MESSAGE: <span class="kw-2">&amp;</span>str = <span class="string">"peer closed connection without sending TLS close_notify: \
+https://docs.rs/rustls/latest/rustls/manual/_03_howto/index.html#unexpected-eof"</span>;
 </code></pre></div></section></main></body></html>

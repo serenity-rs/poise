@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-0.21.9/src/server/builder.rs`."><title>builder.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-b21aa549bf6d91ff.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="rustls" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (79734f1db 2024-05-02)" data-channel="nightly" data-search-js="search-bf21c90c8c1d92b1.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-e32f0c247825364d.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-09095024cf37855e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../rustls/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Type ‘S’ or ‘/’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings">Settings</a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-0.22.4/src/server/builder.rs`."><title>builder.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="rustls" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (9cdfe285c 2024-05-22)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -115,30 +115,43 @@
 <a href="#115" id="115">115</a>
 <a href="#116" id="116">116</a>
 <a href="#117" id="117">117</a>
+<a href="#118" id="118">118</a>
+<a href="#119" id="119">119</a>
+<a href="#120" id="120">120</a>
+<a href="#121" id="121">121</a>
+<a href="#122" id="122">122</a>
+<a href="#123" id="123">123</a>
+<a href="#124" id="124">124</a>
+<a href="#125" id="125">125</a>
+<a href="#126" id="126">126</a>
+<a href="#127" id="127">127</a>
+<a href="#128" id="128">128</a>
+<a href="#129" id="129">129</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::builder::{ConfigBuilder, WantsVerifier};
+<span class="kw">use </span><span class="kw">crate</span>::crypto::CryptoProvider;
 <span class="kw">use </span><span class="kw">crate</span>::error::Error;
-<span class="kw">use </span><span class="kw">crate</span>::key;
-<span class="kw">use </span><span class="kw">crate</span>::kx::SupportedKxGroup;
+<span class="kw">use </span><span class="kw">crate</span>::msgs::handshake::CertificateChain;
 <span class="kw">use </span><span class="kw">crate</span>::server::handy;
 <span class="kw">use </span><span class="kw">crate</span>::server::{ResolvesServerCert, ServerConfig};
-<span class="kw">use </span><span class="kw">crate</span>::suites::SupportedCipherSuite;
-<span class="kw">use </span><span class="kw">crate</span>::verify;
+<span class="kw">use </span><span class="kw">crate</span>::verify::{ClientCertVerifier, NoClientAuth};
 <span class="kw">use </span><span class="kw">crate</span>::versions;
 <span class="kw">use </span><span class="kw">crate</span>::NoKeyLog;
 
-<span class="kw">use </span>std::marker::PhantomData;
-<span class="kw">use </span>std::sync::Arc;
+<span class="kw">use </span>pki_types::{CertificateDer, PrivateKeyDer};
+
+<span class="kw">use </span>alloc::sync::Arc;
+<span class="kw">use </span>alloc::vec::Vec;
+<span class="kw">use </span>core::marker::PhantomData;
 
 <span class="kw">impl </span>ConfigBuilder&lt;ServerConfig, WantsVerifier&gt; {
     <span class="doccomment">/// Choose how to verify client certificates.
     </span><span class="kw">pub fn </span>with_client_cert_verifier(
         <span class="self">self</span>,
-        client_cert_verifier: Arc&lt;<span class="kw">dyn </span>verify::ClientCertVerifier&gt;,
+        client_cert_verifier: Arc&lt;<span class="kw">dyn </span>ClientCertVerifier&gt;,
     ) -&gt; ConfigBuilder&lt;ServerConfig, WantsServerCert&gt; {
         ConfigBuilder {
             state: WantsServerCert {
-                cipher_suites: <span class="self">self</span>.state.cipher_suites,
-                kx_groups: <span class="self">self</span>.state.kx_groups,
+                provider: <span class="self">self</span>.state.provider,
                 versions: <span class="self">self</span>.state.versions,
                 verifier: client_cert_verifier,
             },
@@ -148,7 +161,7 @@
 
     <span class="doccomment">/// Disable client authentication.
     </span><span class="kw">pub fn </span>with_no_client_auth(<span class="self">self</span>) -&gt; ConfigBuilder&lt;ServerConfig, WantsServerCert&gt; {
-        <span class="self">self</span>.with_client_cert_verifier(verify::NoClientAuth::boxed())
+        <span class="self">self</span>.with_client_cert_verifier(Arc::new(NoClientAuth))
     }
 }
 
@@ -158,10 +171,9 @@
 /// For more information, see the [`ConfigBuilder`] documentation.
 </span><span class="attr">#[derive(Clone, Debug)]
 </span><span class="kw">pub struct </span>WantsServerCert {
-    cipher_suites: Vec&lt;SupportedCipherSuite&gt;,
-    kx_groups: Vec&lt;<span class="kw-2">&amp;</span><span class="lifetime">'static </span>SupportedKxGroup&gt;,
+    provider: Arc&lt;CryptoProvider&gt;,
     versions: versions::EnabledVersions,
-    verifier: Arc&lt;<span class="kw">dyn </span>verify::ClientCertVerifier&gt;,
+    verifier: Arc&lt;<span class="kw">dyn </span>ClientCertVerifier&gt;,
 }
 
 <span class="kw">impl </span>ConfigBuilder&lt;ServerConfig, WantsServerCert&gt; {
@@ -175,46 +187,59 @@
     /// disregarded.
     ///
     /// `cert_chain` is a vector of DER-encoded certificates.
-    /// `key_der` is a DER-encoded RSA, ECDSA, or Ed25519 private key.
+    /// `key_der` is a DER-encoded private key as PKCS#1, PKCS#8, or SEC1. The
+    /// `aws-lc-rs` and `ring` [`CryptoProvider`]s support all three encodings,
+    /// but other `CryptoProviders` may not.
     ///
     /// This function fails if `key_der` is invalid.
     </span><span class="kw">pub fn </span>with_single_cert(
         <span class="self">self</span>,
-        cert_chain: Vec&lt;key::Certificate&gt;,
-        key_der: key::PrivateKey,
+        cert_chain: Vec&lt;CertificateDer&lt;<span class="lifetime">'static</span>&gt;&gt;,
+        key_der: PrivateKeyDer&lt;<span class="lifetime">'static</span>&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;ServerConfig, Error&gt; {
-        <span class="kw">let </span>resolver = handy::AlwaysResolvesChain::new(cert_chain, <span class="kw-2">&amp;</span>key_der)<span class="question-mark">?</span>;
+        <span class="kw">let </span>private_key = <span class="self">self
+            </span>.state
+            .provider
+            .key_provider
+            .load_private_key(key_der)<span class="question-mark">?</span>;
+        <span class="kw">let </span>resolver = handy::AlwaysResolvesChain::new(private_key, CertificateChain(cert_chain));
         <span class="prelude-val">Ok</span>(<span class="self">self</span>.with_cert_resolver(Arc::new(resolver)))
     }
 
-    <span class="doccomment">/// Sets a single certificate chain, matching private key, OCSP
-    /// response and SCTs.  This certificate and key is used for all
+    <span class="doccomment">/// Sets a single certificate chain, matching private key and optional OCSP
+    /// response.  This certificate and key is used for all
     /// subsequent connections, irrespective of things like SNI hostname.
     ///
     /// `cert_chain` is a vector of DER-encoded certificates.
-    /// `key_der` is a DER-encoded RSA, ECDSA, or Ed25519 private key.
+    /// `key_der` is a DER-encoded private key as PKCS#1, PKCS#8, or SEC1. The
+    /// `aws-lc-rs` and `ring` [`CryptoProvider`]s support all three encodings,
+    /// but other `CryptoProviders` may not.
     /// `ocsp` is a DER-encoded OCSP response.  Ignored if zero length.
-    /// `scts` is an `SignedCertificateTimestampList` encoding (see RFC6962)
-    /// and is ignored if empty.
     ///
     /// This function fails if `key_der` is invalid.
-    </span><span class="kw">pub fn </span>with_single_cert_with_ocsp_and_sct(
+    </span><span class="kw">pub fn </span>with_single_cert_with_ocsp(
         <span class="self">self</span>,
-        cert_chain: Vec&lt;key::Certificate&gt;,
-        key_der: key::PrivateKey,
+        cert_chain: Vec&lt;CertificateDer&lt;<span class="lifetime">'static</span>&gt;&gt;,
+        key_der: PrivateKeyDer&lt;<span class="lifetime">'static</span>&gt;,
         ocsp: Vec&lt;u8&gt;,
-        scts: Vec&lt;u8&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;ServerConfig, Error&gt; {
-        <span class="kw">let </span>resolver =
-            handy::AlwaysResolvesChain::new_with_extras(cert_chain, <span class="kw-2">&amp;</span>key_der, ocsp, scts)<span class="question-mark">?</span>;
+        <span class="kw">let </span>private_key = <span class="self">self
+            </span>.state
+            .provider
+            .key_provider
+            .load_private_key(key_der)<span class="question-mark">?</span>;
+        <span class="kw">let </span>resolver = handy::AlwaysResolvesChain::new_with_extras(
+            private_key,
+            CertificateChain(cert_chain),
+            ocsp,
+        );
         <span class="prelude-val">Ok</span>(<span class="self">self</span>.with_cert_resolver(Arc::new(resolver)))
     }
 
     <span class="doccomment">/// Sets a custom [`ResolvesServerCert`].
     </span><span class="kw">pub fn </span>with_cert_resolver(<span class="self">self</span>, cert_resolver: Arc&lt;<span class="kw">dyn </span>ResolvesServerCert&gt;) -&gt; ServerConfig {
         ServerConfig {
-            cipher_suites: <span class="self">self</span>.state.cipher_suites,
-            kx_groups: <span class="self">self</span>.state.kx_groups,
+            provider: <span class="self">self</span>.state.provider,
             verifier: <span class="self">self</span>.state.verifier,
             cert_resolver,
             ignore_client_order: <span class="bool-val">false</span>,
@@ -224,8 +249,7 @@
             alpn_protocols: Vec::new(),
             versions: <span class="self">self</span>.state.versions,
             key_log: Arc::new(NoKeyLog {}),
-            <span class="attr">#[cfg(feature = <span class="string">"secret_extraction"</span>)]
-            </span>enable_secret_extraction: <span class="bool-val">false</span>,
+            enable_secret_extraction: <span class="bool-val">false</span>,
             max_early_data_size: <span class="number">0</span>,
             send_half_rtt_data: <span class="bool-val">false</span>,
             send_tls13_tickets: <span class="number">4</span>,

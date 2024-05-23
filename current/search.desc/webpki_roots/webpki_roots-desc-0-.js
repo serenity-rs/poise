@@ -1,1 +1,1 @@
-searchState.loadedDescShard("webpki_roots", 0, "This library is automatically generated from the Mozilla  …\nA trust anchor (sometimes called a root) for validating …\nReturns the argument unchanged.\nCalls <code>U::from(self)</code>.")
+searchState.loadedDescShard("webpki_roots", 0, "A compiled-in copy of the root certificates trusted by …")

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/http-0.2.11/src/header/map.rs`."><title>map.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-b21aa549bf6d91ff.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="http" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (79734f1db 2024-05-02)" data-channel="nightly" data-search-js="search-bf21c90c8c1d92b1.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-e32f0c247825364d.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-09095024cf37855e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../http/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Type ‘S’ or ‘/’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings">Settings</a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/http-1.1.0/src/header/map.rs`."><title>map.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="http" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (9cdfe285c 2024-05-22)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -3543,8 +3543,364 @@
 <a href="#3543" id="3543">3543</a>
 <a href="#3544" id="3544">3544</a>
 <a href="#3545" id="3545">3545</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
-<span class="kw">use </span>std::collections::hash_map::RandomState;
+<a href="#3546" id="3546">3546</a>
+<a href="#3547" id="3547">3547</a>
+<a href="#3548" id="3548">3548</a>
+<a href="#3549" id="3549">3549</a>
+<a href="#3550" id="3550">3550</a>
+<a href="#3551" id="3551">3551</a>
+<a href="#3552" id="3552">3552</a>
+<a href="#3553" id="3553">3553</a>
+<a href="#3554" id="3554">3554</a>
+<a href="#3555" id="3555">3555</a>
+<a href="#3556" id="3556">3556</a>
+<a href="#3557" id="3557">3557</a>
+<a href="#3558" id="3558">3558</a>
+<a href="#3559" id="3559">3559</a>
+<a href="#3560" id="3560">3560</a>
+<a href="#3561" id="3561">3561</a>
+<a href="#3562" id="3562">3562</a>
+<a href="#3563" id="3563">3563</a>
+<a href="#3564" id="3564">3564</a>
+<a href="#3565" id="3565">3565</a>
+<a href="#3566" id="3566">3566</a>
+<a href="#3567" id="3567">3567</a>
+<a href="#3568" id="3568">3568</a>
+<a href="#3569" id="3569">3569</a>
+<a href="#3570" id="3570">3570</a>
+<a href="#3571" id="3571">3571</a>
+<a href="#3572" id="3572">3572</a>
+<a href="#3573" id="3573">3573</a>
+<a href="#3574" id="3574">3574</a>
+<a href="#3575" id="3575">3575</a>
+<a href="#3576" id="3576">3576</a>
+<a href="#3577" id="3577">3577</a>
+<a href="#3578" id="3578">3578</a>
+<a href="#3579" id="3579">3579</a>
+<a href="#3580" id="3580">3580</a>
+<a href="#3581" id="3581">3581</a>
+<a href="#3582" id="3582">3582</a>
+<a href="#3583" id="3583">3583</a>
+<a href="#3584" id="3584">3584</a>
+<a href="#3585" id="3585">3585</a>
+<a href="#3586" id="3586">3586</a>
+<a href="#3587" id="3587">3587</a>
+<a href="#3588" id="3588">3588</a>
+<a href="#3589" id="3589">3589</a>
+<a href="#3590" id="3590">3590</a>
+<a href="#3591" id="3591">3591</a>
+<a href="#3592" id="3592">3592</a>
+<a href="#3593" id="3593">3593</a>
+<a href="#3594" id="3594">3594</a>
+<a href="#3595" id="3595">3595</a>
+<a href="#3596" id="3596">3596</a>
+<a href="#3597" id="3597">3597</a>
+<a href="#3598" id="3598">3598</a>
+<a href="#3599" id="3599">3599</a>
+<a href="#3600" id="3600">3600</a>
+<a href="#3601" id="3601">3601</a>
+<a href="#3602" id="3602">3602</a>
+<a href="#3603" id="3603">3603</a>
+<a href="#3604" id="3604">3604</a>
+<a href="#3605" id="3605">3605</a>
+<a href="#3606" id="3606">3606</a>
+<a href="#3607" id="3607">3607</a>
+<a href="#3608" id="3608">3608</a>
+<a href="#3609" id="3609">3609</a>
+<a href="#3610" id="3610">3610</a>
+<a href="#3611" id="3611">3611</a>
+<a href="#3612" id="3612">3612</a>
+<a href="#3613" id="3613">3613</a>
+<a href="#3614" id="3614">3614</a>
+<a href="#3615" id="3615">3615</a>
+<a href="#3616" id="3616">3616</a>
+<a href="#3617" id="3617">3617</a>
+<a href="#3618" id="3618">3618</a>
+<a href="#3619" id="3619">3619</a>
+<a href="#3620" id="3620">3620</a>
+<a href="#3621" id="3621">3621</a>
+<a href="#3622" id="3622">3622</a>
+<a href="#3623" id="3623">3623</a>
+<a href="#3624" id="3624">3624</a>
+<a href="#3625" id="3625">3625</a>
+<a href="#3626" id="3626">3626</a>
+<a href="#3627" id="3627">3627</a>
+<a href="#3628" id="3628">3628</a>
+<a href="#3629" id="3629">3629</a>
+<a href="#3630" id="3630">3630</a>
+<a href="#3631" id="3631">3631</a>
+<a href="#3632" id="3632">3632</a>
+<a href="#3633" id="3633">3633</a>
+<a href="#3634" id="3634">3634</a>
+<a href="#3635" id="3635">3635</a>
+<a href="#3636" id="3636">3636</a>
+<a href="#3637" id="3637">3637</a>
+<a href="#3638" id="3638">3638</a>
+<a href="#3639" id="3639">3639</a>
+<a href="#3640" id="3640">3640</a>
+<a href="#3641" id="3641">3641</a>
+<a href="#3642" id="3642">3642</a>
+<a href="#3643" id="3643">3643</a>
+<a href="#3644" id="3644">3644</a>
+<a href="#3645" id="3645">3645</a>
+<a href="#3646" id="3646">3646</a>
+<a href="#3647" id="3647">3647</a>
+<a href="#3648" id="3648">3648</a>
+<a href="#3649" id="3649">3649</a>
+<a href="#3650" id="3650">3650</a>
+<a href="#3651" id="3651">3651</a>
+<a href="#3652" id="3652">3652</a>
+<a href="#3653" id="3653">3653</a>
+<a href="#3654" id="3654">3654</a>
+<a href="#3655" id="3655">3655</a>
+<a href="#3656" id="3656">3656</a>
+<a href="#3657" id="3657">3657</a>
+<a href="#3658" id="3658">3658</a>
+<a href="#3659" id="3659">3659</a>
+<a href="#3660" id="3660">3660</a>
+<a href="#3661" id="3661">3661</a>
+<a href="#3662" id="3662">3662</a>
+<a href="#3663" id="3663">3663</a>
+<a href="#3664" id="3664">3664</a>
+<a href="#3665" id="3665">3665</a>
+<a href="#3666" id="3666">3666</a>
+<a href="#3667" id="3667">3667</a>
+<a href="#3668" id="3668">3668</a>
+<a href="#3669" id="3669">3669</a>
+<a href="#3670" id="3670">3670</a>
+<a href="#3671" id="3671">3671</a>
+<a href="#3672" id="3672">3672</a>
+<a href="#3673" id="3673">3673</a>
+<a href="#3674" id="3674">3674</a>
+<a href="#3675" id="3675">3675</a>
+<a href="#3676" id="3676">3676</a>
+<a href="#3677" id="3677">3677</a>
+<a href="#3678" id="3678">3678</a>
+<a href="#3679" id="3679">3679</a>
+<a href="#3680" id="3680">3680</a>
+<a href="#3681" id="3681">3681</a>
+<a href="#3682" id="3682">3682</a>
+<a href="#3683" id="3683">3683</a>
+<a href="#3684" id="3684">3684</a>
+<a href="#3685" id="3685">3685</a>
+<a href="#3686" id="3686">3686</a>
+<a href="#3687" id="3687">3687</a>
+<a href="#3688" id="3688">3688</a>
+<a href="#3689" id="3689">3689</a>
+<a href="#3690" id="3690">3690</a>
+<a href="#3691" id="3691">3691</a>
+<a href="#3692" id="3692">3692</a>
+<a href="#3693" id="3693">3693</a>
+<a href="#3694" id="3694">3694</a>
+<a href="#3695" id="3695">3695</a>
+<a href="#3696" id="3696">3696</a>
+<a href="#3697" id="3697">3697</a>
+<a href="#3698" id="3698">3698</a>
+<a href="#3699" id="3699">3699</a>
+<a href="#3700" id="3700">3700</a>
+<a href="#3701" id="3701">3701</a>
+<a href="#3702" id="3702">3702</a>
+<a href="#3703" id="3703">3703</a>
+<a href="#3704" id="3704">3704</a>
+<a href="#3705" id="3705">3705</a>
+<a href="#3706" id="3706">3706</a>
+<a href="#3707" id="3707">3707</a>
+<a href="#3708" id="3708">3708</a>
+<a href="#3709" id="3709">3709</a>
+<a href="#3710" id="3710">3710</a>
+<a href="#3711" id="3711">3711</a>
+<a href="#3712" id="3712">3712</a>
+<a href="#3713" id="3713">3713</a>
+<a href="#3714" id="3714">3714</a>
+<a href="#3715" id="3715">3715</a>
+<a href="#3716" id="3716">3716</a>
+<a href="#3717" id="3717">3717</a>
+<a href="#3718" id="3718">3718</a>
+<a href="#3719" id="3719">3719</a>
+<a href="#3720" id="3720">3720</a>
+<a href="#3721" id="3721">3721</a>
+<a href="#3722" id="3722">3722</a>
+<a href="#3723" id="3723">3723</a>
+<a href="#3724" id="3724">3724</a>
+<a href="#3725" id="3725">3725</a>
+<a href="#3726" id="3726">3726</a>
+<a href="#3727" id="3727">3727</a>
+<a href="#3728" id="3728">3728</a>
+<a href="#3729" id="3729">3729</a>
+<a href="#3730" id="3730">3730</a>
+<a href="#3731" id="3731">3731</a>
+<a href="#3732" id="3732">3732</a>
+<a href="#3733" id="3733">3733</a>
+<a href="#3734" id="3734">3734</a>
+<a href="#3735" id="3735">3735</a>
+<a href="#3736" id="3736">3736</a>
+<a href="#3737" id="3737">3737</a>
+<a href="#3738" id="3738">3738</a>
+<a href="#3739" id="3739">3739</a>
+<a href="#3740" id="3740">3740</a>
+<a href="#3741" id="3741">3741</a>
+<a href="#3742" id="3742">3742</a>
+<a href="#3743" id="3743">3743</a>
+<a href="#3744" id="3744">3744</a>
+<a href="#3745" id="3745">3745</a>
+<a href="#3746" id="3746">3746</a>
+<a href="#3747" id="3747">3747</a>
+<a href="#3748" id="3748">3748</a>
+<a href="#3749" id="3749">3749</a>
+<a href="#3750" id="3750">3750</a>
+<a href="#3751" id="3751">3751</a>
+<a href="#3752" id="3752">3752</a>
+<a href="#3753" id="3753">3753</a>
+<a href="#3754" id="3754">3754</a>
+<a href="#3755" id="3755">3755</a>
+<a href="#3756" id="3756">3756</a>
+<a href="#3757" id="3757">3757</a>
+<a href="#3758" id="3758">3758</a>
+<a href="#3759" id="3759">3759</a>
+<a href="#3760" id="3760">3760</a>
+<a href="#3761" id="3761">3761</a>
+<a href="#3762" id="3762">3762</a>
+<a href="#3763" id="3763">3763</a>
+<a href="#3764" id="3764">3764</a>
+<a href="#3765" id="3765">3765</a>
+<a href="#3766" id="3766">3766</a>
+<a href="#3767" id="3767">3767</a>
+<a href="#3768" id="3768">3768</a>
+<a href="#3769" id="3769">3769</a>
+<a href="#3770" id="3770">3770</a>
+<a href="#3771" id="3771">3771</a>
+<a href="#3772" id="3772">3772</a>
+<a href="#3773" id="3773">3773</a>
+<a href="#3774" id="3774">3774</a>
+<a href="#3775" id="3775">3775</a>
+<a href="#3776" id="3776">3776</a>
+<a href="#3777" id="3777">3777</a>
+<a href="#3778" id="3778">3778</a>
+<a href="#3779" id="3779">3779</a>
+<a href="#3780" id="3780">3780</a>
+<a href="#3781" id="3781">3781</a>
+<a href="#3782" id="3782">3782</a>
+<a href="#3783" id="3783">3783</a>
+<a href="#3784" id="3784">3784</a>
+<a href="#3785" id="3785">3785</a>
+<a href="#3786" id="3786">3786</a>
+<a href="#3787" id="3787">3787</a>
+<a href="#3788" id="3788">3788</a>
+<a href="#3789" id="3789">3789</a>
+<a href="#3790" id="3790">3790</a>
+<a href="#3791" id="3791">3791</a>
+<a href="#3792" id="3792">3792</a>
+<a href="#3793" id="3793">3793</a>
+<a href="#3794" id="3794">3794</a>
+<a href="#3795" id="3795">3795</a>
+<a href="#3796" id="3796">3796</a>
+<a href="#3797" id="3797">3797</a>
+<a href="#3798" id="3798">3798</a>
+<a href="#3799" id="3799">3799</a>
+<a href="#3800" id="3800">3800</a>
+<a href="#3801" id="3801">3801</a>
+<a href="#3802" id="3802">3802</a>
+<a href="#3803" id="3803">3803</a>
+<a href="#3804" id="3804">3804</a>
+<a href="#3805" id="3805">3805</a>
+<a href="#3806" id="3806">3806</a>
+<a href="#3807" id="3807">3807</a>
+<a href="#3808" id="3808">3808</a>
+<a href="#3809" id="3809">3809</a>
+<a href="#3810" id="3810">3810</a>
+<a href="#3811" id="3811">3811</a>
+<a href="#3812" id="3812">3812</a>
+<a href="#3813" id="3813">3813</a>
+<a href="#3814" id="3814">3814</a>
+<a href="#3815" id="3815">3815</a>
+<a href="#3816" id="3816">3816</a>
+<a href="#3817" id="3817">3817</a>
+<a href="#3818" id="3818">3818</a>
+<a href="#3819" id="3819">3819</a>
+<a href="#3820" id="3820">3820</a>
+<a href="#3821" id="3821">3821</a>
+<a href="#3822" id="3822">3822</a>
+<a href="#3823" id="3823">3823</a>
+<a href="#3824" id="3824">3824</a>
+<a href="#3825" id="3825">3825</a>
+<a href="#3826" id="3826">3826</a>
+<a href="#3827" id="3827">3827</a>
+<a href="#3828" id="3828">3828</a>
+<a href="#3829" id="3829">3829</a>
+<a href="#3830" id="3830">3830</a>
+<a href="#3831" id="3831">3831</a>
+<a href="#3832" id="3832">3832</a>
+<a href="#3833" id="3833">3833</a>
+<a href="#3834" id="3834">3834</a>
+<a href="#3835" id="3835">3835</a>
+<a href="#3836" id="3836">3836</a>
+<a href="#3837" id="3837">3837</a>
+<a href="#3838" id="3838">3838</a>
+<a href="#3839" id="3839">3839</a>
+<a href="#3840" id="3840">3840</a>
+<a href="#3841" id="3841">3841</a>
+<a href="#3842" id="3842">3842</a>
+<a href="#3843" id="3843">3843</a>
+<a href="#3844" id="3844">3844</a>
+<a href="#3845" id="3845">3845</a>
+<a href="#3846" id="3846">3846</a>
+<a href="#3847" id="3847">3847</a>
+<a href="#3848" id="3848">3848</a>
+<a href="#3849" id="3849">3849</a>
+<a href="#3850" id="3850">3850</a>
+<a href="#3851" id="3851">3851</a>
+<a href="#3852" id="3852">3852</a>
+<a href="#3853" id="3853">3853</a>
+<a href="#3854" id="3854">3854</a>
+<a href="#3855" id="3855">3855</a>
+<a href="#3856" id="3856">3856</a>
+<a href="#3857" id="3857">3857</a>
+<a href="#3858" id="3858">3858</a>
+<a href="#3859" id="3859">3859</a>
+<a href="#3860" id="3860">3860</a>
+<a href="#3861" id="3861">3861</a>
+<a href="#3862" id="3862">3862</a>
+<a href="#3863" id="3863">3863</a>
+<a href="#3864" id="3864">3864</a>
+<a href="#3865" id="3865">3865</a>
+<a href="#3866" id="3866">3866</a>
+<a href="#3867" id="3867">3867</a>
+<a href="#3868" id="3868">3868</a>
+<a href="#3869" id="3869">3869</a>
+<a href="#3870" id="3870">3870</a>
+<a href="#3871" id="3871">3871</a>
+<a href="#3872" id="3872">3872</a>
+<a href="#3873" id="3873">3873</a>
+<a href="#3874" id="3874">3874</a>
+<a href="#3875" id="3875">3875</a>
+<a href="#3876" id="3876">3876</a>
+<a href="#3877" id="3877">3877</a>
+<a href="#3878" id="3878">3878</a>
+<a href="#3879" id="3879">3879</a>
+<a href="#3880" id="3880">3880</a>
+<a href="#3881" id="3881">3881</a>
+<a href="#3882" id="3882">3882</a>
+<a href="#3883" id="3883">3883</a>
+<a href="#3884" id="3884">3884</a>
+<a href="#3885" id="3885">3885</a>
+<a href="#3886" id="3886">3886</a>
+<a href="#3887" id="3887">3887</a>
+<a href="#3888" id="3888">3888</a>
+<a href="#3889" id="3889">3889</a>
+<a href="#3890" id="3890">3890</a>
+<a href="#3891" id="3891">3891</a>
+<a href="#3892" id="3892">3892</a>
+<a href="#3893" id="3893">3893</a>
+<a href="#3894" id="3894">3894</a>
+<a href="#3895" id="3895">3895</a>
+<a href="#3896" id="3896">3896</a>
+<a href="#3897" id="3897">3897</a>
+<a href="#3898" id="3898">3898</a>
+<a href="#3899" id="3899">3899</a>
+<a href="#3900" id="3900">3900</a>
+<a href="#3901" id="3901">3901</a>
+</pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::hash_map::RandomState;
+<span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::convert::TryFrom;
 <span class="kw">use </span>std::hash::{BuildHasher, Hash, Hasher};
 <span class="kw">use </span>std::iter::{FromIterator, FusedIterator};
@@ -3553,15 +3909,15 @@
 
 <span class="kw">use </span><span class="kw">crate</span>::Error;
 
-<span class="kw">use </span><span class="kw">super</span>::HeaderValue;
 <span class="kw">use </span><span class="kw">super</span>::name::{HdrName, HeaderName, InvalidHeaderName};
+<span class="kw">use </span><span class="kw">super</span>::HeaderValue;
 
 <span class="kw">pub use </span><span class="self">self</span>::as_header_name::AsHeaderName;
 <span class="kw">pub use </span><span class="self">self</span>::into_header_name::IntoHeaderName;
 
 <span class="doccomment">/// A set of HTTP headers
 ///
-/// `HeaderMap` is an multimap of [`HeaderName`] to values.
+/// `HeaderMap` is a multimap of [`HeaderName`] to values.
 ///
 /// [`HeaderName`]: struct.HeaderName.html
 ///
@@ -3756,6 +4112,11 @@
     first: <span class="prelude-ty">Option</span>&lt;T&gt;,
     next: <span class="prelude-ty">Option</span>&lt;::std::vec::IntoIter&lt;T&gt;&gt;,
     lt: PhantomData&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>HeaderMap&lt;T&gt;&gt;,
+}
+
+<span class="doccomment">/// Error returned when max capacity of `HeaderMap` is exceeded
+</span><span class="kw">pub struct </span>MaxSizeReached {
+    _priv: (),
 }
 
 <span class="doccomment">/// Tracks the value iterator state
@@ -3986,7 +4347,7 @@
     /// assert_eq!(0, map.capacity());
     /// ```
     </span><span class="kw">pub fn </span>new() -&gt; <span class="self">Self </span>{
-        HeaderMap::with_capacity(<span class="number">0</span>)
+        HeaderMap::try_with_capacity(<span class="number">0</span>).unwrap()
     }
 }
 
@@ -3999,10 +4360,10 @@
     /// allocations before `capacity` headers are stored in the map.
     ///
     /// More capacity than requested may be allocated.
-    /// 
+    ///
     /// # Panics
-    /// 
-    /// Requested capacity too large: would overflow `usize`.
+    ///
+    /// This method panics if capacity exceeds max `HeaderMap` capacity.
     ///
     /// # Examples
     ///
@@ -4014,32 +4375,57 @@
     /// assert_eq!(12, map.capacity());
     /// ```
     </span><span class="kw">pub fn </span>with_capacity(capacity: usize) -&gt; HeaderMap&lt;T&gt; {
+        <span class="self">Self</span>::try_with_capacity(capacity).expect(<span class="string">"size overflows MAX_SIZE"</span>)
+    }
+
+    <span class="doccomment">/// Create an empty `HeaderMap` with the specified capacity.
+    ///
+    /// The returned map will allocate internal storage in order to hold about
+    /// `capacity` elements without reallocating. However, this is a "best
+    /// effort" as there are usage patterns that could cause additional
+    /// allocations before `capacity` headers are stored in the map.
+    ///
+    /// More capacity than requested may be allocated.
+    ///
+    /// # Errors
+    ///
+    /// This function may return an error if `HeaderMap` exceeds max capacity
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use http::HeaderMap;
+    /// let map: HeaderMap&lt;u32&gt; = HeaderMap::try_with_capacity(10).unwrap();
+    ///
+    /// assert!(map.is_empty());
+    /// assert_eq!(12, map.capacity());
+    /// ```
+    </span><span class="kw">pub fn </span>try_with_capacity(capacity: usize) -&gt; <span class="prelude-ty">Result</span>&lt;HeaderMap&lt;T&gt;, MaxSizeReached&gt; {
         <span class="kw">if </span>capacity == <span class="number">0 </span>{
-            HeaderMap {
+            <span class="prelude-val">Ok</span>(HeaderMap {
                 mask: <span class="number">0</span>,
                 indices: Box::new([]), <span class="comment">// as a ZST, this doesn't actually allocate anything
                 </span>entries: Vec::new(),
                 extra_values: Vec::new(),
                 danger: Danger::Green,
-            }
+            })
         } <span class="kw">else </span>{
             <span class="kw">let </span>raw_cap = <span class="kw">match </span>to_raw_capacity(capacity).checked_next_power_of_two() {
                 <span class="prelude-val">Some</span>(c) =&gt; c,
-                <span class="prelude-val">None </span>=&gt; <span class="macro">panic!</span>(
-                    <span class="string">"requested capacity {} too large: next power of two would overflow `usize`"</span>,
-                    capacity
-                ),
+                <span class="prelude-val">None </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(MaxSizeReached { _priv: () }),
             };
-            <span class="macro">assert!</span>(raw_cap &lt;= MAX_SIZE, <span class="string">"requested capacity too large"</span>);
+            <span class="kw">if </span>raw_cap &gt; MAX_SIZE {
+                <span class="kw">return </span><span class="prelude-val">Err</span>(MaxSizeReached { _priv: () });
+            }
             <span class="macro">debug_assert!</span>(raw_cap &gt; <span class="number">0</span>);
 
-            HeaderMap {
+            <span class="prelude-val">Ok</span>(HeaderMap {
                 mask: (raw_cap - <span class="number">1</span>) <span class="kw">as </span>Size,
                 indices: <span class="macro">vec!</span>[Pos::none(); raw_cap].into_boxed_slice(),
                 entries: Vec::with_capacity(raw_cap),
                 extra_values: Vec::new(),
                 danger: Danger::Green,
-            }
+            })
         }
     }
 
@@ -4174,7 +4560,7 @@
     ///
     /// # Panics
     ///
-    /// Panics if the new allocation size overflows `usize`.
+    /// Panics if the new allocation size overflows `HeaderMap` `MAX_SIZE`.
     ///
     /// # Examples
     ///
@@ -4186,27 +4572,60 @@
     /// # map.insert(HOST, "bar".parse().unwrap());
     /// ```
     </span><span class="kw">pub fn </span>reserve(<span class="kw-2">&amp;mut </span><span class="self">self</span>, additional: usize) {
+        <span class="self">self</span>.try_reserve(additional)
+            .expect(<span class="string">"size overflows MAX_SIZE"</span>)
+    }
+
+    <span class="doccomment">/// Reserves capacity for at least `additional` more headers to be inserted
+    /// into the `HeaderMap`.
+    ///
+    /// The header map may reserve more space to avoid frequent reallocations.
+    /// Like with `with_capacity`, this will be a "best effort" to avoid
+    /// allocations until `additional` more headers are inserted. Certain usage
+    /// patterns could cause additional allocations before the number is
+    /// reached.
+    ///
+    /// # Errors
+    ///
+    /// This method differs from `reserve` by returning an error instead of
+    /// panicking if the value is too large.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use http::HeaderMap;
+    /// # use http::header::HOST;
+    /// let mut map = HeaderMap::new();
+    /// map.try_reserve(10).unwrap();
+    /// # map.try_insert(HOST, "bar".parse().unwrap()).unwrap();
+    /// ```
+    </span><span class="kw">pub fn </span>try_reserve(<span class="kw-2">&amp;mut </span><span class="self">self</span>, additional: usize) -&gt; <span class="prelude-ty">Result</span>&lt;(), MaxSizeReached&gt; {
         <span class="comment">// TODO: This can't overflow if done properly... since the max # of
         // elements is u16::MAX.
         </span><span class="kw">let </span>cap = <span class="self">self
             </span>.entries
             .len()
             .checked_add(additional)
-            .expect(<span class="string">"reserve overflow"</span>);
+            .ok_or_else(|| MaxSizeReached::new())<span class="question-mark">?</span>;
 
         <span class="kw">if </span>cap &gt; <span class="self">self</span>.indices.len() {
-            <span class="kw">let </span>cap = cap.next_power_of_two();
-            <span class="macro">assert!</span>(cap &lt;= MAX_SIZE, <span class="string">"header map reserve over max capacity"</span>);
-            <span class="macro">assert!</span>(cap != <span class="number">0</span>, <span class="string">"header map reserve overflowed"</span>);
+            <span class="kw">let </span>cap = cap
+                .checked_next_power_of_two()
+                .ok_or_else(|| MaxSizeReached::new())<span class="question-mark">?</span>;
+            <span class="kw">if </span>cap &gt; MAX_SIZE {
+                <span class="kw">return </span><span class="prelude-val">Err</span>(MaxSizeReached::new());
+            }
 
-            <span class="kw">if </span><span class="self">self</span>.entries.len() == <span class="number">0 </span>{
+            <span class="kw">if </span><span class="self">self</span>.entries.is_empty() {
                 <span class="self">self</span>.mask = cap <span class="kw">as </span>Size - <span class="number">1</span>;
                 <span class="self">self</span>.indices = <span class="macro">vec!</span>[Pos::none(); cap].into_boxed_slice();
                 <span class="self">self</span>.entries = Vec::with_capacity(usable_capacity(cap));
             } <span class="kw">else </span>{
-                <span class="self">self</span>.grow(cap);
+                <span class="self">self</span>.try_grow(cap)<span class="question-mark">?</span>;
             }
         }
+
+        <span class="prelude-val">Ok</span>(())
     }
 
     <span class="doccomment">/// Returns a reference to the value associated with the key.
@@ -4515,7 +4934,9 @@
         </span><span class="kw">let </span>entries = <span class="kw-2">&amp;mut </span><span class="self">self</span>.entries[..] <span class="kw">as </span><span class="kw-2">*mut </span><span class="kw">_</span>;
         <span class="kw">let </span>extra_values = <span class="kw-2">&amp;mut </span><span class="self">self</span>.extra_values <span class="kw">as </span><span class="kw-2">*mut </span><span class="kw">_</span>;
         <span class="kw">let </span>len = <span class="self">self</span>.entries.len();
-        <span class="kw">unsafe </span>{ <span class="self">self</span>.entries.set_len(<span class="number">0</span>); }
+        <span class="kw">unsafe </span>{
+            <span class="self">self</span>.entries.set_len(<span class="number">0</span>);
+        }
 
         Drain {
             idx: <span class="number">0</span>,
@@ -4574,6 +4995,10 @@
     <span class="doccomment">/// Gets the given key's corresponding entry in the map for in-place
     /// manipulation.
     ///
+    /// # Panics
+    ///
+    /// This method panics if capacity exceeds max `HeaderMap` capacity
+    ///
     /// # Examples
     ///
     /// ```
@@ -4599,7 +5024,7 @@
     <span class="kw">where
         </span>K: IntoHeaderName,
     {
-        key.entry(<span class="self">self</span>)
+        key.try_entry(<span class="self">self</span>).expect(<span class="string">"size overflows MAX_SIZE"</span>)
     }
 
     <span class="doccomment">/// Gets the given key's corresponding entry in the map for in-place
@@ -4611,22 +5036,35 @@
     /// valid `HeaderName`s to passed as the key (such as `String`). If they
     /// do not parse as a valid `HeaderName`, this returns an
     /// `InvalidHeaderName` error.
+    ///
+    /// If reserving space goes over the maximum, this will also return an
+    /// error. However, to prevent breaking changes to the return type, the
+    /// error will still say `InvalidHeaderName`, unlike other `try_*` methods
+    /// which return a `MaxSizeReached` error.
     </span><span class="kw">pub fn </span>try_entry&lt;K&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: K) -&gt; <span class="prelude-ty">Result</span>&lt;Entry&lt;<span class="lifetime">'_</span>, T&gt;, InvalidHeaderName&gt;
     <span class="kw">where
         </span>K: AsHeaderName,
     {
-        key.try_entry(<span class="self">self</span>)
+        key.try_entry(<span class="self">self</span>).map_err(|err| <span class="kw">match </span>err {
+            as_header_name::TryEntryError::InvalidHeaderName(e) =&gt; e,
+            as_header_name::TryEntryError::MaxSizeReached(_e) =&gt; {
+                <span class="comment">// Unfortunately, we cannot change the return type of this
+                // method, so the max size reached error needs to be converted
+                // into an InvalidHeaderName. Yay.
+                </span>InvalidHeaderName::new()
+            }
+        })
     }
 
-    <span class="kw">fn </span>entry2&lt;K&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: K) -&gt; Entry&lt;<span class="lifetime">'_</span>, T&gt;
+    <span class="kw">fn </span>try_entry2&lt;K&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: K) -&gt; <span class="prelude-ty">Result</span>&lt;Entry&lt;<span class="lifetime">'_</span>, T&gt;, MaxSizeReached&gt;
     <span class="kw">where
         </span>K: Hash + Into&lt;HeaderName&gt;,
         HeaderName: PartialEq&lt;K&gt;,
     {
         <span class="comment">// Ensure that there is space in the map
-        </span><span class="self">self</span>.reserve_one();
+        </span><span class="self">self</span>.try_reserve_one()<span class="question-mark">?</span>;
 
-        <span class="macro">insert_phase_one!</span>(
+        <span class="prelude-val">Ok</span>(<span class="macro">insert_phase_one!</span>(
             <span class="self">self</span>,
             key,
             probe,
@@ -4635,24 +5073,24 @@
             danger,
             Entry::Vacant(VacantEntry {
                 map: <span class="self">self</span>,
-                hash: hash,
+                hash,
                 key: key.into(),
-                probe: probe,
-                danger: danger,
+                probe,
+                danger,
             }),
             Entry::Occupied(OccupiedEntry {
                 map: <span class="self">self</span>,
                 index: pos,
-                probe: probe,
+                probe,
             }),
             Entry::Vacant(VacantEntry {
                 map: <span class="self">self</span>,
-                hash: hash,
+                hash,
                 key: key.into(),
-                probe: probe,
-                danger: danger,
+                probe,
+                danger,
             })
-        )
+        ))
     }
 
     <span class="doccomment">/// Inserts a key-value pair into the map.
@@ -4670,6 +5108,10 @@
     /// The key is not updated, though; this matters for types that can be `==`
     /// without being identical.
     ///
+    /// # Panics
+    ///
+    /// This method panics if capacity exceeds max `HeaderMap` capacity
+    ///
     /// # Examples
     ///
     /// ```
@@ -4686,18 +5128,56 @@
     <span class="kw">where
         </span>K: IntoHeaderName,
     {
-        key.insert(<span class="self">self</span>, val)
+        <span class="self">self</span>.try_insert(key, val).expect(<span class="string">"size overflows MAX_SIZE"</span>)
+    }
+
+    <span class="doccomment">/// Inserts a key-value pair into the map.
+    ///
+    /// If the map did not previously have this key present, then `None` is
+    /// returned.
+    ///
+    /// If the map did have this key present, the new value is associated with
+    /// the key and all previous values are removed. **Note** that only a single
+    /// one of the previous values is returned. If there are multiple values
+    /// that have been previously associated with the key, then the first one is
+    /// returned. See `insert_mult` on `OccupiedEntry` for an API that returns
+    /// all values.
+    ///
+    /// The key is not updated, though; this matters for types that can be `==`
+    /// without being identical.
+    ///
+    /// # Errors
+    ///
+    /// This function may return an error if `HeaderMap` exceeds max capacity
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use http::HeaderMap;
+    /// # use http::header::HOST;
+    /// let mut map = HeaderMap::new();
+    /// assert!(map.try_insert(HOST, "world".parse().unwrap()).unwrap().is_none());
+    /// assert!(!map.is_empty());
+    ///
+    /// let mut prev = map.try_insert(HOST, "earth".parse().unwrap()).unwrap().unwrap();
+    /// assert_eq!("world", prev);
+    /// ```
+    </span><span class="kw">pub fn </span>try_insert&lt;K&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: K, val: T) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;T&gt;, MaxSizeReached&gt;
+    <span class="kw">where
+        </span>K: IntoHeaderName,
+    {
+        key.try_insert(<span class="self">self</span>, val)
     }
 
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>insert2&lt;K&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: K, value: T) -&gt; <span class="prelude-ty">Option</span>&lt;T&gt;
+    </span><span class="kw">fn </span>try_insert2&lt;K&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: K, value: T) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;T&gt;, MaxSizeReached&gt;
     <span class="kw">where
         </span>K: Hash + Into&lt;HeaderName&gt;,
         HeaderName: PartialEq&lt;K&gt;,
     {
-        <span class="self">self</span>.reserve_one();
+        <span class="self">self</span>.try_reserve_one()<span class="question-mark">?</span>;
 
-        <span class="macro">insert_phase_one!</span>(
+        <span class="prelude-val">Ok</span>(<span class="macro">insert_phase_one!</span>(
             <span class="self">self</span>,
             key,
             probe,
@@ -4708,7 +5188,7 @@
             </span>{
                 <span class="kw">let _ </span>= danger; <span class="comment">// Make lint happy
                 </span><span class="kw">let </span>index = <span class="self">self</span>.entries.len();
-                <span class="self">self</span>.insert_entry(hash, key.into(), value);
+                <span class="self">self</span>.try_insert_entry(hash, key.into(), value)<span class="question-mark">?</span>;
                 <span class="self">self</span>.indices[probe] = Pos::new(index, hash);
                 <span class="prelude-val">None
             </span>},
@@ -4716,10 +5196,10 @@
             </span><span class="prelude-val">Some</span>(<span class="self">self</span>.insert_occupied(pos, value)),
             <span class="comment">// Robinhood
             </span>{
-                <span class="self">self</span>.insert_phase_two(key.into(), value, hash, probe, danger);
+                <span class="self">self</span>.try_insert_phase_two(key.into(), value, hash, probe, danger)<span class="question-mark">?</span>;
                 <span class="prelude-val">None
             </span>}
-        )
+        ))
     }
 
     <span class="doccomment">/// Set an occupied bucket to the given value
@@ -4747,14 +5227,12 @@
         <span class="kw">let </span>raw_links = <span class="self">self</span>.raw_links();
         <span class="kw">let </span>extra_values = <span class="kw-2">&amp;mut </span><span class="self">self</span>.extra_values;
 
-        <span class="kw">let </span>next = links.map(|l| {
-            drain_all_extra_values(raw_links, extra_values, l.next)
-                .into_iter()
-        });
+        <span class="kw">let </span>next =
+            links.map(|l| drain_all_extra_values(raw_links, extra_values, l.next).into_iter());
 
         ValueDrain {
             first: <span class="prelude-val">Some</span>(old),
-            next: next,
+            next,
             lt: PhantomData,
         }
     }
@@ -4768,6 +5246,10 @@
     /// of the list of values currently associated with the key. The key is not
     /// updated, though; this matters for types that can be `==` without being
     /// identical.
+    ///
+    /// # Panics
+    ///
+    /// This method panics if capacity exceeds max `HeaderMap` capacity
     ///
     /// # Examples
     ///
@@ -4789,18 +5271,56 @@
     <span class="kw">where
         </span>K: IntoHeaderName,
     {
-        key.append(<span class="self">self</span>, value)
+        <span class="self">self</span>.try_append(key, value)
+            .expect(<span class="string">"size overflows MAX_SIZE"</span>)
+    }
+
+    <span class="doccomment">/// Inserts a key-value pair into the map.
+    ///
+    /// If the map did not previously have this key present, then `false` is
+    /// returned.
+    ///
+    /// If the map did have this key present, the new value is pushed to the end
+    /// of the list of values currently associated with the key. The key is not
+    /// updated, though; this matters for types that can be `==` without being
+    /// identical.
+    ///
+    /// # Errors
+    ///
+    /// This function may return an error if `HeaderMap` exceeds max capacity
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use http::HeaderMap;
+    /// # use http::header::HOST;
+    /// let mut map = HeaderMap::new();
+    /// assert!(map.try_insert(HOST, "world".parse().unwrap()).unwrap().is_none());
+    /// assert!(!map.is_empty());
+    ///
+    /// map.try_append(HOST, "earth".parse().unwrap()).unwrap();
+    ///
+    /// let values = map.get_all("host");
+    /// let mut i = values.iter();
+    /// assert_eq!("world", *i.next().unwrap());
+    /// assert_eq!("earth", *i.next().unwrap());
+    /// ```
+    </span><span class="kw">pub fn </span>try_append&lt;K&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: K, value: T) -&gt; <span class="prelude-ty">Result</span>&lt;bool, MaxSizeReached&gt;
+    <span class="kw">where
+        </span>K: IntoHeaderName,
+    {
+        key.try_append(<span class="self">self</span>, value)
     }
 
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>append2&lt;K&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: K, value: T) -&gt; bool
+    </span><span class="kw">fn </span>try_append2&lt;K&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: K, value: T) -&gt; <span class="prelude-ty">Result</span>&lt;bool, MaxSizeReached&gt;
     <span class="kw">where
         </span>K: Hash + Into&lt;HeaderName&gt;,
         HeaderName: PartialEq&lt;K&gt;,
     {
-        <span class="self">self</span>.reserve_one();
+        <span class="self">self</span>.try_reserve_one()<span class="question-mark">?</span>;
 
-        <span class="macro">insert_phase_one!</span>(
+        <span class="prelude-val">Ok</span>(<span class="macro">insert_phase_one!</span>(
             <span class="self">self</span>,
             key,
             probe,
@@ -4811,7 +5331,7 @@
             </span>{
                 <span class="kw">let _ </span>= danger;
                 <span class="kw">let </span>index = <span class="self">self</span>.entries.len();
-                <span class="self">self</span>.insert_entry(hash, key.into(), value);
+                <span class="self">self</span>.try_insert_entry(hash, key.into(), value)<span class="question-mark">?</span>;
                 <span class="self">self</span>.indices[probe] = Pos::new(index, hash);
                 <span class="bool-val">false
             </span>},
@@ -4822,11 +5342,11 @@
             </span>},
             <span class="comment">// Robinhood
             </span>{
-                <span class="self">self</span>.insert_phase_two(key.into(), value, hash, probe, danger);
+                <span class="self">self</span>.try_insert_phase_two(key.into(), value, hash, probe, danger)<span class="question-mark">?</span>;
 
                 <span class="bool-val">false
             </span>}
-        )
+        ))
     }
 
     <span class="attr">#[inline]
@@ -4862,26 +5382,26 @@
 
     <span class="doccomment">/// phase 2 is post-insert where we forward-shift `Pos` in the indices.
     </span><span class="attr">#[inline]
-    </span><span class="kw">fn </span>insert_phase_two(
+    </span><span class="kw">fn </span>try_insert_phase_two(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         key: HeaderName,
         value: T,
         hash: HashValue,
         probe: usize,
         danger: bool,
-    ) -&gt; usize {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;usize, MaxSizeReached&gt; {
         <span class="comment">// Push the value and get the index
         </span><span class="kw">let </span>index = <span class="self">self</span>.entries.len();
-        <span class="self">self</span>.insert_entry(hash, key, value);
+        <span class="self">self</span>.try_insert_entry(hash, key, value)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>num_displaced = do_insert_phase_two(<span class="kw-2">&amp;mut </span><span class="self">self</span>.indices, probe, Pos::new(index, hash));
 
         <span class="kw">if </span>danger || num_displaced &gt;= DISPLACEMENT_THRESHOLD {
             <span class="comment">// Increase danger level
-            </span><span class="self">self</span>.danger.to_yellow();
+            </span><span class="self">self</span>.danger.set_yellow();
         }
 
-        index
+        <span class="prelude-val">Ok</span>(index)
     }
 
     <span class="doccomment">/// Removes a key from the map, returning the value associated with the key.
@@ -4960,7 +5480,7 @@
 
         <span class="comment">// backward shift deletion in self.indices
         // after probe, shift all non-ideally placed indices backward
-        </span><span class="kw">if </span><span class="self">self</span>.entries.len() &gt; <span class="number">0 </span>{
+        </span><span class="kw">if </span>!<span class="self">self</span>.entries.is_empty() {
             <span class="kw">let </span><span class="kw-2">mut </span>last_probe = probe;
             <span class="kw">let </span><span class="kw-2">mut </span>probe = probe + <span class="number">1</span>;
 
@@ -5003,15 +5523,24 @@
     }
 
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>insert_entry(<span class="kw-2">&amp;mut </span><span class="self">self</span>, hash: HashValue, key: HeaderName, value: T) {
-        <span class="macro">assert!</span>(<span class="self">self</span>.entries.len() &lt; MAX_SIZE, <span class="string">"header map at capacity"</span>);
+    </span><span class="kw">fn </span>try_insert_entry(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        hash: HashValue,
+        key: HeaderName,
+        value: T,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(), MaxSizeReached&gt; {
+        <span class="kw">if </span><span class="self">self</span>.entries.len() &gt;= MAX_SIZE {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(MaxSizeReached::new());
+        }
 
         <span class="self">self</span>.entries.push(Bucket {
-            hash: hash,
-            key: key,
-            value: value,
+            hash,
+            key,
+            value,
             links: <span class="prelude-val">None</span>,
         });
+
+        <span class="prelude-val">Ok</span>(())
     }
 
     <span class="kw">fn </span>rebuild(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
@@ -5061,7 +5590,7 @@
         }
     }
 
-    <span class="kw">fn </span>reserve_one(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+    <span class="kw">fn </span>try_reserve_one(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), MaxSizeReached&gt; {
         <span class="kw">let </span>len = <span class="self">self</span>.entries.len();
 
         <span class="kw">if </span><span class="self">self</span>.danger.is_yellow() {
@@ -5069,15 +5598,15 @@
 
             <span class="kw">if </span>load_factor &gt;= LOAD_FACTOR_THRESHOLD {
                 <span class="comment">// Transition back to green danger level
-                </span><span class="self">self</span>.danger.to_green();
+                </span><span class="self">self</span>.danger.set_green();
 
                 <span class="comment">// Double the capacity
                 </span><span class="kw">let </span>new_cap = <span class="self">self</span>.indices.len() * <span class="number">2</span>;
 
                 <span class="comment">// Grow the capacity
-                </span><span class="self">self</span>.grow(new_cap);
+                </span><span class="self">self</span>.try_grow(new_cap)<span class="question-mark">?</span>;
             } <span class="kw">else </span>{
-                <span class="self">self</span>.danger.to_red();
+                <span class="self">self</span>.danger.set_red();
 
                 <span class="comment">// Rebuild hash table
                 </span><span class="kw">for </span>index <span class="kw">in </span><span class="self">self</span>.indices.iter_mut() {
@@ -5094,18 +5623,20 @@
                 <span class="self">self</span>.entries = Vec::with_capacity(usable_capacity(new_raw_cap));
             } <span class="kw">else </span>{
                 <span class="kw">let </span>raw_cap = <span class="self">self</span>.indices.len();
-                <span class="self">self</span>.grow(raw_cap &lt;&lt; <span class="number">1</span>);
+                <span class="self">self</span>.try_grow(raw_cap &lt;&lt; <span class="number">1</span>)<span class="question-mark">?</span>;
             }
         }
+
+        <span class="prelude-val">Ok</span>(())
     }
 
     <span class="attr">#[inline]
-    </span><span class="kw">fn </span>grow(<span class="kw-2">&amp;mut </span><span class="self">self</span>, new_raw_cap: usize) {
-        <span class="macro">assert!</span>(new_raw_cap &lt;= MAX_SIZE, <span class="string">"requested capacity too large"</span>);
-        <span class="comment">// This path can never be reached when handling the first allocation in
-        // the map.
+    </span><span class="kw">fn </span>try_grow(<span class="kw-2">&amp;mut </span><span class="self">self</span>, new_raw_cap: usize) -&gt; <span class="prelude-ty">Result</span>&lt;(), MaxSizeReached&gt; {
+        <span class="kw">if </span>new_raw_cap &gt; MAX_SIZE {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(MaxSizeReached::new());
+        }
 
-        // find first ideally placed element -- start of cluster
+        <span class="comment">// find first ideally placed element -- start of cluster
         </span><span class="kw">let </span><span class="kw-2">mut </span>first_ideal = <span class="number">0</span>;
 
         <span class="kw">for </span>(i, pos) <span class="kw">in </span><span class="self">self</span>.indices.iter().enumerate() {
@@ -5136,6 +5667,7 @@
         <span class="comment">// Reserve additional entry slots
         </span><span class="kw">let </span>more = <span class="self">self</span>.capacity() - <span class="self">self</span>.entries.len();
         <span class="self">self</span>.entries.reserve_exact(more);
+        <span class="prelude-val">Ok</span>(())
     }
 
     <span class="attr">#[inline]
@@ -5149,9 +5681,8 @@
 </span><span class="kw">fn </span>remove_extra_value&lt;T&gt;(
     <span class="kw-2">mut </span>raw_links: RawLinks&lt;T&gt;,
     extra_values: <span class="kw-2">&amp;mut </span>Vec&lt;ExtraValue&lt;T&gt;&gt;,
-    idx: usize)
-    -&gt; ExtraValue&lt;T&gt;
-{
+    idx: usize,
+) -&gt; ExtraValue&lt;T&gt; {
     <span class="kw">let </span>prev;
     <span class="kw">let </span>next;
 
@@ -5172,8 +5703,7 @@
         (Link::Entry(prev), Link::Extra(next)) =&gt; {
             <span class="macro">debug_assert!</span>(raw_links[prev].is_some());
 
-            raw_links[prev].as_mut().unwrap()
-                .next = next;
+            raw_links[prev].as_mut().unwrap().next = next;
 
             <span class="macro">debug_assert!</span>(extra_values.len() &gt; next);
             extra_values[next].prev = Link::Entry(prev);
@@ -5181,8 +5711,7 @@
         (Link::Extra(prev), Link::Entry(next)) =&gt; {
             <span class="macro">debug_assert!</span>(raw_links[next].is_some());
 
-            raw_links[next].as_mut().unwrap()
-                .tail = prev;
+            raw_links[next].as_mut().unwrap().tail = prev;
 
             <span class="macro">debug_assert!</span>(extra_values.len() &gt; prev);
             extra_values[prev].next = Link::Entry(next);
@@ -5270,9 +5799,8 @@
 <span class="kw">fn </span>drain_all_extra_values&lt;T&gt;(
     raw_links: RawLinks&lt;T&gt;,
     extra_values: <span class="kw-2">&amp;mut </span>Vec&lt;ExtraValue&lt;T&gt;&gt;,
-    <span class="kw-2">mut </span>head: usize)
-    -&gt; Vec&lt;T&gt;
-{
+    <span class="kw-2">mut </span>head: usize,
+) -&gt; Vec&lt;T&gt; {
     <span class="kw">let </span><span class="kw-2">mut </span>vec = Vec::new();
     <span class="kw">loop </span>{
         <span class="kw">let </span>extra = remove_extra_value(raw_links, extra_values, head);
@@ -5394,17 +5922,17 @@
 /// assert_eq!(headers["X-Custom-Header"], "my value");
 /// ```
 </span><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K, V, T&gt; TryFrom&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>HashMap&lt;K, V&gt;&gt; <span class="kw">for </span>HeaderMap&lt;T&gt;
-    <span class="kw">where
-        </span>K: Eq + Hash,
-        HeaderName: TryFrom&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>K&gt;,
-        &lt;HeaderName <span class="kw">as </span>TryFrom&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>K&gt;&gt;::Error: Into&lt;<span class="kw">crate</span>::Error&gt;,
-        T: TryFrom&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>V&gt;,
-        T::Error: Into&lt;<span class="kw">crate</span>::Error&gt;,
+<span class="kw">where
+    </span>K: Eq + Hash,
+    HeaderName: TryFrom&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>K&gt;,
+    &lt;HeaderName <span class="kw">as </span>TryFrom&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>K&gt;&gt;::Error: Into&lt;<span class="kw">crate</span>::Error&gt;,
+    T: TryFrom&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>V&gt;,
+    T::Error: Into&lt;<span class="kw">crate</span>::Error&gt;,
 {
     <span class="kw">type </span>Error = Error;
 
     <span class="kw">fn </span>try_from(c: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>HashMap&lt;K, V&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
-        c.into_iter()
+        c.iter()
             .map(|(k, v)| -&gt; <span class="kw">crate</span>::Result&lt;(HeaderName, T)&gt; {
                 <span class="kw">let </span>name = TryFrom::try_from(k).map_err(Into::into)<span class="question-mark">?</span>;
                 <span class="kw">let </span>value = TryFrom::try_from(v).map_err(Into::into)<span class="question-mark">?</span>;
@@ -5463,7 +5991,7 @@
         };
 
         <span class="lifetime">'outer</span>: <span class="kw">loop </span>{
-            <span class="kw">let </span><span class="kw-2">mut </span>entry = <span class="kw">match </span><span class="self">self</span>.entry2(key) {
+            <span class="kw">let </span><span class="kw-2">mut </span>entry = <span class="kw">match </span><span class="self">self</span>.try_entry2(key).expect(<span class="string">"size overflows MAX_SIZE"</span>) {
                 Entry::Occupied(<span class="kw-2">mut </span>e) =&gt; {
                     <span class="comment">// Replace all previous values while maintaining a handle to
                     // the entry.
@@ -5537,11 +6065,11 @@
 
 <span class="kw">impl</span>&lt;T&gt; Default <span class="kw">for </span>HeaderMap&lt;T&gt; {
     <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
-        HeaderMap::with_capacity(<span class="number">0</span>)
+        HeaderMap::try_with_capacity(<span class="number">0</span>).expect(<span class="string">"zero capacity should never fail"</span>)
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, K, T&gt; ops::Index&lt;K&gt; <span class="kw">for </span>HeaderMap&lt;T&gt;
+<span class="kw">impl</span>&lt;K, T&gt; ops::Index&lt;K&gt; <span class="kw">for </span>HeaderMap&lt;T&gt;
 <span class="kw">where
     </span>K: AsHeaderName,
 {
@@ -5591,7 +6119,7 @@
         <span class="prelude-val">Some</span>(links) =&gt; {
             <span class="kw">let </span>idx = extra.len();
             extra.push(ExtraValue {
-                value: value,
+                value,
                 prev: Link::Extra(links.tail),
                 next: Link::Entry(entry_idx),
             });
@@ -5603,7 +6131,7 @@
         <span class="prelude-val">None </span>=&gt; {
             <span class="kw">let </span>idx = extra.len();
             extra.push(ExtraValue {
-                value: value,
+                value,
                 prev: Link::Entry(entry_idx),
                 next: Link::Entry(entry_idx),
             });
@@ -5745,6 +6273,18 @@
     <span class="kw">fn </span>size_hint(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; (usize, <span class="prelude-ty">Option</span>&lt;usize&gt;) {
         <span class="self">self</span>.inner.size_hint()
     }
+
+    <span class="kw">fn </span>nth(<span class="kw-2">&amp;mut </span><span class="self">self</span>, n: usize) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
+        <span class="self">self</span>.inner.nth(n).map(|b| <span class="kw-2">&amp;</span>b.key)
+    }
+
+    <span class="kw">fn </span>count(<span class="self">self</span>) -&gt; usize {
+        <span class="self">self</span>.inner.count()
+    }
+
+    <span class="kw">fn </span>last(<span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt; {
+        <span class="self">self</span>.inner.last().map(|b| <span class="kw-2">&amp;</span>b.key)
+    }
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; ExactSizeIterator <span class="kw">for </span>Keys&lt;<span class="lifetime">'a</span>, T&gt; {}
@@ -5792,9 +6332,7 @@
             <span class="comment">// Remove the extra value
 
             </span><span class="kw">let </span>raw_links = RawLinks(<span class="self">self</span>.entries);
-            <span class="kw">let </span>extra = <span class="kw">unsafe </span>{
-                remove_extra_value(raw_links, <span class="kw-2">&amp;mut *</span><span class="self">self</span>.extra_values, next)
-            };
+            <span class="kw">let </span>extra = <span class="kw">unsafe </span>{ remove_extra_value(raw_links, <span class="kw-2">&amp;mut *</span><span class="self">self</span>.extra_values, next) };
 
             <span class="kw">match </span>extra.next {
                 Link::Extra(idx) =&gt; <span class="self">self</span>.next = <span class="prelude-val">Some</span>(idx),
@@ -5854,6 +6392,10 @@
     ///
     /// Returns a mutable reference to the **first** value in the entry.
     ///
+    /// # Panics
+    ///
+    /// This method panics if capacity exceeds max `HeaderMap` capacity
+    ///
     /// # Examples
     ///
     /// ```
@@ -5877,11 +6419,47 @@
     /// assert_eq!(map["x-hello"], 1);
     /// ```
     </span><span class="kw">pub fn </span>or_insert(<span class="self">self</span>, default: T) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>T {
+        <span class="self">self</span>.or_try_insert(default)
+            .expect(<span class="string">"size overflows MAX_SIZE"</span>)
+    }
+
+    <span class="doccomment">/// Ensures a value is in the entry by inserting the default if empty.
+    ///
+    /// Returns a mutable reference to the **first** value in the entry.
+    ///
+    /// # Errors
+    ///
+    /// This function may return an error if `HeaderMap` exceeds max capacity
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use http::HeaderMap;
+    /// let mut map: HeaderMap&lt;u32&gt; = HeaderMap::default();
+    ///
+    /// let headers = &amp;[
+    ///     "content-length",
+    ///     "x-hello",
+    ///     "Content-Length",
+    ///     "x-world",
+    /// ];
+    ///
+    /// for &amp;header in headers {
+    ///     let counter = map.entry(header)
+    ///         .or_try_insert(0)
+    ///         .unwrap();
+    ///     *counter += 1;
+    /// }
+    ///
+    /// assert_eq!(map["content-length"], 2);
+    /// assert_eq!(map["x-hello"], 1);
+    /// ```
+    </span><span class="kw">pub fn </span>or_try_insert(<span class="self">self</span>, default: T) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>T, MaxSizeReached&gt; {
         <span class="kw">use </span><span class="self">self</span>::Entry::<span class="kw-2">*</span>;
 
         <span class="kw">match </span><span class="self">self </span>{
-            Occupied(e) =&gt; e.into_mut(),
-            Vacant(e) =&gt; e.insert(default),
+            Occupied(e) =&gt; <span class="prelude-val">Ok</span>(e.into_mut()),
+            Vacant(e) =&gt; e.try_insert(default),
         }
     }
 
@@ -5911,20 +6489,66 @@
     /// # use http::HeaderMap;
     /// # use http::header::HOST;
     /// let mut map = HeaderMap::new();
-    /// map.insert(HOST, "world".parse().unwrap());
+    /// map.try_insert(HOST, "world".parse().unwrap()).unwrap();
     ///
-    /// let res = map.entry("host")
-    ///     .or_insert_with(|| unreachable!());
+    /// let res = map.try_entry("host")
+    ///     .unwrap()
+    ///     .or_try_insert_with(|| unreachable!())
+    ///     .unwrap();
     ///
     ///
     /// assert_eq!(res, "world");
     /// ```
     </span><span class="kw">pub fn </span>or_insert_with&lt;F: FnOnce() -&gt; T&gt;(<span class="self">self</span>, default: F) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>T {
+        <span class="self">self</span>.or_try_insert_with(default)
+            .expect(<span class="string">"size overflows MAX_SIZE"</span>)
+    }
+
+    <span class="doccomment">/// Ensures a value is in the entry by inserting the result of the default
+    /// function if empty.
+    ///
+    /// The default function is not called if the entry exists in the map.
+    /// Returns a mutable reference to the **first** value in the entry.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage.
+    ///
+    /// ```
+    /// # use http::HeaderMap;
+    /// let mut map = HeaderMap::new();
+    ///
+    /// let res = map.entry("x-hello")
+    ///     .or_insert_with(|| "world".parse().unwrap());
+    ///
+    /// assert_eq!(res, "world");
+    /// ```
+    ///
+    /// The default function is not called if the entry exists in the map.
+    ///
+    /// ```
+    /// # use http::HeaderMap;
+    /// # use http::header::HOST;
+    /// let mut map = HeaderMap::new();
+    /// map.try_insert(HOST, "world".parse().unwrap()).unwrap();
+    ///
+    /// let res = map.try_entry("host")
+    ///     .unwrap()
+    ///     .or_try_insert_with(|| unreachable!())
+    ///     .unwrap();
+    ///
+    ///
+    /// assert_eq!(res, "world");
+    /// ```
+    </span><span class="kw">pub fn </span>or_try_insert_with&lt;F: FnOnce() -&gt; T&gt;(
+        <span class="self">self</span>,
+        default: F,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>T, MaxSizeReached&gt; {
         <span class="kw">use </span><span class="self">self</span>::Entry::<span class="kw-2">*</span>;
 
         <span class="kw">match </span><span class="self">self </span>{
-            Occupied(e) =&gt; e.into_mut(),
-            Vacant(e) =&gt; e.insert(default()),
+            Occupied(e) =&gt; <span class="prelude-val">Ok</span>(e.into_mut()),
+            Vacant(e) =&gt; e.try_insert(default()),
         }
     }
 
@@ -5999,12 +6623,33 @@
     /// assert_eq!(map["x-hello"], "world");
     /// ```
     </span><span class="kw">pub fn </span>insert(<span class="self">self</span>, value: T) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>T {
+        <span class="self">self</span>.try_insert(value).expect(<span class="string">"size overflows MAX_SIZE"</span>)
+    }
+
+    <span class="doccomment">/// Insert the value into the entry.
+    ///
+    /// The value will be associated with this entry's key. A mutable reference
+    /// to the inserted value will be returned.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use http::header::{HeaderMap, Entry};
+    /// let mut map = HeaderMap::new();
+    ///
+    /// if let Entry::Vacant(v) = map.entry("x-hello") {
+    ///     v.insert("world".parse().unwrap());
+    /// }
+    ///
+    /// assert_eq!(map["x-hello"], "world");
+    /// ```
+    </span><span class="kw">pub fn </span>try_insert(<span class="self">self</span>, value: T) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>T, MaxSizeReached&gt; {
         <span class="comment">// Ensure that there is space in the map
         </span><span class="kw">let </span>index =
             <span class="self">self</span>.map
-                .insert_phase_two(<span class="self">self</span>.key, value.into(), <span class="self">self</span>.hash, <span class="self">self</span>.probe, <span class="self">self</span>.danger);
+                .try_insert_phase_two(<span class="self">self</span>.key, value, <span class="self">self</span>.hash, <span class="self">self</span>.probe, <span class="self">self</span>.danger)<span class="question-mark">?</span>;
 
-        <span class="kw-2">&amp;mut </span><span class="self">self</span>.map.entries[index].value
+        <span class="prelude-val">Ok</span>(<span class="kw-2">&amp;mut </span><span class="self">self</span>.map.entries[index].value)
     }
 
     <span class="doccomment">/// Insert the value into the entry.
@@ -6018,24 +6663,47 @@
     /// # use http::header::*;
     /// let mut map = HeaderMap::new();
     ///
-    /// if let Entry::Vacant(v) = map.entry("x-hello") {
-    ///     let mut e = v.insert_entry("world".parse().unwrap());
+    /// if let Entry::Vacant(v) = map.try_entry("x-hello").unwrap() {
+    ///     let mut e = v.try_insert_entry("world".parse().unwrap()).unwrap();
     ///     e.insert("world2".parse().unwrap());
     /// }
     ///
     /// assert_eq!(map["x-hello"], "world2");
     /// ```
     </span><span class="kw">pub fn </span>insert_entry(<span class="self">self</span>, value: T) -&gt; OccupiedEntry&lt;<span class="lifetime">'a</span>, T&gt; {
+        <span class="self">self</span>.try_insert_entry(value)
+            .expect(<span class="string">"size overflows MAX_SIZE"</span>)
+    }
+
+    <span class="doccomment">/// Insert the value into the entry.
+    ///
+    /// The value will be associated with this entry's key. The new
+    /// `OccupiedEntry` is returned, allowing for further manipulation.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use http::header::*;
+    /// let mut map = HeaderMap::new();
+    ///
+    /// if let Entry::Vacant(v) = map.try_entry("x-hello").unwrap() {
+    ///     let mut e = v.try_insert_entry("world".parse().unwrap()).unwrap();
+    ///     e.insert("world2".parse().unwrap());
+    /// }
+    ///
+    /// assert_eq!(map["x-hello"], "world2");
+    /// ```
+    </span><span class="kw">pub fn </span>try_insert_entry(<span class="self">self</span>, value: T) -&gt; <span class="prelude-ty">Result</span>&lt;OccupiedEntry&lt;<span class="lifetime">'a</span>, T&gt;, MaxSizeReached&gt; {
         <span class="comment">// Ensure that there is space in the map
         </span><span class="kw">let </span>index =
             <span class="self">self</span>.map
-                .insert_phase_two(<span class="self">self</span>.key, value.into(), <span class="self">self</span>.hash, <span class="self">self</span>.probe, <span class="self">self</span>.danger);
+                .try_insert_phase_two(<span class="self">self</span>.key, value, <span class="self">self</span>.hash, <span class="self">self</span>.probe, <span class="self">self</span>.danger)<span class="question-mark">?</span>;
 
-        OccupiedEntry {
+        <span class="prelude-val">Ok</span>(OccupiedEntry {
             map: <span class="self">self</span>.map,
-            index: index,
+            index,
             probe: <span class="self">self</span>.probe,
-        }
+        })
     }
 }
 
@@ -6439,7 +7107,7 @@
     /// assert_eq!("earth", map["host"]);
     /// ```
     </span><span class="kw">pub fn </span>insert(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: T) -&gt; T {
-        <span class="self">self</span>.map.insert_occupied(<span class="self">self</span>.index, value.into())
+        <span class="self">self</span>.map.insert_occupied(<span class="self">self</span>.index, value)
     }
 
     <span class="doccomment">/// Sets the value of the entry.
@@ -6465,7 +7133,7 @@
     /// assert_eq!("earth", map["host"]);
     /// ```
     </span><span class="kw">pub fn </span>insert_mult(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: T) -&gt; ValueDrain&lt;<span class="lifetime">'_</span>, T&gt; {
-        <span class="self">self</span>.map.insert_occupied_mult(<span class="self">self</span>.index, value.into())
+        <span class="self">self</span>.map.insert_occupied_mult(<span class="self">self</span>.index, value)
     }
 
     <span class="doccomment">/// Insert the value into the entry.
@@ -6492,7 +7160,7 @@
     </span><span class="kw">pub fn </span>append(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: T) {
         <span class="kw">let </span>idx = <span class="self">self</span>.index;
         <span class="kw">let </span>entry = <span class="kw-2">&amp;mut </span><span class="self">self</span>.map.entries[idx];
-        append_value(idx, entry, <span class="kw-2">&amp;mut </span><span class="self">self</span>.map.extra_values, value.into());
+        append_value(idx, entry, <span class="kw-2">&amp;mut </span><span class="self">self</span>.map.extra_values, value);
     }
 
     <span class="doccomment">/// Remove the entry from the map.
@@ -6557,10 +7225,9 @@
         <span class="kw">let </span>raw_links = <span class="self">self</span>.map.raw_links();
         <span class="kw">let </span>extra_values = <span class="kw-2">&amp;mut </span><span class="self">self</span>.map.extra_values;
 
-        <span class="kw">let </span>next = <span class="self">self</span>.map.entries[<span class="self">self</span>.index].links.map(|l| {
-            drain_all_extra_values(raw_links, extra_values, l.next)
-                .into_iter()
-        });
+        <span class="kw">let </span>next = <span class="self">self</span>.map.entries[<span class="self">self</span>.index]
+            .links
+            .map(|l| drain_all_extra_values(raw_links, extra_values, l.next).into_iter());
 
         <span class="kw">let </span>entry = <span class="self">self</span>.map.remove_found(<span class="self">self</span>.probe, <span class="self">self</span>.index);
 
@@ -6671,12 +7338,12 @@
             <span class="comment">// Exactly 1
             </span>(<span class="kw-2">&amp;</span><span class="prelude-val">Some</span>(<span class="kw">_</span>), <span class="kw-2">&amp;</span><span class="prelude-val">None</span>) =&gt; (<span class="number">1</span>, <span class="prelude-val">Some</span>(<span class="number">1</span>)),
             <span class="comment">// 1 + extras
-            </span>(<span class="kw-2">&amp;</span><span class="prelude-val">Some</span>(<span class="kw">_</span>), <span class="kw-2">&amp;</span><span class="prelude-val">Some</span>(<span class="kw-2">ref </span>extras)) =&gt; {
+            </span>(<span class="kw-2">&amp;</span><span class="prelude-val">Some</span>(<span class="kw">_</span>), <span class="prelude-val">Some</span>(extras)) =&gt; {
                 <span class="kw">let </span>(l, u) = extras.size_hint();
                 (l + <span class="number">1</span>, u.map(|u| u + <span class="number">1</span>))
-            },
+            }
             <span class="comment">// Extras only
-            </span>(<span class="kw-2">&amp;</span><span class="prelude-val">None</span>, <span class="kw-2">&amp;</span><span class="prelude-val">Some</span>(<span class="kw-2">ref </span>extras)) =&gt; extras.size_hint(),
+            </span>(<span class="kw-2">&amp;</span><span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(extras)) =&gt; extras.size_hint(),
             <span class="comment">// No more
             </span>(<span class="kw-2">&amp;</span><span class="prelude-val">None</span>, <span class="kw-2">&amp;</span><span class="prelude-val">None</span>) =&gt; (<span class="number">0</span>, <span class="prelude-val">Some</span>(<span class="number">0</span>)),
         }
@@ -6687,7 +7354,7 @@
 
 <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T&gt; Drop <span class="kw">for </span>ValueDrain&lt;<span class="lifetime">'a</span>, T&gt; {
     <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
-        <span class="kw">while let </span><span class="prelude-val">Some</span>(<span class="kw">_</span>) = <span class="self">self</span>.next() {}
+        <span class="kw">for _ in </span><span class="self">self</span>.by_ref() {}
     }
 }
 
@@ -6708,17 +7375,13 @@
     <span class="kw">type </span>Output = <span class="prelude-ty">Option</span>&lt;Links&gt;;
 
     <span class="kw">fn </span>index(<span class="kw-2">&amp;</span><span class="self">self</span>, idx: usize) -&gt; <span class="kw-2">&amp;</span><span class="self">Self</span>::Output {
-        <span class="kw">unsafe </span>{
-            <span class="kw-2">&amp;</span>(<span class="kw-2">*</span><span class="self">self</span>.<span class="number">0</span>)[idx].links
-        }
+        <span class="kw">unsafe </span>{ <span class="kw-2">&amp;</span>(<span class="kw-2">*</span><span class="self">self</span>.<span class="number">0</span>)[idx].links }
     }
 }
 
 <span class="kw">impl</span>&lt;T&gt; ops::IndexMut&lt;usize&gt; <span class="kw">for </span>RawLinks&lt;T&gt; {
     <span class="kw">fn </span>index_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>, idx: usize) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self</span>::Output {
-        <span class="kw">unsafe </span>{
-            <span class="kw-2">&amp;mut </span>(<span class="kw-2">*</span><span class="self">self</span>.<span class="number">0</span>)[idx].links
-        }
+        <span class="kw">unsafe </span>{ <span class="kw-2">&amp;mut </span>(<span class="kw-2">*</span><span class="self">self</span>.<span class="number">0</span>)[idx].links }
     }
 }
 
@@ -6730,7 +7393,7 @@
         <span class="macro">debug_assert!</span>(index &lt; MAX_SIZE);
         Pos {
             index: index <span class="kw">as </span>Size,
-            hash: hash,
+            hash,
         }
     }
 
@@ -6764,38 +7427,53 @@
 
 <span class="kw">impl </span>Danger {
     <span class="kw">fn </span>is_red(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="kw">match </span><span class="kw-2">*</span><span class="self">self </span>{
-            Danger::Red(<span class="kw">_</span>) =&gt; <span class="bool-val">true</span>,
-            <span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
-        }
+        <span class="macro">matches!</span>(<span class="kw-2">*</span><span class="self">self</span>, Danger::Red(<span class="kw">_</span>))
     }
 
-    <span class="kw">fn </span>to_red(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+    <span class="kw">fn </span>set_red(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="macro">debug_assert!</span>(<span class="self">self</span>.is_yellow());
         <span class="kw-2">*</span><span class="self">self </span>= Danger::Red(RandomState::new());
     }
 
     <span class="kw">fn </span>is_yellow(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="kw">match </span><span class="kw-2">*</span><span class="self">self </span>{
-            Danger::Yellow =&gt; <span class="bool-val">true</span>,
-            <span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
+        <span class="macro">matches!</span>(<span class="kw-2">*</span><span class="self">self</span>, Danger::Yellow)
+    }
+
+    <span class="kw">fn </span>set_yellow(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="kw">if let </span>Danger::Green = <span class="kw-2">*</span><span class="self">self </span>{
+            <span class="kw-2">*</span><span class="self">self </span>= Danger::Yellow;
         }
     }
 
-    <span class="kw">fn </span>to_yellow(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
-        <span class="kw">match </span><span class="kw-2">*</span><span class="self">self </span>{
-            Danger::Green =&gt; {
-                <span class="kw-2">*</span><span class="self">self </span>= Danger::Yellow;
-            }
-            <span class="kw">_ </span>=&gt; {}
-        }
-    }
-
-    <span class="kw">fn </span>to_green(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+    <span class="kw">fn </span>set_green(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="macro">debug_assert!</span>(<span class="self">self</span>.is_yellow());
         <span class="kw-2">*</span><span class="self">self </span>= Danger::Green;
     }
 }
+
+<span class="comment">// ===== impl MaxSizeReached =====
+
+</span><span class="kw">impl </span>MaxSizeReached {
+    <span class="kw">fn </span>new() -&gt; <span class="self">Self </span>{
+        MaxSizeReached { _priv: () }
+    }
+}
+
+<span class="kw">impl </span>fmt::Debug <span class="kw">for </span>MaxSizeReached {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
+        f.debug_struct(<span class="string">"MaxSizeReached"</span>)
+            <span class="comment">// skip _priv noise
+            </span>.finish()
+    }
+}
+
+<span class="kw">impl </span>fmt::Display <span class="kw">for </span>MaxSizeReached {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        f.write_str(<span class="string">"max size reached"</span>)
+    }
+}
+
+<span class="kw">impl </span>std::error::Error <span class="kw">for </span>MaxSizeReached {}
 
 <span class="comment">// ===== impl Utils =====
 
@@ -6859,7 +7537,7 @@
  */
 
 </span><span class="kw">mod </span>into_header_name {
-    <span class="kw">use super</span>::{Entry, HdrName, HeaderMap, HeaderName};
+    <span class="kw">use super</span>::{Entry, HdrName, HeaderMap, HeaderName, MaxSizeReached};
 
     <span class="doccomment">/// A marker trait used to identify values that can be used as insert keys
     /// to a `HeaderMap`.
@@ -6875,31 +7553,36 @@
     // without breaking any external crate.
     </span><span class="kw">pub trait </span>Sealed {
         <span class="attr">#[doc(hidden)]
-        </span><span class="kw">fn </span>insert&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;, val: T) -&gt; <span class="prelude-ty">Option</span>&lt;T&gt;;
+        </span><span class="kw">fn </span>try_insert&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;, val: T)
+            -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;T&gt;, MaxSizeReached&gt;;
 
         <span class="attr">#[doc(hidden)]
-        </span><span class="kw">fn </span>append&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;, val: T) -&gt; bool;
+        </span><span class="kw">fn </span>try_append&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;, val: T) -&gt; <span class="prelude-ty">Result</span>&lt;bool, MaxSizeReached&gt;;
 
         <span class="attr">#[doc(hidden)]
-        </span><span class="kw">fn </span>entry&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;) -&gt; Entry&lt;<span class="lifetime">'_</span>, T&gt;;
+        </span><span class="kw">fn </span>try_entry&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Entry&lt;<span class="lifetime">'_</span>, T&gt;, MaxSizeReached&gt;;
     }
 
     <span class="comment">// ==== impls ====
 
     </span><span class="kw">impl </span>Sealed <span class="kw">for </span>HeaderName {
         <span class="attr">#[inline]
-        </span><span class="kw">fn </span>insert&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;, val: T) -&gt; <span class="prelude-ty">Option</span>&lt;T&gt; {
-            map.insert2(<span class="self">self</span>, val)
+        </span><span class="kw">fn </span>try_insert&lt;T&gt;(
+            <span class="self">self</span>,
+            map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;,
+            val: T,
+        ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;T&gt;, MaxSizeReached&gt; {
+            map.try_insert2(<span class="self">self</span>, val)
         }
 
         <span class="attr">#[inline]
-        </span><span class="kw">fn </span>append&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;, val: T) -&gt; bool {
-            map.append2(<span class="self">self</span>, val)
+        </span><span class="kw">fn </span>try_append&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;, val: T) -&gt; <span class="prelude-ty">Result</span>&lt;bool, MaxSizeReached&gt; {
+            map.try_append2(<span class="self">self</span>, val)
         }
 
         <span class="attr">#[inline]
-        </span><span class="kw">fn </span>entry&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;) -&gt; Entry&lt;<span class="lifetime">'_</span>, T&gt; {
-            map.entry2(<span class="self">self</span>)
+        </span><span class="kw">fn </span>try_entry&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Entry&lt;<span class="lifetime">'_</span>, T&gt;, MaxSizeReached&gt; {
+            map.try_entry2(<span class="self">self</span>)
         }
     }
 
@@ -6907,17 +7590,21 @@
 
     <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Sealed <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>HeaderName {
         <span class="attr">#[inline]
-        </span><span class="kw">fn </span>insert&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;, val: T) -&gt; <span class="prelude-ty">Option</span>&lt;T&gt; {
-            map.insert2(<span class="self">self</span>, val)
+        </span><span class="kw">fn </span>try_insert&lt;T&gt;(
+            <span class="self">self</span>,
+            map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;,
+            val: T,
+        ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;T&gt;, MaxSizeReached&gt; {
+            map.try_insert2(<span class="self">self</span>, val)
         }
         <span class="attr">#[inline]
-        </span><span class="kw">fn </span>append&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;, val: T) -&gt; bool {
-            map.append2(<span class="self">self</span>, val)
+        </span><span class="kw">fn </span>try_append&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;, val: T) -&gt; <span class="prelude-ty">Result</span>&lt;bool, MaxSizeReached&gt; {
+            map.try_append2(<span class="self">self</span>, val)
         }
 
         <span class="attr">#[inline]
-        </span><span class="kw">fn </span>entry&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;) -&gt; Entry&lt;<span class="lifetime">'_</span>, T&gt; {
-            map.entry2(<span class="self">self</span>)
+        </span><span class="kw">fn </span>try_entry&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Entry&lt;<span class="lifetime">'_</span>, T&gt;, MaxSizeReached&gt; {
+            map.try_entry2(<span class="self">self</span>)
         }
     }
 
@@ -6925,17 +7612,21 @@
 
     <span class="kw">impl </span>Sealed <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'static </span>str {
         <span class="attr">#[inline]
-        </span><span class="kw">fn </span>insert&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;, val: T) -&gt; <span class="prelude-ty">Option</span>&lt;T&gt; {
-            HdrName::from_static(<span class="self">self</span>, <span class="kw">move </span>|hdr| map.insert2(hdr, val))
+        </span><span class="kw">fn </span>try_insert&lt;T&gt;(
+            <span class="self">self</span>,
+            map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;,
+            val: T,
+        ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;T&gt;, MaxSizeReached&gt; {
+            HdrName::from_static(<span class="self">self</span>, <span class="kw">move </span>|hdr| map.try_insert2(hdr, val))
         }
         <span class="attr">#[inline]
-        </span><span class="kw">fn </span>append&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;, val: T) -&gt; bool {
-            HdrName::from_static(<span class="self">self</span>, <span class="kw">move </span>|hdr| map.append2(hdr, val))
+        </span><span class="kw">fn </span>try_append&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;, val: T) -&gt; <span class="prelude-ty">Result</span>&lt;bool, MaxSizeReached&gt; {
+            HdrName::from_static(<span class="self">self</span>, <span class="kw">move </span>|hdr| map.try_append2(hdr, val))
         }
 
         <span class="attr">#[inline]
-        </span><span class="kw">fn </span>entry&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;) -&gt; Entry&lt;<span class="lifetime">'_</span>, T&gt; {
-            HdrName::from_static(<span class="self">self</span>, <span class="kw">move </span>|hdr| map.entry2(hdr))
+        </span><span class="kw">fn </span>try_entry&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Entry&lt;<span class="lifetime">'_</span>, T&gt;, MaxSizeReached&gt; {
+            HdrName::from_static(<span class="self">self</span>, <span class="kw">move </span>|hdr| map.try_entry2(hdr))
         }
     }
 
@@ -6943,11 +7634,30 @@
 }
 
 <span class="kw">mod </span>as_header_name {
-    <span class="kw">use super</span>::{Entry, HdrName, HeaderMap, HeaderName, InvalidHeaderName};
+    <span class="kw">use super</span>::{Entry, HdrName, HeaderMap, HeaderName, InvalidHeaderName, MaxSizeReached};
 
     <span class="doccomment">/// A marker trait used to identify values that can be used as search keys
     /// to a `HeaderMap`.
     </span><span class="kw">pub trait </span>AsHeaderName: Sealed {}
+
+    <span class="comment">// Debug not currently needed, save on compiling it
+    </span><span class="attr">#[allow(missing_debug_implementations)]
+    </span><span class="kw">pub enum </span>TryEntryError {
+        InvalidHeaderName(InvalidHeaderName),
+        MaxSizeReached(MaxSizeReached),
+    }
+
+    <span class="kw">impl </span>From&lt;InvalidHeaderName&gt; <span class="kw">for </span>TryEntryError {
+        <span class="kw">fn </span>from(e: InvalidHeaderName) -&gt; TryEntryError {
+            TryEntryError::InvalidHeaderName(e)
+        }
+    }
+
+    <span class="kw">impl </span>From&lt;MaxSizeReached&gt; <span class="kw">for </span>TryEntryError {
+        <span class="kw">fn </span>from(e: MaxSizeReached) -&gt; TryEntryError {
+            TryEntryError::MaxSizeReached(e)
+        }
+    }
 
     <span class="comment">// All methods are on this pub(super) trait, instead of `AsHeaderName`,
     // so that they aren't publicly exposed to the world.
@@ -6959,7 +7669,7 @@
     // without breaking any external crate.
     </span><span class="kw">pub trait </span>Sealed {
         <span class="attr">#[doc(hidden)]
-        </span><span class="kw">fn </span>try_entry&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Entry&lt;<span class="lifetime">'_</span>, T&gt;, InvalidHeaderName&gt;;
+        </span><span class="kw">fn </span>try_entry&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Entry&lt;<span class="lifetime">'_</span>, T&gt;, TryEntryError&gt;;
 
         <span class="attr">#[doc(hidden)]
         </span><span class="kw">fn </span>find&lt;T&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, map: <span class="kw-2">&amp;</span>HeaderMap&lt;T&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;(usize, usize)&gt;;
@@ -6972,8 +7682,8 @@
 
     </span><span class="kw">impl </span>Sealed <span class="kw">for </span>HeaderName {
         <span class="attr">#[inline]
-        </span><span class="kw">fn </span>try_entry&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Entry&lt;<span class="lifetime">'_</span>, T&gt;, InvalidHeaderName&gt; {
-            <span class="prelude-val">Ok</span>(map.entry2(<span class="self">self</span>))
+        </span><span class="kw">fn </span>try_entry&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Entry&lt;<span class="lifetime">'_</span>, T&gt;, TryEntryError&gt; {
+            <span class="prelude-val">Ok</span>(map.try_entry2(<span class="self">self</span>)<span class="question-mark">?</span>)
         }
 
         <span class="attr">#[inline]
@@ -6990,8 +7700,8 @@
 
     <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Sealed <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>HeaderName {
         <span class="attr">#[inline]
-        </span><span class="kw">fn </span>try_entry&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Entry&lt;<span class="lifetime">'_</span>, T&gt;, InvalidHeaderName&gt; {
-            <span class="prelude-val">Ok</span>(map.entry2(<span class="self">self</span>))
+        </span><span class="kw">fn </span>try_entry&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Entry&lt;<span class="lifetime">'_</span>, T&gt;, TryEntryError&gt; {
+            <span class="prelude-val">Ok</span>(map.try_entry2(<span class="self">self</span>)<span class="question-mark">?</span>)
         }
 
         <span class="attr">#[inline]
@@ -7000,7 +7710,7 @@
         }
 
         <span class="kw">fn </span>as_str(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
-            &lt;HeaderName&gt;::as_str(<span class="kw-2">*</span><span class="self">self</span>)
+            &lt;HeaderName&gt;::as_str(<span class="self">self</span>)
         }
     }
 
@@ -7008,8 +7718,10 @@
 
     <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Sealed <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>str {
         <span class="attr">#[inline]
-        </span><span class="kw">fn </span>try_entry&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Entry&lt;<span class="lifetime">'_</span>, T&gt;, InvalidHeaderName&gt; {
-            HdrName::from_bytes(<span class="self">self</span>.as_bytes(), <span class="kw">move </span>|hdr| map.entry2(hdr))
+        </span><span class="kw">fn </span>try_entry&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Entry&lt;<span class="lifetime">'_</span>, T&gt;, TryEntryError&gt; {
+            <span class="prelude-val">Ok</span>(HdrName::from_bytes(<span class="self">self</span>.as_bytes(), <span class="kw">move </span>|hdr| {
+                map.try_entry2(hdr)
+            })<span class="question-mark">??</span>)
         }
 
         <span class="attr">#[inline]
@@ -7026,8 +7738,8 @@
 
     <span class="kw">impl </span>Sealed <span class="kw">for </span>String {
         <span class="attr">#[inline]
-        </span><span class="kw">fn </span>try_entry&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Entry&lt;<span class="lifetime">'_</span>, T&gt;, InvalidHeaderName&gt; {
-            <span class="self">self</span>.as_str().try_entry(map)
+        </span><span class="kw">fn </span>try_entry&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Entry&lt;<span class="lifetime">'_</span>, T&gt;, TryEntryError&gt; {
+            <span class="prelude-val">Ok</span>(<span class="self">self</span>.as_str().try_entry(map)<span class="question-mark">?</span>)
         }
 
         <span class="attr">#[inline]
@@ -7044,7 +7756,7 @@
 
     <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Sealed <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">'a </span>String {
         <span class="attr">#[inline]
-        </span><span class="kw">fn </span>try_entry&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Entry&lt;<span class="lifetime">'_</span>, T&gt;, InvalidHeaderName&gt; {
+        </span><span class="kw">fn </span>try_entry&lt;T&gt;(<span class="self">self</span>, map: <span class="kw-2">&amp;mut </span>HeaderMap&lt;T&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Entry&lt;<span class="lifetime">'_</span>, T&gt;, TryEntryError&gt; {
             <span class="self">self</span>.as_str().try_entry(map)
         }
 
@@ -7054,7 +7766,7 @@
         }
 
         <span class="kw">fn </span>as_str(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
-            <span class="kw-2">*</span><span class="self">self
+            <span class="self">self
         </span>}
     }
 
@@ -7084,8 +7796,8 @@
 <span class="attr">#[test]
 </span><span class="kw">fn </span>skip_duplicates_during_key_iteration() {
     <span class="kw">let </span><span class="kw-2">mut </span>map = HeaderMap::new();
-    map.append(<span class="string">"a"</span>, HeaderValue::from_static(<span class="string">"a"</span>));
-    map.append(<span class="string">"a"</span>, HeaderValue::from_static(<span class="string">"b"</span>));
+    map.try_append(<span class="string">"a"</span>, HeaderValue::from_static(<span class="string">"a"</span>)).unwrap();
+    map.try_append(<span class="string">"a"</span>, HeaderValue::from_static(<span class="string">"b"</span>)).unwrap();
     <span class="macro">assert_eq!</span>(map.keys().count(), map.keys_len());
 }
 </code></pre></div></section></main></body></html>

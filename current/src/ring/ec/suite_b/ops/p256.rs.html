@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.5/src/ec/suite_b/ops/p256.rs`."><title>p256.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../../static.files/rustdoc-b21aa549bf6d91ff.css"><meta name="rustdoc-vars" data-root-path="../../../../../" data-static-root-path="../../../../../static.files/" data-current-crate="ring" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (79734f1db 2024-05-02)" data-channel="nightly" data-search-js="search-bf21c90c8c1d92b1.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../../static.files/storage-e32f0c247825364d.js"></script><script defer src="../../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../../src-files.js"></script><script defer src="../../../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../../../static.files/noscript-09095024cf37855e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../../../../ring/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Type ‘S’ or ‘/’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../../settings.html" title="settings">Settings</a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.8/src/ec/suite_b/ops/p256.rs`."><title>p256.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../../../" data-static-root-path="../../../../../static.files/" data-current-crate="ring" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (9cdfe285c 2024-05-22)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../../src-files.js"></script><script defer src="../../../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -325,7 +325,9 @@
 <a href="#325" id="325">325</a>
 <a href="#326" id="326">326</a>
 <a href="#327" id="327">327</a>
-</pre></div><pre class="rust"><code><span class="comment">// Copyright 2016 Brian Smith.
+<a href="#328" id="328">328</a>
+<a href="#329" id="329">329</a>
+</pre></div><pre class="rust"><code><span class="comment">// Copyright 2016-2023 Brian Smith.
 //
 // Permission to use, copy, modify, and/or distribute this software for any
 // purpose with or without fee is hereby granted, provided that the above
@@ -352,6 +354,7 @@
         rr: limbs_from_hex(<span class="string">"4fffffffdfffffffffffffffefffffffbffffffff0000000000000003"</span>),
     },
     n: Elem::from_hex(<span class="string">"ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551"</span>),
+
     a: Elem::from_hex(<span class="string">"fffffffc00000004000000000000000000000003fffffffffffffffffffffffc"</span>),
     b: Elem::from_hex(<span class="string">"dc30061d04874834e5a220abf7212ed6acf005cd78843090d89cdf6229c4bddf"</span>),
 
@@ -360,6 +363,12 @@
 
     point_add_jacobian_impl: p256_point_add,
 };
+
+<span class="attr">#[cfg(test)]
+</span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">static </span>GENERATOR: (Elem&lt;R&gt;, Elem&lt;R&gt;) = (
+    Elem::from_hex(<span class="string">"18905f76a53755c679fb732b7762251075ba95fc5fedb60179e730d418a9143c"</span>),
+    Elem::from_hex(<span class="string">"8571ff1825885d85d2e88688dd21f3258b4ab8e4ba19e45cddf25357ce95560a"</span>),
+);
 
 <span class="kw">pub static </span>PRIVATE_KEY_OPS: PrivateKeyOps = PrivateKeyOps {
     common: <span class="kw-2">&amp;</span>COMMON_OPS,
@@ -434,7 +443,6 @@
 
 <span class="kw">pub static </span>SCALAR_OPS: ScalarOps = ScalarOps {
     common: <span class="kw-2">&amp;</span>COMMON_OPS,
-    scalar_inv_to_mont_impl: p256_scalar_inv_to_mont,
     scalar_mul_mont: p256_scalar_mul_mont,
 };
 
@@ -451,6 +459,9 @@
     },
 
     q_minus_n: Elem::from_hex(<span class="string">"4319055358e8617b0c46353d039cdaae"</span>),
+
+    <span class="comment">// TODO: Use an optimized variable-time implementation.
+    </span>scalar_inv_to_mont_vartime: |s| PRIVATE_SCALAR_OPS.scalar_inv_to_mont(s),
 };
 
 <span class="attr">#[cfg(any(target_arch = <span class="string">"aarch64"</span>, target_arch = <span class="string">"x86_64"</span>))]
@@ -480,9 +491,10 @@
     oneRR_mod_n: Scalar::from_hex(
         <span class="string">"66e12d94f3d956202845b2392b6bec594699799c49bd6fa683244c95be79eea2"</span>,
     ),
+    scalar_inv_to_mont: p256_scalar_inv_to_mont,
 };
 
-<span class="kw">fn </span>p256_scalar_inv_to_mont(a: <span class="kw-2">&amp;</span>Scalar&lt;Unencoded&gt;) -&gt; Scalar&lt;R&gt; {
+<span class="kw">fn </span>p256_scalar_inv_to_mont(a: Scalar&lt;R&gt;) -&gt; Scalar&lt;R&gt; {
     <span class="comment">// Calculate the modular inverse of scalar |a| using Fermat's Little
     // Theorem:
     //
@@ -519,15 +531,6 @@
         binary_op_assign(p256_scalar_mul_mont, acc, b);
     }
 
-    <span class="kw">fn </span>to_mont(a: <span class="kw-2">&amp;</span>Scalar) -&gt; Scalar&lt;R&gt; {
-        <span class="kw">static </span>N_RR: Scalar&lt;Unencoded&gt; = Scalar {
-            limbs: PRIVATE_SCALAR_OPS.oneRR_mod_n.limbs,
-            m: PhantomData,
-            encoding: PhantomData,
-        };
-        binary_op(p256_scalar_mul_mont, a, <span class="kw-2">&amp;</span>N_RR)
-    }
-
     <span class="comment">// Indexes into `d`.
     </span><span class="kw">const </span>B_1: usize = <span class="number">0</span>;
     <span class="kw">const </span>B_10: usize = <span class="number">1</span>;
@@ -541,7 +544,7 @@
 
     <span class="kw">let </span><span class="kw-2">mut </span>d = [Scalar::zero(); DIGIT_COUNT];
 
-    d[B_1] = to_mont(a);
+    d[B_1] = a;
     d[B_10] = sqr(<span class="kw-2">&amp;</span>d[B_1]);
     d[B_11] = mul(<span class="kw-2">&amp;</span>d[B_10], <span class="kw-2">&amp;</span>d[B_1]);
     d[B_101] = mul(<span class="kw-2">&amp;</span>d[B_10], <span class="kw-2">&amp;</span>d[B_11]);
@@ -568,6 +571,7 @@
     //    1011110011100110111110101010110110100111000101111001111010000100
     //    1111001110111001110010101100001011111100011000110010010101001111
 
+    </span><span class="attr">#[allow(clippy::cast_possible_truncation)]
     </span><span class="kw">static </span>REMAINING_WINDOWS: [(u8, u8); <span class="number">26</span>] = [
         (<span class="number">6</span>, B_101111 <span class="kw">as </span>u8),
         (<span class="number">2 </span>+ <span class="number">3</span>, B_111 <span class="kw">as </span>u8),

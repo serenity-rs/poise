@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/reqwest-0.11.22/src/tls.rs`."><title>tls.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-b21aa549bf6d91ff.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="reqwest" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (79734f1db 2024-05-02)" data-channel="nightly" data-search-js="search-bf21c90c8c1d92b1.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-e32f0c247825364d.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-09095024cf37855e.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../reqwest/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Type ‘S’ or ‘/’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings">Settings</a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/reqwest-0.11.27/src/tls.rs`."><title>tls.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="reqwest" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (9cdfe285c 2024-05-22)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -528,25 +528,158 @@
 <a href="#528" id="528">528</a>
 <a href="#529" id="529">529</a>
 <a href="#530" id="530">530</a>
-</pre></div><pre class="rust"><code><span class="doccomment">//! TLS configuration
+<a href="#531" id="531">531</a>
+<a href="#532" id="532">532</a>
+<a href="#533" id="533">533</a>
+<a href="#534" id="534">534</a>
+<a href="#535" id="535">535</a>
+<a href="#536" id="536">536</a>
+<a href="#537" id="537">537</a>
+<a href="#538" id="538">538</a>
+<a href="#539" id="539">539</a>
+<a href="#540" id="540">540</a>
+<a href="#541" id="541">541</a>
+<a href="#542" id="542">542</a>
+<a href="#543" id="543">543</a>
+<a href="#544" id="544">544</a>
+<a href="#545" id="545">545</a>
+<a href="#546" id="546">546</a>
+<a href="#547" id="547">547</a>
+<a href="#548" id="548">548</a>
+<a href="#549" id="549">549</a>
+<a href="#550" id="550">550</a>
+<a href="#551" id="551">551</a>
+<a href="#552" id="552">552</a>
+<a href="#553" id="553">553</a>
+<a href="#554" id="554">554</a>
+<a href="#555" id="555">555</a>
+<a href="#556" id="556">556</a>
+<a href="#557" id="557">557</a>
+<a href="#558" id="558">558</a>
+<a href="#559" id="559">559</a>
+<a href="#560" id="560">560</a>
+<a href="#561" id="561">561</a>
+<a href="#562" id="562">562</a>
+<a href="#563" id="563">563</a>
+<a href="#564" id="564">564</a>
+<a href="#565" id="565">565</a>
+<a href="#566" id="566">566</a>
+<a href="#567" id="567">567</a>
+<a href="#568" id="568">568</a>
+<a href="#569" id="569">569</a>
+<a href="#570" id="570">570</a>
+<a href="#571" id="571">571</a>
+<a href="#572" id="572">572</a>
+<a href="#573" id="573">573</a>
+<a href="#574" id="574">574</a>
+<a href="#575" id="575">575</a>
+<a href="#576" id="576">576</a>
+<a href="#577" id="577">577</a>
+<a href="#578" id="578">578</a>
+<a href="#579" id="579">579</a>
+<a href="#580" id="580">580</a>
+<a href="#581" id="581">581</a>
+<a href="#582" id="582">582</a>
+<a href="#583" id="583">583</a>
+<a href="#584" id="584">584</a>
+<a href="#585" id="585">585</a>
+<a href="#586" id="586">586</a>
+<a href="#587" id="587">587</a>
+<a href="#588" id="588">588</a>
+<a href="#589" id="589">589</a>
+<a href="#590" id="590">590</a>
+<a href="#591" id="591">591</a>
+<a href="#592" id="592">592</a>
+<a href="#593" id="593">593</a>
+<a href="#594" id="594">594</a>
+<a href="#595" id="595">595</a>
+<a href="#596" id="596">596</a>
+<a href="#597" id="597">597</a>
+<a href="#598" id="598">598</a>
+<a href="#599" id="599">599</a>
+<a href="#600" id="600">600</a>
+<a href="#601" id="601">601</a>
+<a href="#602" id="602">602</a>
+<a href="#603" id="603">603</a>
+<a href="#604" id="604">604</a>
+<a href="#605" id="605">605</a>
+<a href="#606" id="606">606</a>
+<a href="#607" id="607">607</a>
+<a href="#608" id="608">608</a>
+<a href="#609" id="609">609</a>
+<a href="#610" id="610">610</a>
+<a href="#611" id="611">611</a>
+<a href="#612" id="612">612</a>
+<a href="#613" id="613">613</a>
+<a href="#614" id="614">614</a>
+<a href="#615" id="615">615</a>
+<a href="#616" id="616">616</a>
+<a href="#617" id="617">617</a>
+<a href="#618" id="618">618</a>
+<a href="#619" id="619">619</a>
+<a href="#620" id="620">620</a>
+<a href="#621" id="621">621</a>
+<a href="#622" id="622">622</a>
+<a href="#623" id="623">623</a>
+<a href="#624" id="624">624</a>
+<a href="#625" id="625">625</a>
+<a href="#626" id="626">626</a>
+<a href="#627" id="627">627</a>
+</pre></div><pre class="rust"><code><span class="doccomment">//! TLS configuration and types
 //!
-//! By default, a `Client` will make use of system-native transport layer
-//! security to connect to HTTPS destinations. This means schannel on Windows,
-//! Security-Framework on macOS, and OpenSSL on Linux.
+//! A `Client` will use transport layer security (TLS) by default to connect to
+//! HTTPS destinations.
 //!
-//! - Additional X509 certificates can be configured on a `ClientBuilder` with the
-//!   [`Certificate`](Certificate) type.
-//! - Client certificates can be add to a `ClientBuilder` with the
-//!   [`Identity`][Identity] type.
-//! - Various parts of TLS can also be configured or even disabled on the
-//!   `ClientBuilder`.
+//! # Backends
+//!
+//! reqwest supports several TLS backends, enabled with Cargo features.
+//!
+//! ## default-tls
+//!
+//! reqwest will pick a TLS backend by default. This is true when the
+//! `default-tls` feature is enabled.
+//!
+//! While it currently uses `native-tls`, the feature set is designed to only
+//! enable configuration that is shared among available backends. This allows
+//! reqwest to change the default to `rustls` (or another) at some point in the
+//! future.
+//!
+//! &lt;div class="warning"&gt;This feature is enabled by default, and takes
+//! precedence if any other crate enables it. This is true even if you declare
+//! `features = []`. You must set `default-features = false` instead.&lt;/div&gt;
+//!
+//! Since Cargo features are additive, other crates in your dependency tree can
+//! cause the default backend to be enabled. If you wish to ensure your
+//! `Client` uses a specific backend, call the appropriate builder methods
+//! (such as [`use_rustls_tls()`][]).
+//!
+//! [`use_rustls_tls()`]: crate::ClientBuilder::use_rustls_tls()
+//!
+//! ## native-tls
+//!
+//! This backend uses the [native-tls][] crate. That will try to use the system
+//! TLS on Windows and Mac, and OpenSSL on Linux targets.
+//!
+//! Enabling the feature explicitly allows for `native-tls`-specific
+//! configuration options.
+//!
+//! [native-tls]: https://crates.io/crates/native-tls
+//!
+//! ## rustls-tls
+//!
+//! This backend uses the [rustls][] crate, a TLS library written in Rust.
+//!
+//! [rustls]: https://crates.io/crates/rustls
 
 </span><span class="attr">#[cfg(feature = <span class="string">"__rustls"</span>)]
 </span><span class="kw">use </span>rustls::{
     client::HandshakeSignatureValid, client::ServerCertVerified, client::ServerCertVerifier,
     DigitallySignedStruct, Error <span class="kw">as </span>TLSError, ServerName,
 };
-<span class="kw">use </span>std::fmt;
+<span class="kw">use </span>std::{
+    fmt,
+    io::{BufRead, BufReader},
+};
 
 <span class="doccomment">/// Represents a server X509 certificate.
 </span><span class="attr">#[derive(Clone)]
@@ -592,7 +725,7 @@
     /// ```
     /// # use std::fs::File;
     /// # use std::io::Read;
-    /// # fn cert() -&gt; Result&lt;(), Box&lt;std::error::Error&gt;&gt; {
+    /// # fn cert() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
     /// let mut buf = Vec::new();
     /// File::open("my_cert.der")?
     ///     .read_to_end(&amp;mut buf)?;
@@ -617,7 +750,7 @@
     /// ```
     /// # use std::fs::File;
     /// # use std::io::Read;
-    /// # fn cert() -&gt; Result&lt;(), Box&lt;std::error::Error&gt;&gt; {
+    /// # fn cert() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
     /// let mut buf = Vec::new();
     /// File::open("my_cert.pem")?
     ///     .read_to_end(&amp;mut buf)?;
@@ -633,6 +766,32 @@
             <span class="attr">#[cfg(feature = <span class="string">"__rustls"</span>)]
             </span>original: Cert::Pem(pem.to_owned()),
         })
+    }
+
+    <span class="doccomment">/// Create a collection of `Certificate`s from a PEM encoded certificate bundle.
+    /// Example byte sources may be `.crt`, `.cer` or `.pem` files.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use std::fs::File;
+    /// # use std::io::Read;
+    /// # fn cert() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
+    /// let mut buf = Vec::new();
+    /// File::open("ca-bundle.crt")?
+    ///     .read_to_end(&amp;mut buf)?;
+    /// let certs = reqwest::Certificate::from_pem_bundle(&amp;buf)?;
+    /// # drop(certs);
+    /// # Ok(())
+    /// # }
+    /// ```
+    </span><span class="kw">pub fn </span>from_pem_bundle(pem_bundle: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="kw">crate</span>::Result&lt;Vec&lt;Certificate&gt;&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>reader = BufReader::new(pem_bundle);
+
+        <span class="self">Self</span>::read_pem_certs(<span class="kw-2">&amp;mut </span>reader)<span class="question-mark">?
+            </span>.iter()
+            .map(|cert_vec| Certificate::from_der(<span class="kw-2">&amp;</span>cert_vec))
+            .collect::&lt;<span class="kw">crate</span>::Result&lt;Vec&lt;Certificate&gt;&gt;&gt;()
     }
 
     <span class="attr">#[cfg(feature = <span class="string">"native-tls-crate"</span>)]
@@ -652,12 +811,8 @@
                 .add(<span class="kw-2">&amp;</span>rustls::Certificate(buf))
                 .map_err(<span class="kw">crate</span>::error::builder)<span class="question-mark">?</span>,
             Cert::Pem(buf) =&gt; {
-                <span class="kw">let </span><span class="kw-2">mut </span>pem = Cursor::new(buf);
-                <span class="kw">let </span>certs = rustls_pemfile::certs(<span class="kw-2">&amp;mut </span>pem).map_err(|<span class="kw">_</span>| {
-                    <span class="kw">crate</span>::error::builder(TLSError::General(String::from(
-                        <span class="string">"No valid certificate was found"</span>,
-                    )))
-                })<span class="question-mark">?</span>;
+                <span class="kw">let </span><span class="kw-2">mut </span>reader = Cursor::new(buf);
+                <span class="kw">let </span>certs = <span class="self">Self</span>::read_pem_certs(<span class="kw-2">&amp;mut </span>reader)<span class="question-mark">?</span>;
                 <span class="kw">for </span>c <span class="kw">in </span>certs {
                     root_cert_store
                         .add(<span class="kw-2">&amp;</span>rustls::Certificate(c))
@@ -666,6 +821,11 @@
             }
         }
         <span class="prelude-val">Ok</span>(())
+    }
+
+    <span class="kw">fn </span>read_pem_certs(reader: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>BufRead) -&gt; <span class="kw">crate</span>::Result&lt;Vec&lt;Vec&lt;u8&gt;&gt;&gt; {
+        rustls_pemfile::certs(reader)
+            .map_err(|<span class="kw">_</span>| <span class="kw">crate</span>::error::builder(<span class="string">"invalid certificate encoding"</span>))
     }
 }
 
@@ -688,7 +848,7 @@
     /// ```
     /// # use std::fs::File;
     /// # use std::io::Read;
-    /// # fn pkcs12() -&gt; Result&lt;(), Box&lt;std::error::Error&gt;&gt; {
+    /// # fn pkcs12() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
     /// let mut buf = Vec::new();
     /// File::open("my-ident.pfx")?
     ///     .read_to_end(&amp;mut buf)?;
@@ -723,7 +883,7 @@
     ///
     /// ```
     /// # use std::fs;
-    /// # fn pkcs8() -&gt; Result&lt;(), Box&lt;std::error::Error&gt;&gt; {
+    /// # fn pkcs8() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
     /// let cert = fs::read("client.pem")?;
     /// let key = fs::read("key.pem")?;
     /// let pkcs8 = reqwest::Identity::from_pkcs8_pem(&amp;cert, &amp;key)?;
@@ -756,7 +916,7 @@
     /// ```
     /// # use std::fs::File;
     /// # use std::io::Read;
-    /// # fn pem() -&gt; Result&lt;(), Box&lt;std::error::Error&gt;&gt; {
+    /// # fn pem() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
     /// let mut buf = Vec::new();
     /// File::open("my-ident.pem")?
     ///     .read_to_end(&amp;mut buf)?;
@@ -1056,6 +1216,40 @@
             -----END RSA PRIVATE KEY-----\n"</span>;
 
         Identity::from_pem(pem).unwrap();
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>certificates_from_pem_bundle() {
+        <span class="kw">const </span>PEM_BUNDLE: <span class="kw-2">&amp;</span>[u8] = <span class="string">b"
+            -----BEGIN CERTIFICATE-----
+            MIIBtjCCAVugAwIBAgITBmyf1XSXNmY/Owua2eiedgPySjAKBggqhkjOPQQDAjA5
+            MQswCQYDVQQGEwJVUzEPMA0GA1UEChMGQW1hem9uMRkwFwYDVQQDExBBbWF6b24g
+            Um9vdCBDQSAzMB4XDTE1MDUyNjAwMDAwMFoXDTQwMDUyNjAwMDAwMFowOTELMAkG
+            A1UEBhMCVVMxDzANBgNVBAoTBkFtYXpvbjEZMBcGA1UEAxMQQW1hem9uIFJvb3Qg
+            Q0EgMzBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABCmXp8ZBf8ANm+gBG1bG8lKl
+            ui2yEujSLtf6ycXYqm0fc4E7O5hrOXwzpcVOho6AF2hiRVd9RFgdszflZwjrZt6j
+            QjBAMA8GA1UdEwEB/wQFMAMBAf8wDgYDVR0PAQH/BAQDAgGGMB0GA1UdDgQWBBSr
+            ttvXBp43rDCGB5Fwx5zEGbF4wDAKBggqhkjOPQQDAgNJADBGAiEA4IWSoxe3jfkr
+            BqWTrBqYaGFy+uGh0PsceGCmQ5nFuMQCIQCcAu/xlJyzlvnrxir4tiz+OpAUFteM
+            YyRIHN8wfdVoOw==
+            -----END CERTIFICATE-----
+
+            -----BEGIN CERTIFICATE-----
+            MIIB8jCCAXigAwIBAgITBmyf18G7EEwpQ+Vxe3ssyBrBDjAKBggqhkjOPQQDAzA5
+            MQswCQYDVQQGEwJVUzEPMA0GA1UEChMGQW1hem9uMRkwFwYDVQQDExBBbWF6b24g
+            Um9vdCBDQSA0MB4XDTE1MDUyNjAwMDAwMFoXDTQwMDUyNjAwMDAwMFowOTELMAkG
+            A1UEBhMCVVMxDzANBgNVBAoTBkFtYXpvbjEZMBcGA1UEAxMQQW1hem9uIFJvb3Qg
+            Q0EgNDB2MBAGByqGSM49AgEGBSuBBAAiA2IABNKrijdPo1MN/sGKe0uoe0ZLY7Bi
+            9i0b2whxIdIA6GO9mif78DluXeo9pcmBqqNbIJhFXRbb/egQbeOc4OO9X4Ri83Bk
+            M6DLJC9wuoihKqB1+IGuYgbEgds5bimwHvouXKNCMEAwDwYDVR0TAQH/BAUwAwEB
+            /zAOBgNVHQ8BAf8EBAMCAYYwHQYDVR0OBBYEFNPsxzplbszh2naaVvuc84ZtV+WB
+            MAoGCCqGSM49BAMDA2gAMGUCMDqLIfG9fhGt0O9Yli/W651+kI0rz2ZVwyzjKKlw
+            CkcO8DdZEv8tmZQoTipPNU0zWgIxAOp1AE47xDqUEpHJWEadIRNyp4iciuRMStuW
+            1KyLa2tJElMzrdfkviT8tQp21KW8EA==
+            -----END CERTIFICATE-----
+        "</span>;
+
+        <span class="macro">assert!</span>(Certificate::from_pem_bundle(PEM_BUNDLE).is_ok())
     }
 }
 </code></pre></div></section></main></body></html>
