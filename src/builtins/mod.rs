@@ -17,7 +17,7 @@ mod paginate;
 #[cfg(any(feature = "chrono", feature = "time"))]
 pub use paginate::*;
 
-use crate::{serenity_prelude as serenity, CreateReply};
+use crate::{serenity::CreateAllowedMentions, serenity_prelude as serenity, CreateReply};
 
 /// An error handler that logs errors either via the [`tracing`] crate or via a Discord message. Set
 /// up a logger (e.g. `env_logger::init()`) or a tracing subscriber
@@ -50,7 +50,18 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
         crate::FrameworkError::Command { ctx, error } => {
             let error = error.to_string();
             eprintln!("An error occured in a command: {}", error);
-            ctx.say(error).await?;
+
+            let mentions = CreateAllowedMentions::new()
+                .everyone(false)
+                .all_roles(false)
+                .all_users(false);
+
+            ctx.send(
+                CreateReply::default()
+                    .content(error)
+                    .allowed_mentions(mentions),
+            )
+            .await?;
         }
         crate::FrameworkError::SubcommandRequired { ctx } => {
             let subcommands = ctx
@@ -91,7 +102,18 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
             } else {
                 format!("**{}**\n{}", error, usage)
             };
-            ctx.say(response).await?;
+
+            let mentions = CreateAllowedMentions::new()
+                .everyone(false)
+                .all_roles(false)
+                .all_users(false);
+
+            ctx.send(
+                CreateReply::default()
+                    .content(response)
+                    .allowed_mentions(mentions),
+            )
+            .await?;
         }
         crate::FrameworkError::CommandStructureMismatch { ctx, description } => {
             tracing::error!(
