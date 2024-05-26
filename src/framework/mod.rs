@@ -141,7 +141,13 @@ impl<U: Send + Sync, E: Send + Sync> serenity::Framework for Framework<U, E> {
         self.shard_manager = Some(client.shard_manager.clone());
 
         if self.options.initialize_owners {
-            if let Err(e) = insert_owners_from_http(&client.http, &mut self.options.owners).await {
+            if let Err(e) = insert_owners_from_http(
+                &client.http,
+                &mut self.options.owners,
+                &self.options.initialized_team_roles,
+            )
+            .await
+            {
                 tracing::warn!("Failed to insert owners from HTTP: {e}");
             }
         }
@@ -239,6 +245,7 @@ fn message_content_intent_sanity_check<U, E>(
 pub async fn insert_owners_from_http(
     http: &serenity::Http,
     owners: &mut std::collections::HashSet<serenity::UserId>,
+    initialized_teams: &Option<Vec<serenity::TeamMemberRole>>,
 ) -> Result<(), serenity::Error> {
     let application_info = http.get_current_application_info().await?;
 
@@ -253,7 +260,16 @@ pub async fn insert_owners_from_http(
                 continue;
             }
 
-            if let TeamMemberRole::Admin | TeamMemberRole::Developer = member.role {
+            // Default configuration.
+            let Some(initialized_teams) = initialized_teams else {
+                if let TeamMemberRole::Admin | TeamMemberRole::Developer = member.role {
+                    owners.insert(member.user.id);
+                }
+                continue;
+            };
+
+            // s has specified the teams they want to be considered "Owner".
+            if initialized_teams.iter().any(|r| *r == member.role) {
                 owners.insert(member.user.id);
             }
         }
