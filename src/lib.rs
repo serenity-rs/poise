@@ -399,7 +399,6 @@ pub mod reply;
 pub mod slash_argument;
 pub mod structs;
 pub mod track_edits;
-mod util;
 pub mod macros {
     //! Procedural macros used in poise, like [`command`]
     #[doc(inline)]
