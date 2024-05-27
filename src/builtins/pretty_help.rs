@@ -54,7 +54,6 @@ async fn pretty_help_all_commands<U, E>(
     ctx: crate::Context<'_, U, E>,
     config: PrettyHelpConfiguration<'_>,
 ) -> Result<(), serenity::Error> {
-    let mut categories = crate::util::OrderedMap::new();
     let commands = ctx.framework().options().commands.iter().filter(|cmd| {
         !cmd.hide_in_help
             && (cmd.prefix_action.is_some()
@@ -62,9 +61,11 @@ async fn pretty_help_all_commands<U, E>(
                 || (cmd.context_menu_action.is_some() && config.show_context_menu_commands))
     });
 
+    let mut categories = indexmap::IndexMap::<Option<&str>, Vec<&crate::Command<U, E>>>::new();
     for cmd in commands {
         categories
-            .get_or_insert_with(cmd.category.as_deref(), Vec::new)
+            .entry(cmd.category.as_deref())
+            .or_default()
             .push(cmd);
     }
 
