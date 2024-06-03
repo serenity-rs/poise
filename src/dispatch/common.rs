@@ -103,8 +103,10 @@ async fn check_permissions_and_cooldown_single<'a, U, E>(
             }
         };
 
-        if !channel.is_nsfw() {
-            return Err(crate::FrameworkError::NsfwOnly { ctx });
+        if let serenity::Channel::Guild(guild_channel) = channel {
+            if !guild_channel.nsfw {
+                return Err(crate::FrameworkError::NsfwOnly { ctx });
+            }
         }
     }
 
