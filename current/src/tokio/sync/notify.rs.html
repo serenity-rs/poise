@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.37.0/src/sync/notify.rs`."><title>notify.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (84b40fc90 2024-05-27)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.38.0/src/sync/notify.rs`."><title>notify.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (032af18af 2024-06-02)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1168,6 +1168,54 @@
 <a href="#1168" id="1168">1168</a>
 <a href="#1169" id="1169">1169</a>
 <a href="#1170" id="1170">1170</a>
+<a href="#1171" id="1171">1171</a>
+<a href="#1172" id="1172">1172</a>
+<a href="#1173" id="1173">1173</a>
+<a href="#1174" id="1174">1174</a>
+<a href="#1175" id="1175">1175</a>
+<a href="#1176" id="1176">1176</a>
+<a href="#1177" id="1177">1177</a>
+<a href="#1178" id="1178">1178</a>
+<a href="#1179" id="1179">1179</a>
+<a href="#1180" id="1180">1180</a>
+<a href="#1181" id="1181">1181</a>
+<a href="#1182" id="1182">1182</a>
+<a href="#1183" id="1183">1183</a>
+<a href="#1184" id="1184">1184</a>
+<a href="#1185" id="1185">1185</a>
+<a href="#1186" id="1186">1186</a>
+<a href="#1187" id="1187">1187</a>
+<a href="#1188" id="1188">1188</a>
+<a href="#1189" id="1189">1189</a>
+<a href="#1190" id="1190">1190</a>
+<a href="#1191" id="1191">1191</a>
+<a href="#1192" id="1192">1192</a>
+<a href="#1193" id="1193">1193</a>
+<a href="#1194" id="1194">1194</a>
+<a href="#1195" id="1195">1195</a>
+<a href="#1196" id="1196">1196</a>
+<a href="#1197" id="1197">1197</a>
+<a href="#1198" id="1198">1198</a>
+<a href="#1199" id="1199">1199</a>
+<a href="#1200" id="1200">1200</a>
+<a href="#1201" id="1201">1201</a>
+<a href="#1202" id="1202">1202</a>
+<a href="#1203" id="1203">1203</a>
+<a href="#1204" id="1204">1204</a>
+<a href="#1205" id="1205">1205</a>
+<a href="#1206" id="1206">1206</a>
+<a href="#1207" id="1207">1207</a>
+<a href="#1208" id="1208">1208</a>
+<a href="#1209" id="1209">1209</a>
+<a href="#1210" id="1210">1210</a>
+<a href="#1211" id="1211">1211</a>
+<a href="#1212" id="1212">1212</a>
+<a href="#1213" id="1213">1213</a>
+<a href="#1214" id="1214">1214</a>
+<a href="#1215" id="1215">1215</a>
+<a href="#1216" id="1216">1216</a>
+<a href="#1217" id="1217">1217</a>
+<a href="#1218" id="1218">1218</a>
 </pre></div><pre class="rust"><code><span class="comment">// Allow `unreachable_pub` warnings when sync is not enabled
 // due to the usage of `Notify` within the `rt` feature set.
 // When this module is compiled with `sync` enabled we will warn on
@@ -1393,7 +1441,9 @@
     /// `Notify`, or it is exclusively owned by the enclosing `Waiter`.
     </span>waker: UnsafeCell&lt;<span class="prelude-ty">Option</span>&lt;Waker&gt;&gt;,
 
-    <span class="doccomment">/// Notification for this waiter.
+    <span class="doccomment">/// Notification for this waiter. Uses 2 bits to store if and how was
+    /// notified, 1 bit for storing if it was woken up using FIFO or LIFO, and
+    /// the rest of it is unused.
     /// * if it's `None`, then `waker` is protected by the `waiters` lock.
     /// * if it's `Some`, then `waker` is exclusively owned by the
     ///   enclosing `Waiter` and can be accessed without locking.
@@ -1423,13 +1473,16 @@
 }
 
 <span class="comment">// No notification.
-</span><span class="kw">const </span>NOTIFICATION_NONE: usize = <span class="number">0</span>;
+</span><span class="kw">const </span>NOTIFICATION_NONE: usize = <span class="number">0b000</span>;
 
 <span class="comment">// Notification type used by `notify_one`.
-</span><span class="kw">const </span>NOTIFICATION_ONE: usize = <span class="number">1</span>;
+</span><span class="kw">const </span>NOTIFICATION_ONE: usize = <span class="number">0b001</span>;
+
+<span class="comment">// Notification type used by `notify_last`.
+</span><span class="kw">const </span>NOTIFICATION_LAST: usize = <span class="number">0b101</span>;
 
 <span class="comment">// Notification type used by `notify_waiters`.
-</span><span class="kw">const </span>NOTIFICATION_ALL: usize = <span class="number">2</span>;
+</span><span class="kw">const </span>NOTIFICATION_ALL: usize = <span class="number">0b010</span>;
 
 <span class="doccomment">/// Notification for a `Waiter`.
 /// This struct is equivalent to `Option&lt;Notification&gt;`, but uses
@@ -1445,13 +1498,20 @@
     <span class="doccomment">/// Store-release a notification.
     /// This method should be called exactly once.
     </span><span class="kw">fn </span>store_release(<span class="kw-2">&amp;</span><span class="self">self</span>, notification: Notification) {
-        <span class="self">self</span>.<span class="number">0</span>.store(notification <span class="kw">as </span>usize, Release);
+        <span class="kw">let </span>data: usize = <span class="kw">match </span>notification {
+            Notification::All =&gt; NOTIFICATION_ALL,
+            Notification::One(NotifyOneStrategy::Fifo) =&gt; NOTIFICATION_ONE,
+            Notification::One(NotifyOneStrategy::Lifo) =&gt; NOTIFICATION_LAST,
+        };
+        <span class="self">self</span>.<span class="number">0</span>.store(data, Release);
     }
 
     <span class="kw">fn </span>load(<span class="kw-2">&amp;</span><span class="self">self</span>, ordering: Ordering) -&gt; <span class="prelude-ty">Option</span>&lt;Notification&gt; {
-        <span class="kw">match </span><span class="self">self</span>.<span class="number">0</span>.load(ordering) {
+        <span class="kw">let </span>data = <span class="self">self</span>.<span class="number">0</span>.load(ordering);
+        <span class="kw">match </span>data {
             NOTIFICATION_NONE =&gt; <span class="prelude-val">None</span>,
-            NOTIFICATION_ONE =&gt; <span class="prelude-val">Some</span>(Notification::One),
+            NOTIFICATION_ONE =&gt; <span class="prelude-val">Some</span>(Notification::One(NotifyOneStrategy::Fifo)),
+            NOTIFICATION_LAST =&gt; <span class="prelude-val">Some</span>(Notification::One(NotifyOneStrategy::Lifo)),
             NOTIFICATION_ALL =&gt; <span class="prelude-val">Some</span>(Notification::All),
             <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
         }
@@ -1468,9 +1528,16 @@
 
 <span class="attr">#[derive(Debug, PartialEq, Eq)]
 #[repr(usize)]
+</span><span class="kw">enum </span>NotifyOneStrategy {
+    Fifo,
+    Lifo,
+}
+
+<span class="attr">#[derive(Debug, PartialEq, Eq)]
+#[repr(usize)]
 </span><span class="kw">enum </span>Notification {
-    One = NOTIFICATION_ONE,
-    All = NOTIFICATION_ALL,
+    One(NotifyOneStrategy),
+    All,
 }
 
 <span class="doccomment">/// List used in `Notify::notify_waiters`. It wraps a guarded linked list
@@ -1691,7 +1758,7 @@
         }
     }
 
-    <span class="doccomment">/// Notifies a waiting task.
+    <span class="doccomment">/// Notifies the first waiting task.
     ///
     /// If a task is currently waiting, that task is notified. Otherwise, a
     /// permit is stored in this `Notify` value and the **next** call to
@@ -1728,6 +1795,23 @@
     </span><span class="comment">// Alias for old name in 0.x
     </span><span class="attr">#[cfg_attr(docsrs, doc(alias = <span class="string">"notify"</span>))]
     </span><span class="kw">pub fn </span>notify_one(<span class="kw-2">&amp;</span><span class="self">self</span>) {
+        <span class="self">self</span>.notify_with_strategy(NotifyOneStrategy::Fifo);
+    }
+
+    <span class="doccomment">/// Notifies the last waiting task.
+    ///
+    /// This function behaves similar to `notify_one`. The only difference is that it wakes
+    /// the most recently added waiter instead of the oldest waiter.
+    ///
+    /// Check the [`notify_one()`] documentation for more info and
+    /// examples.
+    ///
+    /// [`notify_one()`]: Notify::notify_one
+    </span><span class="kw">pub fn </span>notify_last(<span class="kw-2">&amp;</span><span class="self">self</span>) {
+        <span class="self">self</span>.notify_with_strategy(NotifyOneStrategy::Lifo);
+    }
+
+    <span class="kw">fn </span>notify_with_strategy(<span class="kw-2">&amp;</span><span class="self">self</span>, strategy: NotifyOneStrategy) {
         <span class="comment">// Load the current state
         </span><span class="kw">let </span><span class="kw-2">mut </span>curr = <span class="self">self</span>.state.load(SeqCst);
 
@@ -1755,7 +1839,7 @@
         // transition out of WAITING while the lock is held.
         </span>curr = <span class="self">self</span>.state.load(SeqCst);
 
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(waker) = notify_locked(<span class="kw-2">&amp;mut </span>waiters, <span class="kw-2">&amp;</span><span class="self">self</span>.state, curr) {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(waker) = notify_locked(<span class="kw-2">&amp;mut </span>waiters, <span class="kw-2">&amp;</span><span class="self">self</span>.state, curr, strategy) {
             drop(waiters);
             waker.wake();
         }
@@ -1878,7 +1962,12 @@
 <span class="kw">impl </span>UnwindSafe <span class="kw">for </span>Notify {}
 <span class="kw">impl </span>RefUnwindSafe <span class="kw">for </span>Notify {}
 
-<span class="kw">fn </span>notify_locked(waiters: <span class="kw-2">&amp;mut </span>WaitList, state: <span class="kw-2">&amp;</span>AtomicUsize, curr: usize) -&gt; <span class="prelude-ty">Option</span>&lt;Waker&gt; {
+<span class="kw">fn </span>notify_locked(
+    waiters: <span class="kw-2">&amp;mut </span>WaitList,
+    state: <span class="kw-2">&amp;</span>AtomicUsize,
+    curr: usize,
+    strategy: NotifyOneStrategy,
+) -&gt; <span class="prelude-ty">Option</span>&lt;Waker&gt; {
     <span class="kw">match </span>get_state(curr) {
         EMPTY | NOTIFIED =&gt; {
             <span class="kw">let </span>res = state.compare_exchange(curr, set_state(curr, NOTIFIED), SeqCst, SeqCst);
@@ -1898,8 +1987,11 @@
             // concurrently change as holding the lock is required to
             // transition **out** of `WAITING`.
             //
-            // Get a pending waiter
-            </span><span class="kw">let </span>waiter = waiters.pop_back().unwrap();
+            // Get a pending waiter using one of the available dequeue strategies.
+            </span><span class="kw">let </span>waiter = <span class="kw">match </span>strategy {
+                NotifyOneStrategy::Fifo =&gt; waiters.pop_back().unwrap(),
+                NotifyOneStrategy::Lifo =&gt; waiters.pop_front().unwrap(),
+            };
 
             <span class="comment">// Safety: we never make mutable references to waiters.
             </span><span class="kw">let </span>waiter = <span class="kw">unsafe </span>{ waiter.as_ref() };
@@ -1908,7 +2000,9 @@
             </span><span class="kw">let </span>waker = <span class="kw">unsafe </span>{ waiter.waker.with_mut(|waker| (<span class="kw-2">*</span>waker).take()) };
 
             <span class="comment">// This waiter is unlinked and will not be shared ever again, release it.
-            </span>waiter.notification.store_release(Notification::One);
+            </span>waiter
+                .notification
+                .store_release(Notification::One(strategy));
 
             <span class="kw">if </span>waiters.is_empty() {
                 <span class="comment">// As this the **final** waiter in the list, the state
@@ -2307,8 +2401,10 @@
             <span class="comment">// See if the node was notified but not received. In this case, if
             // the notification was triggered via `notify_one`, it must be sent
             // to the next waiter.
-            </span><span class="kw">if </span>notification == <span class="prelude-val">Some</span>(Notification::One) {
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(waker) = notify_locked(<span class="kw-2">&amp;mut </span>waiters, <span class="kw-2">&amp;</span>notify.state, notify_state) {
+            </span><span class="kw">if let </span><span class="prelude-val">Some</span>(Notification::One(strategy)) = notification {
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(waker) =
+                    notify_locked(<span class="kw-2">&amp;mut </span>waiters, <span class="kw-2">&amp;</span>notify.state, notify_state, strategy)
+                {
                     drop(waiters);
                     waker.wake();
                 }

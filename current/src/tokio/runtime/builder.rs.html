@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.37.0/src/runtime/builder.rs`."><title>builder.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (84b40fc90 2024-05-27)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.38.0/src/runtime/builder.rs`."><title>builder.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (032af18af 2024-06-02)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1341,6 +1341,15 @@
 <a href="#1341" id="1341">1341</a>
 <a href="#1342" id="1342">1342</a>
 <a href="#1343" id="1343">1343</a>
+<a href="#1344" id="1344">1344</a>
+<a href="#1345" id="1345">1345</a>
+<a href="#1346" id="1346">1346</a>
+<a href="#1347" id="1347">1347</a>
+<a href="#1348" id="1348">1348</a>
+<a href="#1349" id="1349">1349</a>
+<a href="#1350" id="1350">1350</a>
+<a href="#1351" id="1351">1351</a>
+<a href="#1352" id="1352">1352</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::runtime::handle::Handle;
 <span class="kw">use </span><span class="kw">crate</span>::runtime::{blocking, driver, Callback, HistogramBuilder, Runtime};
 <span class="kw">use </span><span class="kw">crate</span>::util::rand::{RngSeed, RngSeedGenerator};
@@ -1542,9 +1551,9 @@
 <span class="attr">#[derive(Clone, Copy)]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">enum </span>Kind {
     CurrentThread,
-    <span class="attr">#[cfg(all(feature = <span class="string">"rt-multi-thread"</span>, not(target_os = <span class="string">"wasi"</span>)))]
+    <span class="attr">#[cfg(feature = <span class="string">"rt-multi-thread"</span>)]
     </span>MultiThread,
-    <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"rt-multi-thread"</span>, not(target_os = <span class="string">"wasi"</span>)))]
+    <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"rt-multi-thread"</span>))]
     </span>MultiThreadAlt,
 }
 
@@ -1567,35 +1576,33 @@
         Builder::new(Kind::CurrentThread, EVENT_INTERVAL)
     }
 
-    <span class="macro">cfg_not_wasi!</span> {
-        <span class="doccomment">/// Returns a new builder with the multi thread scheduler selected.
+    <span class="doccomment">/// Returns a new builder with the multi thread scheduler selected.
+    ///
+    /// Configuration methods can be chained on the return value.
+    </span><span class="attr">#[cfg(feature = <span class="string">"rt-multi-thread"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"rt-multi-thread"</span>)))]
+    </span><span class="kw">pub fn </span>new_multi_thread() -&gt; Builder {
+        <span class="comment">// The number `61` is fairly arbitrary. I believe this value was copied from golang.
+        </span>Builder::new(Kind::MultiThread, <span class="number">61</span>)
+    }
+
+    <span class="macro">cfg_unstable!</span> {
+        <span class="doccomment">/// Returns a new builder with the alternate multi thread scheduler
+        /// selected.
+        ///
+        /// The alternate multi threaded scheduler is an in-progress
+        /// candidate to replace the existing multi threaded scheduler. It
+        /// currently does not scale as well to 16+ processors.
+        ///
+        /// This runtime flavor is currently **not considered production
+        /// ready**.
         ///
         /// Configuration methods can be chained on the return value.
         </span><span class="attr">#[cfg(feature = <span class="string">"rt-multi-thread"</span>)]
         #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"rt-multi-thread"</span>)))]
-        </span><span class="kw">pub fn </span>new_multi_thread() -&gt; Builder {
+        </span><span class="kw">pub fn </span>new_multi_thread_alt() -&gt; Builder {
             <span class="comment">// The number `61` is fairly arbitrary. I believe this value was copied from golang.
-            </span>Builder::new(Kind::MultiThread, <span class="number">61</span>)
-        }
-
-        <span class="macro">cfg_unstable!</span> {
-            <span class="doccomment">/// Returns a new builder with the alternate multi thread scheduler
-            /// selected.
-            ///
-            /// The alternate multi threaded scheduler is an in-progress
-            /// candidate to replace the existing multi threaded scheduler. It
-            /// currently does not scale as well to 16+ processors.
-            ///
-            /// This runtime flavor is currently **not considered production
-            /// ready**.
-            ///
-            /// Configuration methods can be chained on the return value.
-            </span><span class="attr">#[cfg(feature = <span class="string">"rt-multi-thread"</span>)]
-            #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"rt-multi-thread"</span>)))]
-            </span><span class="kw">pub fn </span>new_multi_thread_alt() -&gt; Builder {
-                <span class="comment">// The number `61` is fairly arbitrary. I believe this value was copied from golang.
-                </span>Builder::new(Kind::MultiThreadAlt, <span class="number">61</span>)
-            }
+            </span>Builder::new(Kind::MultiThreadAlt, <span class="number">61</span>)
         }
     }
 
@@ -2040,26 +2047,27 @@
     </span><span class="kw">pub fn </span>build(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; io::Result&lt;Runtime&gt; {
         <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.kind {
             Kind::CurrentThread =&gt; <span class="self">self</span>.build_current_thread_runtime(),
-            <span class="attr">#[cfg(all(feature = <span class="string">"rt-multi-thread"</span>, not(target_os = <span class="string">"wasi"</span>)))]
+            <span class="attr">#[cfg(feature = <span class="string">"rt-multi-thread"</span>)]
             </span>Kind::MultiThread =&gt; <span class="self">self</span>.build_threaded_runtime(),
-            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"rt-multi-thread"</span>, not(target_os = <span class="string">"wasi"</span>)))]
+            <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"rt-multi-thread"</span>))]
             </span>Kind::MultiThreadAlt =&gt; <span class="self">self</span>.build_alt_threaded_runtime(),
         }
     }
 
-    <span class="kw">fn </span>get_cfg(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; driver::Cfg {
+    <span class="kw">fn </span>get_cfg(<span class="kw-2">&amp;</span><span class="self">self</span>, workers: usize) -&gt; driver::Cfg {
         driver::Cfg {
             enable_pause_time: <span class="kw">match </span><span class="self">self</span>.kind {
                 Kind::CurrentThread =&gt; <span class="bool-val">true</span>,
-                <span class="attr">#[cfg(all(feature = <span class="string">"rt-multi-thread"</span>, not(target_os = <span class="string">"wasi"</span>)))]
+                <span class="attr">#[cfg(feature = <span class="string">"rt-multi-thread"</span>)]
                 </span>Kind::MultiThread =&gt; <span class="bool-val">false</span>,
-                <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"rt-multi-thread"</span>, not(target_os = <span class="string">"wasi"</span>)))]
+                <span class="attr">#[cfg(all(tokio_unstable, feature = <span class="string">"rt-multi-thread"</span>))]
                 </span>Kind::MultiThreadAlt =&gt; <span class="bool-val">false</span>,
             },
             enable_io: <span class="self">self</span>.enable_io,
             enable_time: <span class="self">self</span>.enable_time,
             start_paused: <span class="self">self</span>.start_paused,
             nevents: <span class="self">self</span>.nevents,
+            workers,
         }
     }
 
@@ -2101,6 +2109,10 @@
     ///
     /// [the module documentation]: crate::runtime#multi-threaded-runtime-behavior-at-the-time-of-writing
     ///
+    /// # Panics
+    ///
+    /// This function will panic if 0 is passed as an argument.
+    ///
     /// # Examples
     ///
     /// ```
@@ -2111,7 +2123,9 @@
     ///     .build();
     /// # }
     /// ```
+    </span><span class="attr">#[track_caller]
     </span><span class="kw">pub fn </span>global_queue_interval(<span class="kw-2">&amp;mut </span><span class="self">self</span>, val: u32) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
+        <span class="macro">assert!</span>(val &gt; <span class="number">0</span>, <span class="string">"global_queue_interval must be greater than 0"</span>);
         <span class="self">self</span>.global_queue_interval = <span class="prelude-val">Some</span>(val);
         <span class="self">self
     </span>}
@@ -2175,7 +2189,7 @@
         ///
         /// This option is currently unstable and its implementation is
         /// incomplete. The API may change or be removed in the future. See
-        /// tokio-rs/tokio#4516 for more details.
+        /// issue [tokio-rs/tokio#4516] for more details.
         ///
         /// # Examples
         ///
@@ -2207,6 +2221,7 @@
         /// ```
         ///
         /// [`JoinHandle`]: struct@crate::task::JoinHandle
+        /// [tokio-rs/tokio#4516]: https://github.com/tokio-rs/tokio/issues/4516
         </span><span class="kw">pub fn </span>unhandled_panic(<span class="kw-2">&amp;mut </span><span class="self">self</span>, behavior: UnhandledPanic) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
             <span class="kw">if </span>!<span class="macro">matches!</span>(<span class="self">self</span>.kind, Kind::CurrentThread) &amp;&amp; <span class="macro">matches!</span>(behavior, UnhandledPanic::ShutdownRuntime) {
                 <span class="macro">panic!</span>(<span class="string">"UnhandledPanic::ShutdownRuntime is only supported in current thread runtime"</span>);
@@ -2232,7 +2247,7 @@
         /// is stealable.
         ///
         /// Consider trying this option when the task "scheduled" time is high
-        /// but the runtime is underutilized. Use tokio-rs/tokio-metrics to
+        /// but the runtime is underutilized. Use [tokio-rs/tokio-metrics] to
         /// collect this data.
         ///
         /// # Unstable
@@ -2240,7 +2255,7 @@
         /// This configuration option is considered a workaround for the LIFO
         /// slot not being stealable. When the slot becomes stealable, we will
         /// revisit whether or not this option is necessary. See
-        /// tokio-rs/tokio#4941.
+        /// issue [tokio-rs/tokio#4941].
         ///
         /// # Examples
         ///
@@ -2252,6 +2267,9 @@
         ///     .build()
         ///     .unwrap();
         /// ```
+        ///
+        /// [tokio-rs/tokio-metrics]: https://github.com/tokio-rs/tokio-metrics
+        /// [tokio-rs/tokio#4941]: https://github.com/tokio-rs/tokio/issues/4941
         </span><span class="kw">pub fn </span>disable_lifo_slot(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
             <span class="self">self</span>.disable_lifo_slot = <span class="bool-val">true</span>;
             <span class="self">self
@@ -2291,7 +2309,7 @@
         </span>}
     }
 
-    <span class="macro">cfg_metrics!</span> {
+    <span class="macro">cfg_unstable_metrics!</span> {
         <span class="doccomment">/// Enables tracking the distribution of task poll times.
         ///
         /// Task poll times are not instrumented by default as doing so requires
@@ -2430,7 +2448,7 @@
         <span class="kw">use </span><span class="kw">crate</span>::runtime::scheduler::{<span class="self">self</span>, CurrentThread};
         <span class="kw">use </span><span class="kw">crate</span>::runtime::{runtime::Scheduler, Config};
 
-        <span class="kw">let </span>(driver, driver_handle) = driver::Driver::new(<span class="self">self</span>.get_cfg())<span class="question-mark">?</span>;
+        <span class="kw">let </span>(driver, driver_handle) = driver::Driver::new(<span class="self">self</span>.get_cfg(<span class="number">1</span>))<span class="question-mark">?</span>;
 
         <span class="comment">// Blocking pool
         </span><span class="kw">let </span>blocking_pool = blocking::create_blocking_pool(<span class="self">self</span>, <span class="self">self</span>.max_blocking_threads);
@@ -2583,7 +2601,7 @@
 
             <span class="kw">let </span>core_threads = <span class="self">self</span>.worker_threads.unwrap_or_else(num_cpus);
 
-            <span class="kw">let </span>(driver, driver_handle) = driver::Driver::new(<span class="self">self</span>.get_cfg())<span class="question-mark">?</span>;
+            <span class="kw">let </span>(driver, driver_handle) = driver::Driver::new(<span class="self">self</span>.get_cfg(core_threads))<span class="question-mark">?</span>;
 
             <span class="comment">// Create the blocking pool
             </span><span class="kw">let </span>blocking_pool =
@@ -2630,7 +2648,7 @@
                 <span class="kw">use </span><span class="kw">crate</span>::runtime::scheduler::MultiThreadAlt;
 
                 <span class="kw">let </span>core_threads = <span class="self">self</span>.worker_threads.unwrap_or_else(num_cpus);
-                <span class="kw">let </span>(driver, driver_handle) = driver::Driver::new(<span class="self">self</span>.get_cfg())<span class="question-mark">?</span>;
+                <span class="kw">let </span>(driver, driver_handle) = driver::Driver::new(<span class="self">self</span>.get_cfg(core_threads))<span class="question-mark">?</span>;
 
                 <span class="comment">// Create the blocking pool
                 </span><span class="kw">let </span>blocking_pool =
