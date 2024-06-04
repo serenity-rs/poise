@@ -139,7 +139,12 @@ impl CooldownTracker {
             self.member_invocations.insert((ctx.user_id, guild_id), now);
         }
     }
+
     /// Sets the last invocation for the specified cooldown bucket.
+    ///
+    /// This function is not usually needed for regular usage. It was added to allow for extra
+    /// flexibility in cases where you might want to shorten or lengthen a cooldown after
+    /// invocation.
     pub fn set_last_invocation(&mut self, cooldown_type: CooldownType, instant: Instant) {
         match cooldown_type {
             CooldownType::Global => self.global_invocation = Some(instant),
