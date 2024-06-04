@@ -49,7 +49,7 @@ pub struct CommandArgs {
     category: Option<String>,
     custom_data: Option<syn::Expr>,
 
-    manual_cooldowns: bool,
+    manual_cooldowns: Option<bool>,
 
     // In seconds
     global_cooldown: Option<u64>,
@@ -282,7 +282,7 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
     let description = wrap_option_to_string(inv.description.as_ref());
     let category = wrap_option_to_string(inv.args.category.as_ref());
 
-    let manual_cooldowns = inv.args.manual_cooldowns;
+    let manual_cooldowns = wrap_option(inv.args.manual_cooldowns);
     let cooldown_config = generate_cooldown_config(&inv.args);
 
     let default_member_permissions = &inv.default_member_permissions;
