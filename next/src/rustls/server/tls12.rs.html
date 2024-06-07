@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-0.21.10/src/server/tls12.rs`."><title>tls12.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="rustls" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (8f9080db4 2024-05-09)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-0.22.4/src/server/tls12.rs`."><title>tls12.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="rustls" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (98489f248 2024-06-06)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -953,46 +953,59 @@
 <a href="#953" id="953">953</a>
 <a href="#954" id="954">954</a>
 <a href="#955" id="955">955</a>
+<a href="#956" id="956">956</a>
+<a href="#957" id="957">957</a>
+<a href="#958" id="958">958</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::check::inappropriate_message;
 <span class="kw">use </span><span class="kw">crate</span>::common_state::{CommonState, Side, State};
 <span class="kw">use </span><span class="kw">crate</span>::conn::ConnectionRandoms;
+<span class="kw">use </span><span class="kw">crate</span>::crypto::ActiveKeyExchange;
 <span class="kw">use </span><span class="kw">crate</span>::enums::ProtocolVersion;
 <span class="kw">use </span><span class="kw">crate</span>::enums::{AlertDescription, ContentType, HandshakeType};
 <span class="kw">use </span><span class="kw">crate</span>::error::{Error, PeerIncompatible, PeerMisbehaved};
 <span class="kw">use </span><span class="kw">crate</span>::hash_hs::HandshakeHash;
-<span class="kw">use </span><span class="kw">crate</span>::key::Certificate;
 <span class="attr">#[cfg(feature = <span class="string">"logging"</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::log::{debug, trace};
 <span class="kw">use </span><span class="kw">crate</span>::msgs::base::Payload;
 <span class="kw">use </span><span class="kw">crate</span>::msgs::ccs::ChangeCipherSpecPayload;
 <span class="kw">use </span><span class="kw">crate</span>::msgs::codec::Codec;
-<span class="kw">use </span><span class="kw">crate</span>::msgs::handshake::{ClientECDHParams, HandshakeMessagePayload, HandshakePayload};
+<span class="kw">use </span><span class="kw">crate</span>::msgs::handshake::{
+    CertificateChain, ClientEcdhParams, HandshakeMessagePayload, HandshakePayload,
+};
 <span class="kw">use </span><span class="kw">crate</span>::msgs::handshake::{NewSessionTicketPayload, SessionId};
 <span class="kw">use </span><span class="kw">crate</span>::msgs::message::{Message, MessagePayload};
 <span class="kw">use </span><span class="kw">crate</span>::msgs::persist;
-<span class="attr">#[cfg(feature = <span class="string">"secret_extraction"</span>)]
-</span><span class="kw">use </span><span class="kw">crate</span>::suites::PartiallyExtractedSecrets;
+<span class="kw">use </span><span class="kw">crate</span>::suites::PartiallyExtractedSecrets;
 <span class="kw">use </span><span class="kw">crate</span>::tls12::{<span class="self">self</span>, ConnectionSecrets, Tls12CipherSuite};
-<span class="kw">use crate</span>::{kx, ticketer, verify};
+<span class="kw">use </span><span class="kw">crate</span>::verify;
 
 <span class="kw">use </span><span class="kw">super</span>::common::ActiveCertifiedKey;
 <span class="kw">use </span><span class="kw">super</span>::hs::{<span class="self">self</span>, ServerContext};
 <span class="kw">use </span><span class="kw">super</span>::server_conn::{ProducesTickets, ServerConfig, ServerConnectionData};
 
-<span class="kw">use </span>ring::constant_time;
+<span class="kw">use </span>pki_types::UnixTime;
+<span class="kw">use </span>subtle::ConstantTimeEq;
 
-<span class="kw">use </span>std::sync::Arc;
+<span class="kw">use </span>alloc::borrow::ToOwned;
+<span class="kw">use </span>alloc::boxed::Box;
+<span class="kw">use </span>alloc::string::ToString;
+<span class="kw">use </span>alloc::sync::Arc;
+<span class="kw">use </span>alloc::vec;
+<span class="kw">use </span>alloc::vec::Vec;
 
 <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">use </span>client_hello::CompleteClientHelloHandling;
 
 <span class="kw">mod </span>client_hello {
+    <span class="kw">use </span>pki_types::CertificateDer;
+
+    <span class="kw">use </span><span class="kw">crate</span>::crypto::SupportedKxGroup;
     <span class="kw">use </span><span class="kw">crate</span>::enums::SignatureScheme;
     <span class="kw">use </span><span class="kw">crate</span>::msgs::enums::ECPointFormat;
     <span class="kw">use </span><span class="kw">crate</span>::msgs::enums::{ClientCertificateType, Compression};
-    <span class="kw">use </span><span class="kw">crate</span>::msgs::handshake::ServerECDHParams;
+    <span class="kw">use </span><span class="kw">crate</span>::msgs::handshake::ClientExtension;
+    <span class="kw">use </span><span class="kw">crate</span>::msgs::handshake::ServerEcdhParams;
     <span class="kw">use </span><span class="kw">crate</span>::msgs::handshake::{CertificateRequestPayload, ClientSessionTicket, Random};
-    <span class="kw">use </span><span class="kw">crate</span>::msgs::handshake::{CertificateStatus, ECDHEServerKeyExchange};
-    <span class="kw">use </span><span class="kw">crate</span>::msgs::handshake::{ClientExtension, SessionId};
+    <span class="kw">use </span><span class="kw">crate</span>::msgs::handshake::{CertificateStatus, EcdheServerKeyExchange};
     <span class="kw">use </span><span class="kw">crate</span>::msgs::handshake::{ClientHelloPayload, ServerHelloPayload};
     <span class="kw">use </span><span class="kw">crate</span>::msgs::handshake::{ServerExtension, ServerKeyExchangePayload};
     <span class="kw">use </span><span class="kw">crate</span>::sign;
@@ -1124,9 +1137,10 @@
 
             <span class="kw">let </span>group = <span class="self">self
                 </span>.config
+                .provider
                 .kx_groups
                 .iter()
-                .find(|skxg| groups_ext.contains(<span class="kw-2">&amp;</span>skxg.name))
+                .find(|skxg| groups_ext.contains(<span class="kw-2">&amp;</span>skxg.name()))
                 .cloned()
                 .ok_or_else(|| {
                     cx.common.send_fatal_alert(
@@ -1148,14 +1162,13 @@
 
             <span class="macro">debug_assert_eq!</span>(ecpoint, ECPointFormat::Uncompressed);
 
-            <span class="kw">let </span>(<span class="kw-2">mut </span>ocsp_response, <span class="kw-2">mut </span>sct_list) =
-                (server_key.get_ocsp(), server_key.get_sct_list());
+            <span class="kw">let </span><span class="kw-2">mut </span>ocsp_response = server_key.get_ocsp();
 
             <span class="comment">// If we're not offered a ticket or a potential session ID, allocate a session ID.
             </span><span class="kw">if </span>!<span class="self">self</span>.config.session_storage.can_cache() {
                 <span class="self">self</span>.session_id = SessionId::empty();
             } <span class="kw">else if </span><span class="self">self</span>.session_id.is_empty() &amp;&amp; !ticket_received {
-                <span class="self">self</span>.session_id = SessionId::random()<span class="question-mark">?</span>;
+                <span class="self">self</span>.session_id = SessionId::random(<span class="self">self</span>.config.provider.secure_random)<span class="question-mark">?</span>;
             }
 
             <span class="self">self</span>.send_ticket = emit_server_hello(
@@ -1166,7 +1179,6 @@
                 <span class="self">self</span>.suite,
                 <span class="self">self</span>.using_ems,
                 <span class="kw-2">&amp;mut </span>ocsp_response,
-                <span class="kw-2">&amp;mut </span>sct_list,
                 client_hello,
                 <span class="prelude-val">None</span>,
                 <span class="kw-2">&amp;</span><span class="self">self</span>.randoms,
@@ -1238,7 +1250,6 @@
                 <span class="self">self</span>.suite,
                 <span class="self">self</span>.using_ems,
                 <span class="kw-2">&amp;mut </span><span class="prelude-val">None</span>,
-                <span class="kw-2">&amp;mut </span><span class="prelude-val">None</span>,
                 client_hello,
                 <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>resumedata),
                 <span class="kw-2">&amp;</span><span class="self">self</span>.randoms,
@@ -1294,22 +1305,13 @@
         suite: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Tls12CipherSuite,
         using_ems: bool,
         ocsp_response: <span class="kw-2">&amp;mut </span><span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>[u8]&gt;,
-        sct_list: <span class="kw-2">&amp;mut </span><span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>[u8]&gt;,
         hello: <span class="kw-2">&amp;</span>ClientHelloPayload,
         resumedata: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>persist::ServerSessionValue&gt;,
         randoms: <span class="kw-2">&amp;</span>ConnectionRandoms,
         extra_exts: Vec&lt;ServerExtension&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;bool, Error&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>ep = hs::ExtensionProcessing::new();
-        ep.process_common(
-            config,
-            cx,
-            ocsp_response,
-            sct_list,
-            hello,
-            resumedata,
-            extra_exts,
-        )<span class="question-mark">?</span>;
+        ep.process_common(config, cx, ocsp_response, hello, resumedata, extra_exts)<span class="question-mark">?</span>;
         ep.process_tls12(config, hello, using_ems);
 
         <span class="kw">let </span>sh = Message {
@@ -1336,13 +1338,13 @@
     <span class="kw">fn </span>emit_certificate(
         transcript: <span class="kw-2">&amp;mut </span>HandshakeHash,
         common: <span class="kw-2">&amp;mut </span>CommonState,
-        cert_chain: <span class="kw-2">&amp;</span>[Certificate],
+        cert_chain: <span class="kw-2">&amp;</span>[CertificateDer&lt;<span class="lifetime">'static</span>&gt;],
     ) {
         <span class="kw">let </span>c = Message {
             version: ProtocolVersion::TLSv1_2,
             payload: MessagePayload::handshake(HandshakeMessagePayload {
                 typ: HandshakeType::Certificate,
-                payload: HandshakePayload::Certificate(cert_chain.to_owned()),
+                payload: HandshakePayload::Certificate(CertificateChain(cert_chain.to_vec())),
             }),
         };
 
@@ -1369,12 +1371,14 @@
         transcript: <span class="kw-2">&amp;mut </span>HandshakeHash,
         common: <span class="kw-2">&amp;mut </span>CommonState,
         sigschemes: Vec&lt;SignatureScheme&gt;,
-        skxg: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>kx::SupportedKxGroup,
+        selected_group: <span class="kw-2">&amp;</span><span class="lifetime">'static </span><span class="kw">dyn </span>SupportedKxGroup,
         signing_key: <span class="kw-2">&amp;</span><span class="kw">dyn </span>sign::SigningKey,
         randoms: <span class="kw-2">&amp;</span>ConnectionRandoms,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;kx::KeyExchange, Error&gt; {
-        <span class="kw">let </span>kx = kx::KeyExchange::start(skxg).ok_or(Error::FailedToGetRandomBytes)<span class="question-mark">?</span>;
-        <span class="kw">let </span>secdh = ServerECDHParams::new(skxg.name, kx.pubkey.as_ref());
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Box&lt;<span class="kw">dyn </span>ActiveKeyExchange&gt;, Error&gt; {
+        <span class="kw">let </span>kx = selected_group
+            .start()
+            .map_err(|<span class="kw">_</span>| Error::FailedToGetRandomBytes)<span class="question-mark">?</span>;
+        <span class="kw">let </span>secdh = ServerEcdhParams::new(<span class="kw-2">&amp;*</span>kx);
 
         <span class="kw">let </span><span class="kw-2">mut </span>msg = Vec::new();
         msg.extend(randoms.client);
@@ -1387,7 +1391,7 @@
         <span class="kw">let </span>sigscheme = signer.scheme();
         <span class="kw">let </span>sig = signer.sign(<span class="kw-2">&amp;</span>msg)<span class="question-mark">?</span>;
 
-        <span class="kw">let </span>skx = ServerKeyExchangePayload::ECDHE(ECDHEServerKeyExchange {
+        <span class="kw">let </span>skx = ServerKeyExchangePayload::Ecdhe(EcdheServerKeyExchange {
             params: secdh,
             dss: DigitallySignedStruct::new(sigscheme, sig),
         });
@@ -1420,7 +1424,7 @@
 
         <span class="kw">let </span>names = config
             .verifier
-            .client_auth_root_subjects()
+            .root_hint_subjects()
             .to_vec();
 
         <span class="kw">let </span>cr = CertificateRequestPayload {
@@ -1468,7 +1472,7 @@
     session_id: SessionId,
     suite: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Tls12CipherSuite,
     using_ems: bool,
-    server_kx: kx::KeyExchange,
+    server_kx: Box&lt;<span class="kw">dyn </span>ActiveKeyExchange&gt;,
     send_ticket: bool,
 }
 
@@ -1502,10 +1506,9 @@
                 <span class="prelude-val">None
             </span>}
             <span class="prelude-val">Some</span>((end_entity, intermediates)) =&gt; {
-                <span class="kw">let </span>now = std::time::SystemTime::now();
                 <span class="self">self</span>.config
                     .verifier
-                    .verify_client_cert(end_entity, intermediates, now)
+                    .verify_client_cert(end_entity, intermediates, UnixTime::now())
                     .map_err(|err| {
                         cx.common
                             .send_cert_verify_error_alert(err)
@@ -1537,8 +1540,8 @@
     session_id: SessionId,
     suite: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Tls12CipherSuite,
     using_ems: bool,
-    server_kx: kx::KeyExchange,
-    client_cert: <span class="prelude-ty">Option</span>&lt;Vec&lt;Certificate&gt;&gt;,
+    server_kx: Box&lt;<span class="kw">dyn </span>ActiveKeyExchange&gt;,
+    client_cert: <span class="prelude-ty">Option</span>&lt;CertificateChain&gt;,
     send_ticket: bool,
 }
 
@@ -1557,7 +1560,7 @@
         <span class="comment">// Complete key agreement, and set up encryption with the
         // resulting premaster secret.
         </span><span class="kw">let </span>peer_kx_params =
-            tls12::decode_ecdh_params::&lt;ClientECDHParams&gt;(cx.common, <span class="kw-2">&amp;</span>client_kx.<span class="number">0</span>)<span class="question-mark">?</span>;
+            tls12::decode_ecdh_params::&lt;ClientEcdhParams&gt;(cx.common, <span class="kw-2">&amp;</span>client_kx.<span class="number">0</span>)<span class="question-mark">?</span>;
         <span class="kw">let </span>secrets = ConnectionSecrets::from_key_exchange(
             <span class="self">self</span>.server_kx,
             <span class="kw-2">&amp;</span>peer_kx_params.public.<span class="number">0</span>,
@@ -1605,7 +1608,7 @@
     transcript: HandshakeHash,
     session_id: SessionId,
     using_ems: bool,
-    client_cert: Vec&lt;Certificate&gt;,
+    client_cert: CertificateChain,
     send_ticket: bool,
 }
 
@@ -1708,16 +1711,15 @@
     secrets: <span class="kw-2">&amp;</span>ConnectionSecrets,
     using_ems: bool,
     cx: <span class="kw-2">&amp;</span>ServerContext&lt;<span class="lifetime">'_</span>&gt;,
-    time_now: ticketer::TimeBase,
+    time_now: UnixTime,
 ) -&gt; persist::ServerSessionValue {
     <span class="kw">let </span>version = ProtocolVersion::TLSv1_2;
-    <span class="kw">let </span>secret = secrets.get_master_secret();
 
     <span class="kw">let </span><span class="kw-2">mut </span>v = persist::ServerSessionValue::new(
         cx.data.sni.as_ref(),
         version,
         secrets.suite().common.suite,
-        secret,
+        secrets.master_secret(),
         cx.common.peer_certificates.clone(),
         cx.common.alpn_protocol.clone(),
         cx.data.resumption_data.clone(),
@@ -1739,8 +1741,8 @@
     cx: <span class="kw-2">&amp;mut </span>ServerContext&lt;<span class="lifetime">'_</span>&gt;,
     ticketer: <span class="kw-2">&amp;</span><span class="kw">dyn </span>ProducesTickets,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
-    <span class="kw">let </span>time_now = ticketer::TimeBase::now()<span class="question-mark">?</span>;
-    <span class="kw">let </span>plain = get_server_connection_value_tls12(secrets, using_ems, cx, time_now).get_encoding();
+    <span class="kw">let </span>plain =
+        get_server_connection_value_tls12(secrets, using_ems, cx, UnixTime::now()).get_encoding();
 
     <span class="comment">// If we can't produce a ticket for some reason, we can't
     // report an error. Send an empty one.
@@ -1815,19 +1817,24 @@
         <span class="kw">let </span>vh = <span class="self">self</span>.transcript.get_current_hash();
         <span class="kw">let </span>expect_verify_data = <span class="self">self</span>.secrets.client_verify_data(<span class="kw-2">&amp;</span>vh);
 
-        <span class="kw">let </span>_fin_verified =
-            constant_time::verify_slices_are_equal(<span class="kw-2">&amp;</span>expect_verify_data, <span class="kw-2">&amp;</span>finished.<span class="number">0</span>)
-                .map_err(|<span class="kw">_</span>| {
-                    cx.common
-                        .send_fatal_alert(AlertDescription::DecryptError, Error::DecryptError)
-                })
-                .map(|<span class="kw">_</span>| verify::FinishedMessageVerified::assertion())<span class="question-mark">?</span>;
+        <span class="kw">let </span>_fin_verified = <span class="kw">match </span>ConstantTimeEq::ct_eq(<span class="kw-2">&amp;</span>expect_verify_data[..], <span class="kw-2">&amp;</span>finished.<span class="number">0</span>).into()
+        {
+            <span class="bool-val">true </span>=&gt; verify::FinishedMessageVerified::assertion(),
+            <span class="bool-val">false </span>=&gt; {
+                <span class="kw">return </span><span class="prelude-val">Err</span>(cx
+                    .common
+                    .send_fatal_alert(AlertDescription::DecryptError, Error::DecryptError));
+            }
+        };
 
         <span class="comment">// Save connection, perhaps
         </span><span class="kw">if </span>!<span class="self">self</span>.resuming &amp;&amp; !<span class="self">self</span>.session_id.is_empty() {
-            <span class="kw">let </span>time_now = ticketer::TimeBase::now()<span class="question-mark">?</span>;
-            <span class="kw">let </span>value =
-                get_server_connection_value_tls12(<span class="kw-2">&amp;</span><span class="self">self</span>.secrets, <span class="self">self</span>.using_ems, cx, time_now);
+            <span class="kw">let </span>value = get_server_connection_value_tls12(
+                <span class="kw-2">&amp;</span><span class="self">self</span>.secrets,
+                <span class="self">self</span>.using_ems,
+                cx,
+                UnixTime::now(),
+            );
 
             <span class="kw">let </span>worked = <span class="self">self
                 </span>.config
@@ -1902,8 +1909,7 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">"secret_extraction"</span>)]
-    </span><span class="kw">fn </span>extract_secrets(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;PartiallyExtractedSecrets, Error&gt; {
+    <span class="kw">fn </span>extract_secrets(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;PartiallyExtractedSecrets, Error&gt; {
         <span class="self">self</span>.secrets
             .extract_secrets(Side::Server)
     }

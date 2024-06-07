@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-0.21.10/src/server/tls13.rs`."><title>tls13.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="rustls" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (8f9080db4 2024-05-09)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-0.22.4/src/server/tls13.rs`."><title>tls13.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="rustls" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (98489f248 2024-06-06)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1298,59 +1298,30 @@
 <a href="#1298" id="1298">1298</a>
 <a href="#1299" id="1299">1299</a>
 <a href="#1300" id="1300">1300</a>
-<a href="#1301" id="1301">1301</a>
-<a href="#1302" id="1302">1302</a>
-<a href="#1303" id="1303">1303</a>
-<a href="#1304" id="1304">1304</a>
-<a href="#1305" id="1305">1305</a>
-<a href="#1306" id="1306">1306</a>
-<a href="#1307" id="1307">1307</a>
-<a href="#1308" id="1308">1308</a>
-<a href="#1309" id="1309">1309</a>
-<a href="#1310" id="1310">1310</a>
-<a href="#1311" id="1311">1311</a>
-<a href="#1312" id="1312">1312</a>
-<a href="#1313" id="1313">1313</a>
-<a href="#1314" id="1314">1314</a>
-<a href="#1315" id="1315">1315</a>
-<a href="#1316" id="1316">1316</a>
-<a href="#1317" id="1317">1317</a>
-<a href="#1318" id="1318">1318</a>
-<a href="#1319" id="1319">1319</a>
-<a href="#1320" id="1320">1320</a>
-<a href="#1321" id="1321">1321</a>
-<a href="#1322" id="1322">1322</a>
-<a href="#1323" id="1323">1323</a>
-<a href="#1324" id="1324">1324</a>
-<a href="#1325" id="1325">1325</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::check::inappropriate_handshake_message;
-<span class="attr">#[cfg(feature = <span class="string">"quic"</span>)]
-</span><span class="kw">use </span><span class="kw">crate</span>::check::inappropriate_message;
-<span class="attr">#[cfg(feature = <span class="string">"quic"</span>)]
-</span><span class="kw">use </span><span class="kw">crate</span>::common_state::Protocol;
-<span class="attr">#[cfg(feature = <span class="string">"secret_extraction"</span>)]
-</span><span class="kw">use </span><span class="kw">crate</span>::common_state::Side;
-<span class="kw">use </span><span class="kw">crate</span>::common_state::{CommonState, State};
+<span class="kw">use </span><span class="kw">crate</span>::check::inappropriate_message;
+<span class="kw">use </span><span class="kw">crate</span>::common_state::Protocol;
+<span class="kw">use </span><span class="kw">crate</span>::common_state::{CommonState, Side, State};
 <span class="kw">use </span><span class="kw">crate</span>::conn::ConnectionRandoms;
 <span class="kw">use </span><span class="kw">crate</span>::enums::ProtocolVersion;
 <span class="kw">use </span><span class="kw">crate</span>::enums::{AlertDescription, ContentType, HandshakeType};
 <span class="kw">use </span><span class="kw">crate</span>::error::{Error, PeerIncompatible, PeerMisbehaved};
 <span class="kw">use </span><span class="kw">crate</span>::hash_hs::HandshakeHash;
-<span class="kw">use </span><span class="kw">crate</span>::key::Certificate;
 <span class="attr">#[cfg(feature = <span class="string">"logging"</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::log::{debug, trace, warn};
 <span class="kw">use </span><span class="kw">crate</span>::msgs::codec::Codec;
 <span class="kw">use </span><span class="kw">crate</span>::msgs::enums::KeyUpdateRequest;
+<span class="kw">use </span><span class="kw">crate</span>::msgs::handshake::CertificateChain;
 <span class="kw">use </span><span class="kw">crate</span>::msgs::handshake::HandshakeMessagePayload;
 <span class="kw">use </span><span class="kw">crate</span>::msgs::handshake::HandshakePayload;
-<span class="kw">use </span><span class="kw">crate</span>::msgs::handshake::{NewSessionTicketExtension, NewSessionTicketPayloadTLS13};
+<span class="kw">use </span><span class="kw">crate</span>::msgs::handshake::{NewSessionTicketExtension, NewSessionTicketPayloadTls13};
 <span class="kw">use </span><span class="kw">crate</span>::msgs::message::{Message, MessagePayload};
 <span class="kw">use </span><span class="kw">crate</span>::msgs::persist;
 <span class="kw">use </span><span class="kw">crate</span>::rand;
 <span class="kw">use </span><span class="kw">crate</span>::server::ServerConfig;
-<span class="attr">#[cfg(feature = <span class="string">"secret_extraction"</span>)]
-</span><span class="kw">use </span><span class="kw">crate</span>::suites::PartiallyExtractedSecrets;
-<span class="kw">use </span><span class="kw">crate</span>::ticketer;
+<span class="kw">use </span><span class="kw">crate</span>::suites::PartiallyExtractedSecrets;
+<span class="kw">use </span><span class="kw">crate</span>::tls13::construct_client_verify_message;
+<span class="kw">use </span><span class="kw">crate</span>::tls13::construct_server_verify_message;
 <span class="kw">use </span><span class="kw">crate</span>::tls13::key_schedule::{KeyScheduleTraffic, KeyScheduleTrafficWithClientFinishedPending};
 <span class="kw">use </span><span class="kw">crate</span>::tls13::Tls13CipherSuite;
 <span class="kw">use </span><span class="kw">crate</span>::verify;
@@ -1358,15 +1329,20 @@
 <span class="kw">use </span><span class="kw">super</span>::hs::{<span class="self">self</span>, HandshakeHashOrBuffer, ServerContext};
 <span class="kw">use </span><span class="kw">super</span>::server_conn::ServerConnectionData;
 
-<span class="kw">use </span>std::sync::Arc;
+<span class="kw">use </span>alloc::borrow::ToOwned;
+<span class="kw">use </span>alloc::boxed::Box;
+<span class="kw">use </span>alloc::sync::Arc;
+<span class="kw">use </span>alloc::vec;
+<span class="kw">use </span>alloc::vec::Vec;
 
-<span class="kw">use </span>ring::constant_time;
+<span class="kw">use </span>pki_types::{CertificateDer, UnixTime};
+<span class="kw">use </span>subtle::ConstantTimeEq;
 
 <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">use </span>client_hello::CompleteClientHelloHandling;
 
 <span class="kw">mod </span>client_hello {
+    <span class="kw">use </span><span class="kw">crate</span>::crypto::SupportedKxGroup;
     <span class="kw">use </span><span class="kw">crate</span>::enums::SignatureScheme;
-    <span class="kw">use </span><span class="kw">crate</span>::kx;
     <span class="kw">use </span><span class="kw">crate</span>::msgs::base::{Payload, PayloadU8};
     <span class="kw">use </span><span class="kw">crate</span>::msgs::ccs::ChangeCipherSpecPayload;
     <span class="kw">use </span><span class="kw">crate</span>::msgs::enums::NamedGroup;
@@ -1374,8 +1350,8 @@
     <span class="kw">use </span><span class="kw">crate</span>::msgs::handshake::CertReqExtension;
     <span class="kw">use </span><span class="kw">crate</span>::msgs::handshake::CertificateEntry;
     <span class="kw">use </span><span class="kw">crate</span>::msgs::handshake::CertificateExtension;
-    <span class="kw">use </span><span class="kw">crate</span>::msgs::handshake::CertificatePayloadTLS13;
-    <span class="kw">use </span><span class="kw">crate</span>::msgs::handshake::CertificateRequestPayloadTLS13;
+    <span class="kw">use </span><span class="kw">crate</span>::msgs::handshake::CertificatePayloadTls13;
+    <span class="kw">use </span><span class="kw">crate</span>::msgs::handshake::CertificateRequestPayloadTls13;
     <span class="kw">use </span><span class="kw">crate</span>::msgs::handshake::CertificateStatus;
     <span class="kw">use </span><span class="kw">crate</span>::msgs::handshake::ClientHelloPayload;
     <span class="kw">use </span><span class="kw">crate</span>::msgs::handshake::HelloRetryExtension;
@@ -1449,7 +1425,7 @@
             <span class="kw">let </span>real_binder =
                 key_schedule.resumption_psk_binder_key_and_sign_verify_data(<span class="kw-2">&amp;</span>handshake_hash);
 
-            constant_time::verify_slices_are_equal(real_binder.as_ref(), binder).is_ok()
+            ConstantTimeEq::ct_eq(real_binder.as_ref(), binder).into()
         }
 
         <span class="kw">fn </span>attempt_tls13_ticket_decryption(
@@ -1493,8 +1469,7 @@
                     )
                 })<span class="question-mark">?</span>;
 
-            <span class="kw">let </span>tls13_schemes = sign::supported_sign_tls13();
-            sigschemes_ext.retain(|scheme| tls13_schemes.contains(scheme));
+            sigschemes_ext.retain(SignatureScheme::supported_in_tls13);
 
             <span class="kw">let </span>shares_ext = client_hello
                 .get_keyshare_extension()
@@ -1525,26 +1500,29 @@
             }
 
             <span class="comment">// choose a share that we support
-            </span><span class="kw">let </span>chosen_share = <span class="self">self
+            </span><span class="kw">let </span>chosen_share_and_kxg = <span class="self">self
                 </span>.config
+                .provider
                 .kx_groups
                 .iter()
                 .find_map(|group| {
                     shares_ext
                         .iter()
-                        .find(|share| share.group == group.name)
+                        .find(|share| share.group == group.name())
+                        .map(|share| (share, <span class="kw-2">*</span>group))
                 });
 
-            <span class="kw">let </span>chosen_share = <span class="kw">match </span>chosen_share {
+            <span class="kw">let </span>chosen_share_and_kxg = <span class="kw">match </span>chosen_share_and_kxg {
                 <span class="prelude-val">Some</span>(s) =&gt; s,
                 <span class="prelude-val">None </span>=&gt; {
                     <span class="comment">// We don't have a suitable key share.  Choose a suitable group and
                     // send a HelloRetryRequest.
                     </span><span class="kw">let </span>retry_group_maybe = <span class="self">self
                         </span>.config
+                        .provider
                         .kx_groups
                         .iter()
-                        .find(|group| groups_ext.contains(<span class="kw-2">&amp;</span>group.name))
+                        .find(|group| groups_ext.contains(<span class="kw-2">&amp;</span>group.name()))
                         .cloned();
 
                     <span class="self">self</span>.transcript.add_message(chm);
@@ -1562,7 +1540,7 @@
                             <span class="self">self</span>.suite,
                             client_hello.session_id,
                             cx.common,
-                            group.name,
+                            group.name(),
                         );
                         emit_fake_ccs(cx.common);
 
@@ -1599,7 +1577,6 @@
 
             <span class="kw">let </span><span class="kw-2">mut </span>chosen_psk_index = <span class="prelude-val">None</span>;
             <span class="kw">let </span><span class="kw-2">mut </span>resumedata = <span class="prelude-val">None</span>;
-            <span class="kw">let </span>time_now = ticketer::TimeBase::now()<span class="question-mark">?</span>;
 
             <span class="kw">if let </span><span class="prelude-val">Some</span>(psk_offer) = client_hello.get_psk() {
                 <span class="kw">if </span>!client_hello.check_psk_ext_is_last() {
@@ -1638,7 +1615,7 @@
                     <span class="kw">let </span>resume = <span class="kw">match </span><span class="self">self
                         </span>.attempt_tls13_ticket_decryption(<span class="kw-2">&amp;</span>psk_id.identity.<span class="number">0</span>)
                         .map(|resumedata| {
-                            resumedata.set_freshness(psk_id.obfuscated_ticket_age, time_now)
+                            resumedata.set_freshness(psk_id.obfuscated_ticket_age, UnixTime::now())
                         })
                         .filter(|resumedata| {
                             hs::can_resume(<span class="self">self</span>.suite.into(), <span class="kw-2">&amp;</span>cx.data.sni, <span class="bool-val">false</span>, resumedata)
@@ -1676,7 +1653,9 @@
 
             <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">ref </span>resume) = resumedata {
                 cx.data.received_resumption_data = <span class="prelude-val">Some</span>(resume.application_data.<span class="number">0</span>.clone());
-                cx.common.peer_certificates = resume.client_cert_chain.clone();
+                cx.common
+                    .peer_certificates
+                    .clone_from(<span class="kw-2">&amp;</span>resume.client_cert_chain);
             }
 
             <span class="kw">let </span>full_handshake = resumedata.is_none();
@@ -1687,7 +1666,7 @@
                 <span class="self">self</span>.suite,
                 cx,
                 <span class="kw-2">&amp;</span>client_hello.session_id,
-                chosen_share,
+                chosen_share_and_kxg,
                 chosen_psk_index,
                 resumedata
                     .as_ref()
@@ -1698,14 +1677,12 @@
                 emit_fake_ccs(cx.common);
             }
 
-            <span class="kw">let </span>(<span class="kw-2">mut </span>ocsp_response, <span class="kw-2">mut </span>sct_list) =
-                (server_key.get_ocsp(), server_key.get_sct_list());
+            <span class="kw">let </span><span class="kw-2">mut </span>ocsp_response = server_key.get_ocsp();
             <span class="kw">let </span>doing_early_data = emit_encrypted_extensions(
                 <span class="kw-2">&amp;mut </span><span class="self">self</span>.transcript,
                 <span class="self">self</span>.suite,
                 cx,
                 <span class="kw-2">&amp;mut </span>ocsp_response,
-                <span class="kw-2">&amp;mut </span>sct_list,
                 client_hello,
                 resumedata.as_ref(),
                 <span class="self">self</span>.extra_exts,
@@ -1720,7 +1697,6 @@
                     cx.common,
                     server_key.get_cert(),
                     ocsp_response,
-                    sct_list,
                 );
                 emit_certificate_verify_tls13(
                     <span class="kw-2">&amp;mut </span><span class="self">self</span>.transcript,
@@ -1808,19 +1784,21 @@
         suite: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Tls13CipherSuite,
         cx: <span class="kw-2">&amp;mut </span>ServerContext&lt;<span class="lifetime">'_</span>&gt;,
         session_id: <span class="kw-2">&amp;</span>SessionId,
-        share: <span class="kw-2">&amp;</span>KeyShareEntry,
+        share_and_kxgroup: (<span class="kw-2">&amp;</span>KeyShareEntry, <span class="kw-2">&amp;</span><span class="lifetime">'static </span><span class="kw">dyn </span>SupportedKxGroup),
         chosen_psk_idx: <span class="prelude-ty">Option</span>&lt;usize&gt;,
         resuming_psk: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>[u8]&gt;,
         config: <span class="kw-2">&amp;</span>ServerConfig,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;KeyScheduleHandshake, Error&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>extensions = Vec::new();
 
-        <span class="comment">// Prepare key exchange
-        </span><span class="kw">let </span>kx = kx::KeyExchange::choose(share.group, <span class="kw-2">&amp;</span>config.kx_groups)
-            .and_then(kx::KeyExchange::start)
-            .ok_or(Error::FailedToGetRandomBytes)<span class="question-mark">?</span>;
+        <span class="comment">// Prepare key exchange; the caller already found the matching SupportedKxGroup
+        </span><span class="kw">let </span>(share, kxgroup) = share_and_kxgroup;
+        <span class="macro">debug_assert_eq!</span>(kxgroup.name(), share.group);
+        <span class="kw">let </span>kx = kxgroup
+            .start()
+            .map_err(|<span class="kw">_</span>| Error::FailedToGetRandomBytes)<span class="question-mark">?</span>;
 
-        <span class="kw">let </span>kse = KeyShareEntry::new(share.group, kx.pubkey.as_ref());
+        <span class="kw">let </span>kse = KeyShareEntry::new(share.group, kx.pub_key());
         extensions.push(ServerExtension::KeyShare(kse));
         extensions.push(ServerExtension::SupportedVersions(ProtocolVersion::TLSv1_3));
 
@@ -1867,9 +1845,7 @@
         };
 
         <span class="comment">// Do key exchange
-        </span><span class="kw">let </span>key_schedule = kx.complete(<span class="kw-2">&amp;</span>share.payload.<span class="number">0</span>, |secret| {
-            key_schedule_pre_handshake.into_handshake(secret)
-        })<span class="question-mark">?</span>;
+        </span><span class="kw">let </span>key_schedule = key_schedule_pre_handshake.into_handshake(kx, <span class="kw-2">&amp;</span>share.payload.<span class="number">0</span>)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>handshake_hash = transcript.get_current_hash();
         <span class="kw">let </span>key_schedule = key_schedule.derive_server_handshake_secrets(
@@ -1928,8 +1904,7 @@
         common.send_msg(m, <span class="bool-val">false</span>);
     }
 
-    <span class="attr">#[allow(clippy::needless_pass_by_ref_mut)] </span><span class="comment">// cx only mutated if cfg(feature = "quic")
-    </span><span class="kw">fn </span>decide_if_early_data_allowed(
+    <span class="kw">fn </span>decide_if_early_data_allowed(
         cx: <span class="kw-2">&amp;mut </span>ServerContext&lt;<span class="lifetime">'_</span>&gt;,
         client_hello: <span class="kw-2">&amp;</span>ClientHelloPayload,
         resumedata: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>persist::ServerSessionValue&gt;,
@@ -1979,8 +1954,7 @@
         <span class="kw">if </span>early_data_configured &amp;&amp; early_data_possible &amp;&amp; !cx.data.early_data.was_rejected() {
             EarlyDataDecision::Accepted
         } <span class="kw">else </span>{
-            <span class="attr">#[cfg(feature = <span class="string">"quic"</span>)]
-            </span><span class="kw">if </span>cx.common.is_quic() {
+            <span class="kw">if </span>cx.common.is_quic() {
                 <span class="comment">// Clobber value set in tls13::emit_server_hello
                 </span>cx.common.quic.early_secret = <span class="prelude-val">None</span>;
             }
@@ -1994,22 +1968,13 @@
         suite: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Tls13CipherSuite,
         cx: <span class="kw-2">&amp;mut </span>ServerContext&lt;<span class="lifetime">'_</span>&gt;,
         ocsp_response: <span class="kw-2">&amp;mut </span><span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>[u8]&gt;,
-        sct_list: <span class="kw-2">&amp;mut </span><span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>[u8]&gt;,
         hello: <span class="kw-2">&amp;</span>ClientHelloPayload,
         resumedata: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>persist::ServerSessionValue&gt;,
         extra_exts: Vec&lt;ServerExtension&gt;,
         config: <span class="kw-2">&amp;</span>ServerConfig,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;EarlyDataDecision, Error&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>ep = hs::ExtensionProcessing::new();
-        ep.process_common(
-            config,
-            cx,
-            ocsp_response,
-            sct_list,
-            hello,
-            resumedata,
-            extra_exts,
-        )<span class="question-mark">?</span>;
+        ep.process_common(config, cx, ocsp_response, hello, resumedata, extra_exts)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>early_data = decide_if_early_data_allowed(cx, hello, resumedata, suite, config);
         <span class="kw">if </span>early_data == EarlyDataDecision::Accepted {
@@ -2039,7 +2004,7 @@
             <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="bool-val">false</span>);
         }
 
-        <span class="kw">let </span><span class="kw-2">mut </span>cr = CertificateRequestPayloadTLS13 {
+        <span class="kw">let </span><span class="kw-2">mut </span>cr = CertificateRequestPayloadTls13 {
             context: PayloadU8::empty(),
             extensions: Vec::new(),
         };
@@ -2050,21 +2015,17 @@
         cr.extensions
             .push(CertReqExtension::SignatureAlgorithms(schemes.to_vec()));
 
-        <span class="kw">let </span>names = config
-            .verifier
-            .client_auth_root_subjects()
-            .to_vec();
-
-        <span class="kw">if </span>!names.is_empty() {
+        <span class="kw">let </span>authorities = config.verifier.root_hint_subjects();
+        <span class="kw">if </span>!authorities.is_empty() {
             cr.extensions
-                .push(CertReqExtension::AuthorityNames(names));
+                .push(CertReqExtension::AuthorityNames(authorities.to_vec()));
         }
 
         <span class="kw">let </span>m = Message {
             version: ProtocolVersion::TLSv1_3,
             payload: MessagePayload::handshake(HandshakeMessagePayload {
                 typ: HandshakeType::CertificateRequest,
-                payload: HandshakePayload::CertificateRequestTLS13(cr),
+                payload: HandshakePayload::CertificateRequestTls13(cr),
             }),
         };
 
@@ -2077,9 +2038,8 @@
     <span class="kw">fn </span>emit_certificate_tls13(
         transcript: <span class="kw-2">&amp;mut </span>HandshakeHash,
         common: <span class="kw-2">&amp;mut </span>CommonState,
-        cert_chain: <span class="kw-2">&amp;</span>[Certificate],
+        cert_chain: <span class="kw-2">&amp;</span>[CertificateDer&lt;<span class="lifetime">'static</span>&gt;],
         ocsp_response: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>[u8]&gt;,
-        sct_list: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>[u8]&gt;,
     ) {
         <span class="kw">let </span><span class="kw-2">mut </span>cert_entries = <span class="macro">vec!</span>[];
         <span class="kw">for </span>cert <span class="kw">in </span>cert_chain {
@@ -2100,21 +2060,14 @@
                     .exts
                     .push(CertificateExtension::CertificateStatus(cst));
             }
-
-            <span class="comment">// Likewise, SCT
-            </span><span class="kw">if let </span><span class="prelude-val">Some</span>(sct_list) = sct_list {
-                end_entity_cert
-                    .exts
-                    .push(CertificateExtension::make_sct(sct_list.to_owned()));
-            }
         }
 
-        <span class="kw">let </span>cert_body = CertificatePayloadTLS13::new(cert_entries);
+        <span class="kw">let </span>cert_body = CertificatePayloadTls13::new(cert_entries);
         <span class="kw">let </span>c = Message {
             version: ProtocolVersion::TLSv1_3,
             payload: MessagePayload::handshake(HandshakeMessagePayload {
                 typ: HandshakeType::Certificate,
-                payload: HandshakePayload::CertificateTLS13(cert_body),
+                payload: HandshakePayload::CertificateTls13(cert_body),
             }),
         };
 
@@ -2129,7 +2082,7 @@
         signing_key: <span class="kw-2">&amp;</span><span class="kw">dyn </span>sign::SigningKey,
         schemes: <span class="kw-2">&amp;</span>[SignatureScheme],
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
-        <span class="kw">let </span>message = verify::construct_tls13_server_verify_message(<span class="kw-2">&amp;</span>transcript.get_current_hash());
+        <span class="kw">let </span>message = construct_server_verify_message(<span class="kw-2">&amp;</span>transcript.get_current_hash());
 
         <span class="kw">let </span>signer = signing_key
             .choose_scheme(schemes)
@@ -2226,12 +2179,12 @@
 
 <span class="kw">impl </span>State&lt;ServerConnectionData&gt; <span class="kw">for </span>ExpectCertificate {
     <span class="kw">fn </span>handle(<span class="kw-2">mut </span><span class="self">self</span>: Box&lt;<span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>ServerContext&lt;<span class="lifetime">'_</span>&gt;, m: Message) -&gt; hs::NextStateOrError {
-        <span class="kw">let </span>certp = <span class="macro">require_handshake_msg!</span>(
+        <span class="self">self</span>.transcript.add_message(<span class="kw-2">&amp;</span>m);
+        <span class="kw">let </span>certp = <span class="macro">require_handshake_msg_move!</span>(
             m,
             HandshakeType::Certificate,
-            HandshakePayload::CertificateTLS13
+            HandshakePayload::CertificateTls13
         )<span class="question-mark">?</span>;
-        <span class="self">self</span>.transcript.add_message(<span class="kw-2">&amp;</span>m);
 
         <span class="comment">// We don't send any CertificateRequest extensions, so any extensions
         // here are illegal.
@@ -2268,10 +2221,9 @@
             <span class="prelude-val">Some</span>(chain) =&gt; chain,
         };
 
-        <span class="kw">let </span>now = std::time::SystemTime::now();
         <span class="self">self</span>.config
             .verifier
-            .verify_client_cert(end_entity, intermediates, now)
+            .verify_client_cert(end_entity, intermediates, UnixTime::now())
             .map_err(|err| {
                 cx.common
                     .send_cert_verify_error_alert(err)
@@ -2293,7 +2245,7 @@
     transcript: HandshakeHash,
     suite: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Tls13CipherSuite,
     key_schedule: KeyScheduleTrafficWithClientFinishedPending,
-    client_cert: Vec&lt;Certificate&gt;,
+    client_cert: CertificateChain,
     send_tickets: usize,
 }
 
@@ -2308,7 +2260,7 @@
             <span class="kw">let </span>handshake_hash = <span class="self">self</span>.transcript.get_current_hash();
             <span class="self">self</span>.transcript.abandon_client_auth();
             <span class="kw">let </span>certs = <span class="kw-2">&amp;</span><span class="self">self</span>.client_cert;
-            <span class="kw">let </span>msg = verify::construct_tls13_client_verify_message(<span class="kw-2">&amp;</span>handshake_hash);
+            <span class="kw">let </span>msg = construct_client_verify_message(<span class="kw-2">&amp;</span>handshake_hash);
 
             <span class="self">self</span>.config
                 .verifier
@@ -2397,7 +2349,7 @@
     key_schedule: <span class="kw-2">&amp;</span>KeyScheduleTraffic,
     cx: <span class="kw-2">&amp;</span>ServerContext&lt;<span class="lifetime">'_</span>&gt;,
     nonce: <span class="kw-2">&amp;</span>[u8],
-    time_now: ticketer::TimeBase,
+    time_now: UnixTime,
     age_obfuscation_offset: u32,
 ) -&gt; persist::ServerSessionValue {
     <span class="kw">let </span>version = ProtocolVersion::TLSv1_3;
@@ -2410,7 +2362,7 @@
         cx.data.sni.as_ref(),
         version,
         suite.common.suite,
-        secret,
+        secret.as_ref(),
         cx.common.peer_certificates.clone(),
         cx.common.alpn_protocol.clone(),
         cx.data.resumption_data.clone(),
@@ -2435,12 +2387,19 @@
         key_schedule: <span class="kw-2">&amp;</span>KeyScheduleTraffic,
         config: <span class="kw-2">&amp;</span>ServerConfig,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
-        <span class="kw">let </span>nonce = rand::random_vec(<span class="number">32</span>)<span class="question-mark">?</span>;
-        <span class="kw">let </span>now = ticketer::TimeBase::now()<span class="question-mark">?</span>;
-        <span class="kw">let </span>age_add = rand::random_u32()<span class="question-mark">?</span>;
-        <span class="kw">let </span>plain =
-            get_server_session_value(transcript, suite, key_schedule, cx, <span class="kw-2">&amp;</span>nonce, now, age_add)
-                .get_encoding();
+        <span class="kw">let </span>secure_random = config.provider.secure_random;
+        <span class="kw">let </span>nonce = rand::random_vec(secure_random, <span class="number">32</span>)<span class="question-mark">?</span>;
+        <span class="kw">let </span>age_add = rand::random_u32(secure_random)<span class="question-mark">?</span>;
+        <span class="kw">let </span>plain = get_server_session_value(
+            transcript,
+            suite,
+            key_schedule,
+            cx,
+            <span class="kw-2">&amp;</span>nonce,
+            UnixTime::now(),
+            age_add,
+        )
+        .get_encoding();
 
         <span class="kw">let </span>stateless = config.ticketer.enabled();
         <span class="kw">let </span>(ticket, lifetime) = <span class="kw">if </span>stateless {
@@ -2450,7 +2409,7 @@
             };
             (ticket, config.ticketer.lifetime())
         } <span class="kw">else </span>{
-            <span class="kw">let </span>id = rand::random_vec(<span class="number">32</span>)<span class="question-mark">?</span>;
+            <span class="kw">let </span>id = rand::random_vec(secure_random, <span class="number">32</span>)<span class="question-mark">?</span>;
             <span class="kw">let </span>stored = config
                 .session_storage
                 .put(id.clone(), plain);
@@ -2462,7 +2421,7 @@
             </span>(id, stateful_lifetime)
         };
 
-        <span class="kw">let </span><span class="kw-2">mut </span>payload = NewSessionTicketPayloadTLS13::new(lifetime, age_add, nonce, ticket);
+        <span class="kw">let </span><span class="kw-2">mut </span>payload = NewSessionTicketPayloadTls13::new(lifetime, age_add, nonce, ticket);
 
         <span class="kw">if </span>config.max_early_data_size &gt; <span class="number">0 </span>{
             <span class="kw">if </span>!stateless {
@@ -2482,7 +2441,7 @@
             version: ProtocolVersion::TLSv1_3,
             payload: MessagePayload::handshake(HandshakeMessagePayload {
                 typ: HandshakeType::NewSessionTicket,
-                payload: HandshakePayload::NewSessionTicketTLS13(payload),
+                payload: HandshakePayload::NewSessionTicketTls13(payload),
             }),
         };
 
@@ -2502,15 +2461,16 @@
             </span>.key_schedule
             .sign_client_finish(<span class="kw-2">&amp;</span>handshake_hash, cx.common);
 
-        <span class="kw">let </span>fin = constant_time::verify_slices_are_equal(expect_verify_data.as_ref(), <span class="kw-2">&amp;</span>finished.<span class="number">0</span>)
-            .map_err(|<span class="kw">_</span>| {
-                <span class="macro">warn!</span>(<span class="string">"Finished wrong"</span>);
-                cx.common
-                    .send_fatal_alert(AlertDescription::DecryptError, Error::DecryptError)
-            })
-            .map(|<span class="kw">_</span>| verify::FinishedMessageVerified::assertion())<span class="question-mark">?</span>;
+        <span class="kw">let </span>fin = <span class="kw">match </span>ConstantTimeEq::ct_eq(expect_verify_data.as_ref(), <span class="kw-2">&amp;</span>finished.<span class="number">0</span>[..]).into() {
+            <span class="bool-val">true </span>=&gt; verify::FinishedMessageVerified::assertion(),
+            <span class="bool-val">false </span>=&gt; {
+                <span class="kw">return </span><span class="prelude-val">Err</span>(cx
+                    .common
+                    .send_fatal_alert(AlertDescription::DecryptError, Error::DecryptError));
+            }
+        };
 
-        <span class="comment">// nb. future derivations include Client Finished, but not the
+        <span class="comment">// Note: future derivations include Client Finished, but not the
         // main application data keying.
         </span><span class="self">self</span>.transcript.add_message(<span class="kw-2">&amp;</span>m);
 
@@ -2529,20 +2489,16 @@
         <span class="comment">// Application data may now flow, even if we have client auth enabled.
         </span>cx.common.start_traffic();
 
-        <span class="attr">#[cfg(feature = <span class="string">"quic"</span>)]
-        </span>{
-            <span class="kw">if </span>cx.common.protocol == Protocol::Quic {
-                <span class="kw">return </span><span class="prelude-val">Ok</span>(Box::new(ExpectQuicTraffic {
-                    key_schedule: key_schedule_traffic,
-                    _fin_verified: fin,
-                }));
-            }
-        }
-
-        <span class="prelude-val">Ok</span>(Box::new(ExpectTraffic {
-            key_schedule: key_schedule_traffic,
-            _fin_verified: fin,
-        }))
+        <span class="prelude-val">Ok</span>(<span class="kw">match </span>cx.common.is_quic() {
+            <span class="bool-val">true </span>=&gt; Box::new(ExpectQuicTraffic {
+                key_schedule: key_schedule_traffic,
+                _fin_verified: fin,
+            }),
+            <span class="bool-val">false </span>=&gt; Box::new(ExpectTraffic {
+                key_schedule: key_schedule_traffic,
+                _fin_verified: fin,
+            }),
+        })
     }
 }
 
@@ -2558,14 +2514,11 @@
         common: <span class="kw-2">&amp;mut </span>CommonState,
         key_update_request: <span class="kw-2">&amp;</span>KeyUpdateRequest,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
-        <span class="attr">#[cfg(feature = <span class="string">"quic"</span>)]
-        </span>{
-            <span class="kw">if let </span>Protocol::Quic = common.protocol {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(common.send_fatal_alert(
-                    AlertDescription::UnexpectedMessage,
-                    PeerMisbehaved::KeyUpdateReceivedInQuicConnection,
-                ));
-            }
+        <span class="kw">if let </span>Protocol::Quic = common.protocol {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(common.send_fatal_alert(
+                AlertDescription::UnexpectedMessage,
+                PeerMisbehaved::KeyUpdateReceivedInQuicConnection,
+            ));
         }
 
         common.check_aligned_handshake()<span class="question-mark">?</span>;
@@ -2618,21 +2571,18 @@
             .export_keying_material(output, label, context)
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">"secret_extraction"</span>)]
-    </span><span class="kw">fn </span>extract_secrets(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;PartiallyExtractedSecrets, Error&gt; {
+    <span class="kw">fn </span>extract_secrets(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;PartiallyExtractedSecrets, Error&gt; {
         <span class="self">self</span>.key_schedule
             .extract_secrets(Side::Server)
     }
 }
 
-<span class="attr">#[cfg(feature = <span class="string">"quic"</span>)]
-</span><span class="kw">struct </span>ExpectQuicTraffic {
+<span class="kw">struct </span>ExpectQuicTraffic {
     key_schedule: KeyScheduleTraffic,
     _fin_verified: verify::FinishedMessageVerified,
 }
 
-<span class="attr">#[cfg(feature = <span class="string">"quic"</span>)]
-</span><span class="kw">impl </span>State&lt;ServerConnectionData&gt; <span class="kw">for </span>ExpectQuicTraffic {
+<span class="kw">impl </span>State&lt;ServerConnectionData&gt; <span class="kw">for </span>ExpectQuicTraffic {
     <span class="kw">fn </span>handle(<span class="self">self</span>: Box&lt;<span class="self">Self</span>&gt;, _cx: <span class="kw-2">&amp;mut </span>ServerContext&lt;<span class="lifetime">'_</span>&gt;, m: Message) -&gt; hs::NextStateOrError {
         <span class="comment">// reject all messages
         </span><span class="prelude-val">Err</span>(inappropriate_message(<span class="kw-2">&amp;</span>m.payload, <span class="kw-2">&amp;</span>[]))

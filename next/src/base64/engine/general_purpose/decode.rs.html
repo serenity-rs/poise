@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/base64-0.21.7/src/engine/general_purpose/decode.rs`."><title>decode.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="base64" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (8f9080db4 2024-05-09)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/base64-0.22.1/src/engine/general_purpose/decode.rs`."><title>decode.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="base64" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (98489f248 2024-06-06)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -355,76 +355,31 @@
 <a href="#355" id="355">355</a>
 <a href="#356" id="356">356</a>
 <a href="#357" id="357">357</a>
-<a href="#358" id="358">358</a>
-<a href="#359" id="359">359</a>
-<a href="#360" id="360">360</a>
-<a href="#361" id="361">361</a>
-<a href="#362" id="362">362</a>
-<a href="#363" id="363">363</a>
-<a href="#364" id="364">364</a>
-<a href="#365" id="365">365</a>
-<a href="#366" id="366">366</a>
-<a href="#367" id="367">367</a>
-<a href="#368" id="368">368</a>
-<a href="#369" id="369">369</a>
-<a href="#370" id="370">370</a>
-<a href="#371" id="371">371</a>
-<a href="#372" id="372">372</a>
-<a href="#373" id="373">373</a>
-<a href="#374" id="374">374</a>
-<a href="#375" id="375">375</a>
-<a href="#376" id="376">376</a>
-<a href="#377" id="377">377</a>
-<a href="#378" id="378">378</a>
-<a href="#379" id="379">379</a>
-<a href="#380" id="380">380</a>
-<a href="#381" id="381">381</a>
-<a href="#382" id="382">382</a>
-<a href="#383" id="383">383</a>
 </pre></div><pre class="rust"><code><span class="kw">use crate</span>::{
     engine::{general_purpose::INVALID_VALUE, DecodeEstimate, DecodeMetadata, DecodePaddingMode},
-    DecodeError, PAD_BYTE,
+    DecodeError, DecodeSliceError, PAD_BYTE,
 };
-
-<span class="comment">// decode logic operates on chunks of 8 input bytes without padding
-</span><span class="kw">const </span>INPUT_CHUNK_LEN: usize = <span class="number">8</span>;
-<span class="kw">const </span>DECODED_CHUNK_LEN: usize = <span class="number">6</span>;
-
-<span class="comment">// we read a u64 and write a u64, but a u64 of input only yields 6 bytes of output, so the last
-// 2 bytes of any output u64 should not be counted as written to (but must be available in a
-// slice).
-</span><span class="kw">const </span>DECODED_CHUNK_SUFFIX: usize = <span class="number">2</span>;
-
-<span class="comment">// how many u64's of input to handle at a time
-</span><span class="kw">const </span>CHUNKS_PER_FAST_LOOP_BLOCK: usize = <span class="number">4</span>;
-
-<span class="kw">const </span>INPUT_BLOCK_LEN: usize = CHUNKS_PER_FAST_LOOP_BLOCK * INPUT_CHUNK_LEN;
-
-<span class="comment">// includes the trailing 2 bytes for the final u64 write
-</span><span class="kw">const </span>DECODED_BLOCK_LEN: usize =
-    CHUNKS_PER_FAST_LOOP_BLOCK * DECODED_CHUNK_LEN + DECODED_CHUNK_SUFFIX;
 
 <span class="attr">#[doc(hidden)]
 </span><span class="kw">pub struct </span>GeneralPurposeEstimate {
-    <span class="doccomment">/// Total number of decode chunks, including a possibly partial last chunk
-    </span>num_chunks: usize,
-    decoded_len_estimate: usize,
+    <span class="doccomment">/// input len % 4
+    </span>rem: usize,
+    conservative_decoded_len: usize,
 }
 
 <span class="kw">impl </span>GeneralPurposeEstimate {
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(encoded_len: usize) -&gt; <span class="self">Self </span>{
-        <span class="comment">// Formulas that won't overflow
-        </span><span class="self">Self </span>{
-            num_chunks: encoded_len / INPUT_CHUNK_LEN
-                + (encoded_len % INPUT_CHUNK_LEN &gt; <span class="number">0</span>) <span class="kw">as </span>usize,
-            decoded_len_estimate: (encoded_len / <span class="number">4 </span>+ (encoded_len % <span class="number">4 </span>&gt; <span class="number">0</span>) <span class="kw">as </span>usize) * <span class="number">3</span>,
+        <span class="kw">let </span>rem = encoded_len % <span class="number">4</span>;
+        <span class="self">Self </span>{
+            rem,
+            conservative_decoded_len: (encoded_len / <span class="number">4 </span>+ (rem &gt; <span class="number">0</span>) <span class="kw">as </span>usize) * <span class="number">3</span>,
         }
     }
 }
 
 <span class="kw">impl </span>DecodeEstimate <span class="kw">for </span>GeneralPurposeEstimate {
     <span class="kw">fn </span>decoded_len_estimate(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
-        <span class="self">self</span>.decoded_len_estimate
+        <span class="self">self</span>.conservative_decoded_len
     }
 }
 
@@ -441,263 +396,262 @@
     decode_table: <span class="kw-2">&amp;</span>[u8; <span class="number">256</span>],
     decode_allow_trailing_bits: bool,
     padding_mode: DecodePaddingMode,
-) -&gt; <span class="prelude-ty">Result</span>&lt;DecodeMetadata, DecodeError&gt; {
-    <span class="kw">let </span>remainder_len = input.len() % INPUT_CHUNK_LEN;
+) -&gt; <span class="prelude-ty">Result</span>&lt;DecodeMetadata, DecodeSliceError&gt; {
+    <span class="kw">let </span>input_complete_nonterminal_quads_len =
+        complete_quads_len(input, estimate.rem, output.len(), decode_table)<span class="question-mark">?</span>;
 
-    <span class="comment">// Because the fast decode loop writes in groups of 8 bytes (unrolled to
-    // CHUNKS_PER_FAST_LOOP_BLOCK times 8 bytes, where possible) and outputs 8 bytes at a time (of
-    // which only 6 are valid data), we need to be sure that we stop using the fast decode loop
-    // soon enough that there will always be 2 more bytes of valid data written after that loop.
-    </span><span class="kw">let </span>trailing_bytes_to_skip = <span class="kw">match </span>remainder_len {
-        <span class="comment">// if input is a multiple of the chunk size, ignore the last chunk as it may have padding,
-        // and the fast decode logic cannot handle padding
-        </span><span class="number">0 </span>=&gt; INPUT_CHUNK_LEN,
-        <span class="comment">// 1 and 5 trailing bytes are illegal: can't decode 6 bits of input into a byte
-        </span><span class="number">1 </span>| <span class="number">5 </span>=&gt; {
-            <span class="comment">// trailing whitespace is so common that it's worth it to check the last byte to
-            // possibly return a better error message
-            </span><span class="kw">if let </span><span class="prelude-val">Some</span>(b) = input.last() {
-                <span class="kw">if </span><span class="kw-2">*</span>b != PAD_BYTE &amp;&amp; decode_table[<span class="kw-2">*</span>b <span class="kw">as </span>usize] == INVALID_VALUE {
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(DecodeError::InvalidByte(input.len() - <span class="number">1</span>, <span class="kw-2">*</span>b));
-                }
-            }
+    <span class="kw">const </span>UNROLLED_INPUT_CHUNK_SIZE: usize = <span class="number">32</span>;
+    <span class="kw">const </span>UNROLLED_OUTPUT_CHUNK_SIZE: usize = UNROLLED_INPUT_CHUNK_SIZE / <span class="number">4 </span>* <span class="number">3</span>;
 
-            <span class="kw">return </span><span class="prelude-val">Err</span>(DecodeError::InvalidLength);
-        }
-        <span class="comment">// This will decode to one output byte, which isn't enough to overwrite the 2 extra bytes
-        // written by the fast decode loop. So, we have to ignore both these 2 bytes and the
-        // previous chunk.
-        </span><span class="number">2 </span>=&gt; INPUT_CHUNK_LEN + <span class="number">2</span>,
-        <span class="comment">// If this is 3 un-padded chars, then it would actually decode to 2 bytes. However, if this
-        // is an erroneous 2 chars + 1 pad char that would decode to 1 byte, then it should fail
-        // with an error, not panic from going past the bounds of the output slice, so we let it
-        // use stage 3 + 4.
-        </span><span class="number">3 </span>=&gt; INPUT_CHUNK_LEN + <span class="number">3</span>,
-        <span class="comment">// This can also decode to one output byte because it may be 2 input chars + 2 padding
-        // chars, which would decode to 1 byte.
-        </span><span class="number">4 </span>=&gt; INPUT_CHUNK_LEN + <span class="number">4</span>,
-        <span class="comment">// Everything else is a legal decode len (given that we don't require padding), and will
-        // decode to at least 2 bytes of output.
-        </span><span class="kw">_ </span>=&gt; remainder_len,
-    };
+    <span class="kw">let </span>input_complete_quads_after_unrolled_chunks_len =
+        input_complete_nonterminal_quads_len % UNROLLED_INPUT_CHUNK_SIZE;
 
-    <span class="comment">// rounded up to include partial chunks
-    </span><span class="kw">let </span><span class="kw-2">mut </span>remaining_chunks = estimate.num_chunks;
+    <span class="kw">let </span>input_unrolled_loop_len =
+        input_complete_nonterminal_quads_len - input_complete_quads_after_unrolled_chunks_len;
 
-    <span class="kw">let </span><span class="kw-2">mut </span>input_index = <span class="number">0</span>;
-    <span class="kw">let </span><span class="kw-2">mut </span>output_index = <span class="number">0</span>;
-
+    <span class="comment">// chunks of 32 bytes
+    </span><span class="kw">for </span>(chunk_index, chunk) <span class="kw">in </span>input[..input_unrolled_loop_len]
+        .chunks_exact(UNROLLED_INPUT_CHUNK_SIZE)
+        .enumerate()
     {
-        <span class="kw">let </span>length_of_fast_decode_chunks = input.len().saturating_sub(trailing_bytes_to_skip);
+        <span class="kw">let </span>input_index = chunk_index * UNROLLED_INPUT_CHUNK_SIZE;
+        <span class="kw">let </span>chunk_output = <span class="kw-2">&amp;mut </span>output[chunk_index * UNROLLED_OUTPUT_CHUNK_SIZE
+            ..(chunk_index + <span class="number">1</span>) * UNROLLED_OUTPUT_CHUNK_SIZE];
 
-        <span class="comment">// Fast loop, stage 1
-        // manual unroll to CHUNKS_PER_FAST_LOOP_BLOCK of u64s to amortize slice bounds checks
-        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(max_start_index) = length_of_fast_decode_chunks.checked_sub(INPUT_BLOCK_LEN) {
-            <span class="kw">while </span>input_index &lt;= max_start_index {
-                <span class="kw">let </span>input_slice = <span class="kw-2">&amp;</span>input[input_index..(input_index + INPUT_BLOCK_LEN)];
-                <span class="kw">let </span>output_slice = <span class="kw-2">&amp;mut </span>output[output_index..(output_index + DECODED_BLOCK_LEN)];
-
-                decode_chunk(
-                    <span class="kw-2">&amp;</span>input_slice[<span class="number">0</span>..],
-                    input_index,
-                    decode_table,
-                    <span class="kw-2">&amp;mut </span>output_slice[<span class="number">0</span>..],
-                )<span class="question-mark">?</span>;
-                decode_chunk(
-                    <span class="kw-2">&amp;</span>input_slice[<span class="number">8</span>..],
-                    input_index + <span class="number">8</span>,
-                    decode_table,
-                    <span class="kw-2">&amp;mut </span>output_slice[<span class="number">6</span>..],
-                )<span class="question-mark">?</span>;
-                decode_chunk(
-                    <span class="kw-2">&amp;</span>input_slice[<span class="number">16</span>..],
-                    input_index + <span class="number">16</span>,
-                    decode_table,
-                    <span class="kw-2">&amp;mut </span>output_slice[<span class="number">12</span>..],
-                )<span class="question-mark">?</span>;
-                decode_chunk(
-                    <span class="kw-2">&amp;</span>input_slice[<span class="number">24</span>..],
-                    input_index + <span class="number">24</span>,
-                    decode_table,
-                    <span class="kw-2">&amp;mut </span>output_slice[<span class="number">18</span>..],
-                )<span class="question-mark">?</span>;
-
-                input_index += INPUT_BLOCK_LEN;
-                output_index += DECODED_BLOCK_LEN - DECODED_CHUNK_SUFFIX;
-                remaining_chunks -= CHUNKS_PER_FAST_LOOP_BLOCK;
-            }
-        }
-
-        <span class="comment">// Fast loop, stage 2 (aka still pretty fast loop)
-        // 8 bytes at a time for whatever we didn't do in stage 1.
-        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(max_start_index) = length_of_fast_decode_chunks.checked_sub(INPUT_CHUNK_LEN) {
-            <span class="kw">while </span>input_index &lt; max_start_index {
-                decode_chunk(
-                    <span class="kw-2">&amp;</span>input[input_index..(input_index + INPUT_CHUNK_LEN)],
-                    input_index,
-                    decode_table,
-                    <span class="kw-2">&amp;mut </span>output
-                        [output_index..(output_index + DECODED_CHUNK_LEN + DECODED_CHUNK_SUFFIX)],
-                )<span class="question-mark">?</span>;
-
-                output_index += DECODED_CHUNK_LEN;
-                input_index += INPUT_CHUNK_LEN;
-                remaining_chunks -= <span class="number">1</span>;
-            }
-        }
-    }
-
-    <span class="comment">// Stage 3
-    // If input length was such that a chunk had to be deferred until after the fast loop
-    // because decoding it would have produced 2 trailing bytes that wouldn't then be
-    // overwritten, we decode that chunk here. This way is slower but doesn't write the 2
-    // trailing bytes.
-    // However, we still need to avoid the last chunk (partial or complete) because it could
-    // have padding, so we always do 1 fewer to avoid the last chunk.
-    </span><span class="kw">for _ in </span><span class="number">1</span>..remaining_chunks {
-        decode_chunk_precise(
-            <span class="kw-2">&amp;</span>input[input_index..],
+        decode_chunk_8(
+            <span class="kw-2">&amp;</span>chunk[<span class="number">0</span>..<span class="number">8</span>],
             input_index,
             decode_table,
-            <span class="kw-2">&amp;mut </span>output[output_index..(output_index + DECODED_CHUNK_LEN)],
+            <span class="kw-2">&amp;mut </span>chunk_output[<span class="number">0</span>..<span class="number">6</span>],
         )<span class="question-mark">?</span>;
-
-        input_index += INPUT_CHUNK_LEN;
-        output_index += DECODED_CHUNK_LEN;
+        decode_chunk_8(
+            <span class="kw-2">&amp;</span>chunk[<span class="number">8</span>..<span class="number">16</span>],
+            input_index + <span class="number">8</span>,
+            decode_table,
+            <span class="kw-2">&amp;mut </span>chunk_output[<span class="number">6</span>..<span class="number">12</span>],
+        )<span class="question-mark">?</span>;
+        decode_chunk_8(
+            <span class="kw-2">&amp;</span>chunk[<span class="number">16</span>..<span class="number">24</span>],
+            input_index + <span class="number">16</span>,
+            decode_table,
+            <span class="kw-2">&amp;mut </span>chunk_output[<span class="number">12</span>..<span class="number">18</span>],
+        )<span class="question-mark">?</span>;
+        decode_chunk_8(
+            <span class="kw-2">&amp;</span>chunk[<span class="number">24</span>..<span class="number">32</span>],
+            input_index + <span class="number">24</span>,
+            decode_table,
+            <span class="kw-2">&amp;mut </span>chunk_output[<span class="number">18</span>..<span class="number">24</span>],
+        )<span class="question-mark">?</span>;
     }
 
-    <span class="comment">// always have one more (possibly partial) block of 8 input
-    </span><span class="macro">debug_assert!</span>(input.len() - input_index &gt; <span class="number">1 </span>|| input.is_empty());
-    <span class="macro">debug_assert!</span>(input.len() - input_index &lt;= <span class="number">8</span>);
+    <span class="comment">// remaining quads, except for the last possibly partial one, as it may have padding
+    </span><span class="kw">let </span>output_unrolled_loop_len = input_unrolled_loop_len / <span class="number">4 </span>* <span class="number">3</span>;
+    <span class="kw">let </span>output_complete_quad_len = input_complete_nonterminal_quads_len / <span class="number">4 </span>* <span class="number">3</span>;
+    {
+        <span class="kw">let </span>output_after_unroll = <span class="kw-2">&amp;mut </span>output[output_unrolled_loop_len..output_complete_quad_len];
+
+        <span class="kw">for </span>(chunk_index, chunk) <span class="kw">in </span>input
+            [input_unrolled_loop_len..input_complete_nonterminal_quads_len]
+            .chunks_exact(<span class="number">4</span>)
+            .enumerate()
+        {
+            <span class="kw">let </span>chunk_output = <span class="kw-2">&amp;mut </span>output_after_unroll[chunk_index * <span class="number">3</span>..chunk_index * <span class="number">3 </span>+ <span class="number">3</span>];
+
+            decode_chunk_4(
+                chunk,
+                input_unrolled_loop_len + chunk_index * <span class="number">4</span>,
+                decode_table,
+                chunk_output,
+            )<span class="question-mark">?</span>;
+        }
+    }
 
     <span class="kw">super</span>::decode_suffix::decode_suffix(
         input,
-        input_index,
+        input_complete_nonterminal_quads_len,
         output,
-        output_index,
+        output_complete_quad_len,
         decode_table,
         decode_allow_trailing_bits,
         padding_mode,
     )
 }
 
-<span class="doccomment">/// Decode 8 bytes of input into 6 bytes of output. 8 bytes of output will be written, but only the
-/// first 6 of those contain meaningful data.
+<span class="doccomment">/// Returns the length of complete quads, except for the last one, even if it is complete.
 ///
-/// `input` is the bytes to decode, of which the first 8 bytes will be processed.
+/// Returns an error if the output len is not big enough for decoding those complete quads, or if
+/// the input % 4 == 1, and that last byte is an invalid value other than a pad byte.
+///
+/// - `input` is the base64 input
+/// - `input_len_rem` is input len % 4
+/// - `output_len` is the length of the output slice
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>complete_quads_len(
+    input: <span class="kw-2">&amp;</span>[u8],
+    input_len_rem: usize,
+    output_len: usize,
+    decode_table: <span class="kw-2">&amp;</span>[u8; <span class="number">256</span>],
+) -&gt; <span class="prelude-ty">Result</span>&lt;usize, DecodeSliceError&gt; {
+    <span class="macro">debug_assert!</span>(input.len() % <span class="number">4 </span>== input_len_rem);
+
+    <span class="comment">// detect a trailing invalid byte, like a newline, as a user convenience
+    </span><span class="kw">if </span>input_len_rem == <span class="number">1 </span>{
+        <span class="kw">let </span>last_byte = input[input.len() - <span class="number">1</span>];
+        <span class="comment">// exclude pad bytes; might be part of padding that extends from earlier in the input
+        </span><span class="kw">if </span>last_byte != PAD_BYTE &amp;&amp; decode_table[usize::from(last_byte)] == INVALID_VALUE {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(DecodeError::InvalidByte(input.len() - <span class="number">1</span>, last_byte).into());
+        }
+    };
+
+    <span class="comment">// skip last quad, even if it's complete, as it may have padding
+    </span><span class="kw">let </span>input_complete_nonterminal_quads_len = input
+        .len()
+        .saturating_sub(input_len_rem)
+        <span class="comment">// if rem was 0, subtract 4 to avoid padding
+        </span>.saturating_sub((input_len_rem == <span class="number">0</span>) <span class="kw">as </span>usize * <span class="number">4</span>);
+    <span class="macro">debug_assert!</span>(
+        input.is_empty() || (<span class="number">1</span>..=<span class="number">4</span>).contains(<span class="kw-2">&amp;</span>(input.len() - input_complete_nonterminal_quads_len))
+    );
+
+    <span class="comment">// check that everything except the last quad handled by decode_suffix will fit
+    </span><span class="kw">if </span>output_len &lt; input_complete_nonterminal_quads_len / <span class="number">4 </span>* <span class="number">3 </span>{
+        <span class="kw">return </span><span class="prelude-val">Err</span>(DecodeSliceError::OutputSliceTooSmall);
+    };
+    <span class="prelude-val">Ok</span>(input_complete_nonterminal_quads_len)
+}
+
+<span class="doccomment">/// Decode 8 bytes of input into 6 bytes of output.
+///
+/// `input` is the 8 bytes to decode.
 /// `index_at_start_of_input` is the offset in the overall input (used for reporting errors
 /// accurately)
 /// `decode_table` is the lookup table for the particular base64 alphabet.
-/// `output` will have its first 8 bytes overwritten, of which only the first 6 are valid decoded
-/// data.
+/// `output` will have its first 6 bytes overwritten
 </span><span class="comment">// yes, really inline (worth 30-50% speedup)
 </span><span class="attr">#[inline(always)]
-</span><span class="kw">fn </span>decode_chunk(
+</span><span class="kw">fn </span>decode_chunk_8(
     input: <span class="kw-2">&amp;</span>[u8],
     index_at_start_of_input: usize,
     decode_table: <span class="kw-2">&amp;</span>[u8; <span class="number">256</span>],
     output: <span class="kw-2">&amp;mut </span>[u8],
 ) -&gt; <span class="prelude-ty">Result</span>&lt;(), DecodeError&gt; {
-    <span class="kw">let </span>morsel = decode_table[input[<span class="number">0</span>] <span class="kw">as </span>usize];
+    <span class="kw">let </span>morsel = decode_table[usize::from(input[<span class="number">0</span>])];
     <span class="kw">if </span>morsel == INVALID_VALUE {
         <span class="kw">return </span><span class="prelude-val">Err</span>(DecodeError::InvalidByte(index_at_start_of_input, input[<span class="number">0</span>]));
     }
-    <span class="kw">let </span><span class="kw-2">mut </span>accum = (morsel <span class="kw">as </span>u64) &lt;&lt; <span class="number">58</span>;
+    <span class="kw">let </span><span class="kw-2">mut </span>accum = u64::from(morsel) &lt;&lt; <span class="number">58</span>;
 
-    <span class="kw">let </span>morsel = decode_table[input[<span class="number">1</span>] <span class="kw">as </span>usize];
+    <span class="kw">let </span>morsel = decode_table[usize::from(input[<span class="number">1</span>])];
     <span class="kw">if </span>morsel == INVALID_VALUE {
         <span class="kw">return </span><span class="prelude-val">Err</span>(DecodeError::InvalidByte(
             index_at_start_of_input + <span class="number">1</span>,
             input[<span class="number">1</span>],
         ));
     }
-    accum |= (morsel <span class="kw">as </span>u64) &lt;&lt; <span class="number">52</span>;
+    accum |= u64::from(morsel) &lt;&lt; <span class="number">52</span>;
 
-    <span class="kw">let </span>morsel = decode_table[input[<span class="number">2</span>] <span class="kw">as </span>usize];
+    <span class="kw">let </span>morsel = decode_table[usize::from(input[<span class="number">2</span>])];
     <span class="kw">if </span>morsel == INVALID_VALUE {
         <span class="kw">return </span><span class="prelude-val">Err</span>(DecodeError::InvalidByte(
             index_at_start_of_input + <span class="number">2</span>,
             input[<span class="number">2</span>],
         ));
     }
-    accum |= (morsel <span class="kw">as </span>u64) &lt;&lt; <span class="number">46</span>;
+    accum |= u64::from(morsel) &lt;&lt; <span class="number">46</span>;
 
-    <span class="kw">let </span>morsel = decode_table[input[<span class="number">3</span>] <span class="kw">as </span>usize];
+    <span class="kw">let </span>morsel = decode_table[usize::from(input[<span class="number">3</span>])];
     <span class="kw">if </span>morsel == INVALID_VALUE {
         <span class="kw">return </span><span class="prelude-val">Err</span>(DecodeError::InvalidByte(
             index_at_start_of_input + <span class="number">3</span>,
             input[<span class="number">3</span>],
         ));
     }
-    accum |= (morsel <span class="kw">as </span>u64) &lt;&lt; <span class="number">40</span>;
+    accum |= u64::from(morsel) &lt;&lt; <span class="number">40</span>;
 
-    <span class="kw">let </span>morsel = decode_table[input[<span class="number">4</span>] <span class="kw">as </span>usize];
+    <span class="kw">let </span>morsel = decode_table[usize::from(input[<span class="number">4</span>])];
     <span class="kw">if </span>morsel == INVALID_VALUE {
         <span class="kw">return </span><span class="prelude-val">Err</span>(DecodeError::InvalidByte(
             index_at_start_of_input + <span class="number">4</span>,
             input[<span class="number">4</span>],
         ));
     }
-    accum |= (morsel <span class="kw">as </span>u64) &lt;&lt; <span class="number">34</span>;
+    accum |= u64::from(morsel) &lt;&lt; <span class="number">34</span>;
 
-    <span class="kw">let </span>morsel = decode_table[input[<span class="number">5</span>] <span class="kw">as </span>usize];
+    <span class="kw">let </span>morsel = decode_table[usize::from(input[<span class="number">5</span>])];
     <span class="kw">if </span>morsel == INVALID_VALUE {
         <span class="kw">return </span><span class="prelude-val">Err</span>(DecodeError::InvalidByte(
             index_at_start_of_input + <span class="number">5</span>,
             input[<span class="number">5</span>],
         ));
     }
-    accum |= (morsel <span class="kw">as </span>u64) &lt;&lt; <span class="number">28</span>;
+    accum |= u64::from(morsel) &lt;&lt; <span class="number">28</span>;
 
-    <span class="kw">let </span>morsel = decode_table[input[<span class="number">6</span>] <span class="kw">as </span>usize];
+    <span class="kw">let </span>morsel = decode_table[usize::from(input[<span class="number">6</span>])];
     <span class="kw">if </span>morsel == INVALID_VALUE {
         <span class="kw">return </span><span class="prelude-val">Err</span>(DecodeError::InvalidByte(
             index_at_start_of_input + <span class="number">6</span>,
             input[<span class="number">6</span>],
         ));
     }
-    accum |= (morsel <span class="kw">as </span>u64) &lt;&lt; <span class="number">22</span>;
+    accum |= u64::from(morsel) &lt;&lt; <span class="number">22</span>;
 
-    <span class="kw">let </span>morsel = decode_table[input[<span class="number">7</span>] <span class="kw">as </span>usize];
+    <span class="kw">let </span>morsel = decode_table[usize::from(input[<span class="number">7</span>])];
     <span class="kw">if </span>morsel == INVALID_VALUE {
         <span class="kw">return </span><span class="prelude-val">Err</span>(DecodeError::InvalidByte(
             index_at_start_of_input + <span class="number">7</span>,
             input[<span class="number">7</span>],
         ));
     }
-    accum |= (morsel <span class="kw">as </span>u64) &lt;&lt; <span class="number">16</span>;
+    accum |= u64::from(morsel) &lt;&lt; <span class="number">16</span>;
 
-    write_u64(output, accum);
+    output[..<span class="number">6</span>].copy_from_slice(<span class="kw-2">&amp;</span>accum.to_be_bytes()[..<span class="number">6</span>]);
 
     <span class="prelude-val">Ok</span>(())
 }
 
-<span class="doccomment">/// Decode an 8-byte chunk, but only write the 6 bytes actually decoded instead of including 2
-/// trailing garbage bytes.
-</span><span class="attr">#[inline]
-</span><span class="kw">fn </span>decode_chunk_precise(
+<span class="doccomment">/// Like [decode_chunk_8] but for 4 bytes of input and 3 bytes of output.
+</span><span class="attr">#[inline(always)]
+</span><span class="kw">fn </span>decode_chunk_4(
     input: <span class="kw-2">&amp;</span>[u8],
     index_at_start_of_input: usize,
     decode_table: <span class="kw-2">&amp;</span>[u8; <span class="number">256</span>],
     output: <span class="kw-2">&amp;mut </span>[u8],
 ) -&gt; <span class="prelude-ty">Result</span>&lt;(), DecodeError&gt; {
-    <span class="kw">let </span><span class="kw-2">mut </span>tmp_buf = [<span class="number">0_u8</span>; <span class="number">8</span>];
+    <span class="kw">let </span>morsel = decode_table[usize::from(input[<span class="number">0</span>])];
+    <span class="kw">if </span>morsel == INVALID_VALUE {
+        <span class="kw">return </span><span class="prelude-val">Err</span>(DecodeError::InvalidByte(index_at_start_of_input, input[<span class="number">0</span>]));
+    }
+    <span class="kw">let </span><span class="kw-2">mut </span>accum = u32::from(morsel) &lt;&lt; <span class="number">26</span>;
 
-    decode_chunk(
-        input,
-        index_at_start_of_input,
-        decode_table,
-        <span class="kw-2">&amp;mut </span>tmp_buf[..],
-    )<span class="question-mark">?</span>;
+    <span class="kw">let </span>morsel = decode_table[usize::from(input[<span class="number">1</span>])];
+    <span class="kw">if </span>morsel == INVALID_VALUE {
+        <span class="kw">return </span><span class="prelude-val">Err</span>(DecodeError::InvalidByte(
+            index_at_start_of_input + <span class="number">1</span>,
+            input[<span class="number">1</span>],
+        ));
+    }
+    accum |= u32::from(morsel) &lt;&lt; <span class="number">20</span>;
 
-    output[<span class="number">0</span>..<span class="number">6</span>].copy_from_slice(<span class="kw-2">&amp;</span>tmp_buf[<span class="number">0</span>..<span class="number">6</span>]);
+    <span class="kw">let </span>morsel = decode_table[usize::from(input[<span class="number">2</span>])];
+    <span class="kw">if </span>morsel == INVALID_VALUE {
+        <span class="kw">return </span><span class="prelude-val">Err</span>(DecodeError::InvalidByte(
+            index_at_start_of_input + <span class="number">2</span>,
+            input[<span class="number">2</span>],
+        ));
+    }
+    accum |= u32::from(morsel) &lt;&lt; <span class="number">14</span>;
+
+    <span class="kw">let </span>morsel = decode_table[usize::from(input[<span class="number">3</span>])];
+    <span class="kw">if </span>morsel == INVALID_VALUE {
+        <span class="kw">return </span><span class="prelude-val">Err</span>(DecodeError::InvalidByte(
+            index_at_start_of_input + <span class="number">3</span>,
+            input[<span class="number">3</span>],
+        ));
+    }
+    accum |= u32::from(morsel) &lt;&lt; <span class="number">8</span>;
+
+    output[..<span class="number">3</span>].copy_from_slice(<span class="kw-2">&amp;</span>accum.to_be_bytes()[..<span class="number">3</span>]);
 
     <span class="prelude-val">Ok</span>(())
-}
-
-<span class="attr">#[inline]
-</span><span class="kw">fn </span>write_u64(output: <span class="kw-2">&amp;mut </span>[u8], value: u64) {
-    output[..<span class="number">8</span>].copy_from_slice(<span class="kw-2">&amp;</span>value.to_be_bytes());
 }
 
 <span class="attr">#[cfg(test)]
@@ -707,37 +661,36 @@
     <span class="kw">use </span><span class="kw">crate</span>::engine::general_purpose::STANDARD;
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>decode_chunk_precise_writes_only_6_bytes() {
+    </span><span class="kw">fn </span>decode_chunk_8_writes_only_6_bytes() {
         <span class="kw">let </span>input = <span class="string">b"Zm9vYmFy"</span>; <span class="comment">// "foobar"
         </span><span class="kw">let </span><span class="kw-2">mut </span>output = [<span class="number">0_u8</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>];
 
-        decode_chunk_precise(<span class="kw-2">&amp;</span>input[..], <span class="number">0</span>, <span class="kw-2">&amp;</span>STANDARD.decode_table, <span class="kw-2">&amp;mut </span>output).unwrap();
+        decode_chunk_8(<span class="kw-2">&amp;</span>input[..], <span class="number">0</span>, <span class="kw-2">&amp;</span>STANDARD.decode_table, <span class="kw-2">&amp;mut </span>output).unwrap();
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="macro">vec!</span>[<span class="string">b'f'</span>, <span class="string">b'o'</span>, <span class="string">b'o'</span>, <span class="string">b'b'</span>, <span class="string">b'a'</span>, <span class="string">b'r'</span>, <span class="number">6</span>, <span class="number">7</span>], <span class="kw-2">&amp;</span>output);
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>decode_chunk_writes_8_bytes() {
-        <span class="kw">let </span>input = <span class="string">b"Zm9vYmFy"</span>; <span class="comment">// "foobar"
-        </span><span class="kw">let </span><span class="kw-2">mut </span>output = [<span class="number">0_u8</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>];
+    </span><span class="kw">fn </span>decode_chunk_4_writes_only_3_bytes() {
+        <span class="kw">let </span>input = <span class="string">b"Zm9v"</span>; <span class="comment">// "foobar"
+        </span><span class="kw">let </span><span class="kw-2">mut </span>output = [<span class="number">0_u8</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>];
 
-        decode_chunk(<span class="kw-2">&amp;</span>input[..], <span class="number">0</span>, <span class="kw-2">&amp;</span>STANDARD.decode_table, <span class="kw-2">&amp;mut </span>output).unwrap();
-        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="macro">vec!</span>[<span class="string">b'f'</span>, <span class="string">b'o'</span>, <span class="string">b'o'</span>, <span class="string">b'b'</span>, <span class="string">b'a'</span>, <span class="string">b'r'</span>, <span class="number">0</span>, <span class="number">0</span>], <span class="kw-2">&amp;</span>output);
+        decode_chunk_4(<span class="kw-2">&amp;</span>input[..], <span class="number">0</span>, <span class="kw-2">&amp;</span>STANDARD.decode_table, <span class="kw-2">&amp;mut </span>output).unwrap();
+        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="macro">vec!</span>[<span class="string">b'f'</span>, <span class="string">b'o'</span>, <span class="string">b'o'</span>, <span class="number">3</span>], <span class="kw-2">&amp;</span>output);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>estimate_short_lengths() {
-        <span class="kw">for </span>(range, (num_chunks, decoded_len_estimate)) <span class="kw">in </span>[
-            (<span class="number">0</span>..=<span class="number">0</span>, (<span class="number">0</span>, <span class="number">0</span>)),
-            (<span class="number">1</span>..=<span class="number">4</span>, (<span class="number">1</span>, <span class="number">3</span>)),
-            (<span class="number">5</span>..=<span class="number">8</span>, (<span class="number">1</span>, <span class="number">6</span>)),
-            (<span class="number">9</span>..=<span class="number">12</span>, (<span class="number">2</span>, <span class="number">9</span>)),
-            (<span class="number">13</span>..=<span class="number">16</span>, (<span class="number">2</span>, <span class="number">12</span>)),
-            (<span class="number">17</span>..=<span class="number">20</span>, (<span class="number">3</span>, <span class="number">15</span>)),
+        <span class="kw">for </span>(range, decoded_len_estimate) <span class="kw">in </span>[
+            (<span class="number">0</span>..=<span class="number">0</span>, <span class="number">0</span>),
+            (<span class="number">1</span>..=<span class="number">4</span>, <span class="number">3</span>),
+            (<span class="number">5</span>..=<span class="number">8</span>, <span class="number">6</span>),
+            (<span class="number">9</span>..=<span class="number">12</span>, <span class="number">9</span>),
+            (<span class="number">13</span>..=<span class="number">16</span>, <span class="number">12</span>),
+            (<span class="number">17</span>..=<span class="number">20</span>, <span class="number">15</span>),
         ] {
             <span class="kw">for </span>encoded_len <span class="kw">in </span>range {
                 <span class="kw">let </span>estimate = GeneralPurposeEstimate::new(encoded_len);
-                <span class="macro">assert_eq!</span>(num_chunks, estimate.num_chunks);
-                <span class="macro">assert_eq!</span>(decoded_len_estimate, estimate.decoded_len_estimate);
+                <span class="macro">assert_eq!</span>(decoded_len_estimate, estimate.decoded_len_estimate());
             }
         }
     }
@@ -753,13 +706,8 @@
 
                 <span class="kw">let </span>estimate = GeneralPurposeEstimate::new(encoded_len);
                 <span class="macro">assert_eq!</span>(
-                    ((len_128 + (INPUT_CHUNK_LEN - <span class="number">1</span>) <span class="kw">as </span>u128) / (INPUT_CHUNK_LEN <span class="kw">as </span>u128))
-                        <span class="kw">as </span>usize,
-                    estimate.num_chunks
-                );
-                <span class="macro">assert_eq!</span>(
-                    ((len_128 + <span class="number">3</span>) / <span class="number">4 </span>* <span class="number">3</span>) <span class="kw">as </span>usize,
-                    estimate.decoded_len_estimate
+                    (len_128 + <span class="number">3</span>) / <span class="number">4 </span>* <span class="number">3</span>,
+                    estimate.conservative_decoded_len <span class="kw">as </span>u128
                 );
             })
     }

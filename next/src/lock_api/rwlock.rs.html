@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/lock_api-0.4.11/src/rwlock.rs`."><title>rwlock.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="lock_api" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (8f9080db4 2024-05-09)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/lock_api-0.4.12/src/rwlock.rs`."><title>rwlock.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="lock_api" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (98489f248 2024-06-06)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -2881,6 +2881,9 @@
 <a href="#2881" id="2881">2881</a>
 <a href="#2882" id="2882">2882</a>
 <a href="#2883" id="2883">2883</a>
+<a href="#2884" id="2884">2884</a>
+<a href="#2885" id="2885">2885</a>
+<a href="#2886" id="2886">2886</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2016 Amanieu d'Antras
 //
 // Licensed under the Apache License, Version 2.0, &lt;LICENSE-APACHE or
@@ -2981,7 +2984,7 @@
     }
 }
 
-<span class="doccomment">/// Additional methods for RwLocks which support fair unlocking.
+<span class="doccomment">/// Additional methods for `RwLock`s which support fair unlocking.
 ///
 /// Fair unlocking means that a lock is handed directly over to the next waiting
 /// thread if there is one, without giving other threads the opportunity to
@@ -3031,7 +3034,7 @@
     }
 }
 
-<span class="doccomment">/// Additional methods for RwLocks which support atomically downgrading an
+<span class="doccomment">/// Additional methods for `RwLock`s which support atomically downgrading an
 /// exclusive lock to a shared lock.
 </span><span class="kw">pub unsafe trait </span>RawRwLockDowngrade: RawRwLock {
     <span class="doccomment">/// Atomically downgrades an exclusive lock into a shared lock without
@@ -3043,7 +3046,7 @@
     </span><span class="kw">unsafe fn </span>downgrade(<span class="kw-2">&amp;</span><span class="self">self</span>);
 }
 
-<span class="doccomment">/// Additional methods for RwLocks which support locking with timeouts.
+<span class="doccomment">/// Additional methods for `RwLock`s which support locking with timeouts.
 ///
 /// The `Duration` and `Instant` types are specified as associated types so that
 /// this trait is usable even in `no_std` environments.
@@ -3067,7 +3070,7 @@
     </span><span class="kw">fn </span>try_lock_exclusive_until(<span class="kw-2">&amp;</span><span class="self">self</span>, timeout: <span class="self">Self</span>::Instant) -&gt; bool;
 }
 
-<span class="doccomment">/// Additional methods for RwLocks which support recursive read locks.
+<span class="doccomment">/// Additional methods for `RwLock`s which support recursive read locks.
 ///
 /// These are guaranteed to succeed without blocking if
 /// another read lock is held at the time of the call. This allows a thread
@@ -3082,7 +3085,7 @@
     </span><span class="kw">fn </span>try_lock_shared_recursive(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool;
 }
 
-<span class="doccomment">/// Additional methods for RwLocks which support recursive read locks and timeouts.
+<span class="doccomment">/// Additional methods for `RwLock`s which support recursive read locks and timeouts.
 </span><span class="kw">pub unsafe trait </span>RawRwLockRecursiveTimed: RawRwLockRecursive + RawRwLockTimed {
     <span class="doccomment">/// Attempts to acquire a shared lock until a timeout is reached, without
     /// deadlocking in case of a recursive lock.
@@ -3093,7 +3096,7 @@
     </span><span class="kw">fn </span>try_lock_shared_recursive_until(<span class="kw-2">&amp;</span><span class="self">self</span>, timeout: <span class="self">Self</span>::Instant) -&gt; bool;
 }
 
-<span class="doccomment">/// Additional methods for RwLocks which support atomically upgrading a shared
+<span class="doccomment">/// Additional methods for `RwLock`s which support atomically upgrading a shared
 /// lock to an exclusive lock.
 ///
 /// This requires acquiring a special "upgradable read lock" instead of a
@@ -3129,7 +3132,7 @@
     </span><span class="kw">unsafe fn </span>try_upgrade(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool;
 }
 
-<span class="doccomment">/// Additional methods for RwLocks which support upgradable locks and fair
+<span class="doccomment">/// Additional methods for `RwLock`s which support upgradable locks and fair
 /// unlocking.
 </span><span class="kw">pub unsafe trait </span>RawRwLockUpgradeFair: RawRwLockUpgrade + RawRwLockFair {
     <span class="doccomment">/// Releases an upgradable lock using a fair unlock protocol.
@@ -3154,7 +3157,7 @@
     }
 }
 
-<span class="doccomment">/// Additional methods for RwLocks which support upgradable locks and lock
+<span class="doccomment">/// Additional methods for `RwLock`s which support upgradable locks and lock
 /// downgrading.
 </span><span class="kw">pub unsafe trait </span>RawRwLockUpgradeDowngrade: RawRwLockUpgrade + RawRwLockDowngrade {
     <span class="doccomment">/// Downgrades an upgradable lock to a shared lock.
@@ -3172,7 +3175,7 @@
     </span><span class="kw">unsafe fn </span>downgrade_to_upgradable(<span class="kw-2">&amp;</span><span class="self">self</span>);
 }
 
-<span class="doccomment">/// Additional methods for RwLocks which support upgradable locks and locking
+<span class="doccomment">/// Additional methods for `RwLock`s which support upgradable locks and locking
 /// with timeouts.
 </span><span class="kw">pub unsafe trait </span>RawRwLockUpgradeTimed: RawRwLockUpgrade + RawRwLockTimed {
     <span class="doccomment">/// Attempts to acquire an upgradable lock until a timeout is reached.
@@ -3279,15 +3282,24 @@
 <span class="kw">impl</span>&lt;R, T&gt; RwLock&lt;R, T&gt; {
     <span class="doccomment">/// Creates a new new instance of an `RwLock&lt;T&gt;` based on a pre-existing
     /// `RawRwLock&lt;T&gt;`.
-    ///
-    /// This allows creating a `RwLock&lt;T&gt;` in a constant context on stable
-    /// Rust.
     </span><span class="attr">#[inline]
-    </span><span class="kw">pub const fn </span>const_new(raw_rwlock: R, val: T) -&gt; RwLock&lt;R, T&gt; {
+    </span><span class="kw">pub const fn </span>from_raw(raw_rwlock: R, val: T) -&gt; RwLock&lt;R, T&gt; {
         RwLock {
             data: UnsafeCell::new(val),
             raw: raw_rwlock,
         }
+    }
+
+    <span class="doccomment">/// Creates a new new instance of an `RwLock&lt;T&gt;` based on a pre-existing
+    /// `RawRwLock&lt;T&gt;`.
+    ///
+    /// This allows creating a `RwLock&lt;T&gt;` in a constant context on stable
+    /// Rust.
+    ///
+    /// This method is a legacy alias for [`from_raw`](Self::from_raw).
+    </span><span class="attr">#[inline]
+    </span><span class="kw">pub const fn </span>const_new(raw_rwlock: R, val: T) -&gt; RwLock&lt;R, T&gt; {
+        <span class="self">Self</span>::from_raw(raw_rwlock, val)
     }
 }
 
@@ -3300,7 +3312,7 @@
     ///
     /// This function does not increment the read count of the lock. Calling this function when a
     /// guard has already been produced is undefined behaviour unless the guard was forgotten
-    /// with `mem::forget`.`
+    /// with `mem::forget`.
     </span><span class="attr">#[inline]
     </span><span class="kw">pub unsafe fn </span>make_read_guard_unchecked(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; RwLockReadGuard&lt;<span class="lifetime">'_</span>, R, T&gt; {
         RwLockReadGuard {
@@ -3568,7 +3580,7 @@
 }
 
 <span class="kw">impl</span>&lt;R: RawRwLockFair, T: <span class="question-mark">?</span>Sized&gt; RwLock&lt;R, T&gt; {
-    <span class="doccomment">/// Forcibly unlocks a read lock using a fair unlock procotol.
+    <span class="doccomment">/// Forcibly unlocks a read lock using a fair unlock protocol.
     ///
     /// This is useful when combined with `mem::forget` to hold a lock without
     /// the need to maintain a `RwLockReadGuard` object alive, for example when
@@ -3584,7 +3596,7 @@
         <span class="self">self</span>.raw.unlock_shared_fair();
     }
 
-    <span class="doccomment">/// Forcibly unlocks a write lock using a fair unlock procotol.
+    <span class="doccomment">/// Forcibly unlocks a write lock using a fair unlock protocol.
     ///
     /// This is useful when combined with `mem::forget` to hold a lock without
     /// the need to maintain a `RwLockWriteGuard` object alive, for example when
@@ -3899,7 +3911,7 @@
     ///
     /// This function does not increment the read count of the lock. Calling this function when a
     /// guard has already been produced is undefined behaviour unless the guard was forgotten
-    /// with `mem::forget`.`
+    /// with `mem::forget`.
     </span><span class="attr">#[inline]
     </span><span class="kw">pub unsafe fn </span>make_upgradable_guard_unchecked(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; RwLockUpgradableReadGuard&lt;<span class="lifetime">'_</span>, R, T&gt; {
         RwLockUpgradableReadGuard {
@@ -4081,21 +4093,15 @@
 
 <span class="kw">impl</span>&lt;R: RawRwLock, T: <span class="question-mark">?</span>Sized + fmt::Debug&gt; fmt::Debug <span class="kw">for </span>RwLock&lt;R, T&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
+        <span class="kw">let </span><span class="kw-2">mut </span>d = f.debug_struct(<span class="string">"RwLock"</span>);
         <span class="kw">match </span><span class="self">self</span>.try_read() {
-            <span class="prelude-val">Some</span>(guard) =&gt; f.debug_struct(<span class="string">"RwLock"</span>).field(<span class="string">"data"</span>, &amp;&amp;<span class="kw-2">*</span>guard).finish(),
+            <span class="prelude-val">Some</span>(guard) =&gt; d.field(<span class="string">"data"</span>, &amp;&amp;<span class="kw-2">*</span>guard),
             <span class="prelude-val">None </span>=&gt; {
-                <span class="kw">struct </span>LockedPlaceholder;
-                <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>LockedPlaceholder {
-                    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
-                        f.write_str(<span class="string">"&lt;locked&gt;"</span>)
-                    }
-                }
-
-                f.debug_struct(<span class="string">"RwLock"</span>)
-                    .field(<span class="string">"data"</span>, <span class="kw-2">&amp;</span>LockedPlaceholder)
-                    .finish()
+                <span class="comment">// Additional format_args! here is to remove quotes around &lt;locked&gt; in debug output.
+                </span>d.field(<span class="string">"data"</span>, <span class="kw-2">&amp;</span><span class="macro">format_args!</span>(<span class="string">"&lt;locked&gt;"</span>))
             }
-        }
+        };
+        d.finish()
     }
 }
 
@@ -5048,7 +5054,7 @@
         <span class="kw">if unsafe </span>{ <span class="self">self</span>.rwlock.raw.try_upgrade_for(timeout) } {
             <span class="comment">// Safety: We just upgraded the lock, so we have mutable access to the data.
             // This will restore the state the lock was in at the start of the function.
-            </span><span class="macro">defer!</span>(<span class="kw">unsafe </span>{ <span class="self">self</span>.rwlock.raw.downgrade_upgradable() });
+            </span><span class="macro">defer!</span>(<span class="kw">unsafe </span>{ <span class="self">self</span>.rwlock.raw.downgrade_to_upgradable() });
 
             <span class="comment">// Safety: We upgraded the lock, so we have mutable access to the data.
             // When this function returns, whether by drop or panic,
@@ -5079,7 +5085,7 @@
         <span class="kw">if unsafe </span>{ <span class="self">self</span>.rwlock.raw.try_upgrade_until(timeout) } {
             <span class="comment">// Safety: We just upgraded the lock, so we have mutable access to the data.
             // This will restore the state the lock was in at the start of the function.
-            </span><span class="macro">defer!</span>(<span class="kw">unsafe </span>{ <span class="self">self</span>.rwlock.raw.downgrade_upgradable() });
+            </span><span class="macro">defer!</span>(<span class="kw">unsafe </span>{ <span class="self">self</span>.rwlock.raw.downgrade_to_upgradable() });
 
             <span class="comment">// Safety: We upgraded the lock, so we have mutable access to the data.
             // When this function returns, whether by drop or panic,
@@ -5292,7 +5298,7 @@
 
         <span class="comment">// Safety: We just upgraded the lock, so we have mutable access to the data.
         // This will restore the state the lock was in at the start of the function.
-        </span><span class="macro">defer!</span>(<span class="kw">unsafe </span>{ <span class="self">self</span>.rwlock.raw.downgrade_upgradable() });
+        </span><span class="macro">defer!</span>(<span class="kw">unsafe </span>{ <span class="self">self</span>.rwlock.raw.downgrade_to_upgradable() });
 
         <span class="comment">// Safety: We upgraded the lock, so we have mutable access to the data.
         // When this function returns, whether by drop or panic,
@@ -5314,7 +5320,7 @@
         <span class="kw">if unsafe </span>{ <span class="self">self</span>.rwlock.raw.try_upgrade() } {
             <span class="comment">// Safety: We just upgraded the lock, so we have mutable access to the data.
             // This will restore the state the lock was in at the start of the function.
-            </span><span class="macro">defer!</span>(<span class="kw">unsafe </span>{ <span class="self">self</span>.rwlock.raw.downgrade_upgradable() });
+            </span><span class="macro">defer!</span>(<span class="kw">unsafe </span>{ <span class="self">self</span>.rwlock.raw.downgrade_to_upgradable() });
 
             <span class="comment">// Safety: We upgraded the lock, so we have mutable access to the data.
             // When this function returns, whether by drop or panic,
@@ -5402,7 +5408,7 @@
         <span class="kw">if unsafe </span>{ <span class="self">self</span>.rwlock.raw.try_upgrade_for(timeout) } {
             <span class="comment">// Safety: We just upgraded the lock, so we have mutable access to the data.
             // This will restore the state the lock was in at the start of the function.
-            </span><span class="macro">defer!</span>(<span class="kw">unsafe </span>{ <span class="self">self</span>.rwlock.raw.downgrade_upgradable() });
+            </span><span class="macro">defer!</span>(<span class="kw">unsafe </span>{ <span class="self">self</span>.rwlock.raw.downgrade_to_upgradable() });
 
             <span class="comment">// Safety: We upgraded the lock, so we have mutable access to the data.
             // When this function returns, whether by drop or panic,
@@ -5433,7 +5439,7 @@
         <span class="kw">if unsafe </span>{ <span class="self">self</span>.rwlock.raw.try_upgrade_until(timeout) } {
             <span class="comment">// Safety: We just upgraded the lock, so we have mutable access to the data.
             // This will restore the state the lock was in at the start of the function.
-            </span><span class="macro">defer!</span>(<span class="kw">unsafe </span>{ <span class="self">self</span>.rwlock.raw.downgrade_upgradable() });
+            </span><span class="macro">defer!</span>(<span class="kw">unsafe </span>{ <span class="self">self</span>.rwlock.raw.downgrade_to_upgradable() });
 
             <span class="comment">// Safety: We upgraded the lock, so we have mutable access to the data.
             // When this function returns, whether by drop or panic,

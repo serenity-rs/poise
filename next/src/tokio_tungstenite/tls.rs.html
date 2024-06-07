@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-tungstenite-0.20.1/src/tls.rs`."><title>tls.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="tokio_tungstenite" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (8f9080db4 2024-05-09)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-tungstenite-0.21.0/src/tls.rs`."><title>tls.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="tokio_tungstenite" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (98489f248 2024-06-06)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -219,15 +219,6 @@
 <a href="#219" id="219">219</a>
 <a href="#220" id="220">220</a>
 <a href="#221" id="221">221</a>
-<a href="#222" id="222">222</a>
-<a href="#223" id="223">223</a>
-<a href="#224" id="224">224</a>
-<a href="#225" id="225">225</a>
-<a href="#226" id="226">226</a>
-<a href="#227" id="227">227</a>
-<a href="#228" id="228">228</a>
-<a href="#229" id="229">229</a>
-<a href="#230" id="230">230</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Connection helper.
 </span><span class="kw">use </span>tokio::io::{AsyncRead, AsyncWrite};
 
@@ -295,7 +286,8 @@
     <span class="attr">#[cfg(feature = <span class="string">"__rustls-tls"</span>)]
     </span><span class="kw">pub mod </span>rustls {
         <span class="kw">pub use </span>rustls::ClientConfig;
-        <span class="kw">use </span>rustls::{RootCertStore, ServerName};
+        <span class="kw">use </span>rustls::RootCertStore;
+        <span class="kw">use </span>rustls_pki_types::ServerName;
         <span class="kw">use </span>tokio_rustls::TlsConnector <span class="kw">as </span>TokioTlsConnector;
 
         <span class="kw">use </span>std::{convert::TryFrom, sync::Arc};
@@ -325,36 +317,26 @@
                             <span class="attr">#[cfg(feature = <span class="string">"rustls-tls-native-roots"</span>)]
                             </span>{
                                 <span class="kw">let </span>native_certs = rustls_native_certs::load_native_certs()<span class="question-mark">?</span>;
-                                <span class="kw">let </span>der_certs: Vec&lt;Vec&lt;u8&gt;&gt; =
-                                    native_certs.into_iter().map(|cert| cert.<span class="number">0</span>).collect();
-                                <span class="kw">let </span>total_number = der_certs.len();
+                                <span class="kw">let </span>total_number = native_certs.len();
                                 <span class="kw">let </span>(number_added, number_ignored) =
-                                    root_store.add_parsable_certificates(<span class="kw-2">&amp;</span>der_certs);
+                                    root_store.add_parsable_certificates(native_certs);
                                 <span class="macro">log::debug!</span>(<span class="string">"Added {number_added}/{total_number} native root certificates (ignored {number_ignored})"</span>);
                             }
                             <span class="attr">#[cfg(feature = <span class="string">"rustls-tls-webpki-roots"</span>)]
                             </span>{
-                                root_store.add_trust_anchors(
-                                    webpki_roots::TLS_SERVER_ROOTS.iter().map(|ta| {
-                                        rustls::OwnedTrustAnchor::from_subject_spki_name_constraints(
-                                            ta.subject,
-                                            ta.spki,
-                                            ta.name_constraints,
-                                        )
-                                    })
-                                );
+                                root_store.extend(webpki_roots::TLS_SERVER_ROOTS.iter().cloned());
                             }
 
                             Arc::new(
                                 ClientConfig::builder()
-                                    .with_safe_defaults()
                                     .with_root_certificates(root_store)
                                     .with_no_client_auth(),
                             )
                         }
                     };
                     <span class="kw">let </span>domain = ServerName::try_from(domain.as_str())
-                        .map_err(|<span class="kw">_</span>| TlsError::InvalidDnsName)<span class="question-mark">?</span>;
+                        .map_err(|<span class="kw">_</span>| TlsError::InvalidDnsName)<span class="question-mark">?
+                        </span>.to_owned();
                     <span class="kw">let </span>stream = TokioTlsConnector::from(config);
                     <span class="kw">let </span>connected = stream.connect(domain, socket).<span class="kw">await</span>;
 

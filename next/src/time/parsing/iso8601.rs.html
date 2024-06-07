@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/time-0.3.31/src/parsing/iso8601.rs`."><title>iso8601.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="time" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (8f9080db4 2024-05-09)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="icon" href="https://avatars0.githubusercontent.com/u/55999857"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/time-0.3.36/src/parsing/iso8601.rs`."><title>iso8601.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="time" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (98489f248 2024-06-06)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="icon" href="https://avatars0.githubusercontent.com/u/55999857"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -321,9 +321,14 @@
 <a href="#321" id="321">321</a>
 <a href="#322" id="322">322</a>
 <a href="#323" id="323">323</a>
+<a href="#324" id="324">324</a>
+<a href="#325" id="325">325</a>
+<a href="#326" id="326">326</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Parse parts of an ISO 8601-formatted value.
 
-</span><span class="kw">use </span><span class="kw">crate</span>::convert::<span class="kw-2">*</span>;
+</span><span class="kw">use </span>num_conv::prelude::<span class="kw-2">*</span>;
+
+<span class="kw">use </span><span class="kw">crate</span>::convert::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::error;
 <span class="kw">use </span><span class="kw">crate</span>::error::ParseFromDescription::{InvalidComponent, InvalidLiteral};
 <span class="kw">use </span><span class="kw">crate</span>::format_description::well_known::iso8601::EncodedConfig;
@@ -342,7 +347,6 @@
     // Basic: [year]["W"][week][dayk]
     // Extended: [year]["-"]["W"][week]["-"][dayk]
     </span><span class="doccomment">/// Parse a date in the basic or extended format. Reduced precision is permitted.
-    </span><span class="attr">#[allow(clippy::needless_pass_by_ref_mut)] </span><span class="comment">// rust-lang/rust-clippy#11620
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>parse_date&lt;<span class="lifetime">'a</span>&gt;(
         parsed: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>Parsed,
         extended_kind: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>ExtendedKind,
@@ -358,7 +362,7 @@
                 <span class="prelude-val">None </span>=&gt; ExtendedKind::Basic, <span class="comment">// no separator before mandatory month/ordinal/week
             </span>};
 
-            <span class="kw">let </span><span class="kw-2">mut </span>ret_error = <span class="kw">match </span>(|| {
+            <span class="kw">let </span>parsed_month_day = (|| {
                 <span class="kw">let </span>ParsedItem(<span class="kw-2">mut </span>input, month) = month(input).ok_or(InvalidComponent(<span class="string">"month"</span>))<span class="question-mark">?</span>;
                 <span class="kw">if </span>extended_kind.is_extended() {
                     input = ascii_char::&lt;<span class="string">b'-'</span>&gt;(input)
@@ -367,7 +371,8 @@
                 }
                 <span class="kw">let </span>ParsedItem(input, day) = day(input).ok_or(InvalidComponent(<span class="string">"day"</span>))<span class="question-mark">?</span>;
                 <span class="prelude-val">Ok</span>(ParsedItem(input, (month, day)))
-            })() {
+            })();
+            <span class="kw">let </span><span class="kw-2">mut </span>ret_error = <span class="kw">match </span>parsed_month_day {
                 <span class="prelude-val">Ok</span>(ParsedItem(input, (month, day))) =&gt; {
                     <span class="kw-2">*</span>parsed = parsed
                         .with_year(year)
@@ -391,7 +396,7 @@
                 <span class="kw">return </span><span class="prelude-val">Ok</span>(input);
             }
 
-            <span class="kw">match </span>(|| {
+            <span class="kw">let </span>parsed_week_weekday = (|| {
                 <span class="kw">let </span>input = ascii_char::&lt;<span class="string">b'W'</span>&gt;(input)
                     .ok_or((<span class="bool-val">false</span>, InvalidLiteral))<span class="question-mark">?
                     </span>.into_inner();
@@ -405,7 +410,8 @@
                 <span class="kw">let </span>ParsedItem(input, weekday) =
                     dayk(input).ok_or((<span class="bool-val">true</span>, InvalidComponent(<span class="string">"weekday"</span>)))<span class="question-mark">?</span>;
                 <span class="prelude-val">Ok</span>(ParsedItem(input, (week, weekday)))
-            })() {
+            })();
+            <span class="kw">match </span>parsed_week_weekday {
                 <span class="prelude-val">Ok</span>(ParsedItem(input, (week, weekday))) =&gt; {
                     <span class="kw-2">*</span>parsed = parsed
                         .with_iso_year(year)
@@ -578,10 +584,10 @@
                 .and_then(|parsed_item| {
                     parsed_item.consume_value(|hour| {
                         parsed.set_offset_hour(<span class="kw">if </span>sign == <span class="string">b'-' </span>{
-                            -(hour <span class="kw">as </span>i8)
+                            -hour.cast_signed()
                         } <span class="kw">else </span>{
-                            hour <span class="kw">as _
-                        </span>})
+                            hour.cast_signed()
+                        })
                     })
                 })
                 .ok_or(InvalidComponent(<span class="string">"offset hour"</span>))<span class="question-mark">?</span>;
@@ -600,10 +606,10 @@
                     input = new_input;
                     parsed
                         .set_offset_minute_signed(<span class="kw">if </span>sign == <span class="string">b'-' </span>{
-                            -(min <span class="kw">as </span>i8)
+                            -min.cast_signed()
                         } <span class="kw">else </span>{
-                            min <span class="kw">as _
-                        </span>})
+                            min.cast_signed()
+                        })
                         .ok_or(InvalidComponent(<span class="string">"offset minute"</span>))<span class="question-mark">?</span>;
                 }
                 <span class="prelude-val">None </span>=&gt; {

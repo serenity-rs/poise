@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/socket2-0.5.5/src/sys/unix.rs`."><title>unix.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="socket2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (8f9080db4 2024-05-09)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/socket2-0.5.7/src/sys/unix.rs`."><title>unix.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="socket2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (98489f248 2024-06-06)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -3114,6 +3114,58 @@
 <a href="#3114" id="3114">3114</a>
 <a href="#3115" id="3115">3115</a>
 <a href="#3116" id="3116">3116</a>
+<a href="#3117" id="3117">3117</a>
+<a href="#3118" id="3118">3118</a>
+<a href="#3119" id="3119">3119</a>
+<a href="#3120" id="3120">3120</a>
+<a href="#3121" id="3121">3121</a>
+<a href="#3122" id="3122">3122</a>
+<a href="#3123" id="3123">3123</a>
+<a href="#3124" id="3124">3124</a>
+<a href="#3125" id="3125">3125</a>
+<a href="#3126" id="3126">3126</a>
+<a href="#3127" id="3127">3127</a>
+<a href="#3128" id="3128">3128</a>
+<a href="#3129" id="3129">3129</a>
+<a href="#3130" id="3130">3130</a>
+<a href="#3131" id="3131">3131</a>
+<a href="#3132" id="3132">3132</a>
+<a href="#3133" id="3133">3133</a>
+<a href="#3134" id="3134">3134</a>
+<a href="#3135" id="3135">3135</a>
+<a href="#3136" id="3136">3136</a>
+<a href="#3137" id="3137">3137</a>
+<a href="#3138" id="3138">3138</a>
+<a href="#3139" id="3139">3139</a>
+<a href="#3140" id="3140">3140</a>
+<a href="#3141" id="3141">3141</a>
+<a href="#3142" id="3142">3142</a>
+<a href="#3143" id="3143">3143</a>
+<a href="#3144" id="3144">3144</a>
+<a href="#3145" id="3145">3145</a>
+<a href="#3146" id="3146">3146</a>
+<a href="#3147" id="3147">3147</a>
+<a href="#3148" id="3148">3148</a>
+<a href="#3149" id="3149">3149</a>
+<a href="#3150" id="3150">3150</a>
+<a href="#3151" id="3151">3151</a>
+<a href="#3152" id="3152">3152</a>
+<a href="#3153" id="3153">3153</a>
+<a href="#3154" id="3154">3154</a>
+<a href="#3155" id="3155">3155</a>
+<a href="#3156" id="3156">3156</a>
+<a href="#3157" id="3157">3157</a>
+<a href="#3158" id="3158">3158</a>
+<a href="#3159" id="3159">3159</a>
+<a href="#3160" id="3160">3160</a>
+<a href="#3161" id="3161">3161</a>
+<a href="#3162" id="3162">3162</a>
+<a href="#3163" id="3163">3163</a>
+<a href="#3164" id="3164">3164</a>
+<a href="#3165" id="3165">3165</a>
+<a href="#3166" id="3166">3166</a>
+<a href="#3167" id="3167">3167</a>
+<a href="#3168" id="3168">3168</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2015 The Rust Project Developers.
 //
 // Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
@@ -3237,6 +3289,7 @@
 <span class="attr">#[cfg(not(any(
     target_os = <span class="string">"dragonfly"</span>,
     target_os = <span class="string">"fuchsia"</span>,
+    target_os = <span class="string">"hurd"</span>,
     target_os = <span class="string">"illumos"</span>,
     target_os = <span class="string">"netbsd"</span>,
     target_os = <span class="string">"openbsd"</span>,
@@ -3259,6 +3312,7 @@
     target_os = <span class="string">"redox"</span>,
     target_os = <span class="string">"solaris"</span>,
     target_os = <span class="string">"haiku"</span>,
+    target_os = <span class="string">"hurd"</span>,
     target_os = <span class="string">"nto"</span>,
     target_os = <span class="string">"espidf"</span>,
     target_os = <span class="string">"vita"</span>,
@@ -3268,6 +3322,7 @@
     target_os = <span class="string">"fuchsia"</span>,
     target_os = <span class="string">"redox"</span>,
     target_os = <span class="string">"solaris"</span>,
+    target_os = <span class="string">"haiku"</span>,
     target_os = <span class="string">"illumos"</span>,
 )))]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>libc::IP_TOS;
@@ -3285,6 +3340,8 @@
     target_os = <span class="string">"watchos"</span>,
 ))]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>libc::SO_LINGER_SEC <span class="kw">as </span>SO_LINGER;
+<span class="attr">#[cfg(target_os = <span class="string">"linux"</span>)]
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>libc::SO_PASSCRED;
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>libc::{
     ip_mreq <span class="kw">as </span>IpMreq, linger, IPPROTO_IP, IPPROTO_IPV6, IPV6_MULTICAST_HOPS, IPV6_MULTICAST_IF,
     IPV6_MULTICAST_LOOP, IPV6_UNICAST_HOPS, IPV6_V6ONLY, IP_ADD_MEMBERSHIP, IP_DROP_MEMBERSHIP,
@@ -3295,6 +3352,7 @@
 <span class="attr">#[cfg(not(any(
     target_os = <span class="string">"dragonfly"</span>,
     target_os = <span class="string">"haiku"</span>,
+    target_os = <span class="string">"hurd"</span>,
     target_os = <span class="string">"netbsd"</span>,
     target_os = <span class="string">"openbsd"</span>,
     target_os = <span class="string">"redox"</span>,
@@ -3437,6 +3495,7 @@
         target_os = <span class="string">"linux"</span>,
         any(
             target_env = <span class="string">"musl"</span>,
+            target_env = <span class="string">"ohos"</span>,
             all(target_env = <span class="string">"uclibc"</span>, target_pointer_width = <span class="string">"32"</span>)
         )
     ),
@@ -3445,6 +3504,7 @@
     target_os = <span class="string">"freebsd"</span>,
     target_os = <span class="string">"fuchsia"</span>,
     target_os = <span class="string">"haiku"</span>,
+    target_os = <span class="string">"hurd"</span>,
     target_os = <span class="string">"illumos"</span>,
     target_os = <span class="string">"ios"</span>,
     target_os = <span class="string">"macos"</span>,
@@ -3545,6 +3605,7 @@
             target_os = <span class="string">"dragonfly"</span>,
             target_os = <span class="string">"freebsd"</span>,
             target_os = <span class="string">"fuchsia"</span>,
+            target_os = <span class="string">"hurd"</span>,
             target_os = <span class="string">"illumos"</span>,
             target_os = <span class="string">"linux"</span>,
             target_os = <span class="string">"netbsd"</span>,
@@ -3562,6 +3623,7 @@
                 target_os = <span class="string">"dragonfly"</span>,
                 target_os = <span class="string">"freebsd"</span>,
                 target_os = <span class="string">"fuchsia"</span>,
+                target_os = <span class="string">"hurd"</span>,
                 target_os = <span class="string">"illumos"</span>,
                 target_os = <span class="string">"linux"</span>,
                 target_os = <span class="string">"netbsd"</span>,
@@ -3580,6 +3642,7 @@
         target_os = <span class="string">"dragonfly"</span>,
         target_os = <span class="string">"freebsd"</span>,
         target_os = <span class="string">"fuchsia"</span>,
+        target_os = <span class="string">"hurd"</span>,
         target_os = <span class="string">"illumos"</span>,
         target_os = <span class="string">"linux"</span>,
         target_os = <span class="string">"netbsd"</span>,
@@ -3680,6 +3743,37 @@
     </span><span class="kw">pub const fn </span>is_out_of_band(<span class="self">self</span>) -&gt; bool {
         <span class="self">self</span>.<span class="number">0 </span>&amp; libc::MSG_OOB != <span class="number">0
     </span>}
+
+    <span class="doccomment">/// Check if the confirm flag is set.
+    ///
+    /// This is used by SocketCAN to indicate a frame was sent via the
+    /// socket it is received on. This flag can be interpreted as a
+    /// 'transmission confirmation'.
+    ///
+    /// On Unix this corresponds to the `MSG_CONFIRM` flag.
+    </span><span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"linux"</span>)))]
+    #[cfg_attr(
+        docsrs,
+        doc(cfg(all(feature = <span class="string">"all"</span>, any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"linux"</span>))))
+    )]
+    </span><span class="kw">pub const fn </span>is_confirm(<span class="self">self</span>) -&gt; bool {
+        <span class="self">self</span>.<span class="number">0 </span>&amp; libc::MSG_CONFIRM != <span class="number">0
+    </span>}
+
+    <span class="doccomment">/// Check if the don't route flag is set.
+    ///
+    /// This is used by SocketCAN to indicate a frame was created
+    /// on the local host.
+    ///
+    /// On Unix this corresponds to the `MSG_DONTROUTE` flag.
+    </span><span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"linux"</span>)))]
+    #[cfg_attr(
+        docsrs,
+        doc(cfg(all(feature = <span class="string">"all"</span>, any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"linux"</span>))))
+    )]
+    </span><span class="kw">pub const fn </span>is_dontroute(<span class="self">self</span>) -&gt; bool {
+        <span class="self">self</span>.<span class="number">0 </span>&amp; libc::MSG_DONTROUTE != <span class="number">0
+    </span>}
 }
 
 <span class="attr">#[cfg(not(target_os = <span class="string">"redox"</span>))]
@@ -3691,6 +3785,10 @@
         s.field(<span class="string">"is_out_of_band"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.is_out_of_band());
         <span class="attr">#[cfg(not(target_os = <span class="string">"espidf"</span>))]
         </span>s.field(<span class="string">"is_truncated"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.is_truncated());
+        <span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"linux"</span>)))]
+        </span>s.field(<span class="string">"is_confirm"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.is_confirm());
+        <span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"linux"</span>)))]
+        </span>s.field(<span class="string">"is_dontroute"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.is_dontroute());
         s.finish()
     }
 }
@@ -3809,6 +3907,11 @@
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>msghdr_flags(msg: <span class="kw-2">&amp;</span>msghdr) -&gt; RecvFlags {
     RecvFlags(msg.msg_flags)
 }
+
+<span class="attr">#[cfg(not(target_os = <span class="string">"redox"</span>))]
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>msghdr_control_len(msg: <span class="kw-2">&amp;</span>msghdr) -&gt; usize {
+    msg.msg_controllen <span class="kw">as _
+</span>}
 
 <span class="doccomment">/// Unix only API.
 </span><span class="kw">impl </span>SockAddr {
@@ -4296,6 +4399,7 @@
         target_os = <span class="string">"dragonfly"</span>,
         target_os = <span class="string">"freebsd"</span>,
         target_os = <span class="string">"fuchsia"</span>,
+        target_os = <span class="string">"hurd"</span>,
         target_os = <span class="string">"illumos"</span>,
         target_os = <span class="string">"ios"</span>,
         target_os = <span class="string">"linux"</span>,

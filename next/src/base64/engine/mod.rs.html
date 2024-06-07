@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/base64-0.21.7/src/engine/mod.rs`."><title>mod.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="base64" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (8f9080db4 2024-05-09)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/base64-0.22.1/src/engine/mod.rs`."><title>mod.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="base64" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (98489f248 2024-06-06)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -464,6 +464,18 @@
 <a href="#464" id="464">464</a>
 <a href="#465" id="465">465</a>
 <a href="#466" id="466">466</a>
+<a href="#467" id="467">467</a>
+<a href="#468" id="468">468</a>
+<a href="#469" id="469">469</a>
+<a href="#470" id="470">470</a>
+<a href="#471" id="471">471</a>
+<a href="#472" id="472">472</a>
+<a href="#473" id="473">473</a>
+<a href="#474" id="474">474</a>
+<a href="#475" id="475">475</a>
+<a href="#476" id="476">476</a>
+<a href="#477" id="477">477</a>
+<a href="#478" id="478">478</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Provides the [Engine] abstraction and out of the box implementations.
 </span><span class="attr">#[cfg(any(feature = <span class="string">"alloc"</span>, test))]
 </span><span class="kw">use </span><span class="kw">crate</span>::chunked_encoder;
@@ -549,17 +561,13 @@
     ///
     /// Non-canonical trailing bits in the final tokens or non-canonical padding must be reported as
     /// errors unless the engine is configured otherwise.
-    ///
-    /// # Panics
-    ///
-    /// Panics if `output` is too small.
     </span><span class="attr">#[doc(hidden)]
     </span><span class="kw">fn </span>internal_decode(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         input: <span class="kw-2">&amp;</span>[u8],
         output: <span class="kw-2">&amp;mut </span>[u8],
         decode_estimate: <span class="self">Self</span>::DecodeEstimate,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;DecodeMetadata, DecodeError&gt;;
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;DecodeMetadata, DecodeSliceError&gt;;
 
     <span class="doccomment">/// Returns the config for this engine.
     </span><span class="kw">fn </span>config(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="self">Self</span>::Config;
@@ -579,6 +587,7 @@
     ///     engine::GeneralPurpose::new(&amp;alphabet::URL_SAFE, general_purpose::NO_PAD);
     ///
     /// let b64_url = CUSTOM_ENGINE.encode(b"hello internet~");
+    /// ```
     </span><span class="attr">#[cfg(any(feature = <span class="string">"alloc"</span>, test))]
     #[inline]
     </span><span class="kw">fn </span>encode&lt;T: AsRef&lt;[u8]&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, input: T) -&gt; String {
@@ -719,7 +728,13 @@
             <span class="kw">let </span><span class="kw-2">mut </span>buffer = <span class="macro">vec!</span>[<span class="number">0</span>; estimate.decoded_len_estimate()];
 
             <span class="kw">let </span>bytes_written = engine
-                .internal_decode(input_bytes, <span class="kw-2">&amp;mut </span>buffer, estimate)<span class="question-mark">?
+                .internal_decode(input_bytes, <span class="kw-2">&amp;mut </span>buffer, estimate)
+                .map_err(|e| <span class="kw">match </span>e {
+                    DecodeSliceError::DecodeError(e) =&gt; e,
+                    DecodeSliceError::OutputSliceTooSmall =&gt; {
+                        <span class="macro">unreachable!</span>(<span class="string">"Vec is sized conservatively"</span>)
+                    }
+                })<span class="question-mark">?
                 </span>.decoded_len;
 
             buffer.truncate(bytes_written);
@@ -784,7 +799,13 @@
             <span class="kw">let </span>buffer_slice = <span class="kw-2">&amp;mut </span>buffer.as_mut_slice()[starting_output_len..];
 
             <span class="kw">let </span>bytes_written = engine
-                .internal_decode(input_bytes, buffer_slice, estimate)<span class="question-mark">?
+                .internal_decode(input_bytes, buffer_slice, estimate)
+                .map_err(|e| <span class="kw">match </span>e {
+                    DecodeSliceError::DecodeError(e) =&gt; e,
+                    DecodeSliceError::OutputSliceTooSmall =&gt; {
+                        <span class="macro">unreachable!</span>(<span class="string">"Vec is sized conservatively"</span>)
+                    }
+                })<span class="question-mark">?
                 </span>.decoded_len;
 
             buffer.truncate(starting_output_len + bytes_written);
@@ -820,15 +841,12 @@
         <span class="kw">where
             </span>E: Engine + <span class="question-mark">?</span>Sized,
         {
-            <span class="kw">let </span>estimate = engine.internal_decoded_len_estimate(input_bytes.len());
-
-            <span class="kw">if </span>output.len() &lt; estimate.decoded_len_estimate() {
-                <span class="kw">return </span><span class="prelude-val">Err</span>(DecodeSliceError::OutputSliceTooSmall);
-            }
-
             engine
-                .internal_decode(input_bytes, output, estimate)
-                .map_err(|e| e.into())
+                .internal_decode(
+                    input_bytes,
+                    output,
+                    engine.internal_decoded_len_estimate(input_bytes.len()),
+                )
                 .map(|dm| dm.decoded_len)
         }
 
@@ -866,6 +884,12 @@
                     engine.internal_decoded_len_estimate(input_bytes.len()),
                 )
                 .map(|dm| dm.decoded_len)
+                .map_err(|e| <span class="kw">match </span>e {
+                    DecodeSliceError::DecodeError(e) =&gt; e,
+                    DecodeSliceError::OutputSliceTooSmall =&gt; {
+                        <span class="macro">panic!</span>(<span class="string">"Output slice is too small"</span>)
+                    }
+                })
         }
 
         inner(<span class="self">self</span>, input.as_ref(), output)

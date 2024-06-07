@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.7/src/aead.rs`."><title>aead.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="ring" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (8f9080db4 2024-05-09)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.8/src/aead.rs`."><title>aead.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="ring" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (98489f248 2024-06-06)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -248,6 +248,13 @@
 <a href="#248" id="248">248</a>
 <a href="#249" id="249">249</a>
 <a href="#250" id="250">250</a>
+<a href="#251" id="251">251</a>
+<a href="#252" id="252">252</a>
+<a href="#253" id="253">253</a>
+<a href="#254" id="254">254</a>
+<a href="#255" id="255">255</a>
+<a href="#256" id="256">256</a>
+<a href="#257" id="257">257</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2015-2021 Brian Smith.
 //
 // Permission to use, copy, modify, and/or distribute this software for any
@@ -271,7 +278,10 @@
 //! [AEAD]: https://eprint.iacr.org/2000/025.pdf
 //! [`crypto.cipher.AEAD`]: https://golang.org/pkg/crypto/cipher/#AEAD
 
-</span><span class="kw">use crate</span>::{cpu, error, hkdf, polyfill};
+</span><span class="kw">use crate</span>::{
+    cpu, error, hkdf,
+    polyfill::{u64_from_usize, usize_from_u64_saturated},
+};
 <span class="kw">use </span>core::ops::RangeFrom;
 
 <span class="kw">pub use </span><span class="self">self</span>::{
@@ -384,28 +394,32 @@
 </span><span class="kw">pub struct </span>Algorithm {
     init: <span class="kw">fn</span>(key: <span class="kw-2">&amp;</span>[u8], cpu_features: cpu::Features) -&gt; <span class="prelude-ty">Result</span>&lt;KeyInner, error::Unspecified&gt;,
 
-    seal: <span class="kw">fn</span>(key: <span class="kw-2">&amp;</span>KeyInner, nonce: Nonce, aad: Aad&lt;<span class="kw-2">&amp;</span>[u8]&gt;, in_out: <span class="kw-2">&amp;mut </span>[u8]) -&gt; Tag,
+    seal: <span class="kw">fn</span>(
+        key: <span class="kw-2">&amp;</span>KeyInner,
+        nonce: Nonce,
+        aad: Aad&lt;<span class="kw-2">&amp;</span>[u8]&gt;,
+        in_out: <span class="kw-2">&amp;mut </span>[u8],
+        cpu_features: cpu::Features,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Tag, error::Unspecified&gt;,
     open: <span class="kw">fn</span>(
         key: <span class="kw-2">&amp;</span>KeyInner,
         nonce: Nonce,
         aad: Aad&lt;<span class="kw-2">&amp;</span>[u8]&gt;,
         in_out: <span class="kw-2">&amp;mut </span>[u8],
         src: RangeFrom&lt;usize&gt;,
-    ) -&gt; Tag,
+        cpu_features: cpu::Features,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Tag, error::Unspecified&gt;,
 
     key_len: usize,
     id: AlgorithmID,
-
-    <span class="doccomment">/// Use `max_input_len!()` to initialize this.
-    </span><span class="comment">// TODO: Make this `usize`.
-    </span>max_input_len: u64,
 }
 
-<span class="kw">const fn </span>max_input_len(block_len: usize, overhead_blocks_per_nonce: usize) -&gt; u64 {
+<span class="kw">const fn </span>max_input_len(block_len: usize, overhead_blocks_per_nonce: usize) -&gt; usize {
     <span class="comment">// Each of our AEADs use a 32-bit block counter so the maximum is the
     // largest input that will not overflow the counter.
-    </span>((<span class="number">1u64 </span>&lt;&lt; <span class="number">32</span>) - polyfill::u64_from_usize(overhead_blocks_per_nonce))
-        * polyfill::u64_from_usize(block_len)
+    </span>usize_from_u64_saturated(
+        ((<span class="number">1u64 </span>&lt;&lt; <span class="number">32</span>) - u64_from_usize(overhead_blocks_per_nonce)) * u64_from_usize(block_len),
+    )
 }
 
 <span class="kw">impl </span>Algorithm {

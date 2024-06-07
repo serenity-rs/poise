@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["Zeroizing"],"trait":["DefaultIsZeroes","TryZeroize","Zeroize","ZeroizeOnDrop"]};
+window.SIDEBAR_ITEMS = {"fn":["zeroize_flat_type"],"struct":["Zeroizing"],"trait":["DefaultIsZeroes","TryZeroize","Zeroize","ZeroizeOnDrop"]};

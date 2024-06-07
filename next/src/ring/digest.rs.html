@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.7/src/digest.rs`."><title>digest.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="ring" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (8f9080db4 2024-05-09)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.8/src/digest.rs`."><title>digest.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="ring" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (98489f248 2024-06-06)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -592,6 +592,9 @@
 <a href="#592" id="592">592</a>
 <a href="#593" id="593">593</a>
 <a href="#594" id="594">594</a>
+<a href="#595" id="595">595</a>
+<a href="#596" id="596">596</a>
+<a href="#597" id="597">597</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2015-2019 Brian Smith.
 //
 // Permission to use, copy, modify, and/or distribute this software for any
@@ -635,8 +638,6 @@
 
     <span class="doccomment">/// The context's algorithm.
     </span><span class="kw">pub </span>algorithm: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>Algorithm,
-
-    cpu_features: cpu::Features,
 }
 
 <span class="kw">impl </span>BlockContext {
@@ -645,7 +646,6 @@
             state: algorithm.initial_state,
             completed_data_blocks: <span class="number">0</span>,
             algorithm,
-            cpu_features: cpu::features(),
         }
     }
 
@@ -655,9 +655,8 @@
         <span class="macro">assert_eq!</span>(num_blocks * <span class="self">self</span>.algorithm.block_len, input.len());
 
         <span class="kw">if </span>num_blocks &gt; <span class="number">0 </span>{
-            <span class="kw">let </span>_cpu_features = <span class="self">self</span>.cpu_features;
             <span class="kw">unsafe </span>{
-                (<span class="self">self</span>.algorithm.block_data_order)(<span class="kw-2">&amp;mut </span><span class="self">self</span>.state, input.as_ptr(), num_blocks);
+                <span class="self">self</span>.block_data_order(input.as_ptr(), num_blocks, cpu::features());
             }
             <span class="self">self</span>.completed_data_blocks = <span class="self">self
                 </span>.completed_data_blocks
@@ -677,9 +676,7 @@
 
         <span class="kw">if </span>padding_pos &gt; block_len - <span class="self">self</span>.algorithm.len_len {
             pending[padding_pos..block_len].fill(<span class="number">0</span>);
-            <span class="kw">unsafe </span>{
-                (<span class="self">self</span>.algorithm.block_data_order)(<span class="kw-2">&amp;mut </span><span class="self">self</span>.state, pending.as_ptr(), <span class="number">1</span>);
-            }
+            <span class="kw">unsafe </span>{ <span class="self">self</span>.block_data_order(pending.as_ptr(), <span class="number">1</span>, cpu::features()) };
             <span class="comment">// We don't increase |self.completed_data_blocks| because the
             // padding isn't data, and so it isn't included in the data length.
             </span>padding_pos = <span class="number">0</span>;
@@ -698,13 +695,23 @@
             .unwrap();
         pending[(block_len - <span class="number">8</span>)..block_len].copy_from_slice(<span class="kw-2">&amp;</span>u64::to_be_bytes(completed_data_bits));
 
-        <span class="kw">unsafe </span>{
-            (<span class="self">self</span>.algorithm.block_data_order)(<span class="kw-2">&amp;mut </span><span class="self">self</span>.state, pending.as_ptr(), <span class="number">1</span>);
-        }
+        <span class="kw">unsafe </span>{ <span class="self">self</span>.block_data_order(pending.as_ptr(), <span class="number">1</span>, cpu::features()) };
 
         Digest {
             algorithm: <span class="self">self</span>.algorithm,
             value: (<span class="self">self</span>.algorithm.format_output)(<span class="self">self</span>.state),
+        }
+    }
+
+    <span class="kw">unsafe fn </span>block_data_order(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        pending: <span class="kw-2">*const </span>u8,
+        num_blocks: usize,
+        _cpu_features: cpu::Features,
+    ) {
+        <span class="comment">// CPU features are inspected by assembly implementations.
+        </span><span class="kw">unsafe </span>{
+            (<span class="self">self</span>.algorithm.block_data_order)(<span class="kw-2">&amp;mut </span><span class="self">self</span>.state, pending, num_blocks);
         }
     }
 }
@@ -1173,7 +1180,6 @@
                     state: alg.initial_state,
                     completed_data_blocks: max_blocks - <span class="number">1</span>,
                     algorithm: alg,
-                    cpu_features: <span class="kw">crate</span>::cpu::features(),
                 },
                 pending: [<span class="number">0u8</span>; digest::MAX_BLOCK_LEN],
                 num_pending: <span class="number">0</span>,

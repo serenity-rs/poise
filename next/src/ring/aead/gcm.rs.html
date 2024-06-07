@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.7/src/aead/gcm.rs`."><title>gcm.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="ring" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (8f9080db4 2024-05-09)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.8/src/aead/gcm.rs`."><title>gcm.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="ring" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (98489f248 2024-06-06)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -357,6 +357,38 @@
 <a href="#357" id="357">357</a>
 <a href="#358" id="358">358</a>
 <a href="#359" id="359">359</a>
+<a href="#360" id="360">360</a>
+<a href="#361" id="361">361</a>
+<a href="#362" id="362">362</a>
+<a href="#363" id="363">363</a>
+<a href="#364" id="364">364</a>
+<a href="#365" id="365">365</a>
+<a href="#366" id="366">366</a>
+<a href="#367" id="367">367</a>
+<a href="#368" id="368">368</a>
+<a href="#369" id="369">369</a>
+<a href="#370" id="370">370</a>
+<a href="#371" id="371">371</a>
+<a href="#372" id="372">372</a>
+<a href="#373" id="373">373</a>
+<a href="#374" id="374">374</a>
+<a href="#375" id="375">375</a>
+<a href="#376" id="376">376</a>
+<a href="#377" id="377">377</a>
+<a href="#378" id="378">378</a>
+<a href="#379" id="379">379</a>
+<a href="#380" id="380">380</a>
+<a href="#381" id="381">381</a>
+<a href="#382" id="382">382</a>
+<a href="#383" id="383">383</a>
+<a href="#384" id="384">384</a>
+<a href="#385" id="385">385</a>
+<a href="#386" id="386">386</a>
+<a href="#387" id="387">387</a>
+<a href="#388" id="388">388</a>
+<a href="#389" id="389">389</a>
+<a href="#390" id="390">390</a>
+<a href="#391" id="391">391</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2018 Brian Smith.
 //
 // Permission to use, copy, modify, and/or distribute this software for any
@@ -372,19 +404,22 @@
 // CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 </span><span class="kw">use super</span>::{
+    aes_gcm,
     block::{Block, BLOCK_LEN},
     Aad,
 };
-<span class="kw">use crate</span>::{cpu, polyfill::ArraySplitMap};
+<span class="kw">use crate</span>::{
+    bits::{BitLength, FromUsizeBytes},
+    cpu, error,
+    polyfill::ArraySplitMap,
+};
 <span class="kw">use </span>core::ops::BitXorAssign;
 
-<span class="attr">#[cfg(not(target_arch = <span class="string">"aarch64"</span>))]
-</span><span class="kw">mod </span>gcm_nohw;
+<span class="kw">mod </span>gcm_nohw;
 
 <span class="attr">#[derive(Clone)]
 </span><span class="kw">pub struct </span>Key {
     h_table: HTable,
-    cpu_features: cpu::Features,
 }
 
 <span class="kw">impl </span>Key {
@@ -395,7 +430,6 @@
             h_table: HTable {
                 Htable: [u128 { hi: <span class="number">0</span>, lo: <span class="number">0 </span>}; HTABLE_LEN],
             },
-            cpu_features,
         };
         <span class="kw">let </span>h_table = <span class="kw-2">&amp;mut </span>key.h_table;
 
@@ -435,8 +469,7 @@
                 }
             }
 
-            <span class="attr">#[cfg(not(target_arch = <span class="string">"aarch64"</span>))]
-            </span>Implementation::Fallback =&gt; {
+            Implementation::Fallback =&gt; {
                 h_table.Htable[<span class="number">0</span>] = gcm_nohw::init(h);
             }
         }
@@ -447,17 +480,34 @@
 
 <span class="kw">pub struct </span>Context {
     inner: ContextInner,
+    aad_len: BitLength&lt;u64&gt;,
+    in_out_len: BitLength&lt;u64&gt;,
     cpu_features: cpu::Features,
 }
 
 <span class="kw">impl </span>Context {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(key: <span class="kw-2">&amp;</span>Key, aad: Aad&lt;<span class="kw-2">&amp;</span>[u8]&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span><span class="kw-2">mut </span>ctx = <span class="self">Self </span>{
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(
+        key: <span class="kw-2">&amp;</span>Key,
+        aad: Aad&lt;<span class="kw-2">&amp;</span>[u8]&gt;,
+        in_out_len: usize,
+        cpu_features: cpu::Features,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, error::Unspecified&gt; {
+        <span class="kw">if </span>in_out_len &gt; aes_gcm::MAX_IN_OUT_LEN {
+            <span class="kw">return </span><span class="prelude-val">Err</span>(error::Unspecified);
+        }
+
+        <span class="comment">// NIST SP800-38D Section 5.2.1.1 says that the maximum AAD length is
+        // 2**64 - 1 bits, i.e. BitLength&lt;u64&gt;::MAX, so we don't need to do an
+        // explicit check here.
+
+        </span><span class="kw">let </span><span class="kw-2">mut </span>ctx = <span class="self">Self </span>{
             inner: ContextInner {
                 Xi: Xi(Block::zero()),
                 Htable: key.h_table.clone(),
             },
-            cpu_features: key.cpu_features,
+            aad_len: BitLength::from_usize_bytes(aad.as_ref().len())<span class="question-mark">?</span>,
+            in_out_len: BitLength::from_usize_bytes(in_out_len)<span class="question-mark">?</span>,
+            cpu_features,
         };
 
         <span class="kw">for </span>ad <span class="kw">in </span>aad.<span class="number">0</span>.chunks(BLOCK_LEN) {
@@ -466,11 +516,22 @@
             ctx.update_block(block);
         }
 
-        ctx
+        <span class="prelude-val">Ok</span>(ctx)
+    }
+
+    <span class="attr">#[cfg(all(target_arch = <span class="string">"aarch64"</span>, target_pointer_width = <span class="string">"64"</span>))]
+    </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>in_out_whole_block_bits(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; BitLength&lt;usize&gt; {
+        <span class="kw">use </span><span class="kw">crate</span>::polyfill::usize_from_u64;
+        <span class="kw">const </span>WHOLE_BLOCK_BITS_MASK: usize = !<span class="number">0b111_1111</span>;
+        <span class="kw">const </span>_WHOLE_BLOCK_BITS_MASK_CORRECT: () =
+            <span class="macro">assert!</span>(WHOLE_BLOCK_BITS_MASK == !((BLOCK_LEN * <span class="number">8</span>) - <span class="number">1</span>));
+        BitLength::from_usize_bits(
+            usize_from_u64(<span class="self">self</span>.in_out_len.as_bits()) &amp; WHOLE_BLOCK_BITS_MASK,
+        )
     }
 
     <span class="doccomment">/// Access to `inner` for the integrated AES-GCM implementations only.
-    </span><span class="attr">#[cfg(target_arch = <span class="string">"x86_64"</span>)]
+    </span><span class="attr">#[cfg(any(target_arch = <span class="string">"x86_64"</span>, target_arch = <span class="string">"aarch64"</span>))]
     #[inline]
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>inner(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; (<span class="kw-2">&amp;</span>HTable, <span class="kw-2">&amp;mut </span>Xi) {
         (<span class="kw-2">&amp;</span><span class="self">self</span>.inner.Htable, <span class="kw-2">&amp;mut </span><span class="self">self</span>.inner.Xi)
@@ -546,8 +607,7 @@
                 }
             }
 
-            <span class="attr">#[cfg(not(target_arch = <span class="string">"aarch64"</span>))]
-            </span>Implementation::Fallback =&gt; {
+            Implementation::Fallback =&gt; {
                 gcm_nohw::ghash(xi, h_table.Htable[<span class="number">0</span>], input);
             }
         }
@@ -588,18 +648,21 @@
                 }
             }
 
-            <span class="attr">#[cfg(not(target_arch = <span class="string">"aarch64"</span>))]
-            </span>Implementation::Fallback =&gt; {
+            Implementation::Fallback =&gt; {
                 gcm_nohw::gmult(xi, h_table.Htable[<span class="number">0</span>]);
             }
         }
     }
 
-    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>pre_finish&lt;F&gt;(<span class="self">self</span>, f: F) -&gt; <span class="kw">super</span>::Tag
+    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>pre_finish&lt;F&gt;(<span class="kw-2">mut </span><span class="self">self</span>, f: F) -&gt; <span class="kw">super</span>::Tag
     <span class="kw">where
-        </span>F: FnOnce(Block) -&gt; <span class="kw">super</span>::Tag,
+        </span>F: FnOnce(Block, cpu::Features) -&gt; <span class="kw">super</span>::Tag,
     {
-        f(<span class="self">self</span>.inner.Xi.<span class="number">0</span>)
+        <span class="self">self</span>.update_block(Block::from(
+            [<span class="self">self</span>.aad_len.as_bits(), <span class="self">self</span>.in_out_len.as_bits()].map(u64::to_be_bytes),
+        ));
+
+        f(<span class="self">self</span>.inner.Xi.<span class="number">0</span>, <span class="self">self</span>.cpu_features)
     }
 
     <span class="attr">#[cfg(target_arch = <span class="string">"x86_64"</span>)]
@@ -608,6 +671,14 @@
             Implementation::CLMUL =&gt; has_avx_movbe(<span class="self">self</span>.cpu_features),
             <span class="kw">_ </span>=&gt; <span class="bool-val">false</span>,
         }
+    }
+
+    <span class="attr">#[cfg(target_arch = <span class="string">"aarch64"</span>)]
+    </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>is_clmul(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+        <span class="macro">matches!</span>(
+            detect_implementation(<span class="self">self</span>.cpu_features),
+            Implementation::CLMUL
+        )
     }
 }
 
@@ -666,8 +737,7 @@
     <span class="attr">#[cfg(any(target_arch = <span class="string">"aarch64"</span>, target_arch = <span class="string">"arm"</span>))]
     </span>NEON,
 
-    <span class="attr">#[cfg(not(target_arch = <span class="string">"aarch64"</span>))]
-    </span>Fallback,
+    Fallback,
 }
 
 <span class="attr">#[inline]
@@ -681,35 +751,29 @@
     </span>)))]
     </span><span class="kw">let </span>_cpu_features = cpu_features;
 
-    <span class="attr">#[cfg(any(
-        target_arch = <span class="string">"aarch64"</span>,
-        target_arch = <span class="string">"arm"</span>,
-        target_arch = <span class="string">"x86_64"</span>,
-        target_arch = <span class="string">"x86"
-    </span>))]
+    <span class="attr">#[cfg(any(target_arch = <span class="string">"aarch64"</span>, target_arch = <span class="string">"arm"</span>))]
     </span>{
-        <span class="kw">if </span>(cpu::intel::FXSR.available(cpu_features)
-            &amp;&amp; cpu::intel::PCLMULQDQ.available(cpu_features))
-            || cpu::arm::PMULL.available(cpu_features)
+        <span class="kw">if </span>cpu::arm::PMULL.available(cpu_features) {
+            <span class="kw">return </span>Implementation::CLMUL;
+        }
+    }
+
+    <span class="attr">#[cfg(any(target_arch = <span class="string">"x86_64"</span>, target_arch = <span class="string">"x86"</span>))]
+    </span>{
+        <span class="kw">if </span>cpu::intel::FXSR.available(cpu_features) &amp;&amp; cpu::intel::PCLMULQDQ.available(cpu_features)
         {
             <span class="kw">return </span>Implementation::CLMUL;
         }
     }
 
-    <span class="attr">#[cfg(target_arch = <span class="string">"arm"</span>)]
+    <span class="attr">#[cfg(any(target_arch = <span class="string">"aarch64"</span>, target_arch = <span class="string">"arm"</span>))]
     </span>{
         <span class="kw">if </span>cpu::arm::NEON.available(cpu_features) {
             <span class="kw">return </span>Implementation::NEON;
         }
     }
 
-    <span class="attr">#[cfg(target_arch = <span class="string">"aarch64"</span>)]
-    </span>{
-        <span class="kw">return </span>Implementation::NEON;
-    }
-
-    <span class="attr">#[cfg(not(target_arch = <span class="string">"aarch64"</span>))]
-    </span>Implementation::Fallback
+    Implementation::Fallback
 }
 
 <span class="attr">#[cfg(target_arch = <span class="string">"x86_64"</span>)]

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/http-0.2.11/src/uri/path.rs`."><title>path.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="http" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (8f9080db4 2024-05-09)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/http-1.1.0/src/uri/path.rs`."><title>path.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="http" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (98489f248 2024-06-06)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -562,6 +562,12 @@
 <a href="#562" id="562">562</a>
 <a href="#563" id="563">563</a>
 <a href="#564" id="564">564</a>
+<a href="#565" id="565">565</a>
+<a href="#566" id="566">566</a>
+<a href="#567" id="567">567</a>
+<a href="#568" id="568">568</a>
+<a href="#569" id="569">569</a>
+<a href="#570" id="570">570</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::convert::TryFrom;
 <span class="kw">use </span>std::str::FromStr;
 <span class="kw">use </span>std::{cmp, fmt, hash, str};
@@ -607,13 +613,14 @@
                     <span class="comment">// This is the range of bytes that don't need to be
                     // percent-encoded in the path. If it should have been
                     // percent-encoded, then error.
+                    </span><span class="attr">#[rustfmt::skip]
                     </span><span class="number">0x21 </span>|
                     <span class="number">0x24</span>..=<span class="number">0x3B </span>|
                     <span class="number">0x3D </span>|
                     <span class="number">0x40</span>..=<span class="number">0x5F </span>|
                     <span class="number">0x61</span>..=<span class="number">0x7A </span>|
                     <span class="number">0x7C </span>|
-                    <span class="number">0x7E </span>=&gt; {},
+                    <span class="number">0x7E </span>=&gt; {}
 
                     <span class="comment">// These are code points that are supposed to be
                     // percent-encoded in the path but there are clients
@@ -624,8 +631,9 @@
                     // For reference, those are code points that are used
                     // to send requests with JSON directly embedded in
                     // the URI path. Yes, those things happen for real.
+                    </span><span class="attr">#[rustfmt::skip]
                     </span><span class="string">b'"' </span>|
-                    <span class="string">b'{' </span>| <span class="string">b'}' </span>=&gt; {},
+                    <span class="string">b'{' </span>| <span class="string">b'}' </span>=&gt; {}
 
                     <span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(ErrorKind::InvalidUriChar.into()),
                 }
@@ -640,10 +648,11 @@
                         // See https://url.spec.whatwg.org/#query-state
                         //
                         // Allowed: 0x21 / 0x24 - 0x3B / 0x3D / 0x3F - 0x7E
+                        </span><span class="attr">#[rustfmt::skip]
                         </span><span class="number">0x21 </span>|
                         <span class="number">0x24</span>..=<span class="number">0x3B </span>|
                         <span class="number">0x3D </span>|
-                        <span class="number">0x3F</span>..=<span class="number">0x7E </span>=&gt; {},
+                        <span class="number">0x3F</span>..=<span class="number">0x7E </span>=&gt; {}
 
                         <span class="string">b'#' </span>=&gt; {
                             fragment = <span class="prelude-val">Some</span>(i);
@@ -662,7 +671,7 @@
 
         <span class="prelude-val">Ok</span>(PathAndQuery {
             data: <span class="kw">unsafe </span>{ ByteStr::from_utf8_unchecked(src) },
-            query: query,
+            query,
         })
     }
 
@@ -855,7 +864,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; TryFrom&lt;Vec&lt;u8&gt;&gt; <span class="kw">for </span>PathAndQuery {
+<span class="kw">impl </span>TryFrom&lt;Vec&lt;u8&gt;&gt; <span class="kw">for </span>PathAndQuery {
     <span class="kw">type </span>Error = InvalidUri;
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>try_from(vec: Vec&lt;u8&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
@@ -1119,7 +1128,10 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>json_is_fine() {
-        <span class="macro">assert_eq!</span>(<span class="string">r#"/{"bread":"baguette"}"#</span>, pq(<span class="string">r#"/{"bread":"baguette"}"#</span>).path());
+        <span class="macro">assert_eq!</span>(
+            <span class="string">r#"/{"bread":"baguette"}"#</span>,
+            pq(<span class="string">r#"/{"bread":"baguette"}"#</span>).path()
+        );
     }
 
     <span class="kw">fn </span>pq(s: <span class="kw-2">&amp;</span>str) -&gt; PathAndQuery {

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/time-0.3.31/src/parsing/component.rs`."><title>component.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="time" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (8f9080db4 2024-05-09)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="icon" href="https://avatars0.githubusercontent.com/u/55999857"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/time-0.3.36/src/parsing/component.rs`."><title>component.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="time" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (98489f248 2024-06-06)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="icon" href="https://avatars0.githubusercontent.com/u/55999857"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -343,9 +343,12 @@
 <a href="#343" id="343">343</a>
 <a href="#344" id="344">344</a>
 <a href="#345" id="345">345</a>
+<a href="#346" id="346">346</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Parsing implementations for all [`Component`](crate::format_description::Component)s.
 
 </span><span class="kw">use </span>core::num::{NonZeroU16, NonZeroU8};
+
+<span class="kw">use </span>num_conv::prelude::<span class="kw-2">*</span>;
 
 <span class="kw">use </span><span class="kw">crate</span>::convert::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">crate</span>::format_description::modifier;
@@ -370,14 +373,14 @@
             </span><span class="kw">let </span>ParsedItem(input, year) =
                 n_to_m_digits_padded::&lt;<span class="number">4</span>, <span class="number">6</span>, u32&gt;(modifiers.padding)(input)<span class="question-mark">?</span>;
             <span class="kw">match </span>sign {
-                <span class="prelude-val">Some</span>(<span class="string">b'-'</span>) =&gt; <span class="prelude-val">Some</span>(ParsedItem(input, -(year <span class="kw">as </span>i32))),
+                <span class="prelude-val">Some</span>(<span class="string">b'-'</span>) =&gt; <span class="prelude-val">Some</span>(ParsedItem(input, -year.cast_signed())),
                 <span class="prelude-val">None </span><span class="kw">if </span>modifiers.sign_is_mandatory || year &gt;= <span class="number">10_000 </span>=&gt; <span class="prelude-val">None</span>,
-                <span class="kw">_ </span>=&gt; <span class="prelude-val">Some</span>(ParsedItem(input, year <span class="kw">as </span>i32)),
+                <span class="kw">_ </span>=&gt; <span class="prelude-val">Some</span>(ParsedItem(input, year.cast_signed())),
             }
         }
-        modifier::YearRepr::LastTwo =&gt; {
-            <span class="prelude-val">Some</span>(exactly_n_digits_padded::&lt;<span class="number">2</span>, u32&gt;(modifiers.padding)(input)<span class="question-mark">?</span>.map(|v| v <span class="kw">as </span>i32))
-        }
+        modifier::YearRepr::LastTwo =&gt; <span class="prelude-val">Some</span>(
+            exactly_n_digits_padded::&lt;<span class="number">2</span>, u32&gt;(modifiers.padding)(input)<span class="question-mark">?</span>.map(|v| v.cast_signed()),
+        ),
     }
 }
 
@@ -588,11 +591,11 @@
         Nine =&gt; exactly_n_digits::&lt;<span class="number">9</span>, <span class="kw">_</span>&gt;(input)<span class="question-mark">?</span>,
         OneOrMore =&gt; {
             <span class="kw">let </span>ParsedItem(<span class="kw-2">mut </span>input, <span class="kw-2">mut </span>value) =
-                any_digit(input)<span class="question-mark">?</span>.map(|v| (v - <span class="string">b'0'</span>) <span class="kw">as </span>u32 * <span class="number">100_000_000</span>);
+                any_digit(input)<span class="question-mark">?</span>.map(|v| (v - <span class="string">b'0'</span>).extend::&lt;u32&gt;() * <span class="number">100_000_000</span>);
 
             <span class="kw">let </span><span class="kw-2">mut </span>multiplier = <span class="number">10_000_000</span>;
             <span class="kw">while let </span><span class="prelude-val">Some</span>(ParsedItem(new_input, digit)) = any_digit(input) {
-                value += (digit - <span class="string">b'0'</span>) <span class="kw">as </span>u32 * multiplier;
+                value += (digit - <span class="string">b'0'</span>).extend::&lt;u32&gt;() * multiplier;
                 input = new_input;
                 multiplier /= <span class="number">10</span>;
             }
@@ -614,9 +617,9 @@
     <span class="kw">let </span>ParsedItem(input, sign) = opt(sign)(input);
     <span class="kw">let </span>ParsedItem(input, hour) = exactly_n_digits_padded::&lt;<span class="number">2</span>, u8&gt;(modifiers.padding)(input)<span class="question-mark">?</span>;
     <span class="kw">match </span>sign {
-        <span class="prelude-val">Some</span>(<span class="string">b'-'</span>) =&gt; <span class="prelude-val">Some</span>(ParsedItem(input, (-(hour <span class="kw">as </span>i8), <span class="bool-val">true</span>))),
+        <span class="prelude-val">Some</span>(<span class="string">b'-'</span>) =&gt; <span class="prelude-val">Some</span>(ParsedItem(input, (-hour.cast_signed(), <span class="bool-val">true</span>))),
         <span class="prelude-val">None </span><span class="kw">if </span>modifiers.sign_is_mandatory =&gt; <span class="prelude-val">None</span>,
-        <span class="kw">_ </span>=&gt; <span class="prelude-val">Some</span>(ParsedItem(input, (hour <span class="kw">as </span>i8, <span class="bool-val">false</span>))),
+        <span class="kw">_ </span>=&gt; <span class="prelude-val">Some</span>(ParsedItem(input, (hour.cast_signed(), <span class="bool-val">false</span>))),
     }
 }
 
@@ -627,7 +630,7 @@
 ) -&gt; <span class="prelude-ty">Option</span>&lt;ParsedItem&lt;<span class="lifetime">'_</span>, i8&gt;&gt; {
     <span class="prelude-val">Some</span>(
         exactly_n_digits_padded::&lt;<span class="number">2</span>, u8&gt;(modifiers.padding)(input)<span class="question-mark">?
-            </span>.map(|offset_minute| offset_minute <span class="kw">as _</span>),
+            </span>.map(|offset_minute| offset_minute.cast_signed()),
     )
 }
 
@@ -638,7 +641,7 @@
 ) -&gt; <span class="prelude-ty">Option</span>&lt;ParsedItem&lt;<span class="lifetime">'_</span>, i8&gt;&gt; {
     <span class="prelude-val">Some</span>(
         exactly_n_digits_padded::&lt;<span class="number">2</span>, u8&gt;(modifiers.padding)(input)<span class="question-mark">?
-            </span>.map(|offset_second| offset_second <span class="kw">as _</span>),
+            </span>.map(|offset_second| offset_second.cast_signed()),
     )
 }
 <span class="comment">// endregion offset components
@@ -649,7 +652,7 @@
     modifiers: modifier::Ignore,
 ) -&gt; <span class="prelude-ty">Option</span>&lt;ParsedItem&lt;<span class="lifetime">'_</span>, ()&gt;&gt; {
     <span class="kw">let </span>modifier::Ignore { count } = modifiers;
-    <span class="kw">let </span>input = input.get((count.get() <span class="kw">as </span>usize)..)<span class="question-mark">?</span>;
+    <span class="kw">let </span>input = input.get((count.get().extend())..)<span class="question-mark">?</span>;
     <span class="prelude-val">Some</span>(ParsedItem(input, ()))
 }
 
@@ -660,20 +663,19 @@
 ) -&gt; <span class="prelude-ty">Option</span>&lt;ParsedItem&lt;<span class="lifetime">'_</span>, i128&gt;&gt; {
     <span class="kw">let </span>ParsedItem(input, sign) = opt(sign)(input);
     <span class="kw">let </span>ParsedItem(input, nano_timestamp) = <span class="kw">match </span>modifiers.precision {
-        modifier::UnixTimestampPrecision::Second =&gt; {
-            n_to_m_digits::&lt;<span class="number">1</span>, <span class="number">14</span>, u128&gt;(input)<span class="question-mark">?</span>.map(|val| val * Nanosecond::per(Second) <span class="kw">as </span>u128)
-        }
+        modifier::UnixTimestampPrecision::Second =&gt; n_to_m_digits::&lt;<span class="number">1</span>, <span class="number">14</span>, u128&gt;(input)<span class="question-mark">?
+            </span>.map(|val| val * Nanosecond::per(Second).extend::&lt;u128&gt;()),
         modifier::UnixTimestampPrecision::Millisecond =&gt; n_to_m_digits::&lt;<span class="number">1</span>, <span class="number">17</span>, u128&gt;(input)<span class="question-mark">?
-            </span>.map(|val| val * Nanosecond::per(Millisecond) <span class="kw">as </span>u128),
+            </span>.map(|val| val * Nanosecond::per(Millisecond).extend::&lt;u128&gt;()),
         modifier::UnixTimestampPrecision::Microsecond =&gt; n_to_m_digits::&lt;<span class="number">1</span>, <span class="number">20</span>, u128&gt;(input)<span class="question-mark">?
-            </span>.map(|val| val * Nanosecond::per(Microsecond) <span class="kw">as </span>u128),
+            </span>.map(|val| val * Nanosecond::per(Microsecond).extend::&lt;u128&gt;()),
         modifier::UnixTimestampPrecision::Nanosecond =&gt; n_to_m_digits::&lt;<span class="number">1</span>, <span class="number">23</span>, <span class="kw">_</span>&gt;(input)<span class="question-mark">?</span>,
     };
 
     <span class="kw">match </span>sign {
-        <span class="prelude-val">Some</span>(<span class="string">b'-'</span>) =&gt; <span class="prelude-val">Some</span>(ParsedItem(input, -(nano_timestamp <span class="kw">as </span>i128))),
+        <span class="prelude-val">Some</span>(<span class="string">b'-'</span>) =&gt; <span class="prelude-val">Some</span>(ParsedItem(input, -nano_timestamp.cast_signed())),
         <span class="prelude-val">None </span><span class="kw">if </span>modifiers.sign_is_mandatory =&gt; <span class="prelude-val">None</span>,
-        <span class="kw">_ </span>=&gt; <span class="prelude-val">Some</span>(ParsedItem(input, nano_timestamp <span class="kw">as _</span>)),
+        <span class="kw">_ </span>=&gt; <span class="prelude-val">Some</span>(ParsedItem(input, nano_timestamp.cast_signed())),
     }
 }
 

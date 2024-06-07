@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["DeframerError"],"struct":["Deframed","MessageDeframer"]};
+window.SIDEBAR_ITEMS = {"struct":["DeframerVecBuffer","MessageDeframer"]};

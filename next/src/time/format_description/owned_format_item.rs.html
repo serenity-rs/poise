@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/time-0.3.31/src/format_description/owned_format_item.rs`."><title>owned_format_item.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="time" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (8f9080db4 2024-05-09)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="icon" href="https://avatars0.githubusercontent.com/u/55999857"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/time-0.3.36/src/format_description/owned_format_item.rs`."><title>owned_format_item.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="time" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (98489f248 2024-06-06)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="icon" href="https://avatars0.githubusercontent.com/u/55999857"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -160,6 +160,8 @@
 <a href="#160" id="160">160</a>
 <a href="#161" id="161">161</a>
 <a href="#162" id="162">162</a>
+<a href="#163" id="163">163</a>
+<a href="#164" id="164">164</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A format item with owned data.
 
 </span><span class="kw">use </span>alloc::boxed::Box;
@@ -168,7 +170,7 @@
 <span class="kw">use </span>core::fmt;
 
 <span class="kw">use </span><span class="kw">crate</span>::error;
-<span class="kw">use </span><span class="kw">crate</span>::format_description::{Component, FormatItem};
+<span class="kw">use </span><span class="kw">crate</span>::format_description::{BorrowedFormatItem, Component};
 
 <span class="doccomment">/// A complete description of how to format and parse a type.
 </span><span class="attr">#[non_exhaustive]
@@ -176,8 +178,8 @@
 </span><span class="kw">pub enum </span>OwnedFormatItem {
     <span class="doccomment">/// Bytes that are formatted as-is.
     ///
-    /// **Note**: If you call the `format` method that returns a `String`, these bytes will be
-    /// passed through `String::from_utf8_lossy`.
+    /// **Note**: These bytes **should** be UTF-8, but are not required to be. The value is passed
+    /// through `String::from_utf8_lossy` when necessary.
     </span>Literal(Box&lt;[u8]&gt;),
     <span class="doccomment">/// A minimal representation of a single non-literal item.
     </span>Component(Component),
@@ -208,18 +210,20 @@
 }
 
 <span class="comment">// region: conversions from FormatItem
-</span><span class="kw">impl </span>From&lt;FormatItem&lt;<span class="lifetime">'_</span>&gt;&gt; <span class="kw">for </span>OwnedFormatItem {
-    <span class="kw">fn </span>from(item: FormatItem&lt;<span class="lifetime">'_</span>&gt;) -&gt; <span class="self">Self </span>{
+</span><span class="kw">impl </span>From&lt;BorrowedFormatItem&lt;<span class="lifetime">'_</span>&gt;&gt; <span class="kw">for </span>OwnedFormatItem {
+    <span class="kw">fn </span>from(item: BorrowedFormatItem&lt;<span class="lifetime">'_</span>&gt;) -&gt; <span class="self">Self </span>{
         (<span class="kw-2">&amp;</span>item).into()
     }
 }
 
-<span class="kw">impl </span>From&lt;<span class="kw-2">&amp;</span>FormatItem&lt;<span class="lifetime">'_</span>&gt;&gt; <span class="kw">for </span>OwnedFormatItem {
-    <span class="kw">fn </span>from(item: <span class="kw-2">&amp;</span>FormatItem&lt;<span class="lifetime">'_</span>&gt;) -&gt; <span class="self">Self </span>{
+<span class="kw">impl </span>From&lt;<span class="kw-2">&amp;</span>BorrowedFormatItem&lt;<span class="lifetime">'_</span>&gt;&gt; <span class="kw">for </span>OwnedFormatItem {
+    <span class="kw">fn </span>from(item: <span class="kw-2">&amp;</span>BorrowedFormatItem&lt;<span class="lifetime">'_</span>&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">match </span>item {
-            FormatItem::Literal(literal) =&gt; <span class="self">Self</span>::Literal(literal.to_vec().into_boxed_slice()),
-            FormatItem::Component(component) =&gt; <span class="self">Self</span>::Component(<span class="kw-2">*</span>component),
-            FormatItem::Compound(compound) =&gt; <span class="self">Self</span>::Compound(
+            BorrowedFormatItem::Literal(literal) =&gt; {
+                <span class="self">Self</span>::Literal(literal.to_vec().into_boxed_slice())
+            }
+            BorrowedFormatItem::Component(component) =&gt; <span class="self">Self</span>::Component(<span class="kw-2">*</span>component),
+            BorrowedFormatItem::Compound(compound) =&gt; <span class="self">Self</span>::Compound(
                 compound
                     .iter()
                     .cloned()
@@ -227,8 +231,8 @@
                     .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;()
                     .into_boxed_slice(),
             ),
-            FormatItem::Optional(item) =&gt; <span class="self">Self</span>::Optional(Box::new((<span class="kw-2">*</span>item).into())),
-            FormatItem::First(items) =&gt; <span class="self">Self</span>::First(
+            BorrowedFormatItem::Optional(item) =&gt; <span class="self">Self</span>::Optional(Box::new((<span class="kw-2">*</span>item).into())),
+            BorrowedFormatItem::First(items) =&gt; <span class="self">Self</span>::First(
                 items
                     .iter()
                     .cloned()
@@ -240,13 +244,13 @@
     }
 }
 
-<span class="kw">impl </span>From&lt;Vec&lt;FormatItem&lt;<span class="lifetime">'_</span>&gt;&gt;&gt; <span class="kw">for </span>OwnedFormatItem {
-    <span class="kw">fn </span>from(items: Vec&lt;FormatItem&lt;<span class="lifetime">'_</span>&gt;&gt;) -&gt; <span class="self">Self </span>{
+<span class="kw">impl </span>From&lt;Vec&lt;BorrowedFormatItem&lt;<span class="lifetime">'_</span>&gt;&gt;&gt; <span class="kw">for </span>OwnedFormatItem {
+    <span class="kw">fn </span>from(items: Vec&lt;BorrowedFormatItem&lt;<span class="lifetime">'_</span>&gt;&gt;) -&gt; <span class="self">Self </span>{
         items.as_slice().into()
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T: AsRef&lt;[FormatItem&lt;<span class="lifetime">'a</span>&gt;]&gt; + <span class="question-mark">?</span>Sized&gt; From&lt;<span class="kw-2">&amp;</span>T&gt; <span class="kw">for </span>OwnedFormatItem {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>, T: AsRef&lt;[BorrowedFormatItem&lt;<span class="lifetime">'a</span>&gt;]&gt; + <span class="question-mark">?</span>Sized&gt; From&lt;<span class="kw-2">&amp;</span>T&gt; <span class="kw">for </span>OwnedFormatItem {
     <span class="kw">fn </span>from(items: <span class="kw-2">&amp;</span>T) -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>::Compound(
             items

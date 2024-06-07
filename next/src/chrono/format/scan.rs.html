@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/chrono-0.4.31/src/format/scan.rs`."><title>scan.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="chrono" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (8f9080db4 2024-05-09)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/chrono-0.4.38/src/format/scan.rs`."><title>scan.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="chrono" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (98489f248 2024-06-06)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -432,6 +432,8 @@
 <a href="#432" id="432">432</a>
 <a href="#433" id="433">433</a>
 <a href="#434" id="434">434</a>
+<a href="#435" id="435">435</a>
+<a href="#436" id="436">436</a>
 </pre></div><pre class="rust"><code><span class="comment">// This is a part of Chrono.
 // See README.md and LICENSE.txt for details.
 
@@ -708,7 +710,7 @@
     };
     s = <span class="kw">match </span>s.len() {
         len <span class="kw">if </span>len &gt;= <span class="number">2 </span>=&gt; <span class="kw-2">&amp;</span>s[<span class="number">2</span>..],
-        len <span class="kw">if </span>len == <span class="number">0 </span>=&gt; s,
+        <span class="number">0 </span>=&gt; s,
         <span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(TOO_SHORT),
     };
 
@@ -721,37 +723,39 @@
 /// See [RFC 2822 Section 4.3].
 ///
 /// [RFC 2822 Section 4.3]: https://tools.ietf.org/html/rfc2822#section-4.3
-</span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>timezone_offset_2822(s: <span class="kw-2">&amp;</span>str) -&gt; ParseResult&lt;(<span class="kw-2">&amp;</span>str, <span class="prelude-ty">Option</span>&lt;i32&gt;)&gt; {
+</span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>timezone_offset_2822(s: <span class="kw-2">&amp;</span>str) -&gt; ParseResult&lt;(<span class="kw-2">&amp;</span>str, i32)&gt; {
     <span class="comment">// tries to parse legacy time zone names
     </span><span class="kw">let </span>upto = s.as_bytes().iter().position(|<span class="kw-2">&amp;</span>c| !c.is_ascii_alphabetic()).unwrap_or(s.len());
     <span class="kw">if </span>upto &gt; <span class="number">0 </span>{
         <span class="kw">let </span>name = <span class="kw-2">&amp;</span>s.as_bytes()[..upto];
         <span class="kw">let </span>s = <span class="kw-2">&amp;</span>s[upto..];
-        <span class="kw">let </span>offset_hours = |o| <span class="prelude-val">Ok</span>((s, <span class="prelude-val">Some</span>(o * <span class="number">3600</span>)));
-        <span class="kw">if </span>name.eq_ignore_ascii_case(<span class="string">b"gmt"</span>) || name.eq_ignore_ascii_case(<span class="string">b"ut"</span>) {
-            offset_hours(<span class="number">0</span>)
+        <span class="kw">let </span>offset_hours = |o| <span class="prelude-val">Ok</span>((s, o * <span class="number">3600</span>));
+        <span class="comment">// RFC 2822 requires support for some named North America timezones, a small subset of all
+        // named timezones.
+        </span><span class="kw">if </span>name.eq_ignore_ascii_case(<span class="string">b"gmt"</span>)
+            || name.eq_ignore_ascii_case(<span class="string">b"ut"</span>)
+            || name.eq_ignore_ascii_case(<span class="string">b"z"</span>)
+        {
+            <span class="kw">return </span>offset_hours(<span class="number">0</span>);
         } <span class="kw">else if </span>name.eq_ignore_ascii_case(<span class="string">b"edt"</span>) {
-            offset_hours(-<span class="number">4</span>)
+            <span class="kw">return </span>offset_hours(-<span class="number">4</span>);
         } <span class="kw">else if </span>name.eq_ignore_ascii_case(<span class="string">b"est"</span>) || name.eq_ignore_ascii_case(<span class="string">b"cdt"</span>) {
-            offset_hours(-<span class="number">5</span>)
+            <span class="kw">return </span>offset_hours(-<span class="number">5</span>);
         } <span class="kw">else if </span>name.eq_ignore_ascii_case(<span class="string">b"cst"</span>) || name.eq_ignore_ascii_case(<span class="string">b"mdt"</span>) {
-            offset_hours(-<span class="number">6</span>)
+            <span class="kw">return </span>offset_hours(-<span class="number">6</span>);
         } <span class="kw">else if </span>name.eq_ignore_ascii_case(<span class="string">b"mst"</span>) || name.eq_ignore_ascii_case(<span class="string">b"pdt"</span>) {
-            offset_hours(-<span class="number">7</span>)
+            <span class="kw">return </span>offset_hours(-<span class="number">7</span>);
         } <span class="kw">else if </span>name.eq_ignore_ascii_case(<span class="string">b"pst"</span>) {
-            offset_hours(-<span class="number">8</span>)
+            <span class="kw">return </span>offset_hours(-<span class="number">8</span>);
         } <span class="kw">else if </span>name.len() == <span class="number">1 </span>{
-            <span class="kw">match </span>name[<span class="number">0</span>] {
+            <span class="kw">if let </span><span class="string">b'a'</span>..=<span class="string">b'i' </span>| <span class="string">b'k'</span>..=<span class="string">b'y' </span>| <span class="string">b'A'</span>..=<span class="string">b'I' </span>| <span class="string">b'K'</span>..=<span class="string">b'Y' </span>= name[<span class="number">0</span>] {
                 <span class="comment">// recommended by RFC 2822: consume but treat it as -0000
-                </span><span class="string">b'a'</span>..=<span class="string">b'i' </span>| <span class="string">b'k'</span>..=<span class="string">b'z' </span>| <span class="string">b'A'</span>..=<span class="string">b'I' </span>| <span class="string">b'K'</span>..=<span class="string">b'Z' </span>=&gt; offset_hours(<span class="number">0</span>),
-                <span class="kw">_ </span>=&gt; <span class="prelude-val">Ok</span>((s, <span class="prelude-val">None</span>)),
+                </span><span class="kw">return </span><span class="prelude-val">Ok</span>((s, <span class="number">0</span>));
             }
-        } <span class="kw">else </span>{
-            <span class="prelude-val">Ok</span>((s, <span class="prelude-val">None</span>))
         }
+        <span class="prelude-val">Err</span>(INVALID)
     } <span class="kw">else </span>{
-        <span class="kw">let </span>(s_, offset) = timezone_offset(s, |s| <span class="prelude-val">Ok</span>(s), <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>)<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>((s_, <span class="prelude-val">Some</span>(offset)))
+        timezone_offset(s, |s| <span class="prelude-val">Ok</span>(s), <span class="bool-val">false</span>, <span class="bool-val">false</span>, <span class="bool-val">false</span>)
     }
 }
 
@@ -830,11 +834,11 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_timezone_offset_2822() {
-        <span class="macro">assert_eq!</span>(timezone_offset_2822(<span class="string">"cSt"</span>).unwrap(), (<span class="string">""</span>, <span class="prelude-val">Some</span>(-<span class="number">21600</span>)));
-        <span class="macro">assert_eq!</span>(timezone_offset_2822(<span class="string">"pSt"</span>).unwrap(), (<span class="string">""</span>, <span class="prelude-val">Some</span>(-<span class="number">28800</span>)));
-        <span class="macro">assert_eq!</span>(timezone_offset_2822(<span class="string">"mSt"</span>).unwrap(), (<span class="string">""</span>, <span class="prelude-val">Some</span>(-<span class="number">25200</span>)));
-        <span class="macro">assert_eq!</span>(timezone_offset_2822(<span class="string">"-1551"</span>).unwrap(), (<span class="string">""</span>, <span class="prelude-val">Some</span>(-<span class="number">57060</span>)));
-        <span class="macro">assert_eq!</span>(timezone_offset_2822(<span class="string">"Gp"</span>).unwrap(), (<span class="string">""</span>, <span class="prelude-val">None</span>));
+        <span class="macro">assert_eq!</span>(timezone_offset_2822(<span class="string">"cSt"</span>).unwrap(), (<span class="string">""</span>, -<span class="number">21600</span>));
+        <span class="macro">assert_eq!</span>(timezone_offset_2822(<span class="string">"pSt"</span>).unwrap(), (<span class="string">""</span>, -<span class="number">28800</span>));
+        <span class="macro">assert_eq!</span>(timezone_offset_2822(<span class="string">"mSt"</span>).unwrap(), (<span class="string">""</span>, -<span class="number">25200</span>));
+        <span class="macro">assert_eq!</span>(timezone_offset_2822(<span class="string">"-1551"</span>).unwrap(), (<span class="string">""</span>, -<span class="number">57060</span>));
+        <span class="macro">assert_eq!</span>(timezone_offset_2822(<span class="string">"Gp"</span>), <span class="prelude-val">Err</span>(INVALID));
     }
 
     <span class="attr">#[test]

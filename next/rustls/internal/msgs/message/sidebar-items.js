@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["MessageError","MessagePayload"],"struct":["BorrowedPlainMessage","Message","OpaqueMessage","PlainMessage"]};
+window.SIDEBAR_ITEMS = {"enum":["MessagePayload"],"struct":["Message","OpaqueMessage","PlainMessage"]};

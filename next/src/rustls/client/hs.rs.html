@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-0.21.10/src/client/hs.rs`."><title>hs.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="rustls" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (8f9080db4 2024-05-09)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-0.22.4/src/client/hs.rs`."><title>hs.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="rustls" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (98489f248 2024-06-06)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -903,41 +903,28 @@
 <a href="#903" id="903">903</a>
 <a href="#904" id="904">904</a>
 <a href="#905" id="905">905</a>
-<a href="#906" id="906">906</a>
-<a href="#907" id="907">907</a>
-<a href="#908" id="908">908</a>
-<a href="#909" id="909">909</a>
-<a href="#910" id="910">910</a>
-<a href="#911" id="911">911</a>
-<a href="#912" id="912">912</a>
-<a href="#913" id="913">913</a>
-<a href="#914" id="914">914</a>
-<a href="#915" id="915">915</a>
-<a href="#916" id="916">916</a>
-<a href="#917" id="917">917</a>
 </pre></div><pre class="rust"><code><span class="attr">#[cfg(feature = <span class="string">"logging"</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::bs_debug;
 <span class="kw">use </span><span class="kw">crate</span>::check::inappropriate_handshake_message;
 <span class="kw">use </span><span class="kw">crate</span>::common_state::{CommonState, State};
 <span class="kw">use </span><span class="kw">crate</span>::conn::ConnectionRandoms;
+<span class="kw">use </span><span class="kw">crate</span>::crypto::ActiveKeyExchange;
 <span class="kw">use </span><span class="kw">crate</span>::enums::{AlertDescription, CipherSuite, ContentType, HandshakeType, ProtocolVersion};
 <span class="kw">use </span><span class="kw">crate</span>::error::{Error, PeerIncompatible, PeerMisbehaved};
 <span class="kw">use </span><span class="kw">crate</span>::hash_hs::HandshakeHashBuffer;
-<span class="kw">use </span><span class="kw">crate</span>::kx;
 <span class="attr">#[cfg(feature = <span class="string">"logging"</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::log::{debug, trace};
 <span class="kw">use </span><span class="kw">crate</span>::msgs::base::Payload;
 <span class="kw">use </span><span class="kw">crate</span>::msgs::enums::{Compression, ExtensionType};
 <span class="kw">use </span><span class="kw">crate</span>::msgs::enums::{ECPointFormat, PSKKeyExchangeMode};
 <span class="kw">use </span><span class="kw">crate</span>::msgs::handshake::ConvertProtocolNameList;
-<span class="kw">use </span><span class="kw">crate</span>::msgs::handshake::{CertificateStatusRequest, ClientSessionTicket, Sct};
+<span class="kw">use </span><span class="kw">crate</span>::msgs::handshake::{CertificateStatusRequest, ClientSessionTicket};
 <span class="kw">use </span><span class="kw">crate</span>::msgs::handshake::{ClientExtension, HasServerExtensions};
 <span class="kw">use </span><span class="kw">crate</span>::msgs::handshake::{ClientHelloPayload, HandshakeMessagePayload, HandshakePayload};
 <span class="kw">use </span><span class="kw">crate</span>::msgs::handshake::{HelloRetryRequest, KeyShareEntry};
 <span class="kw">use </span><span class="kw">crate</span>::msgs::handshake::{Random, SessionId};
 <span class="kw">use </span><span class="kw">crate</span>::msgs::message::{Message, MessagePayload};
 <span class="kw">use </span><span class="kw">crate</span>::msgs::persist;
-<span class="kw">use </span><span class="kw">crate</span>::ticketer::TimeBase;
 <span class="kw">use </span><span class="kw">crate</span>::tls13::key_schedule::KeyScheduleEarly;
 <span class="kw">use </span><span class="kw">crate</span>::SupportedCipherSuite;
 
@@ -946,19 +933,25 @@
 <span class="kw">use </span><span class="kw">super</span>::Tls12Resumption;
 <span class="kw">use </span><span class="kw">crate</span>::client::client_conn::ClientConnectionData;
 <span class="kw">use </span><span class="kw">crate</span>::client::common::ClientHelloDetails;
-<span class="kw">use </span><span class="kw">crate</span>::client::{tls13, ClientConfig, ServerName};
+<span class="kw">use </span><span class="kw">crate</span>::client::{tls13, ClientConfig};
 
-<span class="kw">use </span>std::ops::Deref;
-<span class="kw">use </span>std::sync::Arc;
+<span class="kw">use </span>pki_types::{ServerName, UnixTime};
+
+<span class="kw">use </span>alloc::borrow::ToOwned;
+<span class="kw">use </span>alloc::boxed::Box;
+<span class="kw">use </span>alloc::sync::Arc;
+<span class="kw">use </span>alloc::vec;
+<span class="kw">use </span>alloc::vec::Vec;
+<span class="kw">use </span>core::ops::Deref;
 
 <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">type </span>NextState = Box&lt;<span class="kw">dyn </span>State&lt;ClientConnectionData&gt;&gt;;
 <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">type </span>NextStateOrError = <span class="prelude-ty">Result</span>&lt;NextState, Error&gt;;
 <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">type </span>ClientContext&lt;<span class="lifetime">'a</span>&gt; = <span class="kw">crate</span>::common_state::Context&lt;<span class="lifetime">'a</span>, ClientConnectionData&gt;;
 
 <span class="kw">fn </span>find_session(
-    server_name: <span class="kw-2">&amp;</span>ServerName,
+    server_name: <span class="kw-2">&amp;</span>ServerName&lt;<span class="lifetime">'static</span>&gt;,
     config: <span class="kw-2">&amp;</span>ClientConfig,
-    <span class="attr">#[cfg(feature = <span class="string">"quic"</span>)] </span>cx: <span class="kw-2">&amp;mut </span>ClientContext&lt;<span class="lifetime">'_</span>&gt;,
+    cx: <span class="kw-2">&amp;mut </span>ClientContext&lt;<span class="lifetime">'_</span>&gt;,
 ) -&gt; <span class="prelude-ty">Option</span>&lt;persist::Retrieved&lt;ClientSessionValue&gt;&gt; {
     <span class="attr">#[allow(clippy::let_and_return, clippy::unnecessary_lazy_evaluations)]
     </span><span class="kw">let </span>found = config
@@ -980,7 +973,7 @@
             </span><span class="prelude-val">None
         </span>})
         .and_then(|resuming| {
-            <span class="kw">let </span>retrieved = persist::Retrieved::new(resuming, TimeBase::now().ok()<span class="question-mark">?</span>);
+            <span class="kw">let </span>retrieved = persist::Retrieved::new(resuming, UnixTime::now());
             <span class="kw">match </span>retrieved.has_expired() {
                 <span class="bool-val">false </span>=&gt; <span class="prelude-val">Some</span>(retrieved),
                 <span class="bool-val">true </span>=&gt; <span class="prelude-val">None</span>,
@@ -991,8 +984,7 @@
             <span class="prelude-val">None
         </span>});
 
-    <span class="attr">#[cfg(feature = <span class="string">"quic"</span>)]
-    </span><span class="kw">if let </span><span class="prelude-val">Some</span>(resuming) = <span class="kw-2">&amp;</span>found {
+    <span class="kw">if let </span><span class="prelude-val">Some</span>(resuming) = <span class="kw-2">&amp;</span>found {
         <span class="kw">if </span>cx.common.is_quic() {
             cx.common.quic.params = resuming
                 .tls13()
@@ -1004,7 +996,7 @@
 }
 
 <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>start_handshake(
-    server_name: ServerName,
+    server_name: ServerName&lt;<span class="lifetime">'static</span>&gt;,
     extra_exts: Vec&lt;ClientExtension&gt;,
     config: Arc&lt;ClientConfig&gt;,
     cx: <span class="kw-2">&amp;mut </span>ClientContext&lt;<span class="lifetime">'_</span>&gt;,
@@ -1017,12 +1009,7 @@
         transcript_buffer.set_client_auth_enabled();
     }
 
-    <span class="kw">let </span><span class="kw-2">mut </span>resuming = find_session(
-        <span class="kw-2">&amp;</span>server_name,
-        <span class="kw-2">&amp;</span>config,
-        <span class="attr">#[cfg(feature = <span class="string">"quic"</span>)]
-        </span>cx,
-    );
+    <span class="kw">let </span><span class="kw-2">mut </span>resuming = find_session(<span class="kw-2">&amp;</span>server_name, <span class="kw-2">&amp;</span>config, cx);
 
     <span class="kw">let </span>key_share = <span class="kw">if </span>config.supports_version(ProtocolVersion::TLSv1_3) {
         <span class="prelude-val">Some</span>(tls13::initial_key_share(<span class="kw-2">&amp;</span>config, <span class="kw-2">&amp;</span>server_name)<span class="question-mark">?</span>)
@@ -1039,7 +1026,7 @@
             // we're  doing an abbreviated handshake.  See section 3.4 in
             // RFC5077.
             </span><span class="kw">if </span>!inner.ticket().is_empty() {
-                inner.session_id = SessionId::random()<span class="question-mark">?</span>;
+                inner.session_id = SessionId::random(config.provider.secure_random)<span class="question-mark">?</span>;
             }
             session_id = <span class="prelude-val">Some</span>(inner.session_id);
         }
@@ -1055,21 +1042,21 @@
         <span class="prelude-val">Some</span>(session_id) =&gt; session_id,
         <span class="prelude-val">None </span><span class="kw">if </span>cx.common.is_quic() =&gt; SessionId::empty(),
         <span class="prelude-val">None </span><span class="kw">if </span>!config.supports_version(ProtocolVersion::TLSv1_3) =&gt; SessionId::empty(),
-        <span class="prelude-val">None </span>=&gt; SessionId::random()<span class="question-mark">?</span>,
+        <span class="prelude-val">None </span>=&gt; SessionId::random(config.provider.secure_random)<span class="question-mark">?</span>,
     };
 
-    <span class="kw">let </span>may_send_sct_list = config.verifier.request_scts();
+    <span class="kw">let </span>random = Random::new(config.provider.secure_random)<span class="question-mark">?</span>;
+
     <span class="prelude-val">Ok</span>(emit_client_hello_for_retry(
         transcript_buffer,
         <span class="prelude-val">None</span>,
         key_share,
         extra_exts,
-        may_send_sct_list,
         <span class="prelude-val">None</span>,
         ClientHelloInput {
             config,
             resuming,
-            random: Random::new()<span class="question-mark">?</span>,
+            random,
             <span class="attr">#[cfg(feature = <span class="string">"tls12"</span>)]
             </span>using_ems: <span class="bool-val">false</span>,
             sent_tls13_fake_ccs: <span class="bool-val">false</span>,
@@ -1085,7 +1072,7 @@
     input: ClientHelloInput,
     transcript_buffer: HandshakeHashBuffer,
     early_key_schedule: <span class="prelude-ty">Option</span>&lt;KeyScheduleEarly&gt;,
-    offered_key_share: <span class="prelude-ty">Option</span>&lt;kx::KeyExchange&gt;,
+    offered_key_share: <span class="prelude-ty">Option</span>&lt;Box&lt;<span class="kw">dyn </span>ActiveKeyExchange&gt;&gt;,
     suite: <span class="prelude-ty">Option</span>&lt;SupportedCipherSuite&gt;,
 }
 
@@ -1103,15 +1090,14 @@
     sent_tls13_fake_ccs: bool,
     hello: ClientHelloDetails,
     session_id: SessionId,
-    server_name: ServerName,
+    server_name: ServerName&lt;<span class="lifetime">'static</span>&gt;,
 }
 
 <span class="kw">fn </span>emit_client_hello_for_retry(
     <span class="kw-2">mut </span>transcript_buffer: HandshakeHashBuffer,
     retryreq: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>HelloRetryRequest&gt;,
-    key_share: <span class="prelude-ty">Option</span>&lt;kx::KeyExchange&gt;,
+    key_share: <span class="prelude-ty">Option</span>&lt;Box&lt;<span class="kw">dyn </span>ActiveKeyExchange&gt;&gt;,
     extra_exts: Vec&lt;ClientExtension&gt;,
-    may_send_sct_list: bool,
     suite: <span class="prelude-ty">Option</span>&lt;SupportedCipherSuite&gt;,
     <span class="kw-2">mut </span>input: ClientHelloInput,
     cx: <span class="kw-2">&amp;mut </span>ClientContext&lt;<span class="lifetime">'_</span>&gt;,
@@ -1134,12 +1120,13 @@
 
     <span class="kw">let </span><span class="kw-2">mut </span>exts = <span class="macro">vec!</span>[
         ClientExtension::SupportedVersions(supported_versions),
-        ClientExtension::ECPointFormats(ECPointFormat::SUPPORTED.to_vec()),
+        ClientExtension::EcPointFormats(ECPointFormat::SUPPORTED.to_vec()),
         ClientExtension::NamedGroups(
             config
+                .provider
                 .kx_groups
                 .iter()
-                .map(|skxg| skxg.name)
+                .map(|skxg| skxg.name())
                 .collect(),
         ),
         ClientExtension::SignatureAlgorithms(
@@ -1151,17 +1138,14 @@
         ClientExtension::CertificateStatusRequest(CertificateStatusRequest::build_ocsp()),
     ];
 
-    <span class="kw">if let </span>(<span class="prelude-val">Some</span>(sni_name), <span class="bool-val">true</span>) = (input.server_name.for_sni(), config.enable_sni) {
-        exts.push(ClientExtension::make_sni(sni_name));
-    }
-
-    <span class="kw">if </span>may_send_sct_list {
-        exts.push(ClientExtension::SignedCertificateTimestampRequest);
+    <span class="kw">if let </span>(ServerName::DnsName(dns), <span class="bool-val">true</span>) = (<span class="kw-2">&amp;</span>input.server_name, config.enable_sni) {
+        <span class="comment">// We only want to send the SNI extension if the server name contains a DNS name.
+        </span>exts.push(ClientExtension::make_sni(dns));
     }
 
     <span class="kw">if let </span><span class="prelude-val">Some</span>(key_share) = <span class="kw-2">&amp;</span>key_share {
         <span class="macro">debug_assert!</span>(support_tls13);
-        <span class="kw">let </span>key_share = KeyShareEntry::new(key_share.group(), key_share.pubkey.as_ref());
+        <span class="kw">let </span>key_share = KeyShareEntry::new(key_share.group(), key_share.pub_key());
         exts.push(ClientExtension::KeyShare(<span class="macro">vec!</span>[key_share]));
     }
 
@@ -1199,9 +1183,13 @@
         .collect();
 
     <span class="kw">let </span><span class="kw-2">mut </span>cipher_suites: Vec&lt;<span class="kw">_</span>&gt; = config
+        .provider
         .cipher_suites
         .iter()
-        .map(|cs| cs.suite())
+        .filter_map(|cs| <span class="kw">match </span>cs.usable_for_protocol(cx.common.protocol) {
+            <span class="bool-val">true </span>=&gt; <span class="prelude-val">Some</span>(cs.suite()),
+            <span class="bool-val">false </span>=&gt; <span class="prelude-val">None</span>,
+        })
         .collect();
     <span class="comment">// We don't do renegotiation at all, in fact.
     </span>cipher_suites.push(CipherSuite::TLS_EMPTY_RENEGOTIATION_INFO_SCSV);
@@ -1370,20 +1358,17 @@
         }
     }
 
-    <span class="attr">#[cfg(feature = <span class="string">"quic"</span>)]
-    </span>{
-        <span class="comment">// RFC 9001 says: "While ALPN only specifies that servers use this alert, QUIC clients MUST
-        // use error 0x0178 to terminate a connection when ALPN negotiation fails." We judge that
-        // the user intended to use ALPN (rather than some out-of-band protocol negotiation
-        // mechanism) iff any ALPN protocols were configured. This defends against badly-behaved
-        // servers which accept a connection that requires an application-layer protocol they do not
-        // understand.
-        </span><span class="kw">if </span>common.is_quic() &amp;&amp; common.alpn_protocol.is_none() &amp;&amp; !config.alpn_protocols.is_empty() {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(common.send_fatal_alert(
-                AlertDescription::NoApplicationProtocol,
-                Error::NoApplicationProtocol,
-            ));
-        }
+    <span class="comment">// RFC 9001 says: "While ALPN only specifies that servers use this alert, QUIC clients MUST
+    // use error 0x0178 to terminate a connection when ALPN negotiation fails." We judge that
+    // the user intended to use ALPN (rather than some out-of-band protocol negotiation
+    // mechanism) iff any ALPN protocols were configured. This defends against badly-behaved
+    // servers which accept a connection that requires an application-layer protocol they do not
+    // understand.
+    </span><span class="kw">if </span>common.is_quic() &amp;&amp; common.alpn_protocol.is_none() &amp;&amp; !config.alpn_protocols.is_empty() {
+        <span class="kw">return </span><span class="prelude-val">Err</span>(common.send_fatal_alert(
+            AlertDescription::NoApplicationProtocol,
+            Error::NoApplicationProtocol,
+        ));
     }
 
     <span class="macro">debug!</span>(
@@ -1394,13 +1379,6 @@
             .map(|v| bs_debug::BsDebug(v))
     );
     <span class="prelude-val">Ok</span>(())
-}
-
-<span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>sct_list_is_invalid(scts: <span class="kw-2">&amp;</span>[Sct]) -&gt; bool {
-    scts.is_empty()
-        || scts
-            .iter()
-            .any(|sct| sct.as_ref().is_empty())
 }
 
 <span class="kw">impl </span>State&lt;ClientConnectionData&gt; <span class="kw">for </span>ExpectServerHello {
@@ -1538,7 +1516,7 @@
         <span class="comment">// Start our handshake hash, and input the server-hello.
         </span><span class="kw">let </span><span class="kw-2">mut </span>transcript = <span class="self">self
             </span>.transcript_buffer
-            .start_hash(suite.hash_algorithm());
+            .start_hash(suite.hash_provider());
         transcript.add_message(<span class="kw-2">&amp;</span>m);
 
         <span class="kw">let </span>randoms = ConnectionRandoms::new(<span class="self">self</span>.input.random, server_hello.random);
@@ -1730,7 +1708,7 @@
         </span><span class="kw">let </span>transcript = <span class="self">self
             </span>.next
             .transcript_buffer
-            .start_hash(cs.hash_algorithm());
+            .start_hash(cs.hash_provider());
         <span class="kw">let </span><span class="kw-2">mut </span>transcript_buffer = transcript.into_hrr_buffer();
         transcript_buffer.add_message(<span class="kw-2">&amp;</span>m);
 
@@ -1739,21 +1717,20 @@
             cx.data.early_data.rejected();
         }
 
-        <span class="kw">let </span>may_send_sct_list = <span class="self">self
-            </span>.next
-            .input
-            .hello
-            .server_may_send_sct_list();
-
         <span class="kw">let </span>key_share = <span class="kw">match </span>req_group {
             <span class="prelude-val">Some</span>(group) <span class="kw">if </span>group != offered_key_share.group() =&gt; {
-                <span class="kw">let </span>group = kx::KeyExchange::choose(group, <span class="kw-2">&amp;</span>config.kx_groups).ok_or_else(|| {
-                    cx.common.send_fatal_alert(
-                        AlertDescription::IllegalParameter,
-                        PeerMisbehaved::IllegalHelloRetryRequestWithUnofferedNamedGroup,
-                    )
-                })<span class="question-mark">?</span>;
-                kx::KeyExchange::start(group).ok_or(Error::FailedToGetRandomBytes)<span class="question-mark">?
+                <span class="kw">let </span>skxg = <span class="kw">match </span>config.find_kx_group(group) {
+                    <span class="prelude-val">Some</span>(skxg) =&gt; skxg,
+                    <span class="prelude-val">None </span>=&gt; {
+                        <span class="kw">return </span><span class="prelude-val">Err</span>(cx.common.send_fatal_alert(
+                            AlertDescription::IllegalParameter,
+                            PeerMisbehaved::IllegalHelloRetryRequestWithUnofferedNamedGroup,
+                        ));
+                    }
+                };
+
+                skxg.start()
+                    .map_err(|<span class="kw">_</span>| Error::FailedToGetRandomBytes)<span class="question-mark">?
             </span>}
             <span class="kw">_ </span>=&gt; offered_key_share,
         };
@@ -1763,7 +1740,6 @@
             <span class="prelude-val">Some</span>(hrr),
             <span class="prelude-val">Some</span>(key_share),
             <span class="self">self</span>.extra_exts,
-            may_send_sct_list,
             <span class="prelude-val">Some</span>(cs),
             <span class="self">self</span>.next.input,
             cx,

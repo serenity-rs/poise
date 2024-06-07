@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-0.21.10/src/server/handy.rs`."><title>handy.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="rustls" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (8f9080db4 2024-05-09)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-0.22.4/src/server/handy.rs`."><title>handy.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="rustls" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (98489f248 2024-06-06)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -300,30 +300,25 @@
 <a href="#300" id="300">300</a>
 <a href="#301" id="301">301</a>
 <a href="#302" id="302">302</a>
-<a href="#303" id="303">303</a>
-<a href="#304" id="304">304</a>
-<a href="#305" id="305">305</a>
-<a href="#306" id="306">306</a>
-<a href="#307" id="307">307</a>
-<a href="#308" id="308">308</a>
-<a href="#309" id="309">309</a>
-<a href="#310" id="310">310</a>
-<a href="#311" id="311">311</a>
-<a href="#312" id="312">312</a>
-<a href="#313" id="313">313</a>
-<a href="#314" id="314">314</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::dns_name::DnsNameRef;
-<span class="kw">use </span><span class="kw">crate</span>::error::Error;
-<span class="kw">use </span><span class="kw">crate</span>::key;
+</pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::error::Error;
 <span class="kw">use </span><span class="kw">crate</span>::limited_cache;
+<span class="kw">use </span><span class="kw">crate</span>::msgs::handshake::CertificateChain;
 <span class="kw">use </span><span class="kw">crate</span>::server;
 <span class="kw">use </span><span class="kw">crate</span>::server::ClientHello;
 <span class="kw">use </span><span class="kw">crate</span>::sign;
+<span class="kw">use </span><span class="kw">crate</span>::webpki::{verify_server_name, ParsedCertificate};
 
-<span class="kw">use </span>std::collections;
-<span class="kw">use </span>std::sync::{Arc, Mutex};
+<span class="kw">use </span>pki_types::{DnsName, ServerName};
+
+<span class="kw">use </span>alloc::string::{String, ToString};
+<span class="kw">use </span>alloc::sync::Arc;
+<span class="kw">use </span>alloc::vec::Vec;
+<span class="kw">use </span>core::fmt::{Debug, Formatter};
+<span class="kw">use </span>std::collections::HashMap;
+<span class="kw">use </span>std::sync::Mutex;
 
 <span class="doccomment">/// Something which never stores sessions.
+</span><span class="attr">#[derive(Debug)]
 </span><span class="kw">pub struct </span>NoServerSessionStorage {}
 
 <span class="kw">impl </span>server::StoresServerSessions <span class="kw">for </span>NoServerSessionStorage {
@@ -385,7 +380,15 @@
     </span>}
 }
 
+<span class="kw">impl </span>Debug <span class="kw">for </span>ServerSessionMemoryCache {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; core::fmt::Result {
+        f.debug_struct(<span class="string">"ServerSessionMemoryCache"</span>)
+            .finish()
+    }
+}
+
 <span class="doccomment">/// Something which never produces tickets.
+</span><span class="attr">#[derive(Debug)]
 </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">struct </span>NeverProducesTickets {}
 
 <span class="kw">impl </span>server::ProducesTickets <span class="kw">for </span>NeverProducesTickets {
@@ -404,43 +407,33 @@
 }
 
 <span class="doccomment">/// Something which always resolves to the same cert chain.
+</span><span class="attr">#[derive(Debug)]
 </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">struct </span>AlwaysResolvesChain(Arc&lt;sign::CertifiedKey&gt;);
 
 <span class="kw">impl </span>AlwaysResolvesChain {
-    <span class="doccomment">/// Creates an `AlwaysResolvesChain`, auto-detecting the underlying private
-    /// key type and encoding.
-    </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>new(
-        chain: Vec&lt;key::Certificate&gt;,
-        priv_key: <span class="kw-2">&amp;</span>key::PrivateKey,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, Error&gt; {
-        <span class="kw">let </span>key = sign::any_supported_type(priv_key)
-            .map_err(|<span class="kw">_</span>| Error::General(<span class="string">"invalid private key"</span>.into()))<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(<span class="self">Self</span>(Arc::new(sign::CertifiedKey::new(chain, key))))
+    <span class="doccomment">/// Creates an `AlwaysResolvesChain`, using the supplied key and certificate chain.
+    </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>new(private_key: Arc&lt;<span class="kw">dyn </span>sign::SigningKey&gt;, chain: CertificateChain) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>(Arc::new(sign::CertifiedKey::new(chain.<span class="number">0</span>, private_key)))
     }
 
-    <span class="doccomment">/// Creates an `AlwaysResolvesChain`, auto-detecting the underlying private
-    /// key type and encoding.
+    <span class="doccomment">/// Creates an `AlwaysResolvesChain`, using the supplied key, certificate chain and OCSP response.
     ///
-    /// If non-empty, the given OCSP response and SCTs are attached.
+    /// If non-empty, the given OCSP response is attached.
     </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>new_with_extras(
-        chain: Vec&lt;key::Certificate&gt;,
-        priv_key: <span class="kw-2">&amp;</span>key::PrivateKey,
+        private_key: Arc&lt;<span class="kw">dyn </span>sign::SigningKey&gt;,
+        chain: CertificateChain,
         ocsp: Vec&lt;u8&gt;,
-        scts: Vec&lt;u8&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, Error&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>r = <span class="self">Self</span>::new(chain, priv_key)<span class="question-mark">?</span>;
+    ) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span><span class="kw-2">mut </span>r = <span class="self">Self</span>::new(private_key, chain);
 
         {
             <span class="kw">let </span>cert = Arc::make_mut(<span class="kw-2">&amp;mut </span>r.<span class="number">0</span>);
             <span class="kw">if </span>!ocsp.is_empty() {
                 cert.ocsp = <span class="prelude-val">Some</span>(ocsp);
             }
-            <span class="kw">if </span>!scts.is_empty() {
-                cert.sct_list = <span class="prelude-val">Some</span>(scts);
-            }
         }
 
-        <span class="prelude-val">Ok</span>(r)
+        r
     }
 }
 
@@ -452,15 +445,16 @@
 
 <span class="doccomment">/// Something that resolves do different cert chains/keys based
 /// on client-supplied server name (via SNI).
+</span><span class="attr">#[derive(Debug)]
 </span><span class="kw">pub struct </span>ResolvesServerCertUsingSni {
-    by_name: collections::HashMap&lt;String, Arc&lt;sign::CertifiedKey&gt;&gt;,
+    by_name: HashMap&lt;String, Arc&lt;sign::CertifiedKey&gt;&gt;,
 }
 
 <span class="kw">impl </span>ResolvesServerCertUsingSni {
     <span class="doccomment">/// Create a new and empty (i.e., knows no certificates) resolver.
     </span><span class="kw">pub fn </span>new() -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            by_name: collections::HashMap::new(),
+            by_name: HashMap::new(),
         }
     }
 
@@ -470,9 +464,12 @@
     /// it's not valid for the supplied certificate, or if the certificate
     /// chain is syntactically faulty.
     </span><span class="kw">pub fn </span>add(<span class="kw-2">&amp;mut </span><span class="self">self</span>, name: <span class="kw-2">&amp;</span>str, ck: sign::CertifiedKey) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
-        <span class="kw">let </span>checked_name = DnsNameRef::try_from(name)
-            .map_err(|<span class="kw">_</span>| Error::General(<span class="string">"Bad DNS name"</span>.into()))
-            .map(|dns| dns.to_lowercase_owned())<span class="question-mark">?</span>;
+        <span class="kw">let </span>server_name = {
+            <span class="kw">let </span>checked_name = DnsName::try_from(name)
+                .map_err(|<span class="kw">_</span>| Error::General(<span class="string">"Bad DNS name"</span>.into()))
+                .map(|name| name.to_lowercase_owned())<span class="question-mark">?</span>;
+            ServerName::DnsName(checked_name)
+        };
 
         <span class="comment">// Check the certificate chain for validity:
         // - it should be non-empty list
@@ -483,36 +480,14 @@
         // These checks are not security-sensitive.  They are the
         // *server* attempting to detect accidental misconfiguration.
 
-        // Always reject an empty certificate chain.
-        </span><span class="kw">let </span>end_entity_cert = ck.end_entity_cert().map_err(|<span class="kw">_</span>| {
-            Error::General(<span class="string">"No end-entity certificate in certificate chain"</span>.to_string())
-        })<span class="question-mark">?</span>;
+        </span>ck.end_entity_cert()
+            .and_then(ParsedCertificate::try_from)
+            .and_then(|cert| verify_server_name(<span class="kw-2">&amp;</span>cert, <span class="kw-2">&amp;</span>server_name))<span class="question-mark">?</span>;
 
-        <span class="comment">// Reject syntactically-invalid end-entity certificates.
-        </span><span class="kw">let </span>end_entity_cert =
-            webpki::EndEntityCert::try_from(end_entity_cert.as_ref()).map_err(|<span class="kw">_</span>| {
-                Error::General(
-                    <span class="string">"End-entity certificate in certificate chain is syntactically invalid"
-                        </span>.to_string(),
-                )
-            })<span class="question-mark">?</span>;
-
-        <span class="comment">// Note that this doesn't fully validate that the certificate is valid; it only validates that the name is one
-        // that the certificate is valid for, if the certificate is
-        // valid.
-        </span><span class="kw">let </span>general_error =
-            || Error::General(<span class="string">"The server certificate is not valid for the given name"</span>.to_string());
-
-        <span class="kw">let </span>name = webpki::DnsNameRef::try_from_ascii(checked_name.as_ref().as_bytes())
-            .map_err(|<span class="kw">_</span>| general_error())<span class="question-mark">?</span>;
-
-        end_entity_cert
-            .verify_is_valid_for_subject_name(webpki::SubjectNameRef::DnsName(name))
-            .map_err(|<span class="kw">_</span>| general_error())<span class="question-mark">?</span>;
-
-        <span class="kw">let </span>as_str: <span class="kw-2">&amp;</span>str = checked_name.as_ref();
-        <span class="self">self</span>.by_name
-            .insert(as_str.to_string(), Arc::new(ck));
+        <span class="kw">if let </span>ServerName::DnsName(name) = server_name {
+            <span class="self">self</span>.by_name
+                .insert(name.as_ref().to_string(), Arc::new(ck));
+        }
         <span class="prelude-val">Ok</span>(())
     }
 }
@@ -520,7 +495,7 @@
 <span class="kw">impl </span>server::ResolvesServerCert <span class="kw">for </span>ResolvesServerCertUsingSni {
     <span class="kw">fn </span>resolve(<span class="kw-2">&amp;</span><span class="self">self</span>, client_hello: ClientHello) -&gt; <span class="prelude-ty">Option</span>&lt;Arc&lt;sign::CertifiedKey&gt;&gt; {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(name) = client_hello.server_name() {
-            <span class="self">self</span>.by_name.get(name).map(Arc::clone)
+            <span class="self">self</span>.by_name.get(name).cloned()
         } <span class="kw">else </span>{
             <span class="comment">// This kind of resolver requires SNI
             </span><span class="prelude-val">None
@@ -529,11 +504,12 @@
 }
 
 <span class="attr">#[cfg(test)]
-</span><span class="kw">mod </span>test {
+</span><span class="kw">mod </span>tests {
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
     <span class="kw">use </span><span class="kw">crate</span>::server::ProducesTickets;
     <span class="kw">use </span><span class="kw">crate</span>::server::ResolvesServerCert;
     <span class="kw">use </span><span class="kw">crate</span>::server::StoresServerSessions;
+    <span class="kw">use </span>std::vec;
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_noserversessionstorage_drops_put() {
@@ -618,7 +594,7 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_resolvesservercertusingsni_handles_unknown_name() {
         <span class="kw">let </span>rscsni = ResolvesServerCertUsingSni::new();
-        <span class="kw">let </span>name = DnsNameRef::try_from(<span class="string">"hello.com"</span>)
+        <span class="kw">let </span>name = DnsName::try_from(<span class="string">"hello.com"</span>)
             .unwrap()
             .to_owned();
         <span class="macro">assert!</span>(rscsni

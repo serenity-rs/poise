@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-util-0.7.10/src/sync/cancellation_token/tree_node.rs`."><title>tree_node.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="tokio_util" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (8f9080db4 2024-05-09)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-util-0.7.11/src/sync/cancellation_token/tree_node.rs`."><title>tree_node.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="tokio_util" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (98489f248 2024-06-06)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -363,19 +363,21 @@
 <a href="#363" id="363">363</a>
 <a href="#364" id="364">364</a>
 <a href="#365" id="365">365</a>
-</pre></div><pre class="rust"><code><span class="doccomment">//! This mod provides the logic for the inner tree structure of the CancellationToken.
+<a href="#366" id="366">366</a>
+<a href="#367" id="367">367</a>
+</pre></div><pre class="rust"><code><span class="doccomment">//! This mod provides the logic for the inner tree structure of the `CancellationToken`.
 //!
-//! CancellationTokens are only light handles with references to [`TreeNode`].
+//! `CancellationTokens` are only light handles with references to [`TreeNode`].
 //! All the logic is actually implemented in the [`TreeNode`].
 //!
 //! A [`TreeNode`] is part of the cancellation tree and may have one parent and an arbitrary number of
 //! children.
 //!
-//! A [`TreeNode`] can receive the request to perform a cancellation through a CancellationToken.
+//! A [`TreeNode`] can receive the request to perform a cancellation through a `CancellationToken`.
 //! This cancellation request will cancel the node and all of its descendants.
 //!
 //! As soon as a node cannot get cancelled any more (because it was already cancelled or it has no
-//! more CancellationTokens pointing to it any more), it gets removed from the tree, to keep the
+//! more `CancellationTokens` pointing to it any more), it gets removed from the tree, to keep the
 //! tree as small as possible.
 //!
 //! # Invariants
@@ -431,7 +433,7 @@
     }
 }
 
-<span class="doccomment">/// The data contained inside a TreeNode.
+<span class="doccomment">/// The data contained inside a `TreeNode`.
 ///
 /// This struct exists so that the data of the node can be wrapped
 /// in a Mutex.
@@ -543,7 +545,9 @@
                 locked_node = node.inner.lock().unwrap();
                 locked_parent
             }
-            <span class="prelude-val">Err</span>(TryLockError::Poisoned(err)) =&gt; <span class="prelude-val">Err</span>(err).unwrap(),
+            <span class="comment">// https://github.com/tokio-rs/tokio/pull/6273#discussion_r1443752911
+            </span><span class="attr">#[allow(clippy::unnecessary_literal_unwrap)]
+            </span><span class="prelude-val">Err</span>(TryLockError::Poisoned(err)) =&gt; <span class="prelude-val">Err</span>(err).unwrap(),
         };
 
         <span class="comment">// If we unlocked the child, then the parent may have changed. Check
@@ -561,7 +565,7 @@
 /// `parent` MUST have been a parent of the node when they both got locked,
 /// otherwise there is a potential for a deadlock as invariant #2 would be violated.
 ///
-/// To acquire the locks for node and parent, use [with_locked_node_and_parent].
+/// To acquire the locks for node and parent, use [`with_locked_node_and_parent`].
 </span><span class="kw">fn </span>move_children_to_parent(node: <span class="kw-2">&amp;mut </span>Inner, parent: <span class="kw-2">&amp;mut </span>Inner) {
     <span class="comment">// Pre-allocate in the parent, for performance
     </span>parent.children.reserve(node.children.len());
@@ -569,7 +573,7 @@
     <span class="kw">for </span>child <span class="kw">in </span>std::mem::take(<span class="kw-2">&amp;mut </span>node.children) {
         {
             <span class="kw">let </span><span class="kw-2">mut </span>child_locked = child.inner.lock().unwrap();
-            child_locked.parent = node.parent.clone();
+            child_locked.parent.clone_from(<span class="kw-2">&amp;</span>node.parent);
             child_locked.parent_idx = parent.children.len();
         }
         parent.children.push(child);
@@ -579,7 +583,7 @@
 <span class="doccomment">/// Removes a child from the parent.
 ///
 /// `parent` MUST be the parent of `node`.
-/// To acquire the locks for node and parent, use [with_locked_node_and_parent].
+/// To acquire the locks for node and parent, use [`with_locked_node_and_parent`].
 </span><span class="kw">fn </span>remove_child(parent: <span class="kw-2">&amp;mut </span>Inner, <span class="kw-2">mut </span>node: MutexGuard&lt;<span class="lifetime">'_</span>, Inner&gt;) {
     <span class="comment">// Query the position from where to remove a node
     </span><span class="kw">let </span>pos = node.parent_idx;

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-0.21.10/src/builder.rs`."><title>builder.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="rustls" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (8f9080db4 2024-05-09)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-0.22.4/src/builder.rs`."><title>builder.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="rustls" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (98489f248 2024-06-06)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -243,124 +243,161 @@
 <a href="#243" id="243">243</a>
 <a href="#244" id="244">244</a>
 <a href="#245" id="245">245</a>
-<a href="#246" id="246">246</a>
-<a href="#247" id="247">247</a>
-<a href="#248" id="248">248</a>
-<a href="#249" id="249">249</a>
-<a href="#250" id="250">250</a>
-<a href="#251" id="251">251</a>
-<a href="#252" id="252">252</a>
-<a href="#253" id="253">253</a>
-<a href="#254" id="254">254</a>
-<a href="#255" id="255">255</a>
-<a href="#256" id="256">256</a>
-<a href="#257" id="257">257</a>
-<a href="#258" id="258">258</a>
-<a href="#259" id="259">259</a>
-<a href="#260" id="260">260</a>
-<a href="#261" id="261">261</a>
-<a href="#262" id="262">262</a>
-<a href="#263" id="263">263</a>
-<a href="#264" id="264">264</a>
-<a href="#265" id="265">265</a>
-<a href="#266" id="266">266</a>
-<a href="#267" id="267">267</a>
-<a href="#268" id="268">268</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::error::Error;
-<span class="kw">use </span><span class="kw">crate</span>::kx::{SupportedKxGroup, ALL_KX_GROUPS};
-<span class="kw">use </span><span class="kw">crate</span>::suites::{SupportedCipherSuite, DEFAULT_CIPHER_SUITES};
+</pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::crypto::CryptoProvider;
+<span class="kw">use </span><span class="kw">crate</span>::error::Error;
 <span class="kw">use </span><span class="kw">crate</span>::versions;
 
-<span class="kw">use </span>std::fmt;
-<span class="kw">use </span>std::marker::PhantomData;
+<span class="kw">use </span>alloc::format;
+<span class="kw">use </span>core::fmt;
+<span class="kw">use </span>core::marker::PhantomData;
+<span class="kw">use </span>std::sync::Arc;
 
-<span class="doccomment">/// Building a [`ServerConfig`] or [`ClientConfig`] in a linker-friendly and
-/// complete way.
+<span class="attr">#[cfg(doc)]
+</span><span class="kw">use crate</span>::{ClientConfig, ServerConfig};
+
+<span class="doccomment">/// A [builder] for [`ServerConfig`] or [`ClientConfig`] values.
 ///
-/// Linker-friendly: meaning unused cipher suites, protocol
-/// versions, key exchange mechanisms, etc. can be discarded
-/// by the linker as they'll be unreferenced.
+/// To get one of these, call [`ServerConfig::builder()`] or [`ClientConfig::builder()`].
 ///
-/// Complete: the type system ensures all decisions required to run a
-/// server or client have been made by the time the process finishes.
+/// To build a config, you must make at least two decisions (in order):
 ///
-/// Example, to make a [`ServerConfig`]:
+/// - How should this client or server verify certificates provided by its peer?
+/// - What certificates should this client or server present to its peer?
 ///
-/// ```no_run
-/// # use rustls::ServerConfig;
-/// # let certs = vec![];
-/// # let private_key = rustls::PrivateKey(vec![]);
+/// For settings besides these, see the fields of [`ServerConfig`] and [`ClientConfig`].
+///
+/// The usual choice for protocol primitives is to call
+/// [`ClientConfig::builder`]/[`ServerConfig::builder`]
+/// which will use rustls' default cryptographic provider and safe defaults for ciphersuites and
+/// supported protocol versions.
+///
+/// ```
+/// # #[cfg(feature = "ring")] {
+/// use rustls::{ClientConfig, ServerConfig};
+/// ClientConfig::builder()
+/// //  ...
+/// # ;
+///
 /// ServerConfig::builder()
-///     .with_safe_default_cipher_suites()
-///     .with_safe_default_kx_groups()
-///     .with_safe_default_protocol_versions()
-///     .unwrap()
-///     .with_no_client_auth()
-///     .with_single_cert(certs, private_key)
-///     .expect("bad certificate/key");
+/// //  ...
+/// # ;
+/// # }
 /// ```
 ///
-/// This may be shortened to:
+/// You may also override the choice of protocol versions:
 ///
 /// ```no_run
+/// # #[cfg(feature = "ring")] {
 /// # use rustls::ServerConfig;
-/// # let certs = vec![];
-/// # let private_key = rustls::PrivateKey(vec![]);
-/// ServerConfig::builder()
-///     .with_safe_defaults()
-///     .with_no_client_auth()
-///     .with_single_cert(certs, private_key)
-///     .expect("bad certificate/key");
+/// ServerConfig::builder_with_protocol_versions(&amp;[&amp;rustls::version::TLS13])
+/// //  ...
+/// # ;
+/// # }
 /// ```
 ///
-/// To make a [`ClientConfig`]:
+/// Overriding the default cryptographic provider introduces a `Result` that must be unwrapped,
+/// because the config builder checks for consistency of the choices made. For instance, it's an error to
+/// configure only TLS 1.2 cipher suites while specifying that TLS 1.3 should be the only supported protocol
+/// version.
 ///
-/// ```no_run
+/// If you configure a smaller set of protocol primitives than the default, you may get a smaller binary,
+/// since the code for the unused ones can be optimized away at link time.
+///
+/// After choosing protocol primitives, you must choose (a) how to verify certificates and (b) what certificates
+/// (if any) to send to the peer. The methods to do this are specific to whether you're building a ClientConfig
+/// or a ServerConfig, as tracked by the [`ConfigSide`] type parameter on the various impls of ConfigBuilder.
+///
+/// # ClientConfig certificate configuration
+///
+/// For a client, _certificate verification_ must be configured either by calling one of:
+///  - [`ConfigBuilder::with_root_certificates`] or
+///  - [`ConfigBuilder::dangerous()`] and [`DangerousClientConfigBuilder::with_custom_certificate_verifier`]
+///
+/// Next, _certificate sending_ (also known as "client authentication", "mutual TLS", or "mTLS") must be configured
+/// or disabled using one of:
+/// - [`ConfigBuilder::with_no_client_auth`] - to not send client authentication (most common)
+/// - [`ConfigBuilder::with_client_auth_cert`] - to always send a specific certificate
+/// - [`ConfigBuilder::with_client_cert_resolver`] - to send a certificate chosen dynamically
+///
+/// For example:
+///
+/// ```
+/// # #[cfg(feature = "ring")] {
 /// # use rustls::ClientConfig;
 /// # let root_certs = rustls::RootCertStore::empty();
-/// # let certs = vec![];
-/// # let private_key = rustls::PrivateKey(vec![]);
 /// ClientConfig::builder()
-///     .with_safe_default_cipher_suites()
-///     .with_safe_default_kx_groups()
-///     .with_safe_default_protocol_versions()
-///     .unwrap()
-///     .with_root_certificates(root_certs)
-///     .with_client_auth_cert(certs, private_key)
-///     .expect("bad certificate/key");
-/// ```
-///
-/// This may be shortened to:
-///
-/// ```
-/// # use rustls::ClientConfig;
-/// # let root_certs = rustls::RootCertStore::empty();
-/// ClientConfig::builder()
-///     .with_safe_defaults()
 ///     .with_root_certificates(root_certs)
 ///     .with_no_client_auth();
+/// # }
 /// ```
 ///
-/// The types used here fit together like this:
+/// # ServerConfig certificate configuration
 ///
-/// 1. Call [`ClientConfig::builder()`] or [`ServerConfig::builder()`] to initialize a builder.
-/// 1. You must make a decision on which cipher suites to use, typically
-///    by calling [`ConfigBuilder&lt;S, WantsCipherSuites&gt;::with_safe_default_cipher_suites()`].
-/// 2. Now you must make a decision
-///    on key exchange groups: typically by calling
-///    [`ConfigBuilder&lt;S, WantsKxGroups&gt;::with_safe_default_kx_groups()`].
-/// 3. Now you must make
-///    a decision on which protocol versions to support, typically by calling
-///    [`ConfigBuilder&lt;S, WantsVersions&gt;::with_safe_default_protocol_versions()`].
-/// 5. Now see [`ConfigBuilder&lt;ClientConfig, WantsVerifier&gt;`] or
-///    [`ConfigBuilder&lt;ServerConfig, WantsVerifier&gt;`] for further steps.
+/// For a server, _certificate verification_ must be configured by calling one of:
+/// - [`ConfigBuilder::with_no_client_auth`] - to not require client authentication (most common)
+/// - [`ConfigBuilder::with_client_cert_verifier`] - to use a custom verifier
 ///
+/// Next, _certificate sending_ must be configured by calling one of:
+/// - [`ConfigBuilder::with_single_cert`] - to send a specific certificate
+/// - [`ConfigBuilder::with_single_cert_with_ocsp`] - to send a specific certificate, plus stapled OCSP
+/// - [`ConfigBuilder::with_cert_resolver`] - to send a certificate chosen dynamically
+///
+/// For example:
+///
+/// ```no_run
+/// # #[cfg(feature = "ring")] {
+/// # use rustls::ServerConfig;
+/// # let certs = vec![];
+/// # let private_key = pki_types::PrivateKeyDer::from(
+/// #    pki_types::PrivatePkcs8KeyDer::from(vec![])
+/// # );
+/// ServerConfig::builder()
+///     .with_no_client_auth()
+///     .with_single_cert(certs, private_key)
+///     .expect("bad certificate/key");
+/// # }
+/// ```
+///
+/// # Types
+///
+/// ConfigBuilder uses the [typestate] pattern to ensure at compile time that each required
+/// configuration item is provided exactly once. This is tracked in the `State` type parameter,
+/// which can have these values:
+///
+/// - [`WantsVersions`]
+/// - [`WantsVerifier`]
+/// - [`WantsClientCert`]
+/// - [`WantsServerCert`]
+///
+/// The other type parameter is `Side`, which is either `ServerConfig` or `ClientConfig`
+/// depending on whether the ConfigBuilder was built with [`ServerConfig::builder()`] or
+/// [`ClientConfig::builder()`].
+///
+/// You won't need to write out either of these type parameters explicitly. If you write a
+/// correct chain of configuration calls they will be used automatically. If you write an
+/// incorrect chain of configuration calls you will get an error message from the compiler
+/// mentioning some of these types.
+///
+/// Additionally, ServerConfig and ClientConfig carry a private field containing a
+/// [`CryptoProvider`], from [`ClientConfig::builder_with_provider()`] or
+/// [`ServerConfig::builder_with_provider()`]. This determines which cryptographic backend
+/// is used. The default is [`ring::provider`].
+///
+/// [builder]: https://rust-unofficial.github.io/patterns/patterns/creational/builder.html
+/// [typestate]: http://cliffle.com/blog/rust-typestate/
 /// [`ServerConfig`]: crate::ServerConfig
+/// [`ServerConfig::builder`]: crate::ServerConfig::builder
 /// [`ClientConfig`]: crate::ClientConfig
 /// [`ClientConfig::builder()`]: crate::ClientConfig::builder()
 /// [`ServerConfig::builder()`]: crate::ServerConfig::builder()
+/// [`ClientConfig::builder_with_provider()`]: crate::ClientConfig::builder_with_provider()
+/// [`ServerConfig::builder_with_provider()`]: crate::ServerConfig::builder_with_provider()
 /// [`ConfigBuilder&lt;ClientConfig, WantsVerifier&gt;`]: struct.ConfigBuilder.html#impl-3
 /// [`ConfigBuilder&lt;ServerConfig, WantsVerifier&gt;`]: struct.ConfigBuilder.html#impl-6
+/// [`WantsClientCert`]: crate::client::WantsClientCert
+/// [`WantsServerCert`]: crate::server::WantsServerCert
+/// [`ring::provider`]: crate::crypto::ring::default_provider
+/// [`DangerousClientConfigBuilder::with_custom_certificate_verifier`]: crate::client::danger::DangerousClientConfigBuilder::with_custom_certificate_verifier
 </span><span class="attr">#[derive(Clone)]
 </span><span class="kw">pub struct </span>ConfigBuilder&lt;Side: ConfigSide, State&gt; {
     <span class="kw">pub</span>(<span class="kw">crate</span>) state: State,
@@ -369,95 +406,15 @@
 
 <span class="kw">impl</span>&lt;Side: ConfigSide, State: fmt::Debug&gt; fmt::Debug <span class="kw">for </span>ConfigBuilder&lt;Side, State&gt; {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
-        <span class="kw">let </span>side_name = std::any::type_name::&lt;Side&gt;();
-        <span class="kw">let </span>side_name = side_name
-            .split(<span class="string">"::"</span>)
-            .last()
-            .unwrap_or(side_name);
-        f.debug_struct(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"ConfigBuilder&lt;{}, _&gt;"</span>, side_name))
+        <span class="kw">let </span>side_name = core::any::type_name::&lt;Side&gt;();
+        <span class="kw">let </span>(ty, <span class="kw">_</span>) = side_name
+            .split_once(<span class="string">'&lt;'</span>)
+            .unwrap_or((side_name, <span class="string">""</span>));
+        <span class="kw">let </span>(<span class="kw">_</span>, name) = ty.rsplit_once(<span class="string">"::"</span>).unwrap_or((<span class="string">""</span>, ty));
+
+        f.debug_struct(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"ConfigBuilder&lt;{}, _&gt;"</span>, name,))
             .field(<span class="string">"state"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.state)
             .finish()
-    }
-}
-
-<span class="doccomment">/// Config builder state where the caller must supply cipher suites.
-///
-/// For more information, see the [`ConfigBuilder`] documentation.
-</span><span class="attr">#[derive(Clone, Debug)]
-</span><span class="kw">pub struct </span>WantsCipherSuites(<span class="kw">pub</span>(<span class="kw">crate</span>) ());
-
-<span class="kw">impl</span>&lt;S: ConfigSide&gt; ConfigBuilder&lt;S, WantsCipherSuites&gt; {
-    <span class="doccomment">/// Start side-specific config with defaults for underlying cryptography.
-    ///
-    /// If used, this will enable all safe supported cipher suites ([`DEFAULT_CIPHER_SUITES`]), all
-    /// safe supported key exchange groups ([`ALL_KX_GROUPS`]) and all safe supported protocol
-    /// versions ([`DEFAULT_VERSIONS`]).
-    ///
-    /// These are safe defaults, useful for 99% of applications.
-    ///
-    /// [`DEFAULT_VERSIONS`]: versions::DEFAULT_VERSIONS
-    </span><span class="kw">pub fn </span>with_safe_defaults(<span class="self">self</span>) -&gt; ConfigBuilder&lt;S, WantsVerifier&gt; {
-        ConfigBuilder {
-            state: WantsVerifier {
-                cipher_suites: DEFAULT_CIPHER_SUITES.to_vec(),
-                kx_groups: ALL_KX_GROUPS.to_vec(),
-                versions: versions::EnabledVersions::new(versions::DEFAULT_VERSIONS),
-            },
-            side: <span class="self">self</span>.side,
-        }
-    }
-
-    <span class="doccomment">/// Choose a specific set of cipher suites.
-    </span><span class="kw">pub fn </span>with_cipher_suites(
-        <span class="self">self</span>,
-        cipher_suites: <span class="kw-2">&amp;</span>[SupportedCipherSuite],
-    ) -&gt; ConfigBuilder&lt;S, WantsKxGroups&gt; {
-        ConfigBuilder {
-            state: WantsKxGroups {
-                cipher_suites: cipher_suites.to_vec(),
-            },
-            side: <span class="self">self</span>.side,
-        }
-    }
-
-    <span class="doccomment">/// Choose the default set of cipher suites ([`DEFAULT_CIPHER_SUITES`]).
-    ///
-    /// Note that this default provides only high-quality suites: there is no need
-    /// to filter out low-, export- or NULL-strength cipher suites: rustls does not
-    /// implement these.
-    </span><span class="kw">pub fn </span>with_safe_default_cipher_suites(<span class="self">self</span>) -&gt; ConfigBuilder&lt;S, WantsKxGroups&gt; {
-        <span class="self">self</span>.with_cipher_suites(DEFAULT_CIPHER_SUITES)
-    }
-}
-
-<span class="doccomment">/// Config builder state where the caller must supply key exchange groups.
-///
-/// For more information, see the [`ConfigBuilder`] documentation.
-</span><span class="attr">#[derive(Clone, Debug)]
-</span><span class="kw">pub struct </span>WantsKxGroups {
-    cipher_suites: Vec&lt;SupportedCipherSuite&gt;,
-}
-
-<span class="kw">impl</span>&lt;S: ConfigSide&gt; ConfigBuilder&lt;S, WantsKxGroups&gt; {
-    <span class="doccomment">/// Choose a specific set of key exchange groups.
-    </span><span class="kw">pub fn </span>with_kx_groups(
-        <span class="self">self</span>,
-        kx_groups: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="lifetime">'static </span>SupportedKxGroup],
-    ) -&gt; ConfigBuilder&lt;S, WantsVersions&gt; {
-        ConfigBuilder {
-            state: WantsVersions {
-                cipher_suites: <span class="self">self</span>.state.cipher_suites,
-                kx_groups: kx_groups.to_vec(),
-            },
-            side: <span class="self">self</span>.side,
-        }
-    }
-
-    <span class="doccomment">/// Choose the default set of key exchange groups ([`ALL_KX_GROUPS`]).
-    ///
-    /// This is a safe default: rustls doesn't implement any poor-quality groups.
-    </span><span class="kw">pub fn </span>with_safe_default_kx_groups(<span class="self">self</span>) -&gt; ConfigBuilder&lt;S, WantsVersions&gt; {
-        <span class="self">self</span>.with_kx_groups(<span class="kw-2">&amp;</span>ALL_KX_GROUPS)
     }
 }
 
@@ -466,8 +423,7 @@
 /// For more information, see the [`ConfigBuilder`] documentation.
 </span><span class="attr">#[derive(Clone, Debug)]
 </span><span class="kw">pub struct </span>WantsVersions {
-    cipher_suites: Vec&lt;SupportedCipherSuite&gt;,
-    kx_groups: Vec&lt;<span class="kw-2">&amp;</span><span class="lifetime">'static </span>SupportedKxGroup&gt;,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) provider: Arc&lt;CryptoProvider&gt;,
 }
 
 <span class="kw">impl</span>&lt;S: ConfigSide&gt; ConfigBuilder&lt;S, WantsVersions&gt; {
@@ -484,7 +440,7 @@
         versions: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="lifetime">'static </span>versions::SupportedProtocolVersion],
     ) -&gt; <span class="prelude-ty">Result</span>&lt;ConfigBuilder&lt;S, WantsVerifier&gt;, Error&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>any_usable_suite = <span class="bool-val">false</span>;
-        <span class="kw">for </span>suite <span class="kw">in </span><span class="kw-2">&amp;</span><span class="self">self</span>.state.cipher_suites {
+        <span class="kw">for </span>suite <span class="kw">in </span><span class="kw-2">&amp;</span><span class="self">self</span>.state.provider.cipher_suites {
             <span class="kw">if </span>versions.contains(<span class="kw-2">&amp;</span>suite.version()) {
                 any_usable_suite = <span class="bool-val">true</span>;
                 <span class="kw">break</span>;
@@ -495,14 +451,13 @@
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::General(<span class="string">"no usable cipher suites configured"</span>.into()));
         }
 
-        <span class="kw">if </span><span class="self">self</span>.state.kx_groups.is_empty() {
+        <span class="kw">if </span><span class="self">self</span>.state.provider.kx_groups.is_empty() {
             <span class="kw">return </span><span class="prelude-val">Err</span>(Error::General(<span class="string">"no kx groups configured"</span>.into()));
         }
 
         <span class="prelude-val">Ok</span>(ConfigBuilder {
             state: WantsVerifier {
-                cipher_suites: <span class="self">self</span>.state.cipher_suites,
-                kx_groups: <span class="self">self</span>.state.kx_groups,
+                provider: <span class="self">self</span>.state.provider,
                 versions: versions::EnabledVersions::new(versions),
             },
             side: <span class="self">self</span>.side,
@@ -515,8 +470,7 @@
 /// For more information, see the [`ConfigBuilder`] documentation.
 </span><span class="attr">#[derive(Clone, Debug)]
 </span><span class="kw">pub struct </span>WantsVerifier {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) cipher_suites: Vec&lt;SupportedCipherSuite&gt;,
-    <span class="kw">pub</span>(<span class="kw">crate</span>) kx_groups: Vec&lt;<span class="kw-2">&amp;</span><span class="lifetime">'static </span>SupportedKxGroup&gt;,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) provider: Arc&lt;CryptoProvider&gt;,
     <span class="kw">pub</span>(<span class="kw">crate</span>) versions: versions::EnabledVersions,
 }
 

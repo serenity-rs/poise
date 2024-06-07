@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["deserialize","serialize"],"mod":["option"]};
+window.SIDEBAR_ITEMS = {"fn":["deserialize","serialize"],"mod":["microseconds","milliseconds","nanoseconds","option"]};

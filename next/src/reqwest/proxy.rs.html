@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/reqwest-0.11.23/src/proxy.rs`."><title>proxy.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="reqwest" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (8f9080db4 2024-05-09)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/reqwest-0.11.27/src/proxy.rs`."><title>proxy.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="reqwest" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (98489f248 2024-06-06)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -2033,7 +2033,7 @@
 /// For instance, let's look at `Proxy::http`:
 ///
 /// ```rust
-/// # fn run() -&gt; Result&lt;(), Box&lt;std::error::Error&gt;&gt; {
+/// # fn run() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
 /// let proxy = reqwest::Proxy::http("https://secure.example")?;
 /// # Ok(())
 /// # }
@@ -2050,7 +2050,7 @@
 ///
 /// By enabling the `"socks"` feature it is possible to use a socks proxy:
 /// ```rust
-/// # fn run() -&gt; Result&lt;(), Box&lt;std::error::Error&gt;&gt; {
+/// # fn run() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
 /// let proxy = reqwest::Proxy::http("socks5://192.168.1.1:9000")?;
 /// # Ok(())
 /// # }
@@ -2185,7 +2185,7 @@
     ///
     /// ```
     /// # extern crate reqwest;
-    /// # fn run() -&gt; Result&lt;(), Box&lt;std::error::Error&gt;&gt; {
+    /// # fn run() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
     /// let client = reqwest::Client::builder()
     ///     .proxy(reqwest::Proxy::http("https://my.prox")?)
     ///     .build()?;
@@ -2205,7 +2205,7 @@
     ///
     /// ```
     /// # extern crate reqwest;
-    /// # fn run() -&gt; Result&lt;(), Box&lt;std::error::Error&gt;&gt; {
+    /// # fn run() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
     /// let client = reqwest::Client::builder()
     ///     .proxy(reqwest::Proxy::https("https://example.prox:4545")?)
     ///     .build()?;
@@ -2225,7 +2225,7 @@
     ///
     /// ```
     /// # extern crate reqwest;
-    /// # fn run() -&gt; Result&lt;(), Box&lt;std::error::Error&gt;&gt; {
+    /// # fn run() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
     /// let client = reqwest::Client::builder()
     ///     .proxy(reqwest::Proxy::all("http://pro.xy")?)
     ///     .build()?;
@@ -2245,7 +2245,7 @@
     ///
     /// ```
     /// # extern crate reqwest;
-    /// # fn run() -&gt; Result&lt;(), Box&lt;std::error::Error&gt;&gt; {
+    /// # fn run() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
     /// let target = reqwest::Url::parse("https://my.prox")?;
     /// let client = reqwest::Client::builder()
     ///     .proxy(reqwest::Proxy::custom(move |url| {
@@ -2295,7 +2295,7 @@
     ///
     /// ```
     /// # extern crate reqwest;
-    /// # fn run() -&gt; Result&lt;(), Box&lt;std::error::Error&gt;&gt; {
+    /// # fn run() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
     /// let proxy = reqwest::Proxy::https("http://localhost:1234")?
     ///     .basic_auth("Aladdin", "open sesame");
     /// # Ok(())
@@ -2314,7 +2314,7 @@
     /// ```
     /// # extern crate reqwest;
     /// # use reqwest::header::*;
-    /// # fn run() -&gt; Result&lt;(), Box&lt;std::error::Error&gt;&gt; {
+    /// # fn run() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
     /// let proxy = reqwest::Proxy::https("http://localhost:1234")?
     ///     .custom_http_auth(HeaderValue::from_static("justletmeinalreadyplease"));
     /// # Ok(())
@@ -2332,7 +2332,7 @@
     ///
     /// ```
     /// # extern crate reqwest;
-    /// # fn run() -&gt; Result&lt;(), Box&lt;std::error::Error&gt;&gt; {
+    /// # fn run() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
     /// let proxy = reqwest::Proxy::https("http://localhost:1234")?
     ///     .no_proxy(reqwest::NoProxy::from_string("direct.tld, sub.direct2.tld"));
     /// # Ok(())
@@ -2726,8 +2726,8 @@
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>ProxyScheme {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
         <span class="kw">match </span><span class="self">self </span>{
-            ProxyScheme::Http { auth: _auth, host } =&gt; <span class="macro">write!</span>(f, <span class="string">"http://{}"</span>, host),
-            ProxyScheme::Https { auth: _auth, host } =&gt; <span class="macro">write!</span>(f, <span class="string">"https://{}"</span>, host),
+            ProxyScheme::Http { auth: _auth, host } =&gt; <span class="macro">write!</span>(f, <span class="string">"http://{host}"</span>),
+            ProxyScheme::Https { auth: _auth, host } =&gt; <span class="macro">write!</span>(f, <span class="string">"https://{host}"</span>),
             <span class="attr">#[cfg(feature = <span class="string">"socks"</span>)]
             </span>ProxyScheme::Socks5 {
                 addr,
@@ -2735,7 +2735,7 @@
                 remote_dns,
             } =&gt; {
                 <span class="kw">let </span>h = <span class="kw">if </span><span class="kw-2">*</span>remote_dns { <span class="string">"h" </span>} <span class="kw">else </span>{ <span class="string">"" </span>};
-                <span class="macro">write!</span>(f, <span class="string">"socks5{}://{}"</span>, h, addr)
+                <span class="macro">write!</span>(f, <span class="string">"socks5{h}://{addr}"</span>)
             }
         }
     }
@@ -3029,7 +3029,7 @@
                     </span><span class="kw">let </span>address = <span class="kw">if </span>extract_type_prefix(<span class="kw-2">*</span>address).is_some() {
                         String::from(<span class="kw-2">*</span>address)
                     } <span class="kw">else </span>{
-                        <span class="macro">format!</span>(<span class="string">"http://{}"</span>, address)
+                        <span class="macro">format!</span>(<span class="string">"http://{address}"</span>)
                     };
 
                     insert_proxy(<span class="kw-2">&amp;mut </span>proxies, <span class="kw-2">*</span>protocol, address);
@@ -3048,8 +3048,8 @@
             </span>insert_proxy(<span class="kw-2">&amp;mut </span>proxies, scheme, platform_values.to_owned());
         } <span class="kw">else </span>{
             <span class="comment">// No explicit protocol has been specified, default to HTTP
-            </span>insert_proxy(<span class="kw-2">&amp;mut </span>proxies, <span class="string">"http"</span>, <span class="macro">format!</span>(<span class="string">"http://{}"</span>, platform_values));
-            insert_proxy(<span class="kw-2">&amp;mut </span>proxies, <span class="string">"https"</span>, <span class="macro">format!</span>(<span class="string">"http://{}"</span>, platform_values));
+            </span>insert_proxy(<span class="kw-2">&amp;mut </span>proxies, <span class="string">"http"</span>, <span class="macro">format!</span>(<span class="string">"http://{platform_values}"</span>));
+            insert_proxy(<span class="kw-2">&amp;mut </span>proxies, <span class="string">"https"</span>, <span class="macro">format!</span>(<span class="string">"http://{platform_values}"</span>));
         }
     }
     proxies
@@ -3191,7 +3191,7 @@
                 <span class="macro">assert_eq!</span>(auth.unwrap(), encode_basic_auth(<span class="string">"foo"</span>, <span class="string">"bar"</span>));
                 <span class="macro">assert_eq!</span>(host, <span class="string">"localhost:1239"</span>);
             }
-            other =&gt; <span class="macro">panic!</span>(<span class="string">"unexpected: {:?}"</span>, other),
+            other =&gt; <span class="macro">panic!</span>(<span class="string">"unexpected: {other:?}"</span>),
         }
     }
 
@@ -3204,7 +3204,7 @@
                 <span class="macro">assert!</span>(auth.is_none());
                 <span class="macro">assert_eq!</span>(host, <span class="string">"192.168.1.1:8888"</span>);
             }
-            other =&gt; <span class="macro">panic!</span>(<span class="string">"unexpected: {:?}"</span>, other),
+            other =&gt; <span class="macro">panic!</span>(<span class="string">"unexpected: {other:?}"</span>),
         }
     }
 
@@ -3218,7 +3218,7 @@
                 <span class="macro">assert_eq!</span>(auth.unwrap(), encode_basic_auth(<span class="string">"foo"</span>, <span class="string">"bar"</span>));
                 <span class="macro">assert_eq!</span>(host, <span class="string">"localhost:1239"</span>);
             }
-            other =&gt; <span class="macro">panic!</span>(<span class="string">"unexpected: {:?}"</span>, other),
+            other =&gt; <span class="macro">panic!</span>(<span class="string">"unexpected: {other:?}"</span>),
         }
     }
 
@@ -3780,7 +3780,7 @@
         <span class="kw">fn </span>check_parse_error(url: <span class="kw-2">&amp;</span>str, needle: url::ParseError) {
             <span class="kw">let </span>error = Proxy::http(url).unwrap_err();
             <span class="kw">if </span>!includes(<span class="kw-2">&amp;</span>error, needle) {
-                <span class="macro">panic!</span>(<span class="string">"{:?} expected; {:?}, {} found"</span>, needle, error, error);
+                <span class="macro">panic!</span>(<span class="string">"{needle:?} expected; {error:?}, {error} found"</span>);
             }
         }
 

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.7/src/rsa/public_key.rs`."><title>public_key.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="ring" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (8f9080db4 2024-05-09)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ring-0.17.8/src/rsa/public_key.rs`."><title>public_key.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="ring" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (98489f248 2024-06-06)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -217,6 +217,11 @@
 <a href="#217" id="217">217</a>
 <a href="#218" id="218">218</a>
 <a href="#219" id="219">219</a>
+<a href="#220" id="220">220</a>
+<a href="#221" id="221">221</a>
+<a href="#222" id="222">222</a>
+<a href="#223" id="223">223</a>
+<a href="#224" id="224">224</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2015-2021 Brian Smith.
 //
 // Permission to use, copy, modify, and/or distribute this software for any
@@ -363,8 +368,9 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         base: untrusted::Input,
         out_buffer: <span class="kw-2">&amp;</span><span class="lifetime">'out </span><span class="kw-2">mut </span>[u8; PUBLIC_KEY_PUBLIC_MODULUS_MAX_LEN],
+        cpu_features: cpu::Features,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'out </span>[u8], error::Unspecified&gt; {
-        <span class="kw">let </span>n = <span class="kw-2">&amp;</span><span class="self">self</span>.n.value();
+        <span class="kw">let </span>n = <span class="kw-2">&amp;</span><span class="self">self</span>.n.value(cpu_features);
 
         <span class="comment">// The encoded value of the base must be the same length as the modulus,
         // in bytes.
@@ -381,7 +387,7 @@
         }
 
         <span class="comment">// Step 2.
-        </span><span class="kw">let </span>m = <span class="self">self</span>.exponentiate_elem(<span class="kw-2">&amp;</span>s);
+        </span><span class="kw">let </span>m = <span class="self">self</span>.exponentiate_elem(<span class="kw-2">&amp;</span>s, cpu_features);
 
         <span class="comment">// Step 3.
         </span><span class="prelude-val">Ok</span>(fill_be_bytes_n(m, <span class="self">self</span>.n.len_bits(), out_buffer))
@@ -390,13 +396,17 @@
     <span class="doccomment">/// Calculates base**e (mod n).
     ///
     /// This is constant-time with respect to `base` only.
-    </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>exponentiate_elem(<span class="kw-2">&amp;</span><span class="self">self</span>, base: <span class="kw-2">&amp;</span>bigint::Elem&lt;N&gt;) -&gt; bigint::Elem&lt;N&gt; {
+    </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>exponentiate_elem(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        base: <span class="kw-2">&amp;</span>bigint::Elem&lt;N&gt;,
+        cpu_features: cpu::Features,
+    ) -&gt; bigint::Elem&lt;N&gt; {
         <span class="comment">// The exponent was already checked to be at least 3.
         </span><span class="kw">let </span>exponent_without_low_bit = NonZeroU64::try_from(<span class="self">self</span>.e.value().get() &amp; !<span class="number">1</span>).unwrap();
         <span class="comment">// The exponent was already checked to be odd.
         </span><span class="macro">debug_assert_ne!</span>(exponent_without_low_bit, <span class="self">self</span>.e.value());
 
-        <span class="kw">let </span>n = <span class="kw-2">&amp;</span><span class="self">self</span>.n.value();
+        <span class="kw">let </span>n = <span class="kw-2">&amp;</span><span class="self">self</span>.n.value(cpu_features);
 
         <span class="kw">let </span>base_r = bigint::elem_mul(<span class="self">self</span>.n.oneRR(), base.clone(), n);
 

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.35.1/src/io/split.rs`."><title>split.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (8f9080db4 2024-05-09)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.38.0/src/io/split.rs`."><title>split.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (98489f248 2024-06-06)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -164,41 +164,6 @@
 <a href="#164" id="164">164</a>
 <a href="#165" id="165">165</a>
 <a href="#166" id="166">166</a>
-<a href="#167" id="167">167</a>
-<a href="#168" id="168">168</a>
-<a href="#169" id="169">169</a>
-<a href="#170" id="170">170</a>
-<a href="#171" id="171">171</a>
-<a href="#172" id="172">172</a>
-<a href="#173" id="173">173</a>
-<a href="#174" id="174">174</a>
-<a href="#175" id="175">175</a>
-<a href="#176" id="176">176</a>
-<a href="#177" id="177">177</a>
-<a href="#178" id="178">178</a>
-<a href="#179" id="179">179</a>
-<a href="#180" id="180">180</a>
-<a href="#181" id="181">181</a>
-<a href="#182" id="182">182</a>
-<a href="#183" id="183">183</a>
-<a href="#184" id="184">184</a>
-<a href="#185" id="185">185</a>
-<a href="#186" id="186">186</a>
-<a href="#187" id="187">187</a>
-<a href="#188" id="188">188</a>
-<a href="#189" id="189">189</a>
-<a href="#190" id="190">190</a>
-<a href="#191" id="191">191</a>
-<a href="#192" id="192">192</a>
-<a href="#193" id="193">193</a>
-<a href="#194" id="194">194</a>
-<a href="#195" id="195">195</a>
-<a href="#196" id="196">196</a>
-<a href="#197" id="197">197</a>
-<a href="#198" id="198">198</a>
-<a href="#199" id="199">199</a>
-<a href="#200" id="200">200</a>
-<a href="#201" id="201">201</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Split a single value implementing `AsyncRead + AsyncWrite` into separate
 //! `AsyncRead` and `AsyncWrite` handles.
 //!
@@ -207,13 +172,11 @@
 
 </span><span class="kw">use </span><span class="kw">crate</span>::io::{AsyncRead, AsyncWrite, ReadBuf};
 
-<span class="kw">use </span>std::cell::UnsafeCell;
 <span class="kw">use </span>std::fmt;
 <span class="kw">use </span>std::io;
 <span class="kw">use </span>std::pin::Pin;
-<span class="kw">use </span>std::sync::atomic::AtomicBool;
-<span class="kw">use </span>std::sync::atomic::Ordering::{Acquire, Release};
 <span class="kw">use </span>std::sync::Arc;
+<span class="kw">use </span>std::sync::Mutex;
 <span class="kw">use </span>std::task::{Context, Poll};
 
 <span class="macro">cfg_io_util!</span> {
@@ -239,8 +202,7 @@
         <span class="kw">let </span>is_write_vectored = stream.is_write_vectored();
 
         <span class="kw">let </span>inner = Arc::new(Inner {
-            locked: AtomicBool::new(<span class="bool-val">false</span>),
-            stream: UnsafeCell::new(stream),
+            stream: Mutex::new(stream),
             is_write_vectored,
         });
 
@@ -255,13 +217,19 @@
 }
 
 <span class="kw">struct </span>Inner&lt;T&gt; {
-    locked: AtomicBool,
-    stream: UnsafeCell&lt;T&gt;,
+    stream: Mutex&lt;T&gt;,
     is_write_vectored: bool,
 }
 
-<span class="kw">struct </span>Guard&lt;<span class="lifetime">'a</span>, T&gt; {
-    inner: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Inner&lt;T&gt;,
+<span class="kw">impl</span>&lt;T&gt; Inner&lt;T&gt; {
+    <span class="kw">fn </span>with_lock&lt;R&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw">impl </span>FnOnce(Pin&lt;<span class="kw-2">&amp;mut </span>T&gt;) -&gt; R) -&gt; R {
+        <span class="kw">let </span><span class="kw-2">mut </span>guard = <span class="self">self</span>.stream.lock().unwrap();
+
+        <span class="comment">// safety: we do not move the stream.
+        </span><span class="kw">let </span>stream = <span class="kw">unsafe </span>{ Pin::new_unchecked(<span class="kw-2">&amp;mut *</span>guard) };
+
+        f(stream)
+    }
 }
 
 <span class="kw">impl</span>&lt;T&gt; ReadHalf&lt;T&gt; {
@@ -277,8 +245,7 @@
     ///
     /// If this `ReadHalf` and the given `WriteHalf` do not originate from the
     /// same `split` operation this method will panic.
-    /// This can be checked ahead of time by comparing the stream ID
-    /// of the two halves.
+    /// This can be checked ahead of time by calling [`is_pair_of()`](Self::is_pair_of).
     </span><span class="attr">#[track_caller]
     </span><span class="kw">pub fn </span>unsplit(<span class="self">self</span>, wr: WriteHalf&lt;T&gt;) -&gt; T
     <span class="kw">where
@@ -291,7 +258,7 @@
                 .ok()
                 .expect(<span class="string">"`Arc::try_unwrap` failed"</span>);
 
-            inner.stream.into_inner()
+            inner.stream.into_inner().unwrap()
         } <span class="kw">else </span>{
             <span class="macro">panic!</span>(<span class="string">"Unrelated `split::Write` passed to `split::Read::unsplit`."</span>)
         }
@@ -312,8 +279,7 @@
         cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;,
         buf: <span class="kw-2">&amp;mut </span>ReadBuf&lt;<span class="lifetime">'_</span>&gt;,
     ) -&gt; Poll&lt;io::Result&lt;()&gt;&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>inner = <span class="macro">ready!</span>(<span class="self">self</span>.inner.poll_lock(cx));
-        inner.stream_pin().poll_read(cx, buf)
+        <span class="self">self</span>.inner.with_lock(|stream| stream.poll_read(cx, buf))
     }
 }
 
@@ -323,18 +289,15 @@
         cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;,
         buf: <span class="kw-2">&amp;</span>[u8],
     ) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize, io::Error&gt;&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>inner = <span class="macro">ready!</span>(<span class="self">self</span>.inner.poll_lock(cx));
-        inner.stream_pin().poll_write(cx, buf)
+        <span class="self">self</span>.inner.with_lock(|stream| stream.poll_write(cx, buf))
     }
 
     <span class="kw">fn </span>poll_flush(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;(), io::Error&gt;&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>inner = <span class="macro">ready!</span>(<span class="self">self</span>.inner.poll_lock(cx));
-        inner.stream_pin().poll_flush(cx)
+        <span class="self">self</span>.inner.with_lock(|stream| stream.poll_flush(cx))
     }
 
     <span class="kw">fn </span>poll_shutdown(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;(), io::Error&gt;&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>inner = <span class="macro">ready!</span>(<span class="self">self</span>.inner.poll_lock(cx));
-        inner.stream_pin().poll_shutdown(cx)
+        <span class="self">self</span>.inner.with_lock(|stream| stream.poll_shutdown(cx))
     }
 
     <span class="kw">fn </span>poll_write_vectored(
@@ -342,45 +305,12 @@
         cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;,
         bufs: <span class="kw-2">&amp;</span>[io::IoSlice&lt;<span class="lifetime">'_</span>&gt;],
     ) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize, io::Error&gt;&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>inner = <span class="macro">ready!</span>(<span class="self">self</span>.inner.poll_lock(cx));
-        inner.stream_pin().poll_write_vectored(cx, bufs)
+        <span class="self">self</span>.inner
+            .with_lock(|stream| stream.poll_write_vectored(cx, bufs))
     }
 
     <span class="kw">fn </span>is_write_vectored(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         <span class="self">self</span>.inner.is_write_vectored
-    }
-}
-
-<span class="kw">impl</span>&lt;T&gt; Inner&lt;T&gt; {
-    <span class="kw">fn </span>poll_lock(<span class="kw-2">&amp;</span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;Guard&lt;<span class="lifetime">'_</span>, T&gt;&gt; {
-        <span class="kw">if </span><span class="self">self
-            </span>.locked
-            .compare_exchange(<span class="bool-val">false</span>, <span class="bool-val">true</span>, Acquire, Acquire)
-            .is_ok()
-        {
-            Poll::Ready(Guard { inner: <span class="self">self </span>})
-        } <span class="kw">else </span>{
-            <span class="comment">// Spin... but investigate a better strategy
-
-            </span>std::thread::yield_now();
-            cx.waker().wake_by_ref();
-
-            Poll::Pending
-        }
-    }
-}
-
-<span class="kw">impl</span>&lt;T&gt; Guard&lt;<span class="lifetime">'_</span>, T&gt; {
-    <span class="kw">fn </span>stream_pin(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; Pin&lt;<span class="kw-2">&amp;mut </span>T&gt; {
-        <span class="comment">// safety: the stream is pinned in `Arc` and the `Guard` ensures mutual
-        // exclusion.
-        </span><span class="kw">unsafe </span>{ Pin::new_unchecked(<span class="kw-2">&amp;mut *</span><span class="self">self</span>.inner.stream.get()) }
-    }
-}
-
-<span class="kw">impl</span>&lt;T&gt; Drop <span class="kw">for </span>Guard&lt;<span class="lifetime">'_</span>, T&gt; {
-    <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
-        <span class="self">self</span>.inner.locked.store(<span class="bool-val">false</span>, Release);
     }
 }
 

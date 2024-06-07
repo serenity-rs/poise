@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["CooldownConfig","CooldownContext","CooldownTracker"]};
+window.SIDEBAR_ITEMS = {"enum":["CooldownType"],"struct":["CooldownConfig","CooldownContext","CooldownTracker"]};

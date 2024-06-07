@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/time-0.3.31/src/serde/mod.rs`."><title>mod.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="time" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (8f9080db4 2024-05-09)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="icon" href="https://avatars0.githubusercontent.com/u/55999857"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/time-0.3.36/src/serde/mod.rs`."><title>mod.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="time" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (98489f248 2024-06-06)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="icon" href="https://avatars0.githubusercontent.com/u/55999857"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -497,6 +497,10 @@
 <a href="#497" id="497">497</a>
 <a href="#498" id="498">498</a>
 <a href="#499" id="499">499</a>
+<a href="#500" id="500">500</a>
+<a href="#501" id="501">501</a>
+<a href="#502" id="502">502</a>
+<a href="#503" id="503">503</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Differential formats for serde.
 </span><span class="comment">// This also includes the serde implementations for all types. This doesn't need to be externally
 // documented, though.
@@ -521,6 +525,8 @@
 <span class="kw">pub mod </span>timestamp;
 <span class="kw">mod </span>visitor;
 
+<span class="attr">#[cfg(feature = <span class="string">"serde-human-readable"</span>)]
+</span><span class="kw">use </span>alloc::string::ToString;
 <span class="kw">use </span>core::marker::PhantomData;
 
 <span class="attr">#[cfg(feature = <span class="string">"serde-human-readable"</span>)]
@@ -616,9 +622,9 @@
     doc = <span class="string">"use ::serde::Deserialize;"
 </span>)]
 </span><span class="doccomment">/// use time::serde;
-/// use time::format_description::FormatItem;
+/// use time::format_description::BorrowedFormatItem;
 ///
-/// const DATE_TIME_FORMAT: &amp;[FormatItem&lt;'_&gt;] = time::macros::format_description!(
+/// const DATE_TIME_FORMAT: &amp;[BorrowedFormatItem&lt;'_&gt;] = time::macros::format_description!(
 ///     "hour=[hour], minute=[minute]"
 /// );
 ///
@@ -705,18 +711,18 @@
 
 <span class="kw">use </span><span class="self">self</span>::visitor::Visitor;
 <span class="attr">#[cfg(feature = <span class="string">"parsing"</span>)]
-</span><span class="kw">use </span><span class="kw">crate</span>::format_description::{modifier, Component, FormatItem};
+</span><span class="kw">use </span><span class="kw">crate</span>::format_description::{modifier, BorrowedFormatItem, Component};
 <span class="kw">use crate</span>::{Date, Duration, Month, OffsetDateTime, PrimitiveDateTime, Time, UtcOffset, Weekday};
 
 <span class="comment">// region: Date
 </span><span class="doccomment">/// The format used when serializing and deserializing a human-readable `Date`.
 </span><span class="attr">#[cfg(feature = <span class="string">"parsing"</span>)]
-</span><span class="kw">const </span>DATE_FORMAT: <span class="kw-2">&amp;</span>[FormatItem&lt;<span class="lifetime">'_</span>&gt;] = <span class="kw-2">&amp;</span>[
-    FormatItem::Component(Component::Year(modifier::Year::default())),
-    FormatItem::Literal(<span class="string">b"-"</span>),
-    FormatItem::Component(Component::Month(modifier::Month::default())),
-    FormatItem::Literal(<span class="string">b"-"</span>),
-    FormatItem::Component(Component::Day(modifier::Day::default())),
+</span><span class="kw">const </span>DATE_FORMAT: <span class="kw-2">&amp;</span>[BorrowedFormatItem&lt;<span class="lifetime">'_</span>&gt;] = <span class="kw-2">&amp;</span>[
+    BorrowedFormatItem::Component(Component::Year(modifier::Year::default())),
+    BorrowedFormatItem::Literal(<span class="string">b"-"</span>),
+    BorrowedFormatItem::Component(Component::Month(modifier::Month::default())),
+    BorrowedFormatItem::Literal(<span class="string">b"-"</span>),
+    BorrowedFormatItem::Component(Component::Day(modifier::Day::default())),
 ];
 
 <span class="kw">impl </span>Serialize <span class="kw">for </span>Date {
@@ -774,12 +780,12 @@
 // region: OffsetDateTime
 </span><span class="doccomment">/// The format used when serializing and deserializing a human-readable `OffsetDateTime`.
 </span><span class="attr">#[cfg(feature = <span class="string">"parsing"</span>)]
-</span><span class="kw">const </span>OFFSET_DATE_TIME_FORMAT: <span class="kw-2">&amp;</span>[FormatItem&lt;<span class="lifetime">'_</span>&gt;] = <span class="kw-2">&amp;</span>[
-    FormatItem::Compound(DATE_FORMAT),
-    FormatItem::Literal(<span class="string">b" "</span>),
-    FormatItem::Compound(TIME_FORMAT),
-    FormatItem::Literal(<span class="string">b" "</span>),
-    FormatItem::Compound(UTC_OFFSET_FORMAT),
+</span><span class="kw">const </span>OFFSET_DATE_TIME_FORMAT: <span class="kw-2">&amp;</span>[BorrowedFormatItem&lt;<span class="lifetime">'_</span>&gt;] = <span class="kw-2">&amp;</span>[
+    BorrowedFormatItem::Compound(DATE_FORMAT),
+    BorrowedFormatItem::Literal(<span class="string">b" "</span>),
+    BorrowedFormatItem::Compound(TIME_FORMAT),
+    BorrowedFormatItem::Literal(<span class="string">b" "</span>),
+    BorrowedFormatItem::Compound(UTC_OFFSET_FORMAT),
 ];
 
 <span class="kw">impl </span>Serialize <span class="kw">for </span>OffsetDateTime {
@@ -821,10 +827,10 @@
 // region: PrimitiveDateTime
 </span><span class="doccomment">/// The format used when serializing and deserializing a human-readable `PrimitiveDateTime`.
 </span><span class="attr">#[cfg(feature = <span class="string">"parsing"</span>)]
-</span><span class="kw">const </span>PRIMITIVE_DATE_TIME_FORMAT: <span class="kw-2">&amp;</span>[FormatItem&lt;<span class="lifetime">'_</span>&gt;] = <span class="kw-2">&amp;</span>[
-    FormatItem::Compound(DATE_FORMAT),
-    FormatItem::Literal(<span class="string">b" "</span>),
-    FormatItem::Compound(TIME_FORMAT),
+</span><span class="kw">const </span>PRIMITIVE_DATE_TIME_FORMAT: <span class="kw-2">&amp;</span>[BorrowedFormatItem&lt;<span class="lifetime">'_</span>&gt;] = <span class="kw-2">&amp;</span>[
+    BorrowedFormatItem::Compound(DATE_FORMAT),
+    BorrowedFormatItem::Literal(<span class="string">b" "</span>),
+    BorrowedFormatItem::Compound(TIME_FORMAT),
 ];
 
 <span class="kw">impl </span>Serialize <span class="kw">for </span>PrimitiveDateTime {
@@ -863,14 +869,14 @@
 // region: Time
 </span><span class="doccomment">/// The format used when serializing and deserializing a human-readable `Time`.
 </span><span class="attr">#[cfg(feature = <span class="string">"parsing"</span>)]
-</span><span class="kw">const </span>TIME_FORMAT: <span class="kw-2">&amp;</span>[FormatItem&lt;<span class="lifetime">'_</span>&gt;] = <span class="kw-2">&amp;</span>[
-    FormatItem::Component(Component::Hour(&lt;modifier::Hour&gt;::default())),
-    FormatItem::Literal(<span class="string">b":"</span>),
-    FormatItem::Component(Component::Minute(&lt;modifier::Minute&gt;::default())),
-    FormatItem::Literal(<span class="string">b":"</span>),
-    FormatItem::Component(Component::Second(&lt;modifier::Second&gt;::default())),
-    FormatItem::Literal(<span class="string">b"."</span>),
-    FormatItem::Component(Component::Subsecond(&lt;modifier::Subsecond&gt;::default())),
+</span><span class="kw">const </span>TIME_FORMAT: <span class="kw-2">&amp;</span>[BorrowedFormatItem&lt;<span class="lifetime">'_</span>&gt;] = <span class="kw-2">&amp;</span>[
+    BorrowedFormatItem::Component(Component::Hour(modifier::Hour::default())),
+    BorrowedFormatItem::Literal(<span class="string">b":"</span>),
+    BorrowedFormatItem::Component(Component::Minute(modifier::Minute::default())),
+    BorrowedFormatItem::Literal(<span class="string">b":"</span>),
+    BorrowedFormatItem::Component(Component::Second(modifier::Second::default())),
+    BorrowedFormatItem::Literal(<span class="string">b"."</span>),
+    BorrowedFormatItem::Component(Component::Subsecond(modifier::Subsecond::default())),
 ];
 
 <span class="kw">impl </span>Serialize <span class="kw">for </span>Time {
@@ -901,18 +907,20 @@
 // region: UtcOffset
 </span><span class="doccomment">/// The format used when serializing and deserializing a human-readable `UtcOffset`.
 </span><span class="attr">#[cfg(feature = <span class="string">"parsing"</span>)]
-</span><span class="kw">const </span>UTC_OFFSET_FORMAT: <span class="kw-2">&amp;</span>[FormatItem&lt;<span class="lifetime">'_</span>&gt;] = <span class="kw-2">&amp;</span>[
-    FormatItem::Component(Component::OffsetHour({
+</span><span class="kw">const </span>UTC_OFFSET_FORMAT: <span class="kw-2">&amp;</span>[BorrowedFormatItem&lt;<span class="lifetime">'_</span>&gt;] = <span class="kw-2">&amp;</span>[
+    BorrowedFormatItem::Component(Component::OffsetHour({
         <span class="kw">let </span><span class="kw-2">mut </span>m = modifier::OffsetHour::default();
         m.sign_is_mandatory = <span class="bool-val">true</span>;
         m
     })),
-    FormatItem::Optional(<span class="kw-2">&amp;</span>FormatItem::Compound(<span class="kw-2">&amp;</span>[
-        FormatItem::Literal(<span class="string">b":"</span>),
-        FormatItem::Component(Component::OffsetMinute(modifier::OffsetMinute::default())),
-        FormatItem::Optional(<span class="kw-2">&amp;</span>FormatItem::Compound(<span class="kw-2">&amp;</span>[
-            FormatItem::Literal(<span class="string">b":"</span>),
-            FormatItem::Component(Component::OffsetSecond(modifier::OffsetSecond::default())),
+    BorrowedFormatItem::Optional(<span class="kw-2">&amp;</span>BorrowedFormatItem::Compound(<span class="kw-2">&amp;</span>[
+        BorrowedFormatItem::Literal(<span class="string">b":"</span>),
+        BorrowedFormatItem::Component(Component::OffsetMinute(modifier::OffsetMinute::default())),
+        BorrowedFormatItem::Optional(<span class="kw-2">&amp;</span>BorrowedFormatItem::Compound(<span class="kw-2">&amp;</span>[
+            BorrowedFormatItem::Literal(<span class="string">b":"</span>),
+            BorrowedFormatItem::Component(Component::OffsetSecond(
+                modifier::OffsetSecond::default(),
+            )),
         ])),
     ])),
 ];
@@ -982,7 +990,7 @@
             <span class="kw">return </span><span class="self">self</span>.to_string().serialize(serializer);
         }
 
-        (<span class="kw-2">*</span><span class="self">self </span><span class="kw">as </span>u8).serialize(serializer)
+        u8::from(<span class="kw-2">*</span><span class="self">self</span>).serialize(serializer)
     }
 }
 

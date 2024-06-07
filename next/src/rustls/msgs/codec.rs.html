@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-0.21.10/src/msgs/codec.rs`."><title>codec.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="rustls" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (8f9080db4 2024-05-09)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/rustls-0.22.4/src/msgs/codec.rs`."><title>codec.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="rustls" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (98489f248 2024-06-06)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -288,9 +288,56 @@
 <a href="#288" id="288">288</a>
 <a href="#289" id="289">289</a>
 <a href="#290" id="290">290</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span>std::fmt::Debug;
+<a href="#291" id="291">291</a>
+<a href="#292" id="292">292</a>
+<a href="#293" id="293">293</a>
+<a href="#294" id="294">294</a>
+<a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
+<a href="#304" id="304">304</a>
+<a href="#305" id="305">305</a>
+<a href="#306" id="306">306</a>
+<a href="#307" id="307">307</a>
+<a href="#308" id="308">308</a>
+<a href="#309" id="309">309</a>
+<a href="#310" id="310">310</a>
+<a href="#311" id="311">311</a>
+<a href="#312" id="312">312</a>
+<a href="#313" id="313">313</a>
+<a href="#314" id="314">314</a>
+<a href="#315" id="315">315</a>
+<a href="#316" id="316">316</a>
+<a href="#317" id="317">317</a>
+<a href="#318" id="318">318</a>
+<a href="#319" id="319">319</a>
+<a href="#320" id="320">320</a>
+<a href="#321" id="321">321</a>
+<a href="#322" id="322">322</a>
+<a href="#323" id="323">323</a>
+<a href="#324" id="324">324</a>
+<a href="#325" id="325">325</a>
+<a href="#326" id="326">326</a>
+<a href="#327" id="327">327</a>
+<a href="#328" id="328">328</a>
+<a href="#329" id="329">329</a>
+<a href="#330" id="330">330</a>
+<a href="#331" id="331">331</a>
+<a href="#332" id="332">332</a>
+<a href="#333" id="333">333</a>
+<a href="#334" id="334">334</a>
+<a href="#335" id="335">335</a>
+<a href="#336" id="336">336</a>
+</pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::error::InvalidMessage;
 
-<span class="kw">use </span><span class="kw">crate</span>::error::InvalidMessage;
+<span class="kw">use </span>alloc::vec::Vec;
+<span class="kw">use </span>core::fmt::Debug;
 
 <span class="doccomment">/// Wrapper over a slice of bytes that allows reading chunks from
 /// with the current position state held using a cursor.
@@ -415,7 +462,7 @@
     }
 }
 
-<span class="kw">pub fn </span>put_u16(v: u16, out: <span class="kw-2">&amp;mut </span>[u8]) {
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>put_u16(v: u16, out: <span class="kw-2">&amp;mut </span>[u8]) {
     <span class="kw">let </span>out: <span class="kw-2">&amp;mut </span>[u8; <span class="number">2</span>] = (<span class="kw-2">&amp;mut </span>out[..<span class="number">2</span>]).try_into().unwrap();
     <span class="kw-2">*</span>out = u16::to_be_bytes(v);
 }
@@ -475,7 +522,7 @@
     }
 }
 
-<span class="kw">pub fn </span>put_u64(v: u64, bytes: <span class="kw-2">&amp;mut </span>[u8]) {
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>put_u64(v: u64, bytes: <span class="kw-2">&amp;mut </span>[u8]) {
     <span class="kw">let </span>bytes: <span class="kw-2">&amp;mut </span>[u8; <span class="number">8</span>] = (<span class="kw-2">&amp;mut </span>bytes[..<span class="number">8</span>]).try_into().unwrap();
     <span class="kw-2">*</span>bytes = u64::to_be_bytes(v);
 }
@@ -500,40 +547,10 @@
 /// `TlsListElement` provides the size of the length prefix for the list.
 </span><span class="kw">impl</span>&lt;T: Codec + TlsListElement + Debug&gt; Codec <span class="kw">for </span>Vec&lt;T&gt; {
     <span class="kw">fn </span>encode(<span class="kw-2">&amp;</span><span class="self">self</span>, bytes: <span class="kw-2">&amp;mut </span>Vec&lt;u8&gt;) {
-        <span class="kw">let </span>len_offset = bytes.len();
-        bytes.extend(<span class="kw">match </span>T::SIZE_LEN {
-            ListLength::U8 =&gt; <span class="kw-2">&amp;</span>[<span class="number">0</span>][..],
-            ListLength::U16 =&gt; <span class="kw-2">&amp;</span>[<span class="number">0</span>, <span class="number">0</span>],
-            ListLength::U24 { .. } =&gt; <span class="kw-2">&amp;</span>[<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>],
-        });
+        <span class="kw">let </span>nest = LengthPrefixedBuffer::new(T::SIZE_LEN, bytes);
 
         <span class="kw">for </span>i <span class="kw">in </span><span class="self">self </span>{
-            i.encode(bytes);
-        }
-
-        <span class="kw">match </span>T::SIZE_LEN {
-            ListLength::U8 =&gt; {
-                <span class="kw">let </span>len = bytes.len() - len_offset - <span class="number">1</span>;
-                <span class="macro">debug_assert!</span>(len &lt;= <span class="number">0xff</span>);
-                bytes[len_offset] = len <span class="kw">as </span>u8;
-            }
-            ListLength::U16 =&gt; {
-                <span class="kw">let </span>len = bytes.len() - len_offset - <span class="number">2</span>;
-                <span class="macro">debug_assert!</span>(len &lt;= <span class="number">0xffff</span>);
-                <span class="kw">let </span>out: <span class="kw-2">&amp;mut </span>[u8; <span class="number">2</span>] = (<span class="kw-2">&amp;mut </span>bytes[len_offset..len_offset + <span class="number">2</span>])
-                    .try_into()
-                    .unwrap();
-                <span class="kw-2">*</span>out = u16::to_be_bytes(len <span class="kw">as </span>u16);
-            }
-            ListLength::U24 { .. } =&gt; {
-                <span class="kw">let </span>len = bytes.len() - len_offset - <span class="number">3</span>;
-                <span class="macro">debug_assert!</span>(len &lt;= <span class="number">0xff_ffff</span>);
-                <span class="kw">let </span>len_bytes = u32::to_be_bytes(len <span class="kw">as </span>u32);
-                <span class="kw">let </span>out: <span class="kw-2">&amp;mut </span>[u8; <span class="number">3</span>] = (<span class="kw-2">&amp;mut </span>bytes[len_offset..len_offset + <span class="number">3</span>])
-                    .try_into()
-                    .unwrap();
-                out.copy_from_slice(<span class="kw-2">&amp;</span>len_bytes[<span class="number">1</span>..]);
-            }
+            i.encode(nest.buf);
         }
     }
 
@@ -560,9 +577,7 @@
 /// prefixed with a length, the size of which depends on the type of the list elements.
 /// As such, the `Codec` implementation for `Vec&lt;T&gt;` requires an implementation of this trait
 /// for its element type `T`.
-///
-</span><span class="comment">// TODO: make this `pub(crate)` once our MSRV allows it?
-</span><span class="kw">pub trait </span>TlsListElement {
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">trait </span>TlsListElement {
     <span class="kw">const </span>SIZE_LEN: ListLength;
 }
 
@@ -571,11 +586,88 @@
 /// The types that appear in lists are limited to three kinds of length prefixes:
 /// 1, 2, and 3 bytes. For the latter kind, we require a `TlsListElement` implementer
 /// to specify a maximum length.
-///
-</span><span class="comment">// TODO: make this `pub(crate)` once our MSRV allows it?
-</span><span class="kw">pub enum </span>ListLength {
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">enum </span>ListLength {
     U8,
     U16,
     U24 { max: usize },
+}
+
+<span class="doccomment">/// Tracks encoding a length-delimited structure in a single pass.
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>LengthPrefixedBuffer&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) buf: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>Vec&lt;u8&gt;,
+    len_offset: usize,
+    size_len: ListLength,
+}
+
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; LengthPrefixedBuffer&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="doccomment">/// Inserts a dummy length into `buf`, and remembers where it went.
+    ///
+    /// After this, the body of the length-delimited structure should be appended to `LengthPrefixedBuffer::buf`.
+    /// The length header is corrected in `LengthPrefixedBuffer::drop`.
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(size_len: ListLength, buf: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span>Vec&lt;u8&gt;) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>len_offset = buf.len();
+        buf.extend(<span class="kw">match </span>size_len {
+            ListLength::U8 =&gt; <span class="kw-2">&amp;</span>[<span class="number">0xff</span>][..],
+            ListLength::U16 =&gt; <span class="kw-2">&amp;</span>[<span class="number">0xff</span>, <span class="number">0xff</span>],
+            ListLength::U24 { .. } =&gt; <span class="kw-2">&amp;</span>[<span class="number">0xff</span>, <span class="number">0xff</span>, <span class="number">0xff</span>],
+        });
+
+        <span class="self">Self </span>{
+            buf,
+            len_offset,
+            size_len,
+        }
+    }
+}
+
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Drop <span class="kw">for </span>LengthPrefixedBuffer&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="doccomment">/// Goes back and corrects the length previously inserted at the start of the structure.
+    </span><span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="kw">match </span><span class="self">self</span>.size_len {
+            ListLength::U8 =&gt; {
+                <span class="kw">let </span>len = <span class="self">self</span>.buf.len() - <span class="self">self</span>.len_offset - <span class="number">1</span>;
+                <span class="macro">debug_assert!</span>(len &lt;= <span class="number">0xff</span>);
+                <span class="self">self</span>.buf[<span class="self">self</span>.len_offset] = len <span class="kw">as </span>u8;
+            }
+            ListLength::U16 =&gt; {
+                <span class="kw">let </span>len = <span class="self">self</span>.buf.len() - <span class="self">self</span>.len_offset - <span class="number">2</span>;
+                <span class="macro">debug_assert!</span>(len &lt;= <span class="number">0xffff</span>);
+                <span class="kw">let </span>out: <span class="kw-2">&amp;mut </span>[u8; <span class="number">2</span>] = (<span class="kw-2">&amp;mut </span><span class="self">self</span>.buf[<span class="self">self</span>.len_offset..<span class="self">self</span>.len_offset + <span class="number">2</span>])
+                    .try_into()
+                    .unwrap();
+                <span class="kw-2">*</span>out = u16::to_be_bytes(len <span class="kw">as </span>u16);
+            }
+            ListLength::U24 { .. } =&gt; {
+                <span class="kw">let </span>len = <span class="self">self</span>.buf.len() - <span class="self">self</span>.len_offset - <span class="number">3</span>;
+                <span class="macro">debug_assert!</span>(len &lt;= <span class="number">0xff_ffff</span>);
+                <span class="kw">let </span>len_bytes = u32::to_be_bytes(len <span class="kw">as </span>u32);
+                <span class="kw">let </span>out: <span class="kw-2">&amp;mut </span>[u8; <span class="number">3</span>] = (<span class="kw-2">&amp;mut </span><span class="self">self</span>.buf[<span class="self">self</span>.len_offset..<span class="self">self</span>.len_offset + <span class="number">3</span>])
+                    .try_into()
+                    .unwrap();
+                out.copy_from_slice(<span class="kw-2">&amp;</span>len_bytes[<span class="number">1</span>..]);
+            }
+        }
+    }
+}
+
+<span class="attr">#[cfg(test)]
+</span><span class="kw">mod </span>tests {
+    <span class="kw">use super</span>::<span class="kw-2">*</span>;
+    <span class="kw">use </span>std::prelude::v1::<span class="kw-2">*</span>;
+    <span class="kw">use </span>std::vec;
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>interrupted_length_prefixed_buffer_leaves_maximum_length() {
+        <span class="kw">let </span><span class="kw-2">mut </span>buf = Vec::new();
+        <span class="kw">let </span>nested = LengthPrefixedBuffer::new(ListLength::U16, <span class="kw-2">&amp;mut </span>buf);
+        nested.buf.push(<span class="number">0xaa</span>);
+        <span class="macro">assert_eq!</span>(nested.buf, <span class="kw-2">&amp;</span><span class="macro">vec!</span>[<span class="number">0xff</span>, <span class="number">0xff</span>, <span class="number">0xaa</span>]);
+        <span class="comment">// &lt;- if the buffer is accidentally read here, there is no possiblity
+        //    that the contents of the length-prefixed buffer are interpretted
+        //    as a subsequent encoding (perhaps allowing injection of a different
+        //    extension)
+        </span>drop(nested);
+        <span class="macro">assert_eq!</span>(buf, <span class="macro">vec!</span>[<span class="number">0x00</span>, <span class="number">0x01</span>, <span class="number">0xaa</span>]);
+    }
 }
 </code></pre></div></section></main></body></html>

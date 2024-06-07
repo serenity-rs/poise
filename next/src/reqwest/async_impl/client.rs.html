@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/reqwest-0.11.23/src/async_impl/client.rs`."><title>client.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="reqwest" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (8f9080db4 2024-05-09)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/reqwest-0.11.27/src/async_impl/client.rs`."><title>client.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="reqwest" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (98489f248 2024-06-06)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -2500,6 +2500,70 @@
 <a href="#2500" id="2500">2500</a>
 <a href="#2501" id="2501">2501</a>
 <a href="#2502" id="2502">2502</a>
+<a href="#2503" id="2503">2503</a>
+<a href="#2504" id="2504">2504</a>
+<a href="#2505" id="2505">2505</a>
+<a href="#2506" id="2506">2506</a>
+<a href="#2507" id="2507">2507</a>
+<a href="#2508" id="2508">2508</a>
+<a href="#2509" id="2509">2509</a>
+<a href="#2510" id="2510">2510</a>
+<a href="#2511" id="2511">2511</a>
+<a href="#2512" id="2512">2512</a>
+<a href="#2513" id="2513">2513</a>
+<a href="#2514" id="2514">2514</a>
+<a href="#2515" id="2515">2515</a>
+<a href="#2516" id="2516">2516</a>
+<a href="#2517" id="2517">2517</a>
+<a href="#2518" id="2518">2518</a>
+<a href="#2519" id="2519">2519</a>
+<a href="#2520" id="2520">2520</a>
+<a href="#2521" id="2521">2521</a>
+<a href="#2522" id="2522">2522</a>
+<a href="#2523" id="2523">2523</a>
+<a href="#2524" id="2524">2524</a>
+<a href="#2525" id="2525">2525</a>
+<a href="#2526" id="2526">2526</a>
+<a href="#2527" id="2527">2527</a>
+<a href="#2528" id="2528">2528</a>
+<a href="#2529" id="2529">2529</a>
+<a href="#2530" id="2530">2530</a>
+<a href="#2531" id="2531">2531</a>
+<a href="#2532" id="2532">2532</a>
+<a href="#2533" id="2533">2533</a>
+<a href="#2534" id="2534">2534</a>
+<a href="#2535" id="2535">2535</a>
+<a href="#2536" id="2536">2536</a>
+<a href="#2537" id="2537">2537</a>
+<a href="#2538" id="2538">2538</a>
+<a href="#2539" id="2539">2539</a>
+<a href="#2540" id="2540">2540</a>
+<a href="#2541" id="2541">2541</a>
+<a href="#2542" id="2542">2542</a>
+<a href="#2543" id="2543">2543</a>
+<a href="#2544" id="2544">2544</a>
+<a href="#2545" id="2545">2545</a>
+<a href="#2546" id="2546">2546</a>
+<a href="#2547" id="2547">2547</a>
+<a href="#2548" id="2548">2548</a>
+<a href="#2549" id="2549">2549</a>
+<a href="#2550" id="2550">2550</a>
+<a href="#2551" id="2551">2551</a>
+<a href="#2552" id="2552">2552</a>
+<a href="#2553" id="2553">2553</a>
+<a href="#2554" id="2554">2554</a>
+<a href="#2555" id="2555">2555</a>
+<a href="#2556" id="2556">2556</a>
+<a href="#2557" id="2557">2557</a>
+<a href="#2558" id="2558">2558</a>
+<a href="#2559" id="2559">2559</a>
+<a href="#2560" id="2560">2560</a>
+<a href="#2561" id="2561">2561</a>
+<a href="#2562" id="2562">2562</a>
+<a href="#2563" id="2563">2563</a>
+<a href="#2564" id="2564">2564</a>
+<a href="#2565" id="2565">2565</a>
+<a href="#2566" id="2566">2566</a>
 </pre></div><pre class="rust"><code><span class="attr">#[cfg(any(feature = <span class="string">"native-tls"</span>, feature = <span class="string">"__rustls"</span>,))]
 </span><span class="kw">use </span>std::any::Any;
 <span class="kw">use </span>std::net::IpAddr;
@@ -2535,11 +2599,11 @@
 <span class="kw">use </span><span class="kw">crate</span>::connect::Connector;
 <span class="attr">#[cfg(feature = <span class="string">"cookies"</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::cookie;
-<span class="attr">#[cfg(feature = <span class="string">"trust-dns"</span>)]
-</span><span class="kw">use </span><span class="kw">crate</span>::dns::trust_dns::TrustDnsResolver;
+<span class="attr">#[cfg(feature = <span class="string">"hickory-dns"</span>)]
+</span><span class="kw">use </span><span class="kw">crate</span>::dns::hickory::HickoryDnsResolver;
 <span class="kw">use </span><span class="kw">crate</span>::dns::{gai::GaiResolver, DnsResolverWithOverrides, DynResolver, Resolve};
 <span class="kw">use </span><span class="kw">crate</span>::error;
-<span class="kw">use </span><span class="kw">crate</span>::into_url::{expect_uri, try_uri};
+<span class="kw">use </span><span class="kw">crate</span>::into_url::try_uri;
 <span class="kw">use </span><span class="kw">crate</span>::redirect::{<span class="self">self</span>, remove_sensitive_headers};
 <span class="attr">#[cfg(feature = <span class="string">"__tls"</span>)]
 </span><span class="kw">use </span><span class="kw">crate</span>::tls::{<span class="self">self</span>, TlsBackend};
@@ -2637,7 +2701,7 @@
     nodelay: bool,
     <span class="attr">#[cfg(feature = <span class="string">"cookies"</span>)]
     </span>cookie_store: <span class="prelude-ty">Option</span>&lt;Arc&lt;<span class="kw">dyn </span>cookie::CookieStore&gt;&gt;,
-    trust_dns: bool,
+    hickory_dns: bool,
     error: <span class="prelude-ty">Option</span>&lt;<span class="kw">crate</span>::Error&gt;,
     https_only: bool,
     <span class="attr">#[cfg(feature = <span class="string">"http3"</span>)]
@@ -2720,7 +2784,7 @@
                 http2_keep_alive_while_idle: <span class="bool-val">false</span>,
                 local_address: <span class="prelude-val">None</span>,
                 nodelay: <span class="bool-val">true</span>,
-                trust_dns: <span class="macro">cfg!</span>(feature = <span class="string">"trust-dns"</span>),
+                hickory_dns: <span class="macro">cfg!</span>(feature = <span class="string">"hickory-dns"</span>),
                 <span class="attr">#[cfg(feature = <span class="string">"cookies"</span>)]
                 </span>cookie_store: <span class="prelude-val">None</span>,
                 https_only: <span class="bool-val">false</span>,
@@ -2769,12 +2833,12 @@
                 headers.get(USER_AGENT).cloned()
             }
 
-            <span class="kw">let </span><span class="kw-2">mut </span>resolver: Arc&lt;<span class="kw">dyn </span>Resolve&gt; = <span class="kw">match </span>config.trust_dns {
+            <span class="kw">let </span><span class="kw-2">mut </span>resolver: Arc&lt;<span class="kw">dyn </span>Resolve&gt; = <span class="kw">match </span>config.hickory_dns {
                 <span class="bool-val">false </span>=&gt; Arc::new(GaiResolver::new()),
-                <span class="attr">#[cfg(feature = <span class="string">"trust-dns"</span>)]
-                </span><span class="bool-val">true </span>=&gt; Arc::new(TrustDnsResolver::default()),
-                <span class="attr">#[cfg(not(feature = <span class="string">"trust-dns"</span>))]
-                </span><span class="bool-val">true </span>=&gt; <span class="macro">unreachable!</span>(<span class="string">"trust-dns shouldn't be enabled unless the feature is"</span>),
+                <span class="attr">#[cfg(feature = <span class="string">"hickory-dns"</span>)]
+                </span><span class="bool-val">true </span>=&gt; Arc::new(HickoryDnsResolver::default()),
+                <span class="attr">#[cfg(not(feature = <span class="string">"hickory-dns"</span>))]
+                </span><span class="bool-val">true </span>=&gt; <span class="macro">unreachable!</span>(<span class="string">"hickory-dns shouldn't be enabled unless the feature is"</span>),
             };
             <span class="kw">if let </span><span class="prelude-val">Some</span>(dns_resolver) = config.dns_resolver {
                 resolver = dns_resolver;
@@ -2996,10 +3060,8 @@
                                 <span class="prelude-val">Err</span>(err) =&gt; {
                                     invalid_count += <span class="number">1</span>;
                                     <span class="macro">log::warn!</span>(
-                                        <span class="string">"rustls failed to parse DER certificate {:?} {:?}"</span>,
-                                        <span class="kw-2">&amp;</span>err,
-                                        <span class="kw-2">&amp;</span>cert
-                                    );
+                                        <span class="string">"rustls failed to parse DER certificate {err:?} {cert:?}"
+                                    </span>);
                                 }
                             }
                         }
@@ -3288,7 +3350,11 @@
     /// Cookies received in responses will be preserved and included in
     /// additional requests.
     ///
-    /// By default, no cookie store is used.
+    /// By default, no cookie store is used. Enabling the cookie store
+    /// with `cookie_store(true)` will set the store to a default implementation.
+    /// It is **not** necessary to call [cookie_store(true)](crate::ClientBuilder::cookie_store) if [cookie_provider(my_cookie_store)](crate::ClientBuilder::cookie_provider)
+    /// is used; calling [cookie_store(true)](crate::ClientBuilder::cookie_store) _after_ [cookie_provider(my_cookie_store)](crate::ClientBuilder::cookie_provider) will result
+    /// in the provided `my_cookie_store` being **overridden** with a default implementation.
     ///
     /// # Optional
     ///
@@ -3309,7 +3375,10 @@
     /// Cookies received in responses will be passed to this store, and
     /// additional requests will query this store for cookies.
     ///
-    /// By default, no cookie store is used.
+    /// By default, no cookie store is used. It is **not** necessary to also call
+    /// [cookie_store(true)](crate::ClientBuilder::cookie_store) if [cookie_provider(my_cookie_store)](crate::ClientBuilder::cookie_provider) is used; calling
+    /// [cookie_store(true)](crate::ClientBuilder::cookie_store) _after_ [cookie_provider(my_cookie_store)](crate::ClientBuilder::cookie_provider) will result
+    /// in the provided `my_cookie_store` being **overridden** with a default implementation.
     ///
     /// # Optional
     ///
@@ -4023,32 +4092,67 @@
         <span class="self">self
     </span>}
 
-    <span class="doccomment">/// Enables the [trust-dns](trust_dns_resolver) async resolver instead of a default threadpool using `getaddrinfo`.
+    <span class="doccomment">/// Enables the [hickory-dns](hickory_resolver) async resolver instead of a default threadpool
+    /// using `getaddrinfo`.
     ///
-    /// If the `trust-dns` feature is turned on, the default option is enabled.
+    /// If the `hickory-dns` feature is turned on, the default option is enabled.
     ///
     /// # Optional
     ///
-    /// This requires the optional `trust-dns` feature to be enabled
-    </span><span class="attr">#[cfg(feature = <span class="string">"trust-dns"</span>)]
-    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"trust-dns"</span>)))]
+    /// This requires the optional `hickory-dns` feature to be enabled
+    </span><span class="attr">#[cfg(feature = <span class="string">"hickory-dns"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"hickory-dns"</span>)))]
+    #[deprecated(note = <span class="string">"use `hickory_dns` instead"</span>)]
     </span><span class="kw">pub fn </span>trust_dns(<span class="kw-2">mut </span><span class="self">self</span>, enable: bool) -&gt; ClientBuilder {
-        <span class="self">self</span>.config.trust_dns = enable;
+        <span class="self">self</span>.config.hickory_dns = enable;
         <span class="self">self
     </span>}
 
-    <span class="doccomment">/// Disables the trust-dns async resolver.
+    <span class="doccomment">/// Enables the [hickory-dns](hickory_resolver) async resolver instead of a default threadpool
+    /// using `getaddrinfo`.
     ///
-    /// This method exists even if the optional `trust-dns` feature is not enabled.
-    /// This can be used to ensure a `Client` doesn't use the trust-dns async resolver
-    /// even if another dependency were to enable the optional `trust-dns` feature.
+    /// If the `hickory-dns` feature is turned on, the default option is enabled.
+    ///
+    /// # Optional
+    ///
+    /// This requires the optional `hickory-dns` feature to be enabled
+    </span><span class="attr">#[cfg(feature = <span class="string">"hickory-dns"</span>)]
+    #[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"hickory-dns"</span>)))]
+    </span><span class="kw">pub fn </span>hickory_dns(<span class="kw-2">mut </span><span class="self">self</span>, enable: bool) -&gt; ClientBuilder {
+        <span class="self">self</span>.config.hickory_dns = enable;
+        <span class="self">self
+    </span>}
+
+    <span class="doccomment">/// Disables the hickory-dns async resolver.
+    ///
+    /// This method exists even if the optional `hickory-dns` feature is not enabled.
+    /// This can be used to ensure a `Client` doesn't use the hickory-dns async resolver
+    /// even if another dependency were to enable the optional `hickory-dns` feature.
+    </span><span class="attr">#[deprecated(note = <span class="string">"use `no_hickory_dns` instead"</span>)]
     </span><span class="kw">pub fn </span>no_trust_dns(<span class="self">self</span>) -&gt; ClientBuilder {
-        <span class="attr">#[cfg(feature = <span class="string">"trust-dns"</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"hickory-dns"</span>)]
         </span>{
-            <span class="self">self</span>.trust_dns(<span class="bool-val">false</span>)
+            <span class="self">self</span>.hickory_dns(<span class="bool-val">false</span>)
         }
 
-        <span class="attr">#[cfg(not(feature = <span class="string">"trust-dns"</span>))]
+        <span class="attr">#[cfg(not(feature = <span class="string">"hickory-dns"</span>))]
+        </span>{
+            <span class="self">self
+        </span>}
+    }
+
+    <span class="doccomment">/// Disables the hickory-dns async resolver.
+    ///
+    /// This method exists even if the optional `hickory-dns` feature is not enabled.
+    /// This can be used to ensure a `Client` doesn't use the hickory-dns async resolver
+    /// even if another dependency were to enable the optional `hickory-dns` feature.
+    </span><span class="kw">pub fn </span>no_hickory_dns(<span class="self">self</span>) -&gt; ClientBuilder {
+        <span class="attr">#[cfg(feature = <span class="string">"hickory-dns"</span>)]
+        </span>{
+            <span class="self">self</span>.hickory_dns(<span class="bool-val">false</span>)
+        }
+
+        <span class="attr">#[cfg(not(feature = <span class="string">"hickory-dns"</span>))]
         </span>{
             <span class="self">self
         </span>}
@@ -4305,7 +4409,10 @@
             }
         }
 
-        <span class="kw">let </span>uri = expect_uri(<span class="kw-2">&amp;</span>url);
+        <span class="kw">let </span>uri = <span class="kw">match </span>try_uri(<span class="kw-2">&amp;</span>url) {
+            <span class="prelude-val">Ok</span>(uri) =&gt; uri,
+            <span class="kw">_ </span>=&gt; <span class="kw">return </span>Pending::new_err(error::url_invalid_uri(url)),
+        };
 
         <span class="kw">let </span>(reusable, body) = <span class="kw">match </span>body {
             <span class="prelude-val">Some</span>(body) =&gt; {
@@ -4656,7 +4763,7 @@
             <span class="kw">return </span><span class="bool-val">false</span>;
         }
 
-        <span class="macro">trace!</span>(<span class="string">"can retry {:?}"</span>, err);
+        <span class="macro">trace!</span>(<span class="string">"can retry {err:?}"</span>);
 
         <span class="kw">let </span>body = <span class="kw">match </span><span class="self">self</span>.body {
             <span class="prelude-val">Some</span>(<span class="prelude-val">Some</span>(<span class="kw-2">ref </span>body)) =&gt; Body::reusable(body.clone()),
@@ -4673,7 +4780,8 @@
         }
         <span class="self">self</span>.retry_count += <span class="number">1</span>;
 
-        <span class="kw">let </span>uri = expect_uri(<span class="kw-2">&amp;</span><span class="self">self</span>.url);
+        <span class="comment">// If it parsed once, it should parse again
+        </span><span class="kw">let </span>uri = try_uri(<span class="kw-2">&amp;</span><span class="self">self</span>.url).expect(<span class="string">"URL was already validated as URI"</span>);
 
         <span class="kw-2">*</span><span class="self">self</span>.as_mut().in_flight().get_mut() = <span class="kw">match </span><span class="kw-2">*</span><span class="self">self</span>.as_mut().in_flight().as_ref() {
             <span class="attr">#[cfg(feature = <span class="string">"http3"</span>)]
@@ -4711,7 +4819,7 @@
     <span class="attr">#[cfg(feature = <span class="string">"http3"</span>)]
     </span><span class="kw">if let </span><span class="prelude-val">Some</span>(cause) = err.source() {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(err) = cause.downcast_ref::&lt;h3::Error&gt;() {
-            <span class="macro">debug!</span>(<span class="string">"determining if HTTP/3 error {} can be retried"</span>, err);
+            <span class="macro">debug!</span>(<span class="string">"determining if HTTP/3 error {err} can be retried"</span>);
             <span class="comment">// TODO: Does h3 provide an API for checking the error?
             </span><span class="kw">return </span>err.to_string().as_str() == <span class="string">"timeout"</span>;
         }
@@ -4720,9 +4828,16 @@
     <span class="kw">if let </span><span class="prelude-val">Some</span>(cause) = err.source() {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(err) = cause.downcast_ref::&lt;h2::Error&gt;() {
             <span class="comment">// They sent us a graceful shutdown, try with a new connection!
-            </span><span class="kw">return </span>err.is_go_away()
-                &amp;&amp; err.is_remote()
-                &amp;&amp; err.reason() == <span class="prelude-val">Some</span>(h2::Reason::NO_ERROR);
+            </span><span class="kw">if </span>err.is_go_away() &amp;&amp; err.is_remote() &amp;&amp; err.reason() == <span class="prelude-val">Some</span>(h2::Reason::NO_ERROR) {
+                <span class="kw">return </span><span class="bool-val">true</span>;
+            }
+
+            <span class="comment">// REFUSED_STREAM was sent from the server, which is safe to retry.
+            // https://www.rfc-editor.org/rfc/rfc9113.html#section-8.7-3.2
+            </span><span class="kw">if </span>err.is_reset() &amp;&amp; err.is_remote() &amp;&amp; err.reason() == <span class="prelude-val">Some</span>(h2::Reason::REFUSED_STREAM)
+            {
+                <span class="kw">return </span><span class="bool-val">true</span>;
+            }
         }
     }
     <span class="bool-val">false
@@ -4846,7 +4961,7 @@
                     //
                     // If not, just log it and skip the redirect.
                     </span><span class="kw">let </span>loc = loc.and_then(|url| {
-                        <span class="kw">if </span>try_uri(<span class="kw-2">&amp;</span>url).is_some() {
+                        <span class="kw">if </span>try_uri(<span class="kw-2">&amp;</span>url).is_ok() {
                             <span class="prelude-val">Some</span>(url)
                         } <span class="kw">else </span>{
                             <span class="prelude-val">None
@@ -4854,7 +4969,7 @@
                     });
 
                     <span class="kw">if </span>loc.is_none() {
-                        <span class="macro">debug!</span>(<span class="string">"Location header had invalid URI: {:?}"</span>, val);
+                        <span class="macro">debug!</span>(<span class="string">"Location header had invalid URI: {val:?}"</span>);
                     }
                     loc
                 });
@@ -4891,7 +5006,7 @@
                                 std::mem::replace(<span class="self">self</span>.as_mut().headers(), HeaderMap::new());
 
                             remove_sensitive_headers(<span class="kw-2">&amp;mut </span>headers, <span class="kw-2">&amp;</span><span class="self">self</span>.url, <span class="kw-2">&amp;</span><span class="self">self</span>.urls);
-                            <span class="kw">let </span>uri = expect_uri(<span class="kw-2">&amp;</span><span class="self">self</span>.url);
+                            <span class="kw">let </span>uri = try_uri(<span class="kw-2">&amp;</span><span class="self">self</span>.url)<span class="question-mark">?</span>;
                             <span class="kw">let </span>body = <span class="kw">match </span><span class="self">self</span>.body {
                                 <span class="prelude-val">Some</span>(<span class="prelude-val">Some</span>(<span class="kw-2">ref </span>body)) =&gt; Body::reusable(body.clone()),
                                 <span class="kw">_ </span>=&gt; Body::empty(),
@@ -4936,7 +5051,7 @@
                             <span class="kw">continue</span>;
                         }
                         redirect::ActionKind::Stop =&gt; {
-                            <span class="macro">debug!</span>(<span class="string">"redirect policy disallowed redirection to '{}'"</span>, loc);
+                            <span class="macro">debug!</span>(<span class="string">"redirect policy disallowed redirection to '{loc}'"</span>);
                         }
                         redirect::ActionKind::Error(err) =&gt; {
                             <span class="kw">return </span>Poll::Ready(<span class="prelude-val">Err</span>(<span class="kw">crate</span>::error::redirect(err, <span class="self">self</span>.url.clone())));
@@ -4991,8 +5106,21 @@
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
     <span class="attr">#[tokio::test]
-    </span><span class="kw">async fn </span>execute_request_rejects_invald_urls() {
+    </span><span class="kw">async fn </span>execute_request_rejects_invalid_urls() {
         <span class="kw">let </span>url_str = <span class="string">"hxxps://www.rust-lang.org/"</span>;
+        <span class="kw">let </span>url = url::Url::parse(url_str).unwrap();
+        <span class="kw">let </span>result = <span class="kw">crate</span>::get(url.clone()).<span class="kw">await</span>;
+
+        <span class="macro">assert!</span>(result.is_err());
+        <span class="kw">let </span>err = result.err().unwrap();
+        <span class="macro">assert!</span>(err.is_builder());
+        <span class="macro">assert_eq!</span>(url_str, err.url().unwrap().as_str());
+    }
+
+    <span class="doccomment">/// https://github.com/seanmonstar/reqwest/issues/668
+    </span><span class="attr">#[tokio::test]
+    </span><span class="kw">async fn </span>execute_request_rejects_invalid_hostname() {
+        <span class="kw">let </span>url_str = <span class="string">"https://{{hostname}}/"</span>;
         <span class="kw">let </span>url = url::Url::parse(url_str).unwrap();
         <span class="kw">let </span>result = <span class="kw">crate</span>::get(url.clone()).<span class="kw">await</span>;
 

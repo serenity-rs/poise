@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/base64-0.21.7/src/engine/general_purpose/decode_suffix.rs`."><title>decode_suffix.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="base64" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (8f9080db4 2024-05-09)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/base64-0.22.1/src/engine/general_purpose/decode_suffix.rs`."><title>decode_suffix.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="base64" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0-nightly (98489f248 2024-06-06)" data-channel="nightly" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -160,18 +160,12 @@
 <a href="#160" id="160">160</a>
 <a href="#161" id="161">161</a>
 <a href="#162" id="162">162</a>
-<a href="#163" id="163">163</a>
-<a href="#164" id="164">164</a>
-<a href="#165" id="165">165</a>
-<a href="#166" id="166">166</a>
-<a href="#167" id="167">167</a>
-<a href="#168" id="168">168</a>
 </pre></div><pre class="rust"><code><span class="kw">use crate</span>::{
     engine::{general_purpose::INVALID_VALUE, DecodeMetadata, DecodePaddingMode},
-    DecodeError, PAD_BYTE,
+    DecodeError, DecodeSliceError, PAD_BYTE,
 };
 
-<span class="doccomment">/// Decode the last 1-8 bytes, checking for trailing set bits and padding per the provided
+<span class="doccomment">/// Decode the last 0-4 bytes, checking for trailing set bits and padding per the provided
 /// parameters.
 ///
 /// Returns the decode metadata representing the total number of bytes decoded, including the ones
@@ -184,17 +178,19 @@
     decode_table: <span class="kw-2">&amp;</span>[u8; <span class="number">256</span>],
     decode_allow_trailing_bits: bool,
     padding_mode: DecodePaddingMode,
-) -&gt; <span class="prelude-ty">Result</span>&lt;DecodeMetadata, DecodeError&gt; {
-    <span class="comment">// Decode any leftovers that aren't a complete input block of 8 bytes.
-    // Use a u64 as a stack-resident 8 byte buffer.
-    </span><span class="kw">let </span><span class="kw-2">mut </span>leftover_bits: u64 = <span class="number">0</span>;
-    <span class="kw">let </span><span class="kw-2">mut </span>morsels_in_leftover = <span class="number">0</span>;
-    <span class="kw">let </span><span class="kw-2">mut </span>padding_bytes = <span class="number">0</span>;
-    <span class="kw">let </span><span class="kw-2">mut </span>first_padding_index: usize = <span class="number">0</span>;
-    <span class="kw">let </span><span class="kw-2">mut </span>last_symbol = <span class="number">0_u8</span>;
-    <span class="kw">let </span>start_of_leftovers = input_index;
+) -&gt; <span class="prelude-ty">Result</span>&lt;DecodeMetadata, DecodeSliceError&gt; {
+    <span class="macro">debug_assert!</span>((input.len() - input_index) &lt;= <span class="number">4</span>);
 
-    <span class="kw">for </span>(i, <span class="kw-2">&amp;</span>b) <span class="kw">in </span>input[start_of_leftovers..].iter().enumerate() {
+    <span class="comment">// Decode any leftovers that might not be a complete input chunk of 4 bytes.
+    // Use a u32 as a stack-resident 4 byte buffer.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>morsels_in_leftover = <span class="number">0</span>;
+    <span class="kw">let </span><span class="kw-2">mut </span>padding_bytes_count = <span class="number">0</span>;
+    <span class="comment">// offset from input_index
+    </span><span class="kw">let </span><span class="kw-2">mut </span>first_padding_offset: usize = <span class="number">0</span>;
+    <span class="kw">let </span><span class="kw-2">mut </span>last_symbol = <span class="number">0_u8</span>;
+    <span class="kw">let </span><span class="kw-2">mut </span>morsels = [<span class="number">0_u8</span>; <span class="number">4</span>];
+
+    <span class="kw">for </span>(leftover_index, <span class="kw-2">&amp;</span>b) <span class="kw">in </span>input[input_index..].iter().enumerate() {
         <span class="comment">// '=' padding
         </span><span class="kw">if </span>b == PAD_BYTE {
             <span class="comment">// There can be bad padding bytes in a few ways:
@@ -209,30 +205,22 @@
             //     Per config, non-canonical but still functional non- or partially-padded base64
             //     may be treated as an error condition.
 
-            </span><span class="kw">if </span>i % <span class="number">4 </span>&lt; <span class="number">2 </span>{
-                <span class="comment">// Check for case #2.
-                </span><span class="kw">let </span>bad_padding_index = start_of_leftovers
-                    + <span class="kw">if </span>padding_bytes &gt; <span class="number">0 </span>{
-                        <span class="comment">// If we've already seen padding, report the first padding index.
-                        // This is to be consistent with the normal decode logic: it will report an
-                        // error on the first padding character (since it doesn't expect to see
-                        // anything but actual encoded data).
-                        // This could only happen if the padding started in the previous quad since
-                        // otherwise this case would have been hit at i % 4 == 0 if it was the same
-                        // quad.
-                        </span>first_padding_index
-                    } <span class="kw">else </span>{
-                        <span class="comment">// haven't seen padding before, just use where we are now
-                        </span>i
-                    };
-                <span class="kw">return </span><span class="prelude-val">Err</span>(DecodeError::InvalidByte(bad_padding_index, b));
+            </span><span class="kw">if </span>leftover_index &lt; <span class="number">2 </span>{
+                <span class="comment">// Check for error #2.
+                // Either the previous byte was padding, in which case we would have already hit
+                // this case, or it wasn't, in which case this is the first such error.
+                </span><span class="macro">debug_assert!</span>(
+                    leftover_index == <span class="number">0 </span>|| (leftover_index == <span class="number">1 </span>&amp;&amp; padding_bytes_count == <span class="number">0</span>)
+                );
+                <span class="kw">let </span>bad_padding_index = input_index + leftover_index;
+                <span class="kw">return </span><span class="prelude-val">Err</span>(DecodeError::InvalidByte(bad_padding_index, b).into());
             }
 
-            <span class="kw">if </span>padding_bytes == <span class="number">0 </span>{
-                first_padding_index = i;
+            <span class="kw">if </span>padding_bytes_count == <span class="number">0 </span>{
+                first_padding_offset = leftover_index;
             }
 
-            padding_bytes += <span class="number">1</span>;
+            padding_bytes_count += <span class="number">1</span>;
             <span class="kw">continue</span>;
         }
 
@@ -240,39 +228,44 @@
         // To make '=' handling consistent with the main loop, don't allow
         // non-suffix '=' in trailing chunk either. Report error as first
         // erroneous padding.
-        </span><span class="kw">if </span>padding_bytes &gt; <span class="number">0 </span>{
-            <span class="kw">return </span><span class="prelude-val">Err</span>(DecodeError::InvalidByte(
-                start_of_leftovers + first_padding_index,
-                PAD_BYTE,
-            ));
+        </span><span class="kw">if </span>padding_bytes_count &gt; <span class="number">0 </span>{
+            <span class="kw">return </span><span class="prelude-val">Err</span>(
+                DecodeError::InvalidByte(input_index + first_padding_offset, PAD_BYTE).into(),
+            );
         }
 
         last_symbol = b;
 
         <span class="comment">// can use up to 8 * 6 = 48 bits of the u64, if last chunk has no padding.
         // Pack the leftovers from left to right.
-        </span><span class="kw">let </span>shift = <span class="number">64 </span>- (morsels_in_leftover + <span class="number">1</span>) * <span class="number">6</span>;
-        <span class="kw">let </span>morsel = decode_table[b <span class="kw">as </span>usize];
+        </span><span class="kw">let </span>morsel = decode_table[b <span class="kw">as </span>usize];
         <span class="kw">if </span>morsel == INVALID_VALUE {
-            <span class="kw">return </span><span class="prelude-val">Err</span>(DecodeError::InvalidByte(start_of_leftovers + i, b));
+            <span class="kw">return </span><span class="prelude-val">Err</span>(DecodeError::InvalidByte(input_index + leftover_index, b).into());
         }
 
-        leftover_bits |= (morsel <span class="kw">as </span>u64) &lt;&lt; shift;
+        morsels[morsels_in_leftover] = morsel;
         morsels_in_leftover += <span class="number">1</span>;
+    }
+
+    <span class="comment">// If there was 1 trailing byte, and it was valid, and we got to this point without hitting
+    // an invalid byte, now we can report invalid length
+    </span><span class="kw">if </span>!input.is_empty() &amp;&amp; morsels_in_leftover &lt; <span class="number">2 </span>{
+        <span class="kw">return </span><span class="prelude-val">Err</span>(DecodeError::InvalidLength(input_index + morsels_in_leftover).into());
     }
 
     <span class="kw">match </span>padding_mode {
         DecodePaddingMode::Indifferent =&gt; { <span class="comment">/* everything we care about was already checked */ </span>}
         DecodePaddingMode::RequireCanonical =&gt; {
-            <span class="kw">if </span>(padding_bytes + morsels_in_leftover) % <span class="number">4 </span>!= <span class="number">0 </span>{
-                <span class="kw">return </span><span class="prelude-val">Err</span>(DecodeError::InvalidPadding);
+            <span class="comment">// allow empty input
+            </span><span class="kw">if </span>(padding_bytes_count + morsels_in_leftover) % <span class="number">4 </span>!= <span class="number">0 </span>{
+                <span class="kw">return </span><span class="prelude-val">Err</span>(DecodeError::InvalidPadding.into());
             }
         }
         DecodePaddingMode::RequireNone =&gt; {
-            <span class="kw">if </span>padding_bytes &gt; <span class="number">0 </span>{
+            <span class="kw">if </span>padding_bytes_count &gt; <span class="number">0 </span>{
                 <span class="comment">// check at the end to make sure we let the cases of padding that should be InvalidByte
                 // get hit
-                </span><span class="kw">return </span><span class="prelude-val">Err</span>(DecodeError::InvalidPadding);
+                </span><span class="kw">return </span><span class="prelude-val">Err</span>(DecodeError::InvalidPadding.into());
             }
         }
     }
@@ -285,50 +278,45 @@
     // bits in the bottom 6, but would be a non-canonical encoding. So, we calculate a
     // mask based on how many bits are used for just the canonical encoding, and optionally
     // error if any other bits are set. In the example of one encoded byte -&gt; 2 symbols,
-    // 2 symbols can technically encode 12 bits, but the last 4 are non canonical, and
+    // 2 symbols can technically encode 12 bits, but the last 4 are non-canonical, and
     // useless since there are no more symbols to provide the necessary 4 additional bits
     // to finish the second original byte.
 
-    </span><span class="kw">let </span>leftover_bits_ready_to_append = <span class="kw">match </span>morsels_in_leftover {
-        <span class="number">0 </span>=&gt; <span class="number">0</span>,
-        <span class="number">2 </span>=&gt; <span class="number">8</span>,
-        <span class="number">3 </span>=&gt; <span class="number">16</span>,
-        <span class="number">4 </span>=&gt; <span class="number">24</span>,
-        <span class="number">6 </span>=&gt; <span class="number">32</span>,
-        <span class="number">7 </span>=&gt; <span class="number">40</span>,
-        <span class="number">8 </span>=&gt; <span class="number">48</span>,
-        <span class="comment">// can also be detected as case #2 bad padding above
-        </span><span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(
-            <span class="string">"Impossible: must only have 0 to 8 input bytes in last chunk, with no invalid lengths"
-        </span>),
-    };
+    </span><span class="kw">let </span>leftover_bytes_to_append = morsels_in_leftover * <span class="number">6 </span>/ <span class="number">8</span>;
+    <span class="comment">// Put the up to 6 complete bytes as the high bytes.
+    // Gain a couple percent speedup from nudging these ORs to use more ILP with a two-way split.
+    </span><span class="kw">let </span><span class="kw-2">mut </span>leftover_num = (u32::from(morsels[<span class="number">0</span>]) &lt;&lt; <span class="number">26</span>)
+        | (u32::from(morsels[<span class="number">1</span>]) &lt;&lt; <span class="number">20</span>)
+        | (u32::from(morsels[<span class="number">2</span>]) &lt;&lt; <span class="number">14</span>)
+        | (u32::from(morsels[<span class="number">3</span>]) &lt;&lt; <span class="number">8</span>);
 
     <span class="comment">// if there are bits set outside the bits we care about, last symbol encodes trailing bits that
     // will not be included in the output
-    </span><span class="kw">let </span>mask = !<span class="number">0 </span>&gt;&gt; leftover_bits_ready_to_append;
-    <span class="kw">if </span>!decode_allow_trailing_bits &amp;&amp; (leftover_bits &amp; mask) != <span class="number">0 </span>{
+    </span><span class="kw">let </span>mask = !<span class="number">0_u32 </span>&gt;&gt; (leftover_bytes_to_append * <span class="number">8</span>);
+    <span class="kw">if </span>!decode_allow_trailing_bits &amp;&amp; (leftover_num &amp; mask) != <span class="number">0 </span>{
         <span class="comment">// last morsel is at `morsels_in_leftover` - 1
         </span><span class="kw">return </span><span class="prelude-val">Err</span>(DecodeError::InvalidLastSymbol(
-            start_of_leftovers + morsels_in_leftover - <span class="number">1</span>,
+            input_index + morsels_in_leftover - <span class="number">1</span>,
             last_symbol,
-        ));
+        )
+        .into());
     }
 
-    <span class="comment">// TODO benchmark simply converting to big endian bytes
-    </span><span class="kw">let </span><span class="kw-2">mut </span>leftover_bits_appended_to_buf = <span class="number">0</span>;
-    <span class="kw">while </span>leftover_bits_appended_to_buf &lt; leftover_bits_ready_to_append {
-        <span class="comment">// `as` simply truncates the higher bits, which is what we want here
-        </span><span class="kw">let </span>selected_bits = (leftover_bits &gt;&gt; (<span class="number">56 </span>- leftover_bits_appended_to_buf)) <span class="kw">as </span>u8;
-        output[output_index] = selected_bits;
+    <span class="comment">// Strangely, this approach benchmarks better than writing bytes one at a time,
+    // or copy_from_slice into output.
+    </span><span class="kw">for _ in </span><span class="number">0</span>..leftover_bytes_to_append {
+        <span class="kw">let </span>hi_byte = (leftover_num &gt;&gt; <span class="number">24</span>) <span class="kw">as </span>u8;
+        leftover_num &lt;&lt;= <span class="number">8</span>;
+        <span class="kw-2">*</span>output
+            .get_mut(output_index)
+            .ok_or(DecodeSliceError::OutputSliceTooSmall)<span class="question-mark">? </span>= hi_byte;
         output_index += <span class="number">1</span>;
-
-        leftover_bits_appended_to_buf += <span class="number">8</span>;
     }
 
     <span class="prelude-val">Ok</span>(DecodeMetadata::new(
         output_index,
-        <span class="kw">if </span>padding_bytes &gt; <span class="number">0 </span>{
-            <span class="prelude-val">Some</span>(input_index + first_padding_index)
+        <span class="kw">if </span>padding_bytes_count &gt; <span class="number">0 </span>{
+            <span class="prelude-val">Some</span>(input_index + first_padding_offset)
         } <span class="kw">else </span>{
             <span class="prelude-val">None
         </span>},
