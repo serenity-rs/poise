@@ -146,8 +146,9 @@ macro_rules! impl_for_integer {
                 match *value {
                     serenity::ResolvedValue::Integer(x) => x
                         .try_into()
-                        .map_err(|_| SlashArgError::CommandStructureMismatch {
-                            description: "received out of bounds integer",
+                        .map_err(|e| SlashArgError::Parse {
+                            error: Box::new(e),
+                            input: x.to_string(),
                         }),
                     _ => Err(SlashArgError::CommandStructureMismatch {
                         description: "expected integer",
