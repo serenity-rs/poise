@@ -29,6 +29,13 @@ pub struct Framework<U, E> {
 
     /// Handle to the background task in order to `abort()` it on `Drop`
     edit_tracker_purge_task: Option<tokio::task::JoinHandle<()>>,
+
+    /// If [`Framework::dispatch`] should be called
+    /// automatically (`true`) or manually by the developer (`false`)
+    ///
+    /// This allows the developer to make checks and call other functions before commands are
+    /// handled at all.
+    dispatch_automatically: bool,
 }
 
 impl<U, E> Framework<U, E> {
@@ -48,7 +55,7 @@ impl<U, E> Framework<U, E> {
     }
 
     /// Setup a new [`Framework`].
-    pub fn new(options: crate::FrameworkOptions<U, E>) -> Self
+    pub fn new(options: crate::FrameworkOptions<U, E>, dispatch_automatically: bool) -> Self
     where
         U: Send + Sync + 'static + 'static,
         E: Send + 'static,
@@ -58,6 +65,7 @@ impl<U, E> Framework<U, E> {
             edit_tracker_purge_task: None,
             shard_manager: None,
             options,
+            dispatch_automatically,
         }
     }
 
@@ -109,6 +117,15 @@ impl<U: Send + Sync + 'static, E: Send + Sync> serenity::Framework for Framework
 
     async fn dispatch(&self, ctx: &serenity::Context, event: &serenity::FullEvent) {
         raw_dispatch_event(self, ctx, event).await
+    }
+
+    /// If [`Framework::dispatch`] should be called
+    /// automatically (`true`) or manually by the developer (`false`)
+    ///
+    /// This allows the developer to make checks and call other functions before commands are
+    /// handled at all.
+    fn dispatch_automatically(&self) -> bool {
+        self.dispatch_automatically
     }
 }
 

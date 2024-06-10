@@ -112,7 +112,7 @@ async fn main() {
         serenity::GatewayIntents::non_privileged() | serenity::GatewayIntents::MESSAGE_CONTENT;
 
     let client = serenity::ClientBuilder::new(&token, intents)
-        .framework(poise::Framework::new(options))
+        .framework(poise::Framework::new(options, true))
         .data(Arc::new(Data {
             votes: Mutex::new(HashMap::new()),
         }) as _)

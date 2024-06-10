@@ -117,7 +117,7 @@ async fn main() {
     };
 
     let client = serenity::ClientBuilder::new(&token, intents)
-        .framework(poise::Framework::new(options))
+        .framework(poise::Framework::new(options, true))
         .await;
 
     client.unwrap().start().await.unwrap();
