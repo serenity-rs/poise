@@ -1,4 +1,4 @@
-use poise::{serenity_prelude as serenity};
+use poise::{serenity_prelude as serenity, Command, CommandGroup};
 use std::{env::var, sync::Arc, time::Duration, vec};
 // Types used by all command functions
 type Error = Box<dyn std::error::Error + Send + Sync>;
@@ -14,7 +14,7 @@ struct Test {}
 impl Test {
     // Just a test
     #[poise::command(slash_command, prefix_command, rename = "test")]
-    async fn aaa(ctx: Context<'_>) -> Result<(), Error> {
+    async fn test_command(ctx: Context<'_>) -> Result<(), Error> {
         let name = ctx.author();
         ctx.say(format!("Hello, {}", name)).await?;
         Ok(())
@@ -39,13 +39,12 @@ async fn on_error(error: poise::FrameworkError<'_, Data, Error>) {
     }
 }
 
-
 #[tokio::main]
 async fn main() {
     // FrameworkOptions contains all of poise's configuration option in one struct
     // Every option can be omitted to use its default value
     // println!("{:#?}", Test::commands());
-    let commands = Test::commands();
+    let commands: Vec<Command<Data, Error>> = Test::commands();
 
     let options = poise::FrameworkOptions {
         commands: commands,
@@ -120,4 +119,3 @@ async fn main() {
 
     client.unwrap().start().await.unwrap()
 }
-
