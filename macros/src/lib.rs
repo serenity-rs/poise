@@ -9,6 +9,7 @@ mod util;
 
 use proc_macro::TokenStream;
 use quote::{quote, ToTokens};
+use syn::spanned::Spanned;
 
 /**
 This macro transforms plain functions into poise bot commands.
@@ -336,6 +337,9 @@ fn group_impl(args: TokenStream, input_item: TokenStream) -> Result<TokenStream,
     // collect each ImplItem in a stream
     let mut impl_body = proc_macro2::TokenStream::new();
 
+    // context type for correct type inference in CommandGroup
+    let mut ctx_type_with_static: Option<syn::Type> = None;
+
     for item in item_impl.items.iter() {
         let mut item_stream = quote!(#item);
 
@@ -361,6 +365,26 @@ fn group_impl(args: TokenStream, input_item: TokenStream) -> Result<TokenStream,
                     sig: f.sig.clone(),
                     block: Box::new(f.block.clone()),
                 };
+
+                if let None = ctx_type_with_static {
+                    let context_type = match function.sig.inputs.first() {
+                        Some(syn::FnArg::Typed(syn::PatType { ty, .. })) => Some(&**ty),
+                        _ => {
+                            return Err(syn::Error::new(
+                                function.sig.span(),
+                                "expected a Context parameter",
+                            )
+                            .into())
+                        }
+                    };
+                    // Needed because we're not allowed to have lifetimes in the hacky use case below (in command::mod.rs)
+                    ctx_type_with_static = Some(syn::fold::fold_type(
+                        &mut crate::util::AllLifetimesToStatic,
+                        context_type
+                            .expect("context_type has already been set to Some")
+                            .clone(),
+                    ));
+                }
                 item_stream = command::command(new_args, function)?.into();
             }
         }
@@ -371,8 +395,14 @@ fn group_impl(args: TokenStream, input_item: TokenStream) -> Result<TokenStream,
     }
 
     Ok(quote! {
-        impl<D, E> ::poise::CommandGroup<D, E> for #name {
-            fn commands() -> Vec<::poise::Command<D, E>> {
+        impl ::poise::CommandGroup for #name {
+            type Data = <#ctx_type_with_static as poise::_GetGenerics>::U;
+            type Error = <#ctx_type_with_static as poise::_GetGenerics>::E;
+
+            fn commands() -> Vec<::poise::Command<
+                <#ctx_type_with_static as poise::_GetGenerics>::U,
+                <#ctx_type_with_static as poise::_GetGenerics>::E,
+            >> {
                 vec![#(#name::#command_idents()),*]
             }
         }
