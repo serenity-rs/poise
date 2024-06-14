@@ -227,7 +227,13 @@ impl CommandArgs {
 
 /// Representation of the group attribute arguments (`#[group(...)]`)
 ///
-/// Same as CommandArgs, but with some removed, because they wouldn't make sense
+/// Same as `CommandArgs`, but with the following removed:
+/// - subcommands
+/// - aliases
+/// - subcommand_required
+/// - rename
+/// - identifying_name
+///
 #[derive(Default, Debug, darling::FromMeta)]
 #[darling(default)]
 pub struct GroupArgs {
@@ -238,9 +244,6 @@ pub struct GroupArgs {
     // When changing these, document it in parent file!
     // TODO: decide why darling(multiple) feels wrong here but not in e.g. localizations (because
     //  if it's actually irrational, the inconsistency should be fixed)
-    // subcommands: crate::util::List<syn::Path>,
-    // aliases: crate::util::List<String>,
-    // subcommand_required: bool,
     invoke_on_edit: bool,
     reuse_response: bool,
     track_deletion: bool,
@@ -250,7 +253,6 @@ pub struct GroupArgs {
     #[darling(multiple)]
     check: Vec<syn::Path>,
     on_error: Option<syn::Path>,
-    // rename: Option<String>,
     #[darling(multiple)]
     name_localized: Vec<crate::util::Tuple2<String>>,
     #[darling(multiple)]
@@ -265,7 +267,6 @@ pub struct GroupArgs {
     guild_only: bool,
     dm_only: bool,
     nsfw_only: bool,
-    // identifying_name: Option<String>,
     category: Option<String>,
     custom_data: Option<syn::Expr>,
 
