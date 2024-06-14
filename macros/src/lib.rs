@@ -366,7 +366,7 @@ fn group_impl(args: TokenStream, input_item: TokenStream) -> Result<TokenStream,
                     block: Box::new(f.block.clone()),
                 };
 
-                if let None = ctx_type_with_static {
+                if ctx_type_with_static.is_none() {
                     let context_type = match function.sig.inputs.first() {
                         Some(syn::FnArg::Typed(syn::PatType { ty, .. })) => Some(&**ty),
                         _ => {
@@ -381,7 +381,7 @@ fn group_impl(args: TokenStream, input_item: TokenStream) -> Result<TokenStream,
                     ctx_type_with_static = Some(syn::fold::fold_type(
                         &mut crate::util::AllLifetimesToStatic,
                         context_type
-                            .expect("context_type has already been set to Some")
+                            .expect("context_type should have already been set")
                             .clone(),
                     ));
                 }
