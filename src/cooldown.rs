@@ -52,6 +52,23 @@ pub struct CooldownTracker {
     member_invocations: HashMap<(serenity::UserId, serenity::GuildId), Instant>,
 }
 
+/// Possible types of command cooldowns.
+///
+/// Currently used for [CooldownTracker::set_last_invocation]
+#[non_exhaustive]
+pub enum CooldownType {
+    /// A global cooldown that applies to all users, channels, and guilds.
+    Global,
+    /// A cooldown specific to individual users.
+    User(serenity::UserId),
+    /// A cooldown that applies to an entire guild.
+    Guild(serenity::GuildId),
+    /// A cooldown specific to individual channels.
+    Channel(serenity::ChannelId),
+    /// A cooldown specific to individual members within a guild.
+    Member((serenity::UserId, serenity::GuildId)),
+}
+
 /// **Renamed to [`CooldownTracker`]**
 pub use CooldownTracker as Cooldowns;
 
@@ -120,6 +137,29 @@ impl CooldownTracker {
         if let Some(guild_id) = ctx.guild_id {
             self.guild_invocations.insert(guild_id, now);
             self.member_invocations.insert((ctx.user_id, guild_id), now);
+        }
+    }
+
+    /// Sets the last invocation for the specified cooldown bucket.
+    ///
+    /// This function is not usually needed for regular usage. It was added to allow for extra
+    /// flexibility in cases where you might want to shorten or lengthen a cooldown after
+    /// invocation.
+    pub fn set_last_invocation(&mut self, cooldown_type: CooldownType, instant: Instant) {
+        match cooldown_type {
+            CooldownType::Global => self.global_invocation = Some(instant),
+            CooldownType::User(user_id) => {
+                self.user_invocations.insert(user_id, instant);
+            }
+            CooldownType::Guild(guild_id) => {
+                self.guild_invocations.insert(guild_id, instant);
+            }
+            CooldownType::Channel(channel_id) => {
+                self.channel_invocations.insert(channel_id, instant);
+            }
+            CooldownType::Member(member) => {
+                self.member_invocations.insert(member, instant);
+            }
         }
     }
 }

@@ -293,10 +293,11 @@ async fn generate_all_commands<U, E>(
     ctx: crate::Context<'_, U, E>,
     config: &HelpConfiguration<'_>,
 ) -> Result<String, serenity::Error> {
-    let mut categories = crate::util::OrderedMap::<Option<&str>, Vec<&crate::Command<U, E>>>::new();
+    let mut categories = indexmap::IndexMap::<Option<&str>, Vec<&crate::Command<U, E>>>::new();
     for cmd in &ctx.framework().options().commands {
         categories
-            .get_or_insert_with(cmd.category.as_deref(), Vec::new)
+            .entry(cmd.category.as_deref())
+            .or_default()
             .push(cmd);
     }
 
