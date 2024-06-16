@@ -233,22 +233,22 @@ impl_slash_argument!(serenity::PartialMember, |_, _, User(_, member)| {
 });
 impl_slash_argument!(serenity::User, |_, _, User(user, _)| user.clone());
 impl_slash_argument!(serenity::UserId, |_, _, User(user, _)| user.id);
-impl_slash_argument!(serenity::Channel, |ctx, _, Channel(channel)| {
+impl_slash_argument!(serenity::Channel, |ctx, inter, Channel(channel)| {
     channel
         .id
-        .to_channel(ctx)
+        .to_channel(ctx, inter.guild_id)
         .await
         .map_err(SlashArgError::Http)?
 });
 impl_slash_argument!(serenity::ChannelId, |_, _, Channel(channel)| channel.id);
 impl_slash_argument!(serenity::PartialChannel, |_, _, Channel(channel)| channel
     .clone());
-impl_slash_argument!(serenity::GuildChannel, |ctx, _, Channel(channel)| {
-    let channel_res = channel.id.to_channel(ctx).await;
-    let channel = channel_res.map_err(SlashArgError::Http)?.guild();
-    channel.ok_or(SlashArgError::Http(serenity::Error::Model(
-        serenity::ModelError::InvalidChannelType,
-    )))?
+impl_slash_argument!(serenity::GuildChannel, |ctx, inter, Channel(channel)| {
+    channel
+        .id
+        .to_guild_channel(ctx, inter.guild_id)
+        .await
+        .map_err(SlashArgError::Http)?
 });
 impl_slash_argument!(serenity::Role, |_, _, Role(role)| role.clone());
 impl_slash_argument!(serenity::RoleId, |_, _, Role(role)| role.id);
