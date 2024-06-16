@@ -18,7 +18,7 @@ async fn user_permissions(
     let guild = guild_id.to_partial_guild(ctx).await.ok()?;
 
     // Use to_channel so that it can fallback on HTTP for threads (which aren't in cache usually)
-    let channel = match channel_id.to_channel(ctx).await {
+    let channel = match channel_id.to_channel(ctx, Some(guild_id)).await {
         Ok(serenity::Channel::Guild(channel)) => channel,
         Ok(_other_channel) => {
             tracing::warn!(
@@ -94,17 +94,21 @@ async fn check_permissions_and_cooldown_single<'a, U: Send + Sync + 'static, E>(
     }
 
     if cmd.nsfw_only {
-        let channel = match ctx.channel_id().to_channel(ctx.serenity_context()).await {
-            Ok(channel) => channel,
-            Err(e) => {
-                tracing::warn!("Error when getting channel: {}", e);
+        if let Some(guild_id) = ctx.guild_id() {
+            let serenity_ctx = ctx.serenity_context();
+            let channel_id = ctx.channel_id();
+            let channel = match channel_id
+                .to_guild_channel(serenity_ctx, Some(guild_id))
+                .await
+            {
+                Ok(channel) => channel,
+                Err(e) => {
+                    tracing::warn!("Error when getting channel: {}", e);
+                    return Err(crate::FrameworkError::NsfwOnly { ctx });
+                }
+            };
 
-                return Err(crate::FrameworkError::NsfwOnly { ctx });
-            }
-        };
-
-        if let serenity::Channel::Guild(guild_channel) = channel {
-            if !guild_channel.nsfw {
+            if !channel.nsfw {
                 return Err(crate::FrameworkError::NsfwOnly { ctx });
             }
         }
