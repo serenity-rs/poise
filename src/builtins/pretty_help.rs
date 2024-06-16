@@ -36,7 +36,7 @@ impl Default for PrettyHelpConfiguration<'_> {
     }
 }
 
-/// A help command that works similarly to `builtin::help` butt outputs text in an embed.
+/// A help command that works similarly to `builtin::help` but outputs text in an embed.
 ///
 pub async fn pretty_help<U, E>(
     ctx: crate::Context<'_, U, E>,
