@@ -125,10 +125,7 @@ context_methods! {
     ///
     /// Note: panics when called in an autocomplete context!
     await (say self text)
-    (pub async fn say(
-        self,
-        text: impl Into<String>,
-    ) -> Result<crate::ReplyHandle<'a>, serenity::Error>) {
+    (pub async fn say<'arg>(self, text: impl Into<Cow<'arg, str>>) -> Result<crate::ReplyHandle<'a>, serenity::Error>) {
         crate::say_reply(self, text).await
     }
 
@@ -482,7 +479,7 @@ context_methods! {
     /// convert [`crate::CreateReply`] instances into Discord requests.
     #[allow(unused_mut)] // side effect of how macro works
     (reply_builder self builder)
-    (pub fn reply_builder(self, mut builder: crate::CreateReply<'a>) -> crate::CreateReply<'a>) {
+    (pub fn reply_builder<'args>(self, mut builder: crate::CreateReply<'args>) -> crate::CreateReply<'args>) {
         let fw_options = self.framework().options();
         builder.ephemeral = builder.ephemeral.or(Some(self.command().ephemeral));
         builder.allowed_mentions = builder.allowed_mentions.or_else(|| fw_options.allowed_mentions.clone());
