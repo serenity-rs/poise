@@ -4,13 +4,13 @@ use crate::serenity_prelude as serenity;
 
 /// Retrieves user permissions in the given channel. If unknown, returns None. If in DMs, returns
 /// `Permissions::all()`.
-async fn user_permissions(
-    ctx: &serenity::Context,
-    guild_id: Option<serenity::GuildId>,
-    channel_id: serenity::ChannelId,
+async fn user_permissions<U, E>(
+    ctx: crate::Context<'_, U, E>,
     user_id: Option<serenity::UserId>,
     bot_id: Option<serenity::UserId>,
 ) -> Option<(Option<serenity::Permissions>, Option<serenity::Permissions>)> {
+    let guild_id = ctx.guild_id();
+    let channel_id = ctx.channel_id();
     let guild_id = match guild_id {
         Some(x) => x,
         // no permission checks in DMs
@@ -22,8 +22,19 @@ async fn user_permissions(
         }
     };
 
+    match ctx {
+        crate::Context::Application(ctx) => {
+            // This should be present on all interactions within a guild. But discord can be a bit
+            // funny sometimes, so lets be safe.
+            if let Some(member) = &ctx.interaction.member {
+                return Some((member.permissions, ctx.interaction.app_permissions));
+            }
+        }
+        crate::Context::Prefix(_) => {}
+    }
+
     // Use to_channel so that it can fallback on HTTP for threads (which aren't in cache usually)
-    let channel = match channel_id.to_channel(ctx).await {
+    let channel = match channel_id.to_channel(ctx.serenity_context()).await {
         Ok(serenity::Channel::Guild(channel)) => channel,
         Ok(_other_channel) => {
             tracing::warn!(
@@ -36,20 +47,25 @@ async fn user_permissions(
 
     // These are done by HTTP only to prevent outdated data with no GUILD_MEMBERS intent.
     let user_member = if let Some(user_id) = user_id {
-        Some(guild_id.member(ctx, user_id).await.ok()?)
+        Some(
+            guild_id
+                .member(ctx.serenity_context(), user_id)
+                .await
+                .ok()?,
+        )
     } else {
         None
     };
 
     let bot_member = if let Some(bot_id) = bot_id {
-        Some(guild_id.member(ctx, bot_id).await.ok()?)
+        Some(guild_id.member(ctx.serenity_context(), bot_id).await.ok()?)
     } else {
         None
     };
 
     #[cfg(feature = "cache")]
     let cached_perms = {
-        ctx.cache.guild(guild_id).map(|guild| {
+        ctx.cache().guild(guild_id).map(|guild| {
             (
                 user_member
                     .as_ref()
@@ -65,7 +81,10 @@ async fn user_permissions(
     let users_permissions = if let Some(users_permissions) = cached_perms {
         users_permissions
     } else {
-        let partial_guild = guild_id.to_partial_guild(ctx).await.ok()?;
+        let partial_guild = guild_id
+            .to_partial_guild(ctx.serenity_context())
+            .await
+            .ok()?;
         (
             user_member.map(|m| partial_guild.user_permissions_in(&channel, &m)),
             bot_member.map(|m| partial_guild.user_permissions_in(&channel, &m)),
@@ -110,14 +129,7 @@ async fn missing_permissions<U, E>(
     };
 
     // Fetch permissions, returning None if an error occurred
-    let (user_perms, bot_perms) = user_permissions(
-        ctx.serenity_context(),
-        ctx.guild_id(),
-        ctx.channel_id(),
-        user_id,
-        bot_id,
-    )
-    .await?;
+    let (user_perms, bot_perms) = user_permissions(ctx, user_id, bot_id).await?;
 
     let user_missing_perms = user_perms
         .map(|permissions| user.1 - permissions)
