@@ -8,11 +8,18 @@ async fn user_permissions(
     ctx: &serenity::Context,
     guild_id: Option<serenity::GuildId>,
     channel_id: serenity::ChannelId,
-    user_id: serenity::UserId,
-) -> Option<serenity::Permissions> {
+    user_id: Option<serenity::UserId>,
+    bot_id: Option<serenity::UserId>,
+) -> Option<(Option<serenity::Permissions>, Option<serenity::Permissions>)> {
     let guild_id = match guild_id {
         Some(x) => x,
-        None => return Some(serenity::Permissions::all()), // no permission checks in DMs
+        // no permission checks in DMs
+        None => {
+            return Some((
+                Some(serenity::Permissions::all()),
+                Some(serenity::Permissions::all()),
+            ))
+        }
     };
 
     // Use to_channel so that it can fallback on HTTP for threads (which aren't in cache usually)
@@ -27,54 +34,99 @@ async fn user_permissions(
         Err(_) => return None,
     };
 
-    // This is done by HTTP only to prevent outdated data with no GUILD_MEMBERS intent.
-    let member = guild_id.member(ctx, user_id).await.ok()?;
+    // These are done by HTTP only to prevent outdated data with no GUILD_MEMBERS intent.
+    let user_member = if let Some(user_id) = user_id {
+        Some(guild_id.member(ctx, user_id).await.ok()?)
+    } else {
+        None
+    };
+
+    let bot_member = if let Some(bot_id) = bot_id {
+        Some(guild_id.member(ctx, bot_id).await.ok()?)
+    } else {
+        None
+    };
 
     #[cfg(feature = "cache")]
     let cached_perms = {
-        ctx.cache
-            .guild(guild_id)
-            .map(|guild| guild.user_permissions_in(&channel, &member))
+        ctx.cache.guild(guild_id).map(|guild| {
+            (
+                user_member
+                    .as_ref()
+                    .map(|m| guild.user_permissions_in(&channel, m)),
+                bot_member
+                    .as_ref()
+                    .map(|m| guild.user_permissions_in(&channel, m)),
+            )
+        })
     };
 
     #[cfg(feature = "cache")]
-    let user_permissions = if let Some(user_permissions) = cached_perms {
-        user_permissions
+    let users_permissions = if let Some(users_permissions) = cached_perms {
+        users_permissions
     } else {
         let partial_guild = guild_id.to_partial_guild(ctx).await.ok()?;
-        partial_guild.user_permissions_in(&channel, &member)
+        (
+            user_member.map(|m| partial_guild.user_permissions_in(&channel, &m)),
+            bot_member.map(|m| partial_guild.user_permissions_in(&channel, &m)),
+        )
     };
 
     #[cfg(not(feature = "cache"))]
-    let user_permissions = guild_id
-        .to_partial_guild(ctx)
-        .await
-        .ok()?
-        .user_permissions_in(&channel, &member);
+    let partial_guild = guild_id.to_partial_guild.await.ok()?;
+    #[cfg(not(feature = "cache"))]
+    let user_permissions = (
+        user_member.map(|m| partial_guild.user_permissions_in(&channel, &m)),
+        bot_member.map(|m| partial_guild.user_permissions_in(&channel, &m)),
+    );
 
-    Some(user_permissions)
+    Some(users_permissions)
 }
 
 /// Retrieves the set of permissions that are lacking, relative to the given required permission set
 ///
-/// Returns None if permissions couldn't be retrieved
+/// Returns None if permissions couldn't be retrieved.
 async fn missing_permissions<U, E>(
     ctx: crate::Context<'_, U, E>,
-    user: serenity::UserId,
-    required_permissions: serenity::Permissions,
-) -> Option<serenity::Permissions> {
-    if required_permissions.is_empty() {
-        return Some(serenity::Permissions::empty());
+    user: (serenity::UserId, serenity::Permissions),
+    bot: (serenity::UserId, serenity::Permissions),
+) -> Option<(serenity::Permissions, serenity::Permissions)> {
+    // If both user and bot are None, return empty permissions
+    if user.1.is_empty() && bot.1.is_empty() {
+        return Some((
+            serenity::Permissions::empty(),
+            serenity::Permissions::empty(),
+        ));
     }
 
-    let permissions = user_permissions(
+    let user_id = match user.1.is_empty() {
+        true => None,
+        false => Some(user.0),
+    };
+
+    let bot_id = match bot.1.is_empty() {
+        true => None,
+        false => Some(bot.0),
+    };
+
+    // Fetch permissions, returning None if an error occurred
+    let (user_perms, bot_perms) = user_permissions(
         ctx.serenity_context(),
         ctx.guild_id(),
         ctx.channel_id(),
-        user,
+        user_id,
+        bot_id,
     )
-    .await;
-    Some(required_permissions - permissions?)
+    .await?;
+
+    let user_missing_perms = user_perms
+        .map(|permissions| user.1 - permissions)
+        .unwrap_or_default();
+    let bot_missing_perms = bot_perms
+        .map(|permissions| user.1 - permissions)
+        .unwrap_or_default();
+
+    Some((user_missing_perms, bot_missing_perms))
 }
 
 /// See [`check_permissions_and_cooldown`]. Runs the check only for a single command. The caller
@@ -132,35 +184,36 @@ async fn check_permissions_and_cooldown_single<'a, U, E>(
     }
 
     // Make sure that user has required permissions
-    match missing_permissions(ctx, ctx.author().id, cmd.required_permissions).await {
-        Some(missing_permissions) if missing_permissions.is_empty() => {}
-        Some(missing_permissions) => {
+    if let Some((user_missing_permissions, bot_missing_permissions)) = missing_permissions(
+        ctx,
+        (ctx.author().id, cmd.required_permissions),
+        (ctx.framework().bot_id, cmd.required_bot_permissions),
+    )
+    .await
+    {
+        if !user_missing_permissions.is_empty() {
             return Err(crate::FrameworkError::MissingUserPermissions {
                 ctx,
-                missing_permissions: Some(missing_permissions),
-            })
+                missing_permissions: Some(user_missing_permissions),
+            });
         }
-        // Better safe than sorry: when perms are unknown, restrict access
-        None => {
-            return Err(crate::FrameworkError::MissingUserPermissions {
-                ctx,
-                missing_permissions: None,
-            })
-        }
-    }
 
-    // Before running any pre-command checks, make sure the bot has the permissions it needs
-    match missing_permissions(ctx, ctx.framework().bot_id, cmd.required_bot_permissions).await {
-        Some(missing_permissions) if missing_permissions.is_empty() => {}
-        Some(missing_permissions) => {
+        if !bot_missing_permissions.is_empty() {
             return Err(crate::FrameworkError::MissingBotPermissions {
                 ctx,
-                missing_permissions,
-            })
+                missing_permissions: bot_missing_permissions,
+            });
         }
-        // When in doubt, just let it run. Not getting fancy missing permissions errors is better
-        // than the command not executing at all
-        None => {}
+
+        // missing premission checks here.
+    } else {
+        // TODO: ask what I should do here because combining the checks loses the verbosity.
+        // the only previous failure point was it failing to get the guild, channel or members.
+        // Previously when a bots permissions could not be fetched it would just allow execution.
+        return Err(crate::FrameworkError::MissingUserPermissions {
+            missing_permissions: None,
+            ctx,
+        });
     }
 
     // Only continue if command checks returns true
