@@ -15,8 +15,6 @@ async fn user_permissions(
         None => return Some(serenity::Permissions::all()), // no permission checks in DMs
     };
 
-    let guild = guild_id.to_partial_guild(ctx).await.ok()?;
-
     // Use to_channel so that it can fallback on HTTP for threads (which aren't in cache usually)
     let channel = match channel_id.to_channel(ctx).await {
         Ok(serenity::Channel::Guild(channel)) => channel,
@@ -29,9 +27,32 @@ async fn user_permissions(
         Err(_) => return None,
     };
 
-    let member = guild.member(ctx, user_id).await.ok()?;
+    // This is done by HTTP only to prevent outdated data with no GUILD_MEMBERS intent.
+    let member = guild_id.member(ctx, user_id).await.ok()?;
 
-    Some(guild.user_permissions_in(&channel, &member))
+    #[cfg(feature = "cache")]
+    let cached_perms = {
+        ctx.cache
+            .guild(guild_id)
+            .map(|guild| guild.user_permissions_in(&channel, &member))
+    };
+
+    #[cfg(feature = "cache")]
+    let user_permissions = if let Some(user_permissions) = cached_perms {
+        user_permissions
+    } else {
+        let partial_guild = guild_id.to_partial_guild(ctx).await.ok()?;
+        partial_guild.user_permissions_in(&channel, &member)
+    };
+
+    #[cfg(not(feature = "cache"))]
+    let user_permissions = guild_id
+        .to_partial_guild(ctx)
+        .await
+        .ok()?
+        .user_permissions_in(&channel, &member);
+
+    Some(user_permissions)
 }
 
 /// Retrieves the set of permissions that are lacking, relative to the given required permission set
