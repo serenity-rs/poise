@@ -92,9 +92,12 @@ async fn user_permissions<U, E>(
     };
 
     #[cfg(not(feature = "cache"))]
-    let partial_guild = guild_id.to_partial_guild.await.ok()?;
+    let partial_guild = guild_id
+        .to_partial_guild(ctx.serenity_context())
+        .await
+        .ok()?;
     #[cfg(not(feature = "cache"))]
-    let user_permissions = (
+    let users_permissions = (
         user_member.map(|m| partial_guild.user_permissions_in(&channel, &m)),
         bot_member.map(|m| partial_guild.user_permissions_in(&channel, &m)),
     );
