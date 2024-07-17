@@ -88,6 +88,33 @@ async fn execute_modal_generic<
 ///
 /// If you need more specialized behavior, you can copy paste the implementation of this function
 /// and adjust to your needs. The code of this function is just a starting point.
+///
+/// ```rust
+/// # use poise::serenity_prelude as serenity;
+/// # type Data = ();
+/// # type Error = serenity::Error;
+/// use poise::Modal;
+/// type ApplicationContext<'a> = poise::ApplicationContext<'a, Data, Error>;
+///
+/// #[derive(Debug, Modal)]
+/// #[name = "Modal title"] // Struct name by default
+/// struct MyModal {
+///     #[name = "First input label"] // Field name by default
+///     #[placeholder = "Your first input goes here"] // No placeholder by default
+///     #[min_length = 5] // No length restriction by default (so, 1-4000 chars)
+///     #[max_length = 500]
+///     first_input: String,
+/// }
+///
+///#[poise::command(slash_command)]
+///pub async fn modal(ctx: poise::ApplicationContext<'_, Data, Error>) -> Result<(), Error> {
+///    use poise::Modal as _;
+///
+///    let data = MyModal::execute(ctx).await?;
+///    println!("Got data: {:?}", data);
+///
+///    Ok(())
+///}
 pub async fn execute_modal<U: Send + Sync, E, M: Modal>(
     ctx: crate::ApplicationContext<'_, U, E>,
     defaults: Option<M>,
@@ -119,6 +146,56 @@ pub async fn execute_modal<U: Send + Sync, E, M: Modal>(
 ///
 /// If you need more specialized behavior, you can copy paste the implementation of this function
 /// and adjust to your needs. The code of this function is just a starting point.
+///
+/// # Example
+///
+/// ```rust
+/// # use poise::serenity_prelude as serenity;
+/// # type Data = ();
+/// # type Error = serenity::Error;
+/// use poise::Modal;
+/// type ApplicationContext<'a> = poise::ApplicationContext<'a, Data, Error>;
+///
+/// #[derive(Debug, Modal)]
+/// #[name = "Modal title"] // Struct name by default
+/// struct MyModal {
+///     #[name = "First input label"] // Field name by default
+///     #[placeholder = "Your first input goes here"] // No placeholder by default
+///     #[min_length = 5] // No length restriction by default (so, 1-4000 chars)
+///     #[max_length = 500]
+///     first_input: String,
+/// }
+///
+///
+///#[poise::command(prefix_command, slash_command)]
+///pub async fn component_modal(ctx: crate::Context<'_>) -> Result<(), Error> {
+///    // Get a component interaction through a button interaction
+///    let reply = {
+///        let components = vec![serenity::CreateActionRow::Buttons(vec![
+///            serenity::CreateButton::new("open_modal")
+///                .label("Open modal")
+///                .style(poise::serenity_prelude::ButtonStyle::Success),
+///        ])];
+///
+///        poise::CreateReply::default()
+///            .content("Click the button below to open the modal")
+///            .components(components)
+///    };
+///
+///    ctx.send(reply).await?;
+///
+///    while let Some(mci) = serenity::ComponentInteractionCollector::new(ctx.serenity_context())
+///        .timeout(std::time::Duration::from_secs(120))
+///        .filter(move |mci| mci.data.custom_id == "open_modal")
+///        .await
+///    {
+///        // Use the interaction to send a modal with a custom placeholder
+///        let data =
+///            poise::execute_modal_on_component_interaction::<MyModal>(ctx, mci, MyModal {first_input : "Updated placeholder".to_string()}, None).await?;
+///        println!("Got data: {:?}", data);
+///    }
+///    Ok(())
+///}
 pub async fn execute_modal_on_component_interaction<M: Modal>(
     ctx: impl AsRef<serenity::Context>,
     interaction: serenity::ComponentInteraction,
