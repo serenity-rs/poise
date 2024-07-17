@@ -191,7 +191,7 @@ pub async fn execute_modal<U: Send + Sync, E, M: Modal>(
 ///    {
 ///        // Use the interaction to send a modal with a custom placeholder
 ///        let data =
-///            poise::execute_modal_on_component_interaction::<MyModal>(ctx, mci, MyModal {first_input : "Updated placeholder".to_string()}, None).await?;
+///            poise::execute_modal_on_component_interaction::<MyModal>(ctx, mci, Some(MyModal {first_input : "Updated placeholder".to_string()}), None).await?;
 ///        println!("Got data: {:?}", data);
 ///    }
 ///    Ok(())
