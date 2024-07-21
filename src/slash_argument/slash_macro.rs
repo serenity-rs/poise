@@ -21,7 +21,7 @@ pub enum SlashArgError {
     /// A string parameter was found, but it could not be parsed into the target type.
     #[non_exhaustive]
     Parse {
-        /// Error that occured while parsing the string into the target type
+        /// Error that occurred while parsing the string into the target type
         error: Box<dyn std::error::Error + Send + Sync>,
         /// Original input string
         input: String,
@@ -32,7 +32,7 @@ pub enum SlashArgError {
         /// Human readable description of the error
         &'static str,
     ),
-    /// HTTP error occured while retrieving the model type from Discord
+    /// HTTP error occurred while retrieving the model type from Discord
     Http(serenity::Error),
     #[doc(hidden)]
     __NonExhaustive,
@@ -91,7 +91,7 @@ impl std::fmt::Display for SlashArgError {
             Self::Http(error) => {
                 write!(
                     f,
-                    "Error occured while retrieving data from Discord: {error}",
+                    "Error occurred while retrieving data from Discord: {error}",
                 )
             }
             Self::__NonExhaustive => unreachable!(),

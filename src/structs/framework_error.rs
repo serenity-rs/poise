@@ -36,7 +36,7 @@ pub enum FrameworkError<'a, U, E> {
         #[derivative(Debug = "ignore")]
         framework: crate::FrameworkContext<'a, U, E>,
     },
-    /// Error occured during command execution
+    /// Error occurred during command execution
     #[non_exhaustive]
     Command {
         /// Error which was thrown in the command code
@@ -49,7 +49,7 @@ pub enum FrameworkError<'a, U, E> {
         /// General context
         ctx: crate::Context<'a, U, E>,
     },
-    /// Panic occured at any phase of command execution after constructing the `crate::Context`.
+    /// Panic occurred at any phase of command execution after constructing the `crate::Context`.
     ///
     /// This feature is intended as a last-resort safeguard to gracefully print an error message to
     /// the user on a panic. Panics should only be thrown for bugs in the code, don't use this for
