@@ -15,6 +15,7 @@ pub struct CreateReply<'a> {
     components: Option<Cow<'a, [serenity::CreateActionRow<'a>]>>,
     pub(crate) allowed_mentions: Option<serenity::CreateAllowedMentions<'a>>,
     reply: bool,
+    tts: bool,
 }
 
 impl<'a> CreateReply<'a> {
@@ -84,6 +85,12 @@ impl<'a> CreateReply<'a> {
         self.reply = reply;
         self
     }
+
+    /// Sets whether text-to-speech is enabled for this message.
+    pub fn tts(mut self, tts: bool) -> Self {
+        self.tts = tts;
+        self
+    }
 }
 
 /// Methods to create a message builder from any type from this [`CreateReply`]. Used by poise
@@ -102,6 +109,7 @@ impl<'a> CreateReply<'a> {
             ephemeral,
             allowed_mentions,
             reply: _, // can't reply to a message in interactions
+            tts,
         } = self;
 
         if let Some(content) = content {
@@ -117,7 +125,7 @@ impl<'a> CreateReply<'a> {
             builder = builder.ephemeral(ephemeral);
         }
 
-        builder.add_files(attachments).embeds(embeds)
+        builder.tts(tts).add_files(attachments).embeds(embeds)
     }
 
     /// Serialize this response builder to a [`serenity::CreateInteractionResponseFollowup`]
@@ -133,6 +141,7 @@ impl<'a> CreateReply<'a> {
             ephemeral,
             allowed_mentions,
             reply: _,
+            tts,
         } = self;
 
         if let Some(content) = content {
@@ -149,7 +158,7 @@ impl<'a> CreateReply<'a> {
             builder = builder.ephemeral(ephemeral);
         }
 
-        builder.add_files(attachments)
+        builder.tts(tts).add_files(attachments)
     }
 
     /// Serialize this response builder to a [`serenity::EditInteractionResponse`]
@@ -165,6 +174,7 @@ impl<'a> CreateReply<'a> {
             ephemeral: _, // can't edit ephemerality in retrospect
             allowed_mentions,
             reply: _,
+            tts: _,
         } = self;
 
         if let Some(content) = content {
@@ -193,6 +203,7 @@ impl<'a> CreateReply<'a> {
             ephemeral: _, // not supported in prefix
             allowed_mentions,
             reply: _, // can't edit reference message afterwards
+            tts: _,
         } = self;
 
         let mut attachments_builder = serenity::EditAttachments::new();
@@ -226,6 +237,7 @@ impl<'a> CreateReply<'a> {
             ephemeral: _, // not supported in prefix
             allowed_mentions,
             reply,
+            tts,
         } = self;
 
         let mut builder = serenity::CreateMessage::new();
@@ -246,6 +258,6 @@ impl<'a> CreateReply<'a> {
             builder = builder.add_file(attachment);
         }
 
-        builder.embeds(embeds)
+        builder.tts(tts).embeds(embeds)
     }
 }
