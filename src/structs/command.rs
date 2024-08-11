@@ -229,6 +229,12 @@ impl<U, E> Command<U, E> {
             crate::ContextMenuCommandAction::__NonExhaustive => unreachable!(),
         });
 
+        // This is_empty check is needed because Discord special cases empty
+        // default_member_permissions to mean "admin-only" (yes it's stupid)
+        if !self.default_member_permissions.is_empty() {
+            builder = builder.default_member_permissions(self.default_member_permissions);
+        }
+
         if self.guild_only {
             builder = builder.dm_permission(false);
         }
