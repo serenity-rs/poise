@@ -249,8 +249,7 @@ impl<U, E> Command<U, E> {
         });
 
         // This is_empty check is needed because Discord special cases empty
-        // default_member_permissions to mean "everyone". Without this, all Poise context menu commands
-        // would be available to all users regardless of default_member_permissions setting.
+        // default_member_permissions to mean "admin-only"
         if !self.default_member_permissions.is_empty() {
             builder = builder.default_member_permissions(self.default_member_permissions);
         }
