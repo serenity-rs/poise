@@ -49,9 +49,9 @@ pub fn create_application_commands<'a, U:'a , E: 'a>(
 ///
 /// Thin wrapper around [`create_application_commands`] that funnels the returned builder into
 /// [`serenity::Command::set_global_commands`].
-pub async fn register_globally<U, E>(
+pub async fn register_globally<'a, U: 'a, E: 'a>(
     http: impl AsRef<serenity::Http>,
-    commands: &[crate::Command<U, E>],
+    commands: impl IntoIterator<Item=&'a crate::Command<U, E>>,
 ) -> Result<(), serenity::Error> {
     let builder = create_application_commands(commands);
     serenity::Command::set_global_commands(http, builder).await?;
@@ -62,9 +62,9 @@ pub async fn register_globally<U, E>(
 ///
 /// Thin wrapper around [`create_application_commands`] that funnels the returned builder into
 /// [`serenity::GuildId::set_commands`].
-pub async fn register_in_guild<U, E>(
+pub async fn register_in_guild<'a, U: 'a, E: 'a>(
     http: impl AsRef<serenity::Http>,
-    commands: &[crate::Command<U, E>],
+    commands: impl IntoIterator<Item=&'a crate::Command<U, E>>,
     guild_id: serenity::GuildId,
 ) -> Result<(), serenity::Error> {
     let builder = create_application_commands(commands);
