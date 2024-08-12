@@ -16,8 +16,8 @@ use crate::serenity_prelude as serenity;
 /// serenity::Command::set_global_commands(ctx, create_commands).await?;
 /// # Ok(()) }
 /// ```
-pub fn create_application_commands<U, E>(
-    commands: &[crate::Command<U, E>],
+pub fn create_application_commands<'a, U:'a , E: 'a>(
+    commands: impl IntoIterator<Item=&'a crate::Command<U, E>>,
 ) -> Vec<serenity::CreateCommand> {
     /// We decided to extract context menu commands recursively, despite the subcommand hierarchy
     /// not being preserved. Because it's more confusing to just silently discard context menu
@@ -35,7 +35,7 @@ pub fn create_application_commands<U, E>(
         }
     }
 
-    let mut commands_builder = Vec::with_capacity(commands.len());
+    let mut commands_builder = Vec::new();
     for command in commands {
         if let Some(slash_command) = command.create_as_slash_command() {
             commands_builder.push(slash_command);
