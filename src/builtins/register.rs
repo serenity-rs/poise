@@ -35,8 +35,9 @@ pub fn create_application_commands<'a, U: 'a, E: 'a>(
         }
     }
 
-    let mut commands_builder = Vec::new();
-    for command in commands {
+    let command_iter = commands.into_iter();
+    let mut commands_builder = Vec::with_capacity(command_iter.size_hint().0);
+    for command in command_iter {
         if let Some(slash_command) = command.create_as_slash_command() {
             commands_builder.push(slash_command);
         }
