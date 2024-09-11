@@ -125,14 +125,14 @@ impl CreateReply {
         if let Some(components) = components {
             builder = builder.components(components);
         }
+        if let Some(embeds) = embeds {
+            builder = builder.embeds(embeds);
+        }
         if let Some(ephemeral) = ephemeral {
             builder = builder.ephemeral(ephemeral);
         }
         if let Some(poll) = poll {
             builder = builder.poll(poll);
-        }
-        if let Some(embeds) = embeds {
-            builder = builder.embeds(embeds);
         }
 
         builder.add_files(attachments)
@@ -157,11 +157,11 @@ impl CreateReply {
         if let Some(content) = content {
             builder = builder.content(content);
         }
-        if let Some(embeds) = embeds {
-            builder = builder.embeds(embeds);
-        }
         if let Some(components) = components {
             builder = builder.components(components)
+        }
+        if let Some(embeds) = embeds {
+            builder = builder.embeds(embeds);
         }
         if let Some(allowed_mentions) = allowed_mentions {
             builder = builder.allowed_mentions(allowed_mentions);
@@ -199,14 +199,14 @@ impl CreateReply {
         if let Some(components) = components {
             builder = builder.components(components);
         }
+        if let Some(embeds) = embeds {
+            builder = builder.embeds(embeds);
+        }
         if let Some(allowed_mentions) = allowed_mentions {
             builder = builder.allowed_mentions(allowed_mentions);
         }
         for attachment in attachments {
             builder = builder.new_attachment(attachment);
-        }
-        if let Some(embeds) = embeds {
-            builder = builder.embeds(embeds);
         }
 
         builder
