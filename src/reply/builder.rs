@@ -32,7 +32,7 @@ impl CreateReply {
     /// Existing embeds on this are kept.
     /// When editing a message, this will overwrite previously sent embeds.
     pub fn embed(mut self, embed: serenity::CreateEmbed) -> Self {
-        self.embeds.get_or_insert_with(|| Default::default()).push(embed);
+        self.embeds.get_or_insert_with(Vec::new).push(embed);
         self
     }
 
