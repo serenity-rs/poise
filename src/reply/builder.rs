@@ -7,7 +7,7 @@ use crate::serenity_prelude as serenity;
 #[allow(clippy::missing_docs_in_private_items)] // docs on setters
 pub struct CreateReply {
     content: Option<String>,
-    embeds: Vec<serenity::CreateEmbed>,
+    embeds: Option<Vec<serenity::CreateEmbed>>,
     attachments: Vec<serenity::CreateAttachment>,
     pub(crate) ephemeral: Option<bool>,
     components: Option<Vec<serenity::CreateActionRow>>,
@@ -29,9 +29,18 @@ impl CreateReply {
 
     /// Adds an embed to the message.
     ///
-    /// Existing embeds are kept.
+    /// Existing embeds on this are kept.
+    /// When editing a message, this will overwrite previously sent embeds.
     pub fn embed(mut self, embed: serenity::CreateEmbed) -> Self {
-        self.embeds.push(embed);
+        self.embeds.get_or_insert_with(Vec::new).push(embed);
+        self
+    }
+
+    /// Set embeds for the message.
+    ///
+    /// Any previously set embeds will be overwritten.
+    pub fn embeds(mut self, embeds: Vec<serenity::CreateEmbed>) -> Self {
+        self.embeds = Some(embeds);
         self
     }
 
@@ -105,11 +114,14 @@ impl CreateReply {
         if let Some(components) = components {
             builder = builder.components(components);
         }
+        if let Some(embeds) = embeds {
+            builder = builder.embeds(embeds);
+        }
         if let Some(ephemeral) = ephemeral {
             builder = builder.ephemeral(ephemeral);
         }
 
-        builder.add_files(attachments).embeds(embeds)
+        builder.add_files(attachments)
     }
 
     /// Serialize this response builder to a [`serenity::CreateInteractionResponseFollowup`]
@@ -130,9 +142,11 @@ impl CreateReply {
         if let Some(content) = content {
             builder = builder.content(content);
         }
-        builder = builder.embeds(embeds);
         if let Some(components) = components {
             builder = builder.components(components)
+        }
+        if let Some(embeds) = embeds {
+            builder = builder.embeds(embeds);
         }
         if let Some(allowed_mentions) = allowed_mentions {
             builder = builder.allowed_mentions(allowed_mentions);
@@ -165,11 +179,14 @@ impl CreateReply {
         if let Some(components) = components {
             builder = builder.components(components);
         }
+        if let Some(embeds) = embeds {
+            builder = builder.embeds(embeds);
+        }
         if let Some(allowed_mentions) = allowed_mentions {
             builder = builder.allowed_mentions(allowed_mentions);
         }
 
-        builder.embeds(embeds)
+        builder
     }
 
     /// Serialize this response builder to a [`serenity::EditMessage`]
@@ -198,8 +215,11 @@ impl CreateReply {
         if let Some(components) = components {
             builder = builder.components(components);
         }
+        if let Some(embeds) = embeds {
+            builder = builder.embeds(embeds);
+        }
 
-        builder.embeds(embeds).attachments(attachments_builder)
+        builder.attachments(attachments_builder)
     }
 
     /// Serialize this response builder to a [`serenity::CreateMessage`]
@@ -227,6 +247,9 @@ impl CreateReply {
         if let Some(components) = components {
             builder = builder.components(components);
         }
+        if let Some(embeds) = embeds {
+            builder = builder.embeds(embeds)
+        }
         if reply {
             builder = builder.reference_message(invocation_message);
         }
@@ -235,6 +258,6 @@ impl CreateReply {
             builder = builder.add_file(attachment);
         }
 
-        builder.embeds(embeds)
+        builder
     }
 }
