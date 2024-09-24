@@ -19,6 +19,9 @@ mod subcommand_required;
 mod subcommands;
 mod track_edits;
 
+#[cfg(feature = "unstable")]
+mod user_apps;
+
 use poise::serenity_prelude as serenity;
 
 type Error = Box<dyn std::error::Error + Send + Sync>;
@@ -75,6 +78,16 @@ async fn main() {
                 subcommand_required::parent_subcommand_required(),
                 track_edits::test_reuse_response(),
                 track_edits::add(),
+                #[cfg(feature = "unstable")]
+                user_apps::everywhere(),
+                #[cfg(feature = "unstable")]
+                user_apps::everywhere_context(),
+                #[cfg(feature = "unstable")]
+                user_apps::user_install(),
+                #[cfg(feature = "unstable")]
+                user_apps::not_in_guilds(),
+                #[cfg(feature = "unstable")]
+                user_apps::user_install_guild(),
             ],
             prefix_options: poise::PrefixFrameworkOptions {
                 prefix: Some("~".into()),
