@@ -12,9 +12,9 @@ pub use pretty_help::*;
 mod register;
 pub use register::*;
 
-#[cfg(any(feature = "chrono", feature = "time"))]
+#[cfg(feature = "chrono")]
 mod paginate;
-#[cfg(any(feature = "chrono", feature = "time"))]
+#[cfg(feature = "chrono")]
 pub use paginate::*;
 
 use crate::{serenity::CreateAllowedMentions, serenity_prelude as serenity, CreateReply};
