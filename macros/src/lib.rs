@@ -67,7 +67,7 @@ for example for command-specific help (i.e. `~help command_name`). Escape newlin
 - `reuse_response`: After the first response, post subsequent responses as edits to the initial message (prefix only)
 
 ## Cooldown
-
+- `manual_cooldowns`: Allows overriding the framework's built-in cooldowns tracking without affecting other commands.
 - `global_cooldown`: Minimum duration in seconds between invocations, globally
 - `user_cooldown`: Minimum duration in seconds between invocations, per user
 - `guild_cooldown`: Minimum duration in seconds between invocations, per guild
