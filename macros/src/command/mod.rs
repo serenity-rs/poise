@@ -57,6 +57,227 @@ pub struct CommandArgs {
     member_cooldown: Option<u64>,
 }
 
+impl CommandArgs {
+    // Check if a field has the default value
+    fn is_default<T: Default + PartialEq>(value: &T) -> bool {
+        value == &T::default()
+    }
+
+    // create a new CommandArgs from self, with default fields replaced by value from GroupArgs
+    pub fn from_group_args(&self, group_args: &GroupArgs) -> CommandArgs {
+        CommandArgs {
+            prefix_command: if Self::is_default(&self.prefix_command) {
+                group_args.prefix_command
+            } else {
+                self.prefix_command
+            },
+            slash_command: if Self::is_default(&self.slash_command) {
+                group_args.slash_command
+            } else {
+                self.slash_command
+            },
+            context_menu_command: if Self::is_default(&self.context_menu_command) {
+                group_args.context_menu_command.clone()
+            } else {
+                self.context_menu_command.clone()
+            },
+            subcommands: self.subcommands.clone(), // `GroupArgs` doesn't have `subcommands`
+            aliases: self.aliases.clone(),         // `GroupArgs` doesn't have `aliases`
+            subcommand_required: self.subcommand_required, // `GroupArgs` doesn't have `subcommand_required`
+            invoke_on_edit: if Self::is_default(&self.invoke_on_edit) {
+                group_args.invoke_on_edit
+            } else {
+                self.invoke_on_edit
+            },
+            reuse_response: if Self::is_default(&self.reuse_response) {
+                group_args.reuse_response
+            } else {
+                self.reuse_response
+            },
+            track_deletion: if Self::is_default(&self.track_deletion) {
+                group_args.track_deletion
+            } else {
+                self.track_deletion
+            },
+            track_edits: if Self::is_default(&self.track_edits) {
+                group_args.track_edits
+            } else {
+                self.track_edits
+            },
+            broadcast_typing: if Self::is_default(&self.broadcast_typing) {
+                group_args.broadcast_typing
+            } else {
+                self.broadcast_typing
+            },
+            help_text_fn: if Self::is_default(&self.help_text_fn) {
+                group_args.help_text_fn.clone()
+            } else {
+                self.help_text_fn.clone()
+            },
+            check: if Self::is_default(&self.check) {
+                group_args.check.clone()
+            } else {
+                self.check.clone()
+            },
+            on_error: if Self::is_default(&self.on_error) {
+                group_args.on_error.clone()
+            } else {
+                self.on_error.clone()
+            },
+            rename: self.rename.clone(), // `GroupArgs` doesn't have `rename`
+            name_localized: if Self::is_default(&self.name_localized) {
+                group_args.name_localized.clone()
+            } else {
+                self.name_localized.clone()
+            },
+            description_localized: if Self::is_default(&self.description_localized) {
+                group_args.description_localized.clone()
+            } else {
+                self.description_localized.clone()
+            },
+            discard_spare_arguments: if Self::is_default(&self.discard_spare_arguments) {
+                group_args.discard_spare_arguments
+            } else {
+                self.discard_spare_arguments
+            },
+            hide_in_help: if Self::is_default(&self.hide_in_help) {
+                group_args.hide_in_help
+            } else {
+                self.hide_in_help
+            },
+            ephemeral: if Self::is_default(&self.ephemeral) {
+                group_args.ephemeral
+            } else {
+                self.ephemeral
+            },
+            default_member_permissions: if Self::is_default(&self.default_member_permissions) {
+                group_args.default_member_permissions.clone()
+            } else {
+                self.default_member_permissions.clone()
+            },
+            required_permissions: if Self::is_default(&self.required_permissions) {
+                group_args.required_permissions.clone()
+            } else {
+                self.required_permissions.clone()
+            },
+            required_bot_permissions: if Self::is_default(&self.required_bot_permissions) {
+                group_args.required_bot_permissions.clone()
+            } else {
+                self.required_bot_permissions.clone()
+            },
+            owners_only: if Self::is_default(&self.owners_only) {
+                group_args.owners_only
+            } else {
+                self.owners_only
+            },
+            guild_only: if Self::is_default(&self.guild_only) {
+                group_args.guild_only
+            } else {
+                self.guild_only
+            },
+            dm_only: if Self::is_default(&self.dm_only) {
+                group_args.dm_only
+            } else {
+                self.dm_only
+            },
+            nsfw_only: if Self::is_default(&self.nsfw_only) {
+                group_args.nsfw_only
+            } else {
+                self.nsfw_only
+            },
+            identifying_name: self.identifying_name.clone(), // `GroupArgs` doesn't have `identifying_name`
+            category: if Self::is_default(&self.category) {
+                group_args.category.clone()
+            } else {
+                self.category.clone()
+            },
+            custom_data: if Self::is_default(&self.custom_data) {
+                group_args.custom_data.clone()
+            } else {
+                self.custom_data.clone()
+            },
+            global_cooldown: if Self::is_default(&self.global_cooldown) {
+                group_args.global_cooldown
+            } else {
+                self.global_cooldown
+            },
+            user_cooldown: if Self::is_default(&self.user_cooldown) {
+                group_args.user_cooldown
+            } else {
+                self.user_cooldown
+            },
+            guild_cooldown: if Self::is_default(&self.guild_cooldown) {
+                group_args.guild_cooldown
+            } else {
+                self.guild_cooldown
+            },
+            channel_cooldown: if Self::is_default(&self.channel_cooldown) {
+                group_args.channel_cooldown
+            } else {
+                self.channel_cooldown
+            },
+            member_cooldown: if Self::is_default(&self.member_cooldown) {
+                group_args.member_cooldown
+            } else {
+                self.member_cooldown
+            },
+        }
+    }
+}
+
+/// Representation of the group attribute arguments (`#[group(...)]`)
+///
+/// Same as `CommandArgs`, but with the following removed:
+/// - subcommands
+/// - aliases
+/// - subcommand_required
+/// - rename
+/// - identifying_name
+///
+#[derive(Default, Debug, darling::FromMeta)]
+#[darling(default)]
+pub struct GroupArgs {
+    prefix_command: bool,
+    slash_command: bool,
+    context_menu_command: Option<String>,
+
+    // When changing these, document it in parent file!
+    // TODO: decide why darling(multiple) feels wrong here but not in e.g. localizations (because
+    //  if it's actually irrational, the inconsistency should be fixed)
+    invoke_on_edit: bool,
+    reuse_response: bool,
+    track_deletion: bool,
+    track_edits: bool,
+    broadcast_typing: bool,
+    help_text_fn: Option<syn::Path>,
+    #[darling(multiple)]
+    check: Vec<syn::Path>,
+    on_error: Option<syn::Path>,
+    #[darling(multiple)]
+    name_localized: Vec<crate::util::Tuple2<String>>,
+    #[darling(multiple)]
+    description_localized: Vec<crate::util::Tuple2<String>>,
+    discard_spare_arguments: bool,
+    hide_in_help: bool,
+    ephemeral: bool,
+    default_member_permissions: Option<syn::punctuated::Punctuated<syn::Ident, syn::Token![|]>>,
+    required_permissions: Option<syn::punctuated::Punctuated<syn::Ident, syn::Token![|]>>,
+    required_bot_permissions: Option<syn::punctuated::Punctuated<syn::Ident, syn::Token![|]>>,
+    owners_only: bool,
+    guild_only: bool,
+    dm_only: bool,
+    nsfw_only: bool,
+    category: Option<String>,
+    custom_data: Option<syn::Expr>,
+
+    // In seconds
+    global_cooldown: Option<u64>,
+    user_cooldown: Option<u64>,
+    guild_cooldown: Option<u64>,
+    channel_cooldown: Option<u64>,
+    member_cooldown: Option<u64>,
+}
+
 /// Representation of the function parameter attribute arguments
 #[derive(Default, Debug, darling::FromMeta)]
 #[darling(default)]

@@ -8,6 +8,8 @@ mod modal;
 mod util;
 
 use proc_macro::TokenStream;
+use quote::{quote, ToTokens};
+use syn::spanned::Spanned;
 
 /**
 This macro transforms plain functions into poise bot commands.
@@ -275,5 +277,148 @@ pub fn modal(input: TokenStream) -> TokenStream {
     match modal::modal(struct_) {
         Ok(x) => x,
         Err(e) => e.write_errors().into(),
+    }
+}
+
+/**
+Use this macro on an impl block to implement the CommandGroup trait.
+
+It implements a `commands()` function which returns a Vec with all the commands defined by `#[poise::command]`.
+
+# Usage
+
+The following code defines a command group with two commands,
+both of which will have the `slash_command` and `prefix_command` attributes.
+
+`command_one` will have the default user_cooldown of 1000, while `command_two` overrides it to 2000.
+
+```rust
+struct MyCommands;
+
+#[poise::group(slash_command, prefix_command, user_cooldown=1000)]
+impl MyCommands {
+    /// This is a command
+    #[poise::command()]
+    async fn command_one(ctx: Context<'_>) -> Result<(), Error> {
+        // code
+    }
+
+    /// This is another command
+    #[poise::command(user_cooldown=2000)]
+    async fn command_two(ctx: Context<'_>) -> Result<(), Error> {
+        // code
+    }
+}
+```
+*/
+#[proc_macro_attribute]
+pub fn group(args: TokenStream, input_item: TokenStream) -> TokenStream {
+    match group_impl(args, input_item) {
+        Ok(x) => x,
+        Err(err) => err.write_errors().into(),
+    }
+}
+
+fn group_impl(args: TokenStream, input_item: TokenStream) -> Result<TokenStream, darling::Error> {
+    let args = darling::ast::NestedMeta::parse_meta_list(args.into())?;
+
+    let group_args = <command::GroupArgs as darling::FromMeta>::from_list(&args)?;
+
+    // let item_impl = syn::parse_macro_input!(input_item as syn::ItemImpl);
+    let item_impl = match syn::parse::<syn::ItemImpl>(input_item) {
+        Ok(syntax_tree) => syntax_tree,
+        Err(err) => return Err(err.into()),
+    };
+    let name = item_impl.self_ty;
+
+    // vector of all #[poise::command(...)] command idents
+    let mut command_idents = vec![];
+
+    // collect each ImplItem in a stream
+    let mut impl_body = proc_macro2::TokenStream::new();
+
+    // context type for correct type inference in CommandGroup
+    let mut ctx_type_with_static: Option<syn::Type> = None;
+
+    for item in item_impl.items.iter() {
+        let mut item_stream = quote!(#item);
+
+        // if it's a function...
+        if let syn::ImplItem::Fn(f) = item {
+            // ... and it's a command
+            if let Some(attr) = f.attrs.iter().find(|attr| is_command_attr(attr)) {
+                // add to command list
+                command_idents.push(f.sig.ident.clone());
+
+                // Turn a syn::Attribute into command::CommandArgs
+                let attr_args = &attr.meta.require_list()?.tokens;
+
+                let command_args =
+                    darling::ast::NestedMeta::parse_meta_list(attr_args.to_token_stream())?;
+                let command_args =
+                    <command::CommandArgs as darling::FromMeta>::from_list(&command_args)?;
+
+                let new_args = command_args.from_group_args(&group_args);
+                let function = syn::ItemFn {
+                    attrs: vec![],
+                    vis: f.vis.clone(),
+                    sig: f.sig.clone(),
+                    block: Box::new(f.block.clone()),
+                };
+
+                if ctx_type_with_static.is_none() {
+                    let context_type = match function.sig.inputs.first() {
+                        Some(syn::FnArg::Typed(syn::PatType { ty, .. })) => Some(&**ty),
+                        _ => {
+                            return Err(syn::Error::new(
+                                function.sig.span(),
+                                "expected a Context parameter",
+                            )
+                            .into())
+                        }
+                    };
+                    // Needed because we're not allowed to have lifetimes in the hacky use case below (in command::mod.rs)
+                    ctx_type_with_static = Some(syn::fold::fold_type(
+                        &mut crate::util::AllLifetimesToStatic,
+                        context_type
+                            .expect("context_type should have already been set")
+                            .clone(),
+                    ));
+                }
+                item_stream = command::command(new_args, function)?.into();
+            }
+        }
+        impl_body = quote!(
+            #impl_body
+            #item_stream
+        );
+    }
+
+    Ok(quote! {
+        impl ::poise::CommandGroup for #name {
+            type Data = <#ctx_type_with_static as poise::_GetGenerics>::U;
+            type Error = <#ctx_type_with_static as poise::_GetGenerics>::E;
+
+            fn commands() -> Vec<::poise::Command<
+                <#ctx_type_with_static as poise::_GetGenerics>::U,
+                <#ctx_type_with_static as poise::_GetGenerics>::E,
+            >> {
+                vec![#(#name::#command_idents()),*]
+            }
+        }
+        impl #name {
+            #impl_body
+        }
+    }
+    .into())
+}
+
+/// Returns true if an `Attribute` has `path` equal to "poise::command" or "command"
+fn is_command_attr(attr: &syn::Attribute) -> bool {
+    let mut segments = attr.path().segments.iter();
+    match [segments.next(), segments.next(), segments.next()] {
+        [Some(first), Some(second), None] => first.ident == "poise" && second.ident == "command",
+        [Some(first), None, None] => first.ident == "command",
+        [_, _, _] => false,
     }
 }
