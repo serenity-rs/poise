@@ -23,17 +23,14 @@ pub async fn modal(ctx: poise::ApplicationContext<'_, Data, Error>) -> Result<()
 /// present.
 #[poise::command(prefix_command, slash_command)]
 pub async fn component_modal(ctx: crate::Context<'_>) -> Result<(), Error> {
-    let reply = {
-        let components = vec![serenity::CreateActionRow::Buttons(vec![
-            serenity::CreateButton::new("open_modal")
-                .label("Open modal")
-                .style(poise::serenity_prelude::ButtonStyle::Success),
-        ])];
+    let buttons = [serenity::CreateButton::new("open_modal")
+        .label("Open modal")
+        .style(poise::serenity_prelude::ButtonStyle::Success)];
 
-        poise::CreateReply::default()
-            .content("Click the button below to open the modal")
-            .components(components)
-    };
+    let components = [serenity::CreateActionRow::buttons(&buttons)];
+    let reply = poise::CreateReply::default()
+        .content("Click the button below to open the modal")
+        .components(&components);
 
     ctx.send(reply).await?;
 

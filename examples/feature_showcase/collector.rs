@@ -6,17 +6,14 @@ use poise::{serenity_prelude as serenity, CreateReply};
 pub async fn boop(ctx: Context<'_>) -> Result<(), Error> {
     let uuid_boop = ctx.id();
 
-    let reply = {
-        let components = vec![serenity::CreateActionRow::Buttons(vec![
-            serenity::CreateButton::new(format!("{uuid_boop}"))
-                .style(serenity::ButtonStyle::Primary)
-                .label("Boop me!"),
-        ])];
+    let buttons = [serenity::CreateButton::new(format!("{uuid_boop}"))
+        .style(serenity::ButtonStyle::Primary)
+        .label("Boop me!")];
 
-        CreateReply::default()
-            .content("I want some boops!")
-            .components(components)
-    };
+    let components = [serenity::CreateActionRow::buttons(&buttons)];
+    let reply = CreateReply::default()
+        .content("I want some boops!")
+        .components(&components);
 
     ctx.send(reply).await?;
 
