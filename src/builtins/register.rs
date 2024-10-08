@@ -161,7 +161,7 @@ pub async fn register_application_commands_buttons<U: Send + Sync + 'static, E>(
         return Ok(());
     }
 
-    let components = serenity::CreateActionRow::Buttons(vec![
+    let buttons = [
         serenity::CreateButton::new("register.guild")
             .label("Register in guild")
             .style(serenity::ButtonStyle::Primary)
@@ -178,11 +178,12 @@ pub async fn register_application_commands_buttons<U: Send + Sync + 'static, E>(
             .label("Unregister globally")
             .style(serenity::ButtonStyle::Danger)
             .emoji('🗑'),
-    ]);
+    ];
 
+    let components = [serenity::CreateActionRow::buttons(&buttons)];
     let builder = crate::CreateReply::default()
         .content("Choose what to do with the commands:")
-        .components(vec![components]);
+        .components(&components);
 
     let reply = ctx.send(builder).await?;
 
