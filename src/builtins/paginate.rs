@@ -42,16 +42,15 @@ pub async fn paginate<U: Send + Sync + 'static, E>(
     let next_button_id = format!("{}next", ctx_id);
 
     // Send the embed with the first page as content
-    let reply = {
-        let components = serenity::CreateActionRow::Buttons(vec![
-            serenity::CreateButton::new(&prev_button_id).emoji('◀'),
-            serenity::CreateButton::new(&next_button_id).emoji('▶'),
-        ]);
+    let buttons = [
+        serenity::CreateButton::new(&prev_button_id).emoji('◀'),
+        serenity::CreateButton::new(&next_button_id).emoji('▶'),
+    ];
 
-        crate::CreateReply::default()
-            .embed(serenity::CreateEmbed::default().description(pages[0]))
-            .components(vec![components])
-    };
+    let components = [serenity::CreateActionRow::buttons(&buttons)];
+    let reply = crate::CreateReply::default()
+        .embed(serenity::CreateEmbed::default().description(pages[0]))
+        .components(&components);
 
     ctx.send(reply).await?;
 
