@@ -25,7 +25,6 @@ macro_rules! pop_prefix_argument {
 /// sake and also because it keeps open the possibility of parsing whitespace.
 ///
 /// Similar in spirit to [`std::str::FromStr`].
-#[async_trait::async_trait]
 pub trait PopArgument<'a>: Sized {
     /// Parse [`Self`] from the front of the given string and return a tuple of the remaining string
     /// and [`Self`]. If parsing failed, an error is returned and, if applicable, the string on
@@ -43,7 +42,6 @@ pub trait PopArgument<'a>: Sized {
 }
 
 #[doc(hidden)]
-#[async_trait::async_trait]
 pub trait PopArgumentHack<'a, T>: Sized {
     async fn pop_from(
         self,
@@ -54,7 +52,6 @@ pub trait PopArgumentHack<'a, T>: Sized {
     ) -> Result<(&'a str, usize, T), (Box<dyn std::error::Error + Send + Sync>, Option<String>)>;
 }
 
-#[async_trait::async_trait]
 impl<'a, T: serenity::ArgumentConvert + Send> PopArgumentHack<'a, T> for PhantomData<T>
 where
     T::Err: std::error::Error + Send + Sync + 'static,
@@ -77,7 +74,6 @@ where
     }
 }
 
-#[async_trait::async_trait]
 impl<'a, T: PopArgument<'a> + Send + Sync> PopArgumentHack<'a, T> for &PhantomData<T> {
     async fn pop_from(
         self,
@@ -91,7 +87,6 @@ impl<'a, T: PopArgument<'a> + Send + Sync> PopArgumentHack<'a, T> for &PhantomDa
     }
 }
 
-#[async_trait::async_trait]
 impl<'a> PopArgumentHack<'a, bool> for &PhantomData<bool> {
     async fn pop_from(
         self,
@@ -114,7 +109,6 @@ impl<'a> PopArgumentHack<'a, bool> for &PhantomData<bool> {
     }
 }
 
-#[async_trait::async_trait]
 impl<'a> PopArgumentHack<'a, serenity::Attachment> for &PhantomData<serenity::Attachment> {
     async fn pop_from(
         self,

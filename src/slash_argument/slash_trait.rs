@@ -2,6 +2,7 @@
 
 use super::SlashArgError;
 use std::convert::TryInto as _;
+use std::future::Future;
 use std::marker::PhantomData;
 
 #[allow(unused_imports)] // import is required if serenity simdjson feature is enabled
@@ -9,17 +10,16 @@ use crate::serenity::json::*;
 use crate::serenity_prelude as serenity;
 
 /// Implement this trait on types that you want to use as a slash command parameter.
-#[async_trait::async_trait]
 pub trait SlashArgument: Sized {
     /// Extract a Rust value of type T from the slash command argument, given via a
     /// [`serenity::json::Value`].
     ///
     /// Don't call this method directly! Use [`crate::extract_slash_argument!`]
-    async fn extract(
+    fn extract(
         ctx: &serenity::Context,
         interaction: &serenity::CommandInteraction,
         value: &serenity::ResolvedValue<'_>,
-    ) -> Result<Self, SlashArgError>;
+    ) -> impl Future<Output = Result<Self, SlashArgError>>;
 
     /// Create a slash command parameter equivalent to type T.
     ///
@@ -42,14 +42,13 @@ pub trait SlashArgument: Sized {
 /// Currently marked `#[doc(hidden)]` because implementing this trait requires some jank due to a
 /// `PhantomData` hack and the auto-deref specialization hack.
 #[doc(hidden)]
-#[async_trait::async_trait]
 pub trait SlashArgumentHack<T>: Sized {
-    async fn extract(
+    fn extract(
         self,
         ctx: &serenity::Context,
         interaction: &serenity::CommandInteraction,
         value: &serenity::ResolvedValue<'_>,
-    ) -> Result<T, SlashArgError>;
+    ) -> impl Future<Output = Result<T, SlashArgError>>;
 
     fn create(self, builder: serenity::CreateCommandOption) -> serenity::CreateCommandOption;
 
@@ -90,7 +89,6 @@ macro_rules! slash_argument_choices {
 }
 
 /// Handles arbitrary types that can be parsed from string.
-#[async_trait::async_trait]
 impl<T> SlashArgumentHack<T> for PhantomData<T>
 where
     T: serenity::ArgumentConvert + Send + Sync,
@@ -132,7 +130,6 @@ where
 /// Implements slash argument trait for integer types
 macro_rules! impl_for_integer {
     ($($t:ty)*) => { $(
-        #[async_trait::async_trait]
         impl SlashArgument for $t {
             async fn extract(
                 _: &serenity::Context,
@@ -162,7 +159,6 @@ macro_rules! impl_for_integer {
 }
 impl_for_integer!(i8 i16 i32 i64 isize u8 u16 u32 u64 usize);
 
-#[async_trait::async_trait]
 impl<T: SlashArgument + Sync> SlashArgumentHack<T> for &PhantomData<T> {
     async fn extract(
         self,
@@ -185,7 +181,6 @@ impl<T: SlashArgument + Sync> SlashArgumentHack<T> for &PhantomData<T> {
 /// Versatile macro to implement `SlashArgumentHack` for simple types
 macro_rules! impl_slash_argument {
     ($type:ty, |$ctx:pat, $interaction:pat, $slash_param_type:ident ( $($arg:pat),* )| $extractor:expr) => {
-        #[async_trait::async_trait]
         impl SlashArgument for $type {
             async fn extract(
                 $ctx: &serenity::Context,

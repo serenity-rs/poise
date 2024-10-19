@@ -71,7 +71,6 @@ impl KeyValueArgs {
     }
 }
 
-#[async_trait::async_trait]
 impl<'a> PopArgument<'a> for KeyValueArgs {
     async fn pop_from(
         args: &'a str,
