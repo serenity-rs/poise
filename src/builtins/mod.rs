@@ -118,7 +118,7 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
         crate::FrameworkError::CommandStructureMismatch { ctx, description } => {
             tracing::error!(
                 "Error: failed to deserialize interaction arguments for `/{}`: {}",
-                ctx.command.name,
+                ctx.command().name,
                 description,
             );
         }
@@ -201,10 +201,9 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
             );
         }
         crate::FrameworkError::UnknownCommand {
-            msg_content,
-            prefix,
-            ..
+            msg, content_start, ..
         } => {
+            let (prefix, msg_content) = msg.content.split_at(content_start.into());
             tracing::warn!(
                 "Recognized prefix `{}`, but didn't recognize command name in `{}`",
                 prefix,
