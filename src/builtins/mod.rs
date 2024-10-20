@@ -118,7 +118,7 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
         crate::FrameworkError::CommandStructureMismatch { ctx, description } => {
             tracing::error!(
                 "Error: failed to deserialize interaction arguments for `/{}`: {}",
-                ctx.command.name,
+                ctx.command().name,
                 description,
             );
         }

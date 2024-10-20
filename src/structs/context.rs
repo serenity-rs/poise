@@ -333,8 +333,8 @@ context_methods! {
     (command self)
     (pub fn command(self) -> &'a crate::Command<U, E>) {
         match self {
-            Self::Prefix(x) => x.command,
-            Self::Application(x) => x.command,
+            Self::Prefix(x) => x.parent_commands.last().unwrap(),
+            Self::Application(x) => x.parent_commands.last().unwrap(),
         }
     }
 
@@ -392,7 +392,7 @@ context_methods! {
                     string += &parent_command.name;
                     string += " ";
                 }
-                string += &ctx.command.name;
+                string += &ctx.command().name;
                 for arg in ctx.args {
                     #[allow(unused_imports)] // required for simd-json
                     use ::serenity::json::*;
@@ -529,6 +529,7 @@ context_methods! {
 impl<'a, U, E> Context<'a, U, E> {
     /// Actual implementation of rerun() that returns `FrameworkError` for implementation convenience
     async fn rerun_inner(self) -> Result<(), crate::FrameworkError<'a, U, E>> {
+        let command = self.command();
         match self {
             Self::Application(ctx) => {
                 // Skip autocomplete interactions
@@ -538,7 +539,7 @@ impl<'a, U, E> Context<'a, U, E> {
 
                 // Check slash command
                 if ctx.interaction.data.kind == serenity::CommandType::ChatInput {
-                    return if let Some(action) = ctx.command.slash_action {
+                    return if let Some(action) = command.slash_action {
                         action(ctx).await
                     } else {
                         Ok(())
@@ -546,10 +547,9 @@ impl<'a, U, E> Context<'a, U, E> {
                 }
 
                 // Check context menu command
-                if let (Some(action), Some(target)) = (
-                    ctx.command.context_menu_action,
-                    &ctx.interaction.data.target(),
-                ) {
+                if let (Some(action), Some(target)) =
+                    (command.context_menu_action, &ctx.interaction.data.target())
+                {
                     return match action {
                         crate::ContextMenuCommandAction::User(action) => {
                             if let serenity::ResolvedTarget::User(user, _) = target {
@@ -570,7 +570,7 @@ impl<'a, U, E> Context<'a, U, E> {
                 }
             }
             Self::Prefix(ctx) => {
-                if let Some(action) = ctx.command.prefix_action {
+                if let Some(action) = command.prefix_action {
                     return action(ctx).await;
                 }
             }

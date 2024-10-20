@@ -147,7 +147,7 @@ pub fn find_command<'a, U, E>(
     remaining_message: &'a str,
     case_insensitive: bool,
     parent_commands: &mut Vec<&'a crate::Command<U, E>>,
-) -> Option<(&'a crate::Command<U, E>, &'a str, &'a str)> {
+) -> Option<(&'a str, &'a str)> {
     let string_equal = if case_insensitive {
         |a: &str, b: &str| a.eq_ignore_ascii_case(b)
     } else {
@@ -177,10 +177,7 @@ pub fn find_command<'a, U, E>(
                 case_insensitive,
                 parent_commands,
             )
-            .unwrap_or_else(|| {
-                parent_commands.pop();
-                (command, command_name, remaining_message)
-            }),
+            .unwrap_or((command_name, remaining_message)),
         );
     }
 
@@ -255,7 +252,7 @@ pub async fn parse_invocation<'a, U: Send + Sync, E>(
 
     let msg_content = msg.content[content_start.into()..].trim_start();
 
-    let (command, invoked_command_name, args) = find_command(
+    let (invoked_command_name, args) = find_command(
         &framework.options.commands,
         msg_content,
         framework.options.prefix_options.case_insensitive_commands,
@@ -269,7 +266,10 @@ pub async fn parse_invocation<'a, U: Send + Sync, E>(
         trigger,
     })?;
 
-    if command.prefix_action.is_none() {
+    if parent_commands
+        .last()
+        .is_none_or(|c| c.prefix_action.is_none())
+    {
         return Ok(None);
     }
 
@@ -280,7 +280,6 @@ pub async fn parse_invocation<'a, U: Send + Sync, E>(
         args,
         framework,
         parent_commands,
-        command,
         invocation_data,
         trigger,
         __non_exhaustive: (),
@@ -292,14 +291,16 @@ pub async fn parse_invocation<'a, U: Send + Sync, E>(
 pub async fn run_invocation<U, E>(
     ctx: crate::PrefixContext<'_, U, E>,
 ) -> Result<(), crate::FrameworkError<'_, U, E>> {
+    let command = ctx.command();
+
     // This was already checked in parse_invocation, so this could be an unwrap,
     // but this is public so we simply early return if there is no prefix action.
-    let Some(prefix_action) = ctx.command.prefix_action else {
+    let Some(prefix_action) = command.prefix_action else {
         return Ok(());
     };
 
     // Check if we should disregard this invocation if it was triggered by an edit
-    if ctx.trigger == crate::MessageDispatchTrigger::MessageEdit && !ctx.command.invoke_on_edit {
+    if ctx.trigger == crate::MessageDispatchTrigger::MessageEdit && !command.invoke_on_edit {
         return Ok(());
     }
     if ctx.trigger == crate::MessageDispatchTrigger::MessageEditFromInvalid
@@ -308,7 +309,7 @@ pub async fn run_invocation<U, E>(
         return Ok(());
     }
 
-    if ctx.command.subcommand_required {
+    if command.subcommand_required {
         // None of this command's subcommands were invoked, or else we'd have the subcommand in
         // ctx.command and not the parent command
         return Err(crate::FrameworkError::SubcommandRequired {
@@ -319,7 +320,7 @@ pub async fn run_invocation<U, E>(
     super::common::check_permissions_and_cooldown(ctx.into()).await?;
 
     // Typing is broadcasted as long as this object is alive
-    let _typing_broadcaster = if ctx.command.broadcast_typing {
+    let _typing_broadcaster = if command.broadcast_typing {
         Some(
             ctx.msg
                 .channel_id
@@ -339,7 +340,7 @@ pub async fn run_invocation<U, E>(
         edit_tracker
             .write()
             .unwrap()
-            .track_command(ctx.msg, ctx.command.track_deletion);
+            .track_command(ctx.msg, command.track_deletion);
     }
 
     // Execute command
