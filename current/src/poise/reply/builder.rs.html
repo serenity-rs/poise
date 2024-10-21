@@ -246,7 +246,8 @@
 <a href="#245" id="245">245</a>
 <a href="#246" id="246">246</a>
 <a href="#247" id="247">247</a>
-<a href="#248" id="248">248</a></pre></div><pre class="rust"><code><span class="doccomment">//! The builder to create a new reply
+<a href="#248" id="248">248</a>
+<a href="#249" id="249">249</a></pre></div><pre class="rust"><code><span class="doccomment">//! The builder to create a new reply
 
 </span><span class="kw">use </span><span class="kw">crate</span>::serenity_prelude <span class="kw">as </span>serenity;
 
@@ -295,8 +296,6 @@
     </span>}
 
     <span class="doccomment">/// Add an attachment.
-    ///
-    /// This will not have an effect in a slash command's initial response!
     </span><span class="kw">pub fn </span>attachment(<span class="kw-2">mut </span><span class="self">self</span>, attachment: serenity::CreateAttachment) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.attachments.push(attachment);
         <span class="self">self
@@ -405,8 +404,8 @@
         <span class="kw">let </span><span class="kw">crate</span>::CreateReply {
             content,
             embeds,
-            attachments: <span class="kw">_</span>, <span class="comment">// no support for attachment edits in serenity yet
-            </span>components,
+            attachments,
+            components,
             ephemeral: <span class="kw">_</span>, <span class="comment">// can't edit ephemerality in retrospect
             </span>allowed_mentions,
             reply: <span class="kw">_</span>,
@@ -421,6 +420,9 @@
         }
         <span class="kw">if let </span><span class="prelude-val">Some</span>(allowed_mentions) = allowed_mentions {
             builder = builder.allowed_mentions(allowed_mentions);
+        }
+        <span class="kw">for </span>attachment <span class="kw">in </span>attachments {
+            builder = builder.new_attachment(attachment);
         }
 
         builder.embeds(embeds)
