@@ -35,22 +35,7 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
                 quote::quote! { Some(|
                     ctx: poise::ApplicationContext<'_, _, _>,
                     partial: &str,
-                | Box::pin(async move {
-                    use ::poise::futures_util::{Stream, StreamExt};
-
-                    let choices_stream = ::poise::into_stream!(
-                        #autocomplete_fn(ctx.into(), partial).await
-                    );
-                    let choices_vec = choices_stream
-                        .take(25)
-                        // T or AutocompleteChoice<T> -> AutocompleteChoice<T>
-                        .map(poise::serenity_prelude::AutocompleteChoice::from)
-                        .collect()
-                        .await;
-
-                    let mut response = poise::serenity_prelude::CreateAutocompleteResponse::default();
-                    Ok(response.set_choices(choices_vec))
-                })) }
+                | Box::pin(#autocomplete_fn(ctx.into(), partial))) }
             }
             None => quote::quote! { None },
         };

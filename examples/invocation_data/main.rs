@@ -18,13 +18,13 @@ async fn my_check(ctx: Context<'_>) -> Result<bool, Error> {
     Ok(true)
 }
 
-async fn my_autocomplete(ctx: Context<'_>, _: &str) -> impl Iterator<Item = String> {
+async fn my_autocomplete(ctx: Context<'_>, _: &str) -> serenity::CreateAutocompleteResponse {
     println!(
         "In autocomplete: {:?}",
         ctx.invocation_data::<&str>().await.as_deref()
     );
 
-    std::iter::empty()
+    serenity::CreateAutocompleteResponse::new()
 }
 
 /// Test command to ensure that invocation_data works

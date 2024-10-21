@@ -8,6 +8,3 @@ pub use slash_trait::*;
 
 mod context_menu;
 pub use context_menu::*;
-
-mod into_stream;
-pub use into_stream::*;

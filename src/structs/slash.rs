@@ -157,10 +157,7 @@ pub struct CommandParameter<U, E> {
         for<'a> fn(
             crate::ApplicationContext<'a, U, E>,
             &'a str,
-        ) -> BoxFuture<
-            'a,
-            Result<serenity::CreateAutocompleteResponse, crate::SlashArgError>,
-        >,
+        ) -> BoxFuture<'a, serenity::CreateAutocompleteResponse>,
     >,
     #[doc(hidden)]
     pub __non_exhaustive: (),
