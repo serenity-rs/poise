@@ -281,7 +281,23 @@
 <a href="#280" id="280">280</a>
 <a href="#281" id="281">281</a>
 <a href="#282" id="282">282</a>
-<a href="#283" id="283">283</a></pre></div><pre class="rust"><code><span class="doccomment">//! The central Framework struct that ties everything together.
+<a href="#283" id="283">283</a>
+<a href="#284" id="284">284</a>
+<a href="#285" id="285">285</a>
+<a href="#286" id="286">286</a>
+<a href="#287" id="287">287</a>
+<a href="#288" id="288">288</a>
+<a href="#289" id="289">289</a>
+<a href="#290" id="290">290</a>
+<a href="#291" id="291">291</a>
+<a href="#292" id="292">292</a>
+<a href="#293" id="293">293</a>
+<a href="#294" id="294">294</a>
+<a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a></pre></div><pre class="rust"><code><span class="doccomment">//! The central Framework struct that ties everything together.
 
 </span><span class="kw">use </span>std::sync::Arc;
 
@@ -424,7 +440,13 @@
         <span class="self">self</span>.shard_manager = <span class="prelude-val">Some</span>(client.shard_manager.clone());
 
         <span class="kw">if </span><span class="self">self</span>.options.initialize_owners {
-            <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = insert_owners_from_http(<span class="kw-2">&amp;</span>client.http, <span class="kw-2">&amp;mut </span><span class="self">self</span>.options.owners).<span class="kw">await </span>{
+            <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = insert_owners_from_http(
+                <span class="kw-2">&amp;</span>client.http,
+                <span class="kw-2">&amp;mut </span><span class="self">self</span>.options.owners,
+                <span class="kw-2">&amp;</span><span class="self">self</span>.options.initialized_team_roles,
+            )
+            .<span class="kw">await
+            </span>{
                 <span class="macro">tracing::warn!</span>(<span class="string">"Failed to insert owners from HTTP: {e}"</span>);
             }
         }
@@ -522,6 +544,7 @@
 </span><span class="kw">pub async fn </span>insert_owners_from_http(
     http: <span class="kw-2">&amp;</span>serenity::Http,
     owners: <span class="kw-2">&amp;mut </span>std::collections::HashSet&lt;serenity::UserId&gt;,
+    initialized_teams: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span>&lt;Vec&lt;serenity::TeamMemberRole&gt;&gt;,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;(), serenity::Error&gt; {
     <span class="kw">let </span>application_info = http.get_current_application_info().<span class="kw">await</span><span class="question-mark">?</span>;
 
@@ -536,7 +559,16 @@
                 <span class="kw">continue</span>;
             }
 
-            <span class="kw">if let </span>TeamMemberRole::Admin | TeamMemberRole::Developer = member.role {
+            <span class="comment">// Default configuration.
+            </span><span class="kw">let </span><span class="prelude-val">Some</span>(initialized_teams) = initialized_teams <span class="kw">else </span>{
+                <span class="kw">if let </span>TeamMemberRole::Admin | TeamMemberRole::Developer = member.role {
+                    owners.insert(member.user.id);
+                }
+                <span class="kw">continue</span>;
+            };
+
+            <span class="comment">// s has specified the teams they want to be considered "Owner".
+            </span><span class="kw">if </span>initialized_teams.iter().any(|r| <span class="kw-2">*</span>r == member.role) {
                 owners.insert(member.user.id);
             }
         }
