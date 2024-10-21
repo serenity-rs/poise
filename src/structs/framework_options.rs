@@ -67,6 +67,13 @@ pub struct FrameworkOptions<U, E> {
     ///
     /// True by default.
     pub initialize_owners: bool,
+    /// If set and [`Self::initialize_owners`] is `true`, the selected teams will be initialized
+    /// using the results of [`serenity::Http::get_current_application_info()`].
+    ///
+    /// When set to `None`, only users with the Developer and Admin roles are initialized.
+    ///
+    /// None by default.
+    pub initialized_team_roles: Option<Vec<serenity::TeamMemberRole>>,
     // #[non_exhaustive] forbids struct update syntax for ?? reason
     #[doc(hidden)]
     pub __non_exhaustive: (),
@@ -120,6 +127,7 @@ where
             prefix_options: Default::default(),
             owners: Default::default(),
             initialize_owners: true,
+            initialized_team_roles: None,
             __non_exhaustive: (),
         }
     }
