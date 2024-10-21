@@ -47,8 +47,6 @@ impl CreateReply {
     }
 
     /// Add an attachment.
-    ///
-    /// This will not have an effect in a slash command's initial response!
     pub fn attachment(mut self, attachment: serenity::CreateAttachment) -> Self {
         self.attachments.push(attachment);
         self
@@ -157,7 +155,7 @@ impl CreateReply {
         let crate::CreateReply {
             content,
             embeds,
-            attachments: _, // no support for attachment edits in serenity yet
+            attachments,
             components,
             ephemeral: _, // can't edit ephemerality in retrospect
             allowed_mentions,
@@ -173,6 +171,9 @@ impl CreateReply {
         }
         if let Some(allowed_mentions) = allowed_mentions {
             builder = builder.allowed_mentions(allowed_mentions);
+        }
+        for attachment in attachments {
+            builder = builder.new_attachment(attachment);
         }
 
         builder.embeds(embeds)
