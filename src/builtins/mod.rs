@@ -230,13 +230,17 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
 pub async fn autocomplete_command<'a, U, E>(
     ctx: crate::Context<'a, U, E>,
     partial: &'a str,
-) -> impl Iterator<Item = String> + 'a {
-    ctx.framework()
-        .options()
-        .commands
-        .iter()
-        .filter(move |cmd| cmd.name.starts_with(partial))
-        .map(|cmd| cmd.name.to_string())
+) -> serenity::CreateAutocompleteResponse {
+    let commands = ctx.framework().options.commands.iter();
+    let filtered_commands = commands
+        .filter(|cmd| cmd.name.starts_with(partial))
+        .take(25);
+
+    let choices = filtered_commands
+        .map(|cmd| serenity::AutocompleteChoice::from(&cmd.name))
+        .collect();
+
+    serenity::CreateAutocompleteResponse::new().set_choices(choices)
 }
 
 /// Lists servers of which the bot is a member of, including their member counts, sorted

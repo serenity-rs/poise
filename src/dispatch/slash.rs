@@ -227,13 +227,7 @@ async fn run_autocomplete<U, E>(
     use ::serenity::json::*; // as_str() access via trait for simd-json
 
     // Generate an autocomplete response
-    let autocomplete_response = match autocomplete_callback(ctx, partial_input).await {
-        Ok(x) => x,
-        Err(e) => {
-            tracing::warn!("couldn't generate autocomplete response: {e}");
-            return Ok(());
-        }
-    };
+    let autocomplete_response = autocomplete_callback(ctx, partial_input).await;
 
     // Send the generates autocomplete response
     if let Err(e) = ctx
