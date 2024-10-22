@@ -135,7 +135,7 @@ context_methods! {
     /// Like [`Self::say`], but formats the message as a reply to the user's command
     /// message.
     ///
-    /// Equivalent to `.send(|b| b.content("...").reply(true))`.
+    /// Equivalent to `.send(CreateReply::default().content("...").reply(true))`.
     ///
     /// Only has an effect in prefix context, because slash command responses are always
     /// formatted as a reply.
