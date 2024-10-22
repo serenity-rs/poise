@@ -418,7 +418,7 @@ pub mod samples {
 }
 
 #[doc(hidden)]
-pub use {async_trait::async_trait, futures_util};
+pub use futures_util;
 
 /// This module re-exports a bunch of items from all over serenity. Useful if you can't
 /// remember the full paths of serenity items.

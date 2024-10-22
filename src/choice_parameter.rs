@@ -22,7 +22,6 @@ pub trait ChoiceParameter: Sized {
     fn localized_name(&self, locale: &str) -> Option<&'static str>;
 }
 
-#[async_trait::async_trait]
 impl<T: ChoiceParameter> crate::SlashArgument for T {
     async fn extract(
         _: &serenity::Context,
@@ -55,7 +54,6 @@ impl<T: ChoiceParameter> crate::SlashArgument for T {
     }
 }
 
-#[async_trait::async_trait]
 impl<'a, T: ChoiceParameter> crate::PopArgument<'a> for T {
     async fn pop_from(
         args: &'a str,
