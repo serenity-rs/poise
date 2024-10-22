@@ -58,6 +58,11 @@ pub struct Command<U, E> {
     /// Multiline description with detailed usage instructions. Displayed in the command specific
     /// help: `~help command_name`
     pub help_text: Option<String>,
+    /// if `true`, disables automatic cooldown handling before this commands invocation.
+    ///
+    /// Will override [`crate::FrameworkOptions::manual_cooldowns`] allowing manual cooldowns
+    /// on select commands.
+    pub manual_cooldowns: Option<bool>,
     /// Handles command cooldowns. Mainly for framework internal use
     pub cooldowns: std::sync::Mutex<crate::CooldownTracker>,
     /// Configuration for the [`crate::CooldownTracker`]
