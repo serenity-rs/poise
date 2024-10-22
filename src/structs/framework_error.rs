@@ -114,6 +114,8 @@ pub enum FrameworkError<'a, U, E> {
         /// General context
         ctx: crate::Context<'a, U, E>,
     },
+    /// The command was invoked, but an error occurred while fetching the necessary information to
+    /// verify permissions.
     #[non_exhaustive]
     PermissionFetchFailed {
         /// General context
