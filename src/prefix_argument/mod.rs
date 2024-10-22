@@ -125,6 +125,45 @@ impl std::fmt::Display for InvalidBool {
 }
 impl std::error::Error for InvalidBool {}
 
+/// Error thrown when the user enters a string that cannot be parsed as a UserId.
+#[derive(Default, Debug)]
+pub struct InvalidUserId {
+    #[doc(hidden)]
+    pub __non_exhaustive: (),
+}
+impl std::fmt::Display for InvalidUserId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("Enter a valid user's ID or a mention.")
+    }
+}
+impl std::error::Error for InvalidUserId {}
+
+/// Error thrown when the user enters a string that cannot be parsed as a RoleId.
+#[derive(Default, Debug)]
+pub struct InvalidRoleId {
+    #[doc(hidden)]
+    pub __non_exhaustive: (),
+}
+impl std::fmt::Display for InvalidRoleId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("Enter a valid role's ID or a mention.")
+    }
+}
+impl std::error::Error for InvalidRoleId {}
+
+/// Error thrown when the user enters a string that cannot be parsed as a RoleId.
+#[derive(Default, Debug)]
+pub struct InvalidChannelId {
+    #[doc(hidden)]
+    pub __non_exhaustive: (),
+}
+impl std::fmt::Display for InvalidChannelId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("Enter a valid channel's ID or a mention.")
+    }
+}
+impl std::error::Error for InvalidChannelId {}
+
 #[cfg(test)]
 #[test]
 fn test_pop_string() {
