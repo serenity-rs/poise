@@ -114,6 +114,11 @@ pub enum FrameworkError<'a, U, E> {
         /// General context
         ctx: crate::Context<'a, U, E>,
     },
+    #[non_exhaustive]
+    PermissionFetchFailed {
+        /// General context
+        ctx: crate::Context<'a, U, E>,
+    },
     /// A non-owner tried to invoke an owners-only command
     #[non_exhaustive]
     NotAnOwner {
@@ -218,6 +223,7 @@ impl<'a, U, E> FrameworkError<'a, U, E> {
             Self::CooldownHit { ctx, .. } => ctx.serenity_context(),
             Self::MissingBotPermissions { ctx, .. } => ctx.serenity_context(),
             Self::MissingUserPermissions { ctx, .. } => ctx.serenity_context(),
+            Self::PermissionFetchFailed { ctx } => ctx.serenity_context(),
             Self::NotAnOwner { ctx, .. } => ctx.serenity_context(),
             Self::GuildOnly { ctx, .. } => ctx.serenity_context(),
             Self::DmOnly { ctx, .. } => ctx.serenity_context(),
@@ -242,6 +248,7 @@ impl<'a, U, E> FrameworkError<'a, U, E> {
             Self::CooldownHit { ctx, .. } => ctx,
             Self::MissingBotPermissions { ctx, .. } => ctx,
             Self::MissingUserPermissions { ctx, .. } => ctx,
+            Self::PermissionFetchFailed { ctx } => ctx,
             Self::NotAnOwner { ctx, .. } => ctx,
             Self::GuildOnly { ctx, .. } => ctx,
             Self::DmOnly { ctx, .. } => ctx,
@@ -367,6 +374,11 @@ impl<U, E: std::fmt::Display> std::fmt::Display for FrameworkError<'_, U, E> {
                 missing_permissions,
                 full_command_name!(ctx),
             ),
+            Self::PermissionFetchFailed { ctx } => write!(
+                f,
+                "An error occurred when trying to fetch permissions for `{}`",
+                full_command_name!(ctx)
+            ),
             Self::NotAnOwner { ctx } => write!(
                 f,
                 "owner-only command `{}` cannot be run by non-owners",
@@ -436,6 +448,7 @@ impl<'a, U: std::fmt::Debug, E: std::error::Error + 'static> std::error::Error
             Self::CooldownHit { .. } => None,
             Self::MissingBotPermissions { .. } => None,
             Self::MissingUserPermissions { .. } => None,
+            Self::PermissionFetchFailed { .. } => None,
             Self::NotAnOwner { .. } => None,
             Self::GuildOnly { .. } => None,
             Self::DmOnly { .. } => None,
