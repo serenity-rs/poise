@@ -98,7 +98,7 @@ pub enum FrameworkError<'a, U, E> {
         ctx: crate::Context<'a, U, E>,
     },
     /// Command was invoked but the bot is lacking the permissions specified in
-    /// [`crate::Command::required_permissions`]
+    /// [`crate::Command::required_bot_permissions`]
     #[non_exhaustive]
     MissingBotPermissions {
         /// Which permissions in particular the bot is lacking for this command
@@ -107,7 +107,7 @@ pub enum FrameworkError<'a, U, E> {
         ctx: crate::Context<'a, U, E>,
     },
     /// Command was invoked but the user is lacking the permissions specified in
-    /// [`crate::Command::required_bot_permissions`]
+    /// [`crate::Command::required_permissions`]
     #[non_exhaustive]
     MissingUserPermissions {
         /// List of permissions that the user is lacking. May be None if retrieving the user's
