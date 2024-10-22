@@ -37,6 +37,8 @@ for example for command-specific help (i.e. `~help command_name`). Escape newlin
 - `category`: Category of this command which affects placement in the help command
 - `custom_data`: Arbitrary expression that will be boxed and stored in `Command::custom_data`
 - `identifying_name`: Optionally, a unique identifier for this command for your personal usage
+- `install_context`: Installation contexts where this command is available (slash-only) (`unstable` feature)
+- `interaction_context`: Interaction contexts where this command is available (slash-only) (`unstable` feature)
 
 ## Checks
 
