@@ -135,3 +135,57 @@ impl<'a> PopArgumentHack<'a, serenity::Attachment> for &PhantomData<serenity::At
         Ok((args, attachment_index + 1, attachment))
     }
 }
+
+/// Macro to allow for using mentions in snowflake types
+macro_rules! snowflake_pop_argument {
+    ($type:ty, $parse_fn:ident, $error_type:ident) => {
+        /// Error thrown when the user enters a string that cannot be parsed correctly.
+        #[derive(Default, Debug)]
+        pub struct $error_type {
+            #[doc(hidden)]
+            pub __non_exhaustive: (),
+        }
+
+        impl std::error::Error for $error_type {}
+        impl std::fmt::Display for $error_type {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                f.write_str(concat!(
+                    "Enter a valid ",
+                    stringify!($error_type),
+                    " ID or a mention."
+                ))
+            }
+        }
+
+        #[async_trait::async_trait]
+        impl<'a> PopArgumentHack<'a, $type> for &PhantomData<$type> {
+            async fn pop_from(
+                self,
+                args: &'a str,
+                attachment_index: usize,
+                ctx: &serenity::Context,
+                msg: &serenity::Message,
+            ) -> Result<
+                (&'a str, usize, $type),
+                (Box<dyn std::error::Error + Send + Sync>, Option<String>),
+            > {
+                let (args, string) =
+                    pop_string(args).map_err(|_| (TooFewArguments::default().into(), None))?;
+
+                if let Some(parsed_id) = string
+                    .parse()
+                    .ok()
+                    .or_else(|| serenity::utils::$parse_fn(&string))
+                {
+                    Ok((args.trim_start(), attachment_index, parsed_id))
+                } else {
+                    Err(($error_type::default().into(), Some(string)))
+                }
+            }
+        }
+    };
+}
+
+snowflake_pop_argument!(serenity::UserId, parse_user_mention, InvalidUserId);
+snowflake_pop_argument!(serenity::ChannelId, parse_channel_mention, InvalidChannelId);
+snowflake_pop_argument!(serenity::RoleId, parse_role_mention, InvalidRoleId);
