@@ -163,7 +163,11 @@ async fn pretty_help_single_command<U, E>(
                 .is_some_and(|n| n.eq_ignore_ascii_case(command_name))
         })
         // Then interpret command name as a normal command (possibly nested subcommand)
-        .or(crate::find_command(commands, command_name, true, &mut vec![]).map(|(c, _, _)| c));
+        .or_else(|| {
+            let mut parent_commands = Vec::with_capacity(1);
+            crate::find_command(commands, command_name, true, &mut parent_commands);
+            parent_commands.last().copied()
+        });
 
     let Some(command) = command else {
         ctx.send(

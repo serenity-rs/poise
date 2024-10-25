@@ -139,7 +139,9 @@ async fn help_single_command<U, E>(
     });
     // Then interpret command name as a normal command (possibly nested subcommand)
     if command.is_none() {
-        if let Some((c, _, _)) = crate::find_command(commands, command_name, true, &mut vec![]) {
+        let mut parent_commands = Vec::with_capacity(1);
+        crate::find_command(commands, command_name, true, &mut parent_commands);
+        if let Some(c) = parent_commands.last() {
             command = Some(c);
         }
     }

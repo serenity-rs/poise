@@ -8,7 +8,7 @@ fn find_matching_command<'a, 'b, U, E>(
     interaction_options: &'b [serenity::ResolvedOption<'b>],
     commands: &'a [crate::Command<U, E>],
     parent_commands: &mut Vec<&'a crate::Command<U, E>>,
-) -> Option<(&'a crate::Command<U, E>, &'b [serenity::ResolvedOption<'b>])> {
+) -> Option<&'b [serenity::ResolvedOption<'b>]> {
     commands.iter().find_map(|cmd| {
         if interaction_name != cmd.name
             && Some(interaction_name) != cmd.context_menu_name.as_deref()
@@ -16,6 +16,7 @@ fn find_matching_command<'a, 'b, U, E>(
             return None;
         }
 
+        parent_commands.push(cmd);
         if let Some((sub_name, sub_interaction)) =
             interaction_options
                 .iter()
@@ -25,10 +26,9 @@ fn find_matching_command<'a, 'b, U, E>(
                     _ => None,
                 })
         {
-            parent_commands.push(cmd);
             find_matching_command(sub_name, sub_interaction, &cmd.subcommands, parent_commands)
         } else {
-            Some((cmd, interaction_options))
+            Some(interaction_options)
         }
     })
 }
@@ -47,24 +47,23 @@ fn extract_command<'a, U, E>(
     options: &'a [serenity::ResolvedOption<'a>],
     parent_commands: &'a mut Vec<&'a crate::Command<U, E>>,
 ) -> Result<crate::ApplicationContext<'a, U, E>, crate::FrameworkError<'a, U, E>> {
-    let search_result = find_matching_command(
+    let Some(leaf_interaction_options) = find_matching_command(
         &interaction.data.name,
         options,
         &framework.options.commands,
         parent_commands,
-    );
-    let (command, leaf_interaction_options) =
-        search_result.ok_or(crate::FrameworkError::UnknownInteraction {
+    ) else {
+        return Err(crate::FrameworkError::UnknownInteraction {
             framework,
             interaction,
-        })?;
+        });
+    };
 
     Ok(crate::ApplicationContext {
         framework,
         interaction,
         interaction_type,
         args: leaf_interaction_options,
-        command,
         parent_commands,
         has_sent_initial_response,
         invocation_data,
@@ -112,19 +111,17 @@ async fn run_command<U, E>(
         description: "received interaction type but command contained no \
                 matching action or interaction contained no matching context menu object",
     };
+
+    let command = ctx.command();
     let action_result = match ctx.interaction.data.kind {
         serenity::CommandType::ChatInput => {
-            let action = ctx
-                .command
+            let action = command
                 .slash_action
                 .ok_or(command_structure_mismatch_error)?;
             action(ctx).await
         }
         serenity::CommandType::User => {
-            match (
-                ctx.command.context_menu_action,
-                &ctx.interaction.data.target(),
-            ) {
+            match (command.context_menu_action, &ctx.interaction.data.target()) {
                 (
                     Some(crate::ContextMenuCommandAction::User(action)),
                     Some(serenity::ResolvedTarget::User(user, _)),
@@ -133,10 +130,7 @@ async fn run_command<U, E>(
             }
         }
         serenity::CommandType::Message => {
-            match (
-                ctx.command.context_menu_action,
-                &ctx.interaction.data.target(),
-            ) {
+            match (command.context_menu_action, &ctx.interaction.data.target()) {
                 (
                     Some(crate::ContextMenuCommandAction::Message(action)),
                     Some(serenity::ResolvedTarget::Message(message)),
@@ -208,7 +202,7 @@ async fn run_autocomplete<U, E>(
     };
 
     // Find the matching parameter from our Command object
-    let parameters = &ctx.command.parameters;
+    let parameters = &ctx.command().parameters;
     let focused_parameter = parameters
         .iter()
         .find(|p| &p.name == focused_option_name)

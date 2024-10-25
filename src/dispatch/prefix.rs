@@ -1,6 +1,16 @@
 //! Dispatches incoming messages and message edits onto framework commands
 
+use std::convert::TryInto as _;
+
 use crate::serenity_prelude as serenity;
+
+/// Converts a prefix string's length into u16, panicking if it doesn't fit.
+fn prefix_len_to_u16(prefix: &str) -> u16 {
+    prefix
+        .len()
+        .try_into()
+        .expect("messages should not be more than 64k bytes, let alone a prefix")
+}
 
 /// Checks if this message is a bot invocation by attempting to strip the prefix
 ///
@@ -8,7 +18,7 @@ use crate::serenity_prelude as serenity;
 async fn strip_prefix<'a, U, E>(
     framework: crate::FrameworkContext<'a, U, E>,
     msg: &'a serenity::Message,
-) -> Option<(&'a str, &'a str)> {
+) -> Option<u16> {
     let partial_ctx = crate::PartialContext {
         guild_id: msg.guild_id,
         channel_id: msg.channel_id,
@@ -22,7 +32,7 @@ async fn strip_prefix<'a, U, E>(
             Ok(prefix) => {
                 if let Some(prefix) = prefix {
                     if msg.content.starts_with(prefix.as_ref()) {
-                        return Some(msg.content.split_at(prefix.len()));
+                        return Some(prefix_len_to_u16(&prefix));
                     }
                 }
             }
@@ -38,22 +48,22 @@ async fn strip_prefix<'a, U, E>(
     }
 
     if let Some(prefix) = framework.options.prefix_options.prefix.as_deref() {
-        if let Some(content) = msg.content.strip_prefix(prefix) {
-            return Some((prefix, content));
+        if msg.content.starts_with(prefix) {
+            return Some(prefix_len_to_u16(prefix));
         }
     }
 
-    if let Some((prefix, content)) = framework
+    if let Some(prefix) = framework
         .options
         .prefix_options
         .additional_prefixes
         .iter()
         .find_map(|prefix| match prefix {
-            &crate::Prefix::Literal(prefix) => Some((prefix, msg.content.strip_prefix(prefix)?)),
+            &crate::Prefix::Literal(prefix) => Some(prefix),
             crate::Prefix::Regex(prefix) => {
                 let regex_match = prefix.find(&msg.content)?;
                 if regex_match.start() == 0 {
-                    Some(msg.content.split_at(regex_match.end()))
+                    Some(&msg.content[..regex_match.end()])
                 } else {
                     None
                 }
@@ -61,16 +71,13 @@ async fn strip_prefix<'a, U, E>(
             crate::Prefix::__NonExhaustive => unreachable!(),
         })
     {
-        return Some((prefix, content));
+        return Some(prefix_len_to_u16(prefix));
     }
 
     if let Some(dynamic_prefix) = framework.options.prefix_options.stripped_dynamic_prefix {
         match dynamic_prefix(framework.serenity_context, msg, framework.user_data).await {
-            Ok(result) => {
-                if let Some((prefix, content)) = result {
-                    return Some((prefix, content));
-                }
-            }
+            Ok(Some(prefix)) => return Some(prefix_len_to_u16(prefix)),
+            Ok(None) => {}
             Err(error) => {
                 (framework.options.on_error)(crate::FrameworkError::DynamicPrefix {
                     error,
@@ -92,7 +99,7 @@ async fn strip_prefix<'a, U, E>(
                 .strip_prefix('>')
         })() {
             let mention_prefix = &msg.content[..(msg.content.len() - stripped_content.len())];
-            return Some((mention_prefix, stripped_content));
+            return Some(prefix_len_to_u16(mention_prefix));
         }
     }
 
@@ -140,7 +147,7 @@ pub fn find_command<'a, U, E>(
     remaining_message: &'a str,
     case_insensitive: bool,
     parent_commands: &mut Vec<&'a crate::Command<U, E>>,
-) -> Option<(&'a crate::Command<U, E>, &'a str, &'a str)> {
+) -> Option<(&'a str, &'a str)> {
     let string_equal = if case_insensitive {
         |a: &str, b: &str| a.eq_ignore_ascii_case(b)
     } else {
@@ -170,10 +177,7 @@ pub fn find_command<'a, U, E>(
                 case_insensitive,
                 parent_commands,
             )
-            .unwrap_or_else(|| {
-                parent_commands.pop();
-                (command, command_name, remaining_message)
-            }),
+            .unwrap_or((command_name, remaining_message)),
         );
     }
 
@@ -242,13 +246,13 @@ pub async fn parse_invocation<'a, U: Send + Sync, E>(
     }
 
     // Strip prefix, trim whitespace between prefix and rest, split rest into command name and args
-    let (prefix, msg_content) = match strip_prefix(framework, msg).await {
-        Some(x) => x,
-        None => return Ok(None),
+    let Some(content_start) = strip_prefix(framework, msg).await else {
+        return Ok(None);
     };
-    let msg_content = msg_content.trim_start();
 
-    let (command, invoked_command_name, args) = find_command(
+    let msg_content = msg.content[content_start.into()..].trim_start();
+
+    let (invoked_command_name, args) = find_command(
         &framework.options.commands,
         msg_content,
         framework.options.prefix_options.case_insensitive_commands,
@@ -256,30 +260,28 @@ pub async fn parse_invocation<'a, U: Send + Sync, E>(
     )
     .ok_or(crate::FrameworkError::UnknownCommand {
         msg,
-        prefix,
-        msg_content,
+        content_start,
         framework,
         invocation_data,
         trigger,
     })?;
 
-    let action = match command.prefix_action {
-        Some(x) => x,
-        // This command doesn't have a prefix implementation
-        None => return Ok(None),
-    };
+    if parent_commands
+        .last()
+        .is_none_or(|c| c.prefix_action.is_none())
+    {
+        return Ok(None);
+    }
 
     Ok(Some(crate::PrefixContext {
         msg,
-        prefix,
+        content_start,
         invoked_command_name,
         args,
         framework,
         parent_commands,
-        command,
         invocation_data,
         trigger,
-        action,
         __non_exhaustive: (),
     }))
 }
@@ -289,8 +291,16 @@ pub async fn parse_invocation<'a, U: Send + Sync, E>(
 pub async fn run_invocation<U, E>(
     ctx: crate::PrefixContext<'_, U, E>,
 ) -> Result<(), crate::FrameworkError<'_, U, E>> {
+    let command = ctx.command();
+
+    // This was already checked in parse_invocation, so this could be an unwrap,
+    // but this is public so we simply early return if there is no prefix action.
+    let Some(prefix_action) = command.prefix_action else {
+        return Ok(());
+    };
+
     // Check if we should disregard this invocation if it was triggered by an edit
-    if ctx.trigger == crate::MessageDispatchTrigger::MessageEdit && !ctx.command.invoke_on_edit {
+    if ctx.trigger == crate::MessageDispatchTrigger::MessageEdit && !command.invoke_on_edit {
         return Ok(());
     }
     if ctx.trigger == crate::MessageDispatchTrigger::MessageEditFromInvalid
@@ -299,7 +309,7 @@ pub async fn run_invocation<U, E>(
         return Ok(());
     }
 
-    if ctx.command.subcommand_required {
+    if command.subcommand_required {
         // None of this command's subcommands were invoked, or else we'd have the subcommand in
         // ctx.command and not the parent command
         return Err(crate::FrameworkError::SubcommandRequired {
@@ -310,7 +320,7 @@ pub async fn run_invocation<U, E>(
     super::common::check_permissions_and_cooldown(ctx.into()).await?;
 
     // Typing is broadcasted as long as this object is alive
-    let _typing_broadcaster = if ctx.command.broadcast_typing {
+    let _typing_broadcaster = if command.broadcast_typing {
         Some(
             ctx.msg
                 .channel_id
@@ -330,11 +340,11 @@ pub async fn run_invocation<U, E>(
         edit_tracker
             .write()
             .unwrap()
-            .track_command(ctx.msg, ctx.command.track_deletion);
+            .track_command(ctx.msg, command.track_deletion);
     }
 
     // Execute command
-    (ctx.action)(ctx).await?;
+    (prefix_action)(ctx).await?;
 
     (ctx.framework.options.post_command)(crate::Context::Prefix(ctx)).await;
 
