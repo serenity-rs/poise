@@ -6,7 +6,7 @@ use std::marker::PhantomData;
 
 #[allow(unused_imports)] // import is required if serenity simdjson feature is enabled
 use crate::serenity::json::*;
-use crate::serenity_prelude as serenity;
+use crate::{serenity_prelude as serenity, CowVec};
 
 /// Implement this trait on types that you want to use as a slash command parameter.
 #[async_trait::async_trait]
@@ -32,8 +32,8 @@ pub trait SlashArgument: Sized {
     /// If this is a choice parameter, returns the choices
     ///
     /// Don't call this method directly! Use [`crate::slash_argument_choices!`]
-    fn choices() -> Vec<crate::CommandParameterChoice> {
-        Vec::new()
+    fn choices() -> CowVec<crate::CommandParameterChoice> {
+        CowVec::default()
     }
 }
 
@@ -53,8 +53,8 @@ pub trait SlashArgumentHack<T>: Sized {
 
     fn create(self, builder: serenity::CreateCommandOption) -> serenity::CreateCommandOption;
 
-    fn choices(self) -> Vec<crate::CommandParameterChoice> {
-        Vec::new()
+    fn choices(self) -> CowVec<crate::CommandParameterChoice> {
+        CowVec::default()
     }
 }
 
@@ -177,7 +177,7 @@ impl<T: SlashArgument + Sync> SlashArgumentHack<T> for &PhantomData<T> {
         <T as SlashArgument>::create(builder)
     }
 
-    fn choices(self) -> Vec<crate::CommandParameterChoice> {
+    fn choices(self) -> CowVec<crate::CommandParameterChoice> {
         <T as SlashArgument>::choices()
     }
 }

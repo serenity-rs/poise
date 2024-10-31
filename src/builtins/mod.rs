@@ -235,7 +235,7 @@ pub async fn autocomplete_command<'a, U, E>(
         .take(25);
 
     let choices = filtered_commands
-        .map(|cmd| serenity::AutocompleteChoice::from(&cmd.name))
+        .map(|cmd| serenity::AutocompleteChoice::from(cmd.name.as_ref()))
         .collect();
 
     serenity::CreateAutocompleteResponse::new().set_choices(choices)

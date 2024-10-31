@@ -2,6 +2,8 @@
 
 use crate::{serenity_prelude as serenity, BoxFuture};
 
+use super::{CowStr, CowVec};
+
 /// Type returned from `#[poise::command]` annotated functions, which contains all of the generated
 /// prefix and application commands
 #[derive(derivative::Derivative)]
@@ -33,31 +35,31 @@ pub struct Command<U, E> {
     /// Require a subcommand to be invoked
     pub subcommand_required: bool,
     /// Main name of the command. Aliases (prefix-only) can be set in [`Self::aliases`].
-    pub name: String,
+    pub name: CowStr,
     /// Localized names with locale string as the key (slash-only)
-    pub name_localizations: std::collections::HashMap<String, String>,
+    pub name_localizations: CowVec<(CowStr, CowStr)>,
     /// Full name including parent command names.
     ///
     /// Initially set to just [`Self::name`] and properly populated when the framework is started.
-    pub qualified_name: String,
+    pub qualified_name: CowStr,
     /// A string to identify this particular command within a list of commands.
     ///
     /// Can be configured via the [`crate::command`] macro (though it's probably not needed for most
     /// bots). If not explicitly configured, it falls back to the command function name.
-    pub identifying_name: String,
+    pub identifying_name: CowStr,
     /// The name of the `#[poise::command]`-annotated function
-    pub source_code_name: String,
+    pub source_code_name: CowStr,
     /// Identifier for the category that this command will be displayed in for help commands.
-    pub category: Option<String>,
+    pub category: Option<CowStr>,
     /// Whether to hide this command in help menus.
     pub hide_in_help: bool,
     /// Short description of the command. Displayed inline in help menus and similar.
-    pub description: Option<String>,
+    pub description: Option<CowStr>,
     /// Localized descriptions with locale string as the key (slash-only)
-    pub description_localizations: std::collections::HashMap<String, String>,
+    pub description_localizations: CowVec<(CowStr, CowStr)>,
     /// Multiline description with detailed usage instructions. Displayed in the command specific
     /// help: `~help command_name`
-    pub help_text: Option<String>,
+    pub help_text: Option<CowStr>,
     /// if `true`, disables automatic cooldown handling before this commands invocation.
     ///
     /// Will override [`crate::FrameworkOptions::manual_cooldowns`] allowing manual cooldowns
@@ -114,7 +116,7 @@ pub struct Command<U, E> {
 
     // ============= Prefix-specific data
     /// Alternative triggers for the command (prefix-only)
-    pub aliases: Vec<String>,
+    pub aliases: CowVec<CowStr>,
     /// Whether to rerun the command if an existing invocation message is edited (prefix-only)
     pub invoke_on_edit: bool,
     /// Whether to delete the bot response if an existing invocation message is deleted (prefix-only)
@@ -124,7 +126,7 @@ pub struct Command<U, E> {
 
     // ============= Application-specific data
     /// Context menu specific name for this command, displayed in Discord's context menu
-    pub context_menu_name: Option<String>,
+    pub context_menu_name: Option<CowStr>,
     /// Whether responses to this command should be ephemeral by default (application-only)
     pub ephemeral: bool,
     /// List of installation contexts for this command (application-only)
@@ -159,11 +161,11 @@ impl<U, E> Command<U, E> {
         let description = self.description.as_deref().unwrap_or("A slash command");
         let mut builder = serenity::CreateCommandOption::new(kind, self.name.clone(), description);
 
-        for (locale, name) in &self.name_localizations {
-            builder = builder.name_localized(locale, name);
+        for (locale, name) in self.name_localizations.iter() {
+            builder = builder.name_localized(locale.as_ref(), name.as_ref());
         }
-        for (locale, description) in &self.description_localizations {
-            builder = builder.description_localized(locale, description);
+        for (locale, description) in self.description_localizations.iter() {
+            builder = builder.description_localized(locale.as_ref(), description.as_ref());
         }
 
         if self.subcommands.is_empty() {
@@ -191,11 +193,11 @@ impl<U, E> Command<U, E> {
         let mut builder = serenity::CreateCommand::new(self.name.clone())
             .description(self.description.as_deref().unwrap_or("A slash command"));
 
-        for (locale, name) in &self.name_localizations {
-            builder = builder.name_localized(locale, name);
+        for (locale, name) in self.name_localizations.iter() {
+            builder = builder.name_localized(locale.as_ref(), name.as_ref());
         }
-        for (locale, description) in &self.description_localizations {
-            builder = builder.description_localized(locale, description);
+        for (locale, description) in self.description_localizations.iter() {
+            builder = builder.description_localized(locale.as_ref(), description.as_ref());
         }
 
         // This is_empty check is needed because Discord special cases empty

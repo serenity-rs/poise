@@ -2,6 +2,8 @@
 
 use crate::{serenity_prelude as serenity, BoxFuture};
 
+use super::{CowStr, CowVec};
+
 /// Specifies if the current invokation is from a Command or Autocomplete.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum CommandInteractionType {
@@ -111,9 +113,9 @@ impl<U, E> Clone for ContextMenuCommandAction<U, E> {
 #[derive(Debug, Clone)]
 pub struct CommandParameterChoice {
     /// Label of this choice
-    pub name: String,
+    pub name: CowStr,
     /// Localized labels with locale string as the key (slash-only)
-    pub localizations: std::collections::HashMap<String, String>,
+    pub localizations: CowVec<(CowStr, CowStr)>,
     #[doc(hidden)]
     pub __non_exhaustive: (),
 }
@@ -123,21 +125,21 @@ pub struct CommandParameterChoice {
 #[derivative(Debug(bound = ""))]
 pub struct CommandParameter<U, E> {
     /// Name of this command parameter
-    pub name: String,
+    pub name: CowStr,
     /// Localized names with locale string as the key (slash-only)
-    pub name_localizations: std::collections::HashMap<String, String>,
+    pub name_localizations: CowVec<(CowStr, CowStr)>,
     /// Description of the command. Required for slash commands
-    pub description: Option<String>,
+    pub description: Option<CowStr>,
     /// Localized descriptions with locale string as the key (slash-only)
-    pub description_localizations: std::collections::HashMap<String, String>,
+    pub description_localizations: CowVec<(CowStr, CowStr)>,
     /// `true` is this parameter is required, `false` if it's optional or variadic
     pub required: bool,
     /// If this parameter is a channel, users can only enter these channel types in a slash command
     ///
     /// Prefix commands are currently unaffected by this
-    pub channel_types: Option<Vec<serenity::ChannelType>>,
+    pub channel_types: Option<CowVec<serenity::ChannelType>>,
     /// If this parameter is a choice parameter, this is the fixed list of options
-    pub choices: Vec<CommandParameterChoice>,
+    pub choices: CowVec<CommandParameterChoice>,
     /// Closure that sets this parameter's type and min/max value in the given builder
     ///
     /// For example a u32 [`CommandParameter`] would store this as the [`Self::type_setter`]:
@@ -182,18 +184,24 @@ impl<U, E> CommandParameter<U, E> {
             .required(self.required)
             .set_autocomplete(self.autocomplete_callback.is_some());
 
-        for (locale, name) in &self.name_localizations {
-            builder = builder.name_localized(locale, name);
+        for (locale, name) in self.name_localizations.iter() {
+            builder = builder.name_localized(locale.as_ref(), name.as_ref());
         }
-        for (locale, description) in &self.description_localizations {
-            builder = builder.description_localized(locale, description);
+        for (locale, description) in self.description_localizations.iter() {
+            builder = builder.description_localized(locale.as_ref(), description.as_ref());
         }
-        if let Some(channel_types) = self.channel_types.clone() {
-            builder = builder.channel_types(channel_types);
+        if let Some(channel_types) = self.channel_types.as_deref() {
+            builder = builder.channel_types(channel_types.to_owned());
         }
         for (i, choice) in self.choices.iter().enumerate() {
-            builder =
-                builder.add_int_choice_localized(&choice.name, i as _, choice.localizations.iter());
+            builder = builder.add_int_choice_localized(
+                choice.name.as_ref(),
+                i as _,
+                choice
+                    .localizations
+                    .iter()
+                    .map(|(name, description)| (name.as_ref(), description.as_ref())),
+            );
         }
 
         Some((self.type_setter?)(builder))
