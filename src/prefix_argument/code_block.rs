@@ -119,8 +119,7 @@ impl<'a> PopArgument<'a> for CodeBlock {
         attachment_index: usize,
         _: &serenity::Context,
         _: &serenity::Message,
-    ) -> Result<(&'a str, usize, Self), (Box<dyn std::error::Error + Send + Sync>, Option<String>)>
-    {
+    ) -> PopArgumentResult<'a, Self> {
         let (a, b) = pop_from(args).map_err(|e| (e.into(), None))?;
 
         Ok((a, attachment_index, b))

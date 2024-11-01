@@ -78,8 +78,7 @@ impl<'a> PopArgument<'a> for KeyValueArgs {
         attachment_index: usize,
         _: &serenity::Context,
         _: &serenity::Message,
-    ) -> Result<(&'a str, usize, Self), (Box<dyn std::error::Error + Send + Sync>, Option<String>)>
-    {
+    ) -> PopArgumentResult<'a, Self> {
         let (a, b) = Self::pop_from(args);
 
         Ok((a, attachment_index, b))
