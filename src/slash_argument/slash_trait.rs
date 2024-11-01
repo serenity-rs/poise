@@ -1,4 +1,4 @@
-//! Traits for slash command parameters and a macro to wrap the auto-deref specialization hack
+//! Traits for slash command parameters.
 
 use super::SlashArgError;
 use std::{borrow::Cow, convert::TryInto as _};

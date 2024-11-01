@@ -1,6 +1,6 @@
-//! Trait implemented for all types usable as prefix command parameters. This file also includes
-//! the auto-deref specialization emulation code to e.g. support more strings for bool parameters
-//! instead of the `FromStr` ones
+//! Trait implemented for all types usable as prefix command parameters.
+//!
+//! Many of these implementations defer to [`serenity::ArgumentConvert`].
 
 use super::{pop_string, InvalidBool, MissingAttachment, TooFewArguments};
 use crate::serenity_prelude as serenity;
