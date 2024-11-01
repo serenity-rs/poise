@@ -80,7 +80,7 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
                     quote::quote! { Some(|o| o.kind(::poise::serenity_prelude::CommandOptionType::Integer)) }
                 } else {
                     quote::quote! { Some(|o| {
-                        poise::create_slash_argument!(#type_, o)
+                        <#type_ as poise::SlashArgument>::create(o)
                         #min_value_setter #max_value_setter
                         #min_length_setter #max_length_setter
                     }) }
@@ -101,7 +101,7 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
                     __non_exhaustive: (),
                 } ),*]) }
             } else {
-                quote::quote! { poise::slash_argument_choices!(#type_) }
+                quote::quote! { <#type_ as ::poise::SlashArgument>::choices() }
             }
         } else {
             quote::quote! { Cow::Borrowed(&[]) }
