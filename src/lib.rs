@@ -173,7 +173,7 @@ For another example of subcommands, see `examples/feature_showcase/subcommands.r
 Also see the [`command`] macro docs
 
 ```rust
-use poise::serenity_prelude as serenity;
+use poise::{StrArg, serenity_prelude as serenity};
 type Data = ();
 type Error = Box<dyn std::error::Error + Send + Sync>;
 type Context<'a> = poise::Context<'a, Data, Error>;
@@ -190,9 +190,9 @@ type Context<'a> = poise::Context<'a, Data, Error>;
 )]
 async fn my_huge_ass_command(
     ctx: Context<'_>,
-    #[description = "Consectetur"] ip_addr: std::net::IpAddr, // implements FromStr
-    #[description = "Amet"] user: serenity::Member, // implements ArgumentConvert
-    #[description = "Sit"] code_block: poise::CodeBlock, // implements PopArgument
+    #[description = "Amet"] user: serenity::Member,
+    #[description = "Consectetur"] #[rename = "ip_addr"] StrArg(ip_addr): StrArg<std::net::IpAddr>,
+    #[description = "Sit"] code_block: poise::CodeBlock,
     #[description = "Dolor"] #[flag] my_flag: bool,
     #[description = "Ipsum"] #[lazy] always_none: Option<String>,
     #[description = "Lorem"] #[rest] rest: String,
@@ -381,6 +381,7 @@ underlying this framework, so that's what I chose.
 Also, poise is a stat in Dark Souls
 */
 
+mod argument;
 pub mod builtins;
 pub mod choice_parameter;
 pub mod cooldown;
@@ -400,7 +401,7 @@ pub mod macros {
 
 #[doc(no_inline)]
 pub use {
-    choice_parameter::*, cooldown::*, dispatch::*, framework::*, macros::*, modal::*,
+    argument::*, choice_parameter::*, cooldown::*, dispatch::*, framework::*, macros::*, modal::*,
     prefix_argument::*, reply::*, slash_argument::*, structs::*, track_edits::*,
 };
 
