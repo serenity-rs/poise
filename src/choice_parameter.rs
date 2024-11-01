@@ -1,7 +1,7 @@
 //! Contains the [`ChoiceParameter`] trait and the blanket [`crate::SlashArgument`] and
 //! [`crate::PopArgument`] impl
 
-use crate::serenity_prelude as serenity;
+use crate::{serenity_prelude as serenity, PopArgumentResult};
 
 /// This trait is implemented by [`crate::macros::ChoiceParameter`]. See its docs for more
 /// information
@@ -46,13 +46,11 @@ impl<T: ChoiceParameter> crate::SlashArgument for T {
         })
     }
 
-    fn create(builder: serenity::CreateCommandOption) -> serenity::CreateCommandOption {
-        builder.kind(serenity::CommandOptionType::Integer)
-    }
-
     fn choices() -> Vec<crate::CommandParameterChoice> {
         Self::list()
     }
+
+    const ARGUMENT_TYPE: serenity::CommandOptionType = serenity::CommandOptionType::Integer;
 }
 
 #[async_trait::async_trait]
@@ -62,10 +60,9 @@ impl<'a, T: ChoiceParameter> crate::PopArgument<'a> for T {
         attachment_index: usize,
         ctx: &serenity::Context,
         msg: &serenity::Message,
-    ) -> Result<(&'a str, usize, Self), (Box<dyn std::error::Error + Send + Sync>, Option<String>)>
-    {
+    ) -> PopArgumentResult<'a, Self> {
         let (args, attachment_index, s) =
-            crate::pop_prefix_argument!(String, args, attachment_index, ctx, msg).await?;
+            <String as crate::PopArgument<'a>>::pop_from(args, attachment_index, ctx, msg).await?;
 
         Ok((
             args,

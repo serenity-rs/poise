@@ -1,8 +1,7 @@
-//! Traits for slash command parameters and a macro to wrap the auto-deref specialization hack
+//! Traits for slash command parameters.
 
 use super::SlashArgError;
 use std::convert::TryInto as _;
-use std::marker::PhantomData;
 
 #[allow(unused_imports)] // import is required if serenity simdjson feature is enabled
 use crate::serenity::json::*;
@@ -11,123 +10,73 @@ use crate::serenity_prelude as serenity;
 /// Implement this trait on types that you want to use as a slash command parameter.
 #[async_trait::async_trait]
 pub trait SlashArgument: Sized {
-    /// Extract a Rust value of type T from the slash command argument, given via a
-    /// [`serenity::json::Value`].
-    ///
-    /// Don't call this method directly! Use [`crate::extract_slash_argument!`]
+    /// Extract a Rust value of type T from the slash command argument, given via a [`serenity::ResolvedValue`].
     async fn extract(
         ctx: &serenity::Context,
         interaction: &serenity::CommandInteraction,
         value: &serenity::ResolvedValue<'_>,
     ) -> Result<Self, SlashArgError>;
 
-    /// Create a slash command parameter equivalent to type T.
-    ///
-    /// Only fields about the argument type are filled in. The caller is still responsible for
-    /// filling in `name()`, `description()`, and possibly `required()` or other fields.
-    ///
-    /// Don't call this method directly! Use [`crate::create_slash_argument!`]
-    fn create(builder: serenity::CreateCommandOption) -> serenity::CreateCommandOption;
-
     /// If this is a choice parameter, returns the choices
-    ///
-    /// Don't call this method directly! Use [`crate::slash_argument_choices!`]
     fn choices() -> Vec<crate::CommandParameterChoice> {
         Vec::new()
     }
+
+    /// The type of the Argument
+    const ARGUMENT_TYPE: serenity::CommandOptionType;
 }
 
-/// Implemented for all types that can be used as a function parameter in a slash command.
-///
-/// Currently marked `#[doc(hidden)]` because implementing this trait requires some jank due to a
-/// `PhantomData` hack and the auto-deref specialization hack.
-#[doc(hidden)]
-#[async_trait::async_trait]
-pub trait SlashArgumentHack<T>: Sized {
-    async fn extract(
-        self,
-        ctx: &serenity::Context,
-        interaction: &serenity::CommandInteraction,
-        value: &serenity::ResolvedValue<'_>,
-    ) -> Result<T, SlashArgError>;
-
-    fn create(self, builder: serenity::CreateCommandOption) -> serenity::CreateCommandOption;
-
-    fn choices(self) -> Vec<crate::CommandParameterChoice> {
-        Vec::new()
-    }
-}
-
-/// Full version of [`crate::SlashArgument::extract`].
-///
-/// Uses specialization to get full coverage of types. Pass the type as the first argument
-#[macro_export]
-macro_rules! extract_slash_argument {
-    ($target:ty, $ctx:expr, $interaction:expr, $value:expr) => {{
-        use $crate::SlashArgumentHack as _;
-        (&&std::marker::PhantomData::<$target>).extract($ctx, $interaction, $value)
-    }};
-}
-/// Full version of [`crate::SlashArgument::create`].
-///
-/// Uses specialization to get full coverage of types. Pass the type as the first argument
-#[macro_export]
-macro_rules! create_slash_argument {
-    ($target:ty, $builder:expr) => {{
-        use $crate::SlashArgumentHack as _;
-        (&&std::marker::PhantomData::<$target>).create($builder)
-    }};
-}
-/// Full version of [`crate::SlashArgument::choices`].
-///
-/// Uses specialization to get full coverage of types. Pass the type as the first argument
-#[macro_export]
-macro_rules! slash_argument_choices {
-    ($target:ty) => {{
-        use $crate::SlashArgumentHack as _;
-        (&&std::marker::PhantomData::<$target>).choices()
-    }};
-}
-
-/// Handles arbitrary types that can be parsed from string.
-#[async_trait::async_trait]
-impl<T> SlashArgumentHack<T> for PhantomData<T>
+/// Converts a Command value via serenity's ArgumentConvert trait
+async fn extract_via_argumentconvert<T>(
+    ctx: &serenity::Context,
+    interaction: &serenity::CommandInteraction,
+    value: &serenity::ResolvedValue<'_>,
+) -> Result<T, SlashArgError>
 where
     T: serenity::ArgumentConvert + Send + Sync,
     T::Err: std::error::Error + Send + Sync + 'static,
 {
-    async fn extract(
-        self,
-        ctx: &serenity::Context,
-        interaction: &serenity::CommandInteraction,
-        value: &serenity::ResolvedValue<'_>,
-    ) -> Result<T, SlashArgError> {
-        let string = match value {
-            serenity::ResolvedValue::String(str) => *str,
-            _ => {
-                return Err(SlashArgError::CommandStructureMismatch {
-                    description: "expected string",
-                })
-            }
-        };
+    let string = match value {
+        serenity::ResolvedValue::String(str) => *str,
+        _ => {
+            return Err(SlashArgError::CommandStructureMismatch {
+                description: "expected string",
+            })
+        }
+    };
 
-        T::convert(
-            ctx,
-            interaction.guild_id,
-            Some(interaction.channel_id),
-            string,
-        )
-        .await
-        .map_err(|e| SlashArgError::Parse {
-            error: e.into(),
-            input: string.into(),
-        })
-    }
-
-    fn create(self, builder: serenity::CreateCommandOption) -> serenity::CreateCommandOption {
-        builder.kind(serenity::CommandOptionType::String)
-    }
+    T::convert(
+        ctx,
+        interaction.guild_id,
+        Some(interaction.channel_id),
+        string,
+    )
+    .await
+    .map_err(|e| SlashArgError::Parse {
+        error: e.into(),
+        input: string.into(),
+    })
 }
+
+/// Implements `SlashArgument` via `serenity::ArgumentConvert`
+macro_rules! impl_for_argumentconvert {
+    ($type:ty) => {
+        #[async_trait::async_trait]
+        impl SlashArgument for $type {
+            async fn extract(
+                ctx: &serenity::Context,
+                interaction: &serenity::CommandInteraction,
+                value: &serenity::ResolvedValue<'_>,
+            ) -> Result<Self, SlashArgError> {
+                extract_via_argumentconvert::<$type>(ctx, interaction, value).await
+            }
+
+            const ARGUMENT_TYPE: serenity::CommandOptionType = serenity::CommandOptionType::String;
+        }
+    };
+}
+
+impl_for_argumentconvert!(serenity::Message);
 
 /// Implements slash argument trait for integer types
 macro_rules! impl_for_integer {
@@ -151,38 +100,14 @@ macro_rules! impl_for_integer {
                 }
             }
 
-            fn create(builder: serenity::CreateCommandOption) -> serenity::CreateCommandOption {
-                builder
-                    .min_number_value(f64::max(<$t>::MIN as f64, -9007199254740991.))
-                    .max_number_value(f64::min(<$t>::MAX as f64, 9007199254740991.))
-                    .kind(serenity::CommandOptionType::Integer)
-            }
+            const ARGUMENT_TYPE: serenity::CommandOptionType = serenity::CommandOptionType::Integer;
         }
     )* };
 }
+
 impl_for_integer!(i8 i16 i32 i64 isize u8 u16 u32 u64 usize);
 
-#[async_trait::async_trait]
-impl<T: SlashArgument + Sync> SlashArgumentHack<T> for &PhantomData<T> {
-    async fn extract(
-        self,
-        ctx: &serenity::Context,
-        interaction: &serenity::CommandInteraction,
-        value: &serenity::ResolvedValue<'_>,
-    ) -> Result<T, SlashArgError> {
-        <T as SlashArgument>::extract(ctx, interaction, value).await
-    }
-
-    fn create(self, builder: serenity::CreateCommandOption) -> serenity::CreateCommandOption {
-        <T as SlashArgument>::create(builder)
-    }
-
-    fn choices(self) -> Vec<crate::CommandParameterChoice> {
-        <T as SlashArgument>::choices()
-    }
-}
-
-/// Versatile macro to implement `SlashArgumentHack` for simple types
+/// Versatile macro to implement `SlashArgument` for simple types
 macro_rules! impl_slash_argument {
     ($type:ty, |$ctx:pat, $interaction:pat, $slash_param_type:ident ( $($arg:pat),* )| $extractor:expr) => {
         #[async_trait::async_trait]
@@ -200,9 +125,7 @@ macro_rules! impl_slash_argument {
                 }
             }
 
-            fn create(builder: serenity::CreateCommandOption) -> serenity::CreateCommandOption {
-                builder.kind(serenity::CommandOptionType::$slash_param_type)
-            }
+            const ARGUMENT_TYPE: serenity::CommandOptionType = serenity::CommandOptionType::$slash_param_type;
         }
     };
 }
@@ -210,6 +133,7 @@ macro_rules! impl_slash_argument {
 impl_slash_argument!(f32, |_, _, Number(x)| x as f32);
 impl_slash_argument!(f64, |_, _, Number(x)| x);
 impl_slash_argument!(bool, |_, _, Boolean(x)| x);
+impl_slash_argument!(String, |_, _, String(x)| x.into());
 impl_slash_argument!(serenity::Attachment, |_, _, Attachment(att)| att.clone());
 impl_slash_argument!(serenity::Member, |ctx, interaction, User(user, _)| {
     interaction

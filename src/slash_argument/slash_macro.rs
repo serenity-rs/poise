@@ -130,8 +130,7 @@ macro_rules! _parse_slash {
     // Extract Option<T>
     ($ctx:ident, $interaction:ident, $args:ident => $name:literal: Option<$type:ty $(,)*>) => {
         if let Some(arg) = $args.iter().find(|arg| arg.name == $name) {
-            Some($crate::extract_slash_argument!($type, $ctx, $interaction, &arg.value)
-                .await?)
+            Some(<$type as $crate::SlashArgument>::extract($ctx, $interaction, &arg.value).await?)
         } else {
             None
         }
@@ -187,8 +186,6 @@ macro_rules! parse_slash_args {
         ( $name:literal: $($type:tt)* )
     ),* $(,)? ) => {
         async /* not move! */ {
-            use $crate::SlashArgumentHack;
-
             // ctx here is a serenity::Context, so it doesn't already contain interaction!
             let (ctx, interaction, args) = ($ctx, $interaction, $args);
 

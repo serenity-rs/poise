@@ -17,7 +17,7 @@ macro_rules! _parse_prefix {
         $( $rest:tt )*
     ) => {
         // Try parse the next argument
-        match $crate::pop_prefix_argument!($type, &$args, $attachment_index, $ctx, $msg).await {
+        match <$type as $crate::PopArgument>::pop_from(&$args, $attachment_index, $ctx, $msg).await {
             // On success, we get a new `$args` which contains only the rest of the args
             Ok(($args, $attachment_index, token)) => {
                 // On success, store `Some(token)` for the parsed argument
@@ -41,7 +41,7 @@ macro_rules! _parse_prefix {
     ) => {
         let token: Option<$type> = None;
         $crate::_parse_prefix!($ctx $msg $args $attachment_index => [ $error $($preamble)* token ] $($rest)* );
-        match $crate::pop_prefix_argument!($type, &$args, $attachment_index, $ctx, $msg).await {
+        match <$type as $crate::PopArgument>::pop_from(&$args, $attachment_index, $ctx, $msg).await {
             Ok(($args, $attachment_index, token)) => {
                 let token: Option<$type> = Some(token);
                 $crate::_parse_prefix!($ctx $msg $args $attachment_index => [ $error $($preamble)* token ] $($rest)* );
@@ -85,7 +85,7 @@ macro_rules! _parse_prefix {
         let mut attachment = $attachment_index;
 
         loop {
-            match $crate::pop_prefix_argument!($type, &running_args, attachment, $ctx, $msg).await {
+            match <$type as $crate::PopArgument>::pop_from(&running_args, attachment, $ctx, $msg).await {
                 Ok((popped_args, new_attachment, token)) => {
                     tokens.push(token);
                     token_rest_args.push(popped_args.clone());
@@ -138,7 +138,7 @@ macro_rules! _parse_prefix {
         (#[flag] $name:literal)
         $( $rest:tt )*
     ) => {
-        match $crate::pop_prefix_argument!(String, &$args, $attachment_index, $ctx, $msg).await {
+        match <String as $crate::PopArgument>::pop_from(&$args, $attachment_index, $ctx, $msg).await {
             Ok(($args, $attachment_index, token)) if token.eq_ignore_ascii_case($name) => {
                 $crate::_parse_prefix!($ctx $msg $args $attachment_index => [ $error $($preamble)* true ] $($rest)* );
             },
@@ -156,7 +156,7 @@ macro_rules! _parse_prefix {
         ($type:ty)
         $( $rest:tt )*
     ) => {
-        match $crate::pop_prefix_argument!($type, &$args, $attachment_index, $ctx, $msg).await {
+        match <$type as $crate::PopArgument>::pop_from(&$args, $attachment_index, $ctx, $msg).await {
             Ok(($args, $attachment_index, token)) => {
                 $crate::_parse_prefix!($ctx $msg $args $attachment_index => [ $error $($preamble)* token ] $($rest)* );
             },
