@@ -1,9 +1,25 @@
 use super::Invocation;
 use crate::util::{
     extract_type_parameter, iter_tuple_2_to_hash_map, tuple_2_iter_deref, wrap_option_to_string,
+    List,
 };
 use quote::format_ident;
 use syn::spanned::Spanned as _;
+
+fn lit_to_string(lit: &syn::Lit) -> Result<String, syn::Error> {
+    match lit {
+        syn::Lit::Str(lit_str) => Ok(lit_str.value()),
+        syn::Lit::Char(lit_char) => Ok(lit_char.value().to_string()),
+        syn::Lit::Int(lit_int) => Ok(lit_int.base10_digits().to_owned()),
+        syn::Lit::Float(lit_float) => Ok(lit_float.token().to_string()),
+        syn::Lit::Bool(lit_bool) => Ok(lit_bool.value.to_string()),
+
+        _ => Err(syn::Error::new(
+            lit.span(),
+            "Inline choice must be convertable to a string at compile time",
+        )),
+    }
+}
 
 pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStream>, syn::Error> {
     let mut parameter_structs = Vec::new();
@@ -77,10 +93,14 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
         // TODO: move this to poise::CommandParameter::choices (is there a reason not to?)
         let choices = match inv.args.slash_command {
             true => {
-                if let Some(choices) = &param.args.choices {
-                    let choices = &choices.0;
+                if let Some(List(choices)) = &param.args.choices {
+                    let choices = choices
+                        .iter()
+                        .map(lit_to_string)
+                        .collect::<Result<Vec<_>, _>>()?;
+
                     quote::quote! { vec![#( ::poise::CommandParameterChoice {
-                        name: ToString::to_string(&#choices),
+                        name: String::from(#choices),
                         localizations: Default::default(),
                         __non_exhaustive: (),
                     } ),*] }
