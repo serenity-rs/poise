@@ -9,8 +9,7 @@ by poise.
 
 # basic_structure
 
-Showcases the basics of poise: `FrameworkOptions`, creating and accessing the data struct, a help
-command, defining commands and sending responses.
+Showcases the basics of poise: `FrameworkOptions`, creating and accessing the data struct, defining commands and sending responses.
 
 # feature_showcase
 
