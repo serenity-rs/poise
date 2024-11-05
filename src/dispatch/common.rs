@@ -249,16 +249,8 @@ async fn check_permissions_and_cooldown_single<'a, U, E>(
                 missing_permissions: bot_missing_permissions,
             });
         }
-
-        // missing premission checks here.
     } else {
-        // TODO: ask what I should do here because combining the checks loses the verbosity.
-        // the only previous failure point was it failing to get the guild, channel or members.
-        // Previously when a bots permissions could not be fetched it would just allow execution.
-        return Err(crate::FrameworkError::MissingUserPermissions {
-            missing_permissions: None,
-            ctx,
-        });
+        return Err(crate::FrameworkError::PermissionFetchFailed { ctx });
     }
 
     // Only continue if command checks returns true
