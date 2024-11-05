@@ -186,7 +186,7 @@ pub fn generate_slash_action(inv: &Invocation) -> Result<proc_macro2::TokenStrea
             ).await.map_err(|error| error.to_framework_error(ctx))?;
 
             let is_framework_cooldown = !ctx.command.manual_cooldowns
-            .unwrap_or_else(|| ctx.framework.options.manual_cooldowns);
+                .unwrap_or_else(|| ctx.framework.options.manual_cooldowns);
 
             if is_framework_cooldown {
                 ctx.command.cooldowns.lock().unwrap().start_cooldown(ctx.cooldown_context());
@@ -219,7 +219,7 @@ pub fn generate_context_menu_action(
         <#param_type as ::poise::ContextMenuParameter<_, _>>::to_action(|ctx, value| {
             Box::pin(async move {
                 let is_framework_cooldown = !ctx.command.manual_cooldowns
-                .unwrap_or_else(|| ctx.framework.options.manual_cooldowns);
+                    .unwrap_or_else(|| ctx.framework.options.manual_cooldowns);
 
                 if is_framework_cooldown {
                     ctx.command.cooldowns.lock().unwrap().start_cooldown(ctx.cooldown_context());
