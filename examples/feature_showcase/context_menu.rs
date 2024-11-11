@@ -10,7 +10,7 @@ pub async fn user_info(
     let response = format!(
         "**Name**: {}\n**Created**: {}",
         user.name,
-        user.created_at()
+        user.id.created_at()
     );
 
     ctx.say(response).await?;

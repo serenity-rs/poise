@@ -30,7 +30,7 @@ async fn autocomplete_number<'a>(
     _partial: &'a str,
 ) -> serenity::CreateAutocompleteResponse<'a> {
     // Dummy choices
-    let choices = [1_u32, 2, 3, 4, 5].iter().map(|&n| {
+    let choices = [1_u64, 2, 3, 4, 5].iter().map(|&n| {
         serenity::AutocompleteChoice::new(
             format!("{n} (why did discord even give autocomplete choices separate labels)"),
             n,
