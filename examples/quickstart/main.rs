@@ -11,7 +11,7 @@ async fn age(
     #[description = "Selected user"] user: Option<serenity::User>,
 ) -> Result<(), Error> {
     let u = user.as_ref().unwrap_or_else(|| ctx.author());
-    let response = format!("{}'s account was created at {}", u.name, u.created_at());
+    let response = format!("{}'s account was created at {}", u.name, u.id.created_at());
     ctx.say(response).await?;
     Ok(())
 }
