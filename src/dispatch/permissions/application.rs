@@ -24,8 +24,7 @@ pub(super) fn get_author_and_bot_permissions(
     let err = "should always be some as inside interaction";
     let mut author_permissions = author_member.permissions.expect(err);
 
-    let err = "should always be some according to discord docs";
-    let mut bot_permissions = interaction.app_permissions.expect(err);
+    let mut bot_permissions = interaction.app_permissions;
 
     let channel = interaction.channel.as_ref();
     if channel.is_some_and(|c| is_thread(c.kind)) {
