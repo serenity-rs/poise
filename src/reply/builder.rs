@@ -180,7 +180,8 @@ impl CreateReply {
             components,
             ephemeral: _, // can't edit ephemerality in retrospect
             allowed_mentions,
-            poll,
+            // cannot edit polls.
+            poll: _,
             reply: _,
             __non_exhaustive: (),
         } = self;
@@ -197,9 +198,6 @@ impl CreateReply {
         for attachment in attachments {
             builder = builder.new_attachment(attachment);
         }
-        if let Some(poll) = poll {
-            builder = builder.poll(poll);
-        }
 
         builder.embeds(embeds)
     }
@@ -213,7 +211,8 @@ impl CreateReply {
             components,
             ephemeral: _, // not supported in prefix
             allowed_mentions,
-            poll,
+            // cannot edit polls.
+            poll: _,
             reply: _, // can't edit reference message afterwards
             __non_exhaustive: (),
         } = self;
@@ -231,9 +230,6 @@ impl CreateReply {
         }
         if let Some(components) = components {
             builder = builder.components(components);
-        }
-        if let Some(poll) = poll {
-            builder = builder.poll(poll);
         }
 
         builder.embeds(embeds).attachments(attachments_builder)
