@@ -23,21 +23,26 @@ async fn users_permissions<U, E>(
     // No permission checks in DMs.
     let Some(guild_id) = guild_id else {
         return Some(PermissionsInfo {
-            user_permissions: Some(serenity::Permissions::all()),
-            bot_permissions: Some(serenity::Permissions::all()),
+            user_permissions: Some(serenity::Permissions::dm_permissions()),
+            bot_permissions: Some(serenity::Permissions::dm_permissions()),
         });
     };
 
-    if let crate::Context::Application(ctx) = ctx {
-        // This should be present on all interactions within a guild. But discord can be a bit
-        // funny sometimes, so lets be safe.
-        if let Some(member) = &ctx.interaction.member {
+    let ctx = match ctx {
+        crate::Context::Application(ctx) => {
+            let user_permissions = if let Some(member) = &ctx.interaction.member {
+                member.permissions
+            } else {
+                Some(serenity::Permissions::dm_permissions())
+            };
+
             return Some(PermissionsInfo {
-                user_permissions: member.permissions,
+                user_permissions,
                 bot_permissions: ctx.interaction.app_permissions,
             });
         }
-    }
+        crate::Context::Prefix(ctx) => ctx,
+    };
 
     // Use to_channel so that it can fallback on HTTP for threads (which aren't in cache usually)
     let channel = match channel_id.to_channel(ctx.serenity_context()).await {
@@ -51,76 +56,78 @@ async fn users_permissions<U, E>(
         Err(_) => return None,
     };
 
-    // These are done by HTTP only to prevent outdated data with no GUILD_MEMBERS intent.
-    let user_member = if let Some(user_id) = user_id {
-        Some(
-            guild_id
-                .member(ctx.serenity_context(), user_id)
-                .await
-                .ok()?,
-        )
-    } else {
-        None
-    };
-
+    // If present in this function (user requested it) it'll be Some(), else None.
     let bot_member = if let Some(bot_id) = bot_id {
-        Some(guild_id.member(ctx.serenity_context(), bot_id).await.ok()?)
+        Some(guild_id.member(ctx.http(), bot_id).await.ok()?)
     } else {
         None
     };
 
-    get_user_permissions(ctx, &channel, user_member.as_ref(), bot_member.as_ref()).await
+    get_user_permissions(ctx, &channel, user_id.is_some(), bot_member.as_ref()).await
 }
 
 /// Retrieves the set of permissions that are lacking, relative to the given required permission set
 ///
 /// Returns None if permissions couldn't be retrieved
 async fn get_user_permissions<U, E>(
-    ctx: crate::Context<'_, U, E>,
+    ctx: crate::PrefixContext<'_, U, E>,
     channel: &serenity::GuildChannel,
-    user: Option<&serenity::Member>,
+    fetch_user: bool,
     bot: Option<&serenity::Member>,
 ) -> Option<PermissionsInfo> {
     #[cfg(feature = "cache")]
-    if let Some(permissions) = cached_guild(ctx, channel, user, bot) {
-        Some(permissions)
-    } else {
-        fetch_guild(ctx, channel, user, bot).await
+    if let Some(cached_perms) = check_cache_permissions(ctx, channel, fetch_user, bot) {
+        return Some(cached_perms);
     }
 
-    #[cfg(not(feature = "cache"))]
-    fetch_guild(ctx, channel, user, bot).await
+    fetch_guild(ctx, channel, fetch_user, bot).await
 }
 
+/// Retrieves the permissions from the cache, if the cache is available.
 #[cfg(feature = "cache")]
-/// Checks the cache for the guild, returning the permissions if present.
-fn cached_guild<U, E>(
-    ctx: crate::Context<'_, U, E>,
+fn check_cache_permissions<U, E>(
+    ctx: crate::PrefixContext<'_, U, E>,
     channel: &serenity::GuildChannel,
-    user: Option<&serenity::Member>,
+    fetch_user: bool,
     bot: Option<&serenity::Member>,
 ) -> Option<PermissionsInfo> {
-    ctx.guild().map(|guild| {
-        let user_permissions = user.map(|m| guild.user_permissions_in(channel, m));
-        let bot_permissions = bot.map(|m| guild.user_permissions_in(channel, m));
+    let user_permissions = if fetch_user {
+        ctx.msg.author_permissions(ctx)
+    } else {
+        None
+    };
 
-        PermissionsInfo {
+    if let Some(guild) = ctx.guild() {
+        let bot_permissions = bot.map(|bot| guild.user_permissions_in(channel, bot));
+        return Some(PermissionsInfo {
             user_permissions,
             bot_permissions,
-        }
-    })
+        });
+    }
+
+    None
 }
 
 /// Fetches the partial guild from http, returning the permissions if available.
 async fn fetch_guild<U, E>(
-    ctx: crate::Context<'_, U, E>,
+    ctx: crate::PrefixContext<'_, U, E>,
     channel: &serenity::GuildChannel,
-    user: Option<&serenity::Member>,
+    fetch_user: bool,
     bot: Option<&serenity::Member>,
 ) -> Option<PermissionsInfo> {
     let partial_guild = channel.guild_id.to_partial_guild(ctx.http()).await.ok()?;
 
-    let user_permissions = user.map(|m| partial_guild.user_permissions_in(channel, m));
+    let user_permissions = if fetch_user {
+        let partial_member = ctx
+            .msg
+            .member
+            .as_ref()
+            .expect("Member should always be present on a gateway message in a guild.");
+        Some(partial_guild.partial_member_permissions_in(channel, ctx.author().id, partial_member))
+    } else {
+        None
+    };
+
     let bot_permissions = bot.map(|m| partial_guild.user_permissions_in(channel, m));
 
     Some(PermissionsInfo {
