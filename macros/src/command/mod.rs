@@ -2,7 +2,7 @@ mod prefix;
 mod slash;
 
 use crate::util::{
-    iter_tuple_2_to_hash_map, wrap_option, wrap_option_and_map, wrap_option_to_string,
+    iter_tuple_2_to_vec_map, wrap_option, wrap_option_and_map, wrap_option_to_string,
 };
 use proc_macro::TokenStream;
 use syn::spanned::Spanned as _;
@@ -343,9 +343,9 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
         None => quote::quote! { Box::new(()) },
     };
 
-    let name_localizations = iter_tuple_2_to_hash_map(inv.args.name_localized.into_iter());
+    let name_localizations = iter_tuple_2_to_vec_map(inv.args.name_localized.into_iter());
     let description_localizations =
-        iter_tuple_2_to_hash_map(inv.args.description_localized.into_iter());
+        iter_tuple_2_to_vec_map(inv.args.description_localized.into_iter());
 
     let function_ident =
         std::mem::replace(&mut inv.function.sig.ident, syn::parse_quote! { inner });
@@ -359,6 +359,8 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
             <#ctx_type_with_static as poise::_GetGenerics>::U,
             <#ctx_type_with_static as poise::_GetGenerics>::E,
         > {
+            use ::std::borrow::Cow;
+
             #function
 
             ::poise::Command {
@@ -368,11 +370,11 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
 
                 subcommands: vec![ #( #subcommands() ),* ],
                 subcommand_required: #subcommand_required,
-                name: #command_name.to_string(),
+                name: Cow::Borrowed(#command_name),
                 name_localizations: #name_localizations,
-                qualified_name: String::from(#command_name), // properly filled in later by Framework
-                identifying_name: String::from(#identifying_name),
-                source_code_name: String::from(#function_name),
+                qualified_name: Cow::Borrowed(#command_name), // properly filled in later by Framework
+                identifying_name: Cow::Borrowed(#identifying_name),
+                source_code_name: Cow::Borrowed(#function_name),
                 category: #category,
                 description: #description,
                 description_localizations: #description_localizations,
@@ -396,7 +398,7 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
                 parameters: vec![ #( #parameters ),* ],
                 custom_data: #custom_data,
 
-                aliases: vec![ #( #aliases.to_string(), )* ],
+                aliases: Cow::Borrowed(&[ #( Cow::Borrowed(#aliases), )* ]),
                 invoke_on_edit: #invoke_on_edit,
                 track_deletion: #track_deletion,
                 broadcast_typing: #broadcast_typing,
