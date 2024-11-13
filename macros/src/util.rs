@@ -38,8 +38,8 @@ pub fn wrap_option_and_map<T: quote::ToTokens>(
 }
 
 pub fn wrap_option_to_string<T: quote::ToTokens>(literal: Option<T>) -> syn::Expr {
-    let to_string_path = quote::quote!(::std::string::ToString::to_string);
-    wrap_option_and_map(literal, to_string_path)
+    let cowstr_path = quote::quote!(Cow::Borrowed);
+    wrap_option_and_map(literal, cowstr_path)
 }
 
 /// Syn Fold to make all lifetimes 'static. Used to access trait items of a type without having its
@@ -99,13 +99,13 @@ where
         .map(|Tuple2(t, v)| Tuple2(t.deref(), v.deref()))
 }
 
-pub fn iter_tuple_2_to_hash_map<I, T>(v: I) -> proc_macro2::TokenStream
+pub fn iter_tuple_2_to_vec_map<I, T>(v: I) -> proc_macro2::TokenStream
 where
     I: ExactSizeIterator<Item = Tuple2<T>>,
     T: quote::ToTokens,
 {
     if v.len() == 0 {
-        return quote::quote!(std::collections::HashMap::new());
+        return quote::quote!(Cow::Borrowed(&[]));
     }
 
     let (keys, values) = v
@@ -114,8 +114,8 @@ where
         .unzip::<_, _, Vec<_>, Vec<_>>();
 
     quote::quote! {
-        std::collections::HashMap::from([
-            #( (#keys.to_string(), #values.to_string()) ),*
+        Cow::Borrowed(&[
+            #( (Cow::Borrowed(#keys), Cow::Borrowed(#values)) ),*
         ])
     }
 }

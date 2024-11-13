@@ -1,13 +1,13 @@
 //! Contains the [`ChoiceParameter`] trait and the blanket [`crate::SlashArgument`] and
 //! [`crate::PopArgument`] impl
 
-use crate::serenity_prelude as serenity;
+use crate::{serenity_prelude as serenity, CowVec};
 
 /// This trait is implemented by [`crate::macros::ChoiceParameter`]. See its docs for more
 /// information
 pub trait ChoiceParameter: Sized {
     /// Returns all possible choices for this parameter, in the order they will appear in Discord.
-    fn list() -> Vec<crate::CommandParameterChoice>;
+    fn list() -> CowVec<crate::CommandParameterChoice>;
 
     /// Returns an instance of [`Self`] corresponding to the given index into [`Self::list()`]
     fn from_index(index: usize) -> Option<Self>;
@@ -50,7 +50,7 @@ impl<T: ChoiceParameter> crate::SlashArgument for T {
         builder.kind(serenity::CommandOptionType::Integer)
     }
 
-    fn choices() -> Vec<crate::CommandParameterChoice> {
+    fn choices() -> CowVec<crate::CommandParameterChoice> {
         Self::list()
     }
 }
