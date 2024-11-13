@@ -26,7 +26,6 @@ pub struct CommandArgs {
     track_deletion: bool,
     track_edits: bool,
     broadcast_typing: bool,
-    help_text_fn: Option<syn::Path>,
     #[darling(multiple)]
     check: Vec<syn::Path>,
     on_error: Option<syn::Path>,
@@ -318,12 +317,9 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
     let install_context = &inv.install_context;
     let interaction_context = &inv.interaction_context;
 
-    let help_text = match &inv.args.help_text_fn {
-        Some(help_text_fn) => quote::quote! { Some(#help_text_fn()) },
-        None => match &inv.help_text {
-            Some(extracted_explanation) => quote::quote! { Some(#extracted_explanation.into()) },
-            None => quote::quote! { None },
-        },
+    let help_text = match &inv.help_text {
+        Some(extracted_explanation) => quote::quote! { Some(#extracted_explanation.into()) },
+        None => quote::quote! { None },
     };
 
     let checks = &inv.args.check;

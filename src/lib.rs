@@ -185,7 +185,6 @@ type Context<'a> = poise::Context<'a, Data, Error>;
     hide_in_help,
     required_permissions = "SEND_MESSAGES",
     aliases("bigounce", "abomination"),
-    help_text_fn = "my_huge_ass_command_help",
     check = "check",
     on_error = "error_handler",
 )]
@@ -199,12 +198,6 @@ async fn my_huge_ass_command(
     #[description = "Lorem"] #[rest] rest: String,
 ) -> Result<(), Error> {
     Ok(())
-}
-
-fn my_huge_ass_command_help() -> String {
-    String::from("\
-Example usage:
-~my_huge_ass_command 127.0.0.1 @kangalio `i = i + 1` my_flag rest of the message")
 }
 
 async fn check(ctx: Context<'_>) -> Result<bool, Error> {
