@@ -27,7 +27,7 @@ pub async fn choice(
 //
 // Limitations: due to macro limitations (partially self-imposed, partially external), poise
 // currently does not support Options parameters, and only supports parameter types that can be
-// constructed from a literal (https://doc.rust-lang.org/reference/expressions/literal-expr.html).
+// constructed from a literal which can be converted to a string at compile time.
 
 #[poise::command(slash_command)]
 pub async fn inline_choice(
