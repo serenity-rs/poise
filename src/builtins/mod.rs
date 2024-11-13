@@ -173,6 +173,10 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
             ctx.send(CreateReply::default().content(response).ephemeral(true))
                 .await?;
         }
+        crate::FrameworkError::PermissionFetchFailed { ctx } => {
+            ctx.say("An error occurred when fetching permissions.")
+                .await?;
+        }
         crate::FrameworkError::NotAnOwner { ctx } => {
             let response = "Only bot owners can call this command";
             ctx.send(CreateReply::default().content(response).ephemeral(true))
