@@ -40,8 +40,6 @@ async fn main() {
                 bool_parameter::oracle(),
                 #[cfg(feature = "cache")]
                 builtins::servers(),
-                builtins::help(),
-                builtins::pretty_help(),
                 checks::shutdown(),
                 checks::modonly(),
                 checks::delete(),
