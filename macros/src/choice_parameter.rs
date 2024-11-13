@@ -67,14 +67,16 @@ pub fn choice_parameter(input: syn::DeriveInput) -> Result<TokenStream, darling:
     let indices = 0..variant_idents.len();
     Ok(quote::quote! {
         impl poise::ChoiceParameter for #enum_ident {
-            fn list() -> Vec<poise::CommandParameterChoice> {
-                vec![ #( poise::CommandParameterChoice {
+            fn list() -> std::borrow::Cow<'static, [poise::CommandParameterChoice]> {
+                use ::std::borrow::Cow;
+
+                Cow::Borrowed(&[ #( poise::CommandParameterChoice {
                     __non_exhaustive: (),
-                    name: #names.to_string(),
-                    localizations: std::collections::HashMap::from([
-                        #( (#locales.to_string(), #localized_names.to_string()) ),*
+                    name: Cow::Borrowed(#names),
+                    localizations: Cow::Borrowed(&[
+                        #( (Cow::Borrowed(#locales), Cow::Borrowed(#localized_names)) ),*
                     ]),
-                }, )* ]
+                }, )* ])
             }
 
             fn from_index(index: usize) -> Option<Self> {
