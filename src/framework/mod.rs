@@ -1,6 +1,6 @@
 //! The central Framework struct that ties everything together.
 
-use std::sync::Arc;
+use std::{borrow::Cow, sync::Arc};
 
 pub use builder::*;
 
@@ -218,7 +218,7 @@ pub fn set_qualified_names<U, E>(commands: &mut [crate::Command<U, E>]) {
     /// Fills in `qualified_name` fields by appending command name to the parent command name
     fn set_subcommand_qualified_names<U, E>(parents: &str, commands: &mut [crate::Command<U, E>]) {
         for cmd in commands {
-            cmd.qualified_name = format!("{} {}", parents, cmd.name);
+            cmd.qualified_name = Cow::Owned(format!("{} {}", parents, cmd.name));
             set_subcommand_qualified_names(&cmd.qualified_name, &mut cmd.subcommands);
         }
     }

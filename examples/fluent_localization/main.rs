@@ -4,7 +4,7 @@ use poise::serenity_prelude as serenity;
 use translation::tr;
 
 pub struct Data {
-    translations: translation::Translations,
+    translations: &'static translation::Translations,
 }
 
 type Error = Box<dyn std::error::Error + Send + Sync>;
@@ -62,7 +62,12 @@ async fn main() {
 
     let mut commands = vec![welcome(), info(), register()];
     let translations = translation::read_ftl().expect("failed to read translation files");
-    translation::apply_translations(&translations, &mut commands);
+
+    // We leak the translations so we can easily copy around `&'static str`s, to the downside
+    // that the OS will reclaim the memory at the end of `main` instead of the Drop implementation.
+    let translations: &'static translation::Translations = Box::leak(Box::new(translations));
+
+    translation::apply_translations(translations, &mut commands);
 
     let token = std::env::var("TOKEN").unwrap();
     let intents = serenity::GatewayIntents::non_privileged();

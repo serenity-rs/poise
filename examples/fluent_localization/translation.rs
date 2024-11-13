@@ -1,5 +1,7 @@
 //! Wraps the fluent API and provides easy to use functions and macros for translation
 
+use std::borrow::Cow;
+
 use crate::{Context, Data, Error};
 
 type FluentBundle = fluent::bundle::FluentBundle<
@@ -30,27 +32,27 @@ pub(crate) use tr;
 
 /// Given a language file and message identifier, returns the translation
 pub fn format(
-    bundle: &FluentBundle,
+    bundle: &'static FluentBundle,
     id: &str,
     attr: Option<&str>,
     args: Option<&fluent::FluentArgs<'_>>,
-) -> Option<String> {
+) -> Option<Cow<'static, str>> {
     let message = bundle.get_message(id)?;
     let pattern = match attr {
         Some(attribute) => message.get_attribute(attribute)?.value(),
         None => message.value()?,
     };
     let formatted = bundle.format_pattern(pattern, args, &mut vec![]);
-    Some(formatted.into_owned())
+    Some(formatted)
 }
 
 /// Retrieves the appropriate language file depending on user locale and calls [`format`]
 pub fn get(
     ctx: Context,
-    id: &str,
+    id: &'static str,
     attr: Option<&str>,
     args: Option<&fluent::FluentArgs<'_>>,
-) -> String {
+) -> Cow<'static, str> {
     let translations = &ctx.data().translations;
     ctx.locale()
         // Try to get the language-specific translation
@@ -60,7 +62,7 @@ pub fn get(
         // If this message ID is not present in any translation files whatsoever
         .unwrap_or_else(|| {
             tracing::warn!("unknown fluent message identifier `{}`", id);
-            id.to_string()
+            Cow::Borrowed(id)
         })
 }
 
@@ -97,7 +99,7 @@ pub fn read_ftl() -> Result<Translations, Error> {
 
 /// Given a set of language files, fills in command strings and their localizations accordingly
 pub fn apply_translations(
-    translations: &Translations,
+    translations: &'static Translations,
     commands: &mut [poise::Command<Data, Error>],
 ) {
     for command in &mut *commands {
@@ -108,21 +110,24 @@ pub fn apply_translations(
                 Some(x) => x,
                 None => continue, // no localization entry => skip localization
             };
-            command
-                .name_localizations
-                .insert(locale.clone(), localized_command_name);
-            command.description_localizations.insert(
+
+            let locale = Cow::Borrowed(locale.as_str());
+            let name_localizations = command.name_localizations.to_mut();
+            let description_localizations = command.description_localizations.to_mut();
+
+            name_localizations.push((locale.clone(), localized_command_name));
+            description_localizations.push((
                 locale.clone(),
                 format(bundle, &command.name, Some("description"), None).unwrap(),
-            );
+            ));
 
             for parameter in &mut command.parameters {
                 // Insert localized parameter name and description
-                parameter.name_localizations.insert(
+                parameter.name_localizations.to_mut().push((
                     locale.clone(),
                     format(bundle, &command.name, Some(&parameter.name), None).unwrap(),
-                );
-                parameter.description_localizations.insert(
+                ));
+                parameter.description_localizations.to_mut().push((
                     locale.clone(),
                     format(
                         bundle,
@@ -131,14 +136,14 @@ pub fn apply_translations(
                         None,
                     )
                     .unwrap(),
-                );
+                ));
 
                 // If this is a choice parameter, insert its localized variants
-                for choice in &mut parameter.choices {
-                    choice.localizations.insert(
+                for choice in parameter.choices.to_mut().iter_mut() {
+                    choice.localizations.to_mut().push((
                         locale.clone(),
                         format(bundle, &choice.name, None, None).unwrap(),
-                    );
+                    ));
                 }
             }
         }
@@ -170,7 +175,7 @@ pub fn apply_translations(
             );
 
             // If this is a choice parameter, set the choice names to en-US
-            for choice in &mut parameter.choices {
+            for choice in parameter.choices.to_mut().iter_mut() {
                 choice.name = format(bundle, &choice.name, None, None).unwrap();
             }
         }

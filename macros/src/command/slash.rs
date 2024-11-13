@@ -1,7 +1,6 @@
 use super::Invocation;
 use crate::util::{
-    extract_type_parameter, iter_tuple_2_to_hash_map, tuple_2_iter_deref, wrap_option_to_string,
-    List,
+    extract_type_parameter, iter_tuple_2_to_vec_map, tuple_2_iter_deref, wrap_option_to_string,
 };
 use quote::format_ident;
 use syn::spanned::Spanned as _;
@@ -42,9 +41,9 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
 
         let param_name = &param.name;
         let name_localizations =
-            iter_tuple_2_to_hash_map(tuple_2_iter_deref(&param.args.name_localized));
+            iter_tuple_2_to_vec_map(tuple_2_iter_deref(&param.args.name_localized));
         let desc_localizations =
-            iter_tuple_2_to_hash_map(tuple_2_iter_deref(&param.args.description_localized));
+            iter_tuple_2_to_vec_map(tuple_2_iter_deref(&param.args.description_localized));
 
         let autocomplete_callback = match &param.args.autocomplete {
             Some(autocomplete_fn) => {
@@ -91,29 +90,26 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
         };
         // TODO: theoretically a problem that we don't store choices for non slash commands
         // TODO: move this to poise::CommandParameter::choices (is there a reason not to?)
-        let choices = match inv.args.slash_command {
-            true => {
-                if let Some(List(choices)) = &param.args.choices {
-                    let choices = choices
-                        .iter()
-                        .map(lit_to_string)
-                        .collect::<Result<Vec<_>, _>>()?;
+        let choices = if inv.args.slash_command {
+            if let Some(choices) = &param.args.choices {
+                let choices_iter = choices.0.iter();
+                let choices: Vec<_> = choices_iter.map(lit_to_string).collect::<Result<_, _>>()?;
 
-                    quote::quote! { vec![#( ::poise::CommandParameterChoice {
-                        name: String::from(#choices),
-                        localizations: Default::default(),
-                        __non_exhaustive: (),
-                    } ),*] }
-                } else {
-                    quote::quote! { poise::slash_argument_choices!(#type_) }
-                }
+                quote::quote! { Cow::Borrowed(&[#( ::poise::CommandParameterChoice {
+                    name: Cow::Borrowed(#choices),
+                    localizations: Cow::Borrowed(&[]),
+                    __non_exhaustive: (),
+                } ),*]) }
+            } else {
+                quote::quote! { poise::slash_argument_choices!(#type_) }
             }
-            false => quote::quote! { vec![] },
+        } else {
+            quote::quote! { Cow::Borrowed(&[]) }
         };
 
         let channel_types = match &param.args.channel_types {
             Some(crate::util::List(channel_types)) => quote::quote! { Some(
-                vec![ #( poise::serenity_prelude::ChannelType::#channel_types ),* ]
+                Cow::Borrowed(&[ #( poise::serenity_prelude::ChannelType::#channel_types ),* ])
             ) },
             None => quote::quote! { None },
         };
@@ -121,7 +117,7 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
         parameter_structs.push((
             quote::quote! {
                 ::poise::CommandParameter {
-                    name: #param_name.to_string(),
+                    name: ::std::borrow::Cow::Borrowed(#param_name),
                     name_localizations: #name_localizations,
                     description: #description,
                     description_localizations: #desc_localizations,
