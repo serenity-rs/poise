@@ -1,13 +1,7 @@
-//! Building blocks for common commands like help commands or application command registration
+//! Building blocks for common commands
 //!
-//! This file provides sample commands and utility functions like help menus or error handlers to
+//! This file provides sample commands and utility functions like pagination or error handlers to
 //! use as a starting point for the framework.
-
-mod help;
-pub use help::*;
-
-mod pretty_help;
-pub use pretty_help::*;
 
 mod register;
 pub use register::*;

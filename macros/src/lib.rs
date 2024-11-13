@@ -58,8 +58,6 @@ for example for command-specific help (i.e. `~help command_name`). Escape newlin
 ## Help-related arguments
 
 - `hide_in_help`: Hide this command in help menus
-- `help_text_fn`: Path to a string-returning function which is used for command help text instead of documentation comments
-    - Useful if you have many commands with very similar help messages: you can abstract the common parts into a function
 
 ## Edit tracking (prefix only)
 
