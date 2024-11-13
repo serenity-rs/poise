@@ -1,6 +1,7 @@
 //! Contains all code to dispatch incoming events onto framework commands
 
 mod common;
+mod permissions;
 mod prefix;
 mod slash;
 

@@ -2,60 +2,6 @@
 
 use crate::serenity_prelude as serenity;
 
-/// Retrieves user permissions in the given channel. If unknown, returns None. If in DMs, returns
-/// `Permissions::all()`.
-async fn user_permissions(
-    ctx: &serenity::Context,
-    guild_id: Option<serenity::GuildId>,
-    channel_id: serenity::ChannelId,
-    user_id: serenity::UserId,
-) -> Option<serenity::Permissions> {
-    let guild_id = match guild_id {
-        Some(x) => x,
-        None => return Some(serenity::Permissions::all()), // no permission checks in DMs
-    };
-
-    let guild = guild_id.to_partial_guild(ctx).await.ok()?;
-
-    // Use to_channel so that it can fallback on HTTP for threads (which aren't in cache usually)
-    let channel = match channel_id.to_channel(ctx).await {
-        Ok(serenity::Channel::Guild(channel)) => channel,
-        Ok(_other_channel) => {
-            tracing::warn!(
-                "guild message was supposedly sent in a non-guild channel. Denying invocation"
-            );
-            return None;
-        }
-        Err(_) => return None,
-    };
-
-    let member = guild.member(ctx, user_id).await.ok()?;
-
-    Some(guild.user_permissions_in(&channel, &member))
-}
-
-/// Retrieves the set of permissions that are lacking, relative to the given required permission set
-///
-/// Returns None if permissions couldn't be retrieved
-async fn missing_permissions<U, E>(
-    ctx: crate::Context<'_, U, E>,
-    user: serenity::UserId,
-    required_permissions: serenity::Permissions,
-) -> Option<serenity::Permissions> {
-    if required_permissions.is_empty() {
-        return Some(serenity::Permissions::empty());
-    }
-
-    let permissions = user_permissions(
-        ctx.serenity_context(),
-        ctx.guild_id(),
-        ctx.channel_id(),
-        user,
-    )
-    .await;
-    Some(required_permissions - permissions?)
-}
-
 /// See [`check_permissions_and_cooldown`]. Runs the check only for a single command. The caller
 /// should call this multiple time for each parent command to achieve the check inheritance logic.
 async fn check_permissions_and_cooldown_single<'a, U, E>(
@@ -111,35 +57,29 @@ async fn check_permissions_and_cooldown_single<'a, U, E>(
     }
 
     // Make sure that user has required permissions
-    match missing_permissions(ctx, ctx.author().id, cmd.required_permissions).await {
-        Some(missing_permissions) if missing_permissions.is_empty() => {}
-        Some(missing_permissions) => {
+    if let Some((user_missing_permissions, bot_missing_permissions)) =
+        super::permissions::calculate_missing(
+            ctx,
+            cmd.required_permissions,
+            cmd.required_bot_permissions,
+        )
+        .await
+    {
+        if !user_missing_permissions.is_empty() {
             return Err(crate::FrameworkError::MissingUserPermissions {
                 ctx,
-                missing_permissions: Some(missing_permissions),
-            })
+                missing_permissions: Some(user_missing_permissions),
+            });
         }
-        // Better safe than sorry: when perms are unknown, restrict access
-        None => {
-            return Err(crate::FrameworkError::MissingUserPermissions {
-                ctx,
-                missing_permissions: None,
-            })
-        }
-    }
 
-    // Before running any pre-command checks, make sure the bot has the permissions it needs
-    match missing_permissions(ctx, ctx.framework().bot_id(), cmd.required_bot_permissions).await {
-        Some(missing_permissions) if missing_permissions.is_empty() => {}
-        Some(missing_permissions) => {
+        if !bot_missing_permissions.is_empty() {
             return Err(crate::FrameworkError::MissingBotPermissions {
                 ctx,
-                missing_permissions,
-            })
+                missing_permissions: bot_missing_permissions,
+            });
         }
-        // When in doubt, just let it run. Not getting fancy missing permissions errors is better
-        // than the command not executing at all
-        None => {}
+    } else {
+        return Err(crate::FrameworkError::PermissionFetchFailed { ctx });
     }
 
     // Only continue if command checks returns true
