@@ -80,14 +80,20 @@ pub struct Command<U, E> {
     ///
     /// Set to [`serenity::Permissions::empty()`] by default
     pub default_member_permissions: serenity::Permissions,
-    /// Permissions which users must have to invoke this command. This is checked internally and
-    /// works for both prefix commands and slash commands.
+    /// Permissions which users must have to invoke this command.
+    ///
+    /// This is checked internally and works for both prefix commands and slash commands.
+    ///
+    /// This also handles the case a message is sent in a thread, in which `SEND_MESSAGES` is set to `SEND_MESSAGES_IN_THREADS`.
     ///
     /// Set to [`serenity::Permissions::empty()`] by default
     pub required_permissions: serenity::Permissions,
-    /// Permissions without which command execution will fail. You can set this to fail early and
-    /// give a descriptive error message in case the
+    /// Permissions without which command execution will fail.
+    ///
+    /// You can set this to fail early and give a descriptive error message in case the
     /// bot hasn't been assigned the minimum permissions by the guild admin.
+    ///
+    /// This also handles the case a message is sent in a thread, in which `SEND_MESSAGES` is set to `SEND_MESSAGES_IN_THREADS`.
     ///
     /// Set to [`serenity::Permissions::empty()`] by default
     pub required_bot_permissions: serenity::Permissions,
