@@ -50,7 +50,14 @@ fn get_bot_permissions(
         let parent_channel_id = thread.parent_id.expect(err);
 
         let parent_channel = guild.channels.get(&parent_channel_id)?;
-        Some(guild.user_permissions_in(parent_channel, bot_member))
+        let mut parent_permissions = guild.user_permissions_in(parent_channel, bot_member);
+
+        parent_permissions.set(
+            serenity::Permissions::SEND_MESSAGES,
+            parent_permissions.send_messages_in_threads(),
+        );
+
+        Some(parent_permissions)
     } else {
         // The message was either:
         // - Sent in a guild with broken caching
