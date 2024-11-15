@@ -17,8 +17,7 @@ pub(in crate::dispatch::permissions) async fn get_author_and_bot_permissions<U, 
     let author_permissions = if skip_author {
         None
     } else {
-        let err_msg = "should only fail if the guild is not cached";
-        Some(ctx.msg.author_permissions(ctx.cache()).expect(err_msg))
+        Some(ctx.msg.author_permissions(ctx.cache())?)
     };
 
     let bot_permissions = if skip_bot {
