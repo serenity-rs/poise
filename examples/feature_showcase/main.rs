@@ -112,11 +112,11 @@ async fn main() {
         ..Default::default()
     };
 
-    let token = std::env::var("DISCORD_TOKEN").unwrap();
+    let token = serenity::Token::from_env("DISCORD_TOKEN").unwrap();
     let intents =
         serenity::GatewayIntents::non_privileged() | serenity::GatewayIntents::MESSAGE_CONTENT;
 
-    let client = serenity::ClientBuilder::new(&token, intents)
+    let client = serenity::ClientBuilder::new(token, intents)
         .framework(poise::Framework::new(framework_options))
         .await;
 
