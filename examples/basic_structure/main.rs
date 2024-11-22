@@ -5,7 +5,6 @@ mod commands;
 use poise::serenity_prelude as serenity;
 use std::{
     collections::HashMap,
-    env::var,
     sync::{Arc, Mutex},
     time::Duration,
 };
@@ -101,12 +100,11 @@ async fn main() {
         ..Default::default()
     };
 
-    let token = var("DISCORD_TOKEN")
-        .expect("Missing `DISCORD_TOKEN` env var, see README for more information.");
+    let token = serenity::Token::from_env("DISCORD_TOKEN").unwrap();
     let intents =
         serenity::GatewayIntents::non_privileged() | serenity::GatewayIntents::MESSAGE_CONTENT;
 
-    let client = serenity::ClientBuilder::new(&token, intents)
+    let client = serenity::ClientBuilder::new(token, intents)
         .framework(poise::Framework::new(options))
         .data(Arc::new(Data {
             votes: Mutex::new(HashMap::new()),
