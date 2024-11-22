@@ -27,7 +27,7 @@ async fn register_commands(ctx: Context<'_>) -> Result<(), Error> {
 
 #[tokio::main]
 async fn main() {
-    let token = std::env::var("DISCORD_TOKEN").expect("missing DISCORD_TOKEN");
+    let token = serenity::Token::from_env("DISCORD_TOKEN").unwrap();
     let intents = serenity::GatewayIntents::non_privileged();
 
     let options = poise::FrameworkOptions {
@@ -35,7 +35,7 @@ async fn main() {
         ..Default::default()
     };
 
-    let client = serenity::ClientBuilder::new(&token, intents)
+    let client = serenity::ClientBuilder::new(token, intents)
         .framework(poise::Framework::new(options))
         .await;
 
