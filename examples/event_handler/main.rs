@@ -1,4 +1,3 @@
-use std::env::var;
 use std::sync::atomic::{AtomicU32, Ordering};
 use std::sync::Arc;
 
@@ -18,8 +17,7 @@ pub struct Data {
 async fn main() {
     tracing_subscriber::fmt::init();
 
-    let token = var("DISCORD_TOKEN")
-        .expect("Missing `DISCORD_TOKEN` env var, see README for more information.");
+    let token = serenity::Token::from_env("DISCORD_TOKEN").unwrap();
     let intents =
         serenity::GatewayIntents::non_privileged() | serenity::GatewayIntents::MESSAGE_CONTENT;
 
@@ -28,7 +26,7 @@ async fn main() {
         ..Default::default()
     };
 
-    let client = serenity::ClientBuilder::new(&token, intents)
+    let client = serenity::ClientBuilder::new(token, intents)
         .framework(poise::Framework::new(options))
         .data(Arc::new(Data {
             poise_mentions: AtomicU32::new(0),

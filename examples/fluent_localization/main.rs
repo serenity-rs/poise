@@ -71,7 +71,7 @@ async fn main() {
 
     translation::apply_translations(translations, &mut commands);
 
-    let token = std::env::var("TOKEN").unwrap();
+    let token = serenity::Token::from_env("DISCORD_TOKEN").unwrap();
     let intents = serenity::GatewayIntents::non_privileged();
 
     let framework = poise::Framework::builder()
@@ -81,7 +81,7 @@ async fn main() {
         })
         .build();
 
-    let client = serenity::ClientBuilder::new(&token, intents)
+    let client = serenity::ClientBuilder::new(token, intents)
         .data(Arc::new(Data { translations }) as _)
         .framework(framework)
         .await;
