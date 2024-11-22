@@ -1,5 +1,7 @@
 //! Modal trait and utility items for implementing it (mainly for the derive macro)
 
+use std::future::Future;
+
 use crate::serenity_prelude as serenity;
 
 /// Meant for use in derived [`Modal::parse`] implementation
@@ -40,10 +42,7 @@ pub fn find_modal_text(
 
 /// Underlying code for the modal spawning convenience function which abstracts over the kind of
 /// interaction
-async fn execute_modal_generic<
-    M: Modal,
-    F: std::future::Future<Output = Result<(), serenity::Error>>,
->(
+async fn execute_modal_generic<M: Modal, F: Future<Output = Result<(), serenity::Error>>>(
     ctx: &serenity::Context,
     create_interaction_response: impl FnOnce(serenity::CreateInteractionResponse) -> F,
     modal_custom_id: String,
@@ -169,7 +168,6 @@ pub async fn execute_modal_on_component_interaction<M: Modal>(
 ///     Ok(())
 /// }
 /// ```
-#[async_trait::async_trait]
 pub trait Modal: Sized {
     /// Returns an interaction response builder which creates the modal for this type
     ///
@@ -187,18 +185,24 @@ pub trait Modal: Sized {
     ///
     /// For a variant that is triggered on component interactions, see [`execute_modal_on_component_interaction`].
     // TODO: add execute_with_defaults? Or add a `defaults: Option<Self>` param?
-    async fn execute<U: Send + Sync, E>(
+    fn execute<U: Send + Sync, E>(
         ctx: crate::ApplicationContext<'_, U, E>,
-    ) -> Result<Option<Self>, serenity::Error> {
-        execute_modal(ctx, None::<Self>, None).await
+    ) -> impl Future<Output = Result<Option<Self>, serenity::Error>> + Send
+    where
+        Self: Send,
+    {
+        execute_modal(ctx, None::<Self>, None)
     }
 
     /// Calls `execute_modal(ctx, Some(defaults), None)`. See [`execute_modal`]
     // TODO: deprecate this in favor of execute_modal()?
-    async fn execute_with_defaults<U: Send + Sync, E>(
+    fn execute_with_defaults<U: Send + Sync, E>(
         ctx: crate::ApplicationContext<'_, U, E>,
         defaults: Self,
-    ) -> Result<Option<Self>, serenity::Error> {
-        execute_modal(ctx, Some(defaults), None).await
+    ) -> impl Future<Output = Result<Option<Self>, serenity::Error>> + Send
+    where
+        Self: Send,
+    {
+        execute_modal(ctx, Some(defaults), None)
     }
 }

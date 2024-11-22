@@ -109,7 +109,6 @@ fn pop_from(args: &str) -> Result<(&str, CodeBlock), CodeBlockError> {
     }
 }
 
-#[async_trait::async_trait]
 impl<'a> PopArgument<'a> for CodeBlock {
     /// Parse a single-line or multi-line code block. The output of `Self::code` should mirror what
     /// the official Discord client renders, and the output of `Self::language` should mirror the
@@ -119,8 +118,7 @@ impl<'a> PopArgument<'a> for CodeBlock {
         attachment_index: usize,
         _: &serenity::Context,
         _: &serenity::Message,
-    ) -> Result<(&'a str, usize, Self), (Box<dyn std::error::Error + Send + Sync>, Option<String>)>
-    {
+    ) -> PopArgumentResult<'a, Self> {
         let (a, b) = pop_from(args).map_err(|e| (e.into(), None))?;
 
         Ok((a, attachment_index, b))

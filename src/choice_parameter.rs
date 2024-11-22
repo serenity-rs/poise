@@ -1,7 +1,7 @@
 //! Contains the [`ChoiceParameter`] trait and the blanket [`crate::SlashArgument`] and
 //! [`crate::PopArgument`] impl
 
-use crate::{serenity_prelude as serenity, CowVec};
+use crate::{serenity_prelude as serenity, CowVec, PopArgumentResult};
 
 /// This trait is implemented by [`crate::macros::ChoiceParameter`]. See its docs for more
 /// information
@@ -22,7 +22,6 @@ pub trait ChoiceParameter: Sized {
     fn localized_name(&self, locale: &str) -> Option<&'static str>;
 }
 
-#[async_trait::async_trait]
 impl<T: ChoiceParameter> crate::SlashArgument for T {
     async fn extract(
         _: &serenity::Context,
@@ -55,17 +54,15 @@ impl<T: ChoiceParameter> crate::SlashArgument for T {
     }
 }
 
-#[async_trait::async_trait]
 impl<'a, T: ChoiceParameter> crate::PopArgument<'a> for T {
     async fn pop_from(
         args: &'a str,
         attachment_index: usize,
         ctx: &serenity::Context,
         msg: &serenity::Message,
-    ) -> Result<(&'a str, usize, Self), (Box<dyn std::error::Error + Send + Sync>, Option<String>)>
-    {
+    ) -> PopArgumentResult<'a, Self> {
         let (args, attachment_index, s) =
-            crate::pop_prefix_argument!(String, args, attachment_index, ctx, msg).await?;
+            <String as crate::PopArgument<'a>>::pop_from(args, attachment_index, ctx, msg).await?;
 
         Ok((
             args,
