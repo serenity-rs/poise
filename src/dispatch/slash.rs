@@ -72,6 +72,7 @@ fn extract_command<'a, U, E>(
         parent_commands,
         has_sent_initial_response,
         invocation_data,
+        #[cfg(any(not(feature = "unstable_exhaustive_types"), doc))]
         __non_exhaustive: (),
     })
 }

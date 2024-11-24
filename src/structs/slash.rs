@@ -48,6 +48,7 @@ pub struct ApplicationContext<'a, U, E> {
     /// Custom user data carried across a single command invocation
     pub invocation_data: &'a tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
     // #[non_exhaustive] forbids struct update syntax for ?? reason
+    #[cfg(any(not(feature = "unstable_exhaustive_types"), doc))]
     #[doc(hidden)]
     pub __non_exhaustive: (),
 }

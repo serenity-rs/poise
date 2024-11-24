@@ -295,6 +295,7 @@ pub async fn parse_invocation<'a, U: Send + Sync, E>(
         invocation_data,
         trigger,
         action,
+        #[cfg(any(not(feature = "unstable_exhaustive_types"), doc))]
         __non_exhaustive: (),
     }))
 }
