@@ -58,7 +58,7 @@ async fn register(ctx: Context<'_>) -> Result<(), Error> {
 
 #[tokio::main]
 async fn main() {
-    env_logger::init();
+    tracing_subscriber::fmt::init();
 
     let mut commands = vec![welcome(), info(), register()];
     let translations = translation::read_ftl().expect("failed to read translation files");

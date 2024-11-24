@@ -20,7 +20,7 @@ pub use paginate::*;
 use crate::{serenity::CreateAllowedMentions, serenity_prelude as serenity, CreateReply};
 
 /// An error handler that logs errors either via the [`tracing`] crate or via a Discord message. Set
-/// up a logger (e.g. `env_logger::init()`) or a tracing subscriber
+/// up a logger like tracing subscriber
 /// (e.g. `tracing_subscriber::fmt::init()`) to see the logged errors from this method.
 ///
 /// If the user invoked the command wrong ([`crate::FrameworkError::ArgumentParse`]), the command

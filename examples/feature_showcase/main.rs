@@ -29,7 +29,7 @@ pub struct Data {}
 
 #[tokio::main]
 async fn main() {
-    env_logger::init();
+    tracing_subscriber::fmt::init();
 
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
