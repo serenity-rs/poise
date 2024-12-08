@@ -1,6 +1,6 @@
 //! Utilities for registering application commands
 
-use crate::serenity_prelude as serenity;
+use crate::serenity_prelude::{self as serenity, CollectComponentInteractions};
 
 /// Collects all commands into a [`Vec<serenity::CreateCommand>`] builder, which can be used
 /// to register the commands on Discord
@@ -189,7 +189,7 @@ pub async fn register_application_commands_buttons<U: Send + Sync + 'static, E>(
 
     let interaction = reply_message
         .id
-        .await_component_interaction(ctx.serenity_context().shard.clone())
+        .collect_component_interactions(ctx.serenity_context().shard.clone())
         .author_id(ctx.author().id)
         .await;
 
