@@ -4,44 +4,23 @@
 use crate::serenity_prelude as serenity;
 
 /// Updates the given message according to the update event
-fn update_message(message: &mut serenity::Message, update: serenity::MessageUpdateEvent) {
+fn update_message(message: &mut serenity::Message, update: &serenity::Message) {
     message.id = update.id;
     message.channel_id = update.channel_id;
     message.guild_id = update.guild_id;
 
-    if let Some(kind) = update.kind {
-        message.kind = kind;
-    }
-    if let Some(content) = update.content {
-        message.content = content;
-    }
-    if let Some(tts) = update.tts {
-        message.set_tts(tts);
-    }
-    if let Some(pinned) = update.pinned {
-        message.set_pinned(pinned);
-    }
-    if let Some(timestamp) = update.timestamp {
-        message.timestamp = timestamp;
-    }
-    if let Some(edited_timestamp) = update.edited_timestamp {
-        message.edited_timestamp = Some(edited_timestamp);
-    }
-    if let Some(author) = update.author {
-        message.author = author;
-    }
-    if let Some(mention_everyone) = update.mention_everyone {
-        message.set_mention_everyone(mention_everyone);
-    }
-    if let Some(mentions) = update.mentions {
-        message.mentions = mentions;
-    }
-    if let Some(mention_roles) = update.mention_roles {
-        message.mention_roles = mention_roles;
-    }
-    if let Some(attachments) = update.attachments {
-        message.attachments = attachments;
-    }
+    message.kind = update.kind;
+    message.content = update.content.clone();
+    message.set_tts(update.tts());
+    message.set_pinned(update.pinned());
+    message.timestamp = update.timestamp;
+    message.edited_timestamp = update.edited_timestamp;
+    message.author = update.author.clone();
+    message.set_mention_everyone(update.mention_everyone());
+    message.mentions = update.mentions.clone();
+    message.mention_roles = update.mention_roles.clone();
+    message.attachments = update.attachments.clone();
+
     // if let Some(embeds) = update.embeds {
     //     message.embeds = embeds;
     // }
@@ -94,23 +73,14 @@ impl EditTracker {
         match self
             .cache
             .iter_mut()
-            .find(|invocation| invocation.user_msg.id == user_msg_update.id)
+            .find(|invocation| invocation.user_msg.id == user_msg_update.message.id)
         {
             Some(invocation) => {
                 if ignore_edits_if_not_yet_responded && invocation.bot_response.is_none() {
                     return None;
                 }
 
-                // If message content wasn't touched, don't re-run command
-                // Note: this may be Some, but still identical to previous content. We want to
-                // re-run the command in that case too; because that means the user explicitly
-                // edited their message
-                #[allow(clippy::question_mark)]
-                if user_msg_update.content.is_none() {
-                    return None;
-                }
-
-                update_message(&mut invocation.user_msg, user_msg_update.clone());
+                update_message(&mut invocation.user_msg, &user_msg_update.message);
                 Some((invocation.user_msg.clone(), true))
             }
             None => {
@@ -118,7 +88,7 @@ impl EditTracker {
                     return None;
                 }
                 let mut user_msg = serenity::CustomMessage::new().build();
-                update_message(&mut user_msg, user_msg_update.clone());
+                update_message(&mut user_msg, &user_msg_update.message);
                 Some((user_msg, false))
             }
         }
