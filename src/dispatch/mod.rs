@@ -118,7 +118,7 @@ pub async fn dispatch_event<U: Send + Sync + 'static, E>(
                         .as_ref(),
                 );
 
-                if let Some((msg, previously_tracked)) = msg {
+                if let Some(previously_tracked) = result {
                     let invocation_data = tokio::sync::Mutex::new(Box::new(()) as _);
                     let mut command_tree = Vec::new();
                     let trigger = match previously_tracked {
@@ -127,7 +127,7 @@ pub async fn dispatch_event<U: Send + Sync + 'static, E>(
                     };
                     if let Err(error) = prefix::dispatch_message(
                         framework,
-                        &msg,
+                        &event.message,
                         trigger,
                         &invocation_data,
                         &mut command_tree,

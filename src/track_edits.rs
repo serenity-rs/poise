@@ -3,50 +3,6 @@
 
 use crate::serenity_prelude as serenity;
 
-/// Updates the given message according to the update event
-fn update_message(message: &mut serenity::Message, update: serenity::MessageUpdateEvent) {
-    message.id = update.id;
-    message.channel_id = update.channel_id;
-    message.guild_id = update.guild_id;
-
-    if let Some(kind) = update.kind {
-        message.kind = kind;
-    }
-    if let Some(content) = update.content {
-        message.content = content;
-    }
-    if let Some(tts) = update.tts {
-        message.set_tts(tts);
-    }
-    if let Some(pinned) = update.pinned {
-        message.set_pinned(pinned);
-    }
-    if let Some(timestamp) = update.timestamp {
-        message.timestamp = timestamp;
-    }
-    if let Some(edited_timestamp) = update.edited_timestamp {
-        message.edited_timestamp = Some(edited_timestamp);
-    }
-    if let Some(author) = update.author {
-        message.author = author;
-    }
-    if let Some(mention_everyone) = update.mention_everyone {
-        message.set_mention_everyone(mention_everyone);
-    }
-    if let Some(mentions) = update.mentions {
-        message.mentions = mentions;
-    }
-    if let Some(mention_roles) = update.mention_roles {
-        message.mention_roles = mention_roles;
-    }
-    if let Some(attachments) = update.attachments {
-        message.attachments = attachments;
-    }
-    // if let Some(embeds) = update.embeds {
-    //     message.embeds = embeds;
-    // }
-}
-
 /// A single cached command invocation
 #[derive(Debug)]
 struct CachedInvocation {
@@ -82,16 +38,18 @@ impl EditTracker {
         })
     }
 
-    /// Returns a copy of a newly up-to-date cached message, or a brand new generated message when
-    /// not in cache. Also returns a bool with `true` if this message was previously tracked
+    /// Updates the internal invocation cache for a message and returns:
     ///
-    /// Returns None if the command shouldn't be re-run, e.g. if the message content wasn't edited
-    pub fn process_message_update(
-        &mut self,
-        user_msg_update: &serenity::MessageUpdateEvent,
+    /// - `Some(true)` if the command should be re-run, and the command was previously tracked.
+    /// - `Some(false)` if the command should be re-run, but the command wasn't previously tracked.
+    /// - `None` if the command should not be re-run.
+    pub fn process_message_update<'a>(
+        &'a mut self,
+        user_msg_update: &'a serenity::MessageUpdateEvent,
         ignore_edits_if_not_yet_responded: bool,
         tracking_initiation_window: Option<&std::time::Duration>,
-    ) -> Option<(serenity::Message, bool)> {
+    ) -> Option<bool> {
+        let new_message = &user_msg_update.message;
         if let Some(window) = tracking_initiation_window {
             let created = user_msg_update.id.created_at().unix_timestamp();
             let elapsed = serenity::Timestamp::now().unix_timestamp() - created;
@@ -103,7 +61,7 @@ impl EditTracker {
         match self
             .cache
             .iter_mut()
-            .find(|invocation| invocation.user_msg.id == user_msg_update.id)
+            .find(|invocation| invocation.user_msg.id == new_message.id)
         {
             Some(invocation) => {
                 if ignore_edits_if_not_yet_responded && invocation.bot_response.is_none() {
@@ -111,25 +69,15 @@ impl EditTracker {
                 }
 
                 // If message content wasn't touched, don't re-run command
-                if user_msg_update
-                    .content
-                    .as_deref()
-                    .is_some_and(|content| content == invocation.user_msg.content)
-                {
+                if new_message.content == invocation.user_msg.content {
                     return None;
                 }
 
-                update_message(&mut invocation.user_msg, user_msg_update.clone());
-                Some((invocation.user_msg.clone(), true))
+                invocation.user_msg.clone_from(new_message);
+                Some(true)
             }
-            None => {
-                if ignore_edits_if_not_yet_responded {
-                    return None;
-                }
-                let mut user_msg = serenity::CustomMessage::new().build();
-                update_message(&mut user_msg, user_msg_update.clone());
-                Some((user_msg, false))
-            }
+            None if ignore_edits_if_not_yet_responded => None,
+            None => Some(false),
         }
     }
 
