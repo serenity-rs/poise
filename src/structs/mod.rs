@@ -1,4 +1,5 @@
 //! Plain data structs that define the framework configuration.
+#![allow(clippy::needless_lifetimes)] // Triggered from inside derivative
 
 mod context;
 pub use context::*;

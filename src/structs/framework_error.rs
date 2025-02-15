@@ -432,8 +432,8 @@ impl<U, E: std::fmt::Display> std::fmt::Display for FrameworkError<'_, U, E> {
     }
 }
 
-impl<'a, U: std::fmt::Debug, E: std::error::Error + 'static> std::error::Error
-    for FrameworkError<'a, U, E>
+impl<U: std::fmt::Debug, E: std::error::Error + 'static> std::error::Error
+    for FrameworkError<'_, U, E>
 {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         match self {
