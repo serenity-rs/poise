@@ -88,7 +88,7 @@ pub async fn dispatch_event<U: Send + Sync + 'static, E>(
         }
         serenity::FullEvent::MessageUpdate { event, .. } => {
             if let Some(edit_tracker) = &framework.options.prefix_options.edit_tracker {
-                let msg = edit_tracker.write().unwrap().process_message_update(
+                let result = edit_tracker.write().unwrap().process_message_update(
                     event,
                     framework
                         .options()
@@ -96,7 +96,7 @@ pub async fn dispatch_event<U: Send + Sync + 'static, E>(
                         .ignore_edits_if_not_yet_responded,
                 );
 
-                if let Some((msg, previously_tracked)) = msg {
+                if let Some(previously_tracked) = result {
                     let invocation_data = tokio::sync::Mutex::new(Box::new(()) as _);
                     let mut parent_commands = Vec::new();
                     let trigger = match previously_tracked {
@@ -105,7 +105,7 @@ pub async fn dispatch_event<U: Send + Sync + 'static, E>(
                     };
                     if let Err(error) = prefix::dispatch_message(
                         framework,
-                        &msg,
+                        &event.message,
                         trigger,
                         &invocation_data,
                         &mut parent_commands,
