@@ -153,7 +153,7 @@ context_methods! {
     ///
     /// Note: panics when called in an autocomplete context!
     await (send self builder)
-    (pub async fn send<'att>(
+    (pub async fn send(
         self,
         builder: crate::CreateReply,
     ) -> Result<crate::ReplyHandle<'a>, serenity::Error>) {
