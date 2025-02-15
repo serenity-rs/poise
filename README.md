@@ -33,6 +33,7 @@ For each bot, there's a list of notable features for you to take inspiration fro
 - [Rustbot](https://github.com/rust-community-discord/ferrisbot-for-discord) by [@kangalio](https://github.com/kangalio): database, custom prefixes
 - [StatPixel](https://github.com/statpixel-rs/statpixel) by [@matteopolak](https://github.com/matteopolak): modals, buttons, dropdowns, database, localization
 - [CrackTunes](https://github.com/cycle-five/cracktunes) by [@cycle-five](https://github.com/cycle-five): database, voice, custom prefixes, modals.
+- [Selfbot](https://github.com/kyza/discord_selfbot) by [@kyza](https://github.com/kyza): user installation, context menu, modals, buttons, API calls
 
 You're welcome to add your own bot [via a PR](https://github.com/serenity-rs/poise/compare)!
 
