@@ -54,6 +54,6 @@ impl<U, E> FrameworkBuilder<U, E> {
         options.initialize_owners = self.initialize_owners;
 
         // Create framework with specified settings
-        crate::Framework::new(options)
+        crate::Framework::new(options, true)
     }
 }
