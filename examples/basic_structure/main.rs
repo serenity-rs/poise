@@ -88,15 +88,6 @@ async fn main() {
         // Enforce command checks even for owners (enforced by default)
         // Set to true to bypass checks, which is useful for testing
         skip_checks_for_owners: false,
-        event_handler: |_framework, event| {
-            Box::pin(async move {
-                println!(
-                    "Got an event in event handler: {:?}",
-                    event.snake_case_name()
-                );
-                Ok(())
-            })
-        },
         ..Default::default()
     };
 
@@ -106,6 +97,8 @@ async fn main() {
 
     let client = serenity::ClientBuilder::new(token, intents)
         .framework(poise::Framework::new(options))
+        // Set up a serenity EventHandler here if you wish to listen to non-command events.
+        // .event_handler(EventHandler)
         .data(Arc::new(Data {
             votes: Mutex::new(HashMap::new()),
         }) as _)
