@@ -8,17 +8,6 @@ use crate::serenity_prelude as serenity;
 /// These errors are handled with the [`crate::FrameworkOptions::on_error`] callback
 #[derive_where::derive_where(Debug; U, E)]
 pub enum FrameworkError<'a, U, E> {
-    /// User code threw an error in generic event event handler
-    #[non_exhaustive]
-    EventHandler {
-        /// Error which was thrown in the event handler code
-        error: E,
-        /// Which event was being processed when the error occurred
-        event: &'a serenity::FullEvent,
-        /// The Framework passed to the event
-        #[derive_where(skip)]
-        framework: crate::FrameworkContext<'a, U, E>,
-    },
     /// Error occurred during command execution
     #[non_exhaustive]
     Command {
@@ -198,7 +187,6 @@ impl<'a, U: Send + Sync + 'static, E> FrameworkError<'a, U, E> {
     /// Returns the [`serenity::Context`] of this error
     pub fn serenity_context(&self) -> &'a serenity::Context {
         match *self {
-            Self::EventHandler { framework, .. } => framework.serenity_context,
             Self::Command { ctx, .. } => ctx.serenity_context(),
             Self::SubcommandRequired { ctx } => ctx.serenity_context(),
             Self::CommandPanic { ctx, .. } => ctx.serenity_context(),
@@ -238,8 +226,7 @@ impl<'a, U: Send + Sync + 'static, E> FrameworkError<'a, U, E> {
             Self::DmOnly { ctx, .. } => ctx,
             Self::NsfwOnly { ctx, .. } => ctx,
             Self::CommandCheckFailed { ctx, .. } => ctx,
-            Self::EventHandler { .. }
-            | Self::UnknownCommand { .. }
+            Self::UnknownCommand { .. }
             | Self::UnknownInteraction { .. }
             | Self::NonCommandMessage { .. }
             | Self::DynamicPrefix { .. } => return None,
@@ -292,11 +279,6 @@ impl<U: Send + Sync + 'static, E: std::fmt::Display> std::fmt::Display
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::EventHandler { event, .. } => write!(
-                f,
-                "error in {} event event handler",
-                event.snake_case_name()
-            ),
             Self::Command { error: _, ctx } => {
                 write!(f, "error in command `{}`", full_command_name!(ctx))
             }
@@ -422,7 +404,6 @@ where
 {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         match self {
-            Self::EventHandler { error, .. } => Some(error),
             Self::Command { error, .. } => Some(error),
             Self::SubcommandRequired { .. } => None,
             Self::CommandPanic { .. } => None,
