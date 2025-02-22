@@ -35,11 +35,6 @@ where
     E: std::fmt::Display + std::fmt::Debug,
 {
     match error {
-        crate::FrameworkError::EventHandler { error, event, .. } => tracing::error!(
-            "User event event handler encountered an error on {} event: {}",
-            event.snake_case_name(),
-            error
-        ),
         crate::FrameworkError::Command { ctx, error } => {
             let error = error.to_string();
             eprintln!("An error occured in a command: {}", error);

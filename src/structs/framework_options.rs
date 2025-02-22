@@ -49,16 +49,6 @@ pub struct FrameworkOptions<U, E> {
     ///
     /// **If `cache` feature is disabled, this has no effect!**
     pub require_cache_for_guild_check: bool,
-    /// Called on every Discord event. Can be used to react to non-command events, like messages
-    /// deletions or guild updates.
-    #[derivative(Debug = "ignore")]
-    pub event_handler: for<'a> fn(
-        crate::FrameworkContext<'a, U, E>,
-        &'a serenity::FullEvent,
-    ) -> BoxFuture<'a, Result<(), E>>,
-    /// Renamed to [`Self::event_handler`]!
-    #[deprecated = "renamed to event_handler"]
-    pub listener: (),
     /// Prefix command specific options.
     pub prefix_options: crate::PrefixFrameworkOptions<U, E>,
     /// User IDs which are allowed to use owners_only commands
@@ -99,7 +89,6 @@ where
     E: std::fmt::Display + std::fmt::Debug + Send,
 {
     fn default() -> Self {
-        #[allow(deprecated)] // we need to set the listener field
         Self {
             commands: Vec::new(),
             on_error: |error| {
@@ -109,8 +98,6 @@ where
                     }
                 })
             },
-            event_handler: |_, _| Box::pin(async { Ok(()) }),
-            listener: (),
             pre_command: |_| Box::pin(async {}),
             post_command: |_| Box::pin(async {}),
             command_check: None,
