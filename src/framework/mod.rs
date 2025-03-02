@@ -73,6 +73,7 @@ impl<U, E> Framework<U, E> {
             .as_ref()
             .expect("framework should have started")
     }
+
 }
 
 impl<U, E> Drop for Framework<U, E> {
@@ -93,7 +94,7 @@ impl<U: Send + Sync + 'static, E: Send + Sync> serenity::Framework for Framework
             client.shard_manager.intents(),
         );
 
-        self.shard_manager = Some(client.shard_manager.clone());
+        self.shard_manager = Some(Arc::new(client.shard_manager));
 
         if self.options.initialize_owners {
             if let Err(e) = insert_owners_from_http(
