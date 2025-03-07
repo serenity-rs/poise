@@ -24,9 +24,6 @@ pub struct Framework<U, E> {
     /// Stores the framework options
     options: crate::FrameworkOptions<U, E>,
 
-    /// Initialized to Some during construction; so shouldn't be None at any observable point
-    shard_manager: Option<Arc<serenity::ShardManager>>,
-
     /// Handle to the background task in order to `abort()` it on `Drop`
     edit_tracker_purge_task: Option<tokio::task::JoinHandle<()>>,
 }
@@ -56,7 +53,6 @@ impl<U, E> Framework<U, E> {
         Self {
             bot_id: std::sync::OnceLock::new(),
             edit_tracker_purge_task: None,
-            shard_manager: None,
             options,
         }
     }
@@ -64,14 +60,6 @@ impl<U, E> Framework<U, E> {
     /// Return the stored framework options, including commands.
     pub fn options(&self) -> &crate::FrameworkOptions<U, E> {
         &self.options
-    }
-
-    /// Returns the serenity's client shard manager.
-    // Returns a reference so you can plug it into [`FrameworkContext`]
-    pub fn shard_manager(&self) -> &Arc<serenity::ShardManager> {
-        self.shard_manager
-            .as_ref()
-            .expect("framework should have started")
     }
 }
 
@@ -92,8 +80,6 @@ impl<U: Send + Sync + 'static, E: Send + Sync> serenity::Framework for Framework
             &self.options.prefix_options,
             client.shard_manager.intents(),
         );
-
-        self.shard_manager = Some(client.shard_manager.clone());
 
         if self.options.initialize_owners {
             if let Err(e) = insert_owners_from_http(
@@ -141,7 +127,6 @@ async fn raw_dispatch_event<U, E>(
         bot_id,
         serenity_context,
         options: &framework.options,
-        shard_manager: framework.shard_manager(),
     };
     crate::dispatch_event(framework, event).await;
 }
