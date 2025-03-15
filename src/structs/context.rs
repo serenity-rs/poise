@@ -508,13 +508,9 @@ context_methods! {
     /// If the shard has just connected, this value is zero.
     await (ping self)
     (pub async fn ping(self) -> std::time::Duration) {
-        match self.framework().shard_manager.runners.lock().await.get(&self.serenity_context().shard_id) {
-            Some(runner) => runner.latency.unwrap_or(std::time::Duration::ZERO),
-            None => {
-                tracing::error!("current shard is not in shard_manager.runners, this shouldn't happen");
-                std::time::Duration::ZERO
-            }
-        }
+        let zero = std::time::Duration::ZERO;
+        let Ok(runner) = self.serenity_context().runner_info.lock() else { return zero };
+        runner.latency.unwrap_or(zero)
     }
 }
 
@@ -596,11 +592,6 @@ macro_rules! context_trait_impls {
         impl<U: Send + Sync + 'static, E> AsRef<serenity::Http> for $($type)*<'_, U, E> {
             fn as_ref(&self) -> &serenity::Http {
                 &self.serenity_context().http
-            }
-        }
-        impl<U: Send + Sync + 'static, E> AsRef<serenity::ShardMessenger> for $($type)*<'_, U, E> {
-            fn as_ref(&self) -> &serenity::ShardMessenger {
-                &self.serenity_context().shard
             }
         }
         // Originally added as part of component interaction modals; not sure if this impl is really
