@@ -216,9 +216,9 @@ async fn error_handler(error: poise::FrameworkError<'_, Data, Error>) {
 # type Error = Box<dyn std::error::Error + Send + Sync>;
 # type Context<'a> = poise::Context<'a, (), Error>;
 # async fn my_error_function(_: poise::FrameworkError<'_, (), Error>) {}
-# #[poise::command(prefix_command)] async fn command1(ctx: Context<'_>) -> Result<(), Error> { Ok(()) }
-# #[poise::command(prefix_command)] async fn command2(ctx: Context<'_>) -> Result<(), Error> { Ok(()) }
-# #[poise::command(prefix_command)] async fn command3(ctx: Context<'_>) -> Result<(), Error> { Ok(()) }
+# #[poise::command(prefix_command)] async fn command1(_ctx: Context<'_>) -> Result<(), Error> { Ok(()) }
+# #[poise::command(prefix_command)] async fn command2(_ctx: Context<'_>) -> Result<(), Error> { Ok(()) }
+# #[poise::command(prefix_command)] async fn command3(_ctx: Context<'_>) -> Result<(), Error> { Ok(()) }
 use poise::serenity_prelude as serenity;
 
 # async {
@@ -249,7 +249,8 @@ let framework = poise::Framework::builder()
         ..Default::default()
     }).build();
 
-let client = serenity::ClientBuilder::new("...", serenity::GatewayIntents::non_privileged())
+let token = unimplemented!();
+let client = serenity::ClientBuilder::new(token, serenity::GatewayIntents::non_privileged())
     .framework(framework).await;
 
 client.unwrap().start().await.unwrap();
