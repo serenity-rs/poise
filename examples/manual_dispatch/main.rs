@@ -17,17 +17,14 @@ async fn ping(ctx: poise::Context<'_, (), Error>) -> Result<(), Error> {
 
 struct Handler {
     options: poise::FrameworkOptions<(), Error>,
-    shard_manager: std::sync::Mutex<Option<std::sync::Arc<serenity::ShardManager>>>,
 }
 #[serenity::async_trait]
 impl serenity::EventHandler for Handler {
     async fn message(&self, serenity_context: serenity::Context, new_message: serenity::Message) {
         // FrameworkContext contains all data that poise::Framework usually manages
-        let shard_manager = (*self.shard_manager.lock().unwrap()).clone().unwrap();
         let framework_data = poise::FrameworkContext {
             serenity_context: &serenity_context,
             options: &self.options,
-            shard_manager: &shard_manager,
         };
 
         let invocation_data = tokio::sync::Mutex::new(Box::new(()) as _);
@@ -60,16 +57,13 @@ async fn main() -> Result<(), Error> {
             commands: vec![ping()],
             ..Default::default()
         },
-        shard_manager: std::sync::Mutex::new(None),
     };
     poise::set_qualified_names(&mut handler.options.commands); // some setup
 
-    let handler = std::sync::Arc::new(handler);
     let mut client = serenity::Client::builder(token, intents)
-        .event_handler::<Handler>(handler.clone())
+        .event_handler::<Handler>(handler)
         .await?;
 
-    *handler.shard_manager.lock().unwrap() = Some(client.shard_manager.clone());
     client.start().await?;
 
     Ok(())

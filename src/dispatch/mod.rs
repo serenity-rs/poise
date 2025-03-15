@@ -20,8 +20,6 @@ pub struct FrameworkContext<'a, U, E> {
     pub bot_id: serenity::UserId,
     /// Framework configuration
     pub options: &'a crate::FrameworkOptions<U, E>,
-    /// Serenity shard manager. Can be used for example to shutdown the bot
-    pub shard_manager: &'a std::sync::Arc<serenity::ShardManager>,
     // deliberately not non exhaustive because you need to create FrameworkContext from scratch
     // to run your own event loop
 }
@@ -48,14 +46,6 @@ impl<'a, U: Send + Sync + 'static, E> FrameworkContext<'a, U, E> {
     /// also just access the public `options` field.
     pub fn options(&self) -> &'a crate::FrameworkOptions<U, E> {
         self.options
-    }
-
-    /// Returns the serenity's client shard manager.
-    ///
-    /// This function exists for API compatiblity with [`crate::Framework`]. On this type, you can
-    /// also just access the public `shard_manager` field.
-    pub fn shard_manager(&self) -> std::sync::Arc<serenity::ShardManager> {
-        self.shard_manager.clone()
     }
 
     /// Retrieves user data
