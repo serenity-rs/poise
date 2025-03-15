@@ -18,8 +18,7 @@ pub async fn boop(ctx: Context<'_>) -> Result<(), Error> {
     ctx.send(reply).await?;
 
     let mut boop_count = 0;
-    let shard_messenger = &ctx.serenity_context().shard;
-    while let Some(mci) = serenity::ComponentInteractionCollector::new(shard_messenger.clone())
+    while let Some(mci) = serenity::ComponentInteractionCollector::new(ctx.serenity_context())
         .author_id(ctx.author().id)
         .channel_id(ctx.channel_id())
         .timeout(std::time::Duration::from_secs(120))
