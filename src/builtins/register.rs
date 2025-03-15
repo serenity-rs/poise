@@ -190,7 +190,7 @@ pub async fn register_application_commands_buttons<U: Send + Sync + 'static, E>(
 
     let interaction = reply_message
         .id
-        .collect_component_interactions(ctx.serenity_context().shard.clone())
+        .collect_component_interactions(ctx.serenity_context())
         .author_id(ctx.author().id)
         .await;
 
