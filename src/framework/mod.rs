@@ -113,7 +113,7 @@ async fn raw_dispatch_event<U, E>(
 ) where
     U: Send + Sync + 'static,
 {
-    if let serenity::FullEvent::Ready { data_about_bot } = event {
+    if let serenity::FullEvent::Ready { data_about_bot, .. } = event {
         let _: Result<_, _> = framework.bot_id.set(data_about_bot.user.id);
     }
 
