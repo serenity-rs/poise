@@ -19,31 +19,35 @@ struct Handler {
 }
 #[serenity::async_trait]
 impl serenity::EventHandler for Handler {
-    async fn message(&self, serenity_context: serenity::Context, new_message: serenity::Message) {
-        // FrameworkContext contains all data that poise::Framework usually manages
-        let framework_data = poise::FrameworkContext {
-            serenity_context: &serenity_context,
-            options: &self.options,
-        };
+    async fn dispatch(&self, serenity_context: &serenity::Context, event: &serenity::FullEvent) {
+        match event {
+            serenity::FullEvent::Message { new_message, .. } => {
+                // FrameworkContext contains all data that poise::Framework usually manages
+                let framework_data = poise::FrameworkContext {
+                    serenity_context,
+                    options: &self.options,
+                };
 
-        let invocation_data = tokio::sync::Mutex::new(Box::new(()) as _);
-        let trigger = poise::MessageDispatchTrigger::MessageCreate;
-        let mut parent_commands = Vec::new();
+                let invocation_data = tokio::sync::Mutex::new(Box::new(()) as _);
+                let trigger = poise::MessageDispatchTrigger::MessageCreate;
+                let mut parent_commands = Vec::new();
 
-        let res = poise::dispatch_message(
-            framework_data,
-            &new_message,
-            trigger,
-            &invocation_data,
-            &mut parent_commands,
-        );
+                let res = poise::dispatch_message(
+                    framework_data,
+                    new_message,
+                    trigger,
+                    &invocation_data,
+                    &mut parent_commands,
+                );
 
-        if let Err(err) = res.await {
-            err.handle(&self.options).await;
+                if let Err(err) = res.await {
+                    err.handle(&self.options).await;
+                }
+            }
+            // For slash commands or edit tracking to work, forward InteractionCreate and MessageUpdate.
+            _ => {}
         }
     }
-
-    // For slash commands or edit tracking to work, forward interaction_create and message_update
 }
 
 #[tokio::main]
