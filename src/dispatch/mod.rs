@@ -60,7 +60,7 @@ pub async fn dispatch_event<U: Send + Sync + 'static, E>(
     event: &serenity::FullEvent,
 ) {
     match event {
-        serenity::FullEvent::Message { new_message } => {
+        serenity::FullEvent::Message { new_message, .. } => {
             let invocation_data = tokio::sync::Mutex::new(Box::new(()) as _);
             let mut parent_commands = Vec::new();
             let trigger = crate::MessageDispatchTrigger::MessageCreate;
@@ -127,6 +127,7 @@ pub async fn dispatch_event<U: Send + Sync + 'static, E>(
         }
         serenity::FullEvent::InteractionCreate {
             interaction: serenity::Interaction::Command(interaction),
+            ..
         } => {
             let invocation_data = tokio::sync::Mutex::new(Box::new(()) as _);
             let mut parent_commands = Vec::new();
@@ -145,6 +146,7 @@ pub async fn dispatch_event<U: Send + Sync + 'static, E>(
         }
         serenity::FullEvent::InteractionCreate {
             interaction: serenity::Interaction::Autocomplete(interaction),
+            ..
         } => {
             let invocation_data = tokio::sync::Mutex::new(Box::new(()) as _);
             let mut parent_commands = Vec::new();
