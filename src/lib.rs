@@ -274,8 +274,9 @@ functions manually:
 - [`serenity::Command::set_global_commands`]
 - [`serenity::GuildId::set_commands`]
 
-For example, you could call this function in [`serenity::EventHandler::ready`] to automatically
-register commands on startup. Also see the docs of [`builtins::create_application_commands`].
+For example, you could call this function in your event handler on [`serenity::FullEvent::Ready`] to
+automatically register commands on startup. Also see the docs of
+[`builtins::create_application_commands`].
 
 The lowest level of abstraction for registering commands is [`Command::create_as_slash_command`]
 and [`Command::create_as_context_menu_command`].
