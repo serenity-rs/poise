@@ -35,7 +35,7 @@ pub async fn voiceinfo(
 **User limit**: {}
 **RTC region**: {}
 **Video quality mode**: {:?}",
-        channel.name,
+        channel.base.name,
         channel.bitrate.unwrap_or_default(),
         channel.user_limit.unwrap_or_default(),
         channel.rtc_region.unwrap_or_default(),
