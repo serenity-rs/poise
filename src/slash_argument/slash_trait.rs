@@ -176,17 +176,21 @@ impl_slash_argument!(serenity::User, |_, _, User(user, _)| user.clone());
 impl_slash_argument!(serenity::UserId, |_, _, User(user, _)| user.id);
 impl_slash_argument!(serenity::Channel, |ctx, inter, Channel(channel)| {
     channel
-        .id
+        .id()
         .to_channel(ctx, inter.guild_id)
         .await
         .map_err(SlashArgError::Http)?
 });
-impl_slash_argument!(serenity::ChannelId, |_, _, Channel(channel)| channel.id);
-impl_slash_argument!(serenity::PartialChannel, |_, _, Channel(channel)| channel
-    .clone());
+impl_slash_argument!(serenity::GenericChannelId, |_, _, Channel(channel)| channel
+    .id());
+impl_slash_argument!(
+    serenity::GenericInteractionChannel,
+    |_, _, Channel(channel)| channel.clone()
+);
 impl_slash_argument!(serenity::GuildChannel, |ctx, inter, Channel(channel)| {
     channel
-        .id
+        .id()
+        .expect_channel()
         .to_guild_channel(ctx, inter.guild_id)
         .await
         .map_err(SlashArgError::Http)?

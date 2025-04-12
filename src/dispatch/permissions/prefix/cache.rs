@@ -40,32 +40,34 @@ where
 /// Gets the permissions for the bot.
 fn get_bot_permissions(
     guild: &serenity::Guild,
-    channel_id: serenity::ChannelId,
+    channel_id: serenity::GenericChannelId,
     bot_id: serenity::UserId,
 ) -> Option<serenity::Permissions> {
     // Should never fail, as the bot member is always cached
     let bot_member = guild.members.get(&bot_id)?;
 
-    if let Some(channel) = guild.channels.get(&channel_id) {
-        Some(guild.user_permissions_in(channel, bot_member))
-    } else if let Some(thread) = guild.threads.iter().find(|th| th.id == channel_id) {
-        let err = "parent id should always be Some for thread";
-        let parent_channel_id = thread.parent_id.expect(err);
-
-        let parent_channel = guild.channels.get(&parent_channel_id)?;
-        let mut parent_permissions = guild.user_permissions_in(parent_channel, bot_member);
-
-        parent_permissions.set(
-            serenity::Permissions::SEND_MESSAGES,
-            parent_permissions.send_messages_in_threads(),
-        );
-
-        Some(parent_permissions)
-    } else {
+    let Some(channel) = guild.channel(channel_id) else {
         // The message was either:
         // - Sent in a guild with broken caching
         // - Not set in a channel or thread?
         tracing::warn!("Could not find channel/thread ({channel_id}) for permissions check in cache for guild: {}", guild.id);
-        None
+        return None;
+    };
+
+    match channel {
+        serenity::GenericGuildChannelRef::Channel(channel) => {
+            Some(guild.user_permissions_in(channel, bot_member))
+        }
+        serenity::GenericGuildChannelRef::Thread(thread) => {
+            let parent_channel = guild.channels.get(&thread.parent_id)?;
+            let mut parent_permissions = guild.user_permissions_in(parent_channel, bot_member);
+
+            parent_permissions.set(
+                serenity::Permissions::SEND_MESSAGES,
+                parent_permissions.send_messages_in_threads(),
+            );
+
+            Some(parent_permissions)
+        }
     }
 }
