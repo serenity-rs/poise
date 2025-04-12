@@ -4,16 +4,6 @@ use crate::serenity_prelude as serenity;
 
 use super::PermissionsInfo;
 
-/// Checks if a ChannelType is equal to a known thread type.
-fn is_thread(kind: serenity::ChannelType) -> bool {
-    matches!(
-        kind,
-        serenity::ChannelType::NewsThread
-            | serenity::ChannelType::PrivateThread
-            | serenity::ChannelType::PublicThread
-    )
-}
-
 /// Gets the permissions of the ctx author and the bot.
 pub(super) fn get_author_and_bot_permissions(
     interaction: &serenity::CommandInteraction,
@@ -27,7 +17,7 @@ pub(super) fn get_author_and_bot_permissions(
     let mut bot_permissions = interaction.app_permissions;
 
     let channel = interaction.channel.as_ref();
-    if channel.is_some_and(|c| is_thread(c.kind)) {
+    if channel.is_some_and(|c| matches!(c, serenity::GenericInteractionChannel::Thread(_))) {
         author_permissions.set(
             Permissions::SEND_MESSAGES,
             author_permissions.send_messages_in_threads(),

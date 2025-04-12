@@ -14,7 +14,7 @@ pub struct CooldownContext {
     /// The guild this request originated from or `None`
     pub guild_id: Option<serenity::GuildId>,
     /// The channel associated with this request
-    pub channel_id: serenity::ChannelId,
+    pub channel_id: serenity::GenericChannelId,
 }
 
 /// Configuration struct for [`Cooldowns`]
@@ -47,7 +47,7 @@ pub struct CooldownTracker {
     /// Stores the timestamps of the last invocation per guild
     guild_invocations: HashMap<serenity::GuildId, Instant>,
     /// Stores the timestamps of the last invocation per channel
-    channel_invocations: HashMap<serenity::ChannelId, Instant>,
+    channel_invocations: HashMap<serenity::GenericChannelId, Instant>,
     /// Stores the timestamps of the last invocation per member (user and guild)
     member_invocations: HashMap<(serenity::UserId, serenity::GuildId), Instant>,
 }
@@ -64,7 +64,7 @@ pub enum CooldownType {
     /// A cooldown that applies to an entire guild.
     Guild(serenity::GuildId),
     /// A cooldown specific to individual channels.
-    Channel(serenity::ChannelId),
+    Channel(serenity::GenericChannelId),
     /// A cooldown specific to individual members within a guild.
     Member((serenity::UserId, serenity::GuildId)),
 }
