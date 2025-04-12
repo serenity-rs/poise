@@ -187,5 +187,9 @@ macro_rules! snowflake_pop_argument {
 }
 
 snowflake_pop_argument!(serenity::UserId, parse_user_mention, InvalidUserId);
-snowflake_pop_argument!(serenity::ChannelId, parse_channel_mention, InvalidChannelId);
+snowflake_pop_argument!(
+    serenity::GenericChannelId,
+    parse_channel_mention,
+    InvalidChannelId
+);
 snowflake_pop_argument!(serenity::RoleId, parse_role_mention, InvalidRoleId);
