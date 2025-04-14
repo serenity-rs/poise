@@ -21,8 +21,8 @@ pub fn extract_type_parameter<'a>(outer_type: &str, t: &'a syn::Type) -> Option<
 /// Converts None => `None` and Some(x) => `Some(#x)`
 pub fn wrap_option<T: quote::ToTokens>(literal: Option<T>) -> syn::Expr {
     match literal {
-        Some(literal) => syn::parse_quote! { Some(#literal) },
-        None => syn::parse_quote! { None },
+        Some(literal) => syn::parse_quote! { ::core::option::Option::Some(#literal) },
+        None => syn::parse_quote! { ::core::option::Option::None },
     }
 }
 
@@ -32,8 +32,8 @@ pub fn wrap_option_and_map<T: quote::ToTokens>(
     map_path: impl quote::ToTokens,
 ) -> syn::Expr {
     match literal {
-        Some(literal) => syn::parse_quote! { Some(#map_path(#literal)) },
-        None => syn::parse_quote! { None },
+        Some(literal) => syn::parse_quote! { ::core::option::Option::Some(#map_path(#literal)) },
+        None => syn::parse_quote! { ::core::option::Option::None },
     }
 }
 
@@ -105,7 +105,7 @@ where
     T: quote::ToTokens,
 {
     if v.len() == 0 {
-        return quote::quote!(std::collections::HashMap::new());
+        return quote::quote!(::std::collections::HashMap::new());
     }
 
     let (keys, values) = v
@@ -114,8 +114,8 @@ where
         .unzip::<_, _, Vec<_>, Vec<_>>();
 
     quote::quote! {
-        std::collections::HashMap::from([
-            #( (#keys.to_string(), #values.to_string()) ),*
+        ::core::convert::From::from([
+            #( (::std::string::ToString::to_string(#keys), ::std::string::ToString::to_string(#values)) ),*
         ])
     }
 }

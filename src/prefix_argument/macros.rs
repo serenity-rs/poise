@@ -7,7 +7,7 @@ macro_rules! _parse_prefix {
     // All arguments have been consumed
     ( $ctx:ident $msg:ident $args:ident $attachment_index:ident => [ $error:ident $( $name:ident )* ] ) => {
         if $args.is_empty() {
-            return Ok(( $( $name, )* ));
+            return ::core::result::Result::Ok(( $( $name, )* ));
         }
     };
 
@@ -157,10 +157,10 @@ macro_rules! _parse_prefix {
         $( $rest:tt )*
     ) => {
         match $crate::pop_prefix_argument!($type, &$args, $attachment_index, $ctx, $msg).await {
-            Ok(($args, $attachment_index, token)) => {
+            ::core::result::Result::Ok(($args, $attachment_index, token)) => {
                 $crate::_parse_prefix!($ctx $msg $args $attachment_index => [ $error $($preamble)* token ] $($rest)* );
             },
-            Err(e) => $error = e,
+            ::core::result::Result::Err(e) => $error = e,
         }
     };
 
@@ -229,8 +229,8 @@ macro_rules! parse_prefix_args {
             let args = $args;
             let attachment_index = $attachment_index;
 
-            let mut error: (Box<dyn std::error::Error + Send + Sync>, Option<String>)
-                = (Box::new($crate::TooManyArguments { __non_exhaustive: () }) as _, None);
+            let mut error: (::std::boxed::Box<dyn ::std::error::Error + ::core::marker::Send + ::core::marker::Sync>, ::core::option::Option<::std::string::String>)
+                = (::std::boxed::Box::new($crate::TooManyArguments { __non_exhaustive: () }) as _, ::core::option::Option::None);
 
             $crate::_parse_prefix!(
                 ctx msg args attachment_index => [error]
@@ -238,7 +238,7 @@ macro_rules! parse_prefix_args {
                     ($( #[$attr] )? $($type)*)
                 )*
             );
-            Err(error)
+            ::core::result::Result::Err(error)
         }
     };
 }

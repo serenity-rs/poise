@@ -13,7 +13,7 @@ use std::marker::PhantomData;
 macro_rules! pop_prefix_argument {
     ($target:ty, $args:expr, $attachment_id:expr, $ctx:expr, $msg:expr) => {{
         use $crate::PopArgumentHack as _;
-        (&std::marker::PhantomData::<$target>).pop_from($args, $attachment_id, $ctx, $msg)
+        (&::std::marker::PhantomData::<$target>).pop_from($args, $attachment_id, $ctx, $msg)
     }};
 }
 

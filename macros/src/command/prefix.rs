@@ -52,13 +52,13 @@ pub fn generate_prefix_action(inv: &Invocation) -> Result<proc_macro2::TokenStre
     };
 
     Ok(quote::quote! {
-        |ctx| Box::pin(async move {
+        |ctx| ::std::boxed::Box::pin(async move {
             let ( #( #param_idents, )* .. ) = ::poise::parse_prefix_args!(
                 ctx.serenity_context, ctx.msg, ctx.args, 0 =>
                 #( #param_specs, )*
                 #wildcard_arg
-            ).await.map_err(|(error, input)| poise::FrameworkError::new_argument_parse(
-                ctx.into(),
+            ).await.map_err(|(error, input)| ::poise::FrameworkError::new_argument_parse(
+                ::core::convert::Into::into(ctx),
                 input,
                 error,
             ))?;
@@ -70,10 +70,10 @@ pub fn generate_prefix_action(inv: &Invocation) -> Result<proc_macro2::TokenStre
                 ctx.command.cooldowns.lock().unwrap().start_cooldown(ctx.cooldown_context());
             }
 
-            inner(ctx.into(), #( #param_idents, )* )
+            inner(::core::convert::Into::into(ctx), #( #param_idents, )* )
                 .await
-                .map_err(|error| poise::FrameworkError::new_command(
-                    ctx.into(),
+                .map_err(|error| ::poise::FrameworkError::new_command(
+                    ::core::convert::Into::into(ctx),
                     error,
                 ))
         })

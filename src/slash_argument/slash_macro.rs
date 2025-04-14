@@ -114,47 +114,47 @@ impl std::error::Error for SlashArgError {
 macro_rules! _parse_slash {
     // Extract #[choices(...)] (no Option supported ;-;)
     ($ctx:ident, $interaction:ident, $args:ident => $name:literal: INLINE_CHOICE $type:ty [$($index:literal: $value:literal),*]) => {
-        if let Some(arg) = $args.iter().find(|arg| arg.name == $name) {
+        if let ::core::option::Option::Some(arg) = $args.iter().find(|arg| arg.name == $name) {
             let $crate::serenity_prelude::ResolvedValue::Integer(index) = arg.value else {
-                return Err($crate::SlashArgError::new_command_structure_mismatch("expected integer, as the index for an inline choice parameter"));
+                return ::core::result::Result::Err($crate::SlashArgError::new_command_structure_mismatch("expected integer, as the index for an inline choice parameter"));
             };
             match index {
                 $( $index => $value, )*
-                _ => return Err($crate::SlashArgError::new_command_structure_mismatch("out of range index for inline choice parameter")),
+                _ => return ::core::result::Result::Err($crate::SlashArgError::new_command_structure_mismatch("out of range index for inline choice parameter")),
             }
         } else {
-            return Err($crate::SlashArgError::new_command_structure_mismatch("a required argument is missing"));
+            return ::core::result::Result::Err($crate::SlashArgError::new_command_structure_mismatch("a required argument is missing"));
         }
     };
 
     // Extract Option<T>
     ($ctx:ident, $interaction:ident, $args:ident => $name:literal: Option<$type:ty $(,)*>) => {
-        if let Some(arg) = $args.iter().find(|arg| arg.name == $name) {
-            Some($crate::extract_slash_argument!($type, $ctx, $interaction, &arg.value)
+        if let ::core::option::Option::Some(arg) = $args.iter().find(|arg| arg.name == $name) {
+            ::core::option::Option::Some($crate::extract_slash_argument!($type, $ctx, $interaction, &arg.value)
                 .await?)
         } else {
-            None
+            ::core::option::Option::None
         }
     };
 
     // Extract Vec<T> (delegating to Option<T> because slash commands don't support variadic
     // arguments right now)
     ($ctx:ident, $interaction:ident, $args:ident => $name:literal: Vec<$type:ty $(,)*>) => {
-        match $crate::_parse_slash!($ctx, $interaction, $args => $name: Option<$type>) {
-            Some(value) => vec![value],
-            None => vec![],
+        match $crate::_parse_slash!($ctx, $interaction, $args => $name: ::core::option::Option<$type>) {
+            ::core::option::Option::Some(value) => ::std::vec![value],
+            ::core::option::Option::None => ::std::vec![],
         }
     };
 
     // Extract #[flag]
     ($ctx:ident, $interaction:ident, $args:ident => $name:literal: FLAG) => {
-        $crate::_parse_slash!($ctx, $interaction, $args => $name: Option<bool>)
+        $crate::_parse_slash!($ctx, $interaction, $args => $name: ::core::option::Option<bool>)
             .unwrap_or(false)
     };
 
     // Extract T
     ($ctx:ident, $interaction:ident, $args:ident => $name:literal: $($type:tt)*) => {
-        $crate::_parse_slash!($ctx, $interaction, $args => $name: Option<$($type)*>)
+        $crate::_parse_slash!($ctx, $interaction, $args => $name: ::core::option::Option<$($type)*>)
             .ok_or($crate::SlashArgError::new_command_structure_mismatch("a required argument is missing"))?
     };
 }
@@ -192,7 +192,7 @@ macro_rules! parse_slash_args {
             // ctx here is a serenity::Context, so it doesn't already contain interaction!
             let (ctx, interaction, args) = ($ctx, $interaction, $args);
 
-            Ok::<_, $crate::SlashArgError>(( $(
+            ::core::result::Result::Ok::<_, $crate::SlashArgError>(( $(
                 $crate::_parse_slash!( ctx, interaction, args => $name: $($type)* ),
             )* ))
         }
