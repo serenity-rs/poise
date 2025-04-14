@@ -33,22 +33,22 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
         let autocomplete_callback = match &param.args.autocomplete {
             Some(autocomplete_fn) => {
                 quote::quote! { Some(|
-                    ctx: poise::ApplicationContext<'_, _, _>,
+                    ctx: ::poise::ApplicationContext<'_, _, _>,
                     partial: &str,
-                | Box::pin(async move {
+                | ::std::boxed::Box::pin(async move {
                     use ::poise::futures_util::{Stream, StreamExt};
 
                     let choices_stream = ::poise::into_stream!(
-                        #autocomplete_fn(ctx.into(), partial).await
+                        #autocomplete_fn(::core::convert::Into::into(ctx), partial).await
                     );
                     let choices_vec = choices_stream
                         .take(25)
                         // T or AutocompleteChoice<T> -> AutocompleteChoice<T>
-                        .map(poise::serenity_prelude::AutocompleteChoice::from)
+                        .map(::poise::serenity_prelude::AutocompleteChoice::from)
                         .collect()
                         .await;
 
-                    let mut response = poise::serenity_prelude::CreateAutocompleteResponse::default();
+                    let mut response = ::poise::serenity_prelude::CreateAutocompleteResponse::default();
                     Ok(response.set_choices(choices_vec))
                 })) }
             }
@@ -80,7 +80,7 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
                     quote::quote! { Some(|o| o.kind(::poise::serenity_prelude::CommandOptionType::Integer)) }
                 } else {
                     quote::quote! { Some(|o| {
-                        poise::create_slash_argument!(#type_, o)
+                        ::poise::create_slash_argument!(#type_, o)
                         #min_value_setter #max_value_setter
                         #min_length_setter #max_length_setter
                     }) }
@@ -100,7 +100,7 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
                         __non_exhaustive: (),
                     } ),*] }
                 } else {
-                    quote::quote! { poise::slash_argument_choices!(#type_) }
+                    quote::quote! { ::poise::slash_argument_choices!(#type_) }
                 }
             }
             false => quote::quote! { vec![] },
@@ -108,7 +108,7 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
 
         let channel_types = match &param.args.channel_types {
             Some(crate::util::List(channel_types)) => quote::quote! { Some(
-                vec![ #( poise::serenity_prelude::ChannelType::#channel_types ),* ]
+                vec![ #( ::poise::serenity_prelude::ChannelType::#channel_types ),* ]
             ) },
             None => quote::quote! { None },
         };
@@ -175,7 +175,7 @@ pub fn generate_slash_action(inv: &Invocation) -> Result<proc_macro2::TokenStrea
         .collect::<Vec<_>>();
 
     Ok(quote::quote! {
-        |ctx| Box::pin(async move {
+        |ctx| ::std::boxed::Box::pin(async move {
             // idk why this can't be put in the macro itself (where the lint is triggered) and
             // why clippy doesn't turn off this lint inside macros in the first place
             #[allow(clippy::needless_question_mark)]
@@ -192,10 +192,10 @@ pub fn generate_slash_action(inv: &Invocation) -> Result<proc_macro2::TokenStrea
                 ctx.command.cooldowns.lock().unwrap().start_cooldown(ctx.cooldown_context());
             }
 
-            inner(ctx.into(), #( #param_identifiers, )*)
+            inner(::core::convert::Into::into(ctx), #( #param_identifiers, )*)
                 .await
-                .map_err(|error| poise::FrameworkError::new_command(
-                    ctx.into(),
+                .map_err(|error| ::poise::FrameworkError::new_command(
+                    ::core::convert::Into::into(ctx),
                     error,
                 ))
         })
@@ -217,7 +217,7 @@ pub fn generate_context_menu_action(
 
     Ok(quote::quote! {
         <#param_type as ::poise::ContextMenuParameter<_, _>>::to_action(|ctx, value| {
-            Box::pin(async move {
+            ::std::boxed::Box::pin(async move {
                 let is_framework_cooldown = !ctx.command.manual_cooldowns
                     .unwrap_or_else(|| ctx.framework.options.manual_cooldowns);
 
@@ -225,10 +225,10 @@ pub fn generate_context_menu_action(
                     ctx.command.cooldowns.lock().unwrap().start_cooldown(ctx.cooldown_context());
                 }
 
-                inner(ctx.into(), value)
+                inner(::core::convert::Into::into(ctx), value)
                     .await
-                    .map_err(|error| poise::FrameworkError::new_command(
-                        ctx.into(),
+                    .map_err(|error| ::poise::FrameworkError::new_command(
+                        ::core::convert::Into::into(ctx),
                         error,
                     ))
             })

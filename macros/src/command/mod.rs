@@ -214,9 +214,9 @@ pub fn command(
         match perms {
             Some(perms) => {
                 let perms = perms.iter();
-                syn::parse_quote! { #(poise::serenity_prelude::Permissions::#perms)|* }
+                syn::parse_quote! { #(::poise::serenity_prelude::Permissions::#perms)|* }
             }
-            None => syn::parse_quote! { poise::serenity_prelude::Permissions::empty() },
+            None => syn::parse_quote! { ::poise::serenity_prelude::Permissions::empty() },
         }
     }
     let default_member_permissions = permissions_to_tokens(&args.default_member_permissions);
@@ -225,16 +225,16 @@ pub fn command(
 
     let install_context = if let Some(contexts) = &args.install_context {
         let contexts = contexts.iter();
-        syn::parse_quote! { Some(vec![ #(poise::serenity_prelude::InstallationContext::#contexts),* ]) }
+        syn::parse_quote! { ::core::option::Option::Some(vec![ #(::poise::serenity_prelude::InstallationContext::#contexts),* ]) }
     } else {
-        syn::parse_quote! { None }
+        syn::parse_quote! { ::core::option::Option::None }
     };
 
     let interaction_context = if let Some(contexts) = &args.interaction_context {
         let contexts = contexts.iter();
-        syn::parse_quote! { Some(vec![ #(poise::serenity_prelude::InteractionContext::#contexts),* ]) }
+        syn::parse_quote! { ::core::option::Option::Some(vec![ #(::poise::serenity_prelude::InteractionContext::#contexts),* ]) }
     } else {
-        syn::parse_quote! { None }
+        syn::parse_quote! { ::core::option::Option::None }
     };
 
     let inv = Invocation {
@@ -267,16 +267,16 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
         syn::fold::fold_type(&mut crate::util::AllLifetimesToStatic, ctx_type.clone());
 
     let prefix_action = wrap_option(match inv.args.prefix_command {
-        true => Some(prefix::generate_prefix_action(&inv)?),
-        false => None,
+        true => ::core::option::Option::Some(prefix::generate_prefix_action(&inv)?),
+        false => ::core::option::Option::None,
     });
     let slash_action = wrap_option(match inv.args.slash_command {
-        true => Some(slash::generate_slash_action(&inv)?),
-        false => None,
+        true => ::core::option::Option::Some(slash::generate_slash_action(&inv)?),
+        false => ::core::option::Option::None,
     });
     let context_menu_action = wrap_option(match &inv.args.context_menu_command {
-        Some(_) => Some(slash::generate_context_menu_action(&inv)?),
-        None => None,
+        Some(_) => ::core::option::Option::Some(slash::generate_context_menu_action(&inv)?),
+        None => ::core::option::Option::None,
     });
 
     let function_name = inv
@@ -319,18 +319,22 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
     let interaction_context = &inv.interaction_context;
 
     let help_text = match &inv.args.help_text_fn {
-        Some(help_text_fn) => quote::quote! { Some(#help_text_fn()) },
+        Some(help_text_fn) => quote::quote! { ::core::option::Option::Some(#help_text_fn()) },
         None => match &inv.help_text {
-            Some(extracted_explanation) => quote::quote! { Some(#extracted_explanation.into()) },
-            None => quote::quote! { None },
+            Some(extracted_explanation) => {
+                quote::quote! { ::core::option::Option::Some(#extracted_explanation.into()) }
+            }
+            None => quote::quote! { ::core::option::Option::None },
         },
     };
 
     let checks = &inv.args.check;
     // Box::pin the callback in order to store it in a struct
     let on_error = match &inv.args.on_error {
-        Some(on_error) => quote::quote! { Some(|err| Box::pin(#on_error(err))) },
-        None => quote::quote! { None },
+        Some(on_error) => {
+            quote::quote! { ::core::option::Option::Some(|err| ::std::boxed::Box::pin(#on_error(err))) }
+        }
+        None => quote::quote! { ::core::option::Option::None },
     };
 
     let invoke_on_edit = inv.args.invoke_on_edit || inv.args.track_edits;
@@ -343,8 +347,8 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
     let parameters = slash::generate_parameters(&inv)?;
     let ephemeral = inv.args.ephemeral;
     let custom_data = match &inv.args.custom_data {
-        Some(custom_data) => quote::quote! { Box::new(#custom_data) },
-        None => quote::quote! { Box::new(()) },
+        Some(custom_data) => quote::quote! { ::std::boxed::Box::new(#custom_data) },
+        None => quote::quote! { ::std::boxed::Box::new(()) },
     };
 
     let name_localizations = iter_tuple_2_to_hash_map(inv.args.name_localized.into_iter());
@@ -360,8 +364,8 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
     Ok(quote::quote! {
         #[allow(clippy::str_to_string)]
         #function_visibility fn #function_ident #function_generics() -> ::poise::Command<
-            <#ctx_type_with_static as poise::_GetGenerics>::U,
-            <#ctx_type_with_static as poise::_GetGenerics>::E,
+            <#ctx_type_with_static as ::poise::_GetGenerics>::U,
+            <#ctx_type_with_static as ::poise::_GetGenerics>::E,
         > {
             #function
 
@@ -370,20 +374,20 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
                 slash_action: #slash_action,
                 context_menu_action: #context_menu_action,
 
-                subcommands: vec![ #( #subcommands() ),* ],
+                subcommands: ::std::vec![ #( #subcommands() ),* ],
                 subcommand_required: #subcommand_required,
-                name: #command_name.to_string(),
+                name: ::std::string::ToString::to_string(#command_name),
                 name_localizations: #name_localizations,
-                qualified_name: String::from(#command_name), // properly filled in later by Framework
-                identifying_name: String::from(#identifying_name),
-                source_code_name: String::from(#function_name),
+                qualified_name: ::core::convert::From::from(#command_name), // properly filled in later by Framework
+                identifying_name: ::core::convert::From::from(#identifying_name),
+                source_code_name: ::core::convert::From::from(#function_name),
                 category: #category,
                 description: #description,
                 description_localizations: #description_localizations,
                 help_text: #help_text,
                 hide_in_help: #hide_in_help,
                 manual_cooldowns: #manual_cooldowns,
-                cooldowns: std::sync::Mutex::new(::poise::Cooldowns::new()),
+                cooldowns: ::std::sync::Mutex::new(::poise::Cooldowns::new()),
                 cooldown_config: #cooldown_config,
                 reuse_response: #reuse_response,
                 default_member_permissions: #default_member_permissions,
@@ -395,12 +399,12 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
                 nsfw_only: #nsfw_only,
                 install_context: #install_context,
                 interaction_context: #interaction_context,
-                checks: vec![ #( |ctx| Box::pin(#checks(ctx)) ),* ],
+                checks: ::std::vec![ #( |ctx| ::std::boxed::Box::pin(#checks(ctx)) ),* ],
                 on_error: #on_error,
-                parameters: vec![ #( #parameters ),* ],
+                parameters: ::std::vec![ #( #parameters ),* ],
                 custom_data: #custom_data,
 
-                aliases: vec![ #( #aliases.to_string(), )* ],
+                aliases: ::std::vec![ #( ::std::string::ToString::to_string(#aliases), )* ],
                 invoke_on_edit: #invoke_on_edit,
                 track_deletion: #track_deletion,
                 broadcast_typing: #broadcast_typing,
@@ -424,10 +428,10 @@ fn generate_cooldown_config(args: &CommandArgs) -> proc_macro2::TokenStream {
     ];
 
     if all_cooldowns.iter().all(Option::is_none) {
-        return quote::quote!(std::sync::RwLock::default());
+        return quote::quote!(::core::default::Default::default());
     }
 
-    let to_seconds_path = quote::quote!(std::time::Duration::from_secs);
+    let to_seconds_path = quote::quote!(::std::time::Duration::from_secs);
 
     let global_cooldown = wrap_option_and_map(args.global_cooldown, &to_seconds_path);
     let user_cooldown = wrap_option_and_map(args.user_cooldown, &to_seconds_path);
@@ -436,7 +440,7 @@ fn generate_cooldown_config(args: &CommandArgs) -> proc_macro2::TokenStream {
     let member_cooldown = wrap_option_and_map(args.member_cooldown, &to_seconds_path);
 
     quote::quote!(
-        std::sync::RwLock::new(::poise::CooldownConfig {
+        ::std::sync::RwLock::new(::poise::CooldownConfig {
             global: #global_cooldown,
             user: #user_cooldown,
             guild: #guild_cooldown,
