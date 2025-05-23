@@ -38,6 +38,7 @@ fn find_matching_command<'a, 'b, U, E>(
 /// After this, the [`crate::ApplicationContext`] should be passed into [`run_command`] or
 /// [`run_autocomplete`].
 #[allow(clippy::too_many_arguments)] // We need to pass them all in to create Context.
+#[allow(clippy::result_large_err)] // We cannot fix this without breaking
 fn extract_command<'a, U, E>(
     framework: crate::FrameworkContext<'a, U, E>,
     ctx: &'a serenity::Context,

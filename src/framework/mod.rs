@@ -269,7 +269,7 @@ pub async fn insert_owners_from_http(
             };
 
             // s has specified the teams they want to be considered "Owner".
-            if initialized_teams.iter().any(|r| *r == member.role) {
+            if initialized_teams.contains(&member.role) {
                 owners.insert(member.user.id);
             }
         }
