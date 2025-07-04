@@ -95,6 +95,12 @@ impl<'a> CreateReply<'a> {
         self.reply = reply;
         self
     }
+
+    /// Sets the flags for this message.
+    pub fn flags(mut self, flags: MessageFlags) -> Self {
+        self.flags = Some(flags);
+        self
+    }
 }
 
 /// Methods to create a message builder from any type from this [`CreateReply`]. Used by poise
