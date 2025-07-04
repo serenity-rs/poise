@@ -86,18 +86,39 @@ impl EditTracker {
     /// not in cache. Also returns a bool with `true` if this message was previously tracked
     ///
     /// Returns None if the command shouldn't be re-run, e.g. if the message content wasn't edited
-    pub fn process_message_update(
+    pub fn process_message_update<U, E>(
         &mut self,
         user_msg_update: &serenity::MessageUpdateEvent,
-        ignore_edits_if_not_yet_responded: bool,
+        prefix_options: &crate::PrefixFrameworkOptions<U, E>,
+        cached_message: Option<&serenity::Message>,
     ) -> Option<(serenity::Message, bool)> {
+        #[cfg(feature = "cache")]
+        if prefix_options.only_run_on_cached_message && cached_message.is_none() {
+            return None;
+        }
+
+        if let Some(tracking_window) = prefix_options.tracking_window {
+            let created_timestamp = user_msg_update.id.created_at().unix_timestamp();
+            let edited_timestamp = user_msg_update.edited_timestamp.expect(
+                "Discord now sends the entire message object on message edit, regardless of edit.",
+            ).unix_timestamp();
+
+            let diff = edited_timestamp - created_timestamp;
+
+            if diff > tracking_window.as_secs() as i64 {
+                return None;
+            }
+        }
+
         match self
             .cache
             .iter_mut()
             .find(|invocation| invocation.user_msg.id == user_msg_update.id)
         {
             Some(invocation) => {
-                if ignore_edits_if_not_yet_responded && invocation.bot_response.is_none() {
+                if prefix_options.ignore_edits_if_not_yet_responded
+                    && invocation.bot_response.is_none()
+                {
                     return None;
                 }
 
@@ -110,13 +131,52 @@ impl EditTracker {
                     return None;
                 }
 
+                if prefix_options.ignore_suppress_embeds_toggle {
+                    let invocation_has_flag = invocation
+                        .user_msg
+                        .flags
+                        .map(|flags| flags.contains(serenity::MessageFlags::SUPPRESS_EMBEDS))
+                        .unwrap_or(false);
+
+                    let update_has_flag = user_msg_update
+                        .flags
+                        .flatten()
+                        .map(|flags| flags.contains(serenity::MessageFlags::SUPPRESS_EMBEDS))
+                        .unwrap_or(false);
+
+                    if invocation_has_flag != update_has_flag {
+                        return None;
+                    }
+                }
+
                 update_message(&mut invocation.user_msg, user_msg_update.clone());
                 Some((invocation.user_msg.clone(), true))
             }
             None => {
-                if ignore_edits_if_not_yet_responded {
+                if prefix_options.ignore_edits_if_not_yet_responded {
                     return None;
                 }
+
+                if prefix_options.ignore_suppress_embeds_toggle {
+                    if let Some(msg) = cached_message {
+                        let invocation_has_flag = msg
+                            .flags
+                            .map(|flags| flags.contains(serenity::MessageFlags::SUPPRESS_EMBEDS))
+                            .unwrap_or(false);
+
+                        let update_has_flag = user_msg_update
+                            .flags
+                            .flatten()
+                            .map(|flags| flags.contains(serenity::MessageFlags::SUPPRESS_EMBEDS))
+                            .unwrap_or(false);
+
+                        if invocation_has_flag != update_has_flag {
+                            return None;
+                        }
+                    }
+                }
+
+                // not gonna do some stuff with the cache if its available because this functionality vanishes on serenity-next.
                 let mut user_msg = serenity::CustomMessage::new().build();
                 update_message(&mut user_msg, user_msg_update.clone());
                 Some((user_msg, false))

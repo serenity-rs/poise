@@ -156,6 +156,24 @@ pub struct PrefixFrameworkOptions<U, E> {
             &'a serenity::Message,
         ) -> crate::BoxFuture<'a, Result<(), E>>,
     >,
+    /// Whether to ignore messages that are not present in the message cache for a guild.
+    ///
+    /// This is recommended to keep on, or at least [Self::tracking_window] should be set to a sane
+    /// value due to discord sending message updates for old messages that have embeds, invoking
+    /// commands unintentionally.
+    #[cfg(feature = "cache")]
+    pub only_run_on_cached_message: bool,
+    /// Do not invoke commands when the message has had it's suppress embeds toggle changed
+    ///
+    /// It is recommended to keep this on to prevent accidental/unintentional message invocations
+    /// caused by the user or by bots, cache feature is best enabled to cover untracked edits.
+    pub ignore_suppress_embeds_toggle: bool,
+    /// Do not invoke commands from edits when the message is more than this duration old.
+    ///
+    /// This is recommended to keep to a sane because Discord can send message edits for old
+    /// message that have embeds, invoking commands unintentionally which can be considered
+    /// dangerous.
+    pub tracking_window: Option<std::time::Duration>,
     /* // TODO: implement
     /// Whether to invoke help command when someone sends a message with just a bot mention
     pub help_when_mentioned: bool,
@@ -186,6 +204,10 @@ impl<U, E> Default for PrefixFrameworkOptions<U, E> {
             ignore_thread_creation: true,
             case_insensitive_commands: true,
             non_command_message: None,
+            #[cfg(feature = "cache")]
+            only_run_on_cached_message: true,
+            ignore_suppress_embeds_toggle: true,
+            tracking_window: Some(std::time::Duration::from_secs(60 * 15)),
             // help_when_mentioned: true,
             // help_commmand: None,
             // command_specific_help_commmand: None,

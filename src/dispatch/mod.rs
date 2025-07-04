@@ -96,10 +96,15 @@ pub async fn dispatch_event<U: Send + Sync, E>(
             if let Some(edit_tracker) = &framework.options.prefix_options.edit_tracker {
                 let msg = edit_tracker.write().unwrap().process_message_update(
                     event,
+                    &framework.options.prefix_options,
+                    #[cfg(feature = "cache")]
                     framework
-                        .options()
-                        .prefix_options
-                        .ignore_edits_if_not_yet_responded,
+                        .serenity_context
+                        .cache
+                        .message(event.channel_id, event.id)
+                        .as_deref(),
+                    #[cfg(not(feature = "cache"))]
+                    None,
                 );
 
                 if let Some((msg, previously_tracked)) = msg {
