@@ -179,7 +179,9 @@ pub async fn register_application_commands_buttons<U: Send + Sync + 'static, E>(
             .emoji('🗑'),
     ];
 
-    let components = [serenity::CreateActionRow::buttons(&buttons)];
+    let components = [serenity::CreateComponent::ActionRow(
+        serenity::CreateActionRow::buttons(&buttons),
+    )];
     let builder = crate::CreateReply::default()
         .content("Choose what to do with the commands:")
         .components(&components);
