@@ -16,8 +16,8 @@ use crate::serenity_prelude as serenity;
 /// serenity::Command::set_global_commands(ctx, create_commands).await?;
 /// # Ok(()) }
 /// ```
-pub fn create_application_commands<U, E>(
-    commands: &[crate::Command<U, E>],
+pub fn create_application_commands<'a, U: 'a, E: 'a>(
+    commands: impl IntoIterator<Item = &'a crate::Command<U, E>>,
 ) -> Vec<serenity::CreateCommand> {
     /// We decided to extract context menu commands recursively, despite the subcommand hierarchy
     /// not being preserved. Because it's more confusing to just silently discard context menu
@@ -35,8 +35,9 @@ pub fn create_application_commands<U, E>(
         }
     }
 
-    let mut commands_builder = Vec::with_capacity(commands.len());
-    for command in commands {
+    let command_iter = commands.into_iter();
+    let mut commands_builder = Vec::with_capacity(command_iter.size_hint().0);
+    for command in command_iter {
         if let Some(slash_command) = command.create_as_slash_command() {
             commands_builder.push(slash_command);
         }
@@ -49,9 +50,9 @@ pub fn create_application_commands<U, E>(
 ///
 /// Thin wrapper around [`create_application_commands`] that funnels the returned builder into
 /// [`serenity::Command::set_global_commands`].
-pub async fn register_globally<U, E>(
+pub async fn register_globally<'a, U: 'a, E: 'a>(
     http: impl AsRef<serenity::Http>,
-    commands: &[crate::Command<U, E>],
+    commands: impl IntoIterator<Item = &'a crate::Command<U, E>>,
 ) -> Result<(), serenity::Error> {
     let builder = create_application_commands(commands);
     serenity::Command::set_global_commands(http, builder).await?;
@@ -62,9 +63,9 @@ pub async fn register_globally<U, E>(
 ///
 /// Thin wrapper around [`create_application_commands`] that funnels the returned builder into
 /// [`serenity::GuildId::set_commands`].
-pub async fn register_in_guild<U, E>(
+pub async fn register_in_guild<'a, U: 'a, E: 'a>(
     http: impl AsRef<serenity::Http>,
-    commands: &[crate::Command<U, E>],
+    commands: impl IntoIterator<Item = &'a crate::Command<U, E>>,
     guild_id: serenity::GuildId,
 ) -> Result<(), serenity::Error> {
     let builder = create_application_commands(commands);
