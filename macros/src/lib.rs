@@ -88,9 +88,10 @@ for example for command-specific help (i.e. `~help command_name`). Escape newlin
 SlashContext, which contain a variety of context data each. Context provides some utility methods to
 access data present in both PrefixContext and SlashContext, like `author()` or `created_at()`.
 
-All following parameters are inputs to the command. You can use all types that implement `poise::PopArgument`, `serenity::ArgumentConvert` or `std::str::FromStr`.
-You can also wrap types in `Option` or `Vec` to make them optional or variadic. In addition, there
-are multiple attributes you can use on parameters:
+All following parameters are inputs to the command. You can use all types that implement
+`PopArgument` (for prefix commands) or `SlashArgument` (for slash commands). You can also wrap
+types in `Option` or `Vec` to make them optional or variadic. In addition, there are multiple
+attributes you can use on parameters:
 
 ## Meta properties
 
@@ -109,6 +110,7 @@ are multiple attributes you can use on parameters:
 - `#[max_length = 1]`: Maximum length for this string parameter (slash-only)
 
 ## Parser settings (prefix only)
+- `#[string]`: Indicates that a type implements `FromStr` and should be parsed from a string argument.
 - `#[rest]`: Use the entire rest of the message for this parameter (prefix-only)
 - `#[lazy]`: Can be used on Option and Vec parameters and is equivalent to regular expressions' laziness (prefix-only)
 - `#[flag]`: Can be used on a bool parameter to set the bool to true if the user typed the parameter name literally (prefix-only)

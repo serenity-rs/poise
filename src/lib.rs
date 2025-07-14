@@ -192,7 +192,7 @@ type Context<'a> = poise::Context<'a, Data, Error>;
 )]
 async fn my_huge_ass_command(
     ctx: Context<'_>,
-    #[description = "Consectetur"] ip_addr: std::net::IpAddr, // implements FromStr
+    #[description = "Consectetur"] #[string] ip_addr: std::net::IpAddr, // implements FromStr
     #[description = "Amet"] user: serenity::Member, // implements ArgumentConvert
     #[description = "Sit"] code_block: poise::CodeBlock, // implements PopArgument
     #[description = "Dolor"] #[flag] my_flag: bool,

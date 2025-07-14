@@ -8,12 +8,14 @@ fn quote_parameter(p: &super::CommandParameter) -> Result<proc_macro2::TokenStre
         Lazy,
         Flag,
         Rest,
+        String,
     }
-    let modifier = match (p.args.lazy, p.args.rest, p.args.flag) {
-        (false, false, false) => Modifier::None,
-        (true, false, false) => Modifier::Lazy,
-        (false, true, false) => Modifier::Rest,
-        (false, false, true) => Modifier::Flag,
+    let modifier = match (p.args.lazy, p.args.rest, p.args.flag, p.args.string) {
+        (false, false, false, false) => Modifier::None,
+        (true, false, false, false) => Modifier::Lazy,
+        (false, true, false, false) => Modifier::Rest,
+        (false, false, true, false) => Modifier::Flag,
+        (false, false, false, true) => Modifier::String,
         _ => {
             let message = "modifiers like #[lazy] or #[rest] currently cannot be used together";
             return Err(syn::Error::new(p.span, message));
@@ -33,6 +35,7 @@ fn quote_parameter(p: &super::CommandParameter) -> Result<proc_macro2::TokenStre
         }
         Modifier::Lazy => quote::quote! { #[lazy] (#type_) },
         Modifier::Rest => quote::quote! { #[rest] (#type_) },
+        Modifier::String => quote::quote! { #[string] (#type_) },
         Modifier::None => quote::quote! { (#type_) },
     })
 }
