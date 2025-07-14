@@ -140,6 +140,7 @@ fn test_pop_string() {
         (r#"\"AA BB\""#, r#""AA"#),
         (r#"\"AA\ BB\""#, r#""AA BB""#),
         (r#""\"AA BB\"""#, r#""AA BB""#),
+        (r#"   AA BB"#, r#"AA"#),
     ] {
         assert_eq!(pop_string(string).unwrap().1, arg);
     }
