@@ -79,6 +79,7 @@ struct ParamArgs {
     max: Option<syn::Lit>,
     min_length: Option<syn::Lit>,
     max_length: Option<syn::Lit>,
+    string: bool,
     lazy: bool,
     flag: bool,
     rest: bool,
