@@ -30,6 +30,8 @@ pub trait SlashArgument: Sized {
     }
 }
 
+/// Extracts a string argument and then converts it to `T` using its `ArgumentConvert`
+/// implementation.
 async fn extract_via_argumentconvert<T>(
     ctx: &serenity::Context,
     interaction: &serenity::CommandInteraction,
@@ -61,6 +63,7 @@ where
     })
 }
 
+/// Auto-impls `SlashArgument` for a type by deferring to [`extract_via_argumentconvert`].
 macro_rules! argumentconvert_slash_argument {
     ( $(
         $( #[cfg(feature = $feature:literal)] )?

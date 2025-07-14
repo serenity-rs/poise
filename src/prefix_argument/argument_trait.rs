@@ -84,6 +84,7 @@ impl<'a> PopArgument<'a> for String {
     }
 }
 
+/// Pops a string and then converts it to `T` using its `ArgumentConvert` implementation.
 async fn pop_from_argumentconvert<'a, T>(
     args: &'a str,
     attachment_index: usize,
@@ -102,6 +103,7 @@ where
     Ok((args.trim_start(), attachment_index, object))
 }
 
+/// Auto-impls `PopArgument` for a type by deferring to [`pop_from_argumentconvert`].
 macro_rules! argumentconvert_pop_argument {
     ( $(
         $( #[cfg(feature = $feature:literal)] )?
