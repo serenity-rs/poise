@@ -97,7 +97,7 @@ impl<'a> CreateReply<'a> {
     }
 
     /// Sets the flags for this message.
-    pub fn flags(mut self, flags: MessageFlags) -> Self {
+    pub fn flags(mut self, flags: serenity::MessageFlags) -> Self {
         self.flags = Some(flags);
         self
     }
