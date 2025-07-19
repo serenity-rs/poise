@@ -133,7 +133,7 @@ fn parse_rest(
         if input.is_empty() {
             #fail
         } else {
-            match <#ty as ::poise::serenity_prelude::ArgumentConvert>::convert(
+            match <#ty as ::poise::ArgumentConvert>::convert(
                 serenity_ctx, msg.guild_id, Some(msg.channel_id), input
             ).await {
                 Ok(#token) => {
