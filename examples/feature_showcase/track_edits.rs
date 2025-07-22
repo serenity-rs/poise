@@ -13,7 +13,9 @@ pub async fn test_reuse_response(ctx: Context<'_>) -> Result<(), Error> {
         .label("button 1")
         .style(serenity::ButtonStyle::Primary)];
 
-    let components = [serenity::CreateActionRow::buttons(&buttons)];
+    let components = [serenity::CreateComponent::ActionRow(
+        serenity::CreateActionRow::buttons(&buttons),
+    )];
     let reply = poise::CreateReply::default()
         .content("message 1")
         .embed(embed)
@@ -32,7 +34,9 @@ pub async fn test_reuse_response(ctx: Context<'_>) -> Result<(), Error> {
         .label("button 2")
         .style(serenity::ButtonStyle::Danger)];
 
-    let components = [serenity::CreateActionRow::buttons(&buttons)];
+    let components = [serenity::CreateComponent::ActionRow(
+        serenity::CreateActionRow::buttons(&buttons),
+    )];
     let reply = poise::CreateReply::default()
         .content("message 2")
         .embed(embed)
