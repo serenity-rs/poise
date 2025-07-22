@@ -71,8 +71,8 @@ For more projects, see GitHub's [Used by] page.
 [current docs badge]: https://img.shields.io/badge/docs-current-4d76ae.svg?style=flat-square
 [next docs]: https://serenity-rs.github.io/poise/next/poise/index.html
 [next docs badge]: https://img.shields.io/badge/docs-next-4d76ae.svg?style=flat-square
-[msrv]: https://blog.rust-lang.org/2025/02/20/Rust-1.85.0.html
-[msrv badge]: https://img.shields.io/badge/rust-1.85+-93450a.svg?style=flat-square
+[msrv]: https://blog.rust-lang.org/2025/06/26/Rust-1.88.0/
+[msrv badge]: https://img.shields.io/badge/rust-1.88+-93450a.svg?style=flat-square
 [license]: LICENSE
 [license badge]: https://img.shields.io/crates/l/poise.svg?style=flat-square&color=yellow
 [guild]: https://discord.gg/serenity-rs
