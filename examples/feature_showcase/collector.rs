@@ -10,7 +10,9 @@ pub async fn boop(ctx: Context<'_>) -> Result<(), Error> {
         .style(serenity::ButtonStyle::Primary)
         .label("Boop me!")];
 
-    let components = [serenity::CreateActionRow::buttons(&buttons)];
+    let components = [serenity::CreateComponent::ActionRow(
+        serenity::CreateActionRow::buttons(&buttons),
+    )];
     let reply = CreateReply::default()
         .content("I want some boops!")
         .components(&components);
