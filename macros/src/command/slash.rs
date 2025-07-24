@@ -1,4 +1,4 @@
-use super::Invocation;
+use super::{CommandParameter, Invocation};
 use crate::util::{
     extract_type_parameter, iter_tuple_2_to_vec_map, tuple_2_iter_deref, wrap_option_to_string,
 };
@@ -156,35 +156,24 @@ pub fn generate_slash_action(inv: &Invocation) -> Result<proc_macro2::TokenStrea
     let param_identifiers = (0..inv.parameters.len())
         .map(|i| format_ident!("poise_param_{i}"))
         .collect::<Vec<_>>();
-    let param_names = inv.parameters.iter().map(|p| &p.name).collect::<Vec<_>>();
 
-    let param_types = inv
+    let params = inv
         .parameters
         .iter()
-        .map(|p| {
-            let t = &p.type_;
-            if p.args.flag {
-                quote::quote! { FLAG }
-            } else if let Some(choices) = &p.args.choices {
-                let choice_indices = (0..choices.0.len()).map(syn::Index::from);
-                let choice_vals = &choices.0;
-                quote::quote! { INLINE_CHOICE #t [#(#choice_indices: #choice_vals),*] }
-            } else {
-                quote::quote! { #t }
-            }
-        })
+        .map(parse_slash_param)
         .collect::<Vec<_>>();
 
     Ok(quote::quote! {
         |ctx| Box::pin(async move {
-            // idk why this can't be put in the macro itself (where the lint is triggered) and
-            // why clippy doesn't turn off this lint inside macros in the first place
-            #[allow(clippy::needless_question_mark)]
+            let ( #( #param_identifiers, )* ) = async {
+                let serenity_ctx = ctx.serenity_context();
+                let interaction = ctx.interaction;
+                let args = ctx.args;
 
-            let ( #( #param_identifiers, )* ) = ::poise::parse_slash_args!(
-                ctx.serenity_context(), ctx.interaction, ctx.args =>
-                #( (#param_names: #param_types), )*
-            ).await.map_err(|error| error.to_framework_error(ctx))?;
+                Ok::<_, ::poise::SlashArgError>((#( #params, )*))
+            }
+            .await
+            .map_err(|error| error.to_framework_error(ctx))?;
 
             let is_framework_cooldown = !ctx.command.manual_cooldowns
                 .unwrap_or_else(|| ctx.framework.options.manual_cooldowns);
@@ -203,6 +192,106 @@ pub fn generate_slash_action(inv: &Invocation) -> Result<proc_macro2::TokenStrea
     })
 }
 
+fn parse_slash_param(param: &CommandParameter) -> proc_macro2::TokenStream {
+    fn extract_slash_argument(ty: &syn::Type) -> syn::Expr {
+        syn::parse_quote! {
+            <#ty as ::poise::SlashArgument>::extract(
+                serenity_ctx,
+                interaction,
+                &arg.value
+            )
+            .await?
+        }
+    }
+
+    let name = &param.name;
+    let ty = &param.type_;
+
+    if param.args.flag {
+        // Extract #[flag]
+        let extract = extract_slash_argument(&syn::parse_quote! { bool });
+        quote::quote! {
+            match args.iter().find(|arg| arg.name == #name) {
+                Some(arg) => #extract,
+                None => false,
+            }
+        }
+    } else if let Some(choices) = &param.args.choices {
+        // Extract #[choices(...)] (no Option supported ;-;)
+        let choice_indices = (0..choices.0.len()).map(syn::Index::from);
+        let choice_vals = &choices.0;
+        quote::quote! {
+            if let Some(arg) = args.iter().find(|arg| arg.name == #name) {
+                let ::poise::serenity_prelude::ResolvedValue::Integer(index) = arg.value else {
+                    return Err(::poise::SlashArgError::new_command_structure_mismatch(
+                        "expected integer, as the index for an inline choice parameter")
+                    );
+                };
+                match index {
+                    #( #choice_indices => #choice_vals, )*
+                    _ => {
+                        return Err(::poise::SlashArgError::new_command_structure_mismatch(
+                            "out of range index for inline choice parameter"
+                        ));
+                    }
+                }
+            } else {
+                return Err(::poise::SlashArgError::new_command_structure_mismatch(
+                    "a required argument is missing"
+                ));
+            }
+        }
+    } else if let Some(ty) = unwrap_generic(ty, "Option") {
+        // Extract Option<T>
+        let extract = extract_slash_argument(ty);
+        quote::quote! {
+            match args.iter().find(|arg| arg.name == #name) {
+                Some(arg) => Some(#extract),
+                None => None,
+            }
+        }
+    } else if let Some(ty) = unwrap_generic(ty, "Vec") {
+        // Extract Vec<T> (slash commands don't support variadic arguments right now
+        let extract = extract_slash_argument(ty);
+        quote::quote! {
+            match args.iter().find(|arg| arg.name == #name) {
+                Some(arg) => vec![#extract],
+                None => vec![]
+            }
+        }
+    } else {
+        // Extract T
+        let extract = extract_slash_argument(ty);
+        quote::quote! {
+            match args.iter().find(|arg| arg.name == #name) {
+                Some(arg) => #extract,
+                None => {
+                    return Err(::poise::SlashArgError::new_command_structure_mismatch(
+                        "a required argument is missing"
+                    ));
+                }
+            }
+        }
+    }
+}
+
+fn unwrap_generic<'a>(ty: &'a syn::Type, name: &str) -> Option<&'a syn::Type> {
+    if let syn::Type::Path(typepath) = ty {
+        if typepath.qself.is_none() {
+            if let Some(last) = typepath.path.segments.last() {
+                if last.ident == name {
+                    if let syn::PathArguments::AngleBracketed(params) = &last.arguments {
+                        if let Some(syn::GenericArgument::Type(ty)) = params.args.first() {
+                            return Some(ty);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    None
+}
+
 pub fn generate_context_menu_action(
     inv: &Invocation,
 ) -> Result<proc_macro2::TokenStream, syn::Error> {
@@ -212,7 +301,7 @@ pub fn generate_context_menu_action(
             return Err(syn::Error::new(
                 inv.function.sig.inputs.span(),
                 "Context menu commands require exactly one parameter",
-            ))
+            ));
         }
     };
 
