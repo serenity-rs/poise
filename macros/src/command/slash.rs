@@ -217,9 +217,27 @@ fn parse_slash_param(param: &CommandParameter) -> proc_macro2::TokenStream {
             }
         }
     } else if let Some(choices) = &param.args.choices {
-        // Extract #[choices(...)] (no Option supported ;-;)
+        // Extract #[choices(...)]
         let choice_indices = (0..choices.0.len()).map(syn::Index::from);
         let choice_vals = &choices.0;
+
+        // Allow `Option<T>` for choice parameters
+        let (choices, not_found) = if unwrap_generic(ty, "Option").is_some() {
+            (
+                quote::quote! { #( #choice_indices => Some(#choice_vals), )* },
+                quote::quote! { None },
+            )
+        } else {
+            (
+                quote::quote! { #( #choice_indices => #choice_vals, )* },
+                quote::quote! {
+                    return Err(::poise::SlashArgError::new_command_structure_mismatch(
+                        "a required argument is missing"
+                    ));
+                },
+            )
+        };
+
         quote::quote! {
             if let Some(arg) = args.iter().find(|arg| arg.name == #name) {
                 let ::poise::serenity_prelude::ResolvedValue::Integer(index) = arg.value else {
@@ -228,7 +246,7 @@ fn parse_slash_param(param: &CommandParameter) -> proc_macro2::TokenStream {
                     );
                 };
                 match index {
-                    #( #choice_indices => #choice_vals, )*
+                    #choices
                     _ => {
                         return Err(::poise::SlashArgError::new_command_structure_mismatch(
                             "out of range index for inline choice parameter"
@@ -236,9 +254,7 @@ fn parse_slash_param(param: &CommandParameter) -> proc_macro2::TokenStream {
                     }
                 }
             } else {
-                return Err(::poise::SlashArgError::new_command_structure_mismatch(
-                    "a required argument is missing"
-                ));
+                #not_found
             }
         }
     } else if let Some(ty) = unwrap_generic(ty, "Option") {
