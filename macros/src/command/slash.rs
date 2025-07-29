@@ -1,4 +1,4 @@
-use super::{CommandParameter, Invocation};
+use super::{unwrap_generic, CommandParameter, Invocation};
 use crate::util::{
     extract_type_parameter, iter_tuple_2_to_vec_map, tuple_2_iter_deref, wrap_option_to_string,
 };
@@ -289,23 +289,6 @@ fn parse_slash_param(param: &CommandParameter) -> proc_macro2::TokenStream {
             }
         }
     }
-}
-
-fn unwrap_generic<'a>(ty: &'a syn::Type, name: &str) -> Option<&'a syn::Type> {
-    if let syn::Type::Path(typepath) = ty {
-        if typepath.qself.is_none() {
-            if let Some(last) = typepath.path.segments.last() {
-                if last.ident == name {
-                    if let syn::PathArguments::AngleBracketed(params) = &last.arguments {
-                        if let Some(syn::GenericArgument::Type(ty)) = params.args.first() {
-                            return Some(ty);
-                        }
-                    }
-                }
-            }
-        }
-    }
-    None
 }
 
 pub fn generate_context_menu_action(
