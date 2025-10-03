@@ -69,10 +69,15 @@ for example for command-specific help (i.e. `~help command_name`). Escape newlin
 ## Cooldown
 - `manual_cooldowns`: Allows overriding the framework's built-in cooldowns tracking without affecting other commands.
 - `global_cooldown`: Minimum duration in seconds between invocations, globally
+- `global_cooldown_burst`: The number of times the command can be invoked within the cooldown period, globally. The default is 1.
 - `user_cooldown`: Minimum duration in seconds between invocations, per user
+- `user_cooldown_burst`: The number of times the command can be invoked within the cooldown period, per user. The default is 1.
 - `guild_cooldown`: Minimum duration in seconds between invocations, per guild
+- `guild_cooldown_burst`: The number of times the command can be invoked within the cooldown period, per guild. The default is 1.
 - `channel_cooldown`: Minimum duration in seconds between invocations, per channel
+- `channel_cooldown_burst`: The number of times the command can be invoked within the cooldown period, per channel. The default is 1.
 - `member_cooldown`: Minimum duration in seconds between invocations, per guild member
+- `member_cooldown_burst`: The number of times the command can be invoked within the cooldown period, per guild member. The default is 1.
 
 ## Other
 
