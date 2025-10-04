@@ -98,6 +98,20 @@ pub async fn cooldowns(ctx: Context<'_>) -> Result<(), Error> {
     Ok(())
 }
 
+// Burstable cooldowns
+#[poise::command(
+    prefix_command,
+    track_edits,
+    slash_command,
+    user_cooldown = 20,
+    user_cooldown_burst = 3
+)]
+pub async fn burstable_cooldown(ctx: Context<'_>) -> Result<(), Error> {
+    ctx.say("You successfully called this burstable command")
+        .await?;
+    Ok(())
+}
+
 #[poise::command(prefix_command, slash_command)]
 pub async fn minmax(
     ctx: Context<'_>,
