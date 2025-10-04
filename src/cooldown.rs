@@ -703,4 +703,60 @@ mod test {
         assert!(cooldown < Duration::from_secs(1));
         assert!(cooldown > Duration::from_secs(0));
     }
+
+    #[test]
+    fn global_bursts_do_not_return_cooldown_burst_count_is_exceeded() {
+        const BURST_AMOUNT: u64 = 10;
+        let config = CooldownConfig {
+            global: Some(Duration::from_secs(10)),
+            global_burst_amount: Some(BURST_AMOUNT),
+            ..Default::default()
+        };
+        let mut tracker = CooldownTracker::default();
+        let ctx = CooldownContext {
+            user_id: UserId::from(12345),
+            guild_id: None,
+            channel_id: ChannelId::from(67890),
+        };
+
+        for _ in 0..BURST_AMOUNT {
+            assert!(tracker.remaining_cooldown(ctx.clone(), &config).is_none());
+
+            tracker.increment_usage(ctx.clone(), &config);
+        }
+
+        let cooldown = tracker.remaining_cooldown(ctx, &config);
+        assert!(cooldown.is_some());
+        let cooldown = cooldown.unwrap();
+        assert!(cooldown < Duration::from_secs(10));
+        assert!(cooldown > Duration::from_secs(9));
+    }
+
+    #[test]
+    fn member_bursts_do_not_return_cooldown_burst_count_is_exceeded() {
+        const BURST_AMOUNT: u64 = 10;
+        let config = CooldownConfig {
+            member: Some(Duration::from_secs(10)),
+            member_burst_amount: Some(BURST_AMOUNT),
+            ..Default::default()
+        };
+        let mut tracker = CooldownTracker::default();
+        let ctx = CooldownContext {
+            user_id: UserId::from(12345),
+            guild_id: Some(GuildId::from(1337)),
+            channel_id: ChannelId::from(67890),
+        };
+
+        for _ in 0..BURST_AMOUNT {
+            assert!(tracker.remaining_cooldown(ctx.clone(), &config).is_none());
+
+            tracker.increment_usage(ctx.clone(), &config);
+        }
+
+        let cooldown = tracker.remaining_cooldown(ctx, &config);
+        assert!(cooldown.is_some());
+        let cooldown = cooldown.unwrap();
+        assert!(cooldown < Duration::from_secs(10));
+        assert!(cooldown > Duration::from_secs(9));
+    }
 }
