@@ -173,3 +173,392 @@ impl<'a> From<&'a serenity::Message> for CooldownContext {
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+    use ::serenity::all::{ChannelId, GuildId, UserId};
+
+    use super::*;
+
+    #[test]
+    fn start_cooldown_triggers_guild_cooldown() {
+        let config = CooldownConfig {
+            global: Some(Duration::from_secs(1)),
+            ..Default::default()
+        };
+        let mut tracker = CooldownTracker::default();
+        let ctx = CooldownContext {
+            user_id: UserId::from(12345),
+            guild_id: None,
+            channel_id: ChannelId::from(67890),
+        };
+
+        assert!(tracker.remaining_cooldown(ctx.clone(), &config).is_none());
+
+        tracker.start_cooldown(ctx.clone());
+
+        let cooldown = tracker.remaining_cooldown(ctx, &config);
+        assert!(cooldown.is_some());
+        let cooldown = cooldown.unwrap();
+        assert!(cooldown < Duration::from_secs(1));
+        assert!(cooldown > Duration::from_secs(0));
+    }
+
+    #[test]
+    fn cooldown_resets_after_window_expires() {
+        let config = CooldownConfig {
+            global: Some(Duration::from_secs(1)),
+            ..Default::default()
+        };
+        let tracker = CooldownTracker {
+            global_invocation: Some(Instant::now() - Duration::from_secs(1)),
+            ..Default::default()
+        };
+        let ctx = CooldownContext {
+            user_id: UserId::from(12345),
+            guild_id: None,
+            channel_id: ChannelId::from(67890),
+        };
+
+        assert!(tracker.remaining_cooldown(ctx.clone(), &config).is_none());
+    }
+
+    #[tokio::test]
+    async fn basic_global_cooldown() {
+        let config = CooldownConfig {
+            global: Some(Duration::from_secs(1)),
+            ..Default::default()
+        };
+        let mut tracker = CooldownTracker::default();
+        let ctx = CooldownContext {
+            user_id: UserId::from(12345),
+            guild_id: None,
+            channel_id: ChannelId::from(67890),
+        };
+
+        tracker.start_cooldown(ctx.clone());
+
+        let cooldown = tracker.remaining_cooldown(ctx.clone(), &config);
+        assert!(cooldown.is_some());
+        let cooldown = cooldown.unwrap();
+        assert!(cooldown < Duration::from_secs(1));
+        assert!(cooldown > Duration::from_secs(0));
+        tokio::time::sleep(cooldown).await;
+        assert!(tracker.remaining_cooldown(ctx, &config).is_none());
+    }
+
+    #[test]
+    fn global_cooldown_affects_other_users() {
+        let config = CooldownConfig {
+            global: Some(Duration::from_secs(1)),
+            ..Default::default()
+        };
+        let mut tracker = CooldownTracker::default();
+        let ctx = CooldownContext {
+            user_id: UserId::from(12345),
+            guild_id: None,
+            channel_id: ChannelId::from(67890),
+        };
+
+        tracker.start_cooldown(ctx.clone());
+
+        let cooldown = tracker.remaining_cooldown(ctx, &config);
+        assert!(cooldown.is_some());
+        let cooldown = cooldown.unwrap();
+        assert!(cooldown < Duration::from_secs(1));
+        assert!(cooldown > Duration::from_secs(0));
+
+        let other_user_ctx = CooldownContext {
+            user_id: UserId::from(54321),
+            guild_id: None,
+            channel_id: ChannelId::from(67890),
+        };
+
+        let cooldown = tracker.remaining_cooldown(other_user_ctx, &config);
+        assert!(cooldown.is_some());
+        let cooldown = cooldown.unwrap();
+        assert!(cooldown < Duration::from_secs(1));
+        assert!(cooldown > Duration::from_secs(0));
+    }
+
+    #[tokio::test]
+    async fn basic_user_cooldown() {
+        let config = CooldownConfig {
+            user: Some(Duration::from_secs(1)),
+            ..Default::default()
+        };
+        let mut tracker = CooldownTracker::default();
+        let ctx = CooldownContext {
+            user_id: UserId::from(12345),
+            guild_id: None,
+            channel_id: ChannelId::from(67890),
+        };
+
+        assert!(tracker.remaining_cooldown(ctx.clone(), &config).is_none());
+
+        tracker.start_cooldown(ctx.clone());
+
+        let cooldown = tracker.remaining_cooldown(ctx.clone(), &config);
+        assert!(cooldown.is_some());
+        let cooldown = cooldown.unwrap();
+        assert!(cooldown < Duration::from_secs(1));
+        assert!(cooldown > Duration::from_secs(0));
+        tokio::time::sleep(cooldown).await;
+        assert!(tracker.remaining_cooldown(ctx, &config).is_none());
+    }
+
+    #[test]
+    fn user_cooldown_does_not_affect_other_users() {
+        let config = CooldownConfig {
+            user: Some(Duration::from_secs(1)),
+            ..Default::default()
+        };
+        let mut tracker = CooldownTracker::default();
+        let ctx = CooldownContext {
+            user_id: UserId::from(12345),
+            guild_id: None,
+            channel_id: ChannelId::from(67890),
+        };
+
+        tracker.start_cooldown(ctx.clone());
+
+        let cooldown = tracker.remaining_cooldown(ctx, &config);
+        assert!(cooldown.is_some());
+        let cooldown = cooldown.unwrap();
+        assert!(cooldown < Duration::from_secs(1));
+        assert!(cooldown > Duration::from_secs(0));
+
+        let other_user_ctx = CooldownContext {
+            user_id: UserId::from(54321),
+            guild_id: None,
+            channel_id: ChannelId::from(67890),
+        };
+
+        assert!(tracker
+            .remaining_cooldown(other_user_ctx, &config)
+            .is_none());
+
+        let same_user_different_channel_ctx = CooldownContext {
+            user_id: UserId::from(12345),
+            guild_id: None,
+            channel_id: ChannelId::from(9876),
+        };
+
+        let cooldown = tracker.remaining_cooldown(same_user_different_channel_ctx, &config);
+        assert!(cooldown.is_some());
+        let cooldown = cooldown.unwrap();
+        assert!(cooldown < Duration::from_secs(1));
+        assert!(cooldown > Duration::from_secs(0));
+    }
+
+    #[tokio::test]
+    async fn basic_channel_cooldown() {
+        let config = CooldownConfig {
+            channel: Some(Duration::from_secs(1)),
+            ..Default::default()
+        };
+        let mut tracker = CooldownTracker::default();
+        let ctx = CooldownContext {
+            user_id: UserId::from(12345),
+            guild_id: None,
+            channel_id: ChannelId::from(67890),
+        };
+
+        assert!(tracker.remaining_cooldown(ctx.clone(), &config).is_none());
+
+        tracker.start_cooldown(ctx.clone());
+
+        let cooldown = tracker.remaining_cooldown(ctx.clone(), &config);
+        assert!(cooldown.is_some());
+        let cooldown = cooldown.unwrap();
+        assert!(cooldown < Duration::from_secs(1));
+        assert!(cooldown > Duration::from_secs(0));
+        tokio::time::sleep(cooldown).await;
+        assert!(tracker.remaining_cooldown(ctx, &config).is_none())
+    }
+
+    #[test]
+    fn channel_cooldown_affects_one_channel() {
+        let config = CooldownConfig {
+            channel: Some(Duration::from_secs(1)),
+            ..Default::default()
+        };
+        let mut tracker = CooldownTracker::default();
+        let ctx = CooldownContext {
+            user_id: UserId::from(12345),
+            guild_id: None,
+            channel_id: ChannelId::from(67890),
+        };
+
+        tracker.start_cooldown(ctx.clone());
+
+        let cooldown = tracker.remaining_cooldown(ctx, &config);
+        assert!(cooldown.is_some());
+        let cooldown = cooldown.unwrap();
+        assert!(cooldown < Duration::from_secs(1));
+        assert!(cooldown > Duration::from_secs(0));
+
+        let other_user_ctx = CooldownContext {
+            user_id: UserId::from(54321),
+            guild_id: None,
+            channel_id: ChannelId::from(67890),
+        };
+
+        let cooldown = tracker.remaining_cooldown(other_user_ctx, &config);
+        assert!(cooldown.is_some());
+        let cooldown = cooldown.unwrap();
+        assert!(cooldown < Duration::from_secs(1));
+        assert!(cooldown > Duration::from_secs(0));
+
+        let same_user_different_channel_ctx = CooldownContext {
+            user_id: UserId::from(12345),
+            guild_id: None,
+            channel_id: ChannelId::from(9876),
+        };
+
+        assert!(tracker
+            .remaining_cooldown(same_user_different_channel_ctx, &config)
+            .is_none());
+    }
+
+    #[tokio::test]
+    async fn basic_guild_cooldown() {
+        let config = CooldownConfig {
+            guild: Some(Duration::from_secs(1)),
+            ..Default::default()
+        };
+        let mut tracker = CooldownTracker::default();
+        let ctx = CooldownContext {
+            user_id: UserId::from(12345),
+            guild_id: Some(GuildId::from(1337)),
+            channel_id: ChannelId::from(67890),
+        };
+
+        assert!(tracker.remaining_cooldown(ctx.clone(), &config).is_none());
+
+        tracker.start_cooldown(ctx.clone());
+
+        let cooldown = tracker.remaining_cooldown(ctx.clone(), &config);
+        assert!(cooldown.is_some());
+        let cooldown = cooldown.unwrap();
+        assert!(cooldown < Duration::from_secs(1));
+        assert!(cooldown > Duration::from_secs(0));
+        tokio::time::sleep(cooldown).await;
+        assert!(tracker.remaining_cooldown(ctx, &config).is_none());
+    }
+
+    #[test]
+    fn guild_cooldown_affects_one_guild() {
+        let config = CooldownConfig {
+            guild: Some(Duration::from_secs(1)),
+            ..Default::default()
+        };
+        let mut tracker = CooldownTracker::default();
+        let ctx = CooldownContext {
+            user_id: UserId::from(12345),
+            guild_id: Some(GuildId::from(1337)),
+            channel_id: ChannelId::from(67890),
+        };
+
+        tracker.start_cooldown(ctx.clone());
+
+        let cooldown = tracker.remaining_cooldown(ctx, &config);
+        assert!(cooldown.is_some());
+        let cooldown = cooldown.unwrap();
+        assert!(cooldown < Duration::from_secs(1));
+        assert!(cooldown > Duration::from_secs(0));
+
+        let other_user_ctx = CooldownContext {
+            user_id: UserId::from(54321),
+            guild_id: Some(GuildId::from(1337)),
+            channel_id: ChannelId::from(67890),
+        };
+
+        let cooldown = tracker.remaining_cooldown(other_user_ctx, &config);
+        assert!(cooldown.is_some());
+        let cooldown = cooldown.unwrap();
+        assert!(cooldown < Duration::from_secs(1));
+        assert!(cooldown > Duration::from_secs(0));
+
+        // This is not realistic since while guild id is different, the channel id is the same, but
+        // this is to demostrate the guild id affects the cooldown.
+        let same_user_different_guild_ctx = CooldownContext {
+            user_id: UserId::from(12345),
+            guild_id: Some(GuildId::from(420)),
+            channel_id: ChannelId::from(67890),
+        };
+
+        assert!(tracker
+            .remaining_cooldown(same_user_different_guild_ctx, &config)
+            .is_none());
+    }
+
+    #[tokio::test]
+    async fn basic_member_cooldown() {
+        let config = CooldownConfig {
+            member: Some(Duration::from_secs(1)),
+            ..Default::default()
+        };
+        let mut tracker = CooldownTracker::default();
+        let ctx = CooldownContext {
+            user_id: UserId::from(12345),
+            guild_id: Some(GuildId::from(1337)),
+            channel_id: ChannelId::from(67890),
+        };
+
+        assert!(tracker.remaining_cooldown(ctx.clone(), &config).is_none());
+
+        tracker.start_cooldown(ctx.clone());
+
+        let cooldown = tracker.remaining_cooldown(ctx.clone(), &config);
+        assert!(cooldown.is_some());
+        let cooldown = cooldown.unwrap();
+        assert!(cooldown < Duration::from_secs(1));
+        assert!(cooldown > Duration::from_secs(0));
+        tokio::time::sleep(cooldown).await;
+        assert!(tracker.remaining_cooldown(ctx, &config).is_none());
+    }
+
+    #[test]
+    fn member_cooldown_affects_one_member() {
+        let config = CooldownConfig {
+            member: Some(Duration::from_secs(1)),
+            ..Default::default()
+        };
+        let mut tracker = CooldownTracker::default();
+        let ctx = CooldownContext {
+            user_id: UserId::from(12345),
+            guild_id: Some(GuildId::from(1337)),
+            channel_id: ChannelId::from(67890),
+        };
+
+        tracker.start_cooldown(ctx.clone());
+
+        let cooldown = tracker.remaining_cooldown(ctx, &config);
+        assert!(cooldown.is_some());
+        let cooldown = cooldown.unwrap();
+        assert!(cooldown < Duration::from_secs(1));
+        assert!(cooldown > Duration::from_secs(0));
+
+        let other_user_ctx = CooldownContext {
+            user_id: UserId::from(54321),
+            guild_id: Some(GuildId::from(1337)),
+            channel_id: ChannelId::from(67890),
+        };
+
+        assert!(tracker
+            .remaining_cooldown(other_user_ctx, &config)
+            .is_none());
+
+        let same_user_different_channel_ctx = CooldownContext {
+            user_id: UserId::from(12345),
+            guild_id: Some(GuildId::from(1337)),
+            channel_id: ChannelId::from(9876),
+        };
+        let cooldown = tracker.remaining_cooldown(same_user_different_channel_ctx, &config);
+        assert!(cooldown.is_some());
+        let cooldown = cooldown.unwrap();
+        assert!(cooldown < Duration::from_secs(1));
+        assert!(cooldown > Duration::from_secs(0));
+    }
+}
