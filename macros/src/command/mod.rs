@@ -5,6 +5,7 @@ use crate::util::{
     iter_tuple_2_to_vec_map, wrap_option, wrap_option_and_map, wrap_option_to_string,
 };
 use proc_macro::TokenStream;
+use quote::format_ident;
 use syn::spanned::Spanned as _;
 
 /// Representation of the command attribute arguments (`#[command(...)]`)
@@ -192,7 +193,7 @@ pub fn command(
         let name = if let Some(rename) = &attrs.rename {
             rename.clone()
         } else if let syn::Pat::Ident(ident) = &*pattern.pat {
-            ident.ident.to_string().trim_start_matches("r#").into()
+            format_ident!("{}", ident.ident).to_string()
         } else {
             let message = "#[rename = \"...\"] must be specified for pattern parameters";
             return Err(syn::Error::new(pattern.pat.span(), message).into());
@@ -444,4 +445,21 @@ fn generate_cooldown_config(args: &CommandArgs) -> proc_macro2::TokenStream {
             __non_exhaustive: ()
         })
     )
+}
+
+fn unwrap_generic<'a>(ty: &'a syn::Type, name: &str) -> Option<&'a syn::Type> {
+    if let syn::Type::Path(typepath) = ty {
+        if typepath.qself.is_none() {
+            if let Some(last) = typepath.path.segments.last() {
+                if last.ident == name {
+                    if let syn::PathArguments::AngleBracketed(params) = &last.arguments {
+                        if let Some(syn::GenericArgument::Type(ty)) = params.args.first() {
+                            return Some(ty);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    None
 }
