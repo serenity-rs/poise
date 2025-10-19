@@ -46,6 +46,28 @@ pub async fn voiceinfo(
     Ok(())
 }
 
+/// Parses arguments starting from the end of the string.
+///
+/// Demonstrates `#[lazy]`
+#[poise::command(prefix_command)]
+pub async fn reverse(
+    ctx: Context<'_>,
+    #[lazy] first: Option<String>,
+    #[lazy] second: Option<String>,
+    third: Option<String>,
+) -> Result<(), Error> {
+    if let Some(first) = first {
+        ctx.say(format!("First: {first}")).await?;
+    }
+    if let Some(second) = second {
+        ctx.say(format!("Second: {second}")).await?;
+    }
+    if let Some(third) = third {
+        ctx.say(format!("Third: {third}")).await?;
+    }
+    Ok(())
+}
+
 /// Echoes the string you give it
 ///
 /// Demonstrates `#[rest]`
@@ -57,6 +79,25 @@ pub async fn say(
     msg: String,
 ) -> Result<(), Error> {
     ctx.say(msg).await?;
+    Ok(())
+}
+
+/// Demonstrates `#[flag]`
+#[poise::command(prefix_command, slash_command)]
+pub async fn test_flag(ctx: Context<'_>, #[flag] flag: bool) -> Result<(), Error> {
+    if flag {
+        ctx.say("Flag was set.").await?;
+    }
+    Ok(())
+}
+
+/// Demonstrates `#[string]`
+#[poise::command(prefix_command)]
+pub async fn test_fromstr(
+    ctx: Context<'_>,
+    #[string] ip_addr: std::net::IpAddr,
+) -> Result<(), Error> {
+    ctx.say(format!("{ip_addr:?}")).await?;
     Ok(())
 }
 

@@ -46,9 +46,11 @@ pub async fn inline_choice_int(
     ctx: Context<'_>,
     #[description = "Choose a number"]
     #[choices(1, 2, 3, 4, 5, 4, 3, 2, 1)]
-    number: u32,
+    number: Option<u32>,
 ) -> Result<(), Error> {
-    ctx.say(format!("You chose {}... for better or for worse", number))
-        .await?;
+    if let Some(number) = number {
+        ctx.say(format!("You chose {}... for better or for worse", number))
+            .await?;
+    }
     Ok(())
 }
