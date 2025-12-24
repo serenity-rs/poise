@@ -96,7 +96,7 @@ async fn main() {
         serenity::GatewayIntents::non_privileged() | serenity::GatewayIntents::MESSAGE_CONTENT;
 
     let client = serenity::ClientBuilder::new(token, intents)
-        .framework(poise::Framework::new(options))
+        .framework(Box::new(poise::Framework::new(options)))
         // Set up a serenity EventHandler here if you wish to listen to non-command events.
         // .event_handler(EventHandler)
         .data(Arc::new(Data {

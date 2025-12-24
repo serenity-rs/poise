@@ -4,6 +4,8 @@
 //! Note: this example configures no designated prefix. Mention the bot as a prefix instead. For
 //! that to work, please adjust the bot ID below to your bot, for the mention parsing to work.
 
+use std::sync::Arc;
+
 use poise::serenity_prelude as serenity;
 
 type Error = serenity::Error;
@@ -64,7 +66,7 @@ async fn main() -> Result<(), Error> {
     poise::set_qualified_names(&mut handler.options.commands); // some setup
 
     let mut client = serenity::Client::builder(token, intents)
-        .event_handler::<Handler>(handler)
+        .event_handler(Arc::new(handler))
         .await?;
 
     client.start().await?;
