@@ -83,7 +83,7 @@ async fn main() {
 
     let client = serenity::ClientBuilder::new(token, intents)
         .data(Arc::new(Data { translations }) as _)
-        .framework(framework)
+        .framework(Box::new(framework))
         .await;
 
     client.unwrap().start().await.unwrap()

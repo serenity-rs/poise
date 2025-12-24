@@ -254,7 +254,7 @@ let framework = poise::Framework::builder()
 
 let token = unimplemented!();
 let client = serenity::ClientBuilder::new(token, serenity::GatewayIntents::non_privileged())
-    .framework(framework).await;
+    .framework(Box::new(framework)).await;
 
 client.unwrap().start().await.unwrap();
 # Ok::<(), Error>(()) };
