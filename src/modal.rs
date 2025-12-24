@@ -1,7 +1,6 @@
 //! Modal trait and utility items for implementing it (mainly for the derive macro)
 
 use crate::serenity_prelude as serenity;
-use serenity::all::{Component, LabelComponent};
 
 /// Meant for use in derived [`Modal::parse`] implementation
 ///
@@ -15,8 +14,8 @@ pub fn find_modal_text(
     for component in data.components.iter_mut() {
         // text inputs can either exist in Labels or Containers
         match component {
-            Component::Label(label) => match &mut label.component {
-                LabelComponent::InputText(input_text) => {
+            serenity::Component::Label(label) => match &mut label.component {
+                serenity::LabelComponent::InputText(input_text) => {
                     if input_text.custom_id == custom_id {
                         return match std::mem::take(&mut input_text.value) {
                             Some(val) if val.is_empty() => None,
