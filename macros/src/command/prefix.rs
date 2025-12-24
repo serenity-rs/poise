@@ -1,4 +1,4 @@
-use super::{unwrap_generic, CommandParameter, Invocation};
+use super::{CommandParameter, Invocation, unwrap_generic};
 use quote::format_ident;
 use syn::spanned::Spanned as _;
 
