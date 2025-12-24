@@ -99,11 +99,7 @@ async fn main() {
                 println!("what the hell");
                 match error {
                     poise::FrameworkError::ArgumentParse { error, .. } => {
-                        if let Some(error) = error.downcast_ref::<serenity::RoleParseError>() {
-                            println!("Found a RoleParseError: {:?}", error);
-                        } else {
-                            println!("Not a RoleParseError :(");
-                        }
+                        println!("Parse error: {error:?}")
                     }
                     other => poise::builtins::on_error(other).await.unwrap(),
                 }

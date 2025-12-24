@@ -1,9 +1,9 @@
 //! Trait implemented for all types usable as prefix command parameters.
-//!
-//! Many of these implementations defer to [`serenity::ArgumentConvert`].
 
 use super::{pop_string, InvalidBool, MissingAttachment, TooFewArguments};
+use crate::argument_convert::ArgumentConvert;
 use crate::serenity_prelude as serenity;
+use std::str::FromStr;
 
 /// The result of [`PopArgument::pop_from`].
 ///  - If Ok, this is `(remaining, attachment_index, T)`
@@ -38,8 +38,7 @@ impl<'a> PopArgument<'a> for bool {
         ctx: &serenity::Context,
         msg: &serenity::Message,
     ) -> PopArgumentResult<'a, Self> {
-        let (args, string) =
-            pop_string(args).map_err(|_| (TooFewArguments::default().into(), None))?;
+        let (args, string) = pop_string(args).map_err(|e| (e.into(), None))?;
 
         let value = match string.to_ascii_lowercase().trim() {
             "yes" | "y" | "true" | "t" | "1" | "enable" | "on" => true,
@@ -84,26 +83,40 @@ impl<'a> PopArgument<'a> for String {
     }
 }
 
-/// Pops a string and then converts it to `T` using its `ArgumentConvert` implementation.
-async fn pop_from_argumentconvert<'a, T>(
-    args: &'a str,
-    attachment_index: usize,
-    ctx: &serenity::Context,
-    msg: &serenity::Message,
-) -> PopArgumentResult<'a, T>
-where
-    T: serenity::ArgumentConvert + Send,
-    T::Err: std::error::Error + Send + Sync + 'static,
-{
-    let (args, string) = pop_string(args).map_err(|_| (TooFewArguments::default().into(), None))?;
-    let object = T::convert(ctx, msg.guild_id, Some(msg.channel_id), &string)
-        .await
-        .map_err(|e| (e.into(), Some(string)))?;
-
-    Ok((args.trim_start(), attachment_index, object))
+/// Pops a string and then converts it to `T` using its `FromStr` implementation.
+macro_rules! from_str_pop_argument {
+    ( $(
+        $type:ty,
+    )* ) => {
+        $(
+            #[async_trait::async_trait]
+            impl<'a> PopArgument<'a> for $type {
+                async fn pop_from(
+                    args: &'a str,
+                    attachment_index: usize,
+                    ctx: &serenity::Context,
+                    msg: &serenity::Message,
+                ) -> PopArgumentResult<'a, Self>
+                where
+                    Self: FromStr,
+                {
+                    let (args, string) = pop_string(args).map_err(|e| (e.into(), None))?;
+                    let object = Self::from_str(&string).map_err(|e| (e.into(), Some(string)))?;
+                    Ok((args.trim_start(), attachment_index, object))
+                }
+            }
+        )*
+    }
 }
 
-/// Auto-impls `PopArgument` for a type by deferring to [`pop_from_argumentconvert`].
+from_str_pop_argument! {
+    f32, f64,
+    u8, u16, u32, u64,
+    i8, i16, i32, i64,
+    serenity::Mention,
+}
+
+/// Pops a string and then converts it to `T` using its `ArgumentConvert` implementation.
 macro_rules! argumentconvert_pop_argument {
     ( $(
         $( #[cfg(feature = $feature:literal)] )?
@@ -118,8 +131,16 @@ macro_rules! argumentconvert_pop_argument {
                     attachment_index: usize,
                     ctx: &serenity::Context,
                     msg: &serenity::Message,
-                ) -> PopArgumentResult<'a, Self> {
-                    pop_from_argumentconvert(args, attachment_index, ctx, msg).await
+                ) -> PopArgumentResult<'a, Self>
+                where
+                    Self: ArgumentConvert,
+                {
+                    let (args, string) = pop_string(args).map_err(|e| (e.into(), None))?;
+                    let object = Self::convert(ctx, msg.guild_id, Some(msg.channel_id), &string)
+                        .await
+                        .map_err(|e| (e.into(), Some(string)))?;
+
+                    Ok((args.trim_start(), attachment_index, object))
                 }
             }
         )*
@@ -127,20 +148,12 @@ macro_rules! argumentconvert_pop_argument {
 }
 
 argumentconvert_pop_argument! {
-    // Via blanket impl of `ArgumentConvert` for `T: FromStr`
-    f32, f64,
-    u8, u16, u32, u64,
-    i8, i16, i32, i64,
-    serenity::Mention,
-
-    // Via explicit `ArgumentConvert` impls
     serenity::User, serenity::Member,
     serenity::Message,
     serenity::Channel, serenity::GuildChannel,
     serenity::EmojiId, serenity::Emoji,
     serenity::Role,
 
-    #[cfg(feature = "cache")]
     serenity::GuildId,
     #[cfg(feature = "cache")]
     serenity::Guild,
@@ -175,8 +188,7 @@ macro_rules! snowflake_pop_argument {
                 ctx: &serenity::Context,
                 msg: &serenity::Message,
             ) -> PopArgumentResult<'a, Self> {
-                let (args, string) =
-                    pop_string(args).map_err(|_| (TooFewArguments::default().into(), None))?;
+                let (args, string) = pop_string(args).map_err(|e| (e.into(), None))?;
 
                 if let Some(parsed_id) = string
                     .parse()
