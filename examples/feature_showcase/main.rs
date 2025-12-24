@@ -113,7 +113,7 @@ async fn main() {
         serenity::GatewayIntents::non_privileged() | serenity::GatewayIntents::MESSAGE_CONTENT;
 
     let client = serenity::ClientBuilder::new(token, intents)
-        .framework(poise::Framework::new(framework_options))
+        .framework(Box::new(poise::Framework::new(framework_options)))
         .await;
 
     client.unwrap().start().await.unwrap()
