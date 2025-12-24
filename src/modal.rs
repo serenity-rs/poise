@@ -4,31 +4,35 @@ use crate::serenity_prelude as serenity;
 
 /// Meant for use in derived [`Modal::parse`] implementation
 ///
-/// _Takes_ the String out of the data. Logs warnings on unexpected state
+/// _Takes_ the String out of the first InputText component that has the given `custom_id`.
+/// Logs warnings on unexpected state.
 #[doc(hidden)]
 pub fn find_modal_text(
     data: &mut serenity::ModalInteractionData,
     custom_id: &str,
 ) -> Option<String> {
-    for row in data.components.iter_mut() {
-        let text = match row.components.get_mut(0) {
-            Some(serenity::ActionRowComponent::InputText(text)) => text,
-            Some(_) => {
+    for component in data.components.iter_mut() {
+        // text inputs can either exist in Labels or Containers
+        match component {
+            serenity::Component::Label(label) => match &mut label.component {
+                serenity::LabelComponent::InputText(input_text) => {
+                    if input_text.custom_id == custom_id {
+                        return match std::mem::take(&mut input_text.value) {
+                            Some(val) if val.is_empty() => None,
+                            Some(val) => Some(val.into_string()),
+                            None => None,
+                        };
+                    }
+                }
+                _ => {
+                    tracing::warn!("unexpected non input text component in modal response");
+                    continue;
+                }
+            },
+            _ => {
                 tracing::warn!("unexpected non input text component in modal response");
                 continue;
             }
-            None => {
-                tracing::warn!("empty action row in modal response");
-                continue;
-            }
-        };
-
-        if text.custom_id == custom_id {
-            return match std::mem::take(&mut text.value) {
-                Some(val) if val.is_empty() => None,
-                Some(val) => Some(val.into_string()),
-                None => None,
-            };
         }
     }
     tracing::warn!(
