@@ -4,15 +4,15 @@ use crate::serenity_prelude as serenity;
 
 /// Meant for use in derived [`Modal::parse`] implementation
 ///
-/// _Takes_ the String out of the first InputText component that has the given `custom_id`.
-/// Logs warnings on unexpected state.
+/// _Takes_ the String out of the InputText component that has the given `custom_id`.
+/// Logs warning on unexpected state.
 #[doc(hidden)]
 pub fn find_modal_text(
     data: &mut serenity::ModalInteractionData,
     custom_id: &str,
 ) -> Option<String> {
     for component in data.components.iter_mut() {
-        // text inputs can either exist in Labels or Containers
+        // Text Inputs must be inside a Label, so ignore other components.
         match component {
             serenity::ModalComponent::Label(label) => match &mut label.component {
                 serenity::LabelComponent::InputText(input_text) => {
@@ -24,15 +24,9 @@ pub fn find_modal_text(
                         };
                     }
                 }
-                _ => {
-                    tracing::warn!("unexpected non input text component in modal response");
-                    continue;
-                }
+                _ => continue,
             },
-            _ => {
-                tracing::warn!("unexpected non input text component in modal response");
-                continue;
-            }
+            _ => continue,
         }
     }
     tracing::warn!(
