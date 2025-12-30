@@ -7,6 +7,8 @@ use proc_macro::TokenStream;
 #[darling(allow_unknown_fields, default)]
 struct StructAttributes {
     name: Option<String>,
+    #[darling(rename = "text")]
+    text_display: Option<String>,
 }
 
 /// Representation of the struct field attributes
@@ -45,6 +47,13 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
 
     let mut builders = Vec::new();
     let mut parsers = Vec::new();
+
+    if let Some(content) = struct_attrs.text_display {
+        builders.push(quote::quote! {
+            serenity::CreateModalComponent::TextDisplay(serenity::CreateTextDisplay::new(#content)),
+        });
+    }
+
     for field in fields {
         // Extract data from syn::Field
         let field_attrs: Vec<_> = field

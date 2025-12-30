@@ -146,6 +146,7 @@ pub async fn execute_modal_on_component_interaction<M: Modal>(
 ///
 /// #[derive(Debug, Modal)]
 /// #[name = "Modal title"] // Struct name by default
+/// #[text = "My *fancy* `modal`, created using [Poise](https://github.com/serenity-rs/poise/) :crab:"]
 /// struct MyModal {
 ///     #[name = "First input label"] // Field name by default (max 45 chars)
 ///     #[description = "First input description"] // No description by default (max 100 chars)
