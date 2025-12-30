@@ -147,7 +147,8 @@ pub async fn execute_modal_on_component_interaction<M: Modal>(
 /// #[derive(Debug, Modal)]
 /// #[name = "Modal title"] // Struct name by default
 /// struct MyModal {
-///     #[name = "First input label"] // Field name by default
+///     #[name = "First input label"] // Field name by default (max 45 chars)
+///     #[description = "First input description"] // No description by default (max 100 chars)
 ///     #[placeholder = "Your first input goes here"] // No placeholder by default
 ///     #[min_length = 5] // No length restriction by default (so, 1-4000 chars)
 ///     #[max_length = 500]

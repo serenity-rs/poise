@@ -271,7 +271,7 @@ pub fn slash_choice_parameter(input: TokenStream) -> TokenStream {
 /// See `Modal` trait documentation
 #[proc_macro_derive(
     Modal,
-    attributes(name, placeholder, min_length, max_length, paragraph)
+    attributes(name, description, placeholder, min_length, max_length, paragraph)
 )]
 pub fn modal(input: TokenStream) -> TokenStream {
     let struct_ = syn::parse_macro_input!(input as syn::DeriveInput);

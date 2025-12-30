@@ -14,6 +14,7 @@ struct StructAttributes {
 #[darling(allow_unknown_fields, default)]
 struct FieldAttributes {
     name: Option<String>,
+    description: Option<String>,
     placeholder: Option<String>,
     min_length: Option<u16>,
     max_length: Option<u16>,
@@ -29,7 +30,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
         _ => {
             return Err(syn::Error::new(
                 input.ident.span(),
-                "Only structs with named fields can be used for choice parameters",
+                "Only structs with named fields can be used for derived modals",
             )
             .into())
         }
@@ -56,6 +57,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
 
         // Create modal builder code for this field
         let label = field_attrs.name.unwrap_or(field_ident.to_string());
+        let description = field_attrs.description.into_iter();
         let placeholder = field_attrs.placeholder.into_iter();
         let required = crate::util::extract_type_parameter("Option", &field.ty).is_none();
         let style = if field_attrs.paragraph.is_some() {
@@ -80,7 +82,9 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                     .required(#required)
                     #( .min_length(#min_length) )*
                     #( .max_length(#max_length) )*
-            })),
+            })
+            #( .description(#description) )*
+        ),
         });
 
         // Create modal parser code for this field
