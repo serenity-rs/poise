@@ -36,6 +36,37 @@ pub fn find_modal_text(
     None
 }
 
+/// Meant for use in derived [`Modal::parse`] implementation
+///
+/// Collects a `Vec<Attachment>` from the FileUpload component that has the given `custom_id`.
+/// Logs warning on unexpected state.
+#[doc(hidden)]
+pub fn find_modal_attachments(
+    data: &serenity::ModalInteractionData,
+    custom_id: &str,
+) -> Option<Vec<serenity::Attachment>> {
+    if data.resolved.attachments.is_empty() {
+        return None;
+    };
+    for component in data.components.iter() {
+        match component {
+            serenity::Component::Label(label) => match &label.component {
+                serenity::LabelComponent::FileUpload(file_upload) => {
+                    if file_upload.custom_id == custom_id {
+                        let attachments: Vec<serenity::Attachment> =
+                            data.resolved.attachments.iter().cloned().collect();
+                        return Some(attachments);
+                    }
+                }
+                _ => continue,
+            },
+            _ => continue,
+        }
+    }
+    tracing::warn!("{} not found in modal response", custom_id);
+    None
+}
+
 /// Underlying code for the modal spawning convenience function which abstracts over the kind of
 /// interaction
 async fn execute_modal_generic<
@@ -157,6 +188,11 @@ pub async fn execute_modal_on_component_interaction<M: Modal>(
 ///     #[name = "Second input label"]
 ///     #[paragraph] // Switches from single-line input to multiline text box
 ///     second_input: Option<String>, // Option means optional input
+///     #[name = "Third input label"]
+///     #[file_upload] // Allows user to upload 0-10 files (defaults to 1)
+///     #[min_items = 2] // Min number of items allowed (0-10 for files)
+///     #[max_items = 5] // Max number of items allowed (max 10 for files)
+///     third_input: Vec<serenity::Attachment>
 /// }
 ///
 /// #[poise::command(slash_command)]

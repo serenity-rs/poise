@@ -278,7 +278,10 @@ pub fn slash_choice_parameter(input: TokenStream) -> TokenStream {
         placeholder,
         min_length,
         max_length,
-        paragraph
+        paragraph,
+        file_upload,
+        min_items,
+        max_items,
     )
 )]
 pub fn modal(input: TokenStream) -> TokenStream {
