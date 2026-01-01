@@ -42,20 +42,47 @@ pub fn find_modal_text(
 /// Logs warning on unexpected state.
 #[doc(hidden)]
 pub fn find_modal_attachments(
-    data: &serenity::ModalInteractionData,
+    data: &mut serenity::ModalInteractionData,
     custom_id: &str,
 ) -> Option<Vec<serenity::Attachment>> {
     if data.resolved.attachments.is_empty() {
         return None;
     };
-    for component in data.components.iter() {
+    for component in data.components.iter_mut() {
         match component {
-            serenity::Component::Label(label) => match &label.component {
+            serenity::Component::Label(label) => match &mut label.component {
                 serenity::LabelComponent::FileUpload(file_upload) => {
                     if file_upload.custom_id == custom_id {
-                        let attachments: Vec<serenity::Attachment> =
-                            data.resolved.attachments.iter().cloned().collect();
+                        let attachments = std::mem::take(&mut data.resolved.attachments);
+                        let attachments = attachments.into_iter().collect();
                         return Some(attachments);
+                    }
+                }
+                _ => continue,
+            },
+            _ => continue,
+        }
+    }
+    tracing::warn!("{} not found in modal response", custom_id);
+    None
+}
+
+/// Meant for use in derived [`Modal::parse`] implementation
+///
+/// _Takes_ the selected `values` out of the Select component that has the given `custom_id`.
+/// Logs warning on unexpected state.
+#[doc(hidden)]
+pub fn find_modal_selections(
+    data: &mut serenity::ModalInteractionData,
+    custom_id: &str,
+) -> Option<Vec<String>> {
+    for component in data.components.iter_mut() {
+        match component {
+            serenity::Component::Label(label) => match &mut label.component {
+                serenity::LabelComponent::SelectMenu(select_menu) => {
+                    if select_menu.custom_id == custom_id {
+                        let values = std::mem::take(&mut select_menu.values);
+                        return Some(values.into_vec());
                     }
                 }
                 _ => continue,
@@ -179,20 +206,24 @@ pub async fn execute_modal_on_component_interaction<M: Modal>(
 /// #[name = "Modal title"] // Struct name by default
 /// #[text = "My *fancy* `modal`, created using [Poise](https://github.com/serenity-rs/poise/) :crab:"]
 /// struct MyModal {
-///     #[name = "First input label"] // Field name by default (max 45 chars)
+///     #[name = "First label (text input)"] // Field name by default (max 45 chars)
 ///     #[description = "First input description"] // No description by default (max 100 chars)
 ///     #[placeholder = "Your first input goes here"] // No placeholder by default
 ///     #[min_length = 5] // No length restriction by default (so, 1-4000 chars)
 ///     #[max_length = 500]
 ///     first_input: String,
-///     #[name = "Second input label"]
+///     #[name = "Second label (text input)"]
 ///     #[paragraph] // Switches from single-line input to multiline text box
 ///     second_input: Option<String>, // Option means optional input
-///     #[name = "Third input label"]
+///     #[name = "Third label (file upload)"]
 ///     #[file_upload] // Allows user to upload 0-10 files (defaults to 1)
 ///     #[min_items = 2] // Min number of items allowed (0-10 for files)
 ///     #[max_items = 5] // Max number of items allowed (max 10 for files)
-///     third_input: Vec<serenity::Attachment>
+///     third_input: Vec<serenity::Attachment>,
+///     #[name = "Fourth label (string select menu)"]
+///     #[string_select("Option 1", "Option 2")] // Selectable strings (defaults to 1)
+///     #[min_items = 2] // Min number of selections required (1-25 for select menus)
+///     fourth_input: Vec<String>, // Option currently has no effect on select menus
 /// }
 ///
 /// #[poise::command(slash_command)]

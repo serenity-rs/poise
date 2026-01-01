@@ -22,6 +22,7 @@ struct FieldAttributes {
     max_length: Option<u16>,
     paragraph: Option<()>,
     file_upload: Option<()>,
+    string_select: Option<crate::util::List<String>>,
     #[darling(rename = "min_items")]
     min_values: Option<u8>,
     #[darling(rename = "max_items")]
@@ -79,12 +80,11 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
         } else {
             None
         };
+        let min_values = field_attrs.min_values.into_iter();
+        let max_values = field_attrs.max_values.into_iter();
 
         // If field is a file upload component, process and continue
         if field_attrs.file_upload.is_some() {
-            let min_values = field_attrs.min_values.into_iter();
-            let max_values = field_attrs.max_values.into_iter();
-
             builders.push(quote::quote! {
                 serenity::CreateModalComponent::Label(
                     serenity::CreateLabel::file_upload(
@@ -95,17 +95,48 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                         #( .max_values(#max_values) )*
                     )
                     #( .description(#description) )*
-                )
+                ),
             });
 
             parsers.push(quote::quote! {
-                #field_ident: poise::find_modal_attachments(&data, stringify!(#field_ident)) #ok_or,
+                #field_ident: poise::find_modal_attachments(&mut data, stringify!(#field_ident)) #ok_or,
             });
 
             continue;
         }
 
         let placeholder = field_attrs.placeholder.into_iter();
+
+        // If field is a string select menu component, process and continue
+        if let Some(string_select) = field_attrs.string_select {
+            let options = string_select.0;
+            builders.push(quote::quote! {
+                serenity::CreateModalComponent::Label(
+                    serenity::CreateLabel::select_menu(
+                        #label,
+                        serenity::CreateSelectMenu::new(
+                            stringify!(#field_ident),
+                            serenity::CreateSelectMenuKind::String {
+                                options: Cow::Owned(vec![
+                                    #( serenity::CreateSelectMenuOption::new(#options, #options) ),*
+                                ]),
+                            }
+                        )
+                        #( .placeholder(#placeholder) )*
+                        #( .min_values(#min_values) )*
+                        #( .max_values(#max_values) )*
+                    )
+                    #( .description(#description) )*
+                ),
+            });
+
+            parsers.push(quote::quote! {
+                #field_ident: poise::find_modal_selections(&mut data, stringify!(#field_ident)) #ok_or,
+            });
+
+            continue;
+        }
+
         let style = if field_attrs.paragraph.is_some() {
             quote::quote!(serenity::InputTextStyle::Paragraph)
         } else {
@@ -114,23 +145,27 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
         let min_length = field_attrs.min_length.into_iter();
         let max_length = field_attrs.max_length.into_iter();
         builders.push(quote::quote! {
-            serenity::CreateModalComponent::Label(serenity::CreateLabel::input_text(#label, {
-                let mut b = serenity::CreateInputText::new(#style, stringify!(#field_ident));
-                if let Some(defaults) = &mut defaults {
-                    // Can use `defaults.#field_ident` directly in Edition 2021 due to more
-                    // specific closure capture rules
-                    let default = std::mem::take(&mut defaults.#field_ident);
-                    // Option::from().unwrap_or_default() dance to handle both T and Option<T>
-                    b = b.value(Option::from(default).unwrap_or_else(String::new));
-                }
-                b
-                    #( .placeholder(#placeholder) )*
-                    .required(#required)
-                    #( .min_length(#min_length) )*
-                    #( .max_length(#max_length) )*
-            })
-            #( .description(#description) )*
-        ),
+            serenity::CreateModalComponent::Label(
+                serenity::CreateLabel::input_text(
+                    #label, 
+                    {
+                        let mut b = serenity::CreateInputText::new(#style, stringify!(#field_ident));
+                        if let Some(defaults) = &mut defaults {
+                            // Can use `defaults.#field_ident` directly in Edition 2021 due to more
+                            // specific closure capture rules
+                            let default = std::mem::take(&mut defaults.#field_ident);
+                            // Option::from().unwrap_or_default() dance to handle both T and Option<T>
+                            b = b.value(Option::from(default).unwrap_or_else(String::new));
+                        }
+                        b
+                        #( .placeholder(#placeholder) )*
+                        .required(#required)
+                        #( .min_length(#min_length) )*
+                        #( .max_length(#max_length) )*
+                    }
+                )
+                #( .description(#description) )*
+            ),
         });
 
         // Create modal parser code for this field
@@ -143,6 +178,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
     let struct_ident = input.ident;
     let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
     Ok(quote::quote! { const _: () = {
+        use std::borrow::Cow;
         use poise::serenity_prelude as serenity;
         impl #impl_generics poise::Modal for #struct_ident #ty_generics #where_clause {
             fn create(mut defaults: Option<Self>, custom_id: String) -> serenity::CreateInteractionResponse<'static> {
