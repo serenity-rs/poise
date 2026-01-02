@@ -281,6 +281,8 @@ pub fn slash_choice_parameter(input: TokenStream) -> TokenStream {
         paragraph,
         file_upload,
         string_select,
+        user_select,
+        role_select,
         min_items,
         max_items,
     )

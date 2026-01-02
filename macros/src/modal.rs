@@ -23,6 +23,8 @@ struct FieldAttributes {
     paragraph: Option<()>,
     file_upload: Option<()>,
     string_select: Option<crate::util::List<String>>,
+    user_select: Option<crate::util::List<String>>,
+    role_select: Option<crate::util::List<String>>,
     #[darling(rename = "min_items")]
     min_values: Option<u8>,
     #[darling(rename = "max_items")]
@@ -83,6 +85,14 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
         let min_values = field_attrs.min_values.into_iter();
         let max_values = field_attrs.max_values.into_iter();
 
+        if field_attrs.file_upload.is_some() as usize
+            + field_attrs.string_select.is_some() as usize
+            + field_attrs.user_select.is_some() as usize
+            + field_attrs.role_select.is_some() as usize
+            > 1 {
+             return Err(darling::Error::custom("Cannot have multiple component type attributes on a single field"));
+            }
+
         // If field is a file upload component, process and continue
         if field_attrs.file_upload.is_some() {
             builders.push(quote::quote! {
@@ -106,6 +116,9 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
         }
 
         let placeholder = field_attrs.placeholder.into_iter();
+        if field_attrs.min_values.is_some_and(|min| min == 0) {
+            return Err(darling::Error::custom("Minimum value for select menus must be greater than 0"));
+        }
 
         // If field is a string select menu component, process and continue
         if let Some(string_select) = field_attrs.string_select {
