@@ -116,24 +116,65 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
         }
 
         let placeholder = field_attrs.placeholder.into_iter();
+
+        // Can be removed once the required field is added to Serenity
         if field_attrs.min_values.is_some_and(|min| min == 0) {
-            return Err(darling::Error::custom("Minimum value for select menus must be greater than 0"));
+            return Err(darling::Error::custom("Min items for select menus must be greater than 0"));
         }
 
-        // If field is a string select menu component, process and continue
-        if let Some(string_select) = field_attrs.string_select {
-            let options = string_select.0;
+        // If field is a select menu component, process and continue
+        let (select_menu_kind, values) = match field_attrs {
+            FieldAttributes { string_select: Some(ref string_select), .. } => {
+                let strings = &string_select.0;
+                (quote::quote! {
+                    serenity::CreateSelectMenuKind::String {
+                        options: Cow::Owned(vec![
+                            #( serenity::CreateSelectMenuOption::new(#strings, #strings) ),*
+                        ]),
+                    }
+                }, strings.len())
+            },
+            FieldAttributes { user_select: Some(user_select), .. } => {
+                let users: Vec<_> = user_select.0.iter().flat_map(|v| v.parse::<u64>()).collect();
+                (quote::quote! {
+                    serenity::CreateSelectMenuKind::User {
+                        default_users: Some(Cow::Owned(vec![
+                            #( serenity::UserId::new(#users) ),*
+                        ])),
+                    }
+                }, users.len())
+            },
+            FieldAttributes { role_select: Some(role_select), .. } => {
+                let roles: Vec<_> = role_select.0.iter().flat_map(|v| v.parse::<u64>()).collect();
+                (quote::quote! {
+                    serenity::CreateSelectMenuKind::Role {
+                        default_roles: Some(Cow::Owned(vec![
+                            #( serenity::RoleId::new(#roles) ),*
+                        ])),
+                    }
+                }, roles.len())
+            },
+            _ => (quote::quote! {}, 0)
+        };
+
+        match field_attrs.max_values {
+            Some(max_values) if field_attrs.string_select.is_some() => { if usize::from(max_values) > values {
+                return Err(darling::Error::custom("Max items for string select menus must not be greater than the number of options provided"));
+            } },
+            Some(max_values) => { if values > usize::from(max_values) {
+                return Err(darling::Error::custom("Max items for non-string select menus must not be less than the number of default values provided"));
+            } },
+            None => {},
+        }
+
+        if !select_menu_kind.is_empty() {
             builders.push(quote::quote! {
                 serenity::CreateModalComponent::Label(
                     serenity::CreateLabel::select_menu(
                         #label,
                         serenity::CreateSelectMenu::new(
                             stringify!(#field_ident),
-                            serenity::CreateSelectMenuKind::String {
-                                options: Cow::Owned(vec![
-                                    #( serenity::CreateSelectMenuOption::new(#options, #options) ),*
-                                ]),
-                            }
+                            #select_menu_kind
                         )
                         #( .placeholder(#placeholder) )*
                         #( .min_values(#min_values) )*
