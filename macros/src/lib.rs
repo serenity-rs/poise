@@ -268,7 +268,140 @@ pub fn slash_choice_parameter(input: TokenStream) -> TokenStream {
     choice_parameter(input)
 }
 
-/// See `Modal` trait documentation
+/**
+Use this derive macro on a struct to easily generate a modal interaction.
+
+Modals are Discord's version of interactive forms. A single modal can include up to five
+components.
+
+# Example
+
+```rust
+# use poise::serenity_prelude as serenity;
+# type Data = ();
+# type Error = serenity::Error;
+use poise::Modal;
+type ApplicationContext<'a> = poise::ApplicationContext<'a, Data, Error>;
+
+#[derive(Debug, Modal)]
+#[name = "Modal Title"] // Struct name by default
+#[text = "My *fancy* `modal`, created using [Poise](https://github.com/serenity-rs/poise/) :crab:"]
+struct MyModal {
+    #[name = "First text input"] // Field name by default
+    #[description = "Displayed under name"] // No description by default
+    #[placeholder = "Your first input goes here"] // No placeholder by default
+    #[min_length = 5] // No length restriction by default (up to 4000 chars)
+    #[max_length = 500]
+    first_input: String,
+    #[name = "Second text input"]
+    #[value = "This one has been pre-filled!"]
+    #[paragraph] // Switches from single-line to multi-line text box
+    second_input: Option<String>, // Option means optional input
+    #[name = "File upload"]
+    #[file_upload] // Allows user to upload up to 10 files
+    #[min_items = 2] // Min number of files (0-10 for files)
+    #[max_items = 5]
+    third_input: Vec<serenity::Attachment>,
+    #[name = "String select menu"]
+    #[string_select("Option 1", "Option 2")] // Selectable strings (defaults to 1)
+    #[min_items = 2] // Min number of selections required (1-25 for select menus)
+    fourth_input: Vec<String>,
+}
+
+#[poise::command(slash_command)]
+pub async fn modal(ctx: ApplicationContext<'_>) -> Result<(), Error> {
+    let data = MyModal::execute(ctx).await?;
+    println!("Got data: {:?}", data);
+
+    Ok(())
+}
+```
+
+### Struct attributes
+
+- `#[name = ""]`: Sets the modal title. Defaults to struct name if omitted.
+- `#[text = ""]`: Optional [text display][td] component, shown below the modal title. Can
+include markdown-formatted text, mentions (users, roles, etc.), and emojis. Note that this
+counts toward the maximum total of five components per modal.
+
+### Field attributes
+
+The following field attributes are shared by all components below:
+
+- `#[name = ""]`: Sets the input label. Defaults to field name. Max 45 chars.
+- `#[description = ""]`: Adds an optional description under the label. Max 100 chars.
+- `#[placeholder = ""]`: Adds optional placeholder text. Max 100 chars.
+
+The default component is the [text input][ti] component, which returns a `String`. The following
+field attributes are valid for text input components only:
+
+- `#[min_length = 0]`: Minimum number of characters (0-4000)
+- `#[max_length = 1]`: Maximum number of characters (1-4000)
+- `#[paragraph]`: Switches to a multi-line input box. Default is single-line.
+- `#[value = ""]`: Optional pre-filled value for the text input.
+
+Other components supported by the macro include the [file upload][fu], [string select][ss],
+[user select][us], [role select][rs], and [channel select][cs] components. The [mentionable
+select][ms] component is not supported by the macro. Component type is indicated by using
+one of the following field attributes (**one per field**):
+
+- `#[file_upload]`: Allows the user to upload files (0-10). Returns [`Vec<Attachment>`][att].
+- `#[string_select("option 1", "option 2")]`: Supports 1-25 **unique** options (up to 100 chars
+each), defined in the attribute. Returns `Vec<String>`.
+- `#[user_select("", "")]`: Returns [`Vec<UserId>`][userid]
+- `#[role_select("", "")]`: Returns [`Vec<RoleId>`][roleid]
+- `#[channel_select("", "")]`: Returns [`Vec<GenericChannelId>`][gcid]
+
+All select menus support 0-25 selections, with both single-select and multi-select modes.
+User, role, and channel select menus support an **optional** list of default, auto-populated
+values that are defined in the attribute, with upper and lower bounds being determined by
+`min_items` and `max_items`. Default values are defined using user, role, or channel IDs:
+
+```rust
+#[name = "User select menu"]
+#[user_select("889963798599966730", "1091484180342378546")]
+users: Vec<serenity::UserId>
+```
+
+Min and max item values for file upload and select menu components are defined using the
+following field attributes:
+
+- `#[min_items = 0]`: 0-10 for files; 0-25 for select menus. Defaults to 1.
+- `#[max_items = 25]`: 1-10 for files; 1-25 for select menus. Defaults to 1.
+
+```rust
+#[name = "Role select menu"]
+#[role_select()]
+#[max_items = 1]
+roles: Option<Vec<serenity::RoleId>>
+```
+
+For the channel select menu, [channel types][ct] to include in the list may optionally be defined
+using the following field attribute:
+
+- `#[channel_types("", "")]`
+
+```rust
+#[name = "Channel select menu"]
+#[channel_select()]
+#[channel_types("Text", "Forum")]
+channels: Vec<serenity::GenericChannelId>
+```
+
+[td]:https://discord.com/developers/docs/components/reference#text-display
+[ti]:https://discord.com/developers/docs/components/reference#text-input
+[fu]:https://discord.com/developers/docs/components/reference#file-upload
+[ss]:https://discord.com/developers/docs/components/reference#string-select
+[us]:https://discord.com/developers/docs/components/reference#user-select
+[rs]:https://discord.com/developers/docs/components/reference#role-select
+[cs]:https://discord.com/developers/docs/components/reference#channel-select
+[ms]:https://discord.com/developers/docs/components/reference#mentionable-select
+[att]:https://docs.rs/serenity/latest/serenity/model/channel/struct.Attachment.html
+[userid]:https://docs.rs/serenity/latest/serenity/model/id/struct.UserId.html
+[roleid]:https://docs.rs/serenity/latest/serenity/model/id/struct.RoleId.html
+[gcid]:https://serenity-rs.github.io/serenity/next/serenity/model/id/struct.GenericChannelId.html
+[ct]:https://docs.rs/serenity/latest/serenity/model/channel/enum.ChannelType.html
+*/
 #[proc_macro_derive(
     Modal,
     attributes(

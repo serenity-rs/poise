@@ -189,9 +189,10 @@ pub async fn execute_modal_on_component_interaction<M: Modal>(
     .await
 }
 
-/// Derivable trait for modal interactions, Discords version of interactive forms
+/// Derivable trait for modal interactions, Discord's version of interactive forms.
 ///
-/// You don't need to implement this trait manually; use `#[derive(poise::Modal)]` instead
+/// You don't need to implement this trait manually; use `#[derive(poise::Modal)]` instead.
+/// See [`Modal`][crate::macros::Modal] for details.
 ///
 /// # Example
 ///
@@ -203,27 +204,28 @@ pub async fn execute_modal_on_component_interaction<M: Modal>(
 /// type ApplicationContext<'a> = poise::ApplicationContext<'a, Data, Error>;
 ///
 /// #[derive(Debug, Modal)]
-/// #[name = "Modal title"] // Struct name by default
+/// #[name = "Modal Title"] // Struct name by default
 /// #[text = "My *fancy* `modal`, created using [Poise](https://github.com/serenity-rs/poise/) :crab:"]
 /// struct MyModal {
-///     #[name = "First label (text input)"] // Field name by default (max 45 chars)
-///     #[description = "First input description"] // No description by default (max 100 chars)
+///     #[name = "First text input"] // Field name by default
+///     #[description = "Displayed under name"] // No description by default
 ///     #[placeholder = "Your first input goes here"] // No placeholder by default
-///     #[min_length = 5] // No length restriction by default (so, 1-4000 chars)
+///     #[min_length = 5] // No length restriction by default (up to 4000 chars)
 ///     #[max_length = 500]
 ///     first_input: String,
-///     #[name = "Second label (text input)"]
-///     #[paragraph] // Switches from single-line input to multiline text box
+///     #[name = "Second text input"]
+///     #[value = "This one has been pre-filled!"]
+///     #[paragraph] // Switches from single-line to multi-line text box
 ///     second_input: Option<String>, // Option means optional input
-///     #[name = "Third label (file upload)"]
-///     #[file_upload] // Allows user to upload 0-10 files (defaults to 1)
-///     #[min_items = 2] // Min number of items allowed (0-10 for files)
-///     #[max_items = 5] // Max number of items allowed (max 10 for files)
+///     #[name = "File upload"]
+///     #[file_upload] // Allows user to upload up to 10 files
+///     #[min_items = 2] // Min number of files (0-10 for files)
+///     #[max_items = 5]
 ///     third_input: Vec<serenity::Attachment>,
-///     #[name = "Fourth label (string select menu)"]
+///     #[name = "String select menu"]
 ///     #[string_select("Option 1", "Option 2")] // Selectable strings (defaults to 1)
 ///     #[min_items = 2] // Min number of selections required (1-25 for select menus)
-///     fourth_input: Vec<String>, // Option currently has no effect on select menus
+///     fourth_input: Vec<String>,
 /// }
 ///
 /// #[poise::command(slash_command)]
