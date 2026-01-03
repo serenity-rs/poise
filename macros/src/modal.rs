@@ -21,6 +21,7 @@ struct FieldAttributes {
     min_length: Option<u16>,
     max_length: Option<u16>,
     paragraph: Option<()>,
+    value: Option<String>,
     file_upload: Option<()>,
     string_select: Option<crate::util::List<String>>,
     user_select: Option<crate::util::List<String>>,
@@ -254,6 +255,8 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
         };
         let min_length = field_attrs.min_length.into_iter();
         let max_length = field_attrs.max_length.into_iter();
+        let value = field_attrs.value.into_iter();
+        
         builders.push(quote::quote! {
             serenity::CreateModalComponent::Label(
                 serenity::CreateLabel::input_text(
@@ -272,6 +275,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                         .required(#required)
                         #( .min_length(#min_length) )*
                         #( .max_length(#max_length) )*
+                        #( .value(#value) )*
                     }
                 )
                 #( .description(#description) )*
