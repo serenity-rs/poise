@@ -92,6 +92,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
             + field_attrs.string_select.is_some() as usize
             + field_attrs.user_select.is_some() as usize
             + field_attrs.role_select.is_some() as usize
+            + field_attrs.channel_select.is_some() as usize
             > 1 {
              return Err(darling::Error::custom("Cannot have multiple component type attributes on a single field"));
             }
@@ -256,7 +257,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
         let min_length = field_attrs.min_length.into_iter();
         let max_length = field_attrs.max_length.into_iter();
         let value = field_attrs.value.into_iter();
-        
+
         builders.push(quote::quote! {
             serenity::CreateModalComponent::Label(
                 serenity::CreateLabel::input_text(
