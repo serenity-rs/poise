@@ -125,7 +125,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
         }
 
         // If field is a select menu component, process and continue
-        let (select_menu_kind, values) = match field_attrs {
+        let (select_menu_kind, values, select_parser, map) = match field_attrs {
             FieldAttributes { string_select: Some(ref string_select), .. } => {
                 let strings = &string_select.0;
                 (quote::quote! {
@@ -134,7 +134,11 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                             #( serenity::CreateSelectMenuOption::new(#strings, #strings) ),*
                         ]),
                     }
-                }, strings.len())
+                },
+                strings.len(),
+                quote::quote! { find_modal_selections },
+                quote::quote! { .map(|v| v.into_vec()) }
+            )
             },
             FieldAttributes { user_select: Some(user_select), .. } => {
                 let users: Vec<_> = user_select.0.iter().flat_map(|v| v.parse::<u64>()).collect();
@@ -144,7 +148,17 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                             #( serenity::UserId::new(#users) ),*
                         ])),
                     }
-                }, users.len())
+                }, users.len(),
+                quote::quote! { find_modal_selections },
+                quote::quote! {
+                    .map(|v| {
+                        v.iter()
+                            .flat_map(|v| v.parse::<u64>())
+                            .map(|v| serenity::UserId::new(v))
+                            .collect::<Vec<serenity::UserId>>()
+                    })
+                }
+            )
             },
             FieldAttributes { role_select: Some(role_select), .. } => {
                 let roles: Vec<_> = role_select.0.iter().flat_map(|v| v.parse::<u64>()).collect();
@@ -154,7 +168,17 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                             #( serenity::RoleId::new(#roles) ),*
                         ])),
                     }
-                }, roles.len())
+                }, roles.len(),
+                quote::quote! { find_modal_selections },
+                quote::quote! {
+                    .map(|v| {
+                        v.iter()
+                            .flat_map(|v| v.parse::<u64>())
+                            .map(|v| serenity::RoleId::new(v))
+                            .collect::<Vec<serenity::RoleId>>()
+                    })
+                }
+            )
             },
             FieldAttributes { channel_select: Some(ref channel_select), .. } => {
                 let channel_types = match &field_attrs.channel_types {
@@ -173,9 +197,19 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                             #( serenity::GenericChannelId::new(#channels) ),*
                         ])),
                     }
-                }, channels.len())
+                }, channels.len(),
+                quote::quote! { find_modal_selections },
+                quote::quote! {
+                    .map(|v| {
+                        v.iter()
+                            .flat_map(|v| v.parse::<u64>())
+                            .map(|v| serenity::GenericChannelId::new(v))
+                            .collect::<Vec<serenity::GenericChannelId>>()
+                    })
+                }
+            )
             },
-            _ => (quote::quote! {}, 0)
+            _ => (quote::quote! {}, 0, quote::quote! {}, quote::quote! {})
         };
 
         match field_attrs.max_values {
@@ -206,7 +240,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
             });
 
             parsers.push(quote::quote! {
-                #field_ident: poise::find_modal_selections(&mut data, stringify!(#field_ident)) #ok_or,
+                #field_ident: poise::#select_parser(&mut data, stringify!(#field_ident)) #map #ok_or,
             });
 
             continue;

@@ -75,14 +75,14 @@ pub fn find_modal_attachments(
 pub fn find_modal_selections(
     data: &mut serenity::ModalInteractionData,
     custom_id: &str,
-) -> Option<Vec<String>> {
+) -> Option<serenity::small_fixed_array::FixedArray<String>> {
     for component in data.components.iter_mut() {
         match component {
             serenity::Component::Label(label) => match &mut label.component {
                 serenity::LabelComponent::SelectMenu(select_menu) => {
                     if select_menu.custom_id == custom_id {
                         let values = std::mem::take(&mut select_menu.values);
-                        return Some(values.into_vec());
+                        return Some(values);
                     }
                 }
                 _ => continue,
