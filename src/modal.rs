@@ -38,7 +38,7 @@ pub fn find_modal_text(
 
 /// Meant for use in derived [`Modal::parse`] implementation
 ///
-/// Collects a `Vec<Attachment>` from the FileUpload component that has the given `custom_id`.
+/// _Takes_ the `Attachment`s out of the FileUpload component that has the given `custom_id`.
 /// Logs warning on unexpected state.
 #[doc(hidden)]
 pub fn find_modal_attachments(

@@ -25,6 +25,8 @@ struct FieldAttributes {
     string_select: Option<crate::util::List<String>>,
     user_select: Option<crate::util::List<String>>,
     role_select: Option<crate::util::List<String>>,
+    channel_select: Option<crate::util::List<String>>,
+    channel_types: Option<crate::util::List<syn::Ident>>,
     #[darling(rename = "min_items")]
     min_values: Option<u8>,
     #[darling(rename = "max_items")]
@@ -154,6 +156,25 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                     }
                 }, roles.len())
             },
+            FieldAttributes { channel_select: Some(ref channel_select), .. } => {
+                let channel_types = match &field_attrs.channel_types {
+                    Some(crate::util::List(channel_types)) => {
+                        quote::quote! {
+                            Some(Cow::Borrowed(&[ #( serenity::ChannelType::#channel_types ),* ]))
+                        }
+                    },
+                    None => quote::quote! { None },
+                };
+                let channels: Vec<_> = channel_select.0.iter().flat_map(|v| v.parse::<u64>()).collect();
+                (quote::quote! {
+                    serenity::CreateSelectMenuKind::Channel {
+                        channel_types: #channel_types,
+                        default_channels: Some(Cow::Owned(vec![
+                            #( serenity::GenericChannelId::new(#channels) ),*
+                        ])),
+                    }
+                }, channels.len())
+            },
             _ => (quote::quote! {}, 0)
         };
 
@@ -191,6 +212,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
             continue;
         }
 
+        // Field was not upload or select menu, so process as text input
         let style = if field_attrs.paragraph.is_some() {
             quote::quote!(serenity::InputTextStyle::Paragraph)
         } else {

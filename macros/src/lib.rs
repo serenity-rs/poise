@@ -283,6 +283,8 @@ pub fn slash_choice_parameter(input: TokenStream) -> TokenStream {
         string_select,
         user_select,
         role_select,
+        channel_select,
+        channel_types,
         min_items,
         max_items,
     )
