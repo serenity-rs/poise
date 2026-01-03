@@ -4,6 +4,20 @@ use crate::serenity_prelude as serenity;
 
 /// Meant for use in derived [`Modal::parse`] implementation
 ///
+/// Used to return resolved data for a single select menu component.
+#[doc(hidden)]
+#[non_exhaustive]
+#[derive(Default)]
+pub struct SelectDataResolved {
+    pub strings: Option<Vec<String>>,
+    pub users: Option<Vec<serenity::User>>,
+    pub roles: Option<Vec<serenity::Role>>,
+    pub mentionables: Option<(Vec<serenity::User>, Vec<serenity::Role>)>,
+    pub channels: Option<Vec<serenity::GenericInteractionChannel>>,
+}
+
+/// Meant for use in derived [`Modal::parse`] implementation
+///
 /// _Takes_ the String out of the InputText component that has the given `custom_id`.
 /// Logs warning on unexpected state.
 #[doc(hidden)]
@@ -69,20 +83,104 @@ pub fn find_modal_attachments(
 
 /// Meant for use in derived [`Modal::parse`] implementation
 ///
-/// _Takes_ the selected `values` out of the Select component that has the given `custom_id`.
+/// For StringSelect and ChannelSelect components, _takes_ the selected `values` out of the
+/// component that has the given `custom_id`. For UserSelect, RoleSelect, and MentionableSelect
+/// components, clones the data since resolved values may be shared between the components.
 /// Logs warning on unexpected state.
 #[doc(hidden)]
 pub fn find_modal_selections(
     data: &mut serenity::ModalInteractionData,
     custom_id: &str,
-) -> Option<serenity::small_fixed_array::FixedArray<String>> {
+) -> SelectDataResolved {
     for component in data.components.iter_mut() {
         match component {
             serenity::Component::Label(label) => match &mut label.component {
                 serenity::LabelComponent::SelectMenu(select_menu) => {
                     if select_menu.custom_id == custom_id {
-                        let values = std::mem::take(&mut select_menu.values);
-                        return Some(values);
+                        match select_menu.kind {
+                            serenity::ComponentType::StringSelect => {
+                                let values = std::mem::take(&mut select_menu.values);
+                                let strings = if values.is_empty() {
+                                    None
+                                } else {
+                                    Some(values.into_vec())
+                                };
+                                return SelectDataResolved {
+                                    strings,
+                                    ..Default::default()
+                                };
+                            }
+                            serenity::ComponentType::UserSelect => {
+                                let mut users = Vec::new();
+                                for value in &select_menu.values {
+                                    let id = value.parse::<u64>().unwrap_or_default();
+                                    let user_id = serenity::UserId::new(id);
+                                    if let Some(user) = data.resolved.users.get(&user_id) {
+                                        users.push(user.clone());
+                                    }
+                                }
+                                let users = if users.is_empty() { None } else { Some(users) };
+                                return SelectDataResolved {
+                                    users,
+                                    ..Default::default()
+                                };
+                            }
+                            serenity::ComponentType::RoleSelect => {
+                                let mut roles = Vec::new();
+                                for value in &select_menu.values {
+                                    let id = value.parse::<u64>().unwrap_or_default();
+                                    let role_id = serenity::RoleId::new(id);
+                                    if let Some(role) = data.resolved.roles.get(&role_id) {
+                                        roles.push(role.clone());
+                                    }
+                                }
+                                let roles = if roles.is_empty() { None } else { Some(roles) };
+                                return SelectDataResolved {
+                                    roles,
+                                    ..Default::default()
+                                };
+                            }
+                            serenity::ComponentType::MentionableSelect => {
+                                let mut users = Vec::new();
+                                for value in &select_menu.values {
+                                    let id = value.parse::<u64>().unwrap_or_default();
+                                    let user_id = serenity::UserId::new(id);
+                                    if let Some(user) = data.resolved.users.get(&user_id) {
+                                        users.push(user.clone());
+                                    }
+                                }
+                                let mut roles = Vec::new();
+                                for value in &select_menu.values {
+                                    let id = value.parse::<u64>().unwrap_or_default();
+                                    let role_id = serenity::RoleId::new(id);
+                                    if let Some(role) = data.resolved.roles.get(&role_id) {
+                                        roles.push(role.clone());
+                                    }
+                                }
+                                let mentionables = if users.is_empty() && roles.is_empty() {
+                                    None
+                                } else {
+                                    Some((users, roles))
+                                };
+                                return SelectDataResolved {
+                                    mentionables,
+                                    ..Default::default()
+                                };
+                            }
+                            serenity::ComponentType::ChannelSelect => {
+                                let channels = std::mem::take(&mut data.resolved.channels);
+                                let channels = if channels.is_empty() {
+                                    None
+                                } else {
+                                    Some(channels.into_iter().collect())
+                                };
+                                return SelectDataResolved {
+                                    channels,
+                                    ..Default::default()
+                                };
+                            }
+                            _ => continue,
+                        }
                     }
                 }
                 _ => continue,
@@ -91,7 +189,7 @@ pub fn find_modal_selections(
         }
     }
     tracing::warn!("{} not found in modal response", custom_id);
-    None
+    SelectDataResolved::default()
 }
 
 /// Underlying code for the modal spawning convenience function which abstracts over the kind of

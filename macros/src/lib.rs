@@ -417,6 +417,7 @@ channels: Vec<serenity::GenericChannelId>
         string_select,
         user_select,
         role_select,
+        mentionable_select,
         channel_select,
         channel_types,
         min_items,

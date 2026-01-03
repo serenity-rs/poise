@@ -26,6 +26,7 @@ struct FieldAttributes {
     string_select: Option<crate::util::List<String>>,
     user_select: Option<crate::util::List<String>>,
     role_select: Option<crate::util::List<String>>,
+    mentionable_select: Option<()>,
     channel_select: Option<crate::util::List<String>>,
     channel_types: Option<crate::util::List<syn::Ident>>,
     #[darling(rename = "min_items")]
@@ -92,10 +93,15 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
             + field_attrs.string_select.is_some() as usize
             + field_attrs.user_select.is_some() as usize
             + field_attrs.role_select.is_some() as usize
+            + field_attrs.mentionable_select.is_some() as usize
             + field_attrs.channel_select.is_some() as usize
             > 1 {
              return Err(darling::Error::custom("Cannot have multiple component type attributes on a single field"));
             }
+
+        if required && field_attrs.min_values.is_some_and(|min| min == 0) {
+            return Err(darling::Error::custom("Min items must be greater than 0 for required components"));
+        }
 
         // If field is a file upload component, process and continue
         if field_attrs.file_upload.is_some() {
@@ -127,7 +133,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
         }
 
         // If field is a select menu component, process and continue
-        let (select_menu_kind, values, select_parser, map) = match field_attrs {
+        let (select_menu_kind, values, kind) = match field_attrs {
             FieldAttributes { string_select: Some(ref string_select), .. } => {
                 let strings = &string_select.0;
                 (quote::quote! {
@@ -138,9 +144,8 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                     }
                 },
                 strings.len(),
-                quote::quote! { find_modal_selections },
-                quote::quote! { .map(|v| v.into_vec()) }
-            )
+                quote::quote! { .strings }
+                )
             },
             FieldAttributes { user_select: Some(user_select), .. } => {
                 let users: Vec<_> = user_select.0.iter().flat_map(|v| v.parse::<u64>()).collect();
@@ -151,16 +156,8 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                         ])),
                     }
                 }, users.len(),
-                quote::quote! { find_modal_selections },
-                quote::quote! {
-                    .map(|v| {
-                        v.iter()
-                            .flat_map(|v| v.parse::<u64>())
-                            .map(|v| serenity::UserId::new(v))
-                            .collect::<Vec<serenity::UserId>>()
-                    })
-                }
-            )
+                quote::quote! { .users }
+                )
             },
             FieldAttributes { role_select: Some(role_select), .. } => {
                 let roles: Vec<_> = role_select.0.iter().flat_map(|v| v.parse::<u64>()).collect();
@@ -171,16 +168,18 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                         ])),
                     }
                 }, roles.len(),
-                quote::quote! { find_modal_selections },
-                quote::quote! {
-                    .map(|v| {
-                        v.iter()
-                            .flat_map(|v| v.parse::<u64>())
-                            .map(|v| serenity::RoleId::new(v))
-                            .collect::<Vec<serenity::RoleId>>()
-                    })
-                }
-            )
+                quote::quote! { .roles }
+                )
+            },
+            FieldAttributes { mentionable_select: Some(_), .. } => {
+                (quote::quote! {
+                    serenity::CreateSelectMenuKind::Mentionable {
+                        default_users: None,
+                        default_roles: None,
+                    }
+                }, 0,
+                quote::quote! { .mentionables }
+                )
             },
             FieldAttributes { channel_select: Some(ref channel_select), .. } => {
                 let channel_types = match &field_attrs.channel_types {
@@ -200,18 +199,10 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                         ])),
                     }
                 }, channels.len(),
-                quote::quote! { find_modal_selections },
-                quote::quote! {
-                    .map(|v| {
-                        v.iter()
-                            .flat_map(|v| v.parse::<u64>())
-                            .map(|v| serenity::GenericChannelId::new(v))
-                            .collect::<Vec<serenity::GenericChannelId>>()
-                    })
-                }
-            )
+                quote::quote! { .channels }
+                )
             },
-            _ => (quote::quote! {}, 0, quote::quote! {}, quote::quote! {})
+            _ => (quote::quote! {}, 0, quote::quote! {})
         };
 
         match field_attrs.max_values {
@@ -242,7 +233,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
             });
 
             parsers.push(quote::quote! {
-                #field_ident: poise::#select_parser(&mut data, stringify!(#field_ident)) #map #ok_or,
+                #field_ident: poise::find_modal_selections(&mut data, stringify!(#field_ident)) #kind #ok_or,
             });
 
             continue;
