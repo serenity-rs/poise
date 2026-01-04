@@ -416,6 +416,7 @@ channels: Vec<serenity::GenericChannelId>
         max_length,
         paragraph,
         value,
+        text_display,
         file_upload,
         string_select,
         user_select,

@@ -22,6 +22,7 @@ struct FieldAttributes {
     max_length: Option<u16>,
     paragraph: Option<()>,
     value: Option<String>,
+    text_display: Option<String>,
     file_upload: Option<()>,
     string_select: Option<crate::util::List<String>>,
     user_select: Option<crate::util::List<String>>,
@@ -75,6 +76,13 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
             .collect();
         let field_attrs = <FieldAttributes as darling::FromMeta>::from_list(&field_attrs)?;
         let field_ident = field.ident.unwrap();
+
+        // Allow a text display component to be placed above any field
+        if let Some(content) = field_attrs.text_display {
+            builders.push(quote::quote! {
+                serenity::CreateModalComponent::TextDisplay(serenity::CreateTextDisplay::new(#content)),
+            });
+        }
 
         // Prepare to create modal builder and parser code for this field
         let label = field_attrs.name.unwrap_or(field_ident.to_string());
