@@ -127,11 +127,6 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
 
         let placeholder = field_attrs.placeholder.into_iter();
 
-        // Can be removed once the required field is added to Serenity
-        if field_attrs.min_values.is_some_and(|min| min == 0) {
-            return Err(darling::Error::custom("Min items for select menus must be greater than 0"));
-        }
-
         // If field is a select menu component, process and continue
         let (select_menu_kind, values, kind) = match field_attrs {
             FieldAttributes { string_select: Some(ref string_select), .. } => {
@@ -225,6 +220,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                             #select_menu_kind
                         )
                         #( .placeholder(#placeholder) )*
+                        .required(#required)
                         #( .min_values(#min_values) )*
                         #( .max_values(#max_values) )*
                     )
