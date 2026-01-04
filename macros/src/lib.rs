@@ -269,10 +269,13 @@ pub fn slash_choice_parameter(input: TokenStream) -> TokenStream {
 }
 
 /**
-Use this derive macro on a struct to easily generate a modal interaction.
+Use this derive macro on a struct to easily generate a modal interaction, Discord's version
+of interactive forms.
 
-Modals are Discord's version of interactive forms. A single modal can include up to five
-components.
+A single modal can include up to five components. While the macro supports all modal components,
+some flexibility is sacrificed in exchange for convenience. Notably, defaults cannot be provided
+for the mentionable select menu component, and the same component returns a tuple, which may not
+be intuitive.
 
 # Example
 
@@ -338,18 +341,18 @@ field attributes are valid for text input components only:
 - `#[min_length = 0]`: Minimum number of characters (0-4000)
 - `#[max_length = 1]`: Maximum number of characters (1-4000)
 - `#[paragraph]`: Switches to a multi-line input box. Default is single-line.
-- `#[value = ""]`: Optional pre-filled value for the text input.
+- `#[value = ""]`: Optional pre-filled value for the text input
 
-Other components supported by the macro include the [file upload][fu], [string select][ss],
-[user select][us], [role select][rs], and [channel select][cs] components. The [mentionable
-select][ms] component is not supported by the macro. Component type is indicated by using
-one of the following field attributes (**one per field**):
+Other components supported by the macro include the [file upload][fu], [string select][ss], [user
+select][us], [role select][rs], [mentionable select][ms], and [channel select][cs] components.
+Component type is indicated by using one of the following field attributes (**one per field**):
 
 - `#[file_upload]`: Allows the user to upload files (0-10). Returns [`Vec<Attachment>`][att].
 - `#[string_select("option 1", "option 2")]`: Supports 1-25 **unique** options (up to 100 chars
 each), defined in the attribute. Returns `Vec<String>`.
 - `#[user_select("", "")]`: Returns [`Vec<UserId>`][userid]
 - `#[role_select("", "")]`: Returns [`Vec<RoleId>`][roleid]
+- `#[mentionable_select]`: Returns a `(Vec<User>, Vec<Role>)` tuple
 - `#[channel_select("", "")]`: Returns [`Vec<GenericChannelId>`][gcid]
 
 All select menus support 0-25 selections, with both single-select and multi-select modes.
