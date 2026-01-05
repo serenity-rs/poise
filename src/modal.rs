@@ -26,7 +26,6 @@ pub fn find_modal_text(
     custom_id: &str,
 ) -> Option<String> {
     for component in data.components.iter_mut() {
-        // Text Inputs must be inside a Label, so ignore other components.
         match component {
             serenity::ModalComponent::Label(label) => match &mut label.component {
                 serenity::LabelComponent::InputText(input_text) => {
@@ -43,10 +42,7 @@ pub fn find_modal_text(
             _ => continue,
         }
     }
-    tracing::warn!(
-        "{} not found in modal response (expected at least blank string)",
-        custom_id
-    );
+    tracing::warn!("{custom_id} not found in modal response",);
     None
 }
 
@@ -77,7 +73,7 @@ pub fn find_modal_attachments(
             _ => continue,
         }
     }
-    tracing::warn!("{} not found in modal response", custom_id);
+    tracing::warn!("{custom_id} not found in modal response");
     None
 }
 
@@ -99,11 +95,9 @@ pub fn find_modal_selections(
                     if select_menu.custom_id == custom_id {
                         match select_menu.kind {
                             serenity::ComponentType::StringSelect => {
-                                let values = std::mem::take(&mut select_menu.values);
-                                let strings = if values.is_empty() {
-                                    None
-                                } else {
-                                    Some(values.into_vec())
+                                let strings = match std::mem::take(&mut select_menu.values) {
+                                    val if val.is_empty() => None,
+                                    val => Some(val.into_vec()),
                                 };
                                 return SelectDataResolved {
                                     strings,
@@ -188,7 +182,7 @@ pub fn find_modal_selections(
             _ => continue,
         }
     }
-    tracing::warn!("{} not found in modal response", custom_id);
+    tracing::warn!("{custom_id} not found in modal response");
     SelectDataResolved::default()
 }
 
