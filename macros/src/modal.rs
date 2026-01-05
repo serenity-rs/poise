@@ -27,7 +27,7 @@ struct FieldAttributes {
     string_select: Option<crate::util::List<String>>,
     user_select: Option<crate::util::List<String>>,
     role_select: Option<crate::util::List<String>>,
-    mentionable_select: Option<()>,
+    mentionable_select: Option<crate::util::List<String>>,
     channel_select: Option<crate::util::List<String>>,
     channel_types: Option<crate::util::List<syn::Ident>>,
     #[darling(rename = "min_items")]
@@ -182,13 +182,29 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                 quote::quote! { .roles }
                 )
             },
-            FieldAttributes { mentionable_select: Some(_), .. } => {
+            FieldAttributes { mentionable_select: Some(mentionables), .. } => {
+                let mentionables = mentionables.0;
+                let mut users = Vec::new();
+                let mut roles = Vec::new();
+                for string in mentionables {
+                    if string.starts_with("<@&") && string.ends_with(">") {
+                        if let Some(id) = string.trim_start_matches("<@&").trim_end_matches(">").parse::<u64>().ok() {
+                            roles.push(id);
+                        }
+                    } else if string.starts_with("<@") && string.ends_with(">") {
+                        if let Some(id) = string.trim_start_matches("<@").trim_end_matches(">").parse::<u64>().ok() {
+                            users.push(id);
+                        }
+                    }
+                }
+                let default_users = quote::quote! { #( serenity::UserId::new( #users ) ),* };
+                let default_roles = quote::quote! { #( serenity::RoleId::new( #roles ) ),* };
                 (quote::quote! {
                     serenity::CreateSelectMenuKind::Mentionable {
-                        default_users: None,
-                        default_roles: None,
+                        default_users: Some(Cow::Owned(vec![#default_users])),
+                        default_roles: Some(Cow::Owned(vec![#default_roles])),
                     }
-                }, 0,
+                }, users.len() + roles.len(),
                 quote::quote! { .mentionables }
                 )
             },
