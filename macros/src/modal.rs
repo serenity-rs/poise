@@ -240,6 +240,10 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
             let err = "Value of `max_items` cannot be less than the number of default values provided";
             return Err(darling::Error::custom(err).with_span(&field_attrs.max_values.span()));
         }
+        if field_attrs.string_select.is_none() && field_attrs.max_values.is_none() && values > 0 {
+            let err = "`max_items` must be set to equal to or greater than the number of default values provided";
+            return Err(darling::Error::custom(err).with_span(&field_ident));
+        }
 
         if !select_menu_kind.is_empty() {
             builders.push(quote::quote! {
