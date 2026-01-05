@@ -31,9 +31,9 @@ struct FieldAttributes {
     channel_select: Option<crate::util::List<String>>,
     channel_types: Option<crate::util::List<syn::Ident>>,
     #[darling(rename = "min_items")]
-    min_values: Option<u8>,
+    min_values: darling::util::SpannedValue<Option<u8>>,
     #[darling(rename = "max_items")]
-    max_values: Option<u8>,
+    max_values: darling::util::SpannedValue<Option<u8>>,
 }
 
 pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
@@ -69,12 +69,12 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
 
     for field in fields {
         // Extract data from syn::Field
-        let field_attrs: Vec<_> = field
+        let attrs: Vec<_> = field
             .attrs
             .into_iter()
             .map(|attr| darling::ast::NestedMeta::Meta(attr.meta))
             .collect();
-        let field_attrs = <FieldAttributes as darling::FromMeta>::from_list(&field_attrs)?;
+        let field_attrs = <FieldAttributes as darling::FromMeta>::from_list(&attrs)?;
         let field_ident = field.ident.unwrap();
 
         // Allow a text display component to be placed above any field
@@ -104,11 +104,19 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
             + field_attrs.mentionable_select.is_some() as usize
             + field_attrs.channel_select.is_some() as usize
             > 1 {
-             return Err(darling::Error::custom("Cannot have multiple component type attributes on a single field"));
+                let err = "Cannot have multiple input component attributes on a single field";
+                return Err(darling::Error::custom(err).with_span(&field_ident));
             }
 
         if required && field_attrs.min_values.is_some_and(|min| min == 0) {
-            return Err(darling::Error::custom("Min items must be greater than 0 for required components"));
+            let err = "Value of `min_items` must be greater than 0 for required components";
+            return Err(darling::Error::custom(err).with_span(&field_attrs.min_values.span()));
+        }
+        if let Some(max) = *field_attrs.max_values {
+            if field_attrs.min_values.is_some_and(|min| min > max) {
+                let err = "Value of `min_items` should be less than or equal to that of `max_items`";
+                return Err(darling::Error::custom(err).with_span(&field_attrs.min_values.span()));
+            }
         }
 
         // If field is a file upload component, process and continue
@@ -208,14 +216,13 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
             _ => (quote::quote! {}, 0, quote::quote! {})
         };
 
-        match field_attrs.max_values {
-            Some(max_values) if field_attrs.string_select.is_some() => { if usize::from(max_values) > values {
-                return Err(darling::Error::custom("Max items for string select menus must not be greater than the number of options provided"));
-            } },
-            Some(max_values) => { if values > usize::from(max_values) {
-                return Err(darling::Error::custom("Max items for non-string select menus must not be less than the number of default values provided"));
-            } },
-            None => {},
+        if field_attrs.string_select.is_some() && field_attrs.max_values.is_some_and(|v| usize::from(v) > values) {
+            let err = "Value of `max_items` cannot be greater than the number of options provided";
+            return Err(darling::Error::custom(err).with_span(&field_attrs.max_values.span()));
+        }
+        if field_attrs.string_select.is_none() && field_attrs.max_values.is_some_and(|v| usize::from(v) < values) {
+            let err = "Value of `max_items` cannot be less than the number of default values provided";
+            return Err(darling::Error::custom(err).with_span(&field_attrs.max_values.span()));
         }
 
         if !select_menu_kind.is_empty() {
