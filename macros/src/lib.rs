@@ -288,7 +288,7 @@ type ApplicationContext<'a> = poise::ApplicationContext<'a, Data, Error>;
 
 #[derive(Debug, Modal)]
 #[name = "Modal Title"] // Struct name by default
-#[text = "My *fancy* `modal`, created using [Poise](https://github.com/serenity-rs/poise/) :crab:"]
+#[text = "My *fancy* `modal`, created using [Poise](https://serenity-rs.github.io/) :crab:"]
 struct MyModal {
     #[name = "First text input"] // Field name by default
     #[description = "Displayed under name"] // No description by default
@@ -320,16 +320,35 @@ pub async fn modal(ctx: ApplicationContext<'_>) -> Result<(), Error> {
 }
 ```
 
-### Struct attributes
+# Struct attributes
 
 - `#[name = ""]`: Sets the modal title. Defaults to struct name if omitted.
 - `#[text = ""]`: Optional [text display][td] component, shown below the modal title. Can
 include markdown-formatted text, mentions (users, roles, etc.), and emojis. Note that this
 counts toward the maximum total of five components per modal.
 
-### Field attributes
+# Field attributes
 
-The following field attributes are shared by all components below:
+The text display component is the only content-style component available in modals.
+Keeping in mind that they count toward the five-component maximum per modal, text display
+components can be added above any input field using the following attribute:
+
+- `#[text_display]`: Equivalent to the struct-level `#[text]` attribute above.
+
+Because attributes must be placed above fields, text display components will necessarily
+be paired with interactive (input) components. Position relative to the interactive component
+attribute does not matter; the text display will be rendered on top.
+
+```rust
+#[text_display = "**Huge** markdown-friendly text. Shown *above* the `text input` component."]
+#[name = "Input Label #1"]
+text_input_one: Option<String>,
+#[name = "Input Label #2"]
+#[text_display = "Despite the attribute position, still shows __above__ 'Input Label 2'."]
+text_input_two: Option<String>,
+```
+
+The following field attributes are shared by all interactive components:
 
 - `#[name = ""]`: Sets the input label. Defaults to field name. Max 45 chars.
 - `#[description = ""]`: Adds an optional description under the label. Max 100 chars.
@@ -343,9 +362,10 @@ field attributes are valid for text input components only:
 - `#[paragraph]`: Switches to a multi-line input box. Default is single-line.
 - `#[value = ""]`: Optional pre-filled value for the text input
 
-Other components supported by the macro include the [file upload][fu], [string select][ss], [user
-select][us], [role select][rs], [mentionable select][ms], and [channel select][cs] components.
-Component type is indicated by using one of the following field attributes (**one per field**):
+Other interactive components supported by the macro include the [file upload][fu],
+[string select][ss], [user select][us], [role select][rs], [mentionable select][ms], and
+[channel select][cs] components. Component type is indicated by using one of the following
+field attributes (**one per field**):
 
 - `#[file_upload]`: Allows the user to upload files (0-10). Returns [`Vec<Attachment>`][att].
 - `#[string_select("option 1", "option 2")]`: Supports 1-25 **unique** options (up to 100 chars
@@ -366,7 +386,7 @@ values that are defined in the attribute, with upper and lower bounds being dete
 users: Vec<serenity::UserId>
 ```
 
-Min and max item values for file upload and select menu components are defined using the
+Min and max items values for file upload and select menu components are defined using the
 following field attributes:
 
 - `#[min_items = 0]`: 0-10 for files; 0-25 for select menus. Defaults to 1.
@@ -377,6 +397,18 @@ following field attributes:
 #[role_select()]
 #[max_items = 1]
 roles: Option<Vec<serenity::RoleId>>
+```
+
+Note that file upload and select menu components can be optional ***and*** have a `min_items`
+value defined at the same time. In such cases, the defined minimum only comes into effect when
+input is attempted. In the following example, the user would be able to submit the modal with
+either no mentionables ***or*** at least three mentionables selected.
+
+```rust
+#[name = "Mentionable select menu"]
+#[mentionable_select]
+#[min_items = 3]
+roles: Option<(Vec<User>, Vec<Role>)>
 ```
 
 For the channel select menu, [channel types][ct] to include in the list may optionally be defined

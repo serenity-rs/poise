@@ -303,7 +303,7 @@ pub async fn execute_modal_on_component_interaction<M: Modal>(
 ///
 /// #[derive(Debug, Modal)]
 /// #[name = "Modal Title"] // Struct name by default
-/// #[text = "My *fancy* `modal`, created using [Poise](https://github.com/serenity-rs/poise/) :crab:"]
+/// #[text = "My *fancy* `modal`, created using [Poise](https://serenity-rs.github.io/) :crab:"]
 /// struct MyModal {
 ///     #[name = "First text input"] // Field name by default
 ///     #[description = "Displayed under name"] // No description by default
