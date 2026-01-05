@@ -272,10 +272,10 @@ pub fn slash_choice_parameter(input: TokenStream) -> TokenStream {
 Use this derive macro on a struct to easily generate a modal interaction, Discord's version
 of interactive forms.
 
-A single modal can include up to five components. While the macro supports all modal components,
-some flexibility is sacrificed in exchange for convenience. Notably, defaults cannot be provided
-for the mentionable select menu component, and the same component returns a tuple, which may not
-be intuitive.
+A single modal can include up to five components. While the macro does support all modal
+components, the convenience comes with a small amount of awkwardness. Notably, defaults for
+the mentionable select menu component must be provided in an alternative format, and the same
+component returns a tuple, which may not be intuitive.
 
 # Example
 
@@ -372,18 +372,30 @@ field attributes (**one per field**):
 each), defined in the attribute. Returns `Vec<String>`.
 - `#[user_select("", "")]`: Returns [`Vec<UserId>`][userid]
 - `#[role_select("", "")]`: Returns [`Vec<RoleId>`][roleid]
-- `#[mentionable_select]`: Returns a `(Vec<User>, Vec<Role>)` tuple
+- `#[mentionable_select("", "")]`: Returns a `(Vec<User>, Vec<Role>)` tuple
 - `#[channel_select("", "")]`: Returns [`Vec<GenericChannelId>`][gcid]
 
 All select menus support 0-25 selections, with both single-select and multi-select modes.
-User, role, and channel select menus support an **optional** list of default, auto-populated
-values that are defined in the attribute, with upper and lower bounds being determined by
-`min_items` and `max_items`. Default values are defined using user, role, or channel IDs:
+User, role, mentionable, and channel select menus support an **optional** list of default,
+auto-populated values that are defined in the attribute, with upper and lower bounds being
+determined by `min_items` and `max_items`.
+
+Default values for user, role, and channel select menus are defined using numerical user,
+role, or channel IDs (Discord snowflakes):
 
 ```rust
 #[name = "User select menu"]
 #[user_select("889963798599966730", "1091484180342378546")]
 users: Vec<serenity::UserId>
+```
+
+Because mentionable defaults can include both user and role IDs, they must be provided in
+the Discord angle bracket format (`<@USERID>`, `<@&ROLEID>`) to facilitate differentiation:
+
+```rust
+#[name = "Mentionable select menu"]
+#[mentionable_select("<@889963798599966730>", "<@&1147176664095277187>")]
+mentionables: (Vec<User>, Vec<Role>)
 ```
 
 Min and max items values for file upload and select menu components are defined using the
