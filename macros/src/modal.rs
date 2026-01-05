@@ -159,7 +159,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                 )
             },
             FieldAttributes { user_select: Some(user_select), .. } => {
-                let users: Vec<_> = user_select.0.iter().flat_map(|v| v.parse::<u64>()).collect();
+                let users: Vec<_> = user_select.0.iter().flat_map(|s| s.parse::<u64>()).collect();
                 (quote::quote! {
                     serenity::CreateSelectMenuKind::User {
                         default_users: Some(Cow::Owned(vec![
@@ -171,7 +171,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                 )
             },
             FieldAttributes { role_select: Some(role_select), .. } => {
-                let roles: Vec<_> = role_select.0.iter().flat_map(|v| v.parse::<u64>()).collect();
+                let roles: Vec<_> = role_select.0.iter().flat_map(|s| s.parse::<u64>()).collect();
                 (quote::quote! {
                     serenity::CreateSelectMenuKind::Role {
                         default_roles: Some(Cow::Owned(vec![
