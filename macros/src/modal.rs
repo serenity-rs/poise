@@ -62,6 +62,10 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
     let mut parsers = Vec::new();
 
     if let Some(content) = struct_attrs.text_display {
+        if builders.len() > 5 {
+            let err = "Cannot have more than five components in a modal";
+            return Err(darling::Error::custom(err));
+        }
         builders.push(quote::quote! {
             serenity::CreateModalComponent::TextDisplay(serenity::CreateTextDisplay::new(#content)),
         });
@@ -366,6 +370,11 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
         parsers.push(quote::quote! {
             #field_ident: poise::find_modal_text(&mut data, stringify!(#field_ident)) #ok_or,
         });
+    }
+
+    if builders.len() > 5 {
+        let err = "Cannot have more than five components in a modal";
+        return Err(darling::Error::custom(err));
     }
 
     let modal_title = struct_attrs.name.unwrap_or(input.ident.to_string());
