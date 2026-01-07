@@ -141,7 +141,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
             });
 
             parsers.push(quote::quote! {
-                #field_ident: poise::find_modal_attachments(&mut data, stringify!(#field_ident)) #ok_or,
+                #field_ident: poise::find_modal_data(&mut data, stringify!(#field_ident)).attachments #ok_or,
             });
 
             continue;
@@ -325,7 +325,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
             });
 
             parsers.push(quote::quote! {
-                #field_ident: poise::find_modal_selections(&mut data, stringify!(#field_ident)) #kind #ok_or,
+                #field_ident: poise::find_modal_data(&mut data, stringify!(#field_ident)) #kind #ok_or,
             });
 
             continue;
@@ -368,7 +368,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
 
         // Create modal parser code for this field
         parsers.push(quote::quote! {
-            #field_ident: poise::find_modal_text(&mut data, stringify!(#field_ident)) #ok_or,
+            #field_ident: poise::find_modal_data(&mut data, stringify!(#field_ident)).text #ok_or,
         });
     }
 
