@@ -272,10 +272,10 @@ pub fn slash_choice_parameter(input: TokenStream) -> TokenStream {
 Use this derive macro on a struct to easily generate a modal interaction, Discord's version
 of interactive forms.
 
-A single modal can include up to five components. While the macro does support all modal
-components, the convenience comes with a small amount of awkwardness. Notably, defaults for
-the mentionable select menu component must be provided in an alternative format, and the same
-component returns a tuple, which may not be intuitive.
+A single modal can include up to five components. While the macro does support all [available
+modal components][components], the convenience comes with a small amount of awkwardness. Notably,
+defaults for the mentionable select menu component must be provided in an alternative format,
+and the same component returns a tuple, which may not be intuitive.
 
 # Example
 
@@ -330,14 +330,15 @@ counts toward the maximum total of five components per modal.
 # Field attributes
 
 The text display component is the only content-style component available in modals.
-Keeping in mind that they count toward the five-component maximum per modal, text display
-components can be added above any input field using the following attribute:
+However, despite not being interactive, they still count toward the five-component
+maximum per modal. Text display components can be added above any input field using
+the following attribute:
 
 - `#[text_display]`: Equivalent to the struct-level `#[text]` attribute above.
 
 Because attributes must be placed above fields, text display components will necessarily
-be paired with interactive (input) components. Position relative to the interactive component
-attribute does not matter; the text display will be rendered on top.
+be paired with interactive (input) components. Position of the attribute relative to the
+interactive component attribute does not matter; the text display will be rendered on top.
 
 ```rust
 #[text_display = "**Huge** markdown-friendly text. Shown *above* the `text input` component."]
@@ -357,10 +358,10 @@ The following field attributes are shared by all interactive components:
 The default component is the [text input][ti] component, which returns a `String`. The following
 field attributes are valid for text input components only:
 
-- `#[min_length = 0]`: Minimum number of characters (0-4000)
-- `#[max_length = 1]`: Maximum number of characters (1-4000)
+- `#[min_length = 0]`: Minimum number of characters (0-4000).
+- `#[max_length = 1]`: Maximum number of characters (1-4000).
 - `#[paragraph]`: Switches to a multi-line input box. Default is single-line.
-- `#[value = ""]`: Optional pre-filled value for the text input
+- `#[value = ""]`: Optional pre-filled value for the text input.
 
 Other interactive components supported by the macro include the [file upload][fu],
 [string select][ss], [user select][us], [role select][rs], [mentionable select][ms], and
@@ -370,10 +371,10 @@ field attributes (**one per field**):
 - `#[file_upload]`: Allows the user to upload files (0-10). Returns [`Vec<Attachment>`][att].
 - `#[string_select("option 1", "option 2")]`: Supports 1-25 **unique** options (up to 100 chars
 each), defined in the attribute. Returns `Vec<String>`.
-- `#[user_select("", "")]`: Returns [`Vec<UserId>`][userid]
-- `#[role_select("", "")]`: Returns [`Vec<RoleId>`][roleid]
-- `#[mentionable_select("", "")]`: Returns a `(Vec<User>, Vec<Role>)` tuple
-- `#[channel_select("", "")]`: Returns [`Vec<GenericChannelId>`][gcid]
+- `#[user_select("", "")]`: Returns [`Vec<UserId>`][userid].
+- `#[role_select("", "")]`: Returns [`Vec<RoleId>`][roleid].
+- `#[mentionable_select("", "")]`: Returns a `(Vec<User>, Vec<Role>)` tuple.
+- `#[channel_select("", "")]`: Returns [`Vec<GenericChannelId>`][gcid].
 
 All select menus support 0-25 selections, with both single-select and multi-select modes.
 User, role, mentionable, and channel select menus support an **optional** list of default,
@@ -398,8 +399,8 @@ the Discord angle bracket format (`<@USERID>`, `<@&ROLEID>`) to facilitate diffe
 mentionables: (Vec<User>, Vec<Role>)
 ```
 
-Min and max items values for file upload and select menu components are defined using the
-following field attributes:
+Minimum and maximum items values for file upload and select menu components are defined
+using the following field attributes:
 
 - `#[min_items = 0]`: 0-10 for files; 0-25 for select menus. Defaults to 1.
 - `#[max_items = 25]`: 1-10 for files; 1-25 for select menus. Defaults to 1.
@@ -448,6 +449,7 @@ channels: Vec<serenity::GenericChannelId>
 [roleid]:https://docs.rs/serenity/latest/serenity/model/id/struct.RoleId.html
 [gcid]:https://serenity-rs.github.io/serenity/next/serenity/model/id/struct.GenericChannelId.html
 [ct]:https://docs.rs/serenity/latest/serenity/model/channel/enum.ChannelType.html
+[components]:https://discord.com/developers/docs/components/reference#component-object-component-types
 */
 #[proc_macro_derive(
     Modal,
