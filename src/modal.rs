@@ -1,6 +1,7 @@
 //! Modal trait and utility items for implementing it (mainly for the derive macro)
 
 use crate::serenity_prelude as serenity;
+use crate::serenity_prelude::small_fixed_array::FixedArray;
 
 /// Meant for use in derived [`Modal::parse`] implementation.
 ///
@@ -19,43 +20,11 @@ pub struct ModalDataResolved {
 }
 
 impl ModalDataResolved {
-    /// Used by [`find_modal_data`] to retrieve resolved data from a component via _take_.
-    #[doc(hidden)]
-    fn take_from_modal(
-        kind: serenity::ComponentType,
-        values: &mut serenity::small_fixed_array::FixedArray<String, u32>,
-        resolved: &mut serenity::CommandDataResolved,
-    ) -> Self {
-        match kind {
-            serenity::ComponentType::StringSelect => {
-                let strings = match std::mem::take(values) {
-                    val if val.is_empty() => None,
-                    val => Some(val.into_vec()),
-                };
-                ModalDataResolved {
-                    strings,
-                    ..Default::default()
-                }
-            }
-            serenity::ComponentType::ChannelSelect => {
-                let channels = match std::mem::take(&mut resolved.channels) {
-                    val if val.is_empty() => None,
-                    val => Some(val.into_iter().collect::<Vec<_>>()),
-                };
-                ModalDataResolved {
-                    channels,
-                    ..Default::default()
-                }
-            }
-            _ => ModalDataResolved::default(),
-        }
-    }
-
     /// Used by [`find_modal_data`] to retrieve resolved data from a component via _cloning_.
     #[doc(hidden)]
     fn clone_from_modal(
         kind: serenity::ComponentType,
-        values: &serenity::small_fixed_array::FixedArray<String, u32>,
+        values: &FixedArray<String, u32>,
         resolved: &serenity::CommandDataResolved,
     ) -> Self {
         let mut users = Vec::new();
@@ -87,6 +56,94 @@ impl ModalDataResolved {
             ..Default::default()
         }
     }
+
+    /// Used by [`find_modal_data`] to retrieve resolved data from a component via _take_.
+    #[doc(hidden)]
+    fn extract_by_key(
+        file_upload: &mut serenity::all::FileUpload,
+        resolved: &mut serenity::CommandDataResolved,
+    ) -> Self {
+        let mut attachments = Vec::new();
+        for value in &mut file_upload.values {
+            if let Some(attachment) = resolved.attachments.remove(value) {
+                attachments.push(attachment);
+            }
+        }
+        let attachments = if attachments.is_empty() {
+            None
+        } else {
+            Some(attachments)
+        };
+        Self {
+            attachments,
+            ..Default::default()
+        }
+    }
+}
+
+impl From<&mut serenity::all::InputText> for ModalDataResolved {
+    fn from(value: &mut serenity::all::InputText) -> Self {
+        let text = match std::mem::take(&mut value.value) {
+            Some(val) if val.is_empty() => None,
+            Some(val) => Some(val.into_string()),
+            None => None,
+        };
+        Self {
+            text,
+            ..Default::default()
+        }
+    }
+}
+
+impl From<&mut FixedArray<String, u32>> for ModalDataResolved {
+    fn from(value: &mut FixedArray<String, u32>) -> Self {
+        let strings = match std::mem::take(value) {
+            val if val.is_empty() => None,
+            val => Some(val.into_vec()),
+        };
+        Self {
+            strings,
+            ..Default::default()
+        }
+    }
+}
+
+impl From<&mut serenity::CommandDataResolved> for ModalDataResolved {
+    fn from(value: &mut serenity::CommandDataResolved) -> Self {
+        let attachments = match std::mem::take(&mut value.attachments) {
+            val if val.is_empty() => None,
+            val => Some(val.into_iter().collect::<Vec<_>>()),
+        };
+        let channels = match std::mem::take(&mut value.channels) {
+            val if val.is_empty() => None,
+            val => Some(val.into_iter().collect::<Vec<_>>()),
+        };
+        let users = match std::mem::take(&mut value.users) {
+            val if val.is_empty() => None,
+            val => Some(val.into_iter().collect::<Vec<_>>()),
+        };
+        let roles = match std::mem::take(&mut value.roles) {
+            val if val.is_empty() => None,
+            val => Some(val.into_iter().collect::<Vec<_>>()),
+        };
+        let mentionables = if users.is_none() && roles.is_none() {
+            None
+        } else {
+            Some((
+                users.clone().unwrap_or_default(),
+                roles.clone().unwrap_or_default(),
+            ))
+        };
+        Self {
+            text: None,
+            attachments,
+            strings: None,
+            users,
+            roles,
+            mentionables,
+            channels,
+        }
+    }
 }
 
 /// Meant for use in derived [`Modal::parse`] implementation.
@@ -107,43 +164,26 @@ pub fn find_modal_data(
             serenity::ModalComponent::Label(label) => match &mut label.component {
                 serenity::LabelComponent::InputText(input_text) => {
                     if input_text.custom_id == custom_id {
-                        let text = if input_text.value.is_empty() {
-                            None
-                        } else {
-                            Some(std::mem::take(&mut input_text.value).into_string())
-                        };
-                        return ModalDataResolved {
-                            text,
-                            ..Default::default()
-                        };
+                        return ModalDataResolved::from(input_text);
                     }
                 }
                 serenity::LabelComponent::FileUpload(file_upload) => {
                     if file_upload.custom_id == custom_id {
-                        let attachments = match std::mem::take(&mut data.resolved.attachments) {
-                            val if val.is_empty() => None,
-                            val => Some(val.into_iter().collect::<Vec<_>>()),
-                        };
-                        return ModalDataResolved {
-                            attachments,
-                            ..Default::default()
-                        };
+                        return ModalDataResolved::extract_by_key(file_upload, &mut data.resolved);
                     }
                 }
                 serenity::LabelComponent::SelectMenu(select_menu) => {
                     if select_menu.custom_id == custom_id {
                         match select_menu.kind {
-                            serenity::ComponentType::StringSelect
-                            | serenity::ComponentType::ChannelSelect => {
-                                return ModalDataResolved::take_from_modal(
-                                    select_menu.kind,
-                                    &mut select_menu.values,
-                                    &mut data.resolved,
-                                );
+                            serenity::ComponentType::StringSelect => {
+                                return ModalDataResolved::from(&mut select_menu.values);
                             }
                             serenity::ComponentType::UserSelect
                             | serenity::ComponentType::RoleSelect
-                            | serenity::ComponentType::MentionableSelect => {
+                            | serenity::ComponentType::ChannelSelect => {
+                                return ModalDataResolved::from(&mut data.resolved);
+                            }
+                            serenity::ComponentType::MentionableSelect => {
                                 return ModalDataResolved::clone_from_modal(
                                     select_menu.kind,
                                     &select_menu.values,
