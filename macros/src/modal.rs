@@ -45,7 +45,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
         _ => {
             return Err(syn::Error::new(
                 input.ident.span(),
-                "Only structs with named fields can be used for derived modals",
+                "only structs with named fields can be used for derived modals",
             )
             .into())
         }
@@ -62,8 +62,10 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
     let mut parsers = Vec::new();
 
     if let Some(content) = struct_attrs.text_display {
+        // Builder count check appears twice (here and after the final parser is pushed),
+        // but this is intentional. Count does not trigger properly otherwise.
         if builders.len() > 5 {
-            let err = "Cannot have more than five components in a modal";
+            let err = "cannot have more than five components in a modal";
             return Err(darling::Error::custom(err));
         }
         builders.push(quote::quote! {
@@ -81,14 +83,14 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
         let field_attrs = <FieldAttributes as darling::FromMeta>::from_list(&field_attrs)?;
         let field_ident = field.ident.unwrap();
 
-        // Allow a text display component to be placed above any field
+        // Allow a text display component to be placed above any field.
         if let Some(content) = field_attrs.text_display {
             builders.push(quote::quote! {
                 serenity::CreateModalComponent::TextDisplay(serenity::CreateTextDisplay::new(#content)),
             });
         }
 
-        // Prepare to create modal builder and parser code for this field
+        // Initialize variables common to most components and do some light form validation.
         let label = field_attrs.name.unwrap_or(field_ident.to_string());
         let description = field_attrs.description.into_iter();
         let required = crate::util::extract_type_parameter("Option", &field.ty).is_none();
@@ -109,23 +111,23 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
             + field_attrs.channel_select.is_some() as usize
             > 1
         {
-            let err = "Cannot have multiple input component attributes on a single field";
+            let err = "cannot have multiple input component attributes on a single field";
             return Err(darling::Error::custom(err).with_span(&field_ident));
         }
 
         if required && field_attrs.min_values.is_some_and(|min| min == 0) {
-            let err = "Value of `min_items` must be greater than 0 for required components";
+            let err = "value of `min_items` must be greater than 0 for required components";
             return Err(darling::Error::custom(err).with_span(&field_attrs.min_values.span()));
         }
         if let Some(max) = *field_attrs.max_values {
             if field_attrs.min_values.is_some_and(|min| min > max) {
                 let err =
-                    "Value of `min_items` should be less than or equal to that of `max_items`";
+                    "value of `min_items` should be less than or equal to that of `max_items`";
                 return Err(darling::Error::custom(err).with_span(&field_attrs.min_values.span()));
             }
         }
 
-        // If field is a file upload component, process and continue
+        // If field is a file upload component, process and continue.
         if field_attrs.file_upload.is_some() {
             builders.push(quote::quote! {
                 serenity::CreateModalComponent::Label(
@@ -149,7 +151,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
 
         let placeholder = field_attrs.placeholder.into_iter();
 
-        // If field is a select menu component, process and continue
+        // If field is a select menu component, process and continue.
         let (select_menu_kind, values, kind) = match field_attrs {
             FieldAttributes {
                 string_select: Some(ref string_select),
@@ -284,12 +286,13 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
             _ => (quote::quote! {}, 0, quote::quote! {}),
         };
 
+        // Do some simple min/max item validation.
         if field_attrs.string_select.is_some()
             && field_attrs
                 .max_values
                 .is_some_and(|v| usize::from(v) > values)
         {
-            let err = "Value of `max_items` cannot be greater than the number of options provided";
+            let err = "value of `max_items` cannot be greater than the number of options provided";
             return Err(darling::Error::custom(err).with_span(&field_attrs.max_values.span()));
         }
         if field_attrs.string_select.is_none()
@@ -298,11 +301,11 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                 .is_some_and(|v| usize::from(v) < values)
         {
             let err =
-                "Value of `max_items` cannot be less than the number of default values provided";
+                "value of `max_items` cannot be less than the number of default values provided";
             return Err(darling::Error::custom(err).with_span(&field_attrs.max_values.span()));
         }
         if field_attrs.string_select.is_none() && field_attrs.max_values.is_none() && values > 0 {
-            let err = "`max_items` must be set to equal to or greater than the number of default values provided";
+            let err = "`max_items` attribute must be present and set to equal to or greater than the number of default values, when provided";
             return Err(darling::Error::custom(err).with_span(&field_ident));
         }
 
@@ -331,7 +334,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
             continue;
         }
 
-        // Field was not upload or select menu, so process as text input
+        // Field was not upload or select menu, so process as text input (=default).
         let style = if field_attrs.paragraph.is_some() {
             quote::quote!(serenity::InputTextStyle::Paragraph)
         } else {
@@ -366,14 +369,14 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
             ),
         });
 
-        // Create modal parser code for this field
         parsers.push(quote::quote! {
             #field_ident: poise::find_modal_data(&mut data, stringify!(#field_ident)).text #ok_or,
         });
     }
 
+    // Second builder count check. Required to trigger the error consistently.
     if builders.len() > 5 {
-        let err = "Cannot have more than five components in a modal";
+        let err = "cannot have more than five components in a modal";
         return Err(darling::Error::custom(err));
     }
 
