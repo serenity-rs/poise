@@ -371,10 +371,10 @@ field attributes (**one per field**):
 - `#[file_upload]`: Allows the user to upload files (0-10). Returns [`Vec<Attachment>`][att].
 - `#[string_select("option 1", "option 2")]`: Supports 1-25 **unique** options (up to 100 chars
 each), defined in the attribute. Returns `Vec<String>`.
-- `#[user_select("", "")]`: Returns [`Vec<UserId>`][userid].
-- `#[role_select("", "")]`: Returns [`Vec<RoleId>`][roleid].
+- `#[user_select("", "")]`: Returns [`Vec<User>`][user].
+- `#[role_select("", "")]`: Returns [`Vec<Role>`][role].
 - `#[mentionable_select("", "")]`: Returns a `(Vec<User>, Vec<Role>)` tuple.
-- `#[channel_select("", "")]`: Returns [`Vec<GenericChannelId>`][gcid].
+- `#[channel_select("", "")]`: Returns [`Vec<GenericInteractionChannel>`][gic].
 
 All select menus support 0-25 selections, with both single-select and multi-select modes.
 User, role, mentionable, and channel select menus support an **optional** list of default,
@@ -409,7 +409,7 @@ using the following field attributes:
 #[name = "Role select menu"]
 #[role_select()]
 #[max_items = 1]
-roles: Option<Vec<serenity::RoleId>>
+roles: Option<Vec<serenity::Role>>
 ```
 
 Note that file upload and select menu components can be optional ***and*** have a `min_items`
@@ -433,7 +433,7 @@ using the following field attribute:
 #[name = "Channel select menu"]
 #[channel_select()]
 #[channel_types("Text", "Forum")]
-channels: Vec<serenity::GenericChannelId>
+channels: Vec<serenity::GenericInteractionChannel>
 ```
 
 [td]:https://discord.com/developers/docs/components/reference#text-display
@@ -445,9 +445,9 @@ channels: Vec<serenity::GenericChannelId>
 [cs]:https://discord.com/developers/docs/components/reference#channel-select
 [ms]:https://discord.com/developers/docs/components/reference#mentionable-select
 [att]:https://docs.rs/serenity/latest/serenity/model/channel/struct.Attachment.html
-[userid]:https://docs.rs/serenity/latest/serenity/model/id/struct.UserId.html
-[roleid]:https://docs.rs/serenity/latest/serenity/model/id/struct.RoleId.html
-[gcid]:https://serenity-rs.github.io/serenity/next/serenity/model/id/struct.GenericChannelId.html
+[user]:https://docs.rs/serenity/latest/serenity/model/user/struct.User.html
+[role]:https://docs.rs/serenity/latest/serenity/model/guild/struct.Role.html
+[gic]:https://serenity-rs.github.io/serenity/next/serenity/model/channel/enum.GenericInteractionChannel.html
 [ct]:https://docs.rs/serenity/latest/serenity/model/channel/enum.ChannelType.html
 [components]:https://discord.com/developers/docs/components/reference#component-object-component-types
 */
