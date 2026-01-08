@@ -73,12 +73,12 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
 
     for field in fields {
         // Extract data from syn::Field
-        let attrs: Vec<_> = field
+        let field_attrs: Vec<_> = field
             .attrs
             .into_iter()
             .map(|attr| darling::ast::NestedMeta::Meta(attr.meta))
             .collect();
-        let field_attrs = <FieldAttributes as darling::FromMeta>::from_list(&attrs)?;
+        let field_attrs = <FieldAttributes as darling::FromMeta>::from_list(&field_attrs)?;
         let field_ident = field.ident.unwrap();
 
         // Allow a text display component to be placed above any field
