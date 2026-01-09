@@ -45,16 +45,16 @@ impl ModalDataResolved {
     /// Used by [`find_modal_data`] to retrieve resolved data from a component via _take_.
     #[doc(hidden)]
     fn extract_selections_by_key(
-        select_menu: &mut serenity::all::SelectMenu,
-        resolved: &mut serenity::CommandDataResolved,
+        select_menu: &serenity::all::SelectMenu,
+        resolved: &serenity::CommandDataResolved,
     ) -> Self {
         match select_menu.kind {
             serenity::ComponentType::UserSelect => {
                 let mut users = Vec::new();
-                for value in &mut select_menu.values {
+                for value in &select_menu.values {
                     let id = value.parse::<u64>().unwrap_or_default();
-                    if let Some(user) = resolved.users.remove(&id.into()) {
-                        users.push(user);
+                    if let Some(user) = resolved.users.get(&id.into()) {
+                        users.push(user.clone());
                     }
                 }
                 let users = if users.is_empty() { None } else { Some(users) };
@@ -65,10 +65,10 @@ impl ModalDataResolved {
             }
             serenity::ComponentType::RoleSelect => {
                 let mut roles = Vec::new();
-                for value in &mut select_menu.values {
+                for value in &select_menu.values {
                     let id = value.parse::<u64>().unwrap_or_default();
-                    if let Some(role) = resolved.roles.remove(&id.into()) {
-                        roles.push(role);
+                    if let Some(role) = resolved.roles.get(&id.into()) {
+                        roles.push(role.clone());
                     }
                 }
                 let roles = if roles.is_empty() { None } else { Some(roles) };
@@ -80,12 +80,12 @@ impl ModalDataResolved {
             serenity::ComponentType::MentionableSelect => {
                 let mut users = Vec::new();
                 let mut roles = Vec::new();
-                for value in &mut select_menu.values {
+                for value in &select_menu.values {
                     let id = value.parse::<u64>().unwrap_or_default();
-                    if let Some(user) = resolved.users.remove(&id.into()) {
-                        users.push(user);
-                    } else if let Some(role) = resolved.roles.remove(&id.into()) {
-                        roles.push(role);
+                    if let Some(user) = resolved.users.get(&id.into()) {
+                        users.push(user.clone());
+                    } else if let Some(role) = resolved.roles.get(&id.into()) {
+                        roles.push(role.clone());
                     }
                 }
                 let mentionables = match (users.len(), roles.len()) {
@@ -99,10 +99,10 @@ impl ModalDataResolved {
             }
             serenity::ComponentType::ChannelSelect => {
                 let mut channels = Vec::new();
-                for value in &mut select_menu.values {
+                for value in &select_menu.values {
                     let id = value.parse::<u64>().unwrap_or_default();
-                    if let Some(channel) = resolved.channels.remove(&id.into()) {
-                        channels.push(channel);
+                    if let Some(channel) = resolved.channels.get(&id.into()) {
+                        channels.push(channel.clone());
                     }
                 }
                 let channels = if channels.is_empty() {
@@ -194,7 +194,7 @@ pub fn find_modal_data(
                             | serenity::ComponentType::MentionableSelect => {
                                 return ModalDataResolved::extract_selections_by_key(
                                     select_menu,
-                                    &mut data.resolved,
+                                    &data.resolved,
                                 );
                             }
                             _ => continue,
