@@ -22,11 +22,11 @@ impl ModalDataResolved {
     /// Used by [`find_modal_data`] to retrieve resolved data from a component via _take_.
     #[doc(hidden)]
     fn extract_attachments_by_key(
-        file_upload: &mut serenity::all::FileUpload,
+        file_upload: &serenity::all::FileUpload,
         resolved: &mut serenity::CommandDataResolved,
     ) -> Self {
         let mut attachments = Vec::new();
-        for value in &mut file_upload.values {
+        for value in &file_upload.values {
             if let Some(attachment) = resolved.attachments.remove(value) {
                 attachments.push(attachment);
             }
