@@ -9,17 +9,25 @@ use crate::serenity_prelude as serenity;
 #[non_exhaustive]
 #[derive(Default)]
 pub struct ModalDataResolved {
+    /// The user input from a text input component.
     pub text: Option<String>,
+    /// The resolved `Attachment`s from a file upload component.
     pub attachments: Option<Vec<serenity::Attachment>>,
+    /// The selected `String`s from a string select menu component.
     pub strings: Option<Vec<String>>,
+    /// The resolved `User`s from a user select menu component.
     pub users: Option<Vec<serenity::User>>,
+    /// The resolved `Role`s from a role select menu component.
     pub roles: Option<Vec<serenity::Role>>,
+    /// The resolved `User`s and `Role`s from a mentionable select menu component.
     pub mentionables: Option<(Vec<serenity::User>, Vec<serenity::Role>)>,
+    /// The resolved `GenericInteractionChannel`s from a channel select menu component.
     pub channels: Option<Vec<serenity::GenericInteractionChannel>>,
 }
 
 impl ModalDataResolved {
-    /// Used by [`find_modal_data`] to retrieve resolved data from a component via _take_.
+    /// Used by [`find_modal_data`] to retrieve resolved attachment data from a
+    /// `FileUpload` component via _take_.
     #[doc(hidden)]
     fn extract_attachments_by_key(
         file_upload: &serenity::all::FileUpload,
@@ -42,7 +50,9 @@ impl ModalDataResolved {
         }
     }
 
-    /// Used by [`find_modal_data`] to retrieve resolved data from a component via _take_.
+    /// Used by [`find_modal_data`] to retrieve resolved data from `SelectMenu` components.
+    /// Entity data is _cloned_ since resolved data will be shared between components when
+    /// the same entity is selected in those components.
     #[doc(hidden)]
     fn extract_selections_by_key(
         select_menu: &serenity::all::SelectMenu,
@@ -135,6 +145,13 @@ impl From<&mut serenity::all::InputText> for ModalDataResolved {
 }
 
 impl From<&mut serenity::all::SelectMenu> for ModalDataResolved {
+    /// Converts to [`ModalDataResolved`] from [`SelectMenu`][sm].
+    ///
+    /// Only supports [`StringSelect`][ss] since resolved data is unavailable.
+    /// All other components will return their default value.
+    ///
+    /// [sm]: crate::serenity_prelude::all::SelectMenu
+    /// [ss]: crate::serenity_prelude::ComponentType::StringSelect
     fn from(value: &mut serenity::all::SelectMenu) -> Self {
         match value.kind {
             serenity::ComponentType::StringSelect => {
@@ -147,7 +164,6 @@ impl From<&mut serenity::all::SelectMenu> for ModalDataResolved {
                     ..Default::default()
                 }
             }
-            // Only supports StringSelect since resolved data is unavailable.
             _ => Self::default(),
         }
     }
@@ -157,10 +173,6 @@ impl From<&mut serenity::all::SelectMenu> for ModalDataResolved {
 ///
 /// Retrieves the resolved modal interaction data from the component that has the given
 /// `custom_id`, or logs a warning if the component cannot be found.
-///
-/// For `InputText`, `FileUpload`, `StringSelect`, and `ChannelSelect` components, _takes_
-/// the data out of the component. For `UserSelect`, `RoleSelect`, and `MentionableSelect`
-/// components, data is _cloned_ instead since it may be shared between the components.
 #[doc(hidden)]
 pub fn find_modal_data(
     data: &mut serenity::ModalInteractionData,

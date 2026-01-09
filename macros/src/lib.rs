@@ -387,7 +387,7 @@ role, or channel IDs (Discord snowflakes):
 ```rust
 #[name = "User select menu"]
 #[user_select("889963798599966730", "1091484180342378546")]
-users: Vec<serenity::UserId>
+users: Vec<serenity::User>
 ```
 
 Because mentionable defaults can include both user and role IDs, they must be provided in
@@ -396,7 +396,7 @@ the Discord angle bracket format (`<@USERID>`, `<@&ROLEID>`) to facilitate diffe
 ```rust
 #[name = "Mentionable select menu"]
 #[mentionable_select("<@889963798599966730>", "<@&1147176664095277187>")]
-mentionables: (Vec<User>, Vec<Role>)
+mentionables: (Vec<serenity::User>, Vec<serenity::Role>)
 ```
 
 Minimum and maximum items values for file upload and select menu components are defined
@@ -421,7 +421,7 @@ either no mentionables ***or*** at least three mentionables selected.
 #[name = "Mentionable select menu"]
 #[mentionable_select]
 #[min_items = 3]
-roles: Option<(Vec<User>, Vec<Role>)>
+roles: Option<(Vec<serenity::User>, Vec<serenity::Role>)>
 ```
 
 For the channel select menu, [channel types][ct] to include in the list may optionally be defined
