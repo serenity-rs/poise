@@ -1,7 +1,6 @@
 //! Modal trait and utility items for implementing it (mainly for the derive macro)
 
 use crate::serenity_prelude as serenity;
-use crate::serenity_prelude::small_fixed_array::FixedArray;
 
 /// Meant for use in derived [`Modal::parse`] implementation.
 ///
@@ -20,46 +19,9 @@ pub struct ModalDataResolved {
 }
 
 impl ModalDataResolved {
-    /// Used by [`find_modal_data`] to retrieve resolved data from a component via _cloning_.
-    #[doc(hidden)]
-    fn clone_from_modal(
-        kind: serenity::ComponentType,
-        values: &FixedArray<String, u32>,
-        resolved: &serenity::CommandDataResolved,
-    ) -> Self {
-        let mut users = Vec::new();
-        let mut roles = Vec::new();
-        for value in values {
-            let id = value.parse::<u64>().unwrap_or_default();
-            if let Some(user) = resolved.users.get(&id.into()) {
-                users.push(user.clone());
-            } else if let Some(role) = resolved.roles.get(&id.into()) {
-                roles.push(role.clone());
-            }
-        }
-        let (users, roles, mentionables) =
-            if matches!(kind, serenity::ComponentType::MentionableSelect) {
-                let mentionables = match (users.len(), roles.len()) {
-                    (0, 0) => None,
-                    _ => Some((users, roles)),
-                };
-                (None, None, mentionables)
-            } else {
-                let users = if users.is_empty() { None } else { Some(users) };
-                let roles = if roles.is_empty() { None } else { Some(roles) };
-                (users, roles, None)
-            };
-        ModalDataResolved {
-            users,
-            roles,
-            mentionables,
-            ..Default::default()
-        }
-    }
-
     /// Used by [`find_modal_data`] to retrieve resolved data from a component via _take_.
     #[doc(hidden)]
-    fn extract_by_key(
+    fn extract_attachments_by_key(
         file_upload: &mut serenity::all::FileUpload,
         resolved: &mut serenity::CommandDataResolved,
     ) -> Self {
@@ -79,6 +41,83 @@ impl ModalDataResolved {
             ..Default::default()
         }
     }
+
+    /// Used by [`find_modal_data`] to retrieve resolved data from a component via _take_.
+    #[doc(hidden)]
+    fn extract_selections_by_key(
+        select_menu: &mut serenity::all::SelectMenu,
+        resolved: &mut serenity::CommandDataResolved,
+    ) -> Self {
+        match select_menu.kind {
+            serenity::ComponentType::UserSelect => {
+                let mut users = Vec::new();
+                for value in &mut select_menu.values {
+                    let id = value.parse::<u64>().unwrap_or_default();
+                    if let Some(user) = resolved.users.remove(&id.into()) {
+                        users.push(user);
+                    }
+                }
+                let users = if users.is_empty() { None } else { Some(users) };
+                Self {
+                    users,
+                    ..Default::default()
+                }
+            }
+            serenity::ComponentType::RoleSelect => {
+                let mut roles = Vec::new();
+                for value in &mut select_menu.values {
+                    let id = value.parse::<u64>().unwrap_or_default();
+                    if let Some(role) = resolved.roles.remove(&id.into()) {
+                        roles.push(role);
+                    }
+                }
+                let roles = if roles.is_empty() { None } else { Some(roles) };
+                Self {
+                    roles,
+                    ..Default::default()
+                }
+            }
+            serenity::ComponentType::MentionableSelect => {
+                let mut users = Vec::new();
+                let mut roles = Vec::new();
+                for value in &mut select_menu.values {
+                    let id = value.parse::<u64>().unwrap_or_default();
+                    if let Some(user) = resolved.users.remove(&id.into()) {
+                        users.push(user);
+                    } else if let Some(role) = resolved.roles.remove(&id.into()) {
+                        roles.push(role);
+                    }
+                }
+                let mentionables = match (users.len(), roles.len()) {
+                    (0, 0) => None,
+                    _ => Some((users, roles)),
+                };
+                Self {
+                    mentionables,
+                    ..Default::default()
+                }
+            }
+            serenity::ComponentType::ChannelSelect => {
+                let mut channels = Vec::new();
+                for value in &mut select_menu.values {
+                    let id = value.parse::<u64>().unwrap_or_default();
+                    if let Some(channel) = resolved.channels.remove(&id.into()) {
+                        channels.push(channel);
+                    }
+                }
+                let channels = if channels.is_empty() {
+                    None
+                } else {
+                    Some(channels)
+                };
+                Self {
+                    channels,
+                    ..Default::default()
+                }
+            }
+            _ => Self::default(),
+        }
+    }
 }
 
 impl From<&mut serenity::all::InputText> for ModalDataResolved {
@@ -95,53 +134,21 @@ impl From<&mut serenity::all::InputText> for ModalDataResolved {
     }
 }
 
-impl From<&mut FixedArray<String, u32>> for ModalDataResolved {
-    fn from(value: &mut FixedArray<String, u32>) -> Self {
-        let strings = match std::mem::take(value) {
-            val if val.is_empty() => None,
-            val => Some(val.into_vec()),
-        };
-        Self {
-            strings,
-            ..Default::default()
-        }
-    }
-}
-
-impl From<&mut serenity::CommandDataResolved> for ModalDataResolved {
-    fn from(value: &mut serenity::CommandDataResolved) -> Self {
-        let attachments = match std::mem::take(&mut value.attachments) {
-            val if val.is_empty() => None,
-            val => Some(val.into_iter().collect::<Vec<_>>()),
-        };
-        let channels = match std::mem::take(&mut value.channels) {
-            val if val.is_empty() => None,
-            val => Some(val.into_iter().collect::<Vec<_>>()),
-        };
-        let users = match std::mem::take(&mut value.users) {
-            val if val.is_empty() => None,
-            val => Some(val.into_iter().collect::<Vec<_>>()),
-        };
-        let roles = match std::mem::take(&mut value.roles) {
-            val if val.is_empty() => None,
-            val => Some(val.into_iter().collect::<Vec<_>>()),
-        };
-        let mentionables = if users.is_none() && roles.is_none() {
-            None
-        } else {
-            Some((
-                users.clone().unwrap_or_default(),
-                roles.clone().unwrap_or_default(),
-            ))
-        };
-        Self {
-            text: None,
-            attachments,
-            strings: None,
-            users,
-            roles,
-            mentionables,
-            channels,
+impl From<&mut serenity::all::SelectMenu> for ModalDataResolved {
+    fn from(value: &mut serenity::all::SelectMenu) -> Self {
+        match value.kind {
+            serenity::ComponentType::StringSelect => {
+                let strings = match std::mem::take(&mut value.values) {
+                    val if val.is_empty() => None,
+                    val => Some(val.into_vec()),
+                };
+                Self {
+                    strings,
+                    ..Default::default()
+                }
+            }
+            // Only supports StringSelect since resolved data is unavailable.
+            _ => Self::default(),
         }
     }
 }
@@ -169,25 +176,25 @@ pub fn find_modal_data(
                 }
                 serenity::LabelComponent::FileUpload(file_upload) => {
                     if file_upload.custom_id == custom_id {
-                        return ModalDataResolved::extract_by_key(file_upload, &mut data.resolved);
+                        return ModalDataResolved::extract_attachments_by_key(
+                            file_upload,
+                            &mut data.resolved,
+                        );
                     }
                 }
                 serenity::LabelComponent::SelectMenu(select_menu) => {
                     if select_menu.custom_id == custom_id {
                         match select_menu.kind {
                             serenity::ComponentType::StringSelect => {
-                                return ModalDataResolved::from(&mut select_menu.values);
+                                return ModalDataResolved::from(select_menu);
                             }
                             serenity::ComponentType::UserSelect
                             | serenity::ComponentType::RoleSelect
-                            | serenity::ComponentType::ChannelSelect => {
-                                return ModalDataResolved::from(&mut data.resolved);
-                            }
-                            serenity::ComponentType::MentionableSelect => {
-                                return ModalDataResolved::clone_from_modal(
-                                    select_menu.kind,
-                                    &select_menu.values,
-                                    &data.resolved,
+                            | serenity::ComponentType::ChannelSelect
+                            | serenity::ComponentType::MentionableSelect => {
+                                return ModalDataResolved::extract_selections_by_key(
+                                    select_menu,
+                                    &mut data.resolved,
                                 );
                             }
                             _ => continue,
