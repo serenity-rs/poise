@@ -272,10 +272,9 @@ pub fn slash_choice_parameter(input: TokenStream) -> TokenStream {
 Use this derive macro on a struct to easily generate a modal interaction, Discord's version
 of interactive forms.
 
-A single modal can include up to five components. While the macro does support all [available
-modal components][components], the convenience comes with a small amount of awkwardness. Notably,
-defaults for the mentionable select menu component must be provided in an alternative format,
-and the same component returns a tuple, which may not be intuitive.
+Modals are made up of components, which define their layout, content, and type of input accepted.
+A single modal can include up to five components, and all [available modal components][components]
+are supported by the macro.
 
 # Example
 
@@ -373,7 +372,7 @@ field attributes (**one per field**):
 each), defined in the attribute. Returns `Vec<String>`.
 - `#[user_select("", "")]`: Returns [`Vec<User>`][user].
 - `#[role_select("", "")]`: Returns [`Vec<Role>`][role].
-- `#[mentionable_select("", "")]`: Returns a `(Vec<User>, Vec<Role>)` tuple.
+- `#[mentionable_select("", "")]`: Returns [`Mentionables`][mentionables].
 - `#[channel_select("", "")]`: Returns [`Vec<GenericInteractionChannel>`][gic].
 
 All select menus support 0-25 selections, with both single-select and multi-select modes.
@@ -396,7 +395,7 @@ the Discord angle bracket format (`<@USERID>`, `<@&ROLEID>`) to facilitate diffe
 ```rust
 #[name = "Mentionable select menu"]
 #[mentionable_select("<@889963798599966730>", "<@&1147176664095277187>")]
-mentionables: (Vec<serenity::User>, Vec<serenity::Role>)
+mentionables: Mentionables
 ```
 
 Minimum and maximum items values for file upload and select menu components are defined
@@ -421,7 +420,7 @@ either no mentionables ***or*** at least three mentionables selected.
 #[name = "Mentionable select menu"]
 #[mentionable_select]
 #[min_items = 3]
-roles: Option<(Vec<serenity::User>, Vec<serenity::Role>)>
+roles: Option<Mentionables>
 ```
 
 For the channel select menu, [channel types][ct] to include in the list may optionally be defined
@@ -448,6 +447,7 @@ channels: Vec<serenity::GenericInteractionChannel>
 [user]:https://docs.rs/serenity/latest/serenity/model/user/struct.User.html
 [role]:https://docs.rs/serenity/latest/serenity/model/guild/struct.Role.html
 [gic]:https://serenity-rs.github.io/serenity/next/serenity/model/channel/enum.GenericInteractionChannel.html
+[mentionables]:https://serenity-rs.github.io/poise/next/poise/modal/struct.Mentionables.html
 [ct]:https://docs.rs/serenity/latest/serenity/model/channel/enum.ChannelType.html
 [components]:https://discord.com/developers/docs/components/reference#component-object-component-types
 */

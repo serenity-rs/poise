@@ -2,12 +2,23 @@
 
 use crate::serenity_prelude as serenity;
 
+/// The resolved data for selected options in a [`MentionableSelect`][ms] component.
+///
+/// [ms]: crate::serenity_prelude::ComponentType::MentionableSelect
+#[derive(Clone, Debug, Default)]
+pub struct Mentionables {
+    /// The resolved users.
+    pub users: Vec<serenity::User>,
+    /// The resolved roles.
+    pub roles: Vec<serenity::Role>,
+}
+
 /// Meant for use in derived [`Modal::parse`] implementation.
 ///
 /// Used to return resolved modal interaction data for a component after parsing.
 #[doc(hidden)]
 #[non_exhaustive]
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct ModalDataResolved {
     /// The user input from a text input component.
     pub text: Option<String>,
@@ -20,7 +31,7 @@ pub struct ModalDataResolved {
     /// The resolved `Role`s from a role select menu component.
     pub roles: Option<Vec<serenity::Role>>,
     /// The resolved `User`s and `Role`s from a mentionable select menu component.
-    pub mentionables: Option<(Vec<serenity::User>, Vec<serenity::Role>)>,
+    pub mentionables: Option<Mentionables>,
     /// The resolved `GenericInteractionChannel`s from a channel select menu component.
     pub channels: Option<Vec<serenity::GenericInteractionChannel>>,
 }
@@ -98,9 +109,10 @@ impl ModalDataResolved {
                         roles.push(role.clone());
                     }
                 }
-                let mentionables = match (users.len(), roles.len()) {
-                    (0, 0) => None,
-                    _ => Some((users, roles)),
+                let mentionables = if users.is_empty() && roles.is_empty() {
+                    None
+                } else {
+                    Some(Mentionables { users, roles })
                 };
                 Self {
                     mentionables,
