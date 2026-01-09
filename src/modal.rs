@@ -4,7 +4,12 @@ use crate::serenity_prelude as serenity;
 
 /// The resolved data for selected options in a [`MentionableSelect`][ms] component.
 ///
+/// [`User`][user] objects resolved from modal interactions include [`PartialMember`][pm]
+/// data in the `member` field.
+///
 /// [ms]: crate::serenity_prelude::ComponentType::MentionableSelect
+/// [user]: crate::serenity_prelude::User
+/// [pm]: crate::serenity_prelude::PartialMember
 #[derive(Clone, Debug, Default)]
 pub struct Mentionables {
     /// The resolved users.
@@ -75,7 +80,11 @@ impl ModalDataResolved {
                 for value in &select_menu.values {
                     let id = value.parse::<u64>().unwrap_or_default();
                     if let Some(user) = resolved.users.get(&id.into()) {
-                        users.push(user.clone());
+                        let mut user = user.clone();
+                        if let Some(partial_member) = resolved.members.get(&id.into()) {
+                            user.member = Some(Box::new(partial_member.clone()));
+                        }
+                        users.push(user);
                     }
                 }
                 let users = if users.is_empty() { None } else { Some(users) };
@@ -104,7 +113,11 @@ impl ModalDataResolved {
                 for value in &select_menu.values {
                     let id = value.parse::<u64>().unwrap_or_default();
                     if let Some(user) = resolved.users.get(&id.into()) {
-                        users.push(user.clone());
+                        let mut user = user.clone();
+                        if let Some(partial_member) = resolved.members.get(&id.into()) {
+                            user.member = Some(Box::new(partial_member.clone()));
+                        }
+                        users.push(user);
                     } else if let Some(role) = resolved.roles.get(&id.into()) {
                         roles.push(role.clone());
                     }
