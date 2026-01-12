@@ -375,6 +375,26 @@ each), defined in the attribute. Returns `Vec<String>`.
 - `#[mentionable_select("", "")]`: Returns [`Mentionables`][mentionables].
 - `#[channel_select("", "")]`: Returns [`Vec<GenericInteractionChannel>`][gic].
 
+Optionally, emojis may be added to string select menu options with the attribute:
+
+- `#[string_select_emojis("", "")`
+
+If used, the number of emojis provided must not be less than the number of options provided;
+any additional emojis will be ignored. Unicode emojis should be inserted directly. Custom emojis
+should use the Discord angle bracket format (`<:NAME:EMOJI_ID>`, `<a:NAME:EMOJI_ID>`). Providing
+an invalid emoji will cause a runtime error.
+
+```rust
+#[name = "My cool select menu"]
+#[string_select("Unicode icon", "Custom static icon", "Custom animated icon")]
+#[string_select_emojis(
+    "🦀",
+    "<:ferris_owo:1033109474782761110>",
+    "<a:ferris_bongo:494140332812926981>"
+)]
+selections: Option<Vec<String>>
+```
+
 All select menus support 0-25 selections, with both single-select and multi-select modes.
 User, role, mentionable, and channel select menus support an **optional** list of default,
 auto-populated values that are defined in the attribute, with upper and lower bounds being
@@ -465,6 +485,7 @@ channels: Vec<serenity::GenericInteractionChannel>
         text_display,
         file_upload,
         string_select,
+        string_select_emojis,
         user_select,
         role_select,
         mentionable_select,

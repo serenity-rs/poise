@@ -25,6 +25,7 @@ struct FieldAttributes {
     text_display: Option<String>,
     file_upload: Option<()>,
     string_select: Option<crate::util::List<String>>,
+    string_select_emojis: Option<crate::util::List<String>>,
     user_select: Option<crate::util::List<String>>,
     role_select: Option<crate::util::List<String>>,
     mentionable_select: Option<crate::util::List<String>>,
@@ -75,12 +76,12 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
 
     for field in fields {
         // Extract data from syn::Field
-        let field_attrs: Vec<_> = field
+        let attrs: Vec<_> = field
             .attrs
             .into_iter()
             .map(|attr| darling::ast::NestedMeta::Meta(attr.meta))
             .collect();
-        let field_attrs = <FieldAttributes as darling::FromMeta>::from_list(&field_attrs)?;
+        let field_attrs = <FieldAttributes as darling::FromMeta>::from_list(&attrs)?;
         let field_ident = field.ident.unwrap();
 
         // Allow a text display component to be placed above any field.
@@ -158,12 +159,30 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                 ..
             } => {
                 let strings = &string_select.0;
+                let create_option = if let Some(emojis) = field_attrs.string_select_emojis {
+                    let emojis = emojis.0;
+                    if emojis.len() < strings.len() {
+                        let err =
+                            "number of emojis should not be less than the number of string select options";
+                        for attr in attrs.iter() {
+                            if let darling::ast::NestedMeta::Meta(meta) = attr {
+                                if meta.path().is_ident("string_select_emojis") {
+                                    return Err(darling::Error::custom(err).with_span(&meta.path()));
+                                }
+                            }
+                        }
+                    }
+                    quote::quote! {
+                        #( serenity::CreateSelectMenuOption::new(#strings, #strings)
+                        .emoji(serenity::ReactionType::try_from(#emojis).unwrap()) ),*
+                    }
+                } else {
+                    quote::quote! { #( serenity::CreateSelectMenuOption::new(#strings, #strings) ),* }
+                };
                 (
                     quote::quote! {
                         serenity::CreateSelectMenuKind::String {
-                            options: Cow::Owned(vec![
-                                #( serenity::CreateSelectMenuOption::new(#strings, #strings) ),*
-                            ]),
+                            options: Cow::Owned(vec![#create_option]),
                         }
                     },
                     strings.len(),
