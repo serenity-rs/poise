@@ -14,7 +14,7 @@ pub fn find_modal_text(
     for component in data.components.iter_mut() {
         // text inputs can either exist in Labels or Containers
         match component {
-            serenity::Component::Label(label) => match &mut label.component {
+            serenity::ModalComponent::Label(label) => match &mut label.component {
                 serenity::LabelComponent::InputText(input_text) => {
                     if input_text.custom_id == custom_id {
                         return match std::mem::take(&mut input_text.value) {
