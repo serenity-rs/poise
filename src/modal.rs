@@ -38,7 +38,7 @@ pub struct ModalDataResolved {
     /// The resolved `User`s and `Role`s from a mentionable select menu component.
     pub mentionables: Option<Mentionables>,
     /// The resolved `GenericInteractionChannel`s from a channel select menu component.
-    pub channels: Option<Vec<serenity::GenericInteractionChannel>>,
+    pub channels: Option<Vec<serenity::GenericChannelId>>,
 }
 
 impl ModalDataResolved {
@@ -133,16 +133,13 @@ impl ModalDataResolved {
                 }
             }
             serenity::ComponentType::ChannelSelect => {
-                let mut channels = Vec::new();
-                for value in &select_menu.values {
-                    let id = value.parse::<u64>().unwrap_or_default();
-                    if let Some(channel) = resolved.channels.get(&id.into()) {
-                        channels.push(channel.clone());
-                    }
-                }
-                let channels = if channels.is_empty() {
+                let channels = if resolved.channels.is_empty() {
                     None
                 } else {
+                    let mut channels = Vec::new();
+                    for channel in &resolved.channels {
+                        channels.push(channel.id());
+                    }
                     Some(channels)
                 };
                 Self {

@@ -21,15 +21,14 @@ struct FieldAttributes {
     min_length: Option<u16>,
     max_length: Option<u16>,
     paragraph: Option<()>,
-    value: Option<String>,
     text_display: Option<String>,
     file_upload: Option<()>,
     string_select: Option<crate::util::List<String>>,
     string_select_emojis: Option<crate::util::List<String>>,
-    user_select: Option<crate::util::List<String>>,
-    role_select: Option<crate::util::List<String>>,
-    mentionable_select: Option<crate::util::List<String>>,
-    channel_select: Option<crate::util::List<String>>,
+    user_select: Option<()>,
+    role_select: Option<()>,
+    mentionable_select: Option<()>,
+    channel_select: Option<()>,
     channel_types: Option<crate::util::List<syn::Ident>>,
     #[darling(rename = "min_items")]
     min_values: darling::util::SpannedValue<Option<u8>>,
@@ -153,7 +152,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
         let placeholder = field_attrs.placeholder.into_iter();
 
         // If field is a select menu component, process and continue.
-        let (select_menu_kind, values, kind) = match field_attrs {
+        let (select_menu_kind, kind) = match field_attrs {
             FieldAttributes {
                 string_select: Some(ref string_select),
                 ..
@@ -173,107 +172,105 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                         }
                     }
                     quote::quote! {
-                        #( serenity::CreateSelectMenuOption::new(#strings, #strings)
-                        .emoji(serenity::ReactionType::try_from(#emojis).unwrap()) ),*
+                        #({
+                            let mut b = serenity::CreateSelectMenuOption::new(#strings, #strings);
+                            if !default.is_empty() && default.contains(&#strings.to_string()) {
+                                b = b.default_selection(true);
+                            }
+                            b.emoji(serenity::ReactionType::try_from(#emojis).unwrap())
+                        }),*
                     }
                 } else {
-                    quote::quote! { #( serenity::CreateSelectMenuOption::new(#strings, #strings) ),* }
+                    quote::quote! {
+                        #({
+                            let mut b = serenity::CreateSelectMenuOption::new(#strings, #strings);
+                            if !default.is_empty() && default.contains(&#strings.to_string()) {
+                                b = b.default_selection(true);
+                            }
+                            b
+                        }),*
+                    }
                 };
                 (
                     quote::quote! {
-                        serenity::CreateSelectMenuKind::String {
-                            options: Cow::Owned(vec![#create_option]),
+                        {
+                            let default = if let Some(defaults) = &mut defaults {
+                                let default = std::mem::take(&mut defaults.#field_ident);
+                                Option::from(default).unwrap_or_else(|| Vec::new())
+                            } else {
+                                Vec::new()
+                            };
+                            serenity::CreateSelectMenuKind::String {
+                                options: Cow::Owned(vec![#create_option]),
+                            }
                         }
                     },
-                    strings.len(),
                     quote::quote! { .strings },
                 )
             }
             FieldAttributes {
-                user_select: Some(user_select),
+                user_select: Some(()),
                 ..
-            } => {
-                let users: Vec<_> = user_select
-                    .0
-                    .iter()
-                    .flat_map(|s| s.parse::<u64>())
-                    .collect();
-                (
-                    quote::quote! {
-                        serenity::CreateSelectMenuKind::User {
-                            default_users: Some(Cow::Owned(vec![
-                                #( serenity::UserId::new(#users) ),*
-                            ])),
-                        }
-                    },
-                    users.len(),
-                    quote::quote! { .users },
-                )
-            }
-            FieldAttributes {
-                role_select: Some(role_select),
-                ..
-            } => {
-                let roles: Vec<_> = role_select
-                    .0
-                    .iter()
-                    .flat_map(|s| s.parse::<u64>())
-                    .collect();
-                (
-                    quote::quote! {
-                        serenity::CreateSelectMenuKind::Role {
-                            default_roles: Some(Cow::Owned(vec![
-                                #( serenity::RoleId::new(#roles) ),*
-                            ])),
-                        }
-                    },
-                    roles.len(),
-                    quote::quote! { .roles },
-                )
-            }
-            FieldAttributes {
-                mentionable_select: Some(mentionables),
-                ..
-            } => {
-                let mentionables = mentionables.0;
-                let mut users = Vec::new();
-                let mut roles = Vec::new();
-                for string in mentionables {
-                    if string.starts_with("<@&") && string.ends_with(">") {
-                        if let Some(id) = string
-                            .trim_start_matches("<@&")
-                            .trim_end_matches(">")
-                            .parse::<u64>()
-                            .ok()
-                        {
-                            roles.push(id);
-                        }
-                    } else if string.starts_with("<@") && string.ends_with(">") {
-                        if let Some(id) = string
-                            .trim_start_matches("<@")
-                            .trim_end_matches(">")
-                            .parse::<u64>()
-                            .ok()
-                        {
-                            users.push(id);
-                        }
+            } => (
+                quote::quote! {
+                    {
+                        let default_users = if let Some(defaults) = &mut defaults {
+                            let default = std::mem::take(&mut defaults.#field_ident);
+                            let default = Option::from(default).unwrap_or_else(|| Vec::new());
+                            let default = default.iter().map(|u| u.id).collect::<Vec<_>>();
+                            Some(Cow::Owned(default))
+                        } else {
+                            None
+                        };
+                        serenity::CreateSelectMenuKind::User { default_users }
                     }
-                }
-                let default_users = quote::quote! { #( serenity::UserId::new( #users ) ),* };
-                let default_roles = quote::quote! { #( serenity::RoleId::new( #roles ) ),* };
-                (
-                    quote::quote! {
-                        serenity::CreateSelectMenuKind::Mentionable {
-                            default_users: Some(Cow::Owned(vec![#default_users])),
-                            default_roles: Some(Cow::Owned(vec![#default_roles])),
-                        }
-                    },
-                    users.len() + roles.len(),
-                    quote::quote! { .mentionables },
-                )
-            }
+                },
+                quote::quote! { .users },
+            ),
             FieldAttributes {
-                channel_select: Some(ref channel_select),
+                role_select: Some(()),
+                ..
+            } => (
+                quote::quote! {
+                    {
+                        let default_roles = if let Some(defaults) = &mut defaults {
+                            let default = std::mem::take(&mut defaults.#field_ident);
+                            let default = Option::from(default).unwrap_or_else(|| Vec::new());
+                            let default = default.iter().map(|r| r.id).collect::<Vec<_>>();
+                            Some(Cow::Owned(default))
+                        } else {
+                            None
+                        };
+                        serenity::CreateSelectMenuKind::Role { default_roles }
+                    }
+                },
+                quote::quote! { .roles },
+            ),
+            FieldAttributes {
+                mentionable_select: Some(()),
+                ..
+            } => (
+                quote::quote! {
+                    {
+                        let (default_users, default_roles) = if let Some(defaults) = &mut defaults {
+                            let default = std::mem::take(&mut defaults.#field_ident);
+                            let default = Option::from(default).unwrap_or_else(|| poise::Mentionables::default());
+                            let default_users = default.users.iter().map(|u| u.id).collect::<Vec<_>>();
+                            let default_roles = default.roles.iter().map(|r| r.id).collect::<Vec<_>>();
+                            (
+                                Some(Cow::Owned(default_users)),
+                                Some(Cow::Owned(default_roles))
+                            )
+                        } else {
+                            (None, None)
+                        };
+                        serenity::CreateSelectMenuKind::Mentionable { default_users, default_roles }
+                    }
+                },
+                quote::quote! { .mentionables },
+            ),
+            FieldAttributes {
+                channel_select: Some(()),
                 ..
             } => {
                 let channel_types = match &field_attrs.channel_types {
@@ -284,48 +281,38 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                     }
                     None => quote::quote! { None },
                 };
-                let channels: Vec<_> = channel_select
-                    .0
-                    .iter()
-                    .flat_map(|v| v.parse::<u64>())
-                    .collect();
                 (
                     quote::quote! {
-                        serenity::CreateSelectMenuKind::Channel {
-                            channel_types: #channel_types,
-                            default_channels: Some(Cow::Owned(vec![
-                                #( serenity::GenericChannelId::new(#channels) ),*
-                            ])),
+                        {
+                            let default_channels = if let Some(defaults) = &mut defaults {
+                                let default = std::mem::take(&mut defaults.#field_ident);
+                                let default = Option::from(default).unwrap_or_else(|| Vec::new());
+                                Some(Cow::Owned(default))
+                            } else {
+                                None
+                            };
+                            serenity::CreateSelectMenuKind::Channel {
+                                channel_types: #channel_types,
+                                default_channels
+                            }
                         }
                     },
-                    channels.len(),
                     quote::quote! { .channels },
                 )
             }
-            _ => (quote::quote! {}, 0, quote::quote! {}),
+            _ => (quote::quote! {}, quote::quote! {}),
         };
 
         // Do some simple min/max item validation.
-        if field_attrs.string_select.is_some()
-            && field_attrs
+        if let Some(strings) = &field_attrs.string_select {
+            if field_attrs
                 .max_values
-                .is_some_and(|v| usize::from(v) > values)
-        {
-            let err = "value of `max_items` cannot be greater than the number of options provided";
-            return Err(darling::Error::custom(err).with_span(&field_attrs.max_values.span()));
-        }
-        if field_attrs.string_select.is_none()
-            && field_attrs
-                .max_values
-                .is_some_and(|v| usize::from(v) < values)
-        {
-            let err =
-                "value of `max_items` cannot be less than the number of default values provided";
-            return Err(darling::Error::custom(err).with_span(&field_attrs.max_values.span()));
-        }
-        if field_attrs.string_select.is_none() && field_attrs.max_values.is_none() && values > 0 {
-            let err = "`max_items` attribute must be present and set to equal to or greater than the number of default values, when provided";
-            return Err(darling::Error::custom(err).with_span(&field_ident));
+                .is_some_and(|v| usize::from(v) > strings.0.len())
+            {
+                let err =
+                    "value of `max_items` cannot be greater than the number of options provided";
+                return Err(darling::Error::custom(err).with_span(&field_attrs.max_values.span()));
+            }
         }
 
         if !select_menu_kind.is_empty() {
@@ -361,7 +348,6 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
         };
         let min_length = field_attrs.min_length.into_iter();
         let max_length = field_attrs.max_length.into_iter();
-        let value = field_attrs.value.into_iter();
 
         builders.push(quote::quote! {
             serenity::CreateModalComponent::Label(
@@ -381,7 +367,6 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                         .required(#required)
                         #( .min_length(#min_length) )*
                         #( .max_length(#max_length) )*
-                        #( .value(#value) )*
                     }
                 )
                 #( .description(#description) )*
