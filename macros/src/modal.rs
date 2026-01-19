@@ -25,6 +25,7 @@ struct FieldAttributes {
     file_upload: Option<()>,
     string_select: Option<crate::util::List<String>>,
     string_select_emojis: Option<crate::util::List<String>>,
+    string_select_descriptions: Option<crate::util::List<String>>,
     user_select: Option<()>,
     role_select: Option<()>,
     mentionable_select: Option<()>,
@@ -154,12 +155,26 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
         // If field is a select menu component, process and continue.
         let (select_menu_kind, kind) = match field_attrs {
             FieldAttributes {
-                string_select: Some(ref string_select),
+                string_select: Some(string_select),
                 ..
             } => {
-                let strings = &string_select.0;
-                let create_option = if let Some(emojis) = field_attrs.string_select_emojis {
-                    let emojis = emojis.0;
+                let strings = string_select.0;
+                if field_attrs
+                    .max_values
+                    .is_some_and(|v| usize::from(v) > strings.len())
+                {
+                    let err =
+                    "value of `max_items` cannot be greater than the number of options provided";
+                    return Err(
+                        darling::Error::custom(err).with_span(&field_attrs.max_values.span())
+                    );
+                }
+                let mut empty_vec = Vec::new();
+                for _ in 0..strings.len() {
+                    empty_vec.push(String::new());
+                }
+                let emojis = field_attrs.string_select_emojis.unwrap_or_default().0;
+                let emojis = if !emojis.is_empty() {
                     if emojis.len() < strings.len() {
                         let err =
                             "number of emojis should not be less than the number of string select options";
@@ -171,25 +186,43 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                             }
                         }
                     }
-                    quote::quote! {
+                    &emojis
+                } else {
+                    &empty_vec
+                };
+                let descriptions = field_attrs.string_select_descriptions.unwrap_or_default().0;
+                let descriptions = if !descriptions.is_empty() {
+                    if descriptions.len() < strings.len() {
+                        let err =
+                            "number of descriptions should not be less than the number of string select options";
+                        for attr in attrs.iter() {
+                            if let darling::ast::NestedMeta::Meta(meta) = attr {
+                                if meta.path().is_ident("string_select_descriptions") {
+                                    return Err(darling::Error::custom(err).with_span(&meta.path()));
+                                }
+                            }
+                        }
+                    }
+                    &descriptions
+                } else {
+                    &empty_vec
+                };
+                let create_option = quote::quote! {
                         #({
                             let mut b = serenity::CreateSelectMenuOption::new(#strings, #strings);
                             if !default.is_empty() && default.contains(&#strings.to_string()) {
                                 b = b.default_selection(true);
                             }
-                            b.emoji(serenity::ReactionType::try_from(#emojis).unwrap())
-                        }),*
-                    }
-                } else {
-                    quote::quote! {
-                        #({
-                            let mut b = serenity::CreateSelectMenuOption::new(#strings, #strings);
-                            if !default.is_empty() && default.contains(&#strings.to_string()) {
-                                b = b.default_selection(true);
+                            if !#emojis.is_empty() {
+                                if let Ok(emoji) = serenity::ReactionType::try_from(#emojis) {
+                                    b = b.emoji(emoji);
+                                }
+                            }
+                            if !#descriptions.is_empty() {
+                                b = b.description(#descriptions);
                             }
                             b
                         }),*
-                    }
                 };
                 (
                     quote::quote! {
@@ -302,18 +335,6 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
             }
             _ => (quote::quote! {}, quote::quote! {}),
         };
-
-        // Do some simple min/max item validation.
-        if let Some(strings) = &field_attrs.string_select {
-            if field_attrs
-                .max_values
-                .is_some_and(|v| usize::from(v) > strings.0.len())
-            {
-                let err =
-                    "value of `max_items` cannot be greater than the number of options provided";
-                return Err(darling::Error::custom(err).with_span(&field_attrs.max_values.span()));
-            }
-        }
 
         if !select_menu_kind.is_empty() {
             builders.push(quote::quote! {
