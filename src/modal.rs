@@ -67,8 +67,11 @@ impl ModalDataResolved {
     }
 
     /// Used by [`find_modal_data`] to retrieve resolved data from `SelectMenu` components.
-    /// Entity data is _cloned_ since resolved data will be shared between components when
-    /// the same entity is selected in those components.
+    /// `User` and `Role` entity data is _cloned_ since resolved data will be shared between
+    /// components when the same entity is selected in multiple components.
+    ///
+    /// Logs a warning if a value from a component cannot be parsed and used to retrieve the
+    /// resolved data for that ID.
     #[doc(hidden)]
     fn extract_selections_by_key(
         select_menu: &serenity::all::SelectMenu,
@@ -78,13 +81,18 @@ impl ModalDataResolved {
             serenity::ComponentType::UserSelect => {
                 let mut users = Vec::new();
                 for value in &select_menu.values {
-                    let id = value.parse::<u64>().unwrap_or_default();
-                    if let Some(user) = resolved.users.get(&id.into()) {
-                        let mut user = user.clone();
-                        if let Some(partial_member) = resolved.members.get(&id.into()) {
-                            user.member = Some(Box::new(partial_member.clone()));
+                    if let Ok(id) = value.parse::<u64>() {
+                        if let Some(user) = resolved.users.get(&id.into()) {
+                            let mut user = user.clone();
+                            if let Some(partial_member) = resolved.members.get(&id.into()) {
+                                user.member = Some(Box::new(partial_member.clone()));
+                            }
+                            users.push(user);
                         }
-                        users.push(user);
+                    } else {
+                        tracing::warn!(
+                            "Failed to parse `{value}` into u64 and retrieve resolved data"
+                        )
                     }
                 }
                 let users = if users.is_empty() { None } else { Some(users) };
@@ -96,9 +104,14 @@ impl ModalDataResolved {
             serenity::ComponentType::RoleSelect => {
                 let mut roles = Vec::new();
                 for value in &select_menu.values {
-                    let id = value.parse::<u64>().unwrap_or_default();
-                    if let Some(role) = resolved.roles.get(&id.into()) {
-                        roles.push(role.clone());
+                    if let Ok(id) = value.parse::<u64>() {
+                        if let Some(role) = resolved.roles.get(&id.into()) {
+                            roles.push(role.clone());
+                        }
+                    } else {
+                        tracing::warn!(
+                            "Failed to parse `{value}` into u64 and retrieve resolved data"
+                        )
                     }
                 }
                 let roles = if roles.is_empty() { None } else { Some(roles) };
@@ -111,15 +124,20 @@ impl ModalDataResolved {
                 let mut users = Vec::new();
                 let mut roles = Vec::new();
                 for value in &select_menu.values {
-                    let id = value.parse::<u64>().unwrap_or_default();
-                    if let Some(user) = resolved.users.get(&id.into()) {
-                        let mut user = user.clone();
-                        if let Some(partial_member) = resolved.members.get(&id.into()) {
-                            user.member = Some(Box::new(partial_member.clone()));
+                    if let Ok(id) = value.parse::<u64>() {
+                        if let Some(user) = resolved.users.get(&id.into()) {
+                            let mut user = user.clone();
+                            if let Some(partial_member) = resolved.members.get(&id.into()) {
+                                user.member = Some(Box::new(partial_member.clone()));
+                            }
+                            users.push(user);
+                        } else if let Some(role) = resolved.roles.get(&id.into()) {
+                            roles.push(role.clone());
                         }
-                        users.push(user);
-                    } else if let Some(role) = resolved.roles.get(&id.into()) {
-                        roles.push(role.clone());
+                    } else {
+                        tracing::warn!(
+                            "Failed to parse `{value}` into u64 and retrieve resolved data"
+                        )
                     }
                 }
                 let mentionables = if users.is_empty() && roles.is_empty() {
