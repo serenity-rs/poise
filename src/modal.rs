@@ -37,7 +37,9 @@ pub struct ModalDataResolved {
     pub roles: Option<Vec<serenity::Role>>,
     /// The resolved `User`s and `Role`s from a mentionable select menu component.
     pub mentionables: Option<Mentionables>,
-    /// The resolved `GenericInteractionChannel`s from a channel select menu component.
+    /// The `GenericChannelId` values from a channel select menu component.
+    /// Resolved data is not used here because `GenericInteractionChannel` includes
+    /// non-exhaustive structs, which would make it impossible to define defaults.
     pub channels: Option<Vec<serenity::GenericChannelId>>,
 }
 
@@ -299,16 +301,16 @@ async fn execute_modal_generic<
 ///
 /// If the user doesn't submit before the timeout expires, `None` is returned.
 ///
-/// Note: a modal must be the first response to a command. You cannot send any messages before,
+/// Note: A modal must be the first response to a command. You cannot send any messages before,
 /// or the modal will fail.
 ///
 /// This function:
-/// 1. sends the modal via [`Modal::create()`]
-/// 2. waits for the user to submit via [`serenity::ModalInteractionCollector`]
-/// 3. acknowledges the submitted data so that Discord closes the pop-up for the user
-/// 4. parses the submitted data via [`Modal::parse()`]
+/// 1. Sends the modal via [`Modal::create()`]
+/// 2. Waits for the user to submit via [`serenity::ModalInteractionCollector`]
+/// 3. Acknowledges the submitted data so that Discord closes the pop-up for the user
+/// 4. Parses the submitted data via [`Modal::parse()`]
 ///
-/// If you need more specialized behavior, you can copy paste the implementation of this function
+/// If you need more specialized behavior, you can copy the implementation of this function
 /// and adjust to your needs. The code of this function is just a starting point.
 pub async fn execute_modal<U: Send + Sync + 'static, E, M: Modal>(
     ctx: crate::ApplicationContext<'_, U, E>,
@@ -334,12 +336,12 @@ pub async fn execute_modal<U: Send + Sync + 'static, E, M: Modal>(
 /// If the user doesn't submit before the timeout expires, `None` is returned.
 ///
 /// This function:
-/// 1. sends the modal via [`Modal::create()`] as a mci interaction response
-/// 2. waits for the user to submit via [`serenity::ModalInteractionCollector`]
-/// 3. acknowledges the submitted data so that Discord closes the pop-up for the user
-/// 4. parses the submitted data via [`Modal::parse()`]
+/// 1. Sends the modal via [`Modal::create()`] as a mci interaction response
+/// 2. Waits for the user to submit via [`serenity::ModalInteractionCollector`]
+/// 3. Acknowledges the submitted data so that Discord closes the pop-up for the user
+/// 4. Parses the submitted data via [`Modal::parse()`]
 ///
-/// If you need more specialized behavior, you can copy paste the implementation of this function
+/// If you need more specialized behavior, you can copy the implementation of this function
 /// and adjust to your needs. The code of this function is just a starting point.
 pub async fn execute_modal_on_component_interaction<M: Modal>(
     ctx: &serenity::Context,
@@ -382,7 +384,6 @@ pub async fn execute_modal_on_component_interaction<M: Modal>(
 ///     #[max_length = 500]
 ///     first_input: String,
 ///     #[name = "Second text input"]
-///     #[value = "This one has been pre-filled!"]
 ///     #[paragraph] // Switches from single-line to multi-line text box
 ///     second_input: Option<String>, // Option means optional input
 ///     #[name = "File upload"]
@@ -391,8 +392,8 @@ pub async fn execute_modal_on_component_interaction<M: Modal>(
 ///     #[max_items = 5]
 ///     third_input: Vec<serenity::Attachment>,
 ///     #[name = "String select menu"]
-///     #[string_select("Option 1", "Option 2")] // Selectable strings (defaults to 1)
-///     #[min_items = 2] // Min number of selections required (1-25 for select menus)
+///     #[string_select("Option 1", "Option 2")] // Selectable strings
+///     #[min_items = 2] // Min number of selections required (0-25 for select menus)
 ///     fourth_input: Vec<String>,
 /// }
 ///
@@ -406,22 +407,22 @@ pub async fn execute_modal_on_component_interaction<M: Modal>(
 /// ```
 #[async_trait::async_trait]
 pub trait Modal: Sized {
-    /// Returns an interaction response builder which creates the modal for this type
+    /// Returns an interaction response builder which creates the modal for this type.
     ///
-    /// Optionally takes an initialized instance as pre-filled values of this modal (see
-    /// [`Self::execute_with_defaults()`] for more info)
+    /// Optionally takes an initialized instance as pre-filled values of this modal. See
+    /// [`Self::execute_with_defaults()`] for more info.
     fn create(
         defaults: Option<Self>,
         custom_id: String,
     ) -> serenity::CreateInteractionResponse<'static>;
 
-    /// Parses a received modal submit interaction into this type
+    /// Parses a received modal submit interaction into this type.
     ///
     /// Returns an error if a field was missing. This should never happen, because Discord will only
-    /// let users submit when all required fields are filled properly
+    /// let users submit when all required fields are filled properly.
     fn parse(data: serenity::ModalInteractionData) -> Self;
 
-    /// Calls `execute_modal(ctx, None, None)`. See [`execute_modal`]
+    /// Calls `execute_modal(ctx, None, None)`. See [`execute_modal()`].
     ///
     /// For a variant that is triggered on component interactions, see [`execute_modal_on_component_interaction`].
     // TODO: add execute_with_defaults? Or add a `defaults: Option<Self>` param?
@@ -431,7 +432,8 @@ pub trait Modal: Sized {
         execute_modal(ctx, None::<Self>, None).await
     }
 
-    /// Calls `execute_modal(ctx, Some(defaults), None)`. See [`execute_modal`]
+    /// Calls `execute_modal(ctx, Some(defaults), None)`. See [`execute_modal()`] and
+    /// [`Modal`][crate::macros::Modal#specifying-defaults].
     // TODO: deprecate this in favor of execute_modal()?
     async fn execute_with_defaults<U: Send + Sync + 'static, E>(
         ctx: crate::ApplicationContext<'_, U, E>,

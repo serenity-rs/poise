@@ -296,7 +296,6 @@ struct MyModal {
     #[max_length = 500]
     first_input: String,
     #[name = "Second text input"]
-    #[value = "This one has been pre-filled!"]
     #[paragraph] // Switches from single-line to multi-line text box
     second_input: Option<String>, // Option means optional input
     #[name = "File upload"]
@@ -305,8 +304,8 @@ struct MyModal {
     #[max_items = 5]
     third_input: Vec<serenity::Attachment>,
     #[name = "String select menu"]
-    #[string_select("Option 1", "Option 2")] // Selectable strings (defaults to 1)
-    #[min_items = 2] // Min number of selections required (1-25 for select menus)
+    #[string_select("Option 1", "Option 2")] // Selectable strings
+    #[min_items = 2] // Min number of selections required (0-25 for select menus)
     fourth_input: Vec<String>,
 }
 
@@ -360,7 +359,6 @@ field attributes are valid for text input components only:
 - `#[min_length = 0]`: Minimum number of characters (0-4000).
 - `#[max_length = 1]`: Maximum number of characters (1-4000).
 - `#[paragraph]`: Switches to a multi-line input box. Default is single-line.
-- `#[value = ""]`: Optional pre-filled value for the text input.
 
 Other interactive components supported by the macro include the [file upload][fu],
 [string select][ss], [user select][us], [role select][rs], [mentionable select][ms], and
@@ -368,54 +366,37 @@ Other interactive components supported by the macro include the [file upload][fu
 field attributes (**one per field**):
 
 - `#[file_upload]`: Allows the user to upload files (0-10). Returns [`Vec<Attachment>`][att].
-- `#[string_select("option 1", "option 2")]`: Supports 1-25 **unique** options (up to 100 chars
-each), defined in the attribute. Returns `Vec<String>`.
-- `#[user_select("", "")]`: Returns [`Vec<User>`][user].
-- `#[role_select("", "")]`: Returns [`Vec<Role>`][role].
-- `#[mentionable_select("", "")]`: Returns [`Mentionables`][mentionables].
-- `#[channel_select("", "")]`: Returns [`Vec<GenericInteractionChannel>`][gic].
+- `#[string_select("", "")]`: Supports 1-25 **unique** options (up to 100 chars each), defined
+in the attribute. Returns `Vec<String>`.
+- `#[user_select]`: Returns [`Vec<User>`][user].
+- `#[role_select]`: Returns [`Vec<Role>`][role].
+- `#[mentionable_select]`: Returns [`Mentionables`][mentionables].
+- `#[channel_select]`: Returns [`Vec<GenericChannelId>`][gic].
 
-Optionally, emojis may be added to string select menu options with the attribute:
+Optionally, emojis and/or descriptions may be added to string select menu options:
 
 - `#[string_select_emojis("", "")`
+- `#[string_select_descriptions("", "")]`: Max 100 chars per description.
 
-If used, the number of emojis provided must not be less than the number of options provided;
-any additional emojis will be ignored. Unicode emojis should be inserted directly. Custom emojis
-should use the Discord angle bracket format (`<:NAME:EMOJI_ID>`, `<a:NAME:EMOJI_ID>`). Providing
-an invalid emoji will cause a runtime error.
+If used, the number of emojis and/or descriptions provided must not be less than the number
+of options provided; any additional items will be ignored. Unicode emojis should be inserted
+directly. Custom emojis should use the Discord angle bracket format: `<:NAME:EMOJI_ID>` for
+static or `<a:NAME:EMOJI_ID>` for animated. Emojis given in an invalid format will be ignored.
 
 ```rust
 #[name = "My cool select menu"]
-#[string_select("Unicode icon", "Custom static icon", "Custom animated icon")]
+#[string_select("Option 1", "Option 2", "Option 3")]
 #[string_select_emojis(
     "🦀",
     "<:ferris_owo:1033109474782761110>",
     "<a:ferris_bongo:494140332812926981>"
 )]
+#[string_select_descriptions(
+    "Uses a Unicode icon",
+    "Uses a custom static icon",
+    "Uses a custom animated icon"
+)]
 selections: Option<Vec<String>>
-```
-
-All select menus support 0-25 selections, with both single-select and multi-select modes.
-User, role, mentionable, and channel select menus support an **optional** list of default,
-auto-populated values that are defined in the attribute, with upper and lower bounds being
-determined by `min_items` and `max_items`.
-
-Default values for user, role, and channel select menus are defined using numerical user,
-role, or channel IDs (Discord snowflakes):
-
-```rust
-#[name = "User select menu"]
-#[user_select("889963798599966730", "1091484180342378546")]
-users: Vec<serenity::User>
-```
-
-Because mentionable defaults can include both user and role IDs, they must be provided in
-the Discord angle bracket format (`<@USERID>`, `<@&ROLEID>`) to facilitate differentiation:
-
-```rust
-#[name = "Mentionable select menu"]
-#[mentionable_select("<@889963798599966730>", "<@&1147176664095277187>")]
-mentionables: Mentionables
 ```
 
 Minimum and maximum items values for file upload and select menu components are defined
@@ -426,7 +407,7 @@ using the following field attributes:
 
 ```rust
 #[name = "Role select menu"]
-#[role_select()]
+#[role_select]
 #[max_items = 1]
 roles: Option<Vec<serenity::Role>>
 ```
@@ -440,19 +421,67 @@ either no mentionables ***or*** at least three mentionables selected.
 #[name = "Mentionable select menu"]
 #[mentionable_select]
 #[min_items = 3]
-roles: Option<Mentionables>
+mentionables: Option<poise::Mentionables>
 ```
 
-For the channel select menu, [channel types][ct] to include in the list may optionally be defined
+For the channel select menu, channel types to include in the list may optionally be defined
 using the following field attribute:
 
-- `#[channel_types("", "")]`
+- `#[channel_types("", "")]`: See [`ChannelType`][ct] for valid channel types.
 
 ```rust
 #[name = "Channel select menu"]
 #[channel_select()]
 #[channel_types("Text", "Forum")]
-channels: Vec<serenity::GenericInteractionChannel>
+channels: Vec<serenity::GenericChannelId>
+```
+
+# Specifying defaults
+
+Defaults may be provided for text input and select menu components using an initialized instance
+of the modal struct with [`execute_with_defaults()`][ewd], or with [`execute_modal()`][exe] if you
+wish to specify a timeout. For example, assuming the struct from the initial example:
+
+```rust
+let data = MyModal::execute_with_defaults(
+    ctx,
+    MyModal {
+        first_input: "Default text input".to_string(),
+        second_input: None,
+        third_input: vec![],
+        fourth_input: vec!["Option 2".to_string()],
+    },
+)
+.await?;
+```
+
+Alternatively, if the struct also derives `Default`:
+
+```rust
+let data = MyModal::execute_with_defaults(
+    ctx,
+    MyModal {
+        first_input: "Default text input".to_string(),
+        fourth_input: vec!["Option 2".to_string()],
+        ..Default::default()
+    },
+)
+.await?;
+```
+
+And using [`execute_modal()`][exe] with a timeout:
+
+```rust
+let data = poise::execute_modal(
+    ctx,
+    Some(MyModal {
+        first_input: "Default text input".to_string(),
+        fourth_input: vec!["Option 2".to_string()],
+        ..Default::default()
+    }),
+    Some(std::time::Duration::from_secs(300)),
+)
+.await?;
 ```
 
 [td]:https://discord.com/developers/docs/components/reference#text-display
@@ -466,9 +495,11 @@ channels: Vec<serenity::GenericInteractionChannel>
 [att]:https://docs.rs/serenity/latest/serenity/model/channel/struct.Attachment.html
 [user]:https://docs.rs/serenity/latest/serenity/model/user/struct.User.html
 [role]:https://docs.rs/serenity/latest/serenity/model/guild/struct.Role.html
-[gic]:https://serenity-rs.github.io/serenity/next/serenity/model/channel/enum.GenericInteractionChannel.html
+[gic]:https://serenity-rs.github.io/serenity/next/serenity/model/id/struct.GenericChannelId.html
 [mentionables]:https://serenity-rs.github.io/poise/next/poise/modal/struct.Mentionables.html
 [ct]:https://docs.rs/serenity/latest/serenity/model/channel/enum.ChannelType.html
+[exe]:https://serenity-rs.github.io/poise/next/poise/modal/fn.execute_modal.html
+[ewd]:https://serenity-rs.github.io/poise/next/poise/modal/trait.Modal.html#method.execute_with_defaults
 [components]:https://discord.com/developers/docs/components/reference#component-object-component-types
 */
 #[proc_macro_derive(
