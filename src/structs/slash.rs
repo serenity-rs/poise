@@ -109,6 +109,16 @@ impl<U, E> Clone for ContextMenuCommandAction<U, E> {
     }
 }
 
+impl<U, E> From<ContextMenuCommandAction<U, E>> for serenity::CommandType {
+    fn from(value: ContextMenuCommandAction<U, E>) -> Self {
+        match value {
+            ContextMenuCommandAction::User(_) => serenity::CommandType::User,
+            ContextMenuCommandAction::Message(_) => serenity::CommandType::Message,
+            ContextMenuCommandAction::__NonExhaustive => unreachable!(),
+        }
+    }
+}
+
 /// A single drop-down choice in a slash command choice parameter
 #[derive(Debug, Clone)]
 pub struct CommandParameterChoice {
