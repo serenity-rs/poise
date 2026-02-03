@@ -327,7 +327,8 @@ pub fn generate_prefix_action(inv: &Invocation) -> Result<proc_macro2::TokenStre
                 .unwrap_or_else(|| ctx.framework.options.manual_cooldowns);
 
             if is_framework_cooldown {
-                ctx.command.cooldowns.lock().unwrap().start_cooldown(ctx.cooldown_context());
+                let cooldown_config = ctx.command().cooldown_config.read().unwrap();
+                ctx.command().cooldowns.lock().unwrap().increment_usage(ctx.cooldown_context(), <std::sync::RwLockReadGuard<'_, poise::CooldownConfig> as core::ops::Deref>::deref(&cooldown_config));
             }
 
             inner(ctx.into(), #( #param_idents, )* )

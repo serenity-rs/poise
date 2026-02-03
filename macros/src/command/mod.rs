@@ -60,6 +60,12 @@ pub struct CommandArgs {
     guild_cooldown: Option<u64>,
     channel_cooldown: Option<u64>,
     member_cooldown: Option<u64>,
+
+    global_cooldown_burst: Option<u64>,
+    user_cooldown_burst: Option<u64>,
+    guild_cooldown_burst: Option<u64>,
+    channel_cooldown_burst: Option<u64>,
+    member_cooldown_burst: Option<u64>,
 }
 
 /// Representation of the function parameter attribute arguments
@@ -430,18 +436,28 @@ fn generate_cooldown_config(args: &CommandArgs) -> proc_macro2::TokenStream {
     let to_seconds_path = quote::quote!(std::time::Duration::from_secs);
 
     let global_cooldown = wrap_option_and_map(args.global_cooldown, &to_seconds_path);
+    let global_burst = wrap_option(args.global_cooldown_burst);
     let user_cooldown = wrap_option_and_map(args.user_cooldown, &to_seconds_path);
+    let user_burst = wrap_option(args.user_cooldown_burst);
     let guild_cooldown = wrap_option_and_map(args.guild_cooldown, &to_seconds_path);
+    let guild_burst = wrap_option(args.guild_cooldown_burst);
     let channel_cooldown = wrap_option_and_map(args.channel_cooldown, &to_seconds_path);
+    let channel_burst = wrap_option(args.channel_cooldown_burst);
     let member_cooldown = wrap_option_and_map(args.member_cooldown, &to_seconds_path);
+    let member_burst = wrap_option(args.member_cooldown_burst);
 
     quote::quote!(
         std::sync::RwLock::new(::poise::CooldownConfig {
             global: #global_cooldown,
+            global_burst_amount: #global_burst,
             user: #user_cooldown,
+            user_burst_amount: #user_burst,
             guild: #guild_cooldown,
+            guild_burst_amount: #guild_burst,
             channel: #channel_cooldown,
+            channel_burst_amount: #channel_burst,
             member: #member_cooldown,
+            member_burst_amount: #member_burst,
             __non_exhaustive: ()
         })
     )
