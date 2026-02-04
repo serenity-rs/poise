@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/parking_lot-0.12.3/src/raw_rwlock.rs`."><title>raw_rwlock.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-0ce1a80b.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="parking_lot" data-themes="" data-resource-suffix="" data-rustdoc-version="1.89.0-nightly (2eef47813 2025-05-22)" data-channel="nightly" data-search-js="search-f7877310.js" data-settings-js="settings-5514c975.js" ><script src="../../static.files/storage-4e99c027.js"></script><script defer src="../../static.files/src-script-63605ae7.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-fd3af306.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-32bb7600.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1><div class="sub-heading">parking_lot/</div>raw_rwlock.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-4"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="comment">// Copyright 2016 Amanieu d'Antras
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/parking_lot-0.12.3/src/raw_rwlock.rs`."><title>raw_rwlock.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-b7b9f40b.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="parking_lot" data-themes="" data-resource-suffix="" data-rustdoc-version="1.95.0-nightly (366a1b93e 2026-02-03)" data-channel="nightly" data-search-js="search-fb33671b.js" data-stringdex-js="stringdex-b897f86f.js" data-settings-js="settings-170eb4bf.js" ><script src="../../static.files/storage-f9617a14.js"></script><script defer src="../../static.files/src-script-813739b1.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-12f88f4f.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-f7c3ffd8.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><a class="skip-main-content" href="#main-content">Skip to main content</a><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><section id="main-content" class="content" tabindex="-1"><div class="main-heading"><h1><div class="sub-heading">parking_lot/</div>raw_rwlock.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-4"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="comment">// Copyright 2016 Amanieu d'Antras
 <a href=#2 id=2 data-nosnippet>2</a>//
 <a href=#3 id=3 data-nosnippet>3</a>// Licensed under the Apache License, Version 2.0, &lt;LICENSE-APACHE or
 <a href=#4 id=4 data-nosnippet>4</a>// http://apache.org/licenses/LICENSE-2.0&gt; or the MIT license &lt;LICENSE-MIT or
@@ -182,7 +182,7 @@
 <a href=#182 id=182 data-nosnippet>182</a>
 <a href=#183 id=183 data-nosnippet>183</a>    <span class="attr">#[inline]
 <a href=#184 id=184 data-nosnippet>184</a>    </span><span class="kw">unsafe fn </span>bump_exclusive(<span class="kw-2">&amp;</span><span class="self">self</span>) {
-<a href=#185 id=185 data-nosnippet>185</a>        <span class="kw">if </span><span class="self">self</span>.state.load(Ordering::Relaxed) &amp; PARKED_BIT != <span class="number">0 </span>{
+<a href=#185 id=185 data-nosnippet>185</a>        <span class="kw">if </span><span class="self">self</span>.state.load(Ordering::Relaxed) &amp; <span class="macro">PARKED_BIT !</span>= <span class="number">0 </span>{
 <a href=#186 id=186 data-nosnippet>186</a>            <span class="self">self</span>.bump_exclusive_slow();
 <a href=#187 id=187 data-nosnippet>187</a>        }
 <a href=#188 id=188 data-nosnippet>188</a>    }
@@ -196,7 +196,7 @@
 <a href=#196 id=196 data-nosnippet>196</a>            .fetch_add(ONE_READER - WRITER_BIT, Ordering::Release);
 <a href=#197 id=197 data-nosnippet>197</a>
 <a href=#198 id=198 data-nosnippet>198</a>        <span class="comment">// Wake up parked shared and upgradable threads if there are any
-<a href=#199 id=199 data-nosnippet>199</a>        </span><span class="kw">if </span>state &amp; PARKED_BIT != <span class="number">0 </span>{
+<a href=#199 id=199 data-nosnippet>199</a>        </span><span class="kw">if </span>state &amp; <span class="macro">PARKED_BIT !</span>= <span class="number">0 </span>{
 <a href=#200 id=200 data-nosnippet>200</a>            <span class="self">self</span>.downgrade_slow();
 <a href=#201 id=201 data-nosnippet>201</a>        }
 <a href=#202 id=202 data-nosnippet>202</a>    }
@@ -370,7 +370,7 @@
 <a href=#370 id=370 data-nosnippet>370</a>            (ONE_READER | UPGRADABLE_BIT) - WRITER_BIT,
 <a href=#371 id=371 data-nosnippet>371</a>            Ordering::Acquire,
 <a href=#372 id=372 data-nosnippet>372</a>        );
-<a href=#373 id=373 data-nosnippet>373</a>        <span class="kw">if </span>state &amp; READERS_MASK != ONE_READER {
+<a href=#373 id=373 data-nosnippet>373</a>        <span class="kw">if </span>state &amp; <span class="macro">READERS_MASK !</span>= ONE_READER {
 <a href=#374 id=374 data-nosnippet>374</a>            <span class="kw">let </span>result = <span class="self">self</span>.upgrade_slow(<span class="prelude-val">None</span>);
 <a href=#375 id=375 data-nosnippet>375</a>            <span class="macro">debug_assert!</span>(result);
 <a href=#376 id=376 data-nosnippet>376</a>        }
@@ -432,7 +432,7 @@
 <a href=#432 id=432 data-nosnippet>432</a>        <span class="kw">let </span>state = <span class="self">self</span>.state.fetch_sub(UPGRADABLE_BIT, Ordering::Relaxed);
 <a href=#433 id=433 data-nosnippet>433</a>
 <a href=#434 id=434 data-nosnippet>434</a>        <span class="comment">// Wake up parked upgradable threads if there are any
-<a href=#435 id=435 data-nosnippet>435</a>        </span><span class="kw">if </span>state &amp; PARKED_BIT != <span class="number">0 </span>{
+<a href=#435 id=435 data-nosnippet>435</a>        </span><span class="kw">if </span>state &amp; <span class="macro">PARKED_BIT !</span>= <span class="number">0 </span>{
 <a href=#436 id=436 data-nosnippet>436</a>            <span class="self">self</span>.downgrade_slow();
 <a href=#437 id=437 data-nosnippet>437</a>        }
 <a href=#438 id=438 data-nosnippet>438</a>    }
@@ -445,7 +445,7 @@
 <a href=#445 id=445 data-nosnippet>445</a>        );
 <a href=#446 id=446 data-nosnippet>446</a>
 <a href=#447 id=447 data-nosnippet>447</a>        <span class="comment">// Wake up parked shared threads if there are any
-<a href=#448 id=448 data-nosnippet>448</a>        </span><span class="kw">if </span>state &amp; PARKED_BIT != <span class="number">0 </span>{
+<a href=#448 id=448 data-nosnippet>448</a>        </span><span class="kw">if </span>state &amp; <span class="macro">PARKED_BIT !</span>= <span class="number">0 </span>{
 <a href=#449 id=449 data-nosnippet>449</a>            <span class="self">self</span>.downgrade_to_upgradable_slow();
 <a href=#450 id=450 data-nosnippet>450</a>        }
 <a href=#451 id=451 data-nosnippet>451</a>    }
@@ -512,7 +512,7 @@
 <a href=#512 id=512 data-nosnippet>512</a>
 <a href=#513 id=513 data-nosnippet>513</a>        <span class="comment">// We can't allow grabbing a shared lock if there is a writer, even if
 <a href=#514 id=514 data-nosnippet>514</a>        // the writer is still waiting for the remaining readers to exit.
-<a href=#515 id=515 data-nosnippet>515</a>        </span><span class="kw">if </span>state &amp; WRITER_BIT != <span class="number">0 </span>{
+<a href=#515 id=515 data-nosnippet>515</a>        </span><span class="kw">if </span>state &amp; <span class="macro">WRITER_BIT !</span>= <span class="number">0 </span>{
 <a href=#516 id=516 data-nosnippet>516</a>            <span class="comment">// To allow recursive locks, we make an exception and allow readers
 <a href=#517 id=517 data-nosnippet>517</a>            // to skip ahead of a pending writer to avoid deadlocking, at the
 <a href=#518 id=518 data-nosnippet>518</a>            // cost of breaking the fairness guarantees.
@@ -543,7 +543,7 @@
 <a href=#543 id=543 data-nosnippet>543</a>        <span class="kw">loop </span>{
 <a href=#544 id=544 data-nosnippet>544</a>            <span class="comment">// This mirrors the condition in try_lock_shared_fast
 <a href=#545 id=545 data-nosnippet>545</a>            </span><span class="attr">#[allow(clippy::collapsible_if)]
-<a href=#546 id=546 data-nosnippet>546</a>            </span><span class="kw">if </span>state &amp; WRITER_BIT != <span class="number">0 </span>{
+<a href=#546 id=546 data-nosnippet>546</a>            </span><span class="kw">if </span>state &amp; <span class="macro">WRITER_BIT !</span>= <span class="number">0 </span>{
 <a href=#547 id=547 data-nosnippet>547</a>                <span class="kw">if </span>!recursive || state &amp; READERS_MASK == <span class="number">0 </span>{
 <a href=#548 id=548 data-nosnippet>548</a>                    <span class="kw">return </span><span class="bool-val">false</span>;
 <a href=#549 id=549 data-nosnippet>549</a>                }
@@ -653,7 +653,7 @@
 <a href=#653 id=653 data-nosnippet>653</a>        </span><span class="kw">let </span>callback = |<span class="kw-2">mut </span>new_state, result: UnparkResult| {
 <a href=#654 id=654 data-nosnippet>654</a>            <span class="comment">// If we are using a fair unlock then we should keep the
 <a href=#655 id=655 data-nosnippet>655</a>            // rwlock locked and hand it off to the unparked threads.
-<a href=#656 id=656 data-nosnippet>656</a>            </span><span class="kw">if </span>result.unparked_threads != <span class="number">0 </span>&amp;&amp; (force_fair || result.be_fair) {
+<a href=#656 id=656 data-nosnippet>656</a>            </span><span class="kw">if </span>result.<span class="macro">unparked_threads !</span>= <span class="number">0 </span>&amp;&amp; (force_fair || result.be_fair) {
 <a href=#657 id=657 data-nosnippet>657</a>                <span class="kw">if </span>result.have_more_threads {
 <a href=#658 id=658 data-nosnippet>658</a>                    new_state |= PARKED_BIT;
 <a href=#659 id=659 data-nosnippet>659</a>                }
@@ -692,7 +692,7 @@
 <a href=#692 id=692 data-nosnippet>692</a>
 <a href=#693 id=693 data-nosnippet>693</a>                <span class="comment">// This is the same condition as try_lock_shared_fast
 <a href=#694 id=694 data-nosnippet>694</a>                </span><span class="attr">#[allow(clippy::collapsible_if)]
-<a href=#695 id=695 data-nosnippet>695</a>                </span><span class="kw">if </span><span class="kw-2">*</span>state &amp; WRITER_BIT != <span class="number">0 </span>{
+<a href=#695 id=695 data-nosnippet>695</a>                </span><span class="kw">if </span><span class="kw-2">*</span>state &amp; <span class="macro">WRITER_BIT !</span>= <span class="number">0 </span>{
 <a href=#696 id=696 data-nosnippet>696</a>                    <span class="kw">if </span>!recursive || <span class="kw-2">*</span>state &amp; READERS_MASK == <span class="number">0 </span>{
 <a href=#697 id=697 data-nosnippet>697</a>                        <span class="kw">return </span><span class="bool-val">false</span>;
 <a href=#698 id=698 data-nosnippet>698</a>                    }
@@ -855,7 +855,7 @@
 <a href=#855 id=855 data-nosnippet>855</a>    </span><span class="kw">fn </span>try_upgrade_slow(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
 <a href=#856 id=856 data-nosnippet>856</a>        <span class="kw">let </span><span class="kw-2">mut </span>state = <span class="self">self</span>.state.load(Ordering::Relaxed);
 <a href=#857 id=857 data-nosnippet>857</a>        <span class="kw">loop </span>{
-<a href=#858 id=858 data-nosnippet>858</a>            <span class="kw">if </span>state &amp; READERS_MASK != ONE_READER {
+<a href=#858 id=858 data-nosnippet>858</a>            <span class="kw">if </span>state &amp; <span class="macro">READERS_MASK !</span>= ONE_READER {
 <a href=#859 id=859 data-nosnippet>859</a>                <span class="kw">return </span><span class="bool-val">false</span>;
 <a href=#860 id=860 data-nosnippet>860</a>            }
 <a href=#861 id=861 data-nosnippet>861</a>            <span class="kw">match </span><span class="self">self</span>.state.compare_exchange_weak(
@@ -950,12 +950,12 @@
 <a href=#950 id=950 data-nosnippet>950</a>            <span class="kw">let </span>s = new_state.get();
 <a href=#951 id=951 data-nosnippet>951</a>
 <a href=#952 id=952 data-nosnippet>952</a>            <span class="comment">// If we are waking up a writer, don't wake anything else.
-<a href=#953 id=953 data-nosnippet>953</a>            </span><span class="kw">if </span>s &amp; WRITER_BIT != <span class="number">0 </span>{
+<a href=#953 id=953 data-nosnippet>953</a>            </span><span class="kw">if </span>s &amp; <span class="macro">WRITER_BIT !</span>= <span class="number">0 </span>{
 <a href=#954 id=954 data-nosnippet>954</a>                <span class="kw">return </span>FilterOp::Stop;
 <a href=#955 id=955 data-nosnippet>955</a>            }
 <a href=#956 id=956 data-nosnippet>956</a>
 <a href=#957 id=957 data-nosnippet>957</a>            <span class="comment">// Otherwise wake *all* readers and one upgrader/writer.
-<a href=#958 id=958 data-nosnippet>958</a>            </span><span class="kw">if </span>token &amp; (UPGRADABLE_BIT | WRITER_BIT) != <span class="number">0 </span>&amp;&amp; s &amp; UPGRADABLE_BIT != <span class="number">0 </span>{
+<a href=#958 id=958 data-nosnippet>958</a>            </span><span class="kw">if </span>token &amp; (UPGRADABLE_BIT | WRITER_BIT) != <span class="number">0 </span>&amp;&amp; s &amp; <span class="macro">UPGRADABLE_BIT !</span>= <span class="number">0 </span>{
 <a href=#959 id=959 data-nosnippet>959</a>                <span class="comment">// Skip writers and upgradable readers if we already have
 <a href=#960 id=960 data-nosnippet>960</a>                // a writer/upgradable reader.
 <a href=#961 id=961 data-nosnippet>961</a>                </span>FilterOp::Skip
@@ -980,7 +980,7 @@
 <a href=#980 id=980 data-nosnippet>980</a>        // remaining readers to exit the lock.
 <a href=#981 id=981 data-nosnippet>981</a>        </span><span class="kw">let </span><span class="kw-2">mut </span>spinwait = SpinWait::new();
 <a href=#982 id=982 data-nosnippet>982</a>        <span class="kw">let </span><span class="kw-2">mut </span>state = <span class="self">self</span>.state.load(Ordering::Acquire);
-<a href=#983 id=983 data-nosnippet>983</a>        <span class="kw">while </span>state &amp; READERS_MASK != <span class="number">0 </span>{
+<a href=#983 id=983 data-nosnippet>983</a>        <span class="kw">while </span>state &amp; <span class="macro">READERS_MASK !</span>= <span class="number">0 </span>{
 <a href=#984 id=984 data-nosnippet>984</a>            <span class="comment">// Spin a few times to wait for readers to exit
 <a href=#985 id=985 data-nosnippet>985</a>            </span><span class="kw">if </span>spinwait.spin() {
 <a href=#986 id=986 data-nosnippet>986</a>                state = <span class="self">self</span>.state.load(Ordering::Acquire);
@@ -1005,7 +1005,7 @@
 <a href=#1005 id=1005 data-nosnippet>1005</a>            </span><span class="kw">let </span>addr = <span class="self">self </span><span class="kw">as </span><span class="kw-2">*const </span><span class="kw">_ as </span>usize + <span class="number">1</span>;
 <a href=#1006 id=1006 data-nosnippet>1006</a>            <span class="kw">let </span>validate = || {
 <a href=#1007 id=1007 data-nosnippet>1007</a>                <span class="kw">let </span>state = <span class="self">self</span>.state.load(Ordering::Relaxed);
-<a href=#1008 id=1008 data-nosnippet>1008</a>                state &amp; READERS_MASK != <span class="number">0 </span>&amp;&amp; state &amp; WRITER_PARKED_BIT != <span class="number">0
+<a href=#1008 id=1008 data-nosnippet>1008</a>                state &amp; <span class="macro">READERS_MASK !</span>= <span class="number">0 </span>&amp;&amp; state &amp; <span class="macro">WRITER_PARKED_BIT !</span>= <span class="number">0
 <a href=#1009 id=1009 data-nosnippet>1009</a>            </span>};
 <a href=#1010 id=1010 data-nosnippet>1010</a>            <span class="kw">let </span>before_sleep = || {};
 <a href=#1011 id=1011 data-nosnippet>1011</a>            <span class="kw">let </span>timed_out = |<span class="kw">_</span>, <span class="kw">_</span>| {};
@@ -1041,7 +1041,7 @@
 <a href=#1041 id=1041 data-nosnippet>1041</a>                        prev_value.wrapping_sub(WRITER_BIT | WRITER_PARKED_BIT),
 <a href=#1042 id=1042 data-nosnippet>1042</a>                        Ordering::Relaxed,
 <a href=#1043 id=1043 data-nosnippet>1043</a>                    );
-<a href=#1044 id=1044 data-nosnippet>1044</a>                    <span class="kw">if </span>state &amp; PARKED_BIT != <span class="number">0 </span>{
+<a href=#1044 id=1044 data-nosnippet>1044</a>                    <span class="kw">if </span>state &amp; <span class="macro">PARKED_BIT !</span>= <span class="number">0 </span>{
 <a href=#1045 id=1045 data-nosnippet>1045</a>                        <span class="kw">let </span>callback = |<span class="kw">_</span>, result: UnparkResult| {
 <a href=#1046 id=1046 data-nosnippet>1046</a>                            <span class="comment">// Clear the parked bit if there no more parked threads
 <a href=#1047 id=1047 data-nosnippet>1047</a>                            </span><span class="kw">if </span>!result.have_more_threads {
@@ -1101,7 +1101,7 @@
 <a href=#1101 id=1101 data-nosnippet>1101</a>            </span><span class="kw">let </span>addr = <span class="self">self </span><span class="kw">as </span><span class="kw-2">*const </span><span class="kw">_ as </span>usize;
 <a href=#1102 id=1102 data-nosnippet>1102</a>            <span class="kw">let </span>validate = || {
 <a href=#1103 id=1103 data-nosnippet>1103</a>                <span class="kw">let </span>state = <span class="self">self</span>.state.load(Ordering::Relaxed);
-<a href=#1104 id=1104 data-nosnippet>1104</a>                state &amp; PARKED_BIT != <span class="number">0 </span>&amp;&amp; (state &amp; validate_flags != <span class="number">0</span>)
+<a href=#1104 id=1104 data-nosnippet>1104</a>                state &amp; <span class="macro">PARKED_BIT !</span>= <span class="number">0 </span>&amp;&amp; (state &amp; <span class="macro">validate_flags !</span>= <span class="number">0</span>)
 <a href=#1105 id=1105 data-nosnippet>1105</a>            };
 <a href=#1106 id=1106 data-nosnippet>1106</a>            <span class="kw">let </span>before_sleep = || {};
 <a href=#1107 id=1107 data-nosnippet>1107</a>            <span class="kw">let </span>timed_out = |<span class="kw">_</span>, was_last_thread| {
@@ -1150,4 +1150,5 @@
 <a href=#1150 id=1150 data-nosnippet>1150</a>        <span class="kw">unsafe </span>{ deadlock::release_resource(<span class="self">self </span><span class="kw">as </span><span class="kw-2">*const </span><span class="kw">_ as </span>usize) };
 <a href=#1151 id=1151 data-nosnippet>1151</a>        <span class="kw">unsafe </span>{ deadlock::release_resource(<span class="self">self </span><span class="kw">as </span><span class="kw-2">*const </span><span class="kw">_ as </span>usize + <span class="number">1</span>) };
 <a href=#1152 id=1152 data-nosnippet>1152</a>    }
-<a href=#1153 id=1153 data-nosnippet>1153</a>}</code></pre></div></section></main></body></html>
+<a href=#1153 id=1153 data-nosnippet>1153</a>}
+</code></pre></div></section></main></body></html>

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/zerocopy-0.7.35/src/lib.rs`."><title>lib.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-0ce1a80b.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="zerocopy" data-themes="" data-resource-suffix="" data-rustdoc-version="1.89.0-nightly (2eef47813 2025-05-22)" data-channel="nightly" data-search-js="search-f7877310.js" data-settings-js="settings-5514c975.js" ><script src="../../static.files/storage-4e99c027.js"></script><script defer src="../../static.files/src-script-63605ae7.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-fd3af306.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-32bb7600.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1><div class="sub-heading">zerocopy/</div>lib.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-4"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="comment">// Copyright 2018 The Fuchsia Authors
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/zerocopy-0.7.35/src/lib.rs`."><title>lib.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-b7b9f40b.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="zerocopy" data-themes="" data-resource-suffix="" data-rustdoc-version="1.95.0-nightly (366a1b93e 2026-02-03)" data-channel="nightly" data-search-js="search-fb33671b.js" data-stringdex-js="stringdex-b897f86f.js" data-settings-js="settings-170eb4bf.js" ><script src="../../static.files/storage-f9617a14.js"></script><script defer src="../../static.files/src-script-813739b1.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-12f88f4f.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-f7c3ffd8.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><a class="skip-main-content" href="#main-content">Skip to main content</a><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><section id="main-content" class="content" tabindex="-1"><div class="main-heading"><h1><div class="sub-heading">zerocopy/</div>lib.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-4"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="comment">// Copyright 2018 The Fuchsia Authors
 <a href=#2 id=2 data-nosnippet>2</a>//
 <a href=#3 id=3 data-nosnippet>3</a>// Licensed under the 2-Clause BSD License &lt;LICENSE-BSD or
 <a href=#4 id=4 data-nosnippet>4</a>// https://opensource.org/license/bsd-2-clause&gt;, Apache License, Version 2.0
@@ -3293,18 +3293,18 @@
 <a href=#3293 id=3293 data-nosnippet>3293</a>    ///
 <a href=#3294 id=3294 data-nosnippet>3294</a>    ///   `NonZeroU16` is guaranteed to have the same layout and bit validity as
 <a href=#3295 id=3295 data-nosnippet>3295</a>    ///   `u16` with the exception that `0` is not a valid instance.
-<a href=#3296 id=3296 data-nosnippet>3296</a>    </span><span class="macro">unsafe_impl!</span>(NonZeroU8: TryFromBytes; |n: <span class="kw-2">&amp;</span>u8| <span class="kw-2">*</span>n != <span class="number">0</span>);
-<a href=#3297 id=3297 data-nosnippet>3297</a>    <span class="macro">unsafe_impl!</span>(NonZeroI8: TryFromBytes; |n: <span class="kw-2">&amp;</span>i8| <span class="kw-2">*</span>n != <span class="number">0</span>);
-<a href=#3298 id=3298 data-nosnippet>3298</a>    <span class="macro">unsafe_impl!</span>(NonZeroU16: TryFromBytes; |n: <span class="kw-2">&amp;</span>u16| <span class="kw-2">*</span>n != <span class="number">0</span>);
-<a href=#3299 id=3299 data-nosnippet>3299</a>    <span class="macro">unsafe_impl!</span>(NonZeroI16: TryFromBytes; |n: <span class="kw-2">&amp;</span>i16| <span class="kw-2">*</span>n != <span class="number">0</span>);
-<a href=#3300 id=3300 data-nosnippet>3300</a>    <span class="macro">unsafe_impl!</span>(NonZeroU32: TryFromBytes; |n: <span class="kw-2">&amp;</span>u32| <span class="kw-2">*</span>n != <span class="number">0</span>);
-<a href=#3301 id=3301 data-nosnippet>3301</a>    <span class="macro">unsafe_impl!</span>(NonZeroI32: TryFromBytes; |n: <span class="kw-2">&amp;</span>i32| <span class="kw-2">*</span>n != <span class="number">0</span>);
-<a href=#3302 id=3302 data-nosnippet>3302</a>    <span class="macro">unsafe_impl!</span>(NonZeroU64: TryFromBytes; |n: <span class="kw-2">&amp;</span>u64| <span class="kw-2">*</span>n != <span class="number">0</span>);
-<a href=#3303 id=3303 data-nosnippet>3303</a>    <span class="macro">unsafe_impl!</span>(NonZeroI64: TryFromBytes; |n: <span class="kw-2">&amp;</span>i64| <span class="kw-2">*</span>n != <span class="number">0</span>);
-<a href=#3304 id=3304 data-nosnippet>3304</a>    <span class="macro">unsafe_impl!</span>(NonZeroU128: TryFromBytes; |n: <span class="kw-2">&amp;</span>u128| <span class="kw-2">*</span>n != <span class="number">0</span>);
-<a href=#3305 id=3305 data-nosnippet>3305</a>    <span class="macro">unsafe_impl!</span>(NonZeroI128: TryFromBytes; |n: <span class="kw-2">&amp;</span>i128| <span class="kw-2">*</span>n != <span class="number">0</span>);
-<a href=#3306 id=3306 data-nosnippet>3306</a>    <span class="macro">unsafe_impl!</span>(NonZeroUsize: TryFromBytes; |n: <span class="kw-2">&amp;</span>usize| <span class="kw-2">*</span>n != <span class="number">0</span>);
-<a href=#3307 id=3307 data-nosnippet>3307</a>    <span class="macro">unsafe_impl!</span>(NonZeroIsize: TryFromBytes; |n: <span class="kw-2">&amp;</span>isize| <span class="kw-2">*</span>n != <span class="number">0</span>);
+<a href=#3296 id=3296 data-nosnippet>3296</a>    </span><span class="macro">unsafe_impl!</span>(NonZeroU8: TryFromBytes; |n: <span class="kw-2">&amp;</span>u8| <span class="kw-2">*</span><span class="macro">n !</span>= <span class="number">0</span>);
+<a href=#3297 id=3297 data-nosnippet>3297</a>    <span class="macro">unsafe_impl!</span>(NonZeroI8: TryFromBytes; |n: <span class="kw-2">&amp;</span>i8| <span class="kw-2">*</span><span class="macro">n !</span>= <span class="number">0</span>);
+<a href=#3298 id=3298 data-nosnippet>3298</a>    <span class="macro">unsafe_impl!</span>(NonZeroU16: TryFromBytes; |n: <span class="kw-2">&amp;</span>u16| <span class="kw-2">*</span><span class="macro">n !</span>= <span class="number">0</span>);
+<a href=#3299 id=3299 data-nosnippet>3299</a>    <span class="macro">unsafe_impl!</span>(NonZeroI16: TryFromBytes; |n: <span class="kw-2">&amp;</span>i16| <span class="kw-2">*</span><span class="macro">n !</span>= <span class="number">0</span>);
+<a href=#3300 id=3300 data-nosnippet>3300</a>    <span class="macro">unsafe_impl!</span>(NonZeroU32: TryFromBytes; |n: <span class="kw-2">&amp;</span>u32| <span class="kw-2">*</span><span class="macro">n !</span>= <span class="number">0</span>);
+<a href=#3301 id=3301 data-nosnippet>3301</a>    <span class="macro">unsafe_impl!</span>(NonZeroI32: TryFromBytes; |n: <span class="kw-2">&amp;</span>i32| <span class="kw-2">*</span><span class="macro">n !</span>= <span class="number">0</span>);
+<a href=#3302 id=3302 data-nosnippet>3302</a>    <span class="macro">unsafe_impl!</span>(NonZeroU64: TryFromBytes; |n: <span class="kw-2">&amp;</span>u64| <span class="kw-2">*</span><span class="macro">n !</span>= <span class="number">0</span>);
+<a href=#3303 id=3303 data-nosnippet>3303</a>    <span class="macro">unsafe_impl!</span>(NonZeroI64: TryFromBytes; |n: <span class="kw-2">&amp;</span>i64| <span class="kw-2">*</span><span class="macro">n !</span>= <span class="number">0</span>);
+<a href=#3304 id=3304 data-nosnippet>3304</a>    <span class="macro">unsafe_impl!</span>(NonZeroU128: TryFromBytes; |n: <span class="kw-2">&amp;</span>u128| <span class="kw-2">*</span><span class="macro">n !</span>= <span class="number">0</span>);
+<a href=#3305 id=3305 data-nosnippet>3305</a>    <span class="macro">unsafe_impl!</span>(NonZeroI128: TryFromBytes; |n: <span class="kw-2">&amp;</span>i128| <span class="kw-2">*</span><span class="macro">n !</span>= <span class="number">0</span>);
+<a href=#3306 id=3306 data-nosnippet>3306</a>    <span class="macro">unsafe_impl!</span>(NonZeroUsize: TryFromBytes; |n: <span class="kw-2">&amp;</span>usize| <span class="kw-2">*</span><span class="macro">n !</span>= <span class="number">0</span>);
+<a href=#3307 id=3307 data-nosnippet>3307</a>    <span class="macro">unsafe_impl!</span>(NonZeroIsize: TryFromBytes; |n: <span class="kw-2">&amp;</span>isize| <span class="kw-2">*</span><span class="macro">n !</span>= <span class="number">0</span>);
 <a href=#3308 id=3308 data-nosnippet>3308</a>}
 <a href=#3309 id=3309 data-nosnippet>3309</a><span class="macro">safety_comment!</span> {
 <a href=#3310 id=3310 data-nosnippet>3310</a>    <span class="doccomment">/// SAFETY:
@@ -3688,13 +3688,13 @@
 <a href=#3688 id=3688 data-nosnippet>3688</a>                            // target/feature combinations don't emit any impls
 <a href=#3689 id=3689 data-nosnippet>3689</a>                            // and thus don't use this macro.
 <a href=#3690 id=3690 data-nosnippet>3690</a>    </span><span class="macro">macro_rules!</span> simd_arch_mod {
-<a href=#3691 id=3691 data-nosnippet>3691</a>        (<span class="attr">#[cfg <span class="macro-nonterminal">$cfg</span>:tt] </span><span class="macro-nonterminal">$arch</span>:ident, <span class="macro-nonterminal">$</span><span class="kw">mod</span>:<span class="macro-nonterminal">ident</span>, $(<span class="macro-nonterminal">$typ</span>:ident),<span class="kw-2">*</span>) =&gt; {
+<a href=#3691 id=3691 data-nosnippet>3691</a>        (<span class="attr">#[cfg <span class="macro-nonterminal">$cfg</span>:tt] </span><span class="macro-nonterminal">$arch</span>:ident, <span class="macro-nonterminal">$mod</span>:ident, $(<span class="macro-nonterminal">$typ</span>:ident),<span class="kw-2">*</span>) =&gt; {
 <a href=#3692 id=3692 data-nosnippet>3692</a>            <span class="attr">#[cfg <span class="macro-nonterminal">$cfg</span>]
 <a href=#3693 id=3693 data-nosnippet>3693</a>            #[cfg_attr(doc_cfg, doc(cfg <span class="macro-nonterminal">$cfg</span>))]
-<a href=#3694 id=3694 data-nosnippet>3694</a>            </span><span class="kw">mod </span><span class="macro-nonterminal">$</span><span class="kw">mod </span>{
-<a href=#3695 id=3695 data-nosnippet>3695</a>                <span class="kw">use </span><span class="macro-nonterminal">core::arch</span>::<span class="macro-nonterminal">$arch</span>::{$(<span class="macro-nonterminal">$typ</span>),<span class="kw-2">*</span>};
+<a href=#3694 id=3694 data-nosnippet>3694</a>            </span><span class="kw">mod </span><span class="macro-nonterminal">$mod </span>{
+<a href=#3695 id=3695 data-nosnippet>3695</a>                <span class="kw">use </span>core::arch::<span class="macro-nonterminal">$arch:</span>:{$(<span class="macro-nonterminal">$typ</span>),<span class="kw-2">*</span>};
 <a href=#3696 id=3696 data-nosnippet>3696</a>
-<a href=#3697 id=3697 data-nosnippet>3697</a>                <span class="kw">use crate</span>::<span class="kw-2">*</span>;
+<a href=#3697 id=3697 data-nosnippet>3697</a>                <span class="kw">use </span>crate::<span class="kw-2">*</span>;
 <a href=#3698 id=3698 data-nosnippet>3698</a>                <span class="macro">impl_known_layout!</span>($(<span class="macro-nonterminal">$typ</span>),<span class="kw-2">*</span>);
 <a href=#3699 id=3699 data-nosnippet>3699</a>                <span class="macro">safety_comment!</span> {
 <a href=#3700 id=3700 data-nosnippet>3700</a>                    <span class="doccomment">/// SAFETY:
@@ -3907,8 +3907,8 @@
 <a href=#3907 id=3907 data-nosnippet>3907</a>            // value returned from this branch.
 <a href=#3908 id=3908 data-nosnippet>3908</a>            </span><span class="kw">let </span>u;
 <a href=#3909 id=3909 data-nosnippet>3909</a>
-<a href=#3910 id=3910 data-nosnippet>3910</a>            <span class="macro-nonterminal">$</span><span class="macro">crate::assert_size_eq!</span>(<span class="macro-nonterminal">t</span>, u);
-<a href=#3911 id=3911 data-nosnippet>3911</a>            <span class="macro-nonterminal">$</span><span class="macro">crate::assert_align_gt_eq!</span>(<span class="macro-nonterminal">t</span>, u);
+<a href=#3910 id=3910 data-nosnippet>3910</a>            <span class="macro-nonterminal">$crate::assert_size_eq</span>!(t, u);
+<a href=#3911 id=3911 data-nosnippet>3911</a>            <span class="macro-nonterminal">$crate::assert_align_gt_eq</span>!(t, u);
 <a href=#3912 id=3912 data-nosnippet>3912</a>
 <a href=#3913 id=3913 data-nosnippet>3913</a>            <span class="kw-2">&amp;</span>u
 <a href=#3914 id=3914 data-nosnippet>3914</a>        } <span class="kw">else </span>{
@@ -4034,8 +4034,8 @@
 <a href=#4034 id=4034 data-nosnippet>4034</a>            // the value returned from this branch.
 <a href=#4035 id=4035 data-nosnippet>4035</a>            </span><span class="kw">let </span>u;
 <a href=#4036 id=4036 data-nosnippet>4036</a>
-<a href=#4037 id=4037 data-nosnippet>4037</a>            <span class="macro-nonterminal">$</span><span class="macro">crate::assert_size_eq!</span>(<span class="macro-nonterminal">t</span>, u);
-<a href=#4038 id=4038 data-nosnippet>4038</a>            <span class="macro-nonterminal">$</span><span class="macro">crate::assert_align_gt_eq!</span>(<span class="macro-nonterminal">t</span>, u);
+<a href=#4037 id=4037 data-nosnippet>4037</a>            <span class="macro-nonterminal">$crate::assert_size_eq</span>!(t, u);
+<a href=#4038 id=4038 data-nosnippet>4038</a>            <span class="macro-nonterminal">$crate::assert_align_gt_eq</span>!(t, u);
 <a href=#4039 id=4039 data-nosnippet>4039</a>
 <a href=#4040 id=4040 data-nosnippet>4040</a>            <span class="kw-2">&amp;mut </span>u
 <a href=#4041 id=4041 data-nosnippet>4041</a>        } <span class="kw">else </span>{
@@ -4097,7 +4097,7 @@
 <a href=#4097 id=4097 data-nosnippet>4097</a>#[macro_export]
 <a href=#4098 id=4098 data-nosnippet>4098</a></span><span class="macro">macro_rules!</span> include_value {
 <a href=#4099 id=4099 data-nosnippet>4099</a>    (<span class="macro-nonterminal">$file</span>:expr $(,)<span class="question-mark">?</span>) =&gt; {
-<a href=#4100 id=4100 data-nosnippet>4100</a>        <span class="macro-nonterminal">$</span><span class="macro">crate::transmute!</span>(<span class="kw-2">*</span><span class="macro">::core::include_bytes!</span>(<span class="macro-nonterminal">$file</span>))
+<a href=#4100 id=4100 data-nosnippet>4100</a>        <span class="macro-nonterminal">$crate::transmute</span>!(<span class="kw-2">*</span><span class="macro">::core::include_bytes!</span>(<span class="macro-nonterminal">$file</span>))
 <a href=#4101 id=4101 data-nosnippet>4101</a>    };
 <a href=#4102 id=4102 data-nosnippet>4102</a>}
 <a href=#4103 id=4103 data-nosnippet>4103</a>
@@ -4229,7 +4229,7 @@
 <a href=#4229 id=4229 data-nosnippet>4229</a>            .len()
 <a href=#4230 id=4230 data-nosnippet>4230</a>            .checked_rem(mem::size_of::&lt;T&gt;())
 <a href=#4231 id=4231 data-nosnippet>4231</a>            .expect(<span class="string">"Ref::new_slice called on a zero-sized type"</span>);
-<a href=#4232 id=4232 data-nosnippet>4232</a>        <span class="kw">if </span>remainder != <span class="number">0 </span>|| !util::aligned_to::&lt;<span class="kw">_</span>, T&gt;(bytes.deref()) {
+<a href=#4232 id=4232 data-nosnippet>4232</a>        <span class="kw">if </span><span class="macro">remainder !</span>= <span class="number">0 </span>|| !util::aligned_to::&lt;<span class="kw">_</span>, T&gt;(bytes.deref()) {
 <a href=#4233 id=4233 data-nosnippet>4233</a>            <span class="kw">return </span><span class="prelude-val">None</span>;
 <a href=#4234 id=4234 data-nosnippet>4234</a>        }
 <a href=#4235 id=4235 data-nosnippet>4235</a>        <span class="prelude-val">Some</span>(Ref(bytes, PhantomData))
@@ -5282,7 +5282,7 @@
 <a href=#5282 id=5282 data-nosnippet>5282</a></span><span class="kw">mod </span>alloc_support {
 <a href=#5283 id=5283 data-nosnippet>5283</a>    <span class="kw">use </span>alloc::vec::Vec;
 <a href=#5284 id=5284 data-nosnippet>5284</a>
-<a href=#5285 id=5285 data-nosnippet>5285</a>    <span class="kw">use super</span>::<span class="kw-2">*</span>;
+<a href=#5285 id=5285 data-nosnippet>5285</a>    <span class="kw">use </span>super::<span class="kw-2">*</span>;
 <a href=#5286 id=5286 data-nosnippet>5286</a>
 <a href=#5287 id=5287 data-nosnippet>5287</a>    <span class="doccomment">/// Extends a `Vec&lt;T&gt;` by pushing `additional` new items onto the end of the
 <a href=#5288 id=5288 data-nosnippet>5288</a>    /// vector. The new items are initialized with zeroes.
@@ -5328,7 +5328,7 @@
 <a href=#5328 id=5328 data-nosnippet>5328</a>    </span><span class="kw">mod </span>tests {
 <a href=#5329 id=5329 data-nosnippet>5329</a>        <span class="kw">use </span>core::convert::TryFrom <span class="kw">as _</span>;
 <a href=#5330 id=5330 data-nosnippet>5330</a>
-<a href=#5331 id=5331 data-nosnippet>5331</a>        <span class="kw">use super</span>::<span class="kw-2">*</span>;
+<a href=#5331 id=5331 data-nosnippet>5331</a>        <span class="kw">use </span>super::<span class="kw-2">*</span>;
 <a href=#5332 id=5332 data-nosnippet>5332</a>
 <a href=#5333 id=5333 data-nosnippet>5333</a>        <span class="attr">#[test]
 <a href=#5334 id=5334 data-nosnippet>5334</a>        </span><span class="kw">fn </span>test_extend_vec_zeroed() {
@@ -5507,7 +5507,7 @@
 <a href=#5507 id=5507 data-nosnippet>5507</a>
 <a href=#5508 id=5508 data-nosnippet>5508</a>    <span class="kw">use </span>static_assertions::assert_impl_all;
 <a href=#5509 id=5509 data-nosnippet>5509</a>
-<a href=#5510 id=5510 data-nosnippet>5510</a>    <span class="kw">use super</span>::<span class="kw-2">*</span>;
+<a href=#5510 id=5510 data-nosnippet>5510</a>    <span class="kw">use </span>super::<span class="kw-2">*</span>;
 <a href=#5511 id=5511 data-nosnippet>5511</a>    <span class="kw">use </span><span class="kw">crate</span>::util::testutil::<span class="kw-2">*</span>;
 <a href=#5512 id=5512 data-nosnippet>5512</a>
 <a href=#5513 id=5513 data-nosnippet>5513</a>    <span class="comment">// An unsized type.
@@ -5840,8 +5840,8 @@
 <a href=#5840 id=5840 data-nosnippet>5840</a>            // valid `tt`s (required by the top match pattern). See the comment
 <a href=#5841 id=5841 data-nosnippet>5841</a>            // below for more details. This arm removes these parentheses to
 <a href=#5842 id=5842 data-nosnippet>5842</a>            // avoid generating an `unused_parens` warning.
-<a href=#5843 id=5843 data-nosnippet>5843</a>            </span>(@<span class="macro-nonterminal">$</span><span class="kw">_</span>:<span class="macro-nonterminal">ident </span>(<span class="macro-nonterminal">$vals</span>:expr)) =&gt; { <span class="macro-nonterminal">$vals </span>};
-<a href=#5844 id=5844 data-nosnippet>5844</a>            (@<span class="macro-nonterminal">$</span><span class="kw">_</span>:<span class="macro-nonterminal">ident $vals</span>:expr) =&gt; { <span class="macro-nonterminal">$vals </span>};
+<a href=#5843 id=5843 data-nosnippet>5843</a>            </span>(@<span class="macro-nonterminal">$_</span>:ident (<span class="macro-nonterminal">$vals</span>:expr)) =&gt; { <span class="macro-nonterminal">$vals </span>};
+<a href=#5844 id=5844 data-nosnippet>5844</a>            (@<span class="macro-nonterminal">$_</span>:ident <span class="macro-nonterminal">$vals</span>:expr) =&gt; { <span class="macro-nonterminal">$vals </span>};
 <a href=#5845 id=5845 data-nosnippet>5845</a>        }
 <a href=#5846 id=5846 data-nosnippet>5846</a>
 <a href=#5847 id=5847 data-nosnippet>5847</a>        <span class="kw">const </span>EVENS: [usize; <span class="number">8</span>] = [<span class="number">0</span>, <span class="number">2</span>, <span class="number">4</span>, <span class="number">6</span>, <span class="number">8</span>, <span class="number">10</span>, <span class="number">12</span>, <span class="number">14</span>];
@@ -5908,7 +5908,7 @@
 <a href=#5908 id=5908 data-nosnippet>5908</a>                // allowed to rely on this, but a lot of math is nicer if
 <a href=#5909 id=5909 data-nosnippet>5909</a>                // they're able to, and some callers might accidentally do that.
 <a href=#5910 id=5910 data-nosnippet>5910</a>                </span><span class="kw">let </span>sized = <span class="macro">matches!</span>(layout.size_info, SizeInfo::Sized { .. });
-<a href=#5911 id=5911 data-nosnippet>5911</a>                <span class="macro">assert!</span>(!(sized &amp;&amp; elems != <span class="number">0</span>), <span class="string">"{}"</span>, debug_str);
+<a href=#5911 id=5911 data-nosnippet>5911</a>                <span class="macro">assert!</span>(!(sized &amp;&amp; <span class="macro">elems !</span>= <span class="number">0</span>), <span class="string">"{}"</span>, debug_str);
 <a href=#5912 id=5912 data-nosnippet>5912</a>
 <a href=#5913 id=5913 data-nosnippet>5913</a>                <span class="kw">let </span>resulting_size = <span class="kw">match </span>layout.size_info {
 <a href=#5914 id=5914 data-nosnippet>5914</a>                    SizeInfo::Sized { _size } =&gt; _size,
@@ -5960,7 +5960,7 @@
 <a href=#5960 id=5960 data-nosnippet>5960</a>                    _CastType::_Prefix =&gt; <span class="number">0</span>,
 <a href=#5961 id=5961 data-nosnippet>5961</a>                    _CastType::_Suffix =&gt; bytes_len,
 <a href=#5962 id=5962 data-nosnippet>5962</a>                };
-<a href=#5963 id=5963 data-nosnippet>5963</a>                <span class="kw">let </span>misaligned = (base + addr) % layout.align != <span class="number">0</span>;
+<a href=#5963 id=5963 data-nosnippet>5963</a>                <span class="kw">let </span>misaligned = (base + addr) % layout.<span class="macro">align !</span>= <span class="number">0</span>;
 <a href=#5964 id=5964 data-nosnippet>5964</a>
 <a href=#5965 id=5965 data-nosnippet>5965</a>                <span class="macro">assert!</span>(insufficient_bytes || misaligned);
 <a href=#5966 id=5966 data-nosnippet>5966</a>            }
@@ -5973,7 +5973,7 @@
 <a href=#5973 id=5973 data-nosnippet>5973</a>            .map(Into::&lt;SizeInfo&gt;::into)
 <a href=#5974 id=5974 data-nosnippet>5974</a>            .chain(<span class="macro">itertools::iproduct!</span>(sizes, elem_sizes).map(Into::&lt;SizeInfo&gt;::into));
 <a href=#5975 id=5975 data-nosnippet>5975</a>        <span class="kw">let </span>layouts = <span class="macro">itertools::iproduct!</span>(size_infos, [<span class="number">1</span>, <span class="number">2</span>, <span class="number">4</span>, <span class="number">8</span>, <span class="number">16</span>, <span class="number">32</span>])
-<a href=#5976 id=5976 data-nosnippet>5976</a>            .filter(|(size_info, align)| !<span class="macro">matches!</span>(size_info, SizeInfo::Sized { _size } <span class="kw">if </span>_size % align != <span class="number">0</span>))
+<a href=#5976 id=5976 data-nosnippet>5976</a>            .filter(|(size_info, align)| !<span class="macro">matches!</span>(size_info, SizeInfo::Sized { _size } <span class="kw">if </span>_size % <span class="macro">align !</span>= <span class="number">0</span>))
 <a href=#5977 id=5977 data-nosnippet>5977</a>            .map(|(size_info, align)| layout(size_info, align));
 <a href=#5978 id=5978 data-nosnippet>5978</a>        <span class="macro">itertools::iproduct!</span>(layouts, <span class="number">0</span>..<span class="number">8</span>, <span class="number">0</span>..<span class="number">8</span>, [_CastType::_Prefix, _CastType::_Suffix])
 <a href=#5979 id=5979 data-nosnippet>5979</a>            .for_each(validate_behavior);
@@ -6098,7 +6098,7 @@
 <a href=#6098 id=6098 data-nosnippet>6098</a>                    <span class="macro">assert_eq!</span>(got_split_at, size, <span class="string">"{}"</span>, assert_msg);
 <a href=#6099 id=6099 data-nosnippet>6099</a>                    <span class="kw">if </span>dst {
 <a href=#6100 id=6100 data-nosnippet>6100</a>                        <span class="macro">assert!</span>(got_elems &gt;= elems, <span class="string">"{}"</span>, assert_msg);
-<a href=#6101 id=6101 data-nosnippet>6101</a>                        <span class="kw">if </span>got_elems != elems {
+<a href=#6101 id=6101 data-nosnippet>6101</a>                        <span class="kw">if </span><span class="macro">got_elems !</span>= elems {
 <a href=#6102 id=6102 data-nosnippet>6102</a>                            <span class="comment">// If `validate_cast_and_convert_metadata`
 <a href=#6103 id=6103 data-nosnippet>6103</a>                            // returned more elements than `elems`, that
 <a href=#6104 id=6104 data-nosnippet>6104</a>                            // means that `elems` is not the maximum number
@@ -6134,7 +6134,7 @@
 <a href=#6134 id=6134 data-nosnippet>6134</a>                    align: <span class="macro-nonterminal">$align</span>.try_into().unwrap(),
 <a href=#6135 id=6135 data-nosnippet>6135</a>                    elem_size: {
 <a href=#6136 id=6136 data-nosnippet>6136</a>                        <span class="attr">#[allow(unused)]
-<a href=#6137 id=6137 data-nosnippet>6137</a>                        </span><span class="kw">let </span>ret = <span class="prelude-val">None</span>::&lt;usize&gt;;
+<a href=#6137 id=6137 data-nosnippet>6137</a>                        </span><span class="kw">let </span>ret = None::&lt;usize&gt;;
 <a href=#6138 id=6138 data-nosnippet>6138</a>                        $(<span class="kw">let </span>ret = <span class="prelude-val">Some</span>(<span class="macro-nonterminal">$elem_size</span>);)<span class="question-mark">?
 <a href=#6139 id=6139 data-nosnippet>6139</a>                        </span>ret
 <a href=#6140 id=6140 data-nosnippet>6140</a>                    }
@@ -6156,7 +6156,7 @@
 <a href=#6156 id=6156 data-nosnippet>6156</a>                };
 <a href=#6157 id=6157 data-nosnippet>6157</a>                <span class="kw">let </span>addr_of_slice_field = {
 <a href=#6158 id=6158 data-nosnippet>6158</a>                    <span class="attr">#[allow(unused)]
-<a href=#6159 id=6159 data-nosnippet>6159</a>                    </span><span class="kw">let </span>f = <span class="prelude-val">None</span>::&lt;<span class="kw">fn</span>(NonNull&lt;Foo&gt;) -&gt; NonNull&lt;u8&gt;&gt;;
+<a href=#6159 id=6159 data-nosnippet>6159</a>                    </span><span class="kw">let </span>f = None::&lt;<span class="kw">fn</span>(NonNull&lt;Foo&gt;) -&gt; NonNull&lt;u8&gt;&gt;;
 <a href=#6160 id=6160 data-nosnippet>6160</a>                    $(
 <a href=#6161 id=6161 data-nosnippet>6161</a>                        <span class="comment">// SAFETY: `test` promises to only call `f` with a `ptr`
 <a href=#6162 id=6162 data-nosnippet>6162</a>                        // to a valid `Foo`.
@@ -7504,7 +7504,7 @@
 <a href=#7504 id=7504 data-nosnippet>7504</a>                #[should_panic = <span class="macro">concat!</span>(<span class="string">"Ref::"</span>, <span class="macro-nonterminal">$constructor_in_panic_msg</span>, <span class="string">" called on a zero-sized type"</span>)]
 <a href=#7505 id=7505 data-nosnippet>7505</a>                </span><span class="kw">fn </span><span class="macro-nonterminal">$name</span>() {
 <a href=#7506 id=7506 data-nosnippet>7506</a>                    <span class="kw">let </span><span class="kw-2">mut </span>buffer = [<span class="number">0u8</span>];
-<a href=#7507 id=7507 data-nosnippet>7507</a>                    <span class="kw">let </span>r = <span class="macro-nonterminal">$crate::Ref</span>::&lt;<span class="kw">_</span>, [()]&gt;::<span class="macro-nonterminal">$name</span>(<span class="kw-2">&amp;mut </span>buffer[..], $(<span class="macro-nonterminal">$tt</span>)<span class="kw-2">*</span>);
+<a href=#7507 id=7507 data-nosnippet>7507</a>                    <span class="kw">let </span>r = <span class="macro-nonterminal">$crate::Ref:</span>:&lt;<span class="kw">_</span>, [()]&gt;::<span class="macro-nonterminal">$name</span>(<span class="kw-2">&amp;mut </span>buffer[..], $(<span class="macro-nonterminal">$tt</span>)<span class="kw-2">*</span>);
 <a href=#7508 id=7508 data-nosnippet>7508</a>                    <span class="macro">unreachable!</span>(<span class="string">"should have panicked, got {:?}"</span>, r);
 <a href=#7509 id=7509 data-nosnippet>7509</a>                }
 <a href=#7510 id=7510 data-nosnippet>7510</a>            }
@@ -7798,7 +7798,7 @@
 <a href=#7798 id=7798 data-nosnippet>7798</a>                    // the size and alignment requirements of `Self` (whereas
 <a href=#7799 id=7799 data-nosnippet>7799</a>                    // `0` may be any integer type with a different size or
 <a href=#7800 id=7800 data-nosnippet>7800</a>                    // alignment than some `NonZeroXxx` types).
-<a href=#7801 id=7801 data-nosnippet>7801</a>                    </span>@failure <span class="prelude-ty">Option</span>::&lt;<span class="self">Self</span>&gt;::None;
+<a href=#7801 id=7801 data-nosnippet>7801</a>                    </span>@failure Option::&lt;<span class="self">Self</span>&gt;::None;
 <a href=#7802 id=7802 data-nosnippet>7802</a>            [bool]
 <a href=#7803 id=7803 data-nosnippet>7803</a>                =&gt; @success [<span class="bool-val">true</span>, <span class="bool-val">false</span>], [<span class="bool-val">false</span>, <span class="bool-val">true</span>],
 <a href=#7804 id=7804 data-nosnippet>7804</a>                    @failure [<span class="number">2u8</span>], [<span class="number">3u8</span>], [<span class="number">0xFFu8</span>], [<span class="number">0u8</span>, <span class="number">1u8</span>, <span class="number">2u8</span>];
@@ -7850,17 +7850,17 @@
 <a href=#7850 id=7850 data-nosnippet>7850</a>                <span class="attr">#[allow(dead_code)]
 <a href=#7851 id=7851 data-nosnippet>7851</a>                </span><span class="kw">const _</span>: () = { <span class="macro">static_assertions::assert_impl_all!</span>(<span class="macro-nonterminal">$ty</span>: TryFromBytes); };
 <a href=#7852 id=7852 data-nosnippet>7852</a>            };
-<a href=#7853 id=7853 data-nosnippet>7853</a>            (<span class="macro-nonterminal">$ty</span>:ty: <span class="macro-nonterminal">$</span><span class="kw">trait</span>:<span class="macro-nonterminal">ident</span>) =&gt; {
+<a href=#7853 id=7853 data-nosnippet>7853</a>            (<span class="macro-nonterminal">$ty</span>:ty: <span class="macro-nonterminal">$trait</span>:ident) =&gt; {
 <a href=#7854 id=7854 data-nosnippet>7854</a>                <span class="attr">#[allow(dead_code)]
-<a href=#7855 id=7855 data-nosnippet>7855</a>                </span><span class="kw">const _</span>: () = { <span class="macro">static_assertions::assert_impl_all!</span>(<span class="macro-nonterminal">$ty</span>: <span class="macro-nonterminal">$</span><span class="kw">trait</span>); };
+<a href=#7855 id=7855 data-nosnippet>7855</a>                </span><span class="kw">const _</span>: () = { <span class="macro">static_assertions::assert_impl_all!</span>(<span class="macro-nonterminal">$ty</span>: <span class="macro-nonterminal">$trait</span>); };
 <a href=#7856 id=7856 data-nosnippet>7856</a>            };
-<a href=#7857 id=7857 data-nosnippet>7857</a>            (<span class="macro-nonterminal">$ty</span>:ty: !<span class="macro-nonterminal">$</span><span class="kw">trait</span>:<span class="macro-nonterminal">ident</span>) =&gt; {
+<a href=#7857 id=7857 data-nosnippet>7857</a>            (<span class="macro-nonterminal">$ty</span>:ty: !<span class="macro-nonterminal">$trait</span>:ident) =&gt; {
 <a href=#7858 id=7858 data-nosnippet>7858</a>                <span class="attr">#[allow(dead_code)]
-<a href=#7859 id=7859 data-nosnippet>7859</a>                </span><span class="kw">const _</span>: () = { <span class="macro">static_assertions::assert_not_impl_any!</span>(<span class="macro-nonterminal">$ty</span>: <span class="macro-nonterminal">$</span><span class="kw">trait</span>); };
+<a href=#7859 id=7859 data-nosnippet>7859</a>                </span><span class="kw">const _</span>: () = { <span class="macro">static_assertions::assert_not_impl_any!</span>(<span class="macro-nonterminal">$ty</span>: <span class="macro-nonterminal">$trait</span>); };
 <a href=#7860 id=7860 data-nosnippet>7860</a>            };
-<a href=#7861 id=7861 data-nosnippet>7861</a>            (<span class="macro-nonterminal">$ty</span>:ty: $(<span class="macro-nonterminal">$</span><span class="kw">trait</span>:<span class="macro-nonterminal">ident</span>),* $(,)<span class="question-mark">? </span>$(!<span class="macro-nonterminal">$negative_trait</span>:ident),<span class="kw-2">*</span>) =&gt; {
+<a href=#7861 id=7861 data-nosnippet>7861</a>            (<span class="macro-nonterminal">$ty</span>:ty: $(<span class="macro-nonterminal">$trait</span>:ident),* $(,)<span class="question-mark">? </span>$(!<span class="macro-nonterminal">$negative_trait</span>:ident),<span class="kw-2">*</span>) =&gt; {
 <a href=#7862 id=7862 data-nosnippet>7862</a>                $(
-<a href=#7863 id=7863 data-nosnippet>7863</a>                    <span class="macro">assert_impls!</span>(<span class="macro-nonterminal">$ty</span>: <span class="macro-nonterminal">$</span><span class="kw">trait</span>);
+<a href=#7863 id=7863 data-nosnippet>7863</a>                    <span class="macro">assert_impls!</span>(<span class="macro-nonterminal">$ty</span>: <span class="macro-nonterminal">$trait</span>);
 <a href=#7864 id=7864 data-nosnippet>7864</a>                )*
 <a href=#7865 id=7865 data-nosnippet>7865</a>
 <a href=#7866 id=7866 data-nosnippet>7866</a>                $(
@@ -7988,8 +7988,8 @@
 <a href=#7988 id=7988 data-nosnippet>7988</a>            </span><span class="macro">macro_rules!</span> test_simd_arch_mod {
 <a href=#7989 id=7989 data-nosnippet>7989</a>                (<span class="macro-nonterminal">$arch</span>:ident, $(<span class="macro-nonterminal">$typ</span>:ident),<span class="kw-2">*</span>) =&gt; {
 <a href=#7990 id=7990 data-nosnippet>7990</a>                    {
-<a href=#7991 id=7991 data-nosnippet>7991</a>                        <span class="kw">use </span>core::arch::<span class="macro-nonterminal">$arch</span>::{$(<span class="macro-nonterminal">$typ</span>),<span class="kw-2">*</span>};
-<a href=#7992 id=7992 data-nosnippet>7992</a>                        <span class="kw">use crate</span>::<span class="kw-2">*</span>;
+<a href=#7991 id=7991 data-nosnippet>7991</a>                        <span class="kw">use </span>core::arch::<span class="macro-nonterminal">$arch:</span>:{$(<span class="macro-nonterminal">$typ</span>),<span class="kw-2">*</span>};
+<a href=#7992 id=7992 data-nosnippet>7992</a>                        <span class="kw">use </span>crate::<span class="kw-2">*</span>;
 <a href=#7993 id=7993 data-nosnippet>7993</a>                        $( <span class="macro">assert_impls!</span>(<span class="macro-nonterminal">$typ</span>: KnownLayout, TryFromBytes, FromZeroes, FromBytes, AsBytes, !Unaligned); )*
 <a href=#7994 id=7994 data-nosnippet>7994</a>                    }
 <a href=#7995 id=7995 data-nosnippet>7995</a>                };
@@ -8046,7 +8046,7 @@
 <a href=#8046 id=8046 data-nosnippet>8046</a>
 <a href=#8047 id=8047 data-nosnippet>8047</a><span class="attr">#[cfg(kani)]
 <a href=#8048 id=8048 data-nosnippet>8048</a></span><span class="kw">mod </span>proofs {
-<a href=#8049 id=8049 data-nosnippet>8049</a>    <span class="kw">use super</span>::<span class="kw-2">*</span>;
+<a href=#8049 id=8049 data-nosnippet>8049</a>    <span class="kw">use </span>super::<span class="kw-2">*</span>;
 <a href=#8050 id=8050 data-nosnippet>8050</a>
 <a href=#8051 id=8051 data-nosnippet>8051</a>    <span class="kw">impl </span>kani::Arbitrary <span class="kw">for </span>DstLayout {
 <a href=#8052 id=8052 data-nosnippet>8052</a>        <span class="kw">fn </span>any() -&gt; <span class="self">Self </span>{
@@ -8281,4 +8281,5 @@
 <a href=#8281 id=8281 data-nosnippet>8281</a>            </span><span class="macro">assert_eq!</span>(padded.size_info, layout.size_info);
 <a href=#8282 id=8282 data-nosnippet>8282</a>        }
 <a href=#8283 id=8283 data-nosnippet>8283</a>    }
-<a href=#8284 id=8284 data-nosnippet>8284</a>}</code></pre></div></section></main></body></html>
+<a href=#8284 id=8284 data-nosnippet>8284</a>}
+</code></pre></div></section></main></body></html>

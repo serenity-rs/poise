@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/hyper-0.14.31/src/proto/h1/role.rs`."><title>role.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-0ce1a80b.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="hyper" data-themes="" data-resource-suffix="" data-rustdoc-version="1.89.0-nightly (2eef47813 2025-05-22)" data-channel="nightly" data-search-js="search-f7877310.js" data-settings-js="settings-5514c975.js" ><script src="../../../../static.files/storage-4e99c027.js"></script><script defer src="../../../../static.files/src-script-63605ae7.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-fd3af306.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-32bb7600.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1><div class="sub-heading">hyper/proto/h1/</div>role.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-4"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="kw">use </span>std::fmt::{<span class="self">self</span>, Write};
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/hyper-0.14.31/src/proto/h1/role.rs`."><title>role.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-b7b9f40b.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="hyper" data-themes="" data-resource-suffix="" data-rustdoc-version="1.95.0-nightly (366a1b93e 2026-02-03)" data-channel="nightly" data-search-js="search-fb33671b.js" data-stringdex-js="stringdex-b897f86f.js" data-settings-js="settings-170eb4bf.js" ><script src="../../../../static.files/storage-f9617a14.js"></script><script defer src="../../../../static.files/src-script-813739b1.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-12f88f4f.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-f7c3ffd8.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><a class="skip-main-content" href="#main-content">Skip to main content</a><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><section id="main-content" class="content" tabindex="-1"><div class="main-heading"><h1><div class="sub-heading">hyper/proto/h1/</div>role.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-4"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="kw">use </span>std::fmt::{<span class="self">self</span>, Write};
 <a href=#2 id=2 data-nosnippet>2</a><span class="kw">use </span>std::mem::MaybeUninit;
 <a href=#3 id=3 data-nosnippet>3</a>
 <a href=#4 id=4 data-nosnippet>4</a><span class="kw">use </span>bytes::Bytes;
@@ -289,7 +289,7 @@
 <a href=#289 id=289 data-nosnippet>289</a>                    <span class="kw">let </span>len = headers::content_length_parse(<span class="kw-2">&amp;</span>value)
 <a href=#290 id=290 data-nosnippet>290</a>                        .ok_or_else(Parse::content_length_invalid)<span class="question-mark">?</span>;
 <a href=#291 id=291 data-nosnippet>291</a>                    <span class="kw">if let </span><span class="prelude-val">Some</span>(prev) = con_len {
-<a href=#292 id=292 data-nosnippet>292</a>                        <span class="kw">if </span>prev != len {
+<a href=#292 id=292 data-nosnippet>292</a>                        <span class="kw">if </span><span class="macro">prev !</span>= len {
 <a href=#293 id=293 data-nosnippet>293</a>                            <span class="macro">debug!</span>(
 <a href=#294 id=294 data-nosnippet>294</a>                                <span class="string">"multiple Content-Length headers with different values: [{}, {}]"</span>,
 <a href=#295 id=295 data-nosnippet>295</a>                                prev, len,
@@ -531,7 +531,7 @@
 <a href=#531 id=531 data-nosnippet>531</a>    }
 <a href=#532 id=532 data-nosnippet>532</a>
 <a href=#533 id=533 data-nosnippet>533</a>    <span class="kw">fn </span>can_have_implicit_zero_content_length(method: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span>&lt;Method&gt;, status: StatusCode) -&gt; bool {
-<a href=#534 id=534 data-nosnippet>534</a>        Server::can_have_content_length(method, status) &amp;&amp; method != <span class="kw-2">&amp;</span><span class="prelude-val">Some</span>(Method::HEAD)
+<a href=#534 id=534 data-nosnippet>534</a>        Server::can_have_content_length(method, status) &amp;&amp; <span class="macro">method !</span>= <span class="kw-2">&amp;</span><span class="prelude-val">Some</span>(Method::HEAD)
 <a href=#535 id=535 data-nosnippet>535</a>    }
 <a href=#536 id=536 data-nosnippet>536</a>
 <a href=#537 id=537 data-nosnippet>537</a>    <span class="kw">fn </span>encode_headers_with_lower_case(
@@ -619,7 +619,7 @@
 <a href=#619 id=619 data-nosnippet>619</a>                    <span class="kw-2">ref mut </span>current,
 <a href=#620 id=620 data-nosnippet>620</a>                    title_case_headers,
 <a href=#621 id=621 data-nosnippet>621</a>                } = <span class="kw-2">*</span><span class="self">self</span>;
-<a href=#622 id=622 data-nosnippet>622</a>                <span class="kw">if </span>current.as_ref().map_or(<span class="bool-val">true</span>, |(last, <span class="kw">_</span>)| last != name) {
+<a href=#622 id=622 data-nosnippet>622</a>                <span class="kw">if </span>current.as_ref().map_or(<span class="bool-val">true</span>, |(last, <span class="kw">_</span>)| <span class="macro">last !</span>= name) {
 <a href=#623 id=623 data-nosnippet>623</a>                    <span class="kw-2">*</span>current = <span class="prelude-val">None</span>;
 <a href=#624 id=624 data-nosnippet>624</a>                }
 <a href=#625 id=625 data-nosnippet>625</a>                <span class="kw">let </span>(<span class="kw">_</span>, values) =
@@ -745,7 +745,7 @@
 <a href=#745 id=745 data-nosnippet>745</a>
 <a href=#746 id=746 data-nosnippet>746</a>                            </span><span class="kw">if let </span><span class="prelude-val">Some</span>(len) = headers::content_length_parse(<span class="kw-2">&amp;</span>value) {
 <a href=#747 id=747 data-nosnippet>747</a>                                <span class="kw">if let </span><span class="prelude-val">Some</span>(prev) = prev_con_len {
-<a href=#748 id=748 data-nosnippet>748</a>                                    <span class="kw">if </span>prev != len {
+<a href=#748 id=748 data-nosnippet>748</a>                                    <span class="kw">if </span><span class="macro">prev !</span>= len {
 <a href=#749 id=749 data-nosnippet>749</a>                                        <span class="macro">warn!</span>(
 <a href=#750 id=750 data-nosnippet>750</a>                                            <span class="string">"multiple Content-Length values found: [{}, {}]"</span>,
 <a href=#751 id=751 data-nosnippet>751</a>                                            prev, len
@@ -1542,7 +1542,7 @@
 <a href=#1542 id=1542 data-nosnippet>1542</a></span><span class="kw">mod </span>tests {
 <a href=#1543 id=1543 data-nosnippet>1543</a>    <span class="kw">use </span>bytes::BytesMut;
 <a href=#1544 id=1544 data-nosnippet>1544</a>
-<a href=#1545 id=1545 data-nosnippet>1545</a>    <span class="kw">use super</span>::<span class="kw-2">*</span>;
+<a href=#1545 id=1545 data-nosnippet>1545</a>    <span class="kw">use </span>super::<span class="kw-2">*</span>;
 <a href=#1546 id=1546 data-nosnippet>1546</a>
 <a href=#1547 id=1547 data-nosnippet>1547</a>    <span class="attr">#[test]
 <a href=#1548 id=1548 data-nosnippet>1548</a>    </span><span class="kw">fn </span>test_parse_request() {
@@ -2898,4 +2898,5 @@
 <a href=#2898 id=2898 data-nosnippet>2898</a>            vec.clear();
 <a href=#2899 id=2899 data-nosnippet>2899</a>        })
 <a href=#2900 id=2900 data-nosnippet>2900</a>    }
-<a href=#2901 id=2901 data-nosnippet>2901</a>}</code></pre></div></section></main></body></html>
+<a href=#2901 id=2901 data-nosnippet>2901</a>}
+</code></pre></div></section></main></body></html>

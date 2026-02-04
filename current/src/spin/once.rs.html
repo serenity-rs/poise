@@ -1,6 +1,6 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spin-0.9.8/src/once.rs`."><title>once.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-0ce1a80b.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="spin" data-themes="" data-resource-suffix="" data-rustdoc-version="1.89.0-nightly (2eef47813 2025-05-22)" data-channel="nightly" data-search-js="search-f7877310.js" data-settings-js="settings-5514c975.js" ><script src="../../static.files/storage-4e99c027.js"></script><script defer src="../../static.files/src-script-63605ae7.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-fd3af306.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-32bb7600.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1><div class="sub-heading">spin/</div>once.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-3"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="doccomment">//! Synchronization primitives for one-time evaluation.
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/spin-0.9.8/src/once.rs`."><title>once.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-b7b9f40b.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="spin" data-themes="" data-resource-suffix="" data-rustdoc-version="1.95.0-nightly (366a1b93e 2026-02-03)" data-channel="nightly" data-search-js="search-fb33671b.js" data-stringdex-js="stringdex-b897f86f.js" data-settings-js="settings-170eb4bf.js" ><script src="../../static.files/storage-f9617a14.js"></script><script defer src="../../static.files/src-script-813739b1.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-12f88f4f.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-f7c3ffd8.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><a class="skip-main-content" href="#main-content">Skip to main content</a><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><section id="main-content" class="content" tabindex="-1"><div class="main-heading"><h1><div class="sub-heading">spin/</div>once.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-3"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="doccomment">//! Synchronization primitives for one-time evaluation.
 <a href=#2 id=2 data-nosnippet>2</a>
-<a href=#3 id=3 data-nosnippet>3</a></span><span class="kw">use crate</span>::{
+<a href=#3 id=3 data-nosnippet>3</a></span><span class="kw">use </span>crate::{
 <a href=#4 id=4 data-nosnippet>4</a>    atomic::{AtomicU8, Ordering},
 <a href=#5 id=5 data-nosnippet>5</a>    RelaxStrategy, Spin,
 <a href=#6 id=6 data-nosnippet>6</a>};
@@ -54,7 +54,7 @@
 <a href=#54 id=54 data-nosnippet>54</a><span class="kw">unsafe impl</span>&lt;T: Send, R&gt; Send <span class="kw">for </span>Once&lt;T, R&gt; {}
 <a href=#55 id=55 data-nosnippet>55</a>
 <a href=#56 id=56 data-nosnippet>56</a><span class="kw">mod </span>status {
-<a href=#57 id=57 data-nosnippet>57</a>    <span class="kw">use super</span>::<span class="kw-2">*</span>;
+<a href=#57 id=57 data-nosnippet>57</a>    <span class="kw">use </span>super::<span class="kw-2">*</span>;
 <a href=#58 id=58 data-nosnippet>58</a>
 <a href=#59 id=59 data-nosnippet>59</a>    <span class="comment">// SAFETY: This structure has an invariant, namely that the inner atomic u8 must *always* have
 <a href=#60 id=60 data-nosnippet>60</a>    // a value for which there exists a valid Status. This means that users of this API must only
@@ -166,7 +166,7 @@
 <a href=#166 id=166 data-nosnippet>166</a>    /// }
 <a href=#167 id=167 data-nosnippet>167</a>    /// ```
 <a href=#168 id=168 data-nosnippet>168</a>    </span><span class="kw">pub fn </span>call_once&lt;F: FnOnce() -&gt; T&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, f: F) -&gt; <span class="kw-2">&amp;</span>T {
-<a href=#169 id=169 data-nosnippet>169</a>        <span class="kw">match </span><span class="self">self</span>.try_call_once(|| <span class="prelude-val">Ok</span>::&lt;T, core::convert::Infallible&gt;(f())) {
+<a href=#169 id=169 data-nosnippet>169</a>        <span class="kw">match </span><span class="self">self</span>.try_call_once(|| Ok::&lt;T, core::convert::Infallible&gt;(f())) {
 <a href=#170 id=170 data-nosnippet>170</a>            <span class="prelude-val">Ok</span>(x) =&gt; x,
 <a href=#171 id=171 data-nosnippet>171</a>            <span class="prelude-val">Err</span>(void) =&gt; <span class="kw">match </span>void {},
 <a href=#172 id=172 data-nosnippet>172</a>        }
@@ -531,7 +531,7 @@
 <a href=#531 id=531 data-nosnippet>531</a>    <span class="kw">use </span>std::sync::Arc;
 <a href=#532 id=532 data-nosnippet>532</a>    <span class="kw">use </span>std::thread;
 <a href=#533 id=533 data-nosnippet>533</a>
-<a href=#534 id=534 data-nosnippet>534</a>    <span class="kw">use super</span>::<span class="kw-2">*</span>;
+<a href=#534 id=534 data-nosnippet>534</a>    <span class="kw">use </span>super::<span class="kw-2">*</span>;
 <a href=#535 id=535 data-nosnippet>535</a>
 <a href=#536 id=536 data-nosnippet>536</a>    <span class="attr">#[test]
 <a href=#537 id=537 data-nosnippet>537</a>    </span><span class="kw">fn </span>smoke_once() {
@@ -786,4 +786,5 @@
 <a href=#786 id=786 data-nosnippet>786</a>            <span class="macro">assert_eq!</span>(<span class="number">1</span>, share.load(Ordering::SeqCst));
 <a href=#787 id=787 data-nosnippet>787</a>        }
 <a href=#788 id=788 data-nosnippet>788</a>    }
-<a href=#789 id=789 data-nosnippet>789</a>}</code></pre></div></section></main></body></html>
+<a href=#789 id=789 data-nosnippet>789</a>}
+</code></pre></div></section></main></body></html>
