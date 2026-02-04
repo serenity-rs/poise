@@ -18,7 +18,7 @@ Most information is in the [API documentation](https://docs.rs/poise/). Also tak
 look at the [examples](examples), especially [`feature_showcase`](examples/feature_showcase), to learn what poise can do.
 
 If you're using a development version from git directly, you probably want to look at the documentation for the
-[`current`](https://serenity-rs.github.io/poise/current) or [`next`](https://serenity-rs.github.io/poise/next) branch instead.
+[`current`](https://serenity-rs.github.io/poise/current/poise/index.html) or [`next`](https://serenity-rs.github.io/poise/next/poise/index.html) branch instead.
 
 For further questions, don't hesitate to join the support server: https://discord.gg/serenity-rs.
 
