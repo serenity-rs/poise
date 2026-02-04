@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serenity-0.12.4/src/client/dispatch.rs`."><title>dispatch.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../static.files/rustdoc-b7b9f40b.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="serenity" data-themes="" data-resource-suffix="" data-rustdoc-version="1.95.0-nightly (366a1b93e 2026-02-03)" data-channel="nightly" data-search-js="search-fb33671b.js" data-stringdex-js="stringdex-b897f86f.js" data-settings-js="settings-170eb4bf.js" ><script src="../../../static.files/storage-f9617a14.js"></script><script defer src="../../../static.files/src-script-813739b1.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-12f88f4f.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-f7c3ffd8.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><a class="skip-main-content" href="#main-content">Skip to main content</a><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><section id="main-content" class="content" tabindex="-1"><div class="main-heading"><h1><div class="sub-heading">serenity/client/</div>dispatch.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-3"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="kw">use </span>std::sync::Arc;
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serenity-0.12.5/src/client/dispatch.rs`."><title>dispatch.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../static.files/rustdoc-b7b9f40b.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="serenity" data-themes="" data-resource-suffix="" data-rustdoc-version="1.95.0-nightly (366a1b93e 2026-02-03)" data-channel="nightly" data-search-js="search-fb33671b.js" data-stringdex-js="stringdex-b897f86f.js" data-settings-js="settings-170eb4bf.js" ><script src="../../../static.files/storage-f9617a14.js"></script><script defer src="../../../static.files/src-script-813739b1.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-12f88f4f.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-f7c3ffd8.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><a class="skip-main-content" href="#main-content">Skip to main content</a><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><section id="main-content" class="content" tabindex="-1"><div class="main-heading"><h1><div class="sub-heading">serenity/client/</div>dispatch.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-3"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="kw">use </span>std::sync::Arc;
 <a href=#2 id=2 data-nosnippet>2</a>
 <a href=#3 id=3 data-nosnippet>3</a><span class="kw">use </span>tracing::debug;
 <a href=#4 id=4 data-nosnippet>4</a>
@@ -365,134 +365,149 @@
 <a href=#365 id=365 data-nosnippet>365</a>        Event::Resumed(event) =&gt; FullEvent::Resume {
 <a href=#366 id=366 data-nosnippet>366</a>            event,
 <a href=#367 id=367 data-nosnippet>367</a>        },
-<a href=#368 id=368 data-nosnippet>368</a>        Event::TypingStart(event) =&gt; FullEvent::TypingStart {
+<a href=#368 id=368 data-nosnippet>368</a>        Event::SoundboardSounds(event) =&gt; FullEvent::SoundboardSounds {
 <a href=#369 id=369 data-nosnippet>369</a>            event,
 <a href=#370 id=370 data-nosnippet>370</a>        },
-<a href=#371 id=371 data-nosnippet>371</a>        Event::Unknown(event) =&gt; {
-<a href=#372 id=372 data-nosnippet>372</a>            <span class="macro">debug!</span>(<span class="string">"An unknown event was received: {event:?}"</span>);
-<a href=#373 id=373 data-nosnippet>373</a>            <span class="kw">return </span><span class="prelude-val">None</span>;
-<a href=#374 id=374 data-nosnippet>374</a>        },
-<a href=#375 id=375 data-nosnippet>375</a>        Event::UserUpdate(<span class="kw-2">mut </span>event) =&gt; {
-<a href=#376 id=376 data-nosnippet>376</a>            <span class="kw">let </span>before = <span class="macro">if_cache!</span>(event.update(cache));
-<a href=#377 id=377 data-nosnippet>377</a>
-<a href=#378 id=378 data-nosnippet>378</a>            FullEvent::UserUpdate {
-<a href=#379 id=379 data-nosnippet>379</a>                old_data: before,
-<a href=#380 id=380 data-nosnippet>380</a>                new: event.current_user,
-<a href=#381 id=381 data-nosnippet>381</a>            }
+<a href=#371 id=371 data-nosnippet>371</a>        Event::SoundboardSoundCreate(event) =&gt; FullEvent::SoundboardSoundCreate {
+<a href=#372 id=372 data-nosnippet>372</a>            event,
+<a href=#373 id=373 data-nosnippet>373</a>        },
+<a href=#374 id=374 data-nosnippet>374</a>        Event::SoundboardSoundUpdate(event) =&gt; FullEvent::SoundboardSoundUpdate {
+<a href=#375 id=375 data-nosnippet>375</a>            event,
+<a href=#376 id=376 data-nosnippet>376</a>        },
+<a href=#377 id=377 data-nosnippet>377</a>        Event::SoundboardSoundsUpdate(event) =&gt; FullEvent::SoundboardSoundsUpdate {
+<a href=#378 id=378 data-nosnippet>378</a>            event,
+<a href=#379 id=379 data-nosnippet>379</a>        },
+<a href=#380 id=380 data-nosnippet>380</a>        Event::SoundboardSoundDelete(event) =&gt; FullEvent::SoundboardSoundDelete {
+<a href=#381 id=381 data-nosnippet>381</a>            event,
 <a href=#382 id=382 data-nosnippet>382</a>        },
-<a href=#383 id=383 data-nosnippet>383</a>        Event::VoiceServerUpdate(event) =&gt; FullEvent::VoiceServerUpdate {
+<a href=#383 id=383 data-nosnippet>383</a>        Event::TypingStart(event) =&gt; FullEvent::TypingStart {
 <a href=#384 id=384 data-nosnippet>384</a>            event,
 <a href=#385 id=385 data-nosnippet>385</a>        },
-<a href=#386 id=386 data-nosnippet>386</a>        Event::VoiceStateUpdate(<span class="kw-2">mut </span>event) =&gt; {
-<a href=#387 id=387 data-nosnippet>387</a>            <span class="kw">let </span>before = <span class="macro">if_cache!</span>(event.update(cache));
-<a href=#388 id=388 data-nosnippet>388</a>
-<a href=#389 id=389 data-nosnippet>389</a>            FullEvent::VoiceStateUpdate {
-<a href=#390 id=390 data-nosnippet>390</a>                old: before,
-<a href=#391 id=391 data-nosnippet>391</a>                new: event.voice_state,
-<a href=#392 id=392 data-nosnippet>392</a>            }
-<a href=#393 id=393 data-nosnippet>393</a>        },
-<a href=#394 id=394 data-nosnippet>394</a>        Event::VoiceChannelStatusUpdate(<span class="kw-2">mut </span>event) =&gt; {
-<a href=#395 id=395 data-nosnippet>395</a>            <span class="kw">let </span>old = <span class="macro">if_cache!</span>(event.update(cache));
-<a href=#396 id=396 data-nosnippet>396</a>
-<a href=#397 id=397 data-nosnippet>397</a>            FullEvent::VoiceChannelStatusUpdate {
-<a href=#398 id=398 data-nosnippet>398</a>                old,
-<a href=#399 id=399 data-nosnippet>399</a>                status: event.status,
-<a href=#400 id=400 data-nosnippet>400</a>                id: event.id,
-<a href=#401 id=401 data-nosnippet>401</a>                guild_id: event.guild_id,
-<a href=#402 id=402 data-nosnippet>402</a>            }
-<a href=#403 id=403 data-nosnippet>403</a>        },
-<a href=#404 id=404 data-nosnippet>404</a>
-<a href=#405 id=405 data-nosnippet>405</a>        Event::WebhookUpdate(event) =&gt; FullEvent::WebhookUpdate {
-<a href=#406 id=406 data-nosnippet>406</a>            guild_id: event.guild_id,
-<a href=#407 id=407 data-nosnippet>407</a>            belongs_to_channel_id: event.channel_id,
+<a href=#386 id=386 data-nosnippet>386</a>        Event::Unknown(event) =&gt; {
+<a href=#387 id=387 data-nosnippet>387</a>            <span class="macro">debug!</span>(<span class="string">"An unknown event was received: {event:?}"</span>);
+<a href=#388 id=388 data-nosnippet>388</a>            <span class="kw">return </span><span class="prelude-val">None</span>;
+<a href=#389 id=389 data-nosnippet>389</a>        },
+<a href=#390 id=390 data-nosnippet>390</a>        Event::UserUpdate(<span class="kw-2">mut </span>event) =&gt; {
+<a href=#391 id=391 data-nosnippet>391</a>            <span class="kw">let </span>before = <span class="macro">if_cache!</span>(event.update(cache));
+<a href=#392 id=392 data-nosnippet>392</a>
+<a href=#393 id=393 data-nosnippet>393</a>            FullEvent::UserUpdate {
+<a href=#394 id=394 data-nosnippet>394</a>                old_data: before,
+<a href=#395 id=395 data-nosnippet>395</a>                new: event.current_user,
+<a href=#396 id=396 data-nosnippet>396</a>            }
+<a href=#397 id=397 data-nosnippet>397</a>        },
+<a href=#398 id=398 data-nosnippet>398</a>        Event::VoiceServerUpdate(event) =&gt; FullEvent::VoiceServerUpdate {
+<a href=#399 id=399 data-nosnippet>399</a>            event,
+<a href=#400 id=400 data-nosnippet>400</a>        },
+<a href=#401 id=401 data-nosnippet>401</a>        Event::VoiceStateUpdate(<span class="kw-2">mut </span>event) =&gt; {
+<a href=#402 id=402 data-nosnippet>402</a>            <span class="kw">let </span>before = <span class="macro">if_cache!</span>(event.update(cache));
+<a href=#403 id=403 data-nosnippet>403</a>
+<a href=#404 id=404 data-nosnippet>404</a>            FullEvent::VoiceStateUpdate {
+<a href=#405 id=405 data-nosnippet>405</a>                old: before,
+<a href=#406 id=406 data-nosnippet>406</a>                new: event.voice_state,
+<a href=#407 id=407 data-nosnippet>407</a>            }
 <a href=#408 id=408 data-nosnippet>408</a>        },
-<a href=#409 id=409 data-nosnippet>409</a>        Event::InteractionCreate(event) =&gt; FullEvent::InteractionCreate {
-<a href=#410 id=410 data-nosnippet>410</a>            interaction: event.interaction,
-<a href=#411 id=411 data-nosnippet>411</a>        },
-<a href=#412 id=412 data-nosnippet>412</a>        Event::IntegrationCreate(event) =&gt; FullEvent::IntegrationCreate {
-<a href=#413 id=413 data-nosnippet>413</a>            integration: event.integration,
-<a href=#414 id=414 data-nosnippet>414</a>        },
-<a href=#415 id=415 data-nosnippet>415</a>        Event::IntegrationUpdate(event) =&gt; FullEvent::IntegrationUpdate {
-<a href=#416 id=416 data-nosnippet>416</a>            integration: event.integration,
-<a href=#417 id=417 data-nosnippet>417</a>        },
-<a href=#418 id=418 data-nosnippet>418</a>        Event::IntegrationDelete(event) =&gt; FullEvent::IntegrationDelete {
-<a href=#419 id=419 data-nosnippet>419</a>            integration_id: event.id,
-<a href=#420 id=420 data-nosnippet>420</a>            guild_id: event.guild_id,
-<a href=#421 id=421 data-nosnippet>421</a>            application_id: event.application_id,
-<a href=#422 id=422 data-nosnippet>422</a>        },
-<a href=#423 id=423 data-nosnippet>423</a>        Event::StageInstanceCreate(event) =&gt; FullEvent::StageInstanceCreate {
-<a href=#424 id=424 data-nosnippet>424</a>            stage_instance: event.stage_instance,
-<a href=#425 id=425 data-nosnippet>425</a>        },
-<a href=#426 id=426 data-nosnippet>426</a>        Event::StageInstanceUpdate(event) =&gt; FullEvent::StageInstanceUpdate {
-<a href=#427 id=427 data-nosnippet>427</a>            stage_instance: event.stage_instance,
-<a href=#428 id=428 data-nosnippet>428</a>        },
-<a href=#429 id=429 data-nosnippet>429</a>        Event::StageInstanceDelete(event) =&gt; FullEvent::StageInstanceDelete {
-<a href=#430 id=430 data-nosnippet>430</a>            stage_instance: event.stage_instance,
-<a href=#431 id=431 data-nosnippet>431</a>        },
-<a href=#432 id=432 data-nosnippet>432</a>        Event::ThreadCreate(<span class="kw-2">mut </span>event) =&gt; {
-<a href=#433 id=433 data-nosnippet>433</a>            <span class="macro">update_cache!</span>(cache, event);
-<a href=#434 id=434 data-nosnippet>434</a>
-<a href=#435 id=435 data-nosnippet>435</a>            FullEvent::ThreadCreate {
-<a href=#436 id=436 data-nosnippet>436</a>                thread: event.thread,
-<a href=#437 id=437 data-nosnippet>437</a>            }
-<a href=#438 id=438 data-nosnippet>438</a>        },
-<a href=#439 id=439 data-nosnippet>439</a>        Event::ThreadUpdate(<span class="kw-2">mut </span>event) =&gt; {
-<a href=#440 id=440 data-nosnippet>440</a>            <span class="kw">let </span>old = <span class="macro">if_cache!</span>(event.update(cache));
-<a href=#441 id=441 data-nosnippet>441</a>
-<a href=#442 id=442 data-nosnippet>442</a>            FullEvent::ThreadUpdate {
-<a href=#443 id=443 data-nosnippet>443</a>                old,
-<a href=#444 id=444 data-nosnippet>444</a>                new: event.thread,
-<a href=#445 id=445 data-nosnippet>445</a>            }
+<a href=#409 id=409 data-nosnippet>409</a>        Event::VoiceChannelStatusUpdate(<span class="kw-2">mut </span>event) =&gt; {
+<a href=#410 id=410 data-nosnippet>410</a>            <span class="kw">let </span>old = <span class="macro">if_cache!</span>(event.update(cache));
+<a href=#411 id=411 data-nosnippet>411</a>
+<a href=#412 id=412 data-nosnippet>412</a>            FullEvent::VoiceChannelStatusUpdate {
+<a href=#413 id=413 data-nosnippet>413</a>                old,
+<a href=#414 id=414 data-nosnippet>414</a>                status: event.status,
+<a href=#415 id=415 data-nosnippet>415</a>                id: event.id,
+<a href=#416 id=416 data-nosnippet>416</a>                guild_id: event.guild_id,
+<a href=#417 id=417 data-nosnippet>417</a>            }
+<a href=#418 id=418 data-nosnippet>418</a>        },
+<a href=#419 id=419 data-nosnippet>419</a>
+<a href=#420 id=420 data-nosnippet>420</a>        Event::WebhookUpdate(event) =&gt; FullEvent::WebhookUpdate {
+<a href=#421 id=421 data-nosnippet>421</a>            guild_id: event.guild_id,
+<a href=#422 id=422 data-nosnippet>422</a>            belongs_to_channel_id: event.channel_id,
+<a href=#423 id=423 data-nosnippet>423</a>        },
+<a href=#424 id=424 data-nosnippet>424</a>        Event::InteractionCreate(event) =&gt; FullEvent::InteractionCreate {
+<a href=#425 id=425 data-nosnippet>425</a>            interaction: event.interaction,
+<a href=#426 id=426 data-nosnippet>426</a>        },
+<a href=#427 id=427 data-nosnippet>427</a>        Event::IntegrationCreate(event) =&gt; FullEvent::IntegrationCreate {
+<a href=#428 id=428 data-nosnippet>428</a>            integration: event.integration,
+<a href=#429 id=429 data-nosnippet>429</a>        },
+<a href=#430 id=430 data-nosnippet>430</a>        Event::IntegrationUpdate(event) =&gt; FullEvent::IntegrationUpdate {
+<a href=#431 id=431 data-nosnippet>431</a>            integration: event.integration,
+<a href=#432 id=432 data-nosnippet>432</a>        },
+<a href=#433 id=433 data-nosnippet>433</a>        Event::IntegrationDelete(event) =&gt; FullEvent::IntegrationDelete {
+<a href=#434 id=434 data-nosnippet>434</a>            integration_id: event.id,
+<a href=#435 id=435 data-nosnippet>435</a>            guild_id: event.guild_id,
+<a href=#436 id=436 data-nosnippet>436</a>            application_id: event.application_id,
+<a href=#437 id=437 data-nosnippet>437</a>        },
+<a href=#438 id=438 data-nosnippet>438</a>        Event::StageInstanceCreate(event) =&gt; FullEvent::StageInstanceCreate {
+<a href=#439 id=439 data-nosnippet>439</a>            stage_instance: event.stage_instance,
+<a href=#440 id=440 data-nosnippet>440</a>        },
+<a href=#441 id=441 data-nosnippet>441</a>        Event::StageInstanceUpdate(event) =&gt; FullEvent::StageInstanceUpdate {
+<a href=#442 id=442 data-nosnippet>442</a>            stage_instance: event.stage_instance,
+<a href=#443 id=443 data-nosnippet>443</a>        },
+<a href=#444 id=444 data-nosnippet>444</a>        Event::StageInstanceDelete(event) =&gt; FullEvent::StageInstanceDelete {
+<a href=#445 id=445 data-nosnippet>445</a>            stage_instance: event.stage_instance,
 <a href=#446 id=446 data-nosnippet>446</a>        },
-<a href=#447 id=447 data-nosnippet>447</a>        Event::ThreadDelete(<span class="kw-2">mut </span>event) =&gt; {
-<a href=#448 id=448 data-nosnippet>448</a>            <span class="kw">let </span>full_thread_data = <span class="macro">if_cache!</span>(event.update(cache));
+<a href=#447 id=447 data-nosnippet>447</a>        Event::ThreadCreate(<span class="kw-2">mut </span>event) =&gt; {
+<a href=#448 id=448 data-nosnippet>448</a>            <span class="macro">update_cache!</span>(cache, event);
 <a href=#449 id=449 data-nosnippet>449</a>
-<a href=#450 id=450 data-nosnippet>450</a>            FullEvent::ThreadDelete {
+<a href=#450 id=450 data-nosnippet>450</a>            FullEvent::ThreadCreate {
 <a href=#451 id=451 data-nosnippet>451</a>                thread: event.thread,
-<a href=#452 id=452 data-nosnippet>452</a>                full_thread_data,
-<a href=#453 id=453 data-nosnippet>453</a>            }
-<a href=#454 id=454 data-nosnippet>454</a>        },
-<a href=#455 id=455 data-nosnippet>455</a>        Event::ThreadListSync(event) =&gt; FullEvent::ThreadListSync {
-<a href=#456 id=456 data-nosnippet>456</a>            thread_list_sync: event,
-<a href=#457 id=457 data-nosnippet>457</a>        },
-<a href=#458 id=458 data-nosnippet>458</a>        Event::ThreadMemberUpdate(event) =&gt; FullEvent::ThreadMemberUpdate {
-<a href=#459 id=459 data-nosnippet>459</a>            thread_member: event.member,
-<a href=#460 id=460 data-nosnippet>460</a>        },
-<a href=#461 id=461 data-nosnippet>461</a>        Event::ThreadMembersUpdate(event) =&gt; FullEvent::ThreadMembersUpdate {
-<a href=#462 id=462 data-nosnippet>462</a>            thread_members_update: event,
-<a href=#463 id=463 data-nosnippet>463</a>        },
-<a href=#464 id=464 data-nosnippet>464</a>        Event::GuildScheduledEventCreate(event) =&gt; FullEvent::GuildScheduledEventCreate {
-<a href=#465 id=465 data-nosnippet>465</a>            event: event.event,
-<a href=#466 id=466 data-nosnippet>466</a>        },
-<a href=#467 id=467 data-nosnippet>467</a>        Event::GuildScheduledEventUpdate(event) =&gt; FullEvent::GuildScheduledEventUpdate {
-<a href=#468 id=468 data-nosnippet>468</a>            event: event.event,
+<a href=#452 id=452 data-nosnippet>452</a>            }
+<a href=#453 id=453 data-nosnippet>453</a>        },
+<a href=#454 id=454 data-nosnippet>454</a>        Event::ThreadUpdate(<span class="kw-2">mut </span>event) =&gt; {
+<a href=#455 id=455 data-nosnippet>455</a>            <span class="kw">let </span>old = <span class="macro">if_cache!</span>(event.update(cache));
+<a href=#456 id=456 data-nosnippet>456</a>
+<a href=#457 id=457 data-nosnippet>457</a>            FullEvent::ThreadUpdate {
+<a href=#458 id=458 data-nosnippet>458</a>                old,
+<a href=#459 id=459 data-nosnippet>459</a>                new: event.thread,
+<a href=#460 id=460 data-nosnippet>460</a>            }
+<a href=#461 id=461 data-nosnippet>461</a>        },
+<a href=#462 id=462 data-nosnippet>462</a>        Event::ThreadDelete(<span class="kw-2">mut </span>event) =&gt; {
+<a href=#463 id=463 data-nosnippet>463</a>            <span class="kw">let </span>full_thread_data = <span class="macro">if_cache!</span>(event.update(cache));
+<a href=#464 id=464 data-nosnippet>464</a>
+<a href=#465 id=465 data-nosnippet>465</a>            FullEvent::ThreadDelete {
+<a href=#466 id=466 data-nosnippet>466</a>                thread: event.thread,
+<a href=#467 id=467 data-nosnippet>467</a>                full_thread_data,
+<a href=#468 id=468 data-nosnippet>468</a>            }
 <a href=#469 id=469 data-nosnippet>469</a>        },
-<a href=#470 id=470 data-nosnippet>470</a>        Event::GuildScheduledEventDelete(event) =&gt; FullEvent::GuildScheduledEventDelete {
-<a href=#471 id=471 data-nosnippet>471</a>            event: event.event,
+<a href=#470 id=470 data-nosnippet>470</a>        Event::ThreadListSync(event) =&gt; FullEvent::ThreadListSync {
+<a href=#471 id=471 data-nosnippet>471</a>            thread_list_sync: event,
 <a href=#472 id=472 data-nosnippet>472</a>        },
-<a href=#473 id=473 data-nosnippet>473</a>        Event::GuildScheduledEventUserAdd(event) =&gt; FullEvent::GuildScheduledEventUserAdd {
-<a href=#474 id=474 data-nosnippet>474</a>            subscribed: event,
+<a href=#473 id=473 data-nosnippet>473</a>        Event::ThreadMemberUpdate(event) =&gt; FullEvent::ThreadMemberUpdate {
+<a href=#474 id=474 data-nosnippet>474</a>            thread_member: event.member,
 <a href=#475 id=475 data-nosnippet>475</a>        },
-<a href=#476 id=476 data-nosnippet>476</a>        Event::GuildScheduledEventUserRemove(event) =&gt; FullEvent::GuildScheduledEventUserRemove {
-<a href=#477 id=477 data-nosnippet>477</a>            unsubscribed: event,
+<a href=#476 id=476 data-nosnippet>476</a>        Event::ThreadMembersUpdate(event) =&gt; FullEvent::ThreadMembersUpdate {
+<a href=#477 id=477 data-nosnippet>477</a>            thread_members_update: event,
 <a href=#478 id=478 data-nosnippet>478</a>        },
-<a href=#479 id=479 data-nosnippet>479</a>        Event::EntitlementCreate(event) =&gt; FullEvent::EntitlementCreate {
-<a href=#480 id=480 data-nosnippet>480</a>            entitlement: event.entitlement,
+<a href=#479 id=479 data-nosnippet>479</a>        Event::GuildScheduledEventCreate(event) =&gt; FullEvent::GuildScheduledEventCreate {
+<a href=#480 id=480 data-nosnippet>480</a>            event: event.event,
 <a href=#481 id=481 data-nosnippet>481</a>        },
-<a href=#482 id=482 data-nosnippet>482</a>        Event::EntitlementUpdate(event) =&gt; FullEvent::EntitlementUpdate {
-<a href=#483 id=483 data-nosnippet>483</a>            entitlement: event.entitlement,
+<a href=#482 id=482 data-nosnippet>482</a>        Event::GuildScheduledEventUpdate(event) =&gt; FullEvent::GuildScheduledEventUpdate {
+<a href=#483 id=483 data-nosnippet>483</a>            event: event.event,
 <a href=#484 id=484 data-nosnippet>484</a>        },
-<a href=#485 id=485 data-nosnippet>485</a>        Event::EntitlementDelete(event) =&gt; FullEvent::EntitlementDelete {
-<a href=#486 id=486 data-nosnippet>486</a>            entitlement: event.entitlement,
+<a href=#485 id=485 data-nosnippet>485</a>        Event::GuildScheduledEventDelete(event) =&gt; FullEvent::GuildScheduledEventDelete {
+<a href=#486 id=486 data-nosnippet>486</a>            event: event.event,
 <a href=#487 id=487 data-nosnippet>487</a>        },
-<a href=#488 id=488 data-nosnippet>488</a>        Event::MessagePollVoteAdd(event) =&gt; FullEvent::MessagePollVoteAdd {
-<a href=#489 id=489 data-nosnippet>489</a>            event,
+<a href=#488 id=488 data-nosnippet>488</a>        Event::GuildScheduledEventUserAdd(event) =&gt; FullEvent::GuildScheduledEventUserAdd {
+<a href=#489 id=489 data-nosnippet>489</a>            subscribed: event,
 <a href=#490 id=490 data-nosnippet>490</a>        },
-<a href=#491 id=491 data-nosnippet>491</a>        Event::MessagePollVoteRemove(event) =&gt; FullEvent::MessagePollVoteRemove {
-<a href=#492 id=492 data-nosnippet>492</a>            event,
+<a href=#491 id=491 data-nosnippet>491</a>        Event::GuildScheduledEventUserRemove(event) =&gt; FullEvent::GuildScheduledEventUserRemove {
+<a href=#492 id=492 data-nosnippet>492</a>            unsubscribed: event,
 <a href=#493 id=493 data-nosnippet>493</a>        },
-<a href=#494 id=494 data-nosnippet>494</a>    };
-<a href=#495 id=495 data-nosnippet>495</a>
-<a href=#496 id=496 data-nosnippet>496</a>    <span class="prelude-val">Some</span>((event, extra_event))
-<a href=#497 id=497 data-nosnippet>497</a>}
+<a href=#494 id=494 data-nosnippet>494</a>        Event::EntitlementCreate(event) =&gt; FullEvent::EntitlementCreate {
+<a href=#495 id=495 data-nosnippet>495</a>            entitlement: event.entitlement,
+<a href=#496 id=496 data-nosnippet>496</a>        },
+<a href=#497 id=497 data-nosnippet>497</a>        Event::EntitlementUpdate(event) =&gt; FullEvent::EntitlementUpdate {
+<a href=#498 id=498 data-nosnippet>498</a>            entitlement: event.entitlement,
+<a href=#499 id=499 data-nosnippet>499</a>        },
+<a href=#500 id=500 data-nosnippet>500</a>        Event::EntitlementDelete(event) =&gt; FullEvent::EntitlementDelete {
+<a href=#501 id=501 data-nosnippet>501</a>            entitlement: event.entitlement,
+<a href=#502 id=502 data-nosnippet>502</a>        },
+<a href=#503 id=503 data-nosnippet>503</a>        Event::MessagePollVoteAdd(event) =&gt; FullEvent::MessagePollVoteAdd {
+<a href=#504 id=504 data-nosnippet>504</a>            event,
+<a href=#505 id=505 data-nosnippet>505</a>        },
+<a href=#506 id=506 data-nosnippet>506</a>        Event::MessagePollVoteRemove(event) =&gt; FullEvent::MessagePollVoteRemove {
+<a href=#507 id=507 data-nosnippet>507</a>            event,
+<a href=#508 id=508 data-nosnippet>508</a>        },
+<a href=#509 id=509 data-nosnippet>509</a>    };
+<a href=#510 id=510 data-nosnippet>510</a>
+<a href=#511 id=511 data-nosnippet>511</a>    <span class="prelude-val">Some</span>((event, extra_event))
+<a href=#512 id=512 data-nosnippet>512</a>}
 </code></pre></div></section></main></body></html>
