@@ -92,7 +92,7 @@ impl<U, E> FrameworkOptions<U, E> {
 impl<U, E> Default for FrameworkOptions<U, E>
 where
     U: Send + Sync,
-    E: std::fmt::Display + std::fmt::Debug + Send,
+    E: Into<Box<dyn std::error::Error + Send + Sync>> + Send,
 {
     fn default() -> Self {
         #[allow(deprecated)] // we need to set the listener field
