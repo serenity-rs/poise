@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"macro":["parse_prefix_args"],"struct":["CodeBlock","CodeBlockError","InvalidBool","InvalidChannelId","InvalidChoice","InvalidRoleId","InvalidUserId","KeyValueArgs","MissingAttachment","TooFewArguments","TooManyArguments"],"trait":["PopArgument"]};
+window.SIDEBAR_ITEMS = {"struct":["CodeBlock","CodeBlockError","InvalidBool","InvalidChannelId","InvalidChoice","InvalidRoleId","InvalidUserId","KeyValueArgs","MissingAttachment","TooFewArguments","TooManyArguments"],"trait":["PopArgument"]};

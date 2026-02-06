@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/rustls-webpki-0.102.8/src/subject_name/dns_name.rs`."><title>dns_name.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../static.files/rustdoc-aa0817cf.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="webpki" data-themes="" data-resource-suffix="" data-rustdoc-version="1.90.0-nightly (e9182f195 2025-07-13)" data-channel="nightly" data-search-js="search-179e01a3.js" data-settings-js="settings-5514c975.js" ><script src="../../../static.files/storage-4e99c027.js"></script><script defer src="../../../static.files/src-script-813739b1.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-673ee1e0.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-32bb7600.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1><div class="sub-heading">webpki/subject_name/</div>dns_name.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-3"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="comment">// Copyright 2015-2020 Brian Smith.
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/rustls-webpki-0.102.8/src/subject_name/dns_name.rs`."><title>dns_name.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../static.files/rustdoc-b7b9f40b.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="webpki" data-themes="" data-resource-suffix="" data-rustdoc-version="1.95.0-nightly (f889772d6 2026-02-05)" data-channel="nightly" data-search-js="search-fb33671b.js" data-stringdex-js="stringdex-b897f86f.js" data-settings-js="settings-170eb4bf.js" ><script src="../../../static.files/storage-f9617a14.js"></script><script defer src="../../../static.files/src-script-813739b1.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-12f88f4f.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-f7c3ffd8.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><a class="skip-main-content" href="#main-content">Skip to main content</a><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><section id="main-content" class="content" tabindex="-1"><div class="main-heading"><h1><div class="sub-heading">webpki/subject_name/</div>dns_name.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-3"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="comment">// Copyright 2015-2020 Brian Smith.
 <a href=#2 id=2 data-nosnippet>2</a>//
 <a href=#3 id=3 data-nosnippet>3</a>// Permission to use, copy, modify, and/or distribute this software for any
 <a href=#4 id=4 data-nosnippet>4</a>// purpose with or without fee is hereby granted, provided that the above
@@ -326,7 +326,7 @@
 <a href=#326 id=326 data-nosnippet>326</a>    <span class="comment">// Allow a relative presented DNS ID to match an absolute reference DNS ID,
 <a href=#327 id=327 data-nosnippet>327</a>    // unless we're matching a name constraint.
 <a href=#328 id=328 data-nosnippet>328</a>    </span><span class="kw">if </span>!reference.at_end() {
-<a href=#329 id=329 data-nosnippet>329</a>        <span class="kw">if </span>reference_dns_id_role != IdRole::NameConstraint {
+<a href=#329 id=329 data-nosnippet>329</a>        <span class="kw">if </span><span class="macro">reference_dns_id_role !</span>= IdRole::NameConstraint {
 <a href=#330 id=330 data-nosnippet>330</a>            <span class="kw">match </span>reference.read_byte() {
 <a href=#331 id=331 data-nosnippet>331</a>                <span class="prelude-val">Ok</span>(<span class="string">b'.'</span>) =&gt; (),
 <a href=#332 id=332 data-nosnippet>332</a>                <span class="kw">_ </span>=&gt; {
@@ -447,7 +447,7 @@
 <a href=#447 id=447 data-nosnippet>447</a>
 <a href=#448 id=448 data-nosnippet>448</a>            <span class="prelude-val">Ok</span>(<span class="string">b'.'</span>) =&gt; {
 <a href=#449 id=449 data-nosnippet>449</a>                dot_count += <span class="number">1</span>;
-<a href=#450 id=450 data-nosnippet>450</a>                <span class="kw">if </span>label_length == <span class="number">0 </span>&amp;&amp; (id_role != IdRole::NameConstraint || !is_first_byte) {
+<a href=#450 id=450 data-nosnippet>450</a>                <span class="kw">if </span>label_length == <span class="number">0 </span>&amp;&amp; (<span class="macro">id_role !</span>= IdRole::NameConstraint || !is_first_byte) {
 <a href=#451 id=451 data-nosnippet>451</a>                    <span class="kw">return </span><span class="bool-val">false</span>;
 <a href=#452 id=452 data-nosnippet>452</a>                }
 <a href=#453 id=453 data-nosnippet>453</a>                <span class="kw">if </span>label_ends_with_hyphen {
@@ -469,7 +469,7 @@
 <a href=#469 id=469 data-nosnippet>469</a>
 <a href=#470 id=470 data-nosnippet>470</a>    <span class="comment">// Only reference IDs, not presented IDs or name constraints, may be
 <a href=#471 id=471 data-nosnippet>471</a>    // absolute.
-<a href=#472 id=472 data-nosnippet>472</a>    </span><span class="kw">if </span>label_length == <span class="number">0 </span>&amp;&amp; id_role != IdRole::Reference {
+<a href=#472 id=472 data-nosnippet>472</a>    </span><span class="kw">if </span>label_length == <span class="number">0 </span>&amp;&amp; <span class="macro">id_role !</span>= IdRole::Reference {
 <a href=#473 id=473 data-nosnippet>473</a>        <span class="kw">return </span><span class="bool-val">false</span>;
 <a href=#474 id=474 data-nosnippet>474</a>    }
 <a href=#475 id=475 data-nosnippet>475</a>
@@ -503,7 +503,7 @@
 <a href=#503 id=503 data-nosnippet>503</a>
 <a href=#504 id=504 data-nosnippet>504</a><span class="attr">#[cfg(test)]
 <a href=#505 id=505 data-nosnippet>505</a></span><span class="kw">mod </span>tests {
-<a href=#506 id=506 data-nosnippet>506</a>    <span class="kw">use super</span>::<span class="kw-2">*</span>;
+<a href=#506 id=506 data-nosnippet>506</a>    <span class="kw">use </span>super::<span class="kw-2">*</span>;
 <a href=#507 id=507 data-nosnippet>507</a>
 <a href=#508 id=508 data-nosnippet>508</a>    <span class="attr">#[allow(clippy::type_complexity)]
 <a href=#509 id=509 data-nosnippet>509</a>    </span><span class="kw">const </span>PRESENTED_MATCHES_REFERENCE: <span class="kw-2">&amp;</span>[(<span class="kw-2">&amp;</span>[u8], <span class="kw-2">&amp;</span>[u8], <span class="prelude-ty">Result</span>&lt;bool, Error&gt;)] = <span class="kw-2">&amp;</span>[
@@ -958,4 +958,5 @@
 <a href=#958 id=958 data-nosnippet>958</a>            );
 <a href=#959 id=959 data-nosnippet>959</a>        }
 <a href=#960 id=960 data-nosnippet>960</a>    }
-<a href=#961 id=961 data-nosnippet>961</a>}</code></pre></div></section></main></body></html>
+<a href=#961 id=961 data-nosnippet>961</a>}
+</code></pre></div></section></main></body></html>

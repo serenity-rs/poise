@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["SlashArgError"],"macro":["parse_slash_args"],"trait":["ContextMenuParameter","SlashArgument"]};
+window.SIDEBAR_ITEMS = {"enum":["SlashArgError"],"trait":["ContextMenuParameter","SlashArgument"]};
