@@ -12,6 +12,7 @@ mod paginate;
 pub use paginate::*;
 
 use crate::{serenity::CreateAllowedMentions, serenity_prelude as serenity, CreateReply};
+use std::fmt::{self, Display};
 
 /// An error handler that logs errors either via the [`tracing`] crate or via a Discord message. Set
 /// up a logger like tracing subscriber
@@ -29,20 +30,20 @@ use crate::{serenity::CreateAllowedMentions, serenity_prelude as serenity, Creat
 /// }
 /// # };
 /// ```
-pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
+pub async fn on_error<U, E: Into<Box<dyn std::error::Error + Send + Sync>>>(
     error: crate::FrameworkError<'_, U, E>,
 ) -> Result<(), serenity::Error> {
     match error {
         crate::FrameworkError::Setup { error, .. } => {
-            eprintln!("Error in user data setup: {}", error);
+            eprintln!("Error in user data setup: {}", display_error(error));
         }
         crate::FrameworkError::EventHandler { error, event, .. } => tracing::error!(
             "User event event handler encountered an error on {} event: {}",
             event.snake_case_name(),
-            error
+            display_error(error)
         ),
         crate::FrameworkError::Command { ctx, error } => {
-            let error = error.to_string();
+            let error = display_error(error).to_string();
             eprintln!("An error occured in a command: {}", error);
 
             let mentions = CreateAllowedMentions::new()
@@ -118,14 +119,19 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
                 description,
             );
         }
-        crate::FrameworkError::CommandCheckFailed { ctx, error } => {
-            tracing::error!(
-                "A command check failed in command {} for user {}: {:?}",
+        crate::FrameworkError::CommandCheckFailed { ctx, error } => match error {
+            Some(error) => tracing::error!(
+                "A command check failed in command {} for user {}: {}",
                 ctx.command().name,
                 ctx.author().name,
-                error,
-            );
-        }
+                display_error(error),
+            ),
+            None => tracing::error!(
+                "A command check failed in command {} for user {}",
+                ctx.command().name,
+                ctx.author().name,
+            ),
+        },
         crate::FrameworkError::CooldownHit {
             remaining_cooldown,
             ctx,
@@ -197,7 +203,7 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
             tracing::error!(
                 "Dynamic prefix failed for message {:?}: {}",
                 msg.content,
-                error
+                display_error(error)
             );
         }
         crate::FrameworkError::UnknownCommand {
@@ -215,7 +221,10 @@ pub async fn on_error<U, E: std::fmt::Display + std::fmt::Debug>(
             tracing::warn!("received unknown interaction \"{}\"", interaction.data.name);
         }
         crate::FrameworkError::NonCommandMessage { error, .. } => {
-            tracing::warn!("error in non-command message handler: {}", error);
+            tracing::warn!(
+                "error in non-command message handler: {}",
+                display_error(error)
+            );
         }
         crate::FrameworkError::__NonExhaustive(unreachable) => match unreachable {},
     }
@@ -329,4 +338,27 @@ pub async fn servers<U, E>(ctx: crate::Context<'_, U, E>) -> Result<(), serenity
 
     ctx.send(reply).await?;
     Ok(())
+}
+
+/// Helper function to display an `impl Into<Box<dyn std::error::Error>>` and its chain of causes.
+fn display_error(e: impl Into<Box<dyn std::error::Error + Send + Sync>>) -> impl Display {
+    struct DisplayError(Box<dyn std::error::Error + Send + Sync>);
+
+    impl Display for DisplayError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            let mut e: &(dyn std::error::Error + 'static) = &*self.0;
+
+            Display::fmt(e, f)?;
+
+            while let Some(new_e) = e.source() {
+                f.write_str(": ")?;
+                Display::fmt(new_e, f)?;
+                e = new_e;
+            }
+
+            Ok(())
+        }
+    }
+
+    DisplayError(e.into())
 }
