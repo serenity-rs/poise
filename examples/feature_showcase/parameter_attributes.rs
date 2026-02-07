@@ -92,7 +92,7 @@ pub async fn test_flag(ctx: Context<'_>, #[flag] flag: bool) -> Result<(), Error
 }
 
 /// Demonstrates `#[string]`
-#[poise::command(prefix_command)]
+#[poise::command(prefix_command, slash_command)]
 pub async fn test_fromstr(
     ctx: Context<'_>,
     #[string] ip_addr: std::net::IpAddr,
