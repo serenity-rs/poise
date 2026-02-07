@@ -113,7 +113,7 @@ attributes you can use on parameters:
 - `#[string]`: Indicates that a type implements `FromStr` and should be parsed from a string argument.
 - `#[rest]`: Use the entire rest of the message for this parameter (prefix-only)
 - `#[lazy]`: Can be used on Option and Vec parameters and is equivalent to regular expressions' laziness (prefix-only)
-- `#[flag]`: Can be used on a bool parameter make it optional and default to `false`; additionally,
+- `#[flag]`: Can be used on a bool parameter to make it optional and default to `false`; additionally,
   in prefix commands only, the user can pass in the parameter name literally to set it to `true`.
     - For example with `async fn my_command(ctx: Context<'_>, #[flag] my_flag: bool)`, `~my_command` or `/my_command` would set `my_flag` to false, while `~my_command my_flag` would set `my_flag` to true
 
