@@ -139,7 +139,7 @@ async fn run_command<U, E>(
                     let mut user = (*user).clone();
                     user.member = member.map(|v| Box::new(v.clone()));
                     action(ctx, user).await
-                },
+                }
                 _ => return Err(command_structure_mismatch_error),
             }
         }
