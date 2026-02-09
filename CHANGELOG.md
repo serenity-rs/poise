@@ -27,9 +27,46 @@ this find-and-replace regex (VSCode flavor):
 
 To quickly make GitHub usernames into clickable links, prepend each username with @ and then run
 this find-and-replace regex (VSCode flavor):
-- Find: (?<=Thanks to.*)(?<!\[)@([a-z0-9]+)
+- Find: (?<=Thanks to.*)(?<!\[)@([a-z0-9-]+)
 - Replace: [@$1](https://github.com/$1)
 -->
+
+# 0.6.2
+
+New features:
+- Added handler for non-command messages ([1f0abfb](https://github.com/serenity-rs/poise/commit/1f0abfbc4c6d79af62867ff94fe79f5ae4fe6f8f))
+- Added `builtins::pretty_help`, a help command that uses embeds ([ec19915](https://github.com/serenity-rs/poise/commit/ec19915d817cc6ad8f02ec0cab260d29d2704cce))
+- Added support for modifying the last invocation of a command ([c67dde5](https://github.com/serenity-rs/poise/commit/c67dde58e2a185193738b30f2b1e8600dcf391cd))
+  - This makes it possible to shorten or lengthen a cooldown after invocation.
+- Added ability to only initialize certain roles to owners ([b887224](https://github.com/serenity-rs/poise/commit/b887224bbb4c3a9ad3196d3d58aba782ca3de909))
+  - This makes it possible to specify `TeamMemberRole`s other than the default `Admin` and `Developer` to be initialized to owners.
+- Added support for editing initial interaction response attachments ([525bd69](https://github.com/serenity-rs/poise/commit/525bd69b7f91dacdc8eb1da33558102f2f1d8d19))
+- Added support for manual cooldowns on single commands ([7ae055c](https://github.com/serenity-rs/poise/commit/7ae055c95c38432ac7f0622c24d4b36d9d2970aa))
+- Added support for polls ([3eefed4](https://github.com/serenity-rs/poise/commit/3eefed431125398677a6d81fc27a7df85c196f06))
+- Added support for user-installed apps, aka user apps ([773da6c](https://github.com/serenity-rs/poise/commit/773da6cbe78dfab81d631879466c47616df17548))
+
+Behavior changes:
+- The pound sign (#) is now supported in language identifiers (e.g., `c#`, `f#`) in code blocks ([59dba56](https://github.com/serenity-rs/poise/commit/59dba560f9de22c2e6123369b1b52d56cad82a84))
+- Fixed event handler example to remove a race condition and prevent the bot from replying to itself ([9def484](https://github.com/serenity-rs/poise/commit/9def4848ee9958f4b4bcc6ddbf2937717a762062), [48b0318](https://github.com/serenity-rs/poise/commit/48b03181e6d0f604caac829852f64a986ee5f3a2))
+- Disabled allowed mentions for `Command` and `ArgumentParse` errors ([6ead1e1](https://github.com/serenity-rs/poise/commit/6ead1e1962efdfa4c5dec764e7df79694ace35f3))
+  - This prevents these errors from unintentionally pinging users.
+- Fixed `additional_prefixes` usage in the basic structure example ([8ba38c0](https://github.com/serenity-rs/poise/commit/8ba38c04a471fac1f00c43fb2635e3253f43a816))
+- Snowflake ID arguments to prefix commands are now parsed as mentions where appropriate ([bbc837a](https://github.com/serenity-rs/poise/commit/bbc837a1dd170d6ebb5c9208d7a9fd8b3dc27a27))
+- Updated examples to use `tracing-subscriber` instead of `env_logger` ([db10b12](https://github.com/serenity-rs/poise/commit/db10b126c8b07f7e1924cba1672f04ff24ed4ec7))
+- Context menu commands now properly check `default_member_permissions` ([e850875](https://github.com/serenity-rs/poise/commit/e850875cf3925786502d9f126c85f8c61f89ace2))
+  - Previously, the builder failed to set `default_member_permissions` when creating a context menu command.
+- Command description length is now determined based on `char`s instead of bytes ([e144ede](https://github.com/serenity-rs/poise/commit/e144ede7a6e1f29b018ed1982af797cf020371be))
+  - This resolves an artifical constraint on languages that use multibyte (CJK) characters. Further discussion in [#379](https://github.com/serenity-rs/poise/pull/379).
+- The resolved `User` returned by a user context menu command now includes `PartialMember` data when available ([4c7661d](https://github.com/serenity-rs/poise/commit/4c7661d120451d199e62fa3987fb9d0676c8cbb7))
+- `Command` and `ArgumentParse` error replies are now ephemeral ([24fe146](https://github.com/serenity-rs/poise/commit/24fe1469d0b110385a85df7263c0bc547d823800))
+
+Miscellaneous:
+- Reduced generated code for field conversions in macros ([5b369bb](https://github.com/serenity-rs/poise/commit/5b369bbafde38f74670681dc9f4b55430712a4ff))
+- Bumped Rust edition to 2021 and added edition to `.rustfmt.toml` ([1c34184](https://github.com/serenity-rs/poise/commit/1c3418473636a3e3648e36b2e852bb6f4d9e7993), [f1e79b5](https://github.com/serenity-rs/poise/commit/f1e79b5409a2234529053c683387f523ec5667d9))
+
+Detailed changelog: https://github.com/serenity-rs/poise/compare/v0.6.1...v0.6.2
+
+Thanks to [@kangalio](https://github.com/kangalio), [@emilyyyylime](https://github.com/emilyyyylime), [@GnomedDev](https://github.com/GnomedDev), [@fee1-dead](https://github.com/fee1-dead), [@asibahi](https://github.com/asibahi), [@c-git](https://github.com/c-git), [@Spacerulerwill](https://github.com/Spacerulerwill), [@matteopolak](https://github.com/matteopolak), [@jamesbt365](https://github.com/jamesbt365), [@NotNorom](https://github.com/NotNorom), [@keiveulbugs](https://github.com/keiveulbugs), [@arqunis](https://github.com/arqunis), [@ravener](https://github.com/ravener), [@DocJade](https://github.com/DocJade), [@fgardt](https://github.com/fgardt), [@cycle-five](https://github.com/cycle-five), [@Nydauron](https://github.com/Nydauron), [@zkxs](https://github.com/zkxs), [@yuimarudev](https://github.com/yuimarudev), [@meditationmind](https://github.com/meditationmind), [@nwerosama](https://github.com/nwerosama), [@black-sock](https://github.com/black-sock), [@TapGhoul](https://github.com/TapGhoul), and [@HactarCE](https://github.com/HactarCE)!
 
 # 0.6.1
 
