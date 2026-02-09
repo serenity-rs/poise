@@ -134,8 +134,12 @@ async fn run_command<U, E>(
             ) {
                 (
                     Some(crate::ContextMenuCommandAction::User(action)),
-                    Some(serenity::ResolvedTarget::User(user, _)),
-                ) => action(ctx, (*user).clone()).await,
+                    Some(serenity::ResolvedTarget::User(user, member)),
+                ) => {
+                    let mut user = (*user).clone();
+                    user.member = member.map(|v| Box::new(v.clone()));
+                    action(ctx, user).await
+                },
                 _ => return Err(command_structure_mismatch_error),
             }
         }
