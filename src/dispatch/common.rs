@@ -1,8 +1,10 @@
 //! Prefix and slash agnostic utilities for dispatching incoming events onto framework commands
 
+#[cfg(feature = "cache")]
 use crate::serenity_prelude as serenity;
 
 /// Fetches the NSFW status of the channel (or thread) the command was executed in.
+#[cfg(feature = "cache")]
 async fn check_nsfw_channel<U: Send + Sync + 'static, E>(ctx: crate::Context<'_, U, E>) -> bool {
     match ctx.channel().await {
         Some(serenity::Channel::Private(_)) => true,
@@ -61,8 +63,11 @@ async fn check_permissions_and_cooldown_single<'a, U: Send + Sync + 'static, E>(
         return Err(crate::FrameworkError::DmOnly { ctx });
     }
 
-    if cmd.nsfw_only && !check_nsfw_channel(ctx).await {
-        return Err(crate::FrameworkError::NsfwOnly { ctx });
+    #[cfg(feature = "cache")]
+    {
+        if cmd.nsfw_only && !check_nsfw_channel(ctx).await {
+            return Err(crate::FrameworkError::NsfwOnly { ctx });
+        }
     }
 
     // Make sure that user has required permissions

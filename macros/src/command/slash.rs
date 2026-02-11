@@ -105,7 +105,8 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
             } else if param.args.string {
                 quote::quote! { Cow::Borrowed(&[]) }
             } else {
-                quote::quote! { poise::slash_argument_choices!(#type_) }
+                quote::quote! { <#type_ as ::poise::SlashArgument>::choices() }
+            }
         } else {
             quote::quote! { Cow::Borrowed(&[]) }
         };

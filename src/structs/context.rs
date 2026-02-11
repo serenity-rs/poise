@@ -503,7 +503,7 @@ context_methods! {
         &self.serenity_context().http
     }
 
-    /// Returns the current gateway heartbeat latency ([`::serenity::gateway::Shard::latency()`]).
+    /// Returns the current gateway heartbeat latency ([`::serenity::gateway::Shard::heartbeat_latency()`]).
     ///
     /// If the shard has just connected, `None` is returned.
     await (ping self)
