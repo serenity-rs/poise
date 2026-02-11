@@ -1,6 +1,7 @@
 //! Contains implementations of [`ArgumentConvert`] for [`serenity::Guild`] and
 //! [`serenity::GuildId`].
 
+#[cfg(feature = "cache")]
 use std::fmt;
 use std::str::FromStr;
 
@@ -8,6 +9,7 @@ use super::ArgumentConvert;
 use crate::serenity_prelude as serenity;
 
 /// Error that can be returned from [`serenity::Guild::convert`].
+#[cfg(feature = "cache")]
 #[derive(Debug)]
 pub enum GuildParseError {
     /// The parsed guild id could not be found in the cache.
@@ -18,6 +20,7 @@ pub enum GuildParseError {
     NoCache,
 }
 
+#[cfg(feature = "cache")]
 impl std::error::Error for GuildParseError {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         match self {
@@ -27,6 +30,7 @@ impl std::error::Error for GuildParseError {
     }
 }
 
+#[cfg(feature = "cache")]
 impl fmt::Display for GuildParseError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {

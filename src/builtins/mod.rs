@@ -30,7 +30,10 @@ use std::fmt::{self, Display};
 /// }
 /// # };
 /// ```
-pub async fn on_error<U, E: Into<Box<dyn std::error::Error + Send + Sync>>>(
+pub async fn on_error<
+    U: Send + Sync + 'static,
+    E: Into<Box<dyn std::error::Error + Send + Sync>>,
+>(
     error: crate::FrameworkError<'_, U, E>,
 ) -> Result<(), serenity::Error> {
     match error {
