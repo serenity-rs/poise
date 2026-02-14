@@ -46,7 +46,7 @@ pub struct ModalDataResolved {
     /// The `String` values of the options selected from a checkbox group component.
     pub checkbox_options: Option<Vec<String>>,
     /// The `bool` value representing the state of a checkbox component:
-    /// `true` if checked, or `false` if unchecked.
+    /// `true` if checked, `false` if unchecked.
     pub checked: bool,
 }
 

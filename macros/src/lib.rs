@@ -361,9 +361,10 @@ field attributes are valid for text input components only:
 - `#[paragraph]`: Switches to a multi-line input box. Default is single-line.
 
 Other interactive components supported by the macro include the [file upload][fu],
-[string select][ss], [user select][us], [role select][rs], [mentionable select][ms], and
-[channel select][cs] components. Component type is indicated by using one of the following
-field attributes (**one per field**):
+[string select][ss], [user select][us], [role select][rs], [mentionable select][ms],
+[channel select][cs], [radio group][rg], [checkbox group][cbg], and [checkbox][cb]
+components. Component type is indicated by using one of the following field attributes
+(**one per field**):
 
 - `#[file_upload]`: Allows the user to upload files (0-10). Returns [`Vec<Attachment>`][att].
 - `#[string_select("", "")]`: Supports 1-25 **unique** options (up to 100 chars each), defined
@@ -372,11 +373,19 @@ in the attribute. Returns `Vec<String>`.
 - `#[role_select]`: Returns [`Vec<Role>`][role].
 - `#[mentionable_select]`: Returns [`Mentionables`][mentionables].
 - `#[channel_select]`: Returns [`Vec<GenericChannelId>`][gic].
+- `#[radio_group("", "")]`: Supports 2-10 **unique** options (up to 100 chars each), defined
+in the attribute. Returns `String`.
+- `#[checkbox_group("", "")]`: Supports 1-10 **unique** options (up to 100 chars each), defined
+in the attribute. Returns `Vec<String>`.
+- `#[checkbox]`: Returns `true` if checked, `false` if unchecked.
 
-Optionally, emojis and/or descriptions may be added to string select menu options:
+Optionally, emojis and/or descriptions may be added to string select menu options. Radio group
+options and checkbox group options support descriptions, but not emojis.
 
 - `#[string_select_emojis("", "")`
 - `#[string_select_descriptions("", "")]`: Max 100 chars per description.
+- `#[radio_group_descriptions("", "")]`: Max 100 chars per description.
+- `#[checkbox_group_descriptions("", "")]`: Max 100 chars per description.
 
 If used, the number of emojis and/or descriptions provided must not be less than the number
 of options provided; any additional items will be ignored. Unicode emojis should be inserted
@@ -399,11 +408,12 @@ static or `<a:NAME:EMOJI_ID>` for animated. Emojis given in an invalid format wi
 selections: Option<Vec<String>>
 ```
 
-Minimum and maximum values for file upload and select menu components are defined
-using the following field attributes:
+Minimum and maximum values for file upload select menu, and checkbox group components
+are defined using the following field attributes:
 
-- `#[min_values = 0]`: 0-10 for files; 0-25 for select menus. Defaults to 1.
-- `#[max_values = 25]`: 1-10 for files; 1-25 for select menus. Defaults to 1.
+- `#[min_values = 0]`: 0-10 for files/checkbox groups; 0-25 for select menus. Defaults to 1.
+- `#[max_values = 25]`: 1-10 for files/checkbox groups; 1-25 for select menus. Defaults to 1
+for files and select menus; defaults to the number of options for checkbox groups.
 
 ```rust
 #[name = "Role select menu"]
@@ -412,10 +422,10 @@ using the following field attributes:
 roles: Option<Vec<serenity::Role>>
 ```
 
-Note that file upload and select menu components can be optional ***and*** have a `min_values`
-value defined at the same time. In such cases, the defined minimum only comes into effect when
-input is attempted. In the following example, the user would be able to submit the modal with
-either no mentionables ***or*** at least three mentionables selected.
+Note that file upload, select menu, and checkbox group components can be optional ***and***
+have a `min_values` value defined at the same time. In such cases, the defined minimum only
+comes into effect when input is attempted. In the following example, the user would be able
+to submit the modal with either no mentionables ***or*** at least three mentionables selected.
 
 ```rust
 #[name = "Mentionable select menu"]
@@ -492,6 +502,9 @@ let data = poise::execute_modal(
 [rs]:https://docs.discord.com/developers/components/reference#role-select
 [cs]:https://docs.discord.com/developers/components/reference#channel-select
 [ms]:https://docs.discord.com/developers/components/reference#mentionable-select
+[rg]:https://docs.discord.com/developers/components/reference#radio-group
+[cbg]:https://docs.discord.com/developers/components/reference#checkbox-group
+[cb]:https://docs.discord.com/developers/components/reference#checkbox
 [att]:https://docs.rs/serenity/latest/serenity/model/channel/struct.Attachment.html
 [user]:https://docs.rs/serenity/latest/serenity/model/user/struct.User.html
 [role]:https://docs.rs/serenity/latest/serenity/model/guild/struct.Role.html
