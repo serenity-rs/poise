@@ -31,6 +31,11 @@ struct FieldAttributes {
     mentionable_select: Option<()>,
     channel_select: Option<()>,
     channel_types: Option<crate::util::List<syn::Ident>>,
+    radio_group: Option<crate::util::List<String>>,
+    radio_group_descriptions: Option<crate::util::List<String>>,
+    checkbox_group: Option<crate::util::List<String>>,
+    checkbox_group_descriptions: Option<crate::util::List<String>>,
+    checkbox: Option<()>,
     min_values: darling::util::SpannedValue<Option<u8>>,
     max_values: darling::util::SpannedValue<Option<u8>>,
 }
@@ -143,6 +148,214 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
 
             parsers.push(quote::quote! {
                 #field_ident: poise::find_modal_data(&mut data, stringify!(#field_ident)).attachments #ok_or,
+            });
+
+            continue;
+        }
+
+        // If field is a checkbox component, process and continue.
+        if field_attrs.checkbox.is_some() {
+            builders.push(quote::quote! {
+                serenity::CreateModalComponent::Label(
+                    serenity::CreateLabel::checkbox(
+                        #label,
+                        {
+                            let mut b = serenity::CreateCheckbox::new(stringify!(#field_ident));
+                            if let Some(defaults) = &defaults {
+                                b = b.default_selected(defaults.#field_ident);
+                            }
+                            b
+                        }
+                    )
+                    #( .description(#description) )*
+                ),
+            });
+
+            parsers.push(quote::quote! {
+                #field_ident: poise::find_modal_data(&mut data, stringify!(#field_ident)).checked,
+            });
+
+            continue;
+        }
+
+        // If field is a radio group component, process and continue.
+        if let Some(radio_group) = field_attrs.radio_group {
+            let options = radio_group.0;
+            if options.len() < 2 {
+                let err = "minimum of two radio group options is required";
+                for attr in attrs.iter() {
+                    if let darling::ast::NestedMeta::Meta(meta) = attr {
+                        if meta.path().is_ident("radio_group") {
+                            return Err(darling::Error::custom(err).with_span(&meta.path()));
+                        }
+                    }
+                }
+            } else if options.len() > 10 {
+                let err = "maximum of ten radio group options allowed";
+                for attr in attrs.iter() {
+                    if let darling::ast::NestedMeta::Meta(meta) = attr {
+                        if meta.path().is_ident("radio_group") {
+                            return Err(darling::Error::custom(err).with_span(&meta.path()));
+                        }
+                    }
+                }
+            }
+            let mut empty_vec = Vec::new();
+            for _ in 0..options.len() {
+                empty_vec.push(String::new());
+            }
+            let descriptions = field_attrs.radio_group_descriptions.unwrap_or_default().0;
+            let descriptions = if !descriptions.is_empty() {
+                if descriptions.len() < options.len() {
+                    let err =
+                            "number of descriptions should not be less than the number of radio group options";
+                    for attr in attrs.iter() {
+                        if let darling::ast::NestedMeta::Meta(meta) = attr {
+                            if meta.path().is_ident("radio_group_descriptions") {
+                                return Err(darling::Error::custom(err).with_span(&meta.path()));
+                            }
+                        }
+                    }
+                }
+                &descriptions
+            } else {
+                &empty_vec
+            };
+            let create_option = quote::quote! {
+                    #({
+                        let mut b = serenity::CreateRadioGroupOption::new(#options, #options);
+                        if !default.is_empty() && default.contains(&#options.to_string()) {
+                            b = b.default_selection(true);
+                        }
+                        if !#descriptions.is_empty() {
+                            b = b.description(#descriptions);
+                        }
+                        b
+                    }),*
+            };
+
+            builders.push(quote::quote! {
+                serenity::CreateModalComponent::Label(
+                    serenity::CreateLabel::radio_group(
+                        #label,
+                        serenity::CreateRadioGroup::new(
+                            stringify!(#field_ident),
+                            {
+                                let default = if let Some(defaults) = &mut defaults {
+                                    let default = std::mem::take(&mut defaults.#field_ident);
+                                    Option::from(default).unwrap_or_else(|| String::new())
+                                } else {
+                                    String::new()
+                                };
+                                Cow::Owned(vec![#create_option])
+                            }
+                        )
+                        .required(#required)
+                    )
+                    #( .description(#description) )*
+                ),
+            });
+
+            parsers.push(quote::quote! {
+                #field_ident: poise::find_modal_data(&mut data, stringify!(#field_ident)).radio_option #ok_or,
+            });
+
+            continue;
+        }
+
+        // If field is a checkbox group component, process and continue.
+        if let Some(checkbox_group) = field_attrs.checkbox_group {
+            let options = checkbox_group.0;
+            if options.len() < 1 {
+                let err = "at least one checkbox group option is required";
+                for attr in attrs.iter() {
+                    if let darling::ast::NestedMeta::Meta(meta) = attr {
+                        if meta.path().is_ident("checkbox_group") {
+                            return Err(darling::Error::custom(err).with_span(&meta.path()));
+                        }
+                    }
+                }
+            } else if options.len() > 10 {
+                let err = "maximum of ten checkbox group options allowed";
+                for attr in attrs.iter() {
+                    if let darling::ast::NestedMeta::Meta(meta) = attr {
+                        if meta.path().is_ident("checkbox_group") {
+                            return Err(darling::Error::custom(err).with_span(&meta.path()));
+                        }
+                    }
+                }
+            }
+            if field_attrs
+                .max_values
+                .is_some_and(|v| usize::from(v) > options.len())
+            {
+                let err =
+                    "value of `max_values` cannot be greater than the number of options provided";
+                return Err(darling::Error::custom(err).with_span(&field_attrs.max_values.span()));
+            }
+            let mut empty_vec = Vec::new();
+            for _ in 0..options.len() {
+                empty_vec.push(String::new());
+            }
+            let descriptions = field_attrs
+                .checkbox_group_descriptions
+                .unwrap_or_default()
+                .0;
+            let descriptions = if !descriptions.is_empty() {
+                if descriptions.len() < options.len() {
+                    let err =
+                            "number of descriptions should not be less than the number of checkbox group options";
+                    for attr in attrs.iter() {
+                        if let darling::ast::NestedMeta::Meta(meta) = attr {
+                            if meta.path().is_ident("checkbox_group_descriptions") {
+                                return Err(darling::Error::custom(err).with_span(&meta.path()));
+                            }
+                        }
+                    }
+                }
+                &descriptions
+            } else {
+                &empty_vec
+            };
+            let create_option = quote::quote! {
+                    #({
+                        let mut b = serenity::CreateCheckboxGroupOption::new(#options, #options);
+                        if !default.is_empty() && default.contains(&#options.to_string()) {
+                            b = b.default_selection(true);
+                        }
+                        if !#descriptions.is_empty() {
+                            b = b.description(#descriptions);
+                        }
+                        b
+                    }),*
+            };
+
+            builders.push(quote::quote! {
+                serenity::CreateModalComponent::Label(
+                    serenity::CreateLabel::checkbox_group(
+                        #label,
+                        serenity::CreateCheckboxGroup::new(
+                            stringify!(#field_ident),
+                            {
+                                let default = if let Some(defaults) = &mut defaults {
+                                    let default = std::mem::take(&mut defaults.#field_ident);
+                                    Option::from(default).unwrap_or_else(|| Vec::new())
+                                } else {
+                                    Vec::new()
+                                };
+                                Cow::Owned(vec![#create_option])
+                            }
+                        )
+                        .required(#required)
+                        #( .min_values(#min_values) )*
+                        #( .max_values(#max_values) )*
+                    )
+                    #( .description(#description) )*
+                ),
+            });
+
+            parsers.push(quote::quote! {
+                #field_ident: poise::find_modal_data(&mut data, stringify!(#field_ident)).checkbox_options #ok_or,
             });
 
             continue;

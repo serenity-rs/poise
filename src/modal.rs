@@ -41,6 +41,13 @@ pub struct ModalDataResolved {
     /// Resolved data is not used here because `GenericInteractionChannel` includes
     /// non-exhaustive structs, which would make it impossible to define defaults.
     pub channels: Option<Vec<serenity::GenericChannelId>>,
+    /// The `String` value of the option selected from a radio group component.
+    pub radio_option: Option<String>,
+    /// The `String` values of the options selected from a checkbox group component.
+    pub checkbox_options: Option<Vec<String>>,
+    /// The `bool` value representing the state of a checkbox component:
+    /// `true` if checked, or `false` if unchecked.
+    pub checked: bool,
 }
 
 impl ModalDataResolved {
@@ -211,6 +218,42 @@ impl From<&mut serenity::all::SelectMenu> for ModalDataResolved {
     }
 }
 
+impl From<&mut serenity::all::RadioGroup> for ModalDataResolved {
+    fn from(value: &mut serenity::all::RadioGroup) -> Self {
+        let radio_option = match std::mem::take(&mut value.value) {
+            Some(val) if val.is_empty() => None,
+            Some(val) => Some(val.into_string()),
+            None => None,
+        };
+        Self {
+            radio_option,
+            ..Default::default()
+        }
+    }
+}
+
+impl From<&mut serenity::all::CheckboxGroup> for ModalDataResolved {
+    fn from(value: &mut serenity::all::CheckboxGroup) -> Self {
+        let checkbox_options = match std::mem::take(&mut value.values) {
+            val if val.is_empty() => None,
+            val => Some(val.into_vec()),
+        };
+        Self {
+            checkbox_options,
+            ..Default::default()
+        }
+    }
+}
+
+impl From<&mut serenity::all::Checkbox> for ModalDataResolved {
+    fn from(value: &mut serenity::all::Checkbox) -> Self {
+        Self {
+            checked: value.value,
+            ..Default::default()
+        }
+    }
+}
+
 /// Meant for use in derived [`Modal::parse`] implementation.
 ///
 /// Retrieves the resolved modal interaction data from the component that has the given
@@ -253,6 +296,21 @@ pub fn find_modal_data(
                             }
                             _ => continue,
                         }
+                    }
+                }
+                serenity::LabelComponent::RadioGroup(radio_group) => {
+                    if radio_group.custom_id == custom_id {
+                        return ModalDataResolved::from(radio_group);
+                    }
+                }
+                serenity::LabelComponent::CheckboxGroup(checkbox_group) => {
+                    if checkbox_group.custom_id == custom_id {
+                        return ModalDataResolved::from(checkbox_group);
+                    }
+                }
+                serenity::LabelComponent::Checkbox(checkbox) => {
+                    if checkbox.custom_id == custom_id {
+                        return ModalDataResolved::from(checkbox);
                     }
                 }
                 _ => continue,

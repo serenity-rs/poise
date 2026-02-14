@@ -522,6 +522,11 @@ let data = poise::execute_modal(
         mentionable_select,
         channel_select,
         channel_types,
+        radio_group,
+        radio_group_descriptions,
+        checkbox_group,
+        checkbox_group_descriptions,
+        checkbox,
         min_values,
         max_values,
     )
