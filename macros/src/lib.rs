@@ -484,14 +484,14 @@ let data = poise::execute_modal(
 .await?;
 ```
 
-[td]:https://discord.com/developers/docs/components/reference#text-display
-[ti]:https://discord.com/developers/docs/components/reference#text-input
-[fu]:https://discord.com/developers/docs/components/reference#file-upload
-[ss]:https://discord.com/developers/docs/components/reference#string-select
-[us]:https://discord.com/developers/docs/components/reference#user-select
-[rs]:https://discord.com/developers/docs/components/reference#role-select
-[cs]:https://discord.com/developers/docs/components/reference#channel-select
-[ms]:https://discord.com/developers/docs/components/reference#mentionable-select
+[td]:https://docs.discord.com/developers/components/reference#text-display
+[ti]:https://docs.discord.com/developers/components/reference#text-input
+[fu]:https://docs.discord.com/developers/components/reference#file-upload
+[ss]:https://docs.discord.com/developers/components/reference#string-select
+[us]:https://docs.discord.com/developers/components/reference#user-select
+[rs]:https://docs.discord.com/developers/components/reference#role-select
+[cs]:https://docs.discord.com/developers/components/reference#channel-select
+[ms]:https://docs.discord.com/developers/components/reference#mentionable-select
 [att]:https://docs.rs/serenity/latest/serenity/model/channel/struct.Attachment.html
 [user]:https://docs.rs/serenity/latest/serenity/model/user/struct.User.html
 [role]:https://docs.rs/serenity/latest/serenity/model/guild/struct.Role.html
@@ -500,7 +500,7 @@ let data = poise::execute_modal(
 [ct]:https://docs.rs/serenity/latest/serenity/model/channel/enum.ChannelType.html
 [exe]:https://serenity-rs.github.io/poise/next/poise/modal/fn.execute_modal.html
 [ewd]:https://serenity-rs.github.io/poise/next/poise/modal/trait.Modal.html#method.execute_with_defaults
-[components]:https://discord.com/developers/docs/components/reference#component-object-component-types
+[components]:https://docs.discord.com/developers/components/reference#component-object-component-types
 */
 #[proc_macro_derive(
     Modal,
