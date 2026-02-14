@@ -31,9 +31,7 @@ struct FieldAttributes {
     mentionable_select: Option<()>,
     channel_select: Option<()>,
     channel_types: Option<crate::util::List<syn::Ident>>,
-    #[darling(rename = "min_items")]
     min_values: darling::util::SpannedValue<Option<u8>>,
-    #[darling(rename = "max_items")]
     max_values: darling::util::SpannedValue<Option<u8>>,
 }
 
@@ -117,13 +115,13 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
         }
 
         if required && field_attrs.min_values.is_some_and(|min| min == 0) {
-            let err = "value of `min_items` must be greater than 0 for required components";
+            let err = "value of `min_values` must be greater than 0 for required components";
             return Err(darling::Error::custom(err).with_span(&field_attrs.min_values.span()));
         }
         if let Some(max) = *field_attrs.max_values {
             if field_attrs.min_values.is_some_and(|min| min > max) {
                 let err =
-                    "value of `min_items` should be less than or equal to that of `max_items`";
+                    "value of `min_values` should be less than or equal to that of `max_values`";
                 return Err(darling::Error::custom(err).with_span(&field_attrs.min_values.span()));
             }
         }
@@ -164,7 +162,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                     .is_some_and(|v| usize::from(v) > strings.len())
                 {
                     let err =
-                    "value of `max_items` cannot be greater than the number of options provided";
+                    "value of `max_values` cannot be greater than the number of options provided";
                     return Err(
                         darling::Error::custom(err).with_span(&field_attrs.max_values.span())
                     );

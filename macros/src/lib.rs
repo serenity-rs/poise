@@ -300,12 +300,12 @@ struct MyModal {
     second_input: Option<String>, // Option means optional input
     #[name = "File upload"]
     #[file_upload] // Allows user to upload up to 10 files
-    #[min_items = 2] // Min number of files (0-10 for files)
-    #[max_items = 5]
+    #[min_values = 2] // Min number of files (0-10 for files)
+    #[max_values = 5]
     third_input: Vec<serenity::Attachment>,
     #[name = "String select menu"]
     #[string_select("Option 1", "Option 2")] // Selectable strings
-    #[min_items = 2] // Min number of selections required (0-25 for select menus)
+    #[min_values = 2] // Min number of selections required (0-25 for select menus)
     fourth_input: Vec<String>,
 }
 
@@ -399,20 +399,20 @@ static or `<a:NAME:EMOJI_ID>` for animated. Emojis given in an invalid format wi
 selections: Option<Vec<String>>
 ```
 
-Minimum and maximum items values for file upload and select menu components are defined
+Minimum and maximum values for file upload and select menu components are defined
 using the following field attributes:
 
-- `#[min_items = 0]`: 0-10 for files; 0-25 for select menus. Defaults to 1.
-- `#[max_items = 25]`: 1-10 for files; 1-25 for select menus. Defaults to 1.
+- `#[min_values = 0]`: 0-10 for files; 0-25 for select menus. Defaults to 1.
+- `#[max_values = 25]`: 1-10 for files; 1-25 for select menus. Defaults to 1.
 
 ```rust
 #[name = "Role select menu"]
 #[role_select]
-#[max_items = 1]
+#[max_values = 1]
 roles: Option<Vec<serenity::Role>>
 ```
 
-Note that file upload and select menu components can be optional ***and*** have a `min_items`
+Note that file upload and select menu components can be optional ***and*** have a `min_values`
 value defined at the same time. In such cases, the defined minimum only comes into effect when
 input is attempted. In the following example, the user would be able to submit the modal with
 either no mentionables ***or*** at least three mentionables selected.
@@ -420,7 +420,7 @@ either no mentionables ***or*** at least three mentionables selected.
 ```rust
 #[name = "Mentionable select menu"]
 #[mentionable_select]
-#[min_items = 3]
+#[min_values = 3]
 mentionables: Option<poise::Mentionables>
 ```
 
@@ -522,8 +522,8 @@ let data = poise::execute_modal(
         mentionable_select,
         channel_select,
         channel_types,
-        min_items,
-        max_items,
+        min_values,
+        max_values,
     )
 )]
 pub fn modal(input: TokenStream) -> TokenStream {

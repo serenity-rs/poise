@@ -388,12 +388,12 @@ pub async fn execute_modal_on_component_interaction<M: Modal>(
 ///     second_input: Option<String>, // Option means optional input
 ///     #[name = "File upload"]
 ///     #[file_upload] // Allows user to upload up to 10 files
-///     #[min_items = 2] // Min number of files (0-10 for files)
-///     #[max_items = 5]
+///     #[min_values = 2] // Min number of files (0-10 for files)
+///     #[max_values = 5]
 ///     third_input: Vec<serenity::Attachment>,
 ///     #[name = "String select menu"]
 ///     #[string_select("Option 1", "Option 2")] // Selectable strings
-///     #[min_items = 2] // Min number of selections required (0-25 for select menus)
+///     #[min_values = 2] // Min number of selections required (0-25 for select menus)
 ///     fourth_input: Vec<String>,
 /// }
 ///
