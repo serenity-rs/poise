@@ -200,15 +200,21 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                     }
                 }
             }
-            let mut empty_vec = Vec::new();
-            for _ in 0..options.len() {
-                empty_vec.push(String::new());
-            }
             let descriptions = field_attrs.radio_group_descriptions.unwrap_or_default().0;
-            let descriptions = if !descriptions.is_empty() {
+            let create_option = if descriptions.is_empty() {
+                quote::quote! {
+                    #({
+                        let mut b = serenity::CreateRadioGroupOption::new(#options, #options);
+                        if !default.is_empty() && default.contains(&#options.to_string()) {
+                            b = b.default_selection(true);
+                        }
+                        b
+                    }),*
+                }
+            } else {
                 if descriptions.len() < options.len() {
                     let err =
-                            "number of descriptions should not be less than the number of radio group options";
+                        "number of descriptions should not be less than the number of radio group options";
                     for attr in attrs.iter() {
                         if let darling::ast::NestedMeta::Meta(meta) = attr {
                             if meta.path().is_ident("radio_group_descriptions") {
@@ -217,21 +223,16 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                         }
                     }
                 }
-                &descriptions
-            } else {
-                &empty_vec
-            };
-            let create_option = quote::quote! {
+                quote::quote! {
                     #({
                         let mut b = serenity::CreateRadioGroupOption::new(#options, #options);
                         if !default.is_empty() && default.contains(&#options.to_string()) {
                             b = b.default_selection(true);
                         }
-                        if !#descriptions.is_empty() {
-                            b = b.description(#descriptions);
-                        }
+                        b = b.description(#descriptions);
                         b
                     }),*
+                }
             };
 
             builders.push(quote::quote! {
@@ -293,18 +294,24 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                     "value of `max_values` cannot be greater than the number of options provided";
                 return Err(darling::Error::custom(err).with_span(&field_attrs.max_values.span()));
             }
-            let mut empty_vec = Vec::new();
-            for _ in 0..options.len() {
-                empty_vec.push(String::new());
-            }
             let descriptions = field_attrs
                 .checkbox_group_descriptions
                 .unwrap_or_default()
                 .0;
-            let descriptions = if !descriptions.is_empty() {
+            let create_option = if descriptions.is_empty() {
+                quote::quote! {
+                    #({
+                        let mut b = serenity::CreateCheckboxGroupOption::new(#options, #options);
+                        if !default.is_empty() && default.contains(&#options.to_string()) {
+                            b = b.default_selection(true);
+                        }
+                        b
+                    }),*
+                }
+            } else {
                 if descriptions.len() < options.len() {
                     let err =
-                            "number of descriptions should not be less than the number of checkbox group options";
+                        "number of descriptions should not be less than the number of checkbox group options";
                     for attr in attrs.iter() {
                         if let darling::ast::NestedMeta::Meta(meta) = attr {
                             if meta.path().is_ident("checkbox_group_descriptions") {
@@ -313,21 +320,16 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                         }
                     }
                 }
-                &descriptions
-            } else {
-                &empty_vec
-            };
-            let create_option = quote::quote! {
+                quote::quote! {
                     #({
                         let mut b = serenity::CreateCheckboxGroupOption::new(#options, #options);
                         if !default.is_empty() && default.contains(&#options.to_string()) {
                             b = b.default_selection(true);
                         }
-                        if !#descriptions.is_empty() {
-                            b = b.description(#descriptions);
-                        }
+                        b = b.description(#descriptions);
                         b
                     }),*
+                }
             };
 
             builders.push(quote::quote! {
@@ -380,60 +382,78 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                         darling::Error::custom(err).with_span(&field_attrs.max_values.span())
                     );
                 }
-                let mut empty_vec = Vec::new();
-                for _ in 0..strings.len() {
-                    empty_vec.push(String::new());
-                }
                 let emojis = field_attrs.string_select_emojis.unwrap_or_default().0;
-                let emojis = if !emojis.is_empty() {
-                    if emojis.len() < strings.len() {
-                        let err =
-                            "number of emojis should not be less than the number of string select options";
-                        for attr in attrs.iter() {
-                            if let darling::ast::NestedMeta::Meta(meta) = attr {
-                                if meta.path().is_ident("string_select_emojis") {
-                                    return Err(darling::Error::custom(err).with_span(&meta.path()));
-                                }
+                if !emojis.is_empty() && emojis.len() < strings.len() {
+                    let err =
+                        "number of emojis should not be less than the number of string select options";
+                    for attr in attrs.iter() {
+                        if let darling::ast::NestedMeta::Meta(meta) = attr {
+                            if meta.path().is_ident("string_select_emojis") {
+                                return Err(darling::Error::custom(err).with_span(&meta.path()));
                             }
                         }
                     }
-                    &emojis
-                } else {
-                    &empty_vec
-                };
+                }
                 let descriptions = field_attrs.string_select_descriptions.unwrap_or_default().0;
-                let descriptions = if !descriptions.is_empty() {
-                    if descriptions.len() < strings.len() {
-                        let err =
-                            "number of descriptions should not be less than the number of string select options";
-                        for attr in attrs.iter() {
-                            if let darling::ast::NestedMeta::Meta(meta) = attr {
-                                if meta.path().is_ident("string_select_descriptions") {
-                                    return Err(darling::Error::custom(err).with_span(&meta.path()));
-                                }
+                if !descriptions.is_empty() && descriptions.len() < strings.len() {
+                    let err =
+                        "number of descriptions should not be less than the number of string select options";
+                    for attr in attrs.iter() {
+                        if let darling::ast::NestedMeta::Meta(meta) = attr {
+                            if meta.path().is_ident("string_select_descriptions") {
+                                return Err(darling::Error::custom(err).with_span(&meta.path()));
                             }
                         }
                     }
-                    &descriptions
-                } else {
-                    &empty_vec
-                };
-                let create_option = quote::quote! {
+                }
+                let create_option = if emojis.is_empty() && descriptions.is_empty() {
+                    quote::quote! {
                         #({
                             let mut b = serenity::CreateSelectMenuOption::new(#strings, #strings);
                             if !default.is_empty() && default.contains(&#strings.to_string()) {
                                 b = b.default_selection(true);
                             }
-                            if !#emojis.is_empty() {
-                                if let Ok(emoji) = serenity::ReactionType::try_from(#emojis) {
-                                    b = b.emoji(emoji);
-                                }
+                            b
+                        }),*
+                    }
+                } else if emojis.is_empty() && !descriptions.is_empty() {
+                    quote::quote! {
+                        #({
+                            let mut b = serenity::CreateSelectMenuOption::new(#strings, #strings);
+                            if !default.is_empty() && default.contains(&#strings.to_string()) {
+                                b = b.default_selection(true);
                             }
-                            if !#descriptions.is_empty() {
-                                b = b.description(#descriptions);
+                            b = b.description(#descriptions);
+                            b
+                        }),*
+                    }
+                } else if !emojis.is_empty() && descriptions.is_empty() {
+                    quote::quote! {
+                        #({
+                            let mut b = serenity::CreateSelectMenuOption::new(#strings, #strings);
+                            if !default.is_empty() && default.contains(&#strings.to_string()) {
+                                b = b.default_selection(true);
+                            }
+                            if let Ok(emoji) = serenity::ReactionType::try_from(#emojis) {
+                                b = b.emoji(emoji);
                             }
                             b
                         }),*
+                    }
+                } else {
+                    quote::quote! {
+                        #({
+                            let mut b = serenity::CreateSelectMenuOption::new(#strings, #strings);
+                            if !default.is_empty() && default.contains(&#strings.to_string()) {
+                                b = b.default_selection(true);
+                            }
+                            if let Ok(emoji) = serenity::ReactionType::try_from(#emojis) {
+                                b = b.emoji(emoji);
+                            }
+                            b = b.description(#descriptions);
+                            b
+                        }),*
+                    }
                 };
                 (
                     quote::quote! {
