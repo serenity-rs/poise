@@ -94,7 +94,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
             });
         }
 
-        // Initialize variables common to most components and do some light form validation.
+        // Initialize variables common to most components and do some form validation.
         let label = field_attrs.name.unwrap_or(field_ident.to_string());
         let description = field_attrs.description.into_iter();
         let required = crate::util::extract_type_parameter("Option", &field.ty).is_none();
@@ -588,7 +588,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
             continue;
         }
 
-        // Field was not upload or select menu, so process as text input (=default).
+        // Field was none of the above, so process as text input (=default).
         let style = if field_attrs.paragraph.is_some() {
             quote::quote!(serenity::InputTextStyle::Paragraph)
         } else {
