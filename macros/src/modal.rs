@@ -220,22 +220,10 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
             let options = radio_group.0;
             if options.len() < 2 {
                 let err = "minimum of 2 radio group options required";
-                for attr in attrs.iter() {
-                    if let darling::ast::NestedMeta::Meta(meta) = attr {
-                        if meta.path().is_ident("radio_group") {
-                            return Err(darling::Error::custom(err).with_span(&meta.path()));
-                        }
-                    }
-                }
+                return Err(err_on_attr(&attrs, err, "radio_group"));
             } else if options.len() > 10 {
                 let err = "maximum of 10 radio group options allowed";
-                for attr in attrs.iter() {
-                    if let darling::ast::NestedMeta::Meta(meta) = attr {
-                        if meta.path().is_ident("radio_group") {
-                            return Err(darling::Error::custom(err).with_span(&meta.path()));
-                        }
-                    }
-                }
+                return Err(err_on_attr(&attrs, err, "radio_group"));
             }
             let descriptions = field_attrs.radio_group_descriptions.unwrap_or_default().0;
             let create_option = if descriptions.is_empty() {
@@ -252,13 +240,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                 if descriptions.len() < options.len() {
                     let err =
                         "number of descriptions should not be less than the number of radio group options";
-                    for attr in attrs.iter() {
-                        if let darling::ast::NestedMeta::Meta(meta) = attr {
-                            if meta.path().is_ident("radio_group_descriptions") {
-                                return Err(darling::Error::custom(err).with_span(&meta.path()));
-                            }
-                        }
-                    }
+                    return Err(err_on_attr(&attrs, err, "radio_group_descriptions"));
                 }
                 quote::quote! {
                     #({
@@ -306,22 +288,10 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
             let options = checkbox_group.0;
             if options.len() < 1 {
                 let err = "minimum of 1 checkbox group option required";
-                for attr in attrs.iter() {
-                    if let darling::ast::NestedMeta::Meta(meta) = attr {
-                        if meta.path().is_ident("checkbox_group") {
-                            return Err(darling::Error::custom(err).with_span(&meta.path()));
-                        }
-                    }
-                }
+                return Err(err_on_attr(&attrs, err, "checkbox_group"));
             } else if options.len() > 10 {
                 let err = "maximum of 10 checkbox group options allowed";
-                for attr in attrs.iter() {
-                    if let darling::ast::NestedMeta::Meta(meta) = attr {
-                        if meta.path().is_ident("checkbox_group") {
-                            return Err(darling::Error::custom(err).with_span(&meta.path()));
-                        }
-                    }
-                }
+                return Err(err_on_attr(&attrs, err, "checkbox_group"));
             }
             if field_attrs
                 .max_values
@@ -349,13 +319,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                 if descriptions.len() < options.len() {
                     let err =
                         "number of descriptions should not be less than the number of checkbox group options";
-                    for attr in attrs.iter() {
-                        if let darling::ast::NestedMeta::Meta(meta) = attr {
-                            if meta.path().is_ident("checkbox_group_descriptions") {
-                                return Err(darling::Error::custom(err).with_span(&meta.path()));
-                            }
-                        }
-                    }
+                    return Err(err_on_attr(&attrs, err, "checkbox_group_descriptions"));
                 }
                 quote::quote! {
                     #({
@@ -411,22 +375,10 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                 let strings = string_select.0;
                 if strings.len() < 1 {
                     let err = "minimum of 1 string select option required";
-                    for attr in attrs.iter() {
-                        if let darling::ast::NestedMeta::Meta(meta) = attr {
-                            if meta.path().is_ident("string_select") {
-                                return Err(darling::Error::custom(err).with_span(&meta.path()));
-                            }
-                        }
-                    }
+                    return Err(err_on_attr(&attrs, err, "string_select"));
                 } else if strings.len() > 25 {
                     let err = "maximum of 25 string select options allowed";
-                    for attr in attrs.iter() {
-                        if let darling::ast::NestedMeta::Meta(meta) = attr {
-                            if meta.path().is_ident("string_select") {
-                                return Err(darling::Error::custom(err).with_span(&meta.path()));
-                            }
-                        }
-                    }
+                    return Err(err_on_attr(&attrs, err, "string_select"));
                 }
                 if field_attrs
                     .max_values
@@ -442,25 +394,13 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                 if !emojis.is_empty() && emojis.len() < strings.len() {
                     let err =
                         "number of emojis should not be less than the number of string select options";
-                    for attr in attrs.iter() {
-                        if let darling::ast::NestedMeta::Meta(meta) = attr {
-                            if meta.path().is_ident("string_select_emojis") {
-                                return Err(darling::Error::custom(err).with_span(&meta.path()));
-                            }
-                        }
-                    }
+                    return Err(err_on_attr(&attrs, err, "string_select_emojis"));
                 }
                 let descriptions = field_attrs.string_select_descriptions.unwrap_or_default().0;
                 if !descriptions.is_empty() && descriptions.len() < strings.len() {
                     let err =
                         "number of descriptions should not be less than the number of string select options";
-                    for attr in attrs.iter() {
-                        if let darling::ast::NestedMeta::Meta(meta) = attr {
-                            if meta.path().is_ident("string_select_descriptions") {
-                                return Err(darling::Error::custom(err).with_span(&meta.path()));
-                            }
-                        }
-                    }
+                    return Err(err_on_attr(&attrs, err, "string_select_descriptions"));
                 }
                 let create_option = if emojis.is_empty() && descriptions.is_empty() {
                     quote::quote! {
@@ -711,4 +651,17 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
         }
     }; }
     .into())
+}
+
+/// Used to generate a [`darling::Error`] on a specific `target` attribute.
+#[doc(hidden)]
+fn err_on_attr(attrs: &[darling::ast::NestedMeta], err: &str, target: &str) -> darling::Error {
+    for attr in attrs.iter() {
+        if let darling::ast::NestedMeta::Meta(meta) = attr {
+            if meta.path().is_ident(target) {
+                return darling::Error::custom(err).with_span(&meta.path());
+            }
+        }
+    }
+    darling::Error::custom(err)
 }
