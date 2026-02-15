@@ -113,21 +113,58 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
             + field_attrs.role_select.is_some() as usize
             + field_attrs.mentionable_select.is_some() as usize
             + field_attrs.channel_select.is_some() as usize
+            + field_attrs.radio_group.is_some() as usize
+            + field_attrs.checkbox_group.is_some() as usize
+            + field_attrs.checkbox.is_some() as usize
             > 1
         {
             let err = "cannot have multiple input component attributes on a single field";
             return Err(darling::Error::custom(err).with_span(&field_ident));
         }
 
-        if required && field_attrs.min_values.is_some_and(|min| min == 0) {
-            let err = "value of `min_values` must be greater than 0 for required components";
-            return Err(darling::Error::custom(err).with_span(&field_attrs.min_values.span()));
+        if let Some(min) = *field_attrs.min_values {
+            if required && min == 0 {
+                let err = "value of `min_values` must be greater than 0 for required components";
+                return Err(darling::Error::custom(err).with_span(&field_attrs.min_values.span()));
+            }
+            if min > 10
+                && (field_attrs.file_upload.is_some() || field_attrs.checkbox_group.is_some())
+            {
+                let err = "`min_values` must not be greater than 10";
+                return Err(darling::Error::custom(err).with_span(&field_attrs.min_values.span()));
+            }
+            if min > 25
+                && (field_attrs.string_select.is_some()
+                    || field_attrs.user_select.is_some()
+                    || field_attrs.role_select.is_some()
+                    || field_attrs.mentionable_select.is_some()
+                    || field_attrs.channel_select.is_some())
+            {
+                let err = "`min_values` must not be greater than 25";
+                return Err(darling::Error::custom(err).with_span(&field_attrs.min_values.span()));
+            }
         }
         if let Some(max) = *field_attrs.max_values {
             if field_attrs.min_values.is_some_and(|min| min > max) {
                 let err =
                     "value of `min_values` should be less than or equal to that of `max_values`";
                 return Err(darling::Error::custom(err).with_span(&field_attrs.min_values.span()));
+            }
+            if max > 10
+                && (field_attrs.file_upload.is_some() || field_attrs.checkbox_group.is_some())
+            {
+                let err = "`max_values` must not be greater than 10";
+                return Err(darling::Error::custom(err).with_span(&field_attrs.max_values.span()));
+            }
+            if max > 25
+                && (field_attrs.string_select.is_some()
+                    || field_attrs.user_select.is_some()
+                    || field_attrs.role_select.is_some()
+                    || field_attrs.mentionable_select.is_some()
+                    || field_attrs.channel_select.is_some())
+            {
+                let err = "`max_values` must not be greater than 25";
+                return Err(darling::Error::custom(err).with_span(&field_attrs.max_values.span()));
             }
         }
 
@@ -182,7 +219,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
         if let Some(radio_group) = field_attrs.radio_group {
             let options = radio_group.0;
             if options.len() < 2 {
-                let err = "minimum of two radio group options is required";
+                let err = "minimum of 2 radio group options required";
                 for attr in attrs.iter() {
                     if let darling::ast::NestedMeta::Meta(meta) = attr {
                         if meta.path().is_ident("radio_group") {
@@ -191,7 +228,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                     }
                 }
             } else if options.len() > 10 {
-                let err = "maximum of ten radio group options allowed";
+                let err = "maximum of 10 radio group options allowed";
                 for attr in attrs.iter() {
                     if let darling::ast::NestedMeta::Meta(meta) = attr {
                         if meta.path().is_ident("radio_group") {
@@ -268,7 +305,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
         if let Some(checkbox_group) = field_attrs.checkbox_group {
             let options = checkbox_group.0;
             if options.len() < 1 {
-                let err = "at least one checkbox group option is required";
+                let err = "minimum of 1 checkbox group option required";
                 for attr in attrs.iter() {
                     if let darling::ast::NestedMeta::Meta(meta) = attr {
                         if meta.path().is_ident("checkbox_group") {
@@ -277,7 +314,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                     }
                 }
             } else if options.len() > 10 {
-                let err = "maximum of ten checkbox group options allowed";
+                let err = "maximum of 10 checkbox group options allowed";
                 for attr in attrs.iter() {
                     if let darling::ast::NestedMeta::Meta(meta) = attr {
                         if meta.path().is_ident("checkbox_group") {
@@ -372,6 +409,25 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                 ..
             } => {
                 let strings = string_select.0;
+                if strings.len() < 1 {
+                    let err = "minimum of 1 string select option required";
+                    for attr in attrs.iter() {
+                        if let darling::ast::NestedMeta::Meta(meta) = attr {
+                            if meta.path().is_ident("string_select") {
+                                return Err(darling::Error::custom(err).with_span(&meta.path()));
+                            }
+                        }
+                    }
+                } else if strings.len() > 25 {
+                    let err = "maximum of 25 string select options allowed";
+                    for attr in attrs.iter() {
+                        if let darling::ast::NestedMeta::Meta(meta) = attr {
+                            if meta.path().is_ident("string_select") {
+                                return Err(darling::Error::custom(err).with_span(&meta.path()));
+                            }
+                        }
+                    }
+                }
                 if field_attrs
                     .max_values
                     .is_some_and(|v| usize::from(v) > strings.len())
