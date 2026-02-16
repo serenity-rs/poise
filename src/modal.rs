@@ -54,7 +54,7 @@ impl ModalDataResolved {
     /// Used by [`find_modal_data`] to retrieve resolved attachment data from a
     /// `FileUpload` component via _take_.
     #[doc(hidden)]
-    fn extract_attachments_by_key(
+    fn extract_attachments(
         file_upload: &serenity::all::FileUpload,
         resolved: &mut serenity::CommandDataResolved,
     ) -> Self {
@@ -75,18 +75,33 @@ impl ModalDataResolved {
         }
     }
 
-    /// Used by [`find_modal_data`] to retrieve resolved data from `SelectMenu` components.
+    /// Used by [`find_modal_data`] to retrieve `values` from [`StringSelect`][ss] components
+    /// and resolved data from all other [`SelectMenu`][sm] components.
+    ///
     /// `User` and `Role` entity data is _cloned_ since resolved data will be shared between
     /// components when the same entity is selected in multiple components.
     ///
     /// Logs a warning if a value from a component cannot be parsed and used to retrieve the
     /// resolved data for that ID.
+    ///
+    /// [sm]: crate::serenity_prelude::all::SelectMenu
+    /// [ss]: crate::serenity_prelude::ComponentType::StringSelect
     #[doc(hidden)]
-    fn extract_selections_by_key(
-        select_menu: &serenity::all::SelectMenu,
+    fn extract_selections(
+        select_menu: &mut serenity::all::SelectMenu,
         resolved: &serenity::CommandDataResolved,
     ) -> Self {
         match select_menu.kind {
+            serenity::ComponentType::StringSelect => {
+                let strings = match std::mem::take(&mut select_menu.values) {
+                    val if val.is_empty() => None,
+                    val => Some(val.into_vec()),
+                };
+                Self {
+                    strings,
+                    ..Default::default()
+                }
+            }
             serenity::ComponentType::UserSelect => {
                 let mut users = Vec::new();
                 for value in &select_menu.values {
@@ -193,31 +208,6 @@ impl From<&mut serenity::all::InputText> for ModalDataResolved {
     }
 }
 
-impl From<&mut serenity::all::SelectMenu> for ModalDataResolved {
-    /// Converts to [`ModalDataResolved`] from [`SelectMenu`][sm].
-    ///
-    /// Only supports [`StringSelect`][ss] since resolved data is unavailable.
-    /// All other components will return their default value.
-    ///
-    /// [sm]: crate::serenity_prelude::all::SelectMenu
-    /// [ss]: crate::serenity_prelude::ComponentType::StringSelect
-    fn from(value: &mut serenity::all::SelectMenu) -> Self {
-        match value.kind {
-            serenity::ComponentType::StringSelect => {
-                let strings = match std::mem::take(&mut value.values) {
-                    val if val.is_empty() => None,
-                    val => Some(val.into_vec()),
-                };
-                Self {
-                    strings,
-                    ..Default::default()
-                }
-            }
-            _ => Self::default(),
-        }
-    }
-}
-
 impl From<&mut serenity::all::RadioGroup> for ModalDataResolved {
     fn from(value: &mut serenity::all::RadioGroup) -> Self {
         let radio_option = match std::mem::take(&mut value.value) {
@@ -273,7 +263,7 @@ pub fn find_modal_data(
                 }
                 serenity::LabelComponent::FileUpload(file_upload) => {
                     if file_upload.custom_id == custom_id {
-                        return ModalDataResolved::extract_attachments_by_key(
+                        return ModalDataResolved::extract_attachments(
                             file_upload,
                             &mut data.resolved,
                         );
@@ -282,14 +272,12 @@ pub fn find_modal_data(
                 serenity::LabelComponent::SelectMenu(select_menu) => {
                     if select_menu.custom_id == custom_id {
                         match select_menu.kind {
-                            serenity::ComponentType::StringSelect => {
-                                return ModalDataResolved::from(select_menu);
-                            }
-                            serenity::ComponentType::UserSelect
+                            serenity::ComponentType::StringSelect
+                            | serenity::ComponentType::UserSelect
                             | serenity::ComponentType::RoleSelect
                             | serenity::ComponentType::ChannelSelect
                             | serenity::ComponentType::MentionableSelect => {
-                                return ModalDataResolved::extract_selections_by_key(
+                                return ModalDataResolved::extract_selections(
                                     select_menu,
                                     &data.resolved,
                                 );
