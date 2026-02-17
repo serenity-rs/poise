@@ -7,7 +7,6 @@ use proc_macro::TokenStream;
 #[darling(allow_unknown_fields, default)]
 struct StructAttributes {
     name: Option<String>,
-    #[darling(rename = "text")]
     text_display: Option<String>,
 }
 
@@ -118,7 +117,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
             + field_attrs.checkbox.is_some() as usize
             > 1
         {
-            let err = "cannot have multiple input component attributes on a single field";
+            let err = "cannot have multiple interactive component attributes on a single field";
             return Err(darling::Error::custom(err).with_span(&field_ident));
         }
 
@@ -130,7 +129,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
             if min > 10
                 && (field_attrs.file_upload.is_some() || field_attrs.checkbox_group.is_some())
             {
-                let err = "`min_values` must not be greater than 10";
+                let err = "`min_values` must not be greater than 10 for this component";
                 return Err(darling::Error::custom(err).with_span(&field_attrs.min_values.span()));
             }
             if min > 25
@@ -140,20 +139,20 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                     || field_attrs.mentionable_select.is_some()
                     || field_attrs.channel_select.is_some())
             {
-                let err = "`min_values` must not be greater than 25";
+                let err = "`min_values` must not be greater than 25 for this component";
                 return Err(darling::Error::custom(err).with_span(&field_attrs.min_values.span()));
             }
         }
         if let Some(max) = *field_attrs.max_values {
             if field_attrs.min_values.is_some_and(|min| min > max) {
                 let err =
-                    "value of `min_values` should be less than or equal to that of `max_values`";
+                    "value of `min_values` must be less than or equal to that of `max_values`";
                 return Err(darling::Error::custom(err).with_span(&field_attrs.min_values.span()));
             }
             if max > 10
                 && (field_attrs.file_upload.is_some() || field_attrs.checkbox_group.is_some())
             {
-                let err = "`max_values` must not be greater than 10";
+                let err = "`max_values` must not be greater than 10 for this component";
                 return Err(darling::Error::custom(err).with_span(&field_attrs.max_values.span()));
             }
             if max > 25
@@ -163,7 +162,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                     || field_attrs.mentionable_select.is_some()
                     || field_attrs.channel_select.is_some())
             {
-                let err = "`max_values` must not be greater than 25";
+                let err = "`max_values` must not be greater than 25 for this component";
                 return Err(darling::Error::custom(err).with_span(&field_attrs.max_values.span()));
             }
         }
@@ -239,7 +238,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
             } else {
                 if descriptions.len() < options.len() {
                     let err =
-                        "number of descriptions should not be less than the number of radio group options";
+                        "number of descriptions must not be less than the number of radio group options";
                     return Err(err_on_attr(&attrs, err, "radio_group_descriptions"));
                 }
                 quote::quote! {
@@ -318,7 +317,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
             } else {
                 if descriptions.len() < options.len() {
                     let err =
-                        "number of descriptions should not be less than the number of checkbox group options";
+                        "number of descriptions must not be less than the number of checkbox group options";
                     return Err(err_on_attr(&attrs, err, "checkbox_group_descriptions"));
                 }
                 quote::quote! {
@@ -393,17 +392,17 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                 let emojis = field_attrs.string_select_emojis.unwrap_or_default().0;
                 if !emojis.is_empty() && emojis.len() < strings.len() {
                     let err =
-                        "number of emojis should not be less than the number of string select options";
+                        "number of emojis must not be less than the number of string select options";
                     return Err(err_on_attr(&attrs, err, "string_select_emojis"));
                 }
                 let descriptions = field_attrs.string_select_descriptions.unwrap_or_default().0;
                 if !descriptions.is_empty() && descriptions.len() < strings.len() {
                     let err =
-                        "number of descriptions should not be less than the number of string select options";
+                        "number of descriptions must not be less than the number of string select options";
                     return Err(err_on_attr(&attrs, err, "string_select_descriptions"));
                 }
-                let create_option = if emojis.is_empty() && descriptions.is_empty() {
-                    quote::quote! {
+                let create_option = match (emojis.is_empty(), descriptions.is_empty()) {
+                    (true, true) => quote::quote! {
                         #({
                             let mut b = serenity::CreateSelectMenuOption::new(#strings, #strings);
                             if !default.is_empty() && default.contains(&#strings.to_string()) {
@@ -411,9 +410,8 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                             }
                             b
                         }),*
-                    }
-                } else if emojis.is_empty() && !descriptions.is_empty() {
-                    quote::quote! {
+                    },
+                    (true, false) => quote::quote! {
                         #({
                             let mut b = serenity::CreateSelectMenuOption::new(#strings, #strings);
                             if !default.is_empty() && default.contains(&#strings.to_string()) {
@@ -422,9 +420,8 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                             b = b.description(#descriptions);
                             b
                         }),*
-                    }
-                } else if !emojis.is_empty() && descriptions.is_empty() {
-                    quote::quote! {
+                    },
+                    (false, true) => quote::quote! {
                         #({
                             let mut b = serenity::CreateSelectMenuOption::new(#strings, #strings);
                             if !default.is_empty() && default.contains(&#strings.to_string()) {
@@ -435,9 +432,8 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                             }
                             b
                         }),*
-                    }
-                } else {
-                    quote::quote! {
+                    },
+                    (false, false) => quote::quote! {
                         #({
                             let mut b = serenity::CreateSelectMenuOption::new(#strings, #strings);
                             if !default.is_empty() && default.contains(&#strings.to_string()) {
@@ -449,7 +445,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                             b = b.description(#descriptions);
                             b
                         }),*
-                    }
+                    },
                 };
                 (
                     quote::quote! {

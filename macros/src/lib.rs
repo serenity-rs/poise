@@ -287,7 +287,7 @@ type ApplicationContext<'a> = poise::ApplicationContext<'a, Data, Error>;
 
 #[derive(Debug, Modal)]
 #[name = "Modal Title"] // Struct name by default
-#[text = "My *fancy* `modal`, created using [Poise](https://serenity-rs.github.io/) :crab:"]
+#[text_display = "My *fancy* `modal`, created using [Poise](https://serenity-rs.github.io/) :crab:"]
 struct MyModal {
     #[name = "First text input"] // Field name by default
     #[description = "Displayed under name"] // No description by default
@@ -320,19 +320,19 @@ pub async fn modal(ctx: ApplicationContext<'_>) -> Result<(), Error> {
 
 # Struct attributes
 
-- `#[name = ""]`: Sets the modal title. Defaults to struct name if omitted.
-- `#[text = ""]`: Optional [text display][td] component, shown below the modal title. Can
-include markdown-formatted text, mentions (users, roles, etc.), and emojis. Note that this
-counts toward the maximum total of five components per modal.
+- `#[name = ""]`: Sets the modal title. Defaults to struct name if omitted. Max 45 chars.
+- `#[text_display = ""]`: Optional [text display][td] component, shown below the modal title.
+Can include markdown-formatted text, mentions (users, roles, etc.), and emojis. Note that this
+counts toward the maximum total of five components per modal. Max 4000 chars.
 
 # Field attributes
 
-The text display component is the only content-style component available in modals.
-However, despite not being interactive, they still count toward the five-component
-maximum per modal. Text display components can be added above any input field using
-the following attribute:
+The text display component is the only content component available in modals.
+However, despite not being interactive, text display components still count toward the
+five-component maximum per modal. Text display components can be added above any input
+field using the following attribute:
 
-- `#[text_display]`: Equivalent to the struct-level `#[text]` attribute above.
+- `#[text_display = ""]`: Max 4000 chars, shared across all text display components.
 
 Because attributes must be placed above fields, text display components will necessarily
 be paired with interactive (input) components. Position of the attribute relative to the
@@ -382,7 +382,7 @@ in the attribute. Returns `Vec<String>`.
 Optionally, emojis and/or descriptions may be added to string select menu options. Radio group
 options and checkbox group options support descriptions, but not emojis.
 
-- `#[string_select_emojis("", "")`
+- `#[string_select_emojis("", "")]`
 - `#[string_select_descriptions("", "")]`: Max 100 chars per description.
 - `#[radio_group_descriptions("", "")]`: Max 100 chars per description.
 - `#[checkbox_group_descriptions("", "")]`: Max 100 chars per description.
@@ -519,13 +519,12 @@ let data = poise::execute_modal(
     Modal,
     attributes(
         name,
-        text,
+        text_display,
         description,
         placeholder,
         min_length,
         max_length,
         paragraph,
-        text_display,
         file_upload,
         string_select,
         string_select_emojis,
