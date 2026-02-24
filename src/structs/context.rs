@@ -509,7 +509,7 @@ context_methods! {
     await (ping self)
     (pub async fn ping(self) -> Option<std::time::Duration>) {
         let ctx = self.serenity_context();
-        ctx.runners.get(&ctx.shard_id)?.value().0.latency
+        ctx.runner_info.try_read()?.latency
     }
 }
 
