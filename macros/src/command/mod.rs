@@ -226,14 +226,14 @@ pub fn command(
 
     let install_context = if let Some(contexts) = &args.install_context {
         let contexts = contexts.iter();
-        syn::parse_quote! { Some(vec![ #(poise::serenity_prelude::InstallationContext::#contexts),* ]) }
+        syn::parse_quote! { Some(Cow::Borrowed(&[ #(poise::serenity_prelude::InstallationContext::#contexts),* ])) }
     } else {
         syn::parse_quote! { None }
     };
 
     let interaction_context = if let Some(contexts) = &args.interaction_context {
         let contexts = contexts.iter();
-        syn::parse_quote! { Some(vec![ #(poise::serenity_prelude::InteractionContext::#contexts),* ]) }
+        syn::parse_quote! { Some(Cow::Borrowed(&[ #(poise::serenity_prelude::InteractionContext::#contexts),* ])) }
     } else {
         syn::parse_quote! { None }
     };
