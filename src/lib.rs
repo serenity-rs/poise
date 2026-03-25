@@ -96,7 +96,7 @@ your bot is invited on, but it takes up to an hour for global registration to ro
 registration only updates a single guild, but it happens instantly, which is useful for testing.
 
 Your bot also needs to be invited with the `applications.commands` scope. For example, in Discord's
-invite link generator (discord.com/developers/applications/XXX/oauth2/url-generator),
+invite link generator (discord.com/developers/applications/XXX/oauth2),
 tick the `applications.commands` box.
 
 # How to use
@@ -143,7 +143,7 @@ pub async fn child2(ctx: Context<'_>, arg: String) -> Result<(), Error> { Ok(())
 ```
 
 With this setup, users can call `~parent [arg]` or `~parent child1 [arg]` or `~parent child2 [arg]`.
-Slash command subcommands are also supported, but the base command (`/parent`) [cannot be used](https://discord.com/developers/docs/interactions/application-commands#subcommands-and-subcommand-groups)
+Slash command subcommands are also supported, but the base command (`/parent`) [cannot be used](https://docs.discord.com/developers/interactions/application-commands#subcommands-and-subcommand-groups)
 as per Discord; only the leaf commands (`/parent child1 [arg]`, `/parent child2 [arg]`).
 
 When adding the commands to the framework, add just the parent command (since it fully contains its
