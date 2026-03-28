@@ -3,6 +3,10 @@
 use super::{pop_string, InvalidBool, MissingAttachment, TooFewArguments};
 use crate::argument_convert::ArgumentConvert;
 use crate::serenity_prelude as serenity;
+use std::num::{
+    NonZeroI128, NonZeroI16, NonZeroI32, NonZeroI64, NonZeroI8, NonZeroIsize, NonZeroU128,
+    NonZeroU16, NonZeroU32, NonZeroU64, NonZeroU8, NonZeroUsize,
+};
 use std::str::FromStr;
 
 /// The result of [`PopArgument::pop_from`].
@@ -111,8 +115,10 @@ macro_rules! from_str_pop_argument {
 
 from_str_pop_argument! {
     f32, f64,
-    u8, u16, u32, u64,
-    i8, i16, i32, i64,
+    u8, u16, u32, u64, u128, usize,
+    i8, i16, i32, i64, i128, isize,
+    NonZeroU8, NonZeroU16, NonZeroU32, NonZeroU64, NonZeroU128, NonZeroUsize,
+    NonZeroI8, NonZeroI16, NonZeroI32, NonZeroI64, NonZeroI128, NonZeroIsize,
     serenity::Mention,
 }
 
