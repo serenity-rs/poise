@@ -2,6 +2,8 @@
 
 use std::borrow::Cow;
 
+use std::fmt::Debug;
+
 use crate::{serenity_prelude as serenity, BoxFuture};
 
 /// The event that triggered a prefix command execution
@@ -21,8 +23,6 @@ pub enum MessageDispatchTrigger {
 /// Prefix-specific context passed to command invocations.
 ///
 /// Contains the trigger message, the Discord connection management stuff, and the user data.
-#[derive(derivative::Derivative)]
-#[derivative(Debug(bound = ""))]
 pub struct PrefixContext<'a, U, E> {
     /// The invoking user message
     pub msg: &'a serenity::Message,
@@ -35,7 +35,7 @@ pub struct PrefixContext<'a, U, E> {
     /// Read-only reference to the framework
     ///
     /// Useful if you need the list of commands, for example for a custom help command
-    #[derivative(Debug = "ignore")]
+    // #[derivative(Debug = "ignore")]
     pub framework: crate::FrameworkContext<'a, U, E>,
     /// If the invoked command was a subcommand, these are the parent commands, ordered top down.
     pub parent_commands: &'a [&'a crate::Command<U, E>],
@@ -46,7 +46,7 @@ pub struct PrefixContext<'a, U, E> {
     /// How this command invocation was triggered
     pub trigger: MessageDispatchTrigger,
     /// The function that is called to execute the actual command
-    #[derivative(Debug = "ignore")]
+    // #[derivative(Debug = "ignore")]
     pub action: fn(
         PrefixContext<'_, U, E>,
     ) -> crate::BoxFuture<'_, Result<(), crate::FrameworkError<'_, U, E>>>,
@@ -55,6 +55,24 @@ pub struct PrefixContext<'a, U, E> {
     #[doc(hidden)]
     pub __non_exhaustive: (),
 }
+
+// manual Debug impl to remove use of derivative proc macro
+impl<'a, U: Debug, E: Debug> Debug for PrefixContext<'a, U, E> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("PrefixContext")
+            .field("msg", &self.msg)
+            .field("prefix", &self.prefix)
+            .field("invoked_command_name", &self.invoked_command_name)
+            .field("args", &self.args)
+            .field("parent_commands", &self.parent_commands)
+            .field("command", &self.command)
+            .field("invocation_data", &self.invocation_data)
+            .field("trigger", &self.trigger)
+            .field("__non_exhaustive", &self.__non_exhaustive)
+            .finish()
+    }
+}
+
 // manual Copy+Clone implementations because Rust is getting confused about the type parameter
 impl<U, E> Clone for PrefixContext<'_, U, E> {
     fn clone(&self) -> Self {
@@ -79,8 +97,6 @@ pub enum Prefix {
 }
 
 /// Prefix-specific framework configuration
-#[derive(derivative::Derivative)]
-#[derivative(Debug(bound = ""))]
 pub struct PrefixFrameworkOptions<U, E> {
     /// The main bot prefix. Can be set to None if the bot supports only
     /// [dynamic prefixes](Self::dynamic_prefix).
@@ -94,7 +110,6 @@ pub struct PrefixFrameworkOptions<U, E> {
     /// Override this field for a simple dynamic prefix which changes depending on the guild or user.
     ///
     /// For more advanced dynamic prefixes, see [`Self::stripped_dynamic_prefix`]
-    #[derivative(Debug = "ignore")]
     pub dynamic_prefix: Option<
         fn(crate::PartialContext<'_, U, E>) -> BoxFuture<'_, Result<Option<Cow<'static, str>>, E>>,
     >,
@@ -112,7 +127,7 @@ pub struct PrefixFrameworkOptions<U, E> {
     /// Ok(None)
     /// # })), ..Default::default() };
     /// ```
-    #[derivative(Debug = "ignore")]
+    // #[derivative(Debug = "ignore")]
     pub stripped_dynamic_prefix: Option<
         for<'a> fn(
             &'a serenity::Context,

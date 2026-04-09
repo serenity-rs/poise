@@ -1,13 +1,13 @@
 //! Simple module for the `FrameworkError` struct and its impls
 
+use std::fmt::Debug;
+
 use crate::serenity_prelude as serenity;
 
 /// Any error that can occur while the bot runs. Either thrown by user code (those variants will
 /// have an `error` field with your error type `E` in it), or originating from within the framework.
 ///
 /// These errors are handled with the [`crate::FrameworkOptions::on_error`] callback
-#[derive(derivative::Derivative)]
-#[derivative(Debug)]
 pub enum FrameworkError<'a, U, E> {
     /// User code threw an error in user data setup
     #[non_exhaustive]
@@ -15,12 +15,12 @@ pub enum FrameworkError<'a, U, E> {
         /// Error which was thrown in the setup code
         error: E,
         /// The Framework passed to the event
-        #[derivative(Debug = "ignore")]
+        // #[derivative(Debug = "ignore")]
         framework: &'a crate::Framework<U, E>,
         /// Discord Ready event data present during setup
         data_about_bot: &'a serenity::Ready,
         /// The serenity Context passed to the event
-        #[derivative(Debug = "ignore")]
+        // #[derivative(Debug = "ignore")]
         ctx: &'a serenity::Context,
     },
     /// User code threw an error in generic event event handler
@@ -31,7 +31,7 @@ pub enum FrameworkError<'a, U, E> {
         /// Which event was being processed when the error occurred
         event: &'a serenity::FullEvent,
         /// The Framework passed to the event
-        #[derivative(Debug = "ignore")]
+        // #[derivative(Debug = "ignore")]
         framework: crate::FrameworkContext<'a, U, E>,
     },
     /// Error occurred during command execution
@@ -161,7 +161,7 @@ pub enum FrameworkError<'a, U, E> {
         /// Error which was thrown in the dynamic prefix code
         error: E,
         /// General context
-        #[derivative(Debug = "ignore")]
+        // #[derivative(Debug = "ignore")]
         ctx: crate::PartialContext<'a, U, E>,
         /// Message which the dynamic prefix callback was evaluated upon
         msg: &'a serenity::Message,
@@ -178,10 +178,10 @@ pub enum FrameworkError<'a, U, E> {
         /// This is a single field instead of two fields (command name and args) due to subcommands
         msg_content: &'a str,
         /// Framework context
-        #[derivative(Debug = "ignore")]
+        // #[derivative(Debug = "ignore")]
         framework: crate::FrameworkContext<'a, U, E>,
         /// See [`crate::Context::invocation_data`]
-        #[derivative(Debug = "ignore")]
+        // #[derivative(Debug = "ignore")]
         invocation_data: &'a tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
         /// Which event triggered the message parsing routine
         trigger: crate::MessageDispatchTrigger,
@@ -190,7 +190,7 @@ pub enum FrameworkError<'a, U, E> {
     #[non_exhaustive]
     UnknownInteraction {
         /// Framework context
-        #[derivative(Debug = "ignore")]
+        // #[derivative(Debug = "ignore")]
         framework: crate::FrameworkContext<'a, U, E>,
         /// The interaction in question
         interaction: &'a serenity::CommandInteraction,
@@ -201,7 +201,7 @@ pub enum FrameworkError<'a, U, E> {
         /// The error thrown by user code
         error: E,
         /// Framework context
-        #[derivative(Debug = "ignore")]
+        // #[derivative(Debug = "ignore")]
         framework: crate::FrameworkContext<'a, U, E>,
         /// The interaction in question
         msg: &'a serenity::Message,
@@ -209,6 +209,36 @@ pub enum FrameworkError<'a, U, E> {
     // #[non_exhaustive] forbids struct update syntax for ?? reason
     #[doc(hidden)]
     __NonExhaustive(std::convert::Infallible),
+}
+
+// manual Debug impl to remove use of derivative proc macro
+#[allow(unused)]
+impl<'a, U: Debug, E: Debug> Debug for FrameworkError<'_, U, E> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Setup { error, framework, data_about_bot, ctx } => f.debug_struct("Setup").field("error", error).field("data_about_bot", data_about_bot).finish(),
+            Self::EventHandler { error, event, framework } => f.debug_struct("EventHandler").field("error", error).field("event", event).finish(),
+            Self::Command { error, ctx } => f.debug_struct("Command").field("error", error).field("ctx", ctx).finish(),
+            Self::SubcommandRequired { ctx } => f.debug_struct("SubcommandRequired").field("ctx", ctx).finish(),
+            Self::CommandPanic { payload, ctx } => f.debug_struct("CommandPanic").field("payload", payload).field("ctx", ctx).finish(),
+            Self::ArgumentParse { error, input, ctx } => f.debug_struct("ArgumentParse").field("error", error).field("input", input).field("ctx", ctx).finish(),
+            Self::CommandStructureMismatch { description, ctx } => f.debug_struct("CommandStructureMismatch").field("description", description).field("ctx", ctx).finish(),
+            Self::CooldownHit { remaining_cooldown, ctx } => f.debug_struct("CooldownHit").field("remaining_cooldown", remaining_cooldown).field("ctx", ctx).finish(),
+            Self::MissingBotPermissions { missing_permissions, ctx } => f.debug_struct("MissingBotPermissions").field("missing_permissions", missing_permissions).field("ctx", ctx).finish(),
+            Self::MissingUserPermissions { missing_permissions, ctx } => f.debug_struct("MissingUserPermissions").field("missing_permissions", missing_permissions).field("ctx", ctx).finish(),
+            Self::PermissionFetchFailed { ctx } => f.debug_struct("PermissionFetchFailed").field("ctx", ctx).finish(),
+            Self::NotAnOwner { ctx } => f.debug_struct("NotAnOwner").field("ctx", ctx).finish(),
+            Self::GuildOnly { ctx } => f.debug_struct("GuildOnly").field("ctx", ctx).finish(),
+            Self::DmOnly { ctx } => f.debug_struct("DmOnly").field("ctx", ctx).finish(),
+            Self::NsfwOnly { ctx } => f.debug_struct("NsfwOnly").field("ctx", ctx).finish(),
+            Self::CommandCheckFailed { error, ctx } => f.debug_struct("CommandCheckFailed").field("error", error).field("ctx", ctx).finish(),
+            Self::DynamicPrefix { error, ctx, msg } => f.debug_struct("DynamicPrefix").field("error", error).field("msg", msg).finish(),
+            Self::UnknownCommand { msg, prefix, msg_content, framework, invocation_data, trigger } => f.debug_struct("UnknownCommand").field("msg", msg).field("prefix", prefix).field("msg_content", msg_content).field("trigger", trigger).finish(),
+            Self::UnknownInteraction { framework, interaction } => f.debug_struct("UnknownInteraction").field("interaction", interaction).finish(),
+            Self::NonCommandMessage { error, framework, msg } => f.debug_struct("NonCommandMessage").field("error", error).field("msg", msg).finish(),
+            Self::__NonExhaustive(arg0) => f.debug_tuple("__NonExhaustive").field(arg0).finish(),
+        }
+    }
 }
 
 impl<'a, U, E> FrameworkError<'a, U, E> {

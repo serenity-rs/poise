@@ -1,24 +1,24 @@
 //! The Command struct, which stores all information about a single framework command
 
+use std::fmt::Debug;
+
 use crate::{serenity_prelude as serenity, BoxFuture};
 
 use super::{CowStr, CowVec};
 
 /// Type returned from `#[poise::command]` annotated functions, which contains all of the generated
 /// prefix and application commands
-#[derive(derivative::Derivative)]
-#[derivative(Default(bound = ""), Debug(bound = ""))]
 pub struct Command<U, E> {
     // =============
     /// Callback to execute when this command is invoked in a prefix context
-    #[derivative(Debug = "ignore")]
+    //#[derivative(Debug = "ignore")]
     pub prefix_action: Option<
         for<'a> fn(
             crate::PrefixContext<'a, U, E>,
         ) -> BoxFuture<'a, Result<(), crate::FrameworkError<'a, U, E>>>,
     >,
     /// Callback to execute when this command is invoked in a slash context
-    #[derivative(Debug = "ignore")]
+    // #[derivative(Debug = "ignore")]
     pub slash_action: Option<
         for<'a> fn(
             crate::ApplicationContext<'a, U, E>,
@@ -107,17 +107,17 @@ pub struct Command<U, E> {
     /// If true, the command may only run in NSFW channels
     pub nsfw_only: bool,
     /// Command-specific override for [`crate::FrameworkOptions::on_error`]
-    #[derivative(Debug = "ignore")]
+    // #[derivative(Debug = "ignore")]
     pub on_error: Option<fn(crate::FrameworkError<'_, U, E>) -> BoxFuture<'_, ()>>,
     /// If any of these functions returns false, this command will not be executed.
-    #[derivative(Debug = "ignore")]
+    // #[derivative(Debug = "ignore")]
     pub checks: Vec<fn(crate::Context<'_, U, E>) -> BoxFuture<'_, Result<bool, E>>>,
     /// List of parameters for this command
     ///
     /// Used for registering and parsing slash commands. Can also be used in help commands
     pub parameters: Vec<crate::CommandParameter<U, E>>,
     /// Arbitrary data, useful for storing custom metadata about your commands
-    #[derivative(Default(value = "Box::new(())"))]
+    // #[derivative(Default(value = "Box::new(())"))]
     pub custom_data: Box<dyn std::any::Any + Send + Sync>,
 
     // ============= Prefix-specific data
@@ -143,6 +143,49 @@ pub struct Command<U, E> {
     // Like #[non_exhaustive], but #[poise::command] still needs to be able to create an instance
     #[doc(hidden)]
     pub __non_exhaustive: (),
+}
+
+// manual Debug impl to remove use of derivative proc macro
+impl<U: Debug, E: Debug> Debug for Command<U, E> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Command")
+            .field("context_menu_action", &self.context_menu_action)
+            .field("subcommands", &self.subcommands)
+            .field("subcommand_required", &self.subcommand_required)
+            .field("name", &self.name)
+            .field("name_localizations", &self.name_localizations)
+            .field("qualified_name", &self.qualified_name)
+            .field("identifying_name", &self.identifying_name)
+            .field("source_code_name", &self.source_code_name)
+            .field("category", &self.category)
+            .field("hide_in_help", &self.hide_in_help)
+            .field("description", &self.description)
+            .field("description_localizations", &self.description_localizations)
+            .field("help_text", &self.help_text)
+            .field("manual_cooldowns", &self.manual_cooldowns)
+            .field("cooldowns", &self.cooldowns)
+            .field("cooldown_config", &self.cooldown_config)
+            .field("reuse_response", &self.reuse_response)
+            .field("default_member_permissions", &self.default_member_permissions)
+            .field("required_permissions", &self.required_permissions)
+            .field("required_bot_permissions", &self.required_bot_permissions)
+            .field("owners_only", &self.owners_only)
+            .field("guild_only", &self.guild_only)
+            .field("dm_only", &self.dm_only)
+            .field("nsfw_only", &self.nsfw_only)
+            .field("parameters", &self.parameters)
+            .field("custom_data", &self.custom_data)
+            .field("aliases", &self.aliases)
+            .field("invoke_on_edit", &self.invoke_on_edit)
+            .field("track_deletion", &self.track_deletion)
+            .field("broadcast_typing", &self.broadcast_typing)
+            .field("context_menu_name", &self.context_menu_name)
+            .field("ephemeral", &self.ephemeral)
+            .field("install_context", &self.install_context)
+            .field("interaction_context", &self.interaction_context)
+            .field("__non_exhaustive", &self.__non_exhaustive)
+            .finish()
+    }
 }
 
 impl<U, E> PartialEq for Command<U, E> {
