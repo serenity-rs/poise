@@ -1,5 +1,7 @@
 //! Holds application command definition structs.
 
+use std::fmt::Debug;
+
 use crate::{serenity_prelude as serenity, BoxFuture};
 
 use super::{CowStr, CowVec};
@@ -14,8 +16,6 @@ pub enum CommandInteractionType {
 }
 
 /// Application command specific context passed to command invocations.
-#[derive(derivative::Derivative)]
-#[derivative(Debug(bound = ""))]
 pub struct ApplicationContext<'a, U, E> {
     /// The interaction which triggered this command execution.
     pub interaction: &'a serenity::CommandInteraction,
@@ -34,7 +34,7 @@ pub struct ApplicationContext<'a, U, E> {
     /// Read-only reference to the framework
     ///
     /// Useful if you need the list of commands, for example for a custom help command
-    #[derivative(Debug = "ignore")]
+    // #[derivative(Debug = "ignore")]
     pub framework: crate::FrameworkContext<'a, U, E>,
     /// If the invoked command was a subcommand, these are the parent commands, ordered top down.
     pub parent_commands: &'a [&'a crate::Command<U, E>],
@@ -46,6 +46,23 @@ pub struct ApplicationContext<'a, U, E> {
     #[doc(hidden)]
     pub __non_exhaustive: (),
 }
+
+// manual Debug impl to remove use of derivative proc macro
+impl<'a, U: Debug, E: Debug> Debug for ApplicationContext<'a, U, E> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("ApplicationContext")
+            .field("interaction", &self.interaction)
+            .field("interaction_type", &self.interaction_type)
+            .field("args", &self.args)
+            .field("has_sent_initial_response", &self.has_sent_initial_response)
+            .field("parent_commands", &self.parent_commands)
+            .field("command", &self.command)
+            .field("invocation_data", &self.invocation_data)
+            .field("__non_exhaustive", &self.__non_exhaustive)
+            .finish()
+    }
+}
+
 impl<U, E> Clone for ApplicationContext<'_, U, E> {
     fn clone(&self) -> Self {
         *self
@@ -80,12 +97,10 @@ impl<U, E> ApplicationContext<'_, U, E> {
 }
 
 /// Possible actions that a context menu entry can have
-#[derive(derivative::Derivative)]
-#[derivative(Debug(bound = ""))]
 pub enum ContextMenuCommandAction<U, E> {
     /// Context menu entry on a user
     User(
-        #[derivative(Debug = "ignore")]
+        // #[derivative(Debug = "ignore")]
         fn(
             ApplicationContext<'_, U, E>,
             serenity::User,
@@ -93,7 +108,7 @@ pub enum ContextMenuCommandAction<U, E> {
     ),
     /// Context menu entry on a message
     Message(
-        #[derivative(Debug = "ignore")]
+        // #[derivative(Debug = "ignore")]
         fn(
             ApplicationContext<'_, U, E>,
             serenity::Message,
@@ -102,6 +117,18 @@ pub enum ContextMenuCommandAction<U, E> {
     #[doc(hidden)]
     __NonExhaustive,
 }
+
+// manual Debug impl to remove use of derivative proc macro
+impl<U: Debug, E: Debug> Debug for ContextMenuCommandAction<U, E> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::User(_) => f.debug_tuple("User").finish(),
+            Self::Message(_) => f.debug_tuple("Message").finish(),
+            Self::__NonExhaustive => write!(f, "__NonExhaustive"),
+        }
+    }
+}
+
 impl<U, E> Copy for ContextMenuCommandAction<U, E> {}
 impl<U, E> Clone for ContextMenuCommandAction<U, E> {
     fn clone(&self) -> Self {
@@ -131,8 +158,6 @@ pub struct CommandParameterChoice {
 }
 
 /// A single parameter of a [`crate::Command`]
-#[derive(Clone, derivative::Derivative)]
-#[derivative(Debug(bound = ""))]
 pub struct CommandParameter<U, E> {
     /// Name of this command parameter
     pub name: CowStr,
@@ -159,12 +184,12 @@ pub struct CommandParameter<U, E> {
     /// |b| b.kind(serenity::CommandOptionType::Integer).min_int_value(0).max_int_value(u64::MAX)
     /// # ;
     /// ```
-    #[derivative(Debug = "ignore")]
+    // #[derivative(Debug = "ignore")]
     pub type_setter: Option<fn(serenity::CreateCommandOption) -> serenity::CreateCommandOption>,
     /// Optionally, a callback that is invoked on autocomplete interactions. This closure should
     /// extract the partial argument from the given JSON value and generate the autocomplete
     /// response which contains the list of autocomplete suggestions.
-    #[derivative(Debug = "ignore")]
+    // #[derivative(Debug = "ignore")]
     pub autocomplete_callback: Option<
         for<'a> fn(
             crate::ApplicationContext<'a, U, E>,
@@ -173,6 +198,22 @@ pub struct CommandParameter<U, E> {
     >,
     #[doc(hidden)]
     pub __non_exhaustive: (),
+}
+
+// manual Debug impl to remove use of derivative proc macro
+impl<U: Debug, E: Debug> Debug for CommandParameter<U, E> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CommandParameter")
+            .field("name", &self.name)
+            .field("name_localizations", &self.name_localizations)
+            .field("description", &self.description)
+            .field("description_localizations", &self.description_localizations)
+            .field("required", &self.required)
+            .field("channel_types", &self.channel_types)
+            .field("choices", &self.choices)
+            .field("__non_exhaustive", &self.__non_exhaustive)
+            .finish()
+    }
 }
 
 impl<U, E> CommandParameter<U, E> {

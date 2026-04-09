@@ -3,25 +3,23 @@
 use crate::{serenity_prelude as serenity, BoxFuture};
 
 /// Framework configuration
-#[derive(derivative::Derivative)]
-#[derivative(Debug(bound = ""))]
 pub struct FrameworkOptions<U, E> {
     /// List of commands in the framework
     pub commands: Vec<crate::Command<U, E>>,
     /// Provide a callback to be invoked when any user code yields an error.
-    #[derivative(Debug = "ignore")]
+    // #[derivative(Debug = "ignore")]
     pub on_error: fn(crate::FrameworkError<'_, U, E>) -> BoxFuture<'_, ()>,
     /// Called before every command
-    #[derivative(Debug = "ignore")]
+    // #[derivative(Debug = "ignore")]
     pub pre_command: fn(crate::Context<'_, U, E>) -> BoxFuture<'_, ()>,
     /// Called after every command if it was successful (returned Ok)
-    #[derivative(Debug = "ignore")]
+    // #[derivative(Debug = "ignore")]
     pub post_command: fn(crate::Context<'_, U, E>) -> BoxFuture<'_, ()>,
     /// Provide a callback to be invoked before every command. The command will only be executed
     /// if the callback returns true.
     ///
     /// If individual commands add their own check, both callbacks are run and must return true.
-    #[derivative(Debug = "ignore")]
+    // #[derivative(Debug = "ignore")]
     pub command_check: Option<fn(crate::Context<'_, U, E>) -> BoxFuture<'_, Result<bool, E>>>,
     /// If set to true, skips command checks if command was issued by [`FrameworkOptions::owners`]
     pub skip_checks_for_owners: bool,
@@ -32,7 +30,7 @@ pub struct FrameworkOptions<U, E> {
     /// Invoked before every message sent using [`crate::Context::say`] or [`crate::Context::send`]
     ///
     /// Allows you to modify every outgoing message in a central place
-    #[derivative(Debug = "ignore")]
+    // #[derivative(Debug = "ignore")]
     pub reply_callback:
         Option<fn(crate::Context<'_, U, E>, crate::CreateReply) -> crate::CreateReply>,
     /// If `true`, disables automatic cooldown handling before every command invocation.
@@ -47,7 +45,7 @@ pub struct FrameworkOptions<U, E> {
     pub require_cache_for_guild_check: bool,
     /// Called on every Discord event. Can be used to react to non-command events, like messages
     /// deletions or guild updates.
-    #[derivative(Debug = "ignore")]
+    // #[derivative(Debug = "ignore")]
     pub event_handler: for<'a> fn(
         crate::FrameworkContext<'a, U, E>,
         &'a serenity::FullEvent,
