@@ -15,12 +15,10 @@ pub enum FrameworkError<'a, U, E> {
         /// Error which was thrown in the setup code
         error: E,
         /// The Framework passed to the event
-        // #[derivative(Debug = "ignore")]
         framework: &'a crate::Framework<U, E>,
         /// Discord Ready event data present during setup
         data_about_bot: &'a serenity::Ready,
         /// The serenity Context passed to the event
-        // #[derivative(Debug = "ignore")]
         ctx: &'a serenity::Context,
     },
     /// User code threw an error in generic event event handler
@@ -31,7 +29,6 @@ pub enum FrameworkError<'a, U, E> {
         /// Which event was being processed when the error occurred
         event: &'a serenity::FullEvent,
         /// The Framework passed to the event
-        // #[derivative(Debug = "ignore")]
         framework: crate::FrameworkContext<'a, U, E>,
     },
     /// Error occurred during command execution
@@ -161,7 +158,6 @@ pub enum FrameworkError<'a, U, E> {
         /// Error which was thrown in the dynamic prefix code
         error: E,
         /// General context
-        // #[derivative(Debug = "ignore")]
         ctx: crate::PartialContext<'a, U, E>,
         /// Message which the dynamic prefix callback was evaluated upon
         msg: &'a serenity::Message,
@@ -178,10 +174,8 @@ pub enum FrameworkError<'a, U, E> {
         /// This is a single field instead of two fields (command name and args) due to subcommands
         msg_content: &'a str,
         /// Framework context
-        // #[derivative(Debug = "ignore")]
         framework: crate::FrameworkContext<'a, U, E>,
         /// See [`crate::Context::invocation_data`]
-        // #[derivative(Debug = "ignore")]
         invocation_data: &'a tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
         /// Which event triggered the message parsing routine
         trigger: crate::MessageDispatchTrigger,
@@ -190,7 +184,6 @@ pub enum FrameworkError<'a, U, E> {
     #[non_exhaustive]
     UnknownInteraction {
         /// Framework context
-        // #[derivative(Debug = "ignore")]
         framework: crate::FrameworkContext<'a, U, E>,
         /// The interaction in question
         interaction: &'a serenity::CommandInteraction,
@@ -201,7 +194,6 @@ pub enum FrameworkError<'a, U, E> {
         /// The error thrown by user code
         error: E,
         /// Framework context
-        // #[derivative(Debug = "ignore")]
         framework: crate::FrameworkContext<'a, U, E>,
         /// The interaction in question
         msg: &'a serenity::Message,
@@ -220,12 +212,12 @@ impl<'a, U: Debug, E: Debug> Debug for FrameworkError<'_, U, E> {
                 f.debug_struct("Setup")
                     .field("error", error)
                     .field("data_about_bot", data_about_bot)
-                    .finish(),
+                    .finish_non_exhaustive(),
             Self::EventHandler { error, event, framework } =>
                 f.debug_struct("EventHandler")
                     .field("error", error)
                     .field("event", event)
-                    .finish(),
+                    .finish_non_exhaustive(),
             Self::Command { error, ctx } =>
                 f.debug_struct("Command")
                     .field("error", error)
@@ -295,23 +287,23 @@ impl<'a, U: Debug, E: Debug> Debug for FrameworkError<'_, U, E> {
                 f.debug_struct("DynamicPrefix")
                     .field("error", error)
                     .field("msg", msg)
-                    .finish(),
+                    .finish_non_exhaustive(),
             Self::UnknownCommand { msg, prefix, msg_content, framework, invocation_data, trigger } =>
                 f.debug_struct("UnknownCommand")
                     .field("msg", msg)
                     .field("prefix", prefix)
                     .field("msg_content", msg_content)
                     .field("trigger", trigger)
-                    .finish(),
+                    .finish_non_exhaustive(),
             Self::UnknownInteraction { framework, interaction } =>
                 f.debug_struct("UnknownInteraction")
                     .field("interaction", interaction)
-                    .finish(),
+                    .finish_non_exhaustive(),
             Self::NonCommandMessage { error, framework, msg } =>
                 f.debug_struct("NonCommandMessage")
                     .field("error", error)
                     .field("msg", msg)
-                    .finish(),
+                    .finish_non_exhaustive(),
             Self::__NonExhaustive(arg0) => write!(f, "Infallible"),
         }
     }

@@ -11,14 +11,12 @@ use super::{CowStr, CowVec};
 pub struct Command<U, E> {
     // =============
     /// Callback to execute when this command is invoked in a prefix context
-    //#[derivative(Debug = "ignore")]
     pub prefix_action: Option<
         for<'a> fn(
             crate::PrefixContext<'a, U, E>,
         ) -> BoxFuture<'a, Result<(), crate::FrameworkError<'a, U, E>>>,
     >,
     /// Callback to execute when this command is invoked in a slash context
-    // #[derivative(Debug = "ignore")]
     pub slash_action: Option<
         for<'a> fn(
             crate::ApplicationContext<'a, U, E>,
@@ -107,10 +105,8 @@ pub struct Command<U, E> {
     /// If true, the command may only run in NSFW channels
     pub nsfw_only: bool,
     /// Command-specific override for [`crate::FrameworkOptions::on_error`]
-    // #[derivative(Debug = "ignore")]
     pub on_error: Option<fn(crate::FrameworkError<'_, U, E>) -> BoxFuture<'_, ()>>,
     /// If any of these functions returns false, this command will not be executed.
-    // #[derivative(Debug = "ignore")]
     pub checks: Vec<fn(crate::Context<'_, U, E>) -> BoxFuture<'_, Result<bool, E>>>,
     /// List of parameters for this command
     ///
@@ -146,7 +142,7 @@ pub struct Command<U, E> {
 }
 
 // manual Debug impl to remove use of derivative proc macro
-impl<U: Debug, E: Debug> Debug for Command<U, E> {
+impl<U, E> Debug for Command<U, E> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Command")
             .field("context_menu_action", &self.context_menu_action)
@@ -183,8 +179,52 @@ impl<U: Debug, E: Debug> Debug for Command<U, E> {
             .field("ephemeral", &self.ephemeral)
             .field("install_context", &self.install_context)
             .field("interaction_context", &self.interaction_context)
-            .field("__non_exhaustive", &self.__non_exhaustive)
-            .finish()
+            .finish_non_exhaustive()
+    }
+}
+
+impl<U, E> Default for Command<U, E> {
+    fn default() -> Self {
+        Self {
+            prefix_action: None,
+            slash_action: None,
+            context_menu_action: None,
+            subcommands: vec![],
+            subcommand_required: false,
+            name: CowStr::default(),
+            name_localizations: CowVec::default(),
+            qualified_name: CowStr::default(),
+            identifying_name: CowStr::default(),
+            source_code_name: CowStr::default(),
+            category: None,
+            hide_in_help: false,
+            description: None,
+            description_localizations: CowVec::default(),
+            help_text: None,
+            manual_cooldowns: None,
+            cooldowns: std::sync::Mutex::default(),
+            cooldown_config: std::sync::RwLock::default(),
+            reuse_response: false,
+            default_member_permissions: serenity::Permissions::default(),
+            required_permissions: serenity::Permissions::default(),
+            required_bot_permissions: serenity::Permissions::default(),
+            owners_only: false,
+            guild_only: false,
+            dm_only: false,
+            nsfw_only: false,
+            on_error: None,
+            checks: vec![],
+            parameters: vec![],
+            custom_data: Box::new(()),
+            aliases: CowVec::default(),
+            invoke_on_edit: false,
+            track_deletion: false,
+            broadcast_typing: false,
+            context_menu_name: None,
+            ephemeral: false,
+            install_context: None,
+            interaction_context: None,
+            __non_exhaustive: () }
     }
 }
 

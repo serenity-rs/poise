@@ -34,7 +34,6 @@ pub struct ApplicationContext<'a, U, E> {
     /// Read-only reference to the framework
     ///
     /// Useful if you need the list of commands, for example for a custom help command
-    // #[derivative(Debug = "ignore")]
     pub framework: crate::FrameworkContext<'a, U, E>,
     /// If the invoked command was a subcommand, these are the parent commands, ordered top down.
     pub parent_commands: &'a [&'a crate::Command<U, E>],
@@ -48,7 +47,7 @@ pub struct ApplicationContext<'a, U, E> {
 }
 
 // manual Debug impl to remove use of derivative proc macro
-impl<'a, U: Debug, E: Debug> Debug for ApplicationContext<'a, U, E> {
+impl<'a, U, E> Debug for ApplicationContext<'a, U, E> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("ApplicationContext")
             .field("interaction", &self.interaction)
@@ -59,7 +58,7 @@ impl<'a, U: Debug, E: Debug> Debug for ApplicationContext<'a, U, E> {
             .field("command", &self.command)
             .field("invocation_data", &self.invocation_data)
             .field("__non_exhaustive", &self.__non_exhaustive)
-            .finish()
+            .finish_non_exhaustive()
     }
 }
 
@@ -119,11 +118,11 @@ pub enum ContextMenuCommandAction<U, E> {
 }
 
 // manual Debug impl to remove use of derivative proc macro
-impl<U: Debug, E: Debug> Debug for ContextMenuCommandAction<U, E> {
+impl<U, E> Debug for ContextMenuCommandAction<U, E> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::User(_) => f.debug_tuple("User").finish(),
-            Self::Message(_) => f.debug_tuple("Message").finish(),
+            Self::User(_) => write!(f, "User"),
+            Self::Message(_) => write!(f, "Message"),
             Self::__NonExhaustive => write!(f, "__NonExhaustive"),
         }
     }
@@ -184,12 +183,10 @@ pub struct CommandParameter<U, E> {
     /// |b| b.kind(serenity::CommandOptionType::Integer).min_int_value(0).max_int_value(u64::MAX)
     /// # ;
     /// ```
-    // #[derivative(Debug = "ignore")]
     pub type_setter: Option<fn(serenity::CreateCommandOption) -> serenity::CreateCommandOption>,
     /// Optionally, a callback that is invoked on autocomplete interactions. This closure should
     /// extract the partial argument from the given JSON value and generate the autocomplete
     /// response which contains the list of autocomplete suggestions.
-    // #[derivative(Debug = "ignore")]
     pub autocomplete_callback: Option<
         for<'a> fn(
             crate::ApplicationContext<'a, U, E>,
@@ -201,7 +198,7 @@ pub struct CommandParameter<U, E> {
 }
 
 // manual Debug impl to remove use of derivative proc macro
-impl<U: Debug, E: Debug> Debug for CommandParameter<U, E> {
+impl<U, E> Debug for CommandParameter<U, E> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("CommandParameter")
             .field("name", &self.name)
@@ -211,8 +208,7 @@ impl<U: Debug, E: Debug> Debug for CommandParameter<U, E> {
             .field("required", &self.required)
             .field("channel_types", &self.channel_types)
             .field("choices", &self.choices)
-            .field("__non_exhaustive", &self.__non_exhaustive)
-            .finish()
+            .finish_non_exhaustive()
     }
 }
 

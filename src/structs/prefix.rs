@@ -35,7 +35,6 @@ pub struct PrefixContext<'a, U, E> {
     /// Read-only reference to the framework
     ///
     /// Useful if you need the list of commands, for example for a custom help command
-    // #[derivative(Debug = "ignore")]
     pub framework: crate::FrameworkContext<'a, U, E>,
     /// If the invoked command was a subcommand, these are the parent commands, ordered top down.
     pub parent_commands: &'a [&'a crate::Command<U, E>],
@@ -46,7 +45,6 @@ pub struct PrefixContext<'a, U, E> {
     /// How this command invocation was triggered
     pub trigger: MessageDispatchTrigger,
     /// The function that is called to execute the actual command
-    // #[derivative(Debug = "ignore")]
     pub action: fn(
         PrefixContext<'_, U, E>,
     ) -> crate::BoxFuture<'_, Result<(), crate::FrameworkError<'_, U, E>>>,
@@ -57,7 +55,7 @@ pub struct PrefixContext<'a, U, E> {
 }
 
 // manual Debug impl to remove use of derivative proc macro
-impl<'a, U: Debug, E: Debug> Debug for PrefixContext<'a, U, E> {
+impl<'a, U, E> Debug for PrefixContext<'a, U, E> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("PrefixContext")
             .field("msg", &self.msg)
@@ -69,7 +67,7 @@ impl<'a, U: Debug, E: Debug> Debug for PrefixContext<'a, U, E> {
             .field("invocation_data", &self.invocation_data)
             .field("trigger", &self.trigger)
             .field("__non_exhaustive", &self.__non_exhaustive)
-            .finish()
+            .finish_non_exhaustive()
     }
 }
 
@@ -127,7 +125,6 @@ pub struct PrefixFrameworkOptions<U, E> {
     /// Ok(None)
     /// # })), ..Default::default() };
     /// ```
-    // #[derivative(Debug = "ignore")]
     pub stripped_dynamic_prefix: Option<
         for<'a> fn(
             &'a serenity::Context,
@@ -183,6 +180,25 @@ pub struct PrefixFrameworkOptions<U, E> {
     // #[non_exhaustive] forbids struct update syntax for ?? reason
     #[doc(hidden)]
     pub __non_exhaustive: (),
+}
+
+impl<U, E> Debug for PrefixFrameworkOptions<U, E> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("PrefixFrameworkOptions")
+            .field("prefix", &self.prefix)
+            .field("additional_prefixes", &self.additional_prefixes)
+            .field("dynamic_prefix", &self.dynamic_prefix)
+            .field("mention_as_prefix", &self.mention_as_prefix)
+            .field("edit_tracker", &self.edit_tracker)
+            .field("execute_untracked_edits", &self.execute_untracked_edits)
+            .field("ignore_edits_if_not_yet_responded", &self.ignore_edits_if_not_yet_responded)
+            .field("execute_self_messages", &self.execute_self_messages)
+            .field("ignore_bots", &self.ignore_bots)
+            .field("ignore_thread_creation", &self.ignore_thread_creation)
+            .field("case_insensitive_commands", &self.case_insensitive_commands)
+            .field("non_command_message", &self.non_command_message)
+            .finish_non_exhaustive()
+    }
 }
 
 impl<U, E> Default for PrefixFrameworkOptions<U, E> {
