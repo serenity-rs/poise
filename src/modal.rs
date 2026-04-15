@@ -92,7 +92,7 @@ impl ModalDataResolved {
         resolved: &serenity::CommandDataResolved,
     ) -> Self {
         match select_menu.kind {
-            serenity::ComponentType::StringSelect => {
+            serenity::SelectMenuKind::String { options: _ } => {
                 let strings = match std::mem::take(&mut select_menu.values) {
                     val if val.is_empty() => None,
                     val => Some(val.into_vec()),
@@ -102,7 +102,7 @@ impl ModalDataResolved {
                     ..Default::default()
                 }
             }
-            serenity::ComponentType::UserSelect => {
+            serenity::SelectMenuKind::User {} => {
                 let mut users = Vec::new();
                 for value in &select_menu.values {
                     if let Ok(id) = value.parse::<u64>() {
@@ -125,7 +125,7 @@ impl ModalDataResolved {
                     ..Default::default()
                 }
             }
-            serenity::ComponentType::RoleSelect => {
+            serenity::SelectMenuKind::Role {} => {
                 let mut roles = Vec::new();
                 for value in &select_menu.values {
                     if let Ok(id) = value.parse::<u64>() {
@@ -144,7 +144,7 @@ impl ModalDataResolved {
                     ..Default::default()
                 }
             }
-            serenity::ComponentType::MentionableSelect => {
+            serenity::SelectMenuKind::Mentionable {} => {
                 let mut users = Vec::new();
                 let mut roles = Vec::new();
                 for value in &select_menu.values {
@@ -174,7 +174,7 @@ impl ModalDataResolved {
                     ..Default::default()
                 }
             }
-            serenity::ComponentType::ChannelSelect => {
+            serenity::SelectMenuKind::Channel { channel_types: _ } => {
                 let channels = if resolved.channels.is_empty() {
                     None
                 } else {
@@ -195,11 +195,11 @@ impl ModalDataResolved {
 }
 
 impl From<&mut serenity::all::InputText> for ModalDataResolved {
-    fn from(value: &mut serenity::all::InputText) -> Self {
-        let text = match std::mem::take(&mut value.value) {
-            Some(val) if val.is_empty() => None,
-            Some(val) => Some(val.into_string()),
-            None => None,
+    fn from(input_text: &mut serenity::all::InputText) -> Self {
+        let text = if input_text.value.is_empty() {
+            None
+        } else {
+            Some(std::mem::take(&mut input_text.value).into_string())
         };
         Self {
             text,
@@ -209,8 +209,8 @@ impl From<&mut serenity::all::InputText> for ModalDataResolved {
 }
 
 impl From<&mut serenity::all::RadioGroup> for ModalDataResolved {
-    fn from(value: &mut serenity::all::RadioGroup) -> Self {
-        let radio_option = match std::mem::take(&mut value.value) {
+    fn from(radio_group: &mut serenity::all::RadioGroup) -> Self {
+        let radio_option = match std::mem::take(&mut radio_group.value) {
             Some(val) if val.is_empty() => None,
             Some(val) => Some(val.into_string()),
             None => None,
@@ -223,8 +223,8 @@ impl From<&mut serenity::all::RadioGroup> for ModalDataResolved {
 }
 
 impl From<&mut serenity::all::CheckboxGroup> for ModalDataResolved {
-    fn from(value: &mut serenity::all::CheckboxGroup) -> Self {
-        let checkbox_options = match std::mem::take(&mut value.values) {
+    fn from(checkbox_group: &mut serenity::all::CheckboxGroup) -> Self {
+        let checkbox_options = match std::mem::take(&mut checkbox_group.values) {
             val if val.is_empty() => None,
             val => Some(val.into_vec()),
         };
@@ -236,9 +236,9 @@ impl From<&mut serenity::all::CheckboxGroup> for ModalDataResolved {
 }
 
 impl From<&mut serenity::all::Checkbox> for ModalDataResolved {
-    fn from(value: &mut serenity::all::Checkbox) -> Self {
+    fn from(checkbox: &mut serenity::all::Checkbox) -> Self {
         Self {
-            checked: value.value,
+            checked: checkbox.value,
             ..Default::default()
         }
     }
@@ -271,19 +271,7 @@ pub fn find_modal_data(
                 }
                 serenity::LabelComponent::SelectMenu(select_menu) => {
                     if select_menu.custom_id == custom_id {
-                        match select_menu.kind {
-                            serenity::ComponentType::StringSelect
-                            | serenity::ComponentType::UserSelect
-                            | serenity::ComponentType::RoleSelect
-                            | serenity::ComponentType::ChannelSelect
-                            | serenity::ComponentType::MentionableSelect => {
-                                return ModalDataResolved::extract_selections(
-                                    select_menu,
-                                    &data.resolved,
-                                );
-                            }
-                            _ => continue,
-                        }
+                        return ModalDataResolved::extract_selections(select_menu, &data.resolved);
                     }
                 }
                 serenity::LabelComponent::RadioGroup(radio_group) => {
