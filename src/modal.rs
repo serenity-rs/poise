@@ -17,10 +17,10 @@ pub fn find_modal_text(
             serenity::ModalComponent::Label(label) => match &mut label.component {
                 serenity::LabelComponent::InputText(input_text) => {
                     if input_text.custom_id == custom_id {
-                        return match std::mem::take(&mut input_text.value) {
-                            Some(val) if val.is_empty() => None,
-                            Some(val) => Some(val.into_string()),
-                            None => None,
+                        return if input_text.value.is_empty() {
+                            None
+                        } else {
+                            Some(std::mem::take(&mut input_text.value).into_string())
                         };
                     }
                 }
