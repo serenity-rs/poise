@@ -208,102 +208,122 @@ pub enum FrameworkError<'a, U, E> {
 impl<'a, U: Debug, E: Debug> Debug for FrameworkError<'_, U, E> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Setup { error, framework, data_about_bot, ctx } =>
-                f.debug_struct("Setup")
-                    .field("error", error)
-                    .field("data_about_bot", data_about_bot)
-                    .finish_non_exhaustive(),
-            Self::EventHandler { error, event, framework } =>
-                f.debug_struct("EventHandler")
-                    .field("error", error)
-                    .field("event", event)
-                    .finish_non_exhaustive(),
-            Self::Command { error, ctx } =>
-                f.debug_struct("Command")
-                    .field("error", error)
-                    .field("ctx", ctx)
-                    .finish(),
-            Self::SubcommandRequired { ctx } =>
-                f.debug_struct("SubcommandRequired")
-                    .field("ctx", ctx)
-                    .finish(),
-            Self::CommandPanic { payload, ctx } =>
-                f.debug_struct("CommandPanic")
-                    .field("payload", payload)
-                    .field("ctx", ctx)
-                    .finish(),
-            Self::ArgumentParse { error, input, ctx } =>
-                f.debug_struct("ArgumentParse")
-                    .field("error", error)
-                    .field("input", input)
-                    .field("ctx", ctx)
-                    .finish(),
-            Self::CommandStructureMismatch { description, ctx } =>
-                f.debug_struct("CommandStructureMismatch")
-                    .field("description", description)
-                    .field("ctx", ctx)
-                    .finish(),
-            Self::CooldownHit { remaining_cooldown, ctx } =>
-                f.debug_struct("CooldownHit")
-                    .field("remaining_cooldown", remaining_cooldown)
-                    .field("ctx", ctx)
-                    .finish(),
-            Self::MissingBotPermissions { missing_permissions, ctx } =>
-                f.debug_struct("MissingBotPermissions")
-                    .field("missing_permissions", missing_permissions)
-                    .field("ctx", ctx)
-                    .finish(),
-            Self::MissingUserPermissions { missing_permissions, ctx } =>
-                f.debug_struct("MissingUserPermissions")
-                    .field("missing_permissions", missing_permissions)
-                    .field("ctx", ctx)
-                    .finish(),
-            Self::PermissionFetchFailed { ctx } =>
-                f.debug_struct("PermissionFetchFailed")
-                    .field("ctx", ctx)
-                    .finish(),
-            Self::NotAnOwner { ctx } =>
-                f.debug_struct("NotAnOwner")
-                    .field("ctx", ctx)
-                    .finish(),
-            Self::GuildOnly { ctx } =>
-                f.debug_struct("GuildOnly")
-                    .field("ctx", ctx)
-                    .finish(),
-            Self::DmOnly { ctx } =>
-                f.debug_struct("DmOnly")
-                    .field("ctx", ctx)
-                    .finish(),
-            Self::NsfwOnly { ctx } =>
-                f.debug_struct("NsfwOnly")
-                    .field("ctx", ctx)
-                    .finish(),
-            Self::CommandCheckFailed { error, ctx } =>
-                f.debug_struct("CommandCheckFailed")
-                    .field("error", error)
-                    .field("ctx", ctx)
-                    .finish(),
-            Self::DynamicPrefix { error, ctx, msg } =>
-                f.debug_struct("DynamicPrefix")
-                    .field("error", error)
-                    .field("msg", msg)
-                    .finish_non_exhaustive(),
-            Self::UnknownCommand { msg, prefix, msg_content, framework, invocation_data, trigger } =>
-                f.debug_struct("UnknownCommand")
-                    .field("msg", msg)
-                    .field("prefix", prefix)
-                    .field("msg_content", msg_content)
-                    .field("trigger", trigger)
-                    .finish_non_exhaustive(),
-            Self::UnknownInteraction { framework, interaction } =>
-                f.debug_struct("UnknownInteraction")
-                    .field("interaction", interaction)
-                    .finish_non_exhaustive(),
-            Self::NonCommandMessage { error, framework, msg } =>
-                f.debug_struct("NonCommandMessage")
-                    .field("error", error)
-                    .field("msg", msg)
-                    .finish_non_exhaustive(),
+            Self::Setup {
+                error,
+                framework,
+                data_about_bot,
+                ctx,
+            } => f
+                .debug_struct("Setup")
+                .field("error", error)
+                .field("data_about_bot", data_about_bot)
+                .finish_non_exhaustive(),
+            Self::EventHandler {
+                error,
+                event,
+                framework,
+            } => f
+                .debug_struct("EventHandler")
+                .field("error", error)
+                .field("event", event)
+                .finish_non_exhaustive(),
+            Self::Command { error, ctx } => f
+                .debug_struct("Command")
+                .field("error", error)
+                .field("ctx", ctx)
+                .finish(),
+            Self::SubcommandRequired { ctx } => f
+                .debug_struct("SubcommandRequired")
+                .field("ctx", ctx)
+                .finish(),
+            Self::CommandPanic { payload, ctx } => f
+                .debug_struct("CommandPanic")
+                .field("payload", payload)
+                .field("ctx", ctx)
+                .finish(),
+            Self::ArgumentParse { error, input, ctx } => f
+                .debug_struct("ArgumentParse")
+                .field("error", error)
+                .field("input", input)
+                .field("ctx", ctx)
+                .finish(),
+            Self::CommandStructureMismatch { description, ctx } => f
+                .debug_struct("CommandStructureMismatch")
+                .field("description", description)
+                .field("ctx", ctx)
+                .finish(),
+            Self::CooldownHit {
+                remaining_cooldown,
+                ctx,
+            } => f
+                .debug_struct("CooldownHit")
+                .field("remaining_cooldown", remaining_cooldown)
+                .field("ctx", ctx)
+                .finish(),
+            Self::MissingBotPermissions {
+                missing_permissions,
+                ctx,
+            } => f
+                .debug_struct("MissingBotPermissions")
+                .field("missing_permissions", missing_permissions)
+                .field("ctx", ctx)
+                .finish(),
+            Self::MissingUserPermissions {
+                missing_permissions,
+                ctx,
+            } => f
+                .debug_struct("MissingUserPermissions")
+                .field("missing_permissions", missing_permissions)
+                .field("ctx", ctx)
+                .finish(),
+            Self::PermissionFetchFailed { ctx } => f
+                .debug_struct("PermissionFetchFailed")
+                .field("ctx", ctx)
+                .finish(),
+            Self::NotAnOwner { ctx } => f.debug_struct("NotAnOwner").field("ctx", ctx).finish(),
+            Self::GuildOnly { ctx } => f.debug_struct("GuildOnly").field("ctx", ctx).finish(),
+            Self::DmOnly { ctx } => f.debug_struct("DmOnly").field("ctx", ctx).finish(),
+            Self::NsfwOnly { ctx } => f.debug_struct("NsfwOnly").field("ctx", ctx).finish(),
+            Self::CommandCheckFailed { error, ctx } => f
+                .debug_struct("CommandCheckFailed")
+                .field("error", error)
+                .field("ctx", ctx)
+                .finish(),
+            Self::DynamicPrefix { error, ctx, msg } => f
+                .debug_struct("DynamicPrefix")
+                .field("error", error)
+                .field("msg", msg)
+                .finish_non_exhaustive(),
+            Self::UnknownCommand {
+                msg,
+                prefix,
+                msg_content,
+                framework,
+                invocation_data,
+                trigger,
+            } => f
+                .debug_struct("UnknownCommand")
+                .field("msg", msg)
+                .field("prefix", prefix)
+                .field("msg_content", msg_content)
+                .field("trigger", trigger)
+                .finish_non_exhaustive(),
+            Self::UnknownInteraction {
+                framework,
+                interaction,
+            } => f
+                .debug_struct("UnknownInteraction")
+                .field("interaction", interaction)
+                .finish_non_exhaustive(),
+            Self::NonCommandMessage {
+                error,
+                framework,
+                msg,
+            } => f
+                .debug_struct("NonCommandMessage")
+                .field("error", error)
+                .field("msg", msg)
+                .finish_non_exhaustive(),
             Self::__NonExhaustive(arg0) => write!(f, "Infallible"),
         }
     }

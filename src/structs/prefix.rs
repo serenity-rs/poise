@@ -191,7 +191,10 @@ impl<U, E> Debug for PrefixFrameworkOptions<U, E> {
             .field("mention_as_prefix", &self.mention_as_prefix)
             .field("edit_tracker", &self.edit_tracker)
             .field("execute_untracked_edits", &self.execute_untracked_edits)
-            .field("ignore_edits_if_not_yet_responded", &self.ignore_edits_if_not_yet_responded)
+            .field(
+                "ignore_edits_if_not_yet_responded",
+                &self.ignore_edits_if_not_yet_responded,
+            )
             .field("execute_self_messages", &self.execute_self_messages)
             .field("ignore_bots", &self.ignore_bots)
             .field("ignore_thread_creation", &self.ignore_thread_creation)

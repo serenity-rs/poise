@@ -162,7 +162,10 @@ impl<U, E> Debug for Command<U, E> {
             .field("cooldowns", &self.cooldowns)
             .field("cooldown_config", &self.cooldown_config)
             .field("reuse_response", &self.reuse_response)
-            .field("default_member_permissions", &self.default_member_permissions)
+            .field(
+                "default_member_permissions",
+                &self.default_member_permissions,
+            )
             .field("required_permissions", &self.required_permissions)
             .field("required_bot_permissions", &self.required_bot_permissions)
             .field("owners_only", &self.owners_only)
@@ -224,7 +227,8 @@ impl<U, E> Default for Command<U, E> {
             ephemeral: false,
             install_context: None,
             interaction_context: None,
-            __non_exhaustive: () }
+            __non_exhaustive: (),
+        }
     }
 }
 
