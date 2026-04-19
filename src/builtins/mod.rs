@@ -278,13 +278,13 @@ pub async fn servers<U: Send + Sync + 'static, E>(
                 if !is_public && !show_private_guilds {
                     hidden_guilds += 1; // private guild whose name and size shouldn't be exposed
                 } else {
-                    shown_guilds.push((guild.name.clone(), guild.member_count))
+                    shown_guilds.push((guild.name.clone(), guild.member_count.get()))
                 }
             }
             None => hidden_guilds += 1, // uncached guild
         }
     }
-    shown_guilds.sort_by_key(|(_, member)| u64::MAX - member); // sort largest guilds first
+    shown_guilds.sort_by_key(|(_, member)| u32::MAX - member); // sort largest guilds first
 
     // Iterate guilds and build up the response message line by line
     let mut response = format!(
