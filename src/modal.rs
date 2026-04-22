@@ -1,6 +1,7 @@
 //! Modal trait and utility items for implementing it (mainly for the derive macro)
 
 use crate::serenity_prelude as serenity;
+use crate::serenity_prelude::small_fixed_array::{FixedArray, FixedString};
 
 /// The resolved data for selected options in a [`MentionableSelect`][ms] component.
 ///
@@ -13,9 +14,11 @@ use crate::serenity_prelude as serenity;
 #[derive(Clone, Debug, Default)]
 pub struct Mentionables {
     /// The resolved users.
-    pub users: Vec<serenity::User>,
+    // Can be optimized to `FixedArray<serenity::User, u8>>`
+    pub users: FixedArray<serenity::User>,
     /// The resolved roles.
-    pub roles: Vec<serenity::Role>,
+    // Can be optimized to `FixedArray<serenity::Role, u8>>`
+    pub roles: FixedArray<serenity::Role>,
 }
 
 /// Meant for use in derived [`Modal::parse`] implementation.
@@ -26,25 +29,32 @@ pub struct Mentionables {
 #[derive(Debug, Default)]
 pub struct ModalDataResolved {
     /// The user input from a text input component.
-    pub text: Option<String>,
+    pub text: Option<FixedString<u16>>,
     /// The resolved `Attachment`s from a file upload component.
-    pub attachments: Option<Vec<serenity::Attachment>>,
+    // Can be optimized to `Option<FixedArray<serenity::Attachment, u8>>`
+    pub attachments: Option<FixedArray<serenity::Attachment>>,
     /// The selected `String`s from a string select menu component.
-    pub strings: Option<Vec<String>>,
+    // Can be optimized to `Option<FixedArray<FixedString<u8>, u8>>`
+    pub strings: Option<FixedArray<String>>,
     /// The resolved `User`s from a user select menu component.
-    pub users: Option<Vec<serenity::User>>,
+    // Can be optimized to `Option<FixedArray<serenity::User, u8>>`
+    pub users: Option<FixedArray<serenity::User>>,
     /// The resolved `Role`s from a role select menu component.
-    pub roles: Option<Vec<serenity::Role>>,
+    // Can be optimized to `Option<FixedArray<serenity::Role, u8>>`
+    pub roles: Option<FixedArray<serenity::Role>>,
     /// The resolved `User`s and `Role`s from a mentionable select menu component.
     pub mentionables: Option<Mentionables>,
     /// The `GenericChannelId` values from a channel select menu component.
     /// Resolved data is not used here because `GenericInteractionChannel` includes
     /// non-exhaustive structs, which would make it impossible to define defaults.
-    pub channels: Option<Vec<serenity::GenericChannelId>>,
-    /// The `String` value of the option selected from a radio group component.
-    pub radio_option: Option<String>,
+    // Can be optimized to `Option<FixedArray<serenity::GenericChannelId, u8>>`
+    pub channels: Option<FixedArray<serenity::GenericChannelId>>,
+    /// The `FixedString` value of the option selected from a radio group component.
+    // Can be optimized to `Option<FixedString<u8>>`
+    pub radio_option: Option<FixedString>,
     /// The `String` values of the options selected from a checkbox group component.
-    pub checkbox_options: Option<Vec<String>>,
+    // Can be optimized to `Option<FixedArray<FixedString<u8>, u8>>`
+    pub checkbox_options: Option<FixedArray<String>>,
     /// The `bool` value representing the state of a checkbox component:
     /// `true` if checked, `false` if unchecked.
     pub checked: bool,
@@ -67,7 +77,7 @@ impl ModalDataResolved {
         let attachments = if attachments.is_empty() {
             None
         } else {
-            Some(attachments)
+            Some(FixedArray::from_vec_trunc(attachments))
         };
         Self {
             attachments,
@@ -95,7 +105,7 @@ impl ModalDataResolved {
             serenity::SelectMenuKind::String { options: _ } => {
                 let strings = match std::mem::take(&mut select_menu.values) {
                     val if val.is_empty() => None,
-                    val => Some(val.into_vec()),
+                    val => Some(val),
                 };
                 Self {
                     strings,
@@ -119,7 +129,11 @@ impl ModalDataResolved {
                         )
                     }
                 }
-                let users = if users.is_empty() { None } else { Some(users) };
+                let users = if users.is_empty() {
+                    None
+                } else {
+                    Some(FixedArray::from_vec_trunc(users))
+                };
                 Self {
                     users,
                     ..Default::default()
@@ -138,7 +152,11 @@ impl ModalDataResolved {
                         )
                     }
                 }
-                let roles = if roles.is_empty() { None } else { Some(roles) };
+                let roles = if roles.is_empty() {
+                    None
+                } else {
+                    Some(FixedArray::from_vec_trunc(roles))
+                };
                 Self {
                     roles,
                     ..Default::default()
@@ -167,7 +185,10 @@ impl ModalDataResolved {
                 let mentionables = if users.is_empty() && roles.is_empty() {
                     None
                 } else {
-                    Some(Mentionables { users, roles })
+                    Some(Mentionables {
+                        users: FixedArray::from_vec_trunc(users),
+                        roles: FixedArray::from_vec_trunc(roles),
+                    })
                 };
                 Self {
                     mentionables,
@@ -182,7 +203,7 @@ impl ModalDataResolved {
                     for channel in &resolved.channels {
                         channels.push(channel.id());
                     }
-                    Some(channels)
+                    Some(FixedArray::from_vec_trunc(channels))
                 };
                 Self {
                     channels,
@@ -199,7 +220,7 @@ impl From<&mut serenity::all::InputText> for ModalDataResolved {
         let text = if input_text.value.is_empty() {
             None
         } else {
-            Some(std::mem::take(&mut input_text.value).into_string())
+            Some(std::mem::take(&mut input_text.value))
         };
         Self {
             text,
@@ -212,7 +233,7 @@ impl From<&mut serenity::all::RadioGroup> for ModalDataResolved {
     fn from(radio_group: &mut serenity::all::RadioGroup) -> Self {
         let radio_option = match std::mem::take(&mut radio_group.value) {
             Some(val) if val.is_empty() => None,
-            Some(val) => Some(val.into_string()),
+            Some(val) => Some(val),
             None => None,
         };
         Self {
@@ -226,7 +247,7 @@ impl From<&mut serenity::all::CheckboxGroup> for ModalDataResolved {
     fn from(checkbox_group: &mut serenity::all::CheckboxGroup) -> Self {
         let checkbox_options = match std::mem::take(&mut checkbox_group.values) {
             val if val.is_empty() => None,
-            val => Some(val.into_vec()),
+            val => Some(val),
         };
         Self {
             checkbox_options,
@@ -402,6 +423,7 @@ pub async fn execute_modal_on_component_interaction<M: Modal>(
 ///
 /// ```rust
 /// # use poise::serenity_prelude as serenity;
+/// # use poise::serenity_prelude::small_fixed_array::{FixedArray, FixedString};
 /// # type Data = ();
 /// # type Error = serenity::Error;
 /// use poise::Modal;
@@ -416,19 +438,19 @@ pub async fn execute_modal_on_component_interaction<M: Modal>(
 ///     #[placeholder = "Your first input goes here"] // No placeholder by default
 ///     #[min_length = 5] // No length restriction by default (up to 4000 chars)
 ///     #[max_length = 500]
-///     first_input: String,
+///     first_input: FixedString<u16>,
 ///     #[name = "Second text input"]
 ///     #[paragraph] // Switches from single-line to multi-line text box
-///     second_input: Option<String>, // Option means optional input
+///     second_input: Option<FixedString<u16>>, // Option means optional input
 ///     #[name = "File upload"]
 ///     #[file_upload] // Allows user to upload up to 10 files
 ///     #[min_values = 2] // Min number of files (0-10 for files)
 ///     #[max_values = 5]
-///     third_input: Vec<serenity::Attachment>,
+///     third_input: FixedArray<serenity::Attachment>,
 ///     #[name = "String select menu"]
 ///     #[string_select("Option 1", "Option 2")] // Selectable strings
 ///     #[min_values = 2] // Min number of selections required (0-25 for select menus)
-///     fourth_input: Vec<String>,
+///     fourth_input: FixedArray<String>,
 /// }
 ///
 /// #[poise::command(slash_command)]

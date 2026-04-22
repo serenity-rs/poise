@@ -1,11 +1,12 @@
 use crate::{Data, Error};
 use poise::serenity_prelude as serenity;
+use poise::serenity_prelude::small_fixed_array::FixedString;
 
 #[derive(Debug, poise::Modal)]
 #[allow(dead_code)] // fields only used for Debug print
 struct MyModal {
-    first_input: String,
-    second_input: Option<String>,
+    first_input: FixedString<u16>,
+    second_input: Option<FixedString<u16>>,
 }
 #[poise::command(slash_command)]
 pub async fn modal(ctx: poise::ApplicationContext<'_, Data, Error>) -> Result<(), Error> {

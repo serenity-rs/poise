@@ -262,9 +262,9 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                             {
                                 let default = if let Some(defaults) = &mut defaults {
                                     let default = std::mem::take(&mut defaults.#field_ident);
-                                    Option::from(default).unwrap_or_else(|| String::new())
+                                    Option::from(default).unwrap_or_else(|| FixedString::new())
                                 } else {
-                                    String::new()
+                                    FixedString::new()
                                 };
                                 Cow::Owned(vec![#create_option])
                             }
@@ -341,9 +341,9 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                             {
                                 let default = if let Some(defaults) = &mut defaults {
                                     let default = std::mem::take(&mut defaults.#field_ident);
-                                    Option::from(default).unwrap_or_else(|| Vec::new())
+                                    Option::from(default).unwrap_or_else(|| FixedArray::new())
                                 } else {
-                                    Vec::new()
+                                    FixedArray::new()
                                 };
                                 Cow::Owned(vec![#create_option])
                             }
@@ -452,9 +452,9 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                         {
                             let default = if let Some(defaults) = &mut defaults {
                                 let default = std::mem::take(&mut defaults.#field_ident);
-                                Option::from(default).unwrap_or_else(|| Vec::new())
+                                Option::from(default).unwrap_or_else(|| FixedArray::new())
                             } else {
-                                Vec::new()
+                                FixedArray::new()
                             };
                             serenity::CreateSelectMenuKind::String {
                                 options: Cow::Owned(vec![#create_option]),
@@ -472,7 +472,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                     {
                         let default_users = if let Some(defaults) = &mut defaults {
                             let default = std::mem::take(&mut defaults.#field_ident);
-                            let default = Option::from(default).unwrap_or_else(|| Vec::new());
+                            let default = Option::from(default).unwrap_or_else(|| FixedArray::new());
                             let default = default.iter().map(|u| u.id).collect::<Vec<_>>();
                             Some(Cow::Owned(default))
                         } else {
@@ -491,7 +491,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                     {
                         let default_roles = if let Some(defaults) = &mut defaults {
                             let default = std::mem::take(&mut defaults.#field_ident);
-                            let default = Option::from(default).unwrap_or_else(|| Vec::new());
+                            let default = Option::from(default).unwrap_or_else(|| FixedArray::new());
                             let default = default.iter().map(|r| r.id).collect::<Vec<_>>();
                             Some(Cow::Owned(default))
                         } else {
@@ -542,8 +542,8 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                         {
                             let default_channels = if let Some(defaults) = &mut defaults {
                                 let default = std::mem::take(&mut defaults.#field_ident);
-                                let default = Option::from(default).unwrap_or_else(|| Vec::new());
-                                Some(Cow::Owned(default))
+                                let default = Option::from(default).unwrap_or_else(|| FixedArray::new());
+                                Some(Cow::Owned(default.into_vec()))
                             } else {
                                 None
                             };
@@ -604,7 +604,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                             // specific closure capture rules
                             let default = std::mem::take(&mut defaults.#field_ident);
                             // Option::from().unwrap_or_default() dance to handle both T and Option<T>
-                            b = b.value(Option::from(default).unwrap_or_else(String::new));
+                            b = b.value(Option::from(default).unwrap_or_else(FixedString::new));
                         }
                         b
                         #( .placeholder(#placeholder) )*
@@ -634,6 +634,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
     Ok(quote::quote! { const _: () = {
         use std::borrow::Cow;
         use poise::serenity_prelude as serenity;
+        use poise::serenity_prelude::small_fixed_array::{FixedArray, FixedString};
         impl #impl_generics poise::Modal for #struct_ident #ty_generics #where_clause {
             fn create(mut defaults: Option<Self>, custom_id: String) -> serenity::CreateInteractionResponse<'static> {
                 serenity::CreateInteractionResponse::Modal(

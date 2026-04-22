@@ -280,6 +280,7 @@ are supported by the macro.
 
 ```rust
 # use poise::serenity_prelude as serenity;
+# use poise::serenity_prelude::small_fixed_array::{FixedArray, FixedString};
 # type Data = ();
 # type Error = serenity::Error;
 use poise::Modal;
@@ -294,19 +295,19 @@ struct MyModal {
     #[placeholder = "Your first input goes here"] // No placeholder by default
     #[min_length = 5] // No length restriction by default (up to 4000 chars)
     #[max_length = 500]
-    first_input: String,
+    first_input: FixedString<u16>,
     #[name = "Second text input"]
     #[paragraph] // Switches from single-line to multi-line text box
-    second_input: Option<String>, // Option means optional input
+    second_input: Option<FixedString<u16>>, // Option means optional input
     #[name = "File upload"]
     #[file_upload] // Allows user to upload up to 10 files
     #[min_values = 2] // Min number of files (0-10 for files)
     #[max_values = 5]
-    third_input: Vec<serenity::Attachment>,
+    third_input: FixedArray<serenity::Attachment>,
     #[name = "String select menu"]
     #[string_select("Option 1", "Option 2")] // Selectable strings
     #[min_values = 2] // Min number of selections required (0-25 for select menus)
-    fourth_input: Vec<String>,
+    fourth_input: FixedArray<String>,
 }
 
 #[poise::command(slash_command)]
@@ -341,10 +342,10 @@ interactive component attribute does not matter; the text display will be render
 ```rust
 #[text_display = "**Huge** markdown-friendly text. Shown *above* the `text input` component."]
 #[name = "Input Label #1"]
-text_input_one: Option<String>,
+text_input_one: Option<FixedString<u16>>,
 #[name = "Input Label #2"]
 #[text_display = "Despite the attribute position, still shows __above__ 'Input Label 2'."]
-text_input_two: Option<String>,
+text_input_two: Option<FixedString<u16>>,
 ```
 
 The following field attributes are shared by all interactive components:
@@ -353,8 +354,8 @@ The following field attributes are shared by all interactive components:
 - `#[description = ""]`: Adds an optional description under the label. Max 100 chars.
 - `#[placeholder = ""]`: Adds optional placeholder text. Max 100 chars.
 
-The default component is the [text input][ti] component, which returns a `String`. The following
-field attributes are valid for text input components only:
+The default component is the [text input][ti] component, which returns a `FixedString<u16>`. The
+following field attributes are valid for text input components only:
 
 - `#[min_length = 0]`: Minimum number of characters (0-4000).
 - `#[max_length = 1]`: Maximum number of characters (1-4000).
@@ -366,17 +367,17 @@ Other interactive components supported by the macro include the [file upload][fu
 components. Component type is indicated by using one of the following field attributes
 (**one per field**):
 
-- `#[file_upload]`: Allows the user to upload files (0-10). Returns [`Vec<Attachment>`][att].
+- `#[file_upload]`: Allows the user to upload files (0-10). Returns [`FixedArray<Attachment>`][att].
 - `#[string_select("", "")]`: Supports 1-25 **unique** options (up to 100 chars each), defined
-in the attribute. Returns `Vec<String>`.
-- `#[user_select]`: Returns [`Vec<User>`][user].
-- `#[role_select]`: Returns [`Vec<Role>`][role].
+in the attribute. Returns `FixedArray<String>`.
+- `#[user_select]`: Returns [`FixedArray<User>`][user].
+- `#[role_select]`: Returns [`FixedArray<Role>`][role].
 - `#[mentionable_select]`: Returns [`Mentionables`][mentionables].
-- `#[channel_select]`: Returns [`Vec<GenericChannelId>`][gic].
+- `#[channel_select]`: Returns [`FixedArray<GenericChannelId>`][gic].
 - `#[radio_group("", "")]`: Supports 2-10 **unique** options (up to 100 chars each), defined
-in the attribute. Returns `String`.
+in the attribute. Returns `FixedString`.
 - `#[checkbox_group("", "")]`: Supports 1-10 **unique** options (up to 100 chars each), defined
-in the attribute. Returns `Vec<String>`.
+in the attribute. Returns `FixedArray<String>`.
 - `#[checkbox]`: Returns `true` if checked, `false` if unchecked.
 
 Optionally, emojis and/or descriptions may be added to string select menu options. Radio group
@@ -405,7 +406,7 @@ static or `<a:NAME:EMOJI_ID>` for animated. Emojis given in an invalid format wi
     "Uses a custom static icon",
     "Uses a custom animated icon"
 )]
-selections: Option<Vec<String>>
+selections: Option<FixedArray<String>>
 ```
 
 Minimum and maximum values for file upload select menu, and checkbox group components
@@ -419,7 +420,7 @@ for files and select menus; defaults to the number of options for checkbox group
 #[name = "Role select menu"]
 #[role_select]
 #[max_values = 1]
-roles: Option<Vec<serenity::Role>>
+roles: Option<FixedArray<serenity::Role>>
 ```
 
 Note that file upload, select menu, and checkbox group components can be optional ***and***
@@ -443,7 +444,7 @@ using the following field attribute:
 #[name = "Channel select menu"]
 #[channel_select()]
 #[channel_types("Text", "Forum")]
-channels: Vec<serenity::GenericChannelId>
+channels: FixedArray<serenity::GenericChannelId>
 ```
 
 # Specifying defaults
@@ -456,10 +457,10 @@ wish to specify a timeout. For example, assuming the struct from the initial exa
 let data = MyModal::execute_with_defaults(
     ctx,
     MyModal {
-        first_input: "Default text input".to_string(),
+        first_input: FixedString::from_static_trunc("Default text input"),
         second_input: None,
-        third_input: vec![],
-        fourth_input: vec!["Option 2".to_string()],
+        third_input: FixedArray::new(),
+        fourth_input: FixedArray::from_vec_trunc(vec!["Option 2".to_string()]),
     },
 )
 .await?;
@@ -471,8 +472,8 @@ Alternatively, if the struct also derives `Default`:
 let data = MyModal::execute_with_defaults(
     ctx,
     MyModal {
-        first_input: "Default text input".to_string(),
-        fourth_input: vec!["Option 2".to_string()],
+        first_input: FixedString::from_static_trunc("Default text input"),
+        fourth_input: FixedArray::from_vec_trunc(vec!["Option 2".to_string()]),
         ..Default::default()
     },
 )
@@ -485,8 +486,8 @@ And using [`execute_modal()`][exe] with a timeout:
 let data = poise::execute_modal(
     ctx,
     Some(MyModal {
-        first_input: "Default text input".to_string(),
-        fourth_input: vec!["Option 2".to_string()],
+        first_input: FixedString::from_static_trunc("Default text input"),
+        fourth_input: FixedArray::from_vec_trunc(vec!["Option 2".to_string()]),
         ..Default::default()
     }),
     Some(std::time::Duration::from_secs(300)),
