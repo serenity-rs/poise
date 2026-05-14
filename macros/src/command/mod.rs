@@ -185,6 +185,11 @@ pub fn command(
         let attrs: Vec<_> = pattern
             .attrs
             .drain(..)
+            .filter(|attr| {
+                !(attr.path().segments.len() == 2
+                    && attr.path().segments[0].ident == "rustfmt"
+                    && attr.path().segments[1].ident == "skip")
+            })
             .map(|attr| darling::ast::NestedMeta::Meta(attr.meta))
             .collect();
         let attrs = <ParamArgs as darling::FromMeta>::from_list(&attrs)?;
