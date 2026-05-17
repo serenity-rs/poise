@@ -78,6 +78,8 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
             true => {
                 if let Some(_choices) = &param.args.choices {
                     quote::quote! { Some(|o| o.kind(::poise::serenity_prelude::CommandOptionType::Integer)) }
+                } else if param.args.string {
+                    quote::quote! { Some(|o| o.kind(::poise::serenity_prelude::CommandOptionType::String)) }
                 } else {
                     quote::quote! { Some(|o| {
                         <#type_ as ::poise::SlashArgument>::create(o)
@@ -100,6 +102,8 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
                     localizations: Cow::Borrowed(&[]),
                     __non_exhaustive: (),
                 } ),*]) }
+            } else if param.args.string {
+                quote::quote! { Cow::Borrowed(&[]) }
             } else {
                 quote::quote! { <#type_ as ::poise::SlashArgument>::choices() }
             }
@@ -142,12 +146,13 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
 
 pub fn generate_slash_action(inv: &Invocation) -> Result<proc_macro2::TokenStream, syn::Error> {
     if let Some(desc) = &inv.description {
-        if desc.len() > 100 {
+        let length = desc.chars().count();
+        if length > 100 {
             return Err(syn::Error::new(
                 inv.function.span(),
                 format!(
                     "slash command description too long ({} chars, must be max 100)",
-                    desc.len()
+                    length
                 ),
             ));
         }
@@ -193,8 +198,8 @@ pub fn generate_slash_action(inv: &Invocation) -> Result<proc_macro2::TokenStrea
 }
 
 fn parse_slash_param(param: &CommandParameter) -> proc_macro2::TokenStream {
-    fn extract_slash_argument(ty: &syn::Type) -> syn::Expr {
-        syn::parse_quote! {
+    fn extract_slash_argument(ty: impl quote::ToTokens) -> proc_macro2::TokenStream {
+        quote::quote! {
             <#ty as ::poise::SlashArgument>::extract(
                 serenity_ctx,
                 interaction,
@@ -209,76 +214,64 @@ fn parse_slash_param(param: &CommandParameter) -> proc_macro2::TokenStream {
 
     if param.args.flag {
         // Extract #[flag]
-        let extract = extract_slash_argument(&syn::parse_quote! { bool });
-        quote::quote! {
+        let extract = extract_slash_argument(quote::quote! { bool });
+        return quote::quote! {
             match args.iter().find(|arg| arg.name == #name) {
                 Some(arg) => #extract,
                 None => false,
             }
-        }
-    } else if let Some(choices) = &param.args.choices {
+        };
+    }
+
+    enum Wrapper {
+        Option,
+        Vec,
+        Plain,
+    }
+
+    let (wrapper, ty) = if let Some(ty) = unwrap_generic(ty, "Option") {
+        (Wrapper::Option, ty)
+    } else if let Some(ty) = unwrap_generic(ty, "Vec") {
+        (Wrapper::Vec, ty)
+    } else {
+        (Wrapper::Plain, ty)
+    };
+
+    let extract = if let Some(choices) = &param.args.choices {
         // Extract #[choices(...)]
         let choice_indices = (0..choices.0.len()).map(syn::Index::from);
         let choice_vals = &choices.0;
 
-        // Allow `Option<T>` for choice parameters
-        let (choices, not_found) = if unwrap_generic(ty, "Option").is_some() {
-            (
-                quote::quote! { #( #choice_indices => Some(#choice_vals), )* },
-                quote::quote! { None },
-            )
-        } else {
-            (
-                quote::quote! { #( #choice_indices => #choice_vals, )* },
-                quote::quote! {
+        quote::quote! {{
+            let ::poise::serenity_prelude::ResolvedValue::Integer(index) = arg.value else {
+                return Err(::poise::SlashArgError::new_command_structure_mismatch(
+                    "expected integer, as the index for an inline choice parameter")
+                );
+            };
+            match index {
+                #( #choice_indices => #choice_vals, )*
+                _ => {
                     return Err(::poise::SlashArgError::new_command_structure_mismatch(
-                        "a required argument is missing"
+                        "out of range index for inline choice parameter"
                     ));
-                },
-            )
-        };
-
-        quote::quote! {
-            if let Some(arg) = args.iter().find(|arg| arg.name == #name) {
-                let ::poise::serenity_prelude::ResolvedValue::Integer(index) = arg.value else {
-                    return Err(::poise::SlashArgError::new_command_structure_mismatch(
-                        "expected integer, as the index for an inline choice parameter")
-                    );
-                };
-                match index {
-                    #choices
-                    _ => {
-                        return Err(::poise::SlashArgError::new_command_structure_mismatch(
-                            "out of range index for inline choice parameter"
-                        ));
-                    }
                 }
-            } else {
-                #not_found
             }
-        }
-    } else if let Some(ty) = unwrap_generic(ty, "Option") {
-        // Extract Option<T>
-        let extract = extract_slash_argument(ty);
-        quote::quote! {
-            match args.iter().find(|arg| arg.name == #name) {
-                Some(arg) => Some(#extract),
-                None => None,
-            }
-        }
-    } else if let Some(ty) = unwrap_generic(ty, "Vec") {
-        // Extract Vec<T> (slash commands don't support variadic arguments right now
-        let extract = extract_slash_argument(ty);
-        quote::quote! {
-            match args.iter().find(|arg| arg.name == #name) {
-                Some(arg) => vec![#extract],
-                None => vec![]
-            }
-        }
+        }}
+    } else if param.args.string {
+        let extract = extract_slash_argument(quote::quote!(String));
+
+        quote::quote! {{
+            let input = #extract;
+            <#ty as ::std::str::FromStr>::from_str(&input)
+                .map_err(|e| ::poise::SlashArgError::new_parse(e.into(), input))?
+        }}
     } else {
         // Extract T
-        let extract = extract_slash_argument(ty);
-        quote::quote! {
+        extract_slash_argument(ty)
+    };
+
+    match wrapper {
+        Wrapper::Plain => quote::quote! {
             match args.iter().find(|arg| arg.name == #name) {
                 Some(arg) => #extract,
                 None => {
@@ -287,7 +280,20 @@ fn parse_slash_param(param: &CommandParameter) -> proc_macro2::TokenStream {
                     ));
                 }
             }
-        }
+        },
+        Wrapper::Option => quote::quote! {
+            match args.iter().find(|arg| arg.name == #name) {
+                Some(arg) => Some(#extract),
+                None => None,
+            }
+        },
+        // Slash commands don't support variadic arguments right now
+        Wrapper::Vec => quote::quote! {
+            match args.iter().find(|arg| arg.name == #name) {
+                Some(arg) => vec![#extract],
+                None => vec![],
+            }
+        },
     }
 }
 

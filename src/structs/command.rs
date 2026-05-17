@@ -250,11 +250,13 @@ impl<U, E> Command<U, E> {
 
         // TODO: localization?
         let name = self.context_menu_name.as_deref().unwrap_or(&self.name);
-        let mut builder = serenity::CreateCommand::new(name).kind(match context_menu_action {
-            crate::ContextMenuCommandAction::User(_) => serenity::CommandType::User,
-            crate::ContextMenuCommandAction::Message(_) => serenity::CommandType::Message,
-            crate::ContextMenuCommandAction::__NonExhaustive => unreachable!(),
-        });
+        let mut builder = serenity::CreateCommand::new(name).kind(context_menu_action.into());
+
+        // This is_empty check is needed because Discord special cases empty
+        // default_member_permissions to mean "admin-only"
+        if !self.default_member_permissions.is_empty() {
+            builder = builder.default_member_permissions(self.default_member_permissions);
+        }
 
         if self.guild_only {
             builder = builder.contexts(vec![serenity::InteractionContext::Guild]);

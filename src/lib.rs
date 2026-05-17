@@ -1,4 +1,4 @@
-#![cfg_attr(doc_nightly, feature(doc_cfg, doc_auto_cfg))]
+#![cfg_attr(doc_nightly, feature(doc_cfg))]
 #![doc(test(attr(deny(deprecated))))]
 // native #[non_exhaustive] is awful because you can't do struct update syntax with it (??)
 #![allow(clippy::manual_non_exhaustive)]
@@ -340,7 +340,7 @@ pub async fn calc(ctx: Context<'_>, expr: String) -> Result<(), Error> {
 
 Can be transformed into
 
-```rust
+```rust,no_run
 # type Error = Box<dyn std::error::Error>;
 # type Context<'a> = poise::Context<'a, (), Error>;
 fn calc_inner(expr: &str) -> Option<f64> {

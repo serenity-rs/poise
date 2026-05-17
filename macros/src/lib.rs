@@ -109,12 +109,13 @@ attributes you can use on parameters:
 - `#[min_length = 0]`: Minimum length for this string parameter (slash-only)
 - `#[max_length = 1]`: Maximum length for this string parameter (slash-only)
 
-## Parser settings (prefix only)
+## Parser settings
 - `#[string]`: Indicates that a type implements `FromStr` and should be parsed from a string argument.
 - `#[rest]`: Use the entire rest of the message for this parameter (prefix-only)
 - `#[lazy]`: Can be used on Option and Vec parameters and is equivalent to regular expressions' laziness (prefix-only)
-- `#[flag]`: Can be used on a bool parameter to set the bool to true if the user typed the parameter name literally (prefix-only)
-    - For example with `async fn my_command(ctx: Context<'_>, #[flag] my_flag: bool)`, `~my_command` would set my_flag to false, and `~my_command my_flag` would set my_flag to true
+- `#[flag]`: Can be used on a bool parameter to make it optional and default to `false`; additionally,
+  in prefix commands only, the user can pass in the parameter name literally to set it to `true`.
+    - For example with `async fn my_command(ctx: Context<'_>, #[flag] my_flag: bool)`, `~my_command` or `/my_command` would set `my_flag` to false, while `~my_command my_flag` would set `my_flag` to true
 
 # Help text
 

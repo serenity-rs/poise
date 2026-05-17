@@ -5,6 +5,7 @@ use crate::serenity_prelude as serenity;
 /// Check if the interaction with the given name and arguments matches any framework command
 fn find_matching_command<'a, 'b, U, E>(
     interaction_name: &str,
+    interaction_kind: serenity::CommandType,
     interaction_options: &'b [serenity::ResolvedOption<'b>],
     commands: &'a [crate::Command<U, E>],
     parent_commands: &mut Vec<&'a crate::Command<U, E>>,
@@ -14,6 +15,19 @@ fn find_matching_command<'a, 'b, U, E>(
             && Some(interaction_name) != cmd.context_menu_name.as_deref()
         {
             return None;
+        }
+
+        // Discord allows commands with the same name as long as they have different types.
+        match interaction_kind {
+            serenity::CommandType::ChatInput => {
+                cmd.slash_action?;
+            }
+            serenity::CommandType::User | serenity::CommandType::Message => {
+                cmd.context_menu_action
+                    .map(serenity::CommandType::from)
+                    .filter(|kind| kind == &interaction_kind)?;
+            }
+            _ => unimplemented!(),
         }
 
         if let Some((sub_name, sub_interaction)) =
@@ -26,7 +40,13 @@ fn find_matching_command<'a, 'b, U, E>(
                 })
         {
             parent_commands.push(cmd);
-            find_matching_command(sub_name, sub_interaction, &cmd.subcommands, parent_commands)
+            find_matching_command(
+                sub_name,
+                interaction_kind,
+                sub_interaction,
+                &cmd.subcommands,
+                parent_commands,
+            )
         } else {
             Some((cmd, interaction_options))
         }
@@ -50,6 +70,7 @@ fn extract_command<'a, U, E>(
 ) -> Result<crate::ApplicationContext<'a, U, E>, crate::FrameworkError<'a, U, E>> {
     let search_result = find_matching_command(
         &interaction.data.name,
+        interaction.data.kind,
         options,
         &framework.options.commands,
         parent_commands,
@@ -128,8 +149,12 @@ async fn run_command<U, E>(
             ) {
                 (
                     Some(crate::ContextMenuCommandAction::User(action)),
-                    Some(serenity::ResolvedTarget::User(user, _)),
-                ) => action(ctx, (*user).clone()).await,
+                    Some(serenity::ResolvedTarget::User(user, member)),
+                ) => {
+                    let mut user = (*user).clone();
+                    user.member = member.map(|v| Box::new(v.clone()));
+                    action(ctx, user).await
+                }
                 _ => return Err(command_structure_mismatch_error),
             }
         }
